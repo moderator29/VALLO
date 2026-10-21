@@ -209,9 +209,9 @@ export default async function BookingDetailPage({
         tone={BOOKING_TONE[booking.status] ?? "neutral"}
         since={latest ? `${t.threads.reservation.status[latest.to] ?? latest.to} · ${lagosWhen(latest.at, locale)}` : null}
         cells={[
-          ...(next ? [{ label: "Next step", value: next.label }] : []),
+          ...(next ? [{ label: t.memberFlows.booking.nextStep, value: next.label }] : []),
           ...(booking.status === "CONFIRMED" || booking.status === "COMPLETED"
-            ? [{ label: "Your part", value: "No action needed from you" }]
+            ? [{ label: t.memberFlows.booking.yourPart, value: t.memberFlows.booking.noAction }]
             : []),
         ]}
         steps={steps}
@@ -223,7 +223,7 @@ export default async function BookingDetailPage({
       <div className="mt-md">
         <BookingDetailCard booking={booking} locale={locale} />
       </div>
-      {details && <StayDetailsPanel details={details} />}
+      {details && <StayDetailsPanel details={details} words={t.memberFlows.stayDetails} />}
       {receipt && (
         <div className="mt-lg" data-testid="booking-receipt">
           <h2 className="nf-overline mb-sm text-[var(--nf-content-muted)]">{t.experienceMoney.bookings.receiptTitle}</h2>

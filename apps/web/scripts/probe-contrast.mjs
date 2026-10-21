@@ -165,7 +165,7 @@ const browser = await chromium.launch({
   /*
    * WITHOUT THESE, HEADLESS CHROMIUM SILENTLY DROPS `backdrop-filter`, so every
    * glass surface measures as a flat fill and the measurement looks
-   * authoritative. Same argument, same flags, as `compare-surface.mjs`.
+   * authoritative.
    */
   args: [
     "--enable-unsafe-swiftshader",
@@ -516,8 +516,8 @@ for (const theme of THEMES) {
 
       /*
        * WHAT THE BROWSER ACTUALLY GOT, BEFORE ANYTHING IS MEASURED ON IT.
-       * `compare-surface.mjs` learned this the expensive way and this file had
-       * never learned it at all: a 404, a 500 or a redirect to `/sign-in`
+       * The old surface comparison learned this the expensive way and this
+       * file had never learned it at all: a 404, a 500 or a redirect to `/sign-in`
        * measures clean, because a sign-in screen has excellent contrast.
        */
       const status = response?.status() ?? 0;

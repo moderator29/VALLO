@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { chaptersByGroup, type DocChapterIndexEntry } from "./chapters";
+import { chaptersByGroup, type DocChapterIndexEntry } from "./docs-groups";
 
 /**
  * The chapter rail.

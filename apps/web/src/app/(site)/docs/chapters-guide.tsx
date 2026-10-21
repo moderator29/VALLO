@@ -3,6 +3,7 @@ import { NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, PRIVATE_FEE_NOTE } from "@/li
 import { SUPPLY_DOOR_HREF } from "@/lib/supply/roles";
 import { MAX_DAYS_AHEAD, MAX_PARTY } from "@/lib/reservations/limits";
 import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import type { DocChapter } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
 import {
@@ -842,8 +843,9 @@ export const BADGES_AND_VERIFICATION: DocChapter = {
       heading: "Read the verification ladder",
       body: (
         <p>
-          A lister climbs four rungs, in order: identity seen, address confirmed, bank account in their
-          own name, and met in person. The <strong>Verified</strong> tick appears only once a person here
+          A lister climbs four rungs, in order:{" "}
+          {VERIFICATION_ORDER.map((rung) => rung.label.toLowerCase()).join(", ")}. The{" "}
+          <strong>Verified</strong> tick appears only once a person here
           has checked the ID of the lister behind the listing. See{" "}
           <Link href="/docs/for-agents#verification" className={A}>
             the ladder in full

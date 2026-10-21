@@ -37,6 +37,7 @@ import { businessPhotoUrl } from "../stays/business-photos";
 import { MAX_BUSINESS_PHOTOS } from "./photos";
 import { bedsTotal } from "./stays-setup";
 import { readArrivalCharges } from "../stays/arrival-charges";
+import { lagosToday } from "../bookings/schema";
 import { readHostAgreementVersion } from "./agreement";
 import { acceptedVersion } from "../legal/workspace-acceptance";
 import {
@@ -547,7 +548,8 @@ export async function getMyRoomTypes(accommodationId: string): Promise<MyRoomTyp
        with no room types is the common first state, not an edge case. */
     if (data.length === 0) return [];
 
-    const today = new Date().toISOString().slice(0, 10);
+    /* The Lagos calendar day: the UTC one is still yesterday until 01:00. */
+    const today = lagosToday();
     const { data: nights } = await session.supabase
       .from("room_inventory")
       .select("room_type_id, date")

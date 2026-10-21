@@ -132,4 +132,27 @@ describe("the sitemap and the gate agree about what is public", () => {
     expect(later).not.toContain("/areas/lagos");
     expect(later.filter((path) => !isPublicPath(path))).toEqual([]);
   });
+
+  it("lists a language address only where the page body is in that language", () => {
+    /* "Duplicate, Google chose different canonical than user": /ha/terms,
+       /yo/terms and /ig/terms were listed beside /terms with an identical
+       English body. They are canonical at /terms and left out. */
+    const entries = buildSitemap(ORIGIN, [], ["viewings"]);
+    const paths = entries.map((entry) => pathOf(entry.url));
+    for (const copy of ["/ha/terms", "/yo/privacy", "/ig/about", "/ha/docs/viewings", "/yo/guides"]) {
+      expect(paths, copy).not.toContain(copy);
+    }
+    expect(paths).toContain("/terms");
+    expect(paths).toContain("/docs/viewings");
+    const terms = entries.find((entry) => pathOf(entry.url) === "/terms");
+    expect(terms?.alternates).toBeUndefined();
+    /* The pages that really are written in four languages keep all four. */
+    for (const translated of ["/ha", "/yo", "/ig", "/ha/check", "/ig/r"]) {
+      expect(paths, translated).toContain(translated);
+    }
+    const landing = entries.find((entry) => pathOf(entry.url) === "/ha");
+    expect(landing?.alternates?.languages).toMatchObject({ en: `${ORIGIN}/`, yo: `${ORIGIN}/yo` });
+    /* No address is listed twice. */
+    expect(new Set(paths).size).toBe(paths.length);
+  });
 });

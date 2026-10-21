@@ -180,6 +180,9 @@
     border-color: var(--nf-brand-edge);
     background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-inset));
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
+    /* The chosen rate is a blue tint; its policy line and per-night caption
+       read the tint rung (muted was 4.04:1 on it by day, axe). */
+    --nf-content-muted: var(--nf-content-muted-on-tint);
   }
   .nf-rate__main {
     flex: 1;

@@ -24,6 +24,18 @@ export const visitEn = {
   /** The two-dot progress, read aloud. */
   progress: "Step {step} of {total}",
 
+  /**
+   * The door on a listing (`RequestInspection`), and the line it becomes once
+   * a request exists. `{when}` is the day and the hour, `{zone}` is
+   * `tiles.lagos`. Moved out of the component in the language audit.
+   */
+  entry: {
+    ask: "Schedule a visit",
+    askedFor: "You asked to see this on {when} ({zone}).",
+    confirmedFor: "Your visit is confirmed for {when} ({zone}).",
+    offered: "They have offered {when} ({zone}).",
+    track: "See where it stands.",
+  },
   property: {
     /** The card's accessible name. */
     label: "The property",

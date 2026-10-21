@@ -303,7 +303,7 @@
   }
 
   /* LEAVING: the page recedes, two panels close on the mark. */
-  :root:has(.nf-threshold--leave[data-phase="going"]) #main {
+  :root[data-threshold-leaving] #main {
     animation: nf-threshold-recede 520ms var(--nf-ease-exit) forwards;
   }
   @keyframes nf-threshold-recede {
@@ -437,7 +437,7 @@
     }
     :root[data-splash="on"] #main,
     :root[data-arrive] #main,
-    :root:has(.nf-threshold) #main,
+    :root[data-threshold] #main,
     :root[data-arrive="return"] .nf-app-header__brand {
       animation: none;
     }

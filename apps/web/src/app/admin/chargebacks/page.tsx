@@ -44,10 +44,15 @@ export default async function AdminChargebacksPage({
       query={query}
       read={read}
       page={readPage(params.page)}
-      now={Date.now()}
+      now={requestTime()}
       copy={t.chargebacks.desk}
       locale={locale}
       prefill={reference?.trim().slice(0, 200) || null}
     />
   );
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

@@ -69,7 +69,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("locale fit: host and agent work
       name: "Host requests to decide, rooms and a table",
       imports: `
         import { DecideView } from "@/components/host/DecideView";
-        import { requestNow, roomDeadline, sortByDeadline } from "@/lib/host/decide";
+        import { roomDeadline, sortByDeadline } from "@/lib/host/decide";
+        import { requestNow } from "@/lib/format/when";
         import { roomRequest, tableRequest } from "@/app/(dev)/preview/host-c/fixtures";`,
       setup: `
         const now = requestNow();
@@ -89,7 +90,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("locale fit: host and agent work
   fitCases(
     {
       name: "Host requests to decide, caught up and unreadable",
-      imports: `import { DecideView } from "@/components/host/DecideView";\nimport { requestNow } from "@/lib/host/decide";`,
+      imports: `import { DecideView } from "@/components/host/DecideView";\nimport { requestNow } from "@/lib/format/when";`,
       body: `<div className="nf-shell"><DecideView rows={[]} now={requestNow()} locale={locale} unreadable={false} /><DecideView rows={[]} now={requestNow()} locale={locale} unreadable /></div>`,
       bleed: true,
       css: CSS,

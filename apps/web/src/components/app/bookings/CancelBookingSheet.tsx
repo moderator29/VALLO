@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import type { Dictionary } from "@vallo/i18n/core";
 import { useRouter } from "next/navigation";
 import { cancel } from "@/lib/bookings/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
@@ -31,12 +32,17 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
  * state. On success the router refreshes and the server-rendered list becomes
  * the single source of truth, never optimistic guesswork.
  */
+/** The sheet's words (`memberFlows.cancelBooking`). */
+export type CancelBookingWords = Dictionary["memberFlows"]["cancelBooking"];
+
 export function CancelBookingSheet({
   booking,
   onClose,
+  words: w,
 }: {
   booking: BookingView;
   onClose: () => void;
+  words: CancelBookingWords;
 }) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState<ActionResult<null> | null, FormData>(
@@ -56,7 +62,7 @@ export function CancelBookingSheet({
       onOpenChange={(next) => {
         if (!next) onClose();
       }}
-      title="Cancel this booking?"
+      title={w.title}
       /* The success state speaks for itself and the confirm panel carries its
          own title; the title stays on as the sheet's accessible name. */
       hideTitle
@@ -66,7 +72,7 @@ export function CancelBookingSheet({
       footer={
         cancelled ? (
           <Button variant="primary" full onClick={onClose}>
-            Done
+            {w.done}
           </Button>
         ) : undefined
       }
@@ -75,35 +81,35 @@ export function CancelBookingSheet({
         <div className="text-center">
           <p className="flex items-center justify-center gap-xs text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
             <UiIcon name="verified" size={20} className="text-[var(--nf-state-success)]" />
-            Booking cancelled
+            {w.cancelledTitle}
           </p>
           <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {booking.title} for {booking.dateRange} is cancelled. The dates are free again.
+            {w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange)}
           </p>
         </div>
       ) : (
         <ConfirmPanel
           icon="calendar-booking"
           tone="error"
-          title="Cancel this booking?"
-          context="This releases your dates and cannot be undone."
+          title={w.title}
+          context={w.context}
           summary={[
-            { label: "Stay", value: booking.title },
-            { label: "Dates", value: booking.dateRange },
-            { label: "Total", value: booking.totalDisplay },
+            { label: w.stay, value: booking.title },
+            { label: w.dates, value: booking.dateRange },
+            { label: w.total, value: booking.totalDisplay },
           ]}
-          next={[{ icon: "calendar-check", text: "Your dates are released at once." }]}
+          next={[{ icon: "calendar-check", text: w.released }]}
           error={state && !state.ok ? state.error : null}
           cancel={
             <Button variant="secondary" onClick={onClose}>
-              Keep my booking
+              {w.keep}
             </Button>
           }
           primary={
             <form action={formAction}>
               <input type="hidden" name="bookingId" value={booking.id} />
               <Button type="submit" variant="primary" loading={pending}>
-                Yes, cancel the booking
+                {w.confirm}
               </Button>
             </form>
           }
@@ -124,18 +130,21 @@ export function CancelBookingSheet({
  */
 export function CancelBookingControl({
   booking,
-  label = "Cancel",
+  label,
+  words,
 }: {
   booking: BookingView;
+  /** The opener's word; `words.open` when absent. */
   label?: string;
+  words: CancelBookingWords;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <Button variant="quiet" size="sm" onClick={() => setOpen(true)}>
-        {label}
+        {label ?? words.open}
       </Button>
-      {open && <CancelBookingSheet booking={booking} onClose={() => setOpen(false)} />}
+      {open && <CancelBookingSheet booking={booking} onClose={() => setOpen(false)} words={words} />}
     </>
   );
 }

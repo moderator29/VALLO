@@ -735,7 +735,7 @@
   }
   /* While the story's pill is up, back to top steps aside: one floating
      control at the foot of the window, never two on top of each other. */
-  :root:has(.nf-pl-pill[data-shown="true"]) .nf-to-top {
+  :root[data-story-pill] .nf-to-top {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;

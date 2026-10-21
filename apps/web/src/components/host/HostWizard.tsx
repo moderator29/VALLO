@@ -110,18 +110,8 @@ type Notice = { tone: "ok" | "error"; text: string; phoneGate?: boolean } | null
 
 const STORAGE_KEY = "nf_host_draft";
 
-/* The unsaved-changes prompt's heading, as the founder worded it. */
-const UNSAVED_TITLE = "You have unsaved changes";
-
-const KIND_LABEL: Record<BusinessKind, string> = {
-  agency: "Agency",
-  hotel: "Hotel",
-  serviced_apartments: "Serviced apartments",
-  guest_house: "Guest house",
-  resort: "Resort",
-  shortlet_operator: "Shortlet operator",
-  restaurant: "Restaurant",
-};
+/* The unsaved-changes prompt's heading, as the founder worded it, and every
+   other line of the wizard: `hostWorkspace.wizard` (language audit). */
 
 /*
  * THE WEEKDAYS, THE ROOM CATEGORIES AND THE MEAL PLANS HAVE MOVED OUT OF THIS
@@ -355,6 +345,7 @@ export function HostWizard({
   /* The page's CopyScope carries these (W13): no client dictionary read. */
   const successWords = useScopedCopy("success");
   const hostPage = useHostPageCopy();
+  const hw = useHostCopy();
   /* The progress path's words: the same ones the agent's listing wizard uses
      (`experienceFeatures.wizard`). */
   const pathWords = useScopedCopy("featuresWizard");
@@ -427,7 +418,7 @@ export function HostWizard({
             router.refresh();
             resolve(true);
           } catch {
-            setNotice({ tone: "error", text: "That did not go through. Check your connection and try again." });
+            setNotice({ tone: "error", text: hw.wizard.failed });
             resolve(false);
           }
         });
@@ -687,13 +678,13 @@ export function HostWizard({
         onOpenChange={(open) => {
           if (!open && !savingLeave) setLeaving(null);
         }}
-        title={UNSAVED_TITLE}
+        title={hw.wizard.unsavedTitle}
         card
         detents={[0.6]}
       >
         <div className="flex flex-col gap-md p-md" data-testid="unsaved-prompt">
           <p className={TYPE.body}>
-            What you changed here is not saved yet. Save it before you go, or discard it.
+            {hw.wizard.unsavedBody}
           </p>
           {notice?.tone === "error" && (
             <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
@@ -701,13 +692,13 @@ export function HostWizard({
             </p>
           )}
           <Button variant="primary" size="lg" full loading={savingLeave} disabled={savingLeave} onClick={() => void saveAndGo()}>
-            {leaving?.kind === "back" || leaving?.kind === "history" ? "Save and go back" : "Save and go"}
+            {leaving?.kind === "back" || leaving?.kind === "history" ? hw.wizard.saveAndGoBack : hw.wizard.saveAndGo}
           </Button>
           <Button variant="secondary" size="lg" full disabled={savingLeave} onClick={discardAndGo}>
-            Discard
+            {hw.wizard.discard}
           </Button>
           <Button variant="quiet" size="lg" full disabled={savingLeave} onClick={() => setLeaving(null)}>
-            Stay
+            {hw.wizard.stay}
           </Button>
         </div>
       </Sheet>
@@ -748,8 +739,8 @@ export function HostWizard({
           </p>
           <p className="mt-2xs nf-caption">
             {draft.status === "REJECTED"
-              ? "You can change this application and send it again. It goes back to our team as a resubmission, with the note above beside it."
-              : "Change what they asked for, then send it again from the last step."}
+              ? hw.wizard.resubmitRejected
+              : hw.wizard.resubmitMore}
           </p>
         </section>
       )}
@@ -856,14 +847,14 @@ export function HostWizard({
               disabled={!canAdvance || pending}
               loading={pending}
             >
-              Continue
+              {hw.wizard.continue}
             </Button>
           )}
         </div>
       )}
       <p className="nf-host-saved">
         <UiIcon name="verified" size={12} />
-        {draft.businessId ? "Saved to your application as you go." : "Kept on this device until the business step saves."}
+        {draft.businessId ? hw.wizard.savedAsYouGo : hw.wizard.keptOnDevice}
       </p>
     </div>
   );
@@ -1031,7 +1022,7 @@ function HostTypeStep({ draft, set }: StepProps) {
       </div>
       {chosen && chosen.kinds.length > 1 && (
         <div className="nf-panel nf-panel--card block nf-host-group">
-          <p className="nf-host-group__title">What is it, exactly?</p>
+          <p className="nf-host-group__title">{hw.wizard.exactKind}</p>
           <div className="mt-sm flex flex-wrap gap-xs" role="group" aria-label={hw.wizard.businessKindLabel}>
             {chosen.kinds.map((kind) => (
               /* The raw chip, on purpose: `Chip`'s selected state is the lit CTA
@@ -1044,7 +1035,7 @@ function HostTypeStep({ draft, set }: StepProps) {
                 className={`nf-chip${draft.kind === kind ? " nf-chip--active" : ""}`}
                 onClick={() => set("kind", kind)}
               >
-                {KIND_LABEL[kind]}
+                {hw.wizard.kinds[kind]}
               </button>
             ))}
           </div>
@@ -1083,12 +1074,18 @@ function HostAgreementTick({
   agreeNow: boolean;
   onAgree: (next: boolean) => void;
 }) {
+  const w = useHostCopy().wizard;
+  /* The sentence with its three links where the words put them, so a
+     translation owns the order. */
+  const LINKS: Record<string, { href: string; label: string }> = {
+    terms: { href: "/terms", label: w.termsLink },
+    privacy: { href: "/privacy", label: w.privacyLink },
+    agreement: { href: "/host-agreement", label: w.agreementLink },
+  };
   return (
     <section className="nf-panel nf-panel--card block nf-host-group" data-testid="host-agreement">
       {agreed ? (
-        <p className="nf-host-group__note">
-          You agreed to the Terms of service, the Privacy policy and the Host Agreement.
-        </p>
+        <p className="nf-host-group__note">{w.agreed}</p>
       ) : (
         <label className="flex items-start gap-sm">
           <input
@@ -1098,19 +1095,16 @@ function HostAgreementTick({
             onChange={(event) => onAgree(event.target.checked)}
           />
           <span className={TYPE.body}>
-            I agree to the{" "}
-            <Link href="/terms" target="_blank" className="text-[var(--nf-content-link)] underline">
-              Terms of service
-            </Link>
-            , the{" "}
-            <Link href="/privacy" target="_blank" className="text-[var(--nf-content-link)] underline">
-              Privacy policy
-            </Link>{" "}
-            and the{" "}
-            <Link href="/host-agreement" target="_blank" className="text-[var(--nf-content-link)] underline">
-              Host Agreement
-            </Link>
-            . In short: I only charge guests what is listed on Vallo, with a reason for every charge.
+            {w.agreeText.split(/(\{terms\}|\{privacy\}|\{agreement\})/).map((part, i) => {
+              const link = LINKS[part.slice(1, -1)];
+              return link && part.startsWith("{") ? (
+                <Link key={i} href={link.href} target="_blank" className="text-[var(--nf-content-link)] underline">
+                  {link.label}
+                </Link>
+              ) : (
+                part
+              );
+            })}
           </span>
         </label>
       )}
@@ -1169,7 +1163,7 @@ function RegistrationStep({ draft, set, userId, fieldErrors }: StepProps) {
   return (
     <>
       <section className="nf-panel nf-panel--card block nf-host-group">
-        <h2 className="nf-host-group__title">As the CAC holds it</h2>
+        <h2 className="nf-host-group__title">{hw.wizard.cacTitle}</h2>
         <div className="mt-md flex flex-col gap-sm">
           <TextField
             label={hw.wizard.businessName}
@@ -1179,14 +1173,14 @@ function RegistrationStep({ draft, set, userId, fieldErrors }: StepProps) {
           />
           <TextField
             label={hw.wizard.rcNumber}
-            hint="The one on your certificate, like RC 1234567."
+            hint={hw.wizard.rcHint}
             value={draft.cacNumber}
             error={fieldErrors.cacNumber}
             onChange={(event) => set("cacNumber", event.target.value)}
           />
           <TextField
             label={hw.wizard.tin}
-            optionalText="(if you have one)"
+            optionalText={hw.wizard.ifYouHaveOne}
             value={draft.tin}
             error={fieldErrors.tin}
             onChange={(event) => set("tin", event.target.value)}
@@ -1210,11 +1204,11 @@ function RepresentativeStep({ draft, set, userId, fieldErrors }: StepProps) {
   return (
     <>
       <section className="nf-panel nf-panel--card block nf-host-group">
-        <h2 className="nf-host-group__title">You</h2>
+        <h2 className="nf-host-group__title">{hw.wizard.youTitle}</h2>
         <div className="mt-md flex flex-col gap-sm">
           <TextField
             label={hw.wizard.fullName}
-            hint="As it appears on the ID you upload."
+            hint={hw.wizard.nameHint}
             value={draft.representativeName}
             error={fieldErrors.representativeName}
             onChange={(event) => set("representativeName", event.target.value)}
@@ -1279,9 +1273,10 @@ function VenuePhotos({ draft, userId }: StepProps) {
 }
 
 function HygieneAttestation({ draft, pending, saveText }: StepProps) {
+  const w = useHostCopy().wizard;
   return (
     <section className="nf-stays-plate">
-      <span className="nf-stays-plate__label">Health permit</span>
+      <span className="nf-stays-plate__label">{w.hygieneTitle}</span>
       <label className="mt-sm flex items-start gap-sm">
         <input
           type="checkbox"
@@ -1290,13 +1285,10 @@ function HygieneAttestation({ draft, pending, saveText }: StepProps) {
           disabled={pending}
           onChange={(e) => saveText({ hygieneAttested: e.target.checked })}
         />
-        <span className={TYPE.body}>
-          This venue holds a current Local Government health permit and its food handlers hold
-          current medical certificates.
-        </span>
+        <span className={TYPE.body}>{w.hygieneBody}</span>
       </label>
       {draft.hygieneAttestedAt && (
-        <p className="nf-stays-plate__note">Attested and dated on your application.</p>
+        <p className="nf-stays-plate__note">{w.hygieneDone}</p>
       )}
     </section>
   );
@@ -1342,7 +1334,7 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
   const lock = useMoneyStepUp();
   const saveAsync = async () => {
     if (!resolved) {
-      setNotice({ tone: "error", text: "Check the account with the bank first, then save it." });
+      setNotice({ tone: "error", text: hw.wizard.checkFirst });
       return false;
     }
     const saved = await runAsync(async () => {
@@ -1356,7 +1348,7 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
       setBank("");
       setNumber("");
       setResolved(null);
-      setNotice({ tone: "ok", text: "The account is saved, in the name the bank gave." });
+      setNotice({ tone: "ok", text: hw.wizard.accountSaved });
     }
     return saved;
   };
@@ -1367,11 +1359,11 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
     <>
       {lock.sheet}
       <section className="nf-panel nf-panel--card block nf-host-group">
-        <h2 className="nf-host-group__title">Where payouts go</h2>
+        <h2 className="nf-host-group__title">{hw.wizard.payoutsTitle}</h2>
         <p className="nf-host-group__note">
           {draft.hasBankAccount
-            ? "An account is on record. Add another only if payouts should go somewhere else."
-            : "We confirm the account with the bank before it is saved, and show you the name it holds."}
+            ? hw.wizard.accountOnRecord
+            : hw.wizard.confirmFirst}
         </p>
         <div className="mt-md flex flex-col gap-sm">
           {banksError ? (
@@ -1380,7 +1372,7 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
             </p>
           ) : (
             <SelectField label={hw.wizard.bank} value={bank} disabled={banks === null} onChange={(e) => { setBank(e.target.value); setResolved(null); }}>
-              <option value="">{banks === null ? "Loading banks" : "Choose a bank"}</option>
+              <option value="">{banks === null ? hw.wizard.loadingBanks : hw.wizard.chooseBank}</option>
               {(banks ?? []).map((b) => (
                 <option key={b.code} value={b.code}>
                   {b.name}
@@ -1400,17 +1392,17 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
               <UiIcon name="verified" size={20} className="shrink-0" />
               <span className="min-w-0 flex-1">
                 <span className="block nf-body-sm font-semibold">{resolved}</span>
-                <span className="block nf-caption">Is this you, or your business?</span>
+                <span className="block nf-caption">{hw.wizard.isThisYou}</span>
               </span>
             </div>
           ) : (
             <Button variant="secondary" onClick={resolve} disabled={!bank || number.length !== 10 || resolving} loading={resolving}>
-              Check with the bank
+              {hw.wizard.checkWithBank}
             </Button>
           )}
           {resolved && (
             <Button variant="primary" size="lg" full onClick={save} disabled={pending} loading={pending}>
-              Yes, save this account
+              {hw.wizard.saveAccount}
             </Button>
           )}
         </div>
@@ -1449,8 +1441,8 @@ function ConsentStep({ draft, pending, saveText, set }: StepProps) {
               <span className={`block ${TYPE.rowMeta}`}>{consent.detail}</span>
               {consent.id === "terms" && (
                 <span className="mt-2xs flex gap-sm nf-caption">
-                  <Link href="/terms" target="_blank" className="text-[var(--nf-content-link)] underline">Host terms</Link>
-                  <Link href="/privacy" target="_blank" className="text-[var(--nf-content-link)] underline">Privacy policy</Link>
+                  <Link href="/terms" target="_blank" className="text-[var(--nf-content-link)] underline">{hw.wizard.hostTerms}</Link>
+                  <Link href="/privacy" target="_blank" className="text-[var(--nf-content-link)] underline">{hw.wizard.privacyPolicy}</Link>
                 </span>
               )}
             </span>
@@ -1477,10 +1469,10 @@ function ReviewStep({ draft, pending, run, goTo, set, locale }: StepProps) {
   return (
     <>
       <section className="nf-panel nf-panel--card block nf-host-group">
-        <h2 className="nf-host-group__title">{draft.name || "Your business"}</h2>
+        <h2 className="nf-host-group__title">{draft.name || hw.wizard.yourBusiness}</h2>
         <p className="nf-host-group__note">
-          {draft.hostType ? HOST_TYPE_DEFINITIONS[draft.hostType].title : "Host type not chosen"}
-          {draft.kind ? `, ${KIND_LABEL[draft.kind]}` : ""}
+          {draft.hostType ? HOST_TYPE_DEFINITIONS[draft.hostType].title : hw.wizard.hostTypeMissing}
+          {draft.kind ? `, ${hw.wizard.kinds[draft.kind]}` : ""}
         </p>
         <dl className="mt-sm">
           <Fact label={hw.wizard.review.contact} value={[draft.phone, draft.email].filter(Boolean).join(", ")} onEdit={() => goTo("business")} />
@@ -1512,13 +1504,13 @@ function ReviewStep({ draft, pending, run, goTo, set, locale }: StepProps) {
             })()}
             onEdit={() => goTo(accommodation ? "facilities" : "restaurant")}
           />
-          <Fact label={hw.wizard.review.payouts} value={draft.hasBankAccount ? "Bank account on record" : ""} onEdit={() => goTo("payout")} />
+          <Fact label={hw.wizard.review.payouts} value={draft.hasBankAccount ? hw.wizard.bankOnRecord : ""} onEdit={() => goTo("payout")} />
         </dl>
       </section>
 
       <section className="nf-panel nf-panel--card block nf-host-group" aria-live="polite">
         <h2 className="nf-host-group__title">
-          {missing.length === 0 ? "Everything is here" : `Still missing (${missing.length})`}
+          {missing.length === 0 ? hw.wizard.everythingHere : hw.wizard.stillMissing.replace("{count}", String(missing.length))}
         </h2>
         {missing.length > 0 ? (
           <ul className="mt-xs">
@@ -1530,41 +1522,43 @@ function ReviewStep({ draft, pending, run, goTo, set, locale }: StepProps) {
             ))}
           </ul>
         ) : (
-          <p className="nf-host-group__note">A person on our team reads it next. We write to you when it has been read.</p>
+          <p className="nf-host-group__note">{hw.wizard.teamReads}</p>
         )}
       </section>
 
       <Button variant="primary" size="lg" full onClick={send} disabled={pending || missing.length > 0} loading={pending}>
-        {draft.status === "REJECTED" || draft.status === "MORE_INFO_REQUIRED" ? "Send it again" : "Send for review"}
+        {draft.status === "REJECTED" || draft.status === "MORE_INFO_REQUIRED" ? hw.wizard.sendAgain : hw.wizard.sendForReview}
       </Button>
     </>
   );
 }
 
 function Fact({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+  const w = useHostCopy().wizard;
   return (
     <div className="nf-host-missing">
       <dt className="w-28 shrink-0 nf-caption font-semibold">{label}</dt>
-      <dd className="min-w-0 flex-1">{value || <span className="text-[var(--nf-content-muted)]">Not given</span>}</dd>
+      <dd className="min-w-0 flex-1">{value || <span className="text-[var(--nf-content-muted)]">{w.notGiven}</span>}</dd>
       <Button variant="quiet" size="sm" onClick={onEdit}>
-        Edit
+        {w.edit}
       </Button>
     </div>
   );
 }
 
 function Sent({ businessName }: { businessName: string }) {
+  const w = useHostCopy().wizard;
   return (
     <div className="flex flex-col items-center px-lg py-section text-center">
       <span className="grid size-[5.5rem] shrink-0 place-items-center" aria-hidden="true" data-art="calendar-pending">
         <Icon3D name="calendar-pending" size={88} />
       </span>
-      <p className={`mt-block ${TYPE.sectionTitle}`}>{businessName || "Your application"} is with our team</p>
+      <p className={`mt-block ${TYPE.sectionTitle}`}>{w.sentTitle.replace("{name}", businessName || w.yourApplication)}</p>
       <p className={`mt-inline max-w-[42ch] ${TYPE.body}`}>
-        A person reads it next. You will hear from us when it has been read, and you can see where it stands on your host page.
+        {w.sentBody}
       </p>
       <Link href="/host" className="nf-btn nf-btn--primary nf-btn--lg mt-block">
-        Your host page
+        {w.hostPage}
       </Link>
     </div>
   );

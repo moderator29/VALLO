@@ -10,12 +10,19 @@
 -- fixtures are now filed as the server files them (service_role).
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
   agent uuid;
   bid uuid;
   pid uuid;
   n int;
 begin
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The lister is a throwaway account made here, an
+  -- ordinary account with no agents row exactly as the QA member was when this
+  -- probe was written, rolled back with everything else.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-db-05-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe DB-05 agent') returning id into agent;
 
   -- Fixtures, filed by the server.

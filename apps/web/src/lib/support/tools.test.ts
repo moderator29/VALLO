@@ -427,6 +427,33 @@ describe("booking_policy", () => {
     expect(String(record(out.result).refundAlready)).toMatch(/no refund decision is recorded/i);
   });
 
+  it("quotes the host's preset frozen on the booking, not the platform schedule", async () => {
+    /* A Strict stay: half back until 7 days before check-in, then nothing. On
+       the platform schedule this booking (25 days out) would be everything back. */
+    const session = signedIn(
+      fakeDb({
+        bookings: { data: [{ ...FUTURE_STAY, check_in: "2026-09-01", check_out: "2026-09-30" }] },
+        listings: { data: [LISTING] },
+        transactions: { data: [{ booking_id: "b-1", amount_minor: 1_234_567, status: "SUCCESSFUL" }] },
+        booking_cancellation_terms: {
+          data: {
+            source: "policy:strict-1",
+            terms: { check_in_hour: 14, tiers: [{ closes_hours_before: 168, refund_bps: 5_000 }, { closes_hours_before: 0, refund_bps: 0 }] },
+            frozen_at: "2026-08-01T10:00:00Z",
+          },
+        },
+      }),
+    );
+    const out = await runSupportTool("booking_policy", { bookingId: "b-1" }, session);
+    const now = record(record(out.result).ifCancelledNow);
+    expect(now.tier).toBe("50% back");
+    expect(now.refunded).toBe("₦6,172.84");
+    expect(now.keptByHost).toBe("₦6,172.83");
+    const schedule = rows(record(out.result).schedule);
+    expect(schedule.map((step) => step.worth)).toEqual(["₦6,172.84", "₦0"]);
+    expect(said(out.result)).not.toMatch(/Everything back/);
+  });
+
   it("publishes the three steps with what each is worth against this stay", async () => {
     const out = await runSupportTool("booking_policy", { bookingId: "b-1" }, paidStay("2026-09-01"));
     const schedule = rows(record(out.result).schedule);

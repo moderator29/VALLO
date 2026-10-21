@@ -12,6 +12,7 @@ import { VisitListerCard, type ListerCall } from "@/components/app/inspections/v
 import { VisitStatus } from "@/components/app/inspections/visit/VisitStatus";
 import { roleWordsOf, visitPlaceOf, visitPropertyOf } from "@/components/app/inspections/visit/property";
 import "@/app/css/visit.css";
+import { requestNow } from "@/lib/format/when";
 
 /**
  * SCHEDULE A VISIT, STEP 2 (`/listing/[id]/visit/[inspectionId]`): where the
@@ -94,7 +95,7 @@ export default async function VisitStatusPage({ params }: { params: Promise<{ id
       : null;
   /* The render's clock, handed down so the server and the first client
      render agree on the phase of the visit. */
-  const now = Date.now();
+  const now = requestNow();
   const area = listing?.area || listing?.city || "";
 
   return (

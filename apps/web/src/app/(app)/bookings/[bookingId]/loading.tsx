@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
@@ -11,9 +13,10 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  * 8rem from `sm`), the title and place, the dates and the guests, then the
  * price bar under a hairline, and the money record panel below it.
  */
-export default function LoadingBooking() {
+export default async function LoadingBooking() {
+  const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label="Loading your booking" className="mx-auto w-full max-w-2xl">
+    <LoadingShell label={t.memberFlows.loading.booking} className="mx-auto w-full max-w-2xl">
       <PageHeaderSkeleton />
 
       <div className="nf-panel nf-panel--card block overflow-hidden p-0">

@@ -2,7 +2,6 @@ import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { PhotoName } from "@/lib/site/photos";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { STAYS_DOORS } from "@/lib/host/doors";
-import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
 import {
   WHO_PAYS_SENTENCE,
   HOST_PAYOUT_STEP,
@@ -27,7 +26,7 @@ import {
  *                    evidence a reviewer looks at);
  *   money            `lib/money/copy.ts`, the one source for every sentence
  *                    about money, and the live rates (`lister-fees.ts`);
- *   stays refunds    `lib/trust/cancellation.ts`.
+ *   stays refunds    the host's preset (`lib/host/cancellation-presets.ts`).
  *
  * English only for now, like `/safety` and `/standards`; the three languages
  * follow when the public site gets its locale paths (A10).
@@ -166,7 +165,7 @@ export const SUPPLY_DOORS: Record<SupplyRole, SupplyDoor> = {
     payout: [PAYOUT_ANSWER],
     checks: [...LADDER_LINES, LISTING_REVIEW],
     notDone: [
-      `Guests who cancel more than ${FULL_REFUND_HOURS} hours before check-in get everything back, under the platform terms. Your listing shows the terms that apply.`,
+      "You pick Flexible, Moderate, Firm or Strict, and every guest sees its refund steps before they book. The refund follows the policy on the booking, counted in Lagos time from your check-in time.",
     ],
     example: [
       { title: "Booking request: 2 nights", sub: "Deluxe room, Victoria Island", value: "New" },
@@ -179,7 +178,7 @@ export const SUPPLY_DOORS: Record<SupplyRole, SupplyDoor> = {
       { q: "Does Vallo hold the money?", a: NO_CUSTODY_SENTENCE },
       {
         q: "What happens when a guest cancels?",
-        a: `Guests who cancel more than ${FULL_REFUND_HOURS} hours before check-in get everything back, under the platform terms. Your listing shows the terms that apply.`,
+        a: "You pick Flexible, Moderate, Firm or Strict, and every guest sees its refund steps before they book. The refund follows the policy on the booking, counted in Lagos time from your check-in time.",
       },
       { q: "What does a guest pay?", a: WHO_PAYS_SENTENCE },
       { q: "Can I rent or book stays with the same account?", a: ONE_ACCOUNT },

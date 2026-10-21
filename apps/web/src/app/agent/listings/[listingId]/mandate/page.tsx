@@ -9,7 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/app/Screen";
 import { ListingPitch } from "../../../list/ListingPitch";
 import { MandateForm } from "./MandateForm";
-import { requestNow } from "@/lib/landlord/facts";
+import { requestNow } from "@/lib/format/when";
 
 export const metadata: Metadata = { title: "Owner's mandate", robots: { index: false, follow: false } };
 

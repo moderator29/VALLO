@@ -44,6 +44,19 @@ export function isPhoneGate(result: { ok: boolean; gate?: "phone" } | null | und
   return Boolean(result && !result.ok && result.gate === "phone");
 }
 
+/**
+ * The opening words of `SIGNED_OUT_MESSAGE` ("Sign in to continue."), which
+ * lives in a `server-only` module a client component cannot import. A screen
+ * that offers a sign-in link beside a signed-out refusal asks this rather
+ * than matching the sentence itself; `session.test.ts` keeps the two equal.
+ */
+export const SIGNED_OUT_LEAD = "Sign in";
+
+/** Is this refusal the signed-out one? */
+export function isSignedOutRefusal(error: string): boolean {
+  return error.startsWith(SIGNED_OUT_LEAD);
+}
+
 export function fail<T = null>(
   error: string,
   fieldErrors?: Record<string, string>,

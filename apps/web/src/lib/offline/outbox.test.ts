@@ -65,6 +65,12 @@ describe("creates in the outbox (V-40)", () => {
     }
   });
 
+  it("keeps a reply with the message it answers", async () => {
+    const { makeCreateEntry } = await import("./outbox");
+    const entry = makeCreateEntry("send_message", ID, { conversationId: "c", body: "yes", replyToId: "q" }, 1);
+    expect(entry?.payload).toEqual({ conversationId: "c", body: "yes", replyToId: "q" });
+  });
+
   it("refuses money, unknown fields, missing fields and a key that is not a UUID", async () => {
     const { makeCreateEntry, asEntry } = await import("./outbox");
     expect(makeCreateEntry("withdraw", ID, { amount: "5000" }, 1)).toBeNull();

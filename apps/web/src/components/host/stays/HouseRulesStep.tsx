@@ -55,6 +55,7 @@ export function HouseRulesStep({
   advance,
 }: StaysStepProps) {
   const hw = useHostCopy();
+  const w = hw.stays;
   const existing = draft.accommodation?.houseRules ?? "";
   /* What is on record, and the form held in the wizard so Back keeps it. */
   const savedForm = {
@@ -94,7 +95,7 @@ export function HouseRulesStep({
   useGuard("form", differs(form, savedForm), save);
   const saveAndGo = async () => {
     if (!(await save())) return;
-    setNotice({ tone: "ok", text: "Your rules and cancellation are saved." });
+    setNotice({ tone: "ok", text: w.rules.saved });
     advance();
   };
 
@@ -132,7 +133,7 @@ export function HouseRulesStep({
         <div className="grid grid-cols-2 gap-[var(--nf-space-md)]">
           <div>
             <label className="nf-stays-plate__label" htmlFor="stays-check-in">
-              Check in time
+              {w.rules.checkInTime}
             </label>
             <select
               id="stays-check-in"
@@ -150,7 +151,7 @@ export function HouseRulesStep({
           </div>
           <div>
             <label className="nf-stays-plate__label" htmlFor="stays-check-out">
-              Check out time
+              {w.rules.checkOutTime}
             </label>
             <select
               id="stays-check-out"
@@ -195,12 +196,11 @@ export function HouseRulesStep({
         loading={pending}
         disabled={pending || (policies.length > 0 && !policy)}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
-        The rules you switch on are written onto the property word for word, and a guest reads them
-        before they book. Anything you typed yourself stays where it is.
+        {w.rules.note}
       </StaysNote>
     </>
   );

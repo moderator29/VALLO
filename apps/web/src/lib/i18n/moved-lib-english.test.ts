@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getDictionary } from "@vallo/i18n";
+import { SAFETY_EDUCATION_COPY } from "@/lib/messages/education";
 
 /**
  * ENGLISH THAT LEFT SHARED CODE FOR THE DICTIONARY, PINNED (C9, after the route sweep).
@@ -33,6 +34,16 @@ describe("words moved out of shared code", () => {
     });
     expect(en.experienceDiscover.home.there).toBe("there");
     expect(en.experienceDiscover.home.welcome).toBe("Welcome to Vallo");
+  });
+
+  it("the rental panel's safety line is the owner's canon, verbatim (language audit, 17 October 2026)", () => {
+    expect(en.memberFlows.rental.keepInside).toBe(SAFETY_EDUCATION_COPY);
+  });
+
+  it("the booking panels say what the components spelled", () => {
+    expect(en.memberFlows.table.promise).toBe("The restaurant confirms it. Nothing is held until they do.");
+    expect(en.memberFlows.stayReserve.nothingAdded).toBe("Vallo adds nothing of its own. Every figure here is the host's.");
+    expect(en.memberFlows.stayReserve.payAfterInspecting).toBe("Pay only after you have inspected the property");
   });
 
   it("reaches every locale", () => {

@@ -3,7 +3,7 @@
 import { useHostCopy } from "@/components/host/host-copy";
 import { useGuard, useHeld } from "../wizard-memory";
 import { PolicyPicker } from "./PolicyPicker";
-import { countOf, formatMoney } from "@vallo/i18n/core";
+import { countOf, formatMoney, formatNumber } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { addAccommodationDraft, addRatePlanDraft, syncPropertyRatesDraft } from "@/lib/host/actions";
@@ -58,6 +58,7 @@ export function RatesStep({
   goTo,
 }: StaysStepProps) {
   const hw = useHostCopy();
+  const w = hw.stays;
   const cover = draft.accommodation?.photos[0]?.url ?? null;
   const chosen =
     policies.find((policy) => policy.id === draft.accommodation?.cancellationPolicyId) ?? null;
@@ -82,11 +83,10 @@ export function RatesStep({
     return (
       <>
         <StaysNote>
-          There is nothing to price yet. Add a room type on the previous screen and its rates appear
-          here.
+          {w.rates.nothingYet}
         </StaysNote>
         <Button variant="primary" size="lg" full leadingIcon="arrow-left" onClick={() => goTo("room-types")}>
-          Add a room type
+          {w.rates.addRoomType}
         </Button>
       </>
     );
@@ -110,7 +110,7 @@ export function RatesStep({
             <span className="min-w-0 flex-1">
               <span className="nf-stays-card__title block">{room.name}</span>
               <span className="nf-stays-row__meta">
-                {countOf(room.unitsTotal, "rooms", locale)}, sleeps {room.sleeps}
+                {w.rates.sleeps.replace("{rooms}", countOf(room.unitsTotal, "rooms", locale)).replace("{count}", formatNumber(room.sleeps, locale))}
               </span>
             </span>
           </div>
@@ -123,7 +123,7 @@ export function RatesStep({
                   trailing={
                     <span className="nf-stays-price">
                       {formatMoney(rate.rateMinor, locale)}
-                      <span className="nf-stays-price__unit">/ night</span>
+                      <span className="nf-stays-price__unit">{w.rates.perNight}</span>
                     </span>
                   }
                 >
@@ -133,7 +133,7 @@ export function RatesStep({
             </div>
           ) : (
             <p className="nf-stays-plate__note">
-              No rate yet. This room cannot be booked until it has one.
+              {w.rates.noRate}
             </p>
           )}
 
@@ -157,7 +157,7 @@ export function RatesStep({
       <PolicyPicker
         policies={policies}
         chosen={chosen?.id ?? ""}
-        onChoose={(id) => setPolicy(id, "The cancellation policy is saved on every rate.")}
+        onChoose={(id) => setPolicy(id, w.rates.policySaved)}
         locale={locale}
         label={hw.steps.cancellationPolicy}
         disabled={pending}
@@ -172,13 +172,13 @@ export function RatesStep({
         onClick={proceed}
         disabled={pending || !chosen}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
         {chosen
-          ? "The policy is the property\u2019s and applies to every room in it. Every price here is what a guest pays for the night, and this platform adds nothing to it."
-          : "Choose a cancellation policy before going on. A rate cannot be sold without one."}
+          ? w.rates.policyNote
+          : w.rates.choosePolicy}
       </StaysNote>
     </>
   );
@@ -215,6 +215,7 @@ function RateEditor({
   setNotice: StaysStepProps["setNotice"];
 }) {
   const hw = useHostCopy();
+  const w = hw.stays;
   const open = MEAL_PLANS.filter((plan) => !taken.includes(plan.id));
   /* Held in the wizard and guarded: a price typed for a rate and not saved is
      asked about before the host leaves the screen. */
@@ -234,7 +235,7 @@ function RateEditor({
 
   const save = async () => {
     if (kobo <= 0 || !policyId) {
-      setNotice({ tone: "error", text: "Enter what a night costs, and choose the cancellation policy, to save this rate." });
+      setNotice({ tone: "error", text: w.rates.incomplete });
       return false;
     }
     const saved = await runAsync(() =>
@@ -247,7 +248,7 @@ function RateEditor({
       }),
     );
     if (saved) {
-      setNotice({ tone: "ok", text: `${mealPlanLabel(plan)} is priced.` });
+      setNotice({ tone: "ok", text: w.rates.priced.replace("{plan}", mealPlanLabel(plan)) });
       setForm(blank);
     }
     return saved;
@@ -256,7 +257,7 @@ function RateEditor({
 
   if (open.length === 0) {
     return (
-      <p className="nf-stays-plate__note">Every meal plan on this room already has a price.</p>
+      <p className="nf-stays-plate__note">{w.rates.allPriced}</p>
     );
   }
 
@@ -272,7 +273,7 @@ function RateEditor({
           <UiIcon name="plus" size={16} />
         </span>
         <span className="min-w-0 flex-1 text-left">
-          <span className="nf-stays-row__value">Add a rate</span>
+          <span className="nf-stays-row__value">{w.rates.addRate}</span>
         </span>
         <UiIcon name="chevron-right" size={20} className="shrink-0 text-[var(--nf-content-muted)]" />
       </button>
@@ -295,7 +296,7 @@ function RateEditor({
       </StaysTiles>
 
       <label className="nf-stays-plate__label mt-[var(--nf-space-sm)] block" htmlFor={`rate-${roomTypeId}`}>
-        Nightly price
+        {w.rates.nightlyPrice}
       </label>
       <input
         id={`rate-${roomTypeId}`}
@@ -307,12 +308,12 @@ function RateEditor({
         onChange={(event) => setNaira(event.target.value)}
       />
       <p className="nf-stays-plate__note">
-        {kobo > 0 ? `Stored as ${formatMoney(kobo, locale)} a night.` : "Enter what a night costs."}
+        {kobo > 0 ? w.common.storedPerNight.replace("{amount}", formatMoney(kobo, locale)) : w.rates.enterPrice}
       </p>
 
       <div className="mt-[var(--nf-space-sm)] flex flex-wrap gap-[var(--nf-space-xs)]">
         <Button variant="secondary" size="lg" onClick={() => setForm(blank)} disabled={pending}>
-          Cancel
+          {w.common.cancel}
         </Button>
         <Button
           variant="primary"
@@ -322,7 +323,7 @@ function RateEditor({
           disabled={pending || kobo <= 0 || !policyId}
           onClick={() => void save()}
         >
-          Save this rate
+          {w.rates.saveRate}
         </Button>
       </div>
     </div>

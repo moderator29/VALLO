@@ -100,10 +100,10 @@ export default async function SweepListingParts() {
               />
             </Section>
             <Section title="Reserve panel (stays)" divided>
-              <ReservePanel listingId={RENTAL.id} currency="NGN" locale={locale} instantBook messageHref="#" />
+              <ReservePanel listingId={RENTAL.id} currency="NGN" locale={locale} instantBook messageHref="#" copy={t.memberFlows} />
             </Section>
             <Section title="Reserve a table (restaurants)" divided>
-              <ReserveTable listingId={RENTAL.id} messageHref="#" />
+              <ReserveTable listingId={RENTAL.id} messageHref="#" copy={t.memberFlows} locale={locale} />
             </Section>
             <Section title="Example listing" divided>
               <div className="nf-card p-card">

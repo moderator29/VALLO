@@ -17,6 +17,9 @@ const state = vi.hoisted(() => ({
   objects: [] as { name: string; metadata: Record<string, unknown> }[],
   removed: [] as string[][],
   buckets: [] as string[],
+  inspection: { ok: true, container: "mp4", durationSeconds: 42 } as Record<string, unknown>,
+  videoRows: [] as Record<string, unknown>[],
+  scrubOk: true,
 }));
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
@@ -25,8 +28,9 @@ vi.mock("../flags", () => ({ isFeatureEnabled: async () => true }));
 vi.mock("../photo-hash/hash-server", () => ({ hashListingPhotos: vi.fn() }));
 vi.mock("../images/scrub", () => ({
   SCRUB_REFUSED_MESSAGE: "scrub refused",
-  scrubPublicPhoto: vi.fn(async () => ({ ok: true })),
+  scrubPublicPhoto: vi.fn(async () => (state.scrubOk ? { ok: true } : { ok: false, reason: "not-an-image" })),
 }));
+vi.mock("./video-inspect", () => ({ inspectStoredVideo: vi.fn(async () => state.inspection) }));
 
 function chain(resolveData: () => unknown, single?: () => unknown) {
   const c: Record<string, unknown> = {};
@@ -65,6 +69,14 @@ vi.mock("../actions/session", () => ({
           });
           return c;
         }
+        if (table === "listing_videos") {
+          const c = chain(() => null);
+          c.insert = (row: Record<string, unknown>) => {
+            state.videoRows.push(row);
+            return { select: () => ({ single: async () => ({ data: { id: "new-video", position: 0 }, error: null }) }) };
+          };
+          return c;
+        }
         return chain(() => null);
       },
       storage: {
@@ -91,6 +103,9 @@ beforeEach(() => {
   state.objects = [{ name: "1f2e3d4c.jpg", metadata: { size: 200_000, mimetype: "image/jpeg" } }];
   state.removed = [];
   state.buckets = [];
+  state.inspection = { ok: true, container: "mp4", durationSeconds: 42 };
+  state.videoRows = [];
+  state.scrubOk = true;
 });
 
 describe("addPhoto on refusal", () => {
@@ -147,9 +162,65 @@ describe("addVideo on refusal", () => {
     expect(state.buckets).toEqual(["listing-videos", "listing-photos"]);
   });
 
+  it("refuses a video from another of the caller's listings without touching anything", async () => {
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: `user-1/${OTHER_LISTING}/walk.mp4` });
+    expect(result.ok).toBe(false);
+    expect(state.removed).toEqual([]);
+  });
+
   it("refuses a still outside the caller's own folder without touching anything", async () => {
     const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO, posterPath: `user-2/${LISTING_ID}/x.jpg` });
     expect(result.ok).toBe(false);
     expect(state.removed).toEqual([]);
+  });
+});
+
+describe("addVideo reads the stored file, not the label", () => {
+  const VIDEO = `user-1/${LISTING_ID}/walk.mp4`;
+  const POSTER = `user-1/${LISTING_ID}/walk-poster.jpg`;
+
+  beforeEach(() => {
+    state.objects = [{ name: "walk.mp4", metadata: { size: 5_000_000, mimetype: "video/mp4" } }];
+  });
+
+  it("stores the measured length, not the one the browser sent", async () => {
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO, durationSeconds: 5 });
+    expect(result.ok).toBe(true);
+    expect(state.videoRows[0]?.duration_seconds).toBe(42);
+  });
+
+  it("refuses and removes a clip the bytes say is over the minute", async () => {
+    state.inspection = { ok: true, container: "mp4", durationSeconds: 95 };
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO, durationSeconds: 30 });
+    expect(result.ok).toBe(false);
+    expect(state.videoRows).toEqual([]);
+    expect(state.removed).toEqual([[VIDEO]]);
+  });
+
+  it("refuses and removes a file that is not really a video", async () => {
+    state.inspection = { ok: false, reason: "not-a-video" };
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO });
+    expect(result.ok).toBe(false);
+    expect(state.removed).toEqual([[VIDEO]]);
+  });
+
+  it("refuses a file that still carries where it was filmed", async () => {
+    state.inspection = { ok: false, reason: "location" };
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(/place it was filmed/);
+  });
+
+  it("refuses a WebM file labelled as an MP4", async () => {
+    state.inspection = { ok: true, container: "webm", durationSeconds: null };
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO });
+    expect(result.ok).toBe(false);
+  });
+
+  it("refuses a still that cannot be made safe to publish", async () => {
+    state.scrubOk = false;
+    const result = await addVideo({ listingId: LISTING_ID, storagePath: VIDEO, posterPath: POSTER });
+    expect(result.ok).toBe(false);
+    expect(state.videoRows).toEqual([]);
   });
 });

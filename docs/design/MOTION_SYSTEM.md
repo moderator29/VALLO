@@ -1,82 +1,120 @@
 # The Vallo motion system
 
-**Written by Session 1, 6 October 2026.** The complete motion specification. It
-incorporates the motion designer's brief, reconciles it with what this repository
-actually contains, and defines every moment in the product.
+**Written 6 October 2026; section 0 rewritten to the system as built on
+17 October 2026 (Agent D audit).** Section 0 is the reference a session
+builds against: the token names, the patterns and where each lives. Sections
+1 and 2 are the principles and the moment inventory, still in force. Section
+3 is history (D68c). Code comments cite these section numbers, so they stay.
 
 ---
 
-## 0. The finding you need before you read anything else
+## 0. The system as built
 
-**The motion designer's brief says to pull from `scripts/marketing/video/engine/` and
-to reference its GSAP and CustomEase setup rather than rebuilding it.**
+One motion language, in CSS, in the token file
+(`packages/design-tokens/src/tokens.css`). No GSAP and no Three.js in the
+product bundle; framer-motion is installed but the product's motion is CSS and
+the Web Animations API. Animate `transform` and `opacity` only
+(`app/css/no-layout-motion.test.ts` holds it).
 
-**That engine is not in this repository.** Verified on 6 October: there is no
-`scripts/marketing/video/` directory at any path, no `gsap` or `CustomEase` dependency
-in any `package.json`, and no match for `CustomEase` anywhere in the tree or in git
-history.
+### Durations
 
-It presumably lives in the separate marketing and video project. **A session told to
-reference it will waste an hour looking for it and then invent something.** So this
-document does the reconciliation once, here.
-
-### What this repository does have, which is substantial
-
-A mature CSS-driven motion system, already shipped and already wired through the
-product:
-
-| | |
-|---|---|
-| **Duration tokens** | `instant` 90, `fast` 160, `base` 240, `slow` 380, `entrance` 520, `deliberate` 620, `cinematic` 900, `press` 120 |
-| **Ease tokens** | `standard`, `entrance`, `exit`, `spring`, `press` |
-| **Components** | `BrandAssemble`, `DepthWords`, `ThresholdStage`, `Reveal`, `CountUp`, `RouteTransition`, `LoopGate`, `FeatureGlyph`, `useInView`, `useMotionGate` |
-| **Libraries** | `nav-origin` (grow from the tapped element), `photo-morph`, `scroll-loop`, `threshold`, `motion-pref`, `iteration-quiet` |
-| **Stylesheets** | `motion.css`, `motion-kit.css`, `route-motion.css`, `press-motion.css`, `signature-motion.css`, `motion-pref.css`, `docs-motion.css` |
-| **Reduced motion** | Every duration token collapses to 1ms under `prefers-reduced-motion`, which is better than most products manage |
-
-**`BrandAssemble` and `DepthWords` already exist**, and they are close to exactly what
-the startup sequence needs: a mark assembling, and words arriving from depth.
-
-### The designer's five curves, mapped to what is already here
-
-The five named curves are cubic-beziers. **Four of them already exist under different
-names**, so the vocabulary is adopted without adding a dependency:
-
-| Designer's name | Intent | Vallo token |
+| Token | Value | Use |
 |---|---|---|
-| **`land`** | Snap in | `--nf-ease-entrance` `cubic-bezier(0.16, 1, 0.3, 1)` |
-| **`leave`** | Ease out | `--nf-ease-exit` `cubic-bezier(0.4, 0, 1, 1)` |
-| **`glide`** | Smooth float | `--nf-ease-standard` `cubic-bezier(0.22, 0.61, 0.36, 1)` |
-| **`drift`** | Slow settle | `--nf-ease-spring` `cubic-bezier(0.34, 1.28, 0.64, 1)` at `cinematic` |
-| **`whip`** | Fast flick | **New.** `--nf-ease-whip: cubic-bezier(0.7, 0, 0.2, 1)` at `instant` or `fast` |
+| `--nf-duration-instant` | 90ms | a state flip with no travel |
+| `--nf-duration-press` | 120ms | press feedback, inside the time a finger is down |
+| `--nf-duration-fast` | 160ms | state changes: chips, toggles, crossfades, skeleton to content |
+| `--nf-duration-pop` | 180ms | the payoff pop (principle 5), the heart |
+| `--nf-duration-base` | 240ms | layout and sheets: tab change, sheet exit, toast, list arrival |
+| `--nf-duration-slow` | 380ms | scenes: route transition, sheet entry |
+| `--nf-duration-entrance` | 520ms | a card entering on scroll |
+| `--nf-duration-deliberate` | 620ms | figures counting, a chart drawing, a payment confirmed |
+| `--nf-duration-cinematic` | 900ms | the rare brand moment |
 
-**Add `whip` as the one new token and alias the other four to the designer's names in
-comments**, so a conversation with him and a conversation with the code use the same
-words.
+Settings, Appearance, Motion (`lib/motion/motion-pref.ts`, `app/css/motion-pref.css`)
+rescales the ladder: `cinematic` about a quarter longer, `calm` shorter with
+loops stopped after one pass, `off` lands every animation in its final state.
 
-### The GSAP decision
+### Easings
 
-**Do not add GSAP to the application bundle.** Core plus CustomEase is roughly 70KB
-gzipped, this product runs in a Capacitor WebView on budget Android over Nigerian
-mobile networks, and the repository already enforces a weight budget
-(`scripts/check-weight.mjs`). Ninety-five per cent of the motion in section 2 is
-entrance, exit, press, stagger and transform, all of which CSS and the Web Animations
-API do natively and cheaply.
+| Token | Curve | Designer's name | Use |
+|---|---|---|---|
+| `--nf-ease-entrance` | `cubic-bezier(0.16, 1, 0.3, 1)` | land | every enter |
+| `--nf-ease-exit` | `cubic-bezier(0.4, 0, 1, 1)` | leave | every exit |
+| `--nf-ease-standard` | `cubic-bezier(0.22, 0.61, 0.36, 1)` | glide | crossfades, figures, charts |
+| `--nf-ease-spring` | `cubic-bezier(0.34, 1.28, 0.64, 1)` | drift | the low-bounce settle: sheets, the dock pill, toggles |
+| `--nf-ease-whip` | `cubic-bezier(0.7, 0, 0.2, 1)` | whip | a fast flick: a form error's shake |
+| `--nf-ease-press` | `cubic-bezier(0.3, 0, 0.2, 1)` | | press, leaves at once and eases back |
 
-**Two exceptions, both dynamically imported so they never touch first load:**
+`lib/motion/ease.ts` holds the same curves for JavaScript-driven motion.
 
-1. **The Get Started scroll choreography**, where several elements are driven from one
-   scroll position on a shared timeline. Hand-rolling that is where CSS genuinely gets
-   worse than a library.
-2. **The startup sequence**, if and only if `BrandAssemble` cannot carry it. Try the
-   existing component first.
+### Stagger
 
-**Three.js is refused for the product.** A WebGL context plus a renderer on a budget
-Android handset costs battery, memory and a visible first-frame delay, and the
-founder's own directive says the data-saver path drops blur, let alone a 3D scene. The
-3D feeling comes from **pre-rendered assets**, which the founder is generating right
-now, moved with CSS 3D transforms. The marketing video engine can use Three.js freely:
-it is not shipped to a phone.
+| Token | Value | Use |
+|---|---|---|
+| `--nf-stagger` | 40ms | cards, rows, sections arriving together |
+| `--nf-stagger-tight` | 20ms | things read as one: odometer digits, the route's first rows |
+| `--nf-stagger-cap` | 5 | the index cap: the seventh arrives with the sixth |
+
+```css
+.nf-feed-lead {
+  animation: nf-feed-stagger var(--nf-duration-base) var(--nf-ease-entrance) both;
+  animation-delay: calc(min(var(--nf-i, 0), var(--nf-stagger-cap)) * var(--nf-stagger));
+}
+```
+
+The index is data (`--nf-i`, `--card-i`, written by the list), never an
+`nth-child` ladder, and a list staggers on first paint only (the wrapper's key
+is the item id, so a like or a refresh never replays it).
+
+### Press
+
+`--nf-press-scale-sm` 0.94 (icon buttons), `--nf-press-scale` 0.97,
+`--nf-press-scale-lg` 0.985 (cards and heroes), `--nf-press-sink` 1px, all at
+`--nf-duration-press` on `--nf-ease-press` (`app/css/press-motion.css`).
+
+### Reduced motion
+
+Under `prefers-reduced-motion: reduce` every duration token is 1ms, both
+stagger tokens are 0ms, spring and whip are linear, the press scales are 1 and
+the route shifts are 0, in `:root` and in every night subtree. So a rule that
+reads the tokens needs no reduced-motion branch of its own. Where a moment
+must still say where it came from, the reduced cut is a 160ms opacity fade
+written out (`app/css/route-motion.css`, `threshold.css`), because the tokens
+have collapsed there. Ambient loops sit behind `LoopGate` and
+`useMotionGate` (off screen, hidden tab, reduced motion, data saver: stopped).
+
+### Patterns and where they live
+
+| Pattern | Where |
+|---|---|
+| Route transition, grows from the tapped element, folds back on Back | `RouteTransition`, `lib/motion/nav-origin.ts`, `nav-direction.ts`, `app/css/route-motion.css` |
+| Page stagger on arrival | `.nf-page-stage` in `route-motion.css` |
+| Sheet up from the bottom with a scrim, drag to dismiss | `components/ui/Sheet.tsx` |
+| Press feedback | `app/css/press-motion.css`, `lib/motion/press-start.ts` |
+| Chip and segment select pop | `lib/motion/select-pop.ts`, `components/ui/Segmented.tsx` |
+| Figures counting once, odometer per digit | `CountUp`, `components/ui/Odometer.tsx`, `lib/motion/odometer.ts` |
+| Scroll entry for cards | `Reveal`, `useInView`, `lib/motion/scroll-entry.ts` |
+| Photo open from its thumbnail | `lib/motion/photo-morph.ts` |
+| Skeleton to content crossfade | `.nf-fade-swap` in `app/css/motion-kit.css` |
+| The startup hold and the door | `components/startup`, `ThresholdStage`, `lib/motion/threshold.ts` |
+| Payoff pop | `--nf-duration-pop`, `SuccessMoment`, `SuccessSheet` |
+
+### Adding motion
+
+1. Use a pattern above before writing a new one; a new moment goes in the
+   inventory (section 2) in the same commit.
+2. Durations, easings and stagger are tokens. A literal is allowed only for an
+   ambient loop measured in seconds or for the reduced-motion fade.
+3. Transform and opacity only.
+4. No money figure animates before the server confirms it (section 2, Money).
+5. Check it under reduced motion and under Settings, Motion, Calm.
+
+### What was decided on 6 October and still holds
+
+GSAP stays out of the product bundle (about 70KB gzipped on budget Android over
+Nigerian networks; `scripts/check-weight.mjs` holds the budget). Three.js is
+refused for the product; the 3D feeling comes from pre-rendered assets moved
+with CSS 3D transforms. The designer's five curves map to the tokens above.
 
 ---
 
@@ -90,8 +128,9 @@ against.
 2. **Entrances are fast, exits are slower.** `whip` and `land` in, `leave` and `drift`
    out. This is counter-intuitive and it is correct: arriving should feel decisive,
    leaving should feel unhurried.
-3. **Stagger children at most 60ms apart.** It should read as one organism, not a
-   queue. At most six items; the seventh arrives with the sixth.
+3. **Stagger children `--nf-stagger` (40ms) apart, `--nf-stagger-tight` (20ms)
+   for things read as one.** It should read as one organism, not a queue. At
+   most six items; the seventh arrives with the sixth (`--nf-stagger-cap`).
 4. **Depth through parallax.** Background layers move at **0.6x** foreground speed.
 5. **Payoff moments get one sharp impact and a subtle pop**: scale 1.0 to 1.04 to 1.0
    over 180ms, plus one haptic. Confirm, verify, unlock, release, earn. **Nothing else
@@ -149,7 +188,7 @@ this table.
 |---|---|
 | **Sheet entry** | Rises from below with `land` 380ms while the scrim blur ramps 0 to 12 |
 | **Sheet exit** | `leave` 240ms |
-| **Card entry on scroll** | 50 to 90px vertical float with overhang offset, `land` 520ms, children staggered 60ms |
+| **Card entry on scroll** | 50 to 90px vertical float with overhang offset, `land` 520ms, children staggered `--nf-stagger` |
 | **Card press** | Scale 0.985, `press` 120ms |
 | **List stagger** | First six only, 40ms apart, 12px lift and fade |
 | **Skeleton to content** | Crossfade `glide` 160ms. Never a spinner |
@@ -388,20 +427,10 @@ remaining attempts shown before the final one, or a delay that is not real.
 
 ---
 
-## 7. What Session 3 must do
+## 7. What is still open
 
-1. **Add `--nf-ease-whip`** and alias the other four to the designer's names in
-   comments, so code and conversation share a vocabulary.
-2. **Build the moment inventory in section 2** as the one motion layer. Every moment
-   defined once, used everywhere.
-3. **Use the existing components first**: `BrandAssemble`, `DepthWords`,
-   `ThresholdStage`, `Reveal`, `CountUp`, `nav-origin`, `photo-morph`, `scroll-loop`.
-   They exist and they work.
-4. **No GSAP in the application bundle.** Dynamic import only, and only for the Get
-   Started scroll choreography and the startup sequence if `BrandAssemble` cannot
-   carry it.
-5. **No Three.js in the product.** Pre-rendered assets plus CSS 3D transforms.
-6. **Record the shipped durations** against this table in the response file, so the
-   built system can be compared with the specified one.
-7. **Verify every moment under reduced motion and data saver**, on a real mid-range
-   Android, not only in a simulator.
+Built: every token in section 0, the moment inventory's controls, surfaces,
+lists, figures and payoff moments, reduced motion and the Motion setting.
+Not yet measured: dropped frames on the feed, the gallery and the sheets on a
+throttled mid-range Android (needs a device; see the audit report). The
+startup timings are owned by `components/startup` and its tests.

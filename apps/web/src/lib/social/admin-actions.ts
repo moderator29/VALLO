@@ -109,6 +109,10 @@ export async function decideArea(input: {
   if (area.status !== "PROPOSED") {
     return fail("That place has already been decided. Refresh the queue.");
   }
+  /* Nobody decides their own case: a place you proposed waits for another admin. */
+  if (area.created_by === access.user.id) {
+    return fail("You proposed this place, so another admin has to decide it. Nothing was changed.");
+  }
 
   const approving = decision === "APPROVE";
   const { error: updateError } = await access.supabase
@@ -212,6 +216,10 @@ export async function decideModeratorApplication(input: {
   if (!application) return fail(GONE);
   if (application.status !== "PENDING") {
     return fail("That application has already been decided. Refresh the queue.");
+  }
+  /* Nobody makes themselves a moderator. */
+  if (application.user_id === access.user.id) {
+    return fail("This is your own application, so another admin has to decide it. Nothing was changed.");
   }
 
   const approving = decision === "APPROVE";

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
+import { requestNow } from "@/lib/format/when";
 import { getLocale } from "@/lib/locale";
 import { resolveSession } from "@/lib/actions/session";
 import { getMyBusinesses, getMyHostDraft } from "@/lib/host/queries";
@@ -152,9 +153,4 @@ export default async function HostPage({
       />
     </HostShell>
   );
-}
-
-/** The request's clock, read once, so the page agrees with itself. */
-function requestNow(): number {
-  return Date.now();
 }

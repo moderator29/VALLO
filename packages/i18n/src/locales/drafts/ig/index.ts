@@ -20,6 +20,7 @@ import { compliancePepIg } from "./compliancePep";
 import { complianceRiskIg } from "./complianceRisk";
 import { complianceBeneficialOwnershipIg } from "./complianceBeneficialOwnership";
 import { visitIg } from "./visit";
+import { memberFlowsIg } from "./memberFlows";
 
 /**
  * Every machine-drafted namespace for this locale, laid under the locale
@@ -49,4 +50,5 @@ export const igDrafts = {
   complianceRisk: complianceRiskIg,
   complianceBeneficialOwnership: complianceBeneficialOwnershipIg,
   visit: visitIg,
+  memberFlows: memberFlowsIg,
 } satisfies Translation;

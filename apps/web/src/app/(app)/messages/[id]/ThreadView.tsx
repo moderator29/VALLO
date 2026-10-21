@@ -20,18 +20,14 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ChatCard, type ThreadCardData } from "@/components/app/messages/ChatCard";
 import { bundlePhotos, isCaption, isPhotoOnly } from "@/components/app/messages/bundle";
-import { cardRefFor, parseShare, shareHref, SHARE_LEAD } from "@/components/app/messages/share";
+import { cardRefFor, parseShare, shareHref } from "@/components/app/messages/share";
 import {
   attachImage,
   confirmInspection,
   markThreadRead,
   sendMessage,
 } from "@/lib/messages/actions";
-import {
-  MONEY_TALK_RE,
-  SAFETY_EDUCATION_COPY,
-  SAFETY_EDUCATION_SEEN_KEY,
-} from "@/lib/messages/education";
+import { MONEY_TALK_RE, SAFETY_EDUCATION_SEEN_KEY } from "@/lib/messages/education";
 import { lagosTimeLabel } from "@/lib/messages/time";
 import { deleteMessage } from "@/lib/messages/message-actions";
 import { MessageMenu } from "@/components/app/messages/MessageMenu";
@@ -341,14 +337,17 @@ type RetryPayload = { kind: "text"; body: string; replyToId?: string | null } | 
  * sits under. Words where there are words, and an honest noun where there are
  * not.
  */
-function retryLabel(message: { body?: string | null; imageUrl?: string | null }): string {
+function retryLabel(message: { body?: string | null; imageUrl?: string | null }, view: ViewWords): string {
   const words = (message.body ?? "").trim();
   if (words.length > 0) {
     const short = words.length > 40 ? `${words.slice(0, 40).trimEnd()}...` : words;
-    return `Retry sending: ${short}`;
+    return view.retryText.replace("{text}", short);
   }
-  return message.imageUrl ? "Retry sending your photo" : "Retry sending this message";
+  return message.imageUrl ? view.retryPhoto : view.retryMessage;
 }
+
+/** The conversation screen's own words (`experienceInbox.thread.view`). */
+type ViewWords = Dictionary["experienceInbox"]["thread"]["view"];
 
 /**
  * The read ticks. One tick is delivered (the platform holds it), two is read
@@ -388,10 +387,14 @@ function Ticks({ read }: { read: boolean }) {
  * because an owner is nobody's agent. The other side is the Tenant. A stay thread gets none
  * of this: there is no tenancy in it and nobody is anybody's agent.
  */
-function roleTags(context: ThreadContext | undefined, role: ThreadRole): { mine: string; theirs: string } | null {
+function roleTags(
+  context: ThreadContext | undefined,
+  role: ThreadRole,
+  view: ViewWords,
+): { mine: string; theirs: string } | null {
   if (context?.kind !== "listing") return null;
-  const lister = context.listing?.listingRole === "owner" ? "Landlord" : "Vallo Agent";
-  return role === "host" ? { mine: lister, theirs: "Tenant" } : { mine: "Tenant", theirs: lister };
+  const lister = context.listing?.listingRole === "owner" ? view.roleLandlord : view.roleAgent;
+  return role === "host" ? { mine: lister, theirs: view.roleTenant } : { mine: view.roleTenant, theirs: lister };
 }
 
 /**
@@ -513,6 +516,7 @@ export function ThreadView({
      my own send is merged by `mergeEcho`, not by marking its id as seen). */
   const [openedWith] = useState<ReadonlySet<string>>(() => new Set(messages.map((m) => m.id)));
   const threadWords = useInboxPart("thread", inboxThreadCopy);
+  const view = threadWords.view;
   /* The unread divider is fixed at arrival: reading the thread marks it read
      and the page may re-render with nothing unread, but the divider stays
      where the reader came in until they leave. */
@@ -528,7 +532,9 @@ export function ThreadView({
    * reduced motion stills it in the stylesheet.
    */
   /* The bubble's "waiting" word, from the root layout's client copy. */
-  const waitingShort = useClientCopy().platform.outbox.waitingShort;
+  const clientCopy = useClientCopy();
+  const waitingShort = clientCopy.platform.outbox.waitingShort;
+  const verifiedWord = clientCopy.common.verified;
   const [ceremony, setCeremony] = useState(false);
   const [draft, setDraft] = useState("");
   const [pendingFile, setPendingFile] = useState<{ file: File; url: string } | null>(null);
@@ -886,7 +892,7 @@ export function ThreadView({
        good; it now ends the wait and says the step did not go through. */
     const result = await confirmInspection({ conversationId, listingId: listing.id }).catch(() => ({
       ok: false as const,
-      error: "That did not go through. Check your connection and try again.",
+      error: view.failed,
     }));
     setConfirmBusy(false);
     if (result.ok) {
@@ -897,7 +903,7 @@ export function ThreadView({
     } else {
       setConfirmNote(result.error);
     }
-  }, [live, listing, conversationId]);
+  }, [live, listing, conversationId, view.failed]);
 
   const closeSheet = useCallback(() => {
     setSheetOpen(false);
@@ -953,7 +959,7 @@ export function ThreadView({
   /* The kind glyph before the muted context line (the inbox rows' glyphs). */
   const contextGlyph =
     context?.kind === "booking" ? "bed" : context?.kind === "reservation" ? "calendar-clock" : "chat-bubble";
-  const tags = roleTags(context, role);
+  const tags = roleTags(context, role, view);
   const bundles = bundlePhotos(items);
   /* THE VIEWER'S LIST: every photo and video in the thread, in thread order, so
      a swipe in the full-screen viewer moves on through the conversation. Each
@@ -971,7 +977,7 @@ export function ThreadView({
             id: m.id,
             kind: "photo",
             src: m.imageUrl,
-            alt: m.mine ? "Photo you attached" : `Photo from ${counterpartName}`,
+            alt: m.mine ? view.photoYours : view.photoFrom.replace("{name}", counterpartName),
             name: who,
             when,
           });
@@ -1044,7 +1050,7 @@ export function ThreadView({
             <a
               href={`/u/${counterpartHandle}`}
               className="nf-thread__ring"
-              aria-label={`${counterpartName}, open profile`}
+              aria-label={view.openProfile.replace("{name}", counterpartName)}
             >
               <VerifiedAvatar
                 name={counterpartName}
@@ -1095,7 +1101,7 @@ export function ThreadView({
               {propertyFace && listing?.verified && (
                 <span className="nf-badge nf-badge--success shrink-0">
                   <UiIcon name="verified" size={12} />
-                  Verified
+                  {verifiedWord}
                 </span>
               )}
             </p>
@@ -1139,7 +1145,7 @@ export function ThreadView({
           <Button
             ref={sheetTriggerRef}
             variant="icon"
-            aria-label="Conversation options"
+            aria-label={view.options}
             aria-haspopup="dialog"
             aria-expanded={sheetOpen}
             onClick={() => setSheetOpen(true)}
@@ -1203,7 +1209,7 @@ export function ThreadView({
         counterpartId={counterpartId}
         signedIn={live}
         inspected={inspected}
-        confirmedLabel={live ? "Inspection confirmed." : "Inspection confirmed on this device"}
+        confirmedLabel={live ? view.inspectionConfirmed : view.inspectionConfirmedDevice}
         busy={confirmBusy}
         note={confirmNote}
         canShare={live}
@@ -1212,6 +1218,7 @@ export function ThreadView({
         passport={live ? passport : null}
         meId={meId ?? null}
         sheetCopy={sheetCopy}
+        words={view}
         unsafeAsLister={context?.kind === "listing" && role === "host"}
       />
 
@@ -1240,11 +1247,11 @@ export function ThreadView({
         ref={scrollerRef}
         className="nf-thread__scroll"
         aria-live="polite"
-        aria-label="Conversation"
+        aria-label={view.conversation}
       >
         <p className="nf-thread__safety">
           <UiIcon name="verified" size={16} />
-          Keep every chat and payment inside Vallo
+          {view.keepInside}
         </p>
         {sinceLine ? (
           /* Whose date it is, for a screen reader; the line itself is the
@@ -1272,15 +1279,15 @@ export function ThreadView({
         {bundles.length === 0 && (
           <EmptyState
             icon="chat-duo"
-            title={`Say hello to ${counterpartName}`}
+            title={view.emptyTitle.replace("{name}", counterpartName)}
             body={
               context?.kind === "listing"
-                ? "Nothing has been said here yet. Ask what you need to know about the property, agree a time to see it, and keep the whole conversation in one place."
+                ? view.emptyListing
                 : context?.kind === "booking"
-                  ? "Nothing has been said here yet. Ask about your arrival, the room or anything the booking does not answer."
+                  ? view.emptyBooking
                   : context?.kind === "reservation"
-                    ? "Nothing has been said here yet. Confirm the time, the size of the party, and anything the kitchen should know."
-                    : "Nothing has been said here yet. Whatever you write stays between the two of you, and the whole conversation is kept here."
+                    ? view.emptyReservation
+                    : view.emptyDirect
             }
             data-testid="thread-empty"
           />
@@ -1404,7 +1411,7 @@ export function ThreadView({
                 ) : null}
 
                 {m.card ? (
-                  <ChatCard card={m.card} />
+                  <ChatCard card={m.card} thread={threadWords} />
                 ) : (
                   /* Hold for the menu, swipe to reply (`BubbleGestures`). A
                      bubble still on its way has neither: there is no message
@@ -1428,21 +1435,21 @@ export function ThreadView({
                          own proportions, and past three the group swipes. */
                       <PhotoGroup
                         photos={photos.map((p) => ({ id: p.id, url: p.imageUrl ?? "", size: p.imageSize ?? null }))}
-                        alt={m.mine ? "Photo you attached" : `Photo from ${counterpartName}`}
+                        alt={m.mine ? view.photoYours : view.photoFrom.replace("{name}", counterpartName)}
                         locale={locale}
                         onOpen={viewerCopy ? setViewerId : undefined}
                         openLabel={viewerCopy?.openPhoto}
                       />
                     ) : null}
-                    {m.forwarded ? <span className="nf-bubble__forwarded">Forwarded</span> : null}
-                    {m.deleted ? <p className="nf-bubble__deleted">This message was deleted</p> : null}
+                    {m.forwarded ? <span className="nf-bubble__forwarded">{view.forwarded}</span> : null}
+                    {m.deleted ? <p className="nf-bubble__deleted">{view.deleted}</p> : null}
                     {m.audio ? <VoiceNote note={m.audio} mine={m.mine} copy={threadWords.voice} /> : null}
                     {m.file && viewerCopy && (m.file.mime ?? "").toLowerCase().startsWith("video/") ? (
                       <button
                         type="button"
                         className="nf-video-tile"
                         onClick={() => setViewerId(`${m.id}:file`)}
-                        aria-label={`${viewerCopy.openVideo}. ${m.mine ? "Video you attached" : `Video from ${counterpartName}`}`}
+                        aria-label={`${viewerCopy.openVideo}. ${m.mine ? view.videoYours : view.videoFrom.replace("{name}", counterpartName)}`}
                         data-testid="video-tile"
                       >
                         <UiIcon name="circle-play" size={44} filled />
@@ -1460,9 +1467,9 @@ export function ThreadView({
                       /* A share whose card did not resolve for this reader:
                          the words and a link that opens the thing. */
                       <p className="nf-bubble__body">
-                        {SHARE_LEAD[share.kind]}{" "}
+                        {view.shared[share.kind]}{" "}
                         <Link href={shareHref(share)} className="font-semibold underline underline-offset-2">
-                          Open
+                          {view.open}
                         </Link>
                       </p>
                     ) : (
@@ -1476,7 +1483,7 @@ export function ThreadView({
                         the state the platform already keeps.
                       */}
                       {m.state === "sending" ? (
-                        <span>Sending</span>
+                        <span>{view.sending}</span>
                       ) : m.state === "waiting" ? (
                         <span data-testid="bubble-waiting">{waitingShort}</span>
                       ) : (
@@ -1508,14 +1515,14 @@ export function ThreadView({
 
                 {m.state === "failed" && (
                   <p className="mt-inline-tight flex items-center gap-xs nf-caption text-[var(--nf-state-error)]">
-                    Not sent.
+                    {view.notSent}
                     <Button
                       variant="quiet"
                       size="sm"
                       onClick={() => retry(m.id)}
-                      aria-label={retryLabel(m)}
+                      aria-label={retryLabel(m, view)}
                     >
-                      Retry
+                      {view.retry}
                     </Button>
                   </p>
                 )}
@@ -1533,7 +1540,7 @@ export function ThreadView({
             <div
               className="nf-bubble nf-bubble--theirs flex items-center gap-inline-tight"
               role="status"
-              aria-label={`${counterpartName} is typing`}
+              aria-label={view.typing.replace("{name}", counterpartName)}
             >
               {[0, 1, 2].map((i) => (
                 <span
@@ -1555,12 +1562,12 @@ export function ThreadView({
             <UiIcon name="verified" size={ICON.inline} />
           </span>
           <p className="min-w-0 flex-1 nf-body-sm leading-relaxed text-[var(--nf-content-secondary)]">
-            {SAFETY_EDUCATION_COPY}
+            {view.safetyRule}
           </p>
           <Button
             variant="icon"
             leadingIcon="close"
-            aria-label="Dismiss safety note"
+            aria-label={view.dismissSafety}
             onClick={() => setEducationOpen(false)}
             className="shrink-0"
           />
@@ -1576,32 +1583,32 @@ export function ThreadView({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pendingFile.url}
-            alt="Photo ready to send"
+            alt={view.photoReady}
             className="h-14 w-14 rounded-xl object-cover"
           />
-          <p className="min-w-0 flex-1 nf-body-sm text-[var(--nf-content-muted)]">Photo attached</p>
+          <p className="min-w-0 flex-1 nf-body-sm text-[var(--nf-content-muted)]">{view.photoAttached}</p>
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Remove photo"
+            aria-label={view.removePhoto}
             onClick={() => {
               setPendingFile(null);
               if (fileRef.current) fileRef.current.value = "";
             }}
           >
-            Remove
+            {view.remove}
           </Button>
         </div>
       )}
       {replyTo && (
         <div className="nf-composer__reply" data-testid="composer-reply">
           <p className="nf-body-sm text-[var(--nf-content-secondary)]">
-            <span className="font-semibold">{replyTo.mine ? "You" : counterpartName}</span>
+            <span className="font-semibold">{replyTo.mine ? threadWords.quoted.you : counterpartName}</span>
             {": "}
-            {replyTo.deleted ? "This message was deleted" : replyTo.body || "Photo"}
+            {replyTo.deleted ? view.deleted : replyTo.body || threadWords.quoted.photo}
           </p>
-          <Button variant="ghost" size="sm" aria-label="Cancel reply" onClick={() => setReplyTo(null)}>
-            Cancel
+          <Button variant="ghost" size="sm" aria-label={view.cancelReply} onClick={() => setReplyTo(null)}>
+            {view.cancel}
           </Button>
         </div>
       )}
@@ -1660,25 +1667,25 @@ export function ThreadView({
         <Button
           variant="icon"
           leadingIcon="picture"
-          aria-label="Attach a photo"
+          aria-label={view.attachPhoto}
           onClick={() => fileRef.current?.click()}
         />
         <label htmlFor="thread-input" className="sr-only">
-          Message {counterpartName}
+          {view.messageTo.replace("{name}", counterpartName)}
         </label>
         <input
           id="thread-input"
           type="text"
           value={draft}
           onChange={(e) => onDraftChange(e.target.value)}
-          placeholder="Type a message"
+          placeholder={view.placeholder}
           autoComplete="off"
           enterKeyHint="send"
           className="nf-composer__field"
         />
         <button
           type="submit"
-          aria-label="Send message"
+          aria-label={view.send}
           disabled={!draft.trim() && !pendingFile}
           className="nf-composer__send"
         >
@@ -1687,6 +1694,7 @@ export function ThreadView({
       </form>
       {actionMsg && (
         <MessageMenu
+          words={threadWords.menu}
           canCopy={actionMsg.body.length > 0 && !actionMsg.deleted}
           canDeleteEveryone={actionMsg.mine && !actionMsg.deleted}
           canForward={live && canForward(actionMsg)}
@@ -1700,13 +1708,14 @@ export function ThreadView({
       )}
       {live ? (
         <ForwardSheet
+          words={threadWords.forward}
           open={forwarding !== null}
           messageId={forwarding?.id ?? null}
           fromConversationId={conversationId}
           onClose={() => setForwarding(null)}
           onForwarded={(target) => {
             setForwarding(null);
-            setActionNote({ tone: "done", text: `Forwarded to ${target.name}.` });
+            setActionNote({ tone: "done", text: view.forwardedTo.replace("{name}", target.name) });
           }}
         />
       ) : null}

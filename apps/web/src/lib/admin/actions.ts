@@ -24,6 +24,7 @@ import { eddGateMessage, isEddGateRefusal } from "../compliance/gate";
 import { ARRIVAL_DECLARATION_NEEDED, arrivalChargesDeclared } from "../stays/arrival-gate";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { createAdminClient } from "../supabase/admin";
+import { OWN_CASE_REFUSAL, messageSubjects, ownCaseVerdict, reportSubjects } from "./self-review";
 import { writeAudit, type AuditDetail } from "./audit";
 import { adminRefusal, requireAdmin } from "./guard";
 import { announce } from "../notify/junction";
@@ -96,6 +97,10 @@ export async function reviewMessageFlag(input: {
   if (flag.status === "reviewed") {
     return fail("This flag has already been reviewed. Refresh the queue to see the current state.");
   }
+  /* Nobody clears a flag on their own words or their own thread. */
+  const flagCase = ownCaseVerdict(access.user.id, await messageSubjects(access.supabase, flag.message_id));
+  if (flagCase === "unknown") return fail(SERVICE_DOWN);
+  if (flagCase === "own") return fail(OWN_CASE_REFUSAL);
 
   const { error: updateError } = await access.supabase
     .from("message_flags")
@@ -293,7 +298,7 @@ export async function resolveReport(input: {
 
   const { data: report, error: readError } = await access.supabase
     .from("reports")
-    .select("id, status, target_type, target_id, reason")
+    .select("id, status, target_type, target_id, reason, reporter_id")
     .eq("id", reportId)
     .maybeSingle();
   if (readError) return fail(SERVICE_DOWN);
@@ -302,6 +307,11 @@ export async function resolveReport(input: {
   if (report.status === "resolved" || report.status === "dismissed" || (report.status as string) === "withdrawn") {
     return fail("This report has already been closed. Refresh the queue to see the current state.");
   }
+  /* Nobody decides a report they filed or one about them or their own words. */
+  const subjects = await reportSubjects(access.supabase, report.target_type, report.target_id);
+  const reportCase = ownCaseVerdict(access.user.id, subjects ? [...subjects, report.reporter_id] : null);
+  if (reportCase === "unknown") return fail(SERVICE_DOWN);
+  if (reportCase === "own") return fail(OWN_CASE_REFUSAL);
 
   const closing = decision === "resolved" || decision === "dismissed";
   const { data: movedReport, error: updateError } = await access.supabase
@@ -954,6 +964,13 @@ export async function reviewListing(input: {
       });
     }
 
+  } catch {
+    // The transition has committed. Telling the lister is best effort.
+  }
+
+  /* The audit row is written on its own, so a notification or email that
+     throws can never cost the decision its record. */
+  try {
     const detail: AuditDetail = {
       before_status: listing.status,
       after_status: nextStatus,
@@ -964,7 +981,7 @@ export async function reviewListing(input: {
       /* C8: countable on the analytics desk ("why listings were sent back"). */
       reasons: reasons.join(","),
     };
-    await writeAudit(admin, {
+    await writeAudit(createAdminClient(), {
       actorId: access.user.id,
       action: "listing.review",
       entityType: "listing",
@@ -972,7 +989,7 @@ export async function reviewListing(input: {
       detail,
     });
   } catch {
-    // The transition has committed. The follow-on work is best effort.
+    // Best effort, as every other admin decision's audit row.
   }
 
   revalidatePath("/admin/listings");

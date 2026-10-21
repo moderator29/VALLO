@@ -16,6 +16,7 @@ import { cryptoPayEn } from "./crypto-pay.en";
 import { trustVisibleEn } from "./trust-visible.en";
 import { memberKitEn } from "./member-kit.en";
 import { visitEn } from "./visit.en";
+import { memberFlowsEn } from "./member-flows.en";
 import { landlordEn } from "./landlord.en";
 import { trustDoorsEn } from "./trust-doors.en";
 import { publicDoorsEn } from "./public-doors.en";
@@ -965,56 +966,6 @@ export const en = {
         agents: "Approved agents",
         cities: "Cities",
         states: "States",
-      },
-      community: {
-        overline: "Real people. Real places.",
-        /*
-         * The render sets two phrases of this headline in the brand ramp.
-         * Double brackets mark them, so a translator marks the phrases that
-         * carry the emphasis in their own language and a locale that has not
-         * been through this pass simply renders the whole line in white
-         * rather than losing its translation to the English fallback.
-         */
-        /* "A growing community" was the line here and growth is a claim: this
-           platform has had no transaction yet, so nothing in the database can
-           answer for the word. One account for both sides is a fact about the
-           product and says the same thing without asking the reader to take
-           anything on trust. */
-        /* The clean pass (29 September): "One account" headlined four rooms
-           of this page, so each room now has a line of its own. This one is
-           about who the platform is for; brackets are no longer used, so
-           the heading takes the one section-title style. */
-        title: "Built for both sides of the deal.",
-        /* THE FIGURES BESIDE THIS LINE CAN BE NONE, AND THE LINE HAS TO READ
-           CORRECTLY WHEN THEY ARE. `statTiles` drops any count of zero and
-           returns nothing at all when the platform cannot answer, so the band
-           prints no figures rather than a nought dressed as a fact. The line
-           said "every count on this page" and pointed at an empty space. */
-        body: "Renters, buyers and guests on one side. Agents and hosts on the other.",
-        thirdParty: "Third party",
-        thirdPartyTitle: "Partner inventory, always labelled",
-        thirdPartyBody:
-          "A stay fulfilled by a partner carries this tag and says who confirms it. It is never dressed as first party.",
-      },
-      categories: {
-        overline: "Explore by category",
-        title: "Browse by kind of place.",
-        body: "Every tile opens a real search across Nigeria, on the Property side or on Vallo Stays.",
-        apartments: "Apartments",
-        houses: "Houses",
-        shortlets: "Shortlets",
-        hotels: "Hotels",
-        /* The founder's render names these three and the Stays side really
-           serves all three, so they are doors into markets that exist:
-           `resort` and `guest_house` are stay types in lib/stays/types.ts,
-           and Commercial is the office market the catalogue holds. Villas and
-           yearly rentals stood in these slots while the three were thought
-           unavailable; both remain reachable from the search filters. */
-        resorts: "Resorts",
-        guestHouses: "Guest houses",
-        commercial: "Commercial",
-        land: "Land",
-        count: "{count} listed",
       },
       app: {
         title: "Take Vallo with you.",
@@ -2130,6 +2081,17 @@ export const en = {
         "Clear these and the delete button unlocks. Nothing here stops you leaving, it just has to be settled first.",
       /* STORE-12 / MON-09: money in a pot, and rent refunds either way. The
          deletion is also re-checked for these on the day it runs. */
+      /* Money a licensed partner holds or is moving for a deal of theirs, and
+         rewards Vallo owes them. Each has a way out: the agreement, or the
+         rewards screen where Withdraw lives. */
+      blockerPartnerHeld:
+        "A licensed payment partner is holding or moving {amount} for a deal of yours. It has to be released or refunded first.",
+      blockerPartnerHeldCta: "Open my agreements",
+      blockerRewardsBalance: "You have {amount} in rewards to withdraw. Withdraw it first so it is not lost.",
+      blockerRewardsBalanceCta: "Withdraw rewards",
+      blockerRewardsPayouts: "You have {count} rewards withdrawal still on its way to your bank.",
+      blockerRewardsPayoutsPlural: "You have {count} rewards withdrawals still on their way to your bank.",
+      blockerRewardsPayoutsCta: "See my rewards",
       blockerRentRefundsCta: "Talk to support",
       blockerRentRefundsOwed: "You owe {amount} in rent refunds to people who paid you.",
       blockerRentRefundsDue: "{amount} in rent refunds is owed to you.",
@@ -2766,6 +2728,8 @@ export const en = {
       videoCeiling: "A listing holds up to {max} videos.",
       videoFailed: "That video did not finish uploading. Please try it again.",
       videoUploading: "Uploading {name}, {percent}%",
+      videoCancel: "Stop upload",
+      videoCancelled: "Upload stopped. Nothing was attached.",
       notPrepared:
         "We could not prepare that photo safely, so it was not uploaded. Try a different photo.",
       uploadFailed: "That photo did not finish uploading. Please try it again.",
@@ -4765,6 +4729,8 @@ export const en = {
       viewTrips: "View your plans",
       viewProperty: "View the property",
       viewRestaurant: "View the restaurant",
+      /** A renter in a listing thread with no viewing yet: the way to ask for one. */
+      askViewing: "Ask to view this home",
     },
     rental: {
       waitingOnYou: "They asked to inspect this place. Your answer goes to them and to their inspections list.",
@@ -4798,6 +4764,43 @@ export const en = {
       outcomeDealDone: "Inspected, and we have a deal",
       outcomeNoDeal: "Inspected, no deal",
       outcomeSave: "Save",
+      /* The moves the thread face, the inspection card and the dashboard rows
+         share (`viewing-words.ts`), moved into the dictionary in the language
+         audit (17 October 2026) so they read in the reader's language. */
+      confirm: "Confirm",
+      cancelViewing: "Cancel viewing",
+      cancelledNote: "Cancelled.",
+      openChat: "Open the chat",
+      lagosTime: "Lagos time",
+      reasonLabel: "Tell them why (optional)",
+      offerBody: "They will see the time you offer and can take it in one tap. The time they asked for stays on the record.",
+      offerPlaceholder: "The gate closes at 6, so earlier is better",
+      rescheduleBody:
+        "The viewing stops being confirmed until they take the new time. They are told straight away, and the time they asked for stays on the record.",
+      listerCancelTitle: "Cancel this viewing?",
+      listerCancelBody: "They will be told the viewing is off. If another day suits you, offer another time instead.",
+      cancelConfirm: "Yes, cancel it",
+      withdrawTitle: "Withdraw this request?",
+      withdrawBody: "The lister will see that you withdrew. You can ask again from the listing.",
+      withdrawConfirm: "Yes, withdraw",
+      renterCancelBody: "The lister will be told you are not coming. You can ask for another time from the listing.",
+      noShowRenterTitle: "The renter did not come?",
+      noShowListerTitle: "Nobody came to show it?",
+      noShowRenterBody:
+        "They will be told you marked them as a no-show, and they can dispute it within 48 hours. Vallo looks at every dispute.",
+      noShowListerBody:
+        "The lister will be told you marked them as a no-show, and they can dispute it within 48 hours. Vallo looks at every dispute.",
+      whatHappened: "What happened (optional)",
+      noShowConfirm: "Yes, mark as a no-show",
+      disputeTitle: "Dispute this no-show?",
+      disputeBody: "Tell Vallo you were there. Someone on the team will look at both sides and tell you both what they decide.",
+      disputeSend: "Send the dispute",
+      markRenterNoShow: "The renter did not come",
+      markListerNoShow: "Nobody came to show it",
+      noShowBadge: "No-show",
+      disputeThis: "Dispute this",
+      noShowSettled: "Marked as a no-show. They can dispute it within 48 hours.",
+      failed: "That did not go through.",
     },
     reservation: {
       tableFor: "table for {count}",
@@ -5960,6 +5963,7 @@ export const en = {
   memberKit: memberKitEn,
   /* Schedule a visit: the two-step flow at /listing/[id]/visit. */
   visit: visitEn,
+  memberFlows: memberFlowsEn,
   /* The small things: one toast, copy, connection, pull to refresh. */
   details: detailsEn,
 
@@ -6290,6 +6294,7 @@ export const en = {
       noShow: "No-show",
       markedSeated: "Marked as seated.",
       markedNoShow: "Marked as a no-show. The guest is told.",
+      markedDisputed: "Saved. The guest told us something different, so a person at Vallo will check this table.",
     },
     bill: {
       label: "The total on the bill",
@@ -6784,7 +6789,6 @@ export const en = {
   feedV2: {
     card: {
       commentPill: "Drop a comment",
-      commentAria: "reply to this",
       readMore: "Read more",
       readLess: "Show less",
       roleLandlord: "Landlord",
@@ -6806,6 +6810,14 @@ export const en = {
       describePlain: "Posted by {name}",
       describeLandlord: "Posted by {name}, a landlord",
       describeAgent: "Posted by {name}, an agent",
+      /** The action pills' accessible names. `{count}` is the compact count ("1.2K"). */
+      likedUndo: "Liked, {count}. Undo",
+      like: "Likes {count}, like this",
+      repostedUndo: "Reposted, {count}. Undo",
+      repost: "Reposts {count}, repost this",
+      share: "Share this post",
+      savedRemove: "Saved. Remove from saved",
+      save: "Save this post",
     },
     composer: {
       cancel: "Cancel",

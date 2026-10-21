@@ -375,6 +375,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ id:
             cancelNoticeHours: smallNumber(profile, "cancel_notice_hours"),
             sittingMinutes: smallNumber(profile, "sitting_minutes"),
           },
+          t.hostWorkspace.cancellation,
           locale,
         ),
         venueDeposit ? t.tableDeposits.guest.freeLine : null,

@@ -36,7 +36,7 @@ import { CHART_CONTEXT, CHART_INK, CHART_SERIES } from "./palette";
  *
  * DETERMINISTIC GEOMETRY. Every number below is computed from the data, so
  * the server render and the client render are byte-identical and React has
- * nothing to reconcile. `AreaSparkline` established this and it is kept.
+ * nothing to reconcile.
  */
 
 export type TimePoint = {

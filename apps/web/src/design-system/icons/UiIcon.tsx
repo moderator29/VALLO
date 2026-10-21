@@ -1723,8 +1723,7 @@ export type IconSize = keyof typeof ICON_SIZE;
  * quarter over the weight Lucide's geometry is drawn for. It was 1.5 until
  * then, the thin line of SF Symbols regular, which read as hesitant beside
  * the bold type. `LineGlyph` and `SettingsGlyph` are name maps onto this
- * set (since 29 September 2026), and `FeatureGlyph` takes its width from
- * `uiIconStrokeProps`, so all of them follow the set's weight.
+ * set (since 29 September 2026), so both follow the set's weight.
  *
  * SCALED BY SIZE, OPTICALLY. One fixed pixel weight at every step clogs the
  * small steps (2px on a 12px glyph is a third of a counter) and starves the

@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
@@ -9,9 +11,10 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  * an avatar beside two lines - reproduced here at `px-4 py-3.5`, the real row
  * padding, so the first conversation lands where the placeholder sat.
  */
-export default function LoadingMessages() {
+export default async function LoadingMessages() {
+  const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label="Loading your messages" className="mx-auto w-full max-w-2xl">
+    <LoadingShell label={t.memberFlows.loading.messages} className="mx-auto w-full max-w-2xl">
       <PageHeaderSkeleton subtitle />
 
       {/* Hairline rows on the ground, matching `Inbox`, which has not drawn a

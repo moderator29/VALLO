@@ -4,6 +4,14 @@
 -- lister kind and an equally ranked disagreeing pair both fail closed; a
 -- policy row can be neither deleted nor rewritten; members cannot read the
 -- policy or call the resolver; a transaction's rail cannot change once set.
+--
+-- 17 October 2026: a registered business's apartment is no longer direct. The
+-- founder's ruling of 13 October 2026 (D73 as refined, DECISIONS_2026-10-13.md
+-- row 21; migration 20261013170400_pov02_rent_and_shortlet_policy_rows, which
+-- names this move) makes every rent and shortlet escrow by default with the
+-- payer's choice of card, so the business apartment row is now escrow and
+-- lets the payer choose. The probe asserts that instead of direct; every
+-- other assertion is unchanged.
 do $$
 declare
   r record;
@@ -26,7 +34,9 @@ begin
     end loop;
   end loop;
   r := public.resolve_payment_rail('apartment', 'rent', 'business');
-  if r.rail <> 'direct' then raise exception 'PROBE_FAIL rail-router: a business apartment should be direct'; end if;
+  if r.rail is distinct from 'escrow' or not private.rail_policy_lets_payer_choose(r.policy_id) then
+    raise exception 'PROBE_FAIL rail-router: a business apartment should be escrow with the payer''s choice of card, got %', r.rail;
+  end if;
   r := public.resolve_payment_rail('apartment', 'rent', null);
   if r.rail is not null then raise exception 'PROBE_FAIL rail-router: an apartment with no lister kind resolved'; end if;
 

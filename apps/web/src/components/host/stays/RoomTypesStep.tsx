@@ -50,6 +50,7 @@ export function RoomTypesStep({
   expectedRooms,
 }: StaysStepProps & { expectedRooms: number }) {
   const hw = useHostCopy();
+  const w = hw.stays;
   const cover = draft.accommodation?.photos[0]?.url ?? null;
   /*
    * THE FORM LIVES IN THE WIZARD (`useHeld`), so Back, a jump along the path
@@ -83,7 +84,7 @@ export function RoomTypesStep({
 
   const save = async () => {
     if (!complete) {
-      setNotice({ tone: "error", text: "Give the room type a name and a nightly price to save it." });
+      setNotice({ tone: "error", text: w.roomTypes.incomplete });
       return false;
     }
     const saved = await runAsync(async () => {
@@ -109,7 +110,7 @@ export function RoomTypesStep({
       });
     });
     if (saved) {
-      setNotice({ tone: "ok", text: `${name} is saved. Price it on the next screen.` });
+      setNotice({ tone: "ok", text: w.roomTypes.saved.replace("{name}", name) });
       setForm({ ...blank, adding: false });
     }
     return saved;
@@ -149,8 +150,8 @@ export function RoomTypesStep({
                   </span>
                   <span className="nf-stays-row__meta block">
                     {room.rateCount === 0
-                      ? "No rate yet"
-                      : `${formatMoney(room.baseRateMinor, locale)} a night`}
+                      ? w.roomTypes.noRate
+                      : w.roomTypes.perNight.replace("{amount}", formatMoney(room.baseRateMinor, locale))}
                   </span>
                 </span>
               </div>
@@ -169,7 +170,7 @@ export function RoomTypesStep({
           <span className="nf-stays-glyph">
             <UiIcon name="plus" size={20} />
           </span>
-          <span className="nf-stays-rule__label text-left">Add a room type</span>
+          <span className="nf-stays-rule__label text-left">{w.rates.addRoomType}</span>
           <UiIcon name="chevron-right" size={20} className="shrink-0 text-[var(--nf-content-muted)]" />
         </button>
       ) : (
@@ -183,7 +184,7 @@ export function RoomTypesStep({
               aria-invalid={fieldErrors.name ? true : undefined}
               onChange={(event) => setName(event.target.value)}
             />
-            <p className="nf-stays-plate__note">What a guest sees when they pick a room.</p>
+            <p className="nf-stays-plate__note">{w.roomTypes.nameNote}</p>
           </StaysPlate>
 
           <StaysPlate label={hw.steps.roomKind}>
@@ -214,7 +215,7 @@ export function RoomTypesStep({
                   />
                 }
               >
-                <span className="nf-stays-row__value">How many of this room</span>
+                <span className="nf-stays-row__value">{w.roomTypes.howMany}</span>
               </StaysRow>
               <StaysRow
                 trailing={
@@ -228,7 +229,7 @@ export function RoomTypesStep({
                   />
                 }
               >
-                <span className="nf-stays-row__value">Guests it sleeps</span>
+                <span className="nf-stays-row__value">{w.roomTypes.sleeps}</span>
               </StaysRow>
             </div>
           </section>
@@ -244,8 +245,8 @@ export function RoomTypesStep({
             />
             <p className="nf-stays-plate__note">
               {kobo > 0
-                ? `Stored as ${formatMoney(kobo, locale)} a night. The next screen is where the meal plans are priced.`
-                : "What one night in this room costs."}
+                ? w.roomTypes.storedNote.replace("{amount}", formatMoney(kobo, locale))
+                : w.roomTypes.priceNote}
             </p>
           </StaysPlate>
 
@@ -257,7 +258,7 @@ export function RoomTypesStep({
                 onClick={() => setForm({ ...blank, adding: false })}
                 disabled={pending}
               >
-                Cancel
+                {w.common.cancel}
               </Button>
             )}
             <Button
@@ -268,7 +269,7 @@ export function RoomTypesStep({
               loading={pending}
               disabled={pending || name.trim().length < 2 || kobo <= 0}
             >
-              Save this room type
+              {w.roomTypes.save}
             </Button>
           </div>
         </>
@@ -283,14 +284,14 @@ export function RoomTypesStep({
           onClick={proceed}
           disabled={pending}
         >
-          Continue
+          {w.common.continue}
         </Button>
       )}
 
       <StaysNote>
         {draft.roomTypes.length === 0
-          ? "At least one room type is needed before the hotel can go on the shelf, and it needs a rate before a guest can book it."
-          : "The picture on each room is the property's cover. This database holds no photograph of a single room type."}
+          ? w.roomTypes.needOne
+          : w.roomTypes.pictureNote}
       </StaysNote>
     </>
   );

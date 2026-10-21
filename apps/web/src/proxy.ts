@@ -36,6 +36,7 @@ import {
 } from "@/lib/i18n/public-locale";
 import { LOCALE_COOKIE } from "@/lib/locale.constants";
 import { FIRST_RUN_COOKIE, FIRST_RUN_MAX_AGE, FIRST_RUN_SHOWN, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
+import { doorFirstRunRedirect } from "@/app/(auth)/sign-in/first-run-gate";
 import { ANON_VIEWER, VIEWER_HEADER, VIEWER_PATH_HEADER, viewerStamp, wantsViewerStamp } from "@/lib/offline/viewer-stamp";
 import {
   finishSetupGateApplies,
@@ -412,6 +413,16 @@ export function isDocumentRequest(request: { headers: Headers }): boolean {
   return dest === null || dest === "document";
 }
 
+/** The query as the pages' `searchParams` see it: one value, or several. */
+function searchParamsRecord(search: URLSearchParams): Record<string, string | string[]> {
+  const record: Record<string, string | string[]> = {};
+  for (const key of new Set(search.keys())) {
+    const values = search.getAll(key);
+    record[key] = values.length === 1 ? values[0]! : values;
+  }
+  return record;
+}
+
 /**
  * The form pages a signed-out server action may reach. Each one checks the
  * session in the page itself, so a render caused by an action shows nobody
@@ -589,7 +600,8 @@ export async function proxy(request: NextRequest) {
    */
   const finish = (response: NextResponse): NextResponse => {
     if (request.method === "GET" && isLocalizablePath(pathname)) {
-      response.headers.set("link", hreflangLinkHeader(request.nextUrl.origin, pathname));
+      const link = hreflangLinkHeader(request.nextUrl.origin, pathname);
+      if (link) response.headers.set("link", link);
     }
     if (urlLocale && !request.cookies.get(LOCALE_COOKIE)) {
       response.cookies.set(LOCALE_COOKIE, urlLocale, {
@@ -670,6 +682,28 @@ export async function proxy(request: NextRequest) {
    */
   if (request.method === "GET" && isAuthCallbackRefusal(request.nextUrl)) {
     return withSecurityPolicy(NextResponse.redirect(new URL(AUTH_CALLBACK_REFUSED, request.url), 307), nonce);
+  }
+
+  /*
+   * THE DOORS' FIRST RUN IS A 307 ON A PAGE LOAD, NOT A SECOND PAGE LOAD.
+   * `/sign-in` and `/sign-up` send a device that has not met the onboarding
+   * this sitting to `/welcome` first (`first-run-gate.ts`, the founder, 7 and
+   * 8 October 2026). The pages decide it with `redirect()`, but only after
+   * their `loading.tsx` has started the stream, so the browser got a 200, a
+   * skeleton, the door's scripts and then a client navigation (or the
+   * one-second meta refresh) to the slides: Lighthouse on a phone read
+   * first paint at 3.5 s and the slides' largest paint at 6.4 to 7.4 s,
+   * two page loads deep. The same pure decision is made here, before
+   * anything renders, for a page load only; a router navigation or a
+   * prefetch still reaches the page, whose own `redirect()` stays as it was.
+   */
+  if (request.method === "GET" && (pathname === "/sign-in" || pathname === "/sign-up") && isDocumentRequest(request)) {
+    const firstRun = doorFirstRunRedirect({
+      door: pathname,
+      cookie: request.cookies.get(FIRST_RUN_COOKIE)?.value,
+      params: searchParamsRecord(request.nextUrl.searchParams),
+    });
+    if (firstRun) return finish(NextResponse.redirect(new URL(firstRun, request.url), 307));
   }
 
   let response = forward();

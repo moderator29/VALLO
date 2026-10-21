@@ -41,8 +41,9 @@ export const metadata: Metadata = { title: "Checkout" };
  * booking's own stored total in integer kobo, read under the guest's own RLS, so
  * the amount on screen is the amount the server actions charge.
  *
- * The platform charges nothing, so the total is the stay and nothing else
- * (docs/MASTER_TODO.md section 5b).
+ * Nothing is added to a guest's price (HANDOFF.md section 2), so the total
+ * paid here is the stay and nothing else; every charge the host may ask for
+ * at the door is drawn above the pay action with the all-in figure.
  *
  * Paystack sends the guest back to this same route as
  * ?paid=1&reference=rm-book-..., where PaymentReturn verifies the charge and

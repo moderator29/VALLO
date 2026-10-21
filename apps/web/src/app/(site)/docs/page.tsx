@@ -106,7 +106,7 @@ export default async function DocsHomePage() {
               href: "/cancellations",
               icon: "calendar-clock",
               title: "Cancellations",
-              line: "The standard refund schedule for stays, with the windows written out.",
+              line: "The standard refund schedule for stays, and the four policies a host business can pick.",
             },
             {
               href: "/terms",

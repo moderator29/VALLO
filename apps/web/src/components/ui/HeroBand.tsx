@@ -1,4 +1,5 @@
 import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
+import { EdgeLapRing } from "@/components/site/EdgeLapRing";
 
 /**
  * THE HERO BAND: the block at the top of a screen that opens a world or
@@ -31,6 +32,8 @@ import type { ComponentPropsWithoutRef, ElementType, ReactNode } from "react";
  *   as       the element ("section" by default)
  *   titleAs  "h2" (default) or "h1": the screen's own title, for a workspace
  *            home whose band IS the page's heading (a page needs one h1)
+ *   lap      the edge lap round the rim (`.nf-edge-lap`, site.css): the
+ *            workspace home's one band only
  *
  * Server-safe: nothing here holds state.
  */
@@ -42,6 +45,7 @@ type HeroBandOwnProps<E extends ElementType> = {
   sub?: ReactNode;
   action?: ReactNode;
   className?: string;
+  lap?: boolean;
   children?: ReactNode;
 };
 
@@ -56,13 +60,14 @@ export function HeroBand<E extends ElementType = "section">({
   sub,
   action,
   className,
+  lap = false,
   children,
   ...rest
 }: HeroBandProps<E>) {
   const Tag: ElementType = as ?? "section";
   const hasHead = label != null || title != null || sub != null || action != null;
   return (
-    <Tag {...rest} className={["nf-hero-band", className ?? ""].filter(Boolean).join(" ")}>
+    <Tag {...rest} className={["nf-hero-band", lap ? "nf-edge-lap" : "", className ?? ""].filter(Boolean).join(" ")}>
       {hasHead ? (
         <div className="nf-hero-band__head">
           <div className="nf-hero-band__text">
@@ -74,6 +79,7 @@ export function HeroBand<E extends ElementType = "section">({
         </div>
       ) : null}
       {children != null ? <div className="nf-hero-band__body">{children}</div> : null}
+      {lap ? <EdgeLapRing /> : null}
     </Tag>
   );
 }

@@ -33,8 +33,8 @@
  * THE TWO TRAPS THIS REPOSITORY HAS ALREADY BEEN BITTEN BY
  * ===========================================================================
  *
- * Both guards are lifted from `scripts/design/proof-nav.mjs`, which paid for
- * them, rather than invented again here.
+ * Both guards were learned by the old browser walk of every back control,
+ * which paid for them, rather than invented again here.
  *
  *   A 200 IS NOT A PAGE. A Next.js layout calling `notFound()` answers HTTP
  *   200 with the not-found body. `/crypto` and `/gallery` both do exactly

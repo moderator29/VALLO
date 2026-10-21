@@ -26,7 +26,7 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
  *     off the destination; the translated `common.back` in every other locale.
  *   - A NATIVE BUTTON, so Enter and Space work, the focus ring is the
  *     platform's, and `data-nav-back` is the one handle the browser walks
- *     (`tests/back-destinations.spec.mjs`, `scripts/design/proof-nav.mjs`) use.
+ *     (`tests/back-destinations.spec.mjs`) uses.
  *
  * `surface` picks the material for where it sits, never the size or the glyph:
  *

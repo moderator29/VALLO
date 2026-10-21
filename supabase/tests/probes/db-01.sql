@@ -1,6 +1,13 @@
 -- DB-01: a member cannot publish or verify their own business, property or
 -- room; the owner's own steps (draft, edit, submit, close) still work; an
 -- admin writing through their own signed-in client still decides.
+--
+-- 17 October 2026: since pov08 (20261013212007, decision 23 of
+-- DECISIONS_2026-10-13.md) a business moves to SUBMITTED only with the Terms,
+-- the Privacy Policy and the pay-on-Vallo statement in `consents.agreements`,
+-- so the wizard's first save carries them as saveHostDraft writes them
+-- (lib/host/actions.ts: terms, privacy, host_agreement, pay_on_vallo, each
+-- {document, version, at}). The submit failed on acceptance_required before.
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -11,6 +18,11 @@ declare
   room uuid;
   n int;
   r record;
+  accepted constant jsonb := jsonb_build_object('terms', '2026-10-17T09:00:00Z', 'agreements', jsonb_build_array(
+    jsonb_build_object('document', 'terms', 'version', '2026-10-13', 'at', '2026-10-17T09:00:00Z'),
+    jsonb_build_object('document', 'privacy', 'version', '2026-09-25', 'at', '2026-10-17T09:00:00Z'),
+    jsonb_build_object('document', 'host_agreement', 'version', '2026-10-17', 'at', '2026-10-17T09:00:00Z'),
+    jsonb_build_object('document', 'pay_on_vallo', 'version', '2026-10-13', 'at', '2026-10-17T09:00:00Z')));
 begin
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
@@ -26,8 +38,8 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text, true);
 
   -- CONTROL: the host wizard's first save (lib/host/actions.ts) as the member.
-  insert into public.businesses (owner_id, source, status, kind, name, slug)
-  values (member, 'first_party', 'DRAFT', 'hotel', 'Probe DB-01 hotel', 'probe-db01-' || gen_random_uuid())
+  insert into public.businesses (owner_id, source, status, kind, name, slug, consents)
+  values (member, 'first_party', 'DRAFT', 'hotel', 'Probe DB-01 hotel', 'probe-db01-' || gen_random_uuid(), accepted)
   returning id into biz;
   if biz is null then raise exception 'PROBE_FAIL db-01: owner draft insert returned nothing'; end if;
 

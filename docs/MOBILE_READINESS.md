@@ -2,7 +2,7 @@
 
 > **Native release audit, 28 September 2026.** The current release status, the fixes made that day and the full human-action list are in [`docs/VALLO_NATIVE_RELEASE_AUDIT.md`](/docs/VALLO_NATIVE_RELEASE_AUDIT.md). The rows below that it changed are corrected in place and marked *(28 Sep)*.
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 Rewritten 18 September 2026 in the Build 06 pass (G4, store posture). Every
 line below was checked against the tree on that day rather than carried over,

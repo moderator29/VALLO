@@ -36,6 +36,9 @@ describe("the preconditions", () => {
       [{ activeReservations: 1 }, "active-reservations"],
       [{ publishedListings: 3 }, "published-listings"],
       [{ ownedBusinesses: 1 }, "owned-businesses"],
+      [{ partnerHeldMinor: 250_000_00 }, "partner-held"],
+      [{ rewardsWithdrawableMinor: 5_000_00 }, "rewards-balance"],
+      [{ rewardsPayoutsInFlight: 1 }, "rewards-payouts"],
     ];
     for (const [patch, kind] of cases) {
       const blockers = blockersFrom(reading(patch));
@@ -53,9 +56,12 @@ describe("the preconditions", () => {
         activeReservations: 1,
         publishedListings: 1,
         ownedBusinesses: 1,
+        partnerHeldMinor: 1,
+        rewardsWithdrawableMinor: 1,
+        rewardsPayoutsInFlight: 1,
       }),
     );
-    expect(all).toHaveLength(6);
+    expect(all).toHaveLength(9);
     for (const blocker of all) {
       expect(blocker.href.startsWith("/")).toBe(true);
       expect(blocker.href.length).toBeGreaterThan(1);
@@ -86,6 +92,19 @@ describe("the preconditions", () => {
     expect(canProceed(reading({ walletBalanceMinor: -5_000 }))).toBe(true);
   });
 
+  it("puts money a partner holds before every other blocker, and routes it to the agreement", () => {
+    const all = blockersFrom(reading({ rentRefundsOwedMinor: 100, activeBookings: 1, partnerHeldMinor: 9_000_00 }));
+    expect(all[0]).toEqual({ kind: "partner-held", href: "/agreements", amount: 9_000_00 });
+  });
+
+  it("routes the rewards blockers to the rewards screen, where Withdraw lives", () => {
+    const all = blockersFrom(reading({ rewardsWithdrawableMinor: 2_000_00, rewardsPayoutsInFlight: 2 }));
+    expect(all.map((blocker) => [blocker.kind, blocker.href])).toEqual([
+      ["rewards-balance", "/rewards"],
+      ["rewards-payouts", "/rewards"],
+    ]);
+  });
+
   it("sends the business blocker to a surface that carries both doors", () => {
     const [blocker] = blockersFrom(reading({ ownedBusinesses: 2 }));
     expect(blocker?.href).toBe("/host/transfer");
@@ -101,7 +120,7 @@ describe("the preconditions", () => {
 });
 
 describe("reading the database's answer", () => {
-  it("takes the ten numbers", () => {
+  it("takes the thirteen numbers", () => {
     expect(
       readingFrom({
         blocked: true,
@@ -115,6 +134,9 @@ describe("reading the database's answer", () => {
         pending_payouts: 1,
         published_listings: 4,
         owned_businesses: 2,
+        partner_held_minor: "150000000",
+        rewards_withdrawable_minor: 500_000,
+        rewards_payouts_in_flight: 1,
       }),
     ).toEqual({
       walletBalanceMinor: 25_000,
@@ -127,6 +149,9 @@ describe("reading the database's answer", () => {
       pendingPayouts: 1,
       publishedListings: 4,
       ownedBusinesses: 2,
+      partnerHeldMinor: 150_000_000,
+      rewardsWithdrawableMinor: 500_000,
+      rewardsPayoutsInFlight: 1,
     });
   });
 

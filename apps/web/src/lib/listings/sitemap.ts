@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
-import { LOCALES } from "@vallo/i18n/core";
+import { DEFAULT_LOCALE, LOCALES } from "@vallo/i18n/core";
 import { GUIDE_SLUGS } from "@/lib/guides/slugs";
-import { alternateUrls, localizedPath } from "@/lib/i18n/public-locale";
+import { alternateUrls, hasTranslatedBody, localizedPath } from "@/lib/i18n/public-locale";
 
 /**
  * What the sitemap says, decided away from the route that serves it.
@@ -116,15 +116,22 @@ export function buildSitemap(
   docSlugs: readonly string[] = [],
 ): MetadataRoute.Sitemap {
   const base = origin.replace(/\/+$/, "");
-  /* A10: every public page in all four languages, each entry naming the
-     other three as its alternates (hreflang), English also as x-default. */
+  /* A10: a public page whose body is written in all four languages is listed
+     in all four, each entry naming the others as its alternates (hreflang),
+     English also as x-default. A page whose body is English in every locale
+     is listed once, at its English address, with no alternates: its language
+     addresses are canonical at the English page (`hasTranslatedBody`), and
+     listing them was the "Duplicate, Google chose different canonical"
+     report. */
   const languages = (path: string) => {
+    if (!hasTranslatedBody(path)) return {};
     const urls = alternateUrls(base, path);
     return { alternates: { languages: urls } };
   };
+  const localesOf = (path: string) => (hasTranslatedBody(path) ? LOCALES : [DEFAULT_LOCALE]);
   return [
     ...PUBLIC_PAGES.flatMap((page) =>
-      LOCALES.map((locale) => {
+      localesOf(page.path).map((locale) => {
         const localized = localizedPath(page.path, locale);
         return {
           url: localized === "/" ? base : `${base}${localized}`,
@@ -136,7 +143,7 @@ export function buildSitemap(
     ...docSlugs
       .filter((slug) => /^[a-z0-9-]+$/.test(slug))
       .flatMap((slug) =>
-        LOCALES.map((locale) => ({
+        localesOf(`/docs/${slug}`).map((locale) => ({
           url: `${base}${localizedPath(`/docs/${slug}`, locale)}`,
           changeFrequency: "monthly" as const,
           ...languages(`/docs/${slug}`),

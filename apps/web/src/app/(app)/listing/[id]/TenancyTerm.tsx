@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { countOf, type Locale } from "@vallo/i18n/core";
+import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Amount } from "@/components/ui/Amount";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
-import { PERIOD_NOUN, type RentPeriod } from "@/lib/listings/pricing";
+import type { RentPeriod } from "@/lib/listings/pricing";
 import { TYPE } from "@/components/app/Screen";
 
 /** The counted unit a rent period is quoted in. */
@@ -51,7 +51,10 @@ export function TenancyTerm({
   currency,
   locale,
   minimumTerms = 1,
+  copy,
 }: {
+  /** The stepper's words (`t.memberFlows.rental`). */
+  copy: Pick<Dictionary["memberFlows"]["rental"], "howLong" | "shorter" | "longer" | "rentFor" | "rentOnly">;
   /** The rent for ONE term, in kobo. */
   priceMinor: number;
   /** The term the rent is quoted in, so the noun follows the listing. */
@@ -70,13 +73,12 @@ export function TenancyTerm({
   const floor = Math.max(1, Math.min(minimumTerms, MAX_TERMS));
   const [terms, setTerms] = useState(floor);
 
-  const noun = PERIOD_NOUN[period];
   const label = countOf(terms, PERIOD_UNIT[period], locale);
 
   return (
     <div className="mt-md border-t border-[var(--nf-panel-hair)] pt-md">
       <div className="flex items-center justify-between gap-sm">
-        <span className={TYPE.rowTitle}>How long</span>
+        <span className={TYPE.rowTitle}>{copy.howLong}</span>
         {/*
           A stepper rather than a select, matching the guests control on the
           stay panel: the range is small, both ends are one tap, and the number
@@ -85,7 +87,7 @@ export function TenancyTerm({
         <span className="flex items-center gap-2xs">
           <StepButton
             icon="minus"
-            label={`Fewer ${noun}s`}
+            label={copy.shorter}
             disabled={terms <= floor}
             onClick={() => setTerms((n) => Math.max(floor, n - 1))}
           />
@@ -97,7 +99,7 @@ export function TenancyTerm({
           </span>
           <StepButton
             icon="plus"
-            label={`More ${noun}s`}
+            label={copy.longer}
             disabled={terms >= MAX_TERMS}
             onClick={() => setTerms((n) => Math.min(MAX_TERMS, n + 1))}
           />
@@ -109,7 +111,7 @@ export function TenancyTerm({
           same figure twice, forty pixels apart. */}
       {terms > 1 && (
         <p className="mt-sm flex items-baseline justify-between gap-sm">
-          <span className={TYPE.rowMeta}>Rent for {label}</span>
+          <span className={TYPE.rowMeta}>{copy.rentFor.replace("{term}", label)}</span>
           <Amount
             minorUnits={priceMinor * terms}
             locale={locale}
@@ -120,8 +122,7 @@ export function TenancyTerm({
       )}
 
       <p className={`mt-xs ${TYPE.rowMeta}`}>
-        Rent only, before caution, agency and legal fees. The agent agrees the
-        final terms with you.
+        {copy.rentOnly}
       </p>
     </div>
   );

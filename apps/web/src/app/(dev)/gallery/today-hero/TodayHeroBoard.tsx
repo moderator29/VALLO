@@ -36,7 +36,7 @@ const TAG = "en-NG";
 
 function Band({ children }: { children: ReactNode }) {
   return (
-    <HeroBand className="nf-edge-lap" label="Date slot" title="Band title slot">
+    <HeroBand lap label="Date slot" title="Band title slot">
       {children}
     </HeroBand>
   );

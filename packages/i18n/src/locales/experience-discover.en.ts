@@ -167,7 +167,6 @@ export const experienceDiscoverEn = {
   /* Saved as shelves (before-after-collection-shelves.jpg). */
   shelf: {
     verified: "Verified",
-    open: "Open {title}",
   },
   saved: {
     /* The head-to-head of north star 15.3: two of your own saved spaces. */

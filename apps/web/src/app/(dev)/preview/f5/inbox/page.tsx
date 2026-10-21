@@ -7,10 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default function PreviewInbox() {
   return (
-    <div className="nf-shell py-section-tight">
+    <main id="main" className="nf-shell py-section-tight">
       <div className="mx-auto max-w-2xl">
         <Inbox rows={INBOX} meId={PERSON.id} canMarkRead />
       </div>
-    </div>
+    </main>
   );
 }

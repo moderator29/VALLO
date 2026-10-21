@@ -1,6 +1,6 @@
 # Vallo design reference catalogue
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 **Light mode was removed on 23 September 2026 and restored on 25 September 2026** (`LIGHT_MODE_REMOVED.md`). It ships today with a Light / Dark / System choice (default Dark). Rows below that describe light-theme captures from before the removal, or the light twins, are kept as history: the restored light theme does not draw the twins or the navy icon plate (`apps/web/src/app/css/light.css`).
 
@@ -46,7 +46,7 @@ These twelve are the target for HANDOFF 09 Tracks G, N, O and P. Each is a row o
 | GOVERNING-search-filters-target.png | TARGET, governing | The search surface and its filter sheet. |
 | GOVERNING-thread-hotel-booking.jpg | TARGET, governing | A stay booking thread. Paired with `GOVERNING-chat-booking-card.png` above; the bubble colours were sampled from this file. |
 | GOVERNING-thread-rental-enquiry.jpg | TARGET, governing | A property enquiry thread, including the role tag and the verified mark beside a name. |
-| landing-fullpage-target.png | TARGET, governing | The full desktop landing: hero with phone mockup, a six tile feature band, a community stats row, How Vallo Works in four steps, an eight tile category grid, the Stays band, the app download band and the footer. NOT COPIED: the stats row prints "10K+ Properties, 5K+ Happy Clients, 200+ Agents", the exact invented numbers `stat-tiles.ts` exists to refuse; the category tiles print counts for the same reason; and the AI-rendered body text is garbled in several bands and is never transcribed. |
+| landing-fullpage-target.png | TARGET, governing | The full desktop landing: hero with phone mockup, a six tile feature band, a community stats row, How Vallo Works in four steps, an eight tile category grid, the Stays band, the app download band and the footer. NOT COPIED: the stats row prints "10K+ Properties, 5K+ Happy Clients, 200+ Agents", invented numbers the product never prints; the category tiles print counts for the same reason; and the AI-rendered body text is garbled in several bands and is never transcribed. |
 | home-as-shipped-0919.png | DEFECT CAPTURE | Our own in-app home as it shipped on 19 September. Evidence, not a target. |
 | landing-phone-as-shipped-0919.png | DEFECT CAPTURE | Our own landing on a phone, 19 September. Evidence, not a target. |
 | landing-feature-orbs-as-shipped.jpg | DEFECT CAPTURE | The landing feature band as it shipped, the founder's "wtf is that those our house image" complaint about the orbs. |

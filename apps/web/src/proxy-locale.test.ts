@@ -64,6 +64,11 @@ describe("a language address", () => {
     expect(link).toContain("<https://www.vallospaces.com/ig/sign-in>");
   });
 
+  it("sends no hreflang set for a page whose body is English in every language", async () => {
+    expect((await visit("/ha/terms")).headers.get("link")).toBeNull();
+    expect((await visit("/terms")).headers.get("link")).toBeNull();
+  });
+
   it("stores the language for a first-time visitor, and never overrides a choice", async () => {
     const fresh = await visit("/ha/about");
     expect(fresh.headers.get("set-cookie") ?? "").toContain("nf_locale=ha");

@@ -68,7 +68,11 @@ export function PaymentGate({
             {
               key: "review",
               title: "Review",
-              sub: agreement?.status === "rejected" ? "Sent back. Change the terms and confirm again." : "Vallo checks the agreement.",
+              sub:
+                agreement?.status === "rejected"
+                  ? "Sent back. Change the terms and confirm again."
+                  : /* Usually the system approves at once (D83); a person looks only when a risk signal fires. */
+                    "Approved at once, unless something needs a second look.",
               state: review,
             },
             { key: "pay", title: "Pay", sub: "Payment opens once it is approved.", state: pay },

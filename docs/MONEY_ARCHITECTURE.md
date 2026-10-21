@@ -1,6 +1,6 @@
 # How money moves on Vallo
 
-Founder directive, 25 September 2026 (Track A). This page is the current truth. It supersedes every wallet, escrow and held-payment document, which are kept under `docs/archive/retired-custody/` only as history.
+Founder directive, 25 September 2026 (Track A). This page is the current truth. It supersedes every wallet, escrow and held-payment document written before it; those were deleted on 17 October 2026 and live only in git history.
 
 > **Status, 13 October 2026 (docs track, read against the live database).**
 > - **Vallo still never takes custody**, but since ADR 0003 (7 October) a
@@ -19,10 +19,12 @@ Founder directive, 25 September 2026 (Track A). This page is the current truth. 
 > - **The Guarantee is retired**: `money_policy.guarantee_bps` is 0 live, so
 >   the reserve leg in the table below carries nothing on a new payment.
 > - **Commission**: `fee_rates` commission is 0 basis points live. The hotel
->   commission of 10 percent (founder, 13 October) goes live with the payments
->   track. Restaurants: 1,000 naira per seated table
+>   commission of 10 percent (founder, 13 October) is a dated row in
+>   `public.scoped_commission_rates` (scope `hotel_room`, 1,000 basis points,
+>   applied `20261013171019_pov06_hotel_room_commission.sql`). Restaurants: 1,000 naira per seated table
 >   (`restaurant_money_settings.seated_fee_minor` = 100000), and 200 basis
->   points on a bill paid through Vallo, which stays off.
+>   points on a bill paid through Vallo, which stays off behind the fail-closed
+>   switch `restaurant_bill_pay` (`lib/reservations/bill-pay.ts`).
 > - **Switches live**: `stays_instant_pay` and `room_bookings` are ON;
 >   `restaurant_deposits`, `wallet`, `held_payments_payouts`,
 >   `rentals_protected_pay`, `crypto_payments` and `agreement_staff_review`
@@ -46,7 +48,7 @@ When somebody pays, Paystack splits the charge in the same transaction:
 | Share | Where it goes | How big |
 |---|---|---|
 | The lister's share | The owner's or agent's own Paystack subaccount, which settles to their bank account | The rest of the charge |
-| The Vallo Guarantee contribution | A separate Paystack subaccount for the reserve | `money_policy.guarantee_bps`: 150 today, allowed range 100 to 200 |
+| The Vallo Guarantee contribution | A separate Paystack subaccount for the reserve | `money_policy.guarantee_bps`: 0 since the Guarantee was retired (D51), so this leg carries nothing on a new payment |
 | Vallo's commission | Vallo's main account | `fee_rates` commission: zero today |
 
 > **13 October 2026.** The founder confirmed: Vallo charges only on a completed

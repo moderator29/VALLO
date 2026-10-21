@@ -204,7 +204,7 @@
   .nf-pcard.nf-card-in,
   .nf-sc--live.nf-card-in {
     animation-name: nf-list-in;
-    animation-delay: calc(var(--nf-splash-hold, 0s) + min(var(--card-i, 0), 5) * 40ms);
+    animation-delay: calc(var(--nf-splash-hold, 0s) + min(var(--card-i, 0), var(--nf-stagger-cap)) * var(--nf-stagger));
   }
   @keyframes nf-list-in {
     from {
@@ -277,7 +277,7 @@
      It was 1.2 over 240ms. The impact is `SaveControl`'s haptic, fired when
      the save settles, so the hand feels what the eye sees. */
   .nf-heart-pop[aria-pressed="true"] svg {
-    animation: nf-heart-pop 180ms var(--nf-ease-press) both;
+    animation: nf-heart-pop var(--nf-duration-pop) var(--nf-ease-press) both;
   }
   @keyframes nf-heart-pop {
     0% {
@@ -400,6 +400,20 @@
   .nf-pcard__photobtn:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-content-on-media);
     outline-offset: 2px;
+  }
+
+  /*
+   * THE KEYBOARD RING ON A LISTING CARD. The card's link fills the card and
+   * the card clips its overflow (the photograph's corners), so the global
+   * ring, drawn 2px outside the link, was clipped away whole: a keyboard
+   * user tabbing through results saw no card take focus. The ring moves to
+   * the card and sits just inside its edge, where no clip or scroller can
+   * cut it, and an outline paints above the photograph. (The link's own
+   * ring stays as the global rule draws it; the clip simply hides it.)
+   */
+  .nf-pcard:has(> .nf-pcard__link:focus-visible) {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: calc(-1 * var(--nf-focus-ring-width));
   }
 
   /* --------------------------------------------- the rows view */

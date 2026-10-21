@@ -11,6 +11,7 @@ import {
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
+  PAYMENT_GATE_SENTENCE,
   RAIL_COPY,
   REFUND_NO_BALANCE,
   REFUND_ROUTE,
@@ -87,15 +88,15 @@ const INSPECTION_STEPS: { title: string; body: string }[] = [
   },
   {
     title: "Then inspect",
-    body: "For a rental or a sale, view the property before any money moves, in person or on a video call. Bring somebody with you if you can, and go in daylight. Anybody who will not let you inspect before paying is telling you something. A stay is the other way round, because you cannot inspect a hotel room in Enugu from Lagos: there you pay on Vallo first, and the cancellation schedule and the report route are what protect you instead.",
+    body: "For a rental or a sale, view the property before any money moves, in person or on a video call. Bring somebody with you if you can, and go in daylight. Anybody who will not let you inspect before paying is telling you something. A stay is the other way round, because you cannot inspect a hotel room in Enugu from Lagos: there you pay on Vallo first, and the cancellation policy on your booking and the report route are what protect you instead.",
   },
   {
     title: "Submit the inspection report",
     body: "The inspection report is eight items with photographs: the outside, the inside, the kitchen, the bathrooms, the utilities, the appliances, safety and an overall verdict. You submit it from the inspection itself. It is the record of what the place was like, and it is what any later question about the place is compared with.",
   },
   {
-    title: "Both of you confirm the agreement, and Vallo approves it",
-    body: "From the report an agreement is drawn up with the figures from the listing. You and the owner or agent each confirm the same version, and a person at Vallo reviews it. Payment opens only once it is approved, and both of you are told by email and in the app.",
+    title: "Both of you confirm the agreement",
+    body: `From the report an agreement is drawn up with the figures from the listing. You and the owner or agent each confirm the same version. ${PAYMENT_GATE_SENTENCE} Both of you are told by email and in the app.`,
   },
   {
     title: "Only then, pay on Vallo",
@@ -224,8 +225,10 @@ export default function SafetyCentrePage() {
             <CancellationTimeline headingLevel="h3" />
           </div>
           <p className="mt-row text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
-            The same schedule is shown on every listing and on your booking,
-            against your own dates and your own total.{" "}
+            This is the schedule for a stay listed by an owner or agent. A hotel,
+            shortlet or serviced apartment run as a business shows its own policy
+            instead. Either way the terms are shown before you book and on your
+            booking, against your own dates and your own total.{" "}
             <Link
               href="/cancellations"
               className="font-semibold text-[var(--nf-content-secondary)] hover:underline"

@@ -12,7 +12,24 @@ const audit = vi.hoisted(() => ({ writeAudit: vi.fn(async () => true) }));
 vi.mock("../actions/session", () => session);
 vi.mock("../admin/guard", () => guard);
 vi.mock("../admin/audit", () => audit);
-vi.mock("../supabase/admin", () => ({ createAdminClient: () => ({}) }));
+const parties = vi.hoisted(() => ({
+  noShow: { reported_by: "renter", absent_id: "lister" } as Record<string, string> | null,
+  viewing: { requester_id: "renter", lister_id: "lister" } as Record<string, string> | null,
+}));
+vi.mock("../supabase/admin", () => ({
+  createAdminClient: () => ({
+    from: (table: string) => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: table === "inspection_no_shows" ? parties.noShow : table === "inspection_requests" ? parties.viewing : null,
+            error: null,
+          }),
+        }),
+      }),
+    }),
+  }),
+}));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined }));
 vi.mock("server-only", () => ({}));
 
@@ -85,6 +102,17 @@ describe("staff deciding a dispute", () => {
     expect(result.ok).toBe(true);
     expect(c.calls).toEqual([{ fn: "resolve_inspection_no_show", args: { p_inspection: ID, p_upheld: false } }]);
     expect(audit.writeAudit).toHaveBeenCalledOnce();
+  });
+
+  it("refuses a member of staff who is part of the viewing, and calls nothing", async () => {
+    for (const who of ["renter", "lister"]) {
+      const c = client({ data: "upheld" });
+      guard.requireAdmin.mockResolvedValue({ state: "admin", supabase: c.supabase, user: { id: who } });
+      const result = await resolveNoShow({ id: ID, upheld: true });
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.error).toMatch(/another member of staff/);
+      expect(c.calls).toEqual([]);
+    }
   });
 });
 

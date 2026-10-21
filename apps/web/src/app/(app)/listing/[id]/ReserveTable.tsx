@@ -1,6 +1,7 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
+import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useActionState, useId, useMemo, useState } from "react";
 import Link from "next/link";
@@ -13,7 +14,7 @@ import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { slotsFor, type ServiceWindow } from "./table-windows";
 import { useClientMount } from "@/lib/ui/client-mount";
-import type { Dictionary, Locale } from "@vallo/i18n/core";
+import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
 import type { ReservedDeposit } from "@/lib/reservations/actions";
 import { lagosIso, matchDepositRule, type DepositRule, type DepositWindow } from "@/lib/reservations/deposit-rules";
 import { DepositSummary } from "@/components/app/reservations/DepositSummary";
@@ -59,10 +60,13 @@ function lagosClockNow(): string {
   return new Date(Date.now() + 60 * 60 * 1_000).toISOString().slice(11, 16);
 }
 
+/** The words this form says (`t.memberFlows`): its own lines and the two day names. */
+export type ReserveTableCopy = Pick<Dictionary["memberFlows"], "table" | "days">;
+
 /** "Today", "Tomorrow", then a short weekday. Anchored at midday, see below. */
-function dayLabel(iso: string, todayIso: string): string {
-  if (iso === todayIso) return "Today";
-  if (iso === lagosDayIso(1)) return "Tomorrow";
+function dayLabel(iso: string, todayIso: string, days: ReserveTableCopy["days"]): string {
+  if (iso === todayIso) return days.today;
+  if (iso === lagosDayIso(1)) return days.tomorrow;
   /* Midday rather than midnight, because `new Date("2026-08-09")` parses as
      UTC and renders as the previous day for anybody west of Greenwich. A
      booking form that labels tomorrow as today is worse than a raw date.
@@ -81,10 +85,16 @@ export function ReserveTable({
   success,
   windows,
   windowCopy,
-  title = "Book a table",
+  title,
   formId,
   deposit = null,
+  copy,
+  locale,
 }: {
+  /** The form's words, in the reader's language. */
+  copy: ReserveTableCopy;
+  /** The reader's language, for the counted party in the receipt. */
+  locale: Locale;
   /**
    * D75 (track/restaurant-deposits): the venue's active deposit rules, when
    * `restaurant_deposits` is on and a deposit can reach the venue (read on
@@ -101,7 +111,7 @@ export function ReserveTable({
   /**
    * The card's own heading. A page that already heads the section (a
    * restaurant's "Hold a table") passes null, so one card does not carry two
-   * titles. Defaults to the heading it always had.
+   * titles. Absent, the heading it always had (`copy.table.title`).
    */
   title?: string | null;
   /** The form's element id, for an anchored foot that scrolls to it. */
@@ -132,6 +142,8 @@ export function ReserveTable({
    */
   messageHref?: string | null;
 }) {
+  const w = copy.table;
+  const heading = title === undefined ? w.title : title;
   const todayIso = lagosDayIso(0);
   const days = useMemo(() => Array.from({ length: 14 }, (_, i) => lagosDayIso(i)), []);
 
@@ -209,29 +221,34 @@ export function ReserveTable({
           object={words.object}
           title={words.title}
           body={words.body}
-          details={[{ label: success.detail.when, value: `${dayLabel(date, todayIso)}, ${shownTime}` }]}
+          details={[{ label: success.detail.when, value: `${dayLabel(date, todayIso, copy.days)}, ${shownTime}` }]}
           primary={{ label: success.continue }}
-          secondary={{ label: SEE_BOOKINGS, href: "/bookings?side=stays&from=stays" }}
+          secondary={{ label: w.seeBookings, href: "/bookings?side=stays&from=stays" }}
         />
         ) : null}
         <p className="flex items-center gap-xs text-[length:var(--nf-text-body)] font-semibold text-[var(--nf-content-primary)]">
           <UiIcon name="chat-bubble" size={20} className="shrink-0 opacity-80" aria-hidden />
-          Request sent
+          {w.sentTitle}
         </p>
         {/* Deliberately not "Table booked". Nothing is held until a person at
             the restaurant says so, and a receipt that claimed otherwise would
             put somebody at a door with no table. */}
         <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-          The restaurant has your request for {party} on {dayLabel(date, todayIso)} at{" "}
-          {shownTime}. They will confirm or decline it, and you will see the answer in
-          your bookings.
+          {w.sentBody
+            .replace("{party}", countOf(party, "guests", locale))
+            .replace("{day}", dayLabel(date, todayIso, copy.days))
+            .replace("{time}", shownTime)}
         </p>
         <Link
           href="/bookings?side=stays&from=stays"
           className="mt-md inline-flex text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)] underline underline-offset-4"
         >
-          See your bookings
+          {w.seeBookings}
         </Link>
+        {/* The moment the value of a notification is plain: the restaurant's
+            answer is coming. After the success sheet, never over it;
+            PushPrompt decides whether to ask at all (moments.ts). */}
+        {successClosed || !success ? <PushPrompt moment="booking_requested" /> : null}
       </div>
     );
   }
@@ -245,13 +262,13 @@ export function ReserveTable({
       <input type="hidden" name="date" value={date} />
       <input type="hidden" name="time" value={shownTime} />
 
-      {title ? (
-        <p className="text-[length:var(--nf-text-body)] font-semibold text-[var(--nf-content-primary)]">{title}</p>
+      {heading ? (
+        <p className="text-[length:var(--nf-text-body)] font-semibold text-[var(--nf-content-primary)]">{heading}</p>
       ) : null}
 
-      <div className={title ? "mt-md" : undefined}>
+      <div className={heading ? "mt-md" : undefined}>
         <span className="nf-label" id={dateId}>
-          Day
+          {w.day}
         </span>
         <div
           role="group"
@@ -268,7 +285,7 @@ export function ReserveTable({
                 aria-pressed={active}
                 className="nf-choice shrink-0"
               >
-                {dayLabel(iso, todayIso)}
+                {dayLabel(iso, todayIso, copy.days)}
               </button>
             );
           })}
@@ -277,7 +294,7 @@ export function ReserveTable({
 
       <div className="mt-md">
         <span className="nf-label" id={timeId}>
-          Time
+          {w.time}
         </span>
         <div
           role="group"
@@ -302,8 +319,8 @@ export function ReserveTable({
         {slots.length === 0 ? (
           <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]" data-testid="table-closed-day">
             {seatsThisWeekday
-              ? (windowCopy?.noTimesLeftToday ?? "No times left today. Pick another day.")
-              : (windowCopy?.closedThatDay ?? "Not seating on this day. Pick another day.")}
+              ? (windowCopy?.noTimesLeftToday ?? w.noTimesLeftToday)
+              : (windowCopy?.closedThatDay ?? w.closedThatDay)}
           </p>
         ) : hasHours && windowCopy ? (
           <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{windowCopy.withinHours}</p>
@@ -312,7 +329,7 @@ export function ReserveTable({
 
       <div className="mt-md">
         <label className="nf-label" htmlFor={partyId}>
-          Guests
+          {w.guests}
         </label>
         {/* The two steppers are rectangles on the control radius, as the field
             between them is. They were circles. See the note in TenancyTerm.tsx:
@@ -324,7 +341,7 @@ export function ReserveTable({
             size="sm"
             iconOnly
             onClick={() => setParty((n) => Math.max(1, n - 1))}
-            aria-label="One fewer guest"
+            aria-label={w.fewerGuests}
             className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party <= 1}
           >
@@ -349,7 +366,7 @@ export function ReserveTable({
             size="sm"
             iconOnly
             onClick={() => setParty((n) => Math.min(MAX_PARTY, n + 1))}
-            aria-label="One more guest"
+            aria-label={w.moreGuests}
             className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party >= MAX_PARTY}
           >
@@ -361,29 +378,29 @@ export function ReserveTable({
         {party >= MAX_PARTY &&
           (messageHref ? (
             <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-              For a larger party,{" "}
+              {w.largerParty.split("{link}")[0]}
               <Link href={messageHref} className="underline underline-offset-2">
-                message the restaurant
+                {w.largerPartyLink}
               </Link>
-              .
+              {w.largerParty.split("{link}")[1]}
             </p>
           ) : (
             <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-              That is the largest table that can be held here.
+              {w.largestTable}
             </p>
           ))}
       </div>
 
       <div className="mt-md">
         <label className="nf-label" htmlFor={noteId}>
-          Anything they should know
+          {w.note}
         </label>
         <textarea
           id={noteId}
           name="note"
           rows={2}
           maxLength={500}
-          placeholder="A birthday, a wheelchair, an allergy"
+          placeholder={w.notePlaceholder}
           className="mt-2xs w-full nf-glass--well rounded-[var(--nf-radius-control)] border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
         />
       </div>
@@ -419,16 +436,15 @@ export function ReserveTable({
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
       <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0}>
-        {pending ? "Sending" : "Request a table"}
+        {pending ? w.sending : w.submit}
       </Button>
 
       {/* The promise, kept small and directly under the button that makes it.
           Nothing is held until the restaurant answers. */}
       <p className="mt-xs text-center text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
-        The restaurant confirms it. Nothing is held until they do.
+        {w.promise}
       </p>
     </form>
   );
 }
 
-const SEE_BOOKINGS = "See your bookings";

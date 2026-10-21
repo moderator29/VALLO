@@ -50,10 +50,14 @@ describe("the auth cookie policy", () => {
   it("is applied by every writer of the session cookies: server client, proxy, browser client", () => {
     const src = (p: string) => readFileSync(join(__dirname, p), "utf8");
     for (const file of ["server.ts", "../../proxy.ts"]) {
-      /* The locale cookie (the URL's language, /ha /yo /ig) is a preference, not a session cookie: it keeps its own year. */
+      /* Two cookies the proxy writes are not session cookies and keep their
+         own lifetimes: the locale (the URL's language, /ha /yo /ig, a year)
+         and the first-run mark (`vallo_first_run`, set as the slides are
+         served, 16 October 2026). Every other write is the session's. */
+      const notSession = ["LOCALE_COOKIE,", "FIRST_RUN_COOKIE,"];
       const writes = [...src(file).matchAll(/\b(?:cookieStore|response\.cookies)\.set\(([^;]*)\);/g)]
         .map((m) => m[1] ?? "")
-        .filter((w) => !w.trimStart().startsWith("LOCALE_COOKIE,"));
+        .filter((w) => !notSession.some((name) => w.trimStart().startsWith(name)));
       expect(writes.length, file).toBeGreaterThan(0);
       for (const w of writes) expect(w, file).toContain("withAuthCookiePolicy(");
     }

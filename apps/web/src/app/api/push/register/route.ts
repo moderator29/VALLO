@@ -8,6 +8,7 @@ import { FINISH_SETUP_PATH } from "@/lib/auth/finish-setup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { isAllowedWebPushEndpoint } from "@/lib/push/endpoint";
+import { consume, subjectForUser } from "@/lib/security/rate-limit";
 
 /**
  * POST /api/push/register. A device says it can be reached.
@@ -101,6 +102,20 @@ export async function POST(request: Request): Promise<NextResponse> {
      18+) writes nothing here; the step is at /sign-up/finish. */
   if (await accountSetupOwed(supabase, user)) {
     return NextResponse.json({ ok: false, reason: "setup_owed", next: FINISH_SETUP_PATH }, { status: 403 });
+  }
+
+  /* Each call can add a row the drain will then send to, so an account is
+     counted: a person registers a few devices and relaunches a few times a
+     day, never thirty times an hour. The launch re-register (F-14) upserts
+     the same row and spends one count per app open. */
+  const paced = await consume({
+    bucket: "push_register",
+    subject: subjectForUser(user.id),
+    limit: 30,
+    windowSeconds: 3_600,
+  });
+  if (!paced.allowed) {
+    return NextResponse.json({ ok: false, reason: "rate_limited" }, { status: 429 });
   }
 
   let parsed: z.infer<typeof Body>;

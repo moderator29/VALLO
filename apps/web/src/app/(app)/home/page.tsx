@@ -120,9 +120,8 @@ export default async function HomePage() {
    * tiles: `GOVERNING-01` draws a category row with NO counts on it, and
    * the product rule is that the tiles drop their counts rather than
    * print a figure `platform_stats()` cannot yet produce honestly. So the page
-   * no longer pays for a count nothing draws. `./market-queries` is still the
-   * home of that read and is still used by the preview harness; nothing was
-   * deleted, one caller stopped calling.
+   * no longer pays for a count nothing draws. The read itself
+   * (`market-queries.ts`) was removed on 17 October with no caller left.
    */
   /* UX-04: the Property home's shelf is Property: tenancies and sales. A
      shortlet or a hotel room here opened under Stays and turned the app over. */

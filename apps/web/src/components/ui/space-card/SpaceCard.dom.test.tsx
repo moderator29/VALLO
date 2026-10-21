@@ -21,6 +21,10 @@ import type { Page } from "playwright-core";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";
 import { appCss } from "@/lib/testing/locale-fit";
 
+/* The computed colour the browser reports for white, compared as data, never painted. */
+// eslint-disable-next-line nf/no-raw-colour -- a computed style read back from the browser, compared as data
+const WHITE = "rgb(255, 255, 255)";
+
 vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
@@ -140,10 +144,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the space card", () => {
         expect(at.infoBg, "a different surface from the card").not.toBe(at.cardBg);
 
         /* The pill, the heart and the dots. */
-        expect(at.statusBg).toBe("rgb(255, 255, 255)");
+        expect(at.statusBg).toBe(WHITE);
         expect(at.status!.x).toBeLessThan(media.x + media.w / 2);
         expect(at.status!.y).toBeLessThan(media.y + 24);
-        expect(at.heartBg).toBe("rgb(255, 255, 255)");
+        expect(at.heartBg).toBe(WHITE);
         expect(at.heart!.w).toBeGreaterThanOrEqual(44);
         expect(at.heart!.h).toBeGreaterThanOrEqual(44);
         expect(at.heart!.x).toBeGreaterThan(media.x + media.w / 2);
@@ -183,8 +187,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the space card", () => {
     const night = await mounted("", "dark");
     const nightAt = await read(night.page);
     await night.close();
-    expect(dayAt.cardBg).toBe("rgb(255, 255, 255)");
-    expect(nightAt.cardBg).not.toBe("rgb(255, 255, 255)");
+    expect(dayAt.cardBg).toBe(WHITE);
+    expect(nightAt.cardBg).not.toBe(WHITE);
     /* Navy, not grey: blue leads in the dark card. */
     const [r, g, b] = nightAt.cardBg.match(/\d+/g)!.map(Number) as [number, number, number];
     expect(b).toBeGreaterThan(r);

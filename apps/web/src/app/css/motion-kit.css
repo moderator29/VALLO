@@ -91,58 +91,6 @@
     transform: rotate(180deg);
   }
 
-  /* ------------------------------------------------ feature micro-motion */
-
-  .nf-fx .nf-fx-wipe,
-  .nf-fx .nf-fx-line {
-    transform-box: fill-box;
-    transform-origin: 0 50%;
-  }
-  .nf-fx .nf-fx-turn {
-    transform-box: view-box;
-    transform-origin: 7.6px 15.6px;
-  }
-  .nf-fx .nf-fx-drop,
-  .nf-fx .nf-fx-roof,
-  .nf-fx .nf-fx-shadow,
-  .nf-fx .nf-fx-dot {
-    transform-box: fill-box;
-    transform-origin: 50% 100%;
-  }
-
-  /*
-   * Two names for each motion: one plays when the host enters view, the
-   * other on hover. Switching name is what restarts a CSS animation, so the
-   * hover replays even after the entrance has run.
-   */
-  [data-reveal="in"] .nf-fx .nf-fx-wipe { animation: nf-fx-wipe var(--nf-duration-deliberate) var(--nf-ease-entrance) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-turn { animation: nf-fx-turn var(--nf-duration-deliberate) var(--nf-ease-standard) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-dot { animation: nf-fx-dot var(--nf-duration-deliberate) var(--nf-ease-standard) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-drop { animation: nf-fx-drop var(--nf-duration-deliberate) var(--nf-ease-spring) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-shadow { animation: nf-fx-shadow var(--nf-duration-deliberate) var(--nf-ease-spring) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-line { animation: nf-fx-wipe var(--nf-duration-deliberate) var(--nf-ease-entrance) 200ms both; }
-  [data-reveal="in"] .nf-fx .nf-fx-roof { animation: nf-fx-roof var(--nf-duration-deliberate) var(--nf-ease-spring) 200ms both; }
-
-  @media (hover: hover) {
-    .nf-fx-host:hover .nf-fx .nf-fx-wipe { animation: nf-fx-wipe-b var(--nf-duration-deliberate) var(--nf-ease-entrance) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-turn { animation: nf-fx-turn-b var(--nf-duration-deliberate) var(--nf-ease-standard) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-dot { animation: nf-fx-dot-b var(--nf-duration-deliberate) var(--nf-ease-standard) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-drop { animation: nf-fx-drop-b var(--nf-duration-deliberate) var(--nf-ease-spring) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-shadow { animation: nf-fx-shadow-b var(--nf-duration-deliberate) var(--nf-ease-spring) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-line { animation: nf-fx-wipe-b var(--nf-duration-deliberate) var(--nf-ease-entrance) both; }
-    .nf-fx-host:hover .nf-fx .nf-fx-roof { animation: nf-fx-roof-b var(--nf-duration-deliberate) var(--nf-ease-spring) both; }
-  }
-
-  /* The dots type one after another; the second line is written after the first. */
-  .nf-fx .nf-fx-dot:nth-child(2) { animation-delay: 320ms; }
-  .nf-fx .nf-fx-dot:nth-child(3) { animation-delay: 440ms; }
-  .nf-fx .nf-fx-line:last-of-type { animation-delay: 340ms; }
-  @media (hover: hover) {
-    .nf-fx-host:hover .nf-fx .nf-fx-dot:nth-child(2) { animation-delay: 120ms; }
-    .nf-fx-host:hover .nf-fx .nf-fx-dot:nth-child(3) { animation-delay: 240ms; }
-    .nf-fx-host:hover .nf-fx .nf-fx-line:last-of-type { animation-delay: 140ms; }
-  }
-
   @keyframes nf-fx-wipe { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   @keyframes nf-fx-wipe-b { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
@@ -188,9 +136,6 @@
     60% { opacity: 0.35; transform: scaleX(1.1); }
     100% { opacity: 0.28; transform: scaleX(1); }
   }
-  .nf-fx .nf-fx-shadow {
-    opacity: 0.28;
-  }
 
   @keyframes nf-fx-roof {
     0% { opacity: 0; transform: translateY(-4px); }
@@ -199,34 +144,6 @@
   @keyframes nf-fx-roof-b {
     0% { opacity: 0; transform: translateY(-4px); }
     100% { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ------------------------------------------- glass object motion */
-
-  /*
-   * The platform's glass objects on a content surface (the founder's rule:
-   * never a line glyph there) each play one micro-motion, 620ms, when their
-   * host arrives and again on hover. On the wrapper, so the object inside
-   * is never distorted; transform only. The kinds are named in
-   * components/site/landing/glass-motion.ts.
-   */
-  .nf-glass-fx {
-    transform-origin: 50% 60%;
-  }
-  .nf-glass-fx[data-motion="swing"] {
-    transform-origin: 50% 0;
-  }
-  [data-reveal="in"] .nf-glass-fx[data-motion="rise"] { animation: nf-glass-rise var(--nf-duration-deliberate) var(--nf-ease-spring) 200ms both; }
-  [data-reveal="in"] .nf-glass-fx[data-motion="pop"] { animation: nf-glass-pop var(--nf-duration-deliberate) var(--nf-ease-spring) 200ms both; }
-  [data-reveal="in"] .nf-glass-fx[data-motion="tilt"] { animation: nf-glass-tilt var(--nf-duration-deliberate) var(--nf-ease-standard) 200ms both; }
-  [data-reveal="in"] .nf-glass-fx[data-motion="turn"] { animation: nf-glass-turn var(--nf-duration-deliberate) var(--nf-ease-standard) 200ms both; }
-  [data-reveal="in"] .nf-glass-fx[data-motion="swing"] { animation: nf-glass-swing var(--nf-duration-deliberate) var(--nf-ease-standard) 200ms both; }
-  @media (hover: hover) {
-    .nf-fx-host:hover .nf-glass-fx[data-motion="rise"] { animation: nf-glass-rise-b var(--nf-duration-deliberate) var(--nf-ease-spring) both; }
-    .nf-fx-host:hover .nf-glass-fx[data-motion="pop"] { animation: nf-glass-pop-b var(--nf-duration-deliberate) var(--nf-ease-spring) both; }
-    .nf-fx-host:hover .nf-glass-fx[data-motion="tilt"] { animation: nf-glass-tilt-b var(--nf-duration-deliberate) var(--nf-ease-standard) both; }
-    .nf-fx-host:hover .nf-glass-fx[data-motion="turn"] { animation: nf-glass-turn-b var(--nf-duration-deliberate) var(--nf-ease-standard) both; }
-    .nf-fx-host:hover .nf-glass-fx[data-motion="swing"] { animation: nf-glass-swing-b var(--nf-duration-deliberate) var(--nf-ease-standard) both; }
   }
   @keyframes nf-glass-rise { 0% { transform: translate3d(0, 8px, 0) scale(0.94); } 100% { transform: none; } }
   @keyframes nf-glass-rise-b { 0% { transform: translate3d(0, 8px, 0) scale(0.94); } 100% { transform: none; } }
@@ -271,15 +188,11 @@
       transform: none;
       transition: none;
     }
-    .nf-fx * {
-      animation: none !important;
-    }
     .nf-m-details::details-content,
     .nf-m-chevron {
       transition: none;
     }
-    .nf-ai-hello-bot,
-    .nf-glass-fx {
+    .nf-ai-hello-bot {
       animation: none !important;
     }
   }
@@ -305,7 +218,7 @@
  */
 @layer components {
   .nf-odo {
-    --nf-odo-stagger: 20ms;
+    --nf-odo-stagger: var(--nf-stagger-tight);
     display: inline-block;
     font-variant-numeric: tabular-nums;
   }

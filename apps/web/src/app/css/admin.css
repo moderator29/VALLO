@@ -36,7 +36,7 @@
    * (phones), and the public pages' full-bleed heroes are not asked to give up
    * a strip.
    */
-  :root:has(.nf-admin) {
+  :root[data-admin] {
     scrollbar-gutter: stable;
   }
 

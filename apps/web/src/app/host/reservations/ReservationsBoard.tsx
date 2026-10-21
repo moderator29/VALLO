@@ -1,5 +1,6 @@
 "use client";
 
+import { dateTimeLabel, dayLabel as naturalDay } from "@/lib/format/when";
 import { createContext, useActionState, useContext, useEffect, useId, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,7 +9,7 @@ import { confirmTableBill, enterTableBill, seatByCode } from "@/lib/reservations
 import { billOpen } from "@/lib/reservations/seating";
 import { guestRecordLine } from "@/lib/reservations/guest-record";
 import { NairaField } from "@/components/ui/NairaField";
-import { formatMoney } from "@vallo/i18n";
+import { formatMoney } from "@vallo/i18n/core";
 import type { ActionResult } from "@/lib/actions/envelope";
 import type { HostReservationView } from "@/lib/reservations/queries";
 import type { HostTableBoard } from "./board";
@@ -87,16 +88,14 @@ function timeLabel(iso: string): string {
   return at.toLocaleTimeString(DIGITS, { timeZone: LAGOS, hour: "2-digit", minute: "2-digit", hour12: false });
 }
 
+/** "Today", "Tomorrow", "Yesterday", then "Sat 25 Oct", on Lagos time (`lib/format/when`). */
 function dayLabel(iso: string): string {
-  const at = new Date(iso);
-  if (Number.isNaN(at.getTime())) return "";
-  return at.toLocaleDateString(DIGITS, { timeZone: LAGOS, weekday: "short", day: "numeric", month: "short" });
+  return naturalDay(iso);
 }
 
+/** "Today, 19:30", "Tomorrow, 13:00", then "Sat 25 Oct, 19:30". */
 function whenLabel(iso: string): string {
-  const day = dayLabel(iso);
-  const time = timeLabel(iso);
-  return day && time ? `${day}, ${time}` : "";
+  return dateTimeLabel(iso);
 }
 
 function partyLabel(size: number, locale: Locale): string {
@@ -227,7 +226,7 @@ function Outcome({ table }: { table: HostReservationView }) {
   const { words } = useDesk();
   const w = words.outcome;
   const [pending, start] = useTransition();
-  const [done, setDone] = useState<"COMPLETED" | "NO_SHOW" | null>(null);
+  const [done, setDone] = useState<"COMPLETED" | "NO_SHOW" | "DISPUTED" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const mark = (outcome: "COMPLETED" | "NO_SHOW") =>
@@ -238,14 +237,14 @@ function Outcome({ table }: { table: HostReservationView }) {
         setError(result.error);
         return;
       }
-      setDone(outcome);
+      setDone(result.data.disputed ? "DISPUTED" : outcome);
       router.refresh();
     });
 
   if (done) {
     return (
       <p className={`mt-row ${TYPE.rowMeta}`} role="status">
-        {done === "COMPLETED" ? w.markedSeated : w.markedNoShow}
+        {done === "DISPUTED" ? w.markedDisputed : done === "COMPLETED" ? w.markedSeated : w.markedNoShow}
       </p>
     );
   }

@@ -23,6 +23,23 @@ begin
   select id into ag from public.deal_agreements order by created_at desc limit 1;
   if ag is null then
     -- No agreement yet on this database: draw one up on a sale listing (rolled back).
+    -- 17 October 2026: on the live database the example collection's agents row
+    -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
+    -- member, who is the payer here, so every sale listing was the payer's own
+    -- (the CI run of 17 October failed with "listing <NULL> has no owner").
+    -- The fixture gives the row back to the example lister and
+    -- points the example sales at it, for this transaction only, so a sale with
+    -- another owner exists again. Nothing asserted below changes. Rolled back.
+    update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+     where id = 'e0000000-0000-4000-8000-000000000002'
+       and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+       and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+    update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+     where id in ('ed000000-0000-4000-8000-000000000004',
+                  'ed000000-0000-4000-8000-000000000006',
+                  'ed000000-0000-4000-8000-000000000012',
+                  'ed000000-0000-4000-8000-000000000014')
+       and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
     select l.id, a.user_id into v_sale, v_owner from public.listings l join public.agents a on a.id = l.agent_id
      where l.listing_intent = 'sale' and a.user_id is not null and a.user_id <> guest limit 1;
     insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,

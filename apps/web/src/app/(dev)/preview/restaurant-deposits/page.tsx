@@ -62,6 +62,8 @@ export default async function PreviewRestaurantDeposits({
           windowCopy={t.experienceDetail.window}
           success={t.success}
           deposit={view === "guest" ? deposit : null}
+          copy={t.memberFlows}
+          locale={locale}
         />
       ) : view === "step" ? (
         <DepositStep

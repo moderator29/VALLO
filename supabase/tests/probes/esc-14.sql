@@ -38,6 +38,26 @@ declare
   c record; bid uuid; ag public.deal_agreements%rowtype; g bigint;
   r jsonb; st text; n int;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000018',
+                'ed000000-0000-4000-8000-000000000037',
+                'ed000000-0000-4000-8000-000000000039')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- SCUML item 17 (live 29 Sep): an agent listing goes live only on an
   -- approved mandate. The fixture files one as the platform would.
   insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
@@ -82,6 +102,12 @@ begin
        where id = ag.id;
     end if;
     if c.charge_m is not null or c.name = 'paid' then
+      -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+      -- row 21; pov03): a nightly shortlet no longer takes the hotel row; it
+      -- is escrow unless the guest picks card, and a Paystack charge carries
+      -- only the direct rail. A stay with a card charge records the guest's
+      -- choice of card first, as the pay page does.
+      update public.deal_agreements set payer_rail_choice = 'card', payer_rail_chosen_at = now() where id = ag.id;
       g := (ag.amount_minor * coalesce((ag.terms ->> 'guarantee_bps')::int, 150)) / 10000;
       insert into public.transactions (booking_id, provider, provider_ref, amount_minor, status, created_at, agreement_id,
              payee_user_id, payee_subaccount_code, reserve_subaccount_code, lister_share_minor, guarantee_minor, commission_minor)

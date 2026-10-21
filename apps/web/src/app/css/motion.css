@@ -198,43 +198,6 @@
      * with the animation.
      */
   }
-  .nf-odometer__slot {
-    display: inline-block;
-    height: 1em;
-    overflow: hidden;
-    vertical-align: bottom;
-  }
-  .nf-odometer__sep {
-    display: inline-block;
-    vertical-align: bottom;
-  }
-  /*
-   * The roll is on the scale now. It was a hard-coded 1.15s, which is nearly
-   * twice `--nf-duration-deliberate` and outside the 400 to 600ms an entrance
-   * is allowed anywhere else in this product: a wallet balance took well over a
-   * second to finish saying what it was. The digits still land on a left to
-   * right stagger, so the figure assembles rather than snapping, and the whole
-   * thing is over inside the window every other arrival on the platform uses.
-   *
-   * `--nf-ease-entrance` was already right and is untouched: a mechanical
-   * counter overshooting slightly and settling is exactly what that curve is.
-   */
-  .nf-odometer__strip {
-    display: flex;
-    flex-direction: column;
-    transition: transform var(--nf-duration-deliberate) var(--nf-ease-entrance);
-    will-change: transform;
-  }
-  .nf-odometer__digit {
-    display: block;
-    height: 1em;
-    line-height: 1;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nf-odometer__strip {
-      transition: none;
-    }
-  }
 
   /*
    * Transaction row entrance. Money arriving slides in from the left, money
@@ -254,51 +217,6 @@
       opacity: 1 !important;
       transform: none !important;
     }
-  }
-
-  /*
-   * THE BREATHE IS ON ONE OBJECT PER VIEWPORT, AND IT WAS ON EVERY ONE.
-   *
-   * `.nf-story-art` is on every scene the platform draws: eight rail panels on
-   * the landing page, the banner on `/rent`, the empty state, the first-run
-   * slides. Every one of them was running the same twelve second loop, so a
-   * page could carry eight simultaneous infinite transforms, on top of the four
-   * the canvas was running behind them. Eight objects breathing is ambient
-   * noise; one is a focal point, and the difference is the whole of what
-   * "alive" means here as opposed to "busy".
-   *
-   * So the loop belongs to an object that asks for it by name, and the marker
-   * is `[data-breathe]` rather than a second class, because it is a property of
-   * that one placement rather than a different kind of artwork. The scene still
-   * gets the sizing and the hover from `.nf-story-art` everywhere.
-   *
-   * NOTHING IN THE TREE SETS `data-breathe` TODAY, and that is stated here
-   * rather than left to be discovered. The one ambient animation a viewport is
-   * allowed currently belongs to the canvas bloom, which is the right owner of
-   * it on every screen that has no hero. The landing rebuild is where a hero
-   * scene will want it instead, and that is the placement this attribute is
-   * waiting for: one object, on one page, chosen deliberately.
-   *
-   * 28 seconds and one per cent, up from 12 and 1.5. A reviewer should not be
-   * able to catch it moving.
-   */
-  /*
-   * THE STORY ART IS STILL. L-52.
-   *
-   * `nf-art-breathe` ran on EVERY panel carrying `data-breathe`, and there are
-   * five call sites and eight panels on a full rail, so one screen could hold
-   * eight simultaneous infinite transform animations against a budget of one.
-   * It had already been slowed from 12 seconds to 28 and its scale cut to one
-   * per cent, which is the tell: it was quietened twice rather than answered,
-   * and a one per cent breath nobody can see is not restraint, it is a loop
-   * that has stopped earning its cost without stopping.
-   *
-   * The attribute hook stays so no call site changes and so a deliberate,
-   * finite version can be hung off it later.
-   */
-  .nf-story-art[data-breathe] {
-    /* No animation. See the ambient budget note in glass.css. */
-    animation: none;
   }
 
   /*
@@ -324,75 +242,6 @@
    * for tuning, the cheapest question is not "how do I make this cheaper", it is
    * "what renders this".
    */
-
-  @media (prefers-reduced-motion: reduce) {
-    .nf-story-art {
-      animation: none !important;
-    }
-  }
-
-  /*
-   * Story stages. ONE STAGE NOW, AND IT IS THE DARK ONE IN BOTH THEMES.
-   *
-   * There were two. `--paper` was a silver-white sweep and `--night` a navy
-   * one, because each commissioned scene had been lit on its own ground: some
-   * were studio product shots on white, some neon objects on black. Cutting
-   * either one out left a halo on the opposite ground, so the stage adopted the
-   * light the artwork was rendered in and the image edges were feathered to
-   * dissolve the square.
-   *
-   * Every one of those reasons died with the clay pack. The glass objects are
-   * lit for a dark ground, all of them, with a real alpha channel and no square
-   * to hide. On the paper stage a glass object was a pale square holding a faint
-   * blue drawing: exactly the white sticker the swap set out to remove, and it
-   * was the second one visible on `/rent`. So `--paper` resolves to the same
-   * navy stage as `--night`.
-   *
-   * IT IS NAVY IN DAYLIGHT TOO, and that is deliberate rather than an oversight.
-   * A glass object is see-through by design, so it needs something to be glass
-   * against; a dark plate on a white card is the container answer rather than the
-   * recolour answer, and it gives the light theme two or three deliberate dark
-   * panels, which is how a paper product carries a dark brand.
-   *
-   * The two class names stay so no call site has to change today. The prop that
-   * chooses between them is now a no-op and should be removed from
-   * `SceneBanner` and `StoryRail` by the owners of those files.
-   */
-  .nf-story-stage--paper,
-  .nf-story-stage--night {
-    background:
-      radial-gradient(70% 50% at 50% 100%, var(--nf-glow-2) 0%, transparent 70%),
-      var(--nf-story-stage);
-    border-bottom: 1px solid var(--nf-border-on-stage);
-  }
-  /*
-   * THE FEATHER MASK IS GONE. It existed to dissolve the clay artwork's opaque
-   * white square into the stage behind it. The glass objects have no square:
-   * their alpha ramp IS their glow, so the mask was not softening an edge, it
-   * was eating the outer 24 percent of the object and the bloom that makes the
-   * mark look like the logo. Removing it is visible at once on `/rent`.
-   */
-
-  /* A scene shown small inside the platform gets a rounded chip, never a hard
-     square block sitting on the card. */
-  /*
-   * THE EDGE WAS INVERTED ON THE ONE THEME WHERE THE CHIP IS THE DARK OBJECT.
-   *
-   * The base rule gives this a `--nf-wash-2` border, ink at 6 per cent, and
-   * then `:root:not([data-theme="light"])` hands the brand edge to every theme
-   * EXCEPT paper. So at night, where the chip sits on a near-black ground, it
-   * got the lit brand ring; in daylight, where the chip is a dark object on a
-   * white card and needs its outline most, it kept a 6 per cent wash measuring
-   * about 1.18:1. That is the wrong way round.
-   *
-   * The brand edge is the resting edge of a container in both themes, so it is
-   * unconditional now and the wash is the fallback for nothing.
-   */
-  .nf-scene-chip {
-    border-radius: var(--nf-radius-lg);
-    border: 1px solid var(--nf-brand-edge);
-    overflow: hidden;
-  }
 
   /*
    * Anchored headings clear the sticky header instead of hiding under it.
@@ -461,36 +310,6 @@
       transform: none;
     }
   }
-
-  /*
-   * Word by word headline wipe, and it was running twenty-seven animations on
-   * one page, several of them for nearly six seconds.
-   *
-   * THERE WERE TWO PATHS, the same fault `.nf-reveal` had: a delay-staggered
-   * entrance, and a `@supports (animation-timeline: view())` block that
-   * replaced it with a scroll-driven one whose duration grew with the word
-   * index, `calc(1s + i * 0.18s)`. On a headline of twenty-seven words the last
-   * one took 5.9 seconds, and because a scroll-driven animation is tied to
-   * scroll position rather than to time it never finishes at all: the page
-   * reported twenty-seven running animations at rest. The scroll path is gone
-   * and the delay path stays, which is the one that ends.
-   *
-   * THE STAGGER IS CAPPED AT FOUR STEPS, like every other stagger in the
-   * product. Seventy milliseconds times twenty-seven words is nearly two
-   * seconds of a reader waiting for a heading to finish arriving, and nobody
-   * counts past four in a sweep. The words after the fourth arrive with it.
-   *
-   * AND THE BLUR IS GONE. `filter` is the one property in this entrance that is
-   * not handed to the compositor, so a six pixel blur on twenty-seven words was
-   * twenty-seven layers repainting every frame. The lift and the fade say the
-   * same thing and cost nothing. The 1.5 degree rotate went with it: a word
-   * that arrives crooked and straightens is a flourish rather than physics.
-   */
-  .nf-words > span {
-    display: inline-block;
-    animation: nf-word-in var(--nf-duration-entrance) var(--nf-ease-entrance) both;
-    animation-delay: calc(min(var(--i, 0), 3) * 50ms);
-  }
   @keyframes nf-word-in {
     from {
       opacity: 0;
@@ -541,7 +360,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .nf-enter,
-    .nf-words > span,
     .nf-rule-draw {
       animation: none !important;
       opacity: 1 !important;

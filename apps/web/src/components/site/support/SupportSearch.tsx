@@ -51,7 +51,7 @@ export function useSupportSearch(query: string) {
 
 export function SectionChip({ section }: { section: SearchHit["entry"]["section"] }) {
   return (
-    <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-2.5 py-0.5 text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-secondary)]">
+    <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-xs py-3xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-secondary)]">
       {SECTION_LABEL[section]}
     </span>
   );
@@ -144,12 +144,12 @@ export function SupportSearchField({
         onFocus={onFocus}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className="nf-field ps-[calc(0.875rem+1.25rem+var(--nf-gap-row))] pe-12"
+        className="nf-field ps-[calc(0.875rem+1.25rem+var(--nf-gap-row))] pe-2xl"
       />
       {showShortcut && !value && (
         <kbd
           aria-hidden="true"
-          className="pointer-events-none absolute right-3.5 top-1/2 hidden -translate-y-1/2 rounded border border-[var(--nf-border-subtle)] px-1.5 text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)] sm:block"
+          className="pointer-events-none absolute right-3.5 top-1/2 hidden -translate-y-1/2 rounded border border-[var(--nf-border-subtle)] px-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)] sm:block"
         >
           /
         </kbd>
@@ -179,7 +179,7 @@ export function SupportResults({ hits, listId, activeIndex, inline = false, onNa
             <li key={hit.entry.id} id={id} role="option" aria-selected={active}>
               <details className={`nf-panel nf-panel--card nf-m-details group block p-0 ${common}`}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-row p-card-sm font-semibold leading-snug [&::-webkit-details-marker]:hidden">
-                  <span className="flex min-w-0 flex-col items-start gap-1">
+                  <span className="flex min-w-0 flex-col items-start gap-2xs">
                     <SectionChip section="help" />
                     <span>{hit.entry.title}</span>
                   </span>
@@ -203,9 +203,9 @@ export function SupportResults({ hits, listId, activeIndex, inline = false, onNa
                 <SectionChip section={hit.entry.section} />
                 <span className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{hit.entry.trail}</span>
               </span>
-              <span className="mt-1 block font-semibold leading-snug">{hit.entry.title}</span>
+              <span className="mt-2xs block font-semibold leading-snug">{hit.entry.title}</span>
               {hit.snippet && (
-                <span className="mt-1 block text-[length:var(--nf-text-row)] leading-[1.5] text-[var(--nf-content-secondary)]">
+                <span className="mt-2xs block text-[length:var(--nf-text-row)] leading-[1.5] text-[var(--nf-content-secondary)]">
                   {hit.snippet}
                 </span>
               )}

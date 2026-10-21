@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useClientCopy } from "@/lib/i18n/client-copy";
 import type { SharedKind } from "./share";
 
 /**
@@ -57,10 +58,10 @@ export function ShareSheet({
    */
   elsewhereBody?: string;
 }) {
-  const noun = kind === "booking" ? "booking" : kind === "stay" ? "stay" : "property";
+  const words = useClientCopy().frontDoor.share;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="Share" detents={[0.4]}>
+    <Sheet open={open} onOpenChange={onOpenChange} title={words.sheetTitle} detents={[0.4]}>
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{title}</p>
 
       <div className="nf-rows mt-group">
@@ -74,10 +75,10 @@ export function ShareSheet({
           </span>
           <span className="min-w-0 flex-1 leading-tight">
             <span className="nf-body-sm block font-semibold text-[var(--nf-content-primary)]">
-              Send in a Vallo chat
+              {words.inChat}
             </span>
             <span className="nf-caption block">
-              Pick one of your conversations. They get this {noun} as a card they can open.
+              {words.inChatBody}
             </span>
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -96,10 +97,10 @@ export function ShareSheet({
           </span>
           <span className="min-w-0 flex-1 leading-tight">
             <span className="nf-body-sm block font-semibold text-[var(--nf-content-primary)]">
-              Share elsewhere
+              {words.elsewhere}
             </span>
             <span className="nf-caption block">
-              {elsewhereBody ?? "The link, for anywhere off Vallo."}
+              {elsewhereBody ?? words.elsewhereLink}
             </span>
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />

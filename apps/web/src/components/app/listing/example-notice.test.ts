@@ -82,32 +82,14 @@ describe("the example listing rules", () => {
   });
 
   /*
-   * THE LANDING'S CARDS DO NOT SAY IT ANY MORE (D24). They said "Example"
-   * where the market would be (UIUX item 6); the founder's instruction of
-   * 6 October takes the visible labels off, so `ListingMini` wears the market
-   * like any listing. What it must still never do is wear Verified on an
-   * example row, which the mapper's `example` flag lets it gate.
+   * THE LANDING'S CARDS DO NOT SAY IT ANY MORE (D24). The landing's own card
+   * (`ListingMini`) and its hands-on deck (`StackRoom`) left with the retired
+   * landing rooms on 17 October; the mapper that feeds a site card still
+   * carries the row's example flag so a card can withhold Verified on it.
    */
-  it("does not label the landing's listing cards as examples, and never verifies one", () => {
+  it("keeps the example flag on the site card mapper", () => {
     const mapper = read("lib/site/listing-card.ts");
     expect(mapper).toMatch(/example:\s*listing\.isDemo\s*===\s*true/);
-    const mini = read("components/site/landing/ListingMini.tsx");
-    expect(mini).not.toContain("nf-badge--example");
-    expect(mini).not.toContain("exampleLabel");
-    expect(mini).toMatch(/listing\.verified\s*&&\s*!listing\.example/);
-  });
-
-  /*
-   * The landing's hands-on deck draws four product moments that are
-   * illustrations, not inventory; each moment carries the Example mark.
-   */
-  it("marks every moment in the landing's hands-on deck as an example", () => {
-    const room = read("components/site/landing/StackRoom.tsx");
-    expect(room).toContain("nf-badge--example");
-    const moments = room.match(/moment:\s*\(/g)?.length ?? 0;
-    const marks = room.match(/\{example\}/g)?.length ?? 0;
-    expect(moments).toBeGreaterThan(0);
-    expect(marks).toBe(moments);
   });
 
   /*

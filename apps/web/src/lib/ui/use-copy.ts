@@ -68,6 +68,16 @@ export function useCopyFlash(ms = 2000) {
 }
 
 /**
+ * The two words on a copy control that confirms in place ("Copy", then
+ * "Copied"), or null outside the client copy provider, where a caller draws
+ * no control rather than one with no name.
+ */
+export function useCopyLabels(): { copy: string; copied: string } | null {
+  const words = detailsOf(useClientCopyOptional())?.copy;
+  return words ? { copy: words.action, copied: words.copied } : null;
+}
+
+/**
  * Share through the phone's own sheet, or copy the link where there is none,
  * and say which happened. A cancelled sheet says nothing.
  */

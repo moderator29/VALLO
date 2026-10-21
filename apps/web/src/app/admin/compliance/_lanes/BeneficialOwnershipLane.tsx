@@ -4,7 +4,7 @@ import { readBeneficialOwnershipDesk } from "@/lib/compliance/beneficial-ownersh
 import { readActingForParams } from "@/lib/compliance/beneficial-ownership";
 import { ActingFor, ActingForLookup } from "../../_components/ActingFor";
 import { fill } from "../../_components/copy";
-import { requestNow } from "@/lib/landlord/facts";
+import { requestNow } from "@/lib/format/when";
 import { CountUp } from "@/components/motion/CountUp";
 import { panelClass } from "@/components/ui/Panel";
 import type { ComplianceLane, ComplianceLaneProps } from "./lane";

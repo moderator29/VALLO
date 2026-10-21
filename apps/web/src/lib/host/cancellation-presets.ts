@@ -2,7 +2,7 @@
  * THE CANCELLATION POLICIES A HOST PICKS FROM, AND HOW EVERY ONE IS SAID.
  *
  * Four presets, the shape Airbnb and Booking.com use: Flexible, Moderate, Firm
- * and Strict (`20261013090000_four_preset_cancellation_policies.sql`). The
+ * and Strict (`20261013062641_four_preset_cancellation_policies.sql`). The
  * refund tiers live in `cancellation_policies.rules` as
  * `[{hours_before, refund_bps}]`, and `refundLines` turns those tiers into the
  * sentences the host reads in the wizard and the guest reads on the stay page
@@ -11,7 +11,14 @@
  * Pure and client-safe: the wizard, the stay page and checkout all read it.
  */
 
-import { countOf, type Locale } from "@vallo/i18n/core";
+import { countOf, formatDate, formatNumber, type Dictionary, type Locale } from "@vallo/i18n/core";
+
+/**
+ * The sentences, from the dictionary (`t.hostWorkspace.cancellation`), so a
+ * policy reads in the reader's language. These functions took a locale and
+ * returned English until 17 October 2026.
+ */
+export type CancellationWords = Dictionary["hostWorkspace"]["cancellation"];
 
 export const PRESET_ORDER = ["flexible", "moderate", "firm", "strict"] as const;
 export type PresetCode = (typeof PRESET_ORDER)[number];
@@ -49,11 +56,10 @@ export function noticeWords(hours: number, locale: Locale = "en"): string {
   return hours > 0 && hours % 24 === 0 ? countOf(hours / 24, "days", locale) : countOf(hours, "hours", locale);
 }
 
-function refundWords(bps: number): string {
-  if (bps >= 10_000) return "a full refund";
-  if (bps <= 0) return "no refund";
-  const percent = bps / 100;
-  return `${Number.isInteger(percent) ? percent : percent.toFixed(1)}% back`;
+function refundWords(bps: number, words: CancellationWords, locale: Locale): string {
+  if (bps >= 10_000) return words.fullRefund;
+  if (bps <= 0) return words.noRefund;
+  return words.partRefund.replace("{percent}", formatNumber(bps / 100, locale, { maximumFractionDigits: 1 }));
 }
 
 /**
@@ -61,30 +67,38 @@ function refundWords(bps: number): string {
  * them. Falls back to the policy's own summary when the tiers are unreadable,
  * so a screen always says something true.
  */
-export function refundLines(policy: Pick<PolicyLike, "rules" | "summary">, locale: Locale = "en"): string[] {
+export function refundLines(
+  policy: Pick<PolicyLike, "rules" | "summary">,
+  words: CancellationWords,
+  locale: Locale = "en",
+): string[] {
   const tiers = refundTiers(policy.rules);
   if (tiers.length === 0) return [policy.summary];
   const lines: string[] = [];
   tiers.forEach((tier, index) => {
-    const outcome = refundWords(tier.refundBps);
+    const outcome = refundWords(tier.refundBps, words, locale);
     const earlier = tiers[index - 1];
     if (index === 0) {
       lines.push(
-        tier.hoursBefore > 0
-          ? `Cancel at least ${noticeWords(tier.hoursBefore, locale)} before check-in: ${outcome}.`
-          : `Cancel any time before check-in: ${outcome}.`,
+        (tier.hoursBefore > 0
+          ? words.firstTier.replace("{notice}", noticeWords(tier.hoursBefore, locale))
+          : words.anyTime
+        ).replace("{outcome}", outcome),
       );
     } else if (tier.hoursBefore > 0 && earlier) {
       lines.push(
-        `Cancel between ${noticeWords(tier.hoursBefore, locale)} and ${noticeWords(earlier.hoursBefore, locale)} before check-in: ${outcome}.`,
+        words.between
+          .replace("{shorter}", noticeWords(tier.hoursBefore, locale))
+          .replace("{longer}", noticeWords(earlier.hoursBefore, locale))
+          .replace("{outcome}", outcome),
       );
     } else if (earlier) {
-      lines.push(`Cancel less than ${noticeWords(earlier.hoursBefore, locale)} before check-in: ${outcome}.`);
+      lines.push(words.lessThan.replace("{notice}", noticeWords(earlier.hoursBefore, locale)).replace("{outcome}", outcome));
     }
   });
   const last = tiers[tiers.length - 1];
   if (last && last.hoursBefore > 0) {
-    lines.push(`Cancel less than ${noticeWords(last.hoursBefore, locale)} before check-in: no refund.`);
+    lines.push(words.lessThan.replace("{notice}", noticeWords(last.hoursBefore, locale)).replace("{outcome}", words.noRefund));
   }
   return lines;
 }
@@ -98,20 +112,23 @@ export function refundLines(policy: Pick<PolicyLike, "rules" | "summary">, local
  * caution deposit is never kept by a policy: it is returned under the rules
  * listed with it.
  */
-export function policyFootLines(checkInFrom?: string | null): string[] {
-  const time = checkInFrom && /^\d{2}:\d{2}/.test(checkInFrom) ? clock(checkInFrom.slice(0, 5)) : null;
+export function policyFootLines(
+  checkInFrom: string | null | undefined,
+  words: CancellationWords,
+  locale: Locale = "en",
+): string[] {
+  const time = checkInFrom && /^\d{2}:\d{2}/.test(checkInFrom) ? clock(checkInFrom.slice(0, 5), locale) : null;
   return [
-    time
-      ? `Deadlines are counted in Lagos time from check-in at ${time}.`
-      : "Deadlines are counted in Lagos time from the property's check-in time.",
-    "Refunds are paid in naira to the card or account you paid with, through our payment provider.",
-    "A caution deposit is always returned under the rules listed with it, whatever the policy.",
+    time ? words.footAtTime.replace("{time}", time) : words.footNoTime,
+    words.footRefund,
+    words.footCaution,
   ];
 }
 
-function clock(hhmm: string): string {
+/** A wall-clock "HH:MM" as the locale writes a time of day. Read as written: it is already Lagos time. */
+function clock(hhmm: string, locale: Locale): string {
   const [h, m] = hhmm.split(":").map(Number) as [number, number];
-  return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+  return formatDate(new Date(Date.UTC(2000, 0, 1, h, m)), locale, { hour: "numeric", minute: "2-digit", timeZone: "UTC" });
 }
 
 /** The whole hour of a stated check-in time, for the frozen terms; 15 when unknown. */
@@ -151,22 +168,26 @@ export const DEFAULT_CANCEL_NOTICE_HOURS = 2;
 /** The restaurant's house rules for a table, as the guest reads them. */
 export function tableRuleLines(
   rules: { holdMinutes: number | null; cancelNoticeHours: number | null; sittingMinutes: number | null },
+  words: CancellationWords,
   locale: Locale = "en",
 ): string[] {
-  const lines = ["Asking for a table is free. The restaurant confirms it when a table is free, and you pay the bill at the restaurant."];
+  const lines = [words.tableFree];
   if (rules.cancelNoticeHours) {
-    lines.push(`Please cancel at least ${noticeWords(rules.cancelNoticeHours, locale)} ahead if you cannot come.`);
+    lines.push(words.tableCancelNotice.replace("{notice}", noticeWords(rules.cancelNoticeHours, locale)));
   }
   if (rules.holdMinutes) {
-    lines.push(`A table is held for ${rules.holdMinutes} minutes after the booked time.`);
+    lines.push(words.tableHeld.replace("{minutes}", countOf(rules.holdMinutes, "minutes", locale)));
   }
   if (rules.sittingMinutes) {
-    lines.push(`A table is yours for about ${sittingWords(rules.sittingMinutes, locale)}.`);
+    lines.push(words.tableSitting.replace("{duration}", sittingWords(rules.sittingMinutes, words, locale)));
   }
   return lines;
 }
 
-export function sittingWords(minutes: number, locale: Locale = "en"): string {
+export function sittingWords(minutes: number, words: CancellationWords, locale: Locale = "en"): string {
   if (minutes % 60 === 0) return countOf(minutes / 60, "hours", locale);
-  return `${countOf(Math.floor(minutes / 60), "hours", locale)} ${minutes % 60} minutes`;
+  if (minutes < 60) return countOf(minutes, "minutes", locale);
+  return words.hoursAndMinutes
+    .replace("{hours}", countOf(Math.floor(minutes / 60), "hours", locale))
+    .replace("{minutes}", countOf(minutes % 60, "minutes", locale));
 }

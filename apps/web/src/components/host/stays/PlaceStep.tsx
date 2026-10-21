@@ -52,6 +52,7 @@ export function PlaceStep({
   advance,
 }: StaysStepProps) {
   const hw = useHostCopy();
+  const w = hw.stays;
   const unit = draft.roomTypes[0] ?? null;
   /*
    * A studio has no separate bedroom and one bed, which is the smallest honest
@@ -101,7 +102,7 @@ export function PlaceStep({
    */
   const save = async () => {
     if (!complete) {
-      setNotice({ tone: "error", text: "Pick what kind of place it is, name it and give a nightly price to save it." });
+      setNotice({ tone: "error", text: w.place.incomplete });
       return false;
     }
     return runAsync(async () => {
@@ -126,7 +127,7 @@ export function PlaceStep({
   useGuard("form", differs(form, savedForm), save);
   const saveAndGo = async () => {
     if (!(await save())) return;
-    setNotice({ tone: "ok", text: "Your place is saved." });
+    setNotice({ tone: "ok", text: w.place.saved });
     advance();
   };
 
@@ -152,7 +153,7 @@ export function PlaceStep({
           onChange={(event) => setName(event.target.value)}
         />
         <p className="nf-stays-plate__note">
-          The name guests see. It is also the name of the property this place is listed under.
+          {w.place.nameNote}
         </p>
       </StaysPlate>
 
@@ -210,8 +211,8 @@ export function PlaceStep({
         </div>
         <p className="nf-stays-plate__note">
           {kobo > 0
-            ? `Stored as ${formatMoney(kobo, locale)} a night.`
-            : "What one night costs. This is what a guest pays, and this platform adds nothing to it."}
+            ? w.common.storedPerNight.replace("{amount}", formatMoney(kobo, locale))
+            : w.place.priceNote}
         </p>
       </StaysPlate>
 
@@ -224,12 +225,11 @@ export function PlaceStep({
         loading={pending}
         disabled={pending || placeType === null || name.trim().length < 2 || kobo <= 0}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
-        Nothing is on sale yet. The next screen is your house rules and how a guest may cancel, and
-        a person on our team reads the whole application before anything appears on the shelf.
+        {w.place.note}
       </StaysNote>
     </>
   );

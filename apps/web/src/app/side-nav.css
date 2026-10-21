@@ -221,6 +221,8 @@
   .nf-nav__brand {
     display: inline-flex;
     align-items: center;
+    /* The rail's home link: the lockup draws 36 tall, the target is 44. */
+    min-block-size: 2.75rem;
     border-radius: var(--nf-radius-sm);
   }
 

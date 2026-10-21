@@ -125,6 +125,21 @@ describe("the push catalogue", () => {
     }
   });
 
+  it("carries every fact the English body holds into every translation", () => {
+    /* The other direction of the check above: a draft that leaves out {b2}
+       drops an amount, a date or a name from the lock screen in silence. */
+    const dropped: string[] = [];
+    for (const rule of PUSH_TEXT_RULES) {
+      if (!rule.body) continue;
+      const groups = new RegExp(`${rule.body.source}|`).exec("")!.length - 1;
+      for (const [locale, copy] of Object.entries(rule.copy)) {
+        const used = new Set([...copy.body.matchAll(/\{b(\d+)\}/g)].map((m) => Number(m[1])));
+        for (let n = 1; n <= groups; n += 1) if (!used.has(n)) dropped.push(`${rule.id} ${locale} {b${n}}`);
+      }
+    }
+    expect(dropped, "a translation that leaves out a filled-in fact").toEqual([]);
+  });
+
   it("matches the English exactly as the database writes it today", () => {
     const samples: Array<[string, string]> = [
       ["Booking request sent", "Your request for Lekki Loft is with the host."],

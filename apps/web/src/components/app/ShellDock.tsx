@@ -6,6 +6,7 @@ import type { ProfileSelection, Workspace } from "@/lib/supply/workspaces";
 import { ProfileSwitcher, type ProfileSwitcherCopy } from "@/components/supply/ProfileSwitcher";
 import { useHydrated } from "@/components/motion/useInView";
 import { isDataSaver } from "@/lib/ui/data-saver";
+import { useRootFlag } from "@/lib/ui/root-flag";
 import { MobileTabBar } from "./MobileTabBar";
 import { CreateDock } from "./CreateDock";
 
@@ -53,6 +54,11 @@ export function ShellDock({
   /* The dock prefetches its tabs whole once the page is live, and never under
      data saving (Track M performance; see MobileTabBar's prefetchFull). */
   const hydrated = useHydrated();
+  /* `data-docked` on <html> while a dock is drawn: the floating controls
+     (toasts, back to top, the live island, the batch tray) clear it by the
+     tab bar's height (lib/ui/root-flag.ts). Every shell that sets
+     `nf-main--docked` draws this dock. */
+  useRootFlag("docked");
 
   /*
    * The copy is assembled from the dictionary rather than written inline,

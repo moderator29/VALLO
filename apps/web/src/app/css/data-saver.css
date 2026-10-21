@@ -53,13 +53,11 @@
  * continuously, on the largest image on the screen, forever.
  */
 :root[data-save-data="on"] .nf-gallery-kenburns,
-:root[data-save-data="on"] .nf-story-art,
 :root[data-save-data="on"] .nf-breathe,
 :root[data-save-data="on"] .nf-float,
 :root[data-save-data="on"] .nf-card--live,
 :root[data-save-data="on"] .nf-skeleton::after,
-:root[data-save-data="on"] .nf-social-skeleton::after,
-:root[data-save-data="on"] .nf-vcols__strip {
+:root[data-save-data="on"] .nf-social-skeleton::after {
   animation: none;
 }
 

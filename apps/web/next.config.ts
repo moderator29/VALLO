@@ -53,6 +53,13 @@ const nextConfig: NextConfig = {
    * before.
    */
   distDir: process.env.NEXT_DIST_DIR || ".next",
+  /*
+   * A git worktree whose node_modules are symlinks into another checkout
+   * cannot build: Turbopack refuses to resolve `next` outside the workspace
+   * root it detects. TURBOPACK_ROOT widens that root for such a build
+   * (`TURBOPACK_ROOT=/home/user npx next build`). Unset, nothing changes.
+   */
+  ...(process.env.TURBOPACK_ROOT ? { turbopack: { root: process.env.TURBOPACK_ROOT } } : {}),
 
   // Workspace packages ship raw TypeScript, so Next compiles them in place.
   transpilePackages: ["@vallo/design-tokens", "@vallo/i18n"],

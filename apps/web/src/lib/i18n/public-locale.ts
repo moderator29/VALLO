@@ -103,6 +103,77 @@ export function preferredLocale(cookieValue: string | undefined | null, acceptLa
   return localeFromAcceptLanguage(acceptLanguage) ?? DEFAULT_LOCALE;
 }
 
+/**
+ * THE PAGES WHOSE BODY IS WRITTEN IN EVERY LANGUAGE, not only the site
+ * chrome around it.
+ *
+ * Search Console reported "Duplicate, Google chose different canonical than
+ * user" across the public site. Measured on the live site on 17 October 2026:
+ * `/ha/terms`, `/ha/docs/viewings`, `/ha/guides/renting-in-lagos` and every
+ * other public page except the ones below served the English body word for
+ * word (85 to 98 percent of lines identical; only the header, the dock and
+ * the footer were in Hausa), while each declared ITSELF canonical and the
+ * sitemap listed all four copies. Google saw four copies of one English page,
+ * kept the English one and reported the other three.
+ *
+ * So a language address is canonical only where the body really is in that
+ * language. Every other language address names the English page as its
+ * canonical, carries no hreflang set, and is left out of the sitemap. The
+ * address still works and still shows the chrome in the reader's language.
+ *
+ * Matched on the first segment, like `LOCALIZABLE_SEGMENTS`, plus `/`. When a
+ * page's body is translated, add it here in the same commit; the test in
+ * `public-locale.test.ts` holds every entry to a localizable segment.
+ * Measured translated: the landing page, `/check` and `/r`. The others listed
+ * draw every sentence from the dictionaries and are doors (noindex) or the
+ * area price pages, which are written from dictionary sentences.
+ */
+export const TRANSLATED_BODY_SEGMENTS: ReadonlySet<string> = new Set([
+  "areas",
+  "check",
+  "r",
+  "forgot-password",
+  "reset-password",
+  "sign-in",
+  "sign-up",
+  "welcome",
+  "s",
+  "landlord",
+  "safe",
+  "email",
+]);
+
+/** Whether a bare public path's body is written in every language. */
+export function hasTranslatedBody(path: string): boolean {
+  const clean = path.replace(/\/+$/, "") || "/";
+  if (clean === "/") return true;
+  const [, first = ""] = clean.split("/");
+  return TRANSLATED_BODY_SEGMENTS.has(first);
+}
+
+/**
+ * The language a page at this bare path is canonical in, for a reader of
+ * `locale`: their own when the body is translated, English otherwise.
+ */
+export function canonicalLocale(path: string, locale: Locale): Locale {
+  return hasTranslatedBody(path) ? locale : DEFAULT_LOCALE;
+}
+
+/**
+ * The canonical path and, only where every language has its own body, the
+ * hreflang set, for a bare public path read in `locale`. Pure, so the rule is
+ * tested here and `public-metadata.ts` only reads the request.
+ */
+export function publicAlternates(
+  origin: string,
+  path: string,
+  locale: Locale,
+): { canonical: string; languages?: Record<Locale | "x-default", string> } {
+  const canonical = localizedPath(path, canonicalLocale(path, locale));
+  if (!hasTranslatedBody(path)) return { canonical };
+  return { canonical, languages: alternateUrls(origin, path) };
+}
+
 /** Every language's address for one bare path, as an absolute URL. */
 export function alternateUrls(origin: string, path: string): Record<Locale | "x-default", string> {
   const base = origin.replace(/\/+$/, "");
@@ -116,9 +187,12 @@ export function alternateUrls(origin: string, path: string): Record<Locale | "x-
 /**
  * The hreflang set as an HTTP `Link` header, which search engines read the
  * same as `<link rel="alternate" hreflang>` in the page. Sent by the proxy on
- * every localizable page, so no page can forget it and none has to repeat it.
+ * every localizable page whose body is translated (`hasTranslatedBody`), so no
+ * page can forget it and none has to repeat it. Null for the rest: an hreflang
+ * set naming four copies of one English body is the duplicate signal.
  */
-export function hreflangLinkHeader(origin: string, path: string): string {
+export function hreflangLinkHeader(origin: string, path: string): string | null {
+  if (!hasTranslatedBody(path)) return null;
   return Object.entries(alternateUrls(origin, path))
     .map(([lang, url]) => `<${url}>; rel="alternate"; hreflang="${lang}"`)
     .join(", ");

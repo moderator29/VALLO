@@ -446,9 +446,9 @@ export async function cancel(
   // plain words that once money has moved a cancellation is handled by a person
   // rather than by a button, because a refund is somebody's money and it
   // deserves a name against the decision. That person's surface exists:
-  // app/admin/bookings, which computes the refund from the same published
-  // schedule this guest can read and returns it to their wallet inside one
-  // transaction (lib/admin/bookings-actions.ts). So the refusal below is
+  // app/admin/bookings, which prices the refund from the cancellation terms
+  // frozen on this booking and sends it back to the card that paid, inside
+  // one transaction (lib/admin/bookings-actions.ts). So the refusal below is
   // honest, and the sentence it hands the guest is one the platform can now
   // actually keep. Read through the guest's own client, so it can only ever
   // see their own payments.

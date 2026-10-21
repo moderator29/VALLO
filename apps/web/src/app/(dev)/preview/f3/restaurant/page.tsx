@@ -115,7 +115,7 @@ export default async function RestaurantFacePreview() {
 
         <Stack className="mt-block">
           <Section title={copy.reserveTitle} description={copy.reserveBody}>
-            <ReserveTable listingId={id} messageHref={messageHref} />
+            <ReserveTable listingId={id} messageHref={messageHref} copy={t.memberFlows} locale={locale} />
           </Section>
 
           <Section title={copy.hoursTitle}>

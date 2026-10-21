@@ -15,7 +15,7 @@ import { truthOpenNow } from "@/lib/inspections/truth";
 import { SafetyShareControl } from "@/components/app/doors/SafetyShareControl";
 import { safetyControlRows } from "@/lib/doors/safety";
 import { readMyLiveSafetyShares } from "@/lib/doors/queries";
-import { requestNow } from "@/lib/landlord/facts";
+import { requestNow } from "@/lib/format/when";
 
 /**
  * The inspections on Plans: the Property side's diary, in the anatomy of
@@ -102,6 +102,8 @@ export async function InspectionsBoard({
   const sheet = (row: (typeof all)[number]) => (
     <div key={row.id} id={`ix-${row.id}`} className="scroll-mt-16">
       <InspectionSheet
+        viewingCopy={t.threads.rental}
+        flowCopy={t.memberFlows.inspection}
         success={t.success}
         gateCopy={t.platform.gate}
         dayKit={t.memberKit.dayKit}

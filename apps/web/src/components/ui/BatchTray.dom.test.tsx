@@ -190,7 +190,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("BatchTray", () => {
     const { page, close } = await mountInBrowser({
       entry: entry(),
       css: `${PORTED_CSS}\n:root { --nf-tabbar-clearance: 90px; }`,
-      init: `document.body.insertAdjacentHTML("beforeend", '<main class="nf-main--docked"></main>'); document.documentElement.dataset.saveData = "on";`,
+      init: `document.body.insertAdjacentHTML("beforeend", '<main class="nf-main--docked"></main>'); document.documentElement.dataset.docked = ""; document.documentElement.dataset.saveData = "on";`,
     });
     try {
       await page.waitForTimeout(500);

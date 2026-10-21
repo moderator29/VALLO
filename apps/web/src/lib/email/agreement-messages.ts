@@ -1,4 +1,4 @@
-import { NO_CUSTODY_SENTENCE, OFF_PLATFORM_SENTENCE } from "../money/copy";
+import { NO_CUSTODY_SENTENCE, OFF_PLATFORM_SENTENCE, OWNER_PAID_WHEN } from "../money/copy";
 import { appUrl, button, compose, fitSubject, heading, hello, money, note, paragraph, quoteLine, rows, type Block, type ReceiptRow } from "./render";
 import type { EmailKind } from "./icons";
 import type { EmailMessage } from "./messages";
@@ -49,13 +49,14 @@ export function agreementApproved(data: AgreementEmailData): EmailMessage {
     [
       heading("Agreement approved"),
       paragraph(
-        `${hello(data.name)} Vallo reviewed the agreement for ${place(data)} that both of you confirmed, and approved it.`,
+        /* Approval is usually the system's, on the second confirmation (D83); only a flagged card deal is approved by a person. */
+        `${hello(data.name)} The agreement for ${place(data)} that both of you confirmed is approved.`,
       ),
       rows(facts(data)),
       paragraph(
         renter
           ? "Payment is open now, in the app. Pay through Vallo only."
-          : "The renter can pay now. Your share settles straight to the bank account on your payout details.",
+          : `The renter can pay now. ${OWNER_PAID_WHEN}`,
       ),
       paragraph(NO_CUSTODY_SENTENCE),
       button(renter ? "Pay in the app" : "Open the agreement", appUrl(`/agreements/${data.agreementId}`)),

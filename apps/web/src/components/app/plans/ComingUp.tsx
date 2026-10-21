@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { dateTimeLabel, dayLabel } from "@/lib/format/when";
 import type { Dictionary } from "@vallo/i18n/core";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { Section, TYPE } from "@/components/app/Screen";
@@ -20,28 +21,18 @@ const KIND_ICON: Record<PlanKind, UiIconName> = {
   table: "utensils",
 };
 
-/** British order in every locale: dates are written in English words (`intlTag`). */
+/**
+ * When, in words: "Today, 14:00", "Tomorrow, 10:30", then "Mon 27 Oct,
+ * 14:00"; a date with no time reads "Tomorrow" or "Mon 27 Oct". One set of
+ * words for a time (`lib/format/when`), on Lagos time.
+ */
 function when(item: PlanItem): string {
-  const tag = "en-GB";
   if (item.at) {
-    const at = new Date(item.at);
-    if (!Number.isNaN(at.getTime())) {
-      return new Intl.DateTimeFormat(tag, {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "Africa/Lagos",
-      }).format(at);
-    }
+    const timed = dateTimeLabel(item.at);
+    if (timed) return timed;
   }
-  return new Intl.DateTimeFormat(tag, {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  }).format(new Date(`${item.on}T12:00:00Z`));
+  /* A plain date is a Lagos calendar day: noon Lagos keeps it on that day. */
+  return dayLabel(`${item.on}T12:00:00+01:00`);
 }
 
 export function ComingUp({

@@ -3,6 +3,7 @@
 import { useHostCopy } from "@/components/host/host-copy";
 import { Chip } from "@/components/ui/Chip";
 import type { ReactNode } from "react";
+import { countOf, formatNumber } from "@vallo/i18n/core";
 import { differs, useGuard, useHeld } from "../wizard-memory";
 import {
   CANCEL_NOTICE_HOURS,
@@ -45,9 +46,6 @@ import type { StaysStepProps } from "./types";
  * step where the address was actually asked for. It is the restaurant twin of
  * the same row on `GOVERNING-10` screen one.
  */
-/* The two table-rule plates' names, beside the rest of this screen's English. */
-const HOLD_LABEL = "Holding a late table";
-const NOTICE_LABEL = "Asking guests to cancel";
 
 export function RestaurantStep({
   draft,
@@ -59,6 +57,7 @@ export function RestaurantStep({
   goTo,
   advance,
   extra,
+  locale,
 }: StaysStepProps & {
   /**
    * What the wizard adds to this screen above its Continue: the venue's
@@ -68,6 +67,7 @@ export function RestaurantStep({
   extra?: ReactNode;
 }) {
   const hw = useHostCopy();
+  const w = hw.stays;
   /*
    * HELD IN THE WIZARD, so Back keeps the chips and the tiles, and measured
    * against what is on record so the wizard can ask before they are lost. The
@@ -119,8 +119,8 @@ export function RestaurantStep({
     setNotice({
       tone: "ok",
       text: rulesKept
-        ? "Your restaurant is saved."
-        : "Your restaurant is saved. The table hold and cancellation notice are not kept yet; they will be once this estate is updated.",
+        ? w.restaurant.saved
+        : w.restaurant.savedRulesNotKept,
     });
     advance();
   };
@@ -129,8 +129,8 @@ export function RestaurantStep({
     <>
       <StaysHero mark="concierge-bell" inline>
         <div className="min-w-0">
-          <p className="nf-stays-title mt-0">Your restaurant</p>
-          <p className="nf-stays-hint">Tell us about your restaurant.</p>
+          <p className="nf-stays-title mt-0">{w.restaurant.title}</p>
+          <p className="nf-stays-hint">{w.restaurant.hint}</p>
         </div>
       </StaysHero>
 
@@ -166,8 +166,8 @@ export function RestaurantStep({
         </div>
         <p className="nf-stays-plate__note">
           {cuisines.length === 0
-            ? "Pick every one that describes the food. It is how a guest finds you."
-            : `${cuisines.length} chosen.`}
+            ? w.restaurant.cuisinesNone
+            : w.restaurant.cuisinesChosen.replace("{count}", formatNumber(cuisines.length, locale))}
         </p>
       </StaysPlate>
 
@@ -187,7 +187,7 @@ export function RestaurantStep({
                 </span>
               ))
             ) : (
-              <span className="nf-stays-row__meta">Not given yet. Open the business step to add it.</span>
+              <span className="nf-stays-row__meta">{w.common.notGivenBusiness}</span>
             )}
           </span>
           <UiIcon name="chevron-right" size={20} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -208,19 +208,19 @@ export function RestaurantStep({
         </StaysTiles>
         <p className="nf-stays-plate__note">
           {band === null
-            ? "Pick one to go on. Four bands, cheapest to dearest. A band is not a price and none is printed anywhere."
+            ? w.restaurant.bandNone
             : (PRICE_BANDS.find((option) => option.value === band)?.meaning ?? "")}
         </p>
       </StaysPlate>
 
       {/* THE RESTAURANT'S OWN RULES FOR A TABLE, in plain presets. Guests read
           them before they ask for a table. */}
-      <StaysPlate label={HOLD_LABEL}>
-        <StaysTiles label={HOLD_LABEL} columns={4}>
+      <StaysPlate label={w.restaurant.holdLabel}>
+        <StaysTiles label={w.restaurant.holdLabel} columns={4}>
           {HOLD_MINUTES.map((minutes) => (
             <StaysTile
               key={minutes}
-              title={`${minutes} min`}
+              title={w.restaurant.minShort.replace("{count}", formatNumber(minutes, locale))}
               selected={hold === minutes}
               onSelect={() => setHold(minutes)}
               variant="band"
@@ -228,16 +228,16 @@ export function RestaurantStep({
           ))}
         </StaysTiles>
         <p className="nf-stays-plate__note">
-          A confirmed table is kept for {hold} minutes after the booked time, then you may give it away.
+          {w.restaurant.holdNote.replace("{minutes}", countOf(hold, "minutes", locale))}
         </p>
       </StaysPlate>
 
-      <StaysPlate label={NOTICE_LABEL}>
-        <StaysTiles label={NOTICE_LABEL} columns={4}>
+      <StaysPlate label={w.restaurant.noticeLabel}>
+        <StaysTiles label={w.restaurant.noticeLabel} columns={4}>
           {CANCEL_NOTICE_HOURS.map((hours) => (
             <StaysTile
               key={hours}
-              title={hours === 24 ? "1 day" : `${hours} h`}
+              title={hours === 24 ? w.restaurant.oneDay : w.restaurant.hoursShort.replace("{count}", formatNumber(hours, locale))}
               selected={notice === hours}
               onSelect={() => setNoticeHours(hours)}
               variant="band"
@@ -245,9 +245,7 @@ export function RestaurantStep({
           ))}
         </StaysTiles>
         <p className="nf-stays-plate__note">
-          Guests are asked to cancel at least {noticeWords(notice)} ahead. A table is free to book and
-          is never paid for in advance: the guest pays the bill at your restaurant, and you mark each
-          table seated or a no-show after its time.
+          {w.restaurant.noticeNote.replace("{notice}", noticeWords(notice, locale))}
         </p>
       </StaysPlate>
 
@@ -265,12 +263,11 @@ export function RestaurantStep({
         loading={pending}
         disabled={pending || draft.name.trim().length < 2 || band === null}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
-        Nothing here puts a table on sale. The next screen is your opening hours and how many people
-        you seat, and a person on our team reads the application before the venue goes on the shelf.
+        {w.restaurant.note}
       </StaysNote>
     </>
   );

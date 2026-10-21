@@ -45,7 +45,7 @@ export default async function AdminReferralsPage({
   const locale = await getLocale();
   const t = getDictionary(locale);
   const query = readReferralQuery(await searchParams);
-  const now = Date.now();
+  const now = requestTime();
 
   const [desk, tab] = await Promise.all([getReferralDesk(now), readTab(query)]);
 
@@ -62,4 +62,9 @@ async function readTab(query: ReferralQuery): Promise<ReferralTabData> {
   const member = query.member ?? top ?? null;
   const read = member ? await getReferralGraph(member) : null;
   return { fraud, graph: { member, usingDefault: !query.member && member !== null, read } };
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

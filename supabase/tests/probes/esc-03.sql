@@ -29,6 +29,27 @@ declare
   claims text := json_build_object('sub', '957b3bd2-cce3-425d-bba9-5cd876ca3d62', 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text;
   b uuid; b_old uuid; b_paying uuid; b_capped uuid; d1 uuid; d2 uuid; bid uuid; ag uuid; amt bigint; g bigint; host uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'; insp uuid; r jsonb; st text;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000007',
+                'ed000000-0000-4000-8000-000000000018',
+                'ed000000-0000-4000-8000-000000000037',
+                'ed000000-0000-4000-8000-000000000039')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
   -- probe's session carries one for every admin and for the QA member (who
@@ -97,9 +118,16 @@ begin
   -- stored total, and the split.
   foreach bid in array array[b_paying, b_old, b_capped] loop
     select total_minor into amt from public.bookings where id = bid;
+    -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+    -- row 21; pov03): a nightly shortlet no longer takes the hotel row; it is
+    -- escrow unless the guest picks card, and a Paystack charge carries only
+    -- the direct rail. Each fixture agreement records the guest's choice of
+    -- card, as the pay page does, so the sweep is tested on the card charges
+    -- it was written for.
     insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms,
-           status, decided_at, decided_by)
-    select 'stay', listing_id, id, guest_id, lister, amt, '{}'::jsonb, 'approved', now() - interval '47 hours', host
+           status, decided_at, decided_by, payer_rail_choice, payer_rail_chosen_at)
+    select 'stay', listing_id, id, guest_id, lister, amt, '{}'::jsonb, 'approved', now() - interval '47 hours', host,
+           'card', now() - interval '47 hours'
       from public.bookings where id = bid
     returning id into ag;
     g := (amt * 150) / 10000;

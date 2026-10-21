@@ -2,7 +2,7 @@
 
 **This is a readiness assessment, not legal advice.** It records what the repository shows, with citations, and says UNKNOWN where the repository cannot answer; a Nigerian solicitor and the Data Protection Officer must confirm every conclusion before anyone relies on it.
 
-Written 6 October 2026 on branch `claude/vallo-qa-release`. Method: directive D41 in `docs/RULINGS.md` ("Measure, never quote"), so every statement below was read from the tree or fetched, not copied from an older status document. NDPC means the Nigeria Data Protection Commission; NDPA means the Nigeria Data Protection Act 2023.
+Written 6 October 2026 on branch `claude/vallo-qa-release`; sections 3.1, 3.2 and 7 re-read against the code on 17 October 2026. Method: measure, never quote, so every statement below was read from the tree or fetched, not copied from an older status document. NDPC means the Nigeria Data Protection Commission; NDPA means the Nigeria Data Protection Act 2023.
 
 ## 1. Which legal routes exist and return a page
 
@@ -56,7 +56,7 @@ Three content problems that a reviewer or regulator could reach from those URLs:
 | Item | Where | State, as read on 6 Oct |
 | --- | --- | --- |
 | Privacy notice written for the NDPA, with lawful bases (section 4), rights (section 8), breach statement (section 11), controller and DPO (opening) | `apps/web/src/lib/legal/privacy.tsx` | live; version `2026-09-25` |
-| Named Data Protection Officer | `company.ts`, `DATA_PROTECTION_OFFICER = "Omojuni Oluwaseyifunmi Ebenezer"` | named; the founder holds it personally, described in the file as a disclosed arrangement |
+| Named Data Protection Officer | `company.ts`, `DATA_PROTECTION_OFFICER = null` | nobody is named: the founder said on 9 October 2026 that he is not the DPO. Requests go through the contact form with Privacy as the subject, and the notice drops the DPO sentence while the value is null |
 | Retention and destruction schedule | `docs/RETENTION_SCHEDULE.md` | real but **its own header says "Status: DRAFT, not yet approved"**, written 14 September 2026, and it says most periods were sentences and not mechanisms when checked on 23 September; only the account purge (`/api/cron/account-purge`, daily 03:15, `apps/web/vercel.json:13`) and the price-check sweep were mechanisms at that time. It carries four open questions for a solicitor (section 7) and states that "I have not verified the statutory periods cited above against the text of the Acts". It is therefore not a current, approved schedule. Which later periods have since become code is UNKNOWN without reading each job; the SCUML five-year records are covered in `docs/COMPLIANCE_SCUML.md` |
 | Subject access, self-serve and by request | `docs/SUBJECT_ACCESS.md`, `apps/web/src/lib/account/export.ts`, `app/api/account/export/route.ts` | real. The by-request route is a staff procedure with a 30 day send and an `audit_log` row (`account.subject_access`). Known limit: the export lists the retired money tables as `unavailable` and omits the newer money records (`deal_agreements`, `guarantee_claims`, payout accounts), per the file's own dated note of 29 September |
 | Account deletion with a 30 day grace and anonymising purge | `/delete-account`, `docs/RETENTION_SCHEDULE.md` sections 3.2 and 5; the NDPA-rights channel concern about a `null` in a deletion message (section 5.3 of that file) | live; whether the `null` message bug was fixed is UNKNOWN (not re-read) |
@@ -75,14 +75,14 @@ Three content problems that a reviewer or regulator could reach from those URLs:
 | **Retention schedule** | See 3.1: a DRAFT, unapproved, with unverified statutory periods and four open solicitor questions. Needs approval, then the notice reconciled to it ("the notice must not promise a period this schedule does not enforce", `RETENTION_SCHEDULE.md` section 6) | Founder to approve, solicitor to confirm section 7 |
 | **Subject access route** | Exists and documented (`docs/SUBJECT_ACCESS.md`). Gaps: no single public page names the channels; newer money records are missing from the export; the 30 day by-request deadline is a house rule, and the NDPA's own response period was not verified here | DPO; solicitor on the response period |
 | **Breach notification procedure** | The notice promises it: "we will notify the NDPC and affected users as the NDPA requires" (`privacy.tsx:510` to `:511`). **No breach-response procedure document was found.** A search of `docs/` for "incident response", "breach notification", "data breach" and "personal data breach" returned only `docs/archive/recommendations-inbox.md`. There is no runbook naming who decides, the clock, the NDPC submission route, or the template for affected users. The notice's promise currently rests on nothing written | Founder and DPO to write it; solicitor to supply the NDPA deadline and the NDPC route, which are UNKNOWN here |
-| **Cross-border transfer basis** | The notice names Supabase (Ireland), Vercel (United States), Resend (United States), Anthropic (United States), Paystack and Yellow Card (Nigeria) (`privacy.tsx:255` onward). A transfer safeguard record per recipient was NOT found. AI transfers have a consent gate (`lib/ai/consent.ts`) | Solicitor |
+| **Cross-border transfer basis** | The notice names Supabase (Ireland), Vercel (United States), Paystack and Yellow Card (Nigeria), Resend (United States), Anthropic (United States), MapTiler and CARTO, Firebase Cloud Messaging and Apple Push, Sentry and Unsplash (privacy section 5). It does NOT name Payluk (the escrow partner, `api.payluk.ng`), Termii (one-time codes by SMS, `api.ng.termii.com`), LiveKit (voice and video calls) or the sign-in providers Google and Apple, all of which the code calls (see section 7). A transfer safeguard record per recipient was NOT found. AI transfers have a consent gate (`lib/ai/consent.ts`) | Solicitor |
 | **Data protection impact assessment** | None found in `docs/`. Sensitive processing exists (NIN, government ID, business documents, precise location). Whether a DPIA is required is UNKNOWN | Solicitor and DPO |
 | **Staff training and processor contracts** | Not in the repository. The notice says each provider is "under contract". The contracts and their data protection terms are UNKNOWN | Founder |
 | **Cookie and tracking position** | Functional cookies only, per the notice. No consent banner (section 1). Whether this satisfies the NDPA is UNKNOWN | Solicitor |
 
 ### 3.3 Claims in shipped copy to reconcile
 
-- `docs/RECOMMENDATIONS.md:1220` (`LG-1`) records "The landing page claims NDPA compliance as a fact", status OPEN. A search of `apps/web/src` on 6 October found no such sentence in the landing source, so either it was fixed without closing the row or it lives somewhere not searched. Do not claim "NDPA compliant" anywhere while registration is unfiled and the retention schedule is a draft. UNKNOWN which is true until the row's owner confirms.
+- Do not claim "NDPA compliant" anywhere while registration is unfiled and the retention schedule is a draft. A search of `apps/web/src` on 6 October found no such sentence in the landing source.
 
 ## 4. D50 and D48: the provider abstraction never governs the legal surface
 
@@ -100,7 +100,7 @@ What the legal text says today (read 6 Oct):
 
 **D48 (shipped copy telling members Vallo holds their money).** D48 locates the offending strings in `packages/i18n/src/locales/experience-features.en.ts` (lines 149 to 168) on `origin/claude/vallo-experience-upgrade`, with wiring in `components/app/feature-onboarding/first-runs.ts`. On this branch (`claude/vallo-qa-release`) that file does not exist and a search of `apps/web/src` and `packages` for "your wallet", "Open my wallet", "Open escrow" and "held in escrow" found only code comments, a dev fixture string (`app/(dev)/preview/f4/fixtures.ts:389`, a preview harness) and a crypto error line about the user's own crypto wallet (`packages/i18n/src/locales/crypto-pay.en.ts:103`). **No legal page on this branch implies that Vallo holds customer funds.** The risk is on the experience branch and it must be removed there before that branch merges; this assessment did not read that branch. The legal pages here say the opposite, which is correct for today's rail.
 
-**The coming collision.** D50 allows a balance held by a licensed provider (Payluk is the target) under four conditions, one of which is that the words come from `lib/money/copy.ts`, per rail, and that ADR-0003 is accepted. If that ships, the Terms, the privacy notice's processor list, `docs/store/PRIVACY_LABELS.md` ("Vallo holds no money (Track A)", Part B), the Play financial-features declaration and the receipts all change together, and the Terms must then name the provider that holds the balance and say the member's money sits in an account with that provider and not with Vallo. Until then, "Payluk is the target, not the state" (D41); do not write Payluk into any legal page ahead of a live rail.
+**The collision has arrived.** The escrow rail is merged (`pov01` to `pov05` applied, `protectedRailLive()` in `lib/money/rail-live.ts`): a licensed partner, Payluk, may hold a rent, shortlet or sale payment while the rail reads as working. So the Terms, the privacy notice's processor list, `docs/store/PRIVACY_LABELS.md`, the Play financial-features declaration and the receipts must now say who holds an escrow payment and that it sits with that partner and not with Vallo. Section 7 lists the exact sentences.
 
 ## 5. Actions, in order of consequence
 
@@ -128,3 +128,47 @@ What the legal text says today (read 6 Oct):
 | Whether any NDPC filing, processor contract or staff training record exists | Held outside the repository, if at all | Founder |
 | Whether the `null` support-email message in the deletion path was fixed | Not re-read in this assessment | Engineering |
 | Current wording of the experience branch's copy (D48) | That branch was not read | Session 3 |
+
+## 7. What counsel must settle in the published text
+
+Read against the code on 17 October 2026. Engineering corrected the Help centre, the docs, the safety, standards, cancellations and hosts pages, the support chat answers, the EULA's account-deletion sentence and the Host Agreement's restaurant fee (now per seated table, `HOST_AGREEMENT_VERSION` `2026-10-17`). Everything below is contractual text engineering did not change: each item needs counsel's wording, and any change to the Terms or the Privacy policy needs a new `TERMS_VERSION` or `PRIVACY_VERSION` (`lib/legal/versions.ts`), ideally in one release so members accept once.
+
+**Terms (`lib/legal/terms.tsx`, version `2026-10-13`)**
+
+1. Section 4, second bullet: the processor splits every payment and "the Vallo Guarantee contribution described in section 14 goes to a separate reserve"; "Vallo has no wallet and keeps no balance for you ... nothing held and nothing to withdraw". The Guarantee is retired (`guarantee_bps` 0, D51); a licensed partner may hold rent, shortlet and sale payments in escrow (ADR 0003, applied `pov01` to `pov05`); a referral Rewards Balance exists, which is what Vallo owes a member (D85).
+2. Section 4, third bullet: "For a stay, the host accepts the booking and we approve it before payment opens." Hotel rooms are paid by card at once (`stays_instant_pay`), Instant book shortlets need no acceptance, and staff approval is off (D83, `agreement_staff_review`).
+3. Section 4, sixth bullet: "we cannot reverse a payment that has already settled ... what we can do is described in sections 5 and 14". An escrow payment held by the partner can go back to the payer; section 14 is the retired Guarantee.
+4. Section 5, first bullet: "One schedule covers all of them, rather than a different one for each person who lists." A host business picks Flexible, Moderate, Firm or Strict and the refund follows the booked policy (`lib/host/cancellation-presets.ts`, `lib/stays/booked-policy.ts`); only owner and agent stays keep the 72 hour schedule. Deadlines are counted in Lagos time.
+5. Section 5, second bullet, and section 6, last bullet: the lister's share "settles to them when you pay" / "at the moment it is paid". On escrow it is released when the deal is confirmed.
+6. Section 6, first two bullets: the fee position and the thirty days' notice. HANDOFF holds the commission wording for counsel. The section does not mention the 10 percent hotel-room commission (`scoped_commission_rates`, applied `pov06`), the restaurant fee per seated table, or the paid Pro and Business plans and paid promotion (D60, D83: price, renewal, the 4 day trial, cancelling and refunds).
+7. Sections 3 and 12: "you may hold only one personal account". The product requires an owner and an agent to use two accounts ("One account holds one side", `private.one_side_per_account`), and the Help tells people who are both to use two accounts. Counsel to reconcile.
+8. Section 7: describes the verified badge and the ladder but not the Ownership seen mark and its limit (a reviewer saw a document; not a title search).
+9. Section 8: covers messages and screening, not voice and video calls, Requests, delete for everyone (2 days 12 hours) or staff review calls.
+10. Section 9: inspections only by request; no free viewing slots, video visits, or the no-show report with its 48 hour dispute and staff decision (`lib/inspections/no-show-actions.ts`). Its last sentence compares the report with "any claim on the Vallo Guarantee".
+11. Section 13: "A person at Vallo then reviews the agreement and approves it ... Payment opens only after approval." Off since D83; a direct payment waits for a person only when the deal needs a second look (`PAYMENT_GATE_SENTENCE`).
+12. Section 14, the whole Vallo Guarantee section: retired for new payments; claims on payments made while it ran are still honoured (`LEGACY_GUARANTEE_CLAIM`). HANDOFF: remove after counsel, with the help copy, then bump `TERMS_VERSION`.
+13. Section 15: "beyond the specific commitments in sections 5 and 14".
+14. Section 19: Nigerian courts; the file's own note says it should match the co-founders agreement (arbitration in Abuja under the Arbitration and Mediation Act 2023).
+15. Missing: restaurants (free booking, confirmation, check-in code, seated or no-show, the diner's answer and disputes, seated-only reviews, bill payment through Vallo not switched on), the social feed (Around) beyond sections 11 and 12, a pointer to the Community rules (`/eula`), languages, and the apps.
+
+**Disclaimer (`lib/legal/disclaimer.tsx`, part of the Terms)**
+
+16. Section 1: "None of it is covered by the Vallo Guarantee."
+17. Section 2: "Approving an agreement means a person at Vallo checked ..." (D83, as item 11).
+18. Section 3: "keeps no balance in your name". A Rewards Balance is what Vallo owes a member (`REWARDS_BALANCE_SEPARATE`).
+19. Section 5, "The Vallo Guarantee is limited": retired, as item 12.
+
+**Privacy policy (`lib/legal/privacy.tsx`, version `2026-09-25`)**
+
+20. Section 2, Payment data: "how each payment was split (the lister's share, the Vallo Guarantee contribution and our commission)" and "We do not keep a wallet or a balance for you". Escrow arrangements with the partner and the Rewards Balance are not described.
+21. Section 2, "Agreements and Guarantee claims"; section 7, "a Guarantee claim is open" as a deletion blocker; section 7's kept list names "Guarantee claims".
+22. Section 5, Paystack: "splitting each payment to the lister's bank account and the Guarantee reserve".
+23. Section 5, processors the code uses and the notice does not name: Payluk (escrow; it receives the payer's and payee's details and the amount), Termii (SMS one-time codes, the phone number), LiveKit (voice and video calls: who joined, when, for how long; calls are not recorded), Google and Apple (sign-in), and Meta's WhatsApp Cloud API once the `whatsapp_doorbell` flag is on. When they are named, add their hosts to `PROCESSORS` in `lib/legal/privacy-truth.test.ts` so the test keeps the list honest.
+24. Section 2, data the code keeps that the notice does not list: call records and staff review calls with their notes, viewings and video visits, no-show reports and disputes, restaurant reservations with check-in codes and seating outcomes, ownership documents, referral invitations and rewards, phone verification, and compliance screening for money laundering.
+25. Section 5, sharing: a restaurant sees how many tables a guest kept and missed across Vallo in the last 12 months (counts only); public leaderboards show completed deals and bookings (opt-out, D76). Neither is stated.
+26. Section 9, cookies: the passcode unlock cookie (`lib/passcode/unlock-cookie.ts`, `docs/PASSCODE.md`) is not listed.
+
+**Host Agreement (`lib/legal/host-agreement.tsx`, version `2026-10-17`)**
+
+27. Written by engineering (HANDOFF). It has no clause on the hotel-room commission, on how a fee change is notified, or on what happens when a host breaks section 2 beyond "we may refund them and stop your listing" (who pays that refund).
+

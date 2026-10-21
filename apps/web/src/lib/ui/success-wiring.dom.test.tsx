@@ -340,14 +340,16 @@ const REQUEST = `
   import { mount } from "@/lib/testing/browser-root";
   import { AuthGateProvider } from "@/components/auth/AuthGate";
   import { RequestInspection } from "@/components/app/inspections/RequestInspection";
-  mount(<AuthGateProvider signedIn><RequestInspection listingId="l-1" existing={null} locale="en" /></AuthGateProvider>);
+  import { getDictionary } from "@vallo/i18n";
+  mount(<AuthGateProvider signedIn><RequestInspection listingId="l-1" existing={null} locale="en" copy={getDictionary("en").visit.entry} zone="Lagos time" /></AuthGateProvider>);
 `;
 
 const REQUESTED = `
   import { mount } from "@/lib/testing/browser-root";
   import { AuthGateProvider } from "@/components/auth/AuthGate";
   import { RequestInspection } from "@/components/app/inspections/RequestInspection";
-  mount(<AuthGateProvider signedIn><RequestInspection listingId="l-1" locale="en" existing={{ id: "ix-1", listingId: "l-1",
+  import { getDictionary } from "@vallo/i18n";
+  mount(<AuthGateProvider signedIn><RequestInspection listingId="l-1" locale="en" copy={getDictionary("en").visit.entry} zone="Lagos time" existing={{ id: "ix-1", listingId: "l-1",
     listingTitle: null, state: "REQUESTED", requestedAt: "2030-01-15T09:00:00.000Z", slotAt: null, note: null, listerNote: null,
     createdAt: "2030-01-10T09:00:00.000Z", respondedAt: null, conversationId: null, counterpartName: null }} /></AuthGateProvider>);
 `;
@@ -563,7 +565,7 @@ const TABLE = `
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { ReserveTable } from "@/app/(app)/listing/[id]/ReserveTable";
-  mount(<ReserveTable listingId="l-1" success={getDictionary("en").success} />);
+  mount(<ReserveTable listingId="l-1" success={getDictionary("en").success} copy={getDictionary("en").memberFlows} locale="en" />);
 `;
 
 /* Today's seatings can all have passed (the form never offers a past time,

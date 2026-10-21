@@ -8,6 +8,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { Row, RowList } from "@/components/app/Screen";
 import { withNext } from "@/lib/auth/next-link";
+import { useRootFlag } from "@/lib/ui/root-flag";
 
 /**
  * THE DOCK'S "+" AT THE RIGHT END, AND THE SHEET IT OPENS.
@@ -70,6 +71,9 @@ export function CreateDock({
   socialOn?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  /* `data-create-dock` on <html>: the feed's floating bloom steps aside for
+     the dock's own plus (social-feed.css, lib/ui/root-flag.ts). */
+  useRootFlag("create-dock");
   const copy = t.nav.create;
   const stays = side === "stays";
 

@@ -248,7 +248,9 @@
     left: 0;
     right: 0;
     top: 50%;
-    height: var(--nf-btn-h);
+    /* Never under 44, even where a surface draws the compact rung smaller
+       (the profile's Edit and Follow paint 36 and were tapped at 36). */
+    height: max(var(--nf-btn-h), 2.75rem);
     transform: translateY(-50%);
     border-radius: inherit;
   }

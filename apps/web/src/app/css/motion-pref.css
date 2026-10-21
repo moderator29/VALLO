@@ -46,6 +46,8 @@
     --nf-duration-deliberate: 220ms;
     --nf-duration-entrance: 220ms;
     --nf-duration-cinematic: 300ms;
+    --nf-stagger: 20ms;
+    --nf-stagger-tight: 10ms;
     --nf-splash-hold: 0ms;
   }
 }

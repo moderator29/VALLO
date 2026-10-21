@@ -288,6 +288,15 @@ describe("documentPathBelongsTo", () => {
     expect(documentPathBelongsTo("u1", "u10/batch/id.jpg")).toBe(false);
     expect(documentPathBelongsTo("u1", "")).toBe(false);
   });
+
+  it("refuses a path that walks out of the person's own folder", () => {
+    expect(documentPathBelongsTo("u1", "u1/../u2/id.jpg")).toBe(false);
+    expect(documentPathBelongsTo("u1", "u1/./id.jpg")).toBe(false);
+    expect(documentPathBelongsTo("u1", "u1//id.jpg")).toBe(false);
+    expect(documentPathBelongsTo("u1", "u1/batch/")).toBe(false);
+    expect(documentPathBelongsTo("u1", "u1/..\\u2\\id.jpg")).toBe(false);
+    expect(documentPathBelongsTo("u1", "u1/batch/id\u0000.jpg")).toBe(false);
+  });
 });
 
 describe("rejectFile", () => {

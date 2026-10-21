@@ -1,11 +1,11 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
-import { isPhoneGate } from "@/lib/actions/envelope";
+import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
 import { useActionState, useId, useState, useMemo } from "react";
 import Link from "next/link";
 import { withNext } from "@/lib/auth/next-link";
-import { plural, type Locale } from "@vallo/i18n/core";
+import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { reserve, type ReserveReceipt } from "@/lib/bookings/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
@@ -43,12 +43,15 @@ function nextDays(fromIso: string, count: number): string[] {
  * March is a chip that quotes a different price for the same word. Thirty is one
  * number, always, and the dates under it say exactly which nights they are.
  */
-const STAY_LENGTHS: { label: string; nights: number }[] = [
-  { label: "Weekend", nights: 2 },
-  { label: "1 week", nights: 7 },
-  { label: "2 weeks", nights: 14 },
-  { label: "1 month", nights: 30 },
+const STAY_LENGTHS: { key: keyof ReservePanelCopy["stayReserve"]["lengths"]; nights: number }[] = [
+  { key: "weekend", nights: 2 },
+  { key: "week", nights: 7 },
+  { key: "twoWeeks", nights: 14 },
+  { key: "month", nights: 30 },
 ];
+
+/** The panel's words (`t.memberFlows`): its own lines and the two day names. */
+export type ReservePanelCopy = Pick<Dictionary["memberFlows"], "stayReserve" | "days">;
 
 /**
  * "Today", "Tomorrow", then a short weekday and day number.
@@ -59,9 +62,9 @@ const STAY_LENGTHS: { label: string; nights: number }[] = [
  * that shows a raw date. The anchor is midday UTC, read in UTC, so the server
  * and every phone name the same day.
  */
-function quickDateLabel(iso: string, todayIso: string): string {
-  if (iso === todayIso) return "Today";
-  if (iso === addDaysIso(todayIso, 1)) return "Tomorrow";
+function quickDateLabel(iso: string, todayIso: string, days: ReservePanelCopy["days"]): string {
+  if (iso === todayIso) return days.today;
+  if (iso === addDaysIso(todayIso, 1)) return days.tomorrow;
   const d = new Date(`${iso}T12:00:00Z`);
   return d.toLocaleDateString("en-NG", { weekday: "short", day: "numeric", timeZone: "UTC" });
 }
@@ -94,6 +97,8 @@ function labelDate(iso: string): string {
 
 function Stepper({
   label,
+  fewerLabel,
+  moreLabel,
   name,
   value,
   min,
@@ -101,6 +106,10 @@ function Stepper({
   onChange,
 }: {
   label: string;
+  /** The minus button's accessible name. */
+  fewerLabel: string;
+  /** The plus button's accessible name. */
+  moreLabel: string;
   name: string;
   value: number;
   min: number;
@@ -113,7 +122,7 @@ function Stepper({
       <span className="flex items-center gap-row">
         <button
           type="button"
-          aria-label={`Fewer ${label.toLowerCase()}`}
+          aria-label={fewerLabel}
           disabled={value <= min}
           onClick={() => onChange(Math.max(min, value - 1))}
           className="nf-icon-btn h-11 w-11 disabled:opacity-40"
@@ -127,7 +136,7 @@ function Stepper({
           variant="glass"
           size="sm"
           iconOnly
-          aria-label={`More ${label.toLowerCase()}`}
+          aria-label={moreLabel}
           disabled={value >= max}
           onClick={() => onChange(Math.min(max, value + 1))}
           className="h-9 w-9 rounded-[var(--nf-radius-sm)] disabled:opacity-40"
@@ -151,7 +160,10 @@ export function ReservePanel({
   messageHref,
   door = [],
   doorCopy,
+  copy,
 }: {
+  /** The panel's words, in the reader's language. */
+  copy: ReservePanelCopy;
   /** The page's `t.success`, for "Dates held" or "Booking requested". Absent, no sheet. */
   success?: SuccessWords;
   /**
@@ -181,6 +193,7 @@ export function ReservePanel({
      from `t.reserve`, because a counted noun cannot be pluralised properly
      without also owning the words on either side of it. */
   const t = useClientCopy();
+  const w = copy.stayReserve;
 
   const [state, formAction, pending] = useActionState<
     ActionResult<ReserveReceipt> | null,
@@ -273,7 +286,7 @@ export function ReservePanel({
           details={[
             {
               label: success.detail.when,
-              value: `${labelDate(r.checkIn)} to ${labelDate(r.checkOut)}`,
+              value: w.range.replace("{from}", labelDate(r.checkIn)).replace("{to}", labelDate(r.checkOut)),
             },
           ]}
           primary={{ label: success.continue }}
@@ -285,7 +298,7 @@ export function ReservePanel({
             <Icon3D name="calendar-pending" size={72} />
           </span>
           <p className="nf-lede font-semibold text-[var(--nf-content-primary)]">
-            Booking requested
+            {instantBook || r.instant ? w.heldTitle : w.requestedTitle}
           </p>
         </div>
         <p className="nf-rise mt-heading text-center nf-body-sm leading-relaxed text-[var(--nf-content-secondary)]">
@@ -300,30 +313,27 @@ export function ReservePanel({
             data-testid="reserve-arriving"
             className="nf-rise mt-row text-center nf-body-sm leading-relaxed text-[var(--nf-content-muted)]"
           >
-            {r.arrivingName} is the one arriving. We send them the details the moment the host
-            confirms.
+            {w.arriving.replace("{name}", r.arrivingName)}
           </p>
         )}
         <dl className="nf-rise nf-body-sm mt-heading space-y-inline border-t border-[var(--nf-panel-hair)] pt-heading">
           {r.cleaningMinor > 0 && (
             <div className="flex items-center justify-between text-[var(--nf-content-secondary)]">
-              <dt>Cleaning</dt>
+              <dt>{w.cleaning}</dt>
               <dd>
                 <Amount minorUnits={r.cleaningMinor} locale={locale} currency={currency} />
               </dd>
             </div>
           )}
           <div className="flex items-center justify-between font-semibold text-[var(--nf-content-primary)]">
-            <dt>Total</dt>
+            <dt>{w.totalRow}</dt>
             <dd>
               <Amount minorUnits={r.totalMinor} locale={locale} currency={currency} />
             </dd>
           </div>
         </dl>
         <p className="nf-rise mt-heading nf-body-sm leading-relaxed text-[var(--nf-content-muted)]">
-          {instantBook || r.instant
-            ? "Your dates are held. Paying now confirms the stay straight away."
-            : "The agent will confirm your dates personally. You can pay now to secure them, and we will notify you the moment the agent confirms."}
+          {instantBook || r.instant ? w.heldBody : w.requestedBody}
         </p>
         {/* Paying is the primary act, so it is the primary button. Leaving this
             moment with only a link to a list was the one gap between reserving
@@ -334,8 +344,9 @@ export function ReservePanel({
           full
           className="mt-block"
         >
-          Pay <Amount minorUnits={r.totalMinor} locale={locale} currency={currency} /> for this
-          stay
+          {w.pay.split("{amount}")[0]}
+          <Amount minorUnits={r.totalMinor} locale={locale} currency={currency} />
+          {w.pay.split("{amount}")[1]}
         </ButtonLink>
         <ButtonLink
           href={`/bookings?side=stays&from=stays&justBooked=${r.bookingId}`}
@@ -343,7 +354,7 @@ export function ReservePanel({
           full
           className="mt-row"
         >
-          Pay later, view your bookings
+          {w.payLater}
         </ButtonLink>
       </div>
     );
@@ -369,7 +380,7 @@ export function ReservePanel({
               it sits above. That gap is in the model, not in this string, and
               closing it means a per-head booking path rather than a new word.
             */
-            suffix="/ night"
+            suffix={w.perNight}
             className="text-[1.5rem] font-bold leading-none tracking-tight text-[var(--nf-content-primary)]"
             secondaryClassName="text-[length:max(0.54em,0.75rem)] font-semibold opacity-60"
           />
@@ -378,7 +389,7 @@ export function ReservePanel({
         {instantBook && (
           <p className="flex items-center gap-inline nf-caption font-semibold text-[var(--nf-state-warning)]">
             <UiIcon name="calendar-check" size={ICON.inline} />
-            Instant Book available
+            {w.instantBook}
           </p>
         )}
       </div>
@@ -405,8 +416,8 @@ export function ReservePanel({
           are one state, not two.
         */}
         <div className="mb-heading">
-          <p className="nf-label mb-inline">Check in</p>
-          <ChipRow label="Check-in date" radiogroup>
+          <p className="nf-label mb-inline">{w.checkInRail}</p>
+          <ChipRow label={w.checkInRailLabel} radiogroup>
             {quickDates.map((iso) => (
               <Chip
                 key={iso}
@@ -420,7 +431,7 @@ export function ReservePanel({
                   if (checkOut && checkOut <= iso) setCheckOut("");
                 }}
               >
-                {quickDateLabel(iso, today)}
+                {quickDateLabel(iso, today, copy.days)}
               </Chip>
             ))}
           </ChipRow>
@@ -452,14 +463,14 @@ export function ReservePanel({
           step.
         */}
         <div className="mb-heading">
-          <p className="nf-label mb-inline">How long</p>
-          <ChipRow label="Length of stay" radiogroup>
+          <p className="nf-label mb-inline">{w.howLong}</p>
+          <ChipRow label={w.howLongLabel} radiogroup>
             {STAY_LENGTHS.map((length) => {
               const from = checkIn || today;
               const target = addDaysIso(from, length.nights);
               return (
                 <Chip
-                  key={length.label}
+                  key={length.key}
                   behaviour="choice"
                   selected={checkIn !== "" && checkOut === target}
                   onSelectedChange={() => {
@@ -470,7 +481,7 @@ export function ReservePanel({
                     setCheckOut(target);
                   }}
                 >
-                  {length.label}
+                  {w.lengths[length.key]}
                 </Chip>
               );
             })}
@@ -480,7 +491,7 @@ export function ReservePanel({
         <div className="grid grid-cols-2 gap-row [&>*]:min-w-0">
           <div>
             <label htmlFor={`${uid}-checkin`} className="nf-label">
-              Check-in
+              {w.checkIn}
             </label>
             <input
               id={`${uid}-checkin`}
@@ -495,7 +506,7 @@ export function ReservePanel({
           </div>
           <div>
             <label htmlFor={`${uid}-checkout`} className="nf-label">
-              Check-out
+              {w.checkOut}
             </label>
             <input
               id={`${uid}-checkout`}
@@ -522,7 +533,9 @@ export function ReservePanel({
             listing row; this is the courtesy, not the guard. */}
         <div className="mt-block space-y-row rounded-[var(--nf-container-radius)] border border-[var(--nf-panel-hair)] p-card-sm">
           <Stepper
-            label="Adults"
+            label={w.adults}
+            fewerLabel={w.fewer.replace("{what}", w.adults)}
+            moreLabel={w.more.replace("{what}", w.adults)}
             name="adults"
             value={adults}
             min={1}
@@ -530,7 +543,9 @@ export function ReservePanel({
             onChange={setAdults}
           />
           <Stepper
-            label="Children"
+            label={w.children}
+            fewerLabel={w.fewer.replace("{what}", w.children)}
+            moreLabel={w.more.replace("{what}", w.children)}
             name="children"
             value={children}
             min={0}
@@ -562,8 +577,8 @@ export function ReservePanel({
             className="py-sm first:pt-0 last:pb-0"
             checked={forSomeoneElse}
             onCheckedChange={toggleForSomeoneElse}
-            label="Someone else is arriving"
-            description="Booking this for a family member or a friend."
+            label={w.someoneElse}
+            description={w.someoneElseBody}
           />
         </div>
 
@@ -571,7 +586,7 @@ export function ReservePanel({
           <div className="nf-rise mt-heading grid gap-row">
             <div>
               <label htmlFor={`${uid}-guest-name`} className="nf-label">
-                Their full name
+                {w.theirName}
               </label>
               <input
                 id={`${uid}-guest-name`}
@@ -581,7 +596,7 @@ export function ReservePanel({
                 maxLength={80}
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                placeholder="As it appears on their ID"
+                placeholder={w.theirNamePlaceholder}
                 aria-invalid={fieldError("guestName") ? true : undefined}
                 className="nf-field"
               />
@@ -603,16 +618,16 @@ export function ReservePanel({
             <PhoneField
               id={`${uid}-guest-phone`}
               name="guestPhone"
-              label="Their phone number"
+              label={w.theirPhone}
               value={guestPhone}
               onChange={setGuestPhone}
               error={fieldError("guestPhone")}
-              hint="The estate gate rings this number when they arrive."
+              hint={w.theirPhoneHint}
               autoComplete="off"
             />
             <div>
               <label htmlFor={`${uid}-guest-email`} className="nf-label">
-                Their email address, if you have it
+                {w.theirEmail}
               </label>
               <input
                 id={`${uid}-guest-email`}
@@ -622,7 +637,7 @@ export function ReservePanel({
                 maxLength={160}
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
-                placeholder="Optional"
+                placeholder={w.optional}
                 aria-describedby={`${uid}-guest-email-hint`}
                 aria-invalid={fieldError("guestEmail") ? true : undefined}
                 className="nf-field"
@@ -631,8 +646,7 @@ export function ReservePanel({
                 id={`${uid}-guest-email-hint`}
                 className="mt-row nf-caption leading-relaxed text-[var(--nf-content-muted)]"
               >
-                We send them the dates and how to get through the gate once the host confirms.
-                Leave it blank and it all comes to you to pass on.
+                {w.theirEmailHint}
               </p>
               {fieldError("guestEmail") && (
                 <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
@@ -666,7 +680,7 @@ export function ReservePanel({
                 minorUnits={totalMinor}
                 locale={locale}
                 currency={currency}
-                suffix="total"
+                suffix={w.total}
                 className="nf-lede font-bold text-[var(--nf-content-primary)]"
                 secondaryClassName="nf-body-sm font-normal text-[var(--nf-content-muted)]"
               />
@@ -680,7 +694,7 @@ export function ReservePanel({
                 aria-expanded={showPerNight}
                 className="shrink-0"
               >
-                {showPerNight ? "Hide the breakdown" : "See per night"}
+                {showPerNight ? w.hideBreakdown : w.showBreakdown}
               </Button>
             </div>
 
@@ -700,7 +714,7 @@ export function ReservePanel({
                     charges what. */}
                 {cleaningMinor > 0 && (
                   <div className="flex items-center justify-between text-[var(--nf-content-secondary)]">
-                    <dt>Cleaning</dt>
+                    <dt>{w.cleaning}</dt>
                     <dd>
                       <Amount minorUnits={cleaningMinor} locale={locale} currency={currency} />
                     </dd>
@@ -708,21 +722,20 @@ export function ReservePanel({
                 )}
                 {serviceMinor > 0 && (
                   <div className="flex items-center justify-between text-[var(--nf-content-secondary)]">
-                    <dt>Service charge</dt>
+                    <dt>{w.serviceCharge}</dt>
                     <dd>
                       <Amount minorUnits={serviceMinor} locale={locale} currency={currency} />
                     </dd>
                   </div>
                 )}
                 <div className="flex items-center justify-between border-t border-[var(--nf-panel-hair)] pt-inline font-semibold text-[var(--nf-content-primary)]">
-                  <dt>Total</dt>
+                  <dt>{w.totalRow}</dt>
                   <dd>
                     <Amount minorUnits={totalMinor} locale={locale} currency={currency} />
                   </dd>
                 </div>
                 <p className="pt-2xs nf-caption leading-relaxed text-[var(--nf-content-muted)]">
-                  Vallo adds nothing of its own. Every figure here is the
-                  host&apos;s.
+                  {w.nothingAdded}
                 </p>
               </dl>
             )}
@@ -750,12 +763,12 @@ export function ReservePanel({
             className="mt-block rounded-[var(--nf-container-radius)] border border-[var(--nf-panel-hair)] bg-[color-mix(in_oklab,var(--nf-state-warning)_12%,transparent)] p-card-sm nf-body-sm leading-relaxed text-[var(--nf-content-secondary)]"
           >
             {state.error}
-            {state.error.startsWith("Sign in") && (
+            {isSignedOutRefusal(state.error) && (
               <Link
                 href={withNext("/sign-in", `/listing/${encodeURIComponent(listingId)}`)}
                 className="mt-row inline-flex min-h-11 items-center font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"
               >
-                Sign in
+                {w.signIn}
               </Link>
             )}
             <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
@@ -764,11 +777,11 @@ export function ReservePanel({
 
         <div className="mt-block grid gap-row">
           <Button type="submit" variant="primary" full disabled={!ready} loading={pending}>
-            Reserve
+            {w.reserve}
           </Button>
           {/* The second action under the blue Reserve is the warm spark (D81). */}
           <ButtonLink href={messageHref} variant="spark" full>
-            Message agent
+            {w.message}
           </ButtonLink>
         </div>
       </form>
@@ -780,7 +793,7 @@ export function ReservePanel({
         {/* Advice, so a neutral glyph in the line's own ink: the green shield
             means an earned check, and this line is not one (A9). */}
         <UiIcon name="info" size={ICON.inline} className="mt-3xs shrink-0" />
-        Pay only after you have inspected the property
+        {w.payAfterInspecting}
       </p>
     </div>
   );

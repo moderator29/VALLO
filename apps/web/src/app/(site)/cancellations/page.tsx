@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 import { CancellationTimeline } from "@/lib/trust/CancellationTimeline";
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
+import { PRESET_ORDER } from "@/lib/host/cancellation-presets";
 import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
 /* Every money sentence on this page is lib/money/copy.ts's (C6, the route sweep). */
 import {
@@ -31,14 +32,13 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * The cancellation policy.
  *
- * One schedule for the whole platform, deliberately. Per-listing policies are
- * how this category ends up with fourteen variants nobody reads and a dispute
- * queue full of people who genuinely did not know which one applied to them.
- *
- * The timeline itself is `CancellationTimeline`, which reads the schedule from
- * `lib/trust/cancellation.ts` and computes every figure. The same component
- * renders on a listing and on a booking against real dates and a real total,
- * so a guest sees the identical three steps wherever they meet them.
+ * Two kinds of stay, said plainly. A stay listed by an owner or agent follows
+ * the platform schedule, drawn by `CancellationTimeline` from
+ * `lib/trust/cancellation.ts`. A hotel, shortlet or serviced apartment run as
+ * a business picks one of four presets, Flexible, Moderate, Firm or Strict
+ * (`lib/host/cancellation-presets.ts`), and the guest sees that policy's tiers
+ * on the stay page and at checkout. Either way the terms are frozen on the
+ * booking when it is paid, and the refund follows the booked terms.
  */
 
 export default function CancellationPolicyPage() {
@@ -72,6 +72,33 @@ export default function CancellationPolicyPage() {
           <CancellationTimeline headingLevel="h3" />
         </section>
 
+        {/* ------------------------------------------- a host's own policy */}
+        <section aria-labelledby="host-policies">
+          <h2 id="host-policies">
+            When the host picks the policy
+          </h2>
+          <div className="mt-group">
+            <p className="text-[length:var(--nf-text-row)] leading-relaxed text-[var(--nf-content-secondary)]">
+              A hotel, shortlet or serviced apartment run as a business picks one of four
+              policies: {PRESET_ORDER.map((code) => code.charAt(0).toUpperCase() + code.slice(1)).join(", ")}.
+              Its refund steps are shown on the stay before you book and again at checkout, and
+              the refund follows the policy on your booking.{" "}
+              <Link
+                href="/docs/refunds-and-cancellations#which-policy"
+                className="font-semibold text-[var(--nf-content-link)] hover:underline"
+              >
+                The four policies, step by step
+              </Link>
+              .
+            </p>
+            <p className="mt-row text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+              Every deadline is counted in Lagos time from the stay&apos;s check-in time. A
+              caution deposit is always returned under the rules listed with it, whatever the
+              policy.
+            </p>
+          </div>
+        </section>
+
         {/* ----------------------------------------------- before you pay */}
         <section aria-labelledby="before-you-pay">
           <h2 id="before-you-pay">
@@ -100,9 +127,12 @@ export default function CancellationPolicyPage() {
               </span>
               , and sooner when your check-in is close.
             </p>
-            <div className="mt-group">
-              <ButtonLink href="/contact" variant="primary" size="md">
-                Ask support to cancel a paid stay
+            <div className="mt-group flex flex-wrap gap-row">
+              <ButtonLink href="/bookings" variant="primary" size="md">
+                Open your bookings
+              </ButtonLink>
+              <ButtonLink href="/contact" variant="secondary" size="md">
+                Contact support
               </ButtonLink>
             </div>
           </div>

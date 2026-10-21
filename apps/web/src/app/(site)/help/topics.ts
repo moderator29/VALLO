@@ -23,6 +23,8 @@ const TOPIC_GLYPH: Record<string, UiIconName> = {
   Messages: "chat-bubble",
   Hosting: "key",
   "Languages and accessibility": "globe",
+  Around: "feed",
+  "Your account and data": "user-check",
 };
 
 /** A topic's plate glyph; a topic nobody has drawn one for gets the document. */

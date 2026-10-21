@@ -6,10 +6,9 @@ import { getLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/site";
 import { OWN_CARD, SITE_CARD } from "@/lib/site/site-card";
 import {
-  alternateUrls,
   isLocalizablePath,
-  localizedPath,
   OG_LOCALE,
+  publicAlternates,
   splitLocalePrefix,
   URL_PATH_HEADER,
 } from "./public-locale";
@@ -38,11 +37,10 @@ export async function localizedAlternates(barePath?: string): Promise<Metadata["
   const bare = barePath ?? (await publicBarePath());
   if (!bare) return undefined;
   const locale = await getLocale();
-  const urls = alternateUrls(siteUrl(), bare);
-  return {
-    canonical: localizedPath(bare, locale),
-    languages: { ...urls },
-  };
+  /* A language address whose body is still English is canonical at the
+     English page and carries no hreflang set (`hasTranslatedBody`). */
+  const { canonical, languages } = publicAlternates(siteUrl(), bare, locale);
+  return languages ? { canonical, languages: { ...languages } } : { canonical };
 }
 
 /** The Open Graph locale for the page's language, with the other three as alternates. */
@@ -71,7 +69,8 @@ export async function publicPageMetadata(key: PublicPageKey, extra: Metadata = {
       type: "website",
       title: page.title,
       ...(page.description ? { description: page.description } : {}),
-      ...openGraphLocales(locale),
+      /* Other-language card locales only where those languages have a body. */
+      ...(alternates && !alternates.languages ? { locale: OG_LOCALE[locale] } : openGraphLocales(locale)),
       ...(alternates?.canonical ? { url: alternates.canonical as string } : {}),
       /* A page without its own card names the site's, or it unfurls blank. */
       ...(OWN_CARD.has(key) ? {} : { images: [SITE_CARD] }),

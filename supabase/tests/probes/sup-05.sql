@@ -2,9 +2,26 @@
 -- answered, given documents and sent back; an applicant can never approve,
 -- review or re-date their own application, and a document they file is
 -- always pending. The admin still decides through their own signed-in client.
+--
+-- 17 October 2026, two fixture changes, the assertions unchanged:
+--   * since pov08 (20261013212007, decision 23 of DECISIONS_2026-10-13.md) an
+--     application is SUBMITTED only with the Terms, the Privacy Policy and the
+--     pay-on-Vallo statement in `consents.agreements`, so each submission
+--     carries them as the registration forms write them
+--     (lib/legal/workspace-acceptance.ts); it failed on acceptance_required.
+--   * the QA member is now an approved owner with a live agents row and
+--     listings, so "somebody else's listing" could have been their own and an
+--     open application of theirs could have been in the way. The applicant is
+--     a throwaway account, and the other listing belongs to a second one.
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid();
+  stranger constant uuid := gen_random_uuid();
+  stranger_agent uuid;
+  accepted constant jsonb := jsonb_build_object('agreements', jsonb_build_array(
+    jsonb_build_object('document', 'terms', 'version', '2026-10-13', 'at', '2026-10-17T09:00:00Z'),
+    jsonb_build_object('document', 'privacy', 'version', '2026-09-25', 'at', '2026-10-17T09:00:00Z'),
+    jsonb_build_object('document', 'pay_on_vallo', 'version', '2026-10-13', 'at', '2026-10-17T09:00:00Z')));
   admin constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   app uuid;
   doc uuid;
@@ -23,8 +40,13 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-sup-05-member-' || member || '@example.invalid', '{}', '{}', now(), now()),
+         (stranger, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-sup-05-stranger-' || stranger || '@example.invalid', '{}', '{}', now(), now());
   -- Somebody else's listing and document, for the two ownership refusals.
-  select id into others_listing from public.listings limit 1;
+  insert into public.agents (user_id, display_name) values (stranger, 'Probe SUP-05 other lister') returning id into stranger_agent;
+  insert into public.listings (agent_id, title, property_type, status)
+  values (stranger_agent, 'Probe SUP-05 other listing', 'apartment', 'DRAFT') returning id into others_listing;
   insert into public.agent_documents (uploader_id, kind, storage_path)
   values (admin, 'identity', admin::text || '/probe-sup-05/other.jpg')
   returning id into others_doc;
@@ -40,8 +62,8 @@ begin
   exception when insufficient_privilege then null; end;
   -- A submission that names a reviewer keeps none of it (the guard clears it
   -- before the policy's check sees the row).
-  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, reviewer_id, reviewed_at, review_notes)
-  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05 forged', true, member, now(), 'approved')
+  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, reviewer_id, reviewed_at, review_notes, consents)
+  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05 forged', true, member, now(), 'approved', accepted)
   returning id into app;
   select reviewer_id, reviewed_at, review_notes into r from public.agent_applications where id = app;
   if r.reviewer_id is not null or r.reviewed_at is not null or r.review_notes is not null then
@@ -50,15 +72,15 @@ begin
 
   -- CONTROL: the registration forms' insert (status SUBMITTED), RETURNING.
   -- A reference is the sequence's: a supplied one is replaced.
-  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, reference)
-  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05 ref', true, 'VL-AGT-99999')
+  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, reference, consents)
+  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05 ref', true, 'VL-AGT-99999', accepted)
   returning id into app;
   if (select reference from public.agent_applications where id = app) = 'VL-AGT-99999' then
     raise exception 'PROBE_FAIL sup-05: applicant chose their own reference';
   end if;
 
-  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, submitted_at)
-  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05', true, now())
+  insert into public.agent_applications (user_id, status, supply_role, full_name, agree_terms, submitted_at, consents)
+  values (member, 'SUBMITTED', 'owner', 'Probe SUP-05', true, now(), accepted)
   returning id into app;
 
   -- The admin sends it back, through their own client.

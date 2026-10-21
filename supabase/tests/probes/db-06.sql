@@ -27,6 +27,12 @@
 -- A restaurant owner sets their own table deposit rule, behind
 -- restaurant_deposit_rules_owner_insert / _owner_update / _owner_delete (all
 -- `to authenticated`, scoped by private.owns_business(business_id)).
+--
+-- 17 October 2026: passport_settings iu, from pass01_passport_settings
+-- (20261013171854). A member's own passport switches, behind
+-- passport_settings_insert_own and passport_settings_update_own (both
+-- `to authenticated`, `user_id = (select auth.uid())` in using and with check).
+-- No delete grant: switching the passport off is an update.
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -105,6 +111,7 @@ begin
       ('mutes', 'id'),
       ('notifications', 'du'),
       ('occupations', 'idu'),
+      ('passport_settings', 'iu'),
       ('payment_methods', 'u'),
       ('payout_accounts', 'du'),
       ('post_media', 'id'),

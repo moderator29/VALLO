@@ -731,15 +731,19 @@
     line-height: 1.3;
     white-space: nowrap;
     background: color-mix(in oklab, var(--nf-state-warning) 16%, transparent);
-    color: var(--nf-state-warning);
+    /* The ink is a fifth of the way to the page's primary ink, so the word
+       holds 4.5:1 on its own tint in both themes: the bare state ink measured
+       4.28 (waiting) and 4.35 (done) on the day tint (axe). Darker by day,
+       lighter at night, the same hue either way. */
+    color: color-mix(in oklab, var(--nf-state-warning) 80%, var(--nf-content-primary));
   }
   .nf-mw-pill[data-tone="done"] {
     background: color-mix(in oklab, var(--nf-state-success) 16%, transparent);
-    color: var(--nf-state-success);
+    color: color-mix(in oklab, var(--nf-state-success) 80%, var(--nf-content-primary));
   }
   .nf-mw-pill[data-tone="problem"] {
     background: color-mix(in oklab, var(--nf-state-error) 14%, transparent);
-    color: var(--nf-state-error);
+    color: color-mix(in oklab, var(--nf-state-error) 80%, var(--nf-content-primary));
   }
   .nf-mw-pill[data-tone="neutral"] {
     background: var(--nf-surface-raised);

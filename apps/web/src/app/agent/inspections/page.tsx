@@ -139,6 +139,8 @@ export default async function AgentInspectionsPage() {
     sided.map((one) => [
       one.id,
       <InspectionSheet
+        viewingCopy={t.threads.rental}
+        flowCopy={t.memberFlows.inspection}
         success={t.success}
         gateCopy={t.platform.gate}
         dayKit={t.memberKit.dayKit}

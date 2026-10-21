@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin/guard";
 import { getVisitCalendar, getVisitDetail, readVisitQuery } from "@/lib/admin/reads/visits";
 import { lagosDay } from "@/lib/visit-calendar/model";
 import { VisitsDesk } from "./VisitsDesk";
+import { requestNow } from "@/lib/format/when";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDictionary(await getLocale());
@@ -33,7 +34,7 @@ export default async function AdminVisitsPage({
 
   const locale = await getLocale();
   const t = getDictionary(locale);
-  const today = lagosDay(Date.now());
+  const today = lagosDay(requestNow());
   const query = readVisitQuery(await searchParams, today);
   const read = await getVisitCalendar(query);
   const open = read.state === "ok" && query.visit ? read.data.rows.find((row) => row.id === query.visit) : undefined;

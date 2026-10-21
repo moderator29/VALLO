@@ -149,12 +149,15 @@ export default async function ConversationPage({
 }) {
   const { id } = await params;
   const { attach, showme: showMeParam, call: callParam } = await searchParams;
-  const session = await resolveSession();
+  /* The switch is read beside the session, not after it: it is one cached
+     row either way, and in sequence it was a round trip before any of the
+     thread's own reads could start. */
+  const [session, messagingOn] = await Promise.all([resolveSession(), isFeatureEnabled("messaging")]);
 
   const inboxWords = getDictionary(await getLocale()).experienceInbox;
 
   if (session.state === "signed-in") {
-    if (!(await isFeatureEnabled("messaging"))) {
+    if (!messagingOn) {
       return (
         <div className="mx-auto max-w-2xl">
           <PageHeader title={inboxWords.inbox.title} fallback="/messages" />

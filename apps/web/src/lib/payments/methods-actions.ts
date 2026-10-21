@@ -30,6 +30,7 @@ import {
 } from "../actions/session";
 import { setupExempt } from "../actions/setup-exempt";
 import { isFeatureEnabled } from "../flags";
+import { flagIsOn, SAVED_CARDS_FLAG } from "../flags/read";
 import { IN_FLIGHT_MESSAGE, withIdempotency } from "../security/idempotency";
 import { guardMoney } from "../security/money-limits";
 import { subjectForUser } from "../security/rate-limit";
@@ -61,8 +62,22 @@ import {
 } from "./paystack";
 import { FUND_PREFIX, isFundReference } from "./references";
 
-/* The flag is still stored as `wallet`; what it switches off, said to a
-   member, is saving a card (D48: there is no wallet to switch off). */
+/*
+ * SAVING A CARD HAS ITS OWN SWITCH NOW: `saved_cards`, fail-closed (a missing
+ * row reads off). It used to be the `wallet` row, which Track A retired as a
+ * custody switch and whose database guard refuses to turn on: so saving a card
+ * could only ever be on by lifting that guard (the live database lets it be
+ * turned on today, probe track-a-custody-retired). While the guard is not yet
+ * restored (migration 20261021104403), `wallet` still counts, so nothing changes
+ * for a member today. Once it is restored and `wallet` is off, `saved_cards`
+ * alone decides; then drop the `wallet` read here.
+ */
+async function cardSavingOn(): Promise<boolean> {
+  if (await flagIsOn(SAVED_CARDS_FLAG)) return true;
+  return isFeatureEnabled("wallet");
+}
+
+/* What it switches off, said to a member (D48: there is no wallet to switch off). */
 const CARD_SETUP_OFF_MESSAGE =
   "Saving a card is switched off for a moment while we make improvements. Please try again shortly.";
 
@@ -299,7 +314,7 @@ export type CardSetup = {
 export async function startCardSetup(
   input: { idempotencyKey?: string } = {},
 ): Promise<ActionResult<CardSetup>> {
-  if (!(await isFeatureEnabled("wallet"))) return fail(CARD_SETUP_OFF_MESSAGE);
+  if (!(await cardSavingOn())) return fail(CARD_SETUP_OFF_MESSAGE);
 
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);

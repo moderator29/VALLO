@@ -172,9 +172,6 @@
    layouts import it (C6, 6 October). */
 /* Track M, second round: the moving edge on every container and button. */
 @import "./css/edge-m.css";
-/* Track M: the cinema kit (Truchet field, horizontal reel, vertical columns,
-   kinetic type, film HUD). */
-@import "./css/cinema.css";
 @import "./css/light.css";
 /* Section 17 (refs 44 and 45): the soft top, the centred hero figure, the
    figure tiles. After light.css, which it relaxes for the paper header. */

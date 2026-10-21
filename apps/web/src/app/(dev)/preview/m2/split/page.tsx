@@ -28,7 +28,7 @@ export default async function PreviewSplit() {
     <div className="flex h-dvh flex-col">
       <MemberKeys />
       <div className="nf-msg-split">
-        <InboxPane fixture={ROWS} currentId="preview/m2/split" />
+        <InboxPane fixture={ROWS} currentId="preview/m2/split" label="Conversations" />
         <div className="nf-msg-split__thread">
           <ThreadView
             sheetCopy={{ unsafe: t.trustVisible.unsafe }}

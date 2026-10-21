@@ -137,6 +137,6 @@ export const NEVER_ASK: { title: string; body: string }[] = [
   },
   {
     title: "Payment on WhatsApp or by cash at the gate",
-    body: "A conversation that starts on Vallo and moves off it to arrange money is the single clearest warning sign in this market. Keep it here, where there is a record.",
+    body: "A conversation that starts on Vallo and moves off it to arrange money is the single clearest warning sign in this market. Keep it here, where there is a record. The only thing a host may ask for at the door is a charge listed on the place before you booked, for the amount and the reason listed.",
   },
 ];

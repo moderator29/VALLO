@@ -285,6 +285,7 @@ export const afterTheGateYo = {
     asUsed: "Bí a ṣe lò ó",
     allIn: "Gbogbo owó ibùgbé yìí",
     allInNote: "Iye owó náà àti gbogbo owó tí olùgbàlejò kọ sílẹ̀. A kò gbọdọ̀ béèrè ohunkóhun mìíràn ní ẹnu ọ̀nà.",
+    readFailed: "A kò lè gbé owó ẹnu ọ̀nà ibùgbé yìí wá báyìí. Tún ojú-ìwé yìí gbé kí o tó sanwó.",
   },
   shots: {
     heading: "Sọ ohun tí àwòrán kọ̀ọ̀kan ń fi hàn",

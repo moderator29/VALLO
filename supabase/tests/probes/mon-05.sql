@@ -39,6 +39,24 @@ declare
   a1 uuid; a2 uuid; a3 uuid; a6 uuid; ra uuid; g bigint;
   lister uuid := 'e0000000-0000-4000-8000-000000000001'; rental uuid := 'ed000000-0000-4000-8000-000000000007'; r jsonb; n int; st text; s bigint;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000007')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 7 October 2026 (D68d, D77): an agreement approved by the system (no
   -- decided_by) is payable only while no risk signal fires for it. This probe
   -- is about the payment, not the review, so its fixture deals are ordinary
@@ -76,13 +94,20 @@ begin
   values (stay, member, lagos + 40, lagos + 41, 1, rate, rate, rate, 'PENDING') returning id into b3;
   insert into public.bookings (listing_id, guest_id, check_in, check_out, nights, price_per_night_minor, subtotal_minor, total_minor, status)
   values (stay, member, lagos + 50, lagos + 51, 1, rate, rate, rate, 'PENDING') returning id into b4;
+  -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+  -- row 21; pov02 and pov03): a nightly shortlet and a registered business's
+  -- apartment are no longer settled direct by the policy; each is escrow
+  -- unless the payer picks card, and a Paystack charge carries only the
+  -- direct rail. Every fixture agreement below records the payer's choice of
+  -- card, as the pay page does, so each charge is the direct-rail card charge
+  -- this probe was written against. Nothing asserted changes.
   -- Each payable booking carries an approved agreement for its price.
-  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('stay', stay, b1, member, lister, rate * 2, '{}'::jsonb, 'approved') returning id into a1;
-  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('stay', stay, b2, member, lister, rate, '{}'::jsonb, 'approved') returning id into a2;
-  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('stay', stay, b3, member, lister, rate, '{}'::jsonb, 'approved') returning id into a3;
+  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status, payer_rail_choice, payer_rail_chosen_at)
+  values ('stay', stay, b1, member, lister, rate * 2, '{}'::jsonb, 'approved', 'card', now()) returning id into a1;
+  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status, payer_rail_choice, payer_rail_chosen_at)
+  values ('stay', stay, b2, member, lister, rate, '{}'::jsonb, 'approved', 'card', now()) returning id into a2;
+  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status, payer_rail_choice, payer_rail_chosen_at)
+  values ('stay', stay, b3, member, lister, rate, '{}'::jsonb, 'approved', 'card', now()) returning id into a3;
   insert into public.transactions (booking_id, provider, provider_ref, amount_minor, status, agreement_id,
          payee_user_id, payee_subaccount_code, reserve_subaccount_code, lister_share_minor, guarantee_minor, commission_minor) values
     (b1, 'paystack', 'probe-b2-A', rate * 2, 'PENDING', a1, lister, 'ACCT_probe_lister', 'ACCT_probe_reserve',
@@ -208,8 +233,8 @@ begin
   -- the old one, is refused; the remainder is allowed.
   insert into public.bookings (listing_id, guest_id, check_in, check_out, nights, price_per_night_minor, subtotal_minor, total_minor, status)
   values (stay, member, lagos + 80, lagos + 82, 2, rate, rate * 2, rate * 2, 'PENDING') returning id into b6;
-  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('stay', stay, b6, member, lister, rate * 2, '{}'::jsonb, 'approved') returning id into a6;
+  insert into public.deal_agreements (kind, listing_id, booking_id, renter_id, owner_id, amount_minor, terms, status, payer_rail_choice, payer_rail_chosen_at)
+  values ('stay', stay, b6, member, lister, rate * 2, '{}'::jsonb, 'approved', 'card', now()) returning id into a6;
   insert into public.transactions (booking_id, provider, provider_ref, amount_minor, status, agreement_id,
          payee_user_id, payee_subaccount_code, reserve_subaccount_code, lister_share_minor, guarantee_minor, commission_minor)
   values (b6, 'paystack', 'probe-b2-H', rate * 2, 'PENDING', a6, lister, 'ACCT_probe_lister', 'ACCT_probe_reserve',
@@ -243,8 +268,8 @@ begin
    where id = rental;
   insert into public.inspection_requests (listing_id, requester_id, lister_id, state, requested_at, slot_at)
   values (rental, member, lister, 'CONFIRMED', now(), now() + interval '1 day') returning id into insp;
-  insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('rent', rental, insp, member, lister, 150000000, '{}'::jsonb, 'approved') returning id into ra;
+  insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms, status, payer_rail_choice, payer_rail_chosen_at)
+  values ('rent', rental, insp, member, lister, 150000000, '{}'::jsonb, 'approved', 'card', now()) returning id into ra;
   r := private.open_rent_charge(member, insp, lagos + 7);
   if r->>'status' <> 'ok' then raise exception 'PROBE_FAIL mon-05: rent charge did not open %', r; end if;
   rb := (r->>'booking_id')::uuid; rtotal := (r->>'total_minor')::bigint;

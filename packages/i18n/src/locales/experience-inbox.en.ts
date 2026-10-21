@@ -176,6 +176,127 @@ export const experienceInboxEn = {
     },
     day: { today: "Today", yesterday: "Yesterday" },
     newMessages: "Jump to the newest message",
+    /* The conversation screen's own words (`ThreadView`), moved out of the
+       component in the language audit (17 October 2026). `{name}` is the
+       other person. */
+    view: {
+      options: "Conversation options",
+      conversation: "Conversation",
+      openProfile: "{name}, open profile",
+      keepInside: "Keep every chat and payment inside Vallo",
+      emptyTitle: "Say hello to {name}",
+      emptyListing:
+        "Nothing has been said here yet. Ask what you need to know about the property, agree a time to see it, and keep the whole conversation in one place.",
+      emptyBooking: "Nothing has been said here yet. Ask about your arrival, the room or anything the booking does not answer.",
+      emptyReservation: "Nothing has been said here yet. Confirm the time, the size of the party, and anything the kitchen should know.",
+      emptyDirect:
+        "Nothing has been said here yet. Whatever you write stays between the two of you, and the whole conversation is kept here.",
+      roleLandlord: "Landlord",
+      roleAgent: "Vallo Agent",
+      roleTenant: "Tenant",
+      photoYours: "Photo you attached",
+      photoFrom: "Photo from {name}",
+      videoYours: "Video you attached",
+      videoFrom: "Video from {name}",
+      forwarded: "Forwarded",
+      deleted: "This message was deleted",
+      open: "Open",
+      sending: "Sending",
+      notSent: "Not sent.",
+      retry: "Retry",
+      /** `{text}` is the start of the message that failed. */
+      retryText: "Retry sending: {text}",
+      retryPhoto: "Retry sending your photo",
+      retryMessage: "Retry sending this message",
+      typing: "{name} is typing",
+      dismissSafety: "Dismiss safety note",
+      photoReady: "Photo ready to send",
+      photoAttached: "Photo attached",
+      removePhoto: "Remove photo",
+      remove: "Remove",
+      cancelReply: "Cancel reply",
+      cancel: "Cancel",
+      attachPhoto: "Attach a photo",
+      messageTo: "Message {name}",
+      placeholder: "Type a message",
+      send: "Send message",
+      forwardedTo: "Forwarded to {name}.",
+      inspectionConfirmed: "Inspection confirmed.",
+      inspectionConfirmedDevice: "Inspection confirmed on this device",
+      failed: "That did not go through. Check your connection and try again.",
+      /** The line over a shared card. */
+      shared: {
+        listing: "Shared a listing",
+        booking: "Shared a booking",
+        stay: "Shared a stay",
+        passport: "Shared a passport",
+      },
+      /* The options sheet (`ThreadOptionsSheet`). */
+      close: "Close",
+      confirmInspected: "Confirm I have inspected this property",
+      conversationWith: "Conversation with {name}",
+      verifiedListing: "Verified listing",
+      verificationPending: "Verification pending",
+      approved: "Approved",
+      shareHere: "Share a listing or a booking here",
+      shareHereBody: "It arrives as a card {name} can open.",
+      blockAsk: "Block {name}?",
+      block: "Block {name}",
+      blockBody: "They stop being able to reach you, here and everywhere else.",
+      /** `BLOCK_CONFIRM_COPY`, word for word. */
+      blockConfirm:
+        "They will not be able to message you, see your profile or find your listings, and you will not see theirs. They are not told. You can undo this in Settings, Privacy.",
+      keepOpen: "Keep the conversation open",
+      /** The owner's canonical safety rule, verbatim (`SAFETY_EDUCATION_COPY`). */
+      safetyRule:
+        "For your safety, keep every chat and payment inside Vallo. Deals made outside the platform are not protected by us. Pay only after you have inspected the property.",
+    },
+    /** A listing or booking shared into a conversation (`ChatCard`). */
+    card: {
+      /** `{rating}` is a number. */
+      rated: "Rated {rating} out of 5",
+      forward: {
+        listing: "Forward this listing to another conversation",
+        stay: "Forward this stay to another conversation",
+        booking: "Forward this booking to another conversation",
+      },
+      verified: "Verified",
+      /** `{area}` is the area or city. */
+      map: "Map of {area}. The pin shows the area, not the address.",
+      viewStay: "View stay",
+      viewListing: "View listing",
+      messageAgent: "Message agent",
+      checkIn: "Check in",
+      checkOut: "Check out",
+      guests: "Guests",
+      viewBooking: "View booking details",
+      contactHost: "Contact host",
+    },
+    /** A message's long-press menu (`MessageMenu`). */
+    menu: {
+      close: "Close menu",
+      label: "Message options",
+      reply: "Reply",
+      forward: "Forward",
+      copy: "Copy",
+      deleteForMe: "Delete for me",
+      deleteForEveryone: "Delete for everyone",
+    },
+    /** The forward chooser (`ForwardSheet`). */
+    forward: {
+      title: "Forward to",
+      close: "Close",
+      search: "Search the people you follow",
+      clear: "Clear search",
+      placeholder: "Search",
+      loading: "Loading your chats",
+      empty: "Follow someone to forward a message to them.",
+      unreachable: "We could not load your chats just now. Close this and try again.",
+      failed: "That did not work. Please try again.",
+      noMatch: "Nobody you follow matches that.",
+      listLabel: "Chats you can forward to",
+      sending: "Sending",
+    },
   },
 
   /* -------------------------------------------------------------- the inbox */
@@ -194,6 +315,8 @@ export const experienceInboxEn = {
     },
     unreadBadge: { one: "{count} unread message", other: "{count} unread messages" },
     presence: { online: "Online now" },
+    /** The wide screen's list beside an open conversation (`InboxPane`). */
+    pane: "Conversations",
     /* `/messages`, the page's own words (Round 3 sweep, C3). */
     title: "Inbox",
     paused: "Messaging is paused for maintenance. Your conversations are stored on your account, not on this device. Try again in a few minutes.",

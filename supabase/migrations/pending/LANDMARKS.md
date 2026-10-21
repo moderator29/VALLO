@@ -70,7 +70,7 @@ mirrors this table one for one and is applied only after the word is given.
 | Ceddi Plaza | mall | 9.0530 | 7.4830 | |
 | Silverbird Entertainment Centre | mall | 9.0590 | 7.4880 | Silverbird Abuja |
 | Wuse Market | market | 9.0640 | 7.4640 | Wuse Zone 4 market |
-| Moshood Abiola National Stadium | stadium | 9.0007 | 7.4170 | National Stadium Abuja, Abuja stadium |
+| Moshood Abiola National Stadium | stadium | 9.0400 | 7.4550 | National Stadium Abuja, Abuja stadium |
 | Eagle Square | other | 9.0523 | 7.4882 | |
 | Millennium Park | park | 9.0790 | 7.4980 | |
 | Aso Rock | other | 9.0850 | 7.5170 | Aso Villa |
@@ -85,3 +85,27 @@ Fifty-nine rows. Not in this seed on purpose: Zuma Rock (Niger State, not the
 FCT), Redemption Camp (Ogun State), anything whose pin I could not place with
 confidence. Port Harcourt, Ibadan and Enugu are the next lists, after the demo
 catalogue's four cities are confirmed as the launch cities.
+
+## Pin check, 17 October 2026
+
+Both seeds are applied (`20261011142324_m08_landmarks_seed.sql`,
+`20261011142333_m08_landmarks_seed_abuja.sql`). Every pin was read against
+known positions. One was clearly wrong and has a draft fix:
+
+- Moshood Abiola National Stadium: was 9.0007, 7.4170 (about six kilometres
+  south-west, towards Lugbe); the stadium is at about 9.040, 7.455 beside the
+  Airport Road. Fix: `20261021104322_landmark_abuja_stadium_pin.sql` (applied 21 October 2026).
+
+Not certain to within a few hundred metres, worth a look on a map before
+anybody relies on them for a distance:
+
+- Murtala Muhammed Airport Terminal 2 (6.5830, 3.3250): the domestic terminal
+  may sit further east, nearer 3.33.
+- The Palms Shopping Mall (6.4350, 3.4590): may be nearer 3.450.
+- Lagos Business School (6.4330, 3.5480): may be further north, nearer 6.44.
+- Apo (8.9900, 7.4900): the district centre may be nearer 7.50.
+- Millennium Park (9.0790, 7.4980): may be further south and east.
+- National Hospital Abuja (9.0330, 7.4820): may be nearer 9.04, 7.47.
+- Wuse Market (9.0640, 7.4640): may be nearer 9.060, 7.469.
+
+Everything else agreed with a known position to within a few hundred metres.

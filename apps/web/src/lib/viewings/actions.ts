@@ -106,7 +106,9 @@ const windowSchema = z.object({
 type WindowsTable = {
   from: (table: "viewing_windows") => {
     insert: (row: Record<string, unknown>) => PromiseLike<{ error: unknown }>;
-    update: (row: Record<string, unknown>) => { eq: (col: string, value: string) => PromiseLike<{ error: unknown }> };
+    update: (row: Record<string, unknown>) => {
+      eq: (col: string, value: string) => { select: (cols: string) => PromiseLike<{ data: unknown[] | null; error: unknown }> };
+    };
   };
 };
 
@@ -138,11 +140,14 @@ export async function removeViewingWindow(input: unknown): Promise<ActionResult<
   const session = await resolveSession();
   if (session.state !== "signed-in") return fail(t.signIn);
   /* Switched off rather than deleted, so a booked viewing keeps its window. */
-  const { error } = await (session.supabase as unknown as WindowsTable)
+  const { data, error } = await (session.supabase as unknown as WindowsTable)
     .from("viewing_windows")
     .update({ active: false })
-    .eq("id", parsed.data.id);
-  if (error) return fail(t.problems.failed);
+    .eq("id", parsed.data.id)
+    .select("id");
+  /* Row-level security answers somebody else's window with no row and no
+     error, which used to read as "removed" while nothing changed. */
+  if (error || !data || data.length === 0) return fail(t.problems.failed);
   revalidatePath("/agent/inspections");
   return ok(null);
 }

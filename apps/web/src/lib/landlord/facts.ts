@@ -127,16 +127,6 @@ export function readListingFacts(rows: unknown): Map<string, ListingFacts> {
 }
 
 /**
- * The clock, read outside a component body. A server component is rendered
- * once per request, so "now" is the request's moment; reading it through a
- * named function keeps the render itself pure in the linter's eyes, which is
- * the pattern the admin pages already use.
- */
-export function requestNow(): number {
-  return Date.now();
-}
-
-/**
  * V-37 ON THE SEARCH SHELF: ONE CARD PER PROPERTY.
  *
  * Four agents on one flat were four cards, and a renter could not tell four

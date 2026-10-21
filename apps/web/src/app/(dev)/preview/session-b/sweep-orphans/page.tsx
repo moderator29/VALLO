@@ -200,22 +200,22 @@ function View({ v, s }: { v: string; s?: string }) {
     case "booking-cancel":
       return (
         <Frame title={t.nav.bookings}>
-          <CancelSheetFixture booking={BOOKINGS[0]!} />
+          <CancelSheetFixture booking={BOOKINGS[0]!} words={t.memberFlows.cancelBooking} />
         </Frame>
       );
     case "review":
       return (
         <Frame title="Review your stay">
-          <ReviewSubjectPanel subject={REVIEW_SUBJECT} />
+          <ReviewSubjectPanel words={t.memberFlows.review} subject={REVIEW_SUBJECT} />
           <div className="mt-block">
-            <ReviewForm subject={REVIEW_SUBJECT} plansAction={{ label: t.shape.plans.seeStays, href: "/bookings?side=stays&from=stays" }} />
+            <ReviewForm words={t.memberFlows.review} subject={REVIEW_SUBJECT} plansAction={{ label: t.shape.plans.seeStays, href: "/bookings?side=stays&from=stays" }} />
           </div>
         </Frame>
       );
     case "reviewed":
       return (
         <Frame title="Review your stay">
-          <AlreadyReviewedPanel subject={REVIEW_SUBJECT} review={REVIEW} />
+          <AlreadyReviewedPanel words={t.memberFlows.review} subject={REVIEW_SUBJECT} review={REVIEW} />
         </Frame>
       );
     case "kyc":
@@ -309,7 +309,7 @@ function View({ v, s }: { v: string; s?: string }) {
     case "inspection-rows":
       return (
         <Frame title={t.nav.bookings}>
-          <InspectionRows inspections={[INSPECTION, { ...INSPECTION, id: `${INSPECTION.id.slice(0, -1)}2`, state: "REQUESTED" }]} side="requester" locale={locale} />
+          <InspectionRows inspections={[INSPECTION, { ...INSPECTION, id: `${INSPECTION.id.slice(0, -1)}2`, state: "REQUESTED" }]} side="requester" locale={locale} viewingCopy={getDictionary(locale).threads.rental} flowCopy={getDictionary(locale).memberFlows.inspection} />
         </Frame>
       );
     default:

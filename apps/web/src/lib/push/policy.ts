@@ -1,4 +1,4 @@
-import { fitPush } from "./copy";
+import { fitPush, lockScreenSafe } from "./copy";
 import { isUrgentKind, wantsPush, type NotificationKind } from "./preferences";
 import { sameOriginPath } from "./same-origin";
 import { quietVerdict, readQuietHours } from "./quiet-hours";
@@ -179,7 +179,8 @@ export function decide(input: {
     payload: {
       /* Held to the lock-screen limits (lib/push/copy.ts): a title longer
          than a phone shows arrives cut at a word, not mid-letter. */
-      ...fitPush(text),
+      /* And no account or phone number in full (`maskLongDigitRuns`). */
+      ...fitPush(lockScreenSafe(text)),
       href: safeHref(notification.href),
       tag: collapseTag(notification.kind),
       urgent,

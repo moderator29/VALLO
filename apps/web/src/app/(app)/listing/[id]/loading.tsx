@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { panelClass } from "@/components/ui/Panel";
 import { LoadingShell } from "@/components/app/ScreenSkeleton";
@@ -19,14 +21,15 @@ import "@/app/css/space-card.css";
  * different height than the placeholder, pushing the price - the single most
  * important figure on the page - down the screen as the user is reaching for it.
  */
-export default function LoadingListing() {
+export default async function LoadingListing() {
+  const t = getDictionary(await getLocale());
   /* B4: a tap from a card paints the card's own facts in one frame
      (ListingHandoffShell); a cold open keeps this skeleton. */
   return (
-    <LoadingShell label="Loading this place" className="mx-auto w-full max-w-5xl">
+    <LoadingShell label={t.memberFlows.loading.listing} className="mx-auto w-full max-w-5xl">
       {/* The move-in total is in the first viewport: its naira sign arrives with the page. */}
       <NairaFacePreload />
-      <ListingHandoffShell verifiedLabel="Verified" fallback={<ListingSkeleton />} />
+      <ListingHandoffShell verifiedLabel={t.common.verified} fallback={<ListingSkeleton />} />
     </LoadingShell>
   );
 }

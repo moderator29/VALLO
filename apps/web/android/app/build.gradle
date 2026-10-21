@@ -166,7 +166,7 @@ def fcmProblem = null
 def fcmJson = null
 
 if (!googleServicesFile.exists()) {
-    fcmProblem = "apps/web/android/app/google-services.json is missing. Download it from the Firebase console, project vallo-44059, Project settings, Your apps, Android."
+    fcmProblem = "apps/web/android/app/google-services.json is missing. Download it from the Firebase console, project vallo-6f946, Project settings, Your apps, Android."
 } else {
     try {
         fcmJson = new groovy.json.JsonSlurper().parse(googleServicesFile)
@@ -185,7 +185,7 @@ if (fcmProblem == null) {
 if (fcmProblem == null) {
     def key = fcmJson?.client?.getAt(0)?.api_key?.getAt(0)?.current_key
     if (key == null || key.toString().startsWith("PASTE_")) {
-        fcmProblem = "google-services.json still carries the placeholder API key. Replace 'current_key' with the Android API key from the Firebase console, project vallo-44059. It is not a secret and it belongs in this repository."
+        fcmProblem = "google-services.json still carries the placeholder API key. Replace 'current_key' with the Android API key from the Firebase console, project vallo-6f946. It is not a secret and it belongs in this repository."
     }
 }
 

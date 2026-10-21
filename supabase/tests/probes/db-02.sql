@@ -3,12 +3,12 @@
 -- draft) still work; an admin reviewing through their own signed-in client
 -- still approves, publishes and stamps.
 --
--- The QA member is made an ordinary, unverified agent inside the transaction,
+-- A throwaway account is made an ordinary, unverified agent inside the transaction,
 -- exactly as an approved application does (the agents row is written by the
 -- service role on approval), so the probe needs no standing agent.
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
   admin constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   agent uuid;
   lid uuid := gen_random_uuid();
@@ -27,6 +27,13 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The lister is a throwaway account made here, an
+  -- ordinary account with no agents row exactly as the QA member was when this
+  -- probe was written, rolled back with everything else.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-db-02-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe DB-02 lister')
   returning id into agent;
 

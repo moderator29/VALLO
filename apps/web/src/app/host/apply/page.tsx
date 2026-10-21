@@ -75,7 +75,7 @@ export default async function HostApplyPage({
     session.supabase
       .from("cancellation_policies")
       /* `*` so the preset code and its position come back once
-         `20261013090000_four_preset_cancellation_policies.sql` has run, and
+         `20261013062641_four_preset_cancellation_policies.sql` has run, and
          nothing breaks before it has. `rules` are the refund tiers the
          wizard prints in plain words. */
       .select("*")

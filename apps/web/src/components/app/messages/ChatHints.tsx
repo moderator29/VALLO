@@ -99,11 +99,14 @@ export function ChatHints({
   const { hint, chips } = hintsFromGaps(data.gaps, data.visitOpen, dismissed ?? new Set());
   const showCard = hint !== null && dismissed !== null && !closed && !keyboardOpen;
 
-  const dismiss = useCallback(() => {
+  /* No manual memo: `hint` is a fresh object from `hintsFromGaps` on every
+     render, so a useCallback keyed on it could never hold, and the React
+     Compiler memoises this function itself. */
+  const dismiss = () => {
     if (hint === null) return;
     setDismissed(writeDismissed(conversationId, hint));
     setClosed(true);
-  }, [conversationId, hint]);
+  };
 
   const fill = useCallback(
     (key: GapKey) => {

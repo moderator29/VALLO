@@ -112,4 +112,40 @@ describe("the dictionary itself (D61)", () => {
     );
     expect(wrong, "a translation that drops or renames a placeholder").toEqual([]);
   });
+
+  /*
+   * The check above compares a translated line with the English line at the
+   * same path, so a line English does not have is never read: a plural
+   * category a locale adds that English does not use (`few`, `many`, `two`,
+   * `zero`) slipped past it. Such a line answers to English's `other`, which
+   * is the form the count falls back to, so it must say the same
+   * placeholders. Anything else a locale declares beyond English is refused
+   * by the `Translation` type at compile time, which this also pins: no
+   * locale carries a path English lacks except a plural category.
+   */
+  it("says English's placeholders in a plural category English does not use, and adds no other path", () => {
+    const en = strings(getDictionary("en"));
+    const CATEGORY = /\.(zero|one|two|few|many)$/;
+    const extra: string[] = [];
+    const wrong: string[] = [];
+    for (const locale of ["ha", "ig", "yo"] as const) {
+      for (const [path, line] of strings(getDictionary(locale))) {
+        if (en.has(path)) continue;
+        if (!CATEGORY.test(path)) {
+          extra.push(`${locale} ${path}`);
+          continue;
+        }
+        const other = en.get(path.replace(CATEGORY, ".other"));
+        if (other === undefined) {
+          extra.push(`${locale} ${path}`);
+          continue;
+        }
+        if (placeholders(line).join(",") !== placeholders(other).join(",")) {
+          wrong.push(`${locale} ${path}: {${placeholders(line).join("},{")}} where English's other has {${placeholders(other).join("},{")}}`);
+        }
+      }
+    }
+    expect(extra, "a path no English line has").toEqual([]);
+    expect(wrong, "a plural category that drops or renames a placeholder").toEqual([]);
+  });
 });

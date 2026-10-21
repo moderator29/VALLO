@@ -117,7 +117,7 @@ export const MAX_SALE_PRICE_KOBO = 50_000_000_000_00;
    redundant, they are three different kinds of protection:
 
      1. HERE, so the uploader can refuse a file before spending somebody's
-        Nigerian mobile data pushing fifty megabytes that will bounce.
+        Nigerian mobile data pushing a hundred megabytes that will bounce.
      2. On the STORAGE BUCKET, in Postgres, as file_size_limit and
         allowed_mime_types. This is the one that actually holds: it is enforced
         by the storage service against the upload itself, whatever the client
@@ -132,9 +132,8 @@ export const MAX_SALE_PRICE_KOBO = 50_000_000_000_00;
 
 /**
  * The ceiling on a WALKTHROUGH. A hundred megabytes, a minute of 1080p. The
- * `listing-videos` bucket is raised to match by the pending migration
- * `20261012120000_listing_videos_take_a_hundred_megabytes.sql`; until it is
- * applied, storage still refuses a video over fifty and says so.
+ * `listing-videos` bucket was raised to match by
+ * `20261013062253_listing_videos_take_a_hundred_megabytes.sql` (applied).
  *
  * It was the ceiling on a photograph too, and that was wrong: the
  * `listing-photos` bucket is capped at ten megabytes

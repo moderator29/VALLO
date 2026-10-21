@@ -98,16 +98,20 @@ export default async function ListingUnderReviewPage({
     );
   }
 
-  const payeeCtx = found.intent === "sale" ? null : await readPayeeContext(found.id);
-  /* V-48: a closed listing is SUSPENDED underneath and is not a decision; it
-     shows how it closed, and staff may reopen it with a reason. */
-  const closedReason = (await readClosedReasons([found.id]))[found.id] ?? null;
+  /* Four independent reads, together rather than one after another. */
+  const [payeeCtx, closedReasons, provenance, feeAcceptance] = await Promise.all([
+    found.intent === "sale" ? Promise.resolve(null) : readPayeeContext(found.id),
+    /* V-48: a closed listing is SUSPENDED underneath and is not a decision;
+       it shows how it closed, and staff may reopen it with a reason. */
+    readClosedReasons([found.id]),
+    /* V-45: compared at review, whatever the status, so a published listing
+       can still be checked after a report. */
+    readPhotoProvenance(found.id),
+    /* The fee terms the lister accepted (D61), for the reviewer who is asked. */
+    readFeeAcceptance(found.id),
+  ]);
+  const closedReason = closedReasons[found.id] ?? null;
   const decidable = found.status !== "PUBLISHED" && found.status !== "REJECTED" && closedReason === null;
-  /* V-45: compared at review, whatever the status, so a published listing can
-     still be checked after a report. */
-  const provenance = await readPhotoProvenance(found.id);
-  /* The fee terms the lister accepted (D61), for the reviewer who is asked. */
-  const feeAcceptance = await readFeeAcceptance(found.id);
   const dark = tileProvider("dark");
   const nextId = extra?.nextId ?? null;
   const { offset: _offset, ...carried } = query;

@@ -398,6 +398,11 @@ export const frontDoorIg = {
     copyFallback: "Detuo njikọ a",
     elsewhereBody: "Kaadị nwere mpaghara na mkpokọta ego ịbanye. Ọ dịghị mgbe adreesị.",
     elsewhereBodyStay: "Kaadị nwere aha na mpaghara. Ọ dịghị mgbe adreesị.",
+    sheetTitle: "Kesaa",
+    inChat: "Ziga na mkparịta ụka Vallo",
+    inChatBody: "Họrọ otu n'ime mkparịta ụka gị. Ha ga-enweta ya dị ka kaadị ha nwere ike imeghe.",
+    elsewhere: "Kesaa n'ebe ọzọ",
+    elsewhereLink: "Njikọ ahụ, maka ebe ọ bụla na mpụga Vallo.",
   },
   desk: {
     stages: {
@@ -589,6 +594,7 @@ export const frontDoorIg = {
   viewings: {
     pickTitle: "Dobe oge ileta ụlọ",
     pickNote: "Oge onye ndepụta debere maka ileta ụlọ. Họrọ otu, a ga-edobe ya; enweghị ịga na ịbịa.",
+    lagosNote: "Oge ndị a bụ oge Legọs.",
     book: "Dobe {time}",
     booking: "Na-edobe",
     booked: "Edobere ya maka {when}. Ọ dị na Atụmatụ gị, a gwakwala onye ndepụta.",

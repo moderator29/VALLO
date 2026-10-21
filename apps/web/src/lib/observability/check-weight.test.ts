@@ -32,6 +32,9 @@ describe("the weight budget (V-80)", () => {
       "/move-in-cost",
       "/for-agents",
       "/guides/avoiding-rental-scams",
+      /* The documentation (17 October 2026): it shipped 640 KB of dictionary
+         and chapter text through its client rail with nobody watching. */
+      "/docs/quick-start",
       "/home",
       "/search",
       "/listing/seed-2",

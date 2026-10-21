@@ -26,6 +26,9 @@
  * together. A date rather than a number so a stored row says which text was on
  * screen without anybody keeping a separate table of what version meant what.
  */
+/* 2026-10-13: Terms section 6 states the fee position in the product's own words (free to list, nothing added for
+   renters and guests, the platform fee comes out of the lister's share only on a completed deal, a fixed fee per
+   seated restaurant table) and the Host Agreement applies to hosts. */
 export const TERMS_VERSION = "2026-10-13";
 
 /**
@@ -36,9 +39,6 @@ export const TERMS_VERSION = "2026-10-13";
 /* 2026-09-24 (STORE-08 / SEC-13 / STORE-07): processors named, location,
    push tokens, device records, AI and crash data described, the analytics
    claim removed, the deletion section brought to the purge that now runs. */
-/* 2026-10-13: section 6 states the fee position in the product's own words (free to list, nothing added for
-   renters and guests, the platform fee comes out of the lister's share only on a completed deal, a fixed fee per
-   seated restaurant table) and the Host Agreement applies to hosts. */
 /* 2026-09-25 (Track A/B): no wallet or balance is held; payment data now
    describes split settlement, agreements and Guarantee claims. */
 export const PRIVACY_VERSION = "2026-09-25";
@@ -48,8 +48,15 @@ export const PRIVACY_VERSION = "2026-09-25";
  * agreed with the Terms and the Privacy policy before a host's business is
  * created, and recorded with this version on the business
  * (`consents.agreements`).
+ *
+ * 2026-10-17: section 4 said a restaurant pays "a fee for each guest seated",
+ * at an amount "shown in your host settings". The fee is per seated TABLE
+ * (`20261013071048_restaurant_fee_per_seated_table.sql`, `restaurant_seated_fees`)
+ * and no host screen shows it; the amount is published at /docs/what-vallo-costs.
+ * The basis of a fee is what a host agrees to, so this is a new version and a
+ * host ticks the agreement again before their next application is sent.
  */
-export const HOST_AGREEMENT_VERSION = "2026-10-13";
+export const HOST_AGREEMENT_VERSION = "2026-10-17";
 
 /**
  * The founder's statement of 13 October 2026, ticked before any workspace

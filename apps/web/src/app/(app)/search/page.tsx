@@ -7,7 +7,8 @@ import { demandCell } from "@/lib/demand/cell";
 import { readListingFactsFor } from "@/lib/landlord/queries";
 import { readPhotographedCaptions } from "@/lib/listings/photographed";
 import { ownershipSeenForListings } from "@/lib/trust/ownership-seen";
-import { collapseByProperty, ownerConfirmedLine, requestNow, sinkNotReconfirmed } from "@/lib/landlord/facts";
+import { collapseByProperty, ownerConfirmedLine, sinkNotReconfirmed } from "@/lib/landlord/facts";
+import { requestNow } from "@/lib/format/when";
 import { LandlordCardLine } from "@/components/app/listing/LandlordCardLine";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -434,9 +435,15 @@ export default async function SearchPage({
   /* V-70: "Photographed: kitchen, prepaid meter" under a card whose lister labelled its photos. */
   /* "Ownership seen" for the cards drawn, in one read for the page (never one
      per card), alongside the captions. */
+  /* The "New listings" strip can draw a home from past the first screenful,
+     so the eight newest are read with the cards drawn (still one read). */
+  const newestCandidates = listings
+    .filter((l) => !l.isDemo && l.publishedAt)
+    .sort((a, b) => Date.parse(b.publishedAt!) - Date.parse(a.publishedAt!))
+    .slice(0, 8);
   const [photographedCaptions, ownershipSeen] = await Promise.all([
     captionsAhead ?? readPhotographedCaptions(listings.map((l) => l.id), locale),
-    ownershipSeenForListings(drawn.filter((l) => !l.isDemo).map((l) => l.id)),
+    ownershipSeenForListings([...drawn, ...newestCandidates].filter((l) => !l.isDemo).map((l) => l.id)),
   ]);
   const ownershipLabel = t.supply.register.owner.proof.seenMark;
   const landlordNow = requestNow();
@@ -500,7 +507,7 @@ export default async function SearchPage({
    * published order, the first page of the list. Everything they draw was
    * already read for this page (the shelf, the shortlist, the stated
    * interests, the saved searches in the first batch, the ownership marks of
-   * the cards drawn), so neither section adds a read.
+   * the cards drawn and of the eight newest), so neither section adds a read.
    */
   const forYou =
     query.view === "list" &&

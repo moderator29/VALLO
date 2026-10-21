@@ -5,6 +5,7 @@ import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
 import { findUserByEmail } from "../supabase/service";
+import { adminRefusal, requireAdmin } from "./guard";
 import { isNotInstalled } from "./support-queue";
 
 /**
@@ -93,6 +94,12 @@ export async function setInternalAccount(input: { userId: string; internal: bool
 
 /** C10: mark somebody by their email address (the list only shows who is on it already). */
 export async function markInternalByEmail(input: { email: string }): Promise<ActionResult<null>> {
+  /* The door first. The lookup below reads every account by address through
+     the service role, so asked before the door it told anybody signed in, or
+     not, whether an address has a Vallo account. */
+  const access = await requireAdmin();
+  if (access.state !== "admin") return fail(adminRefusal(access));
+  if (!access.isSuperAdmin) return fail(WORDS.forbidden as string);
   const parsed = validate(z.object({ email: z.string().trim().email("Enter an email address.").max(320) }), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   const user = await findUserByEmail(parsed.data.email);

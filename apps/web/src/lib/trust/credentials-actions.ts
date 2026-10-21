@@ -35,6 +35,10 @@ export async function recordCredential(input: unknown): Promise<ActionResult<{ r
   if (access.state !== "admin") return fail(adminRefusal(access));
   const parsed = validate(schema, input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  /* Nobody records a register check on themselves: it is a mark others read. */
+  if (parsed.data.subjectId === access.user.id) {
+    return fail("This is your own record, so another reviewer has to check it. Nothing was recorded.");
+  }
   const { data, error } = await (access.userClient as unknown as RpcCaller).rpc("record_credential", {
     p_subject: parsed.data.subjectId,
     p_kind: parsed.data.kind,

@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { dateTimeLabel } from "@/lib/format/when";
 import Image from "next/image";
-import { formatMoney, getDictionary, plural, type Locale } from "@vallo/i18n";
+import { formatMoney, getDictionary, plural, type Dictionary, type Locale } from "@vallo/i18n";
 import { Disclosure } from "@/components/app/Disclosure";
 import { ICON, TYPE } from "@/components/app/Screen";
 import { StatusPill } from "@/components/ui/StatusPill";
@@ -64,18 +65,13 @@ function lagosDate(iso: string): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date(iso));
 }
 
-/** British order in every locale: dates are written in English words (`intlTag`). */
-function tableWhen(iso: string): string {
-  const at = new Date(iso);
-  if (Number.isNaN(at.getTime())) return iso;
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Africa/Lagos",
-  }).format(at);
+/**
+ * A table's moment in words: "Today, 19:30", "Tomorrow, 13:00", then
+ * "Sat 25 Oct, 19:30" (`lib/format/when`, Lagos time). Read against the
+ * page's own Lagos day, so the server render and the spine agree.
+ */
+function tableWhen(iso: string, today: string): string {
+  return dateTimeLabel(iso, { now: new Date(`${today}T12:00:00+01:00`) }) || iso;
 }
 
 export function TripSpine({
@@ -127,7 +123,7 @@ export function TripSpine({
     cancelled: reservation.status === "CANCELLED",
     title: reservation.listingTitle,
     where: reservation.location,
-    when: tableWhen(reservation.reservedFor),
+    when: tableWhen(reservation.reservedFor, today),
     meta: plural(reservation.partySize, t.counts.guests, locale),
     href: reservation.conversationId
       ? `/messages/${reservation.conversationId}`
@@ -148,7 +144,7 @@ export function TripSpine({
             depositLine(
               reservation.deposit,
               (minor) => formatMoney(minor, locale, "NGN"),
-              (iso) => tableWhen(iso),
+              (iso) => tableWhen(iso, today),
               t.tableDeposits.status,
             ) ?? "",
           payable: depositPayable(reservation.deposit.status) && reservation.cancellable,
@@ -193,6 +189,7 @@ export function TripSpine({
               statusWord={words[item.status]}
               payLabel={bookingCopy.payNow}
               reviewLabel={bookingCopy.leaveReview}
+              cancelWords={t.memberFlows.cancelBooking}
             />
           ))}
         </ol>
@@ -218,6 +215,7 @@ export function TripSpine({
                   statusWord={words[item.status]}
                   payLabel={bookingCopy.payNow}
                   reviewLabel={bookingCopy.leaveReview}
+                  cancelWords={t.memberFlows.cancelBooking}
                   muted
                 />
               ))}
@@ -237,7 +235,10 @@ function SpineRow({
   muted = false,
   payLabel,
   reviewLabel,
+  cancelWords,
 }: {
+  /** The cancel control's words (`memberFlows.cancelBooking`). */
+  cancelWords: Dictionary["memberFlows"]["cancelBooking"];
   item: TripItem;
   today: boolean;
   todayLabel: string;
@@ -369,7 +370,7 @@ function SpineRow({
               {reviewLabel}
             </Link>
           )}
-          {item.booking.cancellable && <CancelBookingControl booking={item.booking} />}
+          {item.booking.cancellable && <CancelBookingControl booking={item.booking} words={cancelWords} />}
         </div>
       )}
       </div>

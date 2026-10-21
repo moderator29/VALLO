@@ -13,6 +13,7 @@ import {
 } from "./AdminNav";
 import { ConsoleClock } from "./ConsoleClock";
 import { ConsolePalette, type PaletteCopy } from "./ConsolePalette";
+import { RootFlag } from "@/components/ui/RootFlag";
 import "./admin-material.css";
 
 /**
@@ -74,6 +75,8 @@ export function AdminFrame({
 
   return (
     <div className="nf-admin">
+      {/* `data-admin` on <html>: the console keeps its scrollbar lane (admin.css). */}
+      <RootFlag name="admin" />
       {/* The rail is a full-height lit column as every render draws it: the
           aside stretches the whole page, and its contents ride a sticky inner
           column the viewport's height, so Settings and the operator stay

@@ -24,7 +24,7 @@ const PHOTOS = [
   { id: "f2", url: "/brand/photos/living-room-day.jpg" },
 ];
 
-/* The four presets of `20261013090000_four_preset_cancellation_policies.sql`,
+/* The four presets of `20261013062641_four_preset_cancellation_policies.sql`,
    with their tiers, as the wizard reads them once that has run. */
 const POLICIES = [
   { id: "ef100000-0000-4000-8000-000000000001", name: "Flexible", preset: "flexible", isFreeUntilHours: 24,

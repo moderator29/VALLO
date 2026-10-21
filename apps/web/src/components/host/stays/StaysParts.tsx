@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useHostCopy } from "@/components/host/host-copy";
 import { Quantity } from "@/components/ui/Quantity";
 import type { BrandIconName } from "@/design-system/icons/BrandIcon";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -227,14 +228,15 @@ export function StaysStepper({
   onChange(next: number): void;
   disabled?: boolean;
 }) {
+  const words = useHostCopy().stays.stepper;
   return (
     <Quantity
       value={value}
       min={min}
       max={max}
       label={label}
-      decreaseLabel={`One fewer ${label}`}
-      increaseLabel={`One more ${label}`}
+      decreaseLabel={words.fewer.replace("{what}", label)}
+      increaseLabel={words.more.replace("{what}", label)}
       showValue={showValue}
       disabled={disabled}
       onChange={onChange}

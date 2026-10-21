@@ -10,13 +10,16 @@ import { geohash5 } from "./geohash";
 import { publicAreaName } from "../share/public-text";
 import { areaSuggestions } from "./queries";
 import { insertPriceCheckWatch, priceCheckRpc } from "./rpc";
+import { openShareSeal, shareSealKey } from "./share-seal";
 import {
   areaSuggestionSchema,
   recordStageSchema,
-  shareAreaSchema,
+  shareSealSchema,
   watchSpotSchema,
 } from "./schema";
 import type { AreaSuggestion } from "./types";
+import { headers } from "next/headers";
+import { consume, ipFromHeaders, subjectForIp, subjectForUser } from "../security/rate-limit";
 
 /**
  * THE FOUR THINGS A PRICE CHECK WRITES, AND WHAT EACH ONE IS ALLOWED TO KEEP.
@@ -56,9 +59,9 @@ const SHARE_FAILED =
 /*
  * THE FREE TEXT ROUTE ONTO A SHARE CARD, AND WHY IT IS CLOSED HERE.
  *
- * `shareAreaSchema.area` is a string a caller supplies, and a server action is
- * a public HTTP endpoint: the screen sends the area the area report was about,
- * but nothing makes a caller use the screen. Until this check, the only thing
+ * `shareAreaSchema.area` is a string a caller supplies: it now travels inside
+ * the server's seal, but the page sealed it from the query string, and anyone
+ * can write a query string. Until this check, the only thing
  * between an arbitrary 80 character string and the heading on a forwarded card
  * was `price_check_shares_area_is_not_an_address`, which refuses a leading
  * house number and a number followed by a street word and is deliberately
@@ -78,6 +81,17 @@ const SHARE_FAILED =
  *
  * A state-wide card carries no area at all and is unaffected.
  */
+const SHARE_TOO_MANY = "That is a lot of cards at once. Try again {when}.";
+
+/** Cards one person (or one address, signed out) may mint per window. */
+const SHARE_LIMIT = 20;
+const SHARE_WINDOW_SECONDS = 3600;
+
+/** Funnel rows one person (or one address) may write per window: about
+    thirty full checks of seven stages an hour, far past any real reader. */
+const STAGE_LIMIT = 240;
+const STAGE_WINDOW_SECONDS = 3600;
+
 const SHARE_AREA_UNKNOWN =
   "We can only make a card for an area we hold listings in. Run the check again and pick the area from the list.";
 
@@ -112,6 +126,17 @@ export async function recordPriceCheckStage(input: unknown): Promise<ActionResul
   try {
     const session = await resolveSession();
     const userId = session.state === "signed-in" ? session.user.id : null;
+
+    /* An open, anonymous door onto a service-role write, so it is paced like
+       the card mint: per person, or per address signed out. Over the limit
+       the row is simply not written; the reader sees nothing either way. */
+    const verdict = await consume({
+      bucket: "price_check_stage",
+      subject: userId ? subjectForUser(userId) : subjectForIp(ipFromHeaders(await headers())),
+      limit: STAGE_LIMIT,
+      windowSeconds: STAGE_WINDOW_SECONDS,
+    });
+    if (!verdict.allowed) return ok(null);
 
     await priceCheckRpc(createAdminClient(), "record_price_check_event", {
       p_check_id: values.checkId,
@@ -201,14 +226,21 @@ export async function watchThisSpot(input: unknown): Promise<ActionResult<{ watc
  * nothing to pass even if it wanted to.
  *
  * A refused check mints nothing, because the three figures are required: an
- * image is a claim and a refusal has nothing to claim.
+ * image is a claim and a refusal has nothing to claim. And the figures are
+ * never the caller's: the input is a seal the server made over the card when
+ * it computed it, so a made-up range cannot be minted.
  */
 export async function shareAreaPrices(input: unknown): Promise<ActionResult<{ id: string }>> {
-  const parsed = validate(shareAreaSchema, input);
-  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const parsed = validate(shareSealSchema, input);
+  if (!parsed.ok) return fail(SHARE_FAILED);
   if (!isSupabaseConfigured()) return fail(NOT_CONFIGURED_MESSAGE);
 
-  const values = parsed.data;
+  /* THE CARD IS THE SERVER'S. Every figure, the count and the place come from
+     the seal the page made when it computed them (`share-seal.ts`); a caller
+     can carry a seal but cannot write one, so it cannot mint a figure. */
+  const key = shareSealKey();
+  const values = key ? openShareSeal(key, parsed.data.seal, Math.floor(Date.now() / 1000)) : null;
+  if (values === null) return fail(SHARE_FAILED);
 
   /* RULE 10: a card names only a neighbourhood on the closed list, in its own
      state, stored in the list's spelling. Checked at mint as well as at
@@ -229,6 +261,17 @@ export async function shareAreaPrices(input: unknown): Promise<ActionResult<{ id
 
   const session = await resolveSession();
   const createdBy = session.state === "signed-in" ? session.user.id : null;
+
+  /* Minting writes a public row through the service role and is open to a
+     signed-out reader, so it is bounded per person, or per address when
+     there is no account. */
+  const verdict = await consume({
+    bucket: "price_share_mint",
+    subject: createdBy ? subjectForUser(createdBy) : subjectForIp(ipFromHeaders(await headers())),
+    limit: SHARE_LIMIT,
+    windowSeconds: SHARE_WINDOW_SECONDS,
+  });
+  if (!verdict.allowed) return fail(SHARE_TOO_MANY.replace("{when}", verdict.retryIn));
 
   try {
     const { data, error } = await priceCheckRpc(

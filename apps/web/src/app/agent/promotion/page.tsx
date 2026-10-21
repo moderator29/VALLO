@@ -14,6 +14,7 @@ import { firstRunPath } from "@/components/app/feature-onboarding/first-runs";
 import { readMyPromotionPurchases } from "@/lib/promotion/my-purchases-read";
 import { purchasePhase } from "@/lib/promotion/my-purchases";
 import { ListingPitch } from "../list/ListingPitch";
+import { requestNow } from "@/lib/format/when";
 
 export const dynamic = "force-dynamic";
 
@@ -63,7 +64,7 @@ export default async function PromotionHubPage() {
     readMyPromotionPurchases(context.supabase),
   ]);
   const live = (listings ?? []).filter(canPromote);
-  const now = Date.now();
+  const now = requestNow();
   const howHref = `${firstRunPath("promotion")}?next=${encodeURIComponent(PROMOTION_HUB_HREF)}`;
 
   return (

@@ -74,10 +74,29 @@ function drafted(
 /** Schedule a visit (`/listing/[id]/visit`), drafted with the flow. */
 export const DRAFTED_2026_10_13 = ["visit"] as const;
 
+/**
+ * The signed-in member flows' words moved out of the components in the
+ * language audit (booking a table, reserving a stay, the rental panel, the
+ * conversation, viewings).
+ */
+export const DRAFTED_2026_10_17 = ["memberFlows"] as const;
+
 export const REVIEW_STATUS: Record<TranslatedLocale, Record<string, NamespaceReview>> = {
-  ha: { ...drafted(DRAFTED_2026_09_30, "2026-09-30"), ...drafted(DRAFTED_2026_10_13, "2026-10-13") },
-  yo: { ...drafted(DRAFTED_2026_09_30, "2026-09-30"), ...drafted(DRAFTED_2026_10_13, "2026-10-13") },
-  ig: { ...drafted(DRAFTED_2026_09_30, "2026-09-30"), ...drafted(DRAFTED_2026_10_13, "2026-10-13") },
+  ha: {
+    ...drafted(DRAFTED_2026_09_30, "2026-09-30"),
+    ...drafted(DRAFTED_2026_10_13, "2026-10-13"),
+    ...drafted(DRAFTED_2026_10_17, "2026-10-17"),
+  },
+  yo: {
+    ...drafted(DRAFTED_2026_09_30, "2026-09-30"),
+    ...drafted(DRAFTED_2026_10_13, "2026-10-13"),
+    ...drafted(DRAFTED_2026_10_17, "2026-10-17"),
+  },
+  ig: {
+    ...drafted(DRAFTED_2026_09_30, "2026-09-30"),
+    ...drafted(DRAFTED_2026_10_13, "2026-10-13"),
+    ...drafted(DRAFTED_2026_10_17, "2026-10-17"),
+  },
 };
 
 /**

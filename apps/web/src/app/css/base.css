@@ -262,6 +262,33 @@ html {
 }
 
 /*
+ * THE RING INSIDE A CLIPPING CONTAINER. A row in a grouped list, a fold's
+ * trigger, a wallet row, a chip in a rail and a tab in a tab row all fill a
+ * container that clips its overflow (for its rounded corners or its scroll),
+ * so the ring above, drawn outside the control, was cut away on three or four
+ * sides and a keyboard user saw nothing move (a Tab walk over the landing,
+ * listing, notifications, host desk, inbox and wallet). Inside those
+ * containers the ring is drawn just inside the control's own edge, where
+ * nothing can clip it. Same specificity as the rule above and later, so it
+ * wins without `!important`; unlayered for the same reason that rule is.
+ */
+:where(.nf-list-group, .nf-unfold, .nf-mw-list, .nf-pl-mcard, .nf-detail-tabs__row, .nf-scroll-x)
+  :where(
+    a,
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex],
+    [role="button"],
+    [role="tab"],
+    [role="switch"]
+  ):focus-visible {
+  outline-offset: calc(-1 * var(--nf-focus-ring-width));
+}
+
+/*
  * A bare input inside a styled shell.
  *
  * Three search bars (the landing hero, the search page and the place picker)

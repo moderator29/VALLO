@@ -83,6 +83,15 @@ function blockerCopy(
   const many = blocker.amount !== 1;
 
   switch (blocker.kind) {
+    case "partner-held":
+      return { line: phrase(copy.blockerPartnerHeld, { amount }), cta: copy.blockerPartnerHeldCta };
+    case "rewards-balance":
+      return { line: phrase(copy.blockerRewardsBalance, { amount }), cta: copy.blockerRewardsBalanceCta };
+    case "rewards-payouts":
+      return {
+        line: phrase(many ? copy.blockerRewardsPayoutsPlural : copy.blockerRewardsPayouts, { count }),
+        cta: copy.blockerRewardsPayoutsCta,
+      };
     case "rent-refunds-owed":
       return { line: phrase(copy.blockerRentRefundsOwed, { amount }), cta: copy.blockerRentRefundsCta };
     case "rent-refunds-due":

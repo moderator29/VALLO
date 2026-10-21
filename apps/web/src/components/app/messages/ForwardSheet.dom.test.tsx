@@ -36,6 +36,7 @@ const sheetEntry = `
   import { useState } from "react";
   import { mount } from "@/lib/testing/browser-root";
   import { ForwardSheet } from "@/components/app/messages/ForwardSheet";
+  import { getDictionary } from "@vallo/i18n";
   function Harness() {
     const [open, setOpen] = useState(true);
     const [done, setDone] = useState(null);
@@ -43,6 +44,7 @@ const sheetEntry = `
       <div>
         <p data-testid="done">{done ?? ""}</p>
         <ForwardSheet
+          words={getDictionary("en").experienceInbox.thread.forward}
           open={open}
           messageId="m-1"
           fromConversationId="c-here"
@@ -130,11 +132,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the forward chooser", () => {
       entry: `
         import { mount } from "@/lib/testing/browser-root";
         import { MessageMenu } from "@/components/app/messages/MessageMenu";
+        import { getDictionary } from "@vallo/i18n";
         const noop = () => {};
+        const words = getDictionary("en").experienceInbox.thread.menu;
         mount(
           <div>
-            <div data-testid="text"><MessageMenu canCopy canDeleteEveryone={false} canForward onReply={noop} onForward={() => { window.__forward = true; }} onCopy={noop} onDeleteForMe={noop} onDeleteForEveryone={noop} onClose={noop} /></div>
-            <div data-testid="photo"><MessageMenu canCopy={false} canDeleteEveryone={false} canForward={false} onReply={noop} onForward={noop} onCopy={noop} onDeleteForMe={noop} onDeleteForEveryone={noop} onClose={noop} /></div>
+            <div data-testid="text"><MessageMenu words={words} canCopy canDeleteEveryone={false} canForward onReply={noop} onForward={() => { window.__forward = true; }} onCopy={noop} onDeleteForMe={noop} onDeleteForEveryone={noop} onClose={noop} /></div>
+            <div data-testid="photo"><MessageMenu words={words} canCopy={false} canDeleteEveryone={false} canForward={false} onReply={noop} onForward={noop} onCopy={noop} onDeleteForMe={noop} onDeleteForEveryone={noop} onClose={noop} /></div>
           </div>,
         );
       `,

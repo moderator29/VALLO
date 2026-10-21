@@ -30,6 +30,8 @@ export const unitsEn = {
   toilets: { one: "1 toilet", other: "{count} toilets" },
   hours: { one: "1 hour", other: "{count} hours" },
   days: { one: "1 day", other: "{count} days" },
+  minutes: { one: "1 minute", other: "{count} minutes" },
+  seats: { one: "1 seat", other: "{count} seats" },
   months: { one: "1 month", other: "{count} months" },
   nights: { one: "1 night", other: "{count} nights" },
   guests: { one: "1 guest", other: "{count} guests" },

@@ -1,12 +1,12 @@
 /**
- * A resumable upload, because fifty megabytes on a Nigerian mobile connection
+ * A resumable upload, because a hundred megabytes on a Nigerian mobile connection
  * will not survive a single POST.
  *
  * ---------------------------------------------------------------------------
  * THE PROBLEM THIS EXISTS FOR, WITH THE ARITHMETIC.
  *
- * A walkthrough is capped at 50MB. On a typical Nigerian mobile uplink of
- * roughly one megabit that is about seven minutes of uninterrupted upload. Seven
+ * A walkthrough is capped at 100MB. On a typical Nigerian mobile uplink of
+ * roughly two megabits that is about seven minutes of uninterrupted upload. Seven
  * minutes is longer than a lift, longer than a handover between masts, and
  * longer than most people will hold a phone still. `supabase.storage.upload` is
  * ONE request with no chunking, no resume and no retry: the connection drops at
@@ -311,6 +311,34 @@ function base64(value: string): string {
  */
 function resumeKey(bucket: string, path: string, file: File): string {
   return `nf_upload:${bucket}:${path}:${file.name}:${file.size}:${file.lastModified}`;
+}
+
+/**
+ * THE SAME FILE GOES TO THE SAME PATH, so a second press really resumes.
+ *
+ * The resume key above names the destination path, and the wizard used to
+ * mint a fresh random path for every attempt, so "press upload again and it
+ * carries on" started from zero every time. This keeps the path chosen for
+ * one file (by its name, size and last modified time) on the device, under a
+ * scope that names the bucket and the listing folder, until the upload is
+ * done with. A stored path outside `prefix` is never reused.
+ */
+export function stableUploadPath(scope: string, prefix: string, file: File, fresh: () => string): string {
+  const key = pathKey(scope, file);
+  const held = readResume(key);
+  if (held && held.startsWith(prefix) && !held.slice(prefix.length).includes("/")) return held;
+  const path = fresh();
+  rememberResume(key, path);
+  return path;
+}
+
+/** The upload is finished with (attached, refused or stopped): forget its path. */
+export function forgetUploadPath(scope: string, file: File): void {
+  forgetResume(pathKey(scope, file));
+}
+
+function pathKey(scope: string, file: File): string {
+  return `nf_upload_path:${scope}:${file.name}:${file.size}:${file.lastModified}`;
 }
 
 function readResume(key: string): string | null {

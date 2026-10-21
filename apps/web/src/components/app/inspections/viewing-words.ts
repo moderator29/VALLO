@@ -1,3 +1,4 @@
+import type { Dictionary } from "@vallo/i18n/core";
 import type { StepSheetWords, TimeSheetWords } from "./ViewingSheets";
 
 /**
@@ -10,105 +11,109 @@ import type { StepSheetWords, TimeSheetWords } from "./ViewingSheets";
  * thread face's (`threads.rental` in the dictionary), so a lister and a
  * renter see the same word for the same move wherever they meet it.
  *
- * The thread face reads the dictionary for every word it carries, and these
- * for the moves the dictionary does not carry yet (asking before a
- * withdrawal, calling off a booked viewing, moving one). Those are English
- * in every locale until `threads.rental` gains them with their translations.
+ * Every word now comes from `threads.rental` (language audit, 17 October
+ * 2026): the moves the thread face did not carry (asking before a
+ * withdrawal, calling off a booked viewing, moving one, a no-show and its
+ * dispute) were English in every locale until then. The shapes are the same
+ * as before, built from the reader's dictionary.
  */
 
-const KEEP = "Keep it";
-/** The one line a decline or a cancel can carry into the renter's notification. */
-export const REASON_LABEL = "Tell them why (optional)";
-const WHEN = "When you can do it (Lagos time)";
-const NOTE = "A line for them, if you want one";
+/** The words a viewing's controls and sheets say, from the reader's `threads.rental`. */
+export function viewingWords(c: Dictionary["threads"]["rental"]) {
+  const VIEWING_WORDS = {
+    confirm: c.confirm,
+    offerAnother: c.offerAnother,
+    decline: c.decline,
+    acceptTime: c.acceptTime,
+    withdraw: c.withdraw,
+    cancelViewing: c.cancelViewing,
+    cancelled: c.cancelledNote,
+    markInspected: c.markInspected,
+    openChat: c.openChat,
+    payRent: c.payRent,
+    lagosTime: c.lagosTime,
+  };
 
-export const VIEWING_WORDS = {
-  confirm: "Confirm",
-  offerAnother: "Offer another time",
-  decline: "Decline",
-  acceptTime: "Accept this time",
-  withdraw: "Withdraw",
-  cancelViewing: "Cancel viewing",
-  cancelled: "Cancelled.",
-  markInspected: "Mark as inspected",
-  openChat: "Open the chat",
-  payRent: "Pay the rent",
-  lagosTime: "Lagos time",
-} as const;
+  /** Offering a time instead of the one asked for. */
+  const PROPOSE_WORDS: TimeSheetWords = {
+    title: c.proposeTitle,
+    body: c.offerBody,
+    when: c.proposeWhen,
+    note: c.proposeNote,
+    notePlaceholder: c.offerPlaceholder,
+    send: c.proposeSend,
+  };
 
-/** Offering a time instead of the one asked for. */
-export const PROPOSE_WORDS: TimeSheetWords = {
-  title: "Offer another time",
-  body: "They will see the time you offer and can take it in one tap. The time they asked for stays on the record.",
-  when: WHEN,
-  note: NOTE,
-  notePlaceholder: "The gate closes at 6, so earlier is better",
-  send: "Send this time",
-};
+  /** Moving a viewing that is already booked: it is not confirmed until they take the new time. */
+  const RESCHEDULE_WORDS: TimeSheetWords = { ...PROPOSE_WORDS, body: c.rescheduleBody };
 
-/** Moving a viewing that is already booked: it is not confirmed until they take the new time. */
-export const RESCHEDULE_WORDS: TimeSheetWords = {
-  ...PROPOSE_WORDS,
-  body: "The viewing stops being confirmed until they take the new time. They are told straight away, and the time they asked for stays on the record.",
-};
+  const DECLINE_WORDS: StepSheetWords = {
+    title: c.declineTitle,
+    body: c.declineBody,
+    note: c.reasonLabel,
+    confirm: c.declineConfirm,
+    keep: c.keep,
+  };
 
-export const DECLINE_WORDS: StepSheetWords = {
-  title: "Decline this request?",
-  body: "They will see that you declined. The chat stays open, so you can still explain.",
-  note: REASON_LABEL,
-  confirm: "Yes, decline",
-  keep: KEEP,
-};
+  const LISTER_CANCEL_WORDS: StepSheetWords = {
+    title: c.listerCancelTitle,
+    body: c.listerCancelBody,
+    note: c.reasonLabel,
+    confirm: c.cancelConfirm,
+    keep: c.keep,
+  };
 
-export const LISTER_CANCEL_WORDS: StepSheetWords = {
-  title: "Cancel this viewing?",
-  body: "They will be told the viewing is off. If another day suits you, offer another time instead.",
-  note: REASON_LABEL,
-  confirm: "Yes, cancel it",
-  keep: KEEP,
-};
+  const WITHDRAW_WORDS: StepSheetWords = {
+    title: c.withdrawTitle,
+    body: c.withdrawBody,
+    confirm: c.withdrawConfirm,
+    keep: c.keep,
+  };
 
-export const WITHDRAW_WORDS: StepSheetWords = {
-  title: "Withdraw this request?",
-  body: "The lister will see that you withdrew. You can ask again from the listing.",
-  confirm: "Yes, withdraw",
-  keep: KEEP,
-};
+  /** Saying the other side did not come: the renter, or the lister (or whoever they sent). */
+  const noShowWords = (otherSide: "requester" | "lister"): StepSheetWords => ({
+    title: otherSide === "requester" ? c.noShowRenterTitle : c.noShowListerTitle,
+    body: otherSide === "requester" ? c.noShowRenterBody : c.noShowListerBody,
+    note: c.whatHappened,
+    confirm: c.noShowConfirm,
+    keep: c.keep,
+  });
 
-/** Saying the other side did not come: the renter, or the lister (or whoever they sent). */
-export function noShowWords(otherSide: "requester" | "lister"): StepSheetWords {
+  const DISPUTE_WORDS: StepSheetWords = {
+    title: c.disputeTitle,
+    body: c.disputeBody,
+    note: c.whatHappened,
+    confirm: c.disputeSend,
+    calm: true,
+    keep: c.keep,
+  };
+
+  const NO_SHOW_WORDS = {
+    markRenter: c.markRenterNoShow,
+    markLister: c.markListerNoShow,
+    badge: c.noShowBadge,
+    dispute: c.disputeThis,
+  };
+
+  const RENTER_CANCEL_WORDS: StepSheetWords = {
+    title: c.listerCancelTitle,
+    body: c.renterCancelBody,
+    confirm: c.cancelConfirm,
+    keep: c.keep,
+  };
+
   return {
-    title: otherSide === "requester" ? "The renter did not come?" : "Nobody came to show it?",
-    body:
-      (otherSide === "requester"
-        ? "They will be told you marked them as a no-show"
-        : "The lister will be told you marked them as a no-show") +
-      ", and they can dispute it within 48 hours. Vallo looks at every dispute.",
-    note: "What happened (optional)",
-    confirm: "Yes, mark as a no-show",
-    keep: KEEP,
+    VIEWING_WORDS,
+    PROPOSE_WORDS,
+    RESCHEDULE_WORDS,
+    DECLINE_WORDS,
+    LISTER_CANCEL_WORDS,
+    WITHDRAW_WORDS,
+    noShowWords,
+    DISPUTE_WORDS,
+    NO_SHOW_WORDS,
+    RENTER_CANCEL_WORDS,
+    /** The one line a decline or a cancel can carry into the renter's notification. */
+    REASON_LABEL: c.reasonLabel,
   };
 }
-
-export const DISPUTE_WORDS: StepSheetWords = {
-  title: "Dispute this no-show?",
-  body: "Tell Vallo you were there. Someone on the team will look at both sides and tell you both what they decide.",
-  note: "What happened (optional)",
-  confirm: "Send the dispute",
-  calm: true,
-  keep: KEEP,
-};
-
-export const NO_SHOW_WORDS = {
-  markRenter: "The renter did not come",
-  markLister: "Nobody came to show it",
-  badge: "No-show",
-  dispute: "Dispute this",
-} as const;
-
-export const RENTER_CANCEL_WORDS: StepSheetWords = {
-  title: "Cancel this viewing?",
-  body: "The lister will be told you are not coming. You can ask for another time from the listing.",
-  confirm: "Yes, cancel it",
-  keep: KEEP,
-};

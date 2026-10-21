@@ -4,7 +4,7 @@
 -- blast radius is gone. Always rolls back.
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
   admin  constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   agent uuid;
   lid uuid := gen_random_uuid();
@@ -22,6 +22,13 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The lister is a throwaway account made here, an
+  -- ordinary account with no agents row exactly as the QA member was when this
+  -- probe was written, rolled back with everything else.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-sup-p2-03-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe SUP-P2-03 lister')
   returning id into agent;
   select count(*) into posts_before from public.posts where author_kind = 'SYSTEM';

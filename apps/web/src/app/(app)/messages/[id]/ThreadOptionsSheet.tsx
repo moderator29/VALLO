@@ -6,9 +6,7 @@ import { useState, useTransition } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ReportSheet } from "@/components/app/ReportSheet";
 import { blockUserSafely } from "@/lib/safety/blocks-actions";
-import { BLOCK_CONFIRM_COPY } from "@/lib/safety/blocks-copy";
 import { MediaSkyline, mediaGround } from "@/components/app/MediaFrame";
-import { SAFETY_EDUCATION_COPY } from "@/lib/messages/education";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
@@ -76,7 +74,10 @@ export function ThreadOptionsSheet({
   meId = null,
   unsafeAsLister = false,
   sheetCopy,
+  words,
 }: {
+  /** The sheet's own words (`experienceInbox.thread.view`), from the thread. */
+  words: Dictionary["experienceInbox"]["thread"]["view"];
   open: boolean;
   conversationId: string;
   /** Null on a direct message or a context thread with no listing attached. */
@@ -145,12 +146,12 @@ export function ThreadOptionsSheet({
       onOpenChange={(next) => {
         if (!next) closeEverything();
       }}
-      title="Conversation"
+      title={words.conversation}
       /* The sheet's own header row: the title and a 44px glass Close on one
          line. The Close used to sit in a second row drawn inside the body with
          a negative top margin, so the scrolling body clipped the top of it and
          of the line beside it, and it was 36px (the second audit's S-C). */
-      closeLabel="Close"
+      closeLabel={words.close}
       footer={
         listing ? (
           <>
@@ -161,7 +162,7 @@ export function ThreadOptionsSheet({
               </p>
             ) : (
               <Button variant="primary" full onClick={onConfirmInspection} loading={busy}>
-                Confirm I have inspected this property
+                {words.confirmInspected}
               </Button>
             )}
             {note && (
@@ -174,7 +175,7 @@ export function ThreadOptionsSheet({
       }
     >
       <p className="mb-md text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
-        Conversation with {counterpartName}
+        {words.conversationWith.replace("{name}", counterpartName)}
       </p>
 
       {/* ------------------------------------------------ listing mini view */}
@@ -196,12 +197,12 @@ export function ThreadOptionsSheet({
               {listing.verified ? (
                 <span className="nf-badge nf-badge--success">
                   <UiIcon name="verified" size={12} />
-                  Verified listing
+                  {words.verifiedListing}
                 </span>
               ) : (
-                <span className="nf-badge nf-badge--warning">Verification pending</span>
+                <span className="nf-badge nf-badge--warning">{words.verificationPending}</span>
               )}
-              {listing.approved && <span className="nf-badge nf-badge--brand">Approved</span>}
+              {listing.approved && <span className="nf-badge nf-badge--brand">{words.approved}</span>}
             </div>
           </div>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -220,10 +221,10 @@ export function ThreadOptionsSheet({
           </IconPlate>
           <span className="min-w-0 flex-1">
             <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
-              Share a listing or a booking here
+              {words.shareHere}
             </span>
             <span className="block nf-caption text-[var(--nf-content-muted)]">
-              It arrives as a card {counterpartName} can open.
+              {words.shareHereBody.replace("{name}", counterpartName)}
             </span>
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -248,7 +249,7 @@ export function ThreadOptionsSheet({
           <UiIcon name="shield-check" size={20} />
         </IconPlate>
         <p className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
-          {SAFETY_EDUCATION_COPY}
+          {words.safetyRule}
         </p>
       </div>
 
@@ -268,7 +269,7 @@ export function ThreadOptionsSheet({
           <ReportSheet
             targetType="conversation"
             targetId={conversationId}
-            targetLabel={`Conversation with ${counterpartName}`}
+            targetLabel={words.conversationWith.replace("{name}", counterpartName)}
             signedIn={signedIn}
             trigger="row"
           />
@@ -276,10 +277,10 @@ export function ThreadOptionsSheet({
           {confirmingBlock ? (
             <div className="nf-panel nf-panel--card mt-md p-md" data-testid="thread-block-confirm">
               <p className="nf-body font-semibold text-[var(--nf-content-primary)]">
-                Block {counterpartName}?
+                {words.blockAsk.replace("{name}", counterpartName)}
               </p>
               <p className="mt-2xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
-                {BLOCK_CONFIRM_COPY}
+                {words.blockConfirm}
               </p>
               {blockNote && (
                 <p
@@ -291,7 +292,7 @@ export function ThreadOptionsSheet({
               )}
               <div className="mt-sm grid gap-xs">
                 <Button variant="danger" full onClick={doBlock} loading={blocking}>
-                  Block {counterpartName}
+                  {words.block.replace("{name}", counterpartName)}
                 </Button>
                 <Button
                   variant="ghost"
@@ -301,7 +302,7 @@ export function ThreadOptionsSheet({
                     setBlockNote(null);
                   }}
                 >
-                  Keep the conversation open
+                  {words.keepOpen}
                 </Button>
               </div>
             </div>
@@ -317,10 +318,10 @@ export function ThreadOptionsSheet({
               </IconPlate>
               <span className="min-w-0 flex-1">
                 <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
-                  Block {counterpartName}
+                  {words.block.replace("{name}", counterpartName)}
                 </span>
                 <span className="block nf-caption text-[var(--nf-content-muted)]">
-                  They stop being able to reach you, here and everywhere else.
+                  {words.blockBody}
                 </span>
               </span>
               <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />

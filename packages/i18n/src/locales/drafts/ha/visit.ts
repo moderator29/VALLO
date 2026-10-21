@@ -10,6 +10,13 @@ export const visitHa = {
   statusTitle: "Ziyararka",
   close: "Rufe",
   progress: "Mataki {step} cikin {total}",
+  entry: {
+    ask: "Shirya ziyara",
+    askedFor: "Ka nemi ganin wannan a ranar {when} ({zone}).",
+    confirmedFor: "An tabbatar da ziyararka a ranar {when} ({zone}).",
+    offered: "Sun ba da {when} ({zone}).",
+    track: "Duba inda abin ya tsaya.",
+  },
   property: {
     label: "Gidan",
   },

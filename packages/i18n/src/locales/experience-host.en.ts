@@ -87,7 +87,8 @@ export const experienceHostEn = {
       dates: "Dates",
       room: "Room",
       nextAgreement: "The stay agreement is drawn up for you and the guest to confirm.",
-      nextChecked: "Vallo checks the agreement.",
+      /* A room is paid by card: the agreement is approved by the system unless a risk signal asks a person to look (D68d, D83). */
+      nextChecked: "The agreement is approved at once, unless something needs a second look at Vallo.",
       nextNightsBack: "The nights go back on sale at once.",
       told: "{name} is told at once.",
       cancel: "Cancel",

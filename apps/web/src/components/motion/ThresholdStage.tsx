@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { THRESHOLD_EVENT, thresholdAllowed, type ThresholdKind } from "@/lib/motion/threshold";
+import { useRootFlag } from "@/lib/ui/root-flag";
 
 /*
  * THE SIGN-OUT MARK LOADS WHEN SIGN-OUT PLAYS (speed, 6 October 2026). This
@@ -58,6 +59,12 @@ export function ThresholdStage({ welcome }: { welcome: string }) {
   /* Going until the route changes under it, arriving after. Derived rather
      than stored, so the change of phase is the change of route itself. */
   const arriving = play !== null && pathname !== play.from;
+  /* Root flags for threshold.css (lib/ui/root-flag.ts): `data-threshold`
+     while the stage draws, `data-threshold-leaving` while a sign-out's page
+     recedes under it. */
+  const drawn = play !== null && play.kind !== "open";
+  useRootFlag("threshold", drawn);
+  useRootFlag("threshold-leaving", drawn && play.kind === "leave" && !arriving);
 
   useEffect(() => {
     const onPlay = (event: Event) => {

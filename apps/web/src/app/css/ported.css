@@ -467,11 +467,11 @@
     inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 1rem);
     --nf-live-from: 0.75rem;
   }
-  :root:has(.nf-main--docked) .nf-live[data-placement="bottom"] {
+  :root[data-docked] .nf-live[data-placement="bottom"] {
     inset-block-end: calc(var(--nf-tabbar-clearance) + 0.25rem);
   }
   @media (min-width: 64rem) {
-    :root:has(.nf-main--docked) .nf-live[data-placement="bottom"],
+    :root[data-docked] .nf-live[data-placement="bottom"],
     .nf-live[data-placement="bottom"] {
       inset-block-end: 1.5rem;
     }
@@ -839,11 +839,11 @@
       opacity var(--nf-duration-base) var(--nf-ease-entrance),
       visibility 0s linear 0s;
   }
-  :root:has(.nf-main--docked) .nf-batch {
+  :root[data-docked] .nf-batch {
     inset-block-end: calc(var(--nf-tabbar-clearance) + 0.25rem);
   }
   @media (min-width: 64rem) {
-    :root:has(.nf-main--docked) .nf-batch,
+    :root[data-docked] .nf-batch,
     .nf-batch {
       inset-block-end: 1.5rem;
     }

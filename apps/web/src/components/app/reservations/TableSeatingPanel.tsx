@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { useCopyFlash, useCopyLabels } from "@/lib/ui/use-copy";
 import { NairaField } from "@/components/ui/NairaField";
 import { TYPE } from "@/components/app/Screen";
-import { formatMoney } from "@vallo/i18n";
+import { formatMoney } from "@vallo/i18n/core";
 import type { ReservationView } from "@/lib/reservations/queries";
 import {
   asksDiner,
@@ -66,15 +67,22 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
   const bill = table.bill ?? null;
   const line = seatingLine(seating);
   const billWords = billLine(bill, money);
-  const mayBill = billOpen(table, now) && (!bill || bill.status === "awaiting_restaurant");
+  /* Paying through Vallo is offered only while `restaurant_bill_pay` is on;
+     until then the diner pays the restaurant directly and nothing here says
+     otherwise. A bill already moving or paid is still shown. */
+  const billPay = table.billPay === true;
+  const mayBill = billPay && billOpen(table, now) && (!bill || bill.status === "awaiting_restaurant");
 
   return (
     <div className="mt-inline grid gap-inline" data-testid="table-seating">
       {showsCode(table, seating, now) && (
         <div className="rounded-[var(--nf-container-radius)] bg-[var(--nf-surface-raised)] px-row py-inline">
           <span className={`block ${TYPE.caption}`}>Your check-in code</span>
-          <span className="nf-numeric block text-[length:var(--nf-text-figure)] font-bold tracking-wide" data-testid="check-in-code">
-            {spacedCode(seating.checkInCode)}
+          <span className="flex flex-wrap items-center justify-between gap-inline">
+            <span className="nf-numeric block text-[length:var(--nf-text-figure)] font-bold tracking-wide" data-testid="check-in-code">
+              {spacedCode(seating.checkInCode)}
+            </span>
+            <CopyCode code={seating.checkInCode} />
           </span>
           <span className={`block ${TYPE.rowMeta}`}>
             Show it to the restaurant when you arrive. Booking the table is free.
@@ -109,7 +117,7 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
       )}
 
       {billWords && <span className={`block ${TYPE.rowMeta}`}>{billWords}</span>}
-      {bill?.status === "awaiting_payment" && (
+      {billPay && bill?.status === "awaiting_payment" && (
         <span>
           <Button
             variant="primary"
@@ -247,5 +255,25 @@ export function BillReturnCheck({ reference }: { reference: string }) {
     <p role="status" className={`mb-block ${TYPE.rowMeta}`} data-testid="bill-return">
       {message}
     </p>
+  );
+}
+
+/** Copy the check-in code, to send to whoever arrives first. Digits only. */
+function CopyCode({ code }: { code: string }) {
+  const words = useCopyLabels();
+  const [copied, copy] = useCopyFlash();
+  if (!words) return null;
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      leadingIcon="document"
+      done={copied}
+      onClick={() => void copy(code)}
+      data-testid="check-in-code-copy"
+    >
+      {copied ? words.copied : words.copy}
+    </Button>
   );
 }

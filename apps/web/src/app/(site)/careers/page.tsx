@@ -108,7 +108,9 @@ export default function CareersPage() {
               the team arrived exactly that way.
             </p>
 
-            <div className="mx-auto mt-heading block max-w-md rounded-[var(--nf-tier-plate-radius)] border border-[var(--nf-tier-plate-edge)] bg-[var(--nf-tier-plate-fill)] p-card-sm text-left">
+            {/* On the card, not a second card inside it: a hairline sets the list
+                apart (pass 3, no box inside a box). */}
+            <div className="mx-auto mt-heading block max-w-md border-t border-[var(--nf-divider)] pt-group text-left">
               <p className="nf-overline">Send us</p>
               <ul className="mt-inline space-y-inline text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
                 <li className="flex items-start gap-inline">

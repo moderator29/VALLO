@@ -7,13 +7,17 @@ const state = vi.hoisted(() => ({
   registered: 0,
   posted: [] as unknown[],
   local: null as null | { deviceRef: string },
+  cleared: 0,
+  status: 200,
 }));
 
 vi.mock("@/lib/native/platform", () => ({ looksNative: () => true }));
 vi.mock("./device-state", () => ({
   readLocalDevice: () => state.local,
   writeLocalDevice: () => undefined,
-  clearLocalDevice: () => undefined,
+  clearLocalDevice: () => {
+    state.cleared += 1;
+  },
   isIosHomeScreenApp: () => false,
 }));
 vi.mock("@capacitor/core", () => ({
@@ -43,10 +47,16 @@ beforeEach(() => {
   state.registered = 0;
   state.posted = [];
   state.local = { deviceRef: "abc123" };
+  state.cleared = 0;
+  state.status = 200;
   vi.stubGlobal("window", {});
   vi.stubGlobal("fetch", async (_url: string, init: { body: string }) => {
     state.posted.push(JSON.parse(init.body));
-    return { ok: true, status: 200, json: async () => ({ ok: true, deviceRef: "abc123" }) };
+    return {
+      ok: state.status === 200,
+      status: state.status,
+      json: async () => (state.status === 200 ? { ok: true, deviceRef: "abc123" } : { ok: false, reason: "signed_out" }),
+    };
   });
 });
 
@@ -73,5 +83,23 @@ describe("the shell's launch push read (F-14, F-15)", () => {
     state.receive = "prompt";
     expect(await refreshNativeRegistration()).toBe("skipped");
     expect(state.registered).toBe(0);
+  });
+
+  it("keeps the record when the launch has no session, so the next signed-in launch re-registers", async () => {
+    state.status = 401;
+    expect(await refreshNativeRegistration()).toBe("failed");
+    expect(state.cleared).toBe(0);
+  });
+
+  it("keeps the record when the register route is pacing calls (429): the server row is still live", async () => {
+    state.status = 429;
+    expect(await refreshNativeRegistration()).toBe("failed");
+    expect(state.cleared).toBe(0);
+  });
+
+  it("still forgets the record when the server refuses it for another reason", async () => {
+    state.status = 500;
+    expect(await refreshNativeRegistration()).toBe("failed");
+    expect(state.cleared).toBe(1);
   });
 });

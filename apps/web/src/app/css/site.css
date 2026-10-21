@@ -491,18 +491,31 @@
  * of the logo container, add it too on the capsule").
  *
  * A thin light runs round the rim of a container: two short arcs of a conic
- * gradient, masked to a 1.5px ring that follows the element's own corner
- * (`border-radius: inherit`), turned by the registered angle `--nf-logo-lap`
- * on the `nf-logo-lap` keyframes. Both were the retired logo pill's (D82), declared once in
- * light.css; the keyframes are not theme-gated, so the lap runs in the night
- * too. Transform-free and paint-only on a pseudo-element, so the container's
- * content never repaints.
+ * gradient, seen through a 1.5px ring that follows the element's own corner
+ * (`border-radius: inherit`). The host carries the class and one empty child,
+ * `.nf-edge-lap__ring`, which `EdgeLap` and `HeroBand lap` render for it.
+ *
+ * HOW IT TURNS, AND WHY IT CHANGED ON 17 OCTOBER 2026. It used to turn the
+ * gradient's start angle, a registered custom property (`--nf-logo-lap`),
+ * which only the main thread can animate: the capsule's styles were matched
+ * and its layer repainted on every frame of the 12 seconds the two laps take,
+ * on every public page, while the page was still loading. Measured on a
+ * production build of /terms (no CPU slowdown, the first 5 seconds): 297
+ * frames with the lap against 40 without, about 360 ms of main thread work
+ * and twice the raster, and the commit waits it caused were the page's
+ * longest tasks. `edge-m.css` records the same lesson for the dock's lights.
+ * Now the ring is a fixed mask and the light behind it is a square, as wide
+ * as the ring's diagonal so it covers every corner at every angle, with the
+ * same conic gradient painted once and turned by the compositor with
+ * `rotate` (`nf-edge-turn`, edge-m.css). A gradient centred on the ring and
+ * turned by an angle is the gradient started at that angle, so the light
+ * runs exactly where it ran before, and the main thread does nothing per
+ * frame.
  *
  * REUSE IT SPARINGLY: the premium containers only (the landing's two
- * capsules, a hero's one card). Put the class on any element with a radius;
- * the ring sits on `::after`, so `::before` stays free for the host. The
- * host's children are lifted above the ring. `--nf-edge-lap-speed` and
- * `--nf-edge-lap-ink` tune it per host.
+ * capsules, a hero's one card). The ring sits above the host's content and
+ * takes no pointer events. `--nf-edge-lap-speed` and `--nf-edge-lap-ink`
+ * tune it per host.
  *
  * STILL UNDER REDUCED MOTION, DATA SAVER, AND THE CALM AND OFF MOTION
  * SETTINGS: the lap stops and the rim settles to a steady faint line.
@@ -518,14 +531,16 @@
     position: relative;
     isolation: isolate;
   }
-  .nf-edge-lap::after {
-    content: "";
+  .nf-edge-lap__ring {
     position: absolute;
     inset: calc(-1 * var(--nf-border-width, 1px));
     z-index: 2;
     padding: var(--nf-edge-lap-width);
     border-radius: inherit;
     pointer-events: none;
+    overflow: hidden;
+    /* The light below sizes itself from the ring (`cqw`, `cqh`). */
+    container-type: size;
     -webkit-mask:
       linear-gradient(var(--nf-mask-opaque, #000) 0 0) content-box,
       linear-gradient(var(--nf-mask-opaque, #000) 0 0);
@@ -533,8 +548,19 @@
     mask:
       linear-gradient(var(--nf-mask-opaque, #000) 0 0) content-box exclude,
       linear-gradient(var(--nf-mask-opaque, #000) 0 0);
+  }
+  .nf-edge-lap__ring::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* The ring's diagonal and a margin for its own padding, so the turning
+       square covers every corner; 200% for an engine without hypot(). */
+    width: 200%;
+    width: calc(hypot(100cqw, 100cqh) + 4 * var(--nf-edge-lap-width) + 2px);
+    aspect-ratio: 1;
+    translate: -50% -50%;
     background: conic-gradient(
-      from var(--nf-logo-lap),
       transparent 0deg 112deg,
       color-mix(in oklab, var(--nf-edge-lap-ink) 55%, transparent) 150deg,
       var(--nf-edge-lap-ink) 177deg,
@@ -545,7 +571,7 @@
     );
     /* Two laps, then it rests at the end angle (the dock's lap does the same):
        nothing loops forever but the aurora and the assistant's thinking. */
-    animation: nf-logo-lap var(--nf-edge-lap-speed) linear 2 both;
+    animation: nf-edge-turn var(--nf-edge-lap-speed) linear 2 both;
   }
   /* THE BLUE-TO-ORANGE LAP (the warm spark, spec section 18): on the landing
      capsule, the hero's eyebrow capsule and the one band that opens each
@@ -558,12 +584,12 @@
     --nf-edge-lap-ink-2: var(--nf-spark);
   }
   @media (prefers-reduced-motion: reduce) {
-    .nf-edge-lap::after {
+    .nf-edge-lap__ring::before {
       animation: none;
       background: color-mix(in oklab, var(--nf-edge-lap-ink) 28%, transparent);
     }
   }
-  :root:is([data-save-data="on"], [data-motion="calm"], [data-motion="off"]) .nf-edge-lap::after {
+  :root:is([data-save-data="on"], [data-motion="calm"], [data-motion="off"]) .nf-edge-lap__ring::before {
     animation: none;
     background: color-mix(in oklab, var(--nf-edge-lap-ink) 28%, transparent);
   }

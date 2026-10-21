@@ -6,7 +6,7 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { countOf, formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
+import { countOf, formatDate, formatNumber, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { GateHandshake } from "./GateHandshake";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -28,6 +28,7 @@ import {
   saveInspectionReport,
 } from "@/lib/inspections/actions";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
+import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import {
   EMPTY_REPORT,
   ROOM_COPY,
@@ -49,7 +50,6 @@ import {
   type InspectionOutcome,
   type InspectionState,
 } from "@/lib/inspections/types";
-import { type LadderKey } from "./ladder";
 import { StatusTrack } from "@/components/app/status/StatusTrack";
 import { viewingTrack } from "@/components/app/status/tracks";
 import { statusFor, type BadgeTone } from "./status";
@@ -60,18 +60,7 @@ import { AGREEMENT_STATUS_LABEL } from "@/components/app/agreements/status";
 import { NO_INSPECTION_FEE, PRIVATE_FEE_NOTE, NO_INSPECTION_FEE_HEADLINE } from "@/lib/money/copy";
 import { ViewingDayKit } from "./ViewingDayKit";
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
-import {
-  DECLINE_WORDS,
-  LISTER_CANCEL_WORDS,
-  PROPOSE_WORDS,
-  RENTER_CANCEL_WORDS,
-  RESCHEDULE_WORDS,
-  VIEWING_WORDS,
-  WITHDRAW_WORDS,
-  DISPUTE_WORDS,
-  NO_SHOW_WORDS,
-  noShowWords,
-} from "./viewing-words";
+import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
 
 /**
@@ -115,17 +104,6 @@ export type InspectionListingFacts = {
   isRental?: boolean;
 };
 
-/** The listing card's badge: what the appointment is. */
-const STATE_LABEL: Record<InspectionState, string> = {
-  REQUESTED: "Requested",
-  CONFIRMED: "Scheduled",
-  PROPOSED: "New time offered",
-  DECLINED: "Declined",
-  COMPLETED: "Inspected",
-  WITHDRAWN: "Withdrawn",
-  NO_SHOW: NO_SHOW_WORDS.badge,
-};
-
 const STATE_TONE: Record<InspectionState, BadgeTone> = {
   REQUESTED: "pending",
   CONFIRMED: "good",
@@ -134,28 +112,6 @@ const STATE_TONE: Record<InspectionState, BadgeTone> = {
   COMPLETED: "good",
   WITHDRAWN: "quiet",
   NO_SHOW: "bad",
-};
-
-/** The lifecycle, in four words, as a strip above the checklist. */
-const RUNG_LABEL: Record<LadderKey, string> = {
-  asked: "Requested",
-  agreed: "Time agreed",
-  visited: "Inspected",
-  recorded: "Recorded",
-};
-
-/* The full meaning, which is the accessible name of each choice. */
-const OUTCOME_LABEL: Record<InspectionOutcome, string> = {
-  inspected: "I inspected it",
-  deal_done: "Inspected, and we have a deal",
-  no_deal: "Inspected, no deal",
-};
-
-/* The drawn words: short, so the three sit in one row (rule R-F). */
-const OUTCOME_SHORT: Record<InspectionOutcome, string> = {
-  inspected: "Inspected",
-  deal_done: "Deal done",
-  no_deal: "No deal",
 };
 
 const CROPS = "/brand/session-b/inspection";
@@ -188,6 +144,8 @@ function Badge({ tone, children }: { tone: BadgeTone; children: React.ReactNode 
 }
 
 export function InspectionSheet({
+  viewingCopy,
+  flowCopy,
   inspection,
   side,
   facts,
@@ -245,7 +203,24 @@ export function InspectionSheet({
   needPhotos?: number;
   /** The agreement already drawn up from this inspection, when there is one. */
   agreement?: { id: string; status: string } | null;
+  /** The moves' words (`threads.rental`), from the server parent. */
+  viewingCopy: Dictionary["threads"]["rental"];
+  /** The card's own words (`memberFlows.inspection`), from the server parent. */
+  flowCopy: Dictionary["memberFlows"]["inspection"];
 }) {
+  const {
+    VIEWING_WORDS,
+    PROPOSE_WORDS,
+    RESCHEDULE_WORDS,
+    DECLINE_WORDS,
+    LISTER_CANCEL_WORDS,
+    WITHDRAW_WORDS,
+    noShowWords,
+    DISPUTE_WORDS,
+    NO_SHOW_WORDS,
+    RENTER_CANCEL_WORDS,
+  } = viewingWords(viewingCopy);
+  const w = flowCopy;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -304,7 +279,7 @@ export function InspectionSheet({
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through.");
+          setError(result.error ?? w.failed);
           return;
         }
         after?.();
@@ -361,11 +336,32 @@ export function InspectionSheet({
    * private bucket, then `addReportPhoto` records the row.
    * The count moves only when that row came back.
    */
-  async function addPhoto(file: File) {
-    const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
+  async function addPhoto(picked: File) {
     setError(null);
     setUploading(true);
     try {
+      /*
+       * The original photo never leaves the phone: a camera photo carries
+       * EXIF, usually with GPS, so it is re-encoded through a canvas first
+       * (pixels only, the rule the thread, support and listing photos follow).
+       * The server scrubs again before recording it. A PDF is a document and
+       * goes as it is. A photo this browser cannot decode (HEIC outside
+       * Safari) is refused in words, never sent as the original.
+       */
+      const isPdf = picked.type === "application/pdf" || picked.name.toLowerCase().endsWith(".pdf");
+      let file: Blob = picked;
+      let extension = "pdf";
+      let contentType = "application/pdf";
+      if (!isPdf) {
+        const clean = await reencodeToJpeg(picked, { maxEdge: 2560, quality: 0.9 });
+        if (!clean) {
+          setError("That photo could not be read on this device. Try a JPEG or a screenshot.");
+          return;
+        }
+        file = clean;
+        extension = "jpg";
+        contentType = "image/jpeg";
+      }
       const target = await createInspectionPhotoUpload({ inspectionId: inspection.id, extension });
       if (!target.ok) {
         setError(target.error);
@@ -373,14 +369,14 @@ export function InspectionSheet({
       }
       const client = await loadBrowserClient();
       if (!client) {
-        setError("That photo did not upload. Try again in a moment.");
+        setError(w.photoFailed);
         return;
       }
       const upload = await client
         .storage.from("inspection-photos")
-        .uploadToSignedUrl(target.data.path, target.data.token, file, { contentType: file.type });
+        .uploadToSignedUrl(target.data.path, target.data.token, file, { contentType });
       if (upload.error) {
-        setError("That photo did not upload. Try again in a moment.");
+        setError(w.photoFailed);
         return;
       }
       const added = await addReportPhoto({ inspectionId: inspection.id, storagePath: target.data.path });
@@ -424,10 +420,10 @@ export function InspectionSheet({
           </div>
           <div className="nf-ix-card__text">
             <span className="nf-ix-card__badges">
-              <Badge tone={STATE_TONE[inspection.state]}>{STATE_LABEL[inspection.state]}</Badge>
-              {facts?.isDemo && <Badge tone="quiet">Example listing</Badge>}
+              <Badge tone={STATE_TONE[inspection.state]}>{w.state[inspection.state]}</Badge>
+              {facts?.isDemo && <Badge tone="quiet">{w.example}</Badge>}
             </span>
-            <p className="nf-ix-card__title">{inspection.listingTitle ?? "A property that is no longer listed"}</p>
+            <p className="nf-ix-card__title">{inspection.listingTitle ?? w.gone}</p>
             {facts && (facts.area || facts.city) && (
               <p className="nf-ix-card__line">
                 <UiIcon name="location" size={12} />
@@ -481,7 +477,7 @@ export function InspectionSheet({
               <Crop name="glyph-calendar" width={44} height={44} />
             </span>
             <div className="nf-ix-fact__text">
-              <p className="nf-ix-fact__label">Inspection date</p>
+              <p className="nf-ix-fact__label">{w.date}</p>
               <p className="nf-ix-fact__value">{when.day}</p>
               {/* The hour somebody has to be at the gate, said on whose
                   clock: a renter reading this abroad sees Lagos time, as the
@@ -501,9 +497,9 @@ export function InspectionSheet({
                   assigned agent: `inspection_requests` names the requester
                   and the lister (owner or agent) and nobody else, so the
                   label says what the row holds (CLAIMS_RULE; ledger 9). */}
-              <p className="nf-ix-fact__label">{side === "requester" ? "Listed by" : "Requested by"}</p>
+              <p className="nf-ix-fact__label">{side === "requester" ? w.listedBy : w.requestedBy}</p>
               <p className="nf-ix-fact__value">
-                {inspection.counterpartName ?? "Not named yet"}
+                {inspection.counterpartName ?? w.notNamed}
                 {inspection.counterpartBadge ? <TierBadge tier={inspection.counterpartBadge} size={14} className="nf-ix-name-tier" /> : null}
               </p>
               {/* The number, visible under the name and itself the tel: link,
@@ -513,7 +509,9 @@ export function InspectionSheet({
                   <a
                     href={`tel:${inspection.counterpartPhone}`}
                     className="nf-ix-fact__phone nf-numeric"
-                    aria-label={`Call ${inspection.counterpartName ?? "them"} on ${formatPhone(inspection.counterpartPhone)}`}
+                    aria-label={w.call
+                      .replace("{name}", inspection.counterpartName ?? w.them)
+                      .replace("{phone}", formatPhone(inspection.counterpartPhone))}
                     data-testid="inspection-call"
                   >
                     {formatPhone(inspection.counterpartPhone)}
@@ -527,7 +525,7 @@ export function InspectionSheet({
               <Crop name="glyph-clock" width={46} height={44} />
             </span>
             <div className="nf-ix-fact__text">
-              <p className="nf-ix-fact__label">Status</p>
+              <p className="nf-ix-fact__label">{w.status}</p>
               <p className="nf-ix-fact__badge">
                 <Badge tone={status.tone}>{status.label}</Badge>
               </p>
@@ -540,7 +538,7 @@ export function InspectionSheet({
             record can honestly say happened, dated from the request's own
             times; a decline or a withdrawal stops it where it stood. */}
         <StatusTrack
-          label="Inspection progress"
+          label={w.progress}
           testId="inspection-track"
           steps={viewingTrack({
             state: inspection.state,
@@ -555,11 +553,11 @@ export function InspectionSheet({
               label:
                 step.state === "failed"
                   ? inspection.state === "DECLINED"
-                    ? "Declined"
+                    ? w.state.DECLINED
                     : inspection.state === "NO_SHOW"
                       ? NO_SHOW_WORDS.badge
-                      : "Withdrawn"
-                  : RUNG_LABEL[step.key],
+                      : w.state.WITHDRAWN
+                  : w.rung[step.key],
               when: at && at.day ? `${at.day}, ${at.time}` : null,
               state: step.state,
             };
@@ -590,20 +588,22 @@ export function InspectionSheet({
         {/* Not drawn on a request that was declined or withdrawn: nobody went,
             and eight rooms that can never be ticked are a form with no use. */}
         {!noViewing && (
-        <section className={panelClass({ className: "nf-ix-check" })} aria-label="Inspection checklist">
+        <section className={panelClass({ className: "nf-ix-check" })} aria-label={w.checklist}>
           <div className="nf-ix-check__head">
             <p className="nf-ix-check__title">
               <Crop name="glyph-list" width={34} height={34} className="nf-ix-check__glyph" />
-              Inspection checklist
+              {w.checklist}
             </p>
             <div className="nf-ix-check__count">
               <span className="nf-numeric">
-                {rooms.done} of {rooms.total} done
+                {w.roomsDone
+                  .replace("{done}", formatNumber(rooms.done, locale))
+                  .replace("{total}", formatNumber(rooms.total, locale))}
               </span>
               <span
                 className="nf-ix-bar"
                 role="progressbar"
-                aria-label="Rooms checked"
+                aria-label={w.roomsChecked}
                 aria-valuemin={0}
                 aria-valuemax={rooms.total}
                 aria-valuenow={rooms.done}
@@ -614,7 +614,7 @@ export function InspectionSheet({
           </div>
           {!reportLive && (
             <p className="nf-ix-check__note" data-testid="inspection-report-off">
-              Ticking the rooms starts when inspection report storage is switched on. Nothing here is saved yet.
+              {w.reportOff}
             </p>
           )}
           <ul className="nf-ix-check__rows">
@@ -634,7 +634,7 @@ export function InspectionSheet({
                     type="button"
                     role="checkbox"
                     aria-checked={checked}
-                    aria-label={`${copy.title} checked`}
+                    aria-label={w.roomChecked.replace("{room}", copy.title)}
                     className="nf-ix-room__check"
                     disabled={!editable || pending}
                     onClick={() => saveReport({ items: [{ item, checked: !checked }] })}
@@ -651,27 +651,27 @@ export function InspectionSheet({
         {/* On a closed request it carries only what each side wrote, and is
             not drawn when neither wrote anything. */}
         {(!noViewing || inspection.note || inspection.listerNote) && (
-        <section className={panelClass({ className: "nf-ix-notes" })} aria-label="Notes">
+        <section className={panelClass({ className: "nf-ix-notes" })} aria-label={w.notes}>
           <span className="nf-ix-notes__glyph" aria-hidden="true">
             <Crop name="glyph-pencil" width={38} height={38} />
           </span>
           <div className="min-w-0 flex-1">
             {noViewing ? (
-              <p className="nf-ix-notes__label">Notes</p>
+              <p className="nf-ix-notes__label">{w.notes}</p>
             ) : (
               <label className="nf-ix-notes__label" htmlFor={`notes-${inspection.id}`}>
-                Notes
+                {w.notes}
               </label>
             )}
             {inspection.note && (
               <p className="nf-ix-notes__said">
-                <span className="nf-ix-notes__who">{side === "requester" ? "You wrote" : "They wrote"}</span>
+                <span className="nf-ix-notes__who">{side === "requester" ? w.youWrote : w.theyWrote}</span>
                 {inspection.note}
               </p>
             )}
             {inspection.listerNote && (
               <p className="nf-ix-notes__said">
-                <span className="nf-ix-notes__who">{side === "lister" ? "You wrote" : "The lister wrote"}</span>
+                <span className="nf-ix-notes__who">{side === "lister" ? w.youWrote : w.listerWrote}</span>
                 {inspection.listerNote}
               </p>
             )}
@@ -681,7 +681,7 @@ export function InspectionSheet({
                 className="nf-ix-notes__field"
                 rows={1}
                 maxLength={2000}
-                placeholder="Add any additional notes or observations..."
+                placeholder={w.notesPlaceholder}
                 value={notes}
                 disabled={!editable || pending}
                 onChange={(event) => setNotes(event.target.value)}
@@ -721,9 +721,9 @@ export function InspectionSheet({
         {/* Asked only once the agreed time has come: before it there is
             nothing to say about how it went, and the server refuses it. */}
         {inspection.state === "CONFIRMED" && !reportLive && timeCome && (
-          <section className={panelClass({ className: "nf-ix-outcome" })} aria-label="How did it go?">
+          <section className={panelClass({ className: "nf-ix-outcome" })} aria-label={w.howItWent}>
             <p className="nf-ix-outcome__head" id={`outcome-${inspection.id}`}>
-              How did it go?
+              {w.howItWent}
             </p>
             <div className="nf-ix-outcome__options" role="radiogroup" aria-labelledby={`outcome-${inspection.id}`}>
               {INSPECTION_OUTCOMES.map((value) => {
@@ -734,13 +734,13 @@ export function InspectionSheet({
                     type="button"
                     role="radio"
                     aria-checked={chosen}
-                    aria-label={OUTCOME_LABEL[value]}
+                    aria-label={w.outcome[value]}
                     className="nf-ix-option"
                     onClick={() => setOutcome(value)}
                     data-testid={`inspection-outcome-${value}`}
                   >
                     <span className="nf-ix-option__ring" aria-hidden="true" />
-                    {OUTCOME_SHORT[value]}
+                    {w.outcomeShort[value]}
                   </button>
                 );
               })}
@@ -806,14 +806,14 @@ export function InspectionSheet({
             <>
               <p className="nf-ix-hint" data-testid="inspection-closed-line">
                 {inspection.state === "NO_SHOW"
-                  ? noShowLine(noShow, side)
+                  ? noShowLine(noShow, side, w.noShow)
                   : inspection.state === "DECLINED"
                   ? side === "requester"
-                    ? "The lister declined this request, so there is no viewing to report on."
-                    : "You declined this request, so there is no viewing to report on."
+                    ? w.listerDeclined
+                    : w.youDeclined
                   : side === "requester"
-                    ? "You withdrew this request, so there is no viewing to report on."
-                    : "They withdrew this request, so there is no viewing to report on."}
+                    ? w.youWithdrew
+                    : w.theyWithdrew}
               </p>
               {mayDispute && (
                 <Button variant="secondary" full disabled={pending} onClick={() => setSheet("dispute")} data-testid="inspection-dispute">
@@ -822,7 +822,7 @@ export function InspectionSheet({
               )}
               {side === "requester" && inspection.state !== "NO_SHOW" && (
                 <ButtonLink href={`/listing/${inspection.listingId}`} variant="secondary" full>
-                  Open the listing to ask again
+                  {w.askAgain}
                 </ButtonLink>
               )}
             </>
@@ -846,7 +846,7 @@ export function InspectionSheet({
                 tabIndex={-1}
                 /* Out of the tab order (the button below opens it), and still
                    named for a screen reader's form list (axe label, C1 sweep). */
-                aria-label="Add a photo to the report"
+                aria-label={w.addPhotoLabel}
                 onChange={(event) => {
                   const file = event.target.files?.[0];
                   event.target.value = "";
@@ -866,7 +866,11 @@ export function InspectionSheet({
                 data-testid="inspection-add-photos"
               >
                 <Crop name="glyph-camera" width={38} height={34} className="nf-ix-cta__glyph" />
-                {uploading ? "Adding photo" : saved.photoCount > 0 ? `Add photos (${saved.photoCount})` : "Add photos"}
+                {uploading
+                  ? w.addingPhoto
+                  : saved.photoCount > 0
+                    ? w.addPhotosCount.replace("{count}", formatNumber(saved.photoCount, locale))
+                    : w.addPhotos}
                 <UiIcon name="chevron-right" size={16} className="nf-ix-cta__end" />
               </Button>
             </>
@@ -874,11 +878,11 @@ export function InspectionSheet({
             <Link
               href={`/messages/${inspection.conversationId}?attach=1`}
               className="nf-btn nf-btn--primary nf-btn--md nf-btn--full nf-ix-cta"
-              aria-label="Add photos, in the conversation about this inspection"
+              aria-label={w.addPhotosInChat}
               data-testid="inspection-add-photos"
             >
               <Crop name="glyph-camera" width={38} height={34} className="nf-ix-cta__glyph" />
-              Add photos
+              {w.addPhotos}
               <UiIcon name="chevron-right" size={16} className="nf-ix-cta__end" />
             </Link>
           ) : null}
@@ -892,7 +896,7 @@ export function InspectionSheet({
             data-testid="inspection-submit"
           >
             <Crop name="glyph-plane" width={36} height={36} className="nf-ix-cta__glyph" />
-            Submit inspection report
+            {w.submit}
           </Button>
           {/* The render draws no helper line: with the report on, the count
               ("n of 8 done") already says why Submit waits. These carry
@@ -902,15 +906,15 @@ export function InspectionSheet({
           {inspection.state === "CONFIRMED" && !timeCome && (
             <p className="nf-ix-hint" data-testid="inspection-report-waits">
               {reportLive
-                ? "Tick the rooms as you go round. The report can be sent once the viewing time has come."
-                : "How it went can be recorded once the viewing time has come."}
+                ? w.waitsReport
+                : w.waitsOutcome}
             </p>
           )}
           {!reportLive && inspection.state === "CONFIRMED" && timeCome && !submittable && (
-            <p className="nf-ix-hint">Choose how it went, and the report can be sent.</p>
+            <p className="nf-ix-hint">{w.chooseOutcome}</p>
           )}
           {(inspection.state === "REQUESTED" || inspection.state === "PROPOSED") && (
-            <p className="nf-ix-hint">The report opens once a time is agreed on both sides.</p>
+            <p className="nf-ix-hint">{w.opensWhenAgreed}</p>
           )}
 
           {/* Once the time has come, either side can say the other did not
@@ -955,8 +959,7 @@ export function InspectionSheet({
               them, so this is said while there is still time to add them. */}
           {editable && photosMissing > 0 && rooms.done === rooms.total && (
             <p className="nf-ix-hint" data-testid="inspection-photos-short">
-              Still needed: {countOf(photosMissing, "photos", locale)} taken at the property. Add them, then submit. The
-              agreement is drawn up from this report, and photos cannot be added once it is sent.
+              {w.photosShort.replace("{photos}", countOf(photosMissing, "photos", locale))}
             </p>
           )}
           {/* TRACK A: the agreement is drawn up from the renter's submitted
@@ -969,10 +972,10 @@ export function InspectionSheet({
             <>
               <p className="nf-ix-hint" data-testid="inspection-agreement-cancelled">
                 {side === "requester"
-                  ? "The agreement drawn up from this report was cancelled. You can draw up a new one from the same report."
-                  : "The agreement drawn up from this report was cancelled. The renter can draw up a new one from the same report."}{" "}
+                  ? w.agreementCancelledYou
+                  : w.agreementCancelledThem}{" "}
                 <Link href={`/agreements/${agreement.id}`} className="underline">
-                  See the cancelled agreement
+                  {w.seeCancelled}
                 </Link>
               </p>
               {side === "requester" && (
@@ -991,7 +994,7 @@ export function InspectionSheet({
                 className="nf-btn nf-btn--primary nf-btn--md nf-btn--full"
                 data-testid="inspection-agreement"
               >
-                Open the agreement
+                {w.openAgreement}
               </Link>
               <p className="nf-ix-hint">{AGREEMENT_STATUS_LABEL[agreement.status] ?? agreement.status}</p>
             </>
@@ -1003,7 +1006,7 @@ export function InspectionSheet({
               />
             ) : (
               <p className="nf-ix-hint" data-testid="inspection-agreement-waiting">
-                The renter draws up the agreement from this report. You will be told when it is waiting for you.
+                {w.renterDrawsUp}
               </p>
             )
           ) : null}
@@ -1073,19 +1076,19 @@ export function InspectionSheet({
 }
 
 /** Where a no-show stands, from this reader's side of it. */
-function noShowLine(noShow: NoShow | null, side: "lister" | "requester"): string {
-  if (!noShow) return "This viewing was marked as a no-show.";
-  if (noShow.resolution === "overturned") return "This no-show was disputed and Vallo took it off the record.";
-  if (noShow.resolution === "upheld") return "This no-show was disputed and Vallo decided it stands.";
+function noShowLine(
+  noShow: NoShow | null,
+  side: "lister" | "requester",
+  w: Dictionary["memberFlows"]["inspection"]["noShow"],
+): string {
+  if (!noShow) return w.marked;
+  if (noShow.resolution === "overturned") return w.overturned;
+  if (noShow.resolution === "upheld") return w.upheld;
   if (noShow.reportedByMe) {
-    const them = side === "lister" ? "the renter" : "the lister";
-    return noShow.disputedAt
-      ? `You marked ${them} as a no-show. They disputed it, and Vallo is looking at both sides.`
-      : `You marked ${them} as a no-show. They have 48 hours to dispute it.`;
+    if (side === "lister") return noShow.disputedAt ? w.youMarkedRenterDisputed : w.youMarkedRenter;
+    return noShow.disputedAt ? w.youMarkedListerDisputed : w.youMarkedLister;
   }
-  return noShow.disputedAt
-    ? "You were marked as a no-show and you disputed it. Vallo is looking at both sides."
-    : "The other side says you did not come to this viewing. If that is not right, you can dispute it within 48 hours of their report.";
+  return noShow.disputedAt ? w.youDisputed : w.theySay;
 }
 
 /**

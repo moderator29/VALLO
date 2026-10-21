@@ -227,7 +227,7 @@ export function ListingCard({
           the LIST puts the inset inside the scrolled content, where a snap
           cannot reach it, and it holds at both ends rather than only the left.
           Measured 0 after. Same shape as the three other markup-padded rails in
-          the tree (`RecentStrip`, `ActiveFilters`, `/rent`), all of which
+          the tree (`RecentStrip`, `/rent`), all of which
           measured 0 because they already do it this way. */}
       {listing.photos.length > 0 && (
         <div className="nf-scroll-x -mx-2xs mt-sm">

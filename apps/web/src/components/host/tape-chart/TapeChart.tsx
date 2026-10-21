@@ -110,14 +110,18 @@ export function TapeChart({
           .filter(Boolean)
           .join(" ")}
       >
+        {/* The cell's sentence was built and then never drawn, so a screen
+            reader heard a bare number; it now hears the day, what is open
+            and the occupancy, and the figures below are for the eye. */}
+        <span className="sr-only">{label}</span>
         {none ? (
-          <span className="nf-tape__cell-n nf-tape__cell-n--none" title={words.notOnSale}>
+          <span className="nf-tape__cell-n nf-tape__cell-n--none" title={words.notOnSale} aria-hidden="true">
             {"–"}
           </span>
         ) : (
           <>
-            <span className="nf-tape__cell-n">{c.available}</span>
-            <span className="nf-tape__cell-pct">({c.occupancyPct ?? 0}%)</span>
+            <span className="nf-tape__cell-n" aria-hidden="true">{c.available}</span>
+            <span className="nf-tape__cell-pct" aria-hidden="true">({c.occupancyPct ?? 0}%)</span>
           </>
         )}
       </div>

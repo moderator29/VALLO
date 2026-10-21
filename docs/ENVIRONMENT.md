@@ -170,6 +170,7 @@ wondering why.
 | `NODE_ENV`, `NEXT_RUNTIME`, `VERCEL`, `VERCEL_ENV`, `VERCEL_URL`, `VERCEL_GIT_COMMIT_SHA`, `VERCEL_PROJECT_PRODUCTION_URL` | Read by the code, set by Next.js or Vercel. Never set them by hand. |
 | `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY` | Not needed, in live or test mode. The server initialises the transaction and the page resumes it by access code in Paystack's inline iframe, which takes no public key, so the browser never holds a Paystack key. There is no `NEXT_PUBLIC_PAYSTACK_TEST_PUBLIC_KEY` for the same reason. |
 | `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` | No analytics client is installed. |
+| `TURBOPACK_ROOT` | Build only, never on Vercel: widens Turbopack's root so a git worktree whose `node_modules` are symlinks into another checkout can run `next build` (`next.config.ts`). Unset, nothing changes. |
 
 ---
 

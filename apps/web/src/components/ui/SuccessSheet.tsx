@@ -10,6 +10,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { Icon3DName } from "@/components/ui/icon-3d";
 import { feedback, type FeedbackKind } from "@/lib/ui/feedback";
 import { motionQuiet } from "@/lib/motion/gate";
+import { useCopyFlash, useCopyLabels } from "@/lib/ui/use-copy";
 import { SUCCESS_FEEL, VARIANT_OBJECT, type SuccessVariant } from "@/lib/ui/success-moments";
 
 /**
@@ -335,7 +336,11 @@ export function SuccessBody({
             {details.map((row) => (
               <div key={row.label} className="nf-success__fact">
                 <dt>{row.label}</dt>
-                <dd className={row.mono ? "nf-success__mono" : undefined}>{row.value}</dd>
+                {row.mono && typeof row.value === "string" ? (
+                  <CopyFact value={row.value} label={row.label} />
+                ) : (
+                  <dd className={row.mono ? "nf-success__mono" : undefined}>{row.value}</dd>
+                )}
               </div>
             ))}
           </dl>
@@ -419,5 +424,35 @@ function SuccessObject({ name, sealed }: { name: Icon3DName; sealed: boolean }) 
       </span>
       <span className="nf-success__pulse" />
     </div>
+  );
+}
+
+/**
+ * A reference row: the reference itself, still selectable in one tap, and a
+ * small Copy control beside it (the one copy path, `useCopyFlash`: the button
+ * says Copied for a beat and a light tick is felt). Outside the client copy
+ * provider there are no words for the control, so only the reference shows.
+ */
+function CopyFact({ value, label }: { value: string; label: string }) {
+  const words = useCopyLabels();
+  const [copied, copy] = useCopyFlash();
+  return (
+    <dd className="flex flex-wrap items-center justify-end gap-inline">
+      <span className="nf-success__mono">{value}</span>
+      {words ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          leadingIcon="document"
+          done={copied}
+          onClick={() => void copy(value)}
+          aria-label={`${words.copy}: ${label}`}
+          data-testid="success-copy"
+        >
+          {copied ? words.copied : words.copy}
+        </Button>
+      ) : null}
+    </dd>
   );
 }

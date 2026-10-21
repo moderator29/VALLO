@@ -23,7 +23,6 @@ afterAll(closeBrowser);
 const CSS = productCss(
   "app/css/controls.css",
   "app/social.css",
-  "app/css/cinema.css",
   "app/css/docs-motion.css",
   "app/css/animation.css",
   "app/css/data-saver.css",
@@ -44,13 +43,12 @@ const entryWith = (saver: boolean) => `
     <div id="tall" className="nf-skeleton" style={{ width: 300, height: 200 }} />
     <div id="tallglass" className="nf-skeleton nf-skeleton--glass" style={{ width: 300, height: 200 }} />
     <div id="tallsoc" className="nf-social-skeleton" style={{ width: 300, height: 200 }} />
-    <div className="nf-vcols"><div className="nf-vcols__col" data-col="0"><div id="strip" className="nf-vcols__strip" /></div></div>
     <div style={{ position: "relative", width: 600, height: 40 }}><span id="pulse" className="nf-flow__pulse" /></div>
   </div>);
 `;
 
 const VIEW = { width: 1000, height: 800 };
-const SELECTORS = ["#sk", "#skg", "#soc", "#strip", "#pulse"] as const;
+const SELECTORS = ["#sk", "#skg", "#soc", "#pulse"] as const;
 
 /* The app and social slabs sweep on their `::after` (W2, round 5: a translated band, not a
    repainted background). */
@@ -90,7 +88,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the last loops are bounded", ()
     try {
       const counts: Record<string, string> = {};
       for (const sel of SELECTORS) counts[sel] = String(await style(page, sel, "animationIterationCount"));
-      expect(counts).toEqual({ "#sk": "4", "#skg": "4", "#soc": "4", "#strip": "2", "#pulse": "2" });
+      expect(counts).toEqual({ "#sk": "4", "#skg": "4", "#soc": "4", "#pulse": "2" });
       expect(await style(page, "#sk", "animationFillMode")).toBe("forwards");
       expect(await style(page, "#soc", "animationFillMode")).toBe("forwards");
     } finally {
@@ -142,7 +140,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the last loops are bounded", ()
   it("data saver starts none of them", async () => {
     const { page, close } = await mountInBrowser({ entry: entryWith(true), css: CSS, viewport: VIEW });
     try {
-      for (const sel of ["#sk", "#skg", "#soc", "#strip"]) expect(await style(page, sel, "animationName"), sel).toBe("none");
+      for (const sel of ["#sk", "#skg", "#soc"]) expect(await style(page, sel, "animationName"), sel).toBe("none");
     } finally {
       await close();
     }

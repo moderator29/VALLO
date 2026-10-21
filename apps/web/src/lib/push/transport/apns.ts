@@ -132,38 +132,42 @@ export function readApnsError(status: number, body: string): ProviderReply {
   if (status === 410 || reason === "Unregistered") {
     return { outcome: "gone", status, error: reason };
   }
+  /* Apple's 404 is `BadPath`, a request we built wrong, never a dead device;
+     `replyFromStatus` would have read it as gone. */
+  if (status === 404) return { outcome: "failed", status, error: reason === `http_${status}` ? "BadPath" : reason };
   return replyFromStatus(status, reason);
 }
 
 /** One HTTP/2 session per gateway, reused. Apple expects a long lived connection. */
-let session: { key: string; client: ClientHttp2Session } | null = null;
+const sessions = new Map<string, ClientHttp2Session>();
 
 function sessionFor(host: string): ClientHttp2Session {
-  if (session && session.key === host && !session.client.closed && !session.client.destroyed) {
-    return session.client;
-  }
+  const open = sessions.get(host);
+  if (open && !open.closed && !open.destroyed) return open;
   const client = connect(host);
   /* An unhandled 'error' on an http2 session is an uncaught exception that
      takes the process down, and a push gateway drops idle connections as a
      matter of course. Swallowed here and re-established on the next send. */
   client.on("error", () => {
-    if (session?.client === client) session = null;
+    if (sessions.get(host) === client) sessions.delete(host);
   });
   client.on("close", () => {
-    if (session?.client === client) session = null;
+    if (sessions.get(host) === client) sessions.delete(host);
   });
-  session = { key: host, client };
+  sessions.set(host, client);
   return client;
 }
 
-/** Close the gateway connection. For tests and for a clean shutdown. */
+/** Close the gateway connections. For tests and for a clean shutdown. */
 export function closeApnsSession(): void {
-  try {
-    session?.client.close();
-  } catch {
-    /* Already gone. */
+  for (const client of sessions.values()) {
+    try {
+      client.close();
+    } catch {
+      /* Already gone. */
+    }
   }
-  session = null;
+  sessions.clear();
 }
 
 /** Send to one iOS device over HTTP/2, and read Apple's reply. */
@@ -196,6 +200,30 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
     actions: payload.actions ?? [],
   });
 
+  const first = await postToGateway(host, target.token, token.token, payload, body);
+  /* THE SANDBOX TRAP, ANSWERED RATHER THAN ONLY DESCRIBED. A token from a
+     development build sent to the production gateway (or the other way
+     round) is refused 400 BadDeviceToken. Counted as a failure, it retired a
+     perfectly good iPhone after eight notifications, and every iPhone at once
+     when APNS_PRODUCTION was set the wrong way. The other gateway is asked
+     once; what it says decides. */
+  if (first.outcome === "failed" && first.error === "BadDeviceToken") {
+    const other = host === PRODUCTION_HOST ? SANDBOX_HOST : PRODUCTION_HOST;
+    const second = await postToGateway(other, target.token, token.token, payload, body);
+    /* Accepted there, or Unregistered there (a dead token from that build). */
+    if (second.outcome !== "failed") return second;
+  }
+  return first;
+}
+
+/** One POST to one gateway, read to the end. */
+function postToGateway(
+  host: string,
+  deviceToken: string,
+  providerToken: string,
+  payload: PushPayload,
+  body: string,
+): Promise<ProviderReply> {
   return new Promise<ProviderReply>((resolve) => {
     let settled = false;
     const finish = (reply: ProviderReply): void => {
@@ -208,8 +236,8 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
       const client = sessionFor(host);
       const request = client.request({
         [constants.HTTP2_HEADER_METHOD]: "POST",
-        [constants.HTTP2_HEADER_PATH]: `/3/device/${target.token}`,
-        authorization: `bearer ${token.token}`,
+        [constants.HTTP2_HEADER_PATH]: `/3/device/${deviceToken}`,
+        authorization: `bearer ${providerToken}`,
         "apns-topic": apnsBundleId(),
         "apns-push-type": "alert",
         /* 10 is "deliver immediately"; 5 lets the device batch for battery.

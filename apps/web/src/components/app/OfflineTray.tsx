@@ -68,9 +68,20 @@ async function replayCreate(entry: OutboxEntry & { payload: Record<string, strin
   const tapKey = entry.target;
   let result: ActionResult<unknown>;
   if (entry.kind === "send_message") {
-    result = await sendMessage({ conversationId: p.conversationId!, body: p.body!, tapKey });
+    result = await sendMessage({
+      conversationId: p.conversationId!,
+      body: p.body!,
+      ...(p.replyToId ? { replyToId: p.replyToId } : {}),
+      tapKey,
+    });
   } else if (entry.kind === "request_inspection") {
-    result = await requestInspection({ listingId: p.listingId, when: p.when, ...(p.note ? { note: p.note } : {}), tapKey });
+    result = await requestInspection({
+      listingId: p.listingId,
+      when: p.when,
+      ...(p.note ? { note: p.note } : {}),
+      ...(p.mode ? { mode: p.mode } : {}),
+      tapKey,
+    });
   } else if (entry.kind === "submit_review") {
     const form = new FormData();
     for (const [key, value] of Object.entries(p)) form.set(key, value);

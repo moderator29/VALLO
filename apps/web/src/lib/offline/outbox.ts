@@ -34,7 +34,9 @@ export type CreateKind = (typeof CREATE_KINDS)[number];
  * an account, a card) has a field to travel in.
  */
 const PAYLOAD_FIELDS: Record<CreateKind, { required: readonly string[]; optional: readonly string[] }> = {
-  send_message: { required: ["conversationId", "body"], optional: [] },
+  /* `replyToId` is the message a reply answers: without it a reply tapped
+     with no signal could not be kept at all. */
+  send_message: { required: ["conversationId", "body"], optional: ["replyToId"] },
   /* `mode` is the visit mode (`in_person` or `video`): without it a video
      visit asked with no signal could not be kept at all. */
   request_inspection: { required: ["listingId", "when"], optional: ["note", "mode"] },

@@ -118,18 +118,15 @@ describe("principle 10, the marketing and loading loops (Session 3, C1)", () => 
     expect(controls.match(/linear-gradient\(\s*90deg,\s*transparent 19\.2%/g)).toHaveLength(1);
   });
 
-  it("the landing columns turn twice and the docs flow pulse walks twice, then both rest", () => {
-    const cinema = strip(css("cinema.css"));
-    expect(cinema).toContain("animation: nf-vcol-up 48s linear 2 forwards;");
-    expect(cinema).not.toMatch(/infinite/);
+  it("the docs flow pulse walks twice, then rests (the landing columns left with the cinema kit)", () => {
     const docs = strip(css("docs-motion.css"));
     expect(docs).toContain("animation: nf-flow-pulse 5.6s var(--nf-ease-standard) 1.4s 2;");
     expect(docs).not.toMatch(/infinite/);
   });
 
-  it("data saver stops the slabs and the columns (the pulse already answered to it)", () => {
+  it("data saver stops the slabs (the pulse already answered to it)", () => {
     const saver = strip(css("data-saver.css"));
-    for (const sel of [".nf-skeleton::after", ".nf-social-skeleton::after", ".nf-vcols__strip"]) {
+    for (const sel of [".nf-skeleton::after", ".nf-social-skeleton::after"]) {
       expect(saver).toContain(`:root[data-save-data="on"] ${sel}`);
     }
     expect(strip(css("docs-motion.css"))).toContain('[data-save-data="on"]) .nf-flow__pulse');

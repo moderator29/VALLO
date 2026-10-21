@@ -17,6 +17,8 @@ const state = vi.hoisted(() => ({
   verifyCalls: [] as string[],
   audits: [] as { action: string; outcome: string }[],
   notices: [] as unknown[],
+  walletRow: true,
+  savedCards: false,
 }));
 
 vi.mock("../actions/session", () => ({
@@ -26,7 +28,11 @@ vi.mock("../actions/session", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined }));
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
-vi.mock("../flags", () => ({ isFeatureEnabled: async () => true }));
+vi.mock("../flags", () => ({ isFeatureEnabled: async () => state.walletRow }));
+vi.mock("../flags/read", () => ({
+  SAVED_CARDS_FLAG: "saved_cards",
+  flagIsOn: async (key: string) => key === "saved_cards" && state.savedCards,
+}));
 vi.mock("../security/money-limits", () => ({
   guardMoney: async () => (state.allowed ? { allowed: true } : { allowed: false, message: "limit reached" }),
 }));
@@ -117,6 +123,8 @@ function signedIn({ intent = true }: { intent?: boolean } = {}) {
 }
 
 beforeEach(() => {
+  state.walletRow = true;
+  state.savedCards = false;
   state.allowed = true;
   state.configured = true;
   state.verify = null;
@@ -289,5 +297,24 @@ describe("the ₦100 in the panel", () => {
     const panel = readFileSync(new URL("../../components/app/payments/PaymentMethodsPanel.tsx", import.meta.url), "utf8");
     const match = panel.match(/export const CARD_SETUP_AMOUNT_MINOR = ([\d_]+);/);
     expect(Number(match?.[1]?.replace(/_/g, ""))).toBe(CARD_SETUP_AMOUNT_MINOR);
+  });
+});
+
+describe("the switch that saving a card sits behind", () => {
+  it("is off when neither saved_cards nor the legacy wallet row is on, and nothing is opened", async () => {
+    state.walletRow = false;
+    state.savedCards = false;
+    const { startCardSetup } = await import("./methods-actions");
+    const result = await startCardSetup();
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toMatch(/Saving a card is switched off/);
+  });
+
+  it("takes its own saved_cards switch, so it no longer needs the retired wallet row", async () => {
+    state.walletRow = false;
+    state.savedCards = true;
+    const { startCardSetup } = await import("./methods-actions");
+    const result = await startCardSetup();
+    if (!result.ok) expect(result.error).not.toMatch(/Saving a card is switched off/);
   });
 });

@@ -433,36 +433,6 @@ export const yo: Dictionary = withFallback({
         cities: "Ìlú",
         states: "Ìpínlẹ̀",
       },
-      /* THE FEATURE BAND IS ABSENT HERE ON PURPOSE, AND FALLS BACK TO
-         ENGLISH. The content truth sweep of 19 September rewrote all six
-         cells and the Yoruba that stood here would have printed a different
-         claim under the same keys. A native speaker writes the six and they
-         come back. */
-      community: {
-        overline: "Àwọn ènìyàn gidi. Àwọn ibi gidi.",
-        /* `title` and `body` are absent on purpose and fall back to English:
-           the clean pass (29 September) rewrote both, and the old Yoruba
-           described a "growing community" and figures the band may not
-           print. A native speaker writes them and they come back here. */
-        thirdParty: "Ẹnìkẹta",
-        thirdPartyTitle: "Ohun ìní alábàáṣiṣẹ́, a máa ń fi àmì sí i nígbà gbogbo",
-        thirdPartyBody:
-          "Ibùgbé tí alábàáṣiṣẹ́ ń pèsè ní àmì yìí ó sì sọ ẹni tó ń jẹ́rìí sí i. A kò fi ṣe bí tiwa láé.",
-      },
-      categories: {
-        overline: "Ṣàwárí nípa ẹ̀ka",
-        /* `title` and `body` fall back to English (the clean pass): the old
-           body claimed Vallo carries "the whole market". */
-        apartments: "Ilé gbígbé",
-        houses: "Ilé",
-        shortlets: "Ìyálé kúkúrú",
-        hotels: "Hótẹ́lì",
-        resorts: "Ibi ìsinmi",
-        guestHouses: "Ilé àlejò",
-        commercial: "Ìṣòwò",
-        land: "Ilẹ̀",
-        count: "{count} ni a kọ sílẹ̀",
-      },
       app: {
         title: "Mú Vallo lọ pẹ̀lú rẹ.",
         body: "Gbogbo ètò ohun ìní nínú àpò rẹ. Vallo ń fi sori ẹrọ láti inú aṣàwákiri rẹ lórí iPhone àti Android.",
@@ -1102,6 +1072,14 @@ export const yo: Dictionary = withFallback({
       typeToConfirm: "Tẹ {phrase} láti fẹsẹ̀múlẹ̀",
       capitals: "Lẹ́tà ńlá gẹ́gẹ́ bí a ti fi hàn. Ohunkóhun mìíràn kò ní ṣí bọ́tìnì náà.",
       confirm: "Pa á rẹ́ pátápátá",
+      // NATIVE REVIEW: the deletion blockers for partner-held money and rewards (17 October 2026).
+      blockerPartnerHeld: "Alábàáṣiṣẹ́pọ̀ ìsanwó tó ní ìwé àṣẹ ń di {amount} mú tàbí ń gbé e fún àdéhùn kan tìrẹ. Wọ́n gbọ́dọ̀ tú u sílẹ̀ tàbí dá a padà ná.",
+      blockerPartnerHeldCta: "Ṣí àwọn àdéhùn mi",
+      blockerRewardsBalance: "O ní {amount} nínú èrè tí o lè gbà jáde. Gbà á jáde ná kí ó má baà sọnù.",
+      blockerRewardsBalanceCta: "Gba èrè jáde",
+      blockerRewardsPayouts: "O ní ìgbàjáde èrè {count} tí ó ṣì ń bọ̀ sí báńkì rẹ.",
+      blockerRewardsPayoutsPlural: "O ní ìgbàjáde èrè {count} tí wọ́n ṣì ń bọ̀ sí báńkì rẹ.",
+      blockerRewardsPayoutsCta: "Wo èrè mi",
     },
 
     about: {
@@ -1576,6 +1554,8 @@ export const yo: Dictionary = withFallback({
       videoCeiling: "Àtòjọ kan gba fídíò {max} péré.",
       videoFailed: "Fídíò náà kò parí ìgbésókè. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i.",
       videoUploading: "Ń gbé {name} sókè, {percent}%",
+      videoCancel: "Dá ìgbésókè dúró",
+      videoCancelled: "A ti dá ìgbésókè dúró. Kò sí ohun tí a so mọ́ ọ.",
       retry: "Gbìyànjú lẹ́ẹ̀kan sí i",
       notPrepared:
         "A kò lè múra àwòrán náà láìséwu, nítorí náà a kò gbé e sókè. Gbìyànjú àwòrán mìíràn.",
@@ -2853,6 +2833,7 @@ export const yo: Dictionary = withFallback({
       viewTrips: "Wo àwọn ìrìnàjò rẹ",
       viewProperty: "Wo ilé náà",
       viewRestaurant: "Wo ilé oúnjẹ náà",
+      askViewing: "Béèrè láti wo ilé yìí",
     },
     rental: {
       waitingOnYou: "They asked to inspect this place. Your answer goes to them and to their inspections list.",
@@ -2886,6 +2867,40 @@ export const yo: Dictionary = withFallback({
       outcomeDealDone: "A ṣàyẹ̀wò, a sì ti fohùn ṣọ̀kan",
       outcomeNoDeal: "A ṣàyẹ̀wò, kò sí àdéhùn",
       outcomeSave: "Fi pamọ́",
+      confirm: "Fìdí rẹ̀ múlẹ̀",
+      cancelViewing: "Fagilé wíwo ilé",
+      cancelledNote: "A ti fagilé e.",
+      openChat: "Ṣí ìjíròrò náà",
+      lagosTime: "Àkókò Èkó",
+      reasonLabel: "Sọ ìdí fún wọn (kò pọn dandan)",
+      offerBody: "Wọn yóò rí àkókò tí o fi lọ̀ wọ́n, wọ́n sì lè gbà á pẹ̀lú ìfọwọ́kàn kan. Àkókò tí wọ́n béèrè wà nínú àkọsílẹ̀.",
+      offerPlaceholder: "Ẹnu ọ̀nà máa ń ti ní agogo 6, nítorí náà ó dára kí ó tètè jẹ́",
+      rescheduleBody:
+        "Wíwo ilé náà kò ní fìdí múlẹ̀ mọ́ títí wọn yóò fi gba àkókò tuntun náà. A ó sọ fún wọn lẹ́sẹ̀kẹsẹ̀, àkókò tí wọ́n béèrè sì wà nínú àkọsílẹ̀.",
+      listerCancelTitle: "Fagilé wíwo ilé yìí?",
+      listerCancelBody: "A ó sọ fún wọn pé wíwo ilé náà ti dópin. Tí ọjọ́ mìíràn bá bá ọ mu, fi àkókò mìíràn lọ̀ wọ́n dípò rẹ̀.",
+      cancelConfirm: "Bẹ́ẹ̀ni, fagilé e",
+      withdrawTitle: "Fa ìbéèrè yìí sẹ́yìn?",
+      withdrawBody: "Olùkéde yóò rí i pé o fà á sẹ́yìn. O lè tún béèrè láti ojú-ìwé ilé náà.",
+      withdrawConfirm: "Bẹ́ẹ̀ni, fà á sẹ́yìn",
+      renterCancelBody: "A ó sọ fún olùkéde pé o kò ní wá. O lè béèrè àkókò mìíràn láti ojú-ìwé ilé náà.",
+      noShowRenterTitle: "Ayálégbé náà kò wá?",
+      noShowListerTitle: "Kò sí ẹni tó wá fi hàn?",
+      noShowRenterBody:
+        "A ó sọ fún wọn pé o sàmì sí wọn pé wọn kò wá, wọ́n sì lè tako ó láàárín wákàtí 48. Vallo ń wo gbogbo àtakò.",
+      noShowListerBody:
+        "A ó sọ fún olùkéde pé o sàmì sí i pé kò wá, ó sì lè tako ó láàárín wákàtí 48. Vallo ń wo gbogbo àtakò.",
+      whatHappened: "Ohun tó ṣẹlẹ̀ (kò pọn dandan)",
+      noShowConfirm: "Bẹ́ẹ̀ni, sàmì sí i pé kò wá",
+      disputeTitle: "Tako àmì àìwá yìí?",
+      disputeBody: "Sọ fún Vallo pé o wà níbẹ̀. Ẹnìkan nínú ẹgbẹ́ yóò wo ẹ̀gbẹ́ méjèèjì, yóò sì sọ ìpinnu fún ẹ̀yin méjèèjì.",
+      disputeSend: "Fi àtakò ránṣẹ́",
+      markRenterNoShow: "Ayálégbé náà kò wá",
+      markListerNoShow: "Kò sí ẹni tó wá fi hàn",
+      noShowBadge: "Kò wá",
+      disputeThis: "Tako èyí",
+      noShowSettled: "A ti sàmì sí i pé kò wá. Wọ́n lè tako ó láàárín wákàtí 48.",
+      failed: "Kò lọ.",
     },
     reservation: {
       tableFor: "tábìlì fún {count}",
@@ -3762,6 +3777,7 @@ export const yo: Dictionary = withFallback({
       noShow: "Kò wá",
       markedSeated: "A ti sàmì sí i pé wọ́n jókòó.",
       markedNoShow: "A ti sàmì sí i pé kò wá. A ti sọ fún àlejò náà.",
+      markedDisputed: "A ti fi pamọ́. Àlejò náà sọ ohun mìíràn fún wa, nítorí náà ẹnìkan ní Vallo yóò yẹ tábìlì yìí wò.",
     },
     bill: {
       label: "Àpapọ̀ owó lórí ìwé owó",
@@ -4205,7 +4221,6 @@ export const yo: Dictionary = withFallback({
   feedV2: {
     card: {
       commentPill: "Fi èsì sílẹ̀",
-      commentAria: "fèsì sí èyí",
       readMore: "Ka síwájú",
       readLess: "Fi díẹ̀ hàn",
       roleLandlord: "Onílé",
@@ -4227,6 +4242,13 @@ export const yo: Dictionary = withFallback({
       describePlain: "{name} ló tẹ̀ ẹ́ jáde",
       describeLandlord: "{name}, onílé, ló tẹ̀ ẹ́ jáde",
       describeAgent: "{name}, aṣojú, ló tẹ̀ ẹ́ jáde",
+      likedUndo: "O fẹ́ràn rẹ̀, {count}. Yí i padà",
+      like: "Ìfẹ́ràn {count}, fẹ́ràn èyí",
+      repostedUndo: "O tún un pín, {count}. Yí i padà",
+      repost: "Àtúnpín {count}, tún èyí pín",
+      share: "Pín àtẹ̀jáde yìí",
+      savedRemove: "A ti fi pamọ́. Yọ ọ́ kúrò nínú àwọn tí a fi pamọ́",
+      save: "Fi àtẹ̀jáde yìí pamọ́",
     },
     composer: {
       cancel: "Fagilé",
@@ -4595,6 +4617,122 @@ export const yo: Dictionary = withFallback({
       openTitle: "Wọ́n ń jiyàn lórí ìsanwó káàdì kan",
       openBody: "Báńkì ẹni tó sanwó ṣí àríyànjiyàn lórí ìsanwó kan tí o gbà. Kò sí ohun tí a dá dúró nígbà tí wọ́n ń pinnu rẹ̀. Ẹgbẹ́ ìṣúná Vallo lè béèrè ẹ̀rí ìfiṣura náà lọ́wọ́ rẹ.",
       openMore: "Àríyànjiyàn tó ṣí sílẹ̀: {count}",
+    },
+  },
+
+  /* The conversation screen's words (language audit, 17 October 2026).
+     Written without a native speaker, like the rest of this file. */
+  experienceInbox: {
+    inbox: { pane: "Àwọn ìjíròrò" },
+    thread: {
+      view: {
+        options: "Àwọn àṣàyàn ìjíròrò",
+        conversation: "Ìjíròrò",
+        openProfile: "{name}, ṣí ojú-ìwé rẹ̀",
+        keepInside: "Jẹ́ kí gbogbo ìjíròrò àti ìsanwó wà nínú Vallo",
+        emptyTitle: "Kí {name}",
+        emptyListing:
+          "Kò sí ohun tí a tíì sọ níbí. Béèrè ohun tí o nílò láti mọ̀ nípa ilé náà, ẹ fohùn ṣọ̀kan lórí àkókò láti wò ó, kí o sì jẹ́ kí gbogbo ìjíròrò wà ní ibì kan.",
+        emptyBooking: "Kò sí ohun tí a tíì sọ níbí. Béèrè nípa bí o ṣe máa dé, yàrá náà tàbí ohunkóhun tí ìfipamọ́ náà kò dáhùn.",
+        emptyReservation: "Kò sí ohun tí a tíì sọ níbí. Fìdí àkókò múlẹ̀, iye ènìyàn, àti ohunkóhun tí ilé ìdáná yẹ kí ó mọ̀.",
+        emptyDirect:
+          "Kò sí ohun tí a tíì sọ níbí. Ohunkóhun tí o bá kọ wà láàárín ẹ̀yin méjèèjì, gbogbo ìjíròrò náà sì wà níbí.",
+        roleLandlord: "Onílé",
+        roleAgent: "Aṣojú Vallo",
+        roleTenant: "Ayálégbé",
+        photoYours: "Àwòrán tí o so mọ́ ọn",
+        photoFrom: "Àwòrán láti ọ̀dọ̀ {name}",
+        videoYours: "Fídíò tí o so mọ́ ọn",
+        videoFrom: "Fídíò láti ọ̀dọ̀ {name}",
+        forwarded: "A fi ránṣẹ́ síwájú",
+        deleted: "A ti pa ọ̀rọ̀ yìí rẹ́",
+        open: "Ṣí i",
+        sending: "Ó ń lọ",
+        notSent: "Kò lọ.",
+        retry: "Tún gbìyànjú",
+        retryText: "Tún fi ránṣẹ́: {text}",
+        retryPhoto: "Tún àwòrán rẹ fi ránṣẹ́",
+        retryMessage: "Tún ọ̀rọ̀ yìí fi ránṣẹ́",
+        typing: "{name} ń kọ̀wé",
+        dismissSafety: "Pa àkíyèsí ààbò dé",
+        photoReady: "Àwòrán ti ṣetán láti lọ",
+        photoAttached: "A ti so àwòrán mọ́ ọn",
+        removePhoto: "Yọ àwòrán kúrò",
+        remove: "Yọ kúrò",
+        cancelReply: "Fagilé èsì",
+        cancel: "Fagilé",
+        attachPhoto: "So àwòrán mọ́ ọn",
+        messageTo: "Ọ̀rọ̀ sí {name}",
+        placeholder: "Kọ ọ̀rọ̀ kan",
+        send: "Fi ọ̀rọ̀ ránṣẹ́",
+        forwardedTo: "A ti fi ránṣẹ́ sí {name}.",
+        inspectionConfirmed: "A ti fìdí àyẹ̀wò múlẹ̀.",
+        inspectionConfirmedDevice: "A ti fìdí àyẹ̀wò múlẹ̀ lórí ẹ̀rọ yìí",
+        failed: "Kò lọ. Ṣàyẹ̀wò ìsopọ̀ rẹ kí o sì tún gbìyànjú.",
+        shared: {
+          listing: "Ó pín ilé kan",
+          booking: "Ó pín ìfipamọ́ kan",
+          stay: "Ó pín ìdúró kan",
+          passport: "Ó pín ìwé ìrìnnà kan",
+        },
+        close: "Pa á dé",
+        confirmInspected: "Fìdí rẹ̀ múlẹ̀ pé mo ti yẹ ilé yìí wò",
+        conversationWith: "Ìjíròrò pẹ̀lú {name}",
+        verifiedListing: "Ilé tí a ti fìdí rẹ̀ múlẹ̀",
+        verificationPending: "Ìfìdímúlẹ̀ ń dúró",
+        approved: "A ti fọwọ́ sí i",
+        shareHere: "Pín ilé tàbí ìfipamọ́ kan níbí",
+        shareHereBody: "Yóò dé gẹ́gẹ́ bí káàdì tí {name} lè ṣí.",
+        blockAsk: "Dí {name} lọ́wọ́?",
+        block: "Dí {name} lọ́wọ́",
+        blockBody: "Wọn kò ní lè kàn sí ọ mọ́, níbí àti níbikíbi.",
+        blockConfirm:
+          "Wọn kò ní lè fi ọ̀rọ̀ ránṣẹ́ sí ọ, rí ojú-ìwé rẹ tàbí rí àwọn ilé rẹ, ìwọ náà kò sì ní rí tiwọn. A kò ní sọ fún wọn. O lè yí èyí padà nínú Ètò, Ìpamọ́.",
+        keepOpen: "Jẹ́ kí ìjíròrò náà ṣí sílẹ̀",
+        safetyRule:
+          "Fún ààbò rẹ, jẹ́ kí gbogbo ìjíròrò àti ìsanwó wà nínú Vallo. A kò dáàbò bo àdéhùn tí a ṣe lóde pèpéle yìí. Sanwó nìkan lẹ́yìn tí o bá ti yẹ ilé náà wò.",
+      },
+      card: {
+        rated: "Ìràwọ̀ {rating} nínú 5",
+        forward: {
+          listing: "Fi ilé yìí ránṣẹ́ sí ìjíròrò mìíràn",
+          stay: "Fi ìdúró yìí ránṣẹ́ sí ìjíròrò mìíràn",
+          booking: "Fi ìfipamọ́ yìí ránṣẹ́ sí ìjíròrò mìíràn",
+        },
+        verified: "A ti fìdí rẹ̀ múlẹ̀",
+        map: "Máàpù {area}. Pínì náà ń fi àdúgbò hàn, kì í ṣe àdírẹ́sì.",
+        viewStay: "Wo ìdúró náà",
+        viewListing: "Wo ilé náà",
+        messageAgent: "Fi ọ̀rọ̀ ránṣẹ́ sí aṣojú",
+        checkIn: "Ìwọlé",
+        checkOut: "Ìjádè",
+        guests: "Àlejò",
+        viewBooking: "Wo àlàyé ìfipamọ́",
+        contactHost: "Kàn sí onílé",
+      },
+      menu: {
+        close: "Pa àkójọ dé",
+        label: "Àwọn àṣàyàn ọ̀rọ̀",
+        reply: "Fèsì",
+        forward: "Fi ránṣẹ́ síwájú",
+        copy: "Da kọ",
+        deleteForMe: "Pa á rẹ́ fún mi",
+        deleteForEveryone: "Pa á rẹ́ fún gbogbo ènìyàn",
+      },
+      forward: {
+        title: "Fi ránṣẹ́ sí",
+        close: "Pa á dé",
+        search: "Wá àwọn tí o ń tẹ̀lé",
+        clear: "Pa ìwádìí rẹ́",
+        placeholder: "Wá",
+        loading: "Ń gbé àwọn ìjíròrò rẹ wọlé",
+        empty: "Tẹ̀lé ẹnìkan kí o lè fi ọ̀rọ̀ ránṣẹ́ sí i.",
+        unreachable: "A kò lè gbé àwọn ìjíròrò rẹ wọlé báyìí. Pa èyí dé kí o sì tún gbìyànjú.",
+        failed: "Kò ṣiṣẹ́. Jọ̀wọ́ tún gbìyànjú.",
+        noMatch: "Kò sí ẹni tí o ń tẹ̀lé tó bá ìyẹn mu.",
+        listLabel: "Àwọn ìjíròrò tí o lè fi ránṣẹ́ sí",
+        sending: "Ó ń lọ",
+      },
     },
   },
 

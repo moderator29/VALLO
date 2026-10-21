@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LoadingShell } from "@/components/app/ScreenSkeleton";
 
@@ -7,9 +9,10 @@ import { LoadingShell } from "@/components/app/ScreenSkeleton";
  * right, then the lister card. The heights match `nf-trust__row` and the agent
  * card, so nothing jumps when the real page streams in over it.
  */
-export default function LoadingSpaceTrust() {
+export default async function LoadingSpaceTrust() {
+  const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label="Loading the checks on this space" className="mx-auto w-full max-w-2xl">
+    <LoadingShell label={t.memberFlows.loading.listingTrust} className="mx-auto w-full max-w-2xl">
       <div className="flex items-center gap-sm py-md">
         <Skeleton width="2.75rem" height="2.75rem" radius="pill" />
         <div className="grid flex-1 gap-2xs">

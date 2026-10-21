@@ -119,6 +119,15 @@ export const shareAreaSchema = z.object({
   newestAt: z.string().optional(),
 });
 
+/**
+ * What the share action is actually sent: the server's seal over a card it
+ * computed (`share-seal.ts`), and nothing else. The card inside is checked
+ * against `shareAreaSchema` when the seal is opened.
+ */
+export const shareSealSchema = z.object({
+  seal: z.string().min(1).max(2048),
+});
+
 export const areaSuggestionSchema = z.object({
   stateCode: z.string().min(1).max(10),
   query: z.string().max(60).optional(),

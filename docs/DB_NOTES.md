@@ -5,6 +5,62 @@ The Supabase connector used by agents waits for a confirmation on any statement 
 seconds. Run them in the Supabase dashboard SQL editor instead. Everything else is applied through
 the connector and recorded in `supabase/migrations/APPLIED.txt`.
 
+## URGENT: run before anything else (17 October 2026)
+
+The Supabase connector in the 17 October session had no access to project
+`uccixoonmbhrnyczyigt`, so this fix is written but not applied. It closes a
+live privacy hole: since pov05 (13 October), a guest whose stay is confirmed but
+unpaid is shown the address, check-in times, host name and, for a listing stay,
+the gate access code, and an unpaid stay can be checked in. The CI probes
+`d75b-stay-trip-details` and `p1_f_stay_events` have failed on every run since.
+
+Fixed and recorded on 21 October 2026 (migration `20261021105606_booking_is_paid_never_null.sql`); the probes `booking-is-paid-never-null`, `d75b-stay-trip-details` and `p1_f_stay_events` should now pass.
+
+## One open alert keeps probe db-p2-02 red (17 October 2026)
+
+The CI run on main says one open alert matches what the pass-one audit probes
+used to raise (an unsigned Paystack webhook, the unconfigured Yellow Card
+webhook, the account purge called without its secret). Look at it first, because
+an invalid signature can also be a real webhook from a stranger:
+
+```sql
+select id, created_at, severity, title, description from public.risk_alerts
+ where status = 'open'
+   and (title ilike 'Cron: account purge, unauthorised%' or title ilike '%signature%invalid%' or title ilike '%yellow%card%unconfigured%');
+```
+
+If it is leftover test noise, close it (an UPDATE, nothing is deleted; the connector can run it too):
+
+```sql
+update public.risk_alerts set status = 'resolved', resolved_at = now() where status = 'open' and (title ilike 'Cron: account purge, unauthorised%' or title ilike '%signature%invalid%' or title ilike '%yellow%card%unconfigured%');
+```
+
+## The example collection belongs to the QA member on live (17 October 2026, inferred, check first)
+
+Read from the CI probe failures, not from the database (this session had no access): the
+example collection's agents row `e0000000-0000-4000-8000-000000000002` no longer belongs to the
+example lister `e0000000-0000-4000-8000-000000000001` but to the QA member
+`957b3bd2-cce3-425d-bba9-5cd876ca3d62`. If so, a viewing request or a message on an example
+listing reaches the QA member's inbox. Check:
+
+```sql
+select id, user_id, display_name, type, is_demo from public.agents
+ where id = 'e0000000-0000-4000-8000-000000000002' or user_id = '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+```
+
+If the row shows the QA member's user id and nobody moved it on purpose, give it back:
+
+```sql
+update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001' where id = 'e0000000-0000-4000-8000-000000000002' and user_id = '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+```
+
+The probes no longer depend on it: each one gives the row back inside its own rolled-back transaction.
+
+## The custody switch guard is missing on live (17 October 2026)
+
+Probe `track-a-custody-retired` says the live database lets the `wallet` switch be turned on,
+which every migration refuses. The guard was restored on 21 October 2026 (migration `20261021104403_custody_switch_guard_restored.sql`); it does not turn any switch off. Saving a card has its own switch, `saved_cards` (off until set). Once the new site is live, set `saved_cards` on if cards should be saved, then turn `wallet` off: `insert into public.feature_flags (key, enabled) values ('saved_cards', true) on conflict (key) do update set enabled = true;` then `update public.feature_flags set enabled = false where key = 'wallet';`
+
 ## What is left, and it is optional
 
 Two housekeeping statements cannot be run through the connector (it freezes on `DELETE` and on

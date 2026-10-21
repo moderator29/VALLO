@@ -27,7 +27,7 @@ const EXTENSION: Record<string, string> = {
 
 /** A readable file name: the app's name for it, the id, and the type's extension when it is known. */
 export function mediaFileName(input: { kind: "photo" | "video"; id: string; src: string }, mime?: string | null): string {
-  const type = (mime ?? "").split(";")[0]!.trim().toLowerCase();
+  const type = bareType(mime);
   let ext = EXTENSION[type];
   if (!ext) {
     const path = input.src.split("?")[0] ?? "";
@@ -36,6 +36,11 @@ export function mediaFileName(input: { kind: "photo" | "video"; id: string; src:
   }
   const safeId = input.id.replace(/[^a-z0-9-]/gi, "").slice(0, 36) || "file";
   return `vallo-${input.kind}-${safeId}.${ext}`;
+}
+
+/** `image/svg+xml;charset=utf-8` reads as `image/svg+xml`; an empty type stays empty. */
+export function bareType(mime: string | null | undefined): string {
+  return (mime ?? "").split(";")[0]!.trim().toLowerCase();
 }
 
 export function canShareMedia(): boolean {
@@ -81,7 +86,11 @@ export async function shareMedia(
 ): Promise<"shared" | "cancelled" | "failed"> {
   try {
     const blob = await fetchBlob(input.src);
-    const file = new File([blob], mediaFileName(input, blob.type), { type: blob.type });
+    /* The bare media type: a server may add parameters (`;charset=utf-8`),
+       and the share sheet matches types against its own list of shareable
+       ones, where a parameter can make a good photo unshareable. */
+    const type = bareType(blob.type);
+    const file = new File([blob], mediaFileName(input, type), { type });
     const data: ShareData = { files: [file], title };
     if (typeof navigator.canShare === "function" && !navigator.canShare(data)) return "failed";
     await navigator.share(data);

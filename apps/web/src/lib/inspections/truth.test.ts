@@ -94,6 +94,8 @@ describe("the wiring", () => {
   it("the card draws the questions above the room checklist", () => {
     const sheet = readFileSync(join(root, "components/app/inspections/InspectionSheet.tsx"), "utf8");
     expect(sheet.indexOf("<TruthQuestions")).toBeGreaterThan(0);
-    expect(sheet.indexOf("<TruthQuestions")).toBeLessThan(sheet.indexOf('aria-label="Inspection checklist"'));
+    /* The checklist's name reads the dictionary since the language audit (`memberFlows.inspection.checklist`). */
+    expect(sheet.indexOf("aria-label={w.checklist}")).toBeGreaterThan(0);
+    expect(sheet.indexOf("<TruthQuestions")).toBeLessThan(sheet.indexOf("aria-label={w.checklist}"));
   });
 });

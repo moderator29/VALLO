@@ -7,7 +7,8 @@ import { createClientWithAgent } from "@/lib/security/agent-client";
 import { consume, ipFromHeaders, subjectForEmail, subjectForIp } from "@/lib/security/rate-limit";
 import { safeReturnPath } from "@/lib/security/return-path";
 import { rememberFirstCodeSignIn } from "./first-sign-in-server";
-import { isSixDigits, type CodeSignInState } from "./code-sign-in-state";
+import type { CodeSignInState } from "./code-sign-in-state";
+import { CONFIRMATION_CODE_RE } from "./confirmation-code";
 
 /**
  * A3. SIGN IN WITH A CODE BY EMAIL, NO PASSWORD.
@@ -60,7 +61,8 @@ export async function verifyEmailSignInCode(_prev: CodeSignInState, formData: Fo
   const email = String(formData.get("target") ?? "").trim().toLowerCase().slice(0, 254);
   const token = String(formData.get("code") ?? "").replace(/\s+/g, "");
   if (!EMAIL.test(email)) return { step: "ask", error: "badTarget" };
-  if (!isSixDigits(token)) return { step: "code", target: email, shown: maskAddress(email), error: "badCode" };
+  /* GoTrue's one email code length, the same as the sign-up code's. */
+  if (!CONFIRMATION_CODE_RE.test(token)) return { step: "code", target: email, shown: maskAddress(email), error: "badCode" };
 
   const verdict = await consume({
     bucket: "email_code_verify",

@@ -151,6 +151,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: npm run lint
 
+      # Unused files, exports and dependencies (knip.jsonc). Report only: the
+      # first reports are lists to read, not a gate. Pinned, run through npx,
+      # so it is not a dependency of the app.
+      - name: Dead code (knip, report only)
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: npx --yes knip@6.41.0 --reporter compact --no-exit-code
+
       # DOC-P2-04: failures are recorded by name, and kept.
       - name: Test
         if: ${{ !cancelled() }}
@@ -164,16 +172,12 @@ jobs:
           path: apps/web/vitest-junit.xml
           if-no-files-found: warn
 
-      # DOC-13 / STORE-03. Red, with one error annotation per placeholder,
-      # until the founder's Apple Team ID and Play signing fingerprints are in
-      # the association files. `continue-on-error` keeps it from blocking web
-      # work; `npm run cap:sync` (the documented release sync) runs the same
-      # check strictly, so a release sync refuses while it is red; a bare
-      # `npx cap sync` is not guarded. Drop `continue-on-error` the day
-      # the values land.
+      # DOC-13 / STORE-03. The Apple Team ID and both Play signing
+      # fingerprints are in the association files (checked 17 October 2026:
+      # the checker exits 0 for both platforms and Apple's CDN serves the
+      # file), so this is a gate now: a placeholder put back fails the run.
       - name: Deep links (founder values)
         if: ${{ !cancelled() }}
-        continue-on-error: true
         run: npm run check:deep-links --workspace @vallo/web
 
       - name: Database probe files keep the contract
@@ -343,6 +347,19 @@ jobs:
         working-directory: apps/web
         run: node scripts/check-weight.mjs
 
+      # The headers and the CSP nonce on the front door, read off the same
+      # production server: a header dropped from next.config.ts or a script
+      # the proxy did not stamp fails here rather than in a browser console.
+      - name: Security headers (public routes)
+        if: ${{ !cancelled() }}
+        working-directory: apps/web
+        run: node scripts/check-security-headers.mjs http://localhost:3210
+
+      - name: Script nonces (public routes)
+        if: ${{ !cancelled() }}
+        working-directory: apps/web
+        run: node scripts/check-script-nonces.mjs http://localhost:3210
+
       - name: Landing height ratchet
         if: ${{ !cancelled() }}
         working-directory: apps/web
@@ -360,6 +377,9 @@ jobs:
   # and the passcode stop a headless browser at the real desks, which is why
   # the harness is the door. Serious or critical axe findings, a confirm panel
   # that loses focus, or a sidebar the keyboard cannot walk fail the job.
+  # The same spec scans the signed-in member screens through the harness
+  # (`MEMBER_ROUTES`: home, search, listing, stays, checkout, saved,
+  # messages, notifications, profile, settings, feed, wallet).
   # `host.spec.mjs` then walks every host route signed out (and signed in when
   # the QA secrets exist).
   desks-a11y:

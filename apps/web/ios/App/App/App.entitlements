@@ -31,8 +31,9 @@
 	expect a device to take up to a day to pick up a change. Whether the
 	build has reached TestFlight testers is UNKNOWN from the repository. No
 	device has ever run the build, so universal links are untested on
-	hardware. The Android half is genuinely blocked: the two fingerprints in
-	`assetlinks.json` are still placeholders.
+	hardware. (17 October 2026: Apple's CDN serves the association file for
+	www.vallospaces.com, and the Android half is no longer blocked: both
+	Play signing fingerprints in `assetlinks.json` are real.)
 
 	The Team ID is ten alphanumeric characters (Apple Developer, Membership
 	details). It is NOT the Apple ID email and it is NOT the bundle

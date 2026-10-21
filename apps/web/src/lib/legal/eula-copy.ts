@@ -8,7 +8,12 @@
  */
 
 /** The date the three documents last changed together. */
-export const EULA_LAST_UPDATED = "22 September 2026";
+/* 17 October 2026: section 7 said an account could be ended "from the
+   delete-account page on the website without signing in". Starting a deletion
+   needs a signed-in session and a re-authentication; the page explains it and
+   carries the restore form. A correction of where the control is, not of the
+   right, so TERMS_VERSION does not move. */
+export const EULA_LAST_UPDATED = "17 October 2026";
 
 /**
  * The operative clause, and the one App Review's rejection message asks for.

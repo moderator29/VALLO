@@ -9,9 +9,10 @@ Task 2 audit and Session 1's own verification.
 - **Commission** lives in **`fee_rates`**, read through
   `private.current_fee_bps('commission')`, which returns 0 with no row. Setting 2
   percent is a `fee_rates` row. `money_policy` has **no `commission_bps` column**.
-- **`money_policy.guarantee_bps` cannot be set to 0.** It is declared
-  `check (guarantee_bps between 100 and 200)`. **Retiring the Guarantee is a
-  migration**, not a configuration change.
+- **`money_policy.guarantee_bps` is 0.** It was declared
+  `check (guarantee_bps between 100 and 200)`; `20261006103626_b3_money_policy_versions.sql`
+  replaced that with `money_policy_guarantee_bps_range` (0 to 200), which is the
+  migration that let the Guarantee retire.
 - **Zeroing the rate does not lift the `PAYSTACK_GUARANTEE_SUBACCOUNT` blocker.**
   Two gates refuse before the rate is ever consulted: `split-attempt.ts:74` returns
   `refused` when the reserve subaccount is unset, and the database requires

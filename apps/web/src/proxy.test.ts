@@ -126,6 +126,48 @@ describe("first run is remembered from the server", () => {
   });
 });
 
+describe("a door's first run is a 307 on a page load (17 October 2026)", () => {
+  /* The pages' own redirect() ran after their loading.tsx started the stream:
+     a 200, a skeleton, the door's scripts, then a client navigation. */
+  it("sends a page load of either door to the slides, with its whole address, policy stamped", async () => {
+    for (const door of ["/sign-in", "/sign-up"]) {
+      const response = await proxy(new NextRequest(`http://localhost${door}?next=%2Fsaved&notice=sign-in-required`));
+      expect(response.status, door).toBe(307);
+      const target = new URL(response.headers.get("location")!);
+      expect(target.pathname, door).toBe("/welcome");
+      expect(target.searchParams.get("next"), door).toBe(`${door}?next=%2Fsaved&notice=sign-in-required`);
+      expect(response.headers.get("content-security-policy"), door).toContain("nonce-");
+    }
+  });
+
+  it("opens the door straight when the decision says so, exactly as the page does", async () => {
+    const seen = await proxy(new NextRequest("http://localhost/sign-in", { headers: { cookie: "vallo_first_run=seen" } }));
+    expect(seen.status).not.toBe(307);
+    const shown = await proxy(new NextRequest("http://localhost/sign-up", { headers: { cookie: "vallo_first_run=shown" } }));
+    expect(shown.status).not.toBe(307);
+    const passed = await proxy(new NextRequest("http://localhost/sign-in?welcomed=1"));
+    expect(passed.status).not.toBe(307);
+    const notice = await proxy(new NextRequest("http://localhost/sign-in?notice=signed-out"));
+    expect(notice.status).not.toBe(307);
+  });
+
+  it("leaves a router navigation, a prefetch and a server action to the page", async () => {
+    const rsc = await proxy(new NextRequest("http://localhost/sign-in", { headers: { rsc: "1" } }));
+    expect(rsc.status).not.toBe(307);
+    const prefetch = await proxy(new NextRequest("http://localhost/sign-in", { headers: { "next-router-prefetch": "1" } }));
+    expect(prefetch.status).not.toBe(307);
+    const action = await proxy(new NextRequest("http://localhost/sign-in", { method: "POST", headers: { "next-action": "a" } }));
+    expect(action.status).not.toBe(307);
+  });
+
+  it("touches no other address", async () => {
+    for (const route of ["/sign-in/email", "/sign-up/email", "/welcome", "/"]) {
+      const response = await proxy(new NextRequest(`http://localhost${route}`));
+      expect(response.headers.get("location") ?? "", route).not.toContain("/welcome?next=");
+    }
+  });
+});
+
 describe("the proxy's Content Security Policy", () => {
   it("stamps a policy on every route, boundaries included", async () => {
     for (const route of ROUTES) {

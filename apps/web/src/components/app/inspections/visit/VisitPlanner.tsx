@@ -56,6 +56,12 @@ import { onRadioKeys, radioTabIndex } from "./radio";
 
 type Copy = Dictionary["visit"];
 
+/** One tap's key: the outbox's own, or the moment as a fallback. Read when a
+    tap happens, never during a render. */
+function visitTapKey(): string {
+  return newTapKey() ?? `${Date.now()}`;
+}
+
 export function VisitPlanner({
   listingId,
   locale,
@@ -126,7 +132,7 @@ export function VisitPlanner({
       book: (input) => bookViewingSlot(input),
       request: (input) => requestInspection(input),
       sendOrKeep: (payload, send) => sendOrKeep("request_inspection", payload, () => send()),
-      newKey: () => newTapKey() ?? `${Date.now()}`,
+      newKey: visitTapKey,
     }),
   );
 

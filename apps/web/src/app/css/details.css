@@ -22,11 +22,11 @@
     padding-inline: 1rem;
     pointer-events: none;
   }
-  :root:has(.nf-main--docked) .nf-toast-host {
+  :root[data-docked] .nf-toast-host {
     bottom: calc(var(--nf-tabbar-clearance) + 0.25rem);
   }
   @media (min-width: 64rem) {
-    :root:has(.nf-main--docked) .nf-toast-host,
+    :root[data-docked] .nf-toast-host,
     .nf-toast-host {
       bottom: 1.5rem;
     }
@@ -190,11 +190,11 @@
       transform var(--nf-duration-base) var(--nf-ease-spring),
       scale var(--nf-duration-press) var(--nf-ease-press);
   }
-  :root:has(.nf-main--docked) .nf-to-top {
+  :root[data-docked] .nf-to-top {
     bottom: calc(var(--nf-tabbar-clearance) + 0.25rem);
   }
   @media (min-width: 64rem) {
-    :root:has(.nf-main--docked) .nf-to-top,
+    :root[data-docked] .nf-to-top,
     .nf-to-top {
       bottom: 1.5rem;
     }
@@ -212,7 +212,7 @@
     outline-offset: 2px;
   }
   /* A toast outranks it: while one is up, back to top steps aside. */
-  :root:has(.nf-toast) .nf-to-top {
+  :root[data-toast-up] .nf-to-top {
     opacity: 0;
     pointer-events: none;
   }

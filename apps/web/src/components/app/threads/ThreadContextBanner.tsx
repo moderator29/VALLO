@@ -208,7 +208,7 @@ export function ThreadContextBanner({
           data-testid="thread-ask-viewing"
         >
           <UiIcon name="calendar-booking" size={16} />
-          {ASK_VIEWING}
+          {words.askViewing}
         </Link>
       )}
       {inspection && (
@@ -230,5 +230,3 @@ export function ThreadContextBanner({
   );
 }
 
-/* English until `threads.context` carries it with its translations. */
-const ASK_VIEWING = "Ask to view this home";

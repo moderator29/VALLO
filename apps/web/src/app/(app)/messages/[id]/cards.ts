@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { formatDate, formatMoney, getDictionary, type Locale } from "@vallo/i18n";
+import { countOf, formatDate, formatMoney, getDictionary, type Locale } from "@vallo/i18n";
 import type { ChatCardData, ThreadCardData } from "@/components/app/messages/ChatCard";
 import { cardRefFor, type ParsedShare, type SharedRef } from "@/components/app/messages/share";
 import { getListingRepository } from "@/lib/listings/repository";
@@ -31,14 +31,6 @@ type Db = SupabaseClient<Database>;
  * touches a formatter and can render on either side of the boundary.
  */
 
-const STATUS_LABEL: Record<string, string> = {
-  PENDING: "Requested",
-  CONFIRMED: "Confirmed",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-  NO_SHOW: "No show",
-};
-
 /** The markets let by the year, so a missing period never prints "per night" on a flat. */
 const LONG_LET = new Set<ListingKind>(["rental", "shop", "office", "land"]);
 
@@ -54,9 +46,6 @@ function dayLabel(iso: string, locale: Locale): string {
   return Number.isNaN(date.getTime()) ? iso : formatDate(date, locale, DAY);
 }
 
-function plural(count: number, one: string, many: string): string {
-  return `${count} ${count === 1 ? one : many}`;
-}
 
 function listingCard(listing: Listing, locale: Locale): ChatCardData {
   /* The repository has already decided the headline: `priceMinor` and
@@ -99,11 +88,11 @@ async function bookingCard(db: Db, id: string, locale: Locale): Promise<ChatCard
   const listing = await getListingRepository().byId(row.id);
   const kind: ListingKind = listing?.kind ?? "shortlet";
   const features = [
-    plural(row.bedrooms, "bedroom", "bedrooms"),
-    plural(row.bathrooms, "bathroom", "bathrooms"),
+    countOf(row.bedrooms, "bedrooms", locale),
+    countOf(row.bathrooms, "bathrooms", locale),
   ];
-  const partyLines = [plural(data.adults, "adult", "adults")];
-  if (data.children > 0) partyLines.push(plural(data.children, "child", "children"));
+  const partyLines = [countOf(data.adults, "adults", locale)];
+  if (data.children > 0) partyLines.push(countOf(data.children, "children", locale));
   return {
     kind: "booking",
     id: data.id,
@@ -115,14 +104,14 @@ async function bookingCard(db: Db, id: string, locale: Locale): Promise<ChatCard
     hue: listing?.hue ?? 0,
     listingKind: kind,
     status: data.status,
-    statusLabel: STATUS_LABEL[data.status] ?? data.status,
+    statusLabel: (getDictionary(locale).threads.reservation.status as Record<string, string>)[data.status] ?? data.status,
     checkInLabel: dayLabel(data.check_in, locale),
     checkOutLabel: dayLabel(data.check_out, locale),
     partyLines,
     roomName: row.title,
     features,
     totalLabel: formatMoney(data.total_minor, locale),
-    nightsLabel: plural(data.nights, "night", "nights"),
+    nightsLabel: countOf(data.nights, "nights", locale),
     rating: listing && listing.reviewCount > 0 ? listing.rating : null,
   };
 }

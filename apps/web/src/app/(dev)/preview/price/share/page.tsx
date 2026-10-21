@@ -8,6 +8,7 @@ import { Disclaimer, PriceCheckMark } from "@/components/app/price/ResultPanel";
 import { ShareAreaButton } from "@/components/app/price/ShareAreaButton";
 import { shareAreaCopy, shareCardCopy } from "@/components/app/price/share-copy";
 import { shareLines } from "@/lib/price-check/share-card";
+import { cardFromAreaRow, sealWithServerKey } from "@/lib/price-check/share-seal";
 import type { AreaShare } from "@/lib/price-check/types";
 
 /**
@@ -103,18 +104,21 @@ export default async function PreviewPriceShare() {
             description="Pressing this mints a real row. The sheet says the rule out loud before it gives the link."
           >
             <ShareAreaButton
-              stateCode="LA"
-              area="Lekki Phase 1"
-              propertyType="apartment"
-              listingIntent="rent"
-              bedrooms={3}
-              figures={{
-                lowMinor: FIXTURE.lowMinor,
-                midMinor: FIXTURE.midMinor,
-                highMinor: FIXTURE.highMinor,
-                listingCount: FIXTURE.listingCount,
-                oldestAt: FIXTURE.oldestAt,
-                newestAt: FIXTURE.newestAt,
+              card={{
+                seal: sealWithServerKey({
+                  scope: "area_and_type",
+                  stateCode: "LA",
+                  area: "Lekki Phase 1",
+                  propertyType: "apartment",
+                  listingIntent: "rent",
+                  bedrooms: 3,
+                  lowMinor: FIXTURE.lowMinor,
+                  midMinor: FIXTURE.midMinor,
+                  highMinor: FIXTURE.highMinor,
+                  listingCount: FIXTURE.listingCount,
+                  oldestAt: FIXTURE.oldestAt ?? undefined,
+                  newestAt: FIXTURE.newestAt ?? undefined,
+                }),
               }}
               copy={share}
               variant="primary"
@@ -127,10 +131,7 @@ export default async function PreviewPriceShare() {
             description="Not a disabled button. A disabled control teaches nobody why it cannot be pressed."
           >
             <ShareAreaButton
-              stateCode="LA"
-              area="Lekki Phase 1"
-              listingIntent="rent"
-              figures={null}
+              card={null}
               copy={share}
             />
           </Section>
@@ -148,21 +149,16 @@ export default async function PreviewPriceShare() {
               typeNames={typeNames}
               renderShare={(row) => (
                 <ShareAreaButton
-                  stateCode="LA"
-                  area="Lekki Phase 1"
-                  propertyType={row === null ? null : "apartment"}
-                  listingIntent="rent"
-                  bedrooms={row === null ? null : row.bedrooms}
-                  figures={
+                  card={
                     row === null
                       ? null
                       : {
-                          lowMinor: row.p25Minor,
-                          midMinor: row.medianMinor,
-                          highMinor: row.p75Minor,
-                          listingCount: row.listingCount,
-                          oldestAt: row.oldestAt,
-                          newestAt: row.newestAt,
+                          seal: sealWithServerKey(
+                            cardFromAreaRow(
+                              { stateCode: "LA", lgaCode: null, area: "Lekki Phase 1", intent: "rent" },
+                              row,
+                            ),
+                          ),
                         }
                   }
                   copy={share}
@@ -185,10 +181,7 @@ export default async function PreviewPriceShare() {
               renderShare={() => (
                 <div className="mt-block">
                   <ShareAreaButton
-                    stateCode="LA"
-                    area="Lekki Phase 1"
-                    listingIntent="rent"
-                    figures={null}
+                    card={null}
                     copy={share}
                   />
                 </div>

@@ -150,7 +150,7 @@ export function LandingBody({
         and map, the community band and the app band are retired from the
         page: the markets carry the kinds of place, the story carries the
         move-in total and the steps, and the trust layer carries the check.
-        Their components stay in the folder for the lead to remove.
+        Their components and their rules were removed on 17 October.
 
         THE FOUNDER'S CUT (7 October, late, on a phone). Six rooms now:
 
@@ -164,8 +164,8 @@ export function LandingBody({
 
         The AI room (the example conversation that typed itself, "Play
         again") left the page; the assistant stays one tap away in the
-        capsule's menu. AiBand.tsx and AiShowcase.tsx stay in the folder for
-        the lead to remove, with the other retired rooms.
+        capsule's menu. AiBand.tsx and AiShowcase.tsx went with the other
+        retired rooms on 17 October.
       */}
       <Hero t={t} locale={locale} door={door} />
       <Markets t={t} door={door} />

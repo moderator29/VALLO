@@ -13,6 +13,7 @@ import { VisitListerCard } from "@/components/app/inspections/visit/VisitListerC
 import { VisitPlanner } from "@/components/app/inspections/visit/VisitPlanner";
 import { roleWordsOf, visitPropertyOf } from "@/components/app/inspections/visit/property";
 import "@/app/css/visit.css";
+import { requestNow } from "@/lib/format/when";
 
 /**
  * SCHEDULE A VISIT, STEP 1 (`/listing/[id]/visit`).
@@ -123,7 +124,7 @@ export default async function ScheduleVisitPage({
 
   /* The render's clock, handed down so the server and the first client
      render agree on which times are still ahead. */
-  const now = Date.now();
+  const now = requestNow();
   const roles = roleWordsOf(planner.lister.role, t.socialProfile.roleLine, copy.roleNoun);
   const asked = typeof query.slot === "string" ? query.slot : null;
   const initialSlot = asked && planner.slots?.some((slot) => slot.slotAt === asked) ? asked : null;

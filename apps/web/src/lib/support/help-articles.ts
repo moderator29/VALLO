@@ -3,6 +3,10 @@ import { SUPPORT_SENTENCE } from "@/lib/support-email";
 import { doorsSentence } from "@/lib/supply/roles";
 import { NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, REFUND_ROUTE, WHO_PAYS_SENTENCE } from "@/lib/money/copy";
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
+import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
+import { DELETE_CONFIRM_PHRASE, GRACE_WINDOW_DAYS } from "@/lib/account-deletion/constants";
+import { EULA_ZERO_TOLERANCE } from "@/lib/legal/eula-copy";
+import { COMPANY_FORMAL_NAME, COMPANY_REGISTERED_OFFICE } from "@/lib/legal/company";
 import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
@@ -60,7 +64,7 @@ export const TRUST_LINKS: { href: string; icon: BrandIconName; title: string; bo
     href: "/cancellations",
     icon: "calendar-clock",
     title: "Cancellations",
-    body: "The standard refund schedule for stays, with the windows written out.",
+    body: "The standard refund schedule for stays, and the four policies a host business can pick.",
   },
 ];
 
@@ -272,7 +276,7 @@ export const FAQS: Faq[] = [
     a: "Flexible, Moderate, Firm or Strict. The guest sees the terms of the one a host picks before they book, and the refund follows them.",
   },
   {
-    category: "Hosting",
+    category: "Booking a stay",
     q: "What happens at a restaurant after I book a table?",
     a: "Booking a table is free and nothing is paid in advance. The restaurant confirms it, Vallo reminds you the evening before and two hours before, and you pay your bill at the restaurant. After the time, the restaurant marks the table seated or a no-show, using your check-in code. If it does not answer, Vallo asks you the next day whether you dined. Only diners whose table was seated can review.",
   },
@@ -324,7 +328,51 @@ export const FAQS: Faq[] = [
     a: "Call your bank first and ask them to raise a dispute on the transfer; a fast report can let them hold the money in the receiving account. Then report it to Vallo with the listing link, the account details and the messages. Payments made outside Vallo are not covered and Vallo cannot recover them, but it can remove the account and stop the same person reaching anybody else.",
   },
 
+  // ------------------------------------------------------------- around
+  {
+    category: "Around",
+    q: "What is Around?",
+    a: "Around is the part of Vallo for places. Join your local government, your estate or your campus, and read what people there are saying today: whether there is light, whether the road is open, whether the tanker came. Reading needs no account; posting needs one. A listing published in a place is announced there once.",
+  },
+  {
+    category: "Around",
+    q: "What are the rules for posts, comments and messages?",
+    a: `${EULA_ZERO_TOLERANCE} That covers posts, comments, stories, profiles, listings and private messages. A post or profile that carries an account number or a request for payment is held until a person reads it. Report anything from its menu, and block or mute anyone. The person you report is never told who reported them.`,
+  },
+
+  // ------------------------------------------------- account and data
+  {
+    category: "Your account and data",
+    q: "How old do I have to be to use Vallo?",
+    a: "You must be 18 or over to make an account, book, pay, post or list. You confirm your age when you sign up. Browsing needs no account.",
+  },
+  {
+    category: "Your account and data",
+    q: "How do I delete my account?",
+    a: `Go to Settings, then Account, then Delete account. Confirm it is you and type ${DELETE_CONFIRM_PHRASE}. You are signed out everywhere at once, and nothing is destroyed for ${GRACE_WINDOW_DAYS} days: the code we email you stops it. After that your profile, posts, saved places and uploaded files are destroyed. Records of money that moved are kept for at least five years with your name, email and phone number removed, because Nigerian anti-money-laundering law requires it. A booking or a listing still open has to be finished, cancelled or unpublished first, and the screen tells you which.`,
+  },
+  {
+    category: "Your account and data",
+    q: "What does Vallo keep about me, and can I get a copy?",
+    a: "Only what the platform needs to work: your account, what you list, book, post and send, payment references, and, if you list or host, your ID and payout account. Download a copy yourself from Settings, under Privacy. To correct something, or to object to how it is used, write through the contact form with Privacy as the subject. If the answer does not satisfy you, you can complain to the Nigeria Data Protection Commission. The Privacy Policy says what is kept and for how long.",
+  },
+  {
+    category: "Your account and data",
+    q: "Can I appeal a decision Vallo made?",
+    a: `Yes. If a post or a listing was taken down, an application refused or your account stopped, reply to the notice or write through the contact form with what happened and why you think the decision was wrong. A person who did not make the first decision reads it. Appeals are answered ${RESPONSE_COMMITMENTS.routine.label.toLowerCase()}.`,
+  },
+  {
+    category: "Your account and data",
+    q: "How do I contact Vallo?",
+    a: `Use the contact form at vallospaces.com/contact, or the support chat in the app. A person replies within one business day, and a report about paying outside Vallo ${RESPONSE_COMMITMENTS.urgent.label.toLowerCase()}. Vallo is run by ${COMPANY_FORMAL_NAME}, whose registered office is ${COMPANY_REGISTERED_OFFICE}.`,
+  },
+
   // ------------------------------------------------------ using the app
+  {
+    category: "Using the app",
+    q: "Is there a Vallo app?",
+    a: "Vallo works in any web browser at vallospaces.com. It also comes as an app for Android phones and iPhones, published through Google Play and the App Store; when a store link shows on the Vallo home page, the app is live in that store. The app opens the same Vallo, with the same account.",
+  },
   {
     category: "Using the app",
     q: "What is the round button at the end of the dock?",

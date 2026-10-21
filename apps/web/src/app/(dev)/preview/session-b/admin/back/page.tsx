@@ -1,6 +1,6 @@
 // Admin console harness, behind the preview gate. The real
 // AdminFrame and the real BackButton, rendered as they render on /admin/money,
-// so a browser can find the control and press it. See scripts/design/session-b-shots/admin-back.mjs.
+// so a browser can find the control and press it.
 import { getDictionary } from "@vallo/i18n";
 import { AdminFrame } from "@/app/admin/_components/AdminFrame";
 import { PageHead } from "@/app/admin/_components/panels";

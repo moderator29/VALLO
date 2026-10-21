@@ -9,7 +9,7 @@
 -- do not trip the owner-write guard).
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
   admin constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   t text;
   n int;
@@ -19,6 +19,13 @@ declare
   lid uuid := gen_random_uuid();
 begin
   -- A live listing at a known exact point, for the comparisons below.
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The lister is a throwaway account made here, an
+  -- ordinary account with no agents row exactly as the QA member was when this
+  -- probe was written, rolled back with everything else.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-new-a4-01-step2-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe NEW-A4-01 lister') returning id into agent;
   insert into public.listings (id, agent_id, title, property_type, status, listing_role, listing_intent,
                                rent_amount_minor, rent_period, latitude, longitude, state_code, city, area)

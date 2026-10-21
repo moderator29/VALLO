@@ -401,6 +401,7 @@ export default async function ListingDetailPage({
     recentlyLet,
     doorDeclared,
     listerCard,
+    ownershipSeen,
   ] = await Promise.all([
     // Written reviews for this listing. Public by policy for a PUBLISHED
     // listing, so this read works for a signed-out visitor too.
@@ -454,10 +455,11 @@ export default async function ListingDetailPage({
     /* The "Listed by" row: the lister's public profile (name, handle,
        photograph, side) and their published badge (lister-card-read.ts). */
     readListerCard(listing),
+    /* "Ownership seen": a reviewer approved the owner's proof of ownership.
+       Only an owner's own listing can carry it; never an example. Read with
+       the rest rather than after them. */
+    listing.isDemo ? Promise.resolve(null) : ownershipSeenForListing(listing.id),
   ]);
-  /* "Ownership seen": a reviewer approved the owner's proof of ownership.
-     Only an owner's own listing can carry it; never an example. */
-  const ownershipSeen = listing.isDemo ? null : await ownershipSeenForListing(listing.id);
   /* V-59: "Moved in for the Vallo price", the one public number from the
      tenancy reviews. Null (and no line) on every example listing. */
   const doorLine = doorHonesty === null ? null : doorHonestyLine(doorHonesty, t.trustVisible.tenancy);
@@ -698,7 +700,7 @@ export default async function ListingDetailPage({
     </div>
   ) : isRestaurant ? (
     <div className="flex flex-col gap-md">
-      <ReserveTable listingId={listing.id} messageHref={messageHref} success={t.success} />
+      <ReserveTable listingId={listing.id} messageHref={messageHref} success={t.success} copy={t.memberFlows} locale={locale} />
       <RestaurantPanel listing={listing} locale={locale} messageHref={messageHref} t={t} />
     </div>
   ) : isRental || isSale ? (
@@ -749,6 +751,7 @@ export default async function ListingDetailPage({
       success={t.success}
       door={toDoorCharges(doorDeclared, t.afterTheGate.arrival)}
       doorCopy={t.afterTheGate.arrival}
+      copy={t.memberFlows}
     />
   );
 

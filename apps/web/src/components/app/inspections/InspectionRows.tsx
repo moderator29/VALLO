@@ -4,7 +4,7 @@ import { TierBadge } from "@/components/trust/TierBadge";
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatDate, type Locale } from "@vallo/i18n/core";
+import { formatDate, type Locale, type Dictionary } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
@@ -17,17 +17,7 @@ import {
 } from "@/lib/inspections/actions";
 import { waitingOn, type Inspection, type InspectionState } from "@/lib/inspections/types";
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
-import {
-  DECLINE_WORDS,
-  LISTER_CANCEL_WORDS,
-  PROPOSE_WORDS,
-  RENTER_CANCEL_WORDS,
-  RESCHEDULE_WORDS,
-  VIEWING_WORDS,
-  WITHDRAW_WORDS,
-  NO_SHOW_WORDS,
-  noShowWords,
-} from "./viewing-words";
+import { viewingWords } from "./viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
 
 /**
@@ -48,27 +38,6 @@ import { reportNoShow } from "@/lib/inspections/no-show-actions";
  * the right. Not a card per request: an agent with eleven enquiries would be
  * looking at eleven bordered boxes.
  */
-
-const STATE_LABEL: Record<InspectionState, string> = {
-  REQUESTED: "Waiting on you",
-  CONFIRMED: "Confirmed",
-  PROPOSED: "New time offered",
-  DECLINED: "Declined",
-  COMPLETED: "Inspected",
-  WITHDRAWN: "Withdrawn",
-  NO_SHOW: "No-show",
-};
-
-/** The same six states as the person who ASKED reads them. */
-const STATE_LABEL_REQUESTER: Record<InspectionState, string> = {
-  REQUESTED: "Waiting for a reply",
-  CONFIRMED: "Confirmed",
-  PROPOSED: "New time offered",
-  DECLINED: "Declined",
-  COMPLETED: "Inspected",
-  WITHDRAWN: "Withdrawn",
-  NO_SHOW: "No-show",
-};
 
 const STATE_TONE: Record<InspectionState, StatusTone> = {
   REQUESTED: "warning",
@@ -115,6 +84,8 @@ export function InspectionRows({
   sideFor,
   highlightId,
   locale,
+  viewingCopy,
+  flowCopy,
 }: {
   inspections: Inspection[];
   /** Which end of the request this screen is. Changes the controls only. */
@@ -133,6 +104,10 @@ export function InspectionRows({
    */
   highlightId?: string | null;
   locale: Locale;
+  /** The moves' words (`threads.rental`), from the server parent. */
+  viewingCopy: Dictionary["threads"]["rental"];
+  /** The rows' own words (`memberFlows.inspection`), from the server parent. */
+  flowCopy: Dictionary["memberFlows"]["inspection"];
 }) {
   return (
     <RowList boxed>
@@ -143,6 +118,8 @@ export function InspectionRows({
           side={sideFor ? sideFor(inspection) : side}
           highlighted={highlightId === inspection.id}
           locale={locale}
+          viewingCopy={viewingCopy}
+          flowCopy={flowCopy}
         />
       ))}
     </RowList>
@@ -154,12 +131,29 @@ function InspectionRow({
   side,
   highlighted = false,
   locale,
+  viewingCopy,
+  flowCopy,
 }: {
+  /** The moves' words (`threads.rental`). */
+  viewingCopy: Dictionary["threads"]["rental"];
+  /** The row's own words (`memberFlows.inspection`). */
+  flowCopy: Dictionary["memberFlows"]["inspection"];
   inspection: Inspection;
   side: "lister" | "requester";
   highlighted?: boolean;
   locale: Locale;
 }) {
+  const {
+    VIEWING_WORDS,
+    PROPOSE_WORDS,
+    RESCHEDULE_WORDS,
+    DECLINE_WORDS,
+    LISTER_CANCEL_WORDS,
+    WITHDRAW_WORDS,
+    noShowWords,
+    NO_SHOW_WORDS,
+    RENTER_CANCEL_WORDS,
+  } = viewingWords(viewingCopy);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -187,7 +181,7 @@ function InspectionRow({
 
   const waiting = waitingOn(inspection.state);
   const yourMove = waiting === side;
-  const labels = side === "lister" ? STATE_LABEL : STATE_LABEL_REQUESTER;
+  const labels = side === "lister" ? flowCopy.rowLister : flowCopy.rowRequester;
 
   /* The time that matters is the agreed one once there is one, and the asked
      one until then. Showing both on a row would be two dates competing on a
@@ -204,7 +198,7 @@ function InspectionRow({
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through.");
+          setError(result.error ?? flowCopy.failed);
           return;
         }
         setJustChanged(true);
@@ -251,11 +245,11 @@ function InspectionRow({
               href={`/listing/${inspection.listingId}`}
               className={`nf-tap block ${TYPE.rowTitle} hover:underline`}
             >
-              {inspection.listingTitle ?? UNTITLED}
+              {inspection.listingTitle ?? flowCopy.gone}
             </Link>
           ) : (
             <span className={`block ${TYPE.rowTitle}`}>
-              {inspection.listingTitle ?? UNTITLED}
+              {inspection.listingTitle ?? flowCopy.gone}
             </span>
           )}
           <span className={`mt-3xs block ${TYPE.rowMeta}`}>
@@ -269,7 +263,7 @@ function InspectionRow({
               somebody wanted Saturday and is being given Sunday. */}
           {inspection.slotAt && inspection.slotAt !== inspection.requestedAt && (
             <span className={`mt-3xs block ${TYPE.caption}`}>
-              {ASKED_FOR} {whenLine(inspection.requestedAt, locale)}
+              {flowCopy.askedFor} {whenLine(inspection.requestedAt, locale)}
             </span>
           )}
 
@@ -464,6 +458,4 @@ function InspectionRow({
   );
 }
 
-/* --------------------------------------------------------------- the copy */
-const UNTITLED = "A property that is no longer listed";
-const ASKED_FOR = "Asked for";
+

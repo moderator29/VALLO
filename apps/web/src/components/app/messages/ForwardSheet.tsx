@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { Dictionary } from "@vallo/i18n/core";
 import { Sheet } from "@/components/ui/Sheet";
 import { TextField } from "@/components/ui/Field";
 import { VerifiedAvatar } from "@/components/messages/VerifiedAvatar";
@@ -28,17 +29,17 @@ import { asSentence, matchTargets, type ForwardTarget } from "./forward";
  */
 
 /** The founder's own words for a reader who follows nobody they chat with. */
-export const FORWARD_EMPTY = "Follow someone to forward a message to them.";
-const UNREACHABLE = "We could not load your chats just now. Close this and try again.";
-const FAILED = "That did not work. Please try again.";
 
 export function ForwardSheet({
+  words,
   open,
   messageId,
   fromConversationId,
   onClose,
   onForwarded,
 }: {
+  /** The chooser's words (`experienceInbox.thread.forward`). */
+  words: Dictionary["experienceInbox"]["thread"]["forward"];
   open: boolean;
   /** The message being forwarded. Null draws nothing to send. */
   messageId: string | null;
@@ -99,11 +100,11 @@ export function ForwardSheet({
     setRefusal(null);
     const result = await forwardMessage({ messageId, conversationId: target.id }).catch(() => ({
       ok: false as const,
-      error: FAILED,
+      error: words.failed,
     }));
     setSendingTo(null);
     if (result.ok) onForwarded(target);
-    else setRefusal(asSentence(result.error || FAILED));
+    else setRefusal(asSentence(result.error || words.failed));
   };
 
   const hasTargets = (targets?.length ?? 0) > 0;
@@ -114,22 +115,22 @@ export function ForwardSheet({
       onOpenChange={(next) => {
         if (!next) onClose();
       }}
-      title="Forward to"
-      closeLabel="Close"
+      title={words.title}
+      closeLabel={words.close}
       detents={[0.75]}
       testId="forward-sheet"
     >
       {hasTargets ? (
         <TextField
-          label="Search the people you follow"
+          label={words.search}
           hideLabel
           type="search"
           leadingIcon="search"
-          clearable="Clear search"
+          clearable={words.clear}
           onClear={() => setQuery("")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search"
+          placeholder={words.placeholder}
           data-testid="forward-search"
         />
       ) : null}
@@ -142,25 +143,25 @@ export function ForwardSheet({
 
       {targets === null ? (
         <p role="status" className="mt-md nf-body-sm text-[var(--nf-content-muted)]" data-testid="forward-loading">
-          Loading your chats
+          {words.loading}
         </p>
       ) : unreachable ? (
         <p role="status" className="mt-md nf-body-sm text-[var(--nf-content-secondary)]" data-testid="forward-unreachable">
-          {UNREACHABLE}
+          {words.unreachable}
         </p>
       ) : !hasTargets ? (
         <div className="mt-md flex flex-col items-center gap-sm py-lg text-center" data-testid="forward-empty">
           <UiIcon name="chat-bubble" size={28} className="text-[var(--nf-content-muted)]" />
           <p role="status" className="nf-body text-[var(--nf-content-secondary)]">
-            {FORWARD_EMPTY}
+            {words.empty}
           </p>
         </div>
       ) : shown.length === 0 ? (
         <p role="status" className="mt-md nf-body-sm text-[var(--nf-content-muted)]" data-testid="forward-no-match">
-          Nobody you follow matches that.
+          {words.noMatch}
         </p>
       ) : (
-        <ul className="mt-sm flex flex-col gap-3xs" aria-label="Chats you can forward to">
+        <ul className="mt-sm flex flex-col gap-3xs" aria-label={words.listLabel}>
           {shown.map((target) => (
             <li key={target.id}>
               <button
@@ -186,7 +187,7 @@ export function ForwardSheet({
                 </span>
                 <span aria-hidden="true" className="shrink-0 text-[var(--nf-content-muted)]">
                   {sendingTo === target.id ? (
-                    <span className="nf-caption">Sending</span>
+                    <span className="nf-caption">{words.sending}</span>
                   ) : (
                     <UiIcon name="arrow-right" size={20} />
                   )}

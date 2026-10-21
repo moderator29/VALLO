@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
@@ -6,9 +8,10 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  *
  * A thread alternates sides, so the placeholder does too: a wall of identical bars reads as a list and this is not a list.
  */
-export default function LoadingThread() {
+export default async function LoadingThread() {
+  const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label="Loading this conversation" className="mx-auto w-full max-w-3xl">
+    <LoadingShell label={t.memberFlows.loading.conversation} className="mx-auto w-full max-w-3xl">
       <PageHeaderSkeleton />
       <div className="space-y-sm">
         {Array.from({ length: 5 }, (_, i) => (

@@ -36,8 +36,8 @@ import { GalleryBoard } from "./GalleryBoard";
  * `NODE_ENV` check therefore 404s the board on the only server a proof counts
  * from, which is exactly the wall the screenshot sweeps hit on `/preview` before
  * that layout was changed. This route was the last one still holding the old
- * shape, found by walking it: `scripts/design/proof-nav.mjs` could not reach
- * the board to prove its back control drew.
+ * shape, found by walking it: a browser walk could not reach the board to
+ * prove its back control drew.
  *
  * It is not a loosening. `previewHarnessIsOpen` needs an explicit
  * `VALLO_PREVIEW_HARNESS=1` and refuses outright on Vercel whatever that

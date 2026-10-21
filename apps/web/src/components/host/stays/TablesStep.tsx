@@ -20,7 +20,7 @@ import {
 } from "@/lib/host/stays-setup";
 import { StaysCountRow, StaysNote, StaysPlate, StaysRow } from "./StaysParts";
 import type { StaysStepProps } from "./types";
-import { countOf } from "@vallo/i18n/core";
+import { countOf, formatNumber } from "@vallo/i18n/core";
 
 /**
  * TABLES AND HOURS. `GOVERNING-11` screen four.
@@ -52,6 +52,7 @@ type DayRow = { weekday: number; label: string; on: boolean; opens: string; clos
 
 export function TablesStep({ draft, pending, runAsync, setNotice, advance, locale }: StaysStepProps) {
   const hw = useHostCopy();
+  const w = hw.stays;
   /*
    * THE WEEK IS AN ARRAY IN THE DRAWN ORDER AND NOT A MAP KEYED BY WEEKDAY.
    * `WEEK_FROM_MONDAY` already carries the order the render lists and the
@@ -98,7 +99,7 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
   let sittingKept = true;
   const save = async () => {
     if (openDays.length === 0 || sending <= 0 || backwards.length > 0) {
-      setNotice({ tone: "error", text: "Open at least one day, count the tables, and close each day after it opens, to save the week." });
+      setNotice({ tone: "error", text: w.tables.incomplete });
       return false;
     }
     const week = await runAsync(() =>
@@ -123,9 +124,14 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
     if (!(await save())) return;
     setNotice({
       tone: "ok",
-      text:
-        `${countOf(openDays.length, "days", locale)} saved, seating ${sending}.` +
-        (sittingKept ? "" : " The sitting length is not kept yet; it will be once this estate is updated."),
+      text: [
+        w.tables.saved
+          .replace("{days}", countOf(openDays.length, "days", locale))
+          .replace("{seats}", countOf(sending, "seats", locale)),
+        sittingKept ? null : w.tables.sittingNotKept,
+      ]
+        .filter(Boolean)
+        .join(" "),
     });
     advance();
   };
@@ -155,7 +161,7 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
                   </button>
                   <Switch
                     checked={row.on}
-                    aria-label={`Open on ${day.label}`}
+                    aria-label={w.tables.openOn.replace("{day}", day.label)}
                     disabled={pending}
                     onCheckedChange={(next) => {
                       edit(day.weekday, { on: next });
@@ -170,7 +176,7 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
                         className="nf-stays-plate__label"
                         htmlFor={`stays-opens-${day.weekday}`}
                       >
-                        Opens
+                        {w.tables.opens}
                       </label>
                       <select
                         id={`stays-opens-${day.weekday}`}
@@ -190,7 +196,7 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
                         className="nf-stays-plate__label"
                         htmlFor={`stays-closes-${day.weekday}`}
                       >
-                        Closes
+                        {w.tables.closes}
                       </label>
                       <select
                         id={`stays-closes-${day.weekday}`}
@@ -212,13 +218,11 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
           })}
         </div>
         <p className="nf-stays-plate__note">
-          Tap a day&rsquo;s hours to change them. A day that is off is a day nobody can book. A
-          service stays inside one day, so a kitchen that runs to midnight closes at 11:59 PM.
+          {w.tables.hoursNote}
         </p>
         {backwards.length > 0 ? (
           <p className="nf-stays-plate__note text-[var(--nf-state-error)]" role="alert">
-            {backwards.map((day) => day.label).join(", ")}: the closing time is not after the opening
-            time. Set it later, or switch the day off.
+            {w.tables.backwards.replace("{days}", backwards.map((day) => day.label).join(", "))}
           </p>
         ) : null}
       </StaysPlate>
@@ -239,10 +243,10 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
         </div>
         <p className="nf-stays-plate__note">
           {covers > 0
-            ? `That is ${covers} seats, and ${covers} is the number saved against every day you are open.`
+            ? w.tables.seatsNow.replace("{seats}", countOf(covers, "seats", locale)).replace("{count}", formatNumber(covers, locale))
             : savedCovers > 0
-              ? `${savedCovers} seats are on record. Count the tables again to change it.`
-              : "Count the tables and the seats add up. The total is what a reservation is checked against; the breakdown is not kept."}
+              ? w.tables.seatsOnRecord.replace("{seats}", countOf(savedCovers, "seats", locale))
+              : w.tables.seatsHint}
         </p>
       </StaysPlate>
 
@@ -263,11 +267,10 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
             </select>
           }
         >
-          <span className="nf-stays-row__value whitespace-nowrap">Sitting duration</span>
+          <span className="nf-stays-row__value whitespace-nowrap">{hw.steps.sittingDuration}</span>
         </StaysRow>
         <p className="nf-stays-plate__note">
-          How long a table is the party&rsquo;s. Guests see it before they ask for a table, and it is
-          saved with your week.
+          {w.tables.sittingNote}
         </p>
       </section>
 
@@ -280,13 +283,13 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
         loading={pending}
         disabled={pending || openDays.length === 0 || sending <= 0 || backwards.length > 0}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
         {openDays.length === 0
-          ? "A restaurant needs at least one open day before the application can be sent."
-          : `Saving writes ${countOf(openDays.length, "days", locale)} and replaces whatever week was on record.`}
+          ? w.tables.needDay
+          : w.tables.savingWrites.replace("{days}", countOf(openDays.length, "days", locale))}
       </StaysNote>
     </>
   );

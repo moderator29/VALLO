@@ -15,6 +15,7 @@ import { AltSignInDoors } from "@/components/auth/AltSignInDoors";
 import { emailFromQuery } from "@/components/auth/auth-intent";
 import { arrivalOf } from "@/app/welcome/plan";
 import { wallHeading } from "@/components/app/welcome/wall-heading";
+import { safeReturnPath } from "@/lib/security/return-path";
 
 /* A10: the title and description in the page's own language, with its
    canonical and hreflang (lib/i18n/public-metadata.ts; words in publicMeta). */
@@ -53,7 +54,9 @@ export default async function SignInPage({
   const locale = await getLocale();
   const t = getDictionary(locale);
   const notice = typeof params.notice === "string" ? params.notice : undefined;
-  const next = typeof params.next === "string" ? params.next : undefined;
+  /* Through the one return-path guard before anything on the screen uses
+     it: the client doors (passkey, Apple) navigate to it themselves. */
+  const next = (typeof params.next === "string" && safeReturnPath(params.next, "")) || undefined;
   /* THE WALL NAMES WHAT THEY ASKED FOR (V-18), here as well as on first
      run. A device that has already seen first run comes straight to this
      screen from the wall, and "Sign in to open that" said nothing about what

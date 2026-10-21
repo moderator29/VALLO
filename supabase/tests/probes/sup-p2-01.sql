@@ -1,11 +1,11 @@
 -- SUP-P2-01: firm_members must be readable through RLS without 42P17: by
 -- staff (the admin supply desk's firm roster), by a member (their own row),
 -- and by a principal (their firm's roster). A plain member sees nobody
--- else's row. The QA member and QA admin are made agents inside the
+-- else's row. A throwaway account and the QA admin are agents inside the
 -- transaction; nothing is left behind.
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  member constant uuid := gen_random_uuid(); -- a throwaway agent, see the 17 October 2026 note below
   admin constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
   agent uuid;
   principal_agent uuid;
@@ -23,8 +23,19 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The staff member is a throwaway account made here,
+  -- an ordinary account with no agents row exactly as the QA member was when
+  -- this probe was written. The QA admin's own agents row is reused if it has
+  -- one: the counts below are per firm, and both firms are made here.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-sup-p2-01-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe SUP-P2-01 staff') returning id into agent;
-  insert into public.agents (user_id, display_name) values (admin, 'Probe SUP-P2-01 principal') returning id into principal_agent;
+  select id into principal_agent from public.agents where user_id = admin;
+  if principal_agent is null then
+    insert into public.agents (user_id, display_name) values (admin, 'Probe SUP-P2-01 principal') returning id into principal_agent;
+  end if;
   insert into public.businesses (owner_id, kind, name, slug, status)
   values (admin, 'agency', 'Probe SUP-P2-01 firm', 'probe-sup-p2-01-' || gen_random_uuid(), 'DRAFT') returning id into firm;
   insert into public.firm_members (firm_id, agent_id, member_role, status)

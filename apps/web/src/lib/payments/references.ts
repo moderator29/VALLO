@@ -62,8 +62,9 @@ import { randomUUID } from "node:crypto";
  *    one hold, and at most one of release or refund; a partial settlement is a
  *    new escrow row, not a fourth leg on this one.
  *
- * The platform charges nothing, so a booking reference always moves the
- * booking total and nothing more (docs/MASTER_TODO.md section 5b).
+ * Nothing is added to a guest's price (HANDOFF.md section 2), so a booking
+ * reference always moves the booking total and nothing more; Vallo's fee
+ * comes out of the host's share inside the split.
  */
 
 export const FUND_PREFIX = "rm-fund-";

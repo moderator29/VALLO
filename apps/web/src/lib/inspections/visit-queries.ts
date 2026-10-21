@@ -20,10 +20,11 @@ import { listerRoleWord, NO_REMINDERS, STRIP_DAYS, visitModeOf, type OpenSlot, t
  *   readVisit          "where does my visit stand"
  *
  * Row-level security answers who may see what. The service role is used in
- * exactly one place, AFTER the caller's own read has proven they are the
+ * exactly two places, both AFTER the caller's own read has proven they are the
  * requester: the renter's reminder rows in `public.viewing_reminders`, which
  * no member's client may read, so the timeline can mark "Reminder sent" from
- * the time it actually went rather than guess. The lister's number goes
+ * the time it actually went rather than guess; and the booked window's slot
+ * length (`readSlotMinutes`), which RLS answers to the lister only. The lister's number goes
  * through `callableNumbersFor`, the one module that decides who may be handed
  * whose (a block either way, or any failure, withholds it).
  *
@@ -235,17 +236,7 @@ export async function readVisit(listingId: string, inspectionId: string): Promis
       .then((answer) => (answer.data ?? null) as ProfileRow | null),
     readTier(db, row.lister_id),
     callableNumbersFor(me, [row.lister_id]),
-    row.window_id
-      ? db
-          .from("viewing_windows")
-          .select("slot_minutes")
-          .eq("id", row.window_id)
-          .maybeSingle()
-          .then((answer) => {
-            const value = Number((answer.data as { slot_minutes?: unknown } | null)?.slot_minutes);
-            return Number.isFinite(value) && value > 0 ? value : null;
-          })
-      : Promise.resolve(null),
+    readSlotMinutes(row.window_id),
     readRenterReminders(row.id, row.slot_at),
     videoCallsOn(),
   ]);
@@ -282,6 +273,31 @@ export async function readVisit(listingId: string, inspectionId: string): Promis
     reminders,
     videoOn,
   };
+}
+
+/**
+ * How long the booked slot is, from the lister's viewing window. RLS answers
+ * `viewing_windows` to its lister only, so the renter's own client always
+ * read nothing here and the visit page never knew the slot's length. Called
+ * only after the caller's own read proved they are the requester of the
+ * inspection carrying this `window_id`; the service role reads one column of
+ * that one window, nothing else. Any failure is null (no length shown).
+ */
+export async function readSlotMinutes(windowId: string | null): Promise<number | null> {
+  if (!windowId) return null;
+  try {
+    const admin = createAdminClient() as unknown as SupabaseClient;
+    const { data, error } = await admin
+      .from("viewing_windows")
+      .select("slot_minutes")
+      .eq("id", windowId)
+      .maybeSingle();
+    if (error) return null;
+    const value = Number((data as { slot_minutes?: unknown } | null)?.slot_minutes);
+    return Number.isFinite(value) && value > 0 ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

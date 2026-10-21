@@ -29,6 +29,23 @@ declare
   ag_a uuid; ag_b uuid; ag_a2 uuid;
   r jsonb; bk_a uuid; bk_b uuid; bk_a2 uuid; n bigint; st text;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000002')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 7 October 2026 (D68d, D77): an agreement approved by the system (no
   -- decided_by) is payable only while no risk signal fires for it. This probe
   -- is about the payment, not the review, so its fixture deals are ordinary
@@ -66,12 +83,19 @@ begin
   values (home, admin, lister, now(), 'CONFIRMED', now() + interval '1 day') returning id into insp_b3;
 
   -- Every inspection has its agreement approved, so only the letting can refuse.
-  insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms, status)
-  values ('rent', home, insp_a,  member, lister, 1000, '{}'::jsonb, 'approved'),
-         ('rent', home, insp_b,  admin,  lister, 1000, '{}'::jsonb, 'approved'),
-         ('rent', home, insp_b2, admin,  lister, 1000, '{}'::jsonb, 'approved'),
-         ('rent', home, insp_a2, member, lister, 1000, '{}'::jsonb, 'approved'),
-         ('rent', home, insp_b3, admin,  lister, 1000, '{}'::jsonb, 'approved');
+  -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+  -- row 21; pov02 and pov03): a registered business's apartment is no longer
+  -- settled direct by the policy; every rent is escrow unless the payer picks
+  -- card, and a Paystack charge carries only the direct rail. Each renter
+  -- picks card on the agreement, as the pay page records it, so the charges
+  -- below are the direct-rail card charges this probe was written against.
+  insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms, status,
+         payer_rail_choice, payer_rail_chosen_at)
+  values ('rent', home, insp_a,  member, lister, 1000, '{}'::jsonb, 'approved', 'card', now()),
+         ('rent', home, insp_b,  admin,  lister, 1000, '{}'::jsonb, 'approved', 'card', now()),
+         ('rent', home, insp_b2, admin,  lister, 1000, '{}'::jsonb, 'approved', 'card', now()),
+         ('rent', home, insp_a2, member, lister, 1000, '{}'::jsonb, 'approved', 'card', now()),
+         ('rent', home, insp_b3, admin,  lister, 1000, '{}'::jsonb, 'approved', 'card', now());
   select id into ag_a from public.deal_agreements where inspection_id = insp_a;
   select id into ag_b from public.deal_agreements where inspection_id = insp_b;
   select id into ag_a2 from public.deal_agreements where inspection_id = insp_a2;

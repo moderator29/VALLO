@@ -51,7 +51,8 @@ export type RestaurantFaceProps = {
   capsules: { key: string; icon: UiIconName; label: string }[];
   aboutParagraphs: string[];
   host: ComponentProps<typeof DetailAboutCard>["host"];
-  reserve: ComponentProps<typeof ReserveTable>;
+  /** The table form's target and deposit; its words and locale come from this face's own `t` and `locale`. */
+  reserve: Omit<ComponentProps<typeof ReserveTable>, "copy" | "locale">;
   /** The venue's service windows, `HH:MM` or `HH:MM:SS`; null when unread. */
   windows: { id: string; weekday: number; opens: string; closes: string }[] | null;
   messageHref: string | null;
@@ -206,6 +207,8 @@ export function RestaurantFace({
                       windows={windows ?? undefined}
                       windowCopy={t.experienceDetail.window}
                       success={t.success}
+                      copy={t.memberFlows}
+                      locale={locale}
                     />
                     {tableRules.length > 0 && (
                       <ul className="mt-row grid gap-inline-tight" data-testid="table-rules">

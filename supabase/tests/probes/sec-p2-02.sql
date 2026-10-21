@@ -21,6 +21,61 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
+  -- member, so no published listing had a lister other than the member or the
+  -- admin ("no published listing to test against"). The fixture gives the row
+  -- back to the example lister and points twenty example listings at it, kept
+  -- published as examples, for this transaction only, so the lister this
+  -- probe needs exists again. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000001',
+                'ed000000-0000-4000-8000-000000000002',
+                'ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000004',
+                'ed000000-0000-4000-8000-000000000005',
+                'ed000000-0000-4000-8000-000000000006',
+                'ed000000-0000-4000-8000-000000000007',
+                'ed000000-0000-4000-8000-000000000008',
+                'ed000000-0000-4000-8000-000000000009',
+                'ed000000-0000-4000-8000-000000000010',
+                'ed000000-0000-4000-8000-000000000011',
+                'ed000000-0000-4000-8000-000000000012',
+                'ed000000-0000-4000-8000-000000000013',
+                'ed000000-0000-4000-8000-000000000014',
+                'ed000000-0000-4000-8000-000000000015',
+                'ed000000-0000-4000-8000-000000000016',
+                'ed000000-0000-4000-8000-000000000017',
+                'ed000000-0000-4000-8000-000000000018',
+                'ed000000-0000-4000-8000-000000000019',
+                'ed000000-0000-4000-8000-000000000020')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
+  update public.listings set status = 'PUBLISHED'
+   where id in ('ed000000-0000-4000-8000-000000000001',
+                'ed000000-0000-4000-8000-000000000002',
+                'ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000004',
+                'ed000000-0000-4000-8000-000000000005',
+                'ed000000-0000-4000-8000-000000000006',
+                'ed000000-0000-4000-8000-000000000007',
+                'ed000000-0000-4000-8000-000000000008',
+                'ed000000-0000-4000-8000-000000000009',
+                'ed000000-0000-4000-8000-000000000010',
+                'ed000000-0000-4000-8000-000000000011',
+                'ed000000-0000-4000-8000-000000000012',
+                'ed000000-0000-4000-8000-000000000013',
+                'ed000000-0000-4000-8000-000000000014',
+                'ed000000-0000-4000-8000-000000000015',
+                'ed000000-0000-4000-8000-000000000016',
+                'ed000000-0000-4000-8000-000000000017',
+                'ed000000-0000-4000-8000-000000000018',
+                'ed000000-0000-4000-8000-000000000019',
+                'ed000000-0000-4000-8000-000000000020')
+     and is_demo and status is distinct from 'PUBLISHED';
   -- A published listing the member has no thread on, and a second published
   -- listing by a different lister (or no second lister: the mismatch then
   -- uses the admin as a counterpart who lists nothing).

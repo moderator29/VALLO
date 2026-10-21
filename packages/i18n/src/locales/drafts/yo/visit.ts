@@ -10,6 +10,13 @@ export const visitYo = {
   statusTitle: "Ìbẹ̀wò rẹ",
   close: "Pa á dé",
   progress: "Ìgbésẹ̀ {step} nínú {total}",
+  entry: {
+    ask: "Ṣètò ìbẹ̀wò",
+    askedFor: "O béèrè láti rí ibí yìí ní {when} ({zone}).",
+    confirmedFor: "A ti fìdí ìbẹ̀wò rẹ múlẹ̀ fún {when} ({zone}).",
+    offered: "Wọ́n ti fi {when} lọ̀ ọ́ ({zone}).",
+    track: "Wo ibi tí ó dé dúró.",
+  },
   property: {
     label: "Ilé náà",
   },

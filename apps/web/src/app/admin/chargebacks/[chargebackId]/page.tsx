@@ -46,5 +46,10 @@ export default async function AdminChargebackPage({ params }: { params: Promise<
     );
   }
 
-  return <ChargebackCase detail={read.data} now={Date.now()} copy={copy} overrideCopy={t.chargebacks.override} locale={locale} />;
+  return <ChargebackCase detail={read.data} now={requestTime()} copy={copy} overrideCopy={t.chargebacks.override} locale={locale} />;
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

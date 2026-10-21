@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@vallo/i18n/core";
+import { useHostCopy } from "@/components/host/host-copy";
 import { Button } from "@/components/ui/Button";
 import {
   ArrivalChargesFields,
@@ -37,6 +38,7 @@ export function ExtraChargesStep({
   goTo,
   copy,
 }: StaysStepProps & { copy?: Dictionary["afterTheGate"]["arrival"] }) {
+  const w = useHostCopy().stays;
   const saved = initialRows(draft.arrivalCharges);
   const [rows, setRows] = useHeld("rows", saved);
   const open = openKeys(rows);
@@ -51,7 +53,7 @@ export function ExtraChargesStep({
   if (!accommodationId || !copy) {
     return (
       <>
-        <StaysNote>Save the property first: the charges at the door belong to it.</StaysNote>
+        <StaysNote>{w.extra.saveFirst}</StaysNote>
         <Button
           variant="primary"
           size="lg"
@@ -59,7 +61,7 @@ export function ExtraChargesStep({
           leadingIcon="arrow-left"
           onClick={() => goTo(branchFor(draft.kind) === "shortlet" ? "place" : "hotel")}
         >
-          Open the property
+          {w.common.openProperty}
         </Button>
       </>
     );
@@ -81,11 +83,10 @@ export function ExtraChargesStep({
           if (!differs(rows, saved) || (await save())) advance();
         }}
       >
-        Continue
+        {w.common.continue}
       </Button>
       <StaysNote>
-        A guest sees these before they book, and nothing else may be asked for at the door. A charge
-        you leave out cannot be collected on arrival.
+        {w.extra.note}
       </StaysNote>
     </>
   );

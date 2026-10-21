@@ -29,7 +29,7 @@ export default async function PreviewListerVisits({
   const sheets = Object.fromEntries(
     LISTER_INSPECTIONS.map((one) => [
       one.id,
-      <InspectionSheet key={one.id} inspection={one} side="lister" facts={null} locale={locale} open now={Date.parse(`${TODAY}T08:00:00Z`)} />,
+      <InspectionSheet key={one.id} inspection={one} side="lister" facts={null} locale={locale} open now={Date.parse(`${TODAY}T08:00:00Z`)} viewingCopy={t.threads.rental} flowCopy={t.memberFlows.inspection} />,
     ]),
   );
   const route = routeFor(

@@ -101,3 +101,38 @@ export function isRetryable(reply: ProviderReply): boolean {
      turns one mistake into a million requests. */
   return false;
 }
+
+/**
+ * THE PROVIDER'S REFUSALS THAT ARE ABOUT OUR SET-UP, NOT THE DEVICE.
+ *
+ * A wrong APNs key, an expired provider token, a wrong bundle topic, a
+ * service account without permission or a wrong FCM project id answers the
+ * same way for every device on the deployment. Counting those against each
+ * device's failure streak retired every token after eight notifications and
+ * quietly emptied `push_tokens` for a configuration mistake. They are still
+ * recorded and still permanent for the queue row; they are never the
+ * device's fault.
+ */
+const CONFIGURATION_ERRORS: ReadonlySet<string> = new Set([
+  /* APNs */
+  "InvalidProviderToken",
+  "ExpiredProviderToken",
+  "MissingProviderToken",
+  "BadCertificate",
+  "BadCertificateEnvironment",
+  "BadTopic",
+  "MissingTopic",
+  "TopicDisallowed",
+  "BadPath",
+  "Forbidden",
+  /* FCM */
+  "UNAUTHENTICATED",
+  "PERMISSION_DENIED",
+  "THIRD_PARTY_AUTH_ERROR",
+  "NOT_FOUND",
+]);
+
+export function isConfigurationFailure(reply: ProviderReply): boolean {
+  return reply.outcome === "failed" && CONFIGURATION_ERRORS.has(reply.error ?? "");
+}
+

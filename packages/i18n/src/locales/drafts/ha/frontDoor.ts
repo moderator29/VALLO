@@ -400,6 +400,11 @@ export const frontDoorHa = {
     copyFallback: "Kwafi wannan mahaɗin",
     elsewhereBody: "Kati mai unguwa da jimlar kuɗin shiga. Ba adireshi ba.",
     elsewhereBodyStay: "Kati mai suna da unguwa. Ba adireshi ba.",
+    sheetTitle: "Raba",
+    inChat: "Aika a cikin hirar Vallo",
+    inChatBody: "Zaɓi ɗaya daga cikin hirarrakinka. Za su same shi a matsayin kati da za su iya buɗewa.",
+    elsewhere: "Raba a wani wuri",
+    elsewhereLink: "Mahaɗin, don ko'ina a wajen Vallo.",
   },
   desk: {
     stages: {
@@ -591,6 +596,7 @@ export const frontDoorHa = {
   viewings: {
     pickTitle: "Yi ajiyar lokacin duba gida",
     pickNote: "Lokutan da mai sanarwa ya keɓe don duba gida. Zaɓi ɗaya kuma an yi ajiya; babu kai da komowa.",
+    lagosNote: "Lokutan na Legas ne.",
     book: "Yi ajiyar {time}",
     booking: "Ana yin ajiya",
     booked: "An yi ajiya don {when}. Yana cikin Shirye-shiryenka, kuma an sanar da mai sanarwa.",

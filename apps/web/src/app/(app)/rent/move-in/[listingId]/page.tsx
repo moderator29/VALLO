@@ -128,7 +128,7 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
             </AuthGate>
           ) : (
             <div data-testid="ledger-inspect">
-              <RequestInspection listingId={listing.id} existing={inspection} locale={locale} />
+              <RequestInspection listingId={listing.id} existing={inspection} locale={locale} copy={t.visit.entry} zone={t.visit.tiles.lagos} />
               <p className="nf-caption mt-row text-center text-[var(--nf-content-muted)]">{copy.inspectFirst}</p>
             </div>
           )

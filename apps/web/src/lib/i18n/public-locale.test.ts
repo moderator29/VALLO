@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import { isPublicPath } from "../../proxy";
 import {
   alternateUrls,
+  hasTranslatedBody,
+  hreflangLinkHeader,
   isLocalizablePath,
   LOCALIZABLE_SEGMENTS,
   localizedPath,
   preferredLocale,
+  publicAlternates,
   splitLocalePrefix,
+  TRANSLATED_BODY_SEGMENTS,
 } from "./public-locale";
 
 describe("language addresses (A10)", () => {
@@ -58,5 +62,41 @@ describe("language addresses (A10)", () => {
       "x-default": "https://vallospaces.com/about",
     });
     expect(alternateUrls("https://vallospaces.com", "/").en).toBe("https://vallospaces.com/");
+  });
+});
+
+describe("a language address is canonical only where its body is in that language", () => {
+  /* Search Console: "Duplicate, Google chose different canonical than user".
+     /ha/terms served the English Terms word for word with a self canonical
+     and a sitemap entry, so Google kept /terms and reported the copy. */
+  const ORIGIN = "https://www.vallospaces.com";
+
+  it("names the English page as canonical for a page whose body is English", () => {
+    for (const locale of ["ha", "yo", "ig"] as const) {
+      expect(publicAlternates(ORIGIN, "/terms", locale)).toEqual({ canonical: "/terms" });
+      expect(publicAlternates(ORIGIN, "/docs/viewings", locale)).toEqual({ canonical: "/docs/viewings" });
+      expect(publicAlternates(ORIGIN, "/guides/renting-in-lagos", locale).canonical).toBe("/guides/renting-in-lagos");
+    }
+    expect(publicAlternates(ORIGIN, "/terms", "en")).toEqual({ canonical: "/terms" });
+  });
+
+  it("keeps a self canonical and the four-language hreflang set where the body is translated", () => {
+    expect(publicAlternates(ORIGIN, "/", "ha")).toEqual({ canonical: "/ha", languages: alternateUrls(ORIGIN, "/") });
+    expect(publicAlternates(ORIGIN, "/check", "yo").canonical).toBe("/yo/check");
+    expect(publicAlternates(ORIGIN, "/check", "yo").languages?.ig).toBe(`${ORIGIN}/ig/check`);
+  });
+
+  it("sends the hreflang Link header only for translated bodies", () => {
+    expect(hreflangLinkHeader(ORIGIN, "/terms")).toBeNull();
+    expect(hreflangLinkHeader(ORIGIN, "/about")).toBeNull();
+    expect(hreflangLinkHeader(ORIGIN, "/")).toContain('hreflang="ha"');
+  });
+
+  it("lists only localizable segments as translated", () => {
+    for (const segment of TRANSLATED_BODY_SEGMENTS) {
+      expect(LOCALIZABLE_SEGMENTS.has(segment), segment).toBe(true);
+    }
+    expect(hasTranslatedBody("/")).toBe(true);
+    expect(hasTranslatedBody("/privacy")).toBe(false);
   });
 });

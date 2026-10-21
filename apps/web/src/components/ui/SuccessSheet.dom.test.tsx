@@ -274,4 +274,35 @@ describe.skipIf(!hasBrowser && !process.env.CI)("SuccessSheet", () => {
       await close();
     }
   });
+
+  it("puts a Copy control beside a reference, which copies it and says Copied", async () => {
+    const withCopy = entry()
+      .replace(
+        'import { SuccessSheet } from "@/components/ui/SuccessSheet";',
+        'import { SuccessSheet } from "@/components/ui/SuccessSheet";\n    import { ClientCopyProvider } from "@/lib/i18n/client-copy";',
+      )
+      .replace(
+        "mount(<Harness />);",
+        'mount(<ClientCopyProvider copy={{ details: { copy: { action: "Copy", copied: "Copied", linkCopied: "Link copied", codeCopied: "Code copied", failed: "Could not copy." } } } as never}><Harness /></ClientCopyProvider>);',
+      );
+    const { page, close } = await mountInBrowser({ entry: withCopy, css: CSS });
+    try {
+      await page.evaluate(() => {
+        Object.defineProperty(navigator, "clipboard", {
+          configurable: true,
+          value: { writeText: async (text: string) => { (window as unknown as { __copied: string }).__copied = text; } },
+        });
+      });
+      const button = page.getByTestId("success-copy");
+      await button.waitFor();
+      expect(await button.getAttribute("aria-label")).toBe("Copy: Reference");
+      /* The reference alone is still the one-tap selectable text. */
+      expect(await page.locator(".nf-success__mono").textContent()).toBe("rm-book-7f3a9c21e4");
+      await button.click();
+      await page.waitForFunction(() => (window as unknown as { __copied?: string }).__copied === "rm-book-7f3a9c21e4");
+      await page.waitForFunction(() => document.querySelector('[data-testid="success-copy"]')?.textContent?.includes("Copied"));
+    } finally {
+      await close();
+    }
+  });
 });

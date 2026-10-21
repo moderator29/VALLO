@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { forRespond } from "@/components/agent/agent-copy";
+import { requestNow } from "@/lib/format/when";
 import { getDictionary, formatDate } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { readMyApplication } from "@/lib/agent/application-status";
@@ -226,9 +227,4 @@ export default async function ProfileApplicationPage() {
       </Stack>
     </div>
   );
-}
-
-/** The request's clock, read once, so the page agrees with itself. */
-function requestNow(): number {
-  return Date.now();
 }

@@ -18,8 +18,11 @@
  */
 
 import { useEffect } from "react";
+import type { Dictionary } from "@vallo/i18n/core";
 
 export type MessageMenuProps = {
+  /** The menu's words (`experienceInbox.thread.menu`). */
+  words: Dictionary["experienceInbox"]["thread"]["menu"];
   canCopy: boolean;
   canDeleteEveryone: boolean;
   /** Draws Forward. False for a photo, a deleted message or one still sending. */
@@ -33,6 +36,7 @@ export type MessageMenuProps = {
 };
 
 export function MessageMenu({
+  words,
   canCopy,
   canDeleteEveryone,
   canForward = false,
@@ -53,23 +57,23 @@ export function MessageMenu({
 
   return (
     <>
-      <button type="button" className="nf-msg-menu__scrim" aria-label="Close menu" onClick={onClose} />
-      <div role="menu" aria-label="Message options" className="nf-msg-menu" data-testid="message-menu">
+      <button type="button" className="nf-msg-menu__scrim" aria-label={words.close} onClick={onClose} />
+      <div role="menu" aria-label={words.label} className="nf-msg-menu" data-testid="message-menu">
         <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onReply}>
-          Reply
+          {words.reply}
         </button>
         {canForward && onForward ? (
           <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onForward}>
-            Forward
+            {words.forward}
           </button>
         ) : null}
         {canCopy ? (
           <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onCopy}>
-            Copy
+            {words.copy}
           </button>
         ) : null}
         <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onDeleteForMe}>
-          Delete for me
+          {words.deleteForMe}
         </button>
         {canDeleteEveryone ? (
           <button
@@ -78,7 +82,7 @@ export function MessageMenu({
             className="nf-msg-menu__item nf-msg-menu__item--danger"
             onClick={onDeleteForEveryone}
           >
-            Delete for everyone
+            {words.deleteForEveryone}
           </button>
         ) : null}
       </div>

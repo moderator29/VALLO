@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import type { Locale } from "@vallo/i18n/core";
+import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { lagosWhen } from "@/components/app/threads/when";
 import { ButtonLink } from "@/components/ui/Button";
 import { AuthGate } from "@/components/auth/AuthGate";
@@ -31,7 +31,13 @@ export function RequestInspection({
   listingId,
   existing,
   locale,
+  copy,
+  zone,
 }: {
+  /** The door's words (`t.visit.entry`). */
+  copy: Dictionary["visit"]["entry"];
+  /** "Lagos time" (`t.visit.tiles.lagos`). */
+  zone: string;
   listingId: string;
   /** An open request this person already has against this property, if any. */
   existing: Inspection | null;
@@ -41,19 +47,23 @@ export function RequestInspection({
     /* The day AND the hour, on Lagos time, said as such: "on Sat 17 Oct"
        alone left a renter to find the hour on another screen. */
     const shown = lagosWhen(existing.slotAt ?? existing.requestedAt, locale);
-    const stamp = shown ? `${shown} (${LAGOS_TIME})` : "";
 
     return (
       <p className={`flex items-start gap-xs ${TYPE.rowMeta}`} data-testid="inspection-existing">
         <UiIcon name="calendar-booking" size={20} className="mt-3xs shrink-0" />
         <span>
-          {existing.state === "CONFIRMED"
-            ? `${CONFIRMED_FOR} ${stamp}. `
-            : existing.state === "PROPOSED"
-              ? `${OFFERED_ANOTHER} ${stamp}. `
-              : `${ASKED_FOR} ${stamp}. `}
+          {shown
+            ? `${(existing.state === "CONFIRMED"
+                ? copy.confirmedFor
+                : existing.state === "PROPOSED"
+                  ? copy.offered
+                  : copy.askedFor
+              )
+                .replace("{when}", shown)
+                .replace("{zone}", zone)} `
+            : null}
           <Link href={`/listing/${listingId}/visit/${existing.id}`} className="underline" data-testid="inspection-existing-link">
-            {TRACK_IT}
+            {copy.track}
           </Link>
         </span>
       </p>
@@ -71,18 +81,8 @@ export function RequestInspection({
         leadingIcon="calendar-booking"
         data-testid="request-inspection"
       >
-        {ASK}
+        {copy.ask}
       </ButtonLink>
     </AuthGate>
   );
 }
-
-/* --------------------------------------------------------------- the copy */
-/* English, as this panel's other lines are (RentalPanel carries its steps in
-   English too); the flow it opens reads every word from `t.visit`. */
-const ASK = "Schedule a visit";
-const ASKED_FOR = "You asked to see this on";
-const CONFIRMED_FOR = "Your visit is confirmed for";
-const OFFERED_ANOTHER = "They have offered";
-const TRACK_IT = "See where it stands.";
-const LAGOS_TIME = "Lagos time";

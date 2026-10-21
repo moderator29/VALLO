@@ -96,9 +96,7 @@ export function HostStandingBody({
                       title: open.status === "SUBMITTED" ? home.draftWithTeam : home.draftInProgress,
                       hint: open.name || home.yourBusiness,
                       content: (
-                        <ListGroup
-                          label={open.status === "SUBMITTED" ? home.draftWithTeam : home.draftInProgress}
-                        >
+                        <ListGroup bare>
                           <ListRow
                             href="/host/apply"
                             leading={
@@ -133,7 +131,10 @@ export function HostStandingBody({
                       title: home.businessesTitle,
                       hint: countOf(businesses.length, "businesses", locale),
                       content: (
-                          <RowList boxed>
+                          /* Unboxed: the fold is already the container, so the
+                             businesses are rows on it with hairlines between
+                             them, not a card inside the card (pass 3). */
+                          <RowList inset={false}>
                             {businesses.map((business) => (
                               <Row key={business.id} className="flex-col items-stretch gap-xs py-md">
                                 {/*

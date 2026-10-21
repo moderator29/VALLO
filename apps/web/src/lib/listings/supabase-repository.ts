@@ -68,7 +68,7 @@ const PHOTO_BUCKET = "listing-photos";
  * somebody else's site into a convincing one. A photograph is trivially stolen
  * anyway and the bucket for those stays public; the video is not handed out.
  *
- * The bucket also carries a 50MB ceiling and a MIME allowlist in Postgres, so
+ * The bucket also carries a 100MB ceiling and a MIME allowlist in Postgres, so
  * the size and type rules hold against a caller that skips the server action.
  */
 export const VIDEO_BUCKET = "listing-videos";

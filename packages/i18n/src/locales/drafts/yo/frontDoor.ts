@@ -400,6 +400,11 @@ export const frontDoorYo = {
     copyFallback: "Da ìjápọ̀ yìí kọ",
     elsewhereBody: "Káàdì pẹ̀lú àdúgbò àti àpapọ̀ owó ìwọlé. Kì í ṣe àdírẹ́sì.",
     elsewhereBodyStay: "Káàdì pẹ̀lú orúkọ àti àdúgbò. Kì í ṣe àdírẹ́sì.",
+    sheetTitle: "Pín in",
+    inChat: "Fi ránṣẹ́ nínú ìjíròrò Vallo",
+    inChatBody: "Yan ọ̀kan nínú àwọn ìjíròrò rẹ. Wọn yóò gbà á gẹ́gẹ́ bí káàdì tí wọ́n lè ṣí.",
+    elsewhere: "Pín in sí ibòmíràn",
+    elsewhereLink: "Ìjápọ̀ náà, fún ibikíbi lóde Vallo.",
   },
   desk: {
     stages: {
@@ -591,6 +596,7 @@ export const frontDoorYo = {
   viewings: {
     pickTitle: "Ṣètò àkókò wíwo ilé",
     pickNote: "Àkókò tí olùkéde ti yà sọ́tọ̀ fún wíwo ilé. Yan ọ̀kan, a ó sì ṣètò rẹ̀; kò sí lọ-bọ̀.",
+    lagosNote: "Àkókò Èkó ni àwọn àkókò yìí.",
     book: "Ṣètò {time}",
     booking: "À ń ṣètò",
     booked: "A ti ṣètò rẹ̀ fún {when}. Ó wà nínú Àwọn Ètò rẹ, a sì ti sọ fún olùkéde.",

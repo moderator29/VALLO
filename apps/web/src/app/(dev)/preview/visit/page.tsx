@@ -13,6 +13,7 @@ import { roleWordsOf } from "@/components/app/inspections/visit/property";
 import { addDays, lagosDayOf, lagosInstant, visitModeOf, type OpenSlot, type VisitLister, type VisitRow } from "@/lib/inspections/visit";
 import type { InspectionState } from "@/lib/inspections/types";
 import "@/app/css/visit.css";
+import { requestNow } from "@/lib/format/when";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,7 @@ export default async function VisitPreview({
   const t = getDictionary(locale);
   const copy = t.visit;
   const [side, identity, { workspaces, current }] = await Promise.all([getSide(), getShellIdentity(), resolveWorkspaces()]);
-  const now = Date.now();
+  const now = requestNow();
   const roles = roleWordsOf(LISTER.role, t.socialProfile.roleLine, copy.roleNoun);
   const step = params.step === "2" ? 2 : 1;
 

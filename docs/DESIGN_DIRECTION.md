@@ -8,7 +8,7 @@
 > file disagrees with it, this file is history. It is kept because code comments
 > cite it. Do not take icon, container, glow or motion direction from here.
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 Written 18 September 2026 on the founder's ruling. This file governs the
 entire frontend visual sweep. **The reference images in
@@ -91,9 +91,9 @@ lists the off-brand details that must be translated rather than copied.
    THE DRAWN RADIUS AS A FRACTION OF THE DRAWN SHORT SIDE: at or above 0.5
    the element is a capsule however it was spelled, and anything above about
    0.35 is looked at on the running page rather than in the file.
-   `scripts/design/compare-surface.mjs --shape-sweep` walks every control on
-   a route in a real browser and reports that ratio, which is the only check
-   that can see this. A source grep proves what was written; it never proves
+   A real-browser sweep (`apps/web/scripts/design/session-b-shots/sweep-orphans.mjs`
+   measures it on every route and state) reports that ratio, which is the
+   only check that can see this. A source grep proves what was written; it never proves
    what the browser drew. The same lesson, in the same week, as the unlayered
    `*` border reset that read perfectly in the file and resolved to white 8%
    in the browser.
@@ -208,9 +208,9 @@ everywhere.
      still centred, no overflow at 320.
    - **The centre "+" is 50px** (inside the 56px tab, so the capsule does
      not grow), the brand-blue button with a white plus and a glow, and the
-     logo pill's running "snake" rim light, in both themes. It reuses the
-     logo's `--nf-logo-lap` angle and `nf-logo-lap` keyframes from
-     `light.css` rather than a copy; under reduced motion, data saving and
+     logo pill's running "snake" rim light, in both themes. The ring is
+     drawn once and turned on the compositor (`nf-edge-turn`, the round dock
+     button's turn in `edge-m.css`); under reduced motion, data saving and
      the Calm or Off motion setting the rim is a steady glow.
 
    **The theme default is DARK for everybody who has not chosen (the

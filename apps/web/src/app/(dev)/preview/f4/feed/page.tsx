@@ -1,5 +1,10 @@
 import { FeedPreview } from "../FeedPreview";
 
 export default function FeedPreviewPage() {
-  return <FeedPreview bloomOpen={false} />;
+  /* The main landmark the app shell gives the real feed. */
+  return (
+    <main id="main">
+      <FeedPreview bloomOpen={false} />
+    </main>
+  );
 }

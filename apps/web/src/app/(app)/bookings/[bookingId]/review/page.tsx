@@ -34,16 +34,17 @@ export default async function ReviewPage({
   const { bookingId } = await params;
   const locale = await getLocale();
   const plans = getDictionary(locale).shape.plans;
+  const w = getDictionary(locale).memberFlows.review;
   const read: ReviewRead = await getReviewView(bookingId, locale);
 
   if (read.state === "unconfigured") {
     return (
-      <Shell>
+      <Shell title={w.title}>
         <ResultScreen
           state="pending"
           mark="reviews"
-          verdict="We cannot reach reviews right now"
-          consequence="This is on our side, not yours. Nothing has been lost. Try again in a few minutes."
+          verdict={w.unreachableTitle}
+          consequence={w.unreachableBody}
           actions={[{ label: plans.seeStays, href: "/bookings?side=stays&from=stays", tone: "primary" }]}
         />
       </Shell>
@@ -53,7 +54,7 @@ export default async function ReviewPage({
   if (read.state === "signed-out") {
     const words = getDictionary(locale).experienceSpeed.stayReview;
     return (
-      <Shell>
+      <Shell title={w.title}>
         {/* A sign-in prompt is not good news: the neutral sign-in state, not
             the confirmed shield. The sentence promises a return here, so the
             link carries it: sign-in reads only `next` (A9). */}
@@ -75,13 +76,13 @@ export default async function ReviewPage({
 
   if (read.state === "missing") {
     return (
-      <Shell>
+      <Shell title={w.title}>
         {/* Rose and a cross. This said "We could not find that stay" under a
             calendar with a tick, in the pending colour. */}
         <ResultScreen
           state="missing"
-          verdict="We could not find that stay"
-          consequence="It may belong to another account. Your stays are all in one place."
+          verdict={w.missingTitle}
+          consequence={w.missingBody}
           actions={[{ label: plans.seeStays, href: "/bookings?side=stays&from=stays", tone: "primary" }]}
         />
       </Shell>
@@ -90,12 +91,12 @@ export default async function ReviewPage({
 
   if (read.state === "unavailable") {
     return (
-      <Shell>
+      <Shell title={w.title}>
         <ResultScreen
           state="failed"
           mark="alert-triangle"
-          verdict="Reviews did not load"
-          consequence="Your stay is unchanged and nothing was lost. Try again in a few minutes."
+          verdict={w.failedTitle}
+          consequence={w.failedBody}
           actions={[{ label: plans.seeStays, href: "/bookings?side=stays&from=stays", tone: "primary" }]}
         />
       </Shell>
@@ -103,39 +104,21 @@ export default async function ReviewPage({
   }
 
   if (read.state === "not-eligible") {
+    const n = w.notEligible;
     const copy = {
-      cancelled: {
-        title: "This stay was cancelled",
-        description:
-          "There is nothing to review, because the stay did not go ahead. The dates are open again if you still want them.",
-      },
-      unconfirmed: {
-        title: "The agent has not accepted yet",
-        description:
-          "Reviews are for stays that actually happened, so this one opens up once the agent accepts and the dates pass.",
-      },
-      unpaid: {
-        title: "This stay was not paid for",
-        description: "Reviews are for stays that were paid for through Vallo and actually happened.",
-      },
+      cancelled: { title: n.cancelledTitle, description: n.cancelledBody },
+      unconfirmed: { title: n.unconfirmedTitle, description: n.unconfirmedBody },
+      unpaid: { title: n.unpaidTitle, description: n.unpaidBody },
       "not-finished": {
-        title: "Your stay is not finished yet",
-        description: `You can share a review from ${read.subject.checkOutDisplay}, once you have checked out. Enjoy the rest of it.`,
+        title: n.notFinishedTitle,
+        description: n.notFinishedBody.replace("{date}", read.subject.checkOutDisplay),
       },
-      "no-show": {
-        title: "This stay was recorded as not attended",
-        description:
-          "Reviews are for stays that happened. If you did arrive, contact support from your bookings and we will look into it.",
-      },
-      tenancy: {
-        title: "A tenancy is not reviewed as a stay",
-        description:
-          "Your move-in and rent are on the tenancy page. Support can help with anything about the home.",
-      },
+      "no-show": { title: n.noShowTitle, description: n.noShowBody },
+      tenancy: { title: n.tenancyTitle, description: n.tenancyBody },
     }[read.reason];
 
     return (
-      <Shell subtitle={read.subject.title}>
+      <Shell title={w.title} subtitle={read.subject.title}>
         {/* A stay that cannot be reviewed YET is a window that has not opened,
             and one that was cancelled is a window that closed. Neither is a
             failure, so neither is rose. */}
@@ -147,7 +130,7 @@ export default async function ReviewPage({
           actions={[
             { label: plans.seeStays, href: "/bookings?side=stays&from=stays", tone: "primary" },
             {
-              label: "View the stay",
+              label: w.viewStay,
               href: read.subject.href,
               tone: "quiet",
             },
@@ -160,21 +143,22 @@ export default async function ReviewPage({
   if (read.state === "already-reviewed") {
     const { review } = read;
     return (
-      <Shell subtitle={read.subject.title}>
-        <AlreadyReviewedPanel subject={read.subject} review={review} />
+      <Shell title={w.title} subtitle={read.subject.title}>
+        <AlreadyReviewedPanel subject={read.subject} review={review} words={w} />
       </Shell>
     );
   }
 
   return (
-    <Shell subtitle={read.subject.title}>
-      <ReviewSubjectPanel subject={read.subject} />
+    <Shell title={w.title} subtitle={read.subject.title}>
+      <ReviewSubjectPanel subject={read.subject} words={w} />
 
       <Reveal delay={80} className="mt-block">
         <ReviewForm
           subject={read.subject}
           plansAction={{ label: plans.seeStays, href: "/bookings?side=stays&from=stays" }}
           success={getDictionary(locale).success}
+          words={w}
         />
       </Reveal>
     </Shell>
@@ -185,15 +169,18 @@ export default async function ReviewPage({
 function Shell({
   children,
   subtitle,
+  title,
 }: {
   children: React.ReactNode;
   subtitle?: string;
+  /** "Review your stay", in the reader's language. */
+  title: string;
 }) {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="relative">
         <PageScene art="calendar-check" />
-        <PageHeader title="Review your stay" subtitle={subtitle} fallback="/bookings?side=stays&from=stays" />
+        <PageHeader title={title} subtitle={subtitle} fallback="/bookings?side=stays&from=stays" />
       </div>
       {children}
     </div>

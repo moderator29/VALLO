@@ -190,7 +190,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("LiveIsland", () => {
     const { page, close } = await mountInBrowser({
       entry: entry({ placement: "bottom" }),
       css: `${PORTED_CSS}\n:root { --nf-tabbar-clearance: 90px; }`,
-      init: `document.body.insertAdjacentHTML("beforeend", '<main class="nf-main--docked"></main>');`,
+      init: `document.body.insertAdjacentHTML("beforeend", '<main class="nf-main--docked"></main>'); document.documentElement.dataset.docked = "";`,
     });
     try {
       /* Measured where it rests: the island rises into place, and on a loaded

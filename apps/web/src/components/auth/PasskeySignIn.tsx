@@ -4,6 +4,7 @@ import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { passkeySignInEnabled } from "@/lib/auth/passkey-flag";
+import { safeReturnPath } from "@/lib/security/return-path";
 import "@/app/css/auth.css";
 
 /**
@@ -11,6 +12,16 @@ import "@/app/css/auth.css";
  * browser has WebAuthn. The account is picked on the device (discoverable
  * credentials), so no email is typed. A cancelled prompt says nothing.
  */
+/**
+ * Where a passkey sign-in lands: `next` through the one return-path guard,
+ * else home. The check here used to be "starts with one slash", which let
+ * `/\evil.example` through, and a browser reads that backslash as a second
+ * slash, so the router left the site.
+ */
+export function passkeyLanding(next: string | undefined): string {
+  return (next && safeReturnPath(next, "")) || "/home";
+}
+
 export function PasskeySignIn({ label, next, failed }: { label: string; next?: string; failed: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -51,7 +62,7 @@ export function PasskeySignIn({ label, next, failed }: { label: string; next?: s
               if (!/abort|cancel|NotAllowed/i.test(failure.name ?? "")) setError(true);
               return;
             }
-            router.replace(next && next.startsWith("/") && !next.startsWith("//") ? next : "/home");
+            router.replace(passkeyLanding(next));
             router.refresh();
           } finally {
             setBusy(false);

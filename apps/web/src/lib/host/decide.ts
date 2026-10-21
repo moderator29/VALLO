@@ -81,7 +81,3 @@ export function sortByDeadline<T extends DecideItem>(items: readonly T[], now: n
   });
 }
 
-/** The server's instant for a render. A function, so a page reads the clock once per request. */
-export function requestNow(): number {
-  return Date.now();
-}

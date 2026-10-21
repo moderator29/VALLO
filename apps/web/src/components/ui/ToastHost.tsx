@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useRootFlag } from "@/lib/ui/root-flag";
 import {
   currentToast,
   dismissToast,
@@ -88,6 +89,9 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
   const timer = useRef<number | null>(null);
   const [offset, setOffset] = useState<{ x: number; y: number } | null>(null);
   const [dragging, setDragging] = useState(false);
+  /* `data-toast-up` on <html> while a toast is on screen: back to top steps
+     aside for it (details.css, lib/ui/root-flag.ts). */
+  useRootFlag("toast-up");
 
   const stop = () => {
     if (timer.current !== null) {

@@ -29,6 +29,8 @@ import { adminRefusal, requireAdmin } from "./guard";
 const SERVICE_DOWN =
   "The console could not reach the platform data just now. Nothing was changed. Please try again.";
 
+const SELF_GRANT = "You cannot grant a badge to yourself. Ask another admin.";
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const grantSchema = z.object({
@@ -93,6 +95,10 @@ export async function grantStandingBadge(
       return fail("No member has that handle. Check the spelling and try again.", {
         handle: "We could not find that handle.",
       });
+    }
+    /* Nobody awards themselves. A granted badge says another person vouched. */
+    if (identity.user_id === access.user.id) {
+      return fail(SELF_GRANT, { handle: SELF_GRANT });
     }
 
     const { error } = await access.supabase.from("user_badges").upsert(

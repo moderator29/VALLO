@@ -10,8 +10,8 @@ import { PERSON } from "../../_fixtures/people";
  */
 export default function NotificationsPreview() {
   return (
-    <div className="nf-shell mx-auto max-w-2xl pb-4xl pt-md">
+    <main id="main" className="nf-shell mx-auto max-w-2xl pb-4xl pt-md">
       <LiveNotifications initial={NOTIFICATIONS} userId={PERSON.id} />
-    </div>
+    </main>
   );
 }

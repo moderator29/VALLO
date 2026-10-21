@@ -55,8 +55,8 @@ export default async function PreviewHome({
    * `GOVERNING-01` screen one draws a hero plate, four category tiles with no
    * counts on them, and one featured row. The nine market tiles, the cities
    * rail and the investment band are not on that screen, so the harness has
-   * nothing left to hand them. `market-queries.ts` still holds the reads; one
-   * caller stopped calling.
+   * nothing left to hand them. The market reads (`market-queries.ts`) were
+   * removed on 17 October with nothing calling them.
    */
 
   return (

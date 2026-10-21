@@ -261,6 +261,9 @@
     backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
     box-shadow: var(--nf-glass-shadow);
     isolation: isolate;
+    /* The card is a tint, so its quiet words take the rung made for a tint:
+       muted measured 4.27:1 on the day card (axe), the tint rung clears 4.5. */
+    --nf-content-muted: var(--nf-content-muted-on-tint);
   }
   .nf-notif__group--stack .nf-list-item + .nf-list-item::before {
     display: none;

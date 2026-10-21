@@ -51,8 +51,8 @@ const NOT_ALLOWED: { title: string; body: string }[] = [
     body: "Photographs that are not of the place, a size or an address that is wrong, or amenities that do not exist. Light, water and gate access are the three that matter most on the Property side, and getting them wrong is not a small thing. On Vallo Stays it is the room, what it sleeps, the check-in hour and the house rules.",
   },
   {
-    title: "Dressing partner inventory as our own",
-    body: "A stay a partner confirms and fulfils carries the Third party tag and names that partner. Presenting one as first party, or letting it wear the verified tick, is a trust breach rather than a labelling slip, and it is treated as one.",
+    title: "Charging at the door what was not listed",
+    body: "A host may ask at the door only for a charge listed on the place before the guest booked: a caution deposit, power, cleaning, an extra guest or a visitor, each with its amount and its reason. Anything else, or more than was listed, is not allowed, and the guest can report it.",
   },
   {
     title: "Harassment, threats or discrimination",

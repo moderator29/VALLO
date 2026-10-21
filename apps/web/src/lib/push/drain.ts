@@ -12,7 +12,7 @@ import { sendApns } from "./transport/apns";
 import { apnsIsOpen, gatePlatforms } from "./apns-flag";
 import { sendFcm } from "./transport/fcm";
 import { sendWebPush } from "./transport/webpush";
-import { isRetryable, type ProviderReply, type PushPayload, type PushTarget } from "./types";
+import { isConfigurationFailure, isRetryable, type ProviderReply, type PushPayload, type PushTarget } from "./types";
 
 /**
  * THE DRAIN. THE ONLY THING THAT SENDS.
@@ -387,10 +387,12 @@ async function deliverOne(
 
     if (isRetryable(reply)) {
       retryable += 1;
-    } else {
+    } else if (!isConfigurationFailure(reply)) {
       /* A failure that is ours: a bad payload, bad credentials. Counted
          against the device so a token that is permanently unreachable does
-         eventually go, but not retired on one bad day. */
+         eventually go, but not retired on one bad day. Our key, our project
+         or our topic is the same answer for every device, so it is recorded
+         and never counted against this one (`isConfigurationFailure`). */
       await bumpFailureStreak(admin, target, counts);
     }
     notes.push(`fail:${target.deviceRef}:${reply.status}:${reply.error ?? "none"}`);

@@ -46,7 +46,8 @@ export default async function SharePage({
   if (kind !== "listing" && kind !== "booking" && kind !== "stay" && kind !== "into") notFound();
 
   const session = await resolveSession();
-  const words = getDictionary(await getLocale()).experienceInbox.share;
+  const inbox = getDictionary(await getLocale()).experienceInbox;
+  const words = inbox.share;
   const back =
     kind === "into"
       ? `/messages/${id}`
@@ -168,7 +169,7 @@ export default async function SharePage({
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader title={words.title} subtitle={card.title} fallback={back} />
-      <ShareToThread card={card} target={ref} threads={threads} copy={words.picker} />
+      <ShareToThread card={card} target={ref} threads={threads} copy={words.picker} thread={inbox.thread} />
     </div>
   );
 }

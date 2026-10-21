@@ -1,0 +1,42 @@
+// Dead-code report (knip). Not a dependency: CI runs a pinned version through
+// npx (the "Dead code" step in .github/workflows/ci.yml), report only. The
+// Capacitor plugins are loaded at run time through registerPlugin, the design
+// tokens through CSS @import, and tailwindcss through PostCSS, so knip cannot
+// see them used. Run locally: npx --yes knip@6.41.0 --reporter compact
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    "apps/web": {
+      // Next.js entries (app router pages, layouts, route handlers, proxy,
+      // instrumentation) come from knip's next plugin; these are the rest.
+      "entry": [
+        "src/proxy.ts",
+        "src/instrumentation.ts",
+        "src/instrumentation-client.ts",
+        "scripts/*.mjs",
+        "tests/*.spec.mjs",
+        "capacitor.config.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mjs"],
+      // database.types.ts is generated; the (dev) preview harness is reached
+      // only by URL in a browser walk.
+      "ignore": ["src/lib/supabase/database.types.ts"],
+      "ignoreDependencies": ["livekit-client", "@capacitor/camera", "@capacitor/haptics", "@capacitor/push-notifications", "@capacitor/share", "@capacitor/assets", "@vallo/design-tokens", "tailwindcss"]
+    },
+    "packages/*": {},
+    ".": {
+      "entry": ["scripts/**/*.mjs"],
+      "ignore": ["scripts/marketing/**"]
+    }
+  },
+  // Report, do not fail, on the first runs: the first report is a list to
+  // read, not a gate. Flip "rules" to "error" one category at a time.
+  "rules": {
+    "files": "warn",
+    "exports": "warn",
+    "types": "warn",
+    "dependencies": "error",
+    "unlisted": "error",
+    "duplicates": "warn"
+  }
+}

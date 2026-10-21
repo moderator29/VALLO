@@ -202,7 +202,7 @@ export default async function StayDetailPage({
     return <ListingPage params={params} searchParams={searchParams} />;
   }
 
-  const [locale, query, savedPlaces, session, instant] = await Promise.all([
+  const [locale, query, savedPlaces, session, instant, declared] = await Promise.all([
     getLocale(),
     searchParams,
     /* THE HEART'S RESTING STATE, read on the server so it survives a reload.
@@ -213,12 +213,14 @@ export default async function StayDetailPage({
     resolveSession(),
     /* D73: words only. The database decides whether each booking is instant. */
     flagIsOn(STAYS_INSTANT_PAY_FLAG),
+    /* Every charge the host declared for the door, so the cost a guest reads
+       before booking is the whole cost (founder decision A). It needs only
+       the stay's id, so it goes out with the other reads instead of waiting
+       for all of them: one round trip fewer before the page can draw. */
+    readDeclaration({ accommodationId: detail.id }),
   ]);
   const t = getDictionary(locale);
   const { checkIn, checkOut, nights, guests } = readStayDates(query);
-  /* Every charge the host declared for the door, so the cost a guest reads
-     before booking is the whole cost (founder decision A). */
-  const declared = await readDeclaration({ accommodationId: detail.id });
   const doorCharges = toDoorCharges(declared, t.afterTheGate.arrival);
   const saved = isSaved(
     savedKeySet(savedPlaces.ok ? savedPlaces.data : []),

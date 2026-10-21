@@ -57,11 +57,14 @@ export function ShareToThread({
   target,
   threads,
   copy,
+  thread,
 }: {
   card: ChatCardData | null;
   target: SharedRef;
   threads: ShareThread[];
   copy: ShareCopy;
+  /** The thread's words, for the card's own lines. */
+  thread?: Dictionary["experienceInbox"]["thread"];
 }) {
   const [chosen, setChosen] = useState<ShareThread | null>(null);
   return (
@@ -69,7 +72,7 @@ export function ShareToThread({
       {card && (
         <div className="mb-block">
           <p className={`mb-inline ${TYPE.label}`}>{copy.sharing}</p>
-          <ChatCard card={card} forwardable={false} />
+          <ChatCard card={card} forwardable={false} thread={thread} />
         </div>
       )}
       <p className={`mb-inline ${TYPE.label}`}>{copy.sendTo}</p>

@@ -2411,6 +2411,10 @@
     }
   }
   .nf-story-ring__row {
+    /* The containing block for the names' screen-reader text: an absolutely
+       placed `.sr-only` inside a scroller that is not positioned escapes it,
+       and the feed scrolled sideways by 79px at 390. */
+    position: relative;
     display: flex;
     gap: 5px;
     /* The first ring's edge 29 image px from the screen (17 CSS). */
@@ -3840,7 +3844,7 @@
   /* The dock is `lg:hidden` (1024 and up it is in the tree but not drawn),
      so the rule stops at the same edge. */
   @media (max-width: 1023.98px) {
-    :root:has(.nf-dock-create) .nf-bloom:not([data-open]) {
+    :root[data-create-dock] .nf-bloom:not([data-open]) {
       display: none;
     }
   }
@@ -4693,6 +4697,13 @@
   }
   .nf-act-pill[aria-pressed="true"] .nf-act-pill__count {
     font-weight: 600;
+  }
+  /* The heart keeps the bright brand blue (a glyph needs 3:1 and has it);
+     the count beside it is 13px text and needs 4.5:1, which the bright
+     blue misses on the night card (4.16:1, axe on the feed). The link ink
+     is the readable blue in both themes. */
+  .nf-act-pill--like[aria-pressed="true"] .nf-act-pill__count {
+    color: var(--nf-content-link);
   }
   .nf-act-pill__count {
     font-variant-numeric: tabular-nums;

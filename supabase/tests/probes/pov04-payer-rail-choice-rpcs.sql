@@ -26,6 +26,23 @@ declare
   start_day date := (now() at time zone 'Africa/Lagos')::date + 40;
   r jsonb;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
+  -- member, who is the payer here, so every sale listing was the payer's own
+  -- (the CI run of 17 October failed with "fixtures missing (a rental, a sale)").
+  -- The fixture gives the row back to the example lister and
+  -- points the example sales at it, for this transaction only, so a sale with
+  -- another owner exists again. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000004',
+                'ed000000-0000-4000-8000-000000000006',
+                'ed000000-0000-4000-8000-000000000012',
+                'ed000000-0000-4000-8000-000000000014')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   select l.id into v_rental from public.listings l where l.property_type = 'rental' and l.listing_intent = 'rent' limit 1;
   select l.id, a.user_id into v_sale, v_sale_owner from public.listings l join public.agents a on a.id = l.agent_id
    where l.listing_intent = 'sale' and a.user_id is not null and a.user_id <> guest limit 1;

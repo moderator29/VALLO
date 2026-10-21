@@ -48,6 +48,8 @@ import { RATE_AGREEMENT_NEEDED_MESSAGE, isRateAgreementRefusal } from "../pricin
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
 import { SCRUB_REFUSED_MESSAGE, scrubPublicPhoto } from "../images/scrub";
+import { inspectStoredVideo } from "./video-inspect";
+import { inListingFolder } from "./media-path";
 import {
   PHOTO_BUCKET,
   VIDEO_BUCKET,
@@ -63,6 +65,7 @@ import {
   MAX_UPLOAD_BYTES,
   MAX_UPLOAD_LABEL,
   MAX_VIDEOS,
+  MAX_VIDEO_SECONDS,
   PHOTO_MIME_TYPES,
   VIDEO_MIME_TYPES,
   addPhotoSchema,
@@ -632,8 +635,8 @@ async function discardUnattached(
  *
  * The browser uploads to listing-photos under `<auth uid>/<listing id>/...`,
  * which storage RLS already restricts to that user's own folder; this checks
- * the same prefix so a path pointing at somebody else's folder can never be
- * recorded. Position 0 is the cover, and the requested slot is honoured only
+ * the same folder, for this listing, so a path pointing at somebody else's
+ * folder (or at another of the caller's listings) can never be recorded. Position 0 is the cover, and the requested slot is honoured only
  * when it is free, so the unique (listing_id, position) index is never raced.
  */
 export async function addPhoto(input: {
@@ -648,7 +651,7 @@ export async function addPhoto(input: {
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   const { listingId, storagePath, position } = parsed.data;
 
-  if (!storagePath.startsWith(`${gate.user.id}/`)) {
+  if (!inListingFolder(storagePath, gate.user.id, listingId)) {
     return fail(
       "That photo was not uploaded to your own folder, so we did not attach it. Choose the photo again.",
     );
@@ -1141,13 +1144,13 @@ export async function addVideo(input: {
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   const { listingId, storagePath, posterPath, durationSeconds } = parsed.data;
 
-  if (!storagePath.startsWith(`${gate.user.id}/`)) {
+  if (!inListingFolder(storagePath, gate.user.id, listingId)) {
     return fail(
       "That video was not uploaded to your own folder, so we did not attach it. Choose the file again.",
     );
   }
 
-  if (posterPath !== undefined && !posterPath.startsWith(`${gate.user.id}/`)) {
+  if (posterPath !== undefined && !inListingFolder(posterPath, gate.user.id, listingId)) {
     return fail(
       "That video's still was not uploaded to your own folder, so we did not attach it. Choose the file again.",
     );
@@ -1199,6 +1202,45 @@ export async function addVideo(input: {
     return refuse("That file is not a video we can play. Use MP4, MOV or WebM.");
   }
 
+  /*
+   * THE BYTES, NOT THE LABEL. The type above is the one the uploader declared,
+   * and storage records whatever it was told. `inspectStoredVideo` reads a few
+   * small ranges of the object back: that it really is an MP4, MOV or WebM
+   * file, that it no longer says where it was filmed (the wizard takes the
+   * location out before upload; a file posted around the wizard has not had
+   * that done), and how long it really is. The measured length is what is
+   * stored, not the one the browser sent.
+   */
+  const inspected = await inspectStoredVideo(VIDEO_BUCKET, storagePath, size, MAX_UPLOAD_BYTES);
+  if (!inspected.ok) {
+    if (inspected.reason === "location") {
+      return refuse(
+        "That video still carries the place it was filmed, so we did not attach it. Add it through the listing form, which takes the location out, and try again.",
+      );
+    }
+    if (inspected.reason === "not-a-video") {
+      return refuse("That file is not a video we can play. Use MP4, MOV or WebM.");
+    }
+    return refuse(VIDEO_FAILED_MESSAGE);
+  }
+  if ((inspected.container === "webm") !== (mime === "video/webm")) {
+    return refuse("That file is not a video we can play. Use MP4, MOV or WebM.");
+  }
+  const measuredSeconds =
+    inspected.durationSeconds === null ? null : Math.max(1, Math.round(inspected.durationSeconds));
+  if (measuredSeconds !== null && measuredSeconds > MAX_VIDEO_SECONDS) {
+    return refuse(`A video can be up to ${MAX_VIDEO_SECONDS} seconds long. Trim it and try again.`);
+  }
+
+  /* The still lives in the PUBLIC photo bucket, so it gets the photograph's
+     treatment: its format read from the bytes and any metadata stripped,
+     before the row makes it reachable. The wizard draws it on a canvas, which
+     carries none; a still posted around the wizard may. */
+  if (posterPath !== undefined) {
+    const still = await scrubPublicPhoto(PHOTO_BUCKET, posterPath);
+    if (!still.ok) return refuse(SCRUB_REFUSED_MESSAGE);
+  }
+
   const { data: existing, error: countError } = await gate.supabase
     .from("listing_videos")
     .select("id, position")
@@ -1230,7 +1272,7 @@ export async function addVideo(input: {
       listing_id: listingId,
       storage_path: storagePath,
       poster_path: posterPath ?? null,
-      duration_seconds: durationSeconds ?? null,
+      duration_seconds: measuredSeconds ?? durationSeconds ?? null,
       position,
     })
     .select("id, position")
@@ -1569,10 +1611,10 @@ export async function deleteListing(input: {
     return fail("Only a draft can be deleted. Take the listing back to a draft first.");
   }
 
-  const { data: photos } = await gate.supabase
-    .from("listing_photos")
-    .select("storage_path")
-    .eq("listing_id", listing.id);
+  const [{ data: photos }, { data: videos }] = await Promise.all([
+    gate.supabase.from("listing_photos").select("storage_path").eq("listing_id", listing.id),
+    gate.supabase.from("listing_videos").select("storage_path, poster_path").eq("listing_id", listing.id),
+  ]);
 
   const { error } = await gate.supabase
     .from("listings")
@@ -1590,9 +1632,19 @@ export async function deleteListing(input: {
     return fail("We could not delete this draft just now. Please try again.");
   }
 
-  const paths = (photos ?? []).map((p) => p.storage_path);
+  /* The objects go with the rows: the photos and the videos' stills from the
+     public bucket (a still left behind stayed downloadable for ever), and
+     the walkthroughs from the private one. Best effort: the draft is gone. */
+  const paths = [
+    ...(photos ?? []).map((p) => p.storage_path),
+    ...(videos ?? []).flatMap((v) => (v.poster_path ? [v.poster_path] : [])),
+  ];
   if (paths.length > 0) {
     await gate.supabase.storage.from(PHOTO_BUCKET).remove(paths);
+  }
+  const walkthroughs = (videos ?? []).map((v) => v.storage_path);
+  if (walkthroughs.length > 0) {
+    await gate.supabase.storage.from(VIDEO_BUCKET).remove(walkthroughs);
   }
 
   refreshAgentSurfaces();

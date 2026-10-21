@@ -104,7 +104,7 @@ export function BookingDetailCard({ booking, locale }: { booking: BookingView; l
               {copy.yourReview}
             </Link>
           )}
-          {booking.cancellable && <CancelBookingControl booking={booking} label={copy.cancel} />}
+          {booking.cancellable && <CancelBookingControl booking={booking} label={copy.cancel} words={t.memberFlows.cancelBooking} />}
           <Link
             href={booking.stayHref}
             className="nf-tap flex items-center gap-2xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"

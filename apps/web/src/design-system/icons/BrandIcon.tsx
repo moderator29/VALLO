@@ -493,8 +493,8 @@ export function BrandIcon({
      * materials standing side by side, a pale frosted mark beside dark artwork
      * on a navy plate. It happened in at least six places and nothing could
      * check it, because the fact lived in a `Set` in this file and never
-     * reached the markup. `scripts/design/compare-surface.mjs --twin-sweep`
-     * was written to walk a real page and report any container holding both.
+     * reached the markup. A browser sweep was written at the time to walk a
+     * real page and report any container holding both.
      *
      * Light mode was removed on 23 September 2026 and there is one artwork
      * family again, so the distinction the attribute carried does not exist and

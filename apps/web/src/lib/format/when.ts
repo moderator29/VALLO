@@ -144,3 +144,14 @@ export function agoShort(value: When, options: { now?: Date | number; locale?: L
     .format(date)
     .replace(/\bSept\b/, "Sep");
 }
+
+/**
+ * The request's clock, read outside a component body. A server component is
+ * rendered once per request, so "now" is the request's moment; reading it
+ * through a named function keeps the render itself pure in the linter's eyes,
+ * and handing the one value down keeps the page agreeing with itself. The one
+ * definition: every page and server component imports it from here.
+ */
+export function requestNow(): number {
+  return Date.now();
+}

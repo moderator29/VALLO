@@ -163,7 +163,7 @@ export function RealDashboard({
           be read, and no tile carries a delta because none of these counts
           has a measured previous period. */}
       <HeroBand
-        className="nf-edge-lap"
+        lap
         label={dateLine}
         title={t.desk.today.title}
         titleAs="h1"
@@ -248,7 +248,7 @@ export function RealDashboard({
         {workspace?.role === "owner" ? (
           <OwnerBody view={workspace.view} places={workspace.places} t={t} locale={locale} />
         ) : workspace?.role === "agent" ? (
-          <AgentBody dash={workspace.dash} now={now ?? new Date()} today={lagosDay(now ?? new Date())} t={t} locale={locale} />
+          <AgentBody dash={workspace.dash} today={lagosDay(now ?? new Date())} t={t} locale={locale} />
         ) : null}
         {workspace?.role === "owner" ? null : figure}
         {listedInspections.length > 0 || (workspace?.role !== "owner" && numbers.totalListings > 0) ? (
@@ -261,7 +261,7 @@ export function RealDashboard({
                     {t.common.viewAll}
                   </Link>
                 </div>
-                <InspectionRows inspections={listedInspections.slice(0, 4)} side="lister" locale={locale} />
+                <InspectionRows inspections={listedInspections.slice(0, 4)} side="lister" locale={locale} viewingCopy={t.threads.rental} flowCopy={t.memberFlows.inspection} />
               </section>
             ) : null}
             {workspace?.role === "owner" ? null : numbers.totalListings > 0 ? (

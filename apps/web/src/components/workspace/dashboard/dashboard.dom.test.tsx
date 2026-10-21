@@ -80,7 +80,7 @@ describe("agent dashboard cards", () => {
   });
 
   it("draws reminders with a door each, the calendar with visit dots, contacts with message and call, and the chart", () => {
-    const body = html(<AgentBody dash={dash} now={NOW} today="2026-10-13" t={t} locale="en" />);
+    const body = html(<AgentBody dash={dash} today="2026-10-13" t={t} locale="en" />);
     expect(body).toContain("3 follow-ups due");
     expect(body).toContain("1 overdue");
     expect(body).toContain("1 visit today");
@@ -94,13 +94,13 @@ describe("agent dashboard cards", () => {
   });
 
   it("only a contact with an allowed number gets a call button", () => {
-    const body = html(<AgentBody dash={dash} now={NOW} today="2026-10-13" t={t} locale="en" />);
+    const body = html(<AgentBody dash={dash} today="2026-10-13" t={t} locale="en" />);
     expect(body.match(/href="tel:/g)?.length).toBe(2);
   });
 
   it("an agent with nothing yet gets empty states, no bars and a calendar with no dots", () => {
     const empty = agentFixture(NOW, true);
-    const body = html(<AgentBody dash={empty} now={NOW} today="2026-10-13" t={t} locale="en" />);
+    const body = html(<AgentBody dash={empty} today="2026-10-13" t={t} locale="en" />);
     expect(body).toContain("Nothing needs you today");
     expect(body).toContain("No live listing yet");
     expect(body).toContain("No enquiries yet");
@@ -124,7 +124,7 @@ describe("agent dashboard cards", () => {
     expect(band).not.toContain("New enquiries");
     expect(band).not.toContain("Deals closed");
     expect(band).toContain("Listings live");
-    const body = html(<AgentBody dash={failed} now={NOW} today="2026-10-13" t={t} locale="en" />);
+    const body = html(<AgentBody dash={failed} today="2026-10-13" t={t} locale="en" />);
     expect(body).toContain("Some reminders could not be loaded.");
     expect(body.match(/This could not be loaded/g)?.length).toBeGreaterThanOrEqual(3);
     expect(body).not.toContain("nf-viz-bar");

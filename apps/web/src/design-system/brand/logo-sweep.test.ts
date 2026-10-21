@@ -287,7 +287,7 @@ describe("the logo never changes colour (D82)", () => {
 
   /* The plates the mark stands on: each is the one white logo plate, never a
      themed surface, so the mark reads the same in both themes. */
-  const PLATES = [".nf-cap__plate", ".nf-close__plate", ".nf-push-ask__mark", ".nf-pl-platinum__mark", ".nf-mo__seal", ".nf-slate-top__plate"];
+  const PLATES = [".nf-cap__plate", ".nf-close__plate", ".nf-push-ask__mark", ".nf-pl-platinum__mark", ".nf-slate-top__plate"];
 
   it("every plate a mark stands on is the one logo plate, in both themes", () => {
     const found: string[] = [];

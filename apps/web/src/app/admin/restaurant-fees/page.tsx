@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { formatMoney, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getRestaurantFees, monthWords } from "@/lib/admin/restaurant-fees";
+import { billPayOn } from "@/lib/reservations/bill-pay";
 import { adminUi } from "../_components/ui";
 import { DisputeDecision } from "./DisputeDecision";
 
@@ -29,7 +30,7 @@ export default async function RestaurantFeesPage() {
   const locale = await getLocale();
   const t = getDictionary(locale);
   const ui = adminUi(t, locale);
-  const read = await getRestaurantFees(6);
+  const [read, billsOn] = await Promise.all([getRestaurantFees(6), billPayOn()]);
   const money = (minor: number) => formatMoney(minor, locale, "NGN");
 
   const header = (
@@ -68,7 +69,10 @@ export default async function RestaurantFeesPage() {
         {money(read.feeMinor)} per seated table.{" "}
         {read.commissionBps === null
           ? "Paying the bill through Vallo is not available yet: the commission on paid bills has not been set."
-          : `Commission on bills paid through Vallo: ${(read.commissionBps / 100).toFixed(2)}%.`}
+          : `Commission on bills paid through Vallo: ${(read.commissionBps / 100).toFixed(2)}%.`}{" "}
+        {/* The commission is set live, so without this line the desk read as
+            if diners could already pay through Vallo. */}
+        {billsOn ? "Bill payment through Vallo is on." : "Bill payment through Vallo is switched off (restaurant_bill_pay)."}
       </p>
 
       {read.disputes.length > 0 && (

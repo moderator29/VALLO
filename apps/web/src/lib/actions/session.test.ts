@@ -80,6 +80,15 @@ async function loadSession() {
   return import("./session");
 }
 
+describe("the signed-out refusal a client recognises", () => {
+  it("opens with the lead a client component matches (envelope.ts cannot import this module)", async () => {
+    const { SIGNED_OUT_MESSAGE } = await loadSession();
+    const { SIGNED_OUT_LEAD, isSignedOutRefusal } = await import("./envelope");
+    expect(SIGNED_OUT_MESSAGE.startsWith(SIGNED_OUT_LEAD)).toBe(true);
+    expect(isSignedOutRefusal(SIGNED_OUT_MESSAGE)).toBe(true);
+  });
+});
+
 describe("resolveSession", () => {
   beforeEach(() => {
     getUser.mockReset();

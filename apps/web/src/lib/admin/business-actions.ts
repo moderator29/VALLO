@@ -46,6 +46,7 @@ import { SELF_REVIEW_REFUSAL, decisionRefusal, isOwnBusiness } from "./business-
 import { adminRefusal, requireAdmin } from "./guard";
 import { writeInAppNotice } from "../notify/in-app";
 import { nightsToOpen } from "../stays/inventory";
+import { lagosToday } from "../bookings/schema";
 import { HOST_AGREEMENT_VERSION } from "../legal/versions";
 import { readHostAgreementVersion } from "../host/agreement";
 
@@ -389,7 +390,8 @@ export async function publishAccommodation(input: {
     .neq("status", "PUBLISHED");
 
   const nights = bookableRooms.flatMap((roomType) =>
-    nightsToOpen(roomType.id, roomType.units_total, new Date()),
+    /* From today on the Lagos calendar, not the UTC one (an hour behind). */
+    nightsToOpen(roomType.id, roomType.units_total, new Date(`${lagosToday()}T00:00:00Z`)),
   );
   /* `onConflict` on the primary key, ignoring duplicates: a room type being
      republished keeps the nights its host has already adjusted rather than

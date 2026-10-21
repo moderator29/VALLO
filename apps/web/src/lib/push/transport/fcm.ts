@@ -166,22 +166,42 @@ export async function fcmAccessToken(now: number = Date.now()): Promise<
  */
 export function readFcmError(status: number, body: string): ProviderReply {
   let code = `http_${status}`;
+  let tokenFieldRefused = false;
   try {
-    const parsed = JSON.parse(body) as { error?: { status?: string; details?: Array<{ errorCode?: string }> } };
-    const fromDetails = parsed.error?.details?.find((detail) => typeof detail.errorCode === "string")?.errorCode;
+    const parsed = JSON.parse(body) as {
+      error?: {
+        status?: string;
+        details?: Array<{ errorCode?: string; fieldViolations?: Array<{ field?: string }> }>;
+      };
+    };
+    const details = parsed.error?.details ?? [];
+    const fromDetails = details.find((detail) => typeof detail.errorCode === "string")?.errorCode;
     const candidate = fromDetails ?? parsed.error?.status;
     /* Only an allow-list of known machine tokens is ever carried forward. A
        free-text message from a provider is a body, and bodies echo tokens. */
     if (typeof candidate === "string" && /^[A-Z_]{3,40}$/.test(candidate)) code = candidate;
+    /* Which field a 400 refused: only `message.token` says the token itself
+       is malformed. The field name is kept as a yes or no, never as text. */
+    tokenFieldRefused = details.some((detail) =>
+      (detail.fieldViolations ?? []).some((violation) => violation.field === "message.token"),
+    );
   } catch {
     /* Not JSON. The status alone is the record. */
   }
 
-  if (code === "UNREGISTERED" || code === "NOT_FOUND") {
+  if (code === "UNREGISTERED") {
     return { outcome: "gone", status, error: code };
   }
-  if (code === "INVALID_ARGUMENT" && status === 400) {
-    /* A malformed registration token, which is dead in the same way. */
+  if (status === 404) {
+    /* A 404 that does not say UNREGISTERED is a wrong project id or a wrong
+       URL: every device on the deployment would get the same answer. It used
+       to read as "gone" and retire them all (`isConfigurationFailure`). */
+    return { outcome: "failed", status, error: "NOT_FOUND" };
+  }
+  if (code === "INVALID_ARGUMENT" && status === 400 && tokenFieldRefused) {
+    /* A malformed registration token, which is dead in the same way. Any
+       other INVALID_ARGUMENT is our message (a field, a size), and retiring
+       every Android device for one bad payload would be the worst answer. */
     return { outcome: "gone", status, error: code };
   }
   return replyFromStatus(status, code);

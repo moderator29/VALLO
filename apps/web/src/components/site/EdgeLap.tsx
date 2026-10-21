@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef, CSSProperties, ElementType, ReactNode } from "react";
 import "@/app/css/site.css";
+import { EdgeLapRing } from "./EdgeLapRing";
 
 /**
  * THE EDGE LAP: a thin light that runs round a container's rim, the logo
@@ -14,8 +15,11 @@ import "@/app/css/site.css";
  *            "+" 5)
  *   ink      the light's colour (the brand glow by default)
  *
- * Decorative and server-safe. The ring stops, and settles to a faint steady
- * rim, under reduced motion, data saver and the Calm and Off settings.
+ * Decorative and server-safe. The ring is one empty `aria-hidden` child after
+ * the host's own (`.nf-edge-lap__ring`): its light turns on the compositor,
+ * so the main thread does no work per frame (site.css says why). It stops,
+ * and settles to a faint steady rim, under reduced motion, data saver and
+ * the Calm and Off settings.
  * Ration it: the landing's two capsules, a hero's one card.
  */
 type EdgeLapOwnProps<E extends ElementType> = {
@@ -48,6 +52,7 @@ export function EdgeLap<E extends ElementType = "div">({
   return (
     <Tag {...rest} className={["nf-edge-lap", className ?? ""].filter(Boolean).join(" ")} style={tuned}>
       {children}
+      <EdgeLapRing />
     </Tag>
   );
 }

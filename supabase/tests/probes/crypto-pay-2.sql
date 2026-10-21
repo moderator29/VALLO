@@ -16,6 +16,23 @@ declare
   ref_c  text := 'rm-yc-' || gen_random_uuid()::text;
   tg name; rate bigint; bk uuid; bk2 uuid; a uuid; b uuid; c uuid; r jsonb; checked timestamptz;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 7 October 2026 (D68d, D77): an agreement approved by the system (no
   -- decided_by) is payable only while no risk signal fires for it. This probe
   -- is about the payment, not the review, so its fixture deals are ordinary

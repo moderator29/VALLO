@@ -4,21 +4,37 @@
 -- a first name set), no payment, no phone step until TERMII_SENDER_ID is set.
 --
 -- Proves, all rolled back by the final raise:
---   1. signup-80 is the one live consumer campaign; launch-d51 is ended; the
---      guard still refuses a campaign with no identity anchor;
+--   1. signup-80-phone is the one live consumer campaign; signup-80 and
+--      launch-d51 are ended; the guard still refuses a campaign with no identity anchor;
 --   2. a sign-up that carries a code is ATTRIBUTED at once (no phone needed);
---   3. one who completes email + onboarding QUALIFIES at 8,000 kobo, waits
+--   3. one who completes phone + onboarding QUALIFIES at 8,000 kobo (an
+--      email alone does not), waits
 --      out the 7-day window (nothing available inside it), and after the
 --      window becomes Available with an 8,000 kobo ledger entry;
---   4. one missing a step (email never confirmed) does NOT qualify, and the
---      member reads "waiting on email" for them;
+--   4. one missing a step (phone never confirmed) does NOT qualify, and the
+--      member reads "waiting on phone" for them;
 --   5. finishing onboarding later qualifies through the profile trigger;
---   6. one Gmail inbox cannot earn twice through dots or a +tag;
+--   6. one phone cannot earn twice;
 --   7. a provider sign-up (no metadata) records the invite through
 --      referral_claim_code, and that call refuses its own code and an old
 --      account;
 --   8. members read progress only through the function; anon cannot.
 -- Switches are set in this transaction only. Live flags are never asserted.
+--
+-- 17 October 2026, rebased on the founder's ruling of 13 October 2026 (D63 in
+-- docs/RULINGS.md; migration 20261013172138_fx01_referral_counts_after_phone_verified):
+-- an invited person counts only after they verify their phone number. fx01
+-- ended signup-80 and started signup-80-phone, the same terms (8,000 kobo, a
+-- 7 day window, the same cap) with requirement_keys ['phone_verified',
+-- 'onboarding_completed'], and the confirmed phone is then always the identity
+-- anchor. So step 1 now finds signup-80 ended and signup-80-phone the one live
+-- consumer campaign; the step that qualifies is a confirmed phone, not a
+-- confirmed email (an email alone is checked NOT to qualify); the missing
+-- step in 4 is the phone (blocked on phone_not_verified, the member reads
+-- "waiting on phone"); 5 and 7 have a confirmed phone; and 6 is one phone
+-- earning once (the inbox rule now applies only without a phone, which this
+-- campaign never allows). Every other assertion is unchanged.
+-- fx01-referral-counts-after-phone-verified.sql proves the phone rule on its own.
 do $$
 declare
   alphabet   constant text := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -36,12 +52,16 @@ declare
   rid        uuid;
   st         text; v text; amt bigint; ok boolean; i int; res text;
   prog       record;
+  phone_1    text := '+23480' || (10000000 + floor(random() * 89999999))::bigint;
 begin
   -- ------------------------------------------------------------ 1. the campaign
   select id into camp from public.referral_campaigns
-   where slug = 'signup-80' and status = 'active' and kind = 'consumer' and reward_minor = 8000
-     and requirement_keys = array['email_verified', 'onboarding_completed'] and review_window = interval '7 days';
-  if camp is null then raise exception 'PROBE_FAIL d85-referral-signup-80: signup-80 is not the live 8,000 kobo sign-up campaign'; end if;
+   where slug = 'signup-80-phone' and status = 'active' and kind = 'consumer' and reward_minor = 8000
+     and requirement_keys = array['phone_verified', 'onboarding_completed'] and review_window = interval '7 days';
+  if camp is null then raise exception 'PROBE_FAIL d85-referral-signup-80: signup-80-phone is not the live 8,000 kobo sign-up campaign'; end if;
+  if exists (select 1 from public.referral_campaigns where slug = 'signup-80' and status <> 'ended') then
+    raise exception 'PROBE_FAIL d85-referral-signup-80: signup-80 is still live';
+  end if;
   if exists (select 1 from public.referral_campaigns where slug = 'launch-d51' and status <> 'ended') then
     raise exception 'PROBE_FAIL d85-referral-signup-80: launch-d51 is still live';
   end if;
@@ -91,11 +111,16 @@ begin
   values (full_user, 'Ada', now(), 'probe') on conflict (id) do update
      set first_name = 'Ada', terms_accepted_at = coalesce(public.profiles.terms_accepted_at, now()), terms_version = 'probe';
   if (select status from public.referrals where id = rid) <> 'attributed' then
-    raise exception 'PROBE_FAIL d85-referral-signup-80: a referral qualified before the email was confirmed';
+    raise exception 'PROBE_FAIL d85-referral-signup-80: a referral qualified before the phone was confirmed';
+  end if;
+  -- An email alone never counts (13 October ruling).
+  update auth.users set email_confirmed_at = now() where id = full_user;
+  if (select status from public.referrals where id = rid) <> 'attributed' then
+    raise exception 'PROBE_FAIL d85-referral-signup-80: a referral qualified on a confirmed email alone';
   end if;
 
-  -- ------------------------------ 3. email confirmed: qualifies at 8,000 kobo
-  update auth.users set email_confirmed_at = now() where id = full_user;
+  -- ------------------------------ 3. phone confirmed: qualifies at 8,000 kobo
+  insert into public.confirmed_phones (user_id, phone) values (full_user, phone_1);
   select status, reward_minor into st, amt from public.referrals where id = rid;
   if st <> 'pending' or amt <> 8000 then
     raise exception 'PROBE_FAIL d85-referral-signup-80: a fully signed-up referral is % at % kobo, not pending at 8,000', st, amt;
@@ -125,7 +150,7 @@ begin
     raise exception 'PROBE_FAIL d85-referral-signup-80: the Rewards Balance has no 8,000 kobo entry for the referral';
   end if;
 
-  -- ------------------------------ 4. a missing step: the email never confirmed
+  -- ------------------------------ 4. a missing step: the phone never confirmed
   insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
   values (no_email, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
           'probe-d85-noemail-' || tag || '@example.invalid', '{}',
@@ -135,12 +160,12 @@ begin
      set first_name = 'Bola', terms_accepted_at = coalesce(public.profiles.terms_accepted_at, now()), terms_version = 'probe';
   v := private.referral_try_qualify(no_email);
   select status, blocked_on into st, v from public.referrals where referred_id = no_email;
-  if st is distinct from 'attributed' or v is distinct from 'email_not_verified' then
-    raise exception 'PROBE_FAIL d85-referral-signup-80: without a confirmed email the referral is % (%)', st, v;
+  if st is distinct from 'attributed' or v is distinct from 'phone_not_verified' then
+    raise exception 'PROBE_FAIL d85-referral-signup-80: without a confirmed phone the referral is % (%)', st, v;
   end if;
   perform public.referral_qualify_pending(5000);
   if (select status from public.referrals where referred_id = no_email) <> 'attributed' then
-    raise exception 'PROBE_FAIL d85-referral-signup-80: the sweep qualified a referral missing its email';
+    raise exception 'PROBE_FAIL d85-referral-signup-80: the sweep qualified a referral missing its phone';
   end if;
 
   -- ---------------------------- 5. onboarding finished last: the profile trigger
@@ -148,6 +173,7 @@ begin
   values (late_setup, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
           'probe-d85-late-' || tag || '@example.invalid', '{}', jsonb_build_object('referral_code', inv_code), now(), now());
   update auth.users set email_confirmed_at = now() where id = late_setup;
+  insert into public.confirmed_phones (user_id, phone) values (late_setup, '+23481' || (10000000 + floor(random() * 89999999))::bigint);
   select status, blocked_on into st, v from public.referrals where referred_id = late_setup;
   if st is distinct from 'attributed' or v is distinct from 'onboarding_incomplete' then
     raise exception 'PROBE_FAIL d85-referral-signup-80: before onboarding the referral is % (%)', st, v;
@@ -159,7 +185,10 @@ begin
     raise exception 'PROBE_FAIL d85-referral-signup-80: finishing onboarding did not qualify the referral';
   end if;
 
-  -- ------------------------------------- 6. one Gmail inbox earns once
+  -- ------------------------------------- 6. one phone earns once
+  -- The same person on a second account: the Gmail inbox of full_user (dots
+  -- and a +tag), and full_user's phone, moved to this account (one account per
+  -- phone, so it leaves full_user first). Rolled back.
   insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, email_confirmed_at)
   values (alias_user, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
           'probed85' || tag || '@googlemail.com', '{}',
@@ -167,9 +196,11 @@ begin
   insert into public.profiles (id, first_name, terms_accepted_at, terms_version)
   values (alias_user, 'Ade', now(), 'probe') on conflict (id) do update
      set first_name = 'Ade', terms_accepted_at = coalesce(public.profiles.terms_accepted_at, now()), terms_version = 'probe';
+  delete from public.confirmed_phones where user_id = full_user;
+  insert into public.confirmed_phones (user_id, phone) values (alias_user, phone_1);
   perform private.referral_try_qualify(alias_user);
   if (select status from public.referrals where referred_id = alias_user) <> 'reversed' then
-    raise exception 'PROBE_FAIL d85-referral-signup-80: one Gmail inbox earned twice through dots and a +tag';
+    raise exception 'PROBE_FAIL d85-referral-signup-80: one phone earned twice';
   end if;
 
   -- --------------------------- 7. a provider sign-up claims the kept invite
@@ -185,6 +216,7 @@ begin
   insert into public.profiles (id, first_name, terms_accepted_at, terms_version)
   values (oauth_user, 'Dayo', now(), 'probe') on conflict (id) do update
      set first_name = 'Dayo', terms_accepted_at = coalesce(public.profiles.terms_accepted_at, now()), terms_version = 'probe';
+  insert into public.confirmed_phones (user_id, phone) values (oauth_user, '+23482' || (10000000 + floor(random() * 89999999))::bigint);
 
   perform set_config('request.jwt.claim.sub', oauth_user::text, true);
   perform set_config('request.jwt.claims', jsonb_build_object('sub', oauth_user, 'role', 'authenticated')::text, true);
@@ -217,7 +249,7 @@ begin
   for prog in select * from public.my_referral_progress(50) loop
     if prog.id = rid and not (prog.stage = 'earned' and prog.earned_state = 'available' and prog.reward_minor = 8000
                               and prog.first_name = 'Ada') then ok := false; end if;
-    if prog.first_name = 'Bola' and not (prog.stage = 'signing_up' and prog.waiting_on = 'email') then ok := false; end if;
+    if prog.first_name = 'Bola' and not (prog.stage = 'signing_up' and prog.waiting_on = 'phone') then ok := false; end if;
     if prog.first_name = 'Chika' and not (prog.stage = 'in_review' and prog.review_until > now()) then ok := false; end if;
     if prog.first_name = 'Ade' and not (prog.stage = 'not_eligible' and prog.not_eligible_reason = 'already_rewarded') then ok := false; end if;
   end loop;

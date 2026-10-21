@@ -5,7 +5,6 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { shareAreaPrices } from "@/lib/price-check/actions";
 import { createShareLink } from "@/lib/share/actions";
-import type { ListingIntent, PriceCheckPropertyType } from "@/lib/price-check/types";
 
 /**
  * THE BUTTON, AND WHY THERE WAS NOT ONE.
@@ -30,7 +29,7 @@ import type { ListingIntent, PriceCheckPropertyType } from "@/lib/price-check/ty
  * layer of the same rule and it is the weakest of the five, which is why it is
  * the one with the comment on it.
  *
- * WHAT IT DOES CARRY IS A PLACE NAME AND A TYPE, and the check constraint
+ * WHAT IT DOES CARRY IS THE SERVER'S SEAL OVER A PLACE NAME AND A TYPE, and the check constraint
  * `price_check_shares_area_is_not_an_address` reads that place name and
  * refuses anything shaped like a street address. Somebody who types their own
  * address into the area field of the ladder gets a refused card rather than a
@@ -51,7 +50,7 @@ import type { ListingIntent, PriceCheckPropertyType } from "@/lib/price-check/ty
  * NOT a disabled button. A control that cannot be pressed teaches nobody why
  * it cannot be pressed.
  *
- * The caller decides which of the two it is by passing `figures` or not, and
+ * The caller decides which of the two it is by passing `card` or not, and
  * the type makes it impossible to ask for a card without them.
  */
 
@@ -73,41 +72,29 @@ export type ShareAreaCopy = {
 };
 
 /**
- * Exactly what a card is minted from. Every field here is on the card.
+ * What a card is minted from: the server's seal over the whole card.
  *
- * `listingCount` is required and the database refuses fewer than three, so a
- * caller cannot hand this component a figure without also handing it the count
- * the figure came from. That is the no-invented-numbers rule expressed as a
- * type rather than as a habit.
+ * The page computed the figures, the count and the place, and sealed them
+ * (`lib/price-check/share-seal.ts`); this component carries the seal as an
+ * opaque string and the action mints only what the seal says. So no figure on
+ * a card can come from the browser, and a form edited after the answer
+ * arrived cannot pair a new area with the old figures. `seal` is null only
+ * where the server could not sign (no service key), and minting then shows
+ * its failure line instead of a card.
  */
-export type ShareFigures = {
-  lowMinor: number;
-  midMinor: number;
-  highMinor: number;
-  listingCount: number;
-  oldestAt?: string | null;
-  newestAt?: string | null;
-};
+export type SealedShare = { seal: string | null };
 
 export type ShareAreaProps = {
-  stateCode: string;
-  lgaCode?: string | null;
-  /** A NEIGHBOURHOOD NAME. Never an address: the database refuses one. */
-  area?: string | null;
-  /** Absent makes an `area` scoped card, which carries no type and no beds. */
-  propertyType?: PriceCheckPropertyType | null;
-  listingIntent: ListingIntent;
-  bedrooms?: number | null;
   copy: ShareAreaCopy;
   variant?: "primary" | "ghost";
 };
 
 export function ShareAreaButton({
-  figures,
+  card,
   ...rest
 }: ShareAreaProps & {
   /** Null is "there is nothing to make a card from", which is a state. */
-  figures: ShareFigures | null;
+  card: SealedShare | null;
 }) {
   /*
    * NO FIGURES, NO BUTTON, AND A SENTENCE INSTEAD.
@@ -115,10 +102,10 @@ export function ShareAreaButton({
    * This is the branch almost every reader meets today, so it is written as
    * the real state rather than as the empty case of the other one. It is also
    * why the two branches are two components: the minting half then takes
-   * `ShareFigures` and not `ShareFigures | null`, so there is no path through
+   * `SealedShare` and not `SealedShare | null`, so there is no path through
    * it that could mint a card out of nothing.
    */
-  if (figures === null) {
+  if (card === null) {
     return (
       <div className="nf-pc-share nf-pc-share--none">
         <p className="nf-body-sm font-semibold text-[var(--nf-content-secondary)]">
@@ -130,20 +117,14 @@ export function ShareAreaButton({
       </div>
     );
   }
-  return <MintableShare {...rest} figures={figures} />;
+  return <MintableShare {...rest} card={card} />;
 }
 
 function MintableShare({
-  stateCode,
-  lgaCode,
-  area,
-  propertyType,
-  listingIntent,
-  bedrooms,
-  figures,
+  card,
   copy,
   variant = "ghost",
-}: ShareAreaProps & { figures: ShareFigures }) {
+}: ShareAreaProps & { card: SealedShare }) {
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<"idle" | "making" | "made" | "failed">("idle");
   const [doorPath, setDoorPath] = useState<string | null>(null);
@@ -164,27 +145,15 @@ function MintableShare({
     setState("making");
     setCopied(false);
     /*
-     * THE SCOPE IS DERIVED FROM WHAT WE HOLD, never passed in. The database's
-     * `price_check_shares_type_matches_scope` refuses an `area` card carrying
-     * a type and an `area_and_type` card carrying none, so deciding it here
-     * from the same value that fills the field is the only way the two cannot
-     * disagree.
+     * THE SEAL IS THE WHOLE CARD. The scope, the place and the figures were
+     * decided on the server when the answer was computed; nothing here can
+     * change them.
      */
-    const result = await shareAreaPrices({
-      scope: propertyType ? "area_and_type" : "area",
-      stateCode,
-      ...(lgaCode ? { lgaCode } : {}),
-      ...(area ? { area } : {}),
-      ...(propertyType ? { propertyType } : {}),
-      listingIntent,
-      ...(propertyType && bedrooms !== null && bedrooms !== undefined ? { bedrooms } : {}),
-      lowMinor: Math.round(figures.lowMinor),
-      midMinor: Math.round(figures.midMinor),
-      highMinor: Math.round(figures.highMinor),
-      listingCount: figures.listingCount,
-      ...(figures.oldestAt ? { oldestAt: figures.oldestAt } : {}),
-      ...(figures.newestAt ? { newestAt: figures.newestAt } : {}),
-    });
+    if (card.seal === null) {
+      setState("failed");
+      return;
+    }
+    const result = await shareAreaPrices({ seal: card.seal });
     if (!result.ok) {
       setState("failed");
       return;

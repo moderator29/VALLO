@@ -132,7 +132,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("locale fit: listing detail, res
           <StayDatesProvider today="2026-09-23" blockedDates={[]} priceMinor={8_500_000} capacity={4}>
             <div className="nf-shell"><Stack>
               <Section title={t.catalogue.detail.moveInTotal} divided>
-                <ReservePanel listingId={RENTAL.id} currency="NGN" locale={locale} instantBook messageHref="#" />
+                <ReservePanel listingId={RENTAL.id} currency="NGN" locale={locale} instantBook messageHref="#" copy={t.memberFlows} />
               </Section>
             </Stack></div>
           </StayDatesProvider>

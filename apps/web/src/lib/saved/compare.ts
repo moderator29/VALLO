@@ -2,7 +2,7 @@
  * THE SAVED COMPARE (recommendation B3, 30 September 2026).
  *
  * The Saved page promised "ready to compare side by side" and had no compare.
- * This is the table behind it: two or three saved listings, one row per fact,
+ * This is the table behind it: two saved listings at a time (the sheet keeps two), one row per fact,
  * each fact from the listing's own record and its own builders
  * (`moveInLines` for the money at the door, `cardUtility` for power). Built on
  * the server, so the client only chooses columns.
@@ -25,7 +25,6 @@ import { KIND_NOUN } from "@/lib/listings/search-params";
 import { placeOf, type CardGlanceMark } from "@/lib/listings/card-glance";
 
 export const COMPARE_MIN = 2;
-export const COMPARE_MAX = 3;
 
 export type CompareColumn = {
   id: string;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { BookingView } from "@/lib/bookings/queries";
-import { CancelBookingSheet } from "@/components/app/bookings/CancelBookingSheet";
+import { CancelBookingSheet, type CancelBookingWords } from "@/components/app/bookings/CancelBookingSheet";
 import { KycFlow, type KycCopy } from "@/components/verification/KycFlow";
 import { DistrictChips, type DistrictChip } from "@/components/social/feed/DistrictHeader";
 
@@ -11,8 +11,8 @@ import { DistrictChips, type DistrictChip } from "@/components/social/feed/Distr
  * page cannot hand across. Both functions do nothing: this is a proof of how
  * the screen is drawn, and the harness never submits anything.
  */
-export function CancelSheetFixture({ booking }: { booking: BookingView }) {
-  return <CancelBookingSheet booking={booking} onClose={() => {}} />;
+export function CancelSheetFixture({ booking, words }: { booking: BookingView; words: CancelBookingWords }) {
+  return <CancelBookingSheet booking={booking} onClose={() => {}} words={words} />;
 }
 
 export function KycFlowFixture({ copy }: { copy: KycCopy }) {

@@ -9,6 +9,7 @@ import { RESTAURANT_DEPOSITS_FLAG } from "./deposits";
 import type { Database } from "../supabase/database.types";
 import type { ReservationStatus } from "./db";
 import { readBill, readSeating, type BillView, type SeatingView } from "./seating";
+import { billPayOn } from "./bill-pay";
 import type { GuestRecord } from "./guest-record";
 
 /**
@@ -61,6 +62,8 @@ export type ReservationView = {
   seating?: SeatingView | null;
   bill?: BillView | null;
   reviewed?: boolean;
+  /** Whether a bill can be paid through Vallo now (`restaurant_bill_pay`, `bill-pay.ts`). */
+  billPay?: boolean;
 };
 
 /**
@@ -214,12 +217,13 @@ async function withSeating<T extends ReservationView>(
   if (views.length === 0) return views;
   try {
     const ids = views.map((v) => v.id);
-    const [seatRead, billRead, reviewRead] = await Promise.all([
+    const [seatRead, billRead, reviewRead, billPay] = await Promise.all([
       db.from("reservation_seatings").select("*").in("reservation_id", ids),
       db.from("restaurant_bills").select("*").in("reservation_id", ids).neq("status", "cancelled"),
       authorId
         ? db.from("reservation_reviews").select("reservation_id").in("reservation_id", ids).eq("author_id", authorId)
         : Promise.resolve({ data: [] as { reservation_id: string }[], error: null }),
+      billPayOn(),
     ]);
     await reportReadError("read.reservations.seatings", seatRead.error);
     await reportReadError("read.reservations.bills", billRead.error);
@@ -243,6 +247,7 @@ async function withSeating<T extends ReservationView>(
       seating: seats.get(v.id) ?? null,
       bill: bills.get(v.id) ?? null,
       reviewed: reviewed.has(v.id),
+      billPay,
     }));
   } catch {
     return views;

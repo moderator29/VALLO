@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { requestNow } from "@/lib/format/when";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getAgentContext } from "@/lib/agent/listings-queries";
@@ -378,9 +379,4 @@ export default async function VerificationPage({
       )}
     </div>
   );
-}
-
-/** The request's clock, read once, so the page agrees with itself. */
-function requestNow(): number {
-  return Date.now();
 }

@@ -33,6 +33,8 @@ export const ADMIN_REVIEW_CALLS_FLAG = "admin_review_calls";
  * reads off here and in the database (`private.subscriptions_checkout_on`).
  */
 export const SUBSCRIPTIONS_CHECKOUT_FLAG = "subscriptions_checkout";
+/** Saving a card at checkout (the 100 naira check). Its own switch since 17 October, in place of the retired `wallet` row (`lib/payments/methods-actions.ts`). */
+export const SAVED_CARDS_FLAG = "saved_cards";
 /** V-41: residents' reports beside the lister's claim. */
 export const NEIGHBOURS_FLAG = "neighbours_account";
 /** V-43: rush-hour times to named places. */

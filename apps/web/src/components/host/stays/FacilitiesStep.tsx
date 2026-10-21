@@ -38,6 +38,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
   userId: string;
 }) {
   const hw = useHostCopy();
+  const w = hw.stays;
   /* Held in the wizard: the ticked facilities and a typed pin survive Back,
      and the wizard asks before either is left unsaved. */
   const chosen = draft.accommodation?.facilities ?? [];
@@ -49,7 +50,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
 
   const locate = () => {
     if (!navigator.geolocation) {
-      setNotice({ tone: "error", text: "This device will not give a location. Type it instead." });
+      setNotice({ tone: "error", text: w.facilities.noLocation });
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -57,7 +58,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
         setLat(coordinateText(position.coords.latitude));
         setLng(coordinateText(position.coords.longitude));
       },
-      () => setNotice({ tone: "error", text: "The location was refused. Type it instead." }),
+      () => setNotice({ tone: "error", text: w.facilities.refused }),
     );
   };
 
@@ -68,7 +69,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
 
   const savePinAsync = async () => {
     if (!pin) {
-      setNotice({ tone: "error", text: "Those are not two coordinates, so the pin cannot be saved." });
+      setNotice({ tone: "error", text: w.facilities.badPin });
       return false;
     }
     const saved = await runAsync(() =>
@@ -81,7 +82,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
     if (saved) {
       setLat("");
       setLng("");
-      setNotice({ tone: "ok", text: "The pin is saved." });
+      setNotice({ tone: "ok", text: w.facilities.pinSaved });
     }
     return saved;
   };
@@ -105,7 +106,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
        hotel's first or a shortlet's first, and this opens whichever it is. */
     return (
       <>
-        <StaysNote>Save the property first and the facilities and photographs hang on it.</StaysNote>
+        <StaysNote>{w.facilities.saveFirst}</StaysNote>
         <Button
           variant="primary"
           size="lg"
@@ -113,7 +114,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
           leadingIcon="arrow-left"
           onClick={() => goTo(branchFor(draft.kind) === "shortlet" ? "place" : "hotel")}
         >
-          Open the property
+          {w.common.openProperty}
         </Button>
       </>
     );
@@ -138,14 +139,14 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
         label={hw.steps.pinLabel}
         note={
           draft.accommodation.hasPin
-            ? "A pin is on record. Setting it again replaces it."
-            : "Required before the property can go on the shelf. Stand at the property and use your location, or type the two numbers."
+            ? w.facilities.pinOnRecord
+            : w.facilities.pinRequired
         }
       >
         <div className="grid grid-cols-2 gap-[var(--nf-space-sm)]">
           <div>
             <label className="nf-stays-plate__label" htmlFor="stays-lat">
-              Latitude
+              {w.facilities.latitude}
             </label>
             <input
               id="stays-lat"
@@ -157,7 +158,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
           </div>
           <div>
             <label className="nf-stays-plate__label" htmlFor="stays-lng">
-              Longitude
+              {w.facilities.longitude}
             </label>
             <input
               id="stays-lng"
@@ -184,7 +185,7 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
         */}
         <div className="mt-[var(--nf-space-sm)] flex flex-wrap gap-[var(--nf-space-xs)]">
           <Button variant="secondary" leadingIcon="location" onClick={locate} disabled={pending}>
-            Use my location
+            {w.facilities.useLocation}
           </Button>
           <Button
             variant="secondary"
@@ -192,13 +193,12 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
             disabled={pending || pin === null}
             loading={pending}
           >
-            Save the pin
+            {w.facilities.savePin}
           </Button>
         </div>
         {typedBadPin ? (
           <p className="nf-stays-plate__note" role="alert">
-            Those are not two coordinates. Latitude is a number from -90 to 90 and longitude from
-            -180 to 180, like 6.4281 and 3.4219 for Victoria Island.
+            {w.facilities.badPinHelp}
           </p>
         ) : null}
       </StaysPlate>
@@ -213,12 +213,11 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
         }}
         disabled={pending}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
-        The first photograph is the cover, and it is the one a guest sees on the shelf. Nothing here
-        is published until a person on our team has read the application.
+        {w.facilities.note}
       </StaysNote>
     </>
   );

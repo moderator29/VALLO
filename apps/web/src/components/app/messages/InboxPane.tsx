@@ -14,7 +14,16 @@ import { VerifiedAvatar } from "@/components/messages/VerifiedAvatar";
  */
 const WIDE = "(min-width: 64rem)";
 
-export function InboxPane({ fixture, currentId }: { fixture?: PaneRow[]; currentId?: string } = {}) {
+export function InboxPane({
+  fixture,
+  currentId,
+  label,
+}: {
+  fixture?: PaneRow[];
+  currentId?: string;
+  /** The list's name and heading, in the reader's language (`experienceInbox.inbox.pane`). */
+  label: string;
+}) {
   const pathname = usePathname();
   const [wide, setWide] = useState(false);
   const [fetched, setFetched] = useState<PaneRow[] | null>(null);
@@ -50,8 +59,8 @@ export function InboxPane({ fixture, currentId }: { fixture?: PaneRow[]; current
 
   if (!wide || !rows || rows.length === 0) return null;
   return (
-    <nav className="nf-msg-pane" aria-label="Conversations" data-testid="inbox-pane">
-      <p className="nf-section-label nf-msg-pane__label">Conversations</p>
+    <nav className="nf-msg-pane" aria-label={label} data-testid="inbox-pane">
+      <p className="nf-section-label nf-msg-pane__label">{label}</p>
       <ul className="nf-msg-pane__list">
         {rows.map((row) => {
           const href = `/messages/${row.id}`;

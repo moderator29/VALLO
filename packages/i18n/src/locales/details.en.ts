@@ -12,6 +12,8 @@
  */
 export const detailsEn = {
   copy: {
+    /** The verb on a small copy control beside a reference or a code. */
+    action: "Copy",
     copied: "Copied",
     linkCopied: "Link copied",
     codeCopied: "Code copied",

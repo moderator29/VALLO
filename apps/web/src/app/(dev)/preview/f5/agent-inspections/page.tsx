@@ -28,7 +28,7 @@ export default async function PreviewAgentInspections() {
             title="Waiting on somebody"
             description="These are the ones with a person on the other end of them."
           >
-            <InspectionRows inspections={open} side="lister" locale={locale} />
+            <InspectionRows inspections={open} side="lister" locale={locale} viewingCopy={t.threads.rental} flowCopy={t.memberFlows.inspection} />
           </Section>
         </Stack>
       </div>

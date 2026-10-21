@@ -14,7 +14,7 @@ import { FEED_POSTS } from "../fixtures";
 export default function ProfilePreview() {
   const t = getDictionary("en");
   return (
-    <div className="nf-shell pt-xl">
+    <main id="main" className="nf-shell pt-xl">
       <div className="mx-auto max-w-2xl">
         <AccountHero
           userId={PERSON.id}
@@ -70,6 +70,6 @@ export default function ProfilePreview() {
           }
         />
       </div>
-    </div>
+    </main>
   );
 }

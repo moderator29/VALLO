@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
@@ -9,9 +11,10 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  * on a blank screen and mean opposite things to someone who paid for a stay
  * yesterday, which is the whole argument for this file.
  */
-export default function LoadingBookings() {
+export default async function LoadingBookings() {
+  const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label="Loading your plans" className="mx-auto w-full max-w-2xl">
+    <LoadingShell label={t.memberFlows.loading.plans} className="mx-auto w-full max-w-2xl">
       <PageHeaderSkeleton />
 
       <div className="nf-panel nf-panel--card block p-md sm:p-lg">

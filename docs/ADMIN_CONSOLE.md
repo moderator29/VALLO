@@ -1,6 +1,6 @@
 # The Vallo admin console: the operations handbook
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 > **Session 3, 6 October 2026.** The console's shell, overview, queue tables, desk sections, rulings and phone drawer were rebuilt on the shared components, and the Money desk, the Agreements gate, the Compliance desk and the console search are described below as they now stand. Session 3 did not add or remove a desk or an address (D28); it gave Lookup, People and Account recovery, which already existed but were reachable only by a typed address, rows on the rail. The money rules and the reads behind each desk are Session 2's; where this document touches them it names the file they live in.
 

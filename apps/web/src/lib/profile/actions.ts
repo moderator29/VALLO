@@ -23,6 +23,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { pathInOwnFolder } from "@/lib/security/own-folder";
 import { isDeviceRef, revokeTokens } from "../push/revoke";
 import { fail, formDataToObject, ok, validate, type ActionResult } from "../actions/envelope";
 import { contentRefusal } from "../safety/content-refusal";
@@ -191,7 +192,7 @@ export async function setAvatar(input: unknown): Promise<ActionResult<{ avatarUr
 
   // Storage policy already confines writes to the caller's own folder. This
   // second check means a forged path can never be recorded on the row either.
-  if (!storagePath.startsWith(`${user.id}/`)) return fail(AVATAR_FOREIGN_PATH_MESSAGE);
+  if (!pathInOwnFolder(user.id, storagePath)) return fail(AVATAR_FOREIGN_PATH_MESSAGE);
 
   const avatarUrl = avatarPublicUrl(SUPABASE_URL, storagePath);
 

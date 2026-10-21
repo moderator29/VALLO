@@ -98,10 +98,15 @@ export function ConfirmTerms({
               </span>
             ),
           }))}
+          /* What happens next, as the gate works (D68d, D83): the second
+             confirmation of the same version approves the agreement, escrow
+             opens at once, and only a card payment with a risk signal waits
+             for a person. It said "A person at Vallo reviews it" to everybody,
+             which is not what happens. Same words as PAYMENT_GATE_SENTENCE. */
           next={[
-            { icon: "users", text: "When both of you have confirmed the same version, it goes to Vallo." },
-            { icon: "shield-check", text: "A person at Vallo reviews it." },
-            { icon: "credit-card", text: "Payment opens once Vallo approves it." },
+            { icon: "users", text: "When both of you have confirmed the same version, the agreement is approved." },
+            { icon: "credit-card", text: "Payment opens then. An escrow payment opens straight away." },
+            { icon: "shield-check", text: "A card payment waits for a person at Vallo only when something about the deal needs a second look." },
           ]}
           error={error}
           cancel={
@@ -157,7 +162,7 @@ export function AmendTerms({
         run(() => amendAgreement({ agreementId, moveIn: a, handoverOn: b, notes: n }), () => setOpen(false));
       }}
     >
-      <p className="nf-caption">Changing the terms means both of you confirm again, and Vallo reviews the new version.</p>
+      <p className="nf-caption">Changing the terms means both of you confirm the new version again.</p>
       <label className="block">
         <span className="nf-label">Move-in date</span>
         <input className="nf-field mt-2xs w-full" type="date" min={minDate} value={a} onChange={(e) => setA(e.target.value)} required />

@@ -102,6 +102,10 @@ export async function decideHeldItem(input: {
   if (status === "gone") return fail(GONE);
   if (status === "reason_needed") return fail(REASON_REQUIRED, { reason: REASON_REQUIRED });
   if (status === "forbidden") return fail(adminRefusal({ state: "not-admin" }));
+  /* Pending migration 20261017120000: a moderator's own held words. */
+  if (status === "own_content") {
+    return fail("This is your own post, story, comment or bio, so another moderator has to decide it. Nothing was changed.");
+  }
   if (status !== "ok") return fail(SERVICE_DOWN);
 
   revalidatePath("/admin/queue");

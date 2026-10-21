@@ -2,7 +2,7 @@ import Link from "next/link";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { TierBadge } from "@/components/trust/TierBadge";
 import { ButtonLink } from "@/components/ui/Button";
-import type { PassportCopy, PassportView } from "@/lib/passport/view";
+import type { PassportView } from "@/lib/passport/view";
 import "./vallo-passport.css";
 
 /**

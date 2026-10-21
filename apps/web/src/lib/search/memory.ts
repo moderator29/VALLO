@@ -35,10 +35,6 @@ export const VIEW_COOKIE = "nf_view";
 /** A year: this is a preference, not a session. */
 const VIEW_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
-export function isViewKey(value: string | undefined | null): value is ViewKey {
-  return value === "list" || value === "rows" || value === "map";
-}
-
 /** Remember the view the person is actually looking at. Client only. */
 export function rememberView(view: ViewKey): void {
   if (typeof document === "undefined") return;

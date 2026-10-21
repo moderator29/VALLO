@@ -15,6 +15,7 @@ import { MODERATOR_CAN, MODERATOR_CANNOT } from "@/lib/social/areas-model";
 import type { DocChapter, DocSection } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
 import { PAY_INSIDE_VALLO } from "./facts";
+import { EULA_ZERO_TOLERANCE } from "@/lib/legal/eula-copy";
 
 /**
  * THE CHAPTERS THE PLATFORM GREW INTO (Track M, the docs pass, 25 September
@@ -770,6 +771,40 @@ export const AROUND: DocChapter = {
             ))}
           </ul>
           <p>You can apply to moderate a place you are in.</p>
+        </>
+      ),
+    },
+    {
+      id: "rules",
+      heading: "Know the rules",
+      body: (
+        <>
+          <p>
+            <strong>{EULA_ZERO_TOLERANCE}</strong>
+          </p>
+          <ul role="list">
+            <li>The rules cover posts, comments, stories, profiles, listings and private messages.</li>
+            <li>
+              No abuse, threats, hate, sexual content, fraud, fake documents, impersonation, or another
+              person&rsquo;s address, phone number or bank details shared without their agreement.
+            </li>
+            <li>
+              A post or a profile that carries an account number or a request for payment is held until a
+              person reads it. {PAY_INSIDE_VALLO}
+            </li>
+            <li>The person you report is never told who reported them.</li>
+          </ul>
+          <p>
+            The full rules are the{" "}
+            <Link href="/eula" className={A}>
+              Community rules
+            </Link>{" "}
+            and the{" "}
+            <Link href="/standards" className={A}>
+              Trust and safety standards
+            </Link>
+            .
+          </p>
         </>
       ),
     },

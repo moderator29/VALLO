@@ -14,7 +14,7 @@ export default function WarmSparkPreview() {
   return (
     <main className="nf-shell flex flex-col gap-lg py-lg">
       <div className="nf-desk-home">
-        <HeroBand className="nf-edge-lap" label="Example" title="Today" sub="An example desk band.">
+        <HeroBand lap label="Example" title="Today" sub="An example desk band.">
           <div className="nf-desk-kpis">
             <KpiTile label="Live listings" icon="house" value={7} href="#" />
             <KpiTile label="Inspections" icon="calendar-clock" value={2} href="#" />

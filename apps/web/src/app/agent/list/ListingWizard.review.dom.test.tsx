@@ -177,7 +177,7 @@ describe.runIf(hasBrowser)("the wizard's way back, its save of an emptied box, a
         canvas.width = 1600;
         canvas.height = 1200;
         const context = canvas.getContext("2d")!;
-        context.fillStyle = "#3a6";
+        context.fillStyle = "seagreen";
         context.fillRect(0, 0, 1600, 1200);
         const blob = await new Promise<Blob>((done) => canvas.toBlob((b) => done(b!), "image/png"));
         const input = document.querySelector<HTMLInputElement>('input[type="file"]')!;

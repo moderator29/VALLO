@@ -27,6 +27,8 @@ import {
   REWARDS_BALANCE_SEPARATE,
   WHO_PAYS_SENTENCE,
 } from "../money/copy";
+import { GRACE_WINDOW_DAYS } from "../account-deletion/constants";
+import { ESCROW_MEANS } from "@/app/(site)/docs/facts";
 
 export type FaqEntry = {
   id: string;
@@ -85,7 +87,7 @@ export const SUPPORT_FAQ: FaqEntry[] = [
       /* The id stays `wallet`, the word members type. The answer says the
          narrower true thing (A9): no balance holds a payment, and the Rewards
          Balance is separate. "Nothing to withdraw" was untrue beside it. */
-      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
+      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${ESCROW_MEANS} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
   },
   {
     id: "guarantee",
@@ -120,13 +122,13 @@ export const SUPPORT_FAQ: FaqEntry[] = [
     id: "cancellations",
     keywords: ["cancel", "call it off", "not as described", "not as listed"],
     answer:
-      "A listed stay is priced under Vallo's platform schedule, and the exact terms are fixed on your booking when you pay, so they cannot change afterwards. Under that schedule the free-cancellation deadline is 72 hours before check-in: cancel before it and everything you paid comes back to the card or account you paid with, cancel inside it and half comes back, and once check-in day has started nothing does. A stay you have not paid for is only a hold on the calendar, so you can call it off from Bookings at any hour for nothing.",
+      "A stay listed by an owner or agent is priced under Vallo's platform schedule, and the exact terms are fixed on your booking when you pay, so they cannot change afterwards. Under that schedule the free-cancellation deadline is 72 hours before check-in: cancel before it and everything you paid comes back to the card or account you paid with, cancel inside it and half comes back, and once check-in day has started nothing does. A hotel, shortlet or serviced apartment run as a business picks one of four policies instead, Flexible, Moderate, Firm or Strict, and shows its steps before you book. Deadlines are counted in Lagos time. A stay you have not paid for is only a hold on the calendar, so you can call it off from Bookings at any hour for nothing.",
   },
   {
     id: "cancel-a-paid-stay",
     keywords: ["already paid", "paid for it", "cancel my paid", "change my booking"],
     answer:
-      "Once money has moved, a cancellation is handled by a person rather than by a button, because a refund is your money and it deserves a name against the decision. Ask support here with your booking, and we apply the published schedule exactly as it is written, refund the amount to the card or account you paid with and put the figure and the reason in writing. Cancellation requests are answered within 1 day, and sooner when your check-in is close.",
+      "Once money has moved, a cancellation is handled by a person rather than by a button, because a refund is your money and it deserves a name against the decision. Ask from the booking under Bookings, or ask support here with your booking, and we apply the terms fixed on your booking exactly as they are written, refund the amount to the card or account you paid with and put the figure and the reason in writing. Cancellation requests are answered within 1 day, and sooner when your check-in is close.",
   },
   {
     id: "refunds",
@@ -168,7 +170,7 @@ export const SUPPORT_FAQ: FaqEntry[] = [
     id: "account",
     keywords: ["account", "sign in", "sign up", "log in", "login", "password", "profile", "delete my"],
     answer:
-      "Create an account with your first name, surname and email from Sign up; your profile and settings then follow you. Manage your details on the Profile page, and use Settings for security and data controls, including asking us to remove your account.",
+      `Create an account with your first name, surname and email from Sign up; you must be 18 or over. Your profile and settings then follow you. Manage your details on the Profile page, and use Settings for security and data controls. You can delete your account yourself, under Settings, Account: nothing is destroyed for ${GRACE_WINDOW_DAYS} days, and the code we email you stops it.`,
   },
   {
     id: "privacy",

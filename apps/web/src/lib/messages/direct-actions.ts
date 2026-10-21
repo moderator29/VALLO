@@ -24,6 +24,9 @@ const UNREACHABLE = "We could not open this chat just now. Please try again.";
 const LIMIT =
   "You have opened 20 new conversations today, which is the daily limit. Your existing chats are unaffected, and you can open new ones tomorrow.";
 
+const followFirst = (name: string) =>
+  `Follow ${name} to message them. They take new messages only from people who follow them.`;
+
 type Rpc = {
   rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{
     data: unknown;
@@ -47,9 +50,7 @@ export async function sendDirectMessage(input: {
   if (read.state === "self") return fail("That is you. Pick somebody else to message.");
   /* The profile's own rule (`message-door.ts`): a person who asks first takes
      a new chat only from somebody who follows them. */
-  if (read.state === "follow-first") {
-    return fail(`Follow ${read.target.displayLabel} to message them. They take new messages only from people who follow them.`);
-  }
+  if (read.state === "follow-first") return fail(followFirst(read.target.displayLabel));
   if (read.state !== "ready") return fail("We could not find that person. They may have changed their name.");
 
   if (await blockedBetween(session.supabase, session.user.id, read.target.userId)) {
@@ -67,6 +68,13 @@ export async function sendDirectMessage(input: {
     });
     if (error || typeof data !== "string") {
       if (error?.code === "54000") return fail(LIMIT);
+      /* The database holds "Ask me first" too (trigger
+         conversations_direct_contact_policy). It refuses with the same 42501
+         as a block, so the word decides which sentence is true: a follow
+         that was undone between the read above and this insert. */
+      if (error?.message?.includes("direct:follow_first")) {
+        return fail(followFirst(read.target.displayLabel));
+      }
       if (error?.code === "42501") return fail(BLOCKED_THREAD_MESSAGE);
       return fail(UNREACHABLE);
     }

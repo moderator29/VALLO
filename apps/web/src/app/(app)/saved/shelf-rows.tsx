@@ -53,7 +53,6 @@ export function listingShelf(listing: Listing, locale: Locale, t: Dictionary, ea
       figure={figure}
       status={verified ? t.experienceDiscover.shelf.verified : listing.intent === "sale" ? card.forSale : card.forRent}
       verified={verified}
-      openLabel={t.experienceDiscover.shelf.open.replace("{title}", listing.title)}
       eager={eager}
     />
   );
@@ -78,7 +77,6 @@ export function placeShelf(stay: StayCardData, locale: Locale, t: Dictionary, ea
       figure={figure}
       status={verified ? t.experienceDiscover.shelf.verified : (stay.hours?.label ?? "")}
       verified={verified}
-      openLabel={t.experienceDiscover.shelf.open.replace("{title}", stay.title)}
       eager={eager}
     />
   );

@@ -110,10 +110,6 @@ const JOURNEYS = [
   { name: "fixture: home", url: "/preview/f1/home", source: "fixture" },
   { name: "fixture: the assistant", url: "/preview/f1/assistant", source: "fixture" },
   { name: "fixture: notifications", url: "/preview/f1/notifications", source: "fixture" },
-  { name: "fixture: the wallet", url: "/preview/e/wallet", source: "fixture" },
-  { name: "fixture: send money", url: "/preview/e/send", source: "fixture" },
-  { name: "fixture: payments", url: "/preview/e/payments", source: "fixture" },
-  { name: "fixture: crypto", url: "/preview/e/crypto", source: "fixture" },
 ];
 
 /* Markers that mean Next failed to render rather than the page being empty. */

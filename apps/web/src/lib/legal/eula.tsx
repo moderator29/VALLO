@@ -180,9 +180,10 @@ export const EULA_SECTIONS: { title: string; body: React.ReactNode }[] = [
           investigation.
         </p>
         <p>
-          You can end your own account at any time, from Settings, Account, or from the
-          delete-account page on the website without signing in. That is your right and
-          nothing in this agreement limits it.
+          You can end your own account at any time, from Settings, Account, in the app or
+          on the website. The delete-account page on the website explains, without signing
+          in, what is deleted and what is kept, and stops a deletion you have started. That
+          is your right and nothing in this agreement limits it.
         </p>
       </>
     ),

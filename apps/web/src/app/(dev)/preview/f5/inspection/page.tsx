@@ -1,3 +1,4 @@
+import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageHeader } from "@/components/app/PageHeader";
 import { InspectionHero, InspectionSheet } from "@/components/app/inspections/InspectionSheet";
@@ -13,7 +14,7 @@ export default async function PreviewInspection() {
       <div className="mx-auto max-w-2xl">
         <PageHeader title="Inspections" fallback="/home" />
         <InspectionHero title="inspection" sub="Check the property, confirm the details, record how it went." />
-        <InspectionSheet inspection={INSPECTION} side="requester" facts={INSPECTION_FACTS} locale={locale} open />
+        <InspectionSheet inspection={INSPECTION} side="requester" facts={INSPECTION_FACTS} locale={locale} open viewingCopy={getDictionary(locale).threads.rental} flowCopy={getDictionary(locale).memberFlows.inspection} />
       </div>
     </div>
   );

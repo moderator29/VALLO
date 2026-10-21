@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { InboxPane } from "@/components/app/messages/InboxPane";
 
 /**
@@ -6,10 +8,11 @@ import { InboxPane } from "@/components/app/messages/InboxPane";
  * as before. A layout rather than a page change, so moving between threads
  * keeps the pane mounted and only the thread re-renders.
  */
-export default function ThreadLayout({ children }: { children: React.ReactNode }) {
+export default async function ThreadLayout({ children }: { children: React.ReactNode }) {
+  const label = getDictionary(await getLocale()).experienceInbox.inbox.pane;
   return (
     <div className="nf-msg-split">
-      <InboxPane />
+      <InboxPane label={label} />
       <div className="nf-msg-split__thread">{children}</div>
     </div>
   );

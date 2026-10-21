@@ -431,36 +431,6 @@ export const ig: Dictionary = withFallback({
         cities: "Obodo",
         states: "Steeti",
       },
-      /* THE FEATURE BAND IS ABSENT HERE ON PURPOSE, AND FALLS BACK TO
-         ENGLISH. The content truth sweep of 19 September rewrote all six
-         cells and the Igbo that stood here would have printed a different
-         claim under the same keys. A native speaker writes the six and they
-         come back. */
-      community: {
-        overline: "Ndị mmadụ n'ezie. Ebe n'ezie.",
-        /* `title` and `body` are absent on purpose and fall back to English:
-           the clean pass (29 September) rewrote both, and the old Igbo
-           described a "growing community" and figures the band may not
-           print. A native speaker writes them and they come back here. */
-        thirdParty: "Ndị ọzọ",
-        thirdPartyTitle: "Ngwa ndị mmekọ, a na-akpọ ya aha mgbe niile",
-        thirdPartyBody:
-          "Ebe obibi onye mmekọ na-emezu na-ebu akara a ma kwuo onye na-akwado ya. A naghị eme ka ọ dị ka nke anyị.",
-      },
-      categories: {
-        overline: "Chọgharịa site n'ụdị",
-        /* `title` and `body` fall back to English (the clean pass): the old
-           body claimed Vallo carries "the whole market". */
-        apartments: "Ụlọ obibi",
-        houses: "Ụlọ",
-        shortlets: "Mgbazinye mkpirikpi",
-        hotels: "Ụlọ oriri",
-        resorts: "Ebe izumike",
-        guestHouses: "Ụlọ ọbịa",
-        commercial: "Azụmahịa",
-        land: "Ala",
-        count: "{count} edepụtara",
-      },
       app: {
         title: "Were Vallo soro gị.",
         body: "Usoro ụlọ zuru oke n'akpa gị. Vallo na-etinye site na ihe nchọgharị gị na iPhone na Android.",
@@ -1106,6 +1076,14 @@ export const ig: Dictionary = withFallback({
       typeToConfirm: "Pịnye {phrase} iji kwado",
       capitals: "Mkpụrụedemede ukwu kpọmkwem ka e gosiri. Ihe ọzọ agaghị emeghe bọtịnụ ahụ.",
       confirm: "Hichapụ kpamkpam",
+      // NATIVE REVIEW: the deletion blockers for partner-held money and rewards (17 October 2026).
+      blockerPartnerHeld: "Onye mmekọ ịkwụ ụgwọ nwere ikikere na-ejide ma ọ bụ na-ebugharị {amount} maka otu nkwekọrịta gị. A ga-ebu ụzọ hapụ ya ma ọ bụ weghachi ya.",
+      blockerPartnerHeldCta: "Mepee nkwekọrịta m",
+      blockerRewardsBalance: "I nwere {amount} n'ụgwọ ọrụ ị ga-ewepụ. Buru ụzọ wepụ ya ka ọ ghara ifu.",
+      blockerRewardsBalanceCta: "Wepụ ụgwọ ọrụ",
+      blockerRewardsPayouts: "I nwere iwepụ ụgwọ ọrụ {count} ka na-aga n'ụlọ akụ gị.",
+      blockerRewardsPayoutsPlural: "I nwere iwepụ ụgwọ ọrụ {count} ka na-aga n'ụlọ akụ gị.",
+      blockerRewardsPayoutsCta: "Lee ụgwọ ọrụ m",
     },
 
     about: {
@@ -1580,6 +1558,8 @@ export const ig: Dictionary = withFallback({
       videoCeiling: "Ndepụta otu na-anagide vidiyo {max} naanị.",
       videoFailed: "Vidiyo ahụ ebugoghị zuru oke. Biko gbalịa ya ọzọ.",
       videoUploading: "Na-ebugo {name}, {percent}%",
+      videoCancel: "Kwụsị ibugo",
+      videoCancelled: "Akwụsịla ibugo. Ọ dịghị ihe etinyere.",
       retry: "Gbalịa ọzọ",
       notPrepared:
         "Anyị enweghị ike ịkwadebe foto ahụ n'enweghị nsogbu, ya mere anyị ebugoghị ya. Nwaa foto ọzọ.",
@@ -2839,6 +2819,7 @@ export const ig: Dictionary = withFallback({
       viewTrips: "Lee njem gị",
       viewProperty: "Lee ụlọ ahụ",
       viewRestaurant: "Lee ụlọ nri ahụ",
+      askViewing: "Rịọ ịhụ ụlọ a",
     },
     rental: {
       waitingOnYou: "They asked to inspect this place. Your answer goes to them and to their inspections list.",
@@ -2872,6 +2853,40 @@ export const ig: Dictionary = withFallback({
       outcomeDealDone: "Enyochara, anyị kwekọrịtakwara",
       outcomeNoDeal: "Enyochara, enweghị nkwekọrịta",
       outcomeSave: "Chekwaa",
+      confirm: "Kwado",
+      cancelViewing: "Kagbuo ileta ụlọ",
+      cancelledNote: "Akagbuola ya.",
+      openChat: "Meghee mkparịta ụka ahụ",
+      lagosTime: "Oge Legọs",
+      reasonLabel: "Gwa ha ihe kpatara ya (ọ bụghị iwu)",
+      offerBody: "Ha ga-ahụ oge ị nyere ma nwee ike ịnara ya otu mmetụ. Oge ha rịọrọ ka dị n'ime ndekọ.",
+      offerPlaceholder: "Ọnụ ụzọ ama na-emechi n'elekere 6, ya mere ngwa ngwa ka mma",
+      rescheduleBody:
+        "Ileta ụlọ ahụ akwụsịla ịbụ nke akwadoro ruo mgbe ha nabatara oge ọhụrụ ahụ. A na-agwa ha ozugbo, oge ha rịọrọ ka dịkwa n'ime ndekọ.",
+      listerCancelTitle: "Kagbuo ileta ụlọ a?",
+      listerCancelBody: "A ga-agwa ha na ileta ụlọ ahụ akagbuola. Ọ bụrụ na ụbọchị ọzọ dabara gị, nye oge ọzọ kama.",
+      cancelConfirm: "Ee, kagbuo ya",
+      withdrawTitle: "Wepụ arịrịọ a?",
+      withdrawBody: "Onye ndepụta ga-ahụ na i wepụrụ ya. Ị nwere ike ịrịọ ọzọ site na peeji ụlọ ahụ.",
+      withdrawConfirm: "Ee, wepụ ya",
+      renterCancelBody: "A ga-agwa onye ndepụta na ị gaghị abịa. Ị nwere ike ịrịọ oge ọzọ site na peeji ụlọ ahụ.",
+      noShowRenterTitle: "Onye mgbazinye ahụ abịaghị?",
+      noShowListerTitle: "Ọ dịghị onye bịara igosi ya?",
+      noShowRenterBody:
+        "A ga-agwa ha na i debere ha akara na ha abịaghị, ha nwere ike ịgbagha ya n'ime awa 48. Vallo na-elele arụmụka ọ bụla.",
+      noShowListerBody:
+        "A ga-agwa onye ndepụta na i debere ya akara na ọ bịaghị, ọ nwere ike ịgbagha ya n'ime awa 48. Vallo na-elele arụmụka ọ bụla.",
+      whatHappened: "Ihe mere (ọ bụghị iwu)",
+      noShowConfirm: "Ee, debe akara na ọ bịaghị",
+      disputeTitle: "Gbagha akara a na ọ bịaghị?",
+      disputeBody: "Gwa Vallo na ị nọ ebe ahụ. Onye otu ga-elele akụkụ abụọ ahụ ma gwa unu abụọ ihe ha kpebiri.",
+      disputeSend: "Ziga arụmụka ahụ",
+      markRenterNoShow: "Onye mgbazinye ahụ abịaghị",
+      markListerNoShow: "Ọ dịghị onye bịara igosi ya",
+      noShowBadge: "Ọ bịaghị",
+      disputeThis: "Gbagha nke a",
+      noShowSettled: "Akara ya na ọ bịaghị. Ha nwere ike ịgbagha ya n'ime awa 48.",
+      failed: "Ọ gaghị.",
     },
     reservation: {
       tableFor: "tebụl maka {count}",
@@ -3748,6 +3763,7 @@ export const ig: Dictionary = withFallback({
       noShow: "Abịaghị",
       markedSeated: "Akaala ya akara dị ka anọdụla ala.",
       markedNoShow: "Akaala ya akara dị ka abịaghị. A gwala ọbịa ahụ.",
+      markedDisputed: "Echekwala ya. Ọbịa ahụ gwara anyị ihe dị iche, ya mere onye na Vallo ga-elele tebụl a.",
     },
     bill: {
       label: "Ngụkọta ego na akwụkwọ ụgwọ",
@@ -4188,7 +4204,6 @@ export const ig: Dictionary = withFallback({
   feedV2: {
     card: {
       commentPill: "Tinye ihe ị chere",
-      commentAria: "zaa nke a",
       readMore: "Gụkwuo",
       readLess: "Gosi obere",
       roleLandlord: "Onye nwe ụlọ",
@@ -4210,6 +4225,13 @@ export const ig: Dictionary = withFallback({
       describePlain: "{name} bipụtara ya",
       describeLandlord: "{name}, onye nwe ụlọ, bipụtara ya",
       describeAgent: "{name}, onye nnọchiteanya, bipụtara ya",
+      likedUndo: "Ị masịrị ya, {count}. Wepụ ya",
+      like: "Ndị ọ masịrị {count}, masị nke a",
+      repostedUndo: "I kesaala ya ọzọ, {count}. Wepụ ya",
+      repost: "Nkesa ọzọ {count}, kesaa nke a ọzọ",
+      share: "Kesaa ederede a",
+      savedRemove: "Edebela ya. Wepụ ya n'ihe ndị echekwara",
+      save: "Chekwaa ederede a",
     },
     composer: {
       cancel: "Kagbuo",
@@ -4578,6 +4600,122 @@ export const ig: Dictionary = withFallback({
       openTitle: "A na-arụrịta ụka maka ịkwụ ụgwọ kaadị",
       openBody: "Ụlọ akụ onye kwụrụ ụgwọ mepere arụmụka maka ịkwụ ụgwọ ị natara. Ọ dịghị ihe a kwụsịrị mgbe a na-ekpebi ya. Ndị otu ego Vallo nwere ike ịrịọ gị ihe akaebe nke ndokwa ahụ.",
       openMore: "Arụmụka mepere emepe: {count}",
+    },
+  },
+
+  /* The conversation screen's words (language audit, 17 October 2026).
+     Written without a native speaker, like the rest of this file. */
+  experienceInbox: {
+    inbox: { pane: "Mkparịta ụka" },
+    thread: {
+      view: {
+        options: "Nhọrọ mkparịta ụka",
+        conversation: "Mkparịta ụka",
+        openProfile: "{name}, meghee profaịlụ",
+        keepInside: "Debe mkparịta ụka na ịkwụ ụgwọ niile n'ime Vallo",
+        emptyTitle: "Kelee {name}",
+        emptyListing:
+          "Ọ dịbeghị ihe e kwuru ebe a. Jụọ ihe ị chọrọ ịma maka ụlọ ahụ, kwekọrịta oge ị ga-ahụ ya, ma debe mkparịta ụka niile n'otu ebe.",
+        emptyBooking: "Ọ dịbeghị ihe e kwuru ebe a. Jụọ maka mbata gị, ọnụ ụlọ ahụ ma ọ bụ ihe ọ bụla ndebanye ahụ azaghị.",
+        emptyReservation: "Ọ dịbeghị ihe e kwuru ebe a. Kwado oge ahụ, ọnụ ọgụgụ ndị mmadụ, na ihe ọ bụla kichin kwesịrị ịma.",
+        emptyDirect:
+          "Ọ dịbeghị ihe e kwuru ebe a. Ihe ọ bụla i dere bụ n'etiti unu abụọ, a na-edebekwa mkparịta ụka niile ebe a.",
+        roleLandlord: "Onye nwe ụlọ",
+        roleAgent: "Onye nnọchite Vallo",
+        roleTenant: "Onye mgbazinye",
+        photoYours: "Foto i tinyere",
+        photoFrom: "Foto si n'aka {name}",
+        videoYours: "Vidiyo i tinyere",
+        videoFrom: "Vidiyo si n'aka {name}",
+        forwarded: "E zigaghachiri ya",
+        deleted: "Ehichapụla ozi a",
+        open: "Meghee",
+        sending: "Ọ na-aga",
+        notSent: "Ezipụghị ya.",
+        retry: "Nwaa ọzọ",
+        retryText: "Zigaghachi: {text}",
+        retryPhoto: "Zigaghachi foto gị",
+        retryMessage: "Zigaghachi ozi a",
+        typing: "{name} na-ede ihe",
+        dismissSafety: "Mechie ndụmọdụ nchekwa",
+        photoReady: "Foto adịla njikere iziga",
+        photoAttached: "Etinyela foto",
+        removePhoto: "Wepụ foto",
+        remove: "Wepụ",
+        cancelReply: "Kagbuo nzaghachi",
+        cancel: "Kagbuo",
+        attachPhoto: "Tinye foto",
+        messageTo: "Ozi nye {name}",
+        placeholder: "Dee ozi",
+        send: "Ziga ozi",
+        forwardedTo: "E zigara ya {name}.",
+        inspectionConfirmed: "Akwadola nleta ụlọ.",
+        inspectionConfirmedDevice: "Akwadola nleta ụlọ na ngwaọrụ a",
+        failed: "Ọ gaghị. Lelee njikọ gị ma nwaa ọzọ.",
+        shared: {
+          listing: "Kesara otu ụlọ",
+          booking: "Kesara otu ndebanye",
+          stay: "Kesara otu ọnọdụ",
+          passport: "Kesara otu paspọtụ",
+        },
+        close: "Mechie",
+        confirmInspected: "Kwado na m lechara ụlọ a",
+        conversationWith: "Mkparịta ụka na {name}",
+        verifiedListing: "Ụlọ akwadoro",
+        verificationPending: "Nkwado ka na-eche",
+        approved: "Akwadola ya",
+        shareHere: "Kesaa ụlọ ma ọ bụ ndebanye ebe a",
+        shareHereBody: "Ọ ga-abịa dị ka kaadị {name} nwere ike imeghe.",
+        blockAsk: "Gbochie {name}?",
+        block: "Gbochie {name}",
+        blockBody: "Ha agaghị enwe ike ịkpọtụrụ gị ọzọ, ebe a na ebe ọ bụla ọzọ.",
+        blockConfirm:
+          "Ha agaghị enwe ike iziga gị ozi, ịhụ profaịlụ gị ma ọ bụ ịchọta ụlọ gị, ị gaghịkwa ahụ nke ha. A gaghị agwa ha. Ị nwere ike ịgbanwe nke a na Ntọala, Nzuzo.",
+        keepOpen: "Hapụ mkparịta ụka ahụ ka ọ meghee",
+        safetyRule:
+          "Maka nchekwa gị, debe mkparịta ụka na ịkwụ ụgwọ niile n'ime Vallo. Anyị anaghị echekwa nkwekọrịta e mere na mpụga ikpo okwu a. Kwụọ ụgwọ naanị mgbe ị lechara ụlọ ahụ.",
+      },
+      card: {
+        rated: "Kpakpando {rating} n'ime 5",
+        forward: {
+          listing: "Ziga ụlọ a na mkparịta ụka ọzọ",
+          stay: "Ziga ọnọdụ a na mkparịta ụka ọzọ",
+          booking: "Ziga ndebanye a na mkparịta ụka ọzọ",
+        },
+        verified: "Akwadoro",
+        map: "Maapụ {area}. Ntụtụ ahụ na-egosi mpaghara, ọ bụghị adreesị.",
+        viewStay: "Lee ọnọdụ ahụ",
+        viewListing: "Lee ụlọ ahụ",
+        messageAgent: "Zigara onye nnọchite ozi",
+        checkIn: "Mbata",
+        checkOut: "Ọpụpụ",
+        guests: "Ndị ọbịa",
+        viewBooking: "Lee nkọwa ndebanye",
+        contactHost: "Kpọtụrụ onye nnabata",
+      },
+      menu: {
+        close: "Mechie menu",
+        label: "Nhọrọ ozi",
+        reply: "Zaa",
+        forward: "Zigaa",
+        copy: "Detuo",
+        deleteForMe: "Hichapụ maka m",
+        deleteForEveryone: "Hichapụ maka onye ọ bụla",
+      },
+      forward: {
+        title: "Ziga nye",
+        close: "Mechie",
+        search: "Chọọ ndị ị na-eso",
+        clear: "Hichapụ ọchụchọ",
+        placeholder: "Chọọ",
+        loading: "Na-ebubata mkparịta ụka gị",
+        empty: "Soro mmadụ ka i nwee ike iziga ya ozi.",
+        unreachable: "Anyị enweghị ike ibubata mkparịta ụka gị ugbu a. Mechie nke a ma nwaa ọzọ.",
+        failed: "Ọ rụghị ọrụ. Biko nwaa ọzọ.",
+        noMatch: "Ọ dịghị onye ị na-eso dabara na nke ahụ.",
+        listLabel: "Mkparịta ụka ị nwere ike iziga",
+        sending: "Ọ na-aga",
+      },
     },
   },
 

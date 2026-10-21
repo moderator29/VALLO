@@ -40,11 +40,6 @@ import { TenancyTerm } from "./TenancyTerm";
  * filing a second identical one.
  */
 
-const STEPS = [
-  { label: "Message the agent", detail: "Ask your questions inside Vallo." },
-  { label: "Inspect the property", detail: "Arrange an inspection before anything is agreed." },
-  { label: "Pay through Vallo", detail: "Only once you have seen the place." },
-];
 
 /** A minimum stated in months, in this listing's own unit. */
 const MONTHS_PER_TERM: Record<RentPeriod, number> = { month: 1, quarter: 3, year: 12 };
@@ -78,6 +73,12 @@ export async function RentalPanel({
   const existing = await readOpenInspectionFor(listingId);
   const forSale = period === "sale";
   const t = getDictionary(locale);
+  const w = t.memberFlows.rental;
+  const steps = [
+    { label: w.steps.message, detail: w.steps.messageDetail },
+    { label: w.steps.inspect, detail: w.steps.inspectDetail },
+    { label: w.steps.pay, detail: w.steps.payDetail },
+  ];
 
   /* Months into terms, rounding UP: a listing priced yearly with an 18 month
      minimum takes two years, not one. Rounding down would offer a tenancy
@@ -100,11 +101,7 @@ export async function RentalPanel({
         />
       </p>
       <p className={`mt-2xs ${TYPE.rowMeta}`}>
-        {forSale
-          ? "Agreed with the agent after an inspection."
-          : period === "year"
-            ? "Annual tenancy, agreed with the agent after an inspection."
-            : "Tenancy agreed with the agent after an inspection."}
+        {forSale ? w.saleTerms : period === "year" ? w.annualTerms : w.tenancyTerms}
       </p>
 
       {/* A sale has no term to lengthen. Nothing is bought by the year. */}
@@ -115,11 +112,12 @@ export async function RentalPanel({
           currency={currency}
           locale={locale}
           minimumTerms={minimumTerms}
+          copy={w}
         />
       )}
 
       <ol className="mt-md space-y-sm border-t border-[var(--nf-panel-hair)] pt-md">
-        {STEPS.map((step, i) => (
+        {steps.map((step, i) => (
           <li key={step.label} className="flex items-start gap-sm">
             {/* KEPT ROUND: an ordinal marker in an <ol>, not a control. */}
             <span className="nf-numeric nf-caption mt-3xs grid h-6 w-6 shrink-0 place-items-center rounded-[var(--nf-radius-xs)] border border-[var(--nf-panel-edge)] font-bold text-[var(--nf-content-secondary)]">
@@ -148,11 +146,11 @@ export async function RentalPanel({
         className="mt-md"
         leadingIcon="chat-bubble"
       >
-        Message agent
+        {w.message}
       </ButtonLink>
 
       <div className="mt-xs">
-        <RequestInspection listingId={listingId} existing={existing} locale={locale} />
+        <RequestInspection listingId={listingId} existing={existing} locale={locale} copy={t.visit.entry} zone={t.visit.tiles.lagos} />
       </div>
 
       {/* The trust block: the plated shield, the same line glyph on the same
@@ -161,8 +159,7 @@ export async function RentalPanel({
         {/* Advice, so a neutral glyph: the shield means an earned check (A9). */}
         <DetailGlyph name="info" />
         <p className={TYPE.rowMeta}>
-          For your safety, keep every chat and payment inside Vallo. Deals made outside the
-          platform are not protected by us. Pay only after you have inspected the property.
+          {w.keepInside}
         </p>
       </div>
     </div>

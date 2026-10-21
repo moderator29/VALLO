@@ -23,6 +23,24 @@ declare
   claims text := json_build_object('sub', '957b3bd2-cce3-425d-bba9-5cd876ca3d62', 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text;
   bk uuid; bk2 uuid; insp uuid; r jsonb; n int; t bigint; rate bigint; ag public.deal_agreements%rowtype; g bigint;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000007')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
   -- probe's session carries one for every admin and for the QA member (who
@@ -75,7 +93,14 @@ begin
   if ag.id is null or ag.kind <> 'stay' or ag.amount_minor <> rate * 3 then
     raise exception 'PROBE_FAIL esc-02: the accepted 3-kobo booking drew agreement % for %', ag.id, ag.amount_minor;
   end if;
-  update public.deal_agreements set status = 'approved', decided_at = now(), decided_by = admin where id = ag.id;
+  -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+  -- row 21; pov02 and pov03): a nightly shortlet is now escrow unless the payer
+  -- picks card, and a Paystack charge carries only the direct rail. The guest
+  -- picks card, as the pay page records it, so the gate below is the same
+  -- direct-rail gate this probe was written against.
+  update public.deal_agreements set status = 'approved', decided_at = now(), decided_by = admin,
+         payer_rail_choice = 'card', payer_rail_chosen_at = now()
+   where id = ag.id;
   r := public.payment_split_for_booking(bk2);
   if r->>'status' not in ('ok', 'payee_not_set_up') or (r->>'status' = 'ok' and (r->>'amount_minor')::bigint <> rate * 3) then
     raise exception 'PROBE_FAIL esc-02: split for the 3-kobo booking answered %', r;

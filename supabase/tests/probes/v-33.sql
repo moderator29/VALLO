@@ -36,6 +36,23 @@ declare
   insp uuid; ag uuid; r jsonb; bk uuid; total bigint; g bigint; tx uuid;
   n int; s bigint; st text;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
   -- probe's session carries one for every admin and for the QA member (who
@@ -69,9 +86,15 @@ begin
   -- Approved by a person (D68d): a system approval on the direct rail is
   -- payable only while no risk signal fires, and this deal is over the
   -- amount threshold. This probe is about the money, not the review.
+  -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+  -- row 21; pov02 and pov03): a registered business's apartment is no longer
+  -- settled direct by the policy; every rent is escrow unless the payer picks
+  -- card, and a Paystack charge carries only the direct rail. The renter
+  -- picks card on the agreement, as the pay page records it, so the charge
+  -- below is the direct-rail card charge this probe was written against.
   insert into public.deal_agreements (kind, listing_id, inspection_id, renter_id, owner_id, amount_minor, terms, status,
-         decided_by, decided_at)
-  values ('rent', lst, insp, member, lister, 240000000, '{}'::jsonb, 'approved', admin, now()) returning id into ag;
+         decided_by, decided_at, payer_rail_choice, payer_rail_chosen_at)
+  values ('rent', lst, insp, member, lister, 240000000, '{}'::jsonb, 'approved', admin, now(), 'card', now()) returning id into ag;
   r := private.open_rent_charge(member, insp, lagos + 7);
   if r->>'status' <> 'ok' then raise exception 'PROBE_FAIL v-33: open %', r; end if;
   bk := (r->>'booking_id')::uuid; total := (r->>'total_minor')::bigint;

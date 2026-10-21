@@ -13,6 +13,24 @@ declare
   tenancy uuid; night uuid; insp uuid; r jsonb; st text; n int;
   rent_ag uuid; stay_ag uuid; ag uuid;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister: every probe
+  -- that made the QA member an agent hit agents_user_id_key, an inspection by
+  -- the QA member on an example listing was refused by
+  -- inspection_requests_parties_differ, a stay they booked there drew no
+  -- agreement (the host was the guest), and the example payout account
+  -- answered payee_not_set_up for the example lister. The fixture gives the
+  -- row back to the example lister and points the listings this probe uses
+  -- at it, for this transaction only, so the two parties are the people the
+  -- probe was written for. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000003',
+                'ed000000-0000-4000-8000-000000000004')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   -- 29 September: the console's second factor. An admin or a staff member
   -- holds their role only on a session that proved a security key, so this
   -- probe's session carries one for every admin and for the QA member (who
@@ -94,6 +112,15 @@ begin
   r := public.open_rent_charge(member, insp, lagos);
   if r ->> 'status' is distinct from 'ok' then raise exception 'PROBE_FAIL esc-p2-02: fixture move-in charge not opened: %', r; end if;
   tenancy := (r ->> 'booking_id')::uuid;
+
+  -- 17 October 2026 (D73 as refined on 13 October, DECISIONS_2026-10-13.md
+  -- row 21; pov02 and pov03): a registered business's apartment and a nightly
+  -- shortlet are no longer settled direct by the policy; each is escrow unless
+  -- the payer picks card, and a Paystack charge carries only the direct rail.
+  -- The payer picks card on both agreements, as the pay page records it, so
+  -- both are the direct-rail card charges this probe was written against.
+  update public.deal_agreements set payer_rail_choice = 'card', payer_rail_chosen_at = now()
+   where id in (rent_ag, stay_ag);
 
   insert into public.transactions (booking_id, provider, provider_ref, amount_minor, status, agreement_id, payee_user_id,
          payee_subaccount_code, reserve_subaccount_code, lister_share_minor, guarantee_minor, commission_minor)

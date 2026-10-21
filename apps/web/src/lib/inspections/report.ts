@@ -49,10 +49,6 @@ export type InspectionReport = {
   submittedAt: string | null;
 };
 
-/** The one sentence every report write returns while storage is off. */
-export const REPORT_NOT_YET =
-  "Ticking the checklist starts when inspection report storage is switched on. Nothing has been saved.";
-
 export const EMPTY_REPORT: InspectionReport = { notes: null, items: {}, photoCount: 0, submittedAt: null };
 
 export function isRoomItem(value: unknown): value is RoomItem {

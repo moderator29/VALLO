@@ -9,6 +9,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { countOf, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { dateTimeLabel } from "@/lib/format/when";
 
 /**
  * Tonight's tables, and the requests still waiting on an answer.
@@ -34,21 +35,9 @@ import { useClientLocale } from "@/lib/i18n/use-client-locale";
  * is a console that produces accepted tables nobody kept.
  */
 
-/** Pinned, never the device's. See the note above. */
-const LAGOS = "Africa/Lagos";
-
+/** "Today, 19:30", "Tomorrow, 13:00", then "Sat 25 Oct, 19:30": pinned to Lagos time, never the device's (see the note above). */
 function whenLabel(iso: string): string {
-  const at = new Date(iso);
-  if (Number.isNaN(at.getTime())) return "";
-  return at.toLocaleString("en-NG", {
-    timeZone: LAGOS,
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
+  return dateTimeLabel(iso);
 }
 
 function waitedLabel(hours: number, locale: Locale): string {

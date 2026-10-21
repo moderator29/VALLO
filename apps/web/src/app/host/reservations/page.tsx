@@ -6,7 +6,7 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
-import { isPaystackConfigured } from "@/lib/payments/paystack";
+import { billPayOn } from "@/lib/reservations/bill-pay";
 import { readHostTableBoard } from "./board";
 import { HostTablesBody } from "./HostTablesBody";
 import { readDeskDeposits } from "@/lib/reservations/deposit-settings";
@@ -60,7 +60,7 @@ export default async function HostReservationsPage() {
   const now = new Date();
   /* D75: the deposit card, only while `restaurant_deposits` is on (read on
      the server, failing closed); null leaves the desk as it was. */
-  const [read, deposits] = await Promise.all([readHostTableBoard(now), readDeskDeposits()]);
+  const [read, deposits, billsOn] = await Promise.all([readHostTableBoard(now), readDeskDeposits(), billPayOn()]);
 
   return (
     <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
@@ -71,8 +71,9 @@ export default async function HostReservationsPage() {
         locale={locale}
         now={now}
         /* A bill is entered on the desk only when the guest could then pay it
-           through Vallo; until Paystack is configured they pay the venue. */
-        billsOn={isPaystackConfigured()}
+           through Vallo (`restaurant_bill_pay` on and Paystack configured);
+           until then they pay the venue. */
+        billsOn={billsOn}
         board={read.state === "ok" ? read.board : null}
         unavailable={read.state === "unavailable"}
         deposits={deposits}

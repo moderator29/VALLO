@@ -430,40 +430,6 @@ export const ha: Dictionary = withFallback({
         cities: "Birane",
         states: "Jihohi",
       },
-      /* THE FEATURE BAND IS ABSENT HERE ON PURPOSE, AND FALLS BACK TO
-         ENGLISH. The content truth sweep of 19 September rewrote all six
-         cells: they now name buy and rent, the assistant, the wallet,
-         bookings and trips, Vallo Stays and messages, where they used to
-         name verified listings, AI, the wallet, "one platform", Stays and
-         property management. Leaving the old Hausa in place would have
-         printed a DIFFERENT claim from the English under the same keys,
-         which is worse than printing English. A native speaker writes the
-         six cells and they come back here. */
-      community: {
-        overline: "Mutane na gaske. Wurare na gaske.",
-        /* `title` and `body` are absent on purpose and fall back to English:
-           the clean pass (29 September) rewrote both, and the old Hausa
-           described a "growing community" and figures the band may not
-           print. A native speaker writes them and they come back here. */
-        thirdParty: "Na ɓangare na uku",
-        thirdPartyTitle: "Kayan abokan hulɗa, koyaushe da alama",
-        thirdPartyBody:
-          "Masaukin da abokin hulɗa ke cikawa yana ɗauke da wannan alama kuma yana faɗin wanda ke tabbatar da shi. Ba a taɓa nuna shi kamar namu ba.",
-      },
-      categories: {
-        overline: "Bincika ta rukuni",
-        /* `title` and `body` fall back to English (the clean pass): the old
-           body claimed Vallo carries "the whole market". */
-        apartments: "Gidajen haya",
-        houses: "Gidaje",
-        shortlets: "Gajeren haya",
-        hotels: "Otal-otal",
-        resorts: "Wuraren hutu",
-        guestHouses: "Gidajen baƙi",
-        commercial: "Kasuwanci",
-        land: "Filaye",
-        count: "{count} aka lissafa",
-      },
       app: {
         title: "Ɗauki Vallo tare da kai.",
         body: "Cikakken tsarin gidaje a aljihunka. Vallo yana shiga daga burauzarka a iPhone da Android.",
@@ -1077,6 +1043,14 @@ export const ha: Dictionary = withFallback({
       typeToConfirm: "Rubuta {phrase} don tabbatarwa",
       capitals: "Manyan baƙaƙe daidai kamar yadda aka nuna. Wani abu daban ba zai buɗe maɓallin ba.",
       confirm: "Share gaba ɗaya",
+      // NATIVE REVIEW: the deletion blockers for partner-held money and rewards (17 October 2026).
+      blockerPartnerHeld: "Wani abokin biyan kuɗi mai lasisi yana riƙe ko yana motsa {amount} don wata yarjejeniyarka. Dole a sake shi ko a mayar da shi tukuna.",
+      blockerPartnerHeldCta: "Buɗe yarjejeniyoyina",
+      blockerRewardsBalance: "Kana da {amount} na lada da za ka cire. Cire shi tukuna don kada ya ɓace.",
+      blockerRewardsBalanceCta: "Cire lada",
+      blockerRewardsPayouts: "Kana da cire lada {count} da ke kan hanyarsa zuwa bankinka.",
+      blockerRewardsPayoutsPlural: "Kana da cire lada {count} da ke kan hanyarsu zuwa bankinka.",
+      blockerRewardsPayoutsCta: "Duba ladana",
     },
 
     about: {
@@ -1550,6 +1524,8 @@ export const ha: Dictionary = withFallback({
       videoCeiling: "Jeri ɗaya yana ɗaukar bidiyo {max} kacal.",
       videoFailed: "Wannan bidiyon bai gama lodawa ba. Da fatan za a sake gwadawa.",
       videoUploading: "Ana loda {name}, {percent}%",
+      videoCancel: "Dakatar da lodawa",
+      videoCancelled: "An dakatar da lodawa. Ba a haɗa komai ba.",
       retry: "Sake gwadawa",
       notPrepared:
         "Ba mu iya shirya wannan hoton lafiya ba, don haka ba a loda shi ba. Ka gwada wani hoto.",
@@ -2810,6 +2786,7 @@ export const ha: Dictionary = withFallback({
       viewTrips: "Duba tafiyeyinka",
       viewProperty: "Duba gidan",
       viewRestaurant: "Duba gidan cin abinci",
+      askViewing: "Nemi ganin wannan gidan",
     },
     rental: {
       waitingOnYou: "They asked to inspect this place. Your answer goes to them and to their inspections list.",
@@ -2843,6 +2820,40 @@ export const ha: Dictionary = withFallback({
       outcomeDealDone: "An duba, kuma mun yarda",
       outcomeNoDeal: "An duba, babu yarjejeniya",
       outcomeSave: "Ajiye",
+      confirm: "Tabbatar",
+      cancelViewing: "Soke duba gida",
+      cancelledNote: "An soke.",
+      openChat: "Buɗe hirar",
+      lagosTime: "Lokacin Legas",
+      reasonLabel: "Faɗa musu dalili (ba dole ba)",
+      offerBody: "Za su ga lokacin da ka bayar kuma za su iya karɓa da taɓawa ɗaya. Lokacin da suka nema yana nan a rubuce.",
+      offerPlaceholder: "Ƙofar tana rufewa da ƙarfe 6, don haka da wuri ya fi kyau",
+      rescheduleBody:
+        "Duba gidan ya daina zama tabbatacce har sai sun karɓi sabon lokacin. Ana sanar da su nan take, kuma lokacin da suka nema yana nan a rubuce.",
+      listerCancelTitle: "Soke wannan duba gida?",
+      listerCancelBody: "Za a sanar da su cewa an fasa duba gidan. Idan wata rana ta dace da kai, ka ba da wani lokaci maimakon haka.",
+      cancelConfirm: "I, soke shi",
+      withdrawTitle: "Janye wannan buƙata?",
+      withdrawBody: "Mai sanarwa zai ga cewa ka janye. Kana iya sake nema daga shafin gidan.",
+      withdrawConfirm: "I, janye",
+      renterCancelBody: "Za a sanar da mai sanarwa cewa ba za ka zo ba. Kana iya neman wani lokaci daga shafin gidan.",
+      noShowRenterTitle: "Mai haya bai zo ba?",
+      noShowListerTitle: "Babu wanda ya zo nuna gidan?",
+      noShowRenterBody:
+        "Za a sanar da su cewa ka yi musu alamar rashin zuwa, kuma za su iya ƙalubalantar hakan cikin sa'o'i 48. Vallo tana duba kowace ƙalubale.",
+      noShowListerBody:
+        "Za a sanar da mai sanarwa cewa ka yi masa alamar rashin zuwa, kuma zai iya ƙalubalantar hakan cikin sa'o'i 48. Vallo tana duba kowace ƙalubale.",
+      whatHappened: "Abin da ya faru (ba dole ba)",
+      noShowConfirm: "I, yi alamar rashin zuwa",
+      disputeTitle: "Ƙalubalanci wannan rashin zuwa?",
+      disputeBody: "Faɗa wa Vallo cewa kana wurin. Wani a ƙungiyar zai duba ɓangarorin biyu ya sanar da ku duka abin da aka yanke.",
+      disputeSend: "Aika ƙalubalen",
+      markRenterNoShow: "Mai haya bai zo ba",
+      markListerNoShow: "Babu wanda ya zo nuna gidan",
+      noShowBadge: "Bai zo ba",
+      disputeThis: "Ƙalubalanci wannan",
+      noShowSettled: "An yi masa alama cewa bai zo ba. Zai iya ƙalubalantar hakan cikin sa'o'i 48.",
+      failed: "Hakan bai yi nasara ba.",
     },
     reservation: {
       tableFor: "tebur na {count}",
@@ -3719,6 +3730,7 @@ export const ha: Dictionary = withFallback({
       noShow: "Bai zo ba",
       markedSeated: "An yi alama cewa an zaunar.",
       markedNoShow: "An yi alama cewa bai zo ba. An sanar da baƙon.",
+      markedDisputed: "An adana. Baƙon ya faɗa mana wani abu daban, don haka wani a Vallo zai duba wannan teburin.",
     },
     bill: {
       label: "Jimillar kuɗin lissafi",
@@ -4159,7 +4171,6 @@ export const ha: Dictionary = withFallback({
   feedV2: {
     card: {
       commentPill: "Bar sharhi",
-      commentAria: "amsa wannan",
       readMore: "Karanta ƙari",
       readLess: "Nuna ƙasa",
       roleLandlord: "Mai gida",
@@ -4181,6 +4192,13 @@ export const ha: Dictionary = withFallback({
       describePlain: "{name} ya wallafa",
       describeLandlord: "{name}, mai gida, ya wallafa",
       describeAgent: "{name}, wakili, ya wallafa",
+      likedUndo: "Ka so, {count}. Janye",
+      like: "Masu so {count}, so wannan",
+      repostedUndo: "Ka sake wallafa, {count}. Janye",
+      repost: "Sake wallafawa {count}, sake wallafa wannan",
+      share: "Raba wannan rubutu",
+      savedRemove: "An ajiye. Cire daga abubuwan da aka ajiye",
+      save: "Ajiye wannan rubutu",
     },
     composer: {
       cancel: "Soke",
@@ -4549,6 +4567,122 @@ export const ha: Dictionary = withFallback({
       openTitle: "Ana jayayya kan biyan kati",
       openBody: "Bankin wanda ya biya ya buɗe jayayya kan biyan da ka karɓa. Babu abin da aka dakatar yayin da ake yanke hukunci. Ƙungiyar kuɗi ta Vallo na iya neman shaidar ajiyar daga gare ka.",
       openMore: "Jayayya a buɗe: {count}",
+    },
+  },
+
+  /* The conversation screen's words (language audit, 17 October 2026).
+     Written without a native speaker, like the rest of this file. */
+  experienceInbox: {
+    inbox: { pane: "Hirarraki" },
+    thread: {
+      view: {
+        options: "Zaɓuɓɓukan hira",
+        conversation: "Hira",
+        openProfile: "{name}, buɗe bayanan martaba",
+        keepInside: "Ka ajiye kowace hira da kowane biya a cikin Vallo",
+        emptyTitle: "Gaishe da {name}",
+        emptyListing:
+          "Ba a faɗi komai a nan ba tukuna. Tambayi abin da kake buƙatar sani game da gidan, ku amince da lokacin ganinsa, kuma ka ajiye duk hirar a wuri ɗaya.",
+        emptyBooking: "Ba a faɗi komai a nan ba tukuna. Tambayi game da isowarka, ɗakin ko duk abin da ajiyar ba ta amsa ba.",
+        emptyReservation: "Ba a faɗi komai a nan ba tukuna. Tabbatar da lokacin, yawan mutane, da duk abin da ya kamata kicin ya sani.",
+        emptyDirect:
+          "Ba a faɗi komai a nan ba tukuna. Duk abin da ka rubuta yana tsakaninku biyu ne kawai, kuma ana ajiye duk hirar a nan.",
+        roleLandlord: "Mai gida",
+        roleAgent: "Wakilin Vallo",
+        roleTenant: "Ɗan haya",
+        photoYours: "Hoton da ka haɗa",
+        photoFrom: "Hoto daga {name}",
+        videoYours: "Bidiyon da ka haɗa",
+        videoFrom: "Bidiyo daga {name}",
+        forwarded: "An tura",
+        deleted: "An goge wannan saƙon",
+        open: "Buɗe",
+        sending: "Ana aikawa",
+        notSent: "Ba a aika ba.",
+        retry: "Sake gwadawa",
+        retryText: "Sake aika: {text}",
+        retryPhoto: "Sake aika hotonka",
+        retryMessage: "Sake aika wannan saƙon",
+        typing: "{name} yana rubutu",
+        dismissSafety: "Rufe bayanin tsaro",
+        photoReady: "Hoto a shirye don aikawa",
+        photoAttached: "An haɗa hoto",
+        removePhoto: "Cire hoto",
+        remove: "Cire",
+        cancelReply: "Soke amsa",
+        cancel: "Soke",
+        attachPhoto: "Haɗa hoto",
+        messageTo: "Saƙo zuwa {name}",
+        placeholder: "Rubuta saƙo",
+        send: "Aika saƙo",
+        forwardedTo: "An tura zuwa {name}.",
+        inspectionConfirmed: "An tabbatar da duba gida.",
+        inspectionConfirmedDevice: "An tabbatar da duba gida a wannan na'urar",
+        failed: "Hakan bai yi nasara ba. Duba haɗin intanet ɗinka ka sake gwadawa.",
+        shared: {
+          listing: "Ya raba wani gida",
+          booking: "Ya raba wata ajiya",
+          stay: "Ya raba wani zama",
+          passport: "Ya raba fasfo",
+        },
+        close: "Rufe",
+        confirmInspected: "Tabbatar cewa na duba wannan gidan",
+        conversationWith: "Hira da {name}",
+        verifiedListing: "Gidan da aka tabbatar",
+        verificationPending: "Ana jiran tabbatarwa",
+        approved: "An amince",
+        shareHere: "Raba gida ko ajiya a nan",
+        shareHereBody: "Zai iso a matsayin kati da {name} zai iya buɗewa.",
+        blockAsk: "Toshe {name}?",
+        block: "Toshe {name}",
+        blockBody: "Ba za su iya tuntuɓar ka ba kuma, a nan da ko'ina.",
+        blockConfirm:
+          "Ba za su iya aika maka saƙo ba, ganin bayanan martabarka ko samun gidajenka ba, kuma kai ma ba za ka ga nasu ba. Ba a sanar da su ba. Kana iya janye wannan a Saituna, Sirri.",
+        keepOpen: "Bar hirar a buɗe",
+        safetyRule:
+          "Don lafiyarka, ka ajiye kowace hira da kowane biya a cikin Vallo. Ba mu kare yarjejeniyar da aka yi a wajen dandalin ba. Ka biya sai bayan ka duba gidan.",
+      },
+      card: {
+        rated: "An ba da taurari {rating} cikin 5",
+        forward: {
+          listing: "Tura wannan gidan zuwa wata hira",
+          stay: "Tura wannan zaman zuwa wata hira",
+          booking: "Tura wannan ajiyar zuwa wata hira",
+        },
+        verified: "An tabbatar",
+        map: "Taswirar {area}. Fil ɗin yana nuna unguwa, ba adireshi ba.",
+        viewStay: "Duba zaman",
+        viewListing: "Duba gidan",
+        messageAgent: "Aika saƙo ga wakili",
+        checkIn: "Shiga",
+        checkOut: "Fita",
+        guests: "Baƙi",
+        viewBooking: "Duba bayanan ajiya",
+        contactHost: "Tuntuɓi mai masauki",
+      },
+      menu: {
+        close: "Rufe menu",
+        label: "Zaɓuɓɓukan saƙo",
+        reply: "Amsa",
+        forward: "Tura",
+        copy: "Kwafa",
+        deleteForMe: "Goge mini",
+        deleteForEveryone: "Goge wa kowa",
+      },
+      forward: {
+        title: "Tura zuwa",
+        close: "Rufe",
+        search: "Nemo mutanen da kake bi",
+        clear: "Share bincike",
+        placeholder: "Nemo",
+        loading: "Ana ɗora hirarrakinka",
+        empty: "Bi wani don ka tura masa saƙo.",
+        unreachable: "Ba mu iya ɗora hirarrakinka yanzu ba. Rufe wannan ka sake gwadawa.",
+        failed: "Hakan bai yi aiki ba. Don Allah sake gwadawa.",
+        noMatch: "Babu wanda kake bi da ya dace da hakan.",
+        listLabel: "Hirarrakin da za ka iya turawa",
+        sending: "Ana aikawa",
+      },
     },
   },
 

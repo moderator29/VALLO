@@ -431,7 +431,7 @@ export async function cancelReservation(
 export async function markReservationOutcome(input: {
   reservationId: string;
   outcome: "COMPLETED" | "NO_SHOW";
-}): Promise<ActionResult<{ outcome: "COMPLETED" | "NO_SHOW" }>> {
+}): Promise<ActionResult<{ outcome: "COMPLETED" | "NO_SHOW"; disputed: boolean }>> {
   const session = await resolveSession();
   if (session.state !== "signed-in") return fail("Sign in to record how a table went.");
 
@@ -451,15 +451,14 @@ export async function markReservationOutcome(input: {
   if (!viaSeating.error || !seatingMissing(viaSeating.error)) {
     if (viaSeating.error) return fail("That could not be saved. Try again.");
     const status = (viaSeating.data as { status?: string } | null)?.status;
-    if (status === "disputed") {
-      revalidatePath("/host/reservations");
-      return fail("The guest told us something different about this table, so a person at Vallo will check it.");
-    }
-    if (status !== "recorded") return fail(seatingRefusal(status));
+    /* `disputed` is a success: the venue's mark IS recorded, and because the
+       diner already said otherwise a dispute was opened beside it. It used
+       to come back as a failure, so the desk drew a saved mark in red. */
+    if (status !== "recorded" && status !== "disputed") return fail(seatingRefusal(status));
     revalidatePath("/host/reservations");
     revalidatePath("/host");
     revalidatePath("/bookings");
-    return ok({ outcome });
+    return ok({ outcome, disputed: status === "disputed" });
   }
 
   const { data, error } = await session.supabase
@@ -478,5 +477,5 @@ export async function markReservationOutcome(input: {
   revalidatePath("/host/reservations");
   revalidatePath("/host");
   revalidatePath("/bookings");
-  return ok({ outcome });
+  return ok({ outcome, disputed: false });
 }

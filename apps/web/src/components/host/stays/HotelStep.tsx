@@ -67,6 +67,7 @@ export function HotelStep({
   onExpectedRooms(next: number): void;
 }) {
   const hw = useHostCopy();
+  const w = hw.stays;
   /* Held in the wizard, so Back and a jump along the path keep what is typed;
      the saved answer is what they start from and what "unsaved" is measured
      against. */
@@ -93,7 +94,7 @@ export function HotelStep({
   const saveAndGo = async () => {
     if (!(await saveTextAsync())) return;
     if (!(await save())) return;
-    setNotice({ tone: "ok", text: "Your hotel is saved." });
+    setNotice({ tone: "ok", text: w.hotel.saved });
     advance();
   };
 
@@ -149,7 +150,7 @@ export function HotelStep({
                 </span>
               ))
             ) : (
-              <span className="nf-stays-row__meta">Not given yet. Open the business step to add it.</span>
+              <span className="nf-stays-row__meta">{w.common.notGivenBusiness}</span>
             )}
           </span>
           <UiIcon name="chevron-right" size={20} className="shrink-0 text-[var(--nf-content-muted)]" />
@@ -178,8 +179,8 @@ export function HotelStep({
         </div>
         <p className="nf-stays-plate__note">
           {stars === null
-            ? "No star rating claimed. Leave it that way unless a body has actually rated the hotel."
-            : "A claimed rating. It renders as a claim and not as a badge until it is checked."}
+            ? w.hotel.starsNone
+            : w.hotel.starsClaimed}
         </p>
       </StaysPlate>
 
@@ -201,8 +202,8 @@ export function HotelStep({
         </StaysRow>
         <p className="nf-stays-plate__note">
           {draft.roomTypes.length > 0
-            ? "This is the total across the room types you have saved. Change it by changing a room type on the next screen."
-            : "The total you expect. The next screen is where the rooms actually go on sale, and what you enter there is what guests can book."}
+            ? w.hotel.roomsTotal
+            : w.hotel.roomsExpected}
         </p>
       </StaysPlate>
 
@@ -215,12 +216,11 @@ export function HotelStep({
         disabled={pending || name.trim().length < 2}
         loading={pending}
       >
-        Continue
+        {w.common.continue}
       </Button>
 
       <StaysNote>
-        Nothing here is on sale yet. A hotel goes on the shelf when a person on our team has read
-        the application, and you can come back to this screen until then.
+        {w.hotel.note}
       </StaysNote>
     </>
   );

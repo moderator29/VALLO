@@ -35,7 +35,7 @@ Nothing about listing stays (apartments, shortlets) changes, whether the switch 
 8. **Settlement.** Paystack's webhook runs `settle_booking_charge`, which records the transaction and ledger entry, the Guarantee contribution and marks the agreement paid. The host sees the payment under **Host > Earnings**, named after the hotel.
 9. **After the stay.** The nightly completion sweep marks the stay completed after check-out, exactly as for listings.
 
-A worked example: one room, three nights at ₦50,000, ₦60,000 and ₦50,000 is ₦160,000. With the Guarantee at 0 and the hotel commission at 10 percent (`DECISIONS_2026-10-13.md` row 22, live with the payments track), the host receives ₦144,000 and ₦16,000 goes to Vallo; until that rate is live the host receives the full ₦160,000 less the processor's fee.
+A worked example: one room, three nights at ₦50,000, ₦60,000 and ₦50,000 is ₦160,000. With the Guarantee at 0 and the hotel commission at 10 percent (`DECISIONS_2026-10-13.md` row 22; a dated row in `public.scoped_commission_rates`, applied `20261013171019_pov06_hotel_room_commission.sql`, taken at the rate in force when the room was booked), the host receives ₦144,000, less the processor's fee, and ₦16,000 goes to Vallo.
 
 ## How the host gets paid
 

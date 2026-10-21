@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRootFlag } from "@/lib/ui/root-flag";
 
 /**
  * THE FLOATING GLASS PILL over the deal story (the founder's
@@ -15,6 +16,10 @@ import { useEffect, useState } from "react";
 export function StoryPill({ label, steps }: { label: string; steps: { id: string; label: string }[] }) {
   const [active, setActive] = useState(0);
   const [shown, setShown] = useState(false);
+  /* `data-story-pill` on <html> while the pill is up: back to top steps
+     aside, one floating control at a time (landing-plasma.css,
+     lib/ui/root-flag.ts). */
+  useRootFlag("story-pill", shown);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;

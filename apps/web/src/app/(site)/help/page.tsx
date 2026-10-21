@@ -51,7 +51,7 @@ export default async function HelpPage() {
         icon="support-chat"
         chip="Help centre"
         title="How can we help?"
-        lede="Straight answers about both sides of Vallo: what the platform is for, the switch, booking a stay, holding a table, payments, refunds, listing and verification. Search below, or browse by topic."
+        lede="Straight answers about both sides of Vallo: what the platform is for, the switch, booking a stay, holding a table, payments, refunds, listing, verification, Around, and your account and data. Search below, or browse by topic."
       />
     <div className="nf-shell pb-section">
       <div className="mx-auto max-w-3xl">

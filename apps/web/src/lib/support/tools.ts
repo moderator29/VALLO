@@ -12,7 +12,10 @@ import {
   FULL_REFUND_HOURS,
   refundAtStop,
   refundForCancellation,
+  refundUnderTerms,
+  type CancellationTerms,
 } from "../trust/cancellation";
+import { readFrozenTerms } from "../after-gate/refunds";
 import { RESPONSE_COMMITMENTS } from "../trust/standards";
 import { SUPPORT_TOPICS, gradeForTopic, supportTopicLabel, type SupportTopic } from "../trust/support-topics";
 import { AGREEMENT_STATUS_LABEL } from "@/components/app/agreements/status";
@@ -177,7 +180,7 @@ export const SUPPORT_TOOLS = [
   {
     name: "booking_policy",
     description:
-      "For one of the caller's own bookings, say exactly how it can be called off, by whom, and what the published cancellation schedule is worth against what they actually paid. Pass the booking id returned by my_bookings. Returns unavailable when nobody is signed in, and not found when the booking is not theirs.",
+      "For one of the caller's own bookings, say exactly how it can be called off, by whom, and what the cancellation terms fixed on that booking are worth against what they actually paid. Pass the booking id returned by my_bookings. Returns unavailable when nobody is signed in, and not found when the booking is not theirs.",
     input_schema: {
       type: "object",
       properties: {
@@ -555,7 +558,7 @@ function nextStepsFor(
     ];
   }
   return [
-    "This stay is paid for, so cancelling it is done by a person rather than by the button: ask support here and the published schedule decides the amount, which is refunded to the card or account they paid with.",
+    "This stay is paid for, so cancelling it is done by a person rather than by the button: ask support here and the cancellation terms fixed on the booking decide the amount, which is refunded to the card or account they paid with.",
     "Call booking_policy with this booking id before quoting any figure.",
   ];
 }
@@ -639,15 +642,13 @@ async function runMyAgreements(session: SignedIn): Promise<ToolOutcome> {
  * How one of the caller's own bookings can be called off, and what that is
  * worth against what they actually paid.
  *
- * This used to hand the model the FAQ paragraph on cancellations and a boolean
- * from the trips hub. Both were wrong in the same direction, towards promising
- * more than the platform does: the paragraph described per-listing deadlines,
- * which Vallo deliberately does not have, and the boolean said a paid stay
- * could be cancelled with a button that refuses paid stays. The schedule now
- * comes from `lib/trust/cancellation.ts`, the single module the public policy
- * page, the listing, the booking and the admin refund desk all compute from, so
- * the agent cannot tell somebody a different story about their own money than
- * the page they can go and read.
+ * A paid stay is answered from the terms frozen on its booking
+ * (`booking_cancellation_terms`, read by `readFrozenTerms`), which is the row
+ * the admin refund desk computes from: a host business's preset (Flexible,
+ * Moderate, Firm or Strict) or the platform schedule. Only a booking with no
+ * frozen row falls back to the platform schedule in `lib/trust/cancellation.ts`.
+ * So the agent cannot tell somebody a different story about their own money
+ * than the booking and the desk do.
  */
 async function runBookingPolicy(session: SignedIn, input: unknown): Promise<ToolOutcome> {
   const bookingId = asString(asRecord(input).bookingId);
@@ -667,7 +668,7 @@ async function runBookingPolicy(session: SignedIn, input: unknown): Promise<Tool
   }
 
   const { paidMinor, currency } = figures;
-  const scheduleNote = `One schedule covers every stay on Vallo. The free-cancellation deadline is ${FULL_REFUND_HOURS} hours before check-in.`;
+  const scheduleNote = `A stay listed by an owner or agent follows Vallo's platform schedule, with the free-cancellation deadline ${FULL_REFUND_HOURS} hours before check-in. A hotel, shortlet or serviced apartment run as a business follows the policy it picked (Flexible, Moderate, Firm or Strict), and the terms are fixed on the booking when it is paid. Deadlines are counted in Lagos time.`;
 
   if (booking.status === "CANCELLED") {
     return {
@@ -718,8 +719,13 @@ async function runBookingPolicy(session: SignedIn, input: unknown): Promise<Tool
     };
   }
 
-  // Paid. The amount is decided by the same function the refund desk runs, so
-  // what the agent quotes and what the desk pays are one number.
+  // Paid. The amount is decided by the terms frozen on the booking when it was
+  // paid (`booking_cancellation_terms`), the row the refund desk reads, so what
+  // the agent quotes and what the desk pays are one number. A host business's
+  // preset (Flexible, Moderate, Firm, Strict) is frozen there; only a booking
+  // with no frozen row falls back to the platform schedule.
+  const frozen = await readFrozenTerms(session.supabase, bookingId);
+  if (frozen) return bookedTermsAnswer(booking, paidMinor, currency, frozen.terms);
   const outcome = refundForCancellation(paidMinor, booking.checkIn);
   return {
     result: {
@@ -745,6 +751,70 @@ async function runBookingPolicy(session: SignedIn, input: unknown): Promise<Tool
       })),
       exceptions:
         "The schedule only governs a cancellation the guest chose. If the host cancelled, the place was not what was listed, or they could not get in, everything comes back whatever the hour. Do not cancel in those cases: report it.",
+      note: "Quote these amounts exactly. Never round them and never work out a figure of your own.",
+    },
+    actions: [BOOKINGS_ACTION],
+  };
+}
+
+/** "Everything back", "Nothing back", "50% back": a tier's share in words. */
+function shareWords(refundBps: number): string {
+  if (refundBps >= 10_000) return "Everything back";
+  if (refundBps <= 0) return "Nothing back";
+  const percent = refundBps / 100;
+  return `${Number.isInteger(percent) ? percent : percent.toFixed(1)}% back`;
+}
+
+/**
+ * A paid stay under the terms frozen on its booking. The same arithmetic as
+ * the refund desk (`refundUnderTerms`), and the same steps the guest was shown
+ * at checkout, so the figure quoted is the figure paid.
+ */
+function bookedTermsAnswer(
+  booking: { checkIn: string },
+  paidMinor: number,
+  currency: string,
+  terms: CancellationTerms,
+): ToolOutcome {
+  const now = refundUnderTerms(paidMinor, booking.checkIn, terms);
+  const lastTier = terms.tiers[terms.tiers.length - 1];
+  const paid = Math.max(0, Math.trunc(paidMinor));
+  const steps = terms.tiers.map((tier, index) => {
+    const earlier = terms.tiers[index - 1];
+    const when =
+      tier.closesHoursBefore > 0
+        ? `More than ${tier.closesHoursBefore} hours before check-in`
+        : earlier
+          ? `Less than ${earlier.closesHoursBefore} hours before check-in`
+          : "Any time before check-in";
+    return { step: shareWords(tier.refundBps), when, worth: naira(Math.round((paid * tier.refundBps) / 10_000), currency) };
+  });
+  if (!lastTier || lastTier.closesHoursBefore > 0 || lastTier.refundBps > 0) {
+    steps.push({
+      step: "Nothing back",
+      when:
+        lastTier && lastTier.closesHoursBefore > 0
+          ? `Less than ${lastTier.closesHoursBefore} hours before check-in`
+          : "From check-in time onwards",
+      worth: naira(0, currency),
+    });
+  }
+  return {
+    result: {
+      booking,
+      route: "a person on the support team",
+      whatHappens:
+        "This stay is paid for, so it is not cancelled by the button in the app: ask here and a person applies the cancellation terms fixed on this booking, refunds the money to the card or account they paid with, and puts the amount and the reason in writing. Cancellation requests are answered within 1 day, sooner when check-in is close.",
+      paid: naira(paidMinor, currency),
+      ifCancelledNow: {
+        tier: shareWords(now.refundBps),
+        refunded: naira(now.refundMinor, currency),
+        keptByHost: naira(now.retainedMinor, currency),
+        why: "These are the cancellation terms fixed on this booking when it was paid, counted in Lagos time from check-in.",
+      },
+      schedule: steps,
+      exceptions:
+        "These terms only govern a cancellation the guest chose. If the host cancelled, the place was not what was listed, or they could not get in, everything comes back whatever the hour. Do not cancel in those cases: report it.",
       note: "Quote these amounts exactly. Never round them and never work out a figure of your own.",
     },
     actions: [BOOKINGS_ACTION],

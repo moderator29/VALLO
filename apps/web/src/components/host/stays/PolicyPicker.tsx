@@ -2,12 +2,9 @@
 
 import type { Locale } from "@vallo/i18n/core";
 import { offeredPolicies, policyFootLines, refundLines } from "@/lib/host/cancellation-presets";
+import { useHostCopy } from "@/components/host/host-copy";
 import { StaysPlate, StaysTile, StaysTiles } from "./StaysParts";
 import type { StaysStepProps } from "./types";
-
-/* Said when the estate publishes no policy at all. */
-const NO_POLICIES =
-  "This estate publishes no cancellation policies yet, so there is nothing to choose from. A rate cannot be sold without one.";
 
 /**
  * THE CANCELLATION POLICY, CHOSEN FROM THE PRESETS.
@@ -40,6 +37,7 @@ export function PolicyPicker({
   label: string;
   disabled?: boolean;
 }) {
+  const words = useHostCopy().cancellation;
   const offered = offeredPolicies(policies);
   const picked = offered.find((policy) => policy.id === chosen) ?? null;
 
@@ -47,7 +45,7 @@ export function PolicyPicker({
     return (
       <StaysPlate
         label={label}
-        note={NO_POLICIES}
+        note={words.noPolicies}
       >
         <span />
       </StaysPlate>
@@ -71,12 +69,12 @@ export function PolicyPicker({
       </StaysTiles>
       {picked ? (
         <ul className="mt-[var(--nf-space-sm)] grid gap-[var(--nf-space-2xs)]" data-testid="policy-lines">
-          {refundLines(picked, locale).map((line) => (
+          {refundLines(picked, words, locale).map((line) => (
             <li key={line} className="nf-stays-plate__note mt-0">
               {line}
             </li>
           ))}
-          {policyFootLines(checkInFrom).map((line) => (
+          {policyFootLines(checkInFrom, words, locale).map((line) => (
             <li key={line} className="nf-stays-plate__note mt-0">
               {line}
             </li>
@@ -84,7 +82,7 @@ export function PolicyPicker({
         </ul>
       ) : (
         <p className="nf-stays-plate__note">
-          Pick one. Guests see its refund rules on your page and before they pay, and a rate cannot be sold without one.
+          {words.pickOne}
         </p>
       )}
     </StaysPlate>

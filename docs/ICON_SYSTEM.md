@@ -1,6 +1,6 @@
 # Vallo Icon System
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 ## Current rule, 29 September 2026: one family, lean glyphs on flat plates
 
@@ -256,7 +256,7 @@ stay bold. So:
 - **Lean** (`UI_ICON_LEAN_BY_EDGE`: 1.25 at 12, 1.4 at 16, 1.6 at 20, 1.7 at
   24, up to 2.25 at 40) is everything else, and the default.
 - Every stroked glyph (`UiIcon`, `SettingsGlyph`, `LineGlyph`,
-  `FeatureGlyph`, `AdminGlyph`) spreads `uiIconStrokeProps(size)`: the lean
+  `AdminGlyph`) spreads `uiIconStrokeProps(size)`: the lean
   width as the attribute, both widths as `--nf-sw-lean` / `--nf-sw-bold`.
   `app/css/symbols.css` switches the chrome to bold with zero-specificity
   rules, so a rule that already sizes one glyph's line still wins.
@@ -299,7 +299,7 @@ solid twin for the active state such as their filled gear). What changed:
   28, 2.5 at 32, 2.75 at 40. One fixed pixel weight clogged the 12 step (2px
   is a third of a counter there) and starved the 40 step; the quarter-pixel
   steps land on the device grid at 2x. `LineGlyph`, `SettingsGlyph`,
-  `FeatureGlyph` and the console's `AdminGlyph` call the same helper, so they
+  The console's `AdminGlyph` calls the same helper, so they
   went bold with the set.
 - **Raised to 2.25 the same day (the ICONS3 audit).** Beside 600-weight
   labels the 20 and 24 steps at 2 still read a shade under pump.fun's, and

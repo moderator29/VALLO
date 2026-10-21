@@ -91,6 +91,14 @@ export type PriceCheckScreenProps = {
   result: PriceCheckResult | null;
   comparables: Comparable[];
   areaRows: AreaAskingRow[] | null;
+  /**
+   * The server's seals over the cards this answer may mint (`share-seal.ts`):
+   * one for the answered range, one per area row in `areaRows` order. A share
+   * sends only the seal, so no figure on a card comes from this screen. Null
+   * where this server could not seal (no service key); minting then fails
+   * with its own line rather than a fake card.
+   */
+  shareSeals?: { answered: string | null; rows: (string | null)[] };
   areaCensus: AreaCensus | null;
   facts: AreaUtilityFacts | null;
   signedIn: boolean;
@@ -512,18 +520,7 @@ export function PriceCheckScreen(props: PriceCheckScreenProps) {
                   signedIn={props.signedIn}
                   share={
                     <ShareAreaButton
-                      stateCode={stateCode}
-                      lgaCode={lgaCode || null}
-                      area={area.trim() || null}
-                      propertyType={propertyType}
-                      listingIntent={intent}
-                      bedrooms={query.bedrooms}
-                      figures={{
-                        lowMinor: result.lowMinor,
-                        midMinor: result.midMinor,
-                        highMinor: result.highMinor,
-                        listingCount: result.comparableCount,
-                      }}
+                      card={{ seal: props.shareSeals?.answered ?? null }}
                       copy={shareCopy}
                     />
                   }
@@ -585,12 +582,6 @@ export function PriceCheckScreen(props: PriceCheckScreenProps) {
           }
           renderShare={(row) => (
             <ShareAreaButton
-              stateCode={stateCode}
-              lgaCode={lgaCode || null}
-              area={area.trim() || null}
-              propertyType={row === null ? null : asSupportedType(row.propertyType)}
-              listingIntent={intent}
-              bedrooms={row === null ? null : row.bedrooms}
               /*
                * THE AREA REPORT'S OWN FIGURES, WHICH ARE ITS QUARTILES AND
                * NOT THE GATE'S RANGE. They are a different claim: "the middle
@@ -598,19 +589,14 @@ export function PriceCheckScreen(props: PriceCheckScreenProps) {
                * from at least three listings rather than five, and the card
                * prints the count so the smaller claim stays the smaller claim.
                * `null` is the honest state where there are no rows at all,
-               * which on this platform today is nearly everywhere.
+               * which on this platform today is nearly everywhere. The figures
+               * travel inside the server's seal for this row, built by
+               * `cardFromAreaRow` on the page, never from this screen.
                */
-              figures={
+              card={
                 row === null
                   ? null
-                  : {
-                      lowMinor: row.p25Minor,
-                      midMinor: row.medianMinor,
-                      highMinor: row.p75Minor,
-                      listingCount: row.listingCount,
-                      oldestAt: row.oldestAt || null,
-                      newestAt: row.newestAt || null,
-                    }
+                  : { seal: props.shareSeals?.rows[areaRows?.indexOf(row) ?? -1] ?? null }
               }
               copy={shareCopy}
             />
@@ -738,23 +724,6 @@ function RefusalActions({
       )}
     </div>
   );
-}
-
-/**
- * An area row's property type, narrowed onto the four a card may carry.
- *
- * `area_asking_summary` answers for every type the database holds, including
- * land, hotels and restaurants, and `price_check_shares.property_type` is a
- * `property_type` column that would accept any of them - but a card built from
- * one would be a price claim about a kind of property this product refuses to
- * price, which is what `unsupported_type` exists to say. So an unsupported row
- * gets an AREA scoped card, which names the neighbourhood and no type, rather
- * than a typed card this feature would not have issued through the gate.
- */
-function asSupportedType(value: string): PriceCheckPropertyType | null {
-  return value === "apartment" || value === "home" || value === "shop" || value === "office"
-    ? value
-    : null;
 }
 
 /** One rung, with its numeral, so a five field column reads as a ladder. */

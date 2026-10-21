@@ -19,6 +19,7 @@ import {
   utilityFacts,
 } from "@/lib/price-check/queries";
 import { REFUSALS } from "@/lib/price-check/refusals";
+import { cardFromAnswer, cardFromAreaRow, sealWithServerKey } from "@/lib/price-check/share-seal";
 import type {
   Comparable,
   ListingIntent,
@@ -171,6 +172,22 @@ export default async function PriceCheckPage({
     );
   }
 
+  /*
+   * THE CARDS THIS ANSWER MAY MINT, SEALED HERE WHERE THE FIGURES WERE
+   * COMPUTED. The share action takes only a seal, so a card can carry no
+   * figure, count or place this page did not produce (`share-seal.ts`).
+   */
+  const place = { stateCode, lgaCode, area, intent };
+  const shareSeals = {
+    answered:
+      result !== null && result.kind === "answered"
+        ? sealWithServerKey(
+            cardFromAnswer({ ...place, propertyType, bedrooms: subject.bedrooms }, result),
+          )
+        : null,
+    rows: (rows ?? []).map((row) => sealWithServerKey(cardFromAreaRow(place, row))),
+  };
+
   return (
     // A form page reads at a measure on a wide screen, as Settings and Saved do,
     // instead of stretching its fields across 1100px (pixel polish).
@@ -204,6 +221,7 @@ export default async function PriceCheckPage({
           result={result}
           comparables={comparables}
           areaRows={rows}
+          shareSeals={shareSeals}
           areaCensus={census}
           facts={facts}
           signedIn={session.state === "signed-in"}

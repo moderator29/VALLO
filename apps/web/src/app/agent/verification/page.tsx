@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
+import { requestNow } from "@/lib/format/when";
 import { getLocale } from "@/lib/locale";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { AgentShell } from "@/components/agent/AgentShell";
@@ -156,7 +157,3 @@ export default async function Page({
   );
 }
 
-/** The request's clock, read once, so the page agrees with itself. */
-function requestNow(): number {
-  return Date.now();
-}

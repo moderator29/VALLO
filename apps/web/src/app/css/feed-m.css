@@ -49,7 +49,7 @@
    */
   .nf-feed-lead {
     animation: nf-feed-stagger var(--nf-duration-base) var(--nf-ease-entrance) both;
-    animation-delay: calc(var(--nf-i, 0) * 40ms);
+    animation-delay: calc(min(var(--nf-i, 0), var(--nf-stagger-cap)) * var(--nf-stagger));
   }
   @keyframes nf-feed-stagger {
     from {
@@ -192,7 +192,7 @@
    * with this `scale` rather than fighting it.
    */
   .nf-act-pill--like[data-pop] {
-    animation: nf-feed-heart 180ms var(--nf-ease-press) both;
+    animation: nf-feed-heart var(--nf-duration-pop) var(--nf-ease-press) both;
   }
   @keyframes nf-feed-heart {
     0% {

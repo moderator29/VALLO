@@ -3,6 +3,7 @@ import { cookies, headers } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { localizedAlternates, openGraphLocales } from "@/lib/i18n/public-metadata";
+import { OG_LOCALE } from "@/lib/i18n/public-locale";
 import { prefersLessData } from "@/lib/save-data";
 import { NONCE_HEADER } from "@/lib/security/csp";
 import { ScrollToTop } from "@/components/site/ScrollToTop";
@@ -244,7 +245,8 @@ export async function generateMetadata(): Promise<Metadata> {
       ...(alternates?.canonical ? { url: alternates.canonical as string } : {}),
       title: site.title,
       description: site.shareDescription,
-      ...openGraphLocales(locale),
+      /* Other-language card locales only where those languages have a body. */
+      ...(alternates && !alternates.languages ? { locale: OG_LOCALE[locale] } : openGraphLocales(locale)),
     },
     twitter: { ...baseMetadata.twitter },
   };

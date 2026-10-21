@@ -23,16 +23,7 @@ import {
   type StepSheetWords,
   type TimeSheetWords,
 } from "@/components/app/inspections/ViewingSheets";
-import {
-  LISTER_CANCEL_WORDS,
-  REASON_LABEL,
-  RENTER_CANCEL_WORDS,
-  RESCHEDULE_WORDS,
-  VIEWING_WORDS,
-  WITHDRAW_WORDS,
-  NO_SHOW_WORDS,
-  noShowWords,
-} from "@/components/app/inspections/viewing-words";
+import { viewingWords } from "@/components/app/inspections/viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
 
 /**
@@ -70,7 +61,6 @@ type OpenSheet =
   | "outcome"
   | "noShow";
 
-const NO_SHOW_SETTLED = "Marked as a no-show. They can dispute it within 48 hours.";
 
 export function RentalFace({
   inspection,
@@ -103,6 +93,16 @@ export function RentalFace({
   /** The render's clock, so a preview can pin "before" and "after" the viewing. */
   now?: number;
 }) {
+  const {
+    VIEWING_WORDS,
+    RESCHEDULE_WORDS,
+    LISTER_CANCEL_WORDS,
+    WITHDRAW_WORDS,
+    noShowWords,
+    NO_SHOW_WORDS,
+    RENTER_CANCEL_WORDS,
+    REASON_LABEL,
+  } = viewingWords(copy);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<InspectionState>(inspection.state);
@@ -123,7 +123,7 @@ export function RentalFace({
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through.");
+          setError(result.error ?? copy.failed);
           return;
         }
         then();
@@ -197,7 +197,7 @@ export function RentalFace({
   const noShow = async (note: string) =>
     fromSheet(await reportNoShow({ id: inspection.id, ...(note ? { note } : {}) }), () => {
       setState("NO_SHOW");
-      setSettled(NO_SHOW_SETTLED);
+      setSettled(copy.noShowSettled);
     });
 
   const complete = async (outcome: InspectionOutcome) =>
@@ -458,12 +458,12 @@ function OutcomeSheet({
     try {
       const result = await onSubmit(chosen);
       if (!result.ok) {
-        setError(result.error ?? "That did not go through.");
+        setError(result.error ?? copy.failed);
         return;
       }
       onOpenChange(false);
     } catch {
-      setError("That did not go through.");
+      setError(copy.failed);
     } finally {
       inFlight.current = false;
       setBusy(false);

@@ -14,7 +14,8 @@ import { DoorTotal } from "./DoorTotal";
  *
  * Given the stay itself (checkout), each charge is worked out for its nights
  * and party and the all-in figure is drawn under them (`DoorTotal`), so the
- * guest reads the whole cost on the screen where they pay.
+ * guest reads the whole cost on the screen where they pay. There a failed
+ * read says so, rather than leaving a gap that reads as "nothing to pay".
  */
 export async function ArrivalChargesLine({
   listingId,
@@ -34,11 +35,25 @@ export async function ArrivalChargesLine({
 }) {
   const copy = getDictionary(locale).afterTheGate.arrival;
   const snapshot = bookingId ? await readBookingSnapshot(bookingId) : null;
-  if (snapshot === undefined) return null;
-  const declaration = snapshot
-    ? snapshot.charges
-    : await readDeclaration(listingId ? { listingId } : { accommodationId: accommodationId ?? undefined });
-  if (declaration === undefined) return null;
+  const declaration =
+    snapshot === undefined
+      ? undefined
+      : snapshot
+        ? snapshot.charges
+        : await readDeclaration(listingId ? { listingId } : { accommodationId: accommodationId ?? undefined });
+  if (declaration === undefined) {
+    /* A failed read draws nothing rather than a promise, except at checkout,
+       where silence above the pay button would read as "nothing at the door". */
+    if (!stay) return null;
+    return (
+      <section className="nf-panel nf-panel--card block p-md" data-testid="arrival-charges-line" aria-label={copy.guestHeading}>
+        <h2 className="nf-h4">{copy.guestHeading}</h2>
+        <p role="status" className="nf-body-sm mt-xs" data-testid="arrival-charges-unread">
+          {copy.readFailed}
+        </p>
+      </section>
+    );
+  }
   const owed = declaration ? declaredCharges(declaration) : [];
   if (stay && owed.length > 0) {
     return (

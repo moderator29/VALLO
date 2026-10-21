@@ -1827,7 +1827,7 @@
     color: var(--nf-content-secondary);
   }
   .nf-statusbar--grow .nf-statusbar__seg {
-    animation: nf-bar-grow 620ms var(--nf-ease-entrance) both;
+    animation: nf-bar-grow var(--nf-duration-deliberate) var(--nf-ease-entrance) both;
   }
   .nf-statusbar--grow .nf-statusbar__legend {
     animation: nf-fade-in var(--nf-duration-base) var(--nf-ease-standard) 300ms both;
@@ -1886,7 +1886,7 @@
     color: var(--nf-content-muted);
   }
   .nf-gauge--light .nf-gauge__tick {
-    animation: nf-fade-in 120ms var(--nf-ease-standard) both;
+    animation: nf-fade-in var(--nf-duration-fast) var(--nf-ease-standard) both;
   }
   .nf-gauge__legend {
     display: grid;
@@ -1939,7 +1939,7 @@
     position: relative;
   }
   .nf-ts__line {
-    animation: nf-ts-draw 700ms var(--nf-ease-entrance) both;
+    animation: nf-ts-draw var(--nf-duration-deliberate) var(--nf-ease-standard) both;
   }
   @keyframes nf-ts-draw {
     from {

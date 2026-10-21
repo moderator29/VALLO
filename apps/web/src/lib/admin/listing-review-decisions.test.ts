@@ -198,6 +198,13 @@ describe("every decision tells the lister and leaves one audit row", () => {
     expect(entry.detail).toMatchObject({ before_status: "SUBMITTED", after_status: "APPROVED", decision: "approve" });
   });
 
+  it("keeps the audit row when telling the lister throws", async () => {
+    seam.announce.mockRejectedValueOnce(new Error("mail down"));
+    const result = await reviewListing({ listingId: LISTING.id, decision: "approve" });
+    expect(result.ok).toBe(true);
+    expect(seam.audit).toHaveBeenCalledTimes(1);
+  });
+
   it("reject: REJECTED with the reason stored, and the notice names the listing it is about", async () => {
     const result = await decide("reject", { reasons: ["photos_elsewhere"], notes: "Please use your own photographs." });
     expect(result.ok).toBe(true);

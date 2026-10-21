@@ -99,11 +99,12 @@ import {
   videoExtension,
   videoMime,
 } from "@/lib/agent/video-prep";
-import { resumableUpload } from "@/lib/agent/resumable-upload";
+import { forgetUploadPath, resumableUpload, stableUploadPath } from "@/lib/agent/resumable-upload";
 import { SUPABASE_URL } from "@/lib/supabase/env";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Quantity } from "@/components/ui/Quantity";
 import { ListingSentForReview } from "./ListingSentForReview";
+import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { TextField, TextArea } from "@/components/ui/Field";
@@ -1148,6 +1149,9 @@ export function ListingWizard({
   const videos = useMemo(() => media.filter((item): item is Media & { kind: "video" } => item.kind === "video"), [media]);
   /** The video being uploaded now, for its progress line. */
   const [videoProgress, setVideoProgress] = useState<{ name: string; percent: number } | null>(null);
+  /* The walkthrough upload in flight, so the lister can stop it. */
+  const videoAbort = useRef<AbortController | null>(null);
+  useEffect(() => () => videoAbort.current?.abort(), []);
   const [chosenAmenities, setChosenAmenities] = useState<string[]>(initial?.amenityCodes ?? []);
   const [listingId, setListingId] = useState<string | null>(initial?.id ?? null);
   /*
@@ -2194,7 +2198,9 @@ export function ListingWizard({
     }
 
     const scrubbed = await scrubVideoLocation(file);
-    const clean = new File([scrubbed], file.name, { type: mime });
+    /* The original's last modified time is kept, so the same file is known
+       again on a second press and its upload resumes rather than restarts. */
+    const clean = new File([scrubbed], file.name, { type: mime, lastModified: file.lastModified });
     const poster = await posterFrame(clean);
 
     const { data: session } = await supabase.auth.getSession();
@@ -2204,7 +2210,11 @@ export function ListingWizard({
       return null;
     }
 
-    const path = `${userId}/${id}/${crypto.randomUUID()}.${videoExtension(file)}`;
+    const folder = `${userId}/${id}/`;
+    const pathScope = `listing-videos:${folder}`;
+    const path = stableUploadPath(pathScope, folder, clean, () => `${folder}${crypto.randomUUID()}.${videoExtension(file)}`);
+    const controller = new AbortController();
+    videoAbort.current = controller;
     setVideoProgress({ name: file.name, percent: 0 });
     const result = await resumableUpload({
       file: clean,
@@ -2212,17 +2222,31 @@ export function ListingWizard({
       path,
       supabaseUrl: SUPABASE_URL,
       accessToken: token,
+      signal: controller.signal,
       onProgress: (progress) =>
         setVideoProgress({
           name: file.name,
           percent: progress.total > 0 ? Math.min(100, Math.round((progress.uploaded / progress.total) * 100)) : 0,
         }),
     });
+    if (videoAbort.current === controller) videoAbort.current = null;
     setVideoProgress(null);
     if (!result.ok) {
+      if (result.reason === "cancelled") {
+        /* Stopped on purpose: the half-sent bytes are dropped and the next
+           try starts clean. */
+        forgetUploadPath(pathScope, clean);
+        refuse(file, copy.photos.videoCancelled);
+        return null;
+      }
+      /* A dropped connection keeps its path, so pressing again resumes. */
+      if (result.reason !== "network") forgetUploadPath(pathScope, clean);
       refuse(file, result.reason === "network" ? copy.photos.videoFailed : result.message, result.reason === "network");
       return null;
     }
+    /* Uploaded: whatever the attach says next, this path is finished with
+       (attached, or removed by the refusal). */
+    forgetUploadPath(pathScope, clean);
 
     /* The still is a nicety: without it the video still plays. */
     let posterPath: string | undefined;
@@ -3211,9 +3235,14 @@ export function ListingWizard({
             )}
 
             {videoProgress && (
-              <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="status" data-testid="video-progress">
-                {fill(copy.photos.videoUploading, { name: videoProgress.name, percent: videoProgress.percent })}
-              </p>
+              <div className="flex flex-wrap items-center gap-sm">
+                <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="status" data-testid="video-progress">
+                  {fill(copy.photos.videoUploading, { name: videoProgress.name, percent: videoProgress.percent })}
+                </p>
+                <Button variant="secondary" size="sm" onClick={() => videoAbort.current?.abort()} data-testid="video-cancel">
+                  {copy.photos.videoCancel}
+                </Button>
+              </div>
             )}
 
             {/* The count, then the nudge from the minimum to the recommendation. */}
@@ -4335,14 +4364,19 @@ export function ListingWizard({
               {memberCard}
             </div>
             {sent ? (
-              <ListingSentForReview
-                copy={copy}
-                reference={reference}
-                lister={listerCopy}
-                status={sent.status}
-                submittedAt={sent.at}
-                locale={locale}
-              />
+              <>
+                <ListingSentForReview
+                  copy={copy}
+                  reference={reference}
+                  lister={listerCopy}
+                  status={sent.status}
+                  submittedAt={sent.at}
+                  locale={locale}
+                />
+                {/* Sent: the lister now wants to know when somebody asks.
+                    PushPrompt decides whether to ask at all (moments.ts). */}
+                <PushPrompt moment="listing_published" />
+              </>
             ) : (
               <div className="nf-lw-publish__send mt-heading">
                 <h2 className="nf-h3" data-testid="send-title">

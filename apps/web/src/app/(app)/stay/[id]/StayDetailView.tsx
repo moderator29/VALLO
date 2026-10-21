@@ -532,12 +532,12 @@ export function StayDetailView({
                               money cannot disagree. */}
                           {refundTiers(detail.policy.rules).length > 0 && (
                             <ul className="mt-row grid gap-inline-tight" data-testid="stay-refund-lines">
-                              {refundLines(detail.policy, locale).map((line) => (
+                              {refundLines(detail.policy, t.hostWorkspace.cancellation, locale).map((line) => (
                                 <li key={line} className={TYPE.rowMeta}>
                                   {line}
                                 </li>
                               ))}
-                              {policyFootLines(detail.checkInFrom).map((line) => (
+                              {policyFootLines(detail.checkInFrom, t.hostWorkspace.cancellation, locale).map((line) => (
                                 <li key={line} className={TYPE.rowMeta}>
                                   {line}
                                 </li>

@@ -32,6 +32,32 @@ export function clipPush(text: string, max: number): string {
 }
 
 /**
+ * A LONG RUN OF DIGITS NEVER REACHES A LOCK SCREEN.
+ *
+ * A push body can carry a member's own words (a new message's first line),
+ * and a lock screen is read by whoever holds the phone, and every push passes
+ * through Apple or Google on the way. A bank account number (ten digits) or a
+ * phone number (eleven) typed into a chat would otherwise sit there in full.
+ * Any run of ten or more digits, single spaces between them allowed, is
+ * shown as its last two digits behind dots. Amounts with separators
+ * ("N360,000"), dates, dashed references and six-digit codes pass.
+ */
+export function maskLongDigitRuns(text: string): string {
+  return text.replace(/\d(?: ?\d){9,}/g, (run) => `••••${run.replace(/\D/g, "").slice(-2)}`);
+}
+
+/** A title and body with long digit runs masked (`maskLongDigitRuns`). */
+export function lockScreenSafe(copy: { title: string; body: string | null | undefined }): {
+  title: string;
+  body: string | null;
+} {
+  return {
+    title: maskLongDigitRuns(copy.title),
+    body: copy.body == null ? null : maskLongDigitRuns(copy.body),
+  };
+}
+
+/**
  * A title and body held to the lock-screen limits.
  *
  * The drain runs every payload through this, so a title written in the

@@ -295,12 +295,15 @@ function ActionRows({
           <button
             type="button"
             className="nf-pc__comment nf-post__act--reply"
-            aria-label={`${countOf(post.replyCount, "replies", locale)}, ${words.commentAria}`}
+            aria-label={`${words.commentPill}, ${countOf(post.replyCount, "replies", locale)}`}
             onClick={onReply}
             data-testid="post-comment-pill"
           >
             <UiIcon name="chat-bubble" size={18} />
             <span className="nf-pc__comment-text">{words.commentPill}</span>
+            {/* A word break the flex row does not draw, so the visible words
+                read "Drop a comment 56" and sit inside the name. */}
+            {" "}
             {post.replyCount > 0 ? (
               <span className="nf-pc__comment-count nf-numeric" aria-hidden="true">
                 {compact(post.replyCount, locale)}
@@ -317,7 +320,7 @@ function ActionRows({
             pressed={post.liked}
             payoff
             count={post.likeCount > 0 ? likes : undefined}
-            label={post.liked ? `Liked, ${likes}. Undo` : `Likes ${likes}, like this`}
+            label={(post.liked ? words.likedUndo : words.like).replace("{count}", likes)}
             onClick={onLike}
           />
         </AuthGate>
@@ -332,7 +335,7 @@ function ActionRows({
             pressed={post.reposted}
             payoff
             count={post.repostCount > 0 ? reposts : undefined}
-            label={post.reposted ? `Reposted, ${reposts}. Undo` : `Reposts ${reposts}, repost this`}
+            label={(post.reposted ? words.repostedUndo : words.repost).replace("{count}", reposts)}
             onClick={onRepost}
           />
         </AuthGate>
@@ -342,7 +345,7 @@ function ActionRows({
           tone="share"
           round
           className="nf-post__act--share"
-          label="Share this post"
+          label={words.share}
           onClick={onShare}
         />
 
@@ -354,7 +357,7 @@ function ActionRows({
               round
               className="nf-post__act--save"
               pressed={post.saved}
-              label={post.saved ? "Saved. Remove from saved" : "Save this post"}
+              label={post.saved ? words.savedRemove : words.save}
               onClick={onSave}
             />
           </AuthGate>
@@ -483,9 +486,14 @@ export function PostCard({
   const textFrame = !hasMedia && (hasWords || Boolean(editor));
 
   /* The time is the post's own link: the keyboard's and the screen reader's
-     way into the thread, as on every feed people know. */
+     way into the thread, as on every feed people know. Its name starts with
+     the time the eye reads (WCAG 2.5.3, label in name). */
   const when = (
-    <Link href={`/post/${post.id}`} className="nf-pc__when" aria-label={words.openPost}>
+    <Link
+      href={`/post/${post.id}`}
+      className="nf-pc__when"
+      aria-label={`${post.createdLabel}${post.edited ? ` · ${words.edited}` : ""}. ${words.openPost}`}
+    >
       {post.createdLabel}
       {post.edited ? ` · ${words.edited}` : ""}
     </Link>
@@ -685,7 +693,7 @@ export function PostCard({
 
       {post.sourceNote ? <p className="nf-pc__note">{post.sourceNote}</p> : null}
 
-      {post.listing ? <ListingAttachment listing={post.listing} /> : null}
+      {post.listing ? <ListingAttachment listing={post.listing} verifiedLabel={copy.common.verified} /> : null}
 
       {detail ? (
         /* On the post's own page: when it was written and how many have
@@ -754,7 +762,7 @@ export function PostCard({
  * tabular on the right, and a chevron. The whole row is the link, so the way
  * in is the attachment itself, as on every product people already know.
  */
-function ListingAttachment({ listing }: { listing: PostListing }) {
+function ListingAttachment({ listing, verifiedLabel }: { listing: PostListing; verifiedLabel: string }) {
   return (
     <Link href={`/listing/${listing.id}`} className="nf-post__attach">
       <span className="nf-post__attach-thumb" aria-hidden="true">
@@ -768,7 +776,7 @@ function ListingAttachment({ listing }: { listing: PostListing }) {
         <span className="nf-post__attach-title">{listing.title}</span>
         <span className="nf-post__attach-place">
           {listing.area}, {listing.city}
-          {listing.verified ? <span className="nf-post__attach-verified"> &middot; Verified</span> : null}
+          {listing.verified ? <span className="nf-post__attach-verified"> &middot; {verifiedLabel}</span> : null}
         </span>
       </span>
       <span className="nf-post__attach-price nf-numeric">

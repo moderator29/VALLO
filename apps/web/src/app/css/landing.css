@@ -627,34 +627,6 @@
     }
   }
 
-  /* The eyebrow capsule: a glyph and one true line on a hairline capsule
-     (a container, not a control), with the edge lap round its rim. */
-  .nf-hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-space-xs);
-    max-width: 100%;
-    min-height: 2.25rem;
-    padding: 0.375rem var(--nf-space-md);
-    border-radius: var(--nf-radius-pill);
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
-    background: color-mix(in oklab, var(--nf-surface-primary) 82%, transparent);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    line-height: 1.35;
-    color: var(--nf-brand-secondary);
-    text-wrap: balance;
-  }
-  .nf-hero-eyebrow > svg {
-    flex: none;
-  }
-  @media (max-width: 39.999rem) {
-    .nf-hero-eyebrow {
-      font-size: var(--nf-text-caption);
-      padding-inline: var(--nf-space-sm);
-    }
-  }
-
   .nf-landing-title {
     max-width: var(--nf-hero-title-max, min(100%, 40rem));
     font-family: var(--nf-font-display);
@@ -820,127 +792,6 @@
     .nf-hero-grid {
       --nf-hero-grid-step: 4.5rem;
     }
-  }
-
-  /* ------------------------------------------------ the listing mini card
-     (ListingMini; the hero's floating card that framed it is gone) */
-
-  .nf-landing-float-media {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    border-radius: var(--nf-radius-sm);
-  }
-  .nf-landing-float-media img {
-    object-fit: cover;
-  }
-  /*
-   * A 28px CHIP TAKES `--nf-radius-sm`, NOT `--nf-radius-control`, AND THAT
-   * IS THE LAW RATHER THAN AN EXCEPTION TO IT.
-   *
-   * The ruling is that a control carrying text is a rounded rectangle and
-   * never a capsule. `--nf-radius-control` is 14px. On a control 44px tall
-   * that is a rounded rectangle; on one 28px tall it is half the height,
-   * which draws a capsule again and returns the exact shape the ruling
-   * forbids. So the small chips take the 10px rung, which is the same shape
-   * language at a smaller size. The reference's Verified badge and its
-   * floating card tags are drawn exactly this way.
-   */
-  .nf-landing-float-badge {
-    position: absolute;
-    top: var(--nf-gap-inline);
-    left: var(--nf-gap-inline);
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-gap-inline-tight);
-    min-height: 1.75rem;
-    padding: 0 var(--nf-space-xs);
-    font-weight: 700;
-    /* The material, the 6px corner (0.21 on 28px; 10px was 0.36) and the
-       tone are the shared status badge's (`nf-badge nf-badge--verified` or
-       `--info` in the markup, SW-C6). */
-  }
-  .nf-landing-float-save {
-    position: absolute;
-    top: var(--nf-gap-inline);
-    right: var(--nf-gap-inline);
-    z-index: 1;
-    display: inline-grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: var(--nf-radius-circle);
-    color: var(--nf-landing-on-ink);
-  }
-  .nf-landing-float-save > span {
-    display: inline-grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: var(--nf-radius-circle);
-    background: var(--nf-landing-control-on-ink);
-    border: 1px solid var(--nf-landing-hairline-on-ink);
-  }
-  .nf-landing-float-save:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: -4px;
-  }
-  .nf-landing-float-body {
-    padding: var(--nf-space-sm) var(--nf-space-xs) var(--nf-space-xs);
-  }
-  /*
-   * TWO LINES, AND THE CARD KEEPS ITS SHAPE.
-   *
-   * The title had no ceiling, so a long one simply made the body taller. In
-   * the drawn phone the landing used to carry, where the card was pinned to
-   * the foot of the screen, the body grew UPWARDS over the photograph behind it (the founder photographed
-   * exactly that), and at 320px it reached seven lines and pushed the place
-   * and the price out of the slab. The render draws the title under the
-   * photograph on two lines at most, so that is what it gets; the full title
-   * is one tap away on the listing itself.
-   *
-   * Three lines since the polish pass: in the two-up grid at 390 two lines
-   * cut every sample title before its place ("Four bedroom terrace in Lekki
-   * Phase..."), which is the half a reader wants. Three still keeps the place
-   * and the price inside the slab, and the whole title is on the element's
-   * `title` for anything longer.
-   */
-  .nf-landing-float-title {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    overflow: hidden;
-    overflow-wrap: anywhere;
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--nf-landing-on-ink);
-  }
-  /* The place and the price share a row while they fit, and the price drops
-     under the place when they do not: the place was cut to 58px of its 118
-     ("Lekki Ph...") beside a price that never shrinks. */
-  .nf-landing-float-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--nf-gap-inline);
-    margin-top: var(--nf-space-2xs);
-  }
-  .nf-landing-float-place {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-gap-inline-tight);
-    min-width: 0;
-    font-size: var(--nf-text-overline);
-    color: var(--nf-landing-on-ink-muted);
-  }
-  .nf-landing-float-price {
-    flex: none;
-    font-size: var(--nf-text-body-sm);
-    font-weight: 700;
-    color: var(--nf-landing-on-ink);
   }
 
   /* ---------------------------------------------------------- the search */
@@ -1296,55 +1147,6 @@
       display: none;
     }
   }
-
-  /* The glass circle every content object sits in from here down. */
-
-  /* ------------------------------------------------- the feature grid */
-
-  .nf-landing-split {
-    display: grid;
-    gap: var(--nf-gap-block);
-  }
-  @media (min-width: 1024px) {
-    .nf-landing-split {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr);
-      align-items: center;
-    }
-    .nf-landing-split--even {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    }
-  }
-
-  /* ---------------------------------------------- the community band */
-
-  .nf-landing-figures {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--nf-gap-block);
-  }
-  .nf-landing-figure {
-    display: flex;
-    flex-direction: column;
-    gap: var(--nf-gap-inline-tight);
-  }
-  .nf-landing-figure > strong {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h1);
-    font-weight: 700;
-    line-height: 1;
-    color: var(--nf-brand-secondary);
-  }
-  .nf-landing-figure > span {
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-secondary);
-  }
-
-  .nf-landing-stack {
-    position: relative;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--nf-gap-row);
-  }
   /*
    * THE FLOATING CARDS FLOAT ON A PHONE TOO.
    * Under 64rem the three pieces used to stack as three unrelated boxes: a
@@ -1355,223 +1157,15 @@
    * note follows underneath. A negative block margin inside a grid moves
    * nothing sideways, so this cannot widen the page.
    */
-  @media (max-width: 63.999rem) {
-    .nf-landing-stack-card--a {
-      position: relative;
-      z-index: 1;
-      width: min(100% - 2 * var(--nf-space-md), var(--nf-landing-card-w));
-      margin-top: calc(-1 * var(--nf-space-4xl));
-      margin-inline-start: var(--nf-space-md);
-    }
-  }
-  .nf-landing-stack-photo {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--nf-container-radius);
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    box-shadow: var(--nf-panel-glow), var(--nf-elev-3);
-  }
-  .nf-landing-stack-photo img {
-    object-fit: cover;
-  }
-  @media (min-width: 1024px) {
-    .nf-landing-stack {
-      display: block;
-      min-height: 30rem;
-    }
-    .nf-landing-stack-photo--main {
-      position: absolute;
-      inset: 0 12% 12% 8%;
-      aspect-ratio: auto;
-    }
-    .nf-landing-stack-photo--side {
-      position: absolute;
-      top: 8%;
-      right: 0;
-      width: 30%;
-      aspect-ratio: 1;
-    }
-    .nf-landing-stack-card--a {
-      position: absolute;
-      left: 0;
-      bottom: 10%;
-      width: 15.5rem;
-    }
-    .nf-landing-stack-card--b {
-      position: absolute;
-      right: 4%;
-      bottom: 0;
-      width: 16rem;
-    }
-  }
-  .nf-landing-stack-card {
-    padding: var(--nf-pad-card-sm);
-    border-radius: var(--nf-container-radius);
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    background: var(--nf-panel-fill-card);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow), var(--nf-elev-3);
-    -webkit-backdrop-filter: blur(var(--nf-panel-blur));
-    backdrop-filter: blur(var(--nf-panel-blur));
-  }
-  .nf-landing-stack-card .nf-landing-float-title,
-  .nf-landing-stack-card .nf-landing-float-price {
-    color: var(--nf-content-primary);
-  }
-  .nf-landing-stack-card .nf-landing-float-place {
-    color: var(--nf-content-muted);
-  }
-  .nf-landing-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-gap-inline-tight);
-    min-height: 1.75rem;
-    padding: 0 var(--nf-space-xs);
-    font-weight: 700;
-    /* Partner inventory is labelled, never dressed as first party: the
-       shared badge's neutral tone (`nf-badge nf-badge--neutral` in the
-       markup, SW-C6), the opposite of the verified brand fill. */
-  }
 
   /* The phrases the render sets in the brand ink inside a white headline. */
   .nf-landing-hl {
     color: var(--nf-brand-secondary);
   }
-
-  .nf-landing-step {
-    display: flex;
-    flex-direction: column;
-    gap: var(--nf-gap-row);
-  }
-  .nf-landing-step-num {
-    display: inline-grid;
-    place-items: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: var(--nf-radius-xs); /* UI-01: a numeral is text; round text is a capsule */
-    font-size: var(--nf-text-overline);
-    font-weight: 700;
-    color: var(--nf-content-on-brand);
-    background: var(--nf-brand-primary);
-  }
-
-  /* ------------------------------------------------ category tiles */
-
-  .nf-landing-cats {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--nf-gap-row);
-  }
-  @media (min-width: 1024px) {
-    .nf-landing-cats {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--nf-gap-group);
-    }
-  }
-  /*
-   * A photo tile, to the fullpage render: the photograph fills the tile and
-   * stays bright, the scrim is weighted to the foot where the glyph, the
-   * name and the count sit, and the rim is lit. A whole-tile scrim made the
-   * eight read as dark slabs with a picture behind them (second stint).
-   */
-  .nf-landing-cat {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    aspect-ratio: 1.04;
-    overflow: hidden;
-    padding: var(--nf-space-sm);
-    color: var(--nf-landing-on-ink);
-    transition:
-      border-color var(--nf-duration-fast) var(--nf-ease-standard),
-      transform var(--nf-duration-press) var(--nf-ease-press);
-    border-radius: var(--nf-container-radius);
-    border: var(--nf-border-width) solid var(--nf-panel-edge);
-    border-color: var(--nf-panel-edges);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
-  }
-  .nf-landing-cat:active {
-    transform: scale(var(--nf-press-scale-lg));
-  }
-  @media (hover: hover) {
-    .nf-landing-cat:hover {
-      border-color: var(--nf-selected-edges);
-    }
-    .nf-landing-cat:hover img {
-      transform: scale(1.04);
-    }
-  }
-  .nf-landing-cat:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: 2px;
-  }
-  .nf-landing-cat img {
-    object-fit: cover;
-    transition: transform var(--nf-duration-slow) var(--nf-ease-standard);
-  }
-  /* WEIGHTED HARDER TO THE FOOT (R1 finding A11). On the bright plates, a
-     sunlit skyline and an orange sunset, the label was set on the photograph
-     with nothing under it. The picture stays bright at the top, which is the
-     whole point of the tile; the foot where the words are is dark enough to
-     read white type on every one of the eight. The gradient is the shared
-     `.nf-photo-scrim--foot` in `utilities.css`, not a second copy. */
-  .nf-landing-cat::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--nf-landing-ink) 14%, transparent) 0%,
-      transparent 26%,
-      color-mix(in oklab, var(--nf-landing-ink) 58%, transparent) 54%,
-      color-mix(in oklab, var(--nf-landing-ink) 95%, transparent) 100%
-    );
-  }
-  .nf-landing-cat-body {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--nf-gap-inline);
-  }
-  .nf-landing-cat-title {
-    display: block;
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    line-height: 1.2;
-    /* Two lines are reserved whether a name needs them or not, so "Guest
-       Houses" and "Land" put their counts on the same baseline and the row
-       does not jog (R1 finding A11). */
-    text-wrap: balance;
-    min-height: calc(2 * 1.2em);
-  }
   /* FOUR ACROSS, THE GLYPH ABOVE THE NAME. The four-column grid sits beside
      the heading, so a tile is 110 to 140px wide from an iPad to a desktop,
      and "Apartments" or "Commercial" beside a 36px glyph was clipped to
      "Apartm". Stacked, the name has the tile's whole width. */
-  @media (min-width: 1024px) {
-    .nf-landing-cat-body {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: var(--nf-space-xs);
-    }
-  }
-  .nf-landing-cat-count {
-    display: block;
-    font-size: var(--nf-text-overline);
-    color: var(--nf-landing-on-ink-muted);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .nf-landing-cat img {
-      transition: none;
-    }
-    .nf-landing-cat:hover img {
-      transform: none;
-    }
-  }
 
   /* ------------------------------------------------------ the buttons */
 
@@ -1652,78 +1246,11 @@
   .nf-app-panel__badges {
     margin-top: var(--nf-gap-heading);
   }
-  .nf-app-panel__install {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--nf-gap-row);
-    max-width: var(--nf-measure-lede);
-    margin-top: var(--nf-gap-heading);
-    padding: var(--nf-space-md);
-    border-radius: var(--nf-radius-md);
-    border: var(--nf-border-width) solid var(--nf-panel-hair);
-    background: var(--nf-glass-fill);
-  }
-  .nf-app-panel__install > svg {
-    flex: none;
-    margin-top: var(--nf-space-3xs);
-    color: var(--nf-brand-secondary);
-  }
-  .nf-app-panel__install-title {
-    font-size: var(--nf-text-body);
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-app-panel__install-body {
-    margin-top: var(--nf-space-3xs);
-    font-size: var(--nf-text-body-sm);
-    line-height: 1.55;
-    color: var(--nf-content-secondary);
-  }
-  .nf-app-panel__aside {
-    padding: var(--nf-pad-card);
-    border-radius: var(--nf-radius-lg);
-    border: var(--nf-border-width) solid var(--nf-panel-hair);
-    background: var(--nf-glass-fill);
-  }
-  .nf-app-panel__mark {
-    display: inline-flex;
-  }
-  .nf-app-panel__aside-title {
-    margin-top: var(--nf-gap-group);
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h3);
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--nf-content-primary);
-  }
-  .nf-app-panel__points {
-    display: grid;
-    gap: var(--nf-gap-row);
-    margin-top: var(--nf-gap-group);
-  }
-  .nf-app-panel__points li {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-gap-row);
-    font-size: var(--nf-text-body);
-    color: var(--nf-content-primary);
-  }
-  .nf-app-panel__tick {
-    display: inline-grid;
-    place-items: center;
-    flex: none;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--nf-radius-sm);
-    background: color-mix(in oklab, var(--nf-brand-primary) 20%, transparent);
-    color: var(--nf-brand-secondary);
-  }
 
   /* -------------------------------------------------- reduced motion */
 
   @media (prefers-reduced-motion: reduce) {
     .nf-site-nav .nf-site-bar,
-    .nf-landing-cat,
     .nf-landing-pill-seg {
       transition: none;
     }
@@ -1777,9 +1304,6 @@
  * and with scripts off.
  */
 @layer components {
-  .nf-hero-eyebrow > svg {
-    color: var(--nf-spark);
-  }
   .nf-landing-title .nf-depth-line--accent .nf-depth-word:last-child,
   .nf-spark-flourish {
     position: relative;
@@ -1825,9 +1349,5 @@
   }
   :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-landing-title .nf-depth-line--accent .nf-depth-word:last-child, .nf-spark-flourish)::after {
     animation: none;
-  }
-  /* The community band's first figure is the highlighted one. */
-  .nf-landing-figure:first-child > strong {
-    color: var(--nf-spark-ink);
   }
 }

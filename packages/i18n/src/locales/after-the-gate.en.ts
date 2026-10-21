@@ -307,6 +307,8 @@ export const afterTheGateEn = {
     asUsed: "As used",
     allIn: "Everything for this stay",
     allInNote: "The price and every charge the host listed. Nothing else may be asked for at the door.",
+    /** Checkout, when the charges at the door could not be read: never a silent gap above the pay button. */
+    readFailed: "We could not load this stay's charges at the door just now. Reload this page before you pay.",
   },
   shots: {
     /** V-70, the wizard's shot list and the listing page's line. */

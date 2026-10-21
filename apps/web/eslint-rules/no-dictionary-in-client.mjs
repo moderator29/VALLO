@@ -24,6 +24,12 @@
  *
  * Files that still break the rule are named in the config's `ignores`, so lint
  * stays green while each is fixed; the list only shrinks.
+ *
+ * THIS RULE SEES ONE FILE. A client module that imports a plain module that
+ * imports `@vallo/i18n` passes it, and ships the dictionary all the same (the
+ * docs chapter rail did, 17 October 2026). `src/app/client-import-graph.test.ts`
+ * follows every static import from every client module and fails on that,
+ * and on zod, livekit-client, leaflet and Paystack reached the same way.
  */
 
 const SOURCE = "@vallo/i18n";

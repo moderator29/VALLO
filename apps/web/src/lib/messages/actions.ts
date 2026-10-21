@@ -52,6 +52,7 @@ import {
 } from "./schema";
 import { dbLimitRefusal } from "../security/db-limit";
 import { phoneGateFor } from "../phone-otp/gate";
+import { pathInOwnFolder } from "../security/own-folder";
 import { attributeConversation } from "../share/attribution";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -523,14 +524,19 @@ export async function sendMessage(input: {
     "outbox.message",
     session.user.id,
     tapKey(input.tapKey),
-    () => sendMessageWork(session, { conversationId: input.conversationId, body: input.body }),
+    () =>
+      sendMessageWork(session, {
+        conversationId: input.conversationId,
+        body: input.body,
+        replyToId: input.replyToId ?? null,
+      }),
     (sent): ReplayedMessage => ({ id: sent.id, conversationId: sent.conversationId, createdAt: sent.createdAt }),
   );
 }
 
 async function sendMessageWork(
   session: Extract<Awaited<ReturnType<typeof resolveSession>>, { state: "signed-in" }>,
-  input: { conversationId: string; body: string },
+  input: { conversationId: string; body: string; replyToId: string | null },
 ): Promise<ActionResult<SentMessage>> {
 
   if (!(await isFeatureEnabled("messaging"))) return fail(PAUSED_MESSAGE);
@@ -617,7 +623,7 @@ export async function attachImage(input: {
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   const data = parsed.data;
 
-  if (!data.storagePath.toLowerCase().startsWith(`${data.conversationId.toLowerCase()}/`)) {
+  if (!pathInOwnFolder(data.conversationId, data.storagePath)) {
     return fail("This photo does not belong to this conversation. Choose the photo again.");
   }
 

@@ -21,7 +21,7 @@ Its own docstring gave the reason it existed: "Needed because SVG
 `<stop stop-color>` does not resolve `color-mix()` and some browsers
 historically mishandled `var()` inside gradient stops." The first half is true
 and the second is not, and the tree proves it: there are exactly two inline SVG
-gradients in the product, and `components/agent/charts/AreaSparkline.tsx` writes
+gradients in the product at the time, and the agent sparkline (since removed) wrote
 
 ```tsx
 <stop offset="0%" stopColor="var(--nf-mode-agent)" stopOpacity="0.34" />

@@ -4,6 +4,7 @@ import { farEnoughAhead, lagosWallClockToIso } from "./when";
 import { oncePerTap, tapKey } from "../offline/replay-guard";
 import { revalidatePath } from "next/cache";
 import { PHOTO_EXTENSIONS, photoPathBelongsTo } from "./report-photo-path";
+import { scrubPublicPhoto } from "../images/scrub";
 import { z } from "zod";
 import { resolveSession } from "../actions/session";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -692,6 +693,9 @@ const addPhotoSchema = z.object({
   item: z.enum(REPORT_ITEMS).optional().nullable(),
 });
 
+const REPORT_PHOTO_SCRUB_REFUSED =
+  "We could not prepare that photo for the report, so it was not added. Use a JPEG, PNG or WebP photo and try again.";
+
 export type ReportPhoto = { id: string; storagePath: string; item: string | null; createdAt: string };
 
 export async function addReportPhoto(input: unknown): Promise<ActionResult<ReportPhoto>> {
@@ -707,6 +711,29 @@ export async function addReportPhoto(input: unknown): Promise<ActionResult<Repor
     return fail("That photo could not be attached to this inspection. Try the upload again.", {
       storagePath: "This file does not belong to this inspection.",
     });
+  }
+
+  /*
+   * THE PHOTO LOSES ITS LOCATION BEFORE ANY ROW POINTS AT IT, the rule the
+   * listing and host photos follow (`lib/images/scrub.ts`). The sheet
+   * re-encodes in the browser, which strips EXIF, but a direct upload with a
+   * signed URL skips the sheet. The scrub runs through the service role, so
+   * the caller must first be a party: the inspection has to be readable
+   * through their own RLS-bound client, or nobody's object is touched.
+   * A PDF is a document, not a photograph, and is left as uploaded; anything
+   * else that is not a JPEG, PNG or WebP is removed and refused (fail closed).
+   */
+  const { data: party } = await session.supabase
+    .from("inspection_requests")
+    .select("id")
+    .eq("id", inspectionId)
+    .maybeSingle();
+  if (!party) {
+    return fail("That photo could not be attached to this inspection. Try the upload again.");
+  }
+  if (!storagePath.endsWith(".pdf")) {
+    const scrubbed = await scrubPublicPhoto("inspection-photos", storagePath);
+    if (!scrubbed.ok) return fail(REPORT_PHOTO_SCRUB_REFUSED);
   }
 
   const { data, error } = await session.supabase

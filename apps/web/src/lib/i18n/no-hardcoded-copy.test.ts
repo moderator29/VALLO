@@ -38,6 +38,14 @@ const SURFACES = [
   /* Schedule a visit (13 October 2026): written to the dictionary from the start. */
   "app/(app)/listing/[id]/visit",
   "components/app/inspections/visit",
+  /* The language audit (17 October 2026): the listing page's booking panels
+     (a table, a stay, a rental), its tenancy stepper and its waits. */
+  "app/(app)/listing/[id]",
+  /* A stay's booking page, its review, cancelling it and the getting-there panel. */
+  "app/(app)/bookings",
+  "components/app/bookings",
+  /* The host wizard's drawn stays screens. */
+  "components/host/stays",
 ];
 
 /** Props whose string value is read or announced. */
@@ -61,6 +69,7 @@ const ALLOWED = new Map<string, string>([
   ['title="Vallo"', "the brand name on the logo, the same in every language"],
   ['"email name"', "the Sign in with Apple scope list, a protocol value"],
   ['"[vallo] auth route error"', "the console tag useErrorReport logs under, read by staff in the log, never shown"],
+  ['"[vallo] space trust error"', "the console tag useErrorReport logs under, read by staff in the log, never shown"],
 ]);
 
 /**

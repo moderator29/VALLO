@@ -1,4 +1,9 @@
+"use client";
+
 import Image from "next/image";
+import { countOf, type Dictionary } from "@vallo/i18n/core";
+import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import Link from "next/link";
 import { MediaFrame } from "@/components/app/MediaFrame";
 import { panelClass } from "@/components/ui/Panel";
@@ -92,11 +97,11 @@ export type ChatCardData = ChatCardListing | ChatCardBooking;
  */
 export type ThreadCardData = ChatCardData | PassportChatCardData;
 
-function Stars({ rating }: { rating: number | null }) {
+function Stars({ rating, label }: { rating: number | null; label: string }) {
   if (rating === null || rating <= 0) return null;
   const full = Math.round(Math.min(5, Math.max(0, rating)));
   return (
-    <span className="nf-chat-card__stars" role="img" aria-label={`Rated ${rating} out of 5`}>
+    <span className="nf-chat-card__stars" role="img" aria-label={label.replace("{rating}", String(rating))}>
       {/* Solid, the way the render draws a rating. `star` is one of the
           glyphs authored as a closed silhouette, so `filled` is real here
           rather than paint poured into an outline. Blue by rule 8. */}
@@ -141,12 +146,12 @@ function Photo({
  * foot row of its own, which cost the card 50px of height the founder asked
  * to have back.
  */
-function Forward({ target }: { target: SharedRef }) {
+function Forward({ target, label }: { target: SharedRef; label: string }) {
   return (
     <Link
       href={`/messages/share/${target.kind}/${target.id}`}
       className="nf-chat-card__forward"
-      aria-label={`Forward this ${target.kind} to another conversation`}
+      aria-label={label}
     >
       <UiIcon name="share" size={16} />
     </Link>
@@ -162,7 +167,18 @@ function Forward({ target }: { target: SharedRef }) {
  */
 const CARD = panelClass({ variant: "card", glass: true, className: "nf-chat-card" });
 
-export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; forwardable?: boolean }) {
+export function ChatCard({
+  card,
+  forwardable = true,
+  thread,
+}: {
+  card: ThreadCardData;
+  forwardable?: boolean;
+  /** The thread's words (`experienceInbox.thread`), from the server parent; read lazily when absent. */
+  thread?: Dictionary["experienceInbox"]["thread"];
+}) {
+  const w = useInboxPart("thread", thread).card;
+  const locale = useClientLocale();
   /* A passport is never forwarded: it is the sender's own, shown in this
      conversation, so it carries no forward control whatever `forwardable` says. */
   if (card.kind === "passport") return <PassportChatCard card={card} />;
@@ -184,21 +200,21 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
           {card.verified && (
             <span className="nf-badge nf-badge--verified nf-chat-card__seal">
               <UiIcon name="verified" size={12} />
-              Verified
+              {w.verified}
             </span>
           )}
-          {forwardable && <Forward target={self} />}
+          {forwardable && <Forward target={self} label={w.forward[self.kind]} />}
           <div className="nf-chat-card__inset" data-theme="dark">
             <div className="nf-chat-card__words">
               <p className="nf-chat-card__title">{card.title}</p>
-              <Stars rating={card.rating} />
+              <Stars rating={card.rating} label={w.rated} />
               <p className="nf-chat-card__place">
                 <UiIcon name="location" size={12} className="shrink-0" />
                 <span>{[card.area, card.city].filter(Boolean).join(", ")}</span>
               </p>
               <div className="nf-chat-card__features">
-                <span>{card.bedrooms} bed</span>
-                <span>{card.bathrooms} bath</span>
+                <span>{countOf(card.bedrooms, "bedrooms", locale)}</span>
+                <span>{countOf(card.bathrooms, "bathrooms", locale)}</span>
               </div>
               <p className="nf-chat-card__price-row">
                 <span className="nf-chat-card__price">{card.priceLabel}</span>
@@ -211,7 +227,7 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
                 lng={point.lng}
                 zoom={13}
                 className="nf-chat-card__map"
-                label={`Map of ${card.area || card.city}. The pin shows the area, not the address.`}
+                label={w.map.replace("{area}", card.area || card.city)}
               />
             ) : null}
           </div>
@@ -219,7 +235,7 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
         <div className="nf-chat-card__body">
           <div className="nf-chat-card__actions">
             <Link href={shareHref(self)} className="nf-btn nf-btn--primary nf-btn--sm">
-              {stay ? "View stay" : "View listing"}
+              {stay ? w.viewStay : w.viewListing}
               <UiIcon name="chevron-right" size={16} />
             </Link>
             {/* A stay's enquiry thread hangs off its accommodation, which
@@ -228,7 +244,7 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
             {!stay && (
               <Link href={`/messages/new?listing=${card.id}`} className="nf-btn nf-btn--glass nf-btn--sm">
                 <UiIcon name="chat-bubble" size={16} />
-                Message agent
+                {w.messageAgent}
               </Link>
             )}
           </div>
@@ -248,9 +264,9 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
       <div className="nf-chat-card__body">
         <div className="nf-chat-card__head">
           <p className="nf-chat-card__title">{card.title}</p>
-          {forwardable && <Forward target={{ kind: "booking", id: card.id }} />}
+          {forwardable && <Forward target={{ kind: "booking", id: card.id }} label={w.forward.booking} />}
         </div>
-        <Stars rating={card.rating} />
+        <Stars rating={card.rating} label={w.rated} />
         <p className="nf-chat-card__place">
           <UiIcon name="location" size={16} className="shrink-0 text-[var(--nf-brand-secondary)]" />
           <span>{[card.area, card.city].filter(Boolean).join(", ")}</span>
@@ -260,21 +276,21 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
           <div className="nf-chat-card__fact">
             <dt className="nf-chat-card__fact-label">
               <UiIcon name="calendar-booking" size={12} className="nf-chat-card__fact-glyph" />
-              Check in
+              {w.checkIn}
             </dt>
             <dd className="nf-chat-card__fact-value">{card.checkInLabel}</dd>
           </div>
           <div className="nf-chat-card__fact">
             <dt className="nf-chat-card__fact-label">
               <UiIcon name="calendar-booking" size={12} className="nf-chat-card__fact-glyph" />
-              Check out
+              {w.checkOut}
             </dt>
             <dd className="nf-chat-card__fact-value">{card.checkOutLabel}</dd>
           </div>
           <div className="nf-chat-card__fact">
             <dt className="nf-chat-card__fact-label">
               <UiIcon name="user" size={12} className="nf-chat-card__fact-glyph" />
-              Guests
+              {w.guests}
             </dt>
             {card.partyLines.map((line, i) => (
               <dd key={line} className={i === 0 ? "nf-chat-card__fact-value" : "nf-chat-card__fact-sub"}>
@@ -309,12 +325,12 @@ export function ChatCard({ card, forwardable = true }: { card: ThreadCardData; f
 
         <div className="nf-chat-card__actions">
           <Link href={shareHref({ kind: "booking", id: card.id })} className="nf-btn nf-btn--primary nf-btn--sm">
-            View booking details
+            {w.viewBooking}
             <UiIcon name="chevron-right" size={16} />
           </Link>
           <Link href={`/messages/new?listing=${card.listingId}`} className="nf-btn nf-btn--glass nf-btn--sm">
             <UiIcon name="chat-bubble" size={16} />
-            Contact host
+            {w.contactHost}
           </Link>
         </div>
       </div>

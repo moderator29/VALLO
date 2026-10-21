@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { FIRST_RUN_COOKIE } from "@/components/app/welcome/first-run-seen";
 import { doorFirstRunRedirect, hasSessionCookie } from "../sign-in/first-run-gate";
+import { safeReturnPath } from "@/lib/security/return-path";
 
 /* A10: the title and description in the page's own language, with its
    canonical and hreflang (lib/i18n/public-metadata.ts; words in publicMeta). */
@@ -60,7 +61,9 @@ export default async function SignUpPage({
     params,
   });
   if (firstRun) redirect(firstRun);
-  const next = typeof params.next === "string" ? params.next : undefined;
+  /* Through the one return-path guard before anything on the screen uses
+     it: the client doors (passkey, Apple) navigate to it themselves. */
+  const next = (typeof params.next === "string" && safeReturnPath(params.next, "")) || undefined;
   const locale = await getLocale();
   const t = getDictionary(locale);
 

@@ -852,8 +852,19 @@ export async function completeEmailVerification(input: {
     const type = ["signup", "email", "recovery", "invite", "magiclink"].includes(input.type ?? "")
       ? (input.type as "signup" | "email" | "recovery" | "invite" | "magiclink")
       : "signup";
-    const { error } = await supabase.auth.verifyOtp({ token_hash: input.tokenHash, type });
+    /* LOGIN CSRF, THE LINK HALF. A `token_hash` link is not tied to this
+       browser either: anybody can ask for a magic link to their OWN account
+       and send the callback address on. Verifying it would silently swap a
+       signed-in member into the stranger's account. Who was signed in is
+       read first; a link that answers with a different account ends the
+       session it just made (local scope: only that one) and is refused. */
+    const { data: before } = await supabase.auth.getUser();
+    const { data: verified, error } = await supabase.auth.verifyOtp({ token_hash: input.tokenHash, type });
     if (error) return { ok: false, reason: "expired" };
+    if (before?.user && verified?.user && verified.user.id !== before.user.id) {
+      await supabase.auth.signOut({ scope: "local" });
+      return { ok: false, reason: "invalid" };
+    }
   } else if (input.accessToken && input.refreshToken) {
     /* LOGIN CSRF. Tokens in a fragment are not tied to this browser: anybody
        can mint a link carrying their own. So they never replace a session
@@ -960,6 +971,10 @@ export async function resendSignUpCode(
   /* One email per attempt, so this is metered like the sign-up it follows. */
   const paced = await throttle("sign_up_resend", subjectForEmail(email), 3, 900);
   if (paced) return paced;
+  /* And per connection, so one place cannot spend three mails on each of a
+     list of addresses: the same ten an hour as a password reset. */
+  const pacedIp = await throttle("sign_up_resend_ip", subjectForIp(await callerIp()), 10, 3_600);
+  if (pacedIp) return pacedIp;
 
   const supabase = await createClient();
   await supabase.auth.resend({

@@ -23,6 +23,14 @@
  * variables the real scan is now a named SKIP and the verdict says the real
  * desks went unmeasured.
  *
+ * 3. THE MEMBER SCREENS THROUGH THE SAME HARNESS (`MEMBER_ROUTES`, added in
+ *    the October audit): home, search, a listing, stays, a stay, restaurants,
+ *    checkout, saved, messages, notifications, profile, settings, the feed
+ *    and the wallet, each drawn from fixtures by the same components the
+ *    signed-in pages use. The real pages sit behind a session and the
+ *    passcode; the harness is how a CI browser reaches what they draw. Same
+ *    matrix, same verdict rules, and the verdict names them.
+ *
  * For each route at 390 and 1440, dark and light, motion off:
  *   - axe-core; SERIOUS and CRITICAL fail, moderate and minor are printed;
  *   - exactly one <h1>... is NOT asserted here: a harness page may draw two
@@ -55,6 +63,26 @@ export const DESK_ROUTES = [
   "/preview/f5/admin-overview",
   "/preview/f5/admin-queue",
   "/preview/f5/confirm",
+];
+
+/* The signed-in member screens, from fixtures (see 3. above). Each page
+   wraps its screen in a `main`, as the app shell does for the real one. */
+export const MEMBER_ROUTES = [
+  "/preview/f1/home",
+  "/preview/f3/search",
+  "/preview/f3/listing",
+  "/preview/f3/stays",
+  "/preview/f3/stay",
+  "/preview/f3/restaurants",
+  "/preview/f3/checkout",
+  "/preview/f3/saved",
+  "/preview/f5/inbox",
+  "/preview/f5/thread-booking",
+  "/preview/f4/notifications",
+  "/preview/f4/profile",
+  "/preview/f4/settings",
+  "/preview/f4/feed",
+  "/preview/p5/wallet",
 ];
 
 /* THE REAL DESKS, scanned when QA_MEMBER_EMAIL and QA_MEMBER_PASSWORD exist.
@@ -250,6 +278,8 @@ async function main() {
     for (const theme of THEMES) for (const width of WIDTHS) {
       console.log(`a11y desks (harness): ${theme} ${width}`);
       await axePass(browser, theme, width);
+      console.log(`a11y member screens (harness): ${theme} ${width}`);
+      await axePass(browser, theme, width, { routes: MEMBER_ROUTES, label: "member " });
     }
     scanned.harness = true;
     await confirmFocus(browser);
@@ -291,7 +321,7 @@ async function main() {
   /* Never a bare "pass". The verdict names the surface it measured, because a
      green tick that does not say what it looked at spends credibility it has
      not earned. */
-  const surfaces = [scanned.harness ? "the fixture harness" : null, scanned.real ? "the real host and agent desks" : null].filter(Boolean);
+  const surfaces = [scanned.harness ? "the fixture harness (desks and member screens)" : null, scanned.real ? "the real host and agent desks" : null].filter(Boolean);
   console.log(`\na11y desks: pass on ${surfaces.join(" and ")} (no serious or critical findings).`);
   if (!scanned.real) {
     console.log("a11y desks: THE REAL DESKS WERE NOT SCANNED. Set QA_MEMBER_EMAIL and QA_MEMBER_PASSWORD to measure them.");

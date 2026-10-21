@@ -10,6 +10,13 @@ export const visitIg = {
   statusTitle: "Nleta gị",
   close: "Mechie",
   progress: "Nzọụkwụ {step} n'ime {total}",
+  entry: {
+    ask: "Hazie nleta",
+    askedFor: "Ị rịọrọ ịhụ ebe a na {when} ({zone}).",
+    confirmedFor: "Akwadola nleta gị maka {when} ({zone}).",
+    offered: "Ha enyela {when} ({zone}).",
+    track: "Lee ebe ọ dị.",
+  },
   property: {
     label: "Ụlọ ahụ",
   },

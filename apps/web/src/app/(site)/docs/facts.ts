@@ -7,8 +7,12 @@ import { SEATED_FEE_MINOR_DEFAULT } from "@/lib/reservations/seating";
  * The founder's money rules of 13 October 2026, and the two figures the docs
  * state, written once so every chapter says them the same way. A figure that
  * lives in the product is imported from the module that enforces it; the
- * only figure typed here is the hotel commission, which goes live with the
- * payments track and is stated in one constant until then.
+ * only figure typed here is the hotel commission. It is live in the database
+ * as a dated row (`public.scoped_commission_rates`, scope `hotel_room`, 1,000
+ * basis points, `20261013171019_pov06_hotel_room_commission.sql`) that the
+ * client cannot read, so this constant moves in the same commit as any new
+ * row. The restaurant fee is the code default; the database row
+ * (`restaurant_money_settings.seated_fee_minor`) wins, and the two must agree.
  *
  * No provider is named: the docs say "licensed payment partner", as
  * `lib/money/copy.ts` does outside a receipt or a legal page.

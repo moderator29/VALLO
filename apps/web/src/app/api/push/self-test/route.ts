@@ -6,6 +6,7 @@ import { accountSetupOwed } from "@/lib/actions/session";
 import { FINISH_SETUP_PATH } from "@/lib/auth/finish-setup";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { consume, subjectForUser } from "@/lib/security/rate-limit";
 import { deliverablePlatforms, describeCredentials } from "@/lib/push/credentials";
 import { sendApns } from "@/lib/push/transport/apns";
 import { sendFcm } from "@/lib/push/transport/fcm";
@@ -71,6 +72,21 @@ export async function POST(request: Request): Promise<NextResponse> {
      18+) writes nothing here; the step is at /sign-up/finish. */
   if (await accountSetupOwed(supabase, user)) {
     return NextResponse.json({ ok: false, reason: "setup_owed", next: FINISH_SETUP_PATH }, { status: 403 });
+  }
+
+  /* A diagnostic, so a person needs a handful; every press is a real call to
+     APNs, FCM or a push service, so it is counted per account. */
+  const paced = await consume({
+    bucket: "push_self_test",
+    subject: subjectForUser(user.id),
+    limit: 5,
+    windowSeconds: 600,
+  });
+  if (!paced.allowed) {
+    return NextResponse.json(
+      { ok: false, reason: "rate_limited", retryAfterSeconds: paced.retryAfterSeconds },
+      { status: 429, headers: { "retry-after": String(paced.retryAfterSeconds) } },
+    );
   }
 
   const platforms = deliverablePlatforms();

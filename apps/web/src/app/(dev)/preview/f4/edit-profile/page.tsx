@@ -10,7 +10,7 @@ import { AREA_OPTIONS, EDITOR_PROFILE } from "../fixtures";
  */
 export default function EditProfilePreview() {
   return (
-    <div className="nf-shell mx-auto max-w-2xl pb-4xl pt-md">
+    <main id="main" className="nf-shell mx-auto max-w-2xl pb-4xl pt-md">
       <PageHeader
         title="Edit your profile"
         subtitle={`@${EDITOR_PROFILE.handle}`}
@@ -30,6 +30,6 @@ export default function EditProfilePreview() {
         initialHandle={EDITOR_PROFILE.handle}
         areas={AREA_OPTIONS}
       />
-    </div>
+    </main>
   );
 }

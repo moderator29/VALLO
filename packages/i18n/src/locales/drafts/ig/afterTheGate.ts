@@ -285,6 +285,7 @@ export const afterTheGateIg = {
     asUsed: "Dịka e jiri ya",
     allIn: "Ihe niile maka ọnọdụ a",
     allInNote: "Ọnụahịa ahụ na ụgwọ ọ bụla onye nnabata dere. A gaghị arịọ ihe ọzọ n'ọnụ ụzọ.",
+    readFailed: "Anyị enweghị ike ibudata ụgwọ ọnụ ụzọ nke ebe a ugbu a. Bugharịa ibe a tupu ị kwụọ ụgwọ.",
   },
   shots: {
     heading: "Kwuo ihe foto ọ bụla na-egosi",

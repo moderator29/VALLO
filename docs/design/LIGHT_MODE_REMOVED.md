@@ -1,8 +1,10 @@
 # Light mode, removed on 23 September and restored on 25 September
 
 > **This whole document is history. Light mode ships today.** It came back on 25 September 2026 (Track E): a complete light palette in the `:root[data-theme="light"]` block of `packages/design-tokens/src/tokens.css` and in `apps/web/src/app/css/light.css`, a dark ground behind the logo and the role-switch coin, glass objects standing alone on white with a soft blue shadow (the founder chose that over the dark tile they first sat on), anything over a photograph kept dark, and a Light / Dark / System control at the foot of the side navigation and in Settings (default Dark, `apps/web/src/lib/theme/theme.ts`). The causes this document records are answered in `docs/research/LIGHT_MODE_SURVEY.md`; both themes are swept at 390px by `apps/web/scripts/design/light/sweep.mjs`.
+>
+> The scripts this history names under `scripts/design/` (`compare-surface.mjs`, `no-light/`) were removed on 17 October 2026: they checked a single-theme product that no longer exists. Recover them from git history if ever needed.
 
-> **Track A, 25 September 2026.** Vallo no longer holds customer money: the wallet, escrow and held payments are retired. Where this document describes them it describes the past; the current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
+> **Money, as of 17 October 2026.** Vallo never holds customer money. A wallet, escrow or held payment kept by Vallo itself was retired on 25 September 2026 (Track A), and where this document describes one it describes the past. Since ADR 0003 a licensed partner may hold a payment in escrow, offered only while `protectedRailLive()` reads it as working. The current truth is [`docs/MONEY_ARCHITECTURE.md`](/docs/MONEY_ARCHITECTURE.md).
 
 **Founder decision, 23 September 2026.** Light mode is removed from the
 platform. This is the record of what came out, what was struck with it, and the

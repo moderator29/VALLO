@@ -33,13 +33,32 @@ declare
   opts text[];
   rv jsonb;
 begin
+  -- 17 October 2026: on the live database the example collection's agents row
+  -- (e0000000-...-0002) no longer belongs to the example lister but to the QA
+  -- member, who is the payer here, so every sale listing was the payer's own
+  -- (the inspection the probe files on a sale was refused by
+  -- inspection_requests_parties_differ; the sale and the restaurant are now
+  -- picked with an owner other than the payer, as pov01 and pov04 pick theirs).
+  -- The fixture gives the row back to the example lister and
+  -- points the example sales at it, for this transaction only, so a sale with
+  -- another owner exists again. Nothing asserted below changes. Rolled back.
+  update public.agents set user_id = 'e0000000-0000-4000-8000-000000000001'
+   where id = 'e0000000-0000-4000-8000-000000000002'
+     and user_id is distinct from 'e0000000-0000-4000-8000-000000000001'
+     and not exists (select 1 from public.agents x where x.user_id = 'e0000000-0000-4000-8000-000000000001');
+  update public.listings set agent_id = 'e0000000-0000-4000-8000-000000000002'
+   where id in ('ed000000-0000-4000-8000-000000000004',
+                'ed000000-0000-4000-8000-000000000006',
+                'ed000000-0000-4000-8000-000000000012',
+                'ed000000-0000-4000-8000-000000000014')
+     and agent_id is distinct from 'e0000000-0000-4000-8000-000000000002';
   select l.id into v_rental from public.listings l where l.property_type = 'rental' and l.listing_intent = 'rent' limit 1;
   select l.id into v_short from public.listings l
    where l.property_type = 'shortlet' and l.listing_intent = 'rent' and l.rate_period = 'night' limit 1;
   select l.id, a.user_id into v_sale, v_sale_owner from public.listings l join public.agents a on a.id = l.agent_id
-   where l.listing_intent = 'sale' and a.user_id is not null limit 1;
+   where l.listing_intent = 'sale' and a.user_id is not null and a.user_id <> guest limit 1;
   select l.id, a.user_id into v_rest, v_rest_owner from public.listings l join public.agents a on a.id = l.agent_id
-   where l.property_type = 'restaurant' and a.user_id is not null limit 1;
+   where l.property_type = 'restaurant' and a.user_id is not null and a.user_id <> guest limit 1;
   if v_rental is null or v_short is null or v_sale is null then
     raise exception 'PROBE_FAIL pov03-rail-resolution-honours-the-choice: fixtures missing (a rental, a nightly shortlet, a sale)';
   end if;

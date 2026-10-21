@@ -75,9 +75,11 @@ export const HOST_AGREEMENT_SECTIONS: { title: string; body: ReactNode }[] = [
           confirm a table when you have one, and the diner pays the bill at your restaurant.
         </li>
         <li>
-          Listing is free. Vallo charges a restaurant only for completed visits: a fee for each
-          guest seated from a Vallo reservation, at the amount shown in your host settings before
-          it applies. You mark each table seated or a no-show after its time, honestly.
+          Listing is free. Vallo charges a restaurant only for completed visits: a fixed fee for
+          each table seated from a Vallo reservation, whatever the size of the party, billed once a
+          month at the amount published on the What Vallo costs page (/docs/what-vallo-costs). A
+          no-show or a cancelled table costs you nothing. You mark each table seated or a no-show
+          after its time, honestly.
         </li>
       </ul>
     ),

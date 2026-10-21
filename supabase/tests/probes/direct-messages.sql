@@ -13,6 +13,11 @@
 --  6. no cold calls still holds (the caller waits until the other has written);
 --     once they have, the call starts and the person rung is sent to the
 --     member inbox, not the agent desk
+--  7. "Ask me first" (contact_policy REQUEST, the default) holds in the
+--     database: a new chat to such a person needs the starter to follow them
+--     (trigger conversations_direct_contact_policy, 20261013085121); once the
+--     starter follows, the chat opens. B and the twenty limit members say
+--     "Anyone can message me" so sections 1 to 6 test their own rule.
 -- Switches are set in this transaction only. Everything is rolled back.
 do $$
 declare
@@ -30,6 +35,7 @@ begin
   insert into public.social_profiles (user_id, handle)
   select x.id, 'pdm' || x.k || tag from (values (a, 'a'), (b, 'b'), (c, 'c')) as x(id, k)
   on conflict (user_id) do nothing;
+  update public.social_profiles set contact_policy = 'OPEN' where user_id in (b, c);
 
   -- 1 and 2. A opens a chat with B.
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
@@ -136,6 +142,7 @@ begin
     values (u, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
             'probe-dm-n' || i || '-' || tag || '@example.invalid', '{}', '{}', now(), now());
     insert into public.social_profiles (user_id, handle) values (u, 'pdmn' || i || tag) on conflict (user_id) do nothing;
+    update public.social_profiles set contact_policy = 'OPEN' where user_id = u;
     perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
     set local role authenticated;
     perform public.start_direct_conversation(u);
@@ -146,6 +153,7 @@ begin
   values (u, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
           'probe-dm-last-' || tag || '@example.invalid', '{}', '{}', now(), now());
   insert into public.social_profiles (user_id, handle) values (u, 'pdmlast' || tag) on conflict (user_id) do nothing;
+  update public.social_profiles set contact_policy = 'OPEN' where user_id = u;
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
   set local role authenticated;
   ok := false;
@@ -153,6 +161,28 @@ begin
   exception when program_limit_exceeded then ok := true; end;
   reset role;
   if not ok then raise exception 'PROBE_FAIL direct-messages 5: the twenty-first new chat of the day was not refused'; end if;
+
+  -- 7. Ask me first. C asks first (C's block is on A, not B); B opens
+  -- nothing with C until B follows C, by the door or by a hand-written insert.
+  update public.social_profiles set contact_policy = 'REQUEST' where user_id = c;
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  ok := false;
+  begin perform public.start_direct_conversation(c);
+  exception when others then ok := sqlerrm = 'direct:follow_first'; end;
+  reset role;
+  if not ok then raise exception 'PROBE_FAIL direct-messages 7: a chat opened with an ask-first member the starter does not follow'; end if;
+  set local role authenticated;
+  ok := false;
+  begin insert into public.conversations (guest_id, agent_id, context_kind) values (b, c, 'direct');
+  exception when others then ok := true; end;
+  reset role;
+  if not ok then raise exception 'PROBE_FAIL direct-messages 7: a hand-written insert got round ask first'; end if;
+  insert into public.follows (follower_id, followee_id) values (b, c);
+  set local role authenticated;
+  cid2 := public.start_direct_conversation(c);
+  reset role;
+  if cid2 is null then raise exception 'PROBE_FAIL direct-messages 7: following did not open the chat'; end if;
 
   raise exception 'PROBE_OK direct-messages';
 end

@@ -1,6 +1,7 @@
 import { HostShell } from "@/components/host/HostShell";
 import { DecideView, type DecideRowData } from "@/components/host/DecideView";
-import { requestNow, roomDeadline, sortByDeadline } from "@/lib/host/decide";
+import { roomDeadline, sortByDeadline } from "@/lib/host/decide";
+import { requestNow } from "@/lib/format/when";
 import { roomRequest, tableRequest } from "../fixtures";
 
 /** C3 on fixtures. `?empty=1` draws the caught-up state. */

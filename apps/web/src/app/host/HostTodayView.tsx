@@ -92,7 +92,7 @@ export function HostTodayView({
       {/* The moving edge light on the one band that opens the desk (lead,
           29 September); `.nf-edge-lap` settles to a steady rim under reduced
           motion, data saver, Calm and Off. */}
-      <HeroBand className="nf-edge-lap" label={dateLine} title={d.today.title} titleAs="h1" sub={sub} action={action}>
+      <HeroBand lap label={dateLine} title={d.today.title} titleAs="h1" sub={sub} action={action}>
         <TodayHero
           caption={d.today.needsYou}
           count={readQueues ? today.needsYou : null}

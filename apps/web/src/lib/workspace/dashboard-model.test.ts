@@ -32,7 +32,6 @@ import {
   visitsToday,
   type Building,
   type EarningRow,
-  type Tenancy,
   type Visit,
 } from "./dashboard-model";
 

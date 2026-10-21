@@ -45,11 +45,18 @@
     grid-column: 2 / -1;
     margin-top: calc(var(--nf-gap-row) * -1 + var(--nf-space-3xs));
   }
+  /*
+   * ONE CONTAINER. The block is the card; its cards and bank accounts are
+   * rows on it with a hairline between them, never a card inside the card
+   * (the founder's pass 3: remove the extra container, keep the content).
+   */
   .nf-pay-rows {
     display: flex;
     flex-direction: column;
-    gap: var(--nf-gap-inline);
-    padding: 0 var(--nf-pad-card-sm) var(--nf-pad-card-sm);
+    padding: 0 var(--nf-space-xs) var(--nf-space-xs);
+  }
+  .nf-pay-rows > * + * {
+    border-top: var(--nf-border-width) solid var(--nf-divider);
   }
   .nf-pay-row {
     display: flex;
@@ -63,15 +70,12 @@
     transition:
       background-color var(--nf-duration-fast) var(--nf-ease-standard),
       box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
-    border: var(--nf-border-width) solid;
-    border-color: var(--nf-panel-edges);
-    border-radius: var(--nf-container-radius);
-    background: var(--nf-panel-fill-card);
-    box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
+    border-radius: var(--nf-radius-sm);
+    background: transparent;
   }
   @media (hover: hover) {
-    button.nf-pay-row:hover {
-      border-color: var(--nf-selected-edges);
+    button.nf-pay-row:hover,
+    a.nf-pay-row:hover {
       background: var(--nf-selected-fill);
     }
   }

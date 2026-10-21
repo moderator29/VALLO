@@ -2,7 +2,7 @@
  * What stands between a person and a deletion, and the way out of each.
  *
  * PURE ON PURPOSE. This module reads no database and imports nothing from the
- * server. It turns the six numbers `public.account_deletion_blockers` answers
+ * server. It turns the numbers `public.account_deletion_blockers` answers
  * with into a list a screen can draw, so the same rule can be driven from a
  * test without a database and can never be one version behind the screen.
  *
@@ -15,7 +15,7 @@
  * `formatMoney` at the edge, per the money law.
  */
 
-/** The seven numbers the database answers with, exactly as they arrive. */
+/** The numbers the database answers with, exactly as they arrive. */
 export type BlockerReading = {
   /** Spendable kobo. Must be zero. */
   walletBalanceMinor: number;
@@ -36,6 +36,17 @@ export type BlockerReading = {
    * nobody can find is not one of them.
    */
   ownedBusinesses: number;
+  /**
+   * Kobo a licensed partner holds or is moving for a deal of theirs, as buyer
+   * or seller (`provider_arrangements` held, disputed or in motion). Vallo
+   * holds none of it, but deleting the account would strand the person the
+   * partner has to pay or refund.
+   */
+  partnerHeldMinor: number;
+  /** The Rewards Balance Vallo owes them, counted only when it can be withdrawn. */
+  rewardsWithdrawableMinor: number;
+  /** Rewards withdrawals still on their way to their bank. */
+  rewardsPayoutsInFlight: number;
 };
 
 export const EMPTY_READING: BlockerReading = {
@@ -49,6 +60,9 @@ export const EMPTY_READING: BlockerReading = {
   pendingPayouts: 0,
   publishedListings: 0,
   ownedBusinesses: 0,
+  partnerHeldMinor: 0,
+  rewardsWithdrawableMinor: 0,
+  rewardsPayoutsInFlight: 0,
 };
 
 /**
@@ -56,8 +70,11 @@ export const EMPTY_READING: BlockerReading = {
  * lives in the dictionary and the rule lives here.
  */
 export type BlockerKind =
+  | "partner-held"
   | "rent-refunds-owed"
   | "rent-refunds-due"
+  | "rewards-balance"
+  | "rewards-payouts"
   | "active-bookings"
   | "active-reservations"
   | "published-listings"
@@ -68,14 +85,14 @@ export type Blocker = {
   /** Where the control that fixes it lives. */
   href: string;
   /**
-   * The one number the copy interpolates: kobo for the two money blockers, a
+   * The one number the copy interpolates: kobo for the money blockers, a
    * plain count for the rest. Never a name, never an address.
    */
   amount: number;
 };
 
 /**
- * Read the seven numbers, answer with the blockers in the order a person
+ * Read the numbers, answer with the blockers in the order a person
  * should deal with them: money first, because a balance is the one that costs
  * somebody something if they get it wrong, and the business last, because it
  * is the one whose route out takes another person's agreement and therefore
@@ -89,12 +106,32 @@ export function blockersFrom(reading: BlockerReading): Blocker[] {
    * Vallo holds no customer money (25 September 2026), so there is none to
    * strand. The reading still carries those fields at zero because the
    * database answers with them; they are not read here.
+   *
+   * MONEY A PARTNER HOLDS OR IS MOVING comes first: it is the one blocker
+   * where real money is in somebody's hands this minute, and the account is
+   * who the partner releases it to or refunds it to. The route out is the
+   * agreement, where the deal is confirmed, disputed or refunded.
    */
+  if (reading.partnerHeldMinor > 0) {
+    blockers.push({ kind: "partner-held", href: "/agreements", amount: reading.partnerHeldMinor });
+  }
   if (reading.rentRefundsOwedMinor > 0) {
     blockers.push({ kind: "rent-refunds-owed", href: "/help", amount: reading.rentRefundsOwedMinor });
   }
   if (reading.rentRefundsDueMinor > 0) {
     blockers.push({ kind: "rent-refunds-due", href: "/help", amount: reading.rentRefundsDueMinor });
+  }
+  /*
+   * REWARDS VALLO OWES THEM. The database counts the balance only when it can
+   * be withdrawn (over the minimum, payouts on), so this blocker always has a
+   * Withdraw behind it; a balance that cannot move does not hold a deletion
+   * hostage. A withdrawal already on its way blocks until it lands.
+   */
+  if (reading.rewardsWithdrawableMinor > 0) {
+    blockers.push({ kind: "rewards-balance", href: "/rewards", amount: reading.rewardsWithdrawableMinor });
+  }
+  if (reading.rewardsPayoutsInFlight > 0) {
+    blockers.push({ kind: "rewards-payouts", href: "/rewards", amount: reading.rewardsPayoutsInFlight });
   }
   if (reading.activeBookings > 0) {
     blockers.push({ kind: "active-bookings", href: "/bookings", amount: reading.activeBookings });
@@ -176,5 +213,8 @@ export function readingFrom(value: unknown): BlockerReading {
     pendingPayouts: num("pending_payouts"),
     publishedListings: num("published_listings"),
     ownedBusinesses: num("owned_businesses"),
+    partnerHeldMinor: num("partner_held_minor"),
+    rewardsWithdrawableMinor: num("rewards_withdrawable_minor"),
+    rewardsPayoutsInFlight: num("rewards_payouts_in_flight"),
   };
 }

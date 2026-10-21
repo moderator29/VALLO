@@ -56,7 +56,9 @@ function RoomCard({ room, locale }: { room: MyRoomType; locale: Locale }) {
   const hw = useHostCopy();
   const w = useHostPageCopy().roomNights;
   const router = useRouter();
-  const today = isoDate(new Date());
+  /* Today in Lagos (UTC+1 all year), not in UTC: between midnight and one in
+     the morning the UTC date is still yesterday, and the editor offered it. */
+  const [today] = useState(() => isoDate(new Date(Date.now() + 3_600_000)));
   const [from, setFrom] = useState(today);
   const [to, setTo] = useState(today);
   const [units, setUnits] = useState(String(room.unitsTotal));

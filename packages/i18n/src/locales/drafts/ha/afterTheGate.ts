@@ -285,6 +285,7 @@ export const afterTheGateHa = {
     asUsed: "Gwargwadon amfani",
     allIn: "Komai na wannan zaman",
     allInNote: "Farashin da kowane kuɗin da mai masauki ya lissafa. Ba za a nemi wani abu dabam a ƙofa ba.",
+    readFailed: "Ba mu iya loda kuɗaɗen ƙofar wannan masauki yanzu ba. Sake loda wannan shafin kafin ka biya.",
   },
   shots: {
     heading: "Faɗi abin da kowane hoto ke nunawa",

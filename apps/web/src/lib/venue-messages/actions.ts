@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { fail, ok, type ActionResult } from "../actions/envelope";
+import { BLOCKED_THREAD_MESSAGE, blockedBetween } from "../messages/blocks";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
 import { isFeatureEnabled } from "../flags";
 import { sendMessage } from "../messages/actions";
@@ -76,6 +77,11 @@ export async function messageVenue(input: {
     callerId: session.user.id,
   });
   if (refusal) return fail(refusal);
+  /* Before the thread is made, as the listing and direct doors do: a block
+     found by the send would otherwise leave an empty thread in both inboxes. */
+  if (ownerId && (await blockedBetween(session.supabase, session.user.id, ownerId))) {
+    return fail(BLOCKED_THREAD_MESSAGE);
+  }
 
   const db = session.supabase as unknown as SupabaseClient;
   const existing = await db

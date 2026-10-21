@@ -158,17 +158,18 @@ export const publicDoorsEn = {
   emailCode: {
     offer: "Email me a code instead",
     title: "Sign in with a code",
-    lede: "We will email a 6-digit code to your address. No password needed.",
+    /** `{count}` is the code's length as a word ("six"), from `codeLengthWord`, so the line follows the code. */
+    lede: "We will email a {count}-digit code to your address. No password needed.",
     emailLabel: "Email address",
     send: "Send me a code",
     sentTo: "We sent a code to {email}.",
-    codeLabel: "6-digit code",
+    codeLabel: "{count}-digit code",
     verify: "Sign in",
     resend: "Send a new code",
     usePassword: "Use my password instead",
     passkey: "Sign in with a passkey",
     badEmail: "Enter a valid email address.",
-    badCode: "Enter the 6 digits from the email.",
+    badCode: "Enter the {count} digits from the email.",
     /* The server answers for the whole code and cannot say which digit is
        wrong, or whether it was mistyped or replaced by a newer one; the one
        action that covers both is the newest code, and the field has the last
@@ -184,17 +185,18 @@ export const publicDoorsEn = {
   phone: {
     offer: "Continue with phone number",
     title: "Sign in with your phone",
-    lede: "We will send a 6-digit code to your number, by WhatsApp first, or by text message.",
+    /** `{count}` as in `emailCode.lede`. */
+    lede: "We will send a {count}-digit code to your number, by WhatsApp first, or by text message.",
     phoneLabel: "Phone number",
     prefix: "+234",
     placeholder: "803 123 4567",
     send: "Send me a code",
     sentTo: "We sent a code to {phone}.",
-    codeLabel: "6-digit code",
+    codeLabel: "{count}-digit code",
     verify: "Continue",
     resend: "Send a new code",
     badPhone: "Enter a Nigerian mobile number, like 0803 123 4567.",
-    badCode: "Enter the 6 digits you were sent.",
+    badCode: "Enter the {count} digits you were sent.",
     wrongCode: "That code did not work. Type the code from your newest message; your last try is selected, so typing replaces it.",
     verifyLimited: "Too many tries at the code. Wait ten minutes, then type it again.",
     off: "Phone sign-in is not available yet. Use your email instead.",

@@ -2787,6 +2787,20 @@
    * ------------------------------------------------------------------ */
   --nf-duration-press: 120ms;
   --nf-ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+  /* THE PAYOFF POP (MOTION_SYSTEM.md principle 5): scale 1 to 1.04 to 1 on a
+     confirm, a heart, a verified badge. The one moment allowed to pop, so it
+     has one length, and it collapses with every other duration. */
+  --nf-duration-pop: 180ms;
+  /* THE STAGGER (Agent D audit, 17 October 2026). One step between siblings
+     that arrive together, and one cap: the seventh arrives with the sixth.
+     `--nf-stagger` for cards, rows and page sections; `--nf-stagger-tight`
+     for things read as one word (odometer digits, the route's first rows).
+     Use as `calc(min(var(--i, 0), var(--nf-stagger-cap)) * var(--nf-stagger))`.
+     Both collapse to 0ms under reduced motion, so a delayed `both` fill never
+     holds anything invisible for somebody who asked for less motion. */
+  --nf-stagger: 40ms;
+  --nf-stagger-tight: 20ms;
+  --nf-stagger-cap: 5;
   --nf-press-scale-sm: 0.94;
   --nf-press-scale: 0.97;
   --nf-press-scale-lg: 0.985;
@@ -3834,6 +3848,9 @@
     --nf-duration-cinematic: 1ms;
     --nf-duration-entrance: 1ms;
     --nf-duration-press: 1ms;
+    --nf-duration-pop: 1ms;
+    --nf-stagger: 0ms;
+    --nf-stagger-tight: 0ms;
     --nf-ease-spring: linear;
     /* The flick goes the same way as the spring: with every duration at 1ms
        the curve is moot, but a rule that pairs `whip` with a literal duration

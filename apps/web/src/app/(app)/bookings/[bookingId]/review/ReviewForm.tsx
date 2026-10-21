@@ -8,7 +8,8 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { submitReview, type ReviewWritten } from "@/lib/reviews/actions";
 import { sendOrKeep } from "@/lib/offline/send-or-keep";
 import { useClientCopy } from "@/lib/i18n/client-copy";
-import { BODY_MAX, RATING_LABELS, RATING_MAX, RATING_MIN } from "@/lib/reviews/model";
+import { BODY_MAX, RATING_MAX, RATING_MIN } from "@/lib/reviews/model";
+import type { Dictionary } from "@vallo/i18n/core";
 import type { ReviewSubject } from "@/lib/reviews/queries";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
@@ -66,7 +67,10 @@ export function ReviewForm({
   subject,
   plansAction,
   success,
+  words: w,
 }: {
+  /** The form's words (`memberFlows.review`). */
+  words: Dictionary["memberFlows"]["review"];
   subject: ReviewSubject;
   /** The page's `t.success`, for "Review posted". Absent, no sheet. */
   success?: SuccessWords;
@@ -82,6 +86,7 @@ export function ReviewForm({
   >((prev, formData) => sendReview(prev, formData, () => setKept(true), OUTBOX.couldNotKeep), null);
 
   const [rating, setRating] = useState(0);
+  const ratingWord = (value: number) => w.ratings[value as keyof typeof w.ratings] ?? "";
   const [body, setBody] = useState("");
   const [successClosed, setSuccessClosed] = useState(false);
   const posted = success ? successCopy(success, "reviewPosted") : null;
@@ -112,11 +117,11 @@ export function ReviewForm({
       <ResultScreen
         state="confirmed"
         mark="reviews"
-        verdict="Thank you for the review"
-        consequence={`Your review of ${subject.title} is live. Other guests can see it now, and the agent has been told.`}
+        verdict={w.thanksTitle}
+        consequence={w.thanksBody.replace("{title}", subject.title)}
         actions={[
           {
-            label: "See it on the listing",
+            label: w.seeOnListing,
             href: state.data.href,
             tone: "primary",
           },
@@ -151,7 +156,7 @@ export function ReviewForm({
 
       <fieldset className="border-0 p-0">
         <legend className="nf-overline text-[var(--nf-content-muted)]">
-          How was the stay?
+          {w.howWasIt}
         </legend>
 
         <div className="mt-heading flex items-center gap-inline-tight">
@@ -181,7 +186,10 @@ export function ReviewForm({
                   }
                 />
                 <span className="sr-only">
-                  {value} out of {RATING_MAX}, {RATING_LABELS[value]}
+                  {w.starLabel
+                    .replace("{value}", String(value))
+                    .replace("{max}", String(RATING_MAX))
+                    .replace("{label}", ratingWord(value))}
                 </span>
               </label>
             );
@@ -195,7 +203,7 @@ export function ReviewForm({
           aria-live="polite"
           className="mt-row min-h-[1.25rem] nf-body-sm font-normal text-[var(--nf-content-secondary)]"
         >
-          {rating > 0 ? RATING_LABELS[rating] : ""}
+          {rating > 0 ? ratingWord(rating) : ""}
         </p>
       </fieldset>
 
@@ -204,7 +212,7 @@ export function ReviewForm({
           htmlFor="review-body"
           className="nf-overline block text-[var(--nf-content-muted)]"
         >
-          Anything you would tell the next guest?
+          {w.bodyLabel}
         </label>
         <textarea
           id="review-body"
@@ -213,11 +221,11 @@ export function ReviewForm({
           maxLength={BODY_MAX}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Was there steady light and water? How was the agent? Would you go back?"
+          placeholder={w.bodyPlaceholder}
           className="nf-field mt-heading w-full resize-y leading-relaxed"
         />
         <p className="mt-row flex items-center justify-between gap-row nf-caption text-[var(--nf-content-muted)]">
-          <span>Optional. Your first name and last initial appear with it.</span>
+          <span>{w.bodyHint}</span>
           <span className="nf-numeric shrink-0">{remaining}</span>
         </p>
       </div>
@@ -233,14 +241,13 @@ export function ReviewForm({
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
       <Button type="submit" variant="primary" full disabled={pending} className="mt-block">
-        {pending ? "Sharing your review..." : "Share review"}
+        {pending ? w.sharing : w.share}
       </Button>
 
       {/* 12px on the sentence warning somebody not to put a bank account
           number where the whole internet can read it. Caption is the floor. */}
       <p className="mt-heading nf-caption leading-relaxed text-[var(--nf-content-muted)]">
-        Reviews are public and cannot be edited once shared, so please write what
-        you would want to read. Never put a bank account number in a review.
+        {w.publicNote}
       </p>
     </form>
   );

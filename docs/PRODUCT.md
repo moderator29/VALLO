@@ -23,9 +23,10 @@ read from the code; the dated audits were retired on 17 October 2026.
 layer, an agreement gate before every negotiated payment and a verification
 ladder. Vallo never holds customer money.**
 
-**Money (current, 13 October 2026).** A licensed partner holds escrow for rent
-and sales (ADR 0003); a fixed-price booking (hotel room, shortlet, restaurant)
-is paid by card and split by the processor at the moment of payment, the
+**Money (current, 17 October 2026).** A licensed partner holds escrow for rent,
+shortlets and sales where the payer chooses it (ADR 0003, `pov01` to `pov05`);
+a hotel room, or a rent or shortlet paid by card, is split by the processor at
+the moment of payment, the
 host's share to their bank and Vallo's commission to Vallo, read from policy
 rows (`fee_rates`, `scoped_commission_rates`), never from a constant. The Vallo
 Guarantee is retired (`guarantee_bps` is 0; the machinery stays built, nothing
@@ -287,13 +288,15 @@ collapse into one tick.**
 4. **Badges** are earned standing, 15 defined in `public.badges`, split into an
    AGENT ladder and a MEMBER ladder, awarded nightly by `private.sweep_badges`
    and grantable by an admin with a mandatory reason and an audit row.
-5. **Escrow, the wallet and held payments are retired** (Track A, 25
-   September 2026). Vallo never holds customer money, and no user-facing copy
-   may say it does: every money sentence is read from
-   `apps/web/src/lib/money/copy.ts`. What a person is offered instead is an
-   **agreement** both sides confirm and Vallo approves before payment opens,
-   and the **Vallo Guarantee**: a separate reserve funded from every payment,
-   claimable within 72 hours of move-in or check-in, capped and reviewed.
+5. **Vallo never holds customer money** (Track A, 25 September 2026, and ADR
+   0003). No user-facing copy may say it does: every money sentence is read
+   from `apps/web/src/lib/money/copy.ts`. A negotiated deal runs on an
+   **agreement** both sides confirm; since D83 the second confirmation approves
+   it, and a direct payment waits for a person only when a risk signal fires.
+   For rent and shortlets the payer picks Escrow, held by a licensed partner
+   while `protectedRailLive()` reads it as working, or card; a sale is always
+   escrow. The **Vallo Guarantee is retired** (`guarantee_bps` 0, D51); claims
+   on payments made while it ran are still honoured.
    `docs/MONEY_ARCHITECTURE.md` is the whole mechanism.
 
 **The badge is earned and is never for sale.** A paid inspection is a service

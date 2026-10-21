@@ -809,9 +809,13 @@
    * premium, glowing, with the same moving snake edge light" as the logo pill).
    *
    * The disc fills the round button (`.nf-dock-create`, 60px). The rim light is
-   * the retired logo pill's (D82): a conic of two short arcs turned by the registered
-   * angle `--nf-logo-lap` on the `nf-logo-lap` keyframes, both declared once
-   * in light.css ("THE LOGO") and not repeated here. The keyframes are not
+   * the retired logo pill's (D82): a conic of two short arcs on a ring. The
+   * disc is a circle, so the ring is drawn once and turned with `rotate` on
+   * the compositor (`nf-edge-turn`, edge-m.css, the round dock button's own
+   * turn), not by animating the gradient's start angle: a registered angle
+   * animates only on the main thread, restyling and repainting the dock on
+   * every frame of both laps on every signed-in screen (17 October 2026;
+   * site.css, THE EDGE LAP, has the measurement). The keyframes are not
    * theme-gated, so the lap runs in both themes. Under reduced motion, data
    * saving, and the Calm or Off motion setting the lap stops and the rim is
    * a steady glow instead (below).
@@ -871,7 +875,6 @@
       linear-gradient(var(--nf-mask-opaque) 0 0) content-box exclude,
       linear-gradient(var(--nf-mask-opaque) 0 0);
     background: conic-gradient(
-      from var(--nf-logo-lap),
       transparent 0deg 110deg,
       color-mix(in oklab, var(--nf-content-on-brand) 45%, transparent) 150deg,
       var(--nf-content-on-brand) 176deg,
@@ -888,7 +891,7 @@
      * the dock arrives and then rests where a lap ends, its two arcs still
      * lit, so the disc keeps its rim and loses only the movement.
      */
-    animation: nf-logo-lap 5s linear 2 both;
+    animation: nf-edge-turn 5s linear 2 both;
   }
   .nf-dock-create:active .nf-dock-plus {
     transform: scale(0.94);

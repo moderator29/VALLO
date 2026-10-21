@@ -69,7 +69,17 @@ export type EnrolOutcome =
       detail?: string;
     };
 
-export type EnrolStep = "permission" | "key" | "worker" | "ready" | "subscribe" | "keys" | "register";
+export type EnrolStep =
+  | "permission"
+  | "key"
+  | "worker"
+  | "ready"
+  | "subscribe"
+  | "keys"
+  | "register"
+  /* Native only: the plugin itself, and the token APNs or FCM hands back. */
+  | "plugin"
+  | "token";
 
 /** A short reference for a failure, e.g. `subscribe/NotAllowedError`, or null. */
 export function failureReference(outcome: EnrolOutcome): string | null {
@@ -318,78 +328,128 @@ type PushPlugin = {
   register: () => Promise<void>;
   addListener: (
     event: "registration" | "registrationError",
-    handler: (payload: { value?: string; error?: string }) => void,
+    handler: (payload: { value?: string; error?: unknown }) => void,
   ) => Promise<{ remove: () => Promise<void> }>;
 };
 
 async function enrolNative(): Promise<EnrolOutcome> {
+  let plugin: PushPlugin;
+  let platform: "ios" | "android";
   try {
     const { Capacitor } = await import("@capacitor/core");
-    if (!Capacitor.isNativePlatform()) return { ok: false, reason: "unsupported" };
-
-    const plugin = Capacitor.registerPlugin<PushPlugin>("PushNotifications");
-
-    /* Alert, badge and sound in ONE request. Asking for them separately
-       produces several prompts, and each one is a fresh chance to be
-       refused. Capacitor's `requestPermissions` asks for all three. */
-    const permission = await plugin.requestPermissions();
-    nativePermissionSeen = fromReceive(permission.receive);
-    if (permission.receive !== "granted") return { ok: false, reason: "permission_denied" };
-
-    const token = await nativeToken(plugin);
-
-    if (!token) return { ok: false, reason: "failed" };
-
-    const platform = Capacitor.getPlatform() === "ios" ? "ios" : "android";
-    return postRegistration({ platform, token, deviceLabel: platform === "ios" ? "iPhone" : "Android" });
-  } catch {
-    return { ok: false, reason: "unsupported" };
+    if (!Capacitor.isNativePlatform()) return { ok: false, reason: "unsupported", step: "plugin" };
+    plugin = Capacitor.registerPlugin<PushPlugin>("PushNotifications");
+    platform = Capacitor.getPlatform() === "ios" ? "ios" : "android";
+  } catch (error) {
+    return { ok: false, reason: "unsupported", step: "plugin", detail: errorName(error) };
   }
+
+  /* Alert, badge and sound in ONE request. Asking for them separately
+     produces several prompts, and each one is a fresh chance to be
+     refused. Capacitor's `requestPermissions` asks for all three.
+
+     EVERY FAILURE BELOW NAMES ITS STEP. This used to be one catch that
+     answered "unsupported" for anything at all, so a binary built without
+     the plugin, a permission call that threw and a token that never came
+     all read as "this browser cannot show notifications", and the empty
+     `push_tokens` table could not say which. */
+  let permission: { receive: NativeReceive };
+  try {
+    permission = await plugin.requestPermissions();
+  } catch (error) {
+    /* A binary built without the plugin rejects with UNIMPLEMENTED: that one
+       really is "unsupported". Anything else is a failure with a name. */
+    return isUnimplemented(error)
+      ? { ok: false, reason: "unsupported", step: "plugin", detail: "UNIMPLEMENTED" }
+      : { ok: false, reason: "failed", step: "permission", detail: errorName(error) };
+  }
+  nativePermissionSeen = fromReceive(permission.receive);
+  if (permission.receive !== "granted") return { ok: false, reason: "permission_denied" };
+
+  const answer = await nativeToken(plugin);
+  if (answer.token === null) return { ok: false, reason: "failed", step: "token", detail: answer.detail };
+
+  return postRegistration({ platform, token: answer.token, deviceLabel: platform === "ios" ? "iPhone" : "Android" });
+}
+
+/** Capacitor's refusal for a plugin the native binary does not carry. */
+function isUnimplemented(error: unknown): boolean {
+  return Boolean(error && typeof error === "object" && "code" in error && error.code === "UNIMPLEMENTED");
+}
+
+/**
+ * What the operating system said when it gave no token, as a short word for
+ * the failure reference: `timeout` (no answer in ten seconds: no network, or
+ * on iOS the app delegate never forwarded the token), `register` (the plugin
+ * refused the call), or `os-` and the start of the operating system's own
+ * sentence (APNs: a build signed without the `aps-environment` entitlement;
+ * FCM: Google Play services missing or a wrong `google-services.json`).
+ */
+export type NativeTokenAnswer = { token: string } | { token: null; detail: string };
+
+function osDetail(error: unknown): string {
+  const text = typeof error === "string" ? error : "";
+  const slug = text.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32);
+  return slug ? `os-${slug}` : "os";
 }
 
 /**
  * Ask the plugin for this device's token and wait for it to arrive on the
- * listener. Null on an error or after ten seconds without an answer.
+ * listener. A null token carries the reason, after an error or ten seconds
+ * without an answer.
  */
-function nativeToken(plugin: PushPlugin): Promise<string | null> {
+async function nativeToken(plugin: PushPlugin): Promise<NativeTokenAnswer> {
   /* THE TOKEN ARRIVES ON A LISTENER, NOT AS A RETURN VALUE. `register()`
      resolves as soon as the request is made; the token comes back from
      APNs or FCM moments later on the `registration` event. Code that
      treats `register()` resolving as success registers nobody, which is a
      very easy mistake to make and an invisible one. */
-  return new Promise<string | null>((resolve) => {
-    let done = false;
-    /* Every attempt used to add a fresh `registration` and
-       `registrationError` pair and never remove it, so a person who tried
-       twice had two listeners posting two registrations. Both handles are
-       kept and removed the moment this attempt settles. */
-    const handles: Array<Promise<{ remove: () => Promise<void> }>> = [];
-    const settle = (value: string | null): void => {
-      if (done) return;
-      done = true;
-      for (const handle of handles) void handle.then((h) => h.remove()).catch(() => undefined);
-      resolve(value);
-    };
-
-    /* A handset with no network gets neither event. Ten seconds, then the
-       person is told it did not work rather than being left on a spinner. */
-    const timer = setTimeout(() => settle(null), 10_000);
-
-    handles.push(
-      plugin.addListener("registration", (payload) => {
-        clearTimeout(timer);
-        settle(typeof payload.value === "string" ? payload.value : null);
-      }),
-      plugin.addListener("registrationError", () => {
-        clearTimeout(timer);
-        settle(null);
-      }),
-    );
-    void plugin.register().catch(() => {
-      clearTimeout(timer);
-      settle(null);
-    });
+  let settle: (value: NativeTokenAnswer) => void = () => undefined;
+  const answered = new Promise<NativeTokenAnswer>((resolve) => {
+    settle = resolve;
   });
+  let done = false;
+  /* A handset with no network gets neither event. Ten seconds, then the
+     person is told it did not work rather than being left on a spinner. */
+  const clock: { timer?: ReturnType<typeof setTimeout> } = {};
+  /* Every attempt used to add a fresh `registration` and
+     `registrationError` pair and never remove it, so a person who tried
+     twice had two listeners posting two registrations. Both handles are
+     kept and removed the moment this attempt settles. */
+  const handles: Array<Promise<{ remove: () => Promise<void> }>> = [];
+  const finish = (value: NativeTokenAnswer): void => {
+    if (done) return;
+    done = true;
+    clearTimeout(clock.timer);
+    for (const handle of handles) void handle.then((h) => h.remove()).catch(() => undefined);
+    settle(value);
+  };
+
+  handles.push(
+    plugin.addListener("registration", (payload) => {
+      finish(
+        typeof payload.value === "string" && payload.value.length > 0
+          ? { token: payload.value }
+          : { token: null, detail: "empty" },
+      );
+    }),
+    plugin.addListener("registrationError", (payload) => {
+      finish({ token: null, detail: osDetail(payload.error) });
+    }),
+  );
+  /* THE LISTENERS ARE IN PLACE BEFORE THE REQUEST IS MADE. iOS emits the
+     `registration` event without keeping it for a late listener, and APNs
+     answers from its cache almost at once, so a token that arrived before
+     the bridge had attached the listener was simply lost. */
+  try {
+    await Promise.all(handles);
+  } catch {
+    finish({ token: null, detail: "listener" });
+    return answered;
+  }
+  clock.timer = setTimeout(() => finish({ token: null, detail: "timeout" }), 10_000);
+  void plugin.register().catch(() => finish({ token: null, detail: "register" }));
+  return answered;
 }
 
 /** The answer the shell last read from the operating system (F-15). */
@@ -439,10 +499,17 @@ export async function refreshNativeRegistration(): Promise<"refreshed" | "skippe
     if (permission !== "granted") return "skipped";
     const { Capacitor } = await import("@capacitor/core");
     const plugin = Capacitor.registerPlugin<PushPlugin>("PushNotifications");
-    const token = await nativeToken(plugin);
-    if (!token) return "failed";
+    const answer = await nativeToken(plugin);
+    if (answer.token === null) return "failed";
     const platform = Capacitor.getPlatform() === "ios" ? "ios" : "android";
-    const outcome = await postRegistration({ platform, token, deviceLabel: platform === "ios" ? "iPhone" : "Android" });
+    /* A launch with no session (it expired, or the member signed out) keeps
+       the record: forgetting it here meant the next sign-in had nothing to
+       re-register, the OS permission was already granted so the Vallo screen
+       never asked again, and the phone went quiet with no word anywhere. */
+    const outcome = await postRegistration(
+      { platform, token: answer.token, deviceLabel: platform === "ios" ? "iPhone" : "Android" },
+      { keepWhenSignedOut: true },
+    );
     return outcome.ok ? "refreshed" : "failed";
   } catch {
     return "failed";
@@ -482,13 +549,16 @@ async function retireLegacyPushWorker(): Promise<void> {
   }
 }
 
-async function postRegistration(body: {
-  platform: "web" | "ios" | "android";
-  token: string;
-  p256dh?: string;
-  auth?: string;
-  deviceLabel?: string;
-}): Promise<EnrolOutcome> {
+async function postRegistration(
+  body: {
+    platform: "web" | "ios" | "android";
+    token: string;
+    p256dh?: string;
+    auth?: string;
+    deviceLabel?: string;
+  },
+  options: { keepWhenSignedOut?: boolean } = {},
+): Promise<EnrolOutcome> {
   try {
     const response = await fetch("/api/push/register", {
       method: "POST",
@@ -502,7 +572,16 @@ async function postRegistration(body: {
        "not_saved": the fix is to sign in inside the app, and saying "try
        again in a moment" would send the person round the same loop. */
     const refused = replyFailure(response.status);
+    if (refused === "signed_out" && options.keepWhenSignedOut) {
+      return { ok: false, reason: refused, step: "register", detail: String(response.status) };
+    }
     if (refused) return failedAndForgotten(refused, String(response.status));
+    /* PACED IS NOT REFUSED. The route counts calls per account (30 an hour);
+       a 429 says "not now", and the row the server already holds is still
+       live, so the record of it is kept for the next try. */
+    if (response.status === 429) {
+      return { ok: false, reason: "not_saved", step: "register", detail: "429" };
+    }
     if (!response.ok) return failedAndForgotten("not_saved", String(response.status));
     const result = (await response.json()) as { ok?: boolean; deviceRef?: string };
     if (!result.ok || typeof result.deviceRef !== "string" || result.deviceRef.length === 0) {

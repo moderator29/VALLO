@@ -128,6 +128,8 @@ export async function decideReferral(input: {
       return fail(refusalOf(error));
     }
     if (data === "not_found") return fail("That referral could not be found. It may have been removed.");
+    /* Migration 20261021104453_nobody_decides_their_own_case_refunds_referrals_payouts_badges. */
+    if (data === "own_referral") return fail("You made or received this invite, so somebody else has to decide it. Nothing was changed.");
     if (data === "refused") {
       return fail("That referral is no longer waiting on a decision. Somebody may have decided it already. Nothing was changed.");
     }
@@ -183,6 +185,7 @@ export async function decidePayout(input: {
       }
       return fail(refusalOf(error));
     }
+    if (data === "own_payout") return fail("This is your own payout, so somebody else has to decide it. Nothing was changed.");
     if (data === "no_recipient") {
       return fail("This payout has no recipient with the payout partner yet, so it cannot be released. Nothing was changed.");
     }

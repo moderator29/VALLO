@@ -5,13 +5,13 @@
 -- column since DB-10 step 2), must succeed. Strangers still see
 -- and change nothing; a firm member sees the firm's listing without 42P17.
 --
--- The QA member is made an ordinary agent inside the transaction, as an
--- approved application does (service role writes the agents row); the QA
--- admin stands in as a second agent who is the firm's principal.
+-- A throwaway account is made an ordinary agent inside the transaction, as an
+-- approved application does (service role writes the agents row); a second
+-- throwaway account stands in as the agent who is the firm's principal.
 do $$
 declare
-  member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
-  other constant uuid := '03f3dd52-ea28-4852-9abe-e5b0a67c2a43';
+  member constant uuid := gen_random_uuid(); -- throwaway accounts, see the 17 October 2026 note below
+  other constant uuid := gen_random_uuid();
   agent uuid;
   other_agent uuid;
   firm uuid;
@@ -30,6 +30,15 @@ begin
           union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
           union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
   on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
+  -- 17 October 2026: the QA member now holds a live agents row (one side per
+  -- account), so inserting a second one failed on agents_user_id_key before
+  -- anything was asserted. The lister and the principal are throwaway accounts
+  -- made here, ordinary accounts with no agents row exactly as the QA member
+  -- and admin were when this probe was written, rolled back with everything
+  -- else. Nothing here needed the principal to be staff.
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-db-03-lister-' || member || '@example.invalid', '{}', '{}', now(), now()),
+         (other, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-db-03-principal-' || other || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe DB-03 lister') returning id into agent;
   insert into public.agents (user_id, display_name) values (other, 'Probe DB-03 principal') returning id into other_agent;
   insert into public.businesses (owner_id, kind, name, slug, status)

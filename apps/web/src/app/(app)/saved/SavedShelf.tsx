@@ -16,7 +16,12 @@ import { MediaFrame } from "@/components/app/MediaFrame";
  * only ever a fact this row holds: "Verified" in the success ink when a
  * person checked the place, otherwise the market it is offered on, muted.
  *
- * The whole object is one link to the place. Remove stays where the board
+ * The whole object is one link to the place, and its words are its name: no
+ * aria-label over them, so a screen reader hears the title, the area, the
+ * price and the status the eye reads (WCAG 2.5.3, label in name; an "Open
+ * {title}" label used to hide the price and the status from it).
+ *
+ * Remove stays where the board
  * puts it (a swipe on touch and the quiet control under the shelf), because
  * a link may not hold a button.
  */
@@ -30,7 +35,6 @@ export function SavedShelf({
   figure,
   status,
   verified,
-  openLabel,
   eager = false,
 }: {
   href: string;
@@ -43,11 +47,10 @@ export function SavedShelf({
   figure: ReactNode;
   status: string;
   verified: boolean;
-  openLabel: string;
   eager?: boolean;
 }) {
   return (
-    <Link href={href} className="nf-shelf" aria-label={openLabel} data-testid="saved-shelf">
+    <Link href={href} className="nf-shelf" data-testid="saved-shelf">
       <span className="nf-shelf__frame" aria-hidden="true">
         <span className="nf-shelf__thumb">
           {photo ? (

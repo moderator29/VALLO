@@ -426,6 +426,7 @@ function Section({
     <ListGroup
       aria-label={label}
       label={label}
+      labelAs="h2"
       action={
         badge || fan ? (
           <span className="nf-notif__section-tools">

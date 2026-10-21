@@ -116,7 +116,7 @@ export function AgentBand({ dash, now, t, tag }: Pick<Common, "t"> & { dash: Age
 }
 
 /** The agent's cards, reminders first on a phone; the desk grid lays them out as the reference does. */
-export function AgentBody({ dash, now, today, t, locale }: Common & { dash: AgentDash; now: Date; today: string }) {
+export function AgentBody({ dash, today, t, locale }: Common & { dash: AgentDash; today: string }) {
   const monthly = agentMonthly(dash.enquiries, dash.visits, today);
   return (
     <div className="wsd-grid wsd-grid--agent" data-testid="wsd-agent">

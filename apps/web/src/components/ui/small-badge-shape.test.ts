@@ -21,9 +21,5 @@ describe("small text never sits in a capsule", () => {
   it("numbered steps are rounded squares, not circles", () => {
     expect(src("components/agent/ApplyWizard.tsx")).not.toMatch(/h-8 w-8 place-items-center rounded-full/);
     expect(src("app/(app)/listing/[id]/RentalPanel.tsx")).not.toMatch(/h-6 w-6 shrink-0 place-items-center rounded-full/);
-    const landing = src("app/css/landing.css");
-    const at = landing.indexOf(".nf-landing-step-num {");
-    expect(at).toBeGreaterThan(-1);
-    expect(landing.slice(at, landing.indexOf("}", at))).toContain("border-radius: var(--nf-radius-xs)");
   });
 });

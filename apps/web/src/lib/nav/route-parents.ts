@@ -106,8 +106,7 @@
  * them, so the hardware button goes to the parent rather than closing the
  * shell, which is the half that matters most there.
  *
- * `scripts/design/proof-nav.mjs` walks the rest in a real browser and writes
- * the landed path per route into `docs/design/proofs/nav/`.
+ * `tests/back-destinations.spec.mjs` walks the rest in a real browser.
  */
 
 /** The top of a hierarchy. Nothing sits above a route marked with this. */
@@ -157,7 +156,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
    * `/welcome?next=/sign-up`. `/sign-in`, `/sign-up` and `/auth/callback` all
    * named it as their parent, and on a device that has already seen first run
    * `planFirstRun` forwards that straight on, so BACK FROM SIGN IN LANDED ON
-   * SIGN UP. Walked, cold and warm, by `scripts/design/proof-nav.mjs`.
+   * SIGN UP. Walked, cold and warm, in a real browser.
    *
    * The screen above both doors is `/welcome`, whose closing panel IS the
    * choice between them (Sign in, Create an account, Look around first). With

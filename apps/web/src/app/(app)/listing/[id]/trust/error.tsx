@@ -41,7 +41,7 @@ export default function SpaceTrustError({
       actions={
         <div className="nf-system__actions">
           <Button variant="primary" size="lg" full onClick={reset}>
-            Try again
+            {copy.authFlow.tryAgain}
           </Button>
           <ButtonLink href={space} variant="secondary" size="lg" full leadingIcon="arrow-left">
             {copy.common.back}

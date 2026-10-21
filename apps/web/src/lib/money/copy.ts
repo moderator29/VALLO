@@ -43,21 +43,35 @@ export const GOVERNING_SENTENCE =
 /** The same sentence, shortened for a screen. */
 export const PARTNERS_SHORT = "Payments are processed through Vallo's financial infrastructure partners.";
 
-/** The one-line promise on the live (direct) rail. */
+/**
+ * The promise, true on both ways to pay (DECISIONS 13 October, rows 21 and 22:
+ * rent and shortlets let the payer pick escrow or card, a sale is escrow, a
+ * hotel room is card). It used to describe the card rail alone ("goes straight
+ * to their bank account ... in the same transaction"), which is untrue of a
+ * payment a licensed partner holds in escrow.
+ */
 export const NO_CUSTODY_SENTENCE =
-  "Vallo never holds your money. When you pay, the owner's or agent's share goes straight to their bank account through our payment processor, in the same transaction.";
+  "Vallo never holds your money. If you pay by card, the owner's or agent's share goes straight to their bank account in the same payment. If you choose to have a licensed partner hold it, it stays with the partner until the deal is confirmed.";
+
+/** How money moves on the card (direct) rail alone, for a surface that knows it is on that rail. */
+export const CARD_RAIL_MOVES =
+  "Vallo never holds your money. When you pay by card, the owner's or agent's share goes straight to their bank account through our payment processor, in the same transaction.";
 
 /** Where a refund goes. */
 export const REFUND_ROUTE =
   "A refund goes back to the card or bank account you paid with, through our payment processor. Banks usually show it within 5 to 10 working days.";
 
-/** For a lister: how and when they are paid. */
+/** For a lister: how and when they are paid, on either way to pay. No provider is named. */
 export const PAYOUT_ANSWER =
-  "Your share of a payment settles straight to the bank account on your payout details, through Paystack, at the moment the renter or guest pays. Vallo never holds it, so there is nothing to withdraw. Paystack pays settled money into your bank on its normal settlement schedule.";
+  "Vallo never holds your share. When the renter or guest pays by card, it goes straight to the bank account on your payout details in the same payment. When they pay into escrow, a licensed partner holds it until the deal is confirmed, then releases it to you. The payment partner pays money into your bank on its normal settlement schedule.";
 
-/** The supply page's last step for a host (/for-hosts): how a stay is paid out, with no screen to point at. */
+/**
+ * The supply page's last step for a host (/for-hosts): how a stay is paid out,
+ * with no screen to point at. A hotel room is paid by card; a shortlet guest
+ * may pay into escrow instead.
+ */
 export const HOST_PAYOUT_STEP =
-  "When a guest pays for a stay, your share goes by Paystack split straight to the bank account on your payout details.";
+  "When a guest pays by card, your share goes straight to the bank account on your payout details. If a shortlet guest pays into escrow, a licensed partner holds it until the stay is confirmed, then releases it to you.";
 
 /* -------------------------------------------------------------------------- */
 /* WHAT STANDS BEHIND A PAYMENT, PER RAIL (what replaced the Guarantee)       */
@@ -99,7 +113,7 @@ export type RailCopy = {
 export const RAIL_COPY: Record<MoneyRail, RailCopy> = {
   direct: {
     standing: DIRECT_RAIL_STANDING,
-    howItMoves: NO_CUSTODY_SENTENCE,
+    howItMoves: CARD_RAIL_MOVES,
     releaseCondition: "Paid to the owner or agent at the moment you pay, through our payment processor.",
     refund: REFUND_ROUTE,
   },
@@ -180,9 +194,18 @@ export const AGREEMENT_IN_REVIEW =
   "Both of you confirmed. Because this payment goes straight to the lister, a person at Vallo is checking the deal first. You will get an email and a notification the moment it is decided.";
 /** The section an approved agreement opens. */
 export const AGREEMENT_PAYMENT_OPEN_TITLE = "Payment is open";
+/**
+ * When the lister's share reaches them, on either way to pay. A card payment
+ * settles in the same payment; an escrow payment waits for the deal to be
+ * confirmed. Said where "settles straight to your bank account from the same
+ * payment" used to be, which was true of the card rail alone.
+ */
+export const OWNER_PAID_WHEN =
+  "Your share goes to the bank account on your payout details: at once if they pay by card, or when the deal is confirmed if they pay into escrow.";
+
 /** The lister's line once the agreement is approved. */
 export function agreementOwnerApproved(kind: "rent" | "stay"): string {
-  return `The agreement is approved. The ${kind === "rent" ? "renter" : "guest"} can pay now, and your share settles straight to your bank account from the same payment.`;
+  return `The agreement is approved. The ${kind === "rent" ? "renter" : "guest"} can pay now. ${OWNER_PAID_WHEN}`;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -376,7 +399,7 @@ export const HISTORY_NOT_A_BALANCE =
 
 /** For a lister, under their earnings total. */
 export const EARNINGS_SETTLEMENT =
-  "Your share of each payment settled to the bank account on your payout details through Paystack, in the same transaction the renter or guest paid.";
+  "Your share of a card payment went to the bank account on your payout details in the same payment; an escrow payment is released to you when the deal is confirmed.";
 
 /** The payer's total card. */
 export const PAYMENTS_TOTAL_LABEL = "Paid through Vallo";
@@ -396,11 +419,11 @@ export const PAYMENTS_EMPTY_BODY =
 /** A lister's empty history. */
 export const EARNINGS_EMPTY_TITLE = "Nothing has been paid to you yet";
 export const EARNINGS_EMPTY_BODY =
-  "When a renter or guest pays for one of your listings, your share appears here. Paystack sends it straight to your bank account, and Vallo never holds it.";
+  "When a renter or guest pays for one of your listings, your share appears here. Vallo never holds it: a card payment goes straight to your bank account, and escrow releases it when the deal is confirmed.";
 
 /** A host's empty history: how a host is paid, in the kit's 180 characters. */
 export const HOST_EARNINGS_EMPTY_BODY =
-  "When a guest pays for a stay, your share appears here. Payouts arrive by Paystack split, straight to the bank account on your payout details.";
+  "When a guest pays for a stay, your share appears here. It goes to the bank account on your payout details: at once by card, or from escrow when the stay is confirmed.";
 
 /** A read that failed. Said plainly, and never drawn as an empty list. */
 export const HISTORY_UNAVAILABLE_TITLE = "Your history could not be loaded";
@@ -414,7 +437,7 @@ export const HISTORY_END = "That is everything.";
 
 /** The Money desk's history panel. */
 export const ADMIN_HISTORY_NOTE =
-  "Every payment and refund on the platform, read from the transaction and refund records at the moment of asking. Vallo holds none of it: each payment was split by Paystack in the same transaction.";
+  "Every payment and refund on the platform, read from the transaction and refund records at the moment of asking. Vallo holds none of it: a card payment was split by Paystack in the same transaction, and an escrow payment is held by the licensed partner.";
 export const ADMIN_HISTORY_UNAVAILABLE =
   "The platform history could not be read just now. This does not mean there were no payments.";
 
@@ -846,7 +869,7 @@ export const HELD_MONEY_NOT_US =
 
 /** /cancellations, the lede: the terms are fixed when the stay is paid. */
 export const CANCEL_LEDE =
-  "A stay listed by an owner or agent follows the three steps below; a hotel room shows its own rate's terms before you choose it. Either way the terms are fixed on your booking when you pay, so they cannot change afterwards.";
+  "A stay listed by an owner or agent follows the three steps below. A hotel, shortlet or serviced apartment run as a business picks one of four policies and shows its terms before you book. Either way the terms are fixed on your booking when you pay, so they cannot change afterwards.";
 
 /** /cancellations: a hold nobody has paid for. */
 export const CANCEL_BEFORE_PAID =
@@ -854,7 +877,7 @@ export const CANCEL_BEFORE_PAID =
 
 /** /cancellations: a paid stay is cancelled by a person, and where the refund goes. */
 export const CANCEL_AFTER_PAID =
-  "Once money has moved, a cancellation is handled by a person rather than by a button, because a refund is somebody's money and it deserves a name against the decision. Write to support with your booking reference. We apply the schedule above exactly as it is written, the refund goes back to the card or account you paid with, and you get the amount and the reason in writing.";
+  "Once money has moved, a cancellation is handled by a person rather than by a button, because a refund is somebody's money and it deserves a name against the decision. Ask from the booking in Plans, or write to support with your booking reference. We apply the terms fixed on your booking exactly as they are written, the refund goes back to the card or account you paid with, and you get the amount and the reason in writing.";
 
 /** /cancellations: the agent cancels. `{hours}` is FULL_REFUND_HOURS, set as a figure by the page. */
 export const CANCEL_BY_AGENT =
@@ -876,13 +899,13 @@ export const CANCEL_TABLE =
 export const SAFETY_NO_ACCOUNT_NUMBER =
   "We add nothing to the price you are shown, and every payment happens inside the platform. So there is no honest reason for anyone to send you an account number, and if somebody does, they are not doing platform business. Report them and stop replying.";
 
-/** /safety, how paying works: after NO_CUSTODY_SENTENCE, the processor and both sides. */
+/** /safety, how paying works: after NO_CUSTODY_SENTENCE, the processor, escrow and both sides. */
 export const SAFETY_PAY_THROUGH_VALLO =
-  "Every payment on Vallo goes through the checkout screen with a licensed Nigerian payment processor, using a card or a bank transfer raised by the processor. That is true on both sides: a hotel room for Friday and a flat for the year are paid the same way, and there is no step on either where somebody sends you an account number.";
+  "Every payment on Vallo goes through the checkout screen with a licensed Nigerian payment partner, using a card or a bank transfer raised by the partner. For rent and shortlets you can choose Escrow instead, where a licensed partner holds the payment until the deal is confirmed, and a sale is always paid through escrow. On both sides there is no step where somebody sends you an account number.";
 
 /** /safety, how paying works: the price is whole, and whose fees are whose. */
 export const SAFETY_PRICE_IS_WHOLE =
-  "The total you see before you commit is the lister's own number for that market, whole: the move-in total on a yearly tenancy, the nights and any cleaning charge on a shortlet, the asking price on a sale or a lease. Where an agent charges a fee of their own it is theirs, it belongs on the listing and not at the door, and it is named as theirs. Nothing of ours is added at the end. If your bank or card network takes something of their own, that is theirs and it is named as theirs too.";
+  "The total you see before you commit is the lister's own number for that market, whole: the move-in total on a yearly tenancy, the nights, any cleaning charge and every charge listed for the door on a stay, the asking price on a sale or a lease. Where an agent charges a fee of their own it is theirs, it belongs on the listing, and it is named as theirs. A host may ask at the door only for a charge listed before you booked. Nothing of ours is added at the end. If your bank or card network takes something of their own, that is theirs and it is named as theirs too.";
 
 /** /safety, how paying works: the reference every payment leaves. */
 export const SAFETY_PAYMENT_RECORD =

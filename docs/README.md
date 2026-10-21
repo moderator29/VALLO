@@ -30,7 +30,6 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 | [adr/0004-two-rails-direct-and-provider-held-escrow.md](adr/0004-two-rails-direct-and-provider-held-escrow.md) | **Current, subordinate to ADR 0003.** Which rail a payment takes: direct settlement by split for fixed-price bookings, provider held escrow for negotiated deals, chosen by data in `payment_rail_policy` |
 | [adr/0002-vallo-never-holds-customer-money.md](adr/0002-vallo-never-holds-customer-money.md) | Vallo never holds customer money (supersedes ADR 0001, amended by ADR 0003 and 0004) |
 | [adr/0001-held-payments-custody-purpose-and-the-float.md](adr/0001-held-payments-custody-purpose-and-the-float.md) | Superseded: held payments (escrow), kept as an ADR record only |
-| [API_INVENTORY.md](API_INVENTORY.md) | The third-party integration plan |
 | [design/ONE-PRODUCT-DECISIONS.md](design/ONE-PRODUCT-DECISIONS.md) | The one-product decisions: shared primitives over per-page inventions |
 
 ## Money
@@ -57,6 +56,7 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 | [DB_NOTES.md](DB_NOTES.md) | Database statements the connector cannot run, for the founder to paste |
 | [db/SUPERSEDED_MIGRATIONS.md](db/SUPERSEDED_MIGRATIONS.md) | Migrations in the folder that the live database never ran as written, and why |
 | [sql-editor/01-cleanup-now.sql](sql-editor/01-cleanup-now.sql) | One paste for the Supabase SQL editor: the purges and drops the connector refuses |
+| [sql-editor/02-health-check-read-only.sql](sql-editor/02-health-check-read-only.sql) | Read-only health checks for the Supabase SQL editor: the advisor pass the 17 October audit could not run |
 | [security/GRANT_STATE.md](security/GRANT_STATE.md) | The grant state of the live database |
 | [schema/NAMES.md](schema/NAMES.md) | Schema names that mislead, and what they actually hold (a unit test checks it) |
 | [ONBOARDING_A_RESTAURANT.md](ONBOARDING_A_RESTAURANT.md) | What to collect from a restaurant owner, and why |
@@ -111,7 +111,6 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 | [design/COMPONENTS.md](design/COMPONENTS.md), [design/COMPONENT_LIBRARY.md](design/COMPONENT_LIBRARY.md) | The component families, and the porting rules for the ported components |
 | [design/CRAFT_DOCTRINE.md](design/CRAFT_DOCTRINE.md) | The taste standard: one screen one idea, and the questions a screen answers before it ships |
 | [design/VOICE.md](design/VOICE.md) | How the product speaks in empty, loading, offline, failed and done states |
-| [design/NAV_STATE.md](design/NAV_STATE.md) | Where back goes, per route (generated) |
 | [design/CATALOGUE.md](design/CATALOGUE.md) | An index of every reference image in `design/references/` |
 | [design/LIGHT_MODE_REMOVED.md](design/LIGHT_MODE_REMOVED.md) | History: why light mode was removed on 23 September 2026. It was restored on 25 September and ships today (Light, Dark or System, default Dark) |
 | [DESIGN_DIRECTION.md](DESIGN_DIRECTION.md) | The earlier design direction, kept because code comments cite it; where it meets `design/PREMIUM-STANDARD.md` or the rulings D78, D81 and D82, those win |
