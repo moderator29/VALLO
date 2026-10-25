@@ -17,6 +17,7 @@ import { loadInterestsState } from "@/lib/interests/queries";
 import { planFirstRun } from "./plan";
 import { resolveSession } from "@/lib/actions/session";
 import { listStates } from "@/lib/places/queries";
+import { publicCatalogueEnabled } from "@/lib/catalogue/public-access";
 
 export const metadata: Metadata = {
   title: "Get started",
@@ -94,6 +95,7 @@ export default async function WelcomePage({
           arrival={plan.arrival}
           atChoice={plan.choice === true}
           fromSignUpForm={tour && isSignUpForm(plan.next)}
+          catalogueOpen={publicCatalogueEnabled()}
         />
       </WelcomeStage>
     );

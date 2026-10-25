@@ -151,6 +151,7 @@ so switching it needs an environment change and a redeploy, not a code change.
   every action stay behind sign-in either way, and an exact address is never
   selected for a signed-out reader (the address columns are not granted to
   anon).
+- **The welcome slides end with a third choice, "Look around first"** (to `/search`), shown only while this flag is on. Added 25 October 2026 after Apple rejected version 1.0.0 under 5.1.1(v): the slides ended on Create account and Sign in only, so a reviewer had to register before browsing.
 - **The native app starts on `/open`**, a public route: signed in goes to
   `/home`; signed out goes to `/search` when the flag is on and to `/welcome`
   when it is off.

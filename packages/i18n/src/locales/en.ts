@@ -410,7 +410,8 @@ export const en = {
        `lib/trust/verification.ts` (a member of staff has seen the agent's
        government ID) and says nothing about the property; paying on Vallo is
        advice, not a guarantee; nothing inside the platform is visible signed
-       out, so the ending offers an account, not a look around. */
+       out, so the ending offers an account. When the founder's public catalogue
+       switch is on, it also offers "Look around first" (Apple 5.1.1(v)). */
     firstRun: {
       carousel: "Getting started with Vallo",
       slideLive: "Slide {n} of {total}: {title}",
@@ -440,6 +441,7 @@ export const en = {
         art: "Search and an account, with the coin between them",
         create: "Create account",
         signIn: "Sign in",
+        lookAround: "Look around first",
       },
       member: {
         titleA: "You are in.",

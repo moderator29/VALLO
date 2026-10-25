@@ -132,6 +132,7 @@ export function FirstRun({
   arrival = null,
   atChoice = false,
   fromSignUpForm = false,
+  catalogueOpen = false,
   asks = null,
 }: {
   t: Dictionary;
@@ -160,6 +161,13 @@ export function FirstRun({
    * and nothing on the first-run path is labelled skip.
    */
   fromSignUpForm?: boolean;
+  /**
+   * The public catalogue is open to a stranger (`VALLO_PUBLIC_CATALOGUE`), so
+   * the closing choice also offers "Look around first". Apple 5.1.1(v): a
+   * person may not be made to register before they can browse. Off, the
+   * choice is the two account doors only, as before.
+   */
+  catalogueOpen?: boolean;
   /**
    * A member only: what the one-screen sign-up no longer asks (A1), shown
    * beside the interests question. Null when there is nothing left to ask.
@@ -777,6 +785,19 @@ export function FirstRun({
             >
               {secondDoor.label}
             </ButtonLink>
+            {catalogueOpen ? (
+              <ButtonLink
+                variant="ghost"
+                size="lg"
+                full
+                href="/search"
+                onClick={door("/search")}
+                className="nf-om-second"
+                data-testid="welcome-look-around"
+              >
+                {f.choice.lookAround}
+              </ButtonLink>
+            ) : null}
           </div>
         ) : (
           <Button
