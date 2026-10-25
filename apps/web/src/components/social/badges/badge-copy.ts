@@ -21,5 +21,6 @@ export function badgeCopyOf(t: Dictionary): BadgeRowCopy {
     /* The platform's one sentence for a share that went nowhere. */
     copyFailed: t.details.share.failed,
     replayHint: p.momentReplayHint,
+    viewProfile: p.momentViewProfile,
   };
 }

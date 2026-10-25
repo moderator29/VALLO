@@ -51,7 +51,7 @@ export function BadgeRow({
   if (shown.length === 0) return null;
 
   return (
-    <section className="nf-merits" aria-label={copy.title} data-testid="profile-badges">
+    <section className="nf-merits" id="badges" aria-label={copy.title} data-testid="profile-badges">
       <h2 className="nf-merits__title">{copy.title}</h2>
       <ul className="nf-merits__list">
         {shown.map((badge) => (

@@ -86,6 +86,7 @@ export function BadgeEarnedHost({
       badge={current}
       copy={copy}
       shareUrl={shareUrl}
+      profileHref="/profile#badges"
       onClose={() => {
         writeSeen(viewerId, [...readSeen(viewerId), current.code]);
         setCurrent(null);

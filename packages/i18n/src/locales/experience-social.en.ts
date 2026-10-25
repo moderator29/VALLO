@@ -103,6 +103,7 @@ export const experienceSocialEn = {
     badgeMeans: "What it means",
     momentOverline: "Badge earned",
     momentShare: "Share",
+    momentViewProfile: "View on my profile",
     momentBack: "Back",
     momentShareText: "I earned {badge} on Vallo.",
     momentCopied: "Copied. Paste it anywhere.",

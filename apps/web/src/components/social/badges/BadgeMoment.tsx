@@ -2,7 +2,9 @@
 
 import "./badges.css";
 import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
+import { BadgeMedal } from "./BadgeMedal";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { Toast, useToast } from "@/components/ui/Toast";
@@ -24,6 +26,8 @@ export type BadgeMomentCopy = {
   /** Said when neither the share sheet nor the clipboard took them. */
   copyFailed: string;
   replayHint: string;
+  /** "View on my profile": the way from the moment to the badge on the page. */
+  viewProfile: string;
 };
 
 /**
@@ -52,14 +56,23 @@ export function BadgeMoment({
   badge,
   copy,
   shareUrl,
+  profileHref,
   onClose,
 }: {
   badge: ProfileBadge;
   copy: BadgeMomentCopy;
   /** The person's own public page, or undefined when they have none. */
   shareUrl?: string;
+  /**
+   * Where the badge lives on the person's own page (`/profile#badges`). When
+   * given, the moment offers "View on my profile" as its main action: it closes
+   * and takes them there, scrolling to the row when they are already on the page.
+   */
+  profileHref?: string;
   onClose: () => void;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { toast, show } = useToast();
   /* Bumping the key restarts every beat. Allowed once. */
   const [play, setPlay] = useState(0);
@@ -101,6 +114,20 @@ export function BadgeMoment({
     }
   };
 
+  const viewProfile = () => {
+    if (!profileHref) return;
+    onClose();
+    const [path, hash] = profileHref.split("#");
+    if (pathname === path) {
+      /* Already on the page: let the sheet leave, then bring the row into view. */
+      window.setTimeout(() => {
+        document.getElementById(hash || "badges")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 160);
+    } else {
+      router.push(profileHref);
+    }
+  };
+
   if (!badge.earned) return null;
 
   return (
@@ -123,7 +150,7 @@ export function BadgeMoment({
             onClick={replay}
             aria-label={replayed ? badge.name : `${badge.name}. ${copy.replayHint}`}
           >
-            <BrandIcon name="rosette" fill drawn={224} />
+            <BadgeMedal className="nf-moment__art" />
             <span className="nf-moment__object" aria-hidden="true">
               <BrandIcon name={object} fill drawn={96} />
             </span>
@@ -134,7 +161,18 @@ export function BadgeMoment({
         <p className="nf-moment__line">{badge.description}</p>
         <p className="nf-moment__date">{badge.grantedLabel}</p>
         <div className="nf-moment__actions">
-          <Button variant="primary" size="lg" full leadingIcon="share" onClick={() => void share()}>
+          {profileHref ? (
+            <Button variant="primary" size="lg" full onClick={viewProfile} data-testid="badge-view-profile">
+              {copy.viewProfile}
+            </Button>
+          ) : null}
+          <Button
+            variant={profileHref ? "secondary" : "primary"}
+            size="lg"
+            full
+            leadingIcon="share"
+            onClick={() => void share()}
+          >
             {copy.share}
           </Button>
           <Button variant="quiet" size="lg" full onClick={onClose}>

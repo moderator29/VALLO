@@ -47,6 +47,20 @@
  * component competes for.
  */
 @layer base {
+  /* A search field is a plain text field: no platform field chrome and no
+     platform magnifier, on iOS and desktop WebKit alike. The platform's small
+     clear button stays, so a bare search bar can still be emptied. */
+  input[type="search"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+  }
   * {
     border-color: var(--nf-border-subtle);
   }
@@ -247,6 +261,46 @@ html {
   ):focus-visible {
   outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
   outline-offset: var(--nf-focus-ring-offset);
+}
+
+/*
+ * A TEXT FIELD NEVER DRAWS ITS OWN SQUARE RING (the founder, many times, 25
+ * October 2026: "that long line inside the search bar, remove it from every
+ * search bar").
+ *
+ * WHY IT SHOWED. The rule above is unlayered on purpose, so it outranks every
+ * component. A search bar is a rounded shell around a bare input, and each one
+ * (the place picker, the shelf, the admin bars, the agent finder) says
+ * `outline: none` on its input inside `@layer components`. That declaration
+ * LOST to the unlayered ring, every time, whatever its specificity. So a tap
+ * into a field painted the shell's own rounded ring AND a second square ring
+ * around the input inside it: two vertical lines at the edges of the text area
+ * and a double ring everywhere else.
+ *
+ * WHAT IT DOES NOW. Text-entry controls (any input that takes typing, and
+ * textarea) never take the generic outline. Focus on a text field is carried by
+ * the field itself (`.nf-field:focus`: border and halo) or by its shell
+ * (`.nf-focus-well:focus-within` and the shelf, hero, landing and admin
+ * shells), which is what the design always said. Buttons, links, checkboxes,
+ * radios, switches, ranges and every other control keep the ring above. This is
+ * unlayered and after the ring, at the same specificity, so it wins by order.
+ */
+:where(
+    input:not(
+      [type="checkbox"],
+      [type="radio"],
+      [type="range"],
+      [type="file"],
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="image"],
+      [type="color"],
+      [type="hidden"]
+    ),
+    textarea
+  ):focus-visible {
+  outline: none;
 }
 
 /*

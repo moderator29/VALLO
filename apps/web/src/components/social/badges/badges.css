@@ -238,10 +238,19 @@
       scale: 1;
     }
   }
-  /* The badge's own object, sitting in the rosette's blank centre. */
+  /* The drawn medal: a vector, so it is sharp at any size and density. */
+  .nf-moment__art {
+    inline-size: 100%;
+    block-size: 100%;
+    display: block;
+    overflow: visible;
+    filter: drop-shadow(0 16px 28px color-mix(in oklab, var(--nf-brand-primary) 55%, transparent));
+  }
+  /* The badge's own object, sitting in the medal's pale centre (centre at
+     120 by 108 of 240, the disc 56 across from it). */
   .nf-moment__object {
     position: absolute;
-    inset: 24% 24% 36%;
+    inset: 26.5% 31.5% 36.5%;
     display: grid;
     place-items: center;
   }
