@@ -185,15 +185,19 @@ const MAX_CACHEABLE_BYTES = 5 * 1024 * 1024;
  * background and the fresh copy replaces the kept one (the page is told, and
  * refreshes itself quietly; `ConnectionLine`).
  */
-const NAVIGATION_TIMEOUT_MS = 3000;
+const NAVIGATION_TIMEOUT_MS = 1200;
+/* It was 3000. On a weak connection that was the three seconds the founder
+   timed at every open: the kept page was on the phone and waited for a
+   network that was not going to answer. 1200 is long enough for a healthy
+   connection to win and short enough that a poor one never feels stuck. */
 
 /*
  * THE INSTANT ANSWER'S LIMITS. A kept page answers at once only while it is
  * younger than this. Older than that, the network is asked first, as above.
- * Forty-eight hours covers "I opened it yesterday" and keeps a copy from a
- * build several deploys old off the screen. The founder may move it.
+ * Seven days covers "I opened it last week" (the copy refreshes itself in
+ * place as soon as the page runs, so an old copy is on screen for a moment). The founder may move it.
  */
-const INSTANT_MAX_AGE_MS = 48 * 60 * 60 * 1000;
+const INSTANT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 /*
  * A SECOND DOCUMENT LOAD SOON AFTER AN INSTANT ANSWER GOES TO THE NETWORK.

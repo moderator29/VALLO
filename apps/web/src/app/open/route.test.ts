@@ -27,7 +27,7 @@ vi.mock("next/headers", () => ({
 }));
 
 /* Mirrors the private constant in route.ts; Next allows no extra route exports. */
-const OPEN_TIMEOUT_MS = 3000;
+const OPEN_TIMEOUT_MS = 800;
 const { GET } = await import("./route");
 
 const request = () => new Request("https://vallo.test/open");

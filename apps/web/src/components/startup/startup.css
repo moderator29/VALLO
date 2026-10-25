@@ -52,13 +52,13 @@
   }
 
   :root[data-splash="on"] .nf-app-header {
-    animation: nf-open-header 540ms var(--nf-ease-entrance) both;
+    animation: nf-open-header 320ms var(--nf-ease-entrance) both;
   }
   :root[data-splash="on"] .nf-dockrow {
-    animation: nf-open-dock 540ms var(--nf-ease-entrance) 60ms both;
+    animation: nf-open-dock 320ms var(--nf-ease-entrance) 30ms both;
   }
   :root[data-splash="on"] #main {
-    animation: nf-open-ground 900ms var(--nf-ease-standard) both;
+    animation: nf-open-ground 540ms var(--nf-ease-standard) both;
   }
 
   :root[data-splash="on"][data-opening="brief"] :is(.nf-app-header, .nf-dockrow) {

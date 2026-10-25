@@ -81,19 +81,19 @@
  */
 
 /** The full opening: the first open of the day. */
-export const OPENING_FULL_MS = 1500;
+export const OPENING_FULL_MS = 600;
 
 /** The brief opening: any open within `RETURNING_WITHIN_MS` of the last. */
 export const OPENING_BRIEF_MS = 400;
 
 /** How recent the last open must be for this one to be brief. */
-export const RETURNING_WITHIN_MS = 6 * 60 * 60 * 1000;
+export const RETURNING_WITHIN_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** After the opening's length, the flag is released by this time at the latest. */
-export const STARTUP_RELEASE_MS = 250;
+export const STARTUP_RELEASE_MS = 100;
 
 /** On the native shell, the longest the opening waits, held at its first frame. */
-export const NATIVE_WAIT_MS = 600;
+export const NATIVE_WAIT_MS = 300;
 
 /** Where the last run's boot trace is kept, as one line. */
 export const BOOT_TRACE_KEY = "nf_boot_trace";

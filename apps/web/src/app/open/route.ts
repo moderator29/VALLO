@@ -49,7 +49,7 @@ import { FIRST_RUN_COOKIE, isFirstRunSeen } from "@/components/app/welcome/first
  * GoTrue before the first redirect of every signed-in cold start. The
  * deadline stays: a cold instance still fetches those keys once.
  */
-const OPEN_TIMEOUT_MS = 3000;
+const OPEN_TIMEOUT_MS = 800;
 
 /** Cheap enough to call on every request: no network, just a cookie name. */
 async function guessSignedIn(): Promise<boolean> {

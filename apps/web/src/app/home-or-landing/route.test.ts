@@ -62,7 +62,7 @@ describe("home or landing, never hanging", () => {
     expect(await pending).toBe("/home");
   });
 
-  it("is still waiting at 2999 ms, so the deadline is the one in the file", async () => {
+  it("is still waiting at 799 ms, so the deadline is the one in the file", async () => {
     vi.useFakeTimers();
     resolveSession.mockImplementation(hangs);
     jar = [{ name: "sb-uccixoonmbhrnyczyigt-auth-token", value: "x" }];
@@ -71,7 +71,7 @@ describe("home or landing, never hanging", () => {
       settled = true;
       return path;
     });
-    await vi.advanceTimersByTimeAsync(2_999);
+    await vi.advanceTimersByTimeAsync(799);
     expect(settled).toBe(false);
     await vi.advanceTimersByTimeAsync(1);
     expect(await pending).toBe("/home");

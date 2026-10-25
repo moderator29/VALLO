@@ -1020,7 +1020,7 @@ async function owesSetup(supabase: SetupReader, userId: string): Promise<boolean
 }
 
 /** OPS-05. How long the guard waits for auth before it stops waiting. */
-const AUTH_ANSWER_TIMEOUT_MS = 3000;
+const AUTH_ANSWER_TIMEOUT_MS = 1200;
 
 /** Whether the request carries a Supabase session cookie at all. */
 function carriesSessionCookie(request: NextRequest): boolean {

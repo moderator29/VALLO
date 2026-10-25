@@ -35,7 +35,7 @@ export const SERVER_CUT_PATHS: readonly string[] = ["/rest/v1/", "/auth/v1/", "/
  * its own answer deadline (OPS-05), and aborting a refresh halfway could
  * lose a rotated token.
  */
-export const PROXY_DEADLINE_MS = 5_000;
+export const PROXY_DEADLINE_MS = 2_500;
 export const PROXY_CUT_PATHS: readonly string[] = ["/rest/v1/"];
 
 function urlOf(input: RequestInfo | URL): string {

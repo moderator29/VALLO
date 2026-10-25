@@ -31,7 +31,7 @@ import { isShellRequest, shellStartPath } from "@/lib/native/shell";
  * very next request, which is what actually decides who may stay. This route
  * only has to stop hanging; it never had to be right on its own.
  */
-const HOME_OR_LANDING_TIMEOUT_MS = 3000;
+const HOME_OR_LANDING_TIMEOUT_MS = 800;
 
 /** Cheap enough to call on every timeout: no network, just a cookie name. */
 async function guessSignedIn(): Promise<boolean> {
