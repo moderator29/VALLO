@@ -8,6 +8,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { publishStory } from "@/lib/social/stories-actions";
+import { uploadFailureText, uploadToStorage, withTimeout } from "@/lib/media/upload";
 import {
   STORY_COPY,
   STORY_FAILURE,
@@ -73,6 +74,9 @@ export function StoryComposer({
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState(false);
   const [pending, startTransition] = useTransition();
+  /* 0 to 1 while the picture is on its way, so "Publishing" is never a
+     spinner that might be stuck. */
+  const [sent, setSent] = useState<number | null>(null);
   /* The object already in the bucket for the picture on screen, so a retry
      after a failed publish writes the row against it instead of uploading
      another copy nobody will ever read. */
@@ -205,11 +209,17 @@ export function StoryComposer({
              first path segment; the read policy resolves the post id out of the
              second, which the server action fills in when it writes the media row. */
           const fresh = `${userId}/${crypto.randomUUID()}.jpg`;
-          const upload = await supabase.storage
-            .from("social-media")
-            .upload(fresh, blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
-          if (upload.error) {
-            setError(STORY_FAILURE.upload);
+          const upload = await uploadToStorage({
+            supabase,
+            bucket: "social-media",
+            path: fresh,
+            body: blob,
+            contentType: "image/jpeg",
+            onProgress: setSent,
+          });
+          if (!upload.ok) {
+            setSent(null);
+            setError(uploadFailureText(upload.reason));
             return;
           }
           uploaded.current = { blob, path: fresh };
@@ -217,14 +227,18 @@ export function StoryComposer({
         }
 
         stage = "publish";
-        const result = await publishStory({
-          areaId,
-          headline: finalHeadline,
-          standfirst: finalStandfirst,
-          placeLabel: place.trim(),
-          imagePath: path,
-          ...(size ? { width: size.width, height: size.height } : {}),
-        });
+        setSent(null);
+        const result = await withTimeout(
+          publishStory({
+            areaId,
+            headline: finalHeadline,
+            standfirst: finalStandfirst,
+            placeLabel: place.trim(),
+            imagePath: path,
+            ...(size ? { width: size.width, height: size.height } : {}),
+          }),
+          30_000,
+        );
 
         if (!result.ok) {
           setError(result.error);
@@ -236,6 +250,7 @@ export function StoryComposer({
         }
         router.replace(`/stories/${result.data.storyId}`);
       } catch {
+        setSent(null);
         setError(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down);
       }
     });
@@ -357,7 +372,11 @@ export function StoryComposer({
       ) : null}
 
       <Button type="submit" variant="primary" full loading={pending} disabled={!canPublish}>
-        {pending ? STORY_COPY.publishing : STORY_COPY.publish}
+        {pending
+          ? sent !== null && sent < 1
+            ? `${STORY_COPY.publishing} ${Math.round(sent * 100)}%`
+            : STORY_COPY.publishing
+          : STORY_COPY.publish}
       </Button>
 
       <input

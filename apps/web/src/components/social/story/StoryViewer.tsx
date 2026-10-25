@@ -267,6 +267,7 @@ export function StoryViewer({
             height={1600}
             sizes="100vw"
             priority
+            quality={90}
             className="nf-story__image"
           />
         ) : (

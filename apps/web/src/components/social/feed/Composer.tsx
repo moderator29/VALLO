@@ -13,6 +13,7 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { initial as initialOf } from "@/lib/text/initial";
 import { Segmented } from "@/components/ui/Segmented";
 import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachPostMedia, dropPost, replyToPost } from "@/lib/social/posts-actions";
 import { sendOrKeep } from "@/lib/offline/send-or-keep";
@@ -319,26 +320,29 @@ export function Composer({
     try {
       const supabase = await loadBrowserClient();
       if (!supabase) return false;
+      /* The local session, not `getUser()`: that is a network call of its own
+         and, on a weak connection, a second place to hang. */
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return false;
 
       const uploaded: { path: string; width: number | null; height: number | null }[] = [];
       for (const picture of items) {
         const path = `${user.id}/${postId}/${crypto.randomUUID()}.jpg`;
-        const upload = await supabase.storage
-          .from(POST_MEDIA_BUCKET)
-          .upload(path, picture.blob, {
-            contentType: "image/jpeg",
-            cacheControl: "3600",
-            upsert: false,
-          });
-        if (upload.error) return false;
+        const upload = await uploadToStorage({
+          supabase,
+          bucket: POST_MEDIA_BUCKET,
+          path,
+          body: picture.blob,
+          contentType: "image/jpeg",
+        });
+        if (!upload.ok) return false;
         uploaded.push({ path, width: picture.width, height: picture.height });
       }
 
-      const result = await attachPostMedia({ postId, items: uploaded });
+      const result = await withTimeout(attachPostMedia({ postId, items: uploaded }), 30_000);
       return result.ok;
     } catch {
       return false;
@@ -367,24 +371,30 @@ export function Composer({
       /* V-40: a new post with no signal and no pictures is kept and posted
          when the signal returns. Replies and pictures need the connection. */
       let result: Awaited<ReturnType<typeof dropPost>>;
-      if (parentId) {
-        result = await replyToPost({ parentId, body });
-      } else if (pictures.length === 0) {
-        const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
-        const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
-        if (done.state === "kept") {
-          setBody("");
-          setError(null);
-          setKeptNote(OUTBOX.waiting);
-          return;
+      try {
+        if (parentId) {
+          result = await withTimeout(replyToPost({ parentId, body }), 30_000);
+        } else if (pictures.length === 0) {
+          const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
+          const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
+          if (done.state === "kept") {
+            setBody("");
+            setError(null);
+            setKeptNote(OUTBOX.waiting);
+            return;
+          }
+          if (done.state === "not_kept") {
+            setError(OUTBOX.couldNotKeep);
+            return;
+          }
+          result = done.result;
+        } else {
+          result = await withTimeout(dropPost(areaId ? { areaId, kind, body } : { kind, body }), 30_000);
         }
-        if (done.state === "not_kept") {
-          setError(OUTBOX.couldNotKeep);
-          return;
-        }
-        result = done.result;
-      } else {
-        result = await dropPost(areaId ? { areaId, kind, body } : { kind, body });
+
+      } catch {
+        setError(POST_FAILURE.down);
+        return;
       }
 
       if (!result.ok) {

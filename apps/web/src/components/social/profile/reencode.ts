@@ -29,7 +29,7 @@ export type ReencodeOptions = {
 
 export async function reencodeToJpeg(
   file: File,
-  { maxEdge, square = false, quality = 0.85 }: ReencodeOptions,
+  { maxEdge, square = false, quality = 0.92 }: ReencodeOptions,
 ): Promise<Blob | null> {
   try {
     const bitmap = await createImageBitmap(file);

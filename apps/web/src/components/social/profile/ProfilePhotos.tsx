@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import { useRef, useState } from "react";
 import Link from "next/link";
@@ -95,15 +96,13 @@ export function ProfilePhotos({
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await supabase.storage
-        .from("social-covers")
-        .upload(path, blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: blob, contentType: "image/jpeg" });
+      if (!upload.ok) {
         setError("That upload did not go through. Check your connection and try again.");
         return;
       }
 
-      const result = await setSocialCover({ storagePath: path });
+      const result = await withTimeout(setSocialCover({ storagePath: path }), 30_000);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -133,15 +132,13 @@ export function ProfilePhotos({
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await supabase.storage
-        .from("avatars")
-        .upload(path, blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: blob, contentType: "image/jpeg" });
+      if (!upload.ok) {
         setError("That upload did not go through. Check your connection and try again.");
         return;
       }
 
-      const result = await setAvatar({ storagePath: path });
+      const result = await withTimeout(setAvatar({ storagePath: path }), 30_000);
       if (!result.ok) {
         setError(result.error);
         return;

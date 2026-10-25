@@ -99,6 +99,7 @@ import {
   videoExtension,
   videoMime,
 } from "@/lib/agent/video-prep";
+import { uploadToStorage } from "@/lib/media/upload";
 import { forgetUploadPath, resumableUpload, stableUploadPath } from "@/lib/agent/resumable-upload";
 import { SUPABASE_URL } from "@/lib/supabase/env";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -1974,10 +1975,11 @@ export function ListingWizard({
       canvas.height = height;
       const context = canvas.getContext("2d");
       if (!context) return null;
+      context.imageSmoothingQuality = "high";
       context.drawImage(decoded.source, 0, 0, width, height);
 
       return await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.9);
+        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92);
       });
     } catch {
       return null;
@@ -2114,10 +2116,19 @@ export function ListingWizard({
 
         let uploadError: { message?: string; statusCode?: string | number } | null = null;
         try {
-          const upload = await supabase.storage
-            .from("listing-photos")
-            .upload(path, clean, { contentType: "image/jpeg", upsert: false });
-          uploadError = upload.error as typeof uploadError;
+          const upload = await uploadToStorage({
+            supabase,
+            bucket: "listing-photos",
+            path,
+            body: clean,
+            contentType: "image/jpeg",
+          });
+          if (!upload.ok) {
+            uploadError = {
+              message: upload.reason === "offline" || upload.reason === "timeout" ? "network" : "failed",
+              statusCode: upload.status,
+            };
+          }
         } catch {
           uploadError = { message: "network" };
         }

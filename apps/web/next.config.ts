@@ -106,6 +106,11 @@ const nextConfig: NextConfig = {
      */
     deviceSizes: [384, 480, 640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     formats: ["image/avif", "image/webp"],
+    /* The optimiser's default allowlist is [75] alone, and 75 in AVIF or WebP
+       is what made posted photographs look dull next to the picture the
+       person approved in the composer. 90 is for the photographs people post
+       and watch (posts, stories); everything else stays at 75. */
+    qualities: [75, 90],
     minimumCacheTTL: 86_400,
     remotePatterns: [
       {

@@ -601,7 +601,7 @@ export function MapCanvas({
          the element a keyboard actually lands on. */
       tabIndex={0}
       aria-label="Map of places. Every pin is a button, and the list control opens the same places as text. Arrow keys pan, plus and minus zoom."
-      className={`relative w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[var(--nf-brand-primary)] ${
+      className={`relative isolate w-full overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[var(--nf-brand-primary)] ${
         fill ? "h-full" : "h-[max(26rem,calc(100svh-18rem))] sm:h-[640px]"
       }`}
       onKeyDown={(event) => {

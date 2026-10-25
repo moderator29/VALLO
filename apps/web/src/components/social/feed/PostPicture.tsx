@@ -58,6 +58,7 @@ export function PostPicture({
       height={height}
       sizes={sizes}
       loading="lazy"
+      quality={90}
       unoptimized={!optimisable}
       className="nf-pic"
       data-loaded={loaded ? "" : undefined}

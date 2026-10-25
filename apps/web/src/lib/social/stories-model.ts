@@ -51,7 +51,7 @@ export const STORY_COMMENT_MAX = 1000;
 /** The longest edge a story image is stored at. Full bleed on a phone, and
     still sensible on a laptop, without shipping a 4MB photograph over 3G. */
 
-export const STORY_IMAGE_MAX_EDGE = 1600;
+export const STORY_IMAGE_MAX_EDGE = 2048;
 
 export const STORY_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 

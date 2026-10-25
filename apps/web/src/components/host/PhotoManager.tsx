@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadToStorage } from "@/lib/media/upload";
 import { useId, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -103,10 +104,14 @@ export function PhotoManager({
         setError(w.uploadFailed);
         return;
       }
-      const { error: uploadError } = await supabase.storage
-        .from("accommodation-photos")
-        .upload(path, chosen, { contentType: chosen.type });
-      if (uploadError) {
+      const uploaded = await uploadToStorage({
+        supabase,
+        bucket: "accommodation-photos",
+        path,
+        body: chosen,
+        contentType: chosen.type,
+      });
+      if (!uploaded.ok) {
         setError(w.uploadFailed);
         return;
       }

@@ -55,7 +55,7 @@ export const EDIT_WINDOW_MINUTES = 15;
  * learn two different limits.
  * ------------------------------------------------------------------ */
 
-export const POST_IMAGE_MAX_EDGE = 1600;
+export const POST_IMAGE_MAX_EDGE = 2048;
 
 export const POST_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
