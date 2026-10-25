@@ -69,6 +69,8 @@ const SHOW_ABOVE = 96;
 const SHOW_NEAR_END = 48;
 /** Movements smaller than this are noise, not a decision. */
 const JITTER = 8;
+/** How long a tapped tab may hold the pill before the bar reverts to the real route. */
+export const PENDING_REVERT_MS = 7000;
 
 export function AutoHideDock({
   label,
@@ -175,6 +177,22 @@ export function AutoHideDock({
       for (const el of document.querySelectorAll(".nf-tab__link[data-on]")) el.removeAttribute("data-on");
     };
   }, [route]);
+  /*
+   * A TAP THAT NEVER LANDS GIVES THE BAR BACK ITS TRUTH. On a weak or dead
+   * network the new route can take a long time, or never arrive. The tapped
+   * tab keeps the pill for a moment (the finger was answered), then the bar
+   * returns to the screen the reader is actually on, so it never says "Feed"
+   * over a Home that is still showing. A route that lands first clears this
+   * through the effect above.
+   */
+  useEffect(() => {
+    if (!pending) return;
+    const timer = window.setTimeout(() => {
+      for (const el of document.querySelectorAll(".nf-tab__link[data-on]")) el.removeAttribute("data-on");
+      setPendingOn(null);
+    }, PENDING_REVERT_MS);
+    return () => window.clearTimeout(timer);
+  }, [pending]);
   const onClickCapture = (event: React.MouseEvent<HTMLElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
     const link = (event.target as Element).closest("a.nf-tab__link");

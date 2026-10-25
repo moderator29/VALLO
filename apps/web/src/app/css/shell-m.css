@@ -1132,9 +1132,34 @@
     opacity: 1;
     transform: none;
   }
-  /* While a tapped tab loads, the old one steps back at once. */
-  .nf-dockrow[data-dock-pending] .nf-tabbar .nf-tab__link[aria-current="page"]:not([data-on]) {
+  /*
+   * ONE TAB IS LIT AT A TIME, ALWAYS (the founder, 25 October 2026: "I click
+   * Home and the bar shows Home AND Feed").
+   *
+   * While a tapped tab loads (`data-dock-pending`, the tapped link carrying
+   * `data-on`), the OLD current tab used to lose only its link colour. Its
+   * glyph kept the brand ink and the bloom (this file, chrome.css and
+   * signature-motion.css), and its orange spark under it (spark.css) stayed
+   * drawn, so on a slow network two tabs read as chosen for as long as the
+   * route took to land. Every mark the current tab wears is taken off here, at
+   * a weight above all of those rules, so no later partial can relight it.
+   * `AutoHideDock` ends the pending state when the route lands or after a
+   * timeout, so the bar never keeps a promise the screen did not keep.
+   */
+  :root .nf-dockrow[data-dock-pending] .nf-tabbar .nf-tab__link[aria-current="page"]:not([data-on]),
+  :root .nf-dockrow[data-dock-pending] .nf-tabbar .nf-tab__link[aria-current="page"]:not([data-on]) .nf-tab__icon {
     color: var(--nf-dock-glyph);
+    filter: none;
+    text-shadow: none;
+    animation: none;
+  }
+  :root .nf-dockrow[data-dock-pending] .nf-tabbar .nf-tab__link[aria-current="page"]:not([data-on])::before {
+    opacity: 0;
+    transform: scale(0.7, 0.86);
+  }
+  :root .nf-dockrow[data-dock-pending] .nf-tabbar .nf-tab__link[aria-current="page"]:not([data-on])::after {
+    content: none;
+    animation: none;
   }
 
   .nf-tabbar .nf-tab__link:active {
