@@ -8,6 +8,7 @@
  * paused by Vallo (the database refuses a paused release as well). Nothing is
  * marked released here: Payluk's webhook does that.
  */
+import { passcodeMoneyRefusal } from "@/lib/passcode/money";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fail, ok, type ActionResult } from "../actions/envelope";
@@ -39,6 +40,9 @@ export async function releaseHeldPayment(input: {
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+  /* A passcode-locked session moves no money (docs/PASSCODE.md). */
+  const lockedOut = await passcodeMoneyRefusal(session.user.id);
+  if (lockedOut) return fail(lockedOut);
   const db = adminDb();
   const ctx = paylukContext();
   if (!db || !ctx) return fail(REFUSED.switched_off!);

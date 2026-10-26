@@ -229,7 +229,7 @@ async function enrolWeb(): Promise<EnrolOutcome> {
 
   let publicKey: string;
   try {
-    const response = await fetch("/api/push/key", { cache: "no-store" });
+    const response = await fetch("/api/push/key", { cache: "no-store", signal: AbortSignal.timeout(15_000) });
 
     /*
      * A 401 IS NOT A MISSING KEY. The route is public now, so this should not
@@ -565,6 +565,7 @@ async function postRegistration(
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15_000),
     });
     /* THE REGISTER CALL IS WHERE A MISSING SESSION NOW SHOWS UP. With the
        key route open, a home screen app with no session of its own gets the

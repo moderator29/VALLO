@@ -71,11 +71,17 @@ export function RewardsPayoutForm({
         setError(null);
         setFieldErrors({});
         start(async () => {
-          const result = await action({ bankCode, accountNumber });
-          if (result.ok) setDone(result.data);
-          else {
-            setError(result.error);
-            setFieldErrors(result.fieldErrors ?? {});
+          /* A dropped connection is said here, never handed to the error
+             boundary with the form's state still in it. */
+          try {
+            const result = await action({ bankCode, accountNumber });
+            if (result.ok) setDone(result.data);
+            else {
+              setError(result.error);
+              setFieldErrors(result.fieldErrors ?? {});
+            }
+          } catch {
+            setError("We could not reach Vallo. Check your connection and try again. Nothing was withdrawn.");
           }
         });
       }}

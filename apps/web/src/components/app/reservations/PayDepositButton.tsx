@@ -28,6 +28,8 @@ export function PayDepositButton({
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useTransition();
+  /* Stays set once the checkout address is on its way, so a second tap cannot open a second checkout. */
+  const [redirecting, setRedirecting] = useState(false);
   return (
     <span className={`${full ? "flex w-full" : "inline-flex"} flex-col gap-inline`}>
       <Button
@@ -35,8 +37,8 @@ export function PayDepositButton({
         variant="primary"
         size={size}
         full={full}
-        disabled={pending}
-        loading={pending}
+        disabled={pending || redirecting}
+        loading={pending || redirecting}
         data-testid="trip-pay-deposit"
         onClick={() =>
           start(async () => {
@@ -48,11 +50,12 @@ export function PayDepositButton({
               setPhoneGate(isPhoneGate(result));
               return;
             }
+            setRedirecting(true);
             window.location.assign(result.data.authorizationUrl);
           })
         }
       >
-        {pending ? (pendingLabel ?? label) : label}
+        {pending || redirecting ? (pendingLabel ?? label) : label}
       </Button>
       {error && (
         <span role="alert" className="nf-caption text-[var(--nf-state-error)]">

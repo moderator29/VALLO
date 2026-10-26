@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -90,33 +91,45 @@ export function ShowMePanel({
 
   const ask = (item: ShowMeItem) =>
     startTransition(async () => {
-      const outcome = await requestShowMe(conversationId, item, item === "other" ? other : undefined);
-      setResult(outcome);
-      if (outcome === "ok") {
-        setOpen(false);
-        setOther("");
-        router.refresh();
+      try {
+        const outcome = await requestShowMe(conversationId, item, item === "other" ? other : undefined);
+        setResult(outcome);
+        if (outcome === "ok") {
+          setOpen(false);
+          setOther("");
+          router.refresh();
+        }
+      } catch {
+        setResult("failed");
       }
     });
 
   const answer = (requestId: string, file: File) =>
     startTransition(async () => {
-      const seconds = await durationOf(file);
-      if (seconds === null || seconds > SHOW_ME_MAX_SECONDS) {
-        setResult("too-long");
-        return;
-      }
-      const path = clipPath(requestId, crypto.randomUUID(), file.name);
-      const { error } = await createClient()
-        .storage.from("show-me-clips")
-        .upload(path, file, { contentType: file.type || "video/mp4" });
-      if (error) {
+      try {
+        const seconds = await durationOf(file);
+        if (seconds === null || seconds > SHOW_ME_MAX_SECONDS) {
+          setResult("too-long");
+          return;
+        }
+        const path = clipPath(requestId, crypto.randomUUID(), file.name);
+        const uploaded = await uploadToStorage({
+          supabase: createClient(),
+          bucket: "show-me-clips",
+          path,
+          body: file,
+          contentType: file.type || "video/mp4",
+        });
+        if (!uploaded.ok) {
+          setResult("failed");
+          return;
+        }
+        const outcome = await withTimeout(answerShowMe(conversationId, requestId, path, seconds), 30_000);
+        setResult(outcome);
+        if (outcome === "ok") router.refresh();
+      } catch {
         setResult("failed");
-        return;
       }
-      const outcome = await answerShowMe(conversationId, requestId, path, seconds);
-      setResult(outcome);
-      if (outcome === "ok") router.refresh();
     });
 
   if (role === "host" && requests.length === 0) return null;

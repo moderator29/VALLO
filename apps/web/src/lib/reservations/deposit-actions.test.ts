@@ -13,6 +13,7 @@ const state = vi.hoisted(() => ({
 
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ host: "vallo.test" }) }));
 vi.mock("../flags/read", () => ({ flagIsOn: async () => state.flag }));
+vi.mock("@/lib/passcode/money", () => ({ passcodeMoneyRefusal: async () => null }));
 vi.mock("../actions/session", () => ({
   NOT_CONFIGURED_MESSAGE: "not configured",
   SIGNED_OUT_MESSAGE: "signed out",

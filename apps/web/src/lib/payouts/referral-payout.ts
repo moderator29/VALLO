@@ -1,3 +1,4 @@
+import { passcodeMoneyRefusal } from "@/lib/passcode/money";
 import "server-only";
 
 import { z } from "zod";
@@ -119,6 +120,9 @@ export async function requestRewardsPayout(input: unknown): Promise<ActionResult
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+  /* A passcode-locked session moves no money (docs/PASSCODE.md). */
+  const lockedOut = await passcodeMoneyRefusal(session.user.id);
+  if (lockedOut) return fail(lockedOut);
   const parsed = validate(payoutSchema, input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   if (!hasServiceRole()) return fail(NOT_CONFIGURED_MESSAGE);

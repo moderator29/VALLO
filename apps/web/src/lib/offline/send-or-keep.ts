@@ -1,4 +1,5 @@
 import type { ActionResult } from "../actions/envelope";
+import { withTimeout } from "../media/upload";
 import { enqueue, entryKey, makeCreateEntry, type CreateKind } from "./outbox";
 
 /**
@@ -15,6 +16,8 @@ export type SendOrKeep<T> =
   | { state: "kept"; key: string }
   | { state: "not_kept" };
 
+const SEND_DEADLINE_MS = 25_000;
+
 export async function sendOrKeep<T>(
   kind: CreateKind,
   payload: { [key: string]: string | undefined },
@@ -28,9 +31,12 @@ export async function sendOrKeep<T>(
   };
   if (typeof navigator !== "undefined" && navigator.onLine === false) return keep();
   try {
-    return { state: "sent", result: await send(tapKey ?? "") };
+    /* A stalled connection never throws, so the wait itself is bounded: past
+       SEND_DEADLINE_MS the tap is kept, and its tap key makes a replay of a
+       request that did land answer with the first result rather than a twin. */
+    return { state: "sent", result: await withTimeout(send(tapKey ?? ""), SEND_DEADLINE_MS) };
   } catch {
-    /* The request never came back: the network dropped under it. */
+    /* The request never came back: the network dropped or stalled under it. */
     return keep();
   }
 }

@@ -50,17 +50,21 @@ export function ArrivalCheckCard({
   const send = (answer: "as_listed" | ArrivalReportReason) => {
     setError(null);
     start(async () => {
-      const result = await answerArrivalCheck({
-        bookingId,
-        answer,
-        note: answer === "as_listed" ? undefined : note.trim() || undefined,
-        photos: answer === "as_listed" ? [] : photos,
-      });
-      if (!result.ok) {
-        setError(result.error || copy.failed);
-        return;
+      try {
+        const result = await answerArrivalCheck({
+          bookingId,
+          answer,
+          note: answer === "as_listed" ? undefined : note.trim() || undefined,
+          photos: answer === "as_listed" ? [] : photos,
+        });
+        if (!result.ok) {
+          setError(result.error || copy.failed);
+          return;
+        }
+        router.refresh();
+      } catch {
+        setError(copy.failed);
       }
-      router.refresh();
     });
   };
 

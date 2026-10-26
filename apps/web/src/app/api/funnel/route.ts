@@ -19,6 +19,8 @@ const EMPTY = () => new NextResponse(null, { status: 204, headers: { "cache-cont
 
 export async function POST(request: Request) {
   let body: unknown = null;
+  /* Refuse by the declared length before reading a byte of it. */
+  if (Number(request.headers.get("content-length") ?? "0") > 4096) return EMPTY();
   try {
     const text = await request.text();
     body = text.length <= 512 ? JSON.parse(text) : null;

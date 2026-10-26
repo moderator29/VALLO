@@ -236,13 +236,17 @@ function ScheduledPanel({
   const restore = () => {
     setError(null);
     start(async () => {
-      const result = await cancelDeletion();
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await cancelDeletion();
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setDone(true);
+        router.refresh();
+      } catch {
+        setError("We could not reach Vallo. Check your connection and try again.");
       }
-      setDone(true);
-      router.refresh();
     });
   };
 

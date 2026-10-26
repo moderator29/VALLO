@@ -345,7 +345,7 @@ export function SupportChat({
           }
         }
         if (!res.ok || !res.body) {
-          patch(replyId, (m) => ({ ...m, text: NETWORK_ERROR_MESSAGE, error: true }));
+          patch(replyId, (m) => ({ ...m, text: m.text.trim() ? m.text : NETWORK_ERROR_MESSAGE, error: true }));
           return;
         }
 
@@ -410,7 +410,7 @@ export function SupportChat({
           patch(replyId, (m) => ({ ...m, stopped: true }));
           return;
         }
-        patch(replyId, (m) => ({ ...m, text: NETWORK_ERROR_MESSAGE, error: true }));
+        patch(replyId, (m) => ({ ...m, text: m.text.trim() ? m.text : NETWORK_ERROR_MESSAGE, error: true }));
       } finally {
         setStreaming(false);
       }

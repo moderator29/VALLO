@@ -10,6 +10,7 @@
  * renter reads a sentence rather than a code. Nothing is marked held here:
  * Payluk's `escrow.ongoing` webhook does that, and the held screen shows it.
  */
+import { passcodeMoneyRefusal } from "@/lib/passcode/money";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { fail, ok, type ActionResult } from "../actions/envelope";
@@ -42,6 +43,9 @@ export async function fundEscrowPayment(input: { agreementId: string }): Promise
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+  /* A passcode-locked session moves no money (docs/PASSCODE.md). */
+  const lockedOut = await passcodeMoneyRefusal(session.user.id);
+  if (lockedOut) return fail(lockedOut);
   /* FULL GATE (13 October 2026): the first payment needs a confirmed phone,
      flag on; a payment fails closed on a failed read (`phone-otp/core.ts`). */
   const phoneGate = await phoneGateFor(session.supabase, session.user.id, "payment");

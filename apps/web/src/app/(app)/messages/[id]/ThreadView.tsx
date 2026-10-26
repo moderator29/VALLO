@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -765,15 +766,19 @@ export function ThreadView({
         }
         const path = `${conversationId}/${crypto.randomUUID()}.jpg`;
         const supabase = createClient();
-        const { error: uploadError } = await supabase.storage
-          .from("message-attachments")
-          .upload(path, clean, { contentType: "image/jpeg" });
-        if (uploadError) {
+        const uploaded = await uploadToStorage({
+          supabase,
+          bucket: "message-attachments",
+          path,
+          body: clean,
+          contentType: "image/jpeg",
+        });
+        if (!uploaded.ok) {
           markFailed(tempId);
           return;
         }
         const { width, height } = await dimensionsOf(previewUrl);
-        const result = await attachImage({ conversationId, storagePath: path, width, height });
+        const result = await withTimeout(attachImage({ conversationId, storagePath: path, width, height }), 30_000);
         if (result.ok) adoptResult(tempId, result.data.messageId);
         else markFailed(tempId);
       } catch {

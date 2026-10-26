@@ -27,6 +27,7 @@
  * off meanwhile (the webhook is not gated either).
  */
 
+import { passcodeMoneyRefusal } from "@/lib/passcode/money";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -95,6 +96,9 @@ export async function payReservationDeposit(reservationId: string): Promise<Acti
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+  /* A passcode-locked session moves no money (docs/PASSCODE.md). */
+  const lockedOut = await passcodeMoneyRefusal(session.user.id);
+  if (lockedOut) return fail(lockedOut);
   if (!idSchema.safeParse(reservationId).success) return fail(depositRefusal("not_found", w.refusals));
   if (!(await flagIsOn(RESTAURANT_DEPOSITS_FLAG))) return fail(depositRefusal("switched_off", w.refusals));
   /* FULL GATE (13 October 2026): the first payment needs a confirmed phone,

@@ -126,13 +126,17 @@ export function PaymentMethodsPanel({
   function run(work: () => Promise<{ ok: boolean; error?: string }>, then?: () => void) {
     setError(null);
     startTransition(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? copy.readFailed);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? copy.readFailed);
+          return;
+        }
+        then?.();
+        router.refresh();
+      } catch {
+        setError(copy.readFailed);
       }
-      then?.();
-      router.refresh();
     });
   }
 
