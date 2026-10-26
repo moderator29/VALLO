@@ -862,7 +862,6 @@
   }
   .nf-landing-pill-field:focus-within {
     color: var(--nf-content-primary);
-    box-shadow: inset 0 0 0 2px var(--nf-focus-ring);
   }
 
   /* The quiet segmented track (spec section 7). The count and the chosen

@@ -42,7 +42,7 @@
     outline: none;
   }
   .nf-palette__field:focus-within {
-    box-shadow: inset 0 -2px 0 var(--nf-brand-primary);
+    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
   }
   .nf-palette__status {
     margin: 0;

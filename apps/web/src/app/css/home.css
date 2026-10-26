@@ -787,7 +787,7 @@
     padding: var(--nf-space-3xs) var(--nf-space-3xs) var(--nf-space-3xs) var(--nf-space-md);
   }
   .nf-hero-plate__search:focus-within {
-    border-color: var(--nf-selected-edge);
+    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
   }
   .nf-hero-plate__glyph {
     flex-shrink: 0;

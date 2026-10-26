@@ -495,7 +495,7 @@
     border-radius: var(--nf-radius-control);
   }
   .nf-shelf-field:focus-within {
-    border-color: var(--nf-selected-edge);
+    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
   }
   .nf-shelf-field > svg {
     flex-shrink: 0;

@@ -1988,7 +1988,7 @@
     outline: none;
   }
   .nf-people__search:focus-within {
-    border-color: var(--nf-border-brand);
+    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
   }
   .nf-people__go {
     flex-shrink: 0;

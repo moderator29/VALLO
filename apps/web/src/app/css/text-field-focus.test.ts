@@ -51,3 +51,11 @@ describe("text fields and the generic focus ring", () => {
     expect(rule).toContain("textarea");
   });
 });
+
+describe("a search field draws no focus ring of its own", () => {
+  const controls = readFileSync(join(__dirname, "controls.css"), "utf8");
+  it("the shared field's focus halo skips search inputs", () => {
+    expect(controls).toContain('.nf-field:not([type="search"]):focus {');
+    expect(controls).toContain('.nf-field--glass:not([type="search"]):focus {');
+  });
+});

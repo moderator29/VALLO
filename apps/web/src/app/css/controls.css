@@ -250,7 +250,8 @@
   .nf-field::placeholder {
     color: var(--nf-content-muted);
   }
-  .nf-field:focus {
+  /* A search input keeps its resting look when focused: no gradient ring, halo or glow. */
+  .nf-field:not([type="search"]):focus {
     outline: none;
     background:
       linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
@@ -892,7 +893,7 @@
       inset 0 1px 0 var(--nf-glass-rim-thin),
       inset 0 2px 6px var(--nf-shade-2);
   }
-  .nf-field--glass:focus {
+  .nf-field--glass:not([type="search"]):focus {
     background:
       var(--nf-well-fill) padding-box,
       linear-gradient(var(--nf-brand-edge-strong), var(--nf-brand-edge-strong)) border-box;

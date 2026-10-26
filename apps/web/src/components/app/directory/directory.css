@@ -31,7 +31,7 @@
 }
 
 .nf-dir__search:focus-within {
-  border-color: var(--nf-brand-edge);
+  /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
 }
 
 .nf-dir__search input {

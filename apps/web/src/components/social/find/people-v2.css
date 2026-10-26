@@ -27,8 +27,7 @@
     transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
   .nf-ppl__search:focus-within {
-    border-color: var(--nf-brand-secondary);
-    box-shadow: 0 0 0 var(--nf-space-3xs) var(--nf-brand-tint-2);
+    /* A search field draws no ring, border or glow when it is focused (the founder, 26 October 2026). The caret is the focus. */
   }
   .nf-ppl__field {
     flex: 1;
