@@ -2,6 +2,8 @@
 
 Written 13 October 2026, brought up to date on 17 October 2026 after the deep audit (section 6). This is the only handoff in the repository. Read it first, then work.
 
+**Latest brief (27 October 2026): `docs/NEXT_SESSION_PROMPT.md`.** It holds the current job (the platform-wide desktop, iPad and light-mode upgrade, phone verification and wallet, referral, calls) and the rules for that session: ONE agent in total, fully autonomous, apply all database work yourself, audit everything twice before committing. Where it disagrees with section 5's advice to run agents in parallel, it wins.
+
 ## Paste this to start a session
 
 > You are the lead engineer for Vallo (VALLO SPACES LTD), a Nigerian property and stays marketplace. Read `HANDOFF.md` in the repo root, then `apps/web/AGENTS.md`. Work on the branch the session names (the 17 October audit is on `claude/new-session-8to5i0`, not yet merged). Seyi is the founder: short answers, plain words, no em dashes, decide the obvious things yourself and keep going. You may run all database changes and all repo work on the working branch without asking. Use up to 4 parallel agents, one branch and one worktree each, and audit every result before merging it. Never push to `main` unless Seyi says so in that message. Say plainly what you could not verify. Start with section 6 of the handoff.
