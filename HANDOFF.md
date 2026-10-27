@@ -2,7 +2,7 @@
 
 Written 13 October 2026, brought up to date on 17 October 2026 after the deep audit (section 6). This is the only handoff in the repository. Read it first, then work.
 
-**Latest brief (27 October 2026): `docs/NEXT_SESSION_PROMPT.md`.** It holds the current job (the platform-wide desktop, iPad and light-mode upgrade, phone verification and wallet, referral, calls) and the rules for that session: ONE agent in total, fully autonomous, apply all database work yourself, audit everything twice before committing. Where it disagrees with section 5's advice to run agents in parallel, it wins.
+**Latest brief (27 October 2026): `docs/NEXT_SESSION_PROMPT.md`.** It holds the current job (the platform-wide desktop, iPad and light-mode upgrade, phone verification and wallet, referral, calls) and the rules for that session: ONE agent in total, fully autonomous, apply all database work yourself, audit everything twice before committing, push to the working branch and never to `main`. Where it disagrees with section 5's advice to run agents in parallel, it wins.
 
 ## Paste this to start a session
 

@@ -4,26 +4,26 @@ Written 27 October 2026 for the next session, at the founder's request. Read `HA
 
 ## Paste this to start the session
 
-> You are the lead engineer for Vallo. Read `HANDOFF.md`, `apps/web/AGENTS.md` and `docs/NEXT_SESSION_PROMPT.md` in full, then do the work in that file from top to bottom, on your own, until it is finished. Use ONE agent in total (you). Do not start sub-agents. Apply every database change yourself through the Supabase connector. Audit every piece of work twice before you commit it. When an area is finished, double-audited and its gates pass, push it to `main` and check the production deploy. Do not stop to ask me things you can decide; give me a short status after each area. Where something cannot be tested here (no phone, no live calls), say so plainly and write down exactly what I must test.
+> You are the lead engineer for Vallo. Read `HANDOFF.md`, `apps/web/AGENTS.md` and `docs/NEXT_SESSION_PROMPT.md` in full, then do the work in that file from top to bottom, on your own, until it is finished. Use ONE agent in total (you). Do not start sub-agents. Apply every database change yourself through the Supabase connector. Audit every piece of work twice before you commit it. When an area is finished, double-audited and its gates pass, commit and push it to the working branch the session gives you (never to `main`). Do not stop to ask me things you can decide; give me a short status after each area. Where something cannot be tested here (no phone, no live calls), say so plainly and write down exactly what I must test.
 
 ## 0. The rules for this session (from the founder)
 
 1. **One agent only.** No sub-agents, no parallel agents, no workflows. One engineer, working through the list in order.
 2. **Fully autonomous.** Decide, build, verify, move on. Seyi pays personally and is on a small plan, so waste nothing: no long narration, no re-reading what you already know, no questions with an obvious answer. Recommend and act.
-3. **Run all the database work yourself.** First check the connector is signed in to the right account (`list_projects` must show `uccixoonmbhrnyczyigt`). If it is not authorised, say so in one line and tell Seyi to re-authorise it in claude.ai connector settings, then continue with everything else. Pending SQL to apply (each is a draft in `docs/sql-editor/`):
+3. **Run all the database work yourself.** First check the connector is signed in to the right account (`list_projects` must show `uccixoonmbhrnyczyigt`). If it is not authorised, say so in one line and tell Seyi to re-authorise it in claude.ai connector settings, then continue with everything else. Pending SQL to apply (database changes are the one thing that takes effect at once, so they are still yours to apply) (each is a draft in `docs/sql-editor/`):
    - `03-messages-body-length.sql` (adds a 4,000 character check on `messages.body`, `not valid`, then validate in a second step).
    - `01-cleanup-now.sql` and `02-health-check-read-only.sql` (read them first; the connector hangs on `DELETE` and `DROP`, so if one hangs, say so and keep the file for Seyi).
    - Any migration you write: small chunks, `set lock_timeout = '5s';`, `$fn$` quoting, save the same SQL as `supabase/migrations/<version>_<name>.sql`, then `node scripts/check-migrations.mjs --record`.
 4. **Double audit before every commit.** Pass 1: build and run it, run the gates and the tests for the area. Pass 2: read your own diff adversarially ("what would make this wrong on a phone, an iPad, a Mac, slow data, light mode, dark mode, a screen reader?"), then re-run. Only then commit. Say "tested" only for what you ran.
 5. **Verify visually.** Chromium and Playwright are installed (`require('playwright')`, no install). For every page you touch, screenshot at 390, 820, 1180, 1440 and 1920 px wide, in light and dark, and look at the pictures. A page is not done until it looks right at all five.
-6. **Push to `main`** after each finished, double-audited area (the founder asked for this in his brief). No pull request unless asked. Check the production deploy on https://www.vallospaces.com after each push (the GitHub status API returns 403 here; check the live site, e.g. a changed file's content).
+6. **Push to the working branch, never to `main`.** Commit each finished, double-audited area and push it to the branch this session names (the founder's instruction, 27 October 2026). Do not merge to `main` and do not open a pull request; Seyi decides when to merge. Because nothing reaches the live site from the branch, verify with a production build and Chromium screenshots instead, and say that the live site is unchanged until he merges.
 7. **No em dashes** anywhere. Gates (`apps/web/scripts/check-no-em-dash.mjs`, `check-valuation-words.mjs`, `check-css-tokens.mjs`, `scripts/check-migrations.mjs`) and `npx tsc --noEmit` must pass. Known baseline tsc errors only in `components/calls/media/session.ts` and `.next/types/validator.ts`.
 8. **Never print, log or commit a credential.** Credentials pasted in chat earlier must be rotated by Seyi.
 9. **Sandbox limits.** No real device, and MapTiler, Payluk, LiveKit and Termii are unreachable from here. Write code and tests to the best of your knowledge, and list what only a device can prove.
 
 ## 1. What is already done and live (do not redo)
 
-State of `main` after 27 October 2026:
+State of `main` on 27 October 2026 (the starting point; your work goes on the working branch):
 
 - Apple 5.1.1(v) fix: the welcome screen has "Look around first" (public browsing). iOS 1.0.0 was resubmitted 25 October 2026 and is Waiting for Review. Google Play is live. Web changes go live without a store build; native changes need a build and a release.
 - Search fields: no focus ring, halo or border change anywhere (`controls.css` skips `[type="search"]`, search wrappers neutralised, unlayered rule in `base.css`; tests in `src/app/css/text-field-focus.test.ts`). **Cascade rule you must know:** component CSS is in `@layer components`; the generic focus ring in `base.css` is deliberately unlayered, so it beats every layered rule. A fix must be unlayered and later in source order, or more specific in the same layer.
@@ -114,4 +114,4 @@ Calls do not ring or connect even with notifications on. Audit the whole chain a
 
 ## 6. Done means
 
-Every page in `docs/PAGE_SWEEP.md` is marked good at all five widths in light and dark; gates, `tsc` and the touched tests pass; the SQL drafts are applied (or reported as blocked with the reason); each area is on `main` and the live site shows it; and a final report says plainly what was verified, what was not, and the exact device tests Seyi must run.
+Every page in `docs/PAGE_SWEEP.md` is marked good at all five widths in light and dark; gates, `tsc` and the touched tests pass; the SQL drafts are applied (or reported as blocked with the reason); each area is committed and pushed to the working branch; and a final report says plainly what was verified, what was not, and the exact device tests Seyi must run.
