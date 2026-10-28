@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { getDictionary, type Dictionary } from "@vallo/i18n";
 import { z } from "zod";
+import { provisionWallet } from "../money/wallet-provision";
 import { getLocale } from "../locale";
 import { readPhone } from "../phone";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -160,5 +161,17 @@ export async function confirmPhoneCode(input: unknown): Promise<ActionResult<{ c
     return fail(confirmMessages(copy)[memberConfirmRefusal(data)]);
   }
   revalidatePath("/settings/phone");
+  /* The wallet opens by itself once the number is confirmed (27 October
+     2026): no extra button. After the response, so the member is not kept
+     waiting for the provider, and never fatal: the wallet screen tries again
+     on its own, and the opening looks the customer up before it creates one. */
+  const user = session.user;
+  after(async () => {
+    try {
+      await provisionWallet(user);
+    } catch {
+      /* The wallet screen retries; nothing here may fail the confirmation. */
+    }
+  });
   return ok({ confirmed: true });
 }
