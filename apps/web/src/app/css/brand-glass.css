@@ -35,7 +35,7 @@
   .nf-icon3d--fallback {
     display: grid;
     place-items: center;
-    border-radius: 28%;
+    border-radius: var(--nf-radius-md);
     color: var(--nf-brand-primary);
     background: color-mix(in srgb, var(--nf-brand-primary) 14%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-brand-primary) 28%, transparent);

@@ -963,6 +963,26 @@
     }
   }
 
+  /* The featured stays: the swipe stack on a phone, a card grid from 640px. */
+  .nf-feature-grid {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .nf-feature-stack {
+      display: none;
+    }
+    .nf-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--nf-space-md);
+    }
+  }
+  @media (min-width: 1024px) {
+    .nf-feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   /* ------------------------------------------------------ the featured band */
   .nf-feature-head {
     display: flex;
