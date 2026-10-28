@@ -43,6 +43,9 @@ type PushPlugin = {
     name: string;
     description?: string;
     importance?: number;
+    visibility?: number;
+    vibration?: boolean;
+    lights?: boolean;
   }) => Promise<void>;
 };
 
@@ -89,6 +92,14 @@ export async function startPushTaps(channelName: string): Promise<() => void> {
   if (Capacitor.getPlatform() === "android" && typeof plugin.createChannel === "function") {
     /* 4 is IMPORTANCE_HIGH: it may make a sound and peek on screen. */
     void plugin.createChannel({ id: "vallo_default", name: channelName, importance: 4 }).catch(() => undefined);
+    /* An incoming call's ring (`lib/push/transport/fcm.ts` names this channel
+       for a ring push): the loudest the system allows, vibrating, shown on the
+       lock screen. Without a channel of this exact id Android 8 and above drops
+       the ring silently. A channel's importance is fixed once it exists on a
+       handset, so this id is never reused for anything quieter. */
+    void plugin
+      .createChannel({ id: "vallo_calls", name: "Calls", importance: 5, visibility: 1, vibration: true, lights: true })
+      .catch(() => undefined);
   }
 
   const handle = await plugin.addListener("pushNotificationActionPerformed", (event) => {

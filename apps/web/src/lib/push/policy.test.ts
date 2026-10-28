@@ -299,3 +299,41 @@ describe("collapsing a night's backlog", () => {
     expect(plan.send).toHaveLength(2);
   });
 });
+
+describe("an incoming call's ring push (27 October 2026)", () => {
+  const now = new Date("2026-10-28T10:00:00Z");
+  const queued = (href: string, expiresAt: string): QueuedNotification => ({
+    queueId: "n1",
+    userId: "u1",
+    kind: "message",
+    title: "Ada",
+    body: "Voice call",
+    href,
+    createdAt: now,
+    expiresAt: new Date(expiresAt),
+  });
+
+  it("is held no longer than the ring, on the calls channel", () => {
+    const ring = decide({
+      settings: {},
+      now,
+      notification: queued(
+        "/messages/11111111-1111-1111-1111-111111111111?call=22222222-2222-2222-2222-222222222222",
+        "2026-10-28T10:00:45Z",
+      ),
+    });
+    expect(ring).toMatchObject({ action: "send", payload: { call: true, ttlSeconds: 45 } });
+  });
+
+  it("an ordinary message keeps the long default and the ordinary channel", () => {
+    const plain = decide({
+      settings: {},
+      now,
+      notification: queued("/messages/11111111-1111-1111-1111-111111111111", "2026-10-29T10:00:00Z"),
+    });
+    expect(plain).toMatchObject({ action: "send" });
+    if (plain.action !== "send") throw new Error("expected send");
+    expect(plain.payload.call).toBeUndefined();
+    expect(plain.payload.ttlSeconds).toBeUndefined();
+  });
+});

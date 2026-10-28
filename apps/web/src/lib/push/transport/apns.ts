@@ -187,6 +187,9 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
     aps: {
       alert: { title: payload.title, body: payload.body },
       sound: payload.urgent ? "default" : undefined,
+      /* A call's ring breaks through a Focus that allows time sensitive
+         notifications; iOS has no native ringing without CallKit. */
+      ...(payload.call ? { "interruption-level": "time-sensitive" } : {}),
       /* Apple collapses on this, so a conversation is one row. */
       "thread-id": payload.tag,
       /* An alert that is allowed to wake the screen. `background` would be
@@ -244,7 +247,7 @@ function postToGateway(
            Sending 10 for everything is how an application ends up throttled
            by iOS itself. */
         "apns-priority": payload.urgent ? "10" : "5",
-        "apns-expiration": String(Math.floor(Date.now() / 1000) + 4 * 60 * 60),
+        "apns-expiration": String(Math.floor(Date.now() / 1000) + (payload.ttlSeconds ?? 4 * 60 * 60)),
         "content-type": "application/json",
       });
 

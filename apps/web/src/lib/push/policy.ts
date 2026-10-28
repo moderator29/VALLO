@@ -187,6 +187,11 @@ export function decide(input: {
       /* B11: an fyi never wakes the phone: it arrives silent. */
       quiet: !urgent && severityOf(notification).severity === "fyi",
       actions: actionsFor(notification.kind, notification.href, locale),
+      /* An incoming call's ring: held no longer than the ring itself, and
+         drawn on the calls channel. */
+      ...(isIncomingCallPath(safeHref(notification.href))
+        ? { call: true, ttlSeconds: Math.max(1, Math.min(45, Math.ceil((notification.expiresAt.getTime() - now.getTime()) / 1000))) }
+        : {}),
     },
   };
 }
