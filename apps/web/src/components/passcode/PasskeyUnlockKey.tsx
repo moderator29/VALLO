@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { assertPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
+import type { DeviceLock } from "@/lib/security/device-lock";
 import { beginPasskeyUnlock, finishPasskeyUnlock } from "@/lib/passcode/passkey-unlock";
 
 /**
@@ -28,6 +29,7 @@ export function PasskeyUnlockKey({
   onUnlocked,
   onFailed,
   label,
+  lock = "face-id",
   variant = "key",
 }: {
   disabled?: boolean;
@@ -35,6 +37,8 @@ export function PasskeyUnlockKey({
   onFailed: () => void;
   /** `passcode.passkeyUnlock`. */
   label: string;
+  /** The lock this device has, so the glyph matches the words (`readDeviceLock`). */
+  lock?: DeviceLock;
   variant?: "key" | "door";
 }) {
   const [busy, setBusy] = useState(false);
@@ -77,7 +81,7 @@ export function PasskeyUnlockKey({
         disabled={disabled || busy}
         data-testid="passcode-passkey"
       >
-        <FaceScan />
+        <LockGlyph lock={lock} />
         {label}
       </Button>
     );
@@ -94,6 +98,32 @@ export function PasskeyUnlockKey({
     >
       <UiIcon name="key" size={26} />
     </button>
+  );
+}
+
+function LockGlyph({ lock }: { lock: DeviceLock }) {
+  if (lock === "face-id") return <FaceScan />;
+  if (lock === "touch-id" || lock === "fingerprint") return <Fingerprint />;
+  return <UiIcon name="shield-lock" size={22} className="nf-passcode__bio-glyph" />;
+}
+
+/** A fingerprint, at the same line weight as the face scan. Decorative. */
+function Fingerprint() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="nf-passcode__bio-glyph"
+    >
+      <path d="M6.5 5.2A9 9 0 0 1 12 3.5c2.1 0 4 .7 5.5 1.9M4 12a8 8 0 0 1 .6-3M20 12c0 1.4-.1 2.6-.4 3.7M8 20c.6-1.3 1-2.7 1.1-4.2M12 20c.5-1.6.8-3.4.8-5.2 0-1.5-.5-2.8-1.6-3.3a2.6 2.6 0 0 0-3.2 1.6c-.2.6-.3 1.2-.3 1.7 0 1.2-.1 2.3-.4 3.4M16 20c.5-1.7.8-3.3.8-5 0-2.6-2-4.8-4.8-4.8M4.2 15.5c.4-.9.6-1.9.6-3" />
+    </svg>
   );
 }
 

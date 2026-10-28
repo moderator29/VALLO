@@ -30,6 +30,21 @@
     -webkit-user-drag: none;
   }
 
+  /* The sticker that replaces a picture that did not arrive (Icon3D.tsx):
+     a brand-blue plate with the line glyph, never the browser's broken icon. */
+  .nf-icon3d--fallback {
+    display: grid;
+    place-items: center;
+    border-radius: 28%;
+    color: var(--nf-brand-primary);
+    background: color-mix(in srgb, var(--nf-brand-primary) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--nf-brand-primary) 28%, transparent);
+  }
+  .nf-icon3d--fallback svg {
+    width: 52%;
+    height: 52%;
+  }
+
   /* ------------------------------------------------- 2. the door glass */
   /* Declared on every theme root (the document and each night island), so
      the values resolve in the theme they are used in. Night: blue-tinted

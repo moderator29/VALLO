@@ -57,6 +57,14 @@ export const passcodeEn = {
   usePassword: "Use your password instead",
   /** C14 and MOTION_SYSTEM section 6: the biometric door, offered before the keypad where the member has a platform key. */
   passkeyUnlock: "Unlock with Face ID or fingerprint",
+  /** 27 October 2026: the door names the lock the device really has (`lib/security/device-lock.ts`). */
+  passkeyUnlockBy: {
+    "face-id": "Unlock with Face ID",
+    "touch-id": "Unlock with Touch ID",
+    fingerprint: "Unlock with fingerprint",
+    "windows-hello": "Unlock with Windows Hello",
+    "this-device": "Unlock with this device",
+  },
   passkeyFailed: "That did not work. Enter your passcode instead.",
   usePasscode: "Enter your passcode instead",
   signOut: "Sign out",

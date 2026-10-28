@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
-import type React from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { icon3dSrc, type Icon3DName } from "./icon-3d";
 
 /**
@@ -32,6 +35,64 @@ import { icon3dSrc, type Icon3DName } from "./icon-3d";
  */
 export { ICON_3D_NAMES, icon3dEmailSrc, icon3dSrc, type Icon3DName } from "./icon-3d";
 
+/**
+ * THE STICKER THAT STANDS IN WHEN THE PICTURE DOES NOT ARRIVE. On weak data a
+ * door's art can fail or stall, and the browser then draws its broken-image
+ * glyph (the founder's 27 October screenshot of the home page). The picture
+ * is replaced by a brand-blue plate with the line glyph for the same idea,
+ * drawn from the icon font of the product itself, so it needs no request.
+ */
+const FALLBACK_GLYPH: Partial<Record<Icon3DName, UiIconName>> = {
+  hotel: "building-hotel",
+  shortlet: "house",
+  restaurant: "utensils",
+  "local-talks": "chat-bubble",
+  buy: "house",
+  rent: "key",
+  pay: "wallet",
+  list: "clipboard-list",
+  bell: "bell",
+  assistant: "bot",
+  "calendar-booked": "calendar-check",
+  "calendar-pending": "calendar-clock",
+  shield: "shield-check",
+  search: "search",
+  explore: "compass",
+  verified: "verified",
+  "id-check": "id-card",
+  "card-secure": "credit-card",
+  "home-verified": "house-heart",
+  "home-small": "house",
+  villa: "house-terrace",
+  city: "building-apartment",
+  apartment: "building-apartment",
+  land: "land-plot",
+  "stay-rated": "star",
+  earnings: "trending-up",
+  coin: "coins",
+  handover: "key",
+  keys: "key",
+  camera: "camera",
+  video: "video",
+  checklist: "clipboard-list",
+  contract: "file-text",
+  receipt: "receipt",
+  "price-tag": "price-tag",
+  analytics: "chart-bar",
+  bank: "bank",
+  support: "headset",
+  team: "users",
+  clock: "clock",
+  "report-flag": "flag",
+  "saved-heart": "heart",
+  envelope: "mail",
+  "phone-code": "phone",
+  "passcode-lock": "lock",
+  gift: "gift",
+  map: "map",
+  celebrate: "star",
+};
+
 export function Icon3D({
   name,
   size = 48,
@@ -47,8 +108,34 @@ export function Icon3D({
   className?: string;
   priority?: boolean;
 }) {
+  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement | null>(null);
+  /* A picture that failed before this component hydrated never fires
+     `onError` here, so read its state once on mount. */
+  useEffect(() => {
+    const el = ref.current;
+    if (el && el.complete && el.naturalWidth === 0) setFailed(true);
+  }, []);
+
+  const classes = ["nf-icon3d", className ?? ""].filter(Boolean).join(" ");
+  const sized = { "--nf-icon3d-default": `${size}px` } as CSSProperties;
+  if (failed) {
+    return (
+      <span
+        className={`${classes} nf-icon3d--fallback`}
+        style={sized}
+        role={label ? "img" : undefined}
+        aria-label={label}
+        aria-hidden={label ? undefined : true}
+      >
+        <UiIcon name={FALLBACK_GLYPH[name] ?? "grid"} size={24} />
+      </span>
+    );
+  }
   return (
     <Image
+      ref={ref}
+      onError={() => setFailed(true)}
       src={icon3dSrc(name)}
       alt={label ?? ""}
       aria-hidden={label ? undefined : true}
@@ -57,8 +144,8 @@ export function Icon3D({
       sizes={`${size}px`}
       /* The drawn size is a custom property, so a host can resize it in CSS
          (`.nf-icon3d` in app/css/brand-glass.css). */
-      style={{ "--nf-icon3d-default": `${size}px` } as React.CSSProperties}
-      className={["nf-icon3d", className ?? ""].filter(Boolean).join(" ")}
+      style={sized}
+      className={classes}
       draggable={false}
       {...(priority ? { priority: true } : {})}
     />
