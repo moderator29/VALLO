@@ -2265,10 +2265,8 @@ export function ListingWizard({
     if (poster) {
       const stillPath = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
       try {
-        const upload = await supabase.storage
-          .from("listing-photos")
-          .upload(stillPath, poster, { contentType: "image/jpeg", upsert: false });
-        if (!upload.error) posterPath = stillPath;
+        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster, contentType: "image/jpeg" });
+        if (upload.ok) posterPath = stillPath;
       } catch {
         /* no still */
       }

@@ -63,6 +63,7 @@ import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSh
 import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * ONE INSPECTION, EXACTLY IN THE ANATOMY OF F6A8A482 / founder/inspection-target.jpg.
@@ -373,10 +374,15 @@ export function InspectionSheet({
         setError(w.photoFailed);
         return;
       }
-      const upload = await client
-        .storage.from("inspection-photos")
-        .uploadToSignedUrl(target.data.path, target.data.token, file, { contentType });
-      if (upload.error) {
+      const upload = await uploadToStorage({
+        supabase: client,
+        bucket: "inspection-photos",
+        path: target.data.path,
+        body: file,
+        contentType,
+        signedToken: target.data.token,
+      });
+      if (!upload.ok) {
         setError(w.photoFailed);
         return;
       }

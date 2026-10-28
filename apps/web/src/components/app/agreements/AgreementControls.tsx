@@ -9,6 +9,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * The controls on an agreement page (Track A): confirm the exact version,
@@ -297,10 +298,15 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
         setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }
-      const { error: upErr } = await supabase.storage
-        .from("guarantee-evidence")
-        .uploadToSignedUrl(prepared.data.path, prepared.data.token, file, { contentType: file.type });
-      if (upErr) {
+      const uploaded = await uploadToStorage({
+        supabase,
+        bucket: "guarantee-evidence",
+        path: prepared.data.path,
+        body: file,
+        contentType: file.type,
+        signedToken: prepared.data.token,
+      });
+      if (!uploaded.ok) {
         setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }
