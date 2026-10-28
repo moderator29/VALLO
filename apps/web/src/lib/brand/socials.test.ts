@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SOCIAL_ACCOUNTS, liveSocials } from "./socials";
+import { liveSocials } from "./socials";
 
 describe("Vallo's social accounts", () => {
   it("draws Facebook, Instagram, TikTok and LinkedIn, each at the address the founder gave", () => {
