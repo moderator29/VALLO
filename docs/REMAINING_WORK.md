@@ -1,4 +1,4 @@
-# The 27 October brief: what is done and what is not (audit of 28 October 2026)
+# The 27 October brief: what is done and what is not (audit of 28 October 2026, updated later the same day)
 
 Checked item by item against `docs/NEXT_SESSION_PROMPT.md`. "Done" means built,
 checked in this sandbox and pushed. "Needs device" means built but only a phone
@@ -26,6 +26,11 @@ or a real account can prove it. Nothing here is merged to `main`.
 | 3.3 Calls (what can be done without a device) | Audible ring, audio unlock, speech-tuned Opus, ring push TTL 45 s, Calls channel, iOS time-sensitive, failure log, `DEVICE_TEST_SCRIPT.md` |
 | 4 `docs/FEATURE_BACKLOG.md` | 56 rows with status, value, effort, priority |
 | 4 Play readiness walk | No repo gap found; every open item is a credential or a Play Console step |
+| 0.3 / 4 Database seams audit (health check 2, 8, 9) | Run. No per-row `auth.uid()` policies; the 21 anon-callable definer functions are public directory, leaderboard and token reads, judged deliberate; 29 foreign keys on growing tables indexed (`20261028132808`); the owner-rights views left as public projections. Recorded in `docs/security/GRANT_STATE.md` |
+| 1 / 4 Every raw uploader | Avatar, cover, listing video poster and the two signed-URL uploads (inspection and claim evidence) moved; the uploader gained a tested signed-PUT mode |
+| 2.4 Broken pictures everywhere | One guard in the root layout (`ImageFallbackGuard`): any failed `<img>` becomes a quiet tile, including ones that failed before the page woke |
+| 2.1 Sheet as a desktop dialog | From 64 rem with a mouse a bottom sheet is a centred dialog; phone, tablet, side panel and page sheets unchanged |
+| 2.1 Master-detail for messages | Already existed (`nf-msg-split`, inbox pane beside the thread) |
 | Extra: social links | Facebook, Instagram, TikTok, LinkedIn as blue and white icons in the footer (landing and all public pages), Contact and Settings, plus `sameAs` |
 | Hygiene | Tests, lint and gates green (13,660 tests, 0 lint errors); fixed red items left from before |
 
@@ -43,16 +48,11 @@ or a real account can prove it. Nothing here is merged to `main`.
 
 | # | Item (brief section) | Why it is open |
 |---|---|---|
-| 1 | Apply `01-cleanup-now.sql` parts 1 to 3 (0.3) | The connector waited on a confirmation for `DELETE`; Seyi pastes it in the dashboard. Part 4 waits for the deploy |
-| 2 | Health check queries 2, 8 and 9 (0.3): anon-executable definer functions, per-row `auth.uid()` policies, foreign keys with no index | Not run |
-| 3 | Seven views that run with owner rights (health check finding) | Needs a decision whether intended |
-| 4 | Remaining raw uploaders: profile avatar and cover in `AccountHero.tsx`, the listing video poster in `ListingWizard.tsx`, and the two signed-URL uploads (`InspectionSheet`, `AgreementControls`) (1, 4) | Not migrated; signed uploads need a signed-URL variant of the uploader |
-| 5 | Test every upload path end to end, and resumable video (4) | Not tested |
+| 1 | Apply `01-cleanup-now.sql` parts 1 to 3 (0.3) | **Blocked on the connector.** It stops on any `DELETE` or `DROP` and asks a confirmation that never reaches the session, twice. Approve the Supabase prompt when it appears, or paste the file in the dashboard SQL editor. Part 4 (old renter passport) waits for the deploy |
 | 6 | Research current best practice with web search (2.1 step 2) | Not done |
-| 7 | `Sheet` becomes a centred dialog or side panel on desktop; lists become master-detail (2.1 step 3) | Not done |
 | 8 | Light theme rebuild in `tokens.css`: surface layers, solid blue, contrast checks, dark-only assets (2.2) | Not done; public pages looked right, signed-in ones unseen |
 | 9 | Stickers, icons, empty states, skeletons audit and one consistent set (2.3) | Not done |
-| 10 | Every `<Image>` and `<img>` with an aspect box, placeholder and fallback, lazy below the fold (2.4) | Only the 3D door art is done |
+| 9b | Provider naming ("Payluk holds it") in member copy (3.1) | Left: it is a legal disclosure of who holds the money and tests police it; a founder and lawyer decision |
 | 11 | Native biometry type via the Capacitor plugin (2.5) | Needs a native build |
 | 12 | Containers, buttons, forms, sheets audit; logo placement audit; landing page redesign; remove backend-only labels from the front end (2.6) | Not done |
 | 13 | Country code picker in the phone screen (3.1) | Nigeria only: the server accepts Nigerian numbers only, so a picker would be a control that cannot act |
