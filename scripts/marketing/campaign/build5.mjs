@@ -1,7 +1,7 @@
 /**
- * THE SOCIAL POSTS, 28 OCTOBER 2026.
+ * THE SOCIAL POSTS, 28 OCTOBER 2026, SECOND PASS (posts5.mjs).
  *
- *   node scripts/marketing/campaign/build4.mjs [--only 1,2,3]
+ *   node scripts/marketing/campaign/build5.mjs [--only 1,2,3]
  *
  * Twenty posts, ONE size: 1080 x 1350 (4:5), drawn at 2x. It is the one shape
  * every feed takes without cropping the picture that matters: Instagram,
@@ -19,7 +19,7 @@ import { dirname, join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { Phones } from "../store/phones.mjs";
-import { POSTS, POSE, LINK } from "./posts4.mjs";
+import { POSTS, POSE, LINK } from "./posts5.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
@@ -69,13 +69,14 @@ function placePhone(p, cx, cy, z = 10) {
   return `<img class="phone" src="${p.src}" style="left:${px(cx - bx)};top:${px(cy - by)};width:${px(w)};height:${px(h)};z-index:${z}">`;
 }
 
-/** A real component of a screen, lifted and held in one heavy rule. */
-function lift({ id, box, cx, cy, w, rot = 0, edge = INK, z = 30 }) {
+/** A real component of a screen, lifted and held in one heavy rule. The rule is
+    sky with a dark ring outside it, so it reads on a light ground and over a dark screen. */
+function lift({ id, box, cx, cy, w, rot = 0, z = 30 }) {
   const [x0, y0, x1, y1] = box;
   const k = w / (x1 - x0);
   const h = (y1 - y0) * k;
-  const rule = Math.max(8, w * 0.018);
-  return `<div class="lift" style="left:${px(cx - w / 2)};top:${px(cy - h / 2)};width:${px(w)};height:${px(h)};border:${px(rule)} solid ${edge};border-radius:${px(w * 0.05 + rule)};transform:rotate(${rot}deg);z-index:${z}">
+  const rule = Math.max(9, w * 0.019);
+  return `<div class="lift" style="left:${px(cx - w / 2)};top:${px(cy - h / 2)};width:${px(w)};height:${px(h)};border:${px(rule)} solid ${SKY};border-radius:${px(w * 0.05 + rule)};box-shadow:0 0 0 ${px(5)} #04071C,0 44px 64px -22px rgba(8,30,100,.6);transform:rotate(${rot}deg);z-index:${z}">
     <img src="${url(SCREEN(id))}" style="left:${px(-x0 * k)};top:${px(-y0 * k)};width:${px(1320 * k)}"></div>`;
 }
 
@@ -98,14 +99,13 @@ const SWIRL = (c = "rgba(0,105,254,.22)") => `<svg class="swirl" width="${W}" he
   <path d="M-40 330 C 220 150, 720 60, 900 220 C 1060 360, 880 560, 560 610 C 300 650, 90 760, 180 900 C 270 1040, 760 960, 1000 1100 C 1160 1190, 1100 1330, 800 1400"/></svg>`;
 
 function ground(kind, p) {
-  if (kind === "paper") return `<div class="bg paper"></div>${WINDOW()}`;
+  if (kind === "ivory") return `<div class="bg ivory"></div>${WINDOW("opacity:.9")}`;
+  if (kind === "ice") return `<div class="bg ice"></div>${WINDOW("opacity:.85")}`;
   if (kind === "electric") return `<div class="bg electric"></div>${TILES("rgba(255,255,255,.075)")}`;
-  if (kind === "tiles") return `<div class="bg electric"></div>${TILES("rgba(255,255,255,.12)")}`;
   if (kind === "sunset") return `<div class="bg sunset"></div>${WINDOW("opacity:.8")}`;
   if (kind === "sky") return `<div class="bg sky"></div>${TILES("rgba(255,255,255,.7)")}${SWIRL()}`;
   if (kind === "photo") return `<img class="full" src="${photo(p.photo)}"><div class="scrim"></div>`;
-  if (kind === "split") return `<div class="bg paper" style="clip-path:polygon(0 0,50% 0,50% 100%,0 100%)"></div>${WINDOW("clip-path:polygon(0 0,50% 0,50% 100%,0 100%)")}<div class="bg night" style="clip-path:polygon(50% 0,100% 0,100% 100%,50% 100%)"></div>`;
-  return `<div class="bg paper"></div>`;
+  return `<div class="bg ice"></div>`;
 }
 
 /* --------------------------------------------------------------- the parts */
@@ -122,7 +122,7 @@ const head = (lines, { size = 108, align = "left", t, lh = 1.04 }) =>
     `<div class="ln">${esc(l).replace(/\*(.+?)\*/g, '<b>$1</b>')}</div>`).join("")}</div>`;
 
 const logo = (t) => `<img class="logo" src="${BRAND(t.logo)}" style="${t.white ? "filter:brightness(0) invert(1)" : ""}"><div class="url" style="color:${t.url}">${LINK}</div>`;
-const badges = (y = 1226, align = "center", left = 0) => `<div class="badges" style="top:${px(y)};${align === "center" ? "left:0;right:0;justify-content:center" : `left:${px(left)};justify-content:flex-start`}">
+const badges = (y = 1226, align = "center", left = 0, h = 70) => `<div class="badges" style="--bh:${h}px;top:${px(y)};${align === "center" ? "left:0;right:0;justify-content:center" : `left:${px(left)};justify-content:flex-start`}">
   <img src="${badgeSvg("google-play-black.svg")}"><img src="${badgeSvg("app-store-black.svg")}"></div>`;
 
 /** An ink container: solid, one heavy rule, its label as the first row. */
@@ -162,42 +162,57 @@ async function layout(p) {
   let headHtml = "";
   const L = p.layout;
 
-  if (L === "hero") {
-    const right = p.hl !== "left";
-    headHtml = `<div class="hwrap" style="${right ? `right:80px;text-align:right;left:auto` : `left:80px`};top:176px;max-width:${right ? 820 : 760}px">${head(p.lines, { size: 108, align: right ? "right" : "left", t })}</div>`;
-    const ph = await phoneImg(SCREEN(p.phone.screen), p.phone.pose, p.phone.h);
-    parts.push(placePhone(ph, p.phone.cx, p.phone.cy));
+  /* THE HANDSET, NEARLY STRAIGHT ON. `phone` is two columns: the words and the
+     lifted part on the left, one big handset rising off the bottom edge on the
+     right. `phoneC` is one column: the headline, the handset centred under it,
+     the lifted part across its corner. */
+  if (L === "phone" || L === "phoneC") {
+    const C = L === "phoneC";
+    const ph = await phoneImg(SCREEN(p.phone.screen), p.phone.pose ?? "s", p.phone.h ?? (C ? 760 : 1060));
+    parts.push(placePhone(ph, p.phone.cx ?? (C ? 540 : 770), p.phone.cy ?? (C ? 810 : 830)));
+    if (C) {
+      headHtml = `<div class="hwrap" style="left:80px;top:168px;max-width:920px">${head(p.lines, { size: 104, t })}</div>`;
+      parts.push(badges(1226));
+    } else {
+      const top = p.kicker ? 238 : 196;
+      headHtml = `${p.kicker ? `<div class="kick" style="top:176px;color:${t.reg}">${esc(p.kicker)}</div>` : ""}<div class="hwrap" style="left:80px;top:${top}px;max-width:392px">${head(p.lines, { size: 104, t, lh: 1.04 })}${p.sub ? `<div class="sub" style="color:${t.reg}">${esc(p.sub)}</div>` : ""}</div>`;
+      parts.push(badges(1236, "left", 80, 60));
+    }
     for (const l of p.lifts ?? []) parts.push(lift(l));
-    for (const [n, s, cx, cy, r] of p.objs ?? []) parts.push(o3(n, s, cx, cy, r));
     for (const sl of p.slabs ?? []) parts.push(slab(sl));
-    parts.push(badges(1226));
+    for (const [n, s, cx, cy, r] of p.objs ?? []) parts.push(o3(n, s, cx, cy, r));
   }
 
   if (L === "bignum") {
-    parts.push(`<div class="num" style="color:#fff">${esc(p.num)}</div>`);
-    headHtml = `<div class="hwrap" style="left:80px;top:720px;max-width:470px">${head(p.lines, { size: 76, t, lh: 1.08 })}</div>`;
-    const ph = await phoneImg(SCREEN(p.phone.screen), p.phone.pose, p.phone.h);
+    parts.push(`<div class="num">${esc(p.num)}</div>`);
+    headHtml = `<div class="hwrap" style="left:80px;top:720px;max-width:430px">${head(p.lines, { size: 76, t, lh: 1.08 })}</div>`;
+    const ph = await phoneImg(SCREEN(p.phone.screen), "s", p.phone.h);
     parts.push(placePhone(ph, p.phone.cx, p.phone.cy));
-    parts.push(badges(1226, "left", 80));
+    parts.push(badges(1236, "left", 80, 60));
   }
 
-  if (L === "welcome") {
-    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 124, t, lh: 1.02 })}</div>`;
-    parts.push(`<div class="sun"></div><div class="arch"><img src="${scene("villa")}"></div>`);
-    parts.push(`<div class="sub" style="position:absolute;left:80px;top:520px;width:470px;z-index:45">${esc(p.sub)}</div>`);
-    parts.push(o3("keys", 250, 760, 1030, 14));
-    parts.push(o3("home-small", 200, 190, 900, -10));
-    parts.push(badges(1226, "left", 80));
+  if (L === "stamp") {
+    parts.push(stamp({ cx: 540, cy: 540, w: 880, h: 640, rot: -3, fill: ELEC, edge: "#9FD9FF", ink: "#fff", q: p.q, a: p.a }));
+    parts.push(o3("keys", 210, 830, 960, 12));
+    parts.push(badges(1226));
   }
 
-  if (L === "grid4") {
-    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 100, t })}</div>`;
-    const cw = 438, ch = 330, gx = 24, x0 = 80, y0 = 470;
-    p.cells.forEach(([name, title, sub], i) => {
-      const x = x0 + (i % 2) * (cw + gx), y = y0 + Math.floor(i / 2) * (ch + gx);
-      parts.push(`<div class="card" style="left:${px(x)};top:${px(y)};width:${px(cw)};height:${px(ch)}">
-        <img src="${obj(name)}" style="width:190px"><div class="ct">${esc(title)}</div><div class="cs">${esc(sub)}</div></div>`);
+  if (L === "steps") {
+    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 108, t })}</div>`;
+    const cw = 290, gap = 25, x0 = 80, y0 = 480;
+    p.steps.forEach(([name, label], i) => {
+      parts.push(`<div class="card" style="left:${px(x0 + i * (cw + gap))};top:${px(y0)};width:${px(cw)};height:${px(360)};gap:14px">
+        <div class="sn">0${i + 1}</div><img src="${obj(name)}" style="width:150px"><div class="ct" style="font-size:33px;text-align:center;padding:0 16px">${esc(label)}</div></div>`);
     });
+    parts.push(slab({ x: 540, y: 990, rot: -2, size: 40, tab: "Good to know", rows: [["title", p.pill]] }));
+    parts.push(badges(1226));
+  }
+
+  if (L === "trust") {
+    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 124, t, lh: 1.02 })}</div>`;
+    parts.push(`<div class="sub dark" style="left:80px;top:520px;width:600px">${esc(p.sub)}</div>`);
+    parts.push(o3("bank", 330, 790, 900, 8));
+    parts.push(slab({ x: 340, y: 930, rot: -3, size: 34, tab: "Straight to", rows: [["title", "The owner"], ["line", "The host or the business"]] }));
     parts.push(badges(1226));
   }
 
@@ -222,27 +237,6 @@ async function layout(p) {
     parts.push(badges(1226));
   }
 
-  if (L === "stamp") {
-    parts.push(stamp({ cx: 540, cy: 520, w: 860, h: 620, rot: -3, fill: ELEC, edge: "#9FD9FF", ink: "#fff", q: p.q, a: p.a }));
-    parts.push(o3("keys", 210, 830, 930, 12));
-    parts.push(badges(1226));
-  }
-
-  if (L === "stampphone") {
-    parts.push(stamp({ cx: 540, cy: 330, w: 900, h: 400, rot: -2, fill: "#FBFAF7", edge: "#9FD9FF", ink: INK, q: p.q, a: p.a }));
-    const ph = await phoneImg(SCREEN(p.phone.screen), p.phone.pose, p.phone.h);
-    parts.push(placePhone(ph, p.phone.cx, p.phone.cy));
-    parts.push(badges(1226));
-  }
-
-  if (L === "homescreen") {
-    const screenFile = await homeScreen();
-    const ph = await phoneImg(screenFile, "corner", 1500);
-    parts.push(placePhone(ph, 840, 1090));
-    headHtml = `<div class="kick">${esc(p.kicker)}</div><div class="hwrap caps" style="left:80px;top:230px;max-width:540px">${head(p.lines, { size: 104, t, lh: 1.0 })}</div>`;
-    parts.push(badges(1226, "left", 80));
-  }
-
   if (L === "langs") {
     headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 108, t })}</div>`;
     p.rows.forEach(([code, name, word], i) => {
@@ -252,87 +246,17 @@ async function layout(p) {
     parts.push(badges(1226));
   }
 
-  if (L === "owner") {
-    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 108, t })}</div>`;
-    parts.push(lift({ ...p.lift, edge: INK }));
-    parts.push(o3("keys", 380, 380, 1030, -14));
-    parts.push(o3("home-small", 230, 800, 1040, 12));
-    parts.push(badges(1226, "right", 0).replace("left:0;right:0", "right:80px"));
+  /* THE APP ICON, as itself: the one honest way to say "look for this". */
+  if (L === "icon") {
+    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 112, t })}</div>`;
+    parts.push(`<div class="iglow"></div><div class="appicon"><img src="${BRAND("vallo-icon.png")}"></div>`);
+    parts.push(`<div class="sub center" style="color:#fff">${esc(p.sub)}</div>`);
+    parts.push(o3("keys", 230, 170, 800, -12));
+    parts.push(o3("home-small", 200, 910, 840, 12));
+    parts.push(badges(1180, "center", 0, 88));
   }
 
-  if (L === "trust") {
-    headHtml = `<div class="hwrap" style="left:80px;top:176px;max-width:920px">${head(p.lines, { size: 124, t, lh: 1.02 })}</div>`;
-    parts.push(`<div class="sub dark" style="left:80px;top:520px;width:600px">${esc(p.sub)}</div>`);
-    parts.push(o3("bank", 330, 790, 900, 8));
-    parts.push(slab({ x: 340, y: 930, rot: -3, size: 34, tab: "Straight to", rows: [["title", "The owner"], ["line", "The host or the business"]] }));
-    parts.push(badges(1226));
-  }
-
-  if (L === "daynight") {
-    const day = await phoneImg(SCREEN("sc-home-lt"), "a", 760);
-    const night = await phoneImg(SCREEN("sc-home"), "c", 760);
-    parts.push(placePhone(day, 290, 810), placePhone(night, 790, 810));
-    headHtml = `<div class="dn l">Day<br><b>mode.</b></div><div class="dn r">Night<br><b>mode.</b></div>`;
-    parts.push(badges(1226));
-  }
-
-  if (L === "poll") {
-    headHtml = `<div class="hwrap" style="left:0;right:0;top:150px;text-align:center">${head(p.lines, { size: 100, align: "center", t })}</div>`;
-    const cw = 438, ch = 290, gx = 24, x0 = 80, y0 = 450;
-    p.opts.forEach(([letter, label, name], i) => {
-      const x = x0 + (i % 2) * (cw + gx), y = y0 + Math.floor(i / 2) * (ch + gx);
-      parts.push(`<div class="opt" style="left:${px(x)};top:${px(y)};width:${px(cw)};height:${px(ch)}">
-        <span class="ol">${letter}</span><span class="on">${esc(label)}</span></div>`);
-      parts.push(o3(name, 150, x + cw - 100, y + ch / 2 + 6, 8, 36));
-    });
-    parts.push(`<div class="vote">Vote in the comments 👇</div>`);
-    parts.push(badges(1226));
-  }
-
-  return { t, parts, headHtml, logoOn: !["daynight", "persona"].includes(L) };
-}
-
-/* ---------------------------------------------------- the home-screen shot */
-
-let HOME_FILE = null;
-async function homeScreen() {
-  if (HOME_FILE) return HOME_FILE;
-  const file = join(tmpdir(), "vallo-homescreen-display.png");
-  const icons = [
-    ["Calendar", "calendar-days", "#FF6B5A,#FF4C3D"], ["Camera", "camera", "#8E96A8,#5B6377"], ["Notes", "notebook-pen", "#FFD84D,#F5B800"], ["Maps", "map-pin", "#5BD08A,#1FA55E"],
-    ["Weather", "cloud-sun", "#59B6FF,#2A7BF0"], ["Mail", "mail", "#4FA3FF,#1B6BE6"], ["Music", "music", "#FF5E7E,#E0245E"],
-  ];
-  const tile = ([name, ic, g]) => { const [a, b] = g.split(","); return `<div class="ap"><div class="ai" style="background:linear-gradient(160deg,${a},${b})">${lucide(ic).replace("<svg", '<svg width="110" height="110" stroke="#fff" stroke-width="2"')}</div><span>${name}</span></div>`; };
-  const html = `<!doctype html><html><head><meta charset="utf-8"><style>
-    @font-face{font-family:Inter;font-weight:100 900;src:url(${INTER}) format("woff2")}
-    *{box-sizing:border-box;margin:0;padding:0}html,body{width:1320px;height:2868px;overflow:hidden;font-family:Inter,sans-serif}
-    body{background:radial-gradient(90% 40% at 70% 0%,#5AA9FF 0%,transparent 70%),radial-gradient(80% 40% at 10% 100%,#0A3FA8 0%,transparent 70%),linear-gradient(170deg,#1B6FF0,#0B2E8E 70%,#071C5C)}
-    .sb{position:absolute;top:70px;left:110px;right:110px;display:flex;justify-content:space-between;color:#fff;font:700 54px/1 Inter}
-    .grid{position:absolute;left:96px;right:96px;top:300px;display:grid;grid-template-columns:repeat(4,1fr);row-gap:92px;justify-items:center}
-    .ap{display:flex;flex-direction:column;align-items:center;gap:22px;color:#fff;font:500 38px/1 Inter}
-    .ai{width:224px;height:224px;border-radius:52px;display:grid;place-items:center;box-shadow:0 20px 40px rgba(0,10,60,.35)}
-    .v .ai{background:none;overflow:hidden;position:relative;padding:0}.v img{width:100%;height:100%}
-    .bd{position:absolute;right:-24px;top:-24px;width:90px;height:90px;border-radius:50%;background:#FF3B30;color:#fff;font:700 54px/90px Inter;text-align:center;border:6px solid #1B6FF0}
-    .dock{position:absolute;left:70px;right:70px;bottom:90px;height:300px;border-radius:84px;background:rgba(255,255,255,.22);display:flex;justify-content:space-around;align-items:center}
-    .dock .ai{width:200px;height:200px}
-  </style></head><body>
-    <div class="sb"><span>9:41</span><span></span></div>
-    <div class="grid">
-      <div class="ap v"><div class="ai" style="position:relative"><img src="${BRAND("vallo-icon.png")}" style="border-radius:52px"><div class="bd">1</div></div><span>Vallo</span></div>
-      ${icons.slice(0, 3).map(tile).join("")}${icons.slice(3, 7).map(tile).join("")}
-    </div>
-    <div class="dock">${icons.slice(0, 4).map(([n, ic, g]) => { const [a, b] = g.split(","); return `<div class="ai" style="background:linear-gradient(160deg,${a},${b})">${lucide(ic).replace("<svg", '<svg width="100" height="100" stroke="#fff" stroke-width="2"')}</div>`; }).join("")}</div>
-  </body></html>`;
-  const f = join(tmpdir(), "vallo-homescreen.html");
-  writeFileSync(f, html);
-  const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--no-sandbox"] });
-  const pg = await b.newPage({ viewport: { width: 1320, height: 2868 } });
-  await pg.goto(url(f), { waitUntil: "load" });
-  await pg.evaluate(() => Promise.all([document.fonts.ready, ...Array.from(document.images).map((i) => i.decode().catch(() => {}))]));
-  await pg.screenshot({ path: file, type: "png" });
-  await b.close();
-  HOME_FILE = file;
-  return file;
+  return { t, parts, headHtml, logoOn: L !== "persona" };
 }
 
 /* ----------------------------------------------------------------- the page */
@@ -348,7 +272,8 @@ async function compose(p) {
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{width:${W}px;height:${H}px;overflow:hidden;font-family:Inter,Poppins,sans-serif;background:#EAF1FF}
     .bg,.win,.tiles,.swirl,.full,.scrim{position:absolute;inset:0;width:100%;height:100%}
-    .paper{background:linear-gradient(180deg,#DDE9FC 0%,#EAF2FF 55%,#F4F8FF 100%)}
+    .ivory{background:radial-gradient(70% 40% at 92% 0%,rgba(255,196,150,.5),transparent 62%),linear-gradient(180deg,#F9F5EE 0%,#F1E9DD 100%)}
+    .ice{background:radial-gradient(70% 40% at 0% 0%,rgba(143,211,255,.55),transparent 62%),linear-gradient(180deg,#E3EEFD,#F3F8FF)}
     .electric{background:radial-gradient(70% 45% at 85% 0%,rgba(143,211,255,.55),transparent 62%),radial-gradient(60% 40% at 0% 100%,rgba(0,40,130,.65),transparent 70%),linear-gradient(160deg,#1B80FF,#0063F0 50%,#0049BE)}
     .sunset{background:radial-gradient(80% 45% at 88% 4%,#FFE6D3,transparent 62%),linear-gradient(170deg,#FFD6B6,#FFB885 55%,#FF9559)}
     .sky{background:linear-gradient(180deg,#D3E6FF,#E8F2FF 60%,#F2F8FF)}
@@ -368,11 +293,16 @@ async function compose(p) {
     .sub.dark{position:absolute;color:${INK};opacity:.86;margin:0;z-index:45}
     .phone{position:absolute;max-width:none;z-index:10;filter:drop-shadow(0 44px 44px rgba(8,30,100,.30)) drop-shadow(0 10px 14px rgba(8,30,100,.18))}
     .o3{position:absolute;filter:drop-shadow(0 26px 26px rgba(8,30,100,.32));z-index:35}
-    .lift{position:absolute;overflow:hidden;background:#fff;box-shadow:0 38px 56px -22px rgba(8,30,100,.5)}
+    .lift{position:absolute;overflow:hidden;background:#04071C}
     .lift img{position:absolute;max-width:none;display:block}
-    .badges{position:absolute;display:flex;gap:22px;z-index:60}.badges img{height:70px;width:auto;filter:drop-shadow(0 8px 14px rgba(8,30,100,.28))}
-    .num{position:absolute;left:62px;top:96px;font:700 640px/1 Poppins;letter-spacing:-.06em;z-index:20}
-    .kick{position:absolute;left:80px;top:150px;font:700 28px/1 Inter;letter-spacing:.16em;color:rgba(255,255,255,.85);z-index:45}
+    .badges{position:absolute;display:flex;gap:22px;z-index:60}.badges img{height:var(--bh,70px);width:auto;filter:drop-shadow(0 8px 14px rgba(8,30,100,.28))}
+    .num{position:absolute;left:62px;top:96px;font:700 640px/1 Poppins;letter-spacing:-.06em;z-index:20;color:#fff}
+    .kick{position:absolute;left:80px;font:700 25px/1 Inter;letter-spacing:.15em;z-index:45;opacity:.82}
+    .sn{position:absolute;left:22px;top:20px;font:700 24px/1 Inter;letter-spacing:.14em;color:rgba(11,18,48,.42)}
+    .sub.center{position:absolute;left:0;right:0;top:1086px;max-width:none;text-align:center;margin:0;font-size:34px;z-index:45}
+    .appicon{position:absolute;left:280px;top:470px;width:520px;height:520px;border-radius:116px;overflow:hidden;z-index:40;box-shadow:0 70px 90px -24px rgba(0,20,100,.7),0 0 0 14px rgba(255,255,255,.2)}
+    .appicon img{width:100%;height:100%;display:block}
+    .iglow{position:absolute;left:90px;top:300px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 66%);z-index:5}
     .sun{position:absolute;right:-150px;top:430px;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#FFD2A8,#FF9A5B 70%);opacity:.95}
     .arch{position:absolute;left:590px;top:470px;width:400px;height:690px;border-radius:200px 200px 40px 40px;overflow:hidden;border:10px solid #fff;box-shadow:0 40px 70px -24px rgba(0,20,90,.65);transform:rotate(3deg)}
     .arch img{width:100%;height:100%;object-fit:cover}
