@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { redirect } from "next/navigation";
 import { getDictionary, type Locale } from "@vallo/i18n";
@@ -206,7 +207,13 @@ export default async function HomePage() {
   const manageHref = agentContext.state === "agent" ? "/agent/listings" : "/profile/setup";
 
   return (
-    <HomeScreen
+    <>
+      {overview.signedIn ? (
+        <Suspense fallback={null}>
+          <InviteStepNudge back="/home" />
+        </Suspense>
+      ) : null}
+      <HomeScreen
       t={t}
       locale={locale}
       overview={overview}
@@ -254,5 +261,6 @@ export default async function HomePage() {
         ) : null
       }
     />
+    </>
   );
 }

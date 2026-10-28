@@ -307,4 +307,22 @@ export const experienceRewardsEn = {
     failedBody: "Nothing has changed. Try again in a moment.",
     back: "Back to rewards",
   },
+
+  /**
+   * 27 October 2026: the invited member's own next step. The invite counts
+   * only once they finish sign-up (the live campaign asks for a confirmed
+   * phone and a finished profile), and nothing used to tell them so. Never
+   * names who invited them.
+   */
+  inviteStep: {
+    phoneTitle: "One step left to finish joining",
+    phoneBody: "Confirm your mobile number. It is never shown to anybody, and it completes your sign-up.",
+    phoneAction: "Confirm my number",
+    setupTitle: "One step left to finish joining",
+    setupBody: "Finish setting up your profile to complete your sign-up.",
+    setupAction: "Finish my profile",
+    emailTitle: "One step left to finish joining",
+    emailBody: "Confirm your email address. We sent you a link and a code.",
+    emailAction: "Open my account settings",
+  },
 };
