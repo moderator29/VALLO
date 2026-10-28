@@ -12,6 +12,7 @@ import {
   reportReady,
   type ArrivalReportReason,
 } from "@/lib/stays/arrival-check";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * V-91. The two answers, and the camera-first report behind "No".
@@ -75,12 +76,12 @@ export function ArrivalCheckCard({
     const added: string[] = [];
     try {
       const { createClient } = await import("@/lib/supabase/client");
-      const storage = createClient().storage.from("arrival-evidence");
+      const supabase = createClient();
       const room = MAX_ARRIVAL_PHOTOS - photos.length;
       for (const file of Array.from(files).slice(0, Math.max(0, room))) {
         const path = arrivalPhotoPath(bookingId, file.name, crypto.randomUUID());
-        const uploaded = await storage.upload(path, file, { contentType: file.type });
-        if (uploaded.error) {
+        const uploaded = await uploadToStorage({ supabase, bucket: "arrival-evidence", path, body: file, contentType: file.type });
+        if (!uploaded.ok) {
           setError(copy.uploadFailed);
           break;
         }

@@ -10,6 +10,7 @@ import { formatMoneyDate } from "@/lib/money/dates";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import type { TenancyReportView } from "@/lib/tenancy/queries";
 import { addTenancyReportPhoto, countersignTenancyReport, saveTenancyReport } from "@/lib/tenancy/actions";
+import { uploadToStorage } from "@/lib/media/upload";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
 
@@ -105,8 +106,8 @@ export function TenancyReportCard({
       setError(copy.failed);
       return;
     }
-    const uploaded = await supabase.storage.from("tenancy-evidence").upload(path, file, { contentType: file.type });
-    if (uploaded.error) {
+    const uploaded = await uploadToStorage({ supabase, bucket: "tenancy-evidence", path, body: file, contentType: file.type });
+    if (!uploaded.ok) {
       setError(copy.failed);
       return;
     }

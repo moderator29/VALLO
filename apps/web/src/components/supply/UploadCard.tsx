@@ -13,6 +13,7 @@ import {
   documentExtension,
   rejectFileIssue,
 } from "@/components/verification/kyc";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * ONE OF THE BIG UPLOAD CARDS ON `GOVERNING-04` SCREEN TWO AND `GOVERNING-05`
@@ -117,10 +118,8 @@ export function UploadCard({
          document is fixed, so re-choosing is a new object and the submit files
          whichever path is current. */
       const path = `${user.id}/${batchId}/${slot}-${crypto.randomUUID()}.${documentExtension(file.type)}`;
-      const upload = await supabase.storage
-        .from(DOCUMENT_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: DOCUMENT_BUCKET, path, body: file, contentType: file.type });
+      if (!upload.ok) {
         setFailure(copy.fileFailed);
         return;
       }

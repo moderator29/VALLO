@@ -12,6 +12,7 @@ import {
   type HostDocumentKind,
 } from "@/lib/host/onboarding";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * One host document, asked for properly and filed the moment it is chosen.
@@ -68,10 +69,8 @@ export function HostDocumentUploader({
         setError("The upload did not finish. Check your connection and choose the file again.");
         return;
       }
-      const { error: uploadError } = await supabase.storage
-        .from("host-documents")
-        .upload(path, chosen, { contentType: chosen.type });
-      if (uploadError) {
+      const uploaded = await uploadToStorage({ supabase, bucket: "host-documents", path, body: chosen, contentType: chosen.type });
+      if (!uploaded.ok) {
         setError("The upload did not finish. Check your connection and choose the file again.");
         return;
       }
