@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   approveBusiness,
@@ -13,6 +13,7 @@ import {
 import type { BusinessRung } from "@/lib/admin/business-queries";
 import type { BusinessDecision } from "@/lib/admin/business-decision";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The three hands this desk offers, and nothing else.
@@ -64,7 +65,7 @@ export function BusinessReviewDecision({
   offered?: readonly BusinessDecision[];
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
@@ -163,7 +164,7 @@ export function PublishControl({
   label: string;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   const run = () => {
@@ -220,7 +221,7 @@ export function RungDecision({
   missingEvidence?: string;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
 

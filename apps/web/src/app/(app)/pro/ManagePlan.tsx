@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,7 @@ import { StatusPill, type StatusTone } from "@/components/ui/StatusPill";
 import { cancelSubscription } from "@/lib/subscriptions/actions";
 import type { LiveSubscription, SubscriptionsCopy } from "@/lib/subscriptions/state";
 import { fill, longDate, money } from "./plan-format";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE PLAN A MEMBER HOLDS THROUGH A SUBSCRIPTION, AND THE WAY OUT OF IT.
@@ -34,7 +35,7 @@ export function ManagePlan({
 }) {
   const router = useRouter();
   const [asking, setAsking] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const m = copy.manage;

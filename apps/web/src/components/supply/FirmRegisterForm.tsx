@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
 import type { RegisterCopy } from "./supply-copy";
@@ -23,6 +23,7 @@ import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * GOVERNING-05, THE FIRM FORM, WHICH IS A BRANCH AND NOT A THIRD ROLE.
@@ -103,7 +104,7 @@ export function FirmRegisterForm({
     reference: string;
     attached: boolean;
   } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* Ruling 6 (13 October 2026): the two ticks before this is sent. */
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);

@@ -1,11 +1,12 @@
 "use client";
 
 import { countOf } from "@vallo/i18n/core";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
 import { clearConsoleKeys, markInternalByEmail, setInternalAccount } from "@/lib/admin/key-roster-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * C14 break-glass: a SECOND super admin revokes a person's keys FOR THE
@@ -17,7 +18,7 @@ export function ClearKeysForm({ userId, name }: { userId: string; name: string }
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   if (!open) {
     return (
@@ -73,7 +74,7 @@ export function ClearKeysForm({ userId, name }: { userId: string; name: string }
 export function InternalSwitch({ userId, name, initial }: { userId: string; name: string; initial: boolean }) {
   const [on, setOn] = useState(initial);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   return (
     <div className="grid gap-2xs">
       <Switch
@@ -106,7 +107,7 @@ export function InternalSwitch({ userId, name, initial }: { userId: string; name
 export function MarkInternalForm() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   return (
     <form

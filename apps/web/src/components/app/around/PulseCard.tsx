@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { recordPulse } from "@/lib/around/pulse-actions";
 import { PULSE_ANSWERS, type PulseKind, type PulseResult } from "@/lib/around/pulse";
 import "@/app/css/catalogue.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * One tap for the neighbours' account (V-41), on an Around place a member
@@ -24,7 +25,7 @@ export function PulseCard({
   copy: Dictionary["shape"]["neighbours"];
 }) {
   const [result, setResult] = useState<PulseResult | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const fill = (text: string) => text.replace("{area}", areaName);
 
   const body = (() => {

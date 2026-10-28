@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
@@ -30,6 +30,7 @@ import { successCopy } from "@/lib/ui/success-moments";
 import { PaystackCheckout, type ConfirmOutcome } from "./PaystackCheckout";
 import { panelClass } from "@/components/ui/Panel";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * PAYMENT METHODS, to the block at the foot of the settings render
@@ -108,7 +109,7 @@ export function PaymentMethodsPanel({
      so the sentence waits here for its `onFailed`. */
   const setupRefusal = useRef<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [addingCard, setAddingCard] = useState(false);
   /* The transaction the in-app checkout is resuming, once the server has

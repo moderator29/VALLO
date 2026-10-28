@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { amendAgreement, cancelAgreement, confirmAgreement, createClaimEvidenceUpload, fileGuaranteeClaim } from "@/lib/agreements/actions";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { withDone, type RecordDoneFlag } from "@/lib/ui/success-moments";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The controls on an agreement page (Track A): confirm the exact version,
@@ -17,7 +18,7 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 
 function useAction() {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /*
    * `done` names the success moment this action ends in. The page re-renders

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import "@/app/css/orphans.css";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +17,7 @@ import {
   type AreaKind,
 } from "@/lib/social/areas-model";
 import { useDisplayHost } from "@/lib/ui/use-display-host";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Suggest a place.
@@ -39,7 +40,7 @@ export function ProposeAreaForm({
 }) {
   const router = useRouter();
   const host = useDisplayHost();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const [name, setName] = useState("");
   const [city, setCity] = useState("");

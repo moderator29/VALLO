@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { fillMacro, SUPPORT_MACROS, type SupportMacro } from "@/lib/admin/support-macros";
 import { sendSupportReply } from "@/lib/admin/support-workbench-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE REPLY BOX. Saved replies fill it (never send it); the agent reads,
@@ -31,7 +32,7 @@ export function SupportComposer({
   const [body, setBody] = useState("");
   const [picked, setPicked] = useState<SupportMacro | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const use = (macro: SupportMacro) => {
     const text = fillMacro(macro, { firstName, reference });

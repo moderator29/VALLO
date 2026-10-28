@@ -1,7 +1,7 @@
 "use client";
 
 import type { AccountCopy } from "@/components/app/account/settings-copy";
-import { useActionState, useEffect, useId, useState, useTransition } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatDate, formatMoney, type Locale } from "@vallo/i18n/core";
@@ -21,6 +21,7 @@ import {
   startDeletionAction,
 } from "@/lib/account-deletion/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The deletion control, and everything behind it.
@@ -222,7 +223,7 @@ function ScheduledPanel({
 }) {
   const copy = t.settings.delete;
   const router = useRouter();
-  const [busy, start] = useTransition();
+  const [busy, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
@@ -310,7 +311,7 @@ function DeleteDrawer({
   const [phraseValue, setPhraseValue] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [codeError, setCodeError] = useState<string | null>(null);
-  const [sending, startSending] = useTransition();
+  const [sending, startSending] = useSafeTransition();
   const phraseId = useId();
   const proofId = useId();
 

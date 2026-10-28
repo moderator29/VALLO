@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addToSupport, removeFromSupport } from "@/lib/admin/staff-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE SUPPORT TEAM, on the team console. Who answers members, what else
@@ -71,7 +72,7 @@ function AddToSupport() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   return (
     <form
       className="flex flex-wrap items-end gap-xs"
@@ -128,7 +129,7 @@ function RemoveFromSupport({ userId, ends }: { userId: string; ends: boolean }) 
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   if (!open) {
     return (
       <div className="mt-2xs">

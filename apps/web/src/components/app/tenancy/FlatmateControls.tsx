@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +14,7 @@ import {
 import { settleShareReturn, startShareCheckout } from "@/lib/tenancy/share-checkout";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, withoutDone, type SuccessWords } from "@/lib/ui/success-moments";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["afterTheGate"]["flatmates"];
 
@@ -26,7 +27,7 @@ type Copy = Dictionary["afterTheGate"]["flatmates"];
  */
 function useRun() {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /* `onOk` takes over the refresh: a success moment refreshes the page when
      it closes, so the list does not jump underneath it. */
@@ -185,7 +186,7 @@ export function PayShare({
   label: string;
   help?: string;
 }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [key] = useState(() => crypto.randomUUID());
   return (

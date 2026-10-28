@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,6 +24,7 @@ import { initial as initialOf } from "@/lib/text/initial";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
 import "../feed/feed-v2.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Writing a story.
@@ -73,7 +74,7 @@ export function StoryComposer({
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* 0 to 1 while the picture is on its way, so "Publishing" is never a
      spinner that might be stuck. */
   const [sent, setSent] = useState<number | null>(null);

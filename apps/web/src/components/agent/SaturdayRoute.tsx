@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { sayRunningLate } from "@/lib/viewings/actions";
 import type { RouteLeg } from "@/lib/viewings/route";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-94: THE DAY AS A ROUTE. Booked viewings in time order, a heading each
@@ -35,7 +36,7 @@ export function SaturdayRoute({
 }) {
   const [said, setSaid] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const time = (iso: string) => formatDate(new Date(iso), locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
 
   return (

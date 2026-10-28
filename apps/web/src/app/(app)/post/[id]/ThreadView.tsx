@@ -1,7 +1,7 @@
 "use client";
 
 import type { SheetWords } from "@/components/social/sheet-words";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -31,6 +31,7 @@ import {
 import { POST_COPY, POST_REPORT_REASONS } from "@/lib/social/posts-model";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type ThreadReply = PostView & { depth: number; parentId: string | null; mutedAuthor: boolean };
 
@@ -89,7 +90,7 @@ export function ThreadView({
   /* The replies on the page when it opened. Only a reply that arrives after
      (yours, after the refresh) opens into the list (`Expand`). */
   const [firstReplies] = useState(() => new Set(thread.replies.map((reply) => reply.id)));
-  const [, startTransition] = useTransition();
+  const [, startTransition] = useSafeTransition();
 
   /*
    * The server is the truth. When a refresh brings a new thread, take it.

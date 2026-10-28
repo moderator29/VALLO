@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +13,7 @@ import {
   type ArrivalReportReason,
 } from "@/lib/stays/arrival-check";
 import { uploadToStorage } from "@/lib/media/upload";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-91. The two answers, and the camera-first report behind "No".
@@ -45,7 +46,7 @@ export function ArrivalCheckCard({
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const input = useRef<HTMLInputElement | null>(null);
 
   const send = (answer: "as_listed" | ArrivalReportReason) => {

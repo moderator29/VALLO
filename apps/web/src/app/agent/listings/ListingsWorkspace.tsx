@@ -1,7 +1,7 @@
 "use client";
 
 import { DuplicateListing } from "./DuplicateListing";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type Dictionary, type Locale, formatMoneyGlance } from "@vallo/i18n/core";
 import { fill } from "../_copy";
@@ -35,6 +35,7 @@ import { markSeen, seenOnce } from "@/lib/ui/seen-once";
 import { feedback } from "@/lib/ui/feedback";
 import { motionQuiet } from "@/lib/motion/gate";
 import "@/app/css/lister-live.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The agent's listings workspace.
@@ -159,7 +160,7 @@ function ConfirmSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [unmet, setUnmet] = useState<string[]>([]);
   const copy = t.workspace.sheets[state.kind];

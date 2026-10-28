@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { acknowledgeRiskAlert } from "@/lib/admin/actions";
 import { ACK_COPY } from "./ack-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * C13: "I have this" on an open alert.
@@ -17,7 +18,7 @@ import { ACK_COPY } from "./ack-copy";
  */
 export function AlertAcknowledge({ alertId }: { alertId: string }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (

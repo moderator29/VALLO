@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { SelectField, TextField } from "@/components/ui/Field";
@@ -8,6 +8,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import type { RewardsPayoutResult } from "@/lib/payouts/referral-payout";
 import { money } from "./format";
 import { fill } from "./money-words";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["experienceRewards"]["withdraw"];
 
@@ -39,7 +40,7 @@ export function RewardsPayoutForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState<RewardsPayoutResult | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (done) {
     return (

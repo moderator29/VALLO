@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { editPost } from "@/lib/social/posts-actions";
 import { EDIT_WINDOW_MINUTES, POST_MAX } from "@/lib/social/posts-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Fixing what you wrote.
@@ -38,7 +39,7 @@ export function PostEditor({
 }) {
   const [body, setBody] = useState(initialBody);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const trimmed = body.trim();
   const left = POST_MAX - body.length;

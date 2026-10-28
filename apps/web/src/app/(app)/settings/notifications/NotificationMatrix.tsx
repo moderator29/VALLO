@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Switch } from "@/components/ui/Switch";
 import { Button } from "@/components/ui/Button";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
@@ -12,6 +12,7 @@ import type {
   ResolvedProfileSettings,
 } from "@/lib/profile/model";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * NOTIFICATION SETTINGS AS A REAL MATRIX (R3-14): event by channel, and quiet
@@ -110,7 +111,7 @@ export function NotificationMatrix({
     tone: "ok" | "error";
     text: string;
   } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const save = (
     patch: Parameters<typeof updateSettings>[0],

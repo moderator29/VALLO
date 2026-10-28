@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AiConsentCopy } from "@/components/app/account/settings-copy";
 import { RowButton, RowLink, SettingsGroup } from "@/components/app/account/rows";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { withdrawAiConsent } from "@/lib/ai/consent-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * STORE-07: the AI disclosure a person agreed to in the assistant, stated on
@@ -25,7 +26,7 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
   const [withdrawn, setWithdrawn] = useState(false);
   const [asking, setAsking] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const agreed = consented && !withdrawn;
 

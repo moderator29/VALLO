@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { setCheckableNumber } from "@/lib/doors/agent-check-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type CardCopy = Dictionary["trustDoors"]["agentCard"];
 
@@ -29,7 +30,7 @@ export function AgentLookupCard({
   const [hint, setHint] = useState(initialHint);
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const save = (phone: string | null) => {
     setError(null);

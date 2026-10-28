@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
@@ -13,6 +13,7 @@ import { feedback } from "@/lib/ui/feedback";
 import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
 import "@/components/verification/verified-face.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** The button morph's payoff pop (`buttons.css`, "THE ACTION MORPH"). */
 const POP = "nf-btn-pop";
@@ -64,7 +65,7 @@ export function PhoneConfirmForm({
   const [wrongCount, setWrongCount] = useState(0);
   /* Seconds until a new code may be asked for, counted down once a second. */
   const [wait, setWait] = useState(0);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const panel = useRef<HTMLDivElement | null>(null);
   const codeField = useRef<HTMLDivElement | null>(null);
   const resend = useRef<HTMLButtonElement | null>(null);

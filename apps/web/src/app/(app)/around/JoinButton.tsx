@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { joinArea, leaveArea } from "@/lib/social/areas-actions";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Join or leave a place.
@@ -37,7 +38,7 @@ export function JoinButton({
    */
   const pathname = usePathname();
   const search = useSearchParams();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [isJoined, setIsJoined] = useState(joined);
   const [error, setError] = useState<string | null>(null);
 

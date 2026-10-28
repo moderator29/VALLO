@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -19,6 +19,7 @@ import {
   type SavedSearchView,
   type SearchChipCopy,
 } from "@/lib/saved/searches";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE KEPT SEARCHES, AND EVERY WRITE THAT CAN REACH THEM.
@@ -116,7 +117,7 @@ function SavedSearchRow({
   onReplace: (next: SavedSearchView) => void;
   onDrop: (id: string) => void;
 }) {
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [note, setNote] = useState<Note>(null);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(row.label);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useHostCopy, useHostPageCopy } from "@/components/host/host-copy";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -19,6 +19,7 @@ import type {
 } from "@/lib/business-transfer/queries";
 import { countOf, formatDate, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The route out of the business precondition, drawn as the two doors it is.
@@ -159,7 +160,7 @@ function BusinessRow({
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
-  const [busy, start] = useTransition();
+  const [busy, start] = useSafeTransition();
   const w = useHostPageCopy();
   const tw = w.transfer;
   const locale = useClientLocale();
@@ -355,7 +356,7 @@ function BusinessRow({
 function IncomingRow({ offer }: { offer: TransferOffer }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [busy, start] = useTransition();
+  const [busy, start] = useSafeTransition();
   const tw = useHostPageCopy().transfer;
   const locale = useClientLocale();
 

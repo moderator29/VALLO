@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
@@ -9,6 +9,7 @@ import { PhotoField } from "@/components/support/PhotoField";
 import { uploadTicketPhoto, type PreparedPhoto } from "@/components/support/photo";
 import { replyToMyTicket } from "@/lib/support/ticket-reply";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 const draftKey = (ticketId: string) => `nf_support_reply_${ticketId}`;
 
@@ -27,7 +28,7 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [error, setError] = useState<string | undefined>();
   const [note, setNote] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   useEffect(() => {
     try {

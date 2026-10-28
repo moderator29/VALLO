@@ -1,9 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { unblockUserSafely } from "@/lib/safety/blocks-actions";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** Nobody blocked yet: what the list is for, and where Block lives. */
 export function BlockedEmpty({ title, body }: { title: string; body: string }) {
@@ -43,7 +44,7 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
   const [armed, setArmed] = useState<string | null>(null);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
   const [failed, setFailed] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function press(row: BlockedRow) {
     setFailed(null);

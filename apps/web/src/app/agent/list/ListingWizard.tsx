@@ -1,7 +1,7 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatDate, formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { ShotList } from "@/components/agent/ShotList";
@@ -141,6 +141,7 @@ import { DetailGlyph } from "@/components/app/listing/DetailGlyph";
 import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/lister-publish.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The List Apartment wizard: eight steps, canon reference 03.
@@ -1236,7 +1237,7 @@ export function ListingWizard({
      blocking flag is on: with it off there is no accept to hold. */
   const [feePolicy, setFeePolicy] = useState<ListerFeePolicy | null | undefined>(initialFeePolicy);
   const [feeAcceptance, setFeeAcceptance] = useState<ListerFeeAcceptance | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /** Whether the last `persist` reached the server and was accepted. */
   const lastSaveOk = useRef(true);
   /** Whether step one's title refusal is currently being shown. */

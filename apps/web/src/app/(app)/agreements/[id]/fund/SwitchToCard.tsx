@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { switchEscrowToCard } from "@/lib/money/fund-fallback-actions";
 import { PAY_CHOICE_CARD_REVIEW, SWITCH_TO_CARD_LABEL, SWITCH_TO_CARD_LEAD } from "@/lib/money/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The calm way from the escrow step to card (founder instruction, 13 October
@@ -14,7 +15,7 @@ import { PAY_CHOICE_CARD_REVIEW, SWITCH_TO_CARD_LABEL, SWITCH_TO_CARD_LEAD } fro
  */
 export function SwitchToCard({ agreementId }: { agreementId: string }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [message, setMessage] = useState<string | null>(null);
   return (
     <div className="grid gap-xs" data-testid="fund-switch-to-card">

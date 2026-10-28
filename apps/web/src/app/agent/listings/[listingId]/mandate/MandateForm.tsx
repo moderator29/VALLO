@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { fileListingMandate } from "@/lib/compliance/beneficial-ownership-actions";
 import { MANDATE_KINDS, RELATIONSHIPS, type MyMandate } from "@/lib/compliance/beneficial-ownership";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["complianceBeneficialOwnership"]["lister"];
 
@@ -43,7 +44,7 @@ export function MandateForm({
   const [expiresOn, setExpiresOn] = useState(initial?.expiresOn ?? "");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function submit(event: React.FormEvent) {
     event.preventDefault();

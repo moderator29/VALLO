@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
@@ -9,6 +9,7 @@ import {
   type EscalationTarget,
 } from "@/lib/admin/support-workspace";
 import { escalateSupportTicket, returnSupportEscalation } from "@/lib/admin/support-workbench-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * HAND A TICKET TO ANOTHER DESK. Support routes money, safety and identity;
@@ -36,7 +37,7 @@ export function SupportEscalate({
   );
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <details id="support-escalate" className="nf-panel nf-panel--card mt-md p-md" data-testid="support-escalate">
@@ -124,7 +125,7 @@ export function ReturnEscalation({ ticketId, escalationId, label }: { ticketId: 
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   if (!open) {
     return (
       <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>

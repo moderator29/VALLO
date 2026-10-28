@@ -3,7 +3,7 @@
 import type { HubCopy } from "@/components/app/account/settings-copy";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
 import { initial } from "@/lib/text/initial";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { withNext } from "@/lib/auth/next-link";
 import { useRouter } from "next/navigation";
@@ -28,6 +28,7 @@ import { clearLocalDevice, readLocalDevice } from "@/components/app/push/device-
 import { playThreshold } from "@/lib/motion/threshold";
 import type { ResolvedProfileSettings } from "@/lib/profile/model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE SETTINGS HOME, per `7F96BE6C`.
@@ -356,7 +357,7 @@ export function SettingsHub({
 export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
   const router = useRouter();
   const hub = t.settings.hub;
-  const [signingOut, startSignOut] = useTransition();
+  const [signingOut, startSignOut] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   if (!signedIn) return null;
   return (

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { plural, type Locale, type PluralForms } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Disclosure } from "@/components/app/Disclosure";
@@ -10,6 +10,7 @@ import { endOtherSessions, endSession } from "@/lib/security/sessions-actions";
 import { endSessionGroup } from "@/lib/security/device-alert-actions";
 import { NotMePanel, type NotMeCopy } from "./NotMePanel";
 import { signOutEverywhere } from "@/lib/profile/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The list, and the buttons that end things.
@@ -117,7 +118,7 @@ export function DeviceList({
 }) {
   const [armed, setArmed] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const run = (key: string, work: () => Promise<Outcome>) => {
     if (armed !== key) {

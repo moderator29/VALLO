@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { answerStillAvailable } from "@/lib/availability/actions";
 import { laterWindow, type AvailabilityAnswer, type AvailabilityCheck } from "@/lib/availability/check";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-14: THE "STILL AVAILABLE?" CARD at the top of a listing thread.
@@ -44,7 +45,7 @@ export function AvailabilityCard({
   const [picking, setPicking] = useState(false);
   const [from, setFrom] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const range = laterWindow(today);
 
   function answer(value: AvailabilityAnswer, date?: string) {

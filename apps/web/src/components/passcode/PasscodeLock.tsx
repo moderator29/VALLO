@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { forgotPasscodeAction, verifyPasscodeAction, type VerifyResult } from "@/lib/passcode/actions";
@@ -18,6 +18,7 @@ import { readDeviceLock, type DeviceLock } from "@/lib/security/device-lock";
 import { platformLockAvailable } from "@/lib/security/webauthn-client";
 import { PasscodeFrame } from "./PasscodeFrame";
 import { OPEN_HOLD_MS, OPEN_LEAVE_MS, arriveThroughOpenDoor } from "./open-door";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export type PasscodeCopy = Dictionary["passcode"];
 
@@ -117,7 +118,7 @@ export function PasscodeLock({
     return seconds > 0 ? Date.now() + seconds * 1000 : 0;
   });
   const [now, setNow] = useState(() => Date.now());
-  const [leaving, startLeaving] = useTransition();
+  const [leaving, startLeaving] = useSafeTransition();
   const sending = useRef(false);
   /* The right answer has landed and the door is opening. */
   const [opening, setOpening] = useState(false);

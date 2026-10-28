@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { reviewListing } from "@/lib/admin/actions";
 import { Chip } from "@/components/ui/Chip";
 import { REVIEW_REASONS, composeReviewNote } from "@/lib/admin/review-reasons";
 import "../../_components/admin-material.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Decision = "approve" | "publish" | "request_changes" | "reject";
 
@@ -52,7 +53,7 @@ export function ReviewActionBar({
   const [notes, setNotes] = useState("");
   /* C8: reason codes as chips; each sends the lister one reviewed sentence. */
   const [codes, setCodes] = useState<string[]>([]);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
   const [armed, setArmed] = useState(false);

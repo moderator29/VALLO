@@ -2,7 +2,7 @@
 
 import "@/app/css/inspection.css";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -62,6 +62,7 @@ import { ViewingDayKit } from "./ViewingDayKit";
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
 import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * ONE INSPECTION, EXACTLY IN THE ANATOMY OF F6A8A482 / founder/inspection-target.jpg.
@@ -222,7 +223,7 @@ export function InspectionSheet({
   } = viewingWords(viewingCopy);
   const w = flowCopy;
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the card, if any: a time to offer, or a final
      move asked before it is made. */

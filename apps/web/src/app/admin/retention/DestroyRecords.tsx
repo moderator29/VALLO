@@ -1,11 +1,12 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { destroyExpiredMoneyRecords } from "@/lib/admin/desk-reads/retention-actions";
 import { confirmationMatches } from "@/lib/admin/desk-reads/retention";
 import { fill } from "../_components/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type DestroyCopy = {
   destroyBody: string;
@@ -43,7 +44,7 @@ export function DestroyRecords({
   const [typed, setTyped] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function run() {
     setError(null);

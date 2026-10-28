@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
@@ -9,6 +9,7 @@ import { criterionLabel } from "@/lib/host/review-contest";
 import { decideReviewContest } from "@/lib/admin/review-contest-actions";
 import { CONTEST_PUBLIC_NOTE_MAX, suggestedPublicNote, type ContestOutcome } from "@/lib/admin/review-contest-decision";
 import type { ContestView } from "@/lib/admin/reads/review-contests";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * A LISTER ASKED VALLO TO LOOK AT A REVIEW: the decision, on the report that
@@ -30,7 +31,7 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
   const [note, setNote] = useState(() => suggestedPublicNote(contest.criterion));
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const reason = criterionLabel(contest.criterion);
   const place = contest.place ?? "The place";

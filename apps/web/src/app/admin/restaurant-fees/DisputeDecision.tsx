@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { resolveSeatingDispute } from "@/lib/reservations/seating-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** Vallo decides: the table was seated, or nobody came. Recorded with who decided. */
 export function DisputeDecision({ reservationId }: { reservationId: string }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const decide = (outcome: "SEATED" | "NO_SHOW") =>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { upholdStopAsFraud } from "@/lib/admin/person-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-90: a senior reviewer upholds a standing stop as fraud. The note is what a
@@ -13,7 +14,7 @@ export function UpholdControl({ suspensionId, userId }: { suspensionId: string; 
   const fieldId = useId();
   const [note, setNote] = useState("");
   const [result, setResult] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <form

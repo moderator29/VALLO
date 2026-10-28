@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { draftFromBroadcast } from "@/lib/agent/broadcast-actions";
 import type { BroadcastKey, BroadcastParse } from "@/lib/agent/broadcast";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * "START FROM YOUR WHATSAPP MESSAGE" (V-09), the panel on the wizard's first
@@ -38,7 +39,7 @@ export function BroadcastPaste({
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ filled: BroadcastKey[]; parse: BroadcastParse } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function read() {
     setError(null);

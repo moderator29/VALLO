@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { Segmented } from "@/components/ui/Segmented";
@@ -12,6 +12,7 @@ import {
   type TruthAnswer,
   type TruthAnswers,
 } from "@/lib/inspections/truth";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * FOUR TRUTH QUESTIONS CLOSE EVERY INSPECTION (V-05): the renter's side.
@@ -50,7 +51,7 @@ export function TruthQuestions({
     answeredAt ? { at: answeredAt, reportOpened: false } : null,
   );
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const options = [
     { value: "yes" as const, label: copy.yes },

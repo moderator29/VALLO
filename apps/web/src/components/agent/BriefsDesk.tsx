@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { answerBrief } from "@/lib/briefs/actions";
 import { briefLine } from "@/lib/briefs/brief";
 import type { DeskBrief } from "@/lib/briefs/queries";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-95: THE BRIEFS A LISTER CAN ANSWER, on the inbox behind its Briefs
@@ -22,7 +23,7 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
   const [choice, setChoice] = useState(homes[0]?.id ?? "");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const full = brief.answered >= 3;
   return (
     <li className="nf-panel nf-panel--card p-card-sm">

@@ -2,7 +2,7 @@
 
 import type { Dictionary } from "@vallo/i18n/core";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ReportSheet } from "@/components/app/ReportSheet";
 import { blockUserSafely } from "@/lib/safety/blocks-actions";
@@ -12,6 +12,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
 import { PassportThreadRows, type PassportSheet } from "@/components/passport/PassportThreadRows";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The conversation's options sheet, behind the kebab in the header.
@@ -113,7 +114,7 @@ export function ThreadOptionsSheet({
 }) {
   const [confirmingBlock, setConfirmingBlock] = useState(false);
   const [blockNote, setBlockNote] = useState<string | null>(null);
-  const [blocking, startBlocking] = useTransition();
+  const [blocking, startBlocking] = useSafeTransition();
 
   /* Every close resets the block confirmation, so reopening the sheet never
      lands somebody straight back on a destructive question they backed out

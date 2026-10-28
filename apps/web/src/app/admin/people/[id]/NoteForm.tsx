@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addMemberNote } from "@/lib/admin/member-actions";
 import { NOTE_MAX, NOTE_MIN } from "@/lib/admin/member-file-rules";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Write a note on this person's file. Notes cannot be edited or deleted, by
@@ -17,7 +18,7 @@ export function NoteForm({ userId }: { userId: string }) {
   const router = useRouter();
   const [body, setBody] = useState("");
   const [result, setResult] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <form

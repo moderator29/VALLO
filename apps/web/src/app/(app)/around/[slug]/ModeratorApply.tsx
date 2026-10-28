@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import {
@@ -15,6 +15,7 @@ import {
   MODERATOR_REASON_MIN,
   MODERATOR_REASON_MAX,
 } from "@/lib/social/areas-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Apply to look after a place.
@@ -39,7 +40,7 @@ export function ModeratorApply({
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   if (pendingApplication) {
     return (

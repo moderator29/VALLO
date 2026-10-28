@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { createSafetyShare, markSafetyDone, stopSafetyShare } from "@/lib/doors/safety-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** The first segment of the trusted contact's page (`app/safe/[token]`). */
 const SAFE_DOOR = "safe";
@@ -48,7 +49,7 @@ export function SafetyShareControl({
     initial === "done" ? { kind: "done" } : initial === "shared" ? { kind: "shared" } : { kind: "idle" },
   );
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const when = formatDate(new Date(slotAt), locale, {
     weekday: "short",

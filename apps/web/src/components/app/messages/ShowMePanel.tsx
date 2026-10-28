@@ -1,7 +1,7 @@
 "use client";
 
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -20,6 +20,7 @@ import {
   type ShowMeResult,
 } from "@/lib/messages/show-me";
 import "@/app/css/catalogue.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** The clip's length, read by the browser from the file's own metadata. */
 function durationOf(file: File): Promise<number | null> {
@@ -76,7 +77,7 @@ export function ShowMePanel({
   const [played, setPlayed] = useState<string[]>([]);
   const [other, setOther] = useState("");
   const [result, setResult] = useState<ShowMeResult | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const fileFor = useRef<string | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const at = new Date(now);

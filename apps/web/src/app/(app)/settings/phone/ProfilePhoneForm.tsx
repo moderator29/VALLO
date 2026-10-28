@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
@@ -8,6 +8,7 @@ import { TextField } from "@/components/ui/Field";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { maskNational } from "@/lib/phone";
 import { saveProfilePhone } from "@/lib/settings/profile-phone";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE NUMBER ON FILE, while codes are not sent. One field, one save; the
@@ -27,7 +28,7 @@ export function ProfilePhoneForm({
   const [phone, setPhone] = useState("");
   const [savedLast, setSavedLast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const last = savedLast ?? currentLast;
 
   const save = () =>

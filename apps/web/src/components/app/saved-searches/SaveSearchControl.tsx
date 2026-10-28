@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveSearch } from "@/lib/saved/searches-actions";
 import type { SavedSearchParams, SavedSearchView } from "@/lib/saved/searches";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * SAVE THIS SEARCH, ON THE SEARCH ITSELF.
@@ -55,7 +56,7 @@ export function SaveSearchControl({
 }) {
   const [row, setRow] = useState<SavedSearchView | null>(saved);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const save = useCallback(() => {
     if (pending) return;

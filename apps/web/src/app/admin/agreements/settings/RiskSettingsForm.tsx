@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -17,6 +17,7 @@ import {
   type SignalChecks,
 } from "@/lib/admin/risk-settings";
 import { parseNairaToKobo } from "@/lib/money/amount";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * D77: the risk settings, one form, and the incident switch apart from it, as
@@ -25,7 +26,7 @@ import { parseNairaToKobo } from "@/lib/money/amount";
  */
 export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings; locale: Locale }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [threshold, setThreshold] = useState(thresholdFieldText(settings.amountThresholdMinor));
   const [days, setDays] = useState(String(settings.recentChangeDays));
   const [checks, setChecks] = useState<SignalChecks>(settings.checks);
@@ -130,7 +131,7 @@ export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings;
 
 function KillSwitch({ on, note }: { on: boolean; note: string | null }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const next = !on;

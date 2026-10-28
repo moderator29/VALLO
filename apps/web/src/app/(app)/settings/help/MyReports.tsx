@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { formatDate, type Locale } from "@vallo/i18n/core";
@@ -9,6 +9,7 @@ import { SettingsGroup } from "@/components/app/account/rows";
 import { StatusPill, type StatusTone } from "@/components/ui/StatusPill";
 import type { MyReports as MyReportsList } from "@/lib/reports/my-reports";
 import { withdrawMyReport } from "@/lib/reports/withdraw-action";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * YOUR REPORTS. V-89, and A1-035 (the reporter could not see the outcome).
@@ -32,7 +33,7 @@ export function MyReports({ list, locale }: { list: MyReportsList; locale: Local
   const router = useRouter();
   const [armed, setArmed] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (list.state === "signed-out") return null;
 

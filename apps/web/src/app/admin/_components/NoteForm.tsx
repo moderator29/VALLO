@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addMemberNote } from "@/lib/admin/notes-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export function NoteForm({
   subjectId,
@@ -18,7 +19,7 @@ export function NoteForm({
   const [body, setBody] = useState("");
   const [scope, setScope] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   return (
     <form

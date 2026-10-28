@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { closeBrief } from "@/lib/briefs/actions";
 import { briefLine } from "@/lib/briefs/brief";
 import type { MyBrief } from "@/lib/briefs/queries";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-95: THE RENTER'S BRIEFS AND THEIR ANSWERS. Each answer is a published
@@ -32,7 +33,7 @@ export function MyBriefs({
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (briefs === null) return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>;
   if (briefs.length === 0) return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.empty}</p>;
