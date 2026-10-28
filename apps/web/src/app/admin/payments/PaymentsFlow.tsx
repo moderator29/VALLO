@@ -188,7 +188,7 @@ export function PaymentsTable({
         <Waiting title={c.unreadTitle} body={c.unreadTable} />
       ) : (
         <>
-          <table className="nf-md-table">
+          <div className="nf-md-scroll"><table className="nf-md-table">
             <thead>
               <tr>
                 <th scope="col">{c.started}</th>
@@ -241,7 +241,7 @@ export function PaymentsTable({
                 ))
               )}
             </tbody>
-          </table>
+          </table></div>
           {desk.table.total > 0 && (
             <NumberedPager base="/admin/payments" params={params} page={desk.table.page} total={desk.table.total} pageSize={desk.table.pageSize} noun={c.paymentsNoun} locale={locale} />
           )}

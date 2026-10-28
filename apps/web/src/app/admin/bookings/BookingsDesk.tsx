@@ -137,7 +137,7 @@ export function BookingsDesk({
           <Waiting title="Stays could not be read" body="Every stay with its guest, dates, money and status. The read did not answer just now." />
         ) : (
           <>
-            <table className="nf-md-table">
+            <div className="nf-md-scroll"><table className="nf-md-table">
               <thead>
                 <tr>
                   <th scope="col">Stay</th>
@@ -202,7 +202,7 @@ export function BookingsDesk({
                   ))
                 )}
               </tbody>
-            </table>
+            </table></div>
             {desk.table.total > 0 && (
               <NumberedPager base="/admin/bookings" params={params} page={desk.table.page} total={desk.table.total} pageSize={desk.table.pageSize} noun="stays" />
             )}

@@ -14,6 +14,18 @@ Run it yourself: `BASE_URL=http://localhost:3000 node apps/web/scripts/design/re
 | Chat photo viewer | Reported as phone chrome on desktop | Checked: the viewer draws no status bar; Escape, arrows, wheel zoom, download and counter work. The chrome in the screenshot is most likely the photo itself (a phone screenshot sent in chat). Not changed |
 | Light mode, public pages | Reported as flat and bright | Looked at at 1440 and 390: photographic heroes, white cards on warm paper, solid blue actions. No defect found on the public pages, so nothing was changed. Signed-in light screens could not be opened here: **check them on a device** |
 
+## The signed-in screens, through the development harness (28 October 2026)
+
+No signed-in account could be used from the build sandbox, so the screens that need one were checked another way: the development harness (`/preview` and `/gallery`) draws the same member, host, agent and admin components with fixture data and no session. `apps/web/scripts/design/responsive/preview-sweep.mjs` loaded all 289 static harness routes at 390, 820, 1180, 1440 and 1920 px in dark (1,445 loads) and at 390, 820 and 1440 px in light (867 loads), checking for anything past the screen edge, a broken image and a thrown error.
+
+| Finding | Verdict |
+|---|---|
+| `/preview/chargebacks` at 820 px: the admin desk table pushed the page wider | **Fixed.** Every `nf-md-table` (payments, bookings, chargebacks, supply) now sits in a scroll box (`nf-md-scroll`); re-run clean at all five widths in both themes |
+| `/gallery/segmented`, `/preview/g1/sheet`, `/preview/g1/surfaces` | Spec-sheet fixtures (the demo action bar and sheet are drawn off the edge on purpose, and one gallery row uses long labels). Not product screens; left alone |
+| `/preview/f4/public-profile` at 390 px | The profile cover bleeds past the 16 px gutter by design |
+
+Everything else in the harness is clean at every width tried. What this does **not** prove: a real signed-in page also depends on real data, the page shell and the passcode lock, so a device pass with a QA account is still owed for the 217 pages marked "needs session" above.
+
 ## Pages
 
 | Route | Area | 5 widths, light and dark |

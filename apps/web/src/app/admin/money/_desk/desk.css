@@ -362,6 +362,13 @@
 
   /* ----------------------------------------------------------- the tables */
 
+  /* A desk table wider than its column scrolls inside its own box, never the
+     page (the 28 October preview sweep: 820 px wide, the page spilled). */
+  .nf-md-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   /* Render: row text cap 6 render px = 9.4 CSS, 13px. */
   .nf-md-table {
     width: 100%;

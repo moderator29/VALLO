@@ -188,7 +188,7 @@ export function ChargebacksDesk({
           <CalmNote kind="error" title={copy.unavailableTitle} fills={copy.unavailableBody} />
         ) : (
           <>
-            <table className="nf-md-table" aria-label={copy.caption}>
+            <div className="nf-md-scroll"><table className="nf-md-table" aria-label={copy.caption}>
               <thead>
                 <tr>
                   <th scope="col">{copy.columns.opened}</th>
@@ -262,7 +262,7 @@ export function ChargebacksDesk({
                   })
                 )}
               </tbody>
-            </table>
+            </table></div>
             {total > PAGE_SIZE ? (
               <NumberedPager base={CHARGEBACKS_BASE} params={params} page={shownPage} total={total} pageSize={PAGE_SIZE} noun={copy.rowsNoun} locale={locale} />
             ) : null}
