@@ -358,4 +358,59 @@
     border-right-color: var(--nf-night-glass-raised-edge);
     background: var(--nf-night-glass-raised-fill);
   }
+
+  /* ------------------------------------------------- the social row */
+  /* White marks on the brand blue, in both themes (SocialLinks.tsx). */
+  .nf-social__heading {
+    margin-bottom: var(--nf-space-xs);
+    color: var(--nf-content-muted);
+  }
+  .nf-social__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-social__link {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--nf-radius-md);
+    color: var(--nf-content-on-brand);
+    background: var(--nf-act-fill);
+    box-shadow: var(--nf-elevation-raised);
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-standard),
+      filter var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-social[data-size="lg"] .nf-social__link {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+  @media (hover: hover) {
+    .nf-social__link:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.12);
+    }
+  }
+  .nf-social__link:active {
+    transform: scale(0.95);
+  }
+  .nf-social__link:focus-visible {
+    outline: var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-social__link {
+      transition: none;
+    }
+    .nf-social__link:hover,
+    .nf-social__link:active {
+      transform: none;
+    }
+  }
 }

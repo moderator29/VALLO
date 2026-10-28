@@ -1016,6 +1016,9 @@ export const en = {
            reader and a search engine all read it as one. */
         registeredOfficeLabel: "Registered office",
         stayConnected: "Stay connected",
+        followUs: "Follow Vallo",
+        /** The accessible name of a social link; `{network}` is the network. */
+        onNetwork: "Vallo on {network}",
         newsletterBody: "New listings, product news and the occasional honest update.",
         emailLabel: "Email address",
         emailPlaceholder: "Enter your email",

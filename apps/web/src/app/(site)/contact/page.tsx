@@ -11,6 +11,7 @@ import { CONTACT_TOPICS, DEFAULT_CONTACT_TOPIC, type ContactTopic } from "./topi
 import { SUPPLY_DOOR_HREF } from "@/lib/supply/roles";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 import "@/app/css/site.css";
 
 /* A10: the title and description in the page's own language, with its
@@ -158,6 +159,17 @@ export default async function ContactPage({
           <h2 className="nf-overline text-center">Or write to us here</h2>
           <div className="nf-panel nf-panel--card block mt-group p-card">
             <ContactForm defaultTopic={defaultTopic} />
+          </div>
+        </Reveal>
+
+        {/* ------------------------------------------------ find us */}
+        <Reveal as="section" className="mt-section">
+          <div className="nf-panel nf-panel--card flex flex-col items-start gap-group p-card sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[length:var(--nf-text-row)] leading-snug text-[var(--nf-content-secondary)]">
+              News, new places and what is happening on Vallo. For a problem with a booking or a payment, use the form above: a message
+              on a social network is not a support ticket.
+            </p>
+            <SocialLinks heading="Follow Vallo" size="lg" />
           </div>
         </Reveal>
 
