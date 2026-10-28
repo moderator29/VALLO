@@ -116,7 +116,7 @@ export function BalanceOnboarding({
             <UiIcon name="wallet" size={ICON_PLATE_GLYPH.lg} />
           </IconPlate>
         </span>
-        <h2 className="nf-mhead__title">{busy ? "Setting up your wallet" : copy.title}</h2>
+        <h2 className="nf-mhead__title">{busy ? "Setting up your balance" : copy.title}</h2>
         <p className="nf-mhead__body" role={busy ? "status" : undefined}>
           {busy ? "This takes a few seconds. You do not need to do anything." : copy.body}
         </p>

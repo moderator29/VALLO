@@ -119,35 +119,37 @@ export function Icon3D({
 
   const classes = ["nf-icon3d", className ?? ""].filter(Boolean).join(" ");
   const sized = { "--nf-icon3d-default": `${size}px` } as CSSProperties;
-  if (failed) {
-    return (
-      <span
-        className={`${classes} nf-icon3d--fallback`}
-        style={sized}
-        role={label ? "img" : undefined}
-        aria-label={label}
-        aria-hidden={label ? undefined : true}
-      >
-        <UiIcon name={FALLBACK_GLYPH[name] ?? "grid"} size={24} />
-      </span>
-    );
-  }
-  return (
-    <Image
-      ref={ref}
-      onError={() => setFailed(true)}
-      src={icon3dSrc(name)}
-      alt={label ?? ""}
-      aria-hidden={label ? undefined : true}
-      width={256}
-      height={256}
-      sizes={`${size}px`}
-      /* The drawn size is a custom property, so a host can resize it in CSS
-         (`.nf-icon3d` in app/css/brand-glass.css). */
+  const sticker = failed ? (
+    <span
+      className={`${classes} nf-icon3d--fallback`}
       style={sized}
-      className={classes}
-      draggable={false}
-      {...(priority ? { priority: true } : {})}
-    />
+      role={label ? "img" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+      data-testid="icon3d-fallback"
+    >
+      <UiIcon name={FALLBACK_GLYPH[name] ?? "grid"} size={24} />
+    </span>
+  ) : null;
+  return (
+    <>
+      {sticker}
+      <Image
+        ref={ref}
+        onError={() => setFailed(true)}
+        src={icon3dSrc(name)}
+        alt={label ?? ""}
+        aria-hidden={label ? undefined : true}
+        width={256}
+        height={256}
+        sizes={`${size}px`}
+        /* The drawn size is a custom property, so a host can resize it in CSS
+           (`.nf-icon3d` in app/css/brand-glass.css). */
+        style={failed ? { ...sized, display: "none" } : sized}
+        className={classes}
+        draggable={false}
+        {...(priority ? { priority: true } : {})}
+      />
+    </>
   );
 }

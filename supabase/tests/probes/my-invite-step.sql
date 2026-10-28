@@ -71,5 +71,5 @@ begin
   ok := has_function_privilege('anon', 'public.my_invite_step()', 'execute');
   if ok then raise exception 'PROBE_FAIL my-invite-step: anon can run it'; end if;
 
-  raise exception 'PROBE_ROLLBACK my-invite-step: all five checks passed';
+  raise exception 'PROBE_OK my-invite-step: all five checks passed';
 end $$;

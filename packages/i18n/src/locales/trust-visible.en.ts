@@ -158,7 +158,7 @@ export const trustVisibleEn = {
     codeCells: "Six digit code",
     done: "Confirmed. Your number is never shown to anybody.",
     /** Under `done`: the wallet opens with the confirmed number, by itself. */
-    walletNote: "Your Vallo wallet is being set up now. You will find it under Wallet.",
+    walletNote: "Your Vallo balance is being set up now.",
     /** The sentence a gated action refuses with. */
     required:
       "Confirm your mobile number first. It is asked once, it is never shown to anybody, and it keeps one person to one account. Open Settings, then Phone.",
