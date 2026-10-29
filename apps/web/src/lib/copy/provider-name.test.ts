@@ -21,6 +21,11 @@ const STAFF_OR_INTERNAL = [
   /\.test\.tsx?$/,
 ];
 
+/** A line with its tags and {expressions} taken out: what is left is the words a member reads. */
+function jsxText(line: string): string {
+  return line.replace(/<[^>]*>/g, "").replace(/\{[^}]*\}/g, "");
+}
+
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
@@ -48,7 +53,7 @@ describe("member copy never names the payments partner", () => {
           if (t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")) return;
           const code = line.split(" //")[0] ?? line;
           /* JSX text is not a string literal: a line of a .tsx file that is plain words (no quote, no brace, no tag) and says Payluk is member-facing text. */
-          if (at.endsWith(".tsx") && /\bPayluk\b/.test(code) && !/["'`{}=<>;()]/.test(code.replace(/<[^>]*>/g, ""))) {
+          if (at.endsWith(".tsx") && jsxText(code).includes("Payluk") && !/["'`=;()<>]/.test(jsxText(code))) {
             found.push(`${at}:${i + 1}: ${t.slice(0, 100)}`);
           }
           if (/["'`][^"'`]*Payluk[^"'`]*["'`]/.test(code) && !/\b(Payluk[A-Z]\w*|payluk)\b/.test(code.replace(/["'`][^"'`]*["'`]/g, ""))) {
