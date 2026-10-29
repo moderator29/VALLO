@@ -738,6 +738,7 @@ export function PermissionView({
   copy,
   error,
   wantedVideo,
+  detail,
   platform,
   onRetry,
   onVoiceOnly,
@@ -746,6 +747,8 @@ export function PermissionView({
   copy: CallsCopy;
   error: MediaErrorKind;
   wantedVideo: boolean;
+  /** The browser's own error, short and token free, shown when the cause is not one we can name. */
+  detail?: string;
   platform: MediaPlatform;
   onRetry: () => void;
   /** Offered when the camera was part of the ask. */
@@ -778,6 +781,11 @@ export function PermissionView({
         </span>
         <h2 className="nf-call__name">{title}</h2>
         <p className="nf-call__note">{body}</p>
+        {error === "other" && detail ? (
+          <p className="nf-caption" data-testid="call-permission-reference">
+            {fill(copy.permission.reference, { detail })}
+          </p>
+        ) : null}
         {error === "denied" ? (
           <>
             <p className="nf-review-call__label">{copy.permission.stepsTitle}</p>

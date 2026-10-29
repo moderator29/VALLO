@@ -92,6 +92,12 @@ export function useCallUpdates(callId: string | null, onNudge: (nudge: CallNudge
  * ringing call, or a review call), an update is an answer elsewhere (the same
  * person answering on another device). Mount once in the signed-in shell.
  */
+/** Whether the incoming-call channel is confirmed live right now (read by the fallback poll). */
+let incomingChannelLive = false;
+export function incomingChannelHealthy(): boolean {
+  return incomingChannelLive;
+}
+
 export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNudge) => void): void {
   const handler = useRef(onNudge);
   useEffect(() => {
@@ -99,18 +105,55 @@ export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNud
   });
   useEffect(() => {
     if (!userId || !isSupabaseConfigured()) return;
-    return openChannel((supabase) =>
-      supabase
-        .channel(`call-invites-${userId}`)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "call_participants", filter: `user_id=eq.${userId}` },
-          (payload) => {
-            const nudge = nudgeFrom(payload.new, "call_id");
-            if (nudge) handler.current(nudge);
-          },
-        )
-        .subscribe(),
-    );
+    let closed = false;
+    let retry = 0;
+    let timer: number | null = null;
+    let opened: { supabase: BrowserClient; channel: Channel } | null = null;
+
+    /* The channel is opened again when it errors, times out or closes under
+       us (a phone's socket drops when the page sleeps), with a growing pause,
+       instead of staying dead until the next page load. A missed message while
+       it was down is found by the fallback poll (`incomingCallNow`). */
+    const open = () => {
+      void loadBrowserClient()
+        .then((supabase) => {
+          if (closed || !supabase) return;
+          const channel = supabase
+            .channel(`call-invites-${userId}-${Date.now()}`)
+            .on(
+              "postgres_changes",
+              { event: "*", schema: "public", table: "call_participants", filter: `user_id=eq.${userId}` },
+              (payload) => {
+                const nudge = nudgeFrom(payload.new, "call_id");
+                if (nudge) handler.current(nudge);
+              },
+            )
+            .subscribe((status) => {
+              if (status === "SUBSCRIBED") {
+                retry = 0;
+                incomingChannelLive = true;
+                return;
+              }
+              if (closed) return;
+              if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+                incomingChannelLive = false;
+                void supabase.removeChannel(channel);
+                if (timer !== null) window.clearTimeout(timer);
+                timer = window.setTimeout(open, Math.min(30_000, 1_000 * 2 ** retry++));
+              }
+            });
+          opened = { supabase, channel };
+        })
+        .catch(() => {
+          if (!closed) timer = window.setTimeout(open, 5_000);
+        });
+    };
+    open();
+    return () => {
+      closed = true;
+      incomingChannelLive = false;
+      if (timer !== null) window.clearTimeout(timer);
+      if (opened) void opened.supabase.removeChannel(opened.channel);
+    };
   }, [userId]);
 }

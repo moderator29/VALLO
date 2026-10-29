@@ -108,6 +108,8 @@ export const callsEn = {
     deniedBody: "Permission was turned off. Turn it on, then try again.",
     stepsTitle: "How to turn it on",
     tryAgain: "Try again",
+    /** `{detail}` is the browser's own error name, for support. */
+    reference: "That did not work. (Reference: {detail})",
     voiceOnly: "Continue with voice only",
     keepMessaging: "Keep messaging instead",
     notFound: "No camera or microphone was found on this device.",

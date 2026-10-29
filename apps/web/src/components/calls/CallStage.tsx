@@ -47,7 +47,7 @@ import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./media/types";
 type Stage =
   | { kind: "waiting" }
   | { kind: "asking" }
-  | { kind: "denied"; error: MediaErrorKind; wantedVideo: boolean }
+  | { kind: "denied"; error: MediaErrorKind; wantedVideo: boolean; detail: string }
   | { kind: "joining" }
   | { kind: "joined" }
   | { kind: "failed"; error: string };
@@ -93,7 +93,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         callLog("join.captured", local.map((t) => t.kind).join("+"));
       } catch (error) {
         callLog("join.capture_failed", errorSummary(error));
-        setStage({ kind: "denied", error: mediaErrorKind(error), wantedVideo: video });
+        setStage({ kind: "denied", error: mediaErrorKind(error), wantedVideo: video, detail: errorSummary(error) });
         return;
       }
       setStage({ kind: "joining" });
@@ -245,6 +245,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         copy={copy}
         error={stage.error}
         wantedVideo={stage.wantedVideo}
+        detail={stage.detail}
         platform={mediaPlatform(navigator.userAgent, looksNative() ? nativePlatform() : null)}
         onRetry={() => setStage({ kind: "waiting" })}
         onVoiceOnly={() => {

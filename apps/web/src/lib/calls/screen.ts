@@ -221,7 +221,8 @@ export function mediaErrorKind(error: unknown): MediaErrorKind {
   if (name === "NotAllowedError" || name === "PermissionDeniedError" || /permission denied|not allowed/i.test(message)) return "denied";
   if (name === "NotFoundError" || name === "DevicesNotFoundError" || name === "OverconstrainedError") return "not_found";
   if (name === "NotReadableError" || name === "TrackStartError" || name === "AbortError") return "in_use";
-  if (name === "SecurityError" || /secure context|getUserMedia is not/i.test(message)) return "insecure";
+  if (name === "DeviceUnsupportedError") return "insecure";
+  if (name === "SecurityError" || /secure context|getUserMedia is not|mediaDevices|undefined is not an object/i.test(message)) return "insecure";
   return "other";
 }
 
