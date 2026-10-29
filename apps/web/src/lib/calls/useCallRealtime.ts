@@ -116,8 +116,21 @@ export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNud
        it was down is found by the fallback poll (`incomingCallNow`). */
     const open = () => {
       void loadBrowserClient()
-        .then((supabase) => {
+        .then(async (supabase) => {
           if (closed || !supabase) return;
+          /* THE CHANNEL MUST JOIN AS THIS PERSON, NOT AS A STRANGER (29 October
+             2026). The realtime socket can open with the public key before the
+             session has been applied to it; the channel then reports
+             SUBSCRIBED while the row security rules hide every event from it,
+             so a call rings in the database and nowhere else. The person's own
+             token is set on the socket before the channel joins. */
+          try {
+            const { data } = await supabase.auth.getSession();
+            if (data.session?.access_token) supabase.realtime.setAuth(data.session.access_token);
+          } catch {
+            /* No session to apply: the poll still looks for the ring. */
+          }
+          if (closed) return;
           const channel = supabase
             .channel(`call-invites-${userId}-${Date.now()}`)
             .on(

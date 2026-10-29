@@ -577,3 +577,11 @@ Everything else in the harness is clean at every width tried. What this does **n
 | `/wallet/transactions` | member or public | needs session |
 | `/wallet/withdraw` | member or public | needs session |
 | `/welcome` | member or public | swept |
+
+## 29 October 2026: empty states, light theme audit, research
+
+- `components/ui/State.tsx`: the 3D object and the line-glyph plate now stand in the same 5.5rem box, so a title starts at the same height whichever a state draws. New `compact` mode for a quiet empty inside a card (36px plate and one line, left aligned). `state-art.ts` maps the chat glyphs to the `local-talks` object.
+- Grey one-line empties moved to `State compact`: my briefs, price area panel, agent briefs desk, viewing windows, firm desk, enquiry funnel and lost areas, Saturday route, agent dashboard upcoming stays, host arrival. The agent reviews screen's two hand-built cards now use `EmptyState`.
+- `scripts/design/state-sweep.mjs` no longer asks a compact state for an action.
+- Light theme: harness pages (workspace dashboard, wallet, cards, buttons, host reviews, landlord) read at 1440 and 390; a contrast scan of the dashboard, cards and wallet found no real text under AA (the only hits were gradient and photo backgrounds the scan cannot resolve). No token change made.
+- `docs/RESPONSIVE_RESEARCH.md` written.

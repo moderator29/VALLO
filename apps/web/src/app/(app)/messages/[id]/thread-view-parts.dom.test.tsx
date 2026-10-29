@@ -100,7 +100,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the thread's new parts", () => 
       const status = mine.getByTestId("msg-status");
       expect((await status.textContent())?.trim()).toBe("10:30");
       /* After the bubble in the document, right aligned, and a reply makes it read. */
-      expect(await mine.locator(".nf-bubble + .nf-msg__status").count()).toBe(1);
+      expect(await mine.locator(".nf-swipe-reply + .nf-msg__status").count()).toBe(1);
       expect(await status.evaluate((el) => getComputedStyle(el).justifyContent)).toMatch(/end/);
       expect(await status.getByRole("img", { name: "Read" }).getAttribute("data-state")).toBe("read");
       /* A short message is a small box, not the column. */

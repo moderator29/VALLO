@@ -46,8 +46,9 @@ export function CallLayer({ userId, copy }: { userId: string; copy: CallsCopy })
 /**
  * THE FALLBACK FOR A MISSED RING (29 October 2026). The realtime channel is the
  * fast path; this asks the server directly every few seconds while the page is
- * visible (every 6 s when the channel is not confirmed live, every 20 s as a
- * safety net when it is), and at once when the page comes back to the front or
+ * visible (every 3 s when the channel is not confirmed live, every 5 s when it
+ * is: "subscribed" is not proof that events arrive, so a ring is never more
+ * than a few seconds from being found), and at once when the page comes back to the front or
  * the network returns. It only looks while no call is on screen, and what it
  * finds goes through the same `resolveNudge` the realtime message uses, so the
  * heartbeat still decides whether the call is really ringing.
@@ -66,7 +67,7 @@ function useIncomingCallPoll(): void {
           if (!stopped && found?.ok && found.data) void resolveNudge({ callId: found.data.callId, state: null, version: null });
         }
       }
-      if (!stopped) timer = window.setTimeout(() => void tick(), incomingChannelHealthy() ? 20_000 : 6_000);
+      if (!stopped) timer = window.setTimeout(() => void tick(), incomingChannelHealthy() ? 5_000 : 3_000);
     };
     const kick = () => void tick();
     timer = window.setTimeout(() => void tick(), 1_500);

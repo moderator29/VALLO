@@ -170,7 +170,7 @@ export function ReviewsWorkspace({
         icon="reviews"
         art="stay-rated"
         title="No reviews yet"
-        body="A guest can review a stay once they have checked out and paid. The first one lands here, and you get the chance to answer it in public."
+        body="A guest can review a stay once the stay is over and paid. The first one lands here, and you get the chance to answer it in public."
         action={
           <ButtonLink href="/agent/listings" variant="glass">
             Your listings

@@ -60,6 +60,7 @@ export default async function PreviewChatBubbles() {
         inspected={false}
         messages={THREAD}
         context={RENTAL_CONTEXT}
+        listing={null}
         role="guest"
         threadCopy={t.threads}
         locale={locale}
