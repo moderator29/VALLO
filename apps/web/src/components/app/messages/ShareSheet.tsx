@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useEffect, useId, useState } from "react";
+import { QrCode } from "@/components/app/payments/crypto/QrCode";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import type { SharedKind } from "./share";
 
@@ -33,6 +35,8 @@ import type { SharedKind } from "./share";
  * `messages.sender_id` is the signed-in caller and `lib/messages/blocks.ts`
  * decides whether the conversation may receive a message at all.
  */
+export type ShareQrCopy = { show: string; hide: string; body: string; label: string; failed: string };
+
 export function ShareSheet({
   open,
   onOpenChange,
@@ -41,6 +45,7 @@ export function ShareSheet({
   title,
   onShareElsewhere,
   elsewhereBody,
+  qr,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -57,8 +62,35 @@ export function ShareSheet({
    * card with the area and the move-in total, and the row says so.
    */
   elsewhereBody?: string;
+  /**
+   * A QR code of the place's share door (backlog row 13): the words, and how
+   * to get the door's address (the caller mints it). Drawn in the browser by
+   * `lib/crypto/qr.ts`, never by an image service, so the address goes to
+   * nobody else. Offered only where the caller has a door.
+   */
+  qr?: { copy: ShareQrCopy; door: () => Promise<string | null> };
 }) {
   const words = useClientCopy().frontDoor.share;
+  const qrId = useId();
+  const [qrOpen, setQrOpen] = useState(false);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [qrFailed, setQrFailed] = useState(false);
+  const door = qr?.door;
+
+  /* The door is asked for when the panel opens, and the sheet closing hides it again. */
+  const qrShown = qrOpen && open;
+  useEffect(() => {
+    if (!qrShown || qrUrl !== null || !door) return;
+    let live = true;
+    void door().then((url) => {
+      if (!live) return;
+      if (url) setQrUrl(url);
+      else setQrFailed(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, [qrShown, qrUrl, door]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={words.sheetTitle} detents={[0.4]}>
@@ -105,7 +137,46 @@ export function ShareSheet({
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
         </button>
+
+        {qr ? (
+          <button
+            type="button"
+            className="nf-row nf-row--tap w-full text-left"
+            aria-expanded={qrShown}
+            aria-controls={qrId}
+            onClick={() => {
+              setQrFailed(false);
+              setQrOpen((v) => !v);
+            }}
+            data-testid="share-qr-toggle"
+          >
+            <span className="nf-role-mark shrink-0" aria-hidden="true">
+              <UiIcon name="grid" size={20} />
+            </span>
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="nf-body-sm block font-semibold text-[var(--nf-content-primary)]">
+                {qrShown ? qr.copy.hide : qr.copy.show}
+              </span>
+            </span>
+          </button>
+        ) : null}
       </div>
+
+      {qr ? (
+        <div id={qrId} hidden={!qrShown} className="mt-group grid justify-items-center gap-xs" data-testid="share-qr">
+          {qrShown && qrUrl ? (
+            <>
+              <QrCode value={qrUrl} label={qr.copy.label} size={184} />
+              <p className="nf-caption text-center text-[var(--nf-content-secondary)]">{qr.copy.body}</p>
+            </>
+          ) : null}
+          {qrShown && qrFailed ? (
+            <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
+              {qr.copy.failed}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </Sheet>
   );
 }

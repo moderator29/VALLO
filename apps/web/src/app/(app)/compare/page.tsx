@@ -6,18 +6,12 @@ import { State } from "@/components/ui/State";
 import { loadListingsByIds } from "@/lib/listings/supabase-repository";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { COMPARE_MAX, parseIds } from "@/lib/compare/ids";
+import { COMPARE_MAX, idsFromQuery } from "@/lib/compare/ids";
 import { comparable, compareTable } from "@/lib/saved/compare";
 import { CompareView } from "./CompareView";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).catalogue.compare.page.title, robots: { index: false, follow: true } };
-}
-
-/** The ids in the address: well formed, unique, at most the tray's four. */
-function idsFromQuery(value: string | string[] | undefined): string[] {
-  const raw = Array.isArray(value) ? value.join(",") : (value ?? "");
-  return parseIds(JSON.stringify(raw.split(",").map((part) => part.trim())));
 }
 
 /**
@@ -75,7 +69,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               open: copy.open,
               openLabel: copy.openLabel,
               title: copy.title,
-              pick: t.experienceDiscover.saved.pickTwo,
+              pick: copy.page.pick,
               pickLimit: t.experienceDiscover.saved.pickSwap,
               tooFew: copy.tooFew,
               notStated: copy.notStated,

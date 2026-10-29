@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMPARE_MAX, compareHref, parseIds, toggled } from "./ids";
+import { COMPARE_MAX, compareHref, idsFromQuery, parseIds, toggled } from "./ids";
 
 const A = "11111111-1111-4111-8111-111111111111";
 const B = "22222222-2222-4222-8222-222222222222";
@@ -28,5 +28,12 @@ describe("compare tray", () => {
   it("ignores a malformed id and builds the address", () => {
     expect(toggled([A], "x")).toEqual({ ids: [A], full: false });
     expect(compareHref([A, B])).toBe(`/compare?ids=${A},${B}`);
+  });
+
+  it("reads the address's ids: trimmed, valid, unique, at most four, either a string or a list", () => {
+    expect(idsFromQuery(undefined)).toEqual([]);
+    expect(idsFromQuery("")).toEqual([]);
+    expect(idsFromQuery(`${A}, ${B} ,junk,${A}`)).toEqual([A, B]);
+    expect(idsFromQuery([`${A},${B}`, `${C},${D},${E}`])).toEqual([A, B, C, D]);
   });
 });

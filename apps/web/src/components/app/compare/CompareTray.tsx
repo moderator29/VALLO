@@ -23,19 +23,19 @@ export function CompareTray() {
   const path = usePathname();
   if (ids.length === 0 || path === "/compare") return null;
   const ready = ids.length >= 2;
-  const count = ids.length === 1 ? words.countOne : words.count.replace("{count}", String(ids.length));
+  const count = words.count.replace("{count}", String(ids.length));
   return (
-    <aside className="nf-compare-tray" aria-label={words.label} data-testid="compare-tray">
+    <aside className="nf-compare-tray" aria-label={words.open} data-testid="compare-tray">
       <p className="nf-compare-tray__count" role="status">
         <UiIcon name="scale" size={16} />
         <span>{ready ? count : `${count}. ${words.needTwo}`}</span>
       </p>
       {ready ? (
-        <Link href={compareHref(ids)} className="nf-compare-tray__open" aria-label={words.openLabel} data-testid="compare-tray-open">
+        <Link href={compareHref(ids)} className="nf-compare-tray__open" data-testid="compare-tray-open">
           {words.open}
         </Link>
       ) : null}
-      <button type="button" className="nf-compare-tray__clear" aria-label={words.clearLabel} onClick={clearCompare} data-testid="compare-tray-clear">
+      <button type="button" className="nf-compare-tray__clear" onClick={clearCompare} data-testid="compare-tray-clear">
         {words.clear}
       </button>
     </aside>

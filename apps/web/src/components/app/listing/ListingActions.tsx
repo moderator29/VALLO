@@ -17,7 +17,7 @@ import {
   useDeviceSaved,
   type SavePlaceTarget,
 } from "@/components/app/SaveControl";
-import { ShareSheet } from "@/components/app/messages/ShareSheet";
+import { ShareSheet, type ShareQrCopy } from "@/components/app/messages/ShareSheet";
 import type { SharedKind } from "@/components/app/messages/share";
 import { createShareLink } from "@/lib/share/actions";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -95,6 +95,7 @@ export function ListingActions({
   initialSaved = false,
   shareKind = "listing",
   place,
+  shareQr,
 }: {
   listingId: string;
   title: string;
@@ -114,6 +115,8 @@ export function ListingActions({
    * listing and restaurant pages both carry listing ids and leave this alone.
    */
   shareKind?: SharedKind;
+  /** The words of the QR row in the share sheet (backlog row 13); only a place with a share door shows it. */
+  shareQr?: ShareQrCopy;
 }) {
   const signInHref = useSignInHref();
   /*
@@ -395,6 +398,7 @@ export function ListingActions({
         id={listingId}
         title={title}
         onShareElsewhere={() => void shareElsewhere()}
+        {...(shareQr && doorable ? { qr: { copy: shareQr, door: mintDoor } } : {})}
         elsewhereBody={
           doorKind === "stay"
             ? t.frontDoor.share.elsewhereBodyStay

@@ -114,3 +114,67 @@ export function staleMonthOptions(since: Date, now: Date): Intl.DateTimeFormatOp
     ? { month: "long", timeZone: "Africa/Lagos" }
     : { month: "long", year: "numeric", timeZone: "Africa/Lagos" };
 }
+
+/** A confirmation older than this is not said at all: an old "still available" is no news. */
+export const CONFIRMED_FRESH_DAYS = 30;
+
+export type ConfirmedAge = { kind: "today" } | { kind: "yesterday" } | { kind: "days"; days: number };
+
+/**
+ * "Confirmed available 3 days ago" (backlog row 33): the lister's own last
+ * "still available" (`listings.lister_confirmed_at`), said only while it is
+ * recent (CONFIRMED_FRESH_DAYS) and only when it adds something: a
+ * confirmation on the day the listing went live says nothing the listed age
+ * does not. Null when there is none, it does not parse, it is in the future,
+ * or it is old. An example listing is never asked (the caller decides).
+ */
+export function confirmedAge(
+  confirmedAt: string | null | undefined,
+  publishedAt: string | null | undefined,
+  now: Date,
+): ConfirmedAge | null {
+  if (!confirmedAt) return null;
+  const at = new Date(confirmedAt);
+  if (Number.isNaN(at.getTime())) return null;
+  if (at.getTime() - now.getTime() > 5 * 60 * 1000) return null;
+  if (publishedAt) {
+    const published = new Date(publishedAt);
+    if (!Number.isNaN(published.getTime()) && lagosDaysBetween(published, at) === 0) return null;
+  }
+  const days = lagosDaysBetween(at, now);
+  if (days > CONFIRMED_FRESH_DAYS) return null;
+  if (days === 0) return { kind: "today" };
+  if (days === 1) return { kind: "yesterday" };
+  return { kind: "days", days };
+}
+
+export type ConfirmedAgeCopy = { today: string; yesterday: string; days: string };
+
+export function confirmedAgeText(age: ConfirmedAge, copy: ConfirmedAgeCopy): string {
+  switch (age.kind) {
+    case "today":
+      return copy.today;
+    case "yesterday":
+      return copy.yesterday;
+    default:
+      return copy.days.replace("{n}", String(age.days));
+  }
+}
+
+/**
+ * The listed age with a recent confirmation taken into account: "Listed in
+ * July, not confirmed since" would be false of a listing its lister confirmed
+ * last week, so a stale age beside a fresh confirmation reads as plain days
+ * ("Listed 118 days ago") and the confirmation line says the rest.
+ */
+export function listedAgeBesideConfirmation(
+  publishedAt: string | null | undefined,
+  confirmed: ConfirmedAge | null,
+  now: Date,
+): ListedAge | null {
+  const age = listedAge(publishedAt, now);
+  if (age?.kind === "stale" && confirmed) {
+    return { kind: "days", days: lagosDaysBetween(age.since, now) };
+  }
+  return age;
+}

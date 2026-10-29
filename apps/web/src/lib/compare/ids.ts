@@ -39,3 +39,9 @@ export function compareHref(ids: readonly string[]): string {
   return `/compare?ids=${ids.join(",")}`;
 }
 
+
+/** The ids in an address's `ids` value: comma separated, well formed, unique, at most the tray's four. */
+export function idsFromQuery(value: string | string[] | undefined): string[] {
+  const raw = Array.isArray(value) ? value.join(",") : (value ?? "");
+  return parseIds(JSON.stringify(raw.split(",").map((part) => part.trim())));
+}

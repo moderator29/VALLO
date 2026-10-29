@@ -5061,6 +5061,15 @@ export const en = {
       similar: "See similar nearby",
     },
     /* B3: the Saved compare (lib/saved/compare.ts). */
+    /* The income line on a rental (backlog row 26): arithmetic, no verdict. */
+    affordability: {
+      title: "Rent against your income",
+      label: "Your monthly income",
+      hint: "Typed here and kept on this phone. It is never sent.",
+      rentShare: "The rent is about {share} of one month of your income.",
+      moveInMonths: "The move-in total is about {months} months of your income.",
+      note: "Arithmetic only. It does not say whether this place suits you.",
+    },
     compare: {
       open: "Compare",
       openLabel: "Compare your saved places side by side",
@@ -5095,6 +5104,7 @@ export const en = {
         oneBody: "A comparison needs at least two places. Add another from search or your saved places.",
         missing: "{count} of these places are no longer available and are left out.",
         browse: "Back to search",
+        pick: "Choose two of these places to set side by side.",
       },
     },
     shelf: {

@@ -34,6 +34,10 @@ export const shapeEn = {
     days: "Listed {n} days ago",
     stale: "Listed in {month}, not confirmed since",
     basis: "Newest first, by the day each listing went live.",
+    /* The lister's own recent "still available" (backlog row 33). */
+    confirmedToday: "Confirmed available today",
+    confirmedYesterday: "Confirmed available yesterday",
+    confirmedDays: "Confirmed available {n} days ago",
     newMark: "New",
     newMarkLabel: "New since your last visit",
   },

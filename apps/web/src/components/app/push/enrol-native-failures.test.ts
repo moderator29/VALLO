@@ -60,7 +60,9 @@ beforeEach(() => {
   state.attachDelayMs = 5;
   state.posted = [];
   vi.stubGlobal("window", {});
-  vi.stubGlobal("fetch", async (_url: string, init: { body: string }) => {
+  vi.stubGlobal("fetch", async (url: string, init: { body: string }) => {
+    /* The attempt report is telemetry, not part of enrolment. */
+    if (url === "/api/push/enrol-log") return { ok: true, status: 200, json: async () => ({ ok: true }) };
     state.posted.push(JSON.parse(init.body));
     return { ok: true, status: 200, json: async () => ({ ok: true, deviceRef: "abc123abc123" }) };
   });

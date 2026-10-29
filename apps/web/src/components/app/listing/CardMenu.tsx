@@ -157,7 +157,6 @@ export function CardMenu({
             close();
             const result = toggleCompare(listingId);
             if (result.full) toast(details.compareTray.full, { tone: "error" });
-            else toast(result.on ? details.compareTray.added : details.compareTray.removed);
           }}
         />
         {!saved ? (

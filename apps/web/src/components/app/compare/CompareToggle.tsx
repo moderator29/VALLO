@@ -31,7 +31,6 @@ export function CompareToggle({ listingId, className }: { listingId: string; cla
           return;
         }
         feedback("select");
-        toast(result.on ? words.added : words.removed);
       }}
     >
       <UiIcon name="scale" size={16} filled={on} />
