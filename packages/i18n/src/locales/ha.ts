@@ -4560,7 +4560,7 @@ export const ha: Dictionary = withFallback({
       body: "Bankin wanda ya biya ya mayar da biyan kati da ka karɓa. Abokin biyan kuɗi ya karɓe shi daga Vallo, don haka ana bin asusunka {amount}.",
       bodyNoAmount: "Bankin wanda ya biya ya mayar da biyan kati da ka karɓa. Abokin biyan kuɗi ya karɓe shi daga Vallo, don haka ana bin asusunka kuɗin.",
       meansTitle: "Abin da yake nufi",
-      means: "Muddin ana bin kuɗin, Vallo na dakatar da sakin kuɗin da Payluk ke riƙe maka, cire kuɗi daga Rewards Balance ɗinka, da biyan buƙatun Vallo Guarantee gare ka. Biyan kuɗi ta kati na ci gaba da shiga asusun karɓar kuɗinka a lokacin biyan. Babu wani abu da zai canza a asusunka.",
+      means: "Muddin ana bin kuɗin, Vallo na dakatar da sakin kuɗin da abokin hulɗarmu mai lasisi ke riƙe maka, cire kuɗi daga Rewards Balance ɗinka, da biyan buƙatun Vallo Guarantee gare ka. Biyan kuɗi ta kati na ci gaba da shiga asusun karɓar kuɗinka a lokacin biyan. Babu wani abu da zai canza a asusunka.",
       nextTitle: "Abin da zai biyo baya",
       next: "Ƙungiyar kuɗi ta Vallo za ta tuntuɓe ka don a daidaita shi. Da zarar an daidaita ko an rufe shi, wannan sanarwar za ta tafi da kanta.",
       help: "Tambayi tallafi game da shi",

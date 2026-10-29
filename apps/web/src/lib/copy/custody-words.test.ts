@@ -202,7 +202,7 @@ const BARE_WALLET_ALLOWED: { file: string; text: RegExp; why: string }[] = [
   { file: "lib/money/balance-copy.ts", text: /^(Set up Wallet|Setting up Wallet|Wallet is ready|We could not set up Wallet)$/, why: "D78: the screen's name (onboarding titles and action)" },
   {
     file: "lib/money/balance-copy.ts",
-    text: /^Your money is held by (our escrow partner|Payluk, our licensed payments partner), never by Vallo\. To set up Wallet we share/,
+    text: /^Your money is held by (our escrow partner|Payluk, our licensed payments partner|our licensed payments partner), never by Vallo\. To set up Wallet we share/,
     why: "D78: the screen's name, in the sentence that says the partner, never Vallo, holds the money",
   },
   { file: "lib/money/balance-copy.ts", text: /^Wallet is not connected yet, so nothing was sent\.$/, why: "D78: the screen's name" },

@@ -313,7 +313,7 @@ function BalanceExplainer({ figures, locale }: { figures: BalanceFigures; locale
         {
           key: "held",
           title: "Held in your name",
-          body: "Payluk, our licensed payments partner, holds it in an account in your name, never Vallo. Vallo keeps the record of every movement.",
+          body: "Our licensed payments partner holds it in an account in your name, never Vallo. Vallo keeps the record of every movement.",
           screenTone: "platinum",
           screen: (
             <>

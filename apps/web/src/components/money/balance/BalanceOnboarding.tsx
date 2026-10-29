@@ -25,7 +25,7 @@ import { reach } from "./reach";
  * inside the second. Each of the seven states has its own words.
  */
 const WHO_DOES_WHAT: { icon: "shield-lock" | "user-check" | "eye-off"; title: string; sub: string }[] = [
-  { icon: "shield-lock", title: "Payluk holds the money", sub: "Our licensed payments partner, in an account in your name. Vallo never holds it." },
+  { icon: "shield-lock", title: "Our licensed partner holds the money", sub: "In an account in your name. Vallo never holds it." },
   { icon: "user-check", title: "Vallo keeps the record", sub: "Every movement, with where it is and when the partner confirmed it." },
   { icon: "eye-off", title: "Only what is needed is shared", sub: "Your name, email and phone. Nothing else, and no card or bank details." },
 ];
@@ -152,7 +152,7 @@ export function BalanceOnboarding({
           },
           {
             key: "open",
-            title: "Open your account with Payluk",
+            title: "Open your account with our partner",
             sub:
               current === "PENDING"
                 ? "Asked. Waiting for their answer; this updates on its own."

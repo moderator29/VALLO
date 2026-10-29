@@ -33,7 +33,7 @@ export function movementReceipt(m: MovementView, locale: Locale): ReceiptModel {
     facts: [{ label: "Date", value: formatMoneyDate(m.createdAt, locale, { withTime: true }) ?? "" }],
     lines: fee ? [{ label: "Processing fee", value: `${fee.whole}${fee.kobo}` }] : [],
     total: { label: "Amount", value: `${whole}${kobo}` },
-    confirmations: m.confirmedByProvider ? [{ label: "Payluk", state: "Confirmed" }] : [],
+    confirmations: m.confirmedByProvider ? [{ label: "Payments partner", state: "Confirmed" }] : [],
     reference: { label: "Reference", value: m.reference },
     note: HELD_BY,
   };

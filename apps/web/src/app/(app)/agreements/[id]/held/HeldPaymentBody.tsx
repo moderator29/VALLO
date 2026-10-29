@@ -75,7 +75,7 @@ export function HeldPaymentBody({
               <p className="nf-held__value">
                 {m.receiveMinor !== null
                   ? money(m.receiveMinor)
-                  : "After Payluk's fee"}
+                  : "After the partner's fee"}
               </p>
             </div>
           </div>
