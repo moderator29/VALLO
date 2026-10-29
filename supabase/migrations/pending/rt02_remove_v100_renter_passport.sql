@@ -1,4 +1,6 @@
--- DRAFT, not applied. RETIRED OBJECTS 2 of 2 (Part B: after the deploy).
+-- APPLIED BY HAND in the dashboard SQL editor on 29 October 2026 (the connector cannot confirm a DROP);
+-- verified afterwards: public.renter_passports and the five functions are gone, passport_settings is intact.
+-- Kept here as the record. Originally: RETIRED OBJECTS 2 of 2 (Part B: after the deploy).
 -- Removes the old V-100 renter passport, retired in the app on 13 October
 -- 2026 and replaced by the Vallo passport (pass01, pass02). This is item 3 of
 -- docs/DB_NOTES.md, with exact signatures and a guard.

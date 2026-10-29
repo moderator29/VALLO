@@ -61,12 +61,8 @@ begin
     raise exception 'PROBE_FAIL pass01-passport-settings 4: row level security is off';
   end if;
 
-  -- 5. Every explicit V-100 choice is carried over exactly (rows made by this
-  -- probe are not renter_passports rows, so only the migrated ones are looked at).
-  select count(*) into n
-    from public.renter_passports rp
-   where not exists (select 1 from public.passport_settings s where s.user_id = rp.user_id and s.enabled = rp.enabled);
-  if n <> 0 then raise exception 'PROBE_FAIL pass01-passport-settings 5: % explicit V-100 choice(s) were not carried over', n; end if;
+  -- (Check 5, that every V-100 choice was carried over, left with the old table: rt02 dropped
+  -- public.renter_passports on 29 October 2026 after the guard confirmed the copy.)
 
   raise exception 'PROBE_OK pass01-passport-settings';
 end
