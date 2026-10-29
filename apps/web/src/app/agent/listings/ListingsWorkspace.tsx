@@ -27,6 +27,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { CloseListingSheet } from "./CloseListingSheet";
 import { OwnerAskStrip } from "./OwnerAskStrip";
+import { ListingMeter } from "@/components/agent/ListingMeter";
 import { BulkBar } from "./BulkBar";
 import { planBulk, rangeToggle } from "./bulk";
 import { livePayoffFor, liveSeenKey } from "@/lib/agent/lister-live";
@@ -494,6 +495,10 @@ function ListingRow({
               ? t.workspace.photoCountOne
               : fill(t.workspace.photoCount, { count: listing.photoCount })}
           </p>
+
+          {listing.completeness ? (
+            <ListingMeter completeness={listing.completeness} listingId={listing.id} editable={editable} copy={t.workspace.completeness} locale={locale} />
+          ) : null}
 
           {/* THE CODE, ON THE ROW, the moment the listing has one. This is
               where a lister will be standing when somebody asks them for it

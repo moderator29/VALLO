@@ -1,0 +1,69 @@
+/*
+ * THE COMPARE TRAY (backlog row 7, 29 October 2026). A bar over the bottom of
+ * a member page: above the dock on a phone (`--nf-tabbar-clearance` is the
+ * dock's own reservation), bottom right from 64rem where the rail replaces
+ * the dock. Tokens only; every control keeps a 44px target.
+ */
+@layer components {
+  .nf-compare-tray {
+    position: fixed;
+    inset-inline: var(--nf-space-sm);
+    bottom: var(--nf-tabbar-clearance, var(--nf-space-md));
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-primary);
+    box-shadow: var(--nf-elevation-dialog);
+  }
+  .nf-compare-tray__count {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-compare-tray__open,
+  .nf-compare-tray__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .nf-compare-tray__open {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    border: 0;
+  }
+  .nf-compare-tray__clear {
+    background: none;
+    border: 0;
+    color: var(--nf-content-secondary);
+  }
+  .nf-compare-tray__open:focus-visible,
+  .nf-compare-tray__clear:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (min-width: 64rem) {
+    .nf-compare-tray {
+      inset-inline-start: auto;
+      inset-inline-end: var(--nf-space-lg);
+      bottom: var(--nf-space-lg);
+      width: min(26rem, calc(100vw - 2 * var(--nf-space-lg)));
+    }
+  }
+}

@@ -57,5 +57,23 @@ export const detailsEn = {
     signIn: "Sign in to save places",
     failed: "That did not go through. Try again.",
   },
+  /* The compare tray (backlog row 7): up to four places set aside on this
+     phone, opened side by side on /compare. */
+  compareTray: {
+    add: "Add to compare",
+    remove: "Remove from compare",
+    added: "Added to compare",
+    removed: "Removed from compare",
+    full: "The tray holds four places. Remove one to add another.",
+    /** "{count} to compare" in the tray. */
+    count: "{count} to compare",
+    countOne: "1 to compare",
+    needTwo: "Add one more to compare",
+    open: "Compare",
+    openLabel: "Compare these places side by side",
+    clear: "Clear",
+    clearLabel: "Remove every place from the compare tray",
+    label: "Compare tray",
+  },
   retry: "Try again",
 };

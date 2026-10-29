@@ -37,6 +37,16 @@ or a real account can prove it. Nothing here is merged to `main`.
 | Extra: social links | Facebook, Instagram, TikTok, LinkedIn as blue and white icons in the footer (landing and all public pages), Contact and Settings, plus `sameAs` |
 | Hygiene | Tests, lint and gates green (13,660 tests, 0 lint errors); fixed red items left from before |
 
+## 29 OCTOBER, LATER: what the device tests changed (all merged to main except the last block)
+
+- **Calls.** The mic error ("AudioSession category is not compatible with audio capture") came from the ring leaving Safari's audio session "ambient"; the ring no longer touches it, capture asks for play-and-record and retries once, and the session is handed back after a call. Accept, decline and end answer on the tap (the server hears in the background; `markLocallyOver` stops a late "still ringing" redrawing a hung-up call). The caller sees their own mirrored camera before anyone answers. The speaker button is phone-only and says Speaker or Phone. "Calling" until the callee's app shows the ring, then "Ringing" (`call_participants.ring_delivered_at`, `call_ring_delivered`). The caller's photo is on every call screen. A missed call is a quiet push (`vallo_missed` Android channel).
+- **Messages.** No name above bubbles, bare header glyphs, no "Direct message" or "Phone confirmed" lines, and on desktop the thread fills its pane with a thin scrollbar.
+- **Videos.** `SafeVideo` (retry once, a sentence and an open link, muted autoplay fallback, first frame on iOS) everywhere a non-call video plays; Show Me clips are size-checked, location-stripped and no longer freeze the button. An expired signed link is refreshed once (`refreshMediaUrl`, buckets allow-listed, signed under the caller's own session).
+- **Push enrolment.** `push_tokens` is still empty, so the cause is on the device. Every attempt now writes a reference (step and error name, never a token) to `public.push_enrol_log` through `/api/push/enrol-log`: read it with `select created_at, platform, ok, reason, step, detail from public.push_enrol_log order by created_at desc;`.
+- **Sign-up phone step.** A new account (made on or after 29 October 2026) confirms a mobile number at `/sign-up/phone` before any member screen, while a code can actually arrive: the `phone_confirmation` flag is on (applied) and the step appears as soon as `TERMII_API_KEY` and `TERMII_SENDER_ID` are set in Vercel. With no vendor wired nobody is locked out.
+- **Idle lock.** Already stricter than 30 minutes: the passcode locks after 5 minutes idle or hidden, a new tab or a reopened app asks for it at once, and the server's unlock lapses at 15.
+- **Founder items.** Termii keys in Vercel; the iPhone and Android push references (or read `push_enrol_log`); Apple review; translations (ha, ig, yo); LinkedIn `/in/` versus a company page; `01-cleanup` part 4.
+
 ## NEEDS A DEVICE OR A REAL ACCOUNT (built, unproven)
 
 1. Calls: ring, answer, sound both ways, background and locked ring, late push (`docs/video-calling/DEVICE_TEST_SCRIPT.md`).

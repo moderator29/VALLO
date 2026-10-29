@@ -209,7 +209,37 @@ export function onIosHomeScreenApp(): boolean {
  */
 export async function enrol(): Promise<EnrolOutcome> {
   if (typeof window === "undefined") return { ok: false, reason: "unsupported" };
-  return looksNative() ? enrolNative() : enrolWeb();
+  const outcome = await (looksNative() ? enrolNative() : enrolWeb());
+  reportAttempt(outcome);
+  return outcome;
+}
+
+/**
+ * Tell the server how an attempt went (a step and an error name, never a
+ * token), so a failure on a phone can be read from `push_enrol_log` instead of
+ * being photographed. Fire and forget: it can never change what the person
+ * sees, and a signed-out device is simply refused.
+ */
+function reportAttempt(outcome: EnrolOutcome): void {
+  try {
+    const platform = looksNative()
+      ? /iPhone|iPad|iPod/i.test(navigator.userAgent)
+        ? "ios"
+        : "android"
+      : "web";
+    const body = outcome.ok
+      ? { platform, ok: true }
+      : { platform, ok: false, reason: outcome.reason, step: outcome.step, detail: outcome.detail };
+    void fetch("/api/push/enrol-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(body),
+      keepalive: true,
+    }).catch(() => undefined);
+  } catch {
+    /* Telemetry is never allowed to break enrolment. */
+  }
 }
 
 async function enrolWeb(): Promise<EnrolOutcome> {

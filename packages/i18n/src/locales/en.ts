@@ -2954,6 +2954,22 @@ export const en = {
       },
       photoCount: "{count} photos",
       photoCountOne: "1 photo",
+      /* The completeness meter on a listing card: steps done out of steps, never a score. */
+      completeness: {
+        label: "Listing steps done",
+        progress: "{done} of {total} done",
+        allDone: "Everything in place",
+        next: {
+          details: "Next: finish the details",
+          price: "Next: set the price",
+          description: "Next: describe the property",
+          photos: "Next: add photos",
+          amenities: "Next: choose the amenities",
+          video: "Next: add a walkthrough video",
+          utilities: "Next: say how power and water work",
+          landmark: "Next: add a landmark",
+        },
+      },
       actions: {
         edit: "Edit",
         submit: "Send for review",
@@ -5068,6 +5084,18 @@ export const en = {
       from: "from",
       view: "Open",
       close: "Close",
+      /* The /compare page (backlog row 7). */
+      page: {
+        title: "Compare places",
+        lede: "Side by side, each fact from the listing's own record.",
+        emptyTitle: "Nothing to compare yet",
+        emptyBody: "Choose Add to compare on two or more places and they open here side by side.",
+        emptyAction: "Browse places",
+        oneTitle: "Add one more place",
+        oneBody: "A comparison needs at least two places. Add another from search or your saved places.",
+        missing: "{count} of these places are no longer available and are left out.",
+        browse: "Back to search",
+      },
     },
     shelf: {
       searchPlaceholder: "Area, city or landmark",
