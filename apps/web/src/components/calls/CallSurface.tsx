@@ -43,6 +43,7 @@ export function CallSurface({ copy }: { copy: CallsCopy }) {
         <OutgoingView
           copy={copy}
           name={active.snapshot.otherName ?? ""}
+          photo={active.snapshot.otherAvatarUrl ?? null}
           kind={active.snapshot.kind}
           context={active.context.line}
           status={copy.connecting.title}
@@ -103,6 +104,7 @@ export function IncomingCallScreen({ active, copy }: { active: ActiveCall; copy:
     <IncomingCallView
       copy={copy}
       name={s.otherName ?? ""}
+      photo={s.otherAvatarUrl ?? null}
       kind={s.kind}
       review={s.purpose === "ADMIN_REVIEW"}
       context={active.context.line}
@@ -136,6 +138,7 @@ export function EndedScreen({ active, copy }: { active: ActiveCall; copy: CallsC
     <EndedView
       copy={copy}
       name={s.otherName ?? ""}
+      photo={s.otherAvatarUrl ?? null}
       kind={s.kind}
       words={endReasonWords(s)}
       duration={s.state === "ENDED" && s.connectedAt ? durationWords(s.durationSeconds) : ""}
@@ -158,6 +161,7 @@ function RecoveryScreen({ active, copy }: { active: ActiveCall; copy: CallsCopy 
     <RecoveryView
       copy={copy}
       name={s.otherName ?? undefined}
+      photo={s.otherAvatarUrl ?? null}
       title={missed ? copy.recovery.missedTitle : copy.recovery.endedTitle}
       body={endReasonWords(s)}
       primaryLabel={s.reviewId ? copy.ended.backReview : copy.ended.back}

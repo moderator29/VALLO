@@ -322,6 +322,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
       <OutgoingView
         copy={copy}
         name={name}
+        photo={snapshot.otherAvatarUrl ?? null}
         kind={snapshot.kind}
         context={active.context.line}
         status={copy.connecting.title}
@@ -341,13 +342,16 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     const status =
       phase === "outgoing" && !answering
         ? snapshot.state === "RINGING"
-          ? copy.outgoing.ringing
+          ? snapshot.otherRinging
+            ? copy.outgoing.ringing
+            : copy.outgoing.calling
           : copy.outgoing.calling
         : copy.connecting.title;
     return (
       <OutgoingView
         copy={copy}
         name={name}
+        photo={snapshot.otherAvatarUrl ?? null}
         kind={snapshot.kind}
         context={active.context.line}
         status={status}
@@ -377,6 +381,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     <InCallView
       copy={copy}
       name={name}
+        photo={snapshot.otherAvatarUrl ?? null}
       kind={snapshot.kind}
       clock={clockWords(talkSeconds(snapshot, now))}
       quality={media.quality}
