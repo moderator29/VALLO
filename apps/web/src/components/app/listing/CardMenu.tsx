@@ -11,6 +11,7 @@ import { toast } from "@/lib/ui/toast";
 import { useShare } from "@/lib/ui/use-copy";
 import { useLongPress } from "@/lib/ui/use-long-press";
 import { hideListing, isHidden, subscribeHidden, unhideListing } from "@/lib/ui/hidden-listings";
+import { toggleCompare, useCompareTray } from "@/lib/compare/tray";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 
@@ -92,6 +93,8 @@ export function CardMenu({
   const { details, frontDoor } = useClientCopy();
   const words = details.cardMenu;
   const share = useShare();
+  const compare = useCompareTray();
+  const inTray = compare.has(listingId);
 
   const close = () => onOpenChange(false);
 
@@ -142,6 +145,21 @@ export function CardMenu({
             }}
           />
         ) : null}
+        <ListRow
+          data-testid="card-menu-compare"
+          leading={
+            <IconPlate size="sm" shape="round" tone="info">
+              <UiIcon name="scale" size={18} filled={inTray} />
+            </IconPlate>
+          }
+          title={inTray ? details.compareTray.remove : details.compareTray.add}
+          onClick={() => {
+            close();
+            const result = toggleCompare(listingId);
+            if (result.full) toast(details.compareTray.full, { tone: "error" });
+            else toast(result.on ? details.compareTray.added : details.compareTray.removed);
+          }}
+        />
         {!saved ? (
           <ListRow
             data-testid="card-menu-hide"

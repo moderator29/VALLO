@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { COMPARE_MAX, parseIds, toggled } from "./ids";
+import { parseIds, toggled } from "./ids";
 
 export { COMPARE_MAX, compareHref, parseIds, toggled } from "./ids";
 

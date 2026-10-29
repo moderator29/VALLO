@@ -26,6 +26,7 @@ import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { CompareToggle } from "@/components/app/compare/CompareToggle";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
@@ -343,6 +344,14 @@ export function ListingActions({
           runs at all and they arrive at sign-up with `?do=save` on the URL they
           came from.
         */}
+        {/* Backlog row 7: a platform listing can be set aside to compare. A
+            stay or a restaurant (`place`) has no comparison, so none is drawn. */}
+        {!place && shareKind === "listing" ? (
+          <CompareToggle
+            listingId={listingId}
+            className="grid h-11 w-11 place-items-center nf-icon-btn nf-icon-btn--round transition-transform active:scale-90 motion-reduce:transition-none"
+          />
+        ) : null}
         <AuthGate action="save">
           <button
             type="button"

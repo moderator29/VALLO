@@ -18,6 +18,7 @@ import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";
 import { OfflineTray } from "@/components/app/OfflineTray";
+import { CompareTray } from "@/components/app/compare/CompareTray";
 import { WidgetBridge } from "@/components/app/WidgetBridge";
 import { ContrastSync } from "@/components/app/account/ContrastSync";
 import { MemberKeys } from "@/components/app/MemberKeys";
@@ -163,6 +164,8 @@ export default async function AppLayout({
       <MemberKeys />
       {/* V-40: what was done offline is sent, and what was paid is resolved. */}
       <OfflineTray />
+      {/* Backlog row 7: places set aside to compare, wherever the reader is. */}
+      <CompareTray />
       {/* V-98: the home-screen widget's token, in the native app only. */}
       <WidgetBridge />
       {/* VC1: incoming calls on any page, and the one call surface, only
