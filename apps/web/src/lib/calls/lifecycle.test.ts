@@ -204,6 +204,16 @@ describe("reading the database's snapshot", () => {
     expect(s.replayed).toBeUndefined();
   });
 
+  it("carries the other person's photo and whether their ring is on screen", () => {
+    const plain = snapshotFromRow(row)!;
+    expect(plain.otherAvatarUrl).toBeUndefined();
+    expect(plain.otherRinging).toBeUndefined();
+    const s = snapshotFromRow({ ...row, other_avatar_url: "https://img.example/a.jpg", other_ringing: true })!;
+    expect(s.otherAvatarUrl).toBe("https://img.example/a.jpg");
+    expect(s.otherRinging).toBe(true);
+    expect(snapshotFromRow({ ...row, other_avatar_url: "" })!.otherAvatarUrl).toBeUndefined();
+  });
+
   it("refuses anything that is not a call, and unknown words become null", () => {
     expect(snapshotFromRow(null)).toBeNull();
     expect(snapshotFromRow({ ...row, state: "PARTY" })).toBeNull();

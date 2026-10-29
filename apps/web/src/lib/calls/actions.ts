@@ -212,6 +212,20 @@ export async function incomingCallNow(): Promise<ActionResult<{ callId: string }
   return ok(callId ? { callId } : null);
 }
 
+/**
+ * The callee's app says the ring is on its screen, so the caller can read
+ * "Ringing" instead of "Calling" (29 October 2026). Stamps the callee's own
+ * participant row once; a call that is not ringing for this person is a no-op.
+ */
+export async function ringDelivered(input: { callId: string }): Promise<ActionResult<null>> {
+  const auth = await signedIn();
+  if (!auth.ok) return fail(auth.error);
+  const parsed = validate(callIdSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const answer = await callRpc(auth.session.supabase, "call_ring_delivered", { p_call: parsed.data.callId });
+  return answer.ok ? ok(null) : fail(answer.words);
+}
+
 /** One conversation's calls, newest first, as the person asking sees them. */
 export async function callHistory(input: { conversationId: string; limit?: number }): Promise<ActionResult<CallSnapshot[]>> {
   const auth = await signedIn();

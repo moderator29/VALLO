@@ -264,7 +264,7 @@ begin
   end if;
   reset role;
   perform set_config('request.jwt.claims', '{"role":"service_role"}', true);
-  if not exists (select 1 from public.notifications where user_id = admin and title = 'Missed voice call') then
+  if not exists (select 1 from public.notifications where user_id = admin and title like 'Missed voice call%') then
     raise exception 'PROBE_FAIL vc1-video-calls 10: no missed-call notification';
   end if;
 

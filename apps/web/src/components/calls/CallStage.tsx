@@ -14,13 +14,15 @@ import {
   talkSeconds,
   type MediaErrorKind,
 } from "@/lib/calls/screen";
-import type { CallKind } from "@/lib/calls/types";
-import { confirmResume, dismissCall, mergeSnapshot, type ActiveCall } from "./call-store";
+import type { CallKind, CallSnapshot } from "@/lib/calls/types";
+import { confirmResume, dismissCall, markLocallyOver, mergeSnapshot, type ActiveCall } from "./call-store";
 import { useCallPulse, useServerClock } from "./use-call-pulse";
 import { ConfirmEnd, InCallView, OutgoingView, PermissionView, type CallBanner, type CallsCopy } from "./views";
 import { Button } from "@/components/ui/Button";
 import { callLog, errorSummary } from "@/lib/calls/diagnostics";
 import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./media/types";
+/** The part of a captured track the stage touches (the media SDK stays behind its own chunk). */
+type LocalTrack = { kind: string; stop(): void; attach(el: HTMLMediaElement): unknown };
 
 /**
  * THE CALL STAGE: outgoing, connecting, in call and reconnecting, for both
@@ -68,6 +70,10 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
   const [ending, setEnding] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [cameraPaused, setCameraPaused] = useState(false);
+  /* The caller's own camera, shown the moment it opens and before anybody
+     answers (the way Snapchat and WhatsApp do), not after the room connects. */
+  const [previewOn, setPreviewOn] = useState(false);
+  const localTracksRef = useRef<LocalTrack[]>([]);
   const mediaRef = useRef<CallMedia | null>(null);
   const rejoins = useRef(0);
   const joiningRef = useRef(false);
@@ -78,6 +84,19 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
   /* What to publish: a video call answered or placed with video publishes the
      camera; "accept with voice" or a voice call publishes the microphone only. */
   const voiceOnlyRef = useRef(active.answeredWith === "AUDIO");
+
+  /* The callee answers on the tap and the server catches up a moment later:
+     the microphone is opened at once, and the join waits here for the server. */
+  const allowedRef = useRef(false);
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
+  const answering = phase === "incoming" && active.answeredWith !== null;
+
+  const stopLocal = useCallback(() => {
+    for (const t of localTracksRef.current) t.stop();
+    localTracksRef.current = [];
+    setPreviewOn(false);
+  }, []);
 
   const join = useCallback(async () => {
     if (joiningRef.current || mediaRef.current) return;
@@ -90,6 +109,8 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
       let local;
       try {
         local = await lib.captureLocal(video);
+        localTracksRef.current = local;
+        if (local.some((t) => t.kind === "video")) setPreviewOn(true);
         callLog("join.captured", local.map((t) => t.kind).join("+"));
       } catch (error) {
         callLog("join.capture_failed", errorSummary(error));
@@ -97,10 +118,20 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         return;
       }
       setStage({ kind: "joining" });
+      /* The callee's answer is on its way to the server; wait for it (the
+         credentials are refused until it lands), but never past the ring. */
+      for (let waited = 0; !allowedRef.current && waited < 20_000; waited += 40) {
+        if (phaseRef.current === "ended") break;
+        await new Promise((resolve) => setTimeout(resolve, 40));
+      }
+      if (phaseRef.current === "ended" || !localTracksRef.current.length) {
+        stopLocal();
+        return;
+      }
       const creds = await getJoinCredentials({ callId });
       if (!creds.ok) {
         callLog("join.token_refused", creds.error.slice(0, 80));
-        for (const t of local) t.stop();
+        stopLocal();
         setStage({ kind: "failed", error: creds.error });
         void beat();
         return;
@@ -123,14 +154,16 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     } finally {
       joiningRef.current = false;
     }
-  }, [callId, snapshot.kind, beat, copy.connecting.body]);
+  }, [callId, snapshot.kind, beat, copy.connecting.body, stopLocal]);
 
-  /* Join as soon as the server allows it and the person has tapped. */
+  /* Join as soon as the server allows it and the person has tapped; a callee
+     who has just tapped Accept starts at once (see `allowedRef`). */
   const allowed = mayJoin(snapshot.state, snapshot.role, snapshot.myState);
+  allowedRef.current = allowed;
   useEffect(() => {
     if (active.resume) return;
-    if (allowed && stage.kind === "waiting") void join();
-  }, [allowed, stage.kind, join, active.resume]);
+    if ((allowed || answering) && stage.kind === "waiting") void join();
+  }, [allowed, answering, stage.kind, join, active.resume]);
 
   /* The room told us somebody joined or left: ask the server now. */
   const remotePresent = media.remotePresent;
@@ -158,6 +191,8 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
       const m = mediaRef.current;
       mediaRef.current = null;
       void m?.close();
+      for (const t of localTracksRef.current) t.stop();
+      localTracksRef.current = [];
     };
     window.addEventListener("pagehide", leave);
     return () => {
@@ -197,35 +232,54 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     };
   }, [media.cameraOn]);
 
-  const hangUp = useCallback(async () => {
+  /* INSTANT (29 October 2026): hanging up answers on the tap. The camera and
+     microphone stop and the screen changes now; the server hears about it in
+     the background, and for a minute no late "still ringing" news can bring
+     the call back (`markLocallyOver`). */
+  const hangUp = useCallback(() => {
     if (ending) return;
-    setEnding(true);
     setConfirming(false);
     const intent = hangUpIntent(snapshot.state, snapshot.role);
     if (intent === "none") {
       dismissCall();
       return;
     }
-    const answer = await endCall({ callId }).catch(() => null);
+    setEnding(true);
+    markLocallyOver(callId);
     const m = mediaRef.current;
     mediaRef.current = null;
-    await m?.close();
-    if (answer?.ok) mergeSnapshot(answer.data);
-    else void beat();
-    setEnding(false);
-  }, [ending, snapshot.state, snapshot.role, callId, beat]);
+    void m?.close();
+    stopLocal();
+    const shown: CallSnapshot = {
+      ...snapshot,
+      state: intent === "cancel" ? "CANCELLED" : intent === "decline" ? "DECLINED" : "ENDED",
+      version: snapshot.version + 1,
+      endedAt: new Date(Date.now() + active.offsetMs).toISOString(),
+      durationSeconds: intent === "end" ? talkSeconds(snapshot, now) : null,
+    };
+    if (intent === "end") mergeSnapshot(shown);
+    else dismissCall();
+    void endCall({ callId })
+      .then((answer) => {
+        if (answer.ok) mergeSnapshot(answer.data);
+      })
+      .catch(() => undefined)
+      .finally(() => setEnding(false));
+  }, [ending, snapshot, callId, active.offsetMs, now, stopLocal]);
 
   const onEnd = useCallback(() => {
     if (endNeedsConfirm(snapshot)) setConfirming(true);
-    else void hangUp();
+    else hangUp();
   }, [snapshot, hangUp]);
 
   const keepMessaging = useCallback(async () => {
-    await endCall({ callId }).catch(() => null);
+    markLocallyOver(callId);
+    stopLocal();
     dismissCall();
+    void endCall({ callId }).catch(() => null);
     const href = returnHref(snapshot, pathname);
     if (pathname !== href) router.push(href);
-  }, [callId, snapshot, pathname, router]);
+  }, [callId, snapshot, pathname, router, stopLocal]);
 
   const name = snapshot.otherName ?? "Vallo member";
   const remoteRef = useCallback((el: HTMLVideoElement | null) => {
@@ -234,7 +288,13 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
   }, []);
   const localRef = useCallback((el: HTMLVideoElement | null) => {
     localEl.current = el;
-    mediaRef.current?.attachLocalVideo(el);
+    if (mediaRef.current) {
+      mediaRef.current.attachLocalVideo(el);
+      return;
+    }
+    /* Before the room exists: draw the camera the person just opened. */
+    const preview = localTracksRef.current.find((t) => t.kind === "video");
+    if (el && preview) preview.attach(el);
   }, []);
 
   /* --------------------------------------------------------------- draw */
@@ -265,7 +325,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         kind={snapshot.kind}
         context={active.context.line}
         status={copy.connecting.title}
-        onCancel={() => void hangUp()}
+        onCancel={() => hangUp()}
         busy={ending}
         extra={
           <Button variant="primary" size="lg" onClick={() => confirmResume()} data-autofocus data-testid="call-rejoin">
@@ -277,9 +337,9 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
   }
 
   const live = phase === "in_call" || phase === "reconnecting" || (stage.kind === "joined" && media.remotePresent && phase === "connecting");
-  if (phase === "outgoing" || (!live && phase === "connecting")) {
+  if (phase === "outgoing" || answering || (!live && phase === "connecting")) {
     const status =
-      phase === "outgoing"
+      phase === "outgoing" && !answering
         ? snapshot.state === "RINGING"
           ? copy.outgoing.ringing
           : copy.outgoing.calling
@@ -292,9 +352,9 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         context={active.context.line}
         status={status}
         localVideoRef={localRef}
-        localVideoOn={snapshot.kind === "VIDEO" && media.cameraOn && stage.kind === "joined"}
+        localVideoOn={snapshot.kind === "VIDEO" && (stage.kind === "joined" ? media.cameraOn : previewOn)}
         error={stage.kind === "failed" ? stage.error : null}
-        onCancel={() => void hangUp()}
+        onCancel={() => hangUp()}
         busy={ending}
       />
     );
@@ -329,8 +389,8 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
       cameraOn={media.cameraOn}
       canCamera={snapshot.kind === "VIDEO"}
       canSwitchCamera={media.canSwitchCamera}
-      canChooseOutput={media.outputs.length > 1}
-      outputLabel={media.outputs.find((o) => o.id === media.outputId)?.label}
+      canChooseOutput={onPhone && media.outputs.length > 1}
+      speakerOn={speakerIsOn(media)}
       rearCamera={media.rear}
       ending={ending}
       onToggleMic={() => void mediaRef.current?.setMic(!media.micOn)}
@@ -345,9 +405,19 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         setCameraPaused(false);
         void mediaRef.current?.setCamera(true);
       }}
-      confirm={confirming ? <ConfirmEnd copy={copy} onConfirm={() => void hangUp()} onCancel={() => setConfirming(false)} /> : null}
+      confirm={confirming ? <ConfirmEnd copy={copy} onConfirm={() => hangUp()} onCancel={() => setConfirming(false)} /> : null}
     />
   );
+}
+
+/** A phone, where the speaker button belongs. A computer picks its speakers in the system, and never shows a device name here. */
+const onPhone =
+  typeof navigator !== "undefined" && (looksNative() || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+
+/** Is the loudspeaker the current output? An output with no name counts as the speaker, the phone's default. */
+function speakerIsOn(media: MediaSnapshot): boolean {
+  const label = media.outputs.find((o) => o.id === media.outputId)?.label ?? "";
+  return label === "" || /speaker/i.test(label);
 }
 
 /** For the tests: which kind a stage publishes, given how the call was answered. */

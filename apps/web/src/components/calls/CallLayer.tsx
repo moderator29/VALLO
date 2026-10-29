@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { heartbeatCall, incomingCallNow } from "@/lib/calls/actions";
+import { heartbeatCall, incomingCallNow, ringDelivered } from "@/lib/calls/actions";
 import { callPhase, isTerminal } from "@/lib/calls/lifecycle";
 import { callIdFromParam } from "@/lib/calls/screen";
 import { incomingChannelHealthy, useIncomingCalls, type CallNudge } from "@/lib/calls/useCallRealtime";
@@ -84,6 +84,14 @@ function useIncomingCallPoll(): void {
   }, []);
 }
 
+/** Tell the server this ring is on screen, once per call, so the caller sees "Ringing". */
+const acknowledged = new Set<string>();
+function ackRing(callId: string): void {
+  if (acknowledged.has(callId)) return;
+  acknowledged.add(callId);
+  void ringDelivered({ callId }).catch(() => acknowledged.delete(callId));
+}
+
 async function resolveNudge(nudge: CallNudge): Promise<void> {
   const current = callState().active;
   if (current && current.snapshot.id !== nudge.callId && !current.recovery && !isTerminal(current.snapshot.state)) {
@@ -96,7 +104,7 @@ async function resolveNudge(nudge: CallNudge): Promise<void> {
     mergeSnapshot(answer.data);
     return;
   }
-  if (callPhase(answer.data.state, answer.data.role) === "incoming") showCall(answer.data);
+  if (callPhase(answer.data.state, answer.data.role) === "incoming" && showCall(answer.data)) ackRing(answer.data.id);
 }
 
 /** Exported for the e2e harness and the tests; the watcher calls it. */
@@ -112,8 +120,9 @@ export async function resolveDeepLink(callId: string | null): Promise<void> {
   }
   const s = answer.data;
   const phase = callPhase(s.state, s.role);
-  if (phase === "incoming") showCall(s);
-  else if (phase === "ended") showCall(s, { recovery: "ended" });
+  if (phase === "incoming") {
+    if (showCall(s)) ackRing(s.id);
+  } else if (phase === "ended") showCall(s, { recovery: "ended" });
   else showCall(s, { resume: true });
 }
 

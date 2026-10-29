@@ -63,20 +63,46 @@ export function canPickOutput(): boolean {
  * the rest), which `mediaErrorKind` turns into the recovery screen.
  */
 export async function captureLocal(wantVideo: boolean): Promise<LocalTrack[]> {
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  const setSession = (type: string) => {
+    try {
+      if (session) session.type = type;
+    } catch {
+      /* Read-only on some builds. */
+    }
+  };
+  const ask = () =>
+    createLocalTracks({
+      audio: {
+        echoCancellation: { ideal: true },
+        noiseSuppression: { ideal: true },
+        autoGainControl: { ideal: true },
+        channelCount: { ideal: 1 },
+      },
+      video: wantVideo ? { facingMode: "user", resolution: VideoPresets.h540.resolution } : false,
+    });
   /* Safari and WKWebView refuse the microphone ("AudioSession category is not
-     compatible with audio capture") while the page's audio session is still
-     playback-only or ambient, which the ring leaves it as. A call plays and
-     records, so say so before asking for the devices. */
+     compatible with audio capture") while the page's audio session is
+     playback-only or ambient. A call plays and records, so say so first, and
+     if the browser still refuses, hand the session back to the system ("auto")
+     and ask once more before giving up. */
+  setSession("play-and-record");
   try {
-    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
-    if (session) session.type = "play-and-record";
-  } catch {
-    /* Read-only on some builds. */
+    const tracks = await ask();
+    for (const t of tracks) {
+      if (t.kind !== Track.Kind.Audio) continue;
+      const got = t.mediaStreamTrack.getSettings();
+      callLog("capture.audio", `aec=${got.echoCancellation} ns=${got.noiseSuppression} agc=${got.autoGainControl}`);
+    }
+    return tracks;
+  } catch (error) {
+    if (!(error instanceof Error) || error.name !== "InvalidStateError") throw error;
+    callLog("capture.retry", errorSummary(error));
+    setSession("auto");
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    setSession("play-and-record");
+    return ask();
   }
-  return createLocalTracks({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    video: wantVideo ? { facingMode: "user", resolution: VideoPresets.h540.resolution } : false,
-  });
 }
 
 export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnapshot) => void): CallMedia {
@@ -169,6 +195,13 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
   room
     .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
       if (track.kind === Track.Kind.Audio) {
+        /* One element per remote audio track: a second subscription for the
+           same track (a reconnect) must not play the voice twice, which
+           sounds like an echo. */
+        for (const old of track.detach()) {
+          old.remove();
+          audioEls.delete(old);
+        }
         const el = track.attach();
         el.setAttribute("data-vallo-call-audio", "");
         el.hidden = true;

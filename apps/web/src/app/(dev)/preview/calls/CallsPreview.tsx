@@ -123,7 +123,7 @@ export function CallsPreview({ state, copy, words }: { state: CallPreviewState; 
     case "active-video":
       return <InCallView {...inCall} />;
     case "active-voice":
-      return <InCallView {...inCall} kind="AUDIO" remoteVideoOn={false} canCamera={false} cameraOn={false} quality={2} canChooseOutput outputLabel="Speaker" />;
+      return <InCallView {...inCall} kind="AUDIO" remoteVideoOn={false} canCamera={false} cameraOn={false} quality={2} canChooseOutput speakerOn />;
     case "active-muted":
       return <InCallView {...inCall} micOn={false} remoteMicMuted cameraOn={false} />;
     case "reconnecting":
