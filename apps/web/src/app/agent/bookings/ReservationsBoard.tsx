@@ -10,6 +10,7 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import { countOf, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { dateTimeLabel } from "@/lib/format/when";
+import { State } from "@/components/ui/State";
 
 /**
  * Tonight's tables, and the requests still waiting on an answer.
@@ -169,7 +170,7 @@ function Section({
         )}
       </h3>
       {reservations.length === 0 ? (
-        <p className="mt-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">{empty}</p>
+        <State compact kind="empty" icon="calendar-check" title={empty} className="mt-xs" />
       ) : (
         <ul className="mt-sm flex flex-col gap-sm">
           {reservations.map((reservation) => (

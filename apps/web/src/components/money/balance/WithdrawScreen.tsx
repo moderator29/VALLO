@@ -187,7 +187,7 @@ export function WithdrawScreen({
           <p className="nf-mw-label text-center">{MOVE_COPY.review}</p>
           <Breakdown breakdown={quote.breakdown} locale={locale} destination={{ label: "To", title: quote.destination.title, detail: quote.destination.detail }} receivedLabel="You'll receive" />
           <p className="nf-caption text-[var(--nf-content-muted)]">
-            The processing fee is set by Payluk, our payments partner, for this withdrawal and is what you will be charged. Reference {quote.reference}.
+            The processing fee is set by our licensed provider for this withdrawal and is what you will be charged. Reference {quote.reference}.
           </p>
           {error ? (
             <p role="alert" className="nf-mw-error">

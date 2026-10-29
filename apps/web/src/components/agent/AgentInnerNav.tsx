@@ -38,7 +38,7 @@ export function AgentInnerNav({
   return (
     /* On its own line above the page's title, at the leading edge where the
        panel opens, so the title stays the subject (as on the host desk). */
-    <div className="mb-xs" data-testid="agent-inner-nav">
+    <div className="mb-xs lg:hidden" data-testid="agent-inner-nav">
       <InnerNav label={label} toggleLabel={toggleLabel} items={items} {...(active ? { activeId: active } : {})} />
     </div>
   );

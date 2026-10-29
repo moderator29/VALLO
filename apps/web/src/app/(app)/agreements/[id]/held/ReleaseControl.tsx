@@ -30,7 +30,7 @@ export function ReleaseControl({
         money
         label={label ?? RELEASE_SWIPE_LABEL}
         armedLabel={RELEASE_ARMED_LABEL}
-        confirmingLabel="Asking our payments partner to release it"
+        confirmingLabel="Asking our licensed provider to release it"
         confirmedLabel="Release asked for"
         errorLabel={error ?? "The release did not go through. The money stays held."}
         onConfirm={async () => {

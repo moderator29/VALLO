@@ -282,6 +282,7 @@ export const shapeEn = {
       expired: "That ask ran out after 48 hours.",
       "bad-path": "That clip did not upload to the right place. Try again.",
       "too-long": "The clip must be 30 seconds or shorter.",
+      "too-big": "That clip is too large. Film it again a little shorter, or at a lower quality, and send it.",
       failed: "That did not work. Try again.",
     },
   },

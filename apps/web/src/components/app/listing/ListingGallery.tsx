@@ -16,6 +16,7 @@ import { usePhotoViewer } from "./PhotoViewer";
 import { clockOf, type GalleryMedia } from "./gallery-media";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * The immersive media hero.
@@ -393,7 +394,7 @@ export function ListingGallery({
             {video && playing === i && (
               /* Muted until the viewer unmutes, with its controls, and never
                  on its own: it starts only because "Watch video" was pressed. */
-              <video
+              <SafeVideo
                 src={video.src}
                 poster={video.poster ?? undefined}
                 controls

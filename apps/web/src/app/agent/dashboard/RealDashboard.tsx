@@ -278,11 +278,11 @@ export function RealDashboard({
                 </div>
               </section>
             ) : (
-              <p className={TYPE.body}>{d.noListings}</p>
+              <State compact kind="empty" icon="home-ring" title={d.noListings} />
             )}
           </div>
         ) : workspace?.role === "owner" ? null : (
-          <p className={TYPE.body}>{d.noListings}</p>
+          <State compact kind="empty" icon="home-ring" title={d.noListings} />
         )}
 
         {/* -------------------------------------------------------- stays */}

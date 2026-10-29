@@ -24,6 +24,7 @@ import { ListingPitch } from "../../list/ListingPitch";
 import { fill } from "../../_copy";
 import { readFunnels, readListingTitles, readRequests, type FunnelsRead } from "../../_intel/space-read";
 import { bookingsMetricViews, metricTitles } from "../../_intel/space-views";
+import { State } from "@/components/ui/State";
 
 export const dynamic = "force-dynamic";
 
@@ -178,7 +179,7 @@ function FunnelFigure({
       </p>
 
       {rows.length === 0 ? (
-        <p className="nf-caption mt-md text-[var(--nf-content-secondary)]">{t.shape.funnel.empty}</p>
+        <State compact kind="empty" icon="report-stats" title={t.shape.funnel.empty} className="mt-md" />
       ) : (
         <>
           {/* "Which listing had most": magnitude across listings, so
@@ -194,7 +195,7 @@ function FunnelFigure({
               limit={rows.length}
             />
           ) : (
-            <p className="nf-caption mt-md text-[var(--nf-content-secondary)]">{a.noneByListing}</p>
+            <State compact kind="empty" icon="report-stats" title={a.noneByListing} className="mt-md" />
           )}
           <ListGroup className="mt-md" label={a.byListing}>
             {rows.map(({ listing, figure }) => (

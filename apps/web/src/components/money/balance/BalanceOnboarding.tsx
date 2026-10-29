@@ -158,7 +158,7 @@ export function BalanceOnboarding({
                 ? "Asked. Waiting for their answer; this updates on its own."
                 : current === "RESTRICTED" || current === "SUSPENDED"
                   ? "On hold with our partner. Support can find out why."
-                  : "Our licensed payments partner opens it in your name. Nothing is charged.",
+                  : "Our licensed provider opens it in your name. Nothing is charged.",
             state: opening,
             children: phoneTaken ? (
               <div className="space-y-row">

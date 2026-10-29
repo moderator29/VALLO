@@ -460,6 +460,17 @@
     .nf-desk-grid {
       grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     }
+    /* A section with nothing beside it takes the row (29 October 2026: the
+       "Listings by status" card sat half-width with empty space next to it).
+       Its gauge draws the dial and the legend side by side. */
+    .nf-desk-grid > :only-child {
+      grid-column: 1 / -1;
+    }
+    .nf-desk-grid > :only-child .nf-gauge {
+      grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+      align-items: center;
+      column-gap: var(--nf-space-xl);
+    }
   }
   .nf-desk-card {
     padding: 1rem;

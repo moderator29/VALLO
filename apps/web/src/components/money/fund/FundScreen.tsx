@@ -102,7 +102,7 @@ export function FundScreen({
                   : model.availableMinor === null
                     ? "Open your balance and add the rent, then pay it in here."
                     : `${money(model.shortMinor)} more needed in your balance.`}
-                {model.balanceStale ? " Last figure from our licensed payments partner; it will refresh." : ""}
+                {model.balanceStale ? " Last figure from our licensed provider; it will refresh." : ""}
               </p>
             </div>
 

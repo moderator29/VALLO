@@ -13,6 +13,7 @@ import {
   POWER_GRID_CHOICES,
   WATER_SUPPLY_CHOICES,
 } from "@/lib/agent/listings-model";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * The console says what the wizard said.
@@ -279,7 +280,7 @@ export function ListingCard({
                   /* A walkthrough of an empty flat carries no speech, so
                      there is no track to caption. The reviewer is here to see
                      the rooms. */
-                  <video
+                  <SafeVideo
                     src={video.url}
                     poster={video.posterUrl ?? undefined}
                     controls

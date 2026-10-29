@@ -21,7 +21,7 @@ export const BALANCE_LEDE = "Every movement of your money, in one place.";
  * licence or regulatory status for it beyond what its documentation states.
  * Counsel to confirm the wording before launch.
  */
-export const HELD_BY = "Your money is held by our licensed payments partner, not by Vallo.";
+export const HELD_BY = "Your money is held by our licensed provider, not by Vallo.";
 export const HELD_BY_LINK = "How payments work";
 export const HELD_BY_HREF = "/safety#how-payments";
 
@@ -200,7 +200,7 @@ export const MOVE_COPY = {
 export const ONBOARDING_COPY: Record<OnboardingState, { title: string; body: string }> = {
   NOT_STARTED: {
     title: "Set up Wallet",
-    body: "Your money is held by our licensed payments partner, never by Vallo. To set up Wallet we share your name, email and phone with them, so they can keep your money under your name. Nothing else is shared and nothing is charged.",
+    body: "Your money is held by our licensed provider, never by Vallo. To set up Wallet we share your name, email and phone with them, so they can keep your money under your name. Nothing else is shared and nothing is charged.",
   },
   PENDING: {
     title: "Setting up Wallet",
@@ -221,14 +221,14 @@ export const ONBOARDING_COPY: Record<OnboardingState, { title: string; body: str
   },
   FAILED: {
     title: "We could not set up Wallet",
-    body: "Our payments partner did not accept the details we sent. Check your name, email and phone on your profile, then try again.",
+    body: "Our licensed provider did not accept the details we sent. Check your name, email and phone on your profile, then try again.",
   },
 };
 
 /** Payluk keeps one account per mobile number; this one is already on another Payluk account. */
 export const PHONE_TAKEN_COPY = {
   title: "That number is already in use",
-  body: "Our payments partner opens one account per mobile number, and the number on your profile already belongs to another account. Use a different mobile number of yours, then try again.",
+  body: "Our licensed provider opens one account per mobile number, and the number on your profile already belongs to another account. Use a different mobile number of yours, then try again.",
   action: "Use a different number",
 } as const;
 

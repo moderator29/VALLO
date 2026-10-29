@@ -56,7 +56,7 @@ function badgeFor(status: string, paused: boolean): HeldModel["badge"] {
     case "released":
       return { label: "Released", tone: "done" };
     case "payment_processing":
-      return { label: "On its way to our payments partner", tone: "moving" };
+      return { label: "On its way to our licensed provider", tone: "moving" };
     case "awaiting_payment":
     case "preparing":
     case "unknown":

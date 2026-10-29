@@ -31,6 +31,7 @@ export const SHOW_ME_RESULTS = [
   "expired",
   "bad-path",
   "too-long",
+  "too-big",
   "failed",
 ] as const;
 export type ShowMeResult = (typeof SHOW_ME_RESULTS)[number];
@@ -43,6 +44,9 @@ export function readShowMeResult(value: unknown): ShowMeResult {
 
 /** The longest clip the thread takes, in seconds. */
 export const SHOW_ME_MAX_SECONDS = 30;
+
+/** The most a clip may weigh: the `show-me-clips` bucket refuses more, and a late refusal after a long upload helps nobody. */
+export const SHOW_ME_MAX_BYTES = 25 * 1024 * 1024;
 
 export type ShowMeRequest = {
   id: string;

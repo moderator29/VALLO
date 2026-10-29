@@ -32,6 +32,7 @@ import {
   type Size,
   type Zoom,
 } from "./media-gesture";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * THE CHAT'S FULL-SCREEN MEDIA VIEWER (founder, 13 October 2026: "tapping a
@@ -468,7 +469,7 @@ export function MediaViewer({
               >
                 {slide.kind === "video" ? (
                   active ? (
-                    <video
+                    <SafeVideo
                       src={slide.src}
                       controls
                       autoPlay
