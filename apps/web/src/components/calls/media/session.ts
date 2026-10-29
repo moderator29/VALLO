@@ -345,6 +345,14 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
       for (const el of audioEls) el.remove();
       audioEls.clear();
       await room.disconnect(true).catch(() => undefined);
+      /* The call is over: hand the audio session back to the system so the next
+         sound the app makes (a ring, a video) is not stuck in call mode. */
+      try {
+        const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+        if (session) session.type = "auto";
+      } catch {
+        /* Read-only on some builds. */
+      }
     },
   };
 }

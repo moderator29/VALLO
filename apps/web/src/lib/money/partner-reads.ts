@@ -39,7 +39,7 @@ export async function readMyBalances(): Promise<PartnerRead<Balances>> {
   if (!f.available.confirmedAt) return ABSENT;
   return {
     state: "ok",
-    data: { availableMinor: f.available.minor, protectedMinor: f.protected.minor, currency: f.currency, heldBy: "our licensed payments partner", asOf: f.available.confirmedAt },
+    data: { availableMinor: f.available.minor, protectedMinor: f.protected.minor, currency: f.currency, heldBy: "our licensed provider", asOf: f.available.confirmedAt },
   };
 }
 

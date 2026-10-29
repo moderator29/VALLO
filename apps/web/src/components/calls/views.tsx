@@ -312,7 +312,7 @@ export function OutgoingView({
     <CallFrame label={`${kind === "VIDEO" ? copy.outgoing.video : copy.outgoing.voice}: ${name}`} media={localVideoOn} testId="call-outgoing">
       {localVideoOn ? (
         <>
-          <video ref={localVideoRef} className="nf-call__remote" autoPlay playsInline muted aria-label={copy.inCall.selfView} />
+          <video ref={localVideoRef} className="nf-call__remote nf-call__preview" autoPlay playsInline muted aria-label={copy.inCall.selfView} />
           <div className="nf-call__placeholder" style={{ background: "var(--nf-scrim-media)" }} />
         </>
       ) : null}

@@ -23,6 +23,7 @@ import {
 } from "../ListingCard";
 import { placeLine, priceLine } from "../rows";
 import { mergeMedia } from "@/lib/listings/media-order";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * The listing under review, C1D98B3C panel 2, with the flow of
@@ -448,7 +449,7 @@ function MediaStrip({ listing, copy }: { listing: ListingReviewView; copy: Admin
                   /* A walkthrough of an empty flat carries no speech, so there
                      is no track to caption. preload none: a reviewer's line is
                      not spent on a video nobody pressed play on. */
-                  <video
+                  <SafeVideo
                     src={video.url}
                     poster={video.posterUrl ?? undefined}
                     controls

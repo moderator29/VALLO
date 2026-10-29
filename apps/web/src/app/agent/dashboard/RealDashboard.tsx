@@ -7,7 +7,7 @@ import { fill } from "../_copy";
 import { ButtonLink } from "@/components/ui/Button";
 import { Amount } from "@/components/ui/Amount";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
-import { Stack, TYPE } from "@/components/app/Screen";
+import { Stack } from "@/components/app/Screen";
 import { InspectionRows } from "@/components/app/inspections/InspectionRows";
 import type { InspectionList } from "@/lib/inspections/queries";
 import { isOpen } from "@/lib/inspections/types";
@@ -278,11 +278,11 @@ export function RealDashboard({
                 </div>
               </section>
             ) : (
-              <p className={TYPE.body}>{d.noListings}</p>
+              <State compact kind="empty" icon="home-ring" title={d.noListings} />
             )}
           </div>
         ) : workspace?.role === "owner" ? null : (
-          <p className={TYPE.body}>{d.noListings}</p>
+          <State compact kind="empty" icon="home-ring" title={d.noListings} />
         )}
 
         {/* -------------------------------------------------------- stays */}

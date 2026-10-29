@@ -107,7 +107,7 @@ describe("the Wallet overview (D81)", () => {
     expect(text(html)).not.toMatch(/\bTransfer\b/);
   });
 
-  it("says our licensed payments partner holds the money, and never names the provider (28 October 2026)", () => {
+  it("says our licensed provider holds the money, and never names the provider (28 October 2026)", () => {
     const html = render(true);
     expect(html).not.toContain("Payluk");
     expect(html).toContain(HELD_BY);

@@ -22,6 +22,7 @@ import { clockOf, photosAsMedia, type GalleryMedia } from "./gallery-media";
 import { useClientMount } from "@/lib/ui/client-mount";
 import { useMotionGate } from "@/components/motion/useMotionGate";
 import "@/app/css/catalogue.css";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * The listing lightbox.
@@ -530,7 +531,7 @@ function Lightbox({
                  holds a player: swiping away unmounts it, which stops it,
                  and the others show their still. */
               i === active ? (
-                <video
+                <SafeVideo
                   src={item.src}
                   poster={item.poster ?? undefined}
                   controls

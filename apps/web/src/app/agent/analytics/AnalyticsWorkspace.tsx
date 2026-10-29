@@ -25,6 +25,7 @@ import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { PeriodBars } from "@/components/ui/charts/PeriodBars";
 import { absentMonths, lagosMonth, monthPoint, moneyTicks } from "@/components/agent/charts/month-points";
+import { State } from "@/components/ui/State";
 
 /**
  * The agent's analytics console.
@@ -215,7 +216,7 @@ function SettledTrend({
 
   const peak = points.reduce((most, point) => Math.max(most, point.agentShareMinor), 0);
   if (peak <= 0) {
-    return <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">{t.trend.empty}</p>;
+    return <State compact kind="empty" icon="chart-growth" title={t.trend.empty} />;
   }
 
   const best = points.reduce((top, point) =>
@@ -302,7 +303,7 @@ function RequestsPanel({
   locale: Locale;
 }) {
   if (outcomes.received === 0) {
-    return <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">{t.requests.empty}</p>;
+    return <State compact kind="empty" icon="chat-duo" title={t.requests.empty} />;
   }
 
   return (
@@ -382,7 +383,7 @@ function CalendarPanel({
   locale: Locale;
 }) {
   if (calendar.listings === 0) {
-    return <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">{t.calendar.none}</p>;
+    return <State compact kind="empty" icon="calendar-check" title={t.calendar.none} />;
   }
 
   const open = Math.max(0, calendar.offeredNights - calendar.bookedNights - calendar.blockedNights);
@@ -478,7 +479,7 @@ function ListingsPanel({
   locale: Locale;
 }) {
   if (rows.length === 0) {
-    return <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">{t.listings.empty}</p>;
+    return <State compact kind="empty" icon="home-ring" title={t.listings.empty} />;
   }
 
   return (

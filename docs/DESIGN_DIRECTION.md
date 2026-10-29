@@ -81,6 +81,16 @@ lists the off-brand details that must be translated rather than copied.
    radius on a control, in the stylesheets and in TSX, so drift cannot
    reopen it either.
 
+   **THE ONE STANDING EXCEPTION, SO THE TWO RULINGS NO LONGER CONTRADICT EACH
+   OTHER (29 October 2026 reconciliation).** The bottom dock (section 12 of
+   this file, the founder's ruling of 29 September 2026, the later one that
+   day) is a capsule on purpose, and so is the round More button beside it:
+   it is navigation chrome and carries a glyph and a short label, not a
+   control a form or a card owns. It is the only text-bearing capsule in the
+   product and it is allowed by that ruling alone. Everything else stays under
+   rule 4; a second capsule needs a new founder ruling, not a reading of this
+   paragraph.
+
    **AND THE PART A NAME CHECK CANNOT SEE, WHICH IS WHY THIS LAW HAS BEEN
    BROKEN TWICE WITH EVERY GREP PASSING: A SHAPE RULING IS ABOUT THE RATIO,
    NEVER ABOUT THE TOKEN NAME.** The same `--nf-radius-*` value is a rounded

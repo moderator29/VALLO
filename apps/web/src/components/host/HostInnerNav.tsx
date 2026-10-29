@@ -49,7 +49,7 @@ export function HostInnerNav({
     /* The pull toggle on its own line above the page's own title, at the
        leading edge where its panel opens, so the title stays the subject; it
        names no page itself. */
-    <div className="mb-xs" data-testid="host-inner-nav">
+    <div className="mb-xs lg:hidden" data-testid="host-inner-nav">
       <InnerNav label={label} toggleLabel={toggleLabel} items={items} activeId={active} />
     </div>
   );

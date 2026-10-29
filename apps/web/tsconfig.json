@@ -74,7 +74,9 @@
     ".next-*/types/**/*.ts",
     ".next-*/dev/types/**/*.ts",
     ".next-catalogue/types/**/*.ts",
-    ".next-catalogue/dev/types/**/*.ts"
+    ".next-catalogue/dev/types/**/*.ts",
+    ".next-forka/types/**/*.ts",
+    ".next-forka/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

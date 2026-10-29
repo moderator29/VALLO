@@ -97,6 +97,10 @@ export async function startPushTaps(channelName: string): Promise<() => void> {
        lock screen. Without a channel of this exact id Android 8 and above drops
        the ring silently. A channel's importance is fixed once it exists on a
        handset, so this id is never reused for anything quieter. */
+    /* A missed call is X's quiet row: importance 2 is LOW, in the shade with
+       no sound and no peek. Android decides sound by channel, so this is the
+       only way to make it quiet (`lib/push/transport/fcm.ts`). */
+    void plugin.createChannel({ id: "vallo_missed", name: "Missed calls", importance: 2 }).catch(() => undefined);
     void plugin
       .createChannel({ id: "vallo_calls", name: "Calls", importance: 5, visibility: 1, vibration: true, lights: true })
       .catch(() => undefined);

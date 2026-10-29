@@ -12,6 +12,7 @@ describe("Show me (V-69)", () => {
     expect(isShowMeItem("meter")).toBe(true);
     expect(isShowMeItem("pool")).toBe(false);
     expect(readShowMeResult("too-long")).toBe("too-long");
+    expect(readShowMeResult("too-big")).toBe("too-big");
     expect(readShowMeResult("nope")).toBe("failed");
   });
 
