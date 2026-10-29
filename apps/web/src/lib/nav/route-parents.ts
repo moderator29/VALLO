@@ -185,6 +185,9 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
      app down rather than bouncing between the gate and this screen. Its own
      "Not you? Sign out" is the way out. */
   "/sign-up/finish": ROOT,
+  /* The phone step of signing up (29 October 2026): reached once, from the
+     app layout, with the account already signed in. A root, like finish. */
+  "/sign-up/phone": ROOT,
   "/forgot-password": "/sign-in",
   "/forgot-password/code": "/forgot-password",
   "/reset-password": "/sign-in",
@@ -251,6 +254,9 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/listing/[id]/visit": "/listing/[id]",
   "/listing/[id]/visit/[inspectionId]": "/listing/[id]",
   "/saved": "/home",
+  /* The compare tray's table (29 October 2026): places set aside from the
+     catalogue, so back is the home screen like Saved. */
+  "/compare": "/home",
   "/saved/searches": "/saved",
   /* V-35: the gate code for one inspection, where a named delegate lands.
      Its parent is Plans, where inspections now live (V-76). */
@@ -747,6 +753,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/paystack/webhook": "processor webhook.",
   "/api/payluk/webhook": "processor webhook.",
   "/api/push/drain": "scheduled job, bearer token.",
+  "/api/push/enrol-log": "POST only, a device reports how its push enrolment went (a reference, never a token).",
   "/api/push/key": "the public VAPID key as JSON.",
   "/api/push/register": "POST only, a subscription write.",
   "/api/push/revoke": "POST only, a subscription delete.",

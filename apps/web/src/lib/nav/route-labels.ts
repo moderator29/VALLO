@@ -28,6 +28,8 @@ const NAMES: Readonly<Record<string, string>> = {
   "/sign-up": "sign up",
   "/sign-up/email": "sign up",
   "/sign-up/finish": "finishing sign up",
+  "/sign-up/phone": "confirming your number",
+  "/compare": "compare",
   "/forgot-password": "password reset",
   "/welcome": "the welcome",
   "/home": "Home",
