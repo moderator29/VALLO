@@ -73,6 +73,7 @@ import type { CallPillWords } from "@/components/calls/call-pill-words";
 import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
 import { placeCall } from "@/components/calls/place-call";
 import { callMarkerView, type CallMarkerView } from "@/lib/calls/screen";
+import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 
 /**
  * The conversation thread, one component for both data sources.
@@ -113,6 +114,11 @@ export type ThreadBubble = {
    * only ever drawn on my own bubbles, and only as the second tick.
    */
   read?: boolean;
+  /**
+   * True once the other side's device or inbox took it. The messages table has
+   * no column for it yet, so no row carries it today (`lib/messages/delivery.ts`).
+   */
+  delivered?: boolean;
   /** The card a share expands into, resolved by the page. Absent otherwise. */
   card?: ThreadCardData;
   /** The row's timestamp, when known. Read by the account card's "checking" window. */
@@ -351,20 +357,23 @@ function retryLabel(message: { body?: string | null; imageUrl?: string | null },
 type ViewWords = Dictionary["experienceInbox"]["thread"]["view"];
 
 /**
- * The read ticks. One tick is delivered (the platform holds it), two is read
- * (the other side opened it). Drawn inline so the two states are one shape
- * apart, which no glyph in the stroked set is.
+ * The ticks under my last message of a run. One tick is sent (the platform
+ * holds it), two muted ticks are delivered, two ticks in the brand blue are
+ * read (`deliveryStates`). Drawn inline so the states are one shape apart,
+ * which no glyph in the stroked set is.
  */
-function Ticks({ read }: { read: boolean }) {
+function Ticks({ state, view }: { state: Delivery; view: ViewWords }) {
+  const two = state !== "sent";
   return (
     <span
-      className={`nf-bubble__ticks${read ? " nf-bubble__ticks--read" : ""}`}
-      aria-label={read ? "Read" : "Delivered"}
+      className={`nf-msg__ticks${state === "read" ? " nf-msg__ticks--read" : ""}`}
+      aria-label={state === "read" ? view.tickRead : state === "delivered" ? view.tickDelivered : view.tickSent}
       role="img"
+      data-state={state}
     >
-      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+      <svg width="16" height="11" viewBox="0 0 18 12" fill="none" aria-hidden="true">
         <path d="M1 6.5l3.2 3.2L10.5 3.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        {read && (
+        {two && (
           <path d="M7 6.5l3.2 3.2L16.5 3.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         )}
       </svg>
@@ -676,6 +685,11 @@ export function ThreadView({
         }
       });
     }
+  }, (row: LiveMessageRow) => {
+    /* The other side opened the thread: `read_at` was set on my messages, so
+       the ticks flip without a reload. */
+    if (!row.read_at) return;
+    setItems((prev) => prev.map((m) => (m.id === row.id && !m.read ? { ...m, read: true } : m)));
   });
 
   /* The safety education moment: the first money-shaped draft in a session
@@ -966,6 +980,8 @@ export function ThreadView({
     context?.kind === "booking" ? "bed" : context?.kind === "reservation" ? "calendar-clock" : "chat-bubble";
   const tags = roleTags(context, role, view);
   const bundles = bundlePhotos(items);
+  /* Sent, delivered or read, per message of mine; a reply counts as read. */
+  const delivery = deliveryStates(items);
   /* THE VIEWER'S LIST: every photo and video in the thread, in thread order, so
      a swipe in the full-screen viewer moves on through the conversation. Each
      carries who sent it and when, for the line at the top. A deleted message
@@ -1313,6 +1329,19 @@ export function ThreadView({
              not words, so no caption and no camera glyph under the picture. */
           const words = run.length === 1 ? (isPhotoOnly(m) ? "" : m.body) : (caption?.body ?? "");
           const last = run[run.length - 1]!;
+          /* The time and the ticks are drawn once, under the LAST bubble of a
+             run from one side in one minute, not inside every bubble. */
+          const following = index < bundles.length - 1 ? bundles[index + 1]!.lead : null;
+          const endsRun = !(
+            following !== null &&
+            !following.call &&
+            !following.card &&
+            following.mine === m.mine &&
+            following.timeLabel === m.timeLabel &&
+            !following.state &&
+            !m.state &&
+            !dayBreaks.has(index + 1)
+          );
           /* V-04: the first message in this run from the other side that
              carries an account number gets the receiver's card above it. */
           /* Only where a check can run: a listing thread, read by the renter,
@@ -1394,7 +1423,6 @@ export function ThreadView({
                   <p className="nf-msg__meta">
                     <span className="nf-msg__sender">{counterpartName}</span>
                     {tags && <span className="nf-role-tag">{tags.theirs}</span>}
-                    <span className="nf-numeric">{m.timeLabel}</span>
                   </p>
                 )}
 
@@ -1480,23 +1508,23 @@ export function ThreadView({
                     ) : (
                       words && <p className="nf-bubble__body">{words}</p>
                     )}
-                    <p className="nf-bubble__foot">
-                      {/*
-                        Delivered is a fact about the system; read is the
-                        other side's `read_at`, which the row carries and
-                        which costs nobody a new obligation because it is
-                        the state the platform already keeps.
-                      */}
-                      {m.state === "sending" ? (
-                        <span>{view.sending}</span>
-                      ) : m.state === "waiting" ? (
-                        <span data-testid="bubble-waiting">{waitingShort}</span>
-                      ) : (
-                        <span className="nf-numeric">{m.timeLabel}</span>
-                      )}
-                      {m.mine && !m.state && <Ticks read={Boolean(last.read)} />}
-                    </p>
                   </BubbleGestures>
+                )}
+
+                {!m.card && endsRun && (
+                  /* Under the last bubble of the run, small and muted: the
+                     time (or "Sending"), then my ticks. It follows the bubble
+                     in the document, so a screen reader reads it with it. */
+                  <p className="nf-msg__status" data-testid="msg-status">
+                    {m.state === "sending" ? (
+                      <span>{view.sending}</span>
+                    ) : m.state === "waiting" ? (
+                      <span data-testid="bubble-waiting">{waitingShort}</span>
+                    ) : m.state === "failed" ? null : (
+                      <span className="nf-numeric">{last.timeLabel}</span>
+                    )}
+                    {m.mine && !m.state && <Ticks state={delivery.get(last.id) ?? "sent"} view={view} />}
+                  </p>
                 )}
 
                 {shielded?.ask && scamCopy && (

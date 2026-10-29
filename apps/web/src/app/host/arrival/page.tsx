@@ -1,3 +1,4 @@
+import { State } from "@/components/ui/State";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
@@ -71,7 +72,7 @@ export default async function HostArrivalPage({
         )}
         <div className="mt-lg">
           {!accommodation ? (
-            <p className={TYPE.body}>{copy.noStays}</p>
+            <State compact kind="empty" icon="hotel" title={copy.noStays} />
           ) : existing === undefined ? (
             <p className={TYPE.body}>{t.afterTheGate.tenancy.unavailableBody}</p>
           ) : (

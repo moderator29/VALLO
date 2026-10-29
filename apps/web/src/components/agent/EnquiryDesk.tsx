@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { State } from "@/components/ui/State";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { LostByArea } from "@/lib/enquiry/queries";
 import { STAGES, type Stage } from "@/lib/enquiry/stage";
@@ -27,7 +28,7 @@ export function EnquiryFunnel({ counts, copy }: { counts: Record<Stage, number> 
       {counts === null ? (
         <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>
       ) : total === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.funnelEmpty}</p>
+        <State compact kind="empty" icon="report-stats" title={copy.funnelEmpty} className="mt-group" />
       ) : (
         <ul className="mt-group grid grid-cols-1 gap-xs">
           {STAGES.map((s) => (
@@ -59,7 +60,7 @@ export function LostByAreaPanel({ areas, copy }: { areas: LostByArea[] | null | 
       ) : areas === null ? (
         <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>
       ) : areas.length === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.lostEmpty}</p>
+        <State compact kind="empty" icon="report-stats" title={copy.lostEmpty} className="mt-group" />
       ) : (
         <ul className="mt-group flex flex-col gap-row">
           {areas.map((area) => (

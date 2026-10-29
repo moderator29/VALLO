@@ -1,5 +1,6 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -36,7 +37,7 @@ export function MyBriefs({
   const [pending, start] = useSafeTransition();
 
   if (briefs === null) return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>;
-  if (briefs.length === 0) return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.empty}</p>;
+  if (briefs.length === 0) return <State compact kind="empty" icon="home-search" title={copy.empty} className="" />;
 
   return (
     <ul className="flex flex-col gap-row" data-testid="my-briefs">

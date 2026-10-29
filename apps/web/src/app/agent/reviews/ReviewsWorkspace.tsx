@@ -5,7 +5,8 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { ReplyForm } from "./ReplyForm";
 import { IconPlate } from "@/components/ui/IconPlate";
-import { Icon3D } from "@/components/ui/Icon3D";
+import { ButtonLink } from "@/components/ui/Button";
+import { EmptyState } from "@/components/app/Screen";
 
 /**
  * The host reviews console.
@@ -165,19 +166,17 @@ export function ReviewsWorkspace({
 
   if (summary.total === 0) {
     return (
-      <div className="nf-panel nf-panel--card block p-xl text-center">
-        <span className="grid size-[5.5rem] shrink-0 place-items-center" aria-hidden="true" data-art="stay-rated">
-          <Icon3D name="stay-rated" size={88} />
-        </span>
-        <p className="mt-md font-semibold text-[var(--nf-content-primary)]">No reviews yet</p>
-        <p className="mx-auto mt-2xs max-w-[42ch] text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">
-          A guest can review a stay once they have checked out and paid. The first
-          one lands here, and you get the chance to answer it in public.
-        </p>
-        <Link href="/agent/listings" className="nf-btn nf-btn--glass mt-md">
-          Your listings
-        </Link>
-      </div>
+      <EmptyState
+        icon="reviews"
+        art="stay-rated"
+        title="No reviews yet"
+        body="A guest can review a stay once they have checked out and paid. The first one lands here, and you get the chance to answer it in public."
+        action={
+          <ButtonLink href="/agent/listings" variant="glass">
+            Your listings
+          </ButtonLink>
+        }
+      />
     );
   }
 
@@ -229,21 +228,18 @@ export function ReviewsWorkspace({
           ))}
         </ul>
       ) : (
-        <div className="nf-panel nf-panel--card block mt-md p-xl text-center">
-          <IconPlate size="lg">
-            <UiIcon name="file-search" size={24} />
-          </IconPlate>
-          <p className="mt-md font-semibold text-[var(--nf-content-primary)]">
-            Every review has your answer
-          </p>
-          <p className="mx-auto mt-2xs max-w-[40ch] text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">
-            A host who answers reads as a host who cares, and that is what the next
-            guest is looking for on the page.
-          </p>
-          <Link href="/agent/reviews?filter=all" className="nf-btn nf-btn--glass mt-md">
-            See all reviews
-          </Link>
-        </div>
+        <EmptyState
+          icon="reviews"
+          art="stay-rated"
+          className="mt-md"
+          title="Every review has your answer"
+          body="A host who answers reads as a host who cares, and that is what the next guest is looking for on the page."
+          action={
+            <ButtonLink href="/agent/reviews?filter=all" variant="glass">
+              See all reviews
+            </ButtonLink>
+          }
+        />
       )}
     </div>
   );

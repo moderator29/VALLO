@@ -244,26 +244,32 @@ describe.skipIf(!hasBrowser)("call rows in a thread", () => {
       expect(await rows.count()).toBe(2);
       expect(await rows.nth(0).getAttribute("data-missed")).toBe("");
       expect(await rows.nth(0).getAttribute("aria-label")).toBe("Voice call. Missed voice call from Nora. 15:40");
-      expect(await rows.nth(0).textContent()).toBe("Missed voice call from Nora15:40");
+      expect(await rows.nth(0).textContent()).toBe("Missed voice call\u00b7 15:40Call back");
       expect(await rows.nth(1).getAttribute("data-missed")).toBeNull();
       expect(await rows.nth(1).getAttribute("aria-label")).toBe("Video call. Video call with Nora, 4 min. 13:02");
-      expect(await rows.nth(1).textContent()).toBe("Video call with Nora, 4 min13:02");
-      /* A pill, not a card: slim, centred in its row and far narrower than the screen. */
+      expect(await rows.nth(1).textContent()).toBe("Video call ended, 4 min\u00b7 13:02");
+      /* A quiet line, not a pill or a card: no box, slim, centred in its row. */
       const geometry = await rows.nth(1).evaluate((el) => {
         const box = el.getBoundingClientRect();
         const row = el.parentElement!.getBoundingClientRect();
         return { height: box.height, width: box.width, off: Math.abs(box.left + box.width / 2 - (row.left + row.width / 2)) };
       });
-      expect(geometry.height).toBeLessThan(48);
+      expect(geometry.height).toBeLessThan(28);
+      const box = await rows.nth(1).evaluate((el) => {
+        const st = getComputedStyle(el);
+        return { bg: st.backgroundColor, border: st.borderTopWidth };
+      });
+      expect(box.bg).toMatch(/, 0\)$|^transparent$/);
+      expect(box.border).toBe("0px");
       expect(geometry.width).toBeLessThan(330);
       expect(geometry.off).toBeLessThan(1);
       /* The missed one is the red one. */
       const ink = (index: number) => rows.nth(index).locator(".nf-call-event__line").evaluate((el) => getComputedStyle(el).color);
       expect(await ink(0)).not.toBe(await ink(1));
-      /* Only the first row was given a call back, and its target is 44px. */
+      /* Only the first row was given a call back: a text action, 44px tall, not a filled button. */
       expect(await page.getByTestId("call-history-callback").count()).toBe(1);
+      expect(await page.getByTestId("call-history-callback").evaluate((el) => getComputedStyle(el).backgroundColor)).toMatch(/, 0\)$|^transparent$/);
       const target = await page.getByTestId("call-history-callback").boundingBox();
-      expect(target!.width).toBeGreaterThanOrEqual(44);
       expect(target!.height).toBeGreaterThanOrEqual(44);
       await page.getByRole("button", { name: "Call Nora back, voice call" }).click();
       await page.waitForFunction(() => ((window as unknown as { __calls?: unknown[][] }).__calls ?? []).length > 0);

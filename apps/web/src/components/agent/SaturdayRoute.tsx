@@ -1,5 +1,6 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -46,7 +47,7 @@ export function SaturdayRoute({
       </h2>
       <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{copy.routeNote}</p>
       {route.length === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.routeEmpty}</p>
+        <State compact kind="empty" icon="map-route" title={copy.routeEmpty} className="mt-group" />
       ) : (
         <ol className="mt-group flex flex-col gap-row">
           {route.map((leg) => (

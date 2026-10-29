@@ -1,5 +1,6 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -79,7 +80,7 @@ export function ViewingWindows({
       {windows === null || homes === null ? (
         <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>
       ) : windows.length === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.windowsEmpty}</p>
+        <State compact kind="empty" icon="calendar-check" title={copy.windowsEmpty} className="mt-group" />
       ) : (
         <ul className="mt-group flex flex-col gap-row">
           {windows.map((w) => (

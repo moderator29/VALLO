@@ -1,5 +1,6 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -100,7 +101,7 @@ export function FirmDesk({
           </h2>
         </div>
         {listings.length === 0 ? (
-          <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.listingsEmpty}</p>
+          <State compact kind="empty" icon="keys-home" title={copy.listingsEmpty} className="mt-group" />
         ) : (
           <ul className="mt-group flex flex-col gap-row">
             {listings.map((listing) => (

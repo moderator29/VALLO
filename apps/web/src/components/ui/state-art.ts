@@ -13,6 +13,9 @@ import type { Icon3DName } from "./icon-3d";
  */
 export const STATE_ART: Partial<Record<BrandIconName, Icon3DName>> = {
   "bell-badge": "bell",
+  chat: "local-talks",
+  "chat-duo": "local-talks",
+  "chat-ring": "local-talks",
   "search-ring": "search",
   "listing-search": "search",
   "home-search": "search",

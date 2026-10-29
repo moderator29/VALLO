@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getDictionary } from "@vallo/i18n";
 import { callMarkerView } from "@/lib/calls/screen";
-import { callPillDuration, callPillSentence } from "./call-pill-words";
+import { callPillDuration, callPillSentence, callRowText } from "./call-pill-words";
 
 /**
  * THE WORDS OF A CALL PILL: who called and what became of it, in plain
@@ -75,8 +75,22 @@ describe("the call pill sentence", () => {
   });
 });
 
+describe("the one-line call row", () => {
+  const row = (body: string, mine: boolean) => callRowText(callMarkerView({ body, mine })!, en);
+  it("says the kind and what became of it, with no name", () => {
+    expect(row("Voice call, missed", false)).toBe("Missed voice call");
+    expect(row("Video call, cancelled", true)).toBe("Video call cancelled");
+    expect(row("Video call, declined", true)).toBe("Video call declined");
+    expect(row("Voice call, missed", true)).toBe("Voice call, no answer");
+    expect(row("Voice call, ended", true)).toBe("Voice call ended");
+    expect(row("Voice call, 21 min 9 s", false)).toBe("Voice call ended, 21 min");
+  });
+});
+
 describe("the call pill in every language", () => {
-  const keys = Object.keys(en) as (keyof typeof en)[];
+  /* The one-line thread row's words are English until translated (other locales fall back). */
+  const englishForNow = new Set(["rowMissed", "rowEnded", "rowEndedFor", "rowOutcome", "rowOutcomeSoft", "callBackShort"]);
+  const keys = (Object.keys(en) as (keyof typeof en)[]).filter((k) => !englishForNow.has(k));
 
   it.each(["yo", "ha", "ig"] as const)("%s has every pill word, translated rather than copied from English", (locale) => {
     const words = getDictionary(locale).chatPolish.calls;

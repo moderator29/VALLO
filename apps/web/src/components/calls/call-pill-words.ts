@@ -62,3 +62,22 @@ export function callPillSentence(view: CallMarkerView, name: string, w: CallPill
   if (view.outcome === "declined") return fill(w.youDeclined, who);
   return fill(w.callFrom, { ...who, outcome });
 }
+
+/**
+ * The visible line of a call row in the thread, the way X draws one: no name,
+ * the kind first and then what became of it ("Voice call ended, 12 min",
+ * "Missed video call", "Video call cancelled"). The sentence with the name
+ * (`callPillSentence`) stays as the row's spoken label.
+ */
+export function callRowText(view: CallMarkerView, w: CallPillWords): string {
+  const nouns = callNouns(view, w);
+  if (view.missed) return fill(w.rowMissed, nouns);
+  if (view.outcome === "talked") {
+    const duration = callPillDuration(view.seconds, w);
+    return duration ? fill(w.rowEndedFor, { ...nouns, duration }) : fill(w.rowEnded, nouns);
+  }
+  const outcome = outcomeWord(view, w);
+  if (outcome === null) return fill(w.rowEnded, nouns);
+  const soft = view.outcome === "missed" || view.outcome === "busy" || view.outcome === "failed" || view.outcome === "expired";
+  return fill(soft ? w.rowOutcomeSoft : w.rowOutcome, { ...nouns, outcome });
+}

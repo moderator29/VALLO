@@ -6914,6 +6914,18 @@ export const en = {
       minutes: "{n} min",
       seconds: "{n} s",
       callBack: "Call {name} back, {call}",
+      /**
+       * The quiet one-line row in the thread (`callRowText`): no name, the
+       * kind first, then what became of it. `{outcome}` is one of the
+       * `outcome*` words above. English until translated; other locales
+       * fall back.
+       */
+      rowMissed: "Missed {call}",
+      rowEnded: "{Call} ended",
+      rowEndedFor: "{Call} ended, {duration}",
+      rowOutcome: "{Call} {outcome}",
+      rowOutcomeSoft: "{Call}, {outcome}",
+      callBackShort: "Call back",
     },
     viewer: {
       label: "Photos and videos in this chat",
