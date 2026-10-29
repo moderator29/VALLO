@@ -63,6 +63,16 @@ export function canPickOutput(): boolean {
  * the rest), which `mediaErrorKind` turns into the recovery screen.
  */
 export async function captureLocal(wantVideo: boolean): Promise<LocalTrack[]> {
+  /* Safari and WKWebView refuse the microphone ("AudioSession category is not
+     compatible with audio capture") while the page's audio session is still
+     playback-only or ambient, which the ring leaves it as. A call plays and
+     records, so say so before asking for the devices. */
+  try {
+    const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+    if (session) session.type = "play-and-record";
+  } catch {
+    /* Read-only on some builds. */
+  }
   return createLocalTracks({
     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
     video: wantVideo ? { facingMode: "user", resolution: VideoPresets.h540.resolution } : false,
