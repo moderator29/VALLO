@@ -247,6 +247,9 @@ export function snapshotFromRow(raw: unknown): CallSnapshot | null {
     durationSeconds: num(r.duration_seconds),
     serverNow: str(r.server_now) ?? new Date().toISOString(),
   };
+  const avatar = str(r.other_avatar_url);
+  if (avatar) snapshot.otherAvatarUrl = avatar;
+  if (r.other_ringing === true) snapshot.otherRinging = true;
   if (r.glare === true) snapshot.glare = true;
   if (r.replayed === true) snapshot.replayed = true;
   if (r.presence_check_due === true) snapshot.presenceCheckDue = true;

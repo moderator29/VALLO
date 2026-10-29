@@ -1419,10 +1419,10 @@ export function ThreadView({
                   !wide && photos.length > 0 ? " nf-msg__stack--media" : ""
                 }`}
               >
-                {!m.mine && !continues && (
+                {/* A direct message names nobody above a bubble: the header already says who it is (X does the same). Only the role tag, when there is one, stays. */}
+                {!m.mine && !continues && tags && (
                   <p className="nf-msg__meta">
-                    <span className="nf-msg__sender">{counterpartName}</span>
-                    {tags && <span className="nf-role-tag">{tags.theirs}</span>}
+                    <span className="nf-role-tag">{tags.theirs}</span>
                   </p>
                 )}
 

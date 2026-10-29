@@ -18,11 +18,13 @@ const RING_GAIN = 0.3;
  * resumes the context, so a person who reaches for the phone hears it at once
  * even where the page could not start sound by itself.
  *
- * Silent means silent. Where the browser exposes the audio session (Safari
- * and WKWebView, `navigator.audioSession`), the ring is declared "ambient",
- * which is the category the iPhone's ring/silent switch mutes. Elsewhere the
- * page plays at the media volume the person set. A browser that blocks
- * audio until a tap simply rings without sound: the screen is the ring.
+ * The ring never touches `navigator.audioSession`. It once declared the
+ * session "ambient" so the silent switch would mute it, and ambient cannot
+ * record: the next microphone request failed with "AudioSession category is
+ * not compatible with audio capture" and a call could not be answered
+ * (29 October 2026). The page plays at the media volume the person set; a
+ * browser that blocks audio until a tap simply rings without sound: the
+ * screen is the ring.
  *
  * Vibration where the device has it (Android), through `lib/ui/feedback.ts`
  * like every other buzz, and not under reduced motion, which asks for less
@@ -33,14 +35,6 @@ export function startRing(opts: { sound?: boolean; vibrate?: boolean } = {}): ()
   if (typeof window === "undefined") return () => {};
   let stopped = false;
   let ctx: AudioContext | null = null;
-
-  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
-  const previousType = session?.type;
-  try {
-    if (session) session.type = "ambient";
-  } catch {
-    /* Read-only on some builds. */
-  }
 
   const tone = (at: number, freq: number) => {
     if (!ctx) return;
@@ -90,12 +84,6 @@ export function startRing(opts: { sound?: boolean; vibrate?: boolean } = {}): ()
     for (const name of events) document.removeEventListener(name, resume, true);
     window.clearInterval(timer);
     ringBuzz(false);
-    /* Ambient cannot record: hand the session back so the mic can open. */
-    try {
-      if (session && previousType !== undefined) session.type = previousType === "ambient" ? "auto" : previousType;
-    } catch {
-      /* Read-only on some builds. */
-    }
     void ctx?.close().catch(() => undefined);
     ctx = null;
   };

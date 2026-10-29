@@ -6,7 +6,7 @@ import { acceptCall, declineCall } from "@/lib/calls/actions";
 import { callPhase, durationWords, endReasonWords } from "@/lib/calls/lifecycle";
 import { returnHref, ringSecondsLeft } from "@/lib/calls/screen";
 import type { CallKind } from "@/lib/calls/types";
-import { dismissCall, mergeSnapshot, setAnsweredWith, useCallStore, type ActiveCall } from "./call-store";
+import { dismissCall, markLocallyOver, mergeSnapshot, setAnsweredWith, setCallNotice, useCallStore, type ActiveCall } from "./call-store";
 import { placeCall } from "./place-call";
 import { startRing } from "./ring";
 import { useCallPulse, useServerClock } from "./use-call-pulse";
@@ -43,6 +43,7 @@ export function CallSurface({ copy }: { copy: CallsCopy }) {
         <OutgoingView
           copy={copy}
           name={active.snapshot.otherName ?? ""}
+          photo={active.snapshot.otherAvatarUrl ?? null}
           kind={active.snapshot.kind}
           context={active.context.line}
           status={copy.connecting.title}
@@ -61,54 +62,57 @@ export function IncomingCallScreen({ active, copy }: { active: ActiveCall; copy:
   const beat = useCallPulse(s.id);
   const now = useServerClock(s, active.offsetMs, beat);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const error = active.notice;
 
   useEffect(() => startRing(), []);
   useEffect(() => {
     void loadStage().catch(() => undefined);
   }, []);
 
+  /* INSTANT (29 October 2026, the founder: "less than half a second"). The
+     screen changes on the tap itself: the answer goes to the server in the
+     background while the stage already opens the microphone and shows
+     "Connecting". If the server refuses, the incoming screen comes back with
+     the reason. */
   const accept = useCallback(
-    async (as: CallKind) => {
-      setBusy(true);
-      setError(null);
-      const answer = await acceptCall({ callId: s.id }).catch(() => null);
-      if (answer?.ok) {
-        setAnsweredWith(as);
-        mergeSnapshot(answer.data);
-        return;
-      }
-      setError(answer ? answer.error : copy.connecting.body);
-      setBusy(false);
-      void beat();
+    (as: CallKind) => {
+      setCallNotice(null);
+      setAnsweredWith(as);
+      void acceptCall({ callId: s.id })
+        .catch(() => null)
+        .then((answer) => {
+          if (answer?.ok) {
+            mergeSnapshot(answer.data);
+            return;
+          }
+          setAnsweredWith(null);
+          setCallNotice(answer ? answer.error : copy.connecting.body);
+          void beat();
+        });
     },
     [s.id, beat, copy.connecting.body],
   );
 
-  const decline = useCallback(async () => {
+  const decline = useCallback(() => {
     setBusy(true);
-    const answer = await declineCall({ callId: s.id }).catch(() => null);
-    if (answer?.ok) {
-      dismissCall();
-      return;
-    }
-    setError(answer ? answer.error : copy.connecting.body);
-    setBusy(false);
-    void beat();
-  }, [s.id, beat, copy.connecting.body]);
+    markLocallyOver(s.id);
+    dismissCall();
+    void declineCall({ callId: s.id }).catch(() => null);
+  }, [s.id]);
 
   return (
     <IncomingCallView
       copy={copy}
       name={s.otherName ?? ""}
+      photo={s.otherAvatarUrl ?? null}
       kind={s.kind}
       review={s.purpose === "ADMIN_REVIEW"}
       context={active.context.line}
       secondsLeft={ringSecondsLeft(s, now)}
       busy={busy}
       error={error}
-      onAccept={(as) => void accept(as)}
-      onDecline={() => void decline()}
+      onAccept={(as) => accept(as)}
+      onDecline={() => decline()}
     />
   );
 }
@@ -134,6 +138,7 @@ export function EndedScreen({ active, copy }: { active: ActiveCall; copy: CallsC
     <EndedView
       copy={copy}
       name={s.otherName ?? ""}
+      photo={s.otherAvatarUrl ?? null}
       kind={s.kind}
       words={endReasonWords(s)}
       duration={s.state === "ENDED" && s.connectedAt ? durationWords(s.durationSeconds) : ""}
@@ -156,6 +161,7 @@ function RecoveryScreen({ active, copy }: { active: ActiveCall; copy: CallsCopy 
     <RecoveryView
       copy={copy}
       name={s.otherName ?? undefined}
+      photo={s.otherAvatarUrl ?? null}
       title={missed ? copy.recovery.missedTitle : copy.recovery.endedTitle}
       body={endReasonWords(s)}
       primaryLabel={s.reviewId ? copy.ended.backReview : copy.ended.back}

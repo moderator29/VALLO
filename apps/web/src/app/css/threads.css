@@ -165,6 +165,19 @@
     gap: var(--nf-gap-inline-tight);
     flex-shrink: 0;
   }
+  /* X's header: the call and the options are bare glyphs, not plates (29
+     October 2026, the founder: "reduce them to be small how X does it"). The
+     tap target stays 44px; only what is drawn gets quieter. */
+  .nf-thread__actions .nf-btn--icon {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--nf-brand-quiet);
+  }
+  .nf-thread__actions .nf-thread__call svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 
   /* -------------------------------------------------------- the scroller */
 

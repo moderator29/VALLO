@@ -325,6 +325,28 @@ describe("an incoming call's ring push (27 October 2026)", () => {
     expect(ring).toMatchObject({ action: "send", payload: { call: true, ttlSeconds: 45 } });
   });
 
+  it("a missed call is a quiet row on its own tag, never the calls channel", () => {
+    const missed = decide({
+      settings: {},
+      now,
+      notification: queued(
+        "/messages/11111111-1111-1111-1111-111111111111?missed=22222222-2222-2222-2222-222222222222",
+        "2026-10-29T10:00:00Z",
+      ),
+    });
+    expect(missed).toMatchObject({
+      action: "send",
+      payload: {
+        quiet: true,
+        tag: "vallo-missed-call",
+        href: "/messages/11111111-1111-1111-1111-111111111111?missed=22222222-2222-2222-2222-222222222222",
+      },
+    });
+    if (missed.action !== "send") throw new Error("expected send");
+    expect(missed.payload.call).toBeUndefined();
+    expect(missed.payload.ttlSeconds).toBeUndefined();
+  });
+
   it("an ordinary message keeps the long default and the ordinary channel", () => {
     const plain = decide({
       settings: {},

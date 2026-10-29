@@ -44,6 +44,8 @@ export type ActiveCall = {
    * never on page load.
    */
   resume: boolean;
+  /** A sentence to show on the incoming screen: the answer did not go through. */
+  notice: string | null;
 };
 
 type State = {
@@ -82,6 +84,9 @@ export function showCall(
 ): boolean {
   const current = state.active;
   if (current && current.snapshot.id !== snapshot.id && !current.recovery && !isOver(current.snapshot)) return false;
+  /* A call this device just hung up on is never drawn again by a late poll or
+     push while the server is still catching up with the hang-up. */
+  if (isLocallyOver(snapshot.id) && !isOver(snapshot) && !opts.recovery) return false;
   const merged = current && current.snapshot.id === snapshot.id ? newerSnapshot(current.snapshot, snapshot) : snapshot;
   const context =
     opts.context ?? (snapshot.conversationId ? state.contexts[snapshot.conversationId] : undefined) ?? current?.context ?? {};
@@ -95,8 +100,28 @@ export function showCall(
       answeredWith: opts.answeredWith ?? (current && current.snapshot.id === snapshot.id ? current.answeredWith : null),
       recovery: opts.recovery ?? null,
       resume: opts.resume ?? false,
+      notice: null,
     },
   });
+  return true;
+}
+
+/** Calls this device hung up on a moment ago, by id and expiry (ms). */
+const locallyOver = new Map<string, number>();
+const LOCALLY_OVER_MS = 60_000;
+
+/** The person hung up here: answer instantly, and ignore stale "still ringing" news for a minute. */
+export function markLocallyOver(callId: string): void {
+  locallyOver.set(callId, Date.now() + LOCALLY_OVER_MS);
+}
+
+export function isLocallyOver(callId: string): boolean {
+  const until = locallyOver.get(callId);
+  if (until === undefined) return false;
+  if (until < Date.now()) {
+    locallyOver.delete(callId);
+    return false;
+  }
   return true;
 }
 
@@ -116,9 +141,15 @@ export function mergeSnapshot(snapshot: CallSnapshot): void {
   });
 }
 
-export function setAnsweredWith(kind: CallKind): void {
+export function setAnsweredWith(kind: CallKind | null): void {
   if (!state.active) return;
   set({ ...state, active: { ...state.active, answeredWith: kind } });
+}
+
+/** The incoming screen's one-line notice (an answer that did not go through). */
+export function setCallNotice(notice: string | null): void {
+  if (!state.active) return;
+  set({ ...state, active: { ...state.active, notice } });
 }
 
 /** The person tapped Rejoin: media may now be asked for. */
@@ -150,5 +181,6 @@ export function registerContext(conversationId: string, context: CallContext): (
 
 /** Tests and previews only: start from nothing. */
 export function resetCallStore(): void {
+  locallyOver.clear();
   set({ active: null, gone: false, contexts: {} });
 }
