@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { pinTenancyMessage } from "@/lib/tenancy/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-47. Pin a message from the thread with the other party to the tenancy,
@@ -23,7 +24,7 @@ export function PinMessages({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   if (candidates.length === 0) return null;
   if (!open) {

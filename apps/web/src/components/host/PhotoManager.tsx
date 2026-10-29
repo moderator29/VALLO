@@ -1,7 +1,7 @@
 "use client";
 
 import { uploadToStorage } from "@/lib/media/upload";
-import { useId, useRef, useState, useTransition } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/host/photos";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { useHostPageCopy } from "./host-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * AN OWNER'S PHOTOGRAPHS, ONE SURFACE FOR BOTH SPINES.
@@ -79,7 +80,7 @@ export function PhotoManager({
   const input = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [removing, startRemoving] = useTransition();
+  const [removing, startRemoving] = useSafeTransition();
 
   const full = photos.length >= MAX_BUSINESS_PHOTOS;
 

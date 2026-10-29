@@ -57,7 +57,7 @@ const entry = `
       <div data-testid={testId} className={"nf-msg" + (mine ? " nf-msg--mine" : "")}>
         <span className="nf-msg__avatar">A</span>
         <div className="nf-msg__stack nf-msg__stack--media">
-          {!mine ? <p className="nf-msg__meta"><span className="nf-msg__sender">A long display name here</span><span>10:42</span></p> : null}
+          {!mine ? <p className="nf-msg__meta"><span className="nf-msg__sender">A long display name here</span></p> : null}
           <BubbleGestures
             side={mine ? "mine" : "theirs"}
             className={"nf-bubble " + (mine ? "nf-bubble--mine" : "nf-bubble--theirs") + " nf-bubble--media" + (caption ? "" : " nf-bubble--photos")}
@@ -66,8 +66,8 @@ const entry = `
           >
             <PhotoGroup photos={photos} alt="Photo you attached" />
             {caption ? <p className="nf-bubble__body">{caption}</p> : null}
-            <p className="nf-bubble__foot"><span>10:42</span></p>
           </BubbleGestures>
+          <p className="nf-msg__status"><span>10:42</span></p>
         </div>
       </div>
     );

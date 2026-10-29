@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
@@ -9,6 +9,7 @@ import { acceptRoomRequest, declineRoomRequest } from "@/lib/host/room-booking-a
 import { bookingAcceptedPreview } from "@/lib/email/everyone-gets";
 import type { Dictionary } from "@vallo/i18n/core";
 import { HOST_ROOM_GUEST_PAYS_NEXT, HOST_ROOM_TOTAL_LABEL, PAYOUT_ANSWER } from "@/lib/money/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** What the confirm panel names: the request as the row already shows it. */
 export type RoomRequestSummary = {
@@ -52,7 +53,7 @@ export function RoomRequestAnswer({
   const [open, setOpen] = useState<"accept" | "decline" | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   const run = (act: () => Promise<{ ok: boolean; error?: string }>) =>

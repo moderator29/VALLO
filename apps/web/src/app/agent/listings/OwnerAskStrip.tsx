@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { answerOwnerHeartbeat } from "@/lib/landlord/close-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-31 FOR A LISTING ITS OWNER PUT UP: "Is this still available?"
@@ -26,7 +27,7 @@ export function OwnerAskStrip({
   onLet: () => void;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [state, setState] = useState<"ask" | "done" | "failed">("ask");
 
   if (state === "done") {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import Link from "next/link";
@@ -23,6 +23,7 @@ import { TextField } from "@/components/ui/Field";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { previewLine } from "@/components/app/messages/preview";
 import { type BadgeTier } from "@/lib/trust/badge-tier";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The Inbox.
@@ -315,12 +316,12 @@ export function Inbox({
   const [side, setSide] = useState<Side>(initialSide);
   const [view, setView] = useState<View>("recent");
   const [archiveNote, setArchiveNote] = useState<string | null>(null);
-  const [archiving, startArchiving] = useTransition();
+  const [archiving, startArchiving] = useSafeTransition();
   /* Optimistic: an archived row leaves Recent the moment it is tapped. */
   const [archivedLocal, setArchivedLocal] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState("");
   const [markError, setMarkError] = useState<string | null>(null);
-  const [marking, startMarking] = useTransition();
+  const [marking, startMarking] = useSafeTransition();
 
   /*
    * The dictionary is read here rather than passed, which is the LAST RESORT

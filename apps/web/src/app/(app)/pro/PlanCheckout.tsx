@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, useTransition } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -16,6 +16,7 @@ import type { PlanOffer, SubscriptionsCopy } from "@/lib/subscriptions/state";
 import { fill, longDate, money } from "./plan-format";
 import type { PaidPlan } from "./pro-state";
 import { nativePlatform } from "@/lib/native/platform";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /* Founder, 8 October 2026 (option A): the iPhone app shows no trial and no
    checkout, so App Review never meets a purchase outside Apple's in-app
@@ -64,7 +65,7 @@ export function PlanCheckout({
   signInHref: string;
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [reviewing, setReviewing] = useState(false);
   const [opened, setOpened] = useState<Opened | null>(null);
   const [error, setError] = useState<string | null>(null);

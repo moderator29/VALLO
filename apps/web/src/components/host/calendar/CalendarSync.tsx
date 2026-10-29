@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { useHostPageCopy } from "../host-copy";
@@ -19,6 +19,7 @@ import {
 import { FEED_SOURCES, type FeedSource } from "@/lib/host/ical";
 import type { CalendarRoom } from "@/lib/host/rate-calendar";
 import type { CalendarImport, SyncState } from "@/lib/host/rate-calendar-queries";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * CALENDAR SYNC FOR ONE ROOM TYPE (C2, 30 September 2026).
@@ -62,7 +63,7 @@ export function CalendarSync({
 }) {
   const router = useRouter();
   const w = useHostPageCopy().calendarUi;
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [source, setSource] = useState<FeedSource>("airbnb");
   const [url, setUrl] = useState("");

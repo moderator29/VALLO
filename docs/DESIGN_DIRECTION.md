@@ -306,3 +306,33 @@ A surface closes only when ALL of these hold:
    governing image.
 6. `npx tsc --noEmit -p apps/web` and the narrow tests pass before the
    lead commits.
+
+## 5. The responsive system (27 October 2026)
+
+One system, measured on the product rather than invented:
+
+| Name | Width | Shell | Content |
+|---|---|---|---|
+| Phone | under 640 px | Floating dock, hamburger drawer, one column | Stacks and swipe decks are allowed |
+| Tablet | 640 to 1023 px | The phone shell (dock and drawer) | Grids replace stacks: four doors across, 2 across cards |
+| Laptop | 1024 to 1439 px | Sticky left rail (`app/side-nav.css`, from `64rem`) and a top account bar, no dock | 3 across cards, master detail where a list opens a thread |
+| Desktop | 1440 px and up | The same rail | The content column keeps a maximum width (about 1380 px at 1920) and is centred, so it does not stretch |
+
+Rules that follow, each checked in the sweep:
+
+1. **A swipe deck is a phone control.** From 640 px the same items are a grid
+   (`StaysFeatured`). One card in a wide empty row is a defect.
+2. **A picture never shows the browser's broken glyph.** A network image sits in
+   a fixed aspect box with a fallback (`Icon3D` swaps to a glyph plate).
+3. **Native chrome is not drawn on desktop.** No status bar, no round
+   phone-only controls; hover and keyboard states exist and focus is visible.
+4. **A biometric is offered only where the device has one**, worded for that
+   device (`lib/security/device-lock.ts`).
+5. **No page scrolls sideways at any of the five widths.** The check that can
+   fail here is `apps/web/tests/_overflow.mjs`, run at 390, 820, 1180, 1440 and
+   1920 in light and dark by `apps/web/scripts/design/responsive/sweep.mjs`
+   (`docs/PAGE_SWEEP.md`).
+
+Left rail and top bar already carry the desktop navigation; do not add a second
+one. Where a screen is still a phone page on a wide window (signed-in
+lists and sheets), the fix is a grid or a master detail, not a wider phone.

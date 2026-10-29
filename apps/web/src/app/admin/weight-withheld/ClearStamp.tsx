@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { clearWeightWithheld } from "@/lib/admin/desk-reads/weight-withheld-actions";
 import { fill } from "../_components/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type ClearCopy = {
   clearAction: string;
@@ -30,7 +31,7 @@ export function ClearStamp({ kind, subject, copy }: { kind: "review" | "report";
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (done) {
     return (

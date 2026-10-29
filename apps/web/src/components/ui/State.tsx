@@ -83,6 +83,13 @@ export type StateProps = {
    * coming, drawn in place of the three default lines.
    */
   children?: ReactNode;
+  /**
+   * A quiet empty inside a card or a section (a short list with nothing in
+   * it yet): the 36px plate and the words in one left-aligned row, no
+   * object, no centring. Where a screen is the empty (a whole list or page)
+   * leave it off and the full kit draws. One way, two sizes.
+   */
+  compact?: boolean;
   className?: string;
   "data-testid"?: string;
 };
@@ -97,6 +104,7 @@ export function State({
   secondary,
   action,
   footnote,
+  compact,
   className,
   children,
   "data-testid": testId,
@@ -125,6 +133,36 @@ export function State({
     );
   }
 
+  if (compact) {
+    return (
+      <div
+        data-testid={testId}
+        data-state-kind={kind}
+        data-state-size="compact"
+        role={role}
+        className={`flex items-start gap-md py-sm ${className ?? ""}`}
+      >
+        <IconPlate size="sm" tone={STATE_TONE[kind]}>
+          <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={20} />
+        </IconPlate>
+        <div className="min-w-0 flex-1 self-center">
+          {/* Words only (no `body`): the one sentence is the state, quiet. */}
+          <p className={body ? "nf-body font-semibold text-[var(--nf-content-primary)]" : "nf-body-sm text-[var(--nf-content-secondary)]"}>
+            {title}
+          </p>
+          {body && <p className="nf-body-sm text-[var(--nf-content-muted)]">{body}</p>}
+          {primary ? (
+            <div className="mt-sm">
+              <EmptyActions primary={primary} {...(secondary ? { secondary } : {})} />
+            </div>
+          ) : (
+            action && <div className="mt-sm">{action}</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid={testId}
@@ -136,17 +174,19 @@ export function State({
           lean line glyph on the kind's flat plate. A state that names a
           glass object draws that object's line twin (`glass-to-line.ts`);
           the glass objects no longer stand in a state. */}
-      {object ? (
-        /* The founder's 3D object (30 September): an empty or done state
-           that names one draws it, 88px in a fixed box (lazy, no shift). */
-        <span className="grid size-[5.5rem] place-items-center" data-art={object}>
+      {/* ONE STICKER BOX. The 3D object and the line-glyph plate both stand in
+          the same 5.5rem square, centred, so the title starts at the same
+          height whichever one a state draws (an audit found 88px objects and
+          56px plates side by side with titles at different heights). */}
+      <span className="grid size-[5.5rem] place-items-center" data-art={object} aria-hidden="true">
+        {object ? (
           <Icon3D name={object} size={88} />
-        </span>
-      ) : (
-        <IconPlate size="lg" tone={STATE_TONE[kind]}>
-          <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={24} />
-        </IconPlate>
-      )}
+        ) : (
+          <IconPlate size="lg" tone={STATE_TONE[kind]}>
+            <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={24} />
+          </IconPlate>
+        )}
+      </span>
       {/* `balance` stops a centred two-line title leaving a one-word orphan. */}
       <p className={`mt-block ${STATE_TITLE_CLASS} [text-wrap:balance]`}>{title}</p>
       {body && <p className={`mt-inline max-w-[42ch] ${STATE_BODY_CLASS}`}>{body}</p>}

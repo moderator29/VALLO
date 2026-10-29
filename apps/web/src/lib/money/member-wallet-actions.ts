@@ -9,9 +9,8 @@ import { guardMoney } from "../security/money-limits";
 import { accountNumberSchema, sameAccountName } from "../payments/bank-resolve";
 import { needsOtp } from "../payments/providers/payluk-client";
 import { memberWalletRailLive } from "../payments/providers";
+import { provisionWallet, type OpenResult } from "./wallet-provision";
 import type { HostedCollection, RailFailure } from "../payments/provider";
-import { recordMoneyAudit } from "./audit";
-import type { AdminClient } from "../supabase/service";
 import { parseNairaToKobo } from "./amount";
 import { REFUSAL } from "./balance-copy";
 import {
@@ -22,13 +21,7 @@ import {
   lastFour,
   movementReference,
   normalisePhone,
-  onboardingStateFor,
-  openFailureKind,
-  profileGaps,
   withdrawalBreakdown,
-  type OnboardingState,
-  type OpenFailure,
-  type ProfileGap,
   type WithdrawalBreakdown,
 } from "./funds";
 import {
@@ -38,7 +31,6 @@ import {
   loadMovement,
   movementView,
   observe,
-  profileFor,
   readBack,
   reportedBalance,
   walletProvider,
@@ -110,86 +102,15 @@ function amountFrom(raw: string, minimum: number): { ok: true; minor: number } |
 
 /* ---------------------------------------------------------- onboarding */
 
-export type OpenResult = { state: OnboardingState; gaps: ProfileGap[]; failure?: OpenFailure | null };
-
 /**
- * Open the member's balance at the provider (founder sections 8 and 9).
- * Looks up before it creates, every time, so a create that timed out is
- * found on the next try rather than made twice.
+ * Open the member's balance at the provider (founder sections 8 and 9). The
+ * work is `provisionWallet`, shared with the moment a phone number is
+ * confirmed, where the wallet now opens by itself.
  */
 export async function openBalanceAccount(): Promise<ActionResult<OpenResult>> {
   const session = await resolveSession();
   if (session.state !== "signed-in") return fail("Sign in to continue.");
-  if ((await memberWalletRailLive()) !== "live") return fail(REFUSAL.notLive);
-  const db = adminDb();
-  const provider = walletProvider();
-  if (!db || !provider) return fail(REFUSAL.notLive);
-  const verdict = await guardMoney("balanceSetup", session.user.id);
-  if (!verdict.allowed) return fail(verdict.message);
-
-  const userId = session.user.id;
-  const profile = await profileFor(db, session.user);
-  const gaps = profileGaps(profile);
-  const existing = await loadAccount(db, userId);
-  if (existing?.status === "ACTIVE") return ok({ state: "ACTIVE", gaps: [] });
-  if (gaps.length > 0) {
-    await db
-      .from("financial_provider_accounts")
-      .upsert({ user_id: userId, provider: "payluk", status: "VERIFICATION_REQUIRED", status_observed_at: new Date().toISOString() }, { onConflict: "user_id,provider" });
-    return ok({ state: "VERIFICATION_REQUIRED", gaps });
-  }
-
-  const save = async (state: OnboardingState, customerId: string | null, providerStatus: string | null, detail?: string) => {
-    await db.from("financial_provider_accounts").upsert(
-      {
-        user_id: userId,
-        provider: "payluk",
-        provider_customer_id: customerId,
-        status: state,
-        provider_status: providerStatus,
-        status_observed_at: new Date().toISOString(),
-        ...(detail ? { metadata: { last_failure: detail } } : {}),
-      },
-      { onConflict: "user_id,provider" },
-    );
-  };
-
-  const email = profile.email!.trim().toLowerCase();
-  let customer = await provider.findCustomer({ email });
-  if (customer.ok && customer.value === null) {
-    await save("PENDING", null, null);
-    const created = await provider.createCustomer({
-      firstName: profile.firstName!.trim(),
-      lastName: profile.lastName!.trim(),
-      email,
-      phone: normalisePhone(profile.phone ?? "")!,
-      /* No countryId: Payluk's live API refuses "NG" (it casts the field to its
-         own internal id, despite the docs), and an omitted country inherits the
-         merchant account's, which is Nigeria (create-merchant-customer). Seen
-         live 9 October 2026: "Cast to ObjectId failed for value NG". */
-    });
-    if (!created.ok) {
-      /* A refusal is a real answer; anything else is not, and the next try looks up first. */
-      if (created.kind === "refused") {
-        await save("FAILED", null, null, created.detail);
-        return ok({ state: "FAILED", gaps: [], failure: openFailureKind(created.detail) });
-      }
-      return ok({ state: "PENDING", gaps: [] });
-    }
-    customer = { ok: true, value: created.value };
-  }
-  if (!customer.ok) return fail(refusalFor(customer));
-  const c = customer.value!;
-  const state = onboardingStateFor({ account: null, customer: c, gaps: [] });
-  await save(state, c.customerId, c.status);
-  await recordMoneyAudit(db as unknown as AdminClient, {
-    actor: { kind: "user", userId },
-    action: "balance.account.opened",
-    reference: null,
-    subjectUserId: userId,
-    outcome: state.toLowerCase(),
-  });
-  return ok({ state, gaps: [] });
+  return provisionWallet(session.user);
 }
 
 /* --------------------------------------------------------------- banks */

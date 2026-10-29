@@ -641,102 +641,78 @@
     outline-offset: var(--nf-focus-ring-offset);
   }
 
-  /* ------------------------------------------- a call, as a thread pill
-     A compact system row centred in the thread (`CallHistoryRow`): glyph,
-     one line, the time, and a call-back button. The visible circle on the
-     button is 28px; the button itself is the full 44px target, pulled back
-     into the pill with negative margins so the pill stays slim. */
+  /* ------------------------------------------ a call, as a thread row
+     A quiet centred line (`CallHistoryRow`), the way X draws one: a small
+     glyph, muted text, the time, and "Call back" as a plain text action. No
+     box, no pill, no filled button. Only a missed call takes the error ink,
+     on the text and the glyph. The call-back button is a full 44px tall
+     target, pulled back with a negative margin so the row stays one slim line. */
   .nf-call-event-row {
     display: flex;
     justify-content: center;
     min-width: 0;
-    margin-block: var(--nf-space-xs);
+    margin-block: var(--nf-space-2xs);
     padding-inline: var(--nf-space-xs);
   }
   .nf-call-event {
     display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--nf-space-xs);
+    justify-content: center;
+    column-gap: var(--nf-space-2xs);
     min-width: 0;
-    max-width: min(100%, 24rem);
-    padding: var(--nf-space-2xs) var(--nf-space-sm);
-    padding-inline-end: var(--nf-space-xs);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
-    border-radius: var(--nf-radius-xl);
-    background: var(--nf-surface-elevated);
-    color: var(--nf-content-secondary);
-  }
-  .nf-call-event:not(:has(.nf-call-event__back)) {
-    padding-inline-end: var(--nf-space-sm);
+    max-width: min(100%, 26rem);
+    font-size: var(--nf-text-caption);
+    line-height: 1.35;
+    color: var(--nf-content-muted);
   }
   .nf-call-event__glyph {
     display: grid;
     place-items: center;
     flex: none;
-    color: var(--nf-brand-quiet);
+    color: inherit;
   }
   .nf-call-event[data-missed] {
-    border-color: color-mix(in oklab, var(--nf-state-error) 28%, var(--nf-border-subtle));
-    background: var(--nf-state-error-surface);
-  }
-  .nf-call-event[data-missed] .nf-call-event__glyph,
-  .nf-call-event[data-missed] .nf-call-event__line {
     color: var(--nf-state-error);
   }
   .nf-call-event__text {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     align-items: baseline;
-    column-gap: var(--nf-space-xs);
+    column-gap: var(--nf-space-2xs);
     min-width: 0;
-    font-size: var(--nf-text-caption);
-    line-height: 1.35;
-    text-wrap: balance;
   }
   .nf-call-event__line {
     min-width: 0;
-    font-weight: 600;
     overflow-wrap: anywhere;
-    color: var(--nf-content-primary);
+    color: inherit;
   }
   .nf-call-event__time {
     flex: none;
-    color: var(--nf-content-muted);
+    color: inherit;
     font-variant-numeric: tabular-nums;
   }
   .nf-call-event__back {
-    display: grid;
-    place-items: center;
+    display: inline-flex;
+    align-items: center;
     flex: none;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin-block: -0.625rem;
-    margin-inline: calc(-1 * var(--nf-space-2xs)) calc(-1 * var(--nf-space-2xs));
-    padding: 0;
+    min-height: 2.75rem;
+    margin-block: -0.75rem;
+    padding: 0 var(--nf-space-2xs);
     border: 0;
     background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--nf-brand-primary);
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .nf-call-event__go {
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: var(--nf-radius-circle);
-    background: var(--nf-brand-primary-soft);
-    color: var(--nf-brand-quiet);
-    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  .nf-call-event[data-missed] .nf-call-event__go {
-    background: var(--nf-surface-elevated);
+  .nf-call-event[data-missed] .nf-call-event__back {
     color: var(--nf-state-error);
   }
-  .nf-call-event__back:hover .nf-call-event__go {
-    background: var(--nf-brand-tint-1);
-  }
-  .nf-call-event__back:active .nf-call-event__go {
-    transform: scale(0.94);
+  .nf-call-event__back:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
   .nf-call-event__back:disabled {
     opacity: 0.5;
@@ -744,8 +720,8 @@
   }
   .nf-call-event__back:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: calc(-1 * var(--nf-space-2xs));
-    border-radius: var(--nf-radius-circle);
+    outline-offset: calc(-1 * var(--nf-space-3xs));
+    border-radius: var(--nf-radius-xs);
   }
 
   /* -------------------------------------------------- review call pages */

@@ -4610,7 +4610,7 @@ export const yo: Dictionary = withFallback({
       body: "Báńkì ẹni tó sanwó dá ìsanwó káàdì kan tí o gbà padà. Alábàáṣiṣẹ́ ìsanwó gbà á padà lọ́wọ́ Vallo, nítorí náà àkọọ́lẹ̀ rẹ jẹ {amount}.",
       bodyNoAmount: "Báńkì ẹni tó sanwó dá ìsanwó káàdì kan tí o gbà padà. Alábàáṣiṣẹ́ ìsanwó gbà á padà lọ́wọ́ Vallo, nítorí náà àkọọ́lẹ̀ rẹ jẹ owó náà.",
       meansTitle: "Ohun tó túmọ̀ sí",
-      means: "Níwọ̀n ìgbà tí owó náà bá ṣì wà lọ́rùn rẹ, Vallo yóò dá ìtúsílẹ̀ àwọn ìsanwó tí Payluk ń dì mú fún ọ dúró, yíyọ owó kúrò nínú Rewards Balance rẹ, àti sísan owó ìbéèrè Vallo Guarantee fún ọ. Ìsanwó káàdì ṣì ń dé àkọọ́lẹ̀ ìsanwó rẹ ní àkókò ìsanwó. Kò sí ohun mìíràn tó yí padà lórí àkọọ́lẹ̀ rẹ.",
+      means: "Níwọ̀n ìgbà tí owó náà bá ṣì wà lọ́rùn rẹ, Vallo yóò dá ìtúsílẹ̀ àwọn ìsanwó tí alábàáṣiṣẹ́pọ̀ wa tó ní ìwé-àṣẹ ń dì mú fún ọ dúró, yíyọ owó kúrò nínú Rewards Balance rẹ, àti sísan owó ìbéèrè Vallo Guarantee fún ọ. Ìsanwó káàdì ṣì ń dé àkọọ́lẹ̀ ìsanwó rẹ ní àkókò ìsanwó. Kò sí ohun mìíràn tó yí padà lórí àkọọ́lẹ̀ rẹ.",
       nextTitle: "Ohun tó kàn",
       next: "Ẹgbẹ́ ìṣúná Vallo yóò kàn sí ọ láti yanjú rẹ̀. Nígbà tí a bá yanjú rẹ̀ tàbí tí a pa á dé, ìkéde yìí yóò lọ fúnra rẹ̀.",
       help: "Béèrè lọ́wọ́ ẹ̀ka ìrànlọ́wọ́ nípa rẹ̀",

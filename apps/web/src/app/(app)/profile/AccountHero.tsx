@@ -18,6 +18,7 @@ import type { BadgeTier } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { IdentityHeader } from "@/components/app/identity/IdentityHeader";
 import { BackChevron } from "@/components/social/profile/BackChevron";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * THE TOP OF YOUR OWN PROFILE, BUILT TO `50E032EA`.
@@ -162,10 +163,8 @@ export function AccountHero({
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await supabase.storage
-        .from("social-covers")
-        .upload(path, blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: blob, contentType: "image/jpeg" });
+      if (!upload.ok) {
         setError("We could not upload that photo. Check your connection and try again.");
         return;
       }
@@ -197,10 +196,8 @@ export function AccountHero({
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await supabase.storage
-        .from("avatars")
-        .upload(path, blob, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: blob, contentType: "image/jpeg" });
+      if (!upload.ok) {
         setError("We could not upload that photo. Check your connection and try again.");
         return;
       }

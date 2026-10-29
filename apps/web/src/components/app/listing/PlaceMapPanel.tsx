@@ -3,6 +3,7 @@
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { AreaMap } from "./AreaMap";
 import { usePhotoViewer } from "./PhotoViewer";
+import { PlaceActions } from "./PlaceActions";
 import "./area-map.css";
 
 /**
@@ -25,6 +26,7 @@ export function PlaceMapPanel({
   unavailable,
   facts,
   photoTour,
+  actions,
 }: {
   lead: string;
   /** Rounded on the server, or null when the place has no position. */
@@ -33,11 +35,14 @@ export function PlaceMapPanel({
   unavailable: string;
   facts: readonly PlaceFact[];
   photoTour: { label: string; caption: string; count: number } | null;
+  /** Copy address and Open in Maps, when the page has the words for them. */
+  actions?: { copyLabel: string; mapsLabel: string };
 }) {
   const viewer = usePhotoViewer();
   return (
     <div className="grid gap-md" data-testid="place-map">
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{lead}</p>
+      {actions ? <PlaceActions text={area} point={coords} copyLabel={actions.copyLabel} mapsLabel={actions.mapsLabel} /> : null}
       {coords ? <AreaMap lat={coords.lat} lng={coords.lng} label={area} unavailable={unavailable} /> : null}
       {facts.length > 0 ? (
         <ul className="nf-placefacts">

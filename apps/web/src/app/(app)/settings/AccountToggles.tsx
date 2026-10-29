@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { setLite } from "@/lib/ui/lite";
 import { RowSwitch, SettingsGroup } from "@/components/app/account/rows";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { updateSettings } from "@/lib/profile/actions";
 import type { NotifyToggleCopy, PrivacyToggleCopy, SettingsOf } from "@/components/app/account/settings-copy";
 import type { ResolvedProfileSettings, SettingsPatch } from "@/lib/profile/schema";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Account-backed preference groups.
@@ -23,7 +24,7 @@ import type { ResolvedProfileSettings, SettingsPatch } from "@/lib/profile/schem
 function useSettingsSaver() {
   const [error, setError] = useState<string | null>(null);
   const [savedAt, setSavedAt] = useState(0);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   useEffect(() => {
     if (savedAt === 0) return;

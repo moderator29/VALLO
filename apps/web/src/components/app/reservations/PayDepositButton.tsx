@@ -2,9 +2,10 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { payReservationDeposit } from "@/lib/reservations/deposit-actions";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * D75: pay a restaurant's table deposit, by card. Opens Paystack's hosted
@@ -27,7 +28,7 @@ export function PayDepositButton({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   /* Stays set once the checkout address is on its way, so a second tap cannot open a second checkout. */
   const [redirecting, setRedirecting] = useState(false);
   return (

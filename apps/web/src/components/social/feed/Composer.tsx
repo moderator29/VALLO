@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useLayoutEffect, useRef, useState, useTransition, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
@@ -35,6 +35,7 @@ import {
   POST_MEDIA_MAX,
   type ComposableKind,
 } from "@/lib/social/posts-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Writing something.
@@ -153,7 +154,7 @@ export function Composer({
 }) {
   const router = useRouter();
   const words = useClientCopy().feedV2.composer;
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [kind, setKind] = useState<ComposableKind>(initialKind);
   /* The words live with the caller when it asks to hold them, so a sheet that
      is closed by a stray drag or Back does not throw a half-written post

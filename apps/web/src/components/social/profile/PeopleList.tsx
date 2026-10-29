@@ -1,7 +1,7 @@
 "use client";
 
 import { initial as initialOf } from "@/lib/text/initial";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { TierBadge } from "@/components/trust/TierBadge";
 import { FollowButton } from "./FollowButton";
@@ -11,6 +11,7 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * A list of people.
@@ -71,7 +72,7 @@ export function PeopleList({
   const [people, setPeople] = useState(initial);
   const [cursor, setCursor] = useState(initialCursor);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const loadMore = () => {
     if (!cursor) return;

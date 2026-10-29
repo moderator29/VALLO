@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { CONSENT_SENTENCE } from "@/lib/landlord/consent";
 import { recordPrincipalConsent } from "@/lib/landlord/admin-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type AdminCopy = Dictionary["landlord"]["admin"];
 
@@ -48,7 +49,7 @@ export function MandateConsent({
 }) {
   const [status, setStatus] = useState(initial);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [note, setNote] = useState("");
 
   if (!hasNumber) {

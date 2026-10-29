@@ -26,6 +26,7 @@ import { ClientCopyProvider } from "@/lib/i18n/client-copy";
 import { clientCopyOf } from "@/lib/i18n/client-copy-of";
 import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
 import { DetailsHost } from "@/components/ui/DetailsHost";
+import { ImageFallbackGuard } from "@/components/app/ImageFallbackGuard";
 
 /*
  * The fonts are declared in `css/fonts.css` and served from `public/fonts`,
@@ -541,6 +542,8 @@ export default async function RootLayout({
           <SuccessFlagHost />
           {/* The one toast, the connection line and back to top. */}
           <DetailsHost />
+          {/* A failed picture becomes a quiet tile, never the browser's glyph. */}
+          <ImageFallbackGuard />
         </ClientCopyProvider>
         <ThresholdStage welcome={t.authFlow.welcomeThrough} />
       </body>

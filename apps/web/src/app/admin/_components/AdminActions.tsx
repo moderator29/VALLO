@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
@@ -22,6 +22,7 @@ import {
   setTicketStatus,
   toggleFeatureFlag,
 } from "@/lib/admin/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Every hand the console offers, in one client module.
@@ -84,7 +85,7 @@ function ActionSheet({
   const router = useRouter();
   const [notes, setNotes] = useState("");
   const [result, setResult] = useState<ActionResult<null> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const submit = () => {
     startTransition(async () => {
@@ -581,7 +582,7 @@ export function TicketReply({
   const router = useRouter();
   const [body, setBody] = useState("");
   const [result, setResult] = useState<ActionResult<null> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const send = () => {
     startTransition(async () => {
@@ -648,7 +649,7 @@ export function TicketStatusControl({
 }) {
   const router = useRouter();
   const [result, setResult] = useState<ActionResult<null> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const [closing, setClosing] = useState(false);
   const [closingNote, setClosingNote] = useState("");
@@ -745,7 +746,7 @@ export function SwitchControl({
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [result, setResult] = useState<ActionResult<null> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const turnOn = () => {
     startTransition(async () => {
@@ -822,7 +823,7 @@ export function StayCancel({
   const [preview, setPreview] = useState<
     { paidMinor: number; refundMinor: number; retainedMinor: number } | null
   >(null);
-  const [previewing, startPreview] = useTransition();
+  const [previewing, startPreview] = useSafeTransition();
 
   useEffect(() => {
     if (!open) return;

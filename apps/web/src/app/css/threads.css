@@ -219,7 +219,7 @@
      stack under one name the way the render stacks the greeting and the
      card. Sits closer to the bubble above than a new turn does. */
   .nf-msg--cont {
-    margin-top: calc(var(--nf-space-2xs) - var(--nf-gap-row));
+    margin-top: calc(var(--nf-space-3xs) - var(--nf-gap-row));
   }
   .nf-msg--cont > .nf-msg__avatar,
   .nf-msg--cont > .nf-msg__side {
@@ -240,7 +240,9 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    max-width: 84%;
+    max-width: 80%;
+    /* A bubble hugs its words and never stretches to the column. */
+    align-items: flex-start;
   }
   .nf-msg--mine .nf-msg__stack {
     align-items: flex-end;
@@ -365,7 +367,7 @@
     padding: var(--nf-space-xs) var(--nf-space-sm);
     border-radius: var(--nf-radius-lg);
     font-size: var(--nf-text-body-sm);
-    line-height: 1.45;
+    line-height: 1.4;
     overflow-wrap: anywhere;
   }
   /* Theirs: a dark glass well with a brand hairline and a faint inner bloom.
@@ -446,33 +448,33 @@
   .nf-bubble__body {
     white-space: pre-wrap;
   }
-  /* Time and the read ticks, on the bubble's last line, right-aligned. */
-  .nf-bubble__foot {
+  /*
+   * THE TIME AND THE TICKS live under the LAST bubble of a run, never inside a
+   * bubble: one small muted line, right aligned for mine and left for theirs,
+   * the way X draws a direct message. The bubble is its words and nothing else,
+   * so "Hii" is a small box. Read ticks take the brand blue; sent and
+   * delivered stay muted, so the blue is the only loud state.
+   */
+  .nf-msg__status {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--nf-space-3xs);
-    margin-top: var(--nf-space-2xs);
+    gap: var(--nf-space-2xs);
+    margin-top: var(--nf-space-3xs);
+    padding-inline: var(--nf-space-2xs);
     font-size: var(--nf-text-overline);
+    line-height: 1.3;
     font-variant-numeric: tabular-nums;
-    opacity: 0.78;
-  }
-  .nf-bubble--theirs .nf-bubble__foot {
     color: var(--nf-content-muted);
-    opacity: 1;
   }
-  /* On the blue sent bubble the time is small text on a fill, so it takes the
-     full on-brand ink: at 0.78 it measured 3.4:1 at night and 3.95:1 in paper
-     (4.5 needed). The hierarchy is the size and the right alignment. */
-  .nf-bubble--mine .nf-bubble__foot {
-    opacity: 1;
+  .nf-msg--mine .nf-msg__status {
+    justify-content: flex-end;
   }
-  .nf-bubble__ticks {
+  .nf-msg__ticks {
     display: inline-flex;
     flex-shrink: 0;
   }
-  .nf-bubble__ticks--read {
-    color: var(--nf-content-on-brand);
+  .nf-msg__ticks--read {
+    color: var(--nf-brand-primary);
   }
   /* The photos in a bubble are `PhotoGroup` and their rules are the "PHOTOS
      IN A BUBBLE" block at the end of this sheet, after the row spec, so the
@@ -1598,28 +1600,12 @@
      past them: it adds nothing to the bubble's own width. */
   .nf-bubble--media > .nf-bubble__body {
     contain: inline-size;
-    padding: var(--nf-space-xs) var(--nf-space-sm) 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
   }
-  .nf-bubble--media > .nf-bubble__foot {
-    margin-top: 0;
-    padding: var(--nf-space-2xs) var(--nf-space-sm) var(--nf-space-xs);
-  }
-  /* Photos with no words: the photos are the whole bubble. The time rides on
-     the photo's lower corner on the media plate, so no strip of bubble fill is
-     left under the picture. */
+  /* Photos with no words: the photos are the whole bubble; the time sits
+     under it like any other, so no strip of bubble fill shows. */
   .nf-bubble--photos {
     background: transparent;
-  }
-  .nf-bubble--photos > .nf-bubble__foot {
-    position: absolute;
-    right: var(--nf-space-2xs);
-    bottom: var(--nf-space-2xs);
-    margin: 0;
-    padding: var(--nf-space-3xs) var(--nf-space-2xs);
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-overlay-media-strong);
-    color: var(--nf-content-on-media);
-    opacity: 1;
   }
   /* A received photo bubble hugs its photo rather than stretching to the
      width of the name row above it. */

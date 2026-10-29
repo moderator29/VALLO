@@ -1,7 +1,7 @@
 "use client";
 
 import { initial } from "@/lib/text/initial";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -36,6 +36,7 @@ import { Toast, useToast } from "@/components/ui/Toast";
 import { countOf, formatNumber } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * A story, full bleed.
@@ -87,7 +88,7 @@ export function StoryViewer({
   const [reporting, setReporting] = useState(false);
   const [commenting, setCommenting] = useState(false);
   const { toast, show } = useToast();
-  const [, startTransition] = useTransition();
+  const [, startTransition] = useSafeTransition();
   const counted = useRef(false);
 
   /*

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { toggleSave } from "@/lib/saved/actions";
@@ -26,6 +26,7 @@ import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The two controls that float over the gallery: share and save.
@@ -171,7 +172,7 @@ export function ListingActions({
     }
     return door.current ?? Promise.resolve(null);
   }, [listingId, doorKind]);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {

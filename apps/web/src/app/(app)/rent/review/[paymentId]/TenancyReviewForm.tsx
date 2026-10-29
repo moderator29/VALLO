@@ -2,7 +2,7 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { Segmented } from "@/components/ui/Segmented";
@@ -12,6 +12,7 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { submitTenancyReview } from "@/lib/tenancy/review-actions";
 import { EXTRA_TO } from "@/lib/tenancy/review-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Tri = "yes" | "no" | "not_sure";
 
@@ -44,7 +45,7 @@ export function TenancyReviewForm({
   const [done, setDone] = useState(false);
   const [successClosed, setSuccessClosed] = useState(false);
   const sent = success ? successCopy(success, "tenancyReviewSent") : null;
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const tri = [
     { value: "yes" as const, label: copy.yes },

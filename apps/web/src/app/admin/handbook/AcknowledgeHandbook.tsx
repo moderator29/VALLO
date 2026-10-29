@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { acknowledgeHandbook } from "@/lib/admin/staff-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export function AcknowledgeHandbook({ version }: { version: string }) {
   const [read, setRead] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   return (
     <div className="grid gap-xs">

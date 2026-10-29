@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,8 @@ import { formatMoneyDate } from "@/lib/money/dates";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import type { TenancyReportView } from "@/lib/tenancy/queries";
 import { addTenancyReportPhoto, countersignTenancyReport, saveTenancyReport } from "@/lib/tenancy/actions";
+import { uploadToStorage } from "@/lib/media/upload";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
 
@@ -42,7 +44,7 @@ export function TenancyReportCard({
   canWrite: boolean;
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<Partial<Record<RoomItem, boolean>>>(report.items);
   const [notes, setNotes] = useState(report.notes ?? "");
@@ -105,8 +107,8 @@ export function TenancyReportCard({
       setError(copy.failed);
       return;
     }
-    const uploaded = await supabase.storage.from("tenancy-evidence").upload(path, file, { contentType: file.type });
-    if (uploaded.error) {
+    const uploaded = await uploadToStorage({ supabase, bucket: "tenancy-evidence", path, body: file, contentType: file.type });
+    if (!uploaded.ok) {
       setError(copy.failed);
       return;
     }

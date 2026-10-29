@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AudioPresets,
   ConnectionQuality,
   DisconnectReason,
   Room,
@@ -15,6 +16,7 @@ import {
   type RemoteParticipant,
   type RemoteTrack,
 } from "livekit-client";
+import { callLog, errorSummary } from "@/lib/calls/diagnostics";
 import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./types";
 
 export { EMPTY_MEDIA, type CallMedia, type MediaSnapshot };
@@ -84,11 +86,38 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
   let videoTracks = local.filter((t) => t.kind === Track.Kind.Video) as LocalVideoTrack[];
   const audioTracks = local.filter((t) => t.kind === Track.Kind.Audio) as LocalAudioTrack[];
 
+  /* A phone's WebView plays no sound that a tap did not allow, and the answer
+     goes through several network round trips before the first remote audio
+     arrives, which is long after the tap. So the room is told to start audio
+     once connected, and if the page still refuses, the very next touch,
+     click or key anywhere on the screen allows it (LiveKit's own rule:
+     `startAudio` must run inside a user gesture). */
+  let unlockArmed = false;
+  const armAudioUnlock = () => {
+    if (unlockArmed || typeof document === "undefined") return;
+    unlockArmed = true;
+    const events = ["pointerdown", "touchend", "keydown"] as const;
+    const unlock = () => {
+      for (const name of events) document.removeEventListener(name, unlock, true);
+      unlockArmed = false;
+      void room
+        .startAudio()
+        .then(() => callLog("audio.unlocked"))
+        .catch((error: unknown) => callLog("audio.unlock_failed", errorSummary(error)));
+    };
+    for (const name of events) document.addEventListener(name, unlock, { capture: true, passive: true } as AddEventListenerOptions);
+  };
+
   const room = new Room({
     adaptiveStream: true,
     dynacast: true,
     videoCaptureDefaults: { facingMode: "user", resolution: VideoPresets.h540.resolution },
-    publishDefaults: { simulcast: true },
+    /* Voice first (27 October 2026): the speech preset is Opus at 24 kbps,
+       which holds on a weak Nigerian mobile connection where the default
+       music preset stutters; DTX stops sending during silence and RED repeats
+       the last frame so one lost packet is not a dropped word. Video keeps
+       simulcast so the server can step a weak receiver down. */
+    publishDefaults: { simulcast: true, audioPreset: AudioPresets.speech, dtx: true, red: true },
     disconnectOnPageLeave: true,
   });
 
@@ -158,13 +187,22 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
     })
     .on(RoomEvent.ParticipantConnected, () => refreshRemote())
     .on(RoomEvent.ParticipantDisconnected, () => refreshRemote())
-    .on(RoomEvent.Reconnecting, () => emit({ connection: "reconnecting" }))
+    .on(RoomEvent.Reconnecting, () => {
+      callLog("room.reconnecting");
+      emit({ connection: "reconnecting" });
+    })
     .on(RoomEvent.SignalReconnecting, () => emit({ connection: "reconnecting" }))
+    .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+      callLog("audio.playback", room.canPlaybackAudio ? "allowed" : "blocked");
+      if (!room.canPlaybackAudio) armAudioUnlock();
+    })
     .on(RoomEvent.Reconnected, () => {
+      callLog("room.reconnected");
       emit({ connection: "connected" });
       refreshRemote();
     })
     .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
+      callLog("room.disconnected", reason === undefined ? "unknown" : (DisconnectReason[reason] ?? String(reason)));
       const why =
         reason === DisconnectReason.CLIENT_INITIATED
           ? "local"
@@ -184,7 +222,13 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
     async connect(credentials) {
       if (closed) return;
       emit({ connection: "connecting", disconnectReason: null });
+      callLog("room.connecting");
       await room.connect(credentials.serverUrl, credentials.token, { autoSubscribe: true });
+      callLog("room.connected");
+      /* Allowed by the answer tap where the platform lets it; otherwise armed
+         for the next touch (see `armAudioUnlock`). */
+      await room.startAudio().catch(() => undefined);
+      if (!room.canPlaybackAudio) armAudioUnlock();
       for (const track of [...audioTracks, ...videoTracks]) {
         if (!credentials.canPublishVideo && track.kind === Track.Kind.Video) {
           track.stop();

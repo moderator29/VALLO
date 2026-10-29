@@ -1,7 +1,7 @@
 "use client";
 
 import { dateTimeLabel, dayLabel as naturalDay } from "@/lib/format/when";
-import { createContext, useActionState, useContext, useEffect, useId, useMemo, useState, useTransition } from "react";
+import { createContext, useActionState, useContext, useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { markReservationOutcome, respondToReservation } from "@/lib/reservations/actions";
@@ -25,6 +25,7 @@ import { countOf, plural, type Dictionary, type Locale } from "@vallo/i18n/core"
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useHostPageCopy } from "@/components/host/host-copy";
 import { venueDepositLine } from "@/lib/reservations/deposits";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The venue's table desk (`/host/reservations`).
@@ -225,7 +226,7 @@ export function Decision({
 function Outcome({ table }: { table: HostReservationView }) {
   const { words } = useDesk();
   const w = words.outcome;
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [done, setDone] = useState<"COMPLETED" | "NO_SHOW" | "DISPUTED" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -279,7 +280,7 @@ function SeatByCode() {
   const w = words.seat;
   const id = useId();
   const [code, setCode] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const router = useRouter();
   return (
@@ -347,7 +348,7 @@ function HostBill({ table }: { table: HostReservationView }) {
   const { words, locale, billsOn, now } = useDesk();
   const w = words.bill;
   const [amount, setAmount] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   if (!table.seating) return null;

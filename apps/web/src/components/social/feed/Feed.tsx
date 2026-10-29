@@ -3,7 +3,7 @@
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PostCard, type PostView } from "./PostCard";
 import { ReportSheet } from "../ReportSheet";
@@ -39,6 +39,7 @@ import type { FeedPage } from "@/lib/social/posts-queries";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { POST_COPY, POST_REPORT_REASONS } from "@/lib/social/posts-model";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The heading when a caller has not given one.
@@ -190,7 +191,7 @@ export function Feed({
     const timer = window.setTimeout(() => setLeadSettled(true), LEAD_SETTLE_MS);
     return () => window.clearTimeout(timer);
   }, []);
-  const [, startTransition] = useTransition();
+  const [, startTransition] = useSafeTransition();
 
   /*
    * The server is the truth. When a refresh brings new props, take them.

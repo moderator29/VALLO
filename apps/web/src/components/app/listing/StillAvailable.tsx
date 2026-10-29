@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { askStillAvailable } from "@/lib/availability/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-14: "STILL AVAILABLE?", the first button on a rental page.
@@ -30,7 +31,7 @@ export function StillAvailable({
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (recentlyLet) {
     const date = formatDate(new Date(recentlyLet), locale, { day: "numeric", month: "short", timeZone: "Africa/Lagos" });

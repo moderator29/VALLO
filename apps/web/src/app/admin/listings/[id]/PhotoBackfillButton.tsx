@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { runPhotoBackfill } from "@/lib/photo-hash/backfill-action";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-45: hash the next batch of old photographs, so the desk can compare them.
@@ -16,7 +17,7 @@ export function PhotoBackfillButton({
   copy: { backfill: string; backfilling: string; backfilled: string };
 }) {
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   return (
     <span className="flex flex-wrap items-center gap-xs">
       <Button

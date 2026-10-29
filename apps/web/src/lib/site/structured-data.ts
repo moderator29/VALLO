@@ -1,3 +1,4 @@
+import { liveSocials } from "@/lib/brand/socials";
 import { siteUrl } from "@/lib/site";
 import { SUPPORT_EMAIL } from "@/lib/support-email";
 
@@ -9,8 +10,9 @@ import { SUPPORT_EMAIL } from "@/lib/support-email";
  *   Organization  the legal name printed in the footer, the logo file that
  *                 ships in `public/brand`, the support contact only when
  *                 `NEXT_PUBLIC_SUPPORT_EMAIL` is set, and `sameAs` only for
- *                 the social handles the footer itself draws (a handle that
- *                 is not set is not claimed).
+ *                 the social accounts the footer itself draws
+ *                 (`lib/brand/socials.ts`; an account with no address is not
+ *                 claimed).
  *   WebSite       with a `SearchAction` only while the catalogue is open to
  *                 strangers: a search box in a result that lands a crawler on
  *                 a sign-in wall is a promise the page does not keep.
@@ -29,15 +31,13 @@ function absolute(path: string): string {
   return path === "/" ? `${base}/` : `${base}${path}`;
 }
 
-/** The social accounts that exist: the same two env values the footer reads. */
-export function socialProfiles(env: Record<string, string | undefined> = process.env): string[] {
-  return [env.NEXT_PUBLIC_VALLO_X_URL, env.NEXT_PUBLIC_VALLO_TELEGRAM_URL]
-    .map((url) => (url ?? "").trim())
-    .filter((url) => /^https:\/\//.test(url));
+/** The social accounts that exist (`lib/brand/socials.ts`): what `sameAs` claims. */
+export function socialProfiles(): string[] {
+  return liveSocials().map((a) => a.url);
 }
 
-export function organizationLd(env: Record<string, string | undefined> = process.env): JsonLdNode {
-  const sameAs = socialProfiles(env);
+export function organizationLd(): JsonLdNode {
+  const sameAs = socialProfiles();
   return {
     "@context": "https://schema.org",
     "@type": "Organization",

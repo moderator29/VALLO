@@ -3,7 +3,7 @@
 import type { HubCopy } from "@/components/app/account/settings-copy";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
 import { initial } from "@/lib/text/initial";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { withNext } from "@/lib/auth/next-link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,8 @@ import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { SettingsGlyph, type SettingsGlyphName } from "@/components/app/account/SettingsGlyph";
 import { ICON } from "@/components/app/Screen";
 import { ROW_GLYPH, RowButton, RowLink, SettingsGroup } from "@/components/app/account/rows";
+import { SocialLinks } from "@/components/ui/SocialLinks";
+import { liveSocials } from "@/lib/brand/socials";
 import { useThemeChoice } from "@/lib/theme/theme-client";
 import { LanguageRow } from "@/components/app/account/SettingsGroups";
 import { DataSaverRow } from "@/components/app/account/DataSaverRow";
@@ -28,6 +30,7 @@ import { clearLocalDevice, readLocalDevice } from "@/components/app/push/device-
 import { playThreshold } from "@/lib/motion/threshold";
 import type { ResolvedProfileSettings } from "@/lib/profile/model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE SETTINGS HOME, per `7F96BE6C`.
@@ -348,6 +351,15 @@ export function SettingsHub({
         <RowLink href="/privacy" glyph={<HubGlyph name="eye-off" />} label={about.privacy} testId="hub-privacy-policy" />
         <RowLink href="/disclaimer" glyph={<HubGlyph name="info" />} label={about.disclaimer} testId="hub-disclaimer" />
       </SettingsGroup>
+
+      {/* Vallo's own pages (28 October 2026): drawn only for the networks that have an address. */}
+      {liveSocials().length > 0 ? (
+        <SettingsGroup label="Follow Vallo">
+          <div className="p-card" data-testid="hub-social">
+            <SocialLinks />
+          </div>
+        </SettingsGroup>
+      ) : null}
     </div>
   );
 }
@@ -356,7 +368,7 @@ export function SettingsHub({
 export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
   const router = useRouter();
   const hub = t.settings.hub;
-  const [signingOut, startSignOut] = useTransition();
+  const [signingOut, startSignOut] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   if (!signedIn) return null;
   return (

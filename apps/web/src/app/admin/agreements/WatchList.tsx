@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { pauseRelease, resolveHeldPayment, resumeRelease } from "@/lib/admin/agreements-actions";
 import { signalWords, type WatchRow } from "@/lib/admin/watch-list";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * D68d: the watch list over live deals, riskiest first. A deal waiting for a
@@ -24,7 +25,7 @@ export function WatchList({ rows, locale }: { rows: WatchRow[]; locale: Locale }
 }
 
 function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const held = row.arrangementId !== null && ["protected", "release_requested", "payment_processing"].includes(row.heldStatus ?? "");

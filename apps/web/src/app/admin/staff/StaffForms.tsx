@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Check";
 import { grantStaff, revokeStaff } from "@/lib/admin/staff-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export type PositionOption = { value: string; label: string; summary: string; scopes: string[] };
 
@@ -20,7 +21,7 @@ export function GrantStaffForm({
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState("");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   return (
     <form
@@ -109,7 +110,7 @@ export function GrantStaffForm({
 export function RevokeStaffForm({ userId }: { userId: string }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   return (
     <form

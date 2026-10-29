@@ -1,9 +1,10 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { putBlockedTerm, retireBlockedTerm } from "@/lib/admin/blocked-terms-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Option = { value: string; label: string };
 
@@ -47,7 +48,7 @@ export function TermForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <form
@@ -176,7 +177,7 @@ export function RetireTerm({ term, copy }: { term: string; copy: RetireCopy }) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (done) {
     return (

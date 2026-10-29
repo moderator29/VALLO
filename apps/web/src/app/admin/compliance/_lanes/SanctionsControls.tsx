@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/lib/compliance/sanctions/actions";
 import type { SanctionsHit, WaitingList } from "@/lib/compliance/sanctions/desk";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["compliance"]["sanctions"];
 
@@ -19,7 +20,7 @@ type Copy = Dictionary["compliance"]["sanctions"];
 export function SanctionsUpload({ copy }: { copy: Copy }) {
   const router = useRouter();
   const [answer, setAnswer] = useState<DeskAnswer | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const act = (form: FormData) =>
     start(async () => {
       const file = form.get("file");
@@ -95,7 +96,7 @@ export function deskRefusal(copy: Copy, code: string): string {
 function useDeskRun(copy: Copy) {
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const run = (work: () => Promise<DeskAnswer>) =>
     start(async () => {
       setError(null);

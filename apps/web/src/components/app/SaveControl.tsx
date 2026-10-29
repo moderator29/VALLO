@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  useTransition,
-} from "react";
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toggleSave } from "@/lib/saved/actions";
 import { feedback } from "@/lib/ui/feedback";
@@ -21,6 +13,7 @@ import {
 import { addLocalSave, readLocalSaves, removeLocalSave } from "@/lib/saved/local";
 import { enqueue, makeEntry } from "@/lib/offline/outbox";
 import { useClientCopy } from "@/lib/i18n/client-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 
 /**
@@ -193,7 +186,7 @@ export function useSaveControl(
    */
   const [override, setOverride] = useState<boolean | null>(null);
   const [note, setNote] = useState<SaveNote>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onDevice = useSyncExternalStore(

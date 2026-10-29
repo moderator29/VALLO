@@ -931,6 +931,58 @@
     margin-bottom: var(--nf-space-3xs);
   }
 
+  /* TABLET AND DESKTOP (27 October brief): two doors across left a wide page
+     half empty. From 640px the four Stays doors go four across, the object
+     beside its words, so the row fills the content width the way a
+     marketplace's category strip does. */
+  @media (min-width: 640px) {
+    .nf-cat-row[data-columns="2"] {
+      --nf-cat-cols: 4;
+      gap: var(--nf-gap-inline);
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: "plate label" "plate meaning";
+      align-items: center;
+      align-content: center;
+      column-gap: var(--nf-space-sm);
+      row-gap: 0;
+      padding: var(--nf-space-sm) var(--nf-space-md);
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__plate {
+      grid-area: plate;
+      margin-bottom: 0;
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__label {
+      grid-area: label;
+      align-self: end;
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__meaning {
+      grid-area: meaning;
+      align-self: start;
+    }
+  }
+
+  /* The featured stays: the swipe stack on a phone, a card grid from 640px. */
+  .nf-feature-grid {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .nf-feature-stack {
+      display: none;
+    }
+    .nf-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--nf-space-md);
+    }
+  }
+  @media (min-width: 1024px) {
+    .nf-feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   /* ------------------------------------------------------ the featured band */
   .nf-feature-head {
     display: flex;

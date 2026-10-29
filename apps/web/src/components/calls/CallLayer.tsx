@@ -2,10 +2,10 @@
 
 import { Suspense, useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { heartbeatCall } from "@/lib/calls/actions";
+import { heartbeatCall, incomingCallNow } from "@/lib/calls/actions";
 import { callPhase, isTerminal } from "@/lib/calls/lifecycle";
 import { callIdFromParam } from "@/lib/calls/screen";
-import { useIncomingCalls, type CallNudge } from "@/lib/calls/useCallRealtime";
+import { incomingChannelHealthy, useIncomingCalls, type CallNudge } from "@/lib/calls/useCallRealtime";
 import { callState, mergeSnapshot, showCall, showGone } from "./call-store";
 import { CallSurface } from "./CallSurface";
 import type { CallsCopy } from "./views";
@@ -32,6 +32,7 @@ import type { CallsCopy } from "./views";
  */
 export function CallLayer({ userId, copy }: { userId: string; copy: CallsCopy }) {
   useIncomingCalls(userId, (nudge) => void resolveNudge(nudge));
+  useIncomingCallPoll();
   return (
     <>
       <Suspense fallback={null}>
@@ -40,6 +41,47 @@ export function CallLayer({ userId, copy }: { userId: string; copy: CallsCopy })
       <CallSurface copy={copy} />
     </>
   );
+}
+
+/**
+ * THE FALLBACK FOR A MISSED RING (29 October 2026). The realtime channel is the
+ * fast path; this asks the server directly every few seconds while the page is
+ * visible (every 3 s when the channel is not confirmed live, every 5 s when it
+ * is: "subscribed" is not proof that events arrive, so a ring is never more
+ * than a few seconds from being found), and at once when the page comes back to the front or
+ * the network returns. It only looks while no call is on screen, and what it
+ * finds goes through the same `resolveNudge` the realtime message uses, so the
+ * heartbeat still decides whether the call is really ringing.
+ */
+function useIncomingCallPoll(): void {
+  useEffect(() => {
+    let stopped = false;
+    let timer = 0;
+    const tick = async () => {
+      window.clearTimeout(timer);
+      if (stopped) return;
+      if (document.visibilityState === "visible" && navigator.onLine !== false) {
+        const active = callState().active;
+        if (!active || isTerminal(active.snapshot.state)) {
+          const found = await incomingCallNow().catch(() => null);
+          if (!stopped && found?.ok && found.data) void resolveNudge({ callId: found.data.callId, state: null, version: null });
+        }
+      }
+      if (!stopped) timer = window.setTimeout(() => void tick(), incomingChannelHealthy() ? 5_000 : 3_000);
+    };
+    const kick = () => void tick();
+    timer = window.setTimeout(() => void tick(), 1_500);
+    document.addEventListener("visibilitychange", kick);
+    window.addEventListener("focus", kick);
+    window.addEventListener("online", kick);
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", kick);
+      window.removeEventListener("focus", kick);
+      window.removeEventListener("online", kick);
+    };
+  }, []);
 }
 
 async function resolveNudge(nudge: CallNudge): Promise<void> {

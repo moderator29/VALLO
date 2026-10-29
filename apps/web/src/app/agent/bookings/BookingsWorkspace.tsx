@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   formatMoney,
@@ -24,6 +24,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { TextArea } from "@/components/ui/Field";
 import { Icon3D } from "@/components/ui/Icon3D";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The host's bookings console: requests that need a decision, plus the stays
@@ -71,7 +72,7 @@ function DecisionSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState<string | null>(null);
   const [reason, setReason] = useState("");

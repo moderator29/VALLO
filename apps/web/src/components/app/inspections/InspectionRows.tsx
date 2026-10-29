@@ -1,7 +1,7 @@
 "use client";
 
 import { TierBadge } from "@/components/trust/TierBadge";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { formatDate, type Locale, type Dictionary } from "@vallo/i18n/core";
@@ -19,6 +19,7 @@ import { waitingOn, type Inspection, type InspectionState } from "@/lib/inspecti
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
 import { viewingWords } from "./viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * INSPECTIONS, AS ROWS, WITH THE STATE VISIBLE ON BOTH SIDES.
@@ -155,7 +156,7 @@ function InspectionRow({
     RENTER_CANCEL_WORDS,
   } = viewingWords(viewingCopy);
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the row: a time to offer, or a final move asked
      before it is made (the same two sheets the card and the thread open). */

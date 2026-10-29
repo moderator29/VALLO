@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@vallo/i18n/core";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { findFaqEntry } from "@/lib/support/faq";
@@ -18,6 +18,7 @@ import { AI_CONSENT_REQUIRED_CODE } from "@/lib/ai/consent";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { AIResponse, type AIResponseStatus } from "@/components/ui/AIResponse";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 /* The answer card's fit (the words keep the line breaks, the stopped note, the
    thinking orb) is the assistant's; support's answers are the same card. */
 import "@/components/app/assistant/assistant-answer.css";
@@ -857,7 +858,7 @@ function EscalationCard({
   const [email, setEmail] = useState(defaultEmail);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string }>({});
   const [note, setNote] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const submit = () => {
     if (!signedIn) {

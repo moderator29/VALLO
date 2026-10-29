@@ -2,13 +2,14 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BackControl } from "@/components/ui/BackControl";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { initial } from "@/lib/text/initial";
 import { sendDirectMessage } from "@/lib/messages/direct-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE FIRST MESSAGE TO A MEMBER, from their profile. It opens as a chat, not a
@@ -32,7 +33,7 @@ export function DirectFirstMessage({
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const send = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

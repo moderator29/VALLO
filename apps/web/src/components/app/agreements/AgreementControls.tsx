@@ -1,13 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { amendAgreement, cancelAgreement, confirmAgreement, createClaimEvidenceUpload, fileGuaranteeClaim } from "@/lib/agreements/actions";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { withDone, type RecordDoneFlag } from "@/lib/ui/success-moments";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * The controls on an agreement page (Track A): confirm the exact version,
@@ -17,7 +19,7 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 
 function useAction() {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /*
    * `done` names the success moment this action ends in. The page re-renders
@@ -296,10 +298,15 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
         setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }
-      const { error: upErr } = await supabase.storage
-        .from("guarantee-evidence")
-        .uploadToSignedUrl(prepared.data.path, prepared.data.token, file, { contentType: file.type });
-      if (upErr) {
+      const uploaded = await uploadToStorage({
+        supabase,
+        bucket: "guarantee-evidence",
+        path: prepared.data.path,
+        body: file,
+        contentType: file.type,
+        signedToken: prepared.data.token,
+      });
+      if (!uploaded.ok) {
         setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }

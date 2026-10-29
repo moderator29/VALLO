@@ -416,3 +416,26 @@ Run with the allowlist emptied it flags 5 of 371, so it bites.
 other half: the twelve refusals AND the four select lists the product issues
 anonymously, in one transaction, because a column of refusals without a control
 beside it is a table nobody can read any more.
+
+## Audit of 28 October 2026 (health check queries 2, 8 and 9)
+
+- **Per-row `auth.uid()` policies:** none found.
+- **Definer functions anon can run (21):** `area_price_pages`, `calendar_feed`,
+  `commission_quote`, `directory`, `fee_protection_rate_at`, `landlord_line_answer`,
+  `landlord_line_read`, `landlord_line_stop`, `leaderboard`, `lister_reply_band`,
+  `listing_ownership_seen_at`, `listings_ownership_seen_at`, `money_policy_at`,
+  `ownership_seen_at`, `platform_stats`, `record_funnel_event`, `referral_door`,
+  `safety_share_read`, `share_door`, `social_follow_suggestions`, `tax_line_at`.
+  The directory, leaderboard and follow suggestions return only listers who chose a
+  public handle; `lister_reply_band` returns one band, not messages; the landline and
+  share functions are token or code gated. Read on 28 October and judged deliberate
+  public reads; none returns an address, phone or email.
+- **Views that run with the owner's rights (7):** `listing_truth_summary`,
+  `listing_lister`, `listing_lister_tier`, `reviews_counted`, `door_honesty`,
+  `listing_credentials`, `person_badge`. Left as they are: they are public projections
+  and `anon` holds no select on the address columns beneath them. Making them
+  `security_invoker` would change what a stranger can read, so it is a founder decision,
+  not a tidy-up.
+- **Foreign keys with no index:** 29 on tables that grow with use were indexed
+  (migration `20261028132808_fk_indexes_hot_tables`); about 30 staff-audit columns
+  (`created_by`, `decided_by`) were left, as they are written rarely and never joined hot.

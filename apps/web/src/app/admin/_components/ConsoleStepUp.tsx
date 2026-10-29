@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
 import { beginConsoleStepUp, finishConsoleStepUp } from "@/lib/security/console-step-up";
 import { beginEnrol, finishEnrol, sendFallbackCode } from "@/lib/security/money-step-up-actions";
 import { assertPlatformKey, createPlatformKey } from "@/lib/security/webauthn-client";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE CONSOLE'S SECOND FACTOR, AS STAFF SEE IT.
@@ -28,7 +29,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
   const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   const confirm = () =>

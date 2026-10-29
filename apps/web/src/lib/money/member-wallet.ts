@@ -299,9 +299,21 @@ export type BalanceRead =
     };
 
 export async function profileFor(db: Db, user: User): Promise<{ firstName: string | null; lastName: string | null; phone: string | null; email: string | null }> {
-  const { data } = await db.from("profiles").select("first_name, surname, phone").eq("id", user.id).maybeSingle();
+  const [{ data }, { data: confirmed }] = await Promise.all([
+    db.from("profiles").select("first_name, surname, phone").eq("id", user.id).maybeSingle(),
+    /* The number the member confirmed with a code is the one the wallet opens
+       with (27 October 2026): "verify your number" must not come back for
+       somebody who already did. */
+    db.from("confirmed_phones").select("phone").eq("user_id", user.id).maybeSingle(),
+  ]);
   const p = (data ?? {}) as { first_name?: string | null; surname?: string | null; phone?: string | null };
-  return { firstName: p.first_name ?? null, lastName: p.surname ?? null, phone: p.phone ?? user.phone ?? null, email: user.email ?? null };
+  const c = (confirmed ?? null) as { phone?: string | null } | null;
+  return {
+    firstName: p.first_name ?? null,
+    lastName: p.surname ?? null,
+    phone: c?.phone ?? p.phone ?? user.phone ?? null,
+    email: user.email ?? null,
+  };
 }
 
 /**

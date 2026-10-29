@@ -1,11 +1,12 @@
 "use client";
 
 import { countOf } from "@vallo/i18n/core";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export type StillAvailableItem = { id: string; title: string; days: number | null };
 
@@ -17,7 +18,7 @@ export type StillAvailableItem = { id: string; title: string; days: number | nul
 export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
   const [done, setDone] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   const left = items.filter((i) => !done.includes(i.id));
   if (items.length === 0) return null;

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { previewRecall, sendRecall } from "@/lib/admin/recall-actions";
 import { recallReason, reportRef, willTell, type RecallPreview } from "@/lib/admin/recall";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-60 ON THE STOPS DESK: recall a standing stop for fraud.
@@ -29,7 +30,7 @@ function day(iso: string): string {
 export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk: Desk }) {
   const [preview, setPreview] = useState<RecallPreview | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function count() {
     setMessage(null);

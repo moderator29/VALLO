@@ -19,6 +19,7 @@ import { confirmResume, dismissCall, mergeSnapshot, type ActiveCall } from "./ca
 import { useCallPulse, useServerClock } from "./use-call-pulse";
 import { ConfirmEnd, InCallView, OutgoingView, PermissionView, type CallBanner, type CallsCopy } from "./views";
 import { Button } from "@/components/ui/Button";
+import { callLog, errorSummary } from "@/lib/calls/diagnostics";
 import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./media/types";
 
 /**
@@ -46,7 +47,7 @@ import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./media/types";
 type Stage =
   | { kind: "waiting" }
   | { kind: "asking" }
-  | { kind: "denied"; error: MediaErrorKind; wantedVideo: boolean }
+  | { kind: "denied"; error: MediaErrorKind; wantedVideo: boolean; detail: string }
   | { kind: "joining" }
   | { kind: "joined" }
   | { kind: "failed"; error: string };
@@ -83,18 +84,22 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     joiningRef.current = true;
     const video = snapshot.kind === "VIDEO" && !voiceOnlyRef.current;
     setStage({ kind: "asking" });
+    callLog("join.start", video ? "video" : "voice");
     try {
       const lib = await import("./media/session");
       let local;
       try {
         local = await lib.captureLocal(video);
+        callLog("join.captured", local.map((t) => t.kind).join("+"));
       } catch (error) {
-        setStage({ kind: "denied", error: mediaErrorKind(error), wantedVideo: video });
+        callLog("join.capture_failed", errorSummary(error));
+        setStage({ kind: "denied", error: mediaErrorKind(error), wantedVideo: video, detail: errorSummary(error) });
         return;
       }
       setStage({ kind: "joining" });
       const creds = await getJoinCredentials({ callId });
       if (!creds.ok) {
+        callLog("join.token_refused", creds.error.slice(0, 80));
         for (const t of local) t.stop();
         setStage({ kind: "failed", error: creds.error });
         void beat();
@@ -102,12 +107,14 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
       }
       const session = lib.createCallMedia(local, (next) => setMedia(next));
       mediaRef.current = session;
+      callLog("join.token_ok");
       await session.connect(creds.data);
       session.attachLocalVideo(localEl.current);
       session.attachRemoteVideo(remoteEl.current);
       setStage({ kind: "joined" });
       void beat();
-    } catch {
+    } catch (error) {
+      callLog("join.connect_failed", errorSummary(error));
       setStage({ kind: "failed", error: copy.connecting.body });
       const m = mediaRef.current;
       mediaRef.current = null;
@@ -238,6 +245,7 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
         copy={copy}
         error={stage.error}
         wantedVideo={stage.wantedVideo}
+        detail={stage.detail}
         platform={mediaPlatform(navigator.userAgent, looksNative() ? nativePlatform() : null)}
         onRetry={() => setStage({ kind: "waiting" })}
         onVoiceOnly={() => {

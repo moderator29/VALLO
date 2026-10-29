@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { revokeAllPushDevices, revokePushDevice } from "@/lib/push/devices-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE LIST THAT MAKES THE PERMISSION REVERSIBLE.
@@ -60,7 +61,7 @@ export function PushDevices({
 }) {
   const [armed, setArmed] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<Outcome>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const run = (key: string, work: () => Promise<Outcome>) => {
     if (armed !== key) {

@@ -85,7 +85,7 @@ describe("the lock and setup screens", () => {
     const second = html.indexOf('data-testid="passcode-use-keypad"');
     expect(bio).toBeGreaterThan(-1);
     expect(second).toBeGreaterThan(bio);
-    expect(html).toContain(copy.passkeyUnlock);
+    expect(html).toContain(copy.passkeyUnlockBy["this-device"]);
     expect(html).toContain(copy.withPasscode);
     expect(html).not.toContain('data-testid="passcode-keypad"');
   });

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { decideListingMandate } from "@/lib/compliance/beneficial-ownership-actions";
 import { ID_DOCUMENT_KINDS, RELATIONSHIPS, VERIFIED_HOW, looksLikeNin } from "@/lib/compliance/beneficial-ownership";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["complianceBeneficialOwnership"];
 
@@ -28,7 +29,7 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
   const [refusing, setRefusing] = useState(false);
   const [done, setDone] = useState<"approved" | "rejected" | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   if (done) {
     return (

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { closeListingWithReason, type CloseReason } from "@/lib/landlord/close-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type CloseCopy = Dictionary["landlord"]["close"];
 
@@ -38,7 +39,7 @@ export function CloseListingSheet({
   const router = useRouter();
   const [reason, setReason] = useState<CloseReason | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function run() {
     if (!reason) {

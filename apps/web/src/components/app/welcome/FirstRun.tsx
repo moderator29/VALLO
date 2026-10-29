@@ -1,7 +1,7 @@
 "use client";
 
 import "@/app/welcome/onboarding-motion.css";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -34,6 +34,7 @@ import {
   skipPlan,
   swipeStep,
 } from "./onboarding-flow";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Get started IN MOTION (30 September), to the founder's onboarding video
@@ -231,7 +232,7 @@ export function FirstRun({
   /* Bumped on every arrival, so the move-in figure counts again each time. */
   const [visit, setVisit] = useState(0);
   const [announce, setAnnounce] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState("");
   /* Whether the device memory really stuck, so an exit can carry the flag
      instead when a browser refuses the cookie. */

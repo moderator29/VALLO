@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { sendMessage } from "@/lib/messages/actions";
 import { shareBody } from "@/components/app/messages/share";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** The words for the two rows, from the page's `t.passportV2`. */
 export type PassportSheet = {
@@ -56,7 +57,7 @@ export function PassportThreadRows({
   /** Called after a card is posted, so the sheet can close. */
   onDone?: () => void;
 }) {
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [note, setNote] = useState<string | null>(null);
   const words = passport.words;
 

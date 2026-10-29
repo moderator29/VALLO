@@ -415,7 +415,7 @@ export async function sendWebPush(target: PushTarget, payload: PushPayload): Pro
            so eleven unread messages in one conversation become one waiting
            notification rather than eleven. Must be base64url and short. */
         Topic: payload.tag.slice(0, 32).replace(/[^A-Za-z0-9_-]/g, ""),
-        TTL: String(DEFAULT_TTL_SECONDS),
+        TTL: String(payload.ttlSeconds ?? DEFAULT_TTL_SECONDS),
         Authorization: authorization,
       },
       body: new Uint8Array(body),

@@ -1016,6 +1016,9 @@ export const en = {
            reader and a search engine all read it as one. */
         registeredOfficeLabel: "Registered office",
         stayConnected: "Stay connected",
+        followUs: "Follow Vallo",
+        /** The accessible name of a social link; `{network}` is the network. */
+        onNetwork: "Vallo on {network}",
         newsletterBody: "New listings, product news and the occasional honest update.",
         emailLabel: "Email address",
         emailPlaceholder: "Enter your email",
@@ -5278,6 +5281,8 @@ export const en = {
         tabMap: "Map",
         mapLead: "The area. The exact address comes with your confirmation.",
         mapLeadTable: "The area. The full address is in your reservation.",
+        copyAddress: "Copy address",
+        openInMaps: "Open in Maps",
         area: "Area",
         photoTour: "Photo tour",
         photos: "{count} photographs",
@@ -6909,6 +6914,18 @@ export const en = {
       minutes: "{n} min",
       seconds: "{n} s",
       callBack: "Call {name} back, {call}",
+      /**
+       * The quiet one-line row in the thread (`callRowText`): no name, the
+       * kind first, then what became of it. `{outcome}` is one of the
+       * `outcome*` words above. English until translated; other locales
+       * fall back.
+       */
+      rowMissed: "Missed {call}",
+      rowEnded: "{Call} ended",
+      rowEndedFor: "{Call} ended, {duration}",
+      rowOutcome: "{Call} {outcome}",
+      rowOutcomeSoft: "{Call}, {outcome}",
+      callBackShort: "Call back",
     },
     viewer: {
       label: "Photos and videos in this chat",

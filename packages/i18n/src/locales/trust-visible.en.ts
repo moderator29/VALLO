@@ -152,7 +152,13 @@ export const trustVisibleEn = {
     confirm: "Confirm",
     confirming: "Confirming",
     resend: "Send a new code",
+    /** `{s}` is whole seconds until a new code may be asked for. */
+    resendIn: "Send a new code in {s}s",
+    /** The code cells' description for a screen reader. */
+    codeCells: "Six digit code",
     done: "Confirmed. Your number is never shown to anybody.",
+    /** Under `done`: the wallet opens with the confirmed number, by itself. */
+    walletNote: "Your Vallo balance is being set up now.",
     /** The sentence a gated action refuses with. */
     required:
       "Confirm your mobile number first. It is asked once, it is never shown to anybody, and it keeps one person to one account. Open Settings, then Phone.",

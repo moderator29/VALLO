@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Quantity } from "@/components/ui/Quantity";
 import { useRouter } from "next/navigation";
 import { countOf, formatMoney, type Locale } from "@vallo/i18n/core";
@@ -17,6 +17,7 @@ import {
   type RatePlanLite,
 } from "@/lib/host/rate-calendar";
 import { useHostPageCopy } from "../host-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * WHAT A HOST CAN DO TO THE NIGHTS THEY SELECTED: price them, put a number
@@ -48,7 +49,7 @@ export function SelectionPanel({
 }) {
   const router = useRouter();
   const w = useHostPageCopy().calendarUi;
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [price, setPrice] = useState("");
   const floor = bookedFloor(cells);
   const openNow = cells.map((c) => c.unitsOpen ?? 0);

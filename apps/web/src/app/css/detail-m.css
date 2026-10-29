@@ -570,6 +570,18 @@
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
   }
+  /* Copy address and Open in Maps sit inside the card, on the note's inset. */
+  .nf-lmap__card .nf-place-actions {
+    margin-top: 0;
+    padding: 0 var(--nf-space-md) var(--nf-space-sm);
+  }
+  .nf-lmap__card.nf-lmap__place {
+    flex-wrap: wrap;
+  }
+  .nf-lmap__card.nf-lmap__place .nf-place-actions {
+    flex: 1 0 100%;
+    padding-inline: 0;
+  }
   .nf-lmap__stats,
   .nf-lmap__media {
     display: grid;

@@ -1,11 +1,12 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { withDone } from "@/lib/ui/success-moments";
 import { awardMandate, inviteAgents, pitchForMandate, withdrawInvitation } from "@/lib/landlord/portfolio-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Copy = Dictionary["landlord"]["portfolio"];
 
@@ -16,7 +17,7 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
   const [note, setNote] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   return (
@@ -81,7 +82,7 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
 
 /** The owner gives the mandate to one pitch (and may give it to more). */
 export function AwardButton({ pitchId, copy }: { pitchId: string; copy: Copy }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState(false);
   return (
     <>
@@ -110,7 +111,7 @@ export function AwardButton({ pitchId, copy }: { pitchId: string; copy: Copy }) 
 }
 
 export function WithdrawButton({ invitationId, copy }: { invitationId: string; copy: Copy }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   return (
     <Button type="button" variant="ghost" size="sm" loading={pending} onClick={() => start(async () => void (await withdrawInvitation({ invitationId })))}>
       {copy.withdraw}
@@ -123,7 +124,7 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
   const fieldId = useId();
   const [text, setText] = useState("");
   const [state, setState] = useState<"idle" | "sent" | "short" | "failed">("idle");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (state === "sent") {
     return (

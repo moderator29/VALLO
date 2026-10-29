@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { TextField } from "@/components/ui/Field";
+import { CodeInput } from "@/components/auth/CodeInput";
+import { RESEND_WAIT_SECONDS, resendLabel } from "@/lib/auth/mail-app";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { maskNational } from "@/lib/phone";
 import { feedback } from "@/lib/ui/feedback";
 import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
 import "@/components/verification/verified-face.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /** The button morph's payoff pop (`buttons.css`, "THE ACTION MORPH"). */
 const POP = "nf-btn-pop";
@@ -59,7 +62,10 @@ export function PhoneConfirmForm({
   /* ...and the payoff has settled (the panel's face turns). */
   const [settled, setSettled] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [wrongCount, setWrongCount] = useState(0);
+  /* Seconds until a new code may be asked for, counted down once a second. */
+  const [wait, setWait] = useState(0);
+  const [pending, startTransition] = useSafeTransition();
   const panel = useRef<HTMLDivElement | null>(null);
   const codeField = useRef<HTMLDivElement | null>(null);
   const resend = useRef<HTMLButtonElement | null>(null);
@@ -87,6 +93,12 @@ export function PhoneConfirmForm({
     };
   }, [done, settled]);
 
+  useEffect(() => {
+    if (wait <= 0) return;
+    const timer = window.setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [wait]);
+
   /* Settled with somewhere to go back to: go, a beat after the words land. */
   useEffect(() => {
     if (!settled || !returnTo) return;
@@ -113,6 +125,7 @@ export function PhoneConfirmForm({
       }
       setSentTo(result.data.sentTo);
       setCode("");
+      setWait(RESEND_WAIT_SECONDS);
     });
   }
 
@@ -122,7 +135,11 @@ export function PhoneConfirmForm({
       const result = await confirmPhoneCode({ code });
       if (!result.ok) {
         feedback("error");
-        next.current = [copy.confirmExpired, copy.confirmLocked, copy.confirmNoCode].includes(result.error) ? "resend" : "code";
+        setWrongCount((n) => n + 1);
+        const spent = [copy.confirmExpired, copy.confirmLocked, copy.confirmNoCode].includes(result.error);
+        next.current = spent ? "resend" : "code";
+        /* A spent code needs a new one now: no countdown stands in the way. */
+        if (spent) setWait(0);
         setError(result.error);
         return;
       }
@@ -140,6 +157,9 @@ export function PhoneConfirmForm({
             </svg>
           </span>
           <p className="nf-body text-[var(--nf-content-primary)]">{copy.done}</p>
+          <p className="nf-body-sm text-[var(--nf-content-secondary)]" data-testid="phone-wallet-note">
+            {copy.walletNote}
+          </p>
           {returnTo && (
             <ButtonLink href={returnTo} variant="secondary" full data-testid="phone-return">
               {copy.profileBack}
@@ -167,14 +187,17 @@ export function PhoneConfirmForm({
             {copy.sentTo.replace("{number}", `+234 ${maskNational(sentTo)}`)}
           </p>
           <div ref={codeField}>
-            <TextField
+            <CodeInput
+              id="phone-code"
+              name="code"
               label={copy.codeLabel}
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              maxLength={6}
+              length={6}
               value={code}
-              readOnly={done}
-              onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(value) => !done && setCode(value.replace(/\D/g, "").slice(0, 6))}
+              error={error && !settled ? error : null}
+              wrongCount={wrongCount}
+              placeholder="······"
+              cellsLabel={copy.codeCells}
             />
           </div>
           <Button
@@ -189,12 +212,12 @@ export function PhoneConfirmForm({
           >
             {pending ? copy.confirming : copy.confirm}
           </Button>
-          <Button ref={resend} type="button" variant="ghost" full onClick={send} disabled={pending || done}>
-            {copy.resend}
+          <Button ref={resend} type="button" variant="ghost" full onClick={send} disabled={pending || done || wait > 0}>
+            {wait > 0 ? resendLabel(copy.resendIn, wait) : copy.resend}
           </Button>
         </>
       )}
-      {error && !settled && (
+      {error && !settled && sentTo === null && (
         <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
           {error}
         </p>

@@ -30,6 +30,12 @@ export type UploadInput = {
   path: string;
   body: Blob;
   contentType: string;
+  /**
+   * A signed upload token (`createSignedUploadUrl`), for a bucket the member
+   * may not write to directly (inspection and claim evidence). The request is
+   * then the signed PUT the Supabase client makes, and needs no session.
+   */
+  signedToken?: string;
   /** 0 to 1, over the bytes sent. */
   onProgress?: (fraction: number) => void;
   signal?: AbortSignal;
@@ -39,7 +45,7 @@ function pause(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
-function once(url: string, token: string, input: UploadInput): Promise<UploadResult> {
+function once(url: string, token: string | null, input: UploadInput): Promise<UploadResult> {
   return new Promise((resolve) => {
     const xhr = new XMLHttpRequest();
     let stall = 0;
@@ -64,12 +70,17 @@ function once(url: string, token: string, input: UploadInput): Promise<UploadRes
       settle({ ok: false, reason: "failed" });
     };
 
-    xhr.open("POST", url);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    const signed = Boolean(input.signedToken);
+    xhr.open(signed ? "PUT" : "POST", url);
+    /* A signed upload has no session; the client then sends the public key as
+       the bearer, as the storage client does. */
+    xhr.setRequestHeader("Authorization", `Bearer ${token ?? SUPABASE_ANON_KEY}`);
     xhr.setRequestHeader("apikey", SUPABASE_ANON_KEY);
-    xhr.setRequestHeader("Content-Type", input.contentType);
-    xhr.setRequestHeader("Cache-Control", "max-age=3600");
     xhr.setRequestHeader("x-upsert", "false");
+    if (!signed) {
+      xhr.setRequestHeader("Content-Type", input.contentType);
+      xhr.setRequestHeader("Cache-Control", "max-age=3600");
+    }
     xhr.upload.onprogress = (event) => {
       arm();
       if (event.lengthComputable && event.total > 0) input.onProgress?.(event.loaded / event.total);
@@ -89,23 +100,38 @@ function once(url: string, token: string, input: UploadInput): Promise<UploadRes
     if (input.signal?.aborted) return onAbort();
     input.signal?.addEventListener("abort", onAbort, { once: true });
     arm();
-    xhr.send(input.body);
+    if (signed) {
+      /* The form the storage client sends for a signed upload: the file under
+         an empty field name, and the cache lifetime. The browser sets the
+         multipart boundary itself. */
+      const form = new FormData();
+      form.append("cacheControl", "3600");
+      form.append("", input.body, (input.body as File).name ?? "upload");
+      xhr.send(form);
+    } else {
+      xhr.send(input.body);
+    }
   });
 }
 
 export async function uploadToStorage(input: UploadInput): Promise<UploadResult> {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return { ok: false, reason: "offline" };
   let token: string | null = null;
-  try {
-    const { data } = await input.supabase.auth.getSession();
-    token = data.session?.access_token ?? null;
-  } catch {
-    token = null;
+  /* A signed upload carries its own authority, so it needs no session. */
+  if (!input.signedToken) {
+    try {
+      const { data } = await input.supabase.auth.getSession();
+      token = data.session?.access_token ?? null;
+    } catch {
+      token = null;
+    }
+    if (!token) return { ok: false, reason: "signed-out" };
   }
-  if (!token) return { ok: false, reason: "signed-out" };
 
   const encoded = input.path.split("/").map(encodeURIComponent).join("/");
-  const url = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(input.bucket)}/${encoded}`;
+  const url = input.signedToken
+    ? `${SUPABASE_URL}/storage/v1/object/upload/sign/${encodeURIComponent(input.bucket)}/${encoded}?token=${encodeURIComponent(input.signedToken)}`
+    : `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(input.bucket)}/${encoded}`;
 
   let last: UploadResult = { ok: false, reason: "failed" };
   for (let attempt = 0; attempt < ATTEMPTS; attempt++) {

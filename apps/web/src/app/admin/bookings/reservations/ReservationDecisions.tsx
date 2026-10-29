@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideReservationAsAdmin } from "@/lib/admin/bookings-actions";
 import type { ReservationDecision } from "@/lib/admin/schema";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The three things an operator can do to a table, and the sentence first.
@@ -52,7 +53,7 @@ export function ReservationDecisions({
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (offers.length === 0) return null;
 

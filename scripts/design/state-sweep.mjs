@@ -123,7 +123,8 @@ for (const file of walk(SRC)) {
     }
     if (match[1] === "State" || match[1] === "StateMoment") {
       const kind = literal(tag, "kind");
-      if (kind && NEEDING.has(kind) && !hasProp(tag, "primary") && !hasProp(tag, "action") && !hasProp(tag, "actions")) {
+      /* A compact state is a quiet line inside a card whose own controls are the way onward. */
+      if (kind && NEEDING.has(kind) && !hasProp(tag, "compact") && !hasProp(tag, "primary") && !hasProp(tag, "action") && !hasProp(tag, "actions")) {
         fail(file, `${kind === "error" || kind === "empty" || kind === "offline" ? "an" : "a"} ${kind} state with no way onward`);
       }
     }
