@@ -35,6 +35,7 @@ export function startRing(opts: { sound?: boolean; vibrate?: boolean } = {}): ()
   let ctx: AudioContext | null = null;
 
   const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  const previousType = session?.type;
   try {
     if (session) session.type = "ambient";
   } catch {
@@ -89,6 +90,12 @@ export function startRing(opts: { sound?: boolean; vibrate?: boolean } = {}): ()
     for (const name of events) document.removeEventListener(name, resume, true);
     window.clearInterval(timer);
     ringBuzz(false);
+    /* Ambient cannot record: hand the session back so the mic can open. */
+    try {
+      if (session && previousType !== undefined) session.type = previousType === "ambient" ? "auto" : previousType;
+    } catch {
+      /* Read-only on some builds. */
+    }
     void ctx?.close().catch(() => undefined);
     ctx = null;
   };
