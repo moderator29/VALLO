@@ -17,7 +17,7 @@ import {
   useDeviceSaved,
   type SavePlaceTarget,
 } from "@/components/app/SaveControl";
-import { ShareSheet } from "@/components/app/messages/ShareSheet";
+import { ShareSheet, type ShareQrCopy } from "@/components/app/messages/ShareSheet";
 import type { SharedKind } from "@/components/app/messages/share";
 import { createShareLink } from "@/lib/share/actions";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -26,6 +26,7 @@ import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { CompareToggle } from "@/components/app/compare/CompareToggle";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
@@ -94,6 +95,7 @@ export function ListingActions({
   initialSaved = false,
   shareKind = "listing",
   place,
+  shareQr,
 }: {
   listingId: string;
   title: string;
@@ -113,6 +115,8 @@ export function ListingActions({
    * listing and restaurant pages both carry listing ids and leave this alone.
    */
   shareKind?: SharedKind;
+  /** The words of the QR row in the share sheet (backlog row 13); only a place with a share door shows it. */
+  shareQr?: ShareQrCopy;
 }) {
   const signInHref = useSignInHref();
   /*
@@ -343,6 +347,14 @@ export function ListingActions({
           runs at all and they arrive at sign-up with `?do=save` on the URL they
           came from.
         */}
+        {/* Backlog row 7: a platform listing can be set aside to compare. A
+            stay or a restaurant (`place`) has no comparison, so none is drawn. */}
+        {!place && shareKind === "listing" ? (
+          <CompareToggle
+            listingId={listingId}
+            className="grid h-11 w-11 place-items-center nf-icon-btn nf-icon-btn--round transition-transform active:scale-90 motion-reduce:transition-none"
+          />
+        ) : null}
         <AuthGate action="save">
           <button
             type="button"
@@ -386,6 +398,7 @@ export function ListingActions({
         id={listingId}
         title={title}
         onShareElsewhere={() => void shareElsewhere()}
+        {...(shareQr && doorable ? { qr: { copy: shareQr, door: mintDoor } } : {})}
         elsewhereBody={
           doorKind === "stay"
             ? t.frontDoor.share.elsewhereBodyStay

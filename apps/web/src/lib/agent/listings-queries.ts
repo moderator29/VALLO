@@ -8,6 +8,7 @@ import { SUPABASE_URL } from "../supabase/env";
 import { resolveSession } from "../actions/session";
 import { loadUnreadCounts } from "../messages/unread";
 import type { AgentProfile } from "./types";
+import { listingCompleteness, type Completeness } from "./completeness";
 import { hasBadge, toBadgeTier } from "../trust/badge-tier";
 import {
   AMENITY_CHOICES,
@@ -213,6 +214,8 @@ export type ListingSummary = {
   reviewNotes: string | null;
   /** SCUML item 17: owner, agent or firm. Optional so older fixtures still type. */
   listingRole?: "owner" | "agent" | "firm" | null;
+  /** Steps done out of steps (`lib/agent/completeness.ts`). Optional so older fixtures still type. */
+  completeness?: Completeness;
 };
 
 /** Everything the wizard needs to reopen a draft exactly as it was left. */
@@ -514,7 +517,47 @@ function toSummary(row: ListingWithChildren): ListingSummary {
     publishedAt: row.published_at ?? null,
     reviewNotes: row.review_notes,
     listingRole: row.listing_role ?? null,
+    completeness: completenessOf(row, photos),
   };
+}
+
+/** The meter's facts, read from the row the list already holds. */
+function completenessOf(row: ListingWithChildren, photos: ListingPhoto[]): Completeness {
+  return listingCompleteness({
+    gate: {
+      title: row.title,
+      description: row.description,
+      propertyType: row.property_type,
+      stateCode: row.state_code,
+      city: row.city,
+      area: row.area,
+      intent: row.listing_intent,
+      rentMinor: row.rent_amount_minor,
+      rentPeriod: row.rent_period,
+      rateMinor: row.rate_minor,
+      ratePeriod: row.rate_period,
+      salePriceMinor: row.sale_price_minor,
+      tenure: row.tenure,
+      bedrooms: row.bedrooms,
+      bathrooms: row.bathrooms,
+      amenityCount: (row.listing_amenities ?? []).length,
+      photoCount: photos.length,
+      videoCount: (row.listing_videos ?? []).length,
+      hasCover: photos.some((photo) => photo.position === 0),
+      moveInStatedMinor: row.total_move_in_cost_minor,
+      moveInPartsMinor: [
+        row.rent_amount_minor,
+        row.caution_deposit_minor,
+        row.service_charge_minor,
+        row.agency_fee_minor,
+        row.legal_fee_minor,
+        row.agreement_fee_minor,
+      ],
+    },
+    videoCount: (row.listing_videos ?? []).length,
+    utilitiesAnswered: Boolean(row.power_grid || row.power_backup || row.water_supply),
+    hasLandmark: Boolean((row.landmark ?? "").trim() || (row.address ?? "").trim()),
+  });
 }
 
 /** A number for an input: the value as typed, or an empty box. */

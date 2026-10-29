@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type VideoHTMLAttributes } from "react";
+import { refreshMediaUrl } from "@/lib/media/refresh-url";
 
 /**
  * A `<video>` THAT NEVER LEAVES A BLACK BOX (29 October 2026, the founder:
@@ -51,11 +52,16 @@ export function SafeVideo({
 }: SafeVideoProps) {
   const ref = useRef<HTMLVideoElement>(null);
   const retried = useRef(false);
+  const refreshed = useRef(false);
   const [failed, setFailed] = useState(!src);
+  /* The link in use: the one given, or a fresh one signed after it expired. */
+  const [live, setLive] = useState<string | null | undefined>(src);
 
   /* A new source is a fresh start. */
   useEffect(() => {
     retried.current = false;
+    refreshed.current = false;
+    setLive(src);
     setFailed(!src);
   }, [src]);
 
@@ -72,7 +78,7 @@ export function SafeVideo({
         }
       });
     }
-  }, [autoPlay, failed, src]);
+  }, [autoPlay, failed, live]);
 
   const onError = useCallback(() => {
     const el = ref.current;
@@ -82,10 +88,27 @@ export function SafeVideo({
       window.setTimeout(() => el.load(), 800);
       return;
     }
+    /* Still failing, and the link is a signed one (they last an hour): ask for
+       a fresh link once. A page left open, or one the service worker kept,
+       holds a link that has run out for a clip that is fine. */
+    if (!refreshed.current && live && live.includes("/object/sign/")) {
+      refreshed.current = true;
+      void refreshMediaUrl({ url: live.split("#")[0]! })
+        .then((answer) => {
+          if (answer.ok) {
+            retried.current = false;
+            setLive(answer.data.url);
+          } else {
+            setFailed(true);
+          }
+        })
+        .catch(() => setFailed(true));
+      return;
+    }
     setFailed(true);
-  }, []);
+  }, [live]);
 
-  if (failed || !src) {
+  if (failed || !live) {
     return (
       <div
         role="alert"
@@ -94,8 +117,8 @@ export function SafeVideo({
         style={{ display: "grid", placeItems: "center", gap: "var(--nf-space-xs)", padding: "var(--nf-space-md)", textAlign: "center" }}
       >
         <p className="nf-body-sm text-[var(--nf-content-secondary)]">{failedText}</p>
-        {src ? (
-          <a className="nf-body-sm font-semibold text-[var(--nf-brand-quiet)] underline" href={src} target="_blank" rel="noopener noreferrer">
+        {live ? (
+          <a className="nf-body-sm font-semibold text-[var(--nf-brand-quiet)] underline" href={live} target="_blank" rel="noopener noreferrer">
             {openText}
           </a>
         ) : null}
@@ -106,7 +129,7 @@ export function SafeVideo({
   return (
     <video
       ref={ref}
-      src={withFirstFrame(src, poster, preload)}
+      src={withFirstFrame(live, poster, preload)}
       poster={poster}
       preload={preload}
       autoPlay={autoPlay}

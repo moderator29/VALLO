@@ -16,15 +16,15 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 4 | Share to WhatsApp from listings, stays, posts and invites | Exists | H | L | review copy |
 | 5 | Saved searches with alerts | Exists | H | M | review |
 | 6 | Price drop alerts on saved places | Exists | H | M | review |
-| 7 | Compare listings side by side | Partial (compare appears in code, not as a tray) | H | M | 3 |
+| 7 | Compare listings side by side | **Built 29 Oct** (compare tray on every member page, "Add to compare" on the listing page and the card menu, `/compare?ids=` page; shares the Saved compare table) | H | M | done |
 | 8 | Recently viewed shelf | Exists (few call sites) | M | L | 6 |
 | 9 | Command palette (Cmd K) on desktop | Exists (member keys) | M | M | review |
 | 10 | Keyboard shortcuts on desktop | Exists (`MemberKeys`) | M | L | document them in Help |
 | 11 | Data saver mode | Exists | H | M | review |
 | 12 | Offline pack of saved screens | Exists (service worker, kept pages) | H | M | measure |
-| 13 | QR code for a listing or an invite | Partial | M | L | 5 |
+| 13 | QR code for a listing or an invite | **Built 29 Oct** (invite already had one; the listing share sheet now draws a QR of the share door, in the browser) | M | L | done |
 | 14 | Add a viewing or a stay to the phone calendar (.ics) | Exists | M | L | review |
-| 15 | Listing completeness meter for hosts and agents | Partial | H | M | 2 |
+| 15 | Listing completeness meter for hosts and agents | **Built 29 Oct** (steps done out of eight on every card in My listings, with the one next step as a link; not a score) | H | M | done |
 | 16 | Host response time on a listing | Exists | H | M | review |
 | 17 | Undo toasts on destructive taps | Exists | M | L | audit coverage |
 | 18 | Pull to refresh on lists | Exists | M | L | review |
@@ -35,14 +35,14 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 23 | Quick filters strip (price, beds, type) | Exists | H | L | review |
 | 24 | Skeleton states for every list | Mostly | M | M | audit with the five width sweep |
 | 25 | Verified by mechanism badges with a "how" sheet | Exists | H | M | keep claims test green |
-| 26 | Rent affordability line ("move in total as a share of monthly income") | New | H | M | 8 |
+| 26 | Rent affordability line ("move-in total as a share of monthly income") | **Built 29 Oct** (arithmetic only on a tenancy page, income typed by the reader and kept on their device) | H | M | done |
 | 27 | Neighbourhood notes: power, water, security reported by members | New | H | H | 12 |
-| 28 | Generator and power backup filter and badge | Partial (amenity) | H | L | 9 |
+| 28 | Generator and power backup filter and badge | Exists (the filter drawer has Backup power and Band A; the card and the page say it) | H | L | done, found already built |
 | 29 | Move-in checklist (keys, meter, agreement) | New | M | M | 13 |
 | 30 | Pay rent in instalments schedule view (read only) | New | H | H | needs money design |
 | 31 | Verified phone and NIN status on a host card (mechanism stated) | Exists | H | M | review |
 | 32 | Re-share a listing to a group with one tap and a short link | Partial | M | L | 10 |
-| 33 | "Last updated" and "still available" on every listing | Partial | H | M | 11 |
+| 33 | "Last updated" and "still available" on every listing | **Built 29 Oct** ("Confirmed available 3 days ago" beside "Listed 12 days ago" while the lister's confirmation is under 30 days old; migration `20261029134320` grants the date to anon) | H | M | done |
 | 34 | Viewing reminder 2 hours before, with the host's number hidden until confirmed | Exists | H | M | review |
 | 35 | Saved places collections ("Lagos shortlist") | Partial | M | M | 14 |
 | 36 | Voice note in messages | New | M | M | 15 |
@@ -66,6 +66,19 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 54 | Referral leaderboard (private, own rank only) | New | L | L | none, risks gaming |
 | 55 | Pidgin language option | New | M | H | founder decision |
 | 56 | Weekly "new near you" digest email | Partial | M | M | 28 |
+
+## Built on 29 October 2026 (Fork D), and what is left of the order
+
+Done, each with tests, both themes and axe where it draws: 7, 13, 15, 26, 33
+(28 turned out to exist already). Not built, in the order to take them:
+
+| Next | Rows | Note |
+|---|---|---|
+| 1 | 8 recently viewed shelf | Exists with few call sites; a sweep, not a build |
+| 2 | 32 re-share to a group with a short link | Partial; the share door exists |
+| 3 | 20 report a problem on any screen | Partial; `ReportSheet` exists, add the entry point |
+| 4 | 35 saved collections, 38 photo drag and drop, 39 bulk reply templates, 40 agent hours | Each is M or L with no dependency |
+| Skipped | 30, 37, 55 | Need a design or provider decision from the founder; 54 is deliberately not built |
 
 ## How to read the priorities
 

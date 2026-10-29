@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 import { getDictionary } from "@vallo/i18n";
 import {
   STALE_AFTER_DAYS,
+  confirmedAge,
+  confirmedAgeText,
   isNewSince,
   lagosDaysBetween,
   listedAge,
+  listedAgeBesideConfirmation,
   listedAgeText,
   staleMonthOptions,
 } from "./listed-age";
@@ -52,5 +55,39 @@ describe("listed age (V-22)", () => {
     expect(isNewSince("2026-09-20T00:00:00Z", visit)).toBe(false);
     expect(isNewSince("2026-09-22T00:00:00Z", null)).toBe(false);
     expect(isNewSince(undefined, visit)).toBe(false);
+  });
+});
+
+describe("confirmedAge (backlog row 33)", () => {
+  const now = new Date("2026-10-29T10:00:00+01:00");
+  const iso = (d: string) => `${d}+01:00`;
+
+  it("says today, yesterday and days, while recent", () => {
+    expect(confirmedAge(iso("2026-10-29T08:00:00"), iso("2026-09-01T09:00:00"), now)).toEqual({ kind: "today" });
+    expect(confirmedAge(iso("2026-10-28T08:00:00"), iso("2026-09-01T09:00:00"), now)).toEqual({ kind: "yesterday" });
+    expect(confirmedAge(iso("2026-10-24T08:00:00"), iso("2026-09-01T09:00:00"), now)).toEqual({ kind: "days", days: 5 });
+  });
+
+  it("says nothing when absent, unparseable, in the future, old, or the day it went live", () => {
+    expect(confirmedAge(null, null, now)).toBeNull();
+    expect(confirmedAge("not a date", null, now)).toBeNull();
+    expect(confirmedAge(iso("2026-10-30T20:00:00"), null, now)).toBeNull();
+    expect(confirmedAge(iso("2026-09-01T08:00:00"), iso("2026-08-01T09:00:00"), now)).toBeNull();
+    expect(confirmedAge(iso("2026-10-27T11:00:00"), iso("2026-10-27T09:00:00"), now)).toBeNull();
+  });
+
+  it("words the three kinds", () => {
+    const copy = { today: "T", yesterday: "Y", days: "{n} days" };
+    expect(confirmedAgeText({ kind: "today" }, copy)).toBe("T");
+    expect(confirmedAgeText({ kind: "yesterday" }, copy)).toBe("Y");
+    expect(confirmedAgeText({ kind: "days", days: 9 }, copy)).toBe("9 days");
+  });
+
+  it("a stale listed age beside a fresh confirmation reads as plain days, never 'not confirmed since'", () => {
+    const published = iso("2026-07-01T09:00:00");
+    expect(listedAgeBesideConfirmation(published, null, now)?.kind).toBe("stale");
+    const beside = listedAgeBesideConfirmation(published, { kind: "days", days: 3 }, now);
+    expect(beside).toEqual({ kind: "days", days: 120 });
+    expect(listedAgeBesideConfirmation(iso("2026-10-20T09:00:00"), { kind: "today" }, now)).toEqual({ kind: "days", days: 9 });
   });
 });

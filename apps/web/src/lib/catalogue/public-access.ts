@@ -34,6 +34,8 @@ export const PUBLIC_CATALOGUE_SEGMENTS: ReadonlySet<string> = new Set([
   "listing",
   "stay",
   "restaurant",
+  /* The compare page: published listings side by side, from ids in the address. */
+  "compare",
 ]);
 
 /** How many catalogue pages one address may open signed out per window. */

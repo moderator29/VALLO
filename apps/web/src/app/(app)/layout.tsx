@@ -18,6 +18,7 @@ import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";
 import { OfflineTray } from "@/components/app/OfflineTray";
+import { CompareTray } from "@/components/app/compare/CompareTray";
 import { WidgetBridge } from "@/components/app/WidgetBridge";
 import { ContrastSync } from "@/components/app/account/ContrastSync";
 import { MemberKeys } from "@/components/app/MemberKeys";
@@ -30,6 +31,10 @@ import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/P
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
+import { redirect } from "next/navigation";
+import { resolveSession } from "@/lib/actions/session";
+import { phoneOwedAtSignup } from "@/lib/phone-otp/signup-gate-server";
+import { SIGNUP_PHONE_PATH } from "@/lib/phone-otp/signup-gate";
 /* C12: the feed's motion sheet, out of `globals.css`; only this tree draws a post. */
 import "@/app/css/feed-m.css";
 
@@ -93,6 +98,14 @@ export default async function AppLayout({
   /* The startup track (13 October 2026): the gate's key read joins it, for
      the same reason. It used to wait for the gate's decision, in series. */
   void passkeyOfferedThisRequest();
+  /* A NEW ACCOUNT CONFIRMS A MOBILE NUMBER FIRST (29 October 2026): an account
+     made after the rollout, with a vendor wired and no confirmed number, goes
+     to the step before any member screen. Older accounts answer from their
+     own `created_at` with no read (`lib/phone-otp/signup-gate-server.ts`). */
+  const gateSession = await resolveSession();
+  if (gateSession.state === "signed-in" && (await phoneOwedAtSignup(gateSession.supabase, gateSession.user))) {
+    redirect(SIGNUP_PHONE_PATH);
+  }
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
   /*
@@ -151,6 +164,8 @@ export default async function AppLayout({
       <MemberKeys />
       {/* V-40: what was done offline is sent, and what was paid is resolved. */}
       <OfflineTray />
+      {/* Backlog row 7: places set aside to compare, wherever the reader is. */}
+      <CompareTray />
       {/* V-98: the home-screen widget's token, in the native app only. */}
       <WidgetBridge />
       {/* VC1: incoming calls on any page, and the one call surface, only

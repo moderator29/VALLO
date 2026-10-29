@@ -336,6 +336,9 @@ const EXPECTED_PUBLIC = new Set([
   /* B-2: "Finish setting up". Public like every door so it can never loop;
      the page itself sends somebody signed out to sign in. */
   "/sign-up/finish",
+  /* The phone step of signing up: a door like the others, the page sends
+     somebody signed out to sign in and somebody with nothing owed on. */
+  "/sign-up/phone",
   "/start",
   "/welcome",
   /* The share door (V-07): one card, area only, one button into sign in. */
