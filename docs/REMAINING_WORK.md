@@ -31,6 +31,9 @@ or a real account can prove it. Nothing here is merged to `main`.
 | 2.4 Broken pictures everywhere | One guard in the root layout (`ImageFallbackGuard`): any failed `<img>` becomes a quiet tile, including ones that failed before the page woke |
 | 2.1 Sheet as a desktop dialog | From 64 rem with a mouse a bottom sheet is a centred dialog; phone, tablet, side panel and page sheets unchanged |
 | 2.1 Master-detail for messages | Already existed (`nf-msg-split`, inbox pane beside the thread) |
+| 29 Oct: payments partner never named to members | "Our licensed payments partner" platform-wide (wallet, held payments, receipts, chargebacks, three languages); a guard test stops it returning; staff-only admin and code identifiers keep the name |
+| 29 Oct: Copy address and Open in Maps | On the listing, stay and restaurant map panels; copies only what the page already shows (the area for a home; the exact address stays private until a viewing is confirmed); the map link uses the area point |
+| 29 Oct: 01-cleanup-now.sql parts 1 to 3 | Run by Seyi; cron job active, test functions and retired objects gone, live replacements intact |
 | Extra: social links | Facebook, Instagram, TikTok, LinkedIn as blue and white icons in the footer (landing and all public pages), Contact and Settings, plus `sameAs` |
 | Hygiene | Tests, lint and gates green (13,660 tests, 0 lint errors); fixed red items left from before |
 
@@ -48,11 +51,10 @@ or a real account can prove it. Nothing here is merged to `main`.
 
 | # | Item (brief section) | Why it is open |
 |---|---|---|
-| 1 | Apply `01-cleanup-now.sql` parts 1 to 3 (0.3) | **Blocked on the connector.** It stops on any `DELETE` or `DROP` and asks a confirmation that never reaches the session, twice. Approve the Supabase prompt when it appears, or paste the file in the dashboard SQL editor. Part 4 (old renter passport) waits for the deploy |
+| 1 | ~~Apply `01-cleanup-now.sql` parts 1 to 3 (0.3)~~ | **Done 29 October by Seyi in the dashboard and confirmed in the database.** (Was blocked on the connector.) It stops on any `DELETE` or `DROP` and asks a confirmation that never reaches the session, twice. Approve the Supabase prompt when it appears, or paste the file in the dashboard SQL editor. Part 4 (old renter passport) waits for the deploy |
 | 6 | Research current best practice with web search (2.1 step 2) | Not done |
 | 8 | Light theme rebuild in `tokens.css`: surface layers, solid blue, contrast checks, dark-only assets (2.2) | Not done; public pages looked right, signed-in ones unseen |
 | 9 | Stickers, icons, empty states, skeletons audit and one consistent set (2.3) | Not done |
-| 9b | Provider naming ("Payluk holds it") in member copy (3.1) | Left: it is a legal disclosure of who holds the money and tests police it; a founder and lawyer decision |
 | 11 | Native biometry type via the Capacitor plugin (2.5) | Needs a native build |
 | 12 | Containers, buttons, forms, sheets audit; logo placement audit; landing page redesign; remove backend-only labels from the front end (2.6) | Not done |
 | 13 | Country code picker in the phone screen (3.1) | Nigeria only: the server accepts Nigerian numbers only, so a picker would be a control that cannot act |

@@ -5281,6 +5281,8 @@ export const en = {
         tabMap: "Map",
         mapLead: "The area. The exact address comes with your confirmation.",
         mapLeadTable: "The area. The full address is in your reservation.",
+        copyAddress: "Copy address",
+        openInMaps: "Open in Maps",
         area: "Area",
         photoTour: "Photo tour",
         photos: "{count} photographs",

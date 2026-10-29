@@ -3690,3 +3690,13 @@
     height: 1rem;
   }
 }
+
+/* Copy address and Open in Maps, under a place's line (PlaceActions.tsx). */
+@layer components {
+  .nf-place-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin-top: var(--nf-space-xs);
+  }
+}

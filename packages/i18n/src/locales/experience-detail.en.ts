@@ -57,6 +57,8 @@ export const experienceDetailEn = {
     previewHint: "Walkthrough video",
     photoTour: "Photo tour",
     photoTourHint: "{count} photographs",
+    copyAddress: "Copy address",
+    openInMaps: "Open in Maps",
   },
   /* The shelf at the foot of a listing: real listings like this one, from the
      same catalogue search reads. Drawn only when there is at least one. */

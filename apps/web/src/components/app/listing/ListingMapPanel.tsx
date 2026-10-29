@@ -3,6 +3,7 @@
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AreaMapTile } from "@/components/app/maps/AreaMapTile";
 import { usePhotoViewer } from "./PhotoViewer";
+import { PlaceActions } from "./PlaceActions";
 
 /**
  * THE LISTING'S MAP TAB (the founder's travel-app set, 7 October: "a route
@@ -28,6 +29,8 @@ export type ListingMapCopy = {
   previewHint: string;
   photoTour: string;
   photoTourHint: string;
+  copyAddress: string;
+  openInMaps: string;
 };
 
 export function ListingMapPanel({
@@ -65,11 +68,13 @@ export function ListingMapPanel({
             <span className="min-w-0">{where}</span>
           </div>
           <p className="nf-lmap__note">{copy.areaOnly}</p>
+          <PlaceActions text={where} point={point} copyLabel={copy.copyAddress} mapsLabel={copy.openInMaps} />
         </div>
       ) : (
         <div className="nf-lmap__card nf-lmap__place">
           <UiIcon name="location" size={16} className="nf-lmap__glyph" />
           <span className="min-w-0">{where}</span>
+          <PlaceActions text={where} point={null} copyLabel={copy.copyAddress} mapsLabel={copy.openInMaps} />
         </div>
       )}
 
