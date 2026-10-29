@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { resolveSession } from "@/lib/actions/session";
-import { FIRST_RUN_COOKIE, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
+import { firstRunCookieFrom, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
 import { isShellRequest, shellStartPath } from "@/lib/native/shell";
 
 /**
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
    * decided here rather than by pointing `server.url` at a path.
    */
   if (isShellRequest({ userAgent: request.headers.get("user-agent"), app: url.searchParams.get("app") })) {
-    const seen = isFirstRunSeen((await cookies()).get(FIRST_RUN_COOKIE)?.value);
+    const seen = isFirstRunSeen(firstRunCookieFrom((await headers()).get("cookie")));
     const start = shellStartPath({ signedIn, firstRunSeen: seen });
     return NextResponse.redirect(new URL(start, request.url), { status: 307 });
   }

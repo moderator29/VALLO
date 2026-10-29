@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/i18n/public-metadata";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { FIRST_RUN_COOKIE } from "@/components/app/welcome/first-run-seen";
+import { firstRunCookieFrom } from "@/components/app/welcome/first-run-seen";
 import { hasSessionCookie, signInFirstRunRedirect } from "./first-run-gate";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
@@ -45,7 +45,7 @@ export default async function SignInPage({
      founder, 7 October). Never a signed-in member. */
   const jar = await cookies();
   const firstRun = signInFirstRunRedirect({
-    cookie: jar.get(FIRST_RUN_COOKIE)?.value,
+    cookie: firstRunCookieFrom((await headers()).get("cookie")),
     signedIn: hasSessionCookie(jar.getAll().map((c) => c.name)),
     params,
   });

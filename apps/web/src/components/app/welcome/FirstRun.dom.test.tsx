@@ -197,7 +197,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("Get started", () => {
     try {
       const f = await facts(page);
       await page.getByRole("button", { name: f.skip, exact: true }).click();
-      expect(await routerCalls(page)).toEqual([["push", "/sign-up"]]);
+      /* A door always carries the passed flag, so it can never bounce back here. */
+      expect(await routerCalls(page)).toEqual([["push", "/sign-up?welcomed=1"]]);
       expect(await seenCookie(page)).toBe(true);
     } finally {
       await close();

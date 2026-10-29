@@ -6,9 +6,9 @@ import { resolveProviderStates } from "@/lib/auth/providers";
 import { requestSurface } from "@/lib/auth/surface";
 import { phoneSignInEnabled } from "@/lib/auth/phone-sign-in-flag";
 import { SignUpOptions } from "@/components/auth/SignUpOptions";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { FIRST_RUN_COOKIE } from "@/components/app/welcome/first-run-seen";
+import { firstRunCookieFrom } from "@/components/app/welcome/first-run-seen";
 import { doorFirstRunRedirect, hasSessionCookie } from "../sign-in/first-run-gate";
 import { safeReturnPath } from "@/lib/security/return-path";
 
@@ -56,7 +56,7 @@ export default async function SignUpPage({
   const jar = await cookies();
   const firstRun = doorFirstRunRedirect({
     door: "/sign-up",
-    cookie: jar.get(FIRST_RUN_COOKIE)?.value,
+    cookie: firstRunCookieFrom((await headers()).get("cookie")),
     signedIn: hasSessionCookie(jar.getAll().map((c) => c.name)),
     params,
   });
