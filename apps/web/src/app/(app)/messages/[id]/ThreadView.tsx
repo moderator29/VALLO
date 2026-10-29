@@ -457,7 +457,7 @@ export function ThreadView({
   scamCopy,
   dayKitCopy,
   sheetCopy,
-  personLine = [],
+  personLine: personLineRaw = [],
   personLabel,
   sinceLine = null,
   recordLine = [],
@@ -936,6 +936,8 @@ export function ThreadView({
      words are on the context card below, so they come from one place. In seed
      mode there is no dictionary, and the English is the fallback rather than
      the source. */
+  /* "Phone confirmed" is not said inside a conversation (29 October 2026, the founder: clean and mature): the header names who it is. */
+  const personLine = personLineRaw.filter((fact) => fact.key !== "phone");
   const words = threadCopy?.context;
   const contextLine =
     context?.kind === "reservation" && context.reservation && threadCopy
@@ -1038,7 +1040,7 @@ export function ThreadView({
   };
 
   return (
-    <div className="nf-thread mx-auto w-full max-w-3xl px-gutter">
+    <div className="nf-thread px-gutter">
       {/* ------------------------------------------------------- header */}
       <header
         className={`nf-thread__head${inspected || ceremony ? " nf-page-header--verified" : ""}`}
@@ -1104,7 +1106,8 @@ export function ThreadView({
           </h1>
           {/* Said once. The context card under a property header already
               carries "Rental enquiry", and the render does not repeat it. */}
-          {!propertyFace && (
+          {/* A plain direct message names no context: "Direct message" under every name said nothing. */}
+          {!propertyFace && (context?.kind === "booking" || context?.kind === "reservation" || context?.kind === "listing") && (
             <p className="nf-thread__context">
               {contextGlyph !== "chat-bubble" ? (
                 <UiIcon name={contextGlyph} size={14} className="shrink-0" />
