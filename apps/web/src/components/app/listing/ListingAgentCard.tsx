@@ -95,6 +95,7 @@ export function ListingAgentCard({
   lister,
   call,
   className,
+  hours,
 }: {
   verified: boolean;
   t: Dictionary;
@@ -115,10 +116,11 @@ export function ListingAgentCard({
   /** A live call button (`ListerCallButton`), when the page can place a call. */
   call?: ReactNode;
   className?: string;
+  hours?: string | null;
 }) {
   const copy = t.catalogue.detail;
   if (lister) {
-    return <ListedByCard lister={lister} t={t} messageHref={messageHref} call={call} className={className} />;
+    return <ListedByCard lister={lister} t={t} messageHref={messageHref} call={call} className={className} hours={hours ?? null} />;
   }
   /* THE RULE LIVES IN `lister-role.ts` AND NOT HERE, because nothing that
      imports a `.tsx` file can be tested under this vitest config, and a rule
@@ -191,12 +193,15 @@ function ListedByCard({
   messageHref,
   call,
   className,
+  hours,
 }: {
   lister: ListerCard;
   t: Dictionary;
   messageHref: string;
   call?: ReactNode;
   className?: string;
+  /** "Mon to Fri, 9:00 to 18:00." when the agent has set hours. */
+  hours?: string | null;
 }) {
   const copy = t.catalogue.detail;
   const roleLabel = lister.role ? t.socialProfile.roleLine[lister.role] : null;
@@ -233,6 +238,11 @@ function ListedByCard({
         {roleLabel && lister.name && (
           <span className="nf-lister__role" data-testid="lister-role-word" data-role={lister.role ?? undefined}>
             {roleLabel}
+          </span>
+        )}
+        {hours && (
+          <span className="nf-lister__role" data-testid="lister-hours">
+            Usually available: {hours}
           </span>
         )}
       </span>

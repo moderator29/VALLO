@@ -17,7 +17,7 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 5 | Saved searches with alerts | Exists | H | M | review |
 | 6 | Price drop alerts on saved places | Exists | H | M | review |
 | 7 | Compare listings side by side | **Built 29 Oct** (compare tray on every member page, "Add to compare" on the listing page and the card menu, `/compare?ids=` page; shares the Saved compare table) | H | M | done |
-| 8 | Recently viewed shelf | Exists (few call sites) | M | L | 6 |
+| 8 | Recently viewed shelf | **Built 30 Oct** (stays and restaurants join the recently viewed memory, each opening at its own page) | M | L | done |
 | 9 | Command palette (Cmd K) on desktop | Exists (member keys) | M | M | review |
 | 10 | Keyboard shortcuts on desktop | Exists (`MemberKeys`) | M | L | document them in Help |
 | 11 | Data saver mode | Exists | H | M | review |
@@ -29,7 +29,7 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 17 | Undo toasts on destructive taps | Exists | M | L | audit coverage |
 | 18 | Pull to refresh on lists | Exists | M | L | review |
 | 19 | Copy address / open in maps | Partial | M | L | 4 |
-| 20 | Report a problem on any screen | Partial | M | L | 7 |
+| 20 | Report a problem on any screen | **Built 30 Oct** (Settings, Help, "Report a problem" files a support ticket of kind problem with the screen named) | M | L | done |
 | 21 | Language switch (English, Yoruba, Hausa, Igbo) | Exists | H | M | translations still English in places |
 | 22 | Map and list kept in sync while panning | Exists in search | M | M | review |
 | 23 | Quick filters strip (price, beds, type) | Exists | H | L | review |
@@ -41,15 +41,15 @@ the order to build, 1 first. Nothing in the "New" rows was built in the
 | 29 | Move-in checklist (keys, meter, agreement) | New | M | M | 13 |
 | 30 | Pay rent in instalments schedule view (read only) | New | H | H | needs money design |
 | 31 | Verified phone and NIN status on a host card (mechanism stated) | Exists | H | M | review |
-| 32 | Re-share a listing to a group with one tap and a short link | Partial | M | L | 10 |
+| 32 | Re-share a listing to a group with one tap and a short link | **Built 30 Oct** (the share sheet sends the short share link to a WhatsApp group in one tap) | M | L | done |
 | 33 | "Last updated" and "still available" on every listing | **Built 29 Oct** ("Confirmed available 3 days ago" beside "Listed 12 days ago" while the lister's confirmation is under 30 days old; migration `20261029134320` grants the date to anon) | H | M | done |
 | 34 | Viewing reminder 2 hours before, with the host's number hidden until confirmed | Exists | H | M | review |
-| 35 | Saved places collections ("Lagos shortlist") | Partial | M | M | 14 |
+| 35 | Saved places collections ("Lagos shortlist") | **Built 30 Oct** (named lists on Saved over listings, stays and tables; migration `20261030101036`) | M | M | done |
 | 36 | Voice note in messages | New | M | M | 15 |
 | 37 | Auto-translate a message to the reader's language | New | M | H | 20 |
-| 38 | Photo order drag and drop for hosts | Partial | M | M | 16 |
-| 39 | Bulk reply templates for agents | New | M | L | 17 |
-| 40 | Agent availability hours on profile | New | M | L | 18 |
+| 38 | Photo order drag and drop for hosts | **Built 30 Oct** (drag or buttons to reorder host photographs; migration `20261030101303`) | M | M | done |
+| 39 | Bulk reply templates for agents | **Built 30 Oct** (saved replies in agent settings, shown as chips above the message box; migration `20261030101535`) | M | L | done |
+| 40 | Agent availability hours on profile | **Built 30 Oct** (hours in agent settings, shown on the listing as "Usually available"; same migration) | M | L | done |
 | 41 | "Is this price fair" band from area price pages | Partial (`/areas`) | H | M | 19 |
 | 42 | Dark and light follow the system for first run only | Exists (default dark by ruling) | L | L | none |
 | 43 | Large text and high contrast settings | Exists (`ContrastSync`) | M | L | review |

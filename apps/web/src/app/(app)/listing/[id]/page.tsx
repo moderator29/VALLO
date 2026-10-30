@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { forProofStrip } from "@/lib/i18n/slice";
 import { StillAvailable } from "@/components/app/listing/StillAvailable";
 import { readRecentlyLet } from "@/lib/availability/queries";
+import { readListingAgentHoursLine } from "@/lib/agent/hours-read";
 import { readViewingSlots } from "@/lib/viewings/queries";
 import { readOpenInspectionFor } from "@/lib/inspections/queries";
 import { ViewingSlots } from "@/components/app/inspections/ViewingSlots";
@@ -406,6 +407,7 @@ export default async function ListingDetailPage({
     neighboursFlag,
     access,
     recentlyLet,
+    agentHours,
     doorDeclared,
     listerCard,
     ownershipSeen,
@@ -456,6 +458,8 @@ export default async function ListingDetailPage({
     /* V-14's "recently let" line, for a rental. PERF-SWEEP 3: read with the
        rest rather than in series while the page renders. */
     isRental ? readRecentlyLet(listing.id) : Promise.resolve(null),
+    /* An agent's own "usually available" hours, when they set any. */
+    listing.listerRole === "agent" ? readListingAgentHoursLine(listing.id) : Promise.resolve(null),
     /* V-57: what a nightly stay declared for the door, so the reserve panel
        states every cost before booking, as the hotel stay page does. */
     isBookable && !listing.isDemo ? readDeclaration({ listingId: listing.id }) : Promise.resolve(null),
@@ -987,6 +991,7 @@ export default async function ListingDetailPage({
       listingRole={listing.listerRole ?? null}
       lister={listerCard}
       call={callButton}
+      hours={agentHours}
     />
   );
 
@@ -1692,6 +1697,7 @@ export default async function ListingDetailPage({
                       messageHref={messageHref}
                       lister={listerCard}
                       call={callButton}
+                      hours={agentHours}
                       className="nf-lister--flat"
                     />
                   ) : null}

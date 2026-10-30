@@ -30,6 +30,7 @@
  * cannot claim somebody else's object.
  */
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { withBusinessPrivate } from "../supabase/private-fields";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -1008,6 +1009,55 @@ export async function removeAccommodationPhoto(input: unknown): Promise<ActionRe
 
   refreshPropertySurfaces();
   return ok(null);
+}
+
+/* ------------------------------------------------ the order of photographs */
+
+const reorderSchema = z.object({
+  subjectId: z.uuid(),
+  photoIds: z.array(z.uuid()).min(1).max(10),
+});
+
+const REORDER_FAILED = "We could not save the new order just now. Please try again in a moment.";
+
+async function reorderPhotos(
+  fn: "reorder_accommodation_photos" | "reorder_business_photos",
+  input: unknown,
+): Promise<ActionResult<null>> {
+  const parsed = validate(reorderSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  if (new Set(parsed.data.photoIds).size !== parsed.data.photoIds.length) return fail(REORDER_FAILED);
+
+  const session = await resolveSession();
+  if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
+  if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  /* One statement inside the caller's own RLS (the function is security
+     invoker and the positions' unique is deferred), so another host's
+     photographs do not move and a half-applied order cannot be saved. */
+  const rpc = session.supabase.rpc as unknown as (
+    name: string,
+    args: Record<string, unknown>,
+  ) => PromiseLike<{ error: unknown }>;
+  const { error } = await rpc.call(session.supabase, fn, {
+    ...(fn === "reorder_business_photos" ? { p_business: parsed.data.subjectId } : { p_accommodation: parsed.data.subjectId }),
+    p_ids: parsed.data.photoIds,
+  });
+  if (error) return fail(REORDER_FAILED);
+
+  if (fn === "reorder_business_photos") refreshVenueSurfaces();
+  else refreshPropertySurfaces();
+  return ok(null);
+}
+
+/** Save the order of a property's photographs; the first is the cover. */
+export async function reorderAccommodationPhotos(input: unknown): Promise<ActionResult<null>> {
+  return reorderPhotos("reorder_accommodation_photos", input);
+}
+
+/** Save the order of a venue's photographs; the first is the cover. */
+export async function reorderBusinessPhotos(input: unknown): Promise<ActionResult<null>> {
+  return reorderPhotos("reorder_business_photos", input);
 }
 
 /* ------------------------------------------------------ nightly inventory */
