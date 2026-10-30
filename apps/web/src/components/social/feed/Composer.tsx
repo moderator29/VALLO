@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { initial as initialOf } from "@/lib/text/initial";
+/* The composer's own look (`nf-compose-who` and the page bar) lives here. It used to arrive only with a PostCard, so a composer opened before any post had loaded drew unstyled: the face collapsed into a bare "?" beside "You" (29 October 2026). */
+import "./feed-v2.css";
 import { Segmented } from "@/components/ui/Segmented";
 import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
@@ -508,7 +510,9 @@ export function Composer({
             {you?.avatarUrl ? (
               <RemoteImage src={you.avatarUrl} alt="" width={88} height={88} sizes="44px" />
             ) : (
-              <span className="nf-compose-who__monogram">{initialOf(you?.label)}</span>
+              <span className="nf-compose-who__monogram">
+                {you?.label ? initialOf(you.label) : <UiIcon name="user" size={20} />}
+              </span>
             )}
           </span>
           <span className="nf-compose-who__text">

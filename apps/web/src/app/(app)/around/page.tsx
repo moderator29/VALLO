@@ -159,7 +159,8 @@ export default async function AroundPage({
           label:
             profile.displayName ||
             [profile.firstName, profile.surname].filter(Boolean).join(" ") ||
-            profile.email,
+            profile.email ||
+            "",
           avatarUrl: profile.avatarUrl,
         }
       : null;

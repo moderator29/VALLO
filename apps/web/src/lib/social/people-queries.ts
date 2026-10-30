@@ -31,6 +31,7 @@ import "server-only";
 import { isSupabaseConfigured } from "../supabase/env";
 import { createClient } from "../supabase/server";
 import { resolveSession } from "../actions/session";
+import { passportNumber } from "../passport/identity";
 import { readPersonBadges, type BadgeTier } from "../trust/badge-tier";
 
 export type PersonRow = {
@@ -66,6 +67,10 @@ export type PeopleDirectory =
     };
 
 const LIMIT = 30;
+/** How many members a passport-number search compares against. */
+const CODE_SCAN = 5000;
+/** "V" and eight characters from the passport alphabet (see `passportNumber`). */
+const PASSPORT_CODE = /^V[0-9A-HJ-NP-Z]{8}$/;
 
 /**
  * PostgREST's `or` filter is a comma separated expression, so a comma or a
@@ -109,9 +114,17 @@ export async function findPeople(rawQuery: string): Promise<PeopleDirectory> {
      */
     const columns = "user_id, handle, display_label, avatar_path, is_agent, supply_role, bio, bio_status";
 
-    let read = supabase.from("social_profiles").select(columns).limit(LIMIT);
+    const asCode = query.toUpperCase();
+    const isCode = PASSPORT_CODE.test(asCode);
+    let read = supabase.from("social_profiles").select(columns).limit(isCode ? CODE_SCAN : LIMIT);
 
-    if (pattern) {
+    if (isCode) {
+      /* A Vallo passport number is derived from the member id, not stored, so
+         it cannot be an `ilike`. The directory is already limited to what
+         `social_profiles_select` lets this caller see (blocks removed), and the
+         number is compared exactly, so a code finds only its own member. */
+      read = read.order("handle_claimed_at", { ascending: false });
+    } else if (pattern) {
       /* The typed text appears only as an `ilike` value that `safePattern`
          has already stripped of the characters PostgREST reads as structure. */
       read = read.or(`handle.ilike.%${pattern}%,display_label.ilike.%${pattern}%`).order("handle");
@@ -136,6 +149,11 @@ export async function findPeople(rawQuery: string): Promise<PeopleDirectory> {
       bio: string | null;
       bio_status: string | null;
     }[];
+    if (isCode) {
+      const hit = rows.filter((row) => passportNumber(row.user_id) === asCode);
+      if (hit.length === 0) return nobody();
+      rows.splice(0, rows.length, ...hit);
+    }
     if (rows.length === 0) return nobody();
     /* The person whose @username is exactly what was typed comes first, then
        handles that start with it, then names that do: a search for "@ada"

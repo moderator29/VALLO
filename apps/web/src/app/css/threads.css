@@ -192,8 +192,38 @@
     color: var(--nf-brand-quiet);
   }
   .nf-thread__actions .nf-thread__call svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  /* Call and options sit together, and the tap targets overlap their empty
+     margins rather than drawing wide gaps. */
+  .nf-thread__actions {
+    gap: 0;
+  }
+  .nf-thread__actions .nf-btn--icon,
+  .nf-thread__actions .nf-thread__call {
+    min-width: 2rem;
+    width: 2rem;
+  }
+  .nf-thread__title > a {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: inherit;
+  }
+  .nf-thread__back {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    min-width: 2rem;
+    width: 2rem;
+    color: var(--nf-content-primary);
+  }
+  .nf-thread__back svg {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   /* -------------------------------------------------------- the scroller */

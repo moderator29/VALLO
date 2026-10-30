@@ -412,9 +412,9 @@ function roleTags(
  * brand tint when there is no photo (founder, 11 October 2026). Decorative:
  * the name is in the row above the bubble, and the run is announced by it.
  */
-function BubbleHead({ name, photoUrl }: { name: string | null; photoUrl: string | null }) {
-  return (
-    <span className="nf-msg__avatar" aria-hidden="true">
+function BubbleHead({ name, photoUrl, href }: { name: string | null; photoUrl: string | null; href?: string | null }) {
+  const face = (
+    <>
       {photoUrl ? (
         <RemoteImage src={photoUrl} alt="" width={36} height={36} sizes="36px" className="h-full w-full object-cover" />
       ) : name ? (
@@ -422,6 +422,18 @@ function BubbleHead({ name, photoUrl }: { name: string | null; photoUrl: string 
       ) : (
         <UiIcon name="user" size={20} />
       )}
+    </>
+  );
+  if (href) {
+    return (
+      <a href={href} className="nf-msg__avatar" aria-label={name ? `Open ${name}'s profile` : "Open profile"}>
+        {face}
+      </a>
+    );
+  }
+  return (
+    <span className="nf-msg__avatar" aria-hidden="true">
+      {face}
     </span>
   );
 }
@@ -1048,7 +1060,7 @@ export function ThreadView({
         {/* The shared back control. A thread is the most deep-linked screen in
             the product (every push lands here): opened cold it goes to the
             inbox, opened from a listing or a booking it goes back there. */}
-        <BackControl fallback="/messages" surface="plate" />
+        <BackControl fallback="/messages" surface="bare" className="nf-thread__back" />
         {/*
           The mark in the lit ring. On a stay thread it is the counterpart and
           it carries their verified state, because the person you are talking
@@ -1095,7 +1107,11 @@ export function ThreadView({
         )}
         <div className="min-w-0 flex-1">
           <h1 className={`nf-thread__title${propertyFace ? " nf-thread__title--place" : ""}`}>
-            <span className="min-w-0">{propertyFace && listing ? listing.title : counterpartName}</span>
+            {!propertyFace && counterpartHandle ? (
+              <a href={`/u/${counterpartHandle}`} className="min-w-0">{counterpartName}</a>
+            ) : (
+              <span className="min-w-0">{propertyFace && listing ? listing.title : counterpartName}</span>
+            )}
             {/* The one shared renderer, from the one published tier. It used to be a
                 `verified-badge` glyph gated on a boolean that was actually the
                 LISTING's verified flag; see the note at this call site in
@@ -1409,12 +1425,12 @@ export function ThreadView({
               }${continues ? " nf-msg--cont" : ""}`}
             >
               {m.mine ? (
-                <span className="nf-msg__side" aria-hidden="true">
-                  <BubbleHead name={meName} photoUrl={meAvatarUrl} />
+                <span className="nf-msg__side">
+                  <BubbleHead name={meName} photoUrl={meAvatarUrl} href="/profile" />
                   {tags && <span>{tags.mine}</span>}
                 </span>
               ) : (
-                <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} />
+                <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} href={counterpartHandle ? `/u/${counterpartHandle}` : null} />
               )}
 
               <div
@@ -1572,7 +1588,7 @@ export function ThreadView({
             a reply lands in, driven by the real broadcast above. */}
         {counterpartTyping && (
           <div className="nf-msg nf-msg-in--theirs">
-            <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} />
+            <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} href={counterpartHandle ? `/u/${counterpartHandle}` : null} />
             <div
               className="nf-bubble nf-bubble--theirs flex items-center gap-inline-tight"
               role="status"

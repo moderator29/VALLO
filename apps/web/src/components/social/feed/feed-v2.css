@@ -489,6 +489,7 @@
     pointer-events: auto;
   }
   .nf-pc .nf-pc__place {
+    min-block-size: 2.8rem;
     margin: 0;
     min-inline-size: 0;
     max-inline-size: 70%;
@@ -737,9 +738,66 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  /* The story composer wears the same rounded container as a post's picture. */
+  /* The story composer is a full page, like Instagram and Snapchat: a near-black
+     layer over the shell, the picture full bleed, close at the top left and
+     Share at the bottom right. */
+  .nf-story-form {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    background: var(--nf-overlay-media-deep);
+    color: var(--nf-content-on-media);
+  }
   .nf-story-form .nf-story-compose {
-    border-radius: var(--nf-radius-island);
+    flex: 1;
+    aspect-ratio: auto;
+    min-block-size: 0;
+    max-block-size: none;
+    border: 0;
+    border-radius: 0;
+    padding-block-end: 5.5rem;
+  }
+  .nf-story-form .nf-story-compose__swap {
+    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-space-sm));
+    inset-inline-end: var(--nf-space-md);
+  }
+  .nf-story-form .nf-story-compose__card {
+    inline-size: min(100%, 40rem);
+    margin-inline: auto;
+  }
+  .nf-story-form__close {
+    position: absolute;
+    z-index: 3;
+    inset-block-start: calc(env(safe-area-inset-top, 0px) + var(--nf-space-sm));
+    inset-inline-start: var(--nf-space-md);
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 0;
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-smoked-glass-fill);
+    color: var(--nf-content-on-media);
+  }
+  .nf-story-form .nf-story-form__share {
+    position: absolute;
+    z-index: 3;
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-md));
+    inset-inline-end: var(--nf-space-md);
+    min-inline-size: 7rem;
+    border-radius: var(--nf-radius-pill);
+  }
+  .nf-story-form > label,
+  .nf-story-form > [role="alert"] {
+    position: absolute;
+    z-index: 3;
+    inset-inline: var(--nf-space-md);
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+  }
+  .nf-story-form > [role="alert"] {
+    inset-block-end: calc(env(safe-area-inset-bottom, 0px) + 9rem);
   }
   /* The page's bar: Cancel at the left, a clear Post button at the right. */
   .nf-compose-page .nf-compose-page__send {
