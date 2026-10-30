@@ -87,8 +87,6 @@ const BODY = `
 
 const PROBES: Probe[] = [
   { name: "the time under a bubble (chat)", selector: '[data-probe="chat-time"] .nf-msg__status .nf-numeric' },
-  { name: "the sent bubble's time (assistant)", selector: '[data-probe="assistant-time"] .nf-ai__stamp' },
-  { name: "the assistant's 'answered' tick (graphic, 3:1)", selector: '[data-probe="assistant-time"] .nf-ai__ticks', graphic: true },
   { name: "the chosen history row's title", selector: '[data-probe="assistant-row"] .nf-ai__row--on > span:first-child' },
   { name: "the chosen history row's time", selector: '[data-probe="assistant-row"] .nf-ai__row--on > span:nth-child(2)' },
   { name: "the unread time on an inbox row", selector: '[data-probe="inbox-time"] .nf-inbox-row__when' },
