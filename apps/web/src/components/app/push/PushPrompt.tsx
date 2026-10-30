@@ -131,6 +131,7 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
           failureMessage(outcome.reason, {
             iosHomeScreenApp: onIosHomeScreenApp(),
             where: "prompt",
+            reference,
           }) + (reference ? ` (Reference: ${reference}.)` : ""),
         signIn: outcome.reason === "signed_out",
       });
