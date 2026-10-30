@@ -91,8 +91,12 @@ export function readSeverity(n: {
  * feed), keyed by the record's own address; everything else stays one row
  * each, because two bookings are two things.
  */
-export function bundleKey(n: { kind: string; href: string | null }): string | null {
+export function bundleKey(n: { kind: string; href: string | null; title?: string }): string | null {
   if (!n.href) return null;
+  /* A ring or a missed call is not a message: it bundles only with calls. */
+  if (n.kind === "message" && n.title && /^(?:incoming|missed) (?:voice|video) call\b/i.test(n.title.trim())) {
+    return `call:${n.href.split("?")[0]}`;
+  }
   if (n.kind === "message" || n.kind === "social") return `${n.kind}:${n.href.split("?")[0]}`;
   return null;
 }
@@ -100,7 +104,7 @@ export function bundleKey(n: { kind: string; href: string | null }): string | nu
 export type Bundle<T> = { key: string; lead: T; rows: T[] };
 
 /** Group rows into bundles, keeping the order of each bundle's newest row. */
-export function bundle<T extends { id: string; kind: string; href: string | null }>(rows: readonly T[]): Bundle<T>[] {
+export function bundle<T extends { id: string; kind: string; href: string | null; title?: string }>(rows: readonly T[]): Bundle<T>[] {
   const out: Bundle<T>[] = [];
   const at = new Map<string, Bundle<T>>();
   for (const row of rows) {

@@ -29,7 +29,9 @@ import {
   FAMILY_TONE,
   familyOf,
   figureIn,
+  glyphOf,
   groupByObject,
+  isCallRow,
   type NotificationFamily,
 } from "./family";
 
@@ -462,10 +464,10 @@ function Section({
 
 /* --------------------------------------------------------------------- rows */
 
-function plateFor(family: NotificationFamily) {
+function plateFor(family: NotificationFamily, n?: NotificationItem) {
   return (
     <IconPlate size="sm" shape="round" tone={FAMILY_TONE[family]}>
-      <UiIcon name={FAMILY_GLYPH[family]} size={ICON_PLATE_GLYPH.sm} />
+      <UiIcon name={n ? glyphOf(n) : FAMILY_GLYPH[family]} size={ICON_PLATE_GLYPH.sm} />
     </IconPlate>
   );
 }
@@ -493,7 +495,7 @@ function FigureLine({ n, locale }: { n: NotificationItem; locale: Locale }) {
 function RowBody({ n, c, locale, family }: { n: NotificationItem; c: Copy; locale: Locale; family: NotificationFamily }) {
   return (
     <>
-      <span className="nf-list-row__lead">{plateFor(family)}</span>
+      <span className="nf-list-row__lead">{plateFor(family, n)}</span>
       <span className="nf-list-row__text">
         <span className="nf-list-row__title">{n.title}</span>
         {n.body ? <span className="nf-list-row__sub nf-notif__body">{n.body}</span> : null}
@@ -558,7 +560,7 @@ function GroupRow({
   const family = familyOf(lead);
   const unread = rows.filter((r) => !r.read).length;
   const title =
-    family === "messages" && lead.href?.startsWith("/") && /messages/.test(lead.href)
+    family === "messages" && !isCallRow(lead) && lead.href?.startsWith("/") && /messages/.test(lead.href)
       ? plural(rows.length, c.group.messages, locale)
       : lead.title;
   return (
@@ -572,7 +574,7 @@ function GroupRow({
         data-testid="notification-bundle"
         data-family={family}
       >
-        <span className="nf-list-row__lead">{plateFor(family)}</span>
+        <span className="nf-list-row__lead">{plateFor(family, lead)}</span>
         <span className="nf-list-row__text">
           <span className="nf-list-row__title">{title}</span>
           <span className="nf-list-row__sub nf-notif__body">{lead.body || lead.title}</span>
