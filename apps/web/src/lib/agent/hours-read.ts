@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "../supabase/server";
+import { reportReadError } from "../observability/read-error";
 import { hoursLine, readSchedule } from "./hours";
 
 /**
@@ -17,7 +18,11 @@ export async function readListingAgentHoursLine(listingId: string): Promise<stri
       args: { p_listing: string },
     ) => PromiseLike<{ data: unknown; error: unknown }>;
     const { data, error } = await rpc("listing_agent_hours", { p_listing: listingId });
-    return error ? null : hoursLine(readSchedule(data));
+    if (error) {
+      await reportReadError("read.agent.listing_agent_hours", error);
+      return null;
+    }
+    return hoursLine(readSchedule(data));
   } catch {
     return null;
   }
