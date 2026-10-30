@@ -139,24 +139,15 @@ describe("every role gets its own version", () => {
   it("gives the undeclared reader the general version, not a lesser one", () => {
     const general = welcome({ name: "Ada" });
     expect(general.html).toBe(welcome({ name: "Ada", role: null }).html);
-    expect(flat(general.text)).toMatch(/Look for a home/);
-    expect(flat(general.text)).toMatch(/Find somewhere to stay/);
-    expect(flat(general.text)).toMatch(/Have property to let or sell/);
+    expect(flat(general.text)).toContain("Hello Ada.");
   });
 
-  it.each(ALL)("$role numbers three first steps and one lit button", ({ message }) => {
-    expect(flat(message.text)).toMatch(/1\. .+ 2\. .+ 3\. /);
+  it.each(ALL)("$role keeps to a greeting, one line and one lit button", ({ message }) => {
     // One primary action, drawn twice: once as VML for classic Outlook and
     // once as the HTML anchor everyone else gets.
-    expect(message.html.split("Step inside").length - 1).toBe(2);
+    expect(message.html).toContain("Step inside");
     expect(message.html).toContain("v:roundrect");
     expect(message.html).toContain("<!--[if !mso]><!-->");
-  });
-
-  it("the buyer's version still refuses to vouch for a title", () => {
-    const text = flat(welcome({ role: "buyer" }).text);
-    expect(text).toMatch(/cannot verify it/i);
-    expect(text).toMatch(/land registry/i);
   });
 });
 
@@ -246,19 +237,6 @@ describe("every statement has evidence in the code", () => {
     }
   });
 
-  it("says what verification actually shows, where it is offered", () => {
-    for (const role of ["landlord", "seller", "agent"] as const) {
-      expect(flat(welcome({ role }).text)).toContain(
-        "Once a person at Vallo has checked your identity, your listings carry the verified tick.",
-      );
-    }
-  });
-
-  it("describes the agent registration as the form asks it", () => {
-    const text = flat(welcome({ role: "agent" }).text);
-    expect(text).toContain("how long you have done this and what you charge");
-    expect(text).toContain("A person at Vallo reads every registration before you can publish.");
-  });
 });
 
 describe("it is built to survive a mail client", () => {
@@ -300,8 +278,7 @@ describe("it is built to survive a mail client", () => {
     const blind = visible(message.html.replace(/<img\b[^>]*>/g, ""));
     expect(blind).toContain("Vallo");
     expect(blind).toContain("Step inside");
-    expect(blind).toContain("Where to begin");
-    expect(blind.length).toBeGreaterThan(800);
+    expect(blind.length).toBeGreaterThan(150);
   });
 
   it.each(ALL)("$role draws the one flat brand-blue button, with a Word fallback", ({ message }) => {

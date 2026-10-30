@@ -66,10 +66,10 @@ export function ProgressPath({
           <>
             <span className="nf-path__tile" aria-hidden="true">
               {step.tile ? (
-                // A decorative 256px render shown at 44px: a plain img keeps it
+                // A decorative 256px render shown at 32px: a plain img keeps it
                 // out of the image optimiser's queue on every wizard step.
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={step.tile} alt="" width={44} height={44} loading="lazy" decoding="async" />
+                <img src={step.tile} alt="" width={32} height={32} loading="lazy" decoding="async" />
               ) : (
                 <span className="nf-path__tilenum nf-numeric">{number}</span>
               )}

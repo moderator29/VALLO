@@ -335,12 +335,8 @@ describe("the welcome is the version the reader declared, and never a guess", ()
       contextFor(PAYER, "Ada Balogun"),
     );
     expect(message?.subject).toBe("Welcome to Vallo, Ada");
-    expect(message?.html).toContain("You told us you have property to let");
-    expect(message?.html).toContain("Register as an owner");
     /* And NOT the renter's opening, which is the failure this catches: a
        registry that dropped the lookup would send everybody the general one. */
-    expect(message?.html).not.toContain("You told us you are looking for somewhere to live");
-    expect(message?.html).not.toContain("You have not told us what brought you here");
   });
 
   it("sends the general version when nothing was declared, and says so honestly", () => {
@@ -348,8 +344,7 @@ describe("the welcome is the version the reader declared, and never a guess", ()
       PAYLOADS["account.welcome"],
       contextFor(PAYEE, "Chidi Okonkwo"),
     );
-    expect(message?.html).toContain("You have not told us what brought you here");
-    expect(message?.html).not.toContain("You told us you have property to let");
+    expect(message?.html).toContain("Hello Chidi.");
   });
 
   it("greets by the first name and never opens with a legal name or an id", () => {

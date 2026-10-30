@@ -28,6 +28,10 @@ vi.mock("next/headers", () => ({
     get: (name: string) => jar.find((cookie) => cookie.name === name),
     getAll: () => jar,
   }),
+  /* The raw header, which is what the first-run read uses (every copy of the cookie). */
+  headers: async () => ({
+    get: (name: string) => (name === "cookie" ? jar.map((c) => `${c.name}=${c.value}`).join("; ") || null : null),
+  }),
 }));
 
 /** The session that never answers: a slow or unreachable GoTrue. */

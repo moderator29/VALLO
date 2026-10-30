@@ -378,18 +378,12 @@
    * face is the night glass it was drawn on, and the object's own ground
    * steps back so there is no square inside the circle.
    * ---------------------------------------------------------------- */
-  :root[data-theme="light"] .nf-side-switch__ring:not(:where([data-theme="dark"] *)) {
-    background:
-      radial-gradient(80% 70% at 50% 20%, var(--nf-night-tile-glow), transparent 72%),
-      var(--nf-night-tile-ground);
-    border-color: var(--nf-night-tile-rim);
-    box-shadow:
-      0 1px 2px var(--nf-shade-1),
-      0 6px 14px -6px var(--nf-night-tile-bloom);
-  }
+  /* Paper: only the icon. No disc, no ring, no night ground. */
+  :root[data-theme="light"] .nf-side-switch__ring:not(:where([data-theme="dark"] *)),
   :root[data-theme="light"] .nf-side-switch__coin:not(:where([data-theme="dark"] *)) {
-    background: var(--nf-night-tile-face);
-    box-shadow: inset 0 0 0 1px var(--nf-night-tile-rim);
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
   }
   :root[data-theme="light"] .nf-side-switch__coin :is(.nf-brand-icon-ground, .nf-icon-tile) {
     background: none;

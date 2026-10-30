@@ -46,7 +46,12 @@ function fakeDb(opts: { phone?: boolean; prior?: number; fail?: boolean } = {}) 
     return { data: opts.fail ? null : opts.phone ? { user_id: MEMBER } : null, error: a.error };
   };
   chain.then = (resolve: (v: unknown) => unknown) => resolve(answer());
-  return { from: () => chain };
+  /* The caller's paid deposits and plans, counted by one definer function. */
+  const rpc = async () => {
+    const a = answer();
+    return { data: a.error ? null : 0, error: a.error };
+  };
+  return { from: () => chain, rpc };
 }
 
 beforeEach(() => {

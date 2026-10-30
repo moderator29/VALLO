@@ -3554,7 +3554,7 @@ export const yo: Dictionary = withFallback({
           name: "Orúkọ kíkún",
           phone: "Nọ́mbà fóònù",
           nin: "Nọ́mbà Ìdánimọ̀ Orílẹ̀-èdè (NIN)",
-          ninHint: "Nọ́mbà mọ́kànlá. O lè fi kun nígbà mìíràn bí kò bá sí lọ́wọ́ rẹ báyìí.",
+          ninHint: "Nọ́mbà mọ́kànlá.",
           assurance: "Ẹnìkan ní Vallo máa ń ka ìbéèrè rẹ, àti gbogbo ìpolówó, kí a tó tẹ ohunkóhun jáde.",
         },
         where: {

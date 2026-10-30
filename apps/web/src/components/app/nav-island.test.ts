@@ -53,21 +53,19 @@ describe("the dock", () => {
     expect(label).toContain("font-weight: 600");
   });
 
-  it("draws the round \"+\" at the right end, 60px, that turns a quarter into its own close", () => {
-    /* It fills the round button, which is `--nf-dock-round` (60px; 52px under 380px). */
-    expect(rule(".nf-dock-plus")).toMatch(/width: var\(--nf-dock-round, 3\.75rem\);\s*height: var\(--nf-dock-round, 3\.75rem\);/);
-    expect(shell).toMatch(/\.nf-dockrow \{\s*--nf-dock-round: 3\.75rem;/);
-    expect(shell).toMatch(/max-width: 379\.98px\) \{\s*\.nf-dockrow \{\s*--nf-dock-round: 3\.25rem;/);
-    expect(css).toMatch(/\.nf-dock-create\[aria-expanded="true"\] \.nf-dock-plus \{\s*transform: rotate\(90deg\);/);
-    expect(dock).toContain("nf-dock-plus__glyph--close");
-    expect(dock).toContain('className="nf-dock-create"');
+  it("draws no round \"+\" at the right end: the Create sheet opens from the header (29 October 2026)", () => {
+    /* The founder: "that + remove it like remove it in any area in my app". */
+    expect(shell).toMatch(/\.nf-dockrow \{\s*--nf-dock-round: 0rem;/);
+    expect(dock).not.toContain('className="nf-dock-create"');
+    expect(dock).toContain("CREATE_OPEN_EVENT");
+    expect(bar).not.toContain('className="nf-dockcreate"');
   });
 
   it("keeps the menu in the capsule's centre slot and opens its tray centred above the capsule", () => {
     /* The swap (13 October 2026): the menu is a slot of the capsule... */
     expect(bar).toMatch(/<li key="menu" className="nf-tab nf-tab--switch">\s*<DockMore/);
-    /* ...and the "+" is the control after the capsule, in the round slot. */
-    expect(bar.indexOf("</ul>")).toBeLessThan(bar.indexOf('className="nf-dockcreate"'));
+    /* ...and nothing follows the capsule: the "+" is gone. */
+    expect(bar).not.toContain('className="nf-dockcreate"');
     /* Nothing in the slot is a positioned box, so the tray anchors to the capsule. */
     expect(shell).toMatch(/\.nf-tabbar \.nf-tab--switch \{\s*position: static;/);
     expect(shell).toMatch(/\.nf-dockmore \{\s*position: static;/);
@@ -105,7 +103,7 @@ describe("the side navigation", () => {
     expect(tree).toContain("title={collapsed ? item.label : undefined}");
   });
 
-  it("keeps the workspace coin on its dark ground by day", () => {
-    expect(css).toMatch(/:root\[data-theme="light"\] \.nf-nav \.nf-side-switch__coin \{\s*background: var\(--nf-surface-artwork\);/);
+  it("draws only the bare icon for the workspace coin by day", () => {
+    expect(css).toMatch(/:root\[data-theme="light"\] \.nf-nav \.nf-side-switch__coin \{\s*background: none;/);
   });
 });

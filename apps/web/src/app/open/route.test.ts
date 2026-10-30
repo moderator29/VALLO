@@ -24,6 +24,13 @@ vi.mock("next/headers", () => ({
       ...(firstRunValue ? [{ name: "vallo_first_run", value: firstRunValue }] : []),
     ],
   }),
+  /* The raw header, which is what the first-run read uses (every copy of the cookie). */
+  headers: async () => ({
+    get: (name: string) =>
+      name === "cookie"
+        ? [...cookieNames.map((n) => `${n}=x`), ...(firstRunValue ? [`vallo_first_run=${firstRunValue}`] : [])].join("; ") || null
+        : null,
+  }),
 }));
 
 /* Mirrors the private constant in route.ts; Next allows no extra route exports. */

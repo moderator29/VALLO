@@ -275,12 +275,6 @@ describe("the messages that carry a promise", () => {
     });
     expect(flat(m.text)).toMatch(/do not carry money/i);
   });
-
-  it("the welcome for a buyer refuses to vouch for a title", () => {
-    const m = welcome({ role: "buyer" });
-    expect(flat(m.text)).toMatch(/cannot verify it/i);
-    expect(flat(m.text)).toMatch(/land registry/i);
-  });
 });
 
 describe("the lock-screen helpers", () => {

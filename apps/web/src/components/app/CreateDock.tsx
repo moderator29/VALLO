@@ -2,7 +2,7 @@
 
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import type { Side } from "@/lib/side.constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -50,6 +50,18 @@ import { useRootFlag } from "@/lib/ui/root-flag";
  * `data-dock-create` marks the button for tests and screenshots, so neither
  * depends on a class name.
  */
+/**
+ * The event that opens the Create sheet from anywhere (the header's compose
+ * button). The round "+" that used to sit at the dock's right end is gone (29
+ * October 2026, the founder: "that + remove it like remove it in any area in
+ * my app"); the sheet and every option in it stay, opened from the header.
+ */
+export const CREATE_OPEN_EVENT = "vallo:create-open";
+
+export function openCreateSheet(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(CREATE_OPEN_EVENT));
+}
+
 export function CreateDock({
   t,
   listHref,
@@ -74,6 +86,12 @@ export function CreateDock({
   /* `data-create-dock` on <html>: the feed's floating bloom steps aside for
      the dock's own plus (social-feed.css, lib/ui/root-flag.ts). */
   useRootFlag("create-dock");
+  /* Opened by the header's compose button (`openCreateSheet`). */
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener(CREATE_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(CREATE_OPEN_EVENT, onOpen);
+  }, []);
   const copy = t.nav.create;
   const stays = side === "stays";
 
@@ -105,28 +123,6 @@ export function CreateDock({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-label={copy.trigger}
-        className="nf-dock-create"
-        data-dock-create=""
-      >
-        {/* THE CENTRE TURNS INTO ITS OWN CLOSE (north star 6.1): the disc
-            rotates 90 degrees as its sheet opens while the plus crossfades
-            to a close mark (nav-island.css). */}
-        <span className="nf-dock-plus" aria-hidden="true">
-          <span className="nf-dock-plus__glyph nf-dock-plus__glyph--open">
-            <UiIcon name="plus" size="md" />
-          </span>
-          <span className="nf-dock-plus__glyph nf-dock-plus__glyph--close">
-            <UiIcon name="close" size="md" />
-          </span>
-        </span>
-      </button>
-
       <Sheet
         open={open}
         onOpenChange={setOpen}

@@ -9,7 +9,6 @@ import type { MiniListing } from "@/lib/site/listing-card";
 import "@/app/css/landing-plasma.css";
 import { Hero } from "./Hero";
 import { Markets } from "./Markets";
-import { DealStory } from "./DealStory";
 import { TrustLayer } from "./TrustLayer";
 import { LandingFaq } from "./LandingFaq";
 import { FinalCta } from "./FinalCta";
@@ -169,7 +168,6 @@ export function LandingBody({
       */}
       <Hero t={t} locale={locale} door={door} />
       <Markets t={t} door={door} />
-      <DealStory t={t} locale={locale} />
       <TrustLayer t={t} locale={locale} />
       <LandingFaq t={t} nonce={nonce} />
       <FinalCta t={t} native={native} />

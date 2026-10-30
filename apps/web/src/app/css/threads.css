@@ -192,8 +192,36 @@
     color: var(--nf-brand-quiet);
   }
   .nf-thread__actions .nf-thread__call svg {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  /* Call and options sit together, and the tap targets overlap their empty
+     margins rather than drawing wide gaps. */
+  .nf-thread__actions {
+    gap: 0;
+  }
+  .nf-thread__actions .nf-btn--icon,
+  .nf-thread__actions .nf-thread__call {
+    margin-inline: -0.375rem;
+  }
+  .nf-thread__title > a {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: inherit;
+  }
+  .nf-thread__back {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    margin-inline-start: -0.5rem;
+    color: var(--nf-content-primary);
+  }
+  .nf-thread__back svg {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 
   /* -------------------------------------------------------- the scroller */
@@ -252,6 +280,7 @@
     margin-top: calc(var(--nf-space-3xs) - var(--nf-gap-row));
   }
   .nf-msg--cont > .nf-msg__avatar,
+  .nf-msg--cont > .nf-msg__hit,
   .nf-msg--cont > .nf-msg__side {
     visibility: hidden;
   }
@@ -263,6 +292,7 @@
    * than removed, the way a continuation keeps it.
    */
   .nf-msg--card > .nf-msg__avatar,
+  .nf-msg--card > .nf-msg__hit,
   .nf-msg--card > .nf-msg__side {
     visibility: hidden;
   }
@@ -295,6 +325,16 @@
   /* The small avatar beside a bubble, in a thinner ring than the header's:
      the person's photo, or their initial on the brand tint (founder, 11
      October 2026). */
+  /* The avatar is a profile link: a 44px target around the 36px photo,
+     pulled back so the row keeps its measure. */
+  .nf-msg__hit {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.25rem;
+  }
   .nf-msg__avatar {
     display: grid;
     place-items: center;

@@ -10,6 +10,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { AppRail } from "./AppRail";
 import { isFocusedRoute, isImmersiveRoute, showsTabBar } from "./MobileTabBar";
 import { ShellDock } from "./ShellDock";
+import { openCreateSheet } from "./CreateDock";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AuthGateProvider, SignedOutActions } from "@/components/auth/AuthGate";
 import { sideOfPath, sideOfPlansQuery, type Side } from "@/lib/side.constants";
@@ -392,31 +393,47 @@ export function AppShell({
               </span>
             )}
             <SignedOutActions t={t} className="ms-auto" />
-            {signedIn && BELL_PATHS.has(pathname ?? "") && (
-              <>
-                {/* Fetched whole, so the bell opens the list with no skeleton:
-                    about 11 KB on the wire, kept for five minutes. */}
-                <WholePrefetchLink
-                  href="/notifications"
-                  aria-label={
-                    marked
-                      ? t.a11y.notificationsUnread.replace("{count}", String(unreadNotifications))
-                      : t.nav.notifications
-                  }
-                  /* `ms-auto` in place of the removed spacer. On a signed-in
-                     header `SignedOutActions` renders null, so this is the
-                     first item after the brand and it is the one that has to
-                     push the group right. */
-                  className="nf-tap nf-icon-btn nf-icon-btn--round nf-app-header__btn ms-auto"
-                >
-                  <UiIcon name="bell" size={20} />
-                  {marked && <span aria-hidden="true" className="nf-app-header__dot" />}
-                </WholePrefetchLink>
+            {signedIn && (BELL_PATHS.has(pathname ?? "") || (!immersive && showsTabBar(active))) && (
+              /* `ms-auto` on the group: on a signed-in header
+                 `SignedOutActions` renders null, so this is the first item
+                 after the brand and it is the one that has to push right. */
+              <div className="ms-auto flex items-center gap-inline-tight">
+                {!immersive && showsTabBar(active) && (
+                  /* CREATE, FROM THE HEADER (29 October 2026). The round "+"
+                     at the dock's end is gone; this opens the same Create
+                     sheet (post, story, list a place, book). A pencil, the
+                     compose mark X, Telegram and WhatsApp use. */
+                  <button
+                    type="button"
+                    onClick={openCreateSheet}
+                    aria-label={t.nav.create.trigger}
+                    aria-haspopup="dialog"
+                    className="nf-tap nf-icon-btn nf-icon-btn--round nf-app-header__btn"
+                    data-testid="header-create"
+                  >
+                    <UiIcon name="pencil" size={20} />
+                  </button>
+                )}
+                {BELL_PATHS.has(pathname ?? "") && (
+                  /* Fetched whole, so the bell opens the list with no skeleton:
+                     about 11 KB on the wire, kept for five minutes. */
+                  <WholePrefetchLink
+                    href="/notifications"
+                    aria-label={
+                      marked
+                        ? t.a11y.notificationsUnread.replace("{count}", String(unreadNotifications))
+                        : t.nav.notifications
+                    }
+                    className="nf-tap nf-icon-btn nf-icon-btn--round nf-app-header__btn"
+                  >
+                    <UiIcon name="bell" size={20} />
+                    {marked && <span aria-hidden="true" className="nf-app-header__dot" />}
+                  </WholePrefetchLink>
+                )}
                 {/* NO AVATAR HERE (Track M, 25 September 2026). The founder
                     took the round photograph out of the header: the drawer
-                    opens on the person, and the dock carries Profile, so the
-                    header keeps one job on the right, the bell. */}
-              </>
+                    opens on the person, and the dock carries Profile. */}
+              </div>
             )}
           </div>
         </header>

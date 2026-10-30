@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { resolveSessionClaims } from "@/lib/actions/session";
 import { signedOutStart } from "@/lib/catalogue/public-access";
-import { FIRST_RUN_COOKIE, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
+import { firstRunCookieFrom, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
 
 /**
  * WHERE THE NATIVE APP OPENS (STORE-04).
@@ -75,8 +75,7 @@ async function signedInWithDeadline(): Promise<boolean> {
 
 /** This device has been shown the onboarding (`first-run-seen.ts`). */
 async function onboardingSeen(): Promise<boolean> {
-  const jar = await cookies();
-  return isFirstRunSeen(jar.getAll().find(({ name }) => name === FIRST_RUN_COOKIE)?.value);
+  return isFirstRunSeen(firstRunCookieFrom((await headers()).get("cookie")));
 }
 
 export const dynamic = "force-dynamic";

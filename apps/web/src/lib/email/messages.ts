@@ -269,6 +269,8 @@ export function verificationCode(data: VerificationCodeData): EmailMessage {
   const copy = data.copy ?? mailEn;
   const m = copy.verificationCode;
   const minutes = data.expiresInMinutes;
+  /* BRIEF (29 October 2026, the founder: "short, clean, only the code"): the
+     heading, one line, the code, one line. Nothing to click. */
   return message(
     "verificationCode",
     fill(m.subject, { code: data.code }),
@@ -278,10 +280,9 @@ export function verificationCode(data: VerificationCodeData): EmailMessage {
       paragraph(fill(m.lead, { hello: helloIn(copy, data.name) })),
       code(data.code),
       paragraph(fill(m.expiry, { minutes })),
-      note(m.note),
       englishLine(data.locale ?? DEFAULT_LOCALE, mailEn.verificationCode.securityInEnglish),
     ],
-    [m.footerWhy, m.footerNever],
+    [m.footerNever],
   );
 }
 
@@ -298,32 +299,29 @@ export type PasswordResetData = MailLanguage & {
 };
 
 /**
- * The password reset: a link, and the code beside it.
+ * The password reset: the code, and two short lines (29 October 2026, the
+ * founder: a long email with a raw address in it looks like spam).
  *
- * THIS ONE HAS A BUTTON AND THE CODE EMAIL DOES NOT, WHICH IS A DECISION
- * RATHER THAN AN INCONSISTENCY. The link is the one-tap way through, and the
- * session it creates is what `updatePassword` acts on.
- *
- * THE CODE IS HERE BECAUSE THE LINK ONLY WORKS WHERE IT WAS ASKED FOR. It is
- * a PKCE link: `/auth/callback` exchanges it with a verifier held by the
- * browser that asked, so opened in a mail app's own browser, on another phone
- * or in another browser it reads as expired. The code works anywhere, typed
- * at `/forgot-password/code` (`verifyPasswordResetCode`). It is printed only
- * when the Send Email Hook was given the token; nothing is invented.
- *
- * The destination is also printed underneath, selectable. If a mail gateway
- * rewrites the anchor, a dead button with no address beneath it is a locked
- * account rather than an inconvenience.
+ * The code works on any device, typed at `/forgot-password/code`
+ * (`verifyPasswordResetCode`), which is where the forgot-password screen sends
+ * the person next. The one-tap link used to lead, but it is a PKCE link that
+ * only works in the browser that asked, so it read as expired in a mail app's
+ * own browser; the code never does. The link is drawn only when the hook was
+ * handed no code at all, so a reset can never arrive empty.
  *
  * Sent by `app/api/auth/email-hook` for a `recovery` action. With the hook
  * on, GoTrue sends nothing itself, so this is the only reset email.
  */
 export function passwordReset(data: PasswordResetData): EmailMessage {
-  const link = data.resetUrl || null;
   const otp = data.code || null;
+  /* The link is a fallback only for a hook call that carried no code. */
+  const link = otp ? null : data.resetUrl || null;
   const copy = data.copy ?? mailEn;
   const m = copy.passwordReset;
   const minutes = data.expiresInMinutes;
+  /* BRIEF (29 October 2026, the founder): the code and two short lines, no
+     link, no address printed out. The code works on any device at
+     `/forgot-password/code`, which is where "Forgot password" now leads. */
   return message(
     "passwordReset",
     /* No code in the subject: a reset code grants a password change, and a
@@ -333,12 +331,10 @@ export function passwordReset(data: PasswordResetData): EmailMessage {
     [
       heading(m.heading),
       paragraph(fill(m.lead, { hello: helloIn(copy, data.name) })),
+      otp ? code(otp) : null,
+      otp ? paragraph(fill(m.codeExpiry ?? mailEn.passwordReset.codeExpiry, { minutes })) : null,
       link ? button(m.button, link, true) : null,
       link ? paragraph(fill(m.linkExpiry, { minutes })) : null,
-      otp ? paragraph(link ? m.codeInstead : m.codeOnly) : null,
-      otp ? code(otp) : null,
-      otp && data.codeUrl ? paragraph(fill(m.codeWhere, { url: data.codeUrl, minutes })) : null,
-      note(m.note),
       englishLine(data.locale ?? DEFAULT_LOCALE, mailEn.passwordReset.securityInEnglish),
     ],
     [m.footerWhy],

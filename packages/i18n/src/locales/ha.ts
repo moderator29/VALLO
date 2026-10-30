@@ -3507,7 +3507,7 @@ export const ha: Dictionary = withFallback({
           name: "Cikakken suna",
           phone: "Lambar waya",
           nin: "Lambar Shaida ta Kasa (NIN)",
-          ninHint: "Lambobi goma sha ɗaya. Kana iya ƙara ta daga baya idan ba ka da ita yanzu.",
+          ninHint: "Lambobi goma sha ɗaya.",
           assurance: "Wani mutum a Vallo yana karanta takardar neman ka, da kowane jeri, kafin a wallafa komai.",
         },
         where: {

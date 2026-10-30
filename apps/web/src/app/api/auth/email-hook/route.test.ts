@@ -124,36 +124,17 @@ describe("the auth email hook", () => {
       };
     }
 
-    it("carries GoTrue's own link and the code, with where to type it", async () => {
+    it("carries the code alone, brief: no link and no address (29 October 2026)", async () => {
       const response = await post(recovery({ token: "482913", token_hash: "pkce_abc123", redirect_to: CALLBACK }));
       expect(response.status).toBe(200);
       expect(sent).toHaveLength(1);
       const message = sent[0]?.message;
-      /* The link is the one the dashboard template printed: verify, the
-         hash, the type, and our callback as the way back. */
-      const link = new URL("https://project.supabase.co/auth/v1/verify");
-      link.searchParams.set("token", "pkce_abc123");
-      link.searchParams.set("type", "recovery");
-      link.searchParams.set("redirect_to", CALLBACK);
-      expect(message?.text).toContain(link.toString());
       expect(message?.text).toContain("482913");
-      expect(message?.text).toContain("https://www.vallospaces.com/forgot-password/code");
+      expect(message?.text).not.toContain("/auth/v1/verify");
+      expect(message?.text).not.toContain("/forgot-password/code");
+      expect(message?.html).not.toContain("/auth/v1/verify");
       /* The code never rides in the subject, where a lock screen shows it. */
       expect(message?.subject).not.toContain("482913");
-    });
-
-    it("prints the canonical origin for the code, never the host redirect_to names", async () => {
-      const response = await post(
-        recovery({
-          token: "482913",
-          token_hash: "pkce_abc123",
-          redirect_to: "http://localhost:3000/auth/callback?next=%2Freset-password",
-        }),
-      );
-      expect(response.status).toBe(200);
-      const text = sent[0]?.message?.text ?? "";
-      expect(text).toContain("https://www.vallospaces.com/forgot-password/code");
-      expect(text).not.toContain("http://localhost:3000/forgot-password/code");
     });
 
     it("prints no code when the hook was handed none, and still sends the link", async () => {
@@ -162,7 +143,7 @@ describe("the auth email hook", () => {
       const text = sent[0]?.message?.text ?? "";
       expect(text).toContain("/auth/v1/verify");
       expect(text).not.toContain("/forgot-password/code");
-      expect(sent[0]?.message?.subject).toBe("Set a new Vallo password");
+      expect(sent[0]?.message?.subject).toBe("Your Vallo password reset code");
     });
 
     it("sends the code alone when there is no hash to build the link from", async () => {

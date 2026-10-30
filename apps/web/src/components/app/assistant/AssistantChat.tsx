@@ -41,7 +41,7 @@ import {
   type Thread,
 } from "./threads";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { AiConsentSheet } from "@/components/app/ai/AiConsentSheet";
+import { recordAiConsent } from "@/lib/ai/consent-actions";
 import { AI_CONSENT_REQUIRED_CODE } from "@/lib/ai/consent";
 import { WORKSPACE_FRAMES, type AssistantWorkspace } from "@/lib/assistant/workspace";
 import { Icon3D } from "@/components/ui/Icon3D";
@@ -224,11 +224,8 @@ export function AssistantChat({
   const [language, setLanguage] = useState<Language>("English");
   const [draft, setDraft] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  /* STORE-07: nothing is sent until this person has agreed to the disclosure.
-     `pending` is the question they asked before agreeing, sent on agreement. */
+  /* STORE-07: the first send records the agreement the server checks (see `send`). */
   const [consent, setConsent] = useState<"yes" | "ask" | "declined">(aiConsented ? "yes" : "ask");
-  const [consentSheet, setConsentSheet] = useState(false);
-  const [pending, setPending] = useState<string | null>(null);
   /* Which answer was just copied (its label says so for a moment), and
      whether the reader has scrolled away from the newest part of the thread,
      which is when a streaming answer gets its island. */
@@ -407,9 +404,9 @@ export function AssistantChat({
              Nothing was sent to the AI; ask now. */
           const j = (await res.json().catch(() => null)) as { code?: string; message?: string } | null;
           if (j?.code === AI_CONSENT_REQUIRED_CODE) {
-            setText(j.message ?? "Agree to how the assistant works before asking it anything.");
+            /* The record did not reach the server: ask again quietly on the next send. */
+            setText(j.message ?? "Something went wrong. Send it again.");
             setConsent("ask");
-            setConsentSheet(true);
             return;
           }
         }
@@ -493,9 +490,17 @@ export function AssistantChat({
       const text = raw.trim();
       if (!text) return;
       if ((decided ?? consent) !== "yes") {
-        /* Asked before anything leaves the device. The draft stays put. */
-        setPending(text);
-        setConsentSheet(true);
+        /* SENDING IS AGREEING (29 October 2026, the founder: no "Before you
+           ask" card in the chat). The quiet line under the box says answers
+           are written by AI; the first send records the agreement the server
+           checks, then goes. The draft stays put if it cannot be recorded. */
+        setConsent("yes");
+        void recordAiConsent()
+          .then((result) => {
+            if (result.ok) send(text, "yes");
+            else setConsent("ask");
+          })
+          .catch(() => setConsent("ask"));
         return;
       }
       setDraft("");
@@ -914,33 +919,6 @@ export function AssistantChat({
             ))}
           </div>
 
-          {consentSheet ? (
-            <AiConsentSheet
-              onAgreed={() => {
-                /* Agreeing sends the question they had asked; declining
-                   leaves the draft where it was and the assistant off. */
-                setConsentSheet(false);
-                setConsent("yes");
-                if (pending) send(pending, "yes");
-                setPending(null);
-              }}
-              onDeclined={() => {
-                setConsentSheet(false);
-                setConsent("declined");
-                setPending(null);
-              }}
-            />
-          ) : null}
-          {consent === "declined" && !consentSheet ? (
-            <p className="nf-body-sm text-[var(--nf-content-secondary)]" data-testid="ai-declined">
-              The assistant stays off, and nothing you typed was sent. Search is live, and{" "}
-              <Link href="/contact" className="underline">
-                a person at support
-              </Link>{" "}
-              will answer you without any AI.
-            </p>
-          ) : null}
-
           {/* ----------------------------------------------------- composer */}
           <form
             onSubmit={(e) => {
@@ -977,6 +955,9 @@ export function AssistantChat({
               className="nf-ai__send"
             />
           </form>
+          <p className="nf-ai__note" data-testid="ai-note">
+            Answers are written by AI and can be wrong. Never share passwords or card numbers.
+          </p>
         </section>
       </div>
 

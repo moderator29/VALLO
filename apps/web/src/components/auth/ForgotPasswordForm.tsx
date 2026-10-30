@@ -13,7 +13,7 @@ import { AuthPillButton, AuthPillLink } from "./slate";
 const EMPTY: AuthFormState = { ok: false };
 
 /**
- * Ask for a reset link.
+ * Ask for a reset code.
  *
  * One field, and then one sentence that says the same thing whether or not the
  * address has an account. That sentence is the security property, not a
@@ -41,11 +41,11 @@ export function ForgotPasswordForm({ t }: { t: Dictionary }) {
           <p role="status" className="nf-auth__notice">
             {state.message}
           </p>
-          {/* The link works only in this browser; the code in the same
-              email works anywhere. */}
+          {/* The email carries the code alone (29 October 2026), so typing
+              it is the way on, and the button leads there. */}
           <p className="nf-auth__hint">{t.auth.resetHaveCode}</p>
           <div className="nf-auth__form">
-            <AuthPillLink href="/forgot-password/code" quiet>
+            <AuthPillLink href="/forgot-password/code">
               {t.auth.resetEnterCode}
             </AuthPillLink>
           </div>

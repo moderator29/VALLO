@@ -20,6 +20,7 @@ import {
   rememberFirstInterest,
   rememberFirstRunSeen,
   withPassedFlag,
+  isAuthDoor,
   isSignUpForm,
 } from "./first-run-seen";
 import type { Arrival } from "@/app/welcome/plan";
@@ -243,17 +244,23 @@ export function FirstRun({
     return stuck.current;
   }, []);
 
-  /* Called from a handler only, never while rendering: it writes the cookie. */
+  /* Called from a handler only, never while rendering: it writes the cookie.
+     A sign-in or sign-up door is ALWAYS handed the passed flag, whatever the
+     cookie did (29 October 2026, the founder: Skip and the last slide sent him
+     back here). A cookie can be refused, arrive late in a webview, or sit
+     beside a stale copy the server reads instead; the flag in the address
+     cannot, so the door never bounces the person back to the slides. */
   const onward = useCallback(
-    (path: string) => (remember() ? path : withPassedFlag(path)),
+    (path: string) => (remember() && !isAuthDoor(path) ? path : withPassedFlag(path)),
     [remember],
   );
 
-  /* A door is a real link (it middle-clicks, it prefetches). If the device
-     refused the cookie, the click is rerouted to the same place with the
-     passed flag, so the page behind it does not send them back here. */
+  /* A door is a real link (it middle-clicks, it prefetches). The click is
+     taken over and sent with the passed flag, for the reason above. */
   const door = (path: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (remember()) return;
+    /* Anywhere but a door (Look around first) needs the flag only when the cookie was refused. */
+    if (remember() && !isAuthDoor(path)) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
     router.push(withPassedFlag(path));
   };

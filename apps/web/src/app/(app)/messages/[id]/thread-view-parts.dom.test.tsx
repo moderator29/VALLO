@@ -114,7 +114,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the thread's new parts", () => 
   it("heads each run of bubbles with the person's photo, or their initial when there is none", async () => {
     const { page, close } = await mountInBrowser({ entry: entry(false), css: CSS });
     try {
-      const theirs = page.locator(".nf-msg:not(.nf-msg--mine) > .nf-msg__avatar").first();
+      const theirs = page.locator(".nf-msg:not(.nf-msg--mine) .nf-msg__avatar").first();
       expect(await theirs.locator("img").count()).toBe(1);
       const mine = page.locator(".nf-msg--mine .nf-msg__avatar").first();
       expect(await mine.locator("img").count()).toBe(0);

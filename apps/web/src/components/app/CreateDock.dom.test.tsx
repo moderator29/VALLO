@@ -54,7 +54,8 @@ function entry({
 
 /** The options as the sheet draws them: the test ids in order, and their words. */
 async function optionsOf(page: import("playwright-core").Page) {
-  await page.getByRole("button", { name: "Create" }).click();
+  /* Opened the way the header's compose button opens it (`openCreateSheet`). */
+  await page.evaluate(() => window.dispatchEvent(new Event("vallo:create-open")));
   await page.getByRole("dialog").waitFor();
   return page.evaluate(() =>
     [...document.querySelectorAll("[data-testid='create-options'] a")].map((a) => ({
@@ -132,17 +133,14 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
     }
   });
 
-  it("returns focus to the + when the sheet closes", async () => {
+  it("opens from the header's event, and closes on Escape", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false }) });
     try {
-      const plus = page.getByRole("button", { name: "Create" });
-      await plus.focus();
-      await page.keyboard.press("Enter");
+      expect(await page.getByRole("button", { name: "Create" }).count()).toBe(0);
+      await page.evaluate(() => window.dispatchEvent(new Event("vallo:create-open")));
       await page.getByRole("dialog").waitFor();
       await page.keyboard.press("Escape");
       await page.getByRole("dialog").waitFor({ state: "detached" });
-      await page.waitForFunction(() => document.activeElement?.hasAttribute("data-dock-create") === true);
-      expect(await page.evaluate(() => document.activeElement?.getAttribute("aria-label"))).toBe("Create");
     } finally {
       await close();
     }

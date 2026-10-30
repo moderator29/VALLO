@@ -26,11 +26,11 @@ const base = {
 };
 
 describe("ShellDock on a workspace page", () => {
-  it("offers Home, Search, the menu, Feed and Profile, and the plus", () => {
+  it("offers Home, Search, the menu, Feed and Profile, and no plus", () => {
     const html = renderToStaticMarkup(<ShellDock {...base} side="property" />);
     for (const href of ["/home", "/search", "/around", "/profile"]) expect(html, href).toContain(`href="${href}"`);
     expect(html).toContain("nf-tab--switch");
-    expect(html).toContain("data-dock-create");
+    expect(html).not.toContain("data-dock-create");
   });
 
   it("is one navigation landmark, not two stacked", () => {
