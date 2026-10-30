@@ -68,6 +68,8 @@ export type SavedBoardItem = {
   card: ReactNode;
   /** B13: what moved on this listing lately (lib/saved/changes.ts). */
   changes?: SavedChange[];
+  /** Under the card: which lists it is in, and the sheet to change that (signed in, saved to the account). */
+  lists?: ReactNode;
   /** B13: where "See similar nearby" goes when it is no longer available. */
   similarHref?: string;
 };
@@ -396,6 +398,7 @@ export function SavedBoard({
                         <UiIcon name="heart" size={16} filled />
                       </button>
                     </div>
+                    {item.lists ?? null}
                     {changeCopy && lastSaved !== undefined ? (
                       <ChangeLine item={item} since={lastSaved} locale={locale} copy={changeCopy} />
                     ) : null}

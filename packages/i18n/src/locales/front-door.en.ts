@@ -460,6 +460,8 @@ export const frontDoorEn = {
     body: "Scan it with a phone camera to open this place. Good for a flyer or a board outside.",
     label: "QR code for this place",
     failed: "Could not make the QR code just now. Try again.",
+    whatsapp: "Send to a WhatsApp group",
+    whatsappBody: "Opens WhatsApp with a short link. Never the address.",
   },
   /** V-72: the enquiry desk. */
   desk: {

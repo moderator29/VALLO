@@ -8,6 +8,9 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AccountNotificationsCard } from "../../(app)/settings/AccountToggles";
 import { AgentLookupCard } from "@/components/app/doors/AgentLookupCard";
 import type { MyAgentLookup } from "@/lib/doors/queries";
+import { AgentHoursCard, ReplyTemplatesCard } from "@/components/agent/AgentToolsCards";
+import type { Schedule } from "@/lib/agent/hours";
+import type { ReplyTemplate } from "@/lib/agent/reply-templates";
 
 /**
  * The body of /agent/settings, apart from its reads.
@@ -22,6 +25,8 @@ export function AgentSettingsBody({
   accounts,
   notifications,
   lookup = null,
+  templates = [],
+  hours = {},
 }: {
   t: Dictionary;
   agent: AgentProfile;
@@ -30,6 +35,9 @@ export function AgentSettingsBody({
   notifications: ResolvedProfileSettings["notifications"] | null;
   /** V-61: the agent's code and number hint. Null draws no card, as before. */
   lookup?: MyAgentLookup | null;
+  /** Saved replies and the hours the agent is usually reachable. */
+  templates?: ReplyTemplate[];
+  hours?: Schedule;
 }) {
   const preferred = accounts.find((a) => a.isDefault) ?? accounts[0] ?? null;
 
@@ -55,6 +63,9 @@ export function AgentSettingsBody({
             </p>
           </div>
         )}
+
+        <ReplyTemplatesCard templates={templates} />
+        <AgentHoursCard initial={hours} />
 
         {/* -------------------------------------------------------- payout */}
         <div className="nf-panel nf-panel--card block p-panel">

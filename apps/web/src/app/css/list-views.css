@@ -518,6 +518,17 @@
       color: var(--nf-state-error);
     }
   }
+  /* Under a saved card: the lists it is in. A quiet line, not a control plate. */
+  .nf-saved-lists {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-height: 2.75rem;
+    padding-inline: var(--nf-space-xs);
+    color: var(--nf-content-secondary);
+    background: none;
+    border: 0;
+  }
   .nf-saved-undo {
     animation: nf-saved-undo-in 200ms var(--nf-ease-standard) both;
   }

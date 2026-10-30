@@ -35,7 +35,7 @@ import type { SharedKind } from "./share";
  * `messages.sender_id` is the signed-in caller and `lib/messages/blocks.ts`
  * decides whether the conversation may receive a message at all.
  */
-export type ShareQrCopy = { show: string; hide: string; body: string; label: string; failed: string };
+export type ShareQrCopy = { show: string; hide: string; body: string; label: string; failed: string; whatsapp: string; whatsappBody: string };
 
 export function ShareSheet({
   open,
@@ -92,6 +92,25 @@ export function ShareSheet({
     };
   }, [qrShown, qrUrl, door]);
 
+  /* One tap. The window is opened inside the tap (a window opened after an
+     await is blocked on iOS) and pointed at WhatsApp once the short link exists. */
+  async function shareToWhatsApp() {
+    if (!door) return;
+    const win = typeof window !== "undefined" ? window.open("", "_blank") : null;
+    const url = qrUrl ?? (await door().catch(() => null));
+    if (!url) {
+      win?.close();
+      setQrFailed(true);
+      setQrOpen(true);
+      return;
+    }
+    setQrUrl(url);
+    const target = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`;
+    if (win) win.location.href = target;
+    else window.location.href = target;
+    onOpenChange(false);
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title={words.sheetTitle} detents={[0.4]}>
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{title}</p>
@@ -137,6 +156,24 @@ export function ShareSheet({
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
         </button>
+
+        {qr ? (
+          <button
+            type="button"
+            className="nf-row nf-row--tap w-full text-left"
+            onClick={() => void shareToWhatsApp()}
+            data-testid="share-whatsapp"
+          >
+            <span className="nf-role-mark shrink-0" aria-hidden="true">
+              <UiIcon name="chat-bubble" size={20} />
+            </span>
+            <span className="min-w-0 flex-1 leading-tight">
+              <span className="nf-body-sm block font-semibold text-[var(--nf-content-primary)]">{qr.copy.whatsapp}</span>
+              <span className="nf-caption block">{qr.copy.whatsappBody}</span>
+            </span>
+            <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
+          </button>
+        ) : null}
 
         {qr ? (
           <button

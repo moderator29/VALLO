@@ -23,6 +23,8 @@ import { readMyPassportOn } from "@/lib/passport/passport-read";
 import { InboxEmpty } from "../Inbox";
 import { readDeskStage } from "@/lib/enquiry/queries";
 import { readFollowup } from "@/lib/enquiry/followup-queries";import { quickReplies } from "@/lib/enquiry/quick-replies";
+import { readMyReplyTemplates } from "@/lib/agent/tools-read";
+import { templatesAsReplies } from "@/lib/agent/reply-templates";
 import { renterQuestions } from "@/lib/enquiry/renter-questions";
 import { loadListingsByIds } from "@/lib/listings/supabase-repository";
 import { StageControl } from "@/components/app/messages/StageControl";
@@ -194,6 +196,8 @@ export default async function ConversationPage({
        answers only for the caller's own threads, and the listing is read
        under the lister's own client for the quick replies' figures. */
     const desk = listingThread && role === "host";
+    /* Saved replies, for the lister only: the answers they give all day. */
+    const savedReplies = role === "host" ? templatesAsReplies(await readMyReplyTemplates()) : [];
     /* B6: the renter's question chips, on a listing thread nobody has written
        in yet. The listing is read for the same reason as the desk's: to leave
        out what it already answers. */
@@ -381,12 +385,14 @@ export default async function ConversationPage({
         }
         quickReplies={
           desk
-            ? quickReplies(deskListing, t.frontDoor.desk.quick, locale)
+            ? [...quickReplies(deskListing, t.frontDoor.desk.quick, locale), ...savedReplies]
+            : savedReplies.length > 0
+              ? savedReplies
             : askChips
               ? renterQuestions(deskListing, t.memberKit.questions)
               : []
         }
-        quickRepliesTitle={desk ? t.frontDoor.desk.quickTitle : t.memberKit.questions.title}
+        quickRepliesTitle={desk ? t.frontDoor.desk.quickTitle : savedReplies.length > 0 ? "Saved replies" : t.memberKit.questions.title}
         chatHints={
           chatHintGaps && thread.listing
             ? {

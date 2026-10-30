@@ -9,6 +9,9 @@ import { stayCardFromRow } from "@/components/app/stays/stay-card-model";
 import { SAVED_COOKIE, parseSavedCookie } from "@/lib/saved/keys";
 import { getSavedListings, getSavedPlaces } from "@/lib/saved/queries";
 import { SavedBoard, type SavedBoardItem } from "./SavedBoard";
+import { AddToList, CollectionsBar } from "./Collections";
+import { collectionKey, inCollection } from "@/lib/saved/collections";
+import { readCollections } from "@/lib/saved/collections-read";
 import { listingShelf, placeShelf } from "./shelf-rows";
 import { ShelfSync } from "./ShelfSync";
 import { resolveSession } from "@/lib/actions/session";
@@ -54,7 +57,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * so the board is one shortlist in the order the person built it rather than
  * two piles with a heading between them.
  */
-export default async function SavedPage() {
+export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string }> }) {
+  const { list } = await searchParams;
   const locale = await getLocale();
   const t = getDictionary(locale);
 
@@ -106,7 +110,13 @@ export default async function SavedPage() {
   /* The board opens on the newest save, so that card's photograph is the
      page's largest paint and loads at once (integration QA O5). */
   const newest = Math.max(-Infinity, ...entries.map((e) => e.savedAt), ...places.map((e) => e.savedAt));
-  const items: SavedBoardItem[] = [
+  const collections = session.state === "signed-in" ? await readCollections(session.supabase as unknown as SupabaseClient) : [];
+  const activeList = collections.find((c) => c.id === list) ?? null;
+  const listsFor = (kind: "listing" | "accommodation" | "restaurant", id: string) =>
+    session.state === "signed-in" ? (
+      <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} />
+    ) : undefined;
+  const allItems: SavedBoardItem[] = [
     ...entries.map<SavedBoardItem>((entry) => ({
       id: entry.listing.id,
       mode: entry.mode,
@@ -118,6 +128,7 @@ export default async function SavedPage() {
          keeps are objects on lit ledges. The card stays the catalogue's. */
       card: listingShelf(entry.listing, locale, t, entry.savedAt === newest),
       changes: changes.get(entry.listing.id),
+      ...(entry.mode === "db" ? { lists: listsFor("listing", entry.listing.id) } : {}),
       similarHref: `/search?q=${encodeURIComponent(entry.listing.area || entry.listing.city)}`,
     })),
     ...places.map<SavedBoardItem>((entry) => ({
@@ -129,8 +140,10 @@ export default async function SavedPage() {
       savedAt: entry.savedAt,
       place: { kind: entry.kind === "restaurant" ? "restaurant" : "accommodation", id: entry.row.entity_id },
       card: placeShelf(stayCardFromRow(entry.row), locale, t, entry.savedAt === newest),
+      lists: listsFor(entry.kind === "restaurant" ? "restaurant" : "accommodation", entry.row.entity_id),
     })),
   ].sort((a, b) => b.savedAt - a.savedAt);
+  const items = inCollection(allItems, activeList);
 
   return (
     <div className="nf-cat-surface mx-auto max-w-3xl">
@@ -158,6 +171,9 @@ export default async function SavedPage() {
       {/* V-77: the saved listings, copied to the phone for when there is no
           signal, and any figure that moved since it was first copied. */}
       {owner && <ShelfSync owner={owner} items={shelf} copy={t.platform.shelf} locale={locale} />}
+      {session.state === "signed-in" && allItems.length > 0 ? (
+        <CollectionsBar collections={collections} active={activeList?.id ?? null} />
+      ) : null}
       <SavedBoard
         items={items}
         comparable={compare.columns.length}

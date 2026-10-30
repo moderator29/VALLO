@@ -44,6 +44,18 @@ const MONEY_WORDS = /\b(rent|payment|paid|pay|refund|deposit|caution|withdraw\w*
 const TRUST_WORDS = /\b(verif\w*|badge|passport|mandate|identity|document|streak|record)\b/i;
 const ACCOUNT_WORDS = /\b(sign-?in|device|passcode|password|e-?mail|phone number|security|support ticket|ticket|data export|deletion)\b/i;
 
+/** A ring or a missed call, written by the call triggers as "Incoming video call" or "Missed voice call from Ada". */
+const CALL_TITLE = /^(?:incoming|missed) (?:voice|video) call\b/i;
+
+export function isCallRow(n: { title: string }): boolean {
+  return CALL_TITLE.test(n.title.trim());
+}
+
+/** The row's glyph: a call is a handset, never a chat bubble. */
+export function glyphOf(n: Facts): UiIconName {
+  return isCallRow(n) ? "phone" : FAMILY_GLYPH[familyOf(n)];
+}
+
 export function familyOf(n: Facts): NotificationFamily {
   /* The kinds that mean one thing wherever they point. */
   if (n.kind === "message") return "messages";
@@ -194,11 +206,13 @@ export type Group<T> = { key: string; lead: T; rows: T[] };
  * Fold rows that share a record into one group, keeping the order of each
  * group's newest row (the input is newest first).
  */
-export function groupByObject<T extends { id: string; href: string | null }>(rows: readonly T[]): Group<T>[] {
+export function groupByObject<T extends { id: string; href: string | null; title?: string }>(rows: readonly T[]): Group<T>[] {
   const out: Group<T>[] = [];
   const at = new Map<string, Group<T>>();
   for (const row of rows) {
-    const key = objectKeyOf(row.href);
+    const path = objectKeyOf(row.href);
+    /* Calls fold only with calls, so a ring never hides inside "3 new messages". */
+    const key = path && row.title !== undefined && isCallRow({ title: row.title }) ? `call:${path}` : path;
     if (key) {
       const existing = at.get(key);
       if (existing) {

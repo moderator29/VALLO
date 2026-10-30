@@ -1,6 +1,6 @@
 "use client";
 
-import { addAccommodationPhoto, removeAccommodationPhoto } from "@/lib/host/actions";
+import { addAccommodationPhoto, removeAccommodationPhoto, reorderAccommodationPhotos } from "@/lib/host/actions";
 import { MAX_BUSINESS_PHOTOS } from "@/lib/host/photos";
 import { PhotoManager } from "./PhotoManager";
 import { useHostPageCopy } from "./host-copy";
@@ -45,6 +45,7 @@ export function AccommodationPhotoManager({
       }}
       add={({ storagePath }) => addAccommodationPhoto({ accommodationId, storagePath })}
       remove={({ photoId }) => removeAccommodationPhoto({ photoId })}
+      reorder={(photoIds) => reorderAccommodationPhotos({ subjectId: accommodationId, photoIds })}
     />
   );
 }

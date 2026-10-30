@@ -144,7 +144,7 @@ export function AgentRegisterForm({
   }
 
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "";
+    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "" || !/^\d{11}$/.test(nin.trim());
     /*
      * SCREEN TWO IS NOT GATED ON THE UPLOADS, and that is deliberate rather
      * than an oversight. An agent standing in a compound with no ID to hand

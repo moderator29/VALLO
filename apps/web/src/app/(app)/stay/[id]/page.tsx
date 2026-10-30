@@ -9,6 +9,7 @@ import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { StayDetailView } from "./StayDetailView";
+import { RecordPlaceVisit } from "@/components/app/listing/RecordPlaceVisit";
 import { readStayDates } from "@/components/app/stays/model";
 import type { StayDetail } from "./detail-model";
 
@@ -229,6 +230,14 @@ export default async function StayDetailPage({
   );
 
   return (
+    <>
+    <RecordPlaceVisit
+      id={detail.id}
+      title={detail.name}
+      place={[detail.area, detail.city].filter(Boolean).join(", ")}
+      photo={detail.photos[0]?.url ?? null}
+      href={`/stay/${detail.id}`}
+    />
     <StayDetailView
       detail={detail}
       nights={nights}
@@ -247,5 +256,6 @@ export default async function StayDetailPage({
       arrival={<ArrivalChargesLine listingId={null} accommodationId={detail.id} locale={locale} />}
       door={doorCharges}
     />
+    </>
   );
 }
