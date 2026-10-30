@@ -96,41 +96,6 @@ export const experienceLandingEn = {
         },
       },
     },
-    story: {
-      overline: "How a deal works",
-      title: "From the first search to the keys.",
-      lede: "Five steps, in order. Nothing moves on until the step before it is done.",
-      /** The floating pill's name. */
-      pill: "Steps of a deal",
-      steps: {
-        find: { label: "Find", title: "Find the place." },
-        verify: { label: "Verify", title: "See it, and who is behind it." },
-        agree: { label: "Agree", title: "Agree before anything is paid." },
-        pay: { label: "Pay", title: "Pay through Vallo." },
-        move: {
-          label: "Move in",
-          title: "Move in, with the record.",
-          body: "The agreement, the receipt and every message stay on your record, and the rental is counted on your Vallo passport.",
-        },
-      },
-      /** The small product words on each step's fragment. */
-      frag: {
-        inspection: "Inspection",
-        noFee: "No inspection fee",
-        reviewed: "Agent application reviewed by a person",
-        gate: "Attended, recorded by both phones",
-        agreement: "Agreement",
-        confirmed: "Confirmed",
-        approved: "Approved",
-        you: "You",
-        owner: "Owner",
-        vallo: "Vallo",
-        youPaid: "You paid",
-        receipt: "Receipt",
-        kept: "Kept on your record",
-        passport: "Counted on your Vallo passport",
-      },
-    },
     trust: {
       overline: "The trust layer",
       title: "What stands behind every deal.",

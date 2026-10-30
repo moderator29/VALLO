@@ -64,8 +64,9 @@ const state = (page: import("playwright-core").Page) =>
   });
 
 describe("the words of a post (pure)", () => {
-  it("sets a short line large, in the frame", () => {
-    expect(shapeOfText("Any good flats in Yaba?", "frame", false)).toEqual({ big: true, long: false });
+  it("sets a short text post at reading size, never blown up (X, 29 October 2026)", () => {
+    expect(shapeOfText("Hey", "frame", false)).toEqual({ big: false, long: false });
+    expect(shapeOfText("Any good flats in Yaba?", "frame", false)).toEqual({ big: false, long: false });
   });
   it("folds a long post with Read more, but never on the post's own page", () => {
     expect(shapeOfText(LONG, "frame", false).long).toBe(true);
@@ -98,19 +99,19 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a post card on a phone", () => 
     }
   });
 
-  it("puts a text-only post inside the rounded frame, large when short", async () => {
+  it("draws a text-only post as plain words, with no frame around them", async () => {
     const { page, close } = await mountInBrowser({
-      entry: entryFor(`{ body: "Any good serviced flats in Yaba?", media: [] }`),
+      entry: entryFor(`{ body: "Hey", media: [] }`),
       css: CSS,
     });
     try {
-      const frame = page.locator(".nf-pc__textframe");
-      expect(await frame.count()).toBe(1);
-      expect(await frame.locator(".nf-pc__text--big").innerText()).toContain("Any good serviced flats");
+      const text = page.locator(".nf-pc__plaintext .nf-pc__text");
+      expect(await text.innerText()).toContain("Hey");
+      expect(await page.locator(".nf-pc__textframe").count()).toBe(0);
       expect(await page.locator(".nf-pc__media").count()).toBe(0);
-      /* The same rounded container a picture would have had. */
-      const radius = await frame.evaluate((el) => getComputedStyle(el).borderTopLeftRadius);
-      expect(radius).toBe("22px");
+      /* As tall as the words: one line, not a 9rem box. */
+      const height = await page.locator(".nf-pc__plaintext").evaluate((el) => el.getBoundingClientRect().height);
+      expect(height).toBeLessThan(48);
     } finally {
       await close();
     }

@@ -302,7 +302,7 @@ export function AgentRegisterForm({
             {...(errors.selfiePath ? { error: errors.selfiePath } : {})}
           />
           <RegFieldGroup>
-            <RegField optional={copy.optional}>
+            <RegField>
               <TextField
                 label={mine.identity.nin}
                 placeholder={mine.identity.ninPlaceholder}
@@ -311,6 +311,7 @@ export function AgentRegisterForm({
                 onChange={(e) => setNin(e.target.value.replace(/\D/g, "").slice(0, 11))}
                 inputMode="numeric"
                 autoComplete="off"
+                required
                 {...(errors.nin ? { error: errors.nin } : {})}
               />
             </RegField>

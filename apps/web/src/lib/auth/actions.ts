@@ -1249,6 +1249,17 @@ export async function requestPasswordReset(
     return { ok: false, message: w.resetBusy };
   }
 
+  /* The code screen is the next step: it opens with the address already in
+     place (the same short-lived chooser cookie sign-in uses). Set whether or
+     not the address has an account, so it reveals nothing. */
+  (await cookies()).set(CHOOSER_EMAIL_COOKIE, email, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: CHOOSER_EMAIL_MAX_AGE,
+  });
+
   return { ok: true, message: w.resetSent };
 }
 

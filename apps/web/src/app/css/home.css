@@ -269,6 +269,62 @@
     box-shadow: var(--nf-selected-shadow-inline);
     color: var(--nf-content-on-brand);
   }
+  /*
+   * THE ASSISTANT READS LIKE CHATGPT AND CLAUDE (29 October 2026, the founder:
+   * "the containers are too big on all ends"). The answer is text on the page,
+   * full width, with no card round it, a small mark and name above it and a
+   * quiet copy action below. The question is a compact bubble on the right,
+   * with no avatar and no stamp beside it.
+   */
+  .nf-ai.nf-ai-answer {
+    gap: var(--nf-space-2xs);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__head > :first-child {
+    display: none;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__who {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-ai.nf-ai-answer .nf-ai__body {
+    line-height: 1.6;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__actions {
+    gap: 0;
+    margin-inline-start: calc(-1 * var(--nf-space-xs));
+  }
+  .nf-ai.nf-ai-answer .nf-ai__actions .nf-btn {
+    min-block-size: 2.25rem;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-ai__turn--mine .nf-ai__me {
+    display: none;
+  }
+  .nf-ai__turn--mine .nf-ai__bubble--mine {
+    max-width: 78%;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-lg);
+    border-bottom-right-radius: var(--nf-radius-xs);
+    box-shadow: none;
+  }
+  .nf-ai__bubble--mine .nf-ai__stamp {
+    display: none;
+  }
+  /* The one line under the box that says what answers are. */
+  .nf-ai__note {
+    margin: var(--nf-space-2xs) 0 0;
+    text-align: center;
+    font-size: var(--nf-text-overline);
+    color: var(--nf-content-muted);
+  }
+
   /* The chosen row in the history list and the chosen answer in the
      settings sheet: the shared selected state, as the console's nav row on. */
   .nf-ai__row--on {

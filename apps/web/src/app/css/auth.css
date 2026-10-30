@@ -387,19 +387,21 @@
     color: var(--nf-slate-top-ink);
     border-color: var(--nf-slate-top-ink);
   }
-  /* The keyboard: a touch screen with a field in focus gets the short block. */
+  /* The keyboard: a touch screen with a field in focus gets the short block.
+     `data-typing` (KeepPillInView) and not `:focus`, so the block holds still
+     through the tap that leaves the field and the button never moves under it. */
   @media (pointer: coarse) {
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-slate-top {
+    .nf-auth[data-typing] .nf-slate-top {
       --nf-slate-top-h: 8.5rem;
     }
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-slate-top__brand {
+    .nf-auth[data-typing] .nf-slate-top__brand {
       margin-top: var(--nf-space-2xs);
     }
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-slate-top__line,
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-slate-top__depth {
+    .nf-auth[data-typing] .nf-slate-top__line,
+    .nf-auth[data-typing] .nf-slate-top__depth {
       opacity: 0;
     }
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-auth__title {
+    .nf-auth[data-typing] .nf-auth__title {
       font-size: 1.75rem;
     }
   }
@@ -593,7 +595,9 @@
     pointer-events: none;
     animation: nf-slate-pop 320ms var(--nf-ease-spring) both;
   }
-  .nf-auth-field__box:has(input[type="email"]:not(:placeholder-shown):valid:not([aria-invalid="true"])) input {
+  /* The room for the tick is always there, so the text never shifts when it
+     appears (a shifting field moved the caret under the finger). */
+  .nf-auth-field__box input[type="email"] {
     padding-right: 2.75rem;
   }
   @keyframes nf-slate-pop {
@@ -1101,10 +1105,11 @@
   .nf-auth .nf-code__input::selection {
     background: transparent;
   }
-  /* The keyboard focus is still shown: the row takes the halo. */
-  .nf-code__box:has(.nf-code__input:focus-visible) .nf-code__cells {
-    border-radius: var(--nf-radius-control);
-    box-shadow: 0 0 0 3px var(--nf-slate-halo);
+  /* The keyboard focus is still shown, on the cells themselves: no ring is
+     ever drawn round the row (29 October 2026, the founder: no container
+     around the code). */
+  .nf-code__box:has(.nf-code__input:focus-visible) .nf-code__cell {
+    border-color: var(--nf-slate-ink);
   }
 
   /* The help around the code (A4). */
@@ -1605,11 +1610,11 @@
   /* The keyboard: the short block has no room for the ring, so it steps
      away and the column moves up with the block. */
   @media (pointer: coarse) {
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-slate-focal {
+    .nf-auth[data-typing] .nf-slate-focal {
       opacity: 0;
       transform: translate(-50%, 20%) scale(0.6);
     }
-    .nf-auth:has(.nf-auth__body :is(input:not([type="checkbox"]), select, textarea):focus) .nf-auth__body {
+    .nf-auth[data-typing] .nf-auth__body {
       padding-top: var(--nf-space-xs);
     }
   }
@@ -1619,7 +1624,13 @@
     }
   }
 
-  /* ----------------------------------------- the code: glass rings */
+  /* ------------------------------------------- the code: square cells */
+  /*
+   * ROUNDED SQUARES, NEVER CIRCLES (29 October 2026, the founder: "there
+   * should never be that circle box to put code in anywhere"). The industry
+   * one-time-code row: six equal squares with a small corner, no capsule
+   * around them, the next empty square lit as the caret, an error in red.
+   */
   .nf-code__cells {
     justify-content: center;
   }
@@ -1627,27 +1638,23 @@
     flex: 0 1 3.25rem;
     height: auto;
     aspect-ratio: 1;
-    border-radius: var(--nf-radius-circle);
-    border-width: 2px;
+    border-radius: var(--nf-radius-sm);
+    border-width: 1.5px;
     font-size: 1.375rem;
   }
   .nf-code__cell[data-filled] {
-    border-color: color-mix(in oklab, var(--nf-brand-primary) 75%, transparent);
-    box-shadow:
-      var(--nf-slate-card-shadow),
-      0 0 14px -2px color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 70%, transparent);
   }
   .nf-code__cell[data-next] {
-    border-color: var(--nf-slate-edge);
+    border-color: var(--nf-brand-primary);
     box-shadow:
       var(--nf-slate-card-shadow),
-      0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
+      0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
   }
-  :root[data-theme="light"] .nf-code__cell[data-next] {
-    border-color: var(--nf-brand-primary);
-  }
-  .nf-code__box:has(.nf-code__input:focus-visible) .nf-code__cells {
-    border-radius: var(--nf-radius-pill);
+  .nf-code[data-error] .nf-code__cell,
+  .nf-code__cell[data-over] {
+    border-color: var(--nf-state-error);
+    box-shadow: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

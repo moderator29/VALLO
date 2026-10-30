@@ -26,7 +26,8 @@ export function ComposeButton({ label }: { label: string }) {
       variant="primary"
       size="sm"
       iconOnly
-      leadingIcon="plus"
+      /* A pencil, the compose mark: no "+" anywhere (29 October 2026). */
+      leadingIcon="pencil"
       className="nf-feed-compose"
       aria-label={label}
       data-testid="feed-compose"

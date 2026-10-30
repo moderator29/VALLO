@@ -192,7 +192,8 @@
     position: relative;
     display: block;
     min-inline-size: 0;
-    padding: var(--nf-space-md);
+    /* Compact, the way X reads: the words start right under the name. */
+    padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-xs);
     border: var(--nf-border-width) solid var(--nf-card-border);
     border-radius: var(--nf-radius-island);
     background: var(--nf-surface-primary);
@@ -214,16 +215,23 @@
     gap: var(--nf-space-sm);
   }
   .nf-pc__face {
+    position: relative;
     display: block;
     flex: none;
     border-radius: var(--nf-radius-circle);
+  }
+  /* The face is 40px to read like X; its tap target still reaches 44. */
+  .nf-pc__face::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
   }
   .nf-pc__avatar {
     display: grid;
     flex: none;
     place-items: center;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
     overflow: hidden;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-surface-raised);
@@ -385,12 +393,6 @@
     white-space: pre-line;
     overflow-wrap: anywhere;
   }
-  .nf-pc .nf-pc__text--big {
-    font-size: var(--nf-text-h3);
-    font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
-  }
   .nf-pc .nf-pc__text--clamped {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -403,7 +405,7 @@
     line-clamp: 5;
   }
   .nf-pc__caption {
-    margin-block-start: var(--nf-space-sm);
+    margin-block-start: var(--nf-space-xs);
   }
   .nf-pc__more {
     display: inline-flex;
@@ -504,6 +506,9 @@
   .nf-pc__plainplace {
     margin-block-start: var(--nf-space-2xs);
   }
+  .nf-pc__plainplace .nf-post__place {
+    min-block-size: 2.8rem;
+  }
   .nf-pc__plainplace .nf-pc__place {
     max-inline-size: 100%;
     margin-inline-start: 0;
@@ -517,41 +522,21 @@
     color: var(--nf-brand-secondary);
   }
 
-  /* Words in the frame: the same rounded container as a picture. */
-  .nf-pc__textframe {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--nf-space-sm);
-    min-block-size: 9rem;
-    padding: var(--nf-space-lg) var(--nf-space-md);
-    border: var(--nf-border-width) solid var(--nf-card-border);
-    background:
-      radial-gradient(120% 90% at 100% 0, var(--nf-brand-tint-1), transparent 60%),
-      var(--nf-surface-secondary);
-    box-shadow: var(--nf-card-shadow);
-  }
-  .nf-pc__textframe:has(.nf-pc__text--big) {
-    min-block-size: 12rem;
-  }
-  .nf-pc__textframe .nf-pc__more {
-    align-self: flex-start;
-    min-block-size: 2rem;
-    margin-block-end: calc(-1 * var(--nf-space-2xs));
-  }
-  .nf-pc__chips--text {
-    position: static;
-    inset: auto;
-    justify-content: flex-end;
+  /* Words alone: the post is the text, at reading size, as tall as it is
+     (29 October 2026, the founder; X's text post is the reference). */
+  .nf-pc__plaintext {
     margin-block-start: var(--nf-space-xs);
+  }
+  .nf-pc__plaintext .nf-pc__more {
+    min-block-size: 2rem;
   }
 
   /* ---------------------------------------------------------- the actions */
 
   .nf-pc__actions {
     display: grid;
-    gap: var(--nf-space-2xs);
-    margin-block-start: var(--nf-space-sm);
+    gap: 0;
+    margin-block-start: var(--nf-space-xs);
   }
   .nf-pc__reply-row {
     display: flex;
@@ -566,7 +551,7 @@
     align-items: center;
     gap: var(--nf-space-sm);
     min-inline-size: 0;
-    min-block-size: 2.75rem;
+    min-block-size: 2.8rem;
     padding-inline: var(--nf-space-md);
     border-radius: var(--nf-radius-pill);
     border: var(--nf-border-width) solid var(--nf-border-subtle);
@@ -716,8 +701,8 @@
     display: grid;
     flex: none;
     place-items: center;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
     overflow: hidden;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-surface-raised);

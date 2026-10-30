@@ -10,7 +10,7 @@
  */
 @layer components {
   .nf-path {
-    --nf-path-tile: 3rem;
+    --nf-path-tile: 2rem;
     --nf-path-pad: var(--nf-space-sm);
     --nf-path-gap: var(--nf-space-sm);
     display: grid;
@@ -47,7 +47,7 @@
     align-items: center;
     gap: var(--nf-space-sm);
     inline-size: 100%;
-    min-block-size: 4rem;
+    min-block-size: 3.5rem;
     padding: var(--nf-space-xs) var(--nf-path-pad);
     border: 1px solid var(--nf-border-subtle);
     border-radius: var(--nf-radius-card);
@@ -79,29 +79,23 @@
     outline-offset: 2px;
   }
 
-  /* The tile: the 3D render on a soft plate, the same plate at every step. */
+  /* The tile: the bare render, small, with no plate or container round it
+     (30 October 2026, the founder: "too big, remove it from the container,
+     clean smaller and mature"). */
   .nf-path__tile {
     display: grid;
     flex: none;
     place-items: center;
-    inline-size: var(--nf-path-tile, 3rem);
-    block-size: var(--nf-path-tile, 3rem);
-    overflow: hidden;
-    border-radius: var(--nf-radius-control);
-    background: radial-gradient(
-      circle at 50% 40%,
-      color-mix(in oklab, var(--nf-brand-primary) 24%, var(--nf-surface-raised)),
-      color-mix(in oklab, var(--nf-brand-primary) 6%, var(--nf-surface-raised)) 72%
-    );
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
+    inline-size: var(--nf-path-tile, 2rem);
+    block-size: var(--nf-path-tile, 2rem);
+    overflow: visible;
+    background: none;
+    box-shadow: none;
   }
-  /* The renders carry their own breathing room; scaled past it so the
-     object, not the padding, fills the tile. */
   .nf-path__tile img {
     inline-size: 100%;
     block-size: 100%;
     object-fit: contain;
-    transform: scale(1.2);
   }
   .nf-path__step[data-state="upcoming"] .nf-path__tile img {
     opacity: 0.72;

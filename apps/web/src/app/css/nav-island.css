@@ -237,10 +237,10 @@
     font-weight: 600;
   }
 
-  /* The workspace coin keeps its dark ground by day, so the mark inside it
-     never sits on white (north star 6.2). */
+  /* The workspace coin in paper is the bare icon (30 October 2026): the
+     artwork's own colours read on paper without a night disc behind them. */
   :root[data-theme="light"] .nf-nav .nf-side-switch__coin {
-    background: var(--nf-surface-artwork);
+    background: none;
     box-shadow: none;
   }
 

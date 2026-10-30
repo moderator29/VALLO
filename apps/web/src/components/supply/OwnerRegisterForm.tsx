@@ -280,15 +280,7 @@ export function OwnerRegisterForm({
                 error={errors.phone}
               />
             </RegField>
-            {/*
-              OPTIONAL, AND IT IS BACK IN THE CORNER THE IMAGE DRAWS IT IN.
-              `GOVERNING-05` draws "Optional" as a capsule at the top right of
-              the field's own container. The corner is the target and the capsule
-              is not: it ships at 6px on a 24px box, which is 0.250 and a
-              rectangle by the only test that counts. The word is not passed down
-              to the primitive as well, or it would be drawn twice.
-            */}
-            <RegField optional={copy.optional}>
+            <RegField>
               <TextField
                 label={own.you.nin}
                 hint={own.you.ninHint}
@@ -298,6 +290,7 @@ export function OwnerRegisterForm({
                 /* Never autofilled, never remembered by the browser, and never
                    logged anywhere by this platform. */
                 autoComplete="off"
+                required
                 {...(errors.nin ? { error: errors.nin } : {})}
               />
             </RegField>

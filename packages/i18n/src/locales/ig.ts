@@ -3540,7 +3540,7 @@ export const ig: Dictionary = withFallback({
           name: "Aha zuru ezu",
           phone: "Nọmba ekwentị",
           nin: "Nọmba Njirimara Mba (NIN)",
-          ninHint: "Ọnụọgụ iri na otu. Ị nwere ike itinye ya ma emechaa ma ọ bụrụ na ị nweghị ya ugbu a.",
+          ninHint: "Ọnụọgụ iri na otu.",
           assurance: "Otu onye na Vallo na-agụ akwụkwọ arịrịọ gị, na ndepụta ọ bụla, tupu e bipụta ihe ọ bụla.",
         },
         where: {

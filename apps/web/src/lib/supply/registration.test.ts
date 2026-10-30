@@ -74,7 +74,7 @@ describe("I have none of these", () => {
       role: "owner" as const,
       fullName: "Oluwaseyi Omojuni",
       phone: "08031234567",
-      nin: "",
+      nin: "12345678901",
       stateCode: "LA",
       lgaCode: "LA-ETI",
       area: "Lekki Phase 1",
@@ -180,7 +180,7 @@ describe("the agent and firm schemas", () => {
       role: "agent",
       fullName: "Adebayo Tunde",
       phone: "08031234567",
-      nin: "",
+      nin: "12345678901",
       experience: "1_2",
       agencyFeeBps: null,
       legalFeeBps: null,
@@ -336,5 +336,26 @@ describe("what the forms may not say", () => {
       const text = everyString(getDictionary(locale).supply.register).join(" \n ");
       expect(text).not.toContain("—");
     }
+  });
+});
+
+describe("the NIN is compulsory (30 October 2026)", () => {
+  const owner = {
+    role: "owner" as const,
+    fullName: "Ada Obi",
+    phone: "08031234567",
+    stateCode: "LA",
+    lgaCode: "LA-ETI",
+    ownershipDocument: "none" as const,
+    acceptTerms: true as const,
+    acceptPayOnVallo: true as const,
+  };
+  it("refuses an owner with no NIN or a short one, in words that do not echo the number", () => {
+    for (const nin of ["", "123"]) {
+      const result = ownerRegistrationSchema.safeParse({ ...owner, nin });
+      expect(result.success).toBe(false);
+      if (!result.success) expect(JSON.stringify(result.error.issues)).not.toContain("123\"");
+    }
+    expect(ownerRegistrationSchema.safeParse({ ...owner, nin: "12345678901" }).success).toBe(true);
   });
 });
