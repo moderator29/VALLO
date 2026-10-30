@@ -200,7 +200,7 @@ export function PushSetting({
     const reference = failureReference(outcome);
     setNote({
       text:
-        failureMessage(outcome.reason, { iosHomeScreenApp: onIosHomeScreenApp(), where: "settings" }) +
+        failureMessage(outcome.reason, { iosHomeScreenApp: onIosHomeScreenApp(), where: "settings", reference }) +
         (reference ? ` (Reference: ${reference}.)` : ""),
       signIn: outcome.reason === "signed_out",
       tone: "problem",

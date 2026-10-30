@@ -194,8 +194,13 @@ export function isIosHomeScreenApp(input: {
  */
 export function failureMessage(
   reason: EnrolFailureReason,
-  context: { iosHomeScreenApp: boolean; where: "settings" | "prompt" },
+  context: { iosHomeScreenApp: boolean; where: "settings" | "prompt"; reference?: string | null },
 ): string {
+  /* An app build signed without Apple's push permission can never register:
+     trying again changes nothing, so say that instead of "try again". */
+  if (context.reference?.includes("aps-environment")) {
+    return "This version of the Vallo app cannot receive notifications yet. A newer version will turn them on. Nothing for you to do.";
+  }
   switch (reason) {
     case "signed_out":
       return context.iosHomeScreenApp
