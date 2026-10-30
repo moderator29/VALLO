@@ -51,7 +51,7 @@ describe("the server refuses without them, not only the form", () => {
     role: "owner",
     fullName: "Test Owner",
     phone: "08031234567",
-    nin: "",
+    nin: "12345678901",
     stateCode: "LA",
     lgaCode: "LA-ETI",
     area: "",

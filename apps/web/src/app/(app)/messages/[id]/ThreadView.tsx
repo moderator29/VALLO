@@ -426,8 +426,8 @@ function BubbleHead({ name, photoUrl, href }: { name: string | null; photoUrl: s
   );
   if (href) {
     return (
-      <a href={href} className="nf-msg__avatar" aria-label={name ? `Open ${name}'s profile` : "Open profile"}>
-        {face}
+      <a href={href} className="nf-msg__hit" aria-label={name ? `Open ${name}'s profile` : "Open profile"}>
+        <span className="nf-msg__avatar">{face}</span>
       </a>
     );
   }

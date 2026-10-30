@@ -202,8 +202,7 @@
   }
   .nf-thread__actions .nf-btn--icon,
   .nf-thread__actions .nf-thread__call {
-    min-width: 2rem;
-    width: 2rem;
+    margin-inline: -0.375rem;
   }
   .nf-thread__title > a {
     display: block;
@@ -217,8 +216,7 @@
     background: none;
     border: 0;
     box-shadow: none;
-    min-width: 2rem;
-    width: 2rem;
+    margin-inline-start: -0.5rem;
     color: var(--nf-content-primary);
   }
   .nf-thread__back svg {
@@ -282,6 +280,7 @@
     margin-top: calc(var(--nf-space-3xs) - var(--nf-gap-row));
   }
   .nf-msg--cont > .nf-msg__avatar,
+  .nf-msg--cont > .nf-msg__hit,
   .nf-msg--cont > .nf-msg__side {
     visibility: hidden;
   }
@@ -293,6 +292,7 @@
    * than removed, the way a continuation keeps it.
    */
   .nf-msg--card > .nf-msg__avatar,
+  .nf-msg--card > .nf-msg__hit,
   .nf-msg--card > .nf-msg__side {
     visibility: hidden;
   }
@@ -325,6 +325,16 @@
   /* The small avatar beside a bubble, in a thinner ring than the header's:
      the person's photo, or their initial on the brand tint (founder, 11
      October 2026). */
+  /* The avatar is a profile link: a 44px target around the 36px photo,
+     pulled back so the row keeps its measure. */
+  .nf-msg__hit {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.25rem;
+  }
   .nf-msg__avatar {
     display: grid;
     place-items: center;
