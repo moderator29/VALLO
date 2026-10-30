@@ -189,12 +189,11 @@ export function OwnerRegisterForm({
    *
    * The server validates everything again and is the authority; this exists so
    * that pressing Continue with an empty name does not make somebody walk
-   * three more screens before being told. The NIN is never gated on, because
-   * it is optional on this form and a person who does not have it to hand must
-   * be able to finish.
+   * three more screens before being told. The NIN is required, so the first
+   * screen holds Continue until it is eleven digits.
    */
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "";
+    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || !/^\d{11}$/.test(nin.trim());
     if (step === 1) return stateCode === "" || lgaCode === "";
     if (step === 2) return held === null || !acceptTerms || !acceptPay;
     return false;
