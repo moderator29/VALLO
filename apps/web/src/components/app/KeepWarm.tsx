@@ -3,7 +3,7 @@
 import { startTransition, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { isDataSaver } from "@/lib/ui/data-saver";
-import { heldByPasscode } from "@/lib/offline/page-cache";
+import { heldByPasscode, seedTabs } from "@/lib/offline/page-cache";
 import type { Side } from "@/lib/side.constants";
 import {
   REFRESH_AFTER_AWAY_MS,
@@ -44,6 +44,9 @@ import {
    so no internal Next module is imported (as `FilterDrawerPanel` does). */
 type PrefetchOptions = NonNullable<Parameters<ReturnType<typeof useRouter>["prefetch"]>[1]>;
 const whole = (onInvalidate: () => void) => ({ kind: "full", onInvalidate }) as unknown as PrefetchOptions;
+
+/* How long after the page lands the worker is asked to keep the tabs it lacks. */
+const SEED_AFTER_MS = 4_000;
 
 /* The browser's idle moment, or a short delay where there is none (Safari). */
 function whenIdle(work: () => void): () => void {
@@ -91,6 +94,34 @@ export function KeepWarm({
   /* Only for a member: a guest's tab tap is never held (`shouldHold`). */
   useEffect(() => {
     if (enabled) watchArrivals();
+  }, [enabled]);
+
+  /* THE FIRST-INSTALL GAP (fast-start plan item 3). The service worker only keeps
+     a page it saw load or was told about, so right after an install (or a new
+     worker version, which empties the page caches) it holds nothing to answer
+     the next open with. Once the worker controls this page, and a few seconds
+     after it landed, the worker is asked to keep the main tabs it lacks. It
+     skips any it has, never runs under data saving, and runs once per load. */
+  useEffect(() => {
+    if (!enabled || process.env.NODE_ENV !== "production") return;
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    let seeded = false;
+    let timer: number | undefined;
+    const seed = () => {
+      if (seeded || isDataSaver() || !navigator.onLine) return;
+      const paths = tabsRef.current.filter((tab) => tab !== currentRef.current);
+      if (seedTabs(paths)) seeded = true;
+    };
+    const later = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(seed, SEED_AFTER_MS);
+    };
+    later();
+    navigator.serviceWorker.addEventListener("controllerchange", later);
+    return () => {
+      window.clearTimeout(timer);
+      navigator.serviceWorker.removeEventListener("controllerchange", later);
+    };
   }, [enabled]);
 
   useEffect(() => {

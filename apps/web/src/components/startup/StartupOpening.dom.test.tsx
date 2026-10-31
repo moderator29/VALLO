@@ -205,6 +205,16 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the app opening, in a browser",
     }
   });
 
+  it("on the shell, the first open of the day plays the brief opening, never the full one (plan item 14)", async () => {
+    const { page, close } = await open({ userAgent: "Mozilla/5.0 VALLO-NATIVE" }, { native: 50 });
+    try {
+      await settled(page);
+      expect(await page.evaluate(() => document.documentElement.dataset.opening)).toBe("brief");
+    } finally {
+      await close();
+    }
+  });
+
   it("on the shell, tells the native splash to go on the first parse, before any frame and before load, and traces it", async () => {
     const { page, close } = await open({ userAgent: "Mozilla/5.0 VALLO-NATIVE" }, { native: 50 });
     try {
@@ -212,7 +222,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the app opening, in a browser",
       const hides = await page.evaluate(() => (window as unknown as { __hides: { plugin: string; method: string; frames: number; loaded: boolean }[] }).__hides);
       expect(hides[0]).toMatchObject({ plugin: "SplashScreen", method: "hide", frames: 0, loaded: false });
       const trace = await page.evaluate((k) => localStorage.getItem(k), BOOT_TRACE_KEY);
-      for (const stage of ["parse@", "hide:sent:parse@", "hide:answered:parse@", "opening:full@", "wait:lifted@", "opening:done@"]) {
+      for (const stage of ["parse@", "hide:sent:parse@", "hide:answered:parse@", "opening:brief@", "wait:lifted@", "opening:done@"]) {
         expect(trace).toContain(stage);
       }
     } finally {

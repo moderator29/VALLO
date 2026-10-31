@@ -31,7 +31,10 @@ export const PAGE_CACHE_PREFIX = "vallo-pages-";
 /** The Server-Timing name the worker puts on a page it answered from the phone. */
 export const KEPT_TIMING_NAME = "vallo-kept";
 
-type WorkerMessage = { type: "vallo:visited"; path: string } | { type: "vallo:forget" };
+type WorkerMessage =
+  | { type: "vallo:visited"; path: string }
+  | { type: "vallo:seed"; paths: string[] }
+  | { type: "vallo:forget" };
 
 function post(message: WorkerMessage): void {
   try {
@@ -46,6 +49,24 @@ function post(message: WorkerMessage): void {
 export function announceVisit(path: string): void {
   if (!path.startsWith("/") || path.startsWith("//")) return;
   post({ type: "vallo:visited", path });
+}
+
+/**
+ * Ask the worker to keep these main tabs if it has no copy of them yet (a
+ * first install, or a new worker version that emptied the page caches). A tab
+ * already kept costs a cache lookup only. Returns whether a worker was there to ask.
+ */
+export function seedTabs(paths: readonly string[]): boolean {
+  try {
+    const controller = typeof navigator !== "undefined" && "serviceWorker" in navigator ? navigator.serviceWorker.controller : null;
+    if (!controller) return false;
+    const clean = paths.filter((p) => p.startsWith("/") && !p.startsWith("//")).slice(0, 6);
+    if (clean.length === 0) return false;
+    controller.postMessage({ type: "vallo:seed", paths: clean } satisfies WorkerMessage);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Sign-out: delete every kept page, here and in the worker. */
@@ -74,19 +95,24 @@ export const KEPT_MARK_ATTRIBUTE = "data-vallo-kept";
  *   - "instant": answered at once while the network refreshes it behind the
  *     screen. Nothing is wrong, so nothing is said; the page refreshes itself
  *     in place as soon as it runs (`ConnectionLine`).
+ *   - "frugal": the same instant answer on a weak, 2G or Save-Data link, with
+ *     NO refresh behind it (a refresh is a second download). Nothing is said.
  *   - "kept": answered because the network failed or was too slow to wait
  *     for. The connection line says so.
  *
  * Null for a document the network answered.
  */
-export type KeptCopyKind = "instant" | "kept";
+export type KeptCopyKind = "instant" | "frugal" | "kept";
 
 export function keptCopyKind(): KeptCopyKind | null {
   try {
     if (typeof performance !== "undefined" && typeof performance.getEntriesByType === "function") {
       const [entry] = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
       const timing = (entry?.serverTiming ?? []).find((item) => item.name === KEPT_TIMING_NAME);
-      if (timing) return timing.description === "instant" ? "instant" : "kept";
+      if (timing) {
+        if (timing.description === "instant") return "instant";
+        return timing.description === "frugal" ? "frugal" : "kept";
+      }
     }
   } catch {
     /* Fall through to the mark. */

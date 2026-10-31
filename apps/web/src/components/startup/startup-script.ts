@@ -31,7 +31,11 @@
  * THE OPENING. `data-splash="on"` on the root, with `data-opening`:
  *
  *   full   the first open of the day (no open recorded in the last
- *          `RETURNING_WITHIN_MS`): about 1,500ms of choreography. The header
+ *          `RETURNING_WITHIN_MS`), on the website only: about 600ms of
+ *          choreography. The native shell and any page the phone kept
+ *          (`data-vallo-kept`) always play the brief one instead, because the
+ *          full opening alone is longer than the 500ms the app is meant to
+ *          open in (fast-start plan item 14). The header
  *          and the dock resolve into place from frame one (they are already
  *          there, dim and a few pixels off, never absent), the ground settles,
  *          and the page's own entrances rise after `--nf-splash-hold`, which
@@ -162,7 +166,8 @@ export const STARTUP_SCRIPT = [
  */
 export const STARTUP_GATE_SCRIPT =
   "(function(){var W=window,d=document.documentElement,m=W.__nfMark||function(){};try{if(!sessionStorage.getItem('nf_entered')){sessionStorage.setItem('nf_entered','1');" +
-  "var full=true;try{var l=+localStorage.getItem('nf_entered')||0;full=!(Date.now()-l<" + RETURNING_WITHIN_MS + ");localStorage.setItem('nf_entered',String(Date.now()))}catch(e){}" +
+  "W.__nfCold=1;var full=true;try{var l=+localStorage.getItem('nf_entered')||0;full=!(Date.now()-l<" + RETURNING_WITHIN_MS + ");localStorage.setItem('nf_entered',String(Date.now()))}catch(e){}" +
+  "if(W.__nfLoud||d.dataset.valloKept!==undefined)full=false;" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "if(!still&&d.dataset.saveData!=='on'&&d.dataset.motionSplash!=='off'&&d.dataset.motion!=='calm'&&d.dataset.motion!=='off'&&!/^\\/(admin|auth|api|offline|open|s|r)(\\/|$)/.test(location.pathname)){d.dataset.splash='on';d.dataset.opening=full?'full':'brief'}" +
   "else m('opening:settled')}}catch(e){}})();" +

@@ -42,6 +42,13 @@ const INSTANT_DOCUMENT = `
     type === "navigation" ? [{ serverTiming: [{ name: "vallo-kept", description: "instant", duration: 0 }] }] : original(type);
 `;
 
+/* The mark on a page answered at once on a weak or Save-Data link: no refresh behind it. */
+const FRUGAL_DOCUMENT = `
+  const original = performance.getEntriesByType.bind(performance);
+  performance.getEntriesByType = (type) =>
+    type === "navigation" ? [{ serverTiming: [{ name: "vallo-kept", description: "frugal", duration: 0 }] }] : original(type);
+`;
+
 const OFFLINE_FROM_THE_START = `Object.defineProperty(Navigator.prototype, "onLine", { configurable: true, get: () => false });`;
 
 const refreshCalls = (page: import("playwright-core").Page) =>
@@ -96,6 +103,17 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the connection line", () => {
       expect(await line.textContent()).toContain(copy.back);
       const calls = await page.evaluate(() => (window as unknown as { __router: { calls: unknown[][] } }).__router.calls);
       expect(calls.filter(([name]) => name === "refresh")).toHaveLength(1);
+    } finally {
+      await close();
+    }
+  });
+
+  it("a page answered at once on a Save-Data link says nothing and does NOT refresh itself", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: CSS, init: FRUGAL_DOCUMENT });
+    try {
+      await page.waitForTimeout(600);
+      expect(await refreshCalls(page)).toBe(0);
+      expect(await page.getByTestId("connection-line").count()).toBe(0);
     } finally {
       await close();
     }

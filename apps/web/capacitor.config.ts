@@ -10,9 +10,9 @@ import { KeyboardResize } from "@capacitor/keyboard";
  * READ THIS BEFORE CHANGING `webDir` OR `server`.
  *
  * Capacitor normally packages a folder of static files into the native binary.
- * Vallo cannot produce one, and that is not a gap to be closed later: 40 files
+ * Vallo cannot produce one, and that is not a gap to be closed later: about 200 files
  * declare server actions and `output: 'export'` refuses a project containing
- * one; `src/middleware.ts` is the session lock and static export runs no
+ * one; `src/proxy.ts` (Next 16's name for middleware) is the session lock and static export runs no
  * middleware, so a static bundle would ship with no route protection at all;
  * and every route is dynamically rendered anyway because the root layout reads
  * cookies. See `docs/MOBILE_READINESS.md` section 2 for the full reasoning.

@@ -9,7 +9,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  * is unresolved no document exists, so none of the splash's own failsafes has
  * been parsed, let alone armed: the phone sits on the branded image for as long
  * as the request takes, which on 2 October was more than fifteen minutes.
- * `resolveSession()` calls GoTrue over the network with no deadline of its own,
+ * `resolveSessionClaims()` (the signature check, no GoTrue round trip) is raced against the deadline; the original hang was `resolveSession()`, which calls GoTrue over the network with no deadline of its own,
  * so "as long as the request takes" is unbounded.
  *
  * What is gated here is that the handler ALWAYS ANSWERS: inside the deadline
@@ -19,10 +19,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
  * against the hanging version, so the hanging session is the main case below.
  */
 
-const resolveSession = vi.fn();
+const resolveSessionClaims = vi.fn();
 let jar: Array<{ name: string; value: string }> = [];
 
-vi.mock("@/lib/actions/session", () => ({ resolveSession }));
+vi.mock("@/lib/actions/session", () => ({ resolveSessionClaims }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
     get: (name: string) => jar.find((cookie) => cookie.name === name),
@@ -45,21 +45,28 @@ async function landing(request = new Request("http://localhost:3000/home-or-land
 
 afterEach(() => {
   vi.useRealTimers();
-  resolveSession.mockReset();
+  resolveSessionClaims.mockReset();
   jar = [];
 });
 
 describe("home or landing, never hanging", () => {
   it("answers from the real session when it arrives in time", async () => {
-    resolveSession.mockResolvedValue({ state: "signed-in" });
+    jar = [{ name: "sb-uccixoonmbhrnyczyigt-auth-token", value: "x" }];
+    resolveSessionClaims.mockResolvedValue({ state: "signed-in" });
     expect(await landing()).toBe("/home");
-    resolveSession.mockResolvedValue({ state: "signed-out" });
+    resolveSessionClaims.mockResolvedValue({ state: "signed-out" });
     expect(await landing()).toBe("/");
+  });
+
+  it("asks nothing at all when there is no auth cookie (no round trip)", async () => {
+    resolveSessionClaims.mockResolvedValue({ state: "signed-in" });
+    expect(await landing()).toBe("/");
+    expect(resolveSessionClaims).not.toHaveBeenCalled();
   });
 
   it("falls back to the cookie guess 3 seconds after a session that never answers", async () => {
     vi.useFakeTimers();
-    resolveSession.mockImplementation(hangs);
+    resolveSessionClaims.mockImplementation(hangs);
     jar = [{ name: "sb-uccixoonmbhrnyczyigt-auth-token", value: "x" }];
     const pending = landing();
     await vi.advanceTimersByTimeAsync(3_000);
@@ -68,7 +75,7 @@ describe("home or landing, never hanging", () => {
 
   it("is still waiting at 799 ms, so the deadline is the one in the file", async () => {
     vi.useFakeTimers();
-    resolveSession.mockImplementation(hangs);
+    resolveSessionClaims.mockImplementation(hangs);
     jar = [{ name: "sb-uccixoonmbhrnyczyigt-auth-token", value: "x" }];
     let settled = false;
     const pending = landing().then((path) => {
@@ -83,7 +90,7 @@ describe("home or landing, never hanging", () => {
 
   it("guesses signed out when no Supabase auth cookie is present", async () => {
     vi.useFakeTimers();
-    resolveSession.mockImplementation(hangs);
+    resolveSessionClaims.mockImplementation(hangs);
     jar = [{ name: "vallo_first_run", value: "seen" }, { name: "sb-x-something-else", value: "y" }];
     const pending = landing();
     await vi.advanceTimersByTimeAsync(3_000);
@@ -92,7 +99,7 @@ describe("home or landing, never hanging", () => {
 
   it("never sends the store shell to the landing page, even on a timeout (V-11)", async () => {
     vi.useFakeTimers();
-    resolveSession.mockImplementation(hangs);
+    resolveSessionClaims.mockImplementation(hangs);
     const pending = landing(new Request("http://localhost:3000/home-or-landing?app=1"));
     await vi.advanceTimersByTimeAsync(3_000);
     const path = await pending;

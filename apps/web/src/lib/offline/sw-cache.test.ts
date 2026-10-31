@@ -97,8 +97,9 @@ describe("withKeptMark", () => {
 describe("the version", () => {
   it("was bumped, so the activate step clears the caches keyed the old way", () => {
     /* v5 (8 October 2026): visited pages kept per viewer, photographs and fonts.
-       v6 (13 October 2026): kept pages answer at once, marked, with a whole flag. */
-    expect(sw.CACHE_VERSION).toBe("v6");
+       v6 (13 October 2026): kept pages answer at once, marked, with a whole flag.
+       v7 (31 October 2026): the instant answer reaches weak, 2G and Save-Data links, with no refresh behind it. */
+    expect(sw.CACHE_VERSION).toBe("v7");
   });
 });
 

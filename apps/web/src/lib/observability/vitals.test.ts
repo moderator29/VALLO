@@ -30,6 +30,20 @@ describe("sanitiseVitals", () => {
     expect(rows?.map((r) => r.metric).sort()).toEqual(["CLS", "INP", "LCP"]);
     expect(rows?.[0]).toMatchObject({ route: "/search", effective_type: "3g", save_data: true, transfer_kb: 812 });
   });
+  it("reads the cold-start figures and labels (fast-start plan item 1)", () => {
+    const rows = sanitiseVitals({
+      path: "/home",
+      cold: true,
+      startKind: "instant",
+      metrics: { LCP: 900, BOOT_HIDE: 210, BOOT_OPEN: 640 },
+    });
+    expect(rows?.map((r) => r.metric).sort()).toEqual(["BOOT_HIDE", "BOOT_OPEN", "LCP"]);
+    expect(rows?.[0]).toMatchObject({ cold: true, start_kind: "instant" });
+  });
+  it("ignores a start kind or cold flag it does not know", () => {
+    const rows = sanitiseVitals({ path: "/home", cold: "yes", startKind: "teleport", metrics: { LCP: 5 } });
+    expect(rows?.[0]).toMatchObject({ cold: null, start_kind: null });
+  });
   it("drops what it cannot trust", () => {
     expect(sanitiseVitals({ path: "https://evil.example", metrics: { LCP: 1 } })).toBeNull();
     expect(sanitiseVitals({ path: "/x", metrics: { LCP: -1, CLS: Number.NaN, TTFB: 9e9 } })).toBeNull();

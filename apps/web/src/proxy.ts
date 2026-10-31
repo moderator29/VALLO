@@ -966,11 +966,17 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  /* OPS-17 / UI-16: a listing, stay or restaurant page for something that is
+  /* FAST-START PLAN ITEM 5 (31 October 2026): this read costs a database round
+     trip on the document's path, and its only purpose is the true 404 status
+     that a crawler or link checker sees. A signed-in person (never a crawler)
+     does not need it: the page renders its own not-found state. So it runs for
+     strangers only; the early check above is already counted.
+
+     OPS-17 / UI-16: a listing, stay or restaurant page for something that is
      not there answers 404 before the stream starts. Documents only: a prefetch or an RSC fetch goes on to
      the page, which renders the not-found state itself. The refreshed session
      cookies on `response` are carried over. */
-  if (request.method === "GET" && isDocumentRequest(request)) {
+  if (request.method === "GET" && isDocumentRequest(request) && (!user || earlyDetailCheck)) {
     const path = pathname.replace(/\/+$/, "") || "/";
     if (await (earlyDetailCheck ?? detailIsMissing(path, supabase as unknown as ListingCounter))) {
       const missing = request.nextUrl.clone();

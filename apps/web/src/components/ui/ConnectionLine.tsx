@@ -111,7 +111,11 @@ export function ConnectionLine() {
         );
       }
     } else if (kind === "kept") kept();
-    else if (!navigator.onLine) offline();
+    else if (kind === "frugal") {
+      /* Answered at once on a weak or Save-Data link: no refresh behind it,
+         so nothing is said unless the phone is offline. */
+      if (!navigator.onLine) offline();
+    } else if (!navigator.onLine) offline();
     /* The worker kept a fresh copy of this page after showing the old one:
        refresh in place, and the slow-connection line goes. */
     const stopFresh = onFreshCopy(() => {

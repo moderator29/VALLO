@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies, headers } from "next/headers";
-import { resolveSession } from "@/lib/actions/session";
+import { resolveSessionClaims } from "@/lib/actions/session";
 import { firstRunCookieFrom, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
 import { isShellRequest, shellStartPath } from "@/lib/native/shell";
 
@@ -41,18 +41,26 @@ async function guessSignedIn(): Promise<boolean> {
 
 /**
  * Signed in or not, inside the deadline above, and never left hanging.
- * `resolveSession()` already treats "unconfigured" as signed-out for this
- * route's purposes (see the comment on `target` below), so a boolean is the
- * whole answer this route needs.
+ *
+ * NO COOKIE, NO ROUND TRIP; WITH ONE, NO GOTRUE ROUND TRIP EITHER (31 October
+ * 2026, fast-start plan item 10). This route only chooses where to send
+ * somebody, and `/home` passes back through `proxy.ts`'s own gate on the very
+ * next request, so it needs to know whether the token is a real one, not to
+ * ask GoTrue about it. Without an auth cookie the answer is already "signed
+ * out"; with one, `resolveSessionClaims()` checks the token's signature and
+ * expiry locally (as `/open` does) instead of calling GoTrue. "Unconfigured"
+ * stays signed out for this route's purposes.
  */
 async function signedInWithDeadline(): Promise<boolean> {
+  if (!(await guessSignedIn())) return false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<"timeout">((resolve) => {
     timer = setTimeout(() => resolve("timeout"), HOME_OR_LANDING_TIMEOUT_MS);
   });
   try {
-    const outcome = await Promise.race([resolveSession(), timeout]);
-    if (outcome === "timeout") return guessSignedIn();
+    const outcome = await Promise.race([resolveSessionClaims(), timeout]);
+    /* The cookie is there (checked above), so the guess is "signed in". */
+    if (outcome === "timeout") return true;
     return outcome.state === "signed-in";
   } finally {
     clearTimeout(timer);

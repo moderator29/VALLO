@@ -10,7 +10,10 @@
 
 import { matchRoute, normalisePath } from "../nav/resolve";
 
-export const VITAL_METRICS = ["LCP", "INP", "CLS", "FCP", "TTFB"] as const;
+/* BOOT_HIDE: milliseconds from the page's start to the native splash's hide being
+   answered (shell only). BOOT_OPEN: to the opening finishing or being skipped.
+   Fast-start plan item 1: the first real cold-start numbers. */
+export const VITAL_METRICS = ["LCP", "INP", "CLS", "FCP", "TTFB", "BOOT_HIDE", "BOOT_OPEN"] as const;
 export type VitalMetric = (typeof VITAL_METRICS)[number];
 export const EFFECTIVE_TYPES = ["slow-2g", "2g", "3g", "4g"] as const;
 
@@ -31,7 +34,12 @@ export function sampleRateAt(now: number): number {
   return now < FULL_SAMPLING_UNTIL ? 1 : SAMPLE_RATE;
 }
 
+/** How the document reached the screen: the network, or the phone's own copy. */
+export const START_KINDS = ["network", "instant", "frugal", "kept"] as const;
+
 export type VitalsRow = {
+  cold: boolean | null;
+  start_kind: (typeof START_KINDS)[number] | null;
   route: string;
   metric: VitalMetric;
   value: number;
@@ -69,6 +77,11 @@ export function sanitiseVitals(payload: unknown): VitalsRow[] | null {
       ? (p.effectiveType as VitalsRow["effective_type"])
       : null;
   const saveData = p.saveData === true;
+  const startKind =
+    typeof p.startKind === "string" && (START_KINDS as readonly string[]).includes(p.startKind)
+      ? (p.startKind as VitalsRow["start_kind"])
+      : null;
+  const cold = typeof p.cold === "boolean" ? p.cold : null;
   const transferKb =
     typeof p.transferKb === "number" && Number.isFinite(p.transferKb) && p.transferKb >= 0 && p.transferKb < 1_000_000
       ? Math.round(p.transferKb)
@@ -78,7 +91,16 @@ export function sanitiseVitals(payload: unknown): VitalsRow[] | null {
   for (const metric of VITAL_METRICS) {
     const value = metrics[metric];
     if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value >= 600_000) continue;
-    rows.push({ route, metric, value, effective_type: effective, save_data: saveData, transfer_kb: transferKb });
+    rows.push({
+      route,
+      metric,
+      value,
+      effective_type: effective,
+      save_data: saveData,
+      transfer_kb: transferKb,
+      cold,
+      start_kind: startKind,
+    });
   }
   return rows.length > 0 ? rows : null;
 }

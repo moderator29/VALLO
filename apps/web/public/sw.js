@@ -82,8 +82,10 @@
    viewer, and listing photographs and fonts joined the kept assets. v6 (13
    October 2026) when a kept page began answering at once, carrying the
    `data-vallo-kept` mark and a note of whether its assets are all on the
-   phone, and the hashed build output went cache first. */
-const CACHE_VERSION = "v6";
+   phone, and the hashed build output went cache first. v7 (31 October 2026)
+   when a weak, 2G or Save-Data link began getting the instant answer too (the
+   copy alone, no refresh behind it). */
+const CACHE_VERSION = "v7";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;
@@ -273,6 +275,13 @@ const VIEWER_PATTERN = /^(anon|[a-f0-9]{16,64})$/;
    keeps quiet about unless the refresh is slow. */
 const FROM_CACHE_TIMING = 'vallo-kept;desc="kept"';
 const INSTANT_TIMING = 'vallo-kept;desc="instant"';
+/* An instant answer on a weak, 2G or Save-Data link: the same copy, shown at
+   once, and NO refresh behind it (the refresh is a second download, which is
+   exactly what those people are saving). The page draws no line for it. */
+const FRUGAL_TIMING = 'vallo-kept;desc="frugal"';
+/* On those links the copy answers only while it is this young: nothing
+   refreshes it behind the screen, so it must not be a week old. */
+const FRUGAL_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /* Where the shell's own start (`/open`, and `/` for the shell) lands offline,
    in order: the first of these this viewer has kept. */
@@ -942,13 +951,12 @@ let lastInstantAt = 0;
  */
 async function mayAnswerInstantly(request, kept, now, pathname) {
   if (askedForNetwork(request)) return false;
-  if (saveDataRequested(request)) return false;
   if (now - lastInstantAt < INSTANT_COOLDOWN_MS) return false;
   const headers = kept.headers;
   if (headers.get(WHOLE_HEADER) !== "1") return false;
   const keptAt = Number(headers.get("x-vallo-kept-at") || "0");
   if (!keptAt || keptAt > now + 60 * 1000) return false;
-  if (now - keptAt > INSTANT_MAX_AGE_MS) return false;
+  if (now - keptAt > (saveDataRequested(request) ? FRUGAL_MAX_AGE_MS : INSTANT_MAX_AGE_MS)) return false;
   /* A two-way page answers at once only when it was kept the way it would be drawn now. */
   const variant = await pageVariant(pathname);
   if (variant === null) return false;
@@ -1007,26 +1015,37 @@ function handleNavigation(event) {
 
   /* The network's answer once it is in, untouched (the copy kept below is a clone). */
   let reply = null;
-  const network = networkAnswer(event);
-  const keeping = network
-    .then(async (response) => {
-      reply = response;
-      const fresh = await keepPage(url, response.clone());
-      /* Just kept: the page's own announcement need not fetch it again. */
-      if (fresh) lastWarmed.set(key, Date.now());
-      worthTelling = fresh || response.ok || isRedirectAnswer(response);
-      await tell();
-      if (response.ok) await refreshShellIfDue(saveDataRequested(request));
-    })
-    .catch(() => undefined);
-  event.waitUntil(keeping);
+  let network = null;
+  /* On a weak, 2G or Save-Data link the network is not asked until it is known
+     that the kept copy cannot answer by itself: an instant answer there is
+     the copy alone, with no download behind it. Everywhere else the network
+     starts at once, as before. */
+  const frugal = saveDataRequested(request);
+  const startNetwork = () => {
+    if (network) return network;
+    network = networkAnswer(event);
+    const keeping = network
+      .then(async (response) => {
+        reply = response;
+        const fresh = await keepPage(url, response.clone());
+        /* Just kept: the page's own announcement need not fetch it again. */
+        if (fresh) lastWarmed.set(key, Date.now());
+        worthTelling = fresh || response.ok || isRedirectAnswer(response);
+        await tell();
+        if (response.ok) await refreshShellIfDue(saveDataRequested(request));
+      })
+      .catch(() => undefined);
+    event.waitUntil(keeping);
+    return network;
+  };
+  if (!frugal) startNetwork();
 
   return (async () => {
     const kept = await keptPage(url);
 
     if (!kept) {
       try {
-        const response = await network;
+        const response = await startNetwork();
         settled = "network";
         return response;
       } catch {
@@ -1042,6 +1061,11 @@ function handleNavigation(event) {
 
     const now = Date.now();
     if (kept.key === key && (await mayAnswerInstantly(request, kept.response, now, url.pathname))) {
+      if (frugal) {
+        settled = "frugal";
+        lastInstantAt = now;
+        return markKept(kept.response, FRUGAL_TIMING);
+      }
       /* The network was quicker than the cache after all: show the fresh page. */
       if (reply && reply.ok && !reply.redirected) {
         settled = "network";
@@ -1057,7 +1081,7 @@ function handleNavigation(event) {
     const timeout = new Promise((resolve) => {
       timer = setTimeout(() => resolve("timeout"), NAVIGATION_TIMEOUT_MS);
     });
-    const outcome = await Promise.race([network.then((r) => r, () => "failed"), timeout]);
+    const outcome = await Promise.race([startNetwork().then((r) => r, () => "failed"), timeout]);
     clearTimeout(timer);
 
     if (outcome !== "timeout" && outcome !== "failed") {
@@ -1200,6 +1224,8 @@ self.addEventListener("fetch", (event) => {
  *                     address as a document, in the background, once per
  *                     WARM_INTERVAL_MS, and keeps it under the viewer the
  *                     server names. Never under Save-Data or on 2g.
+ *   `vallo:seed`      the main tabs, kept if this viewer has no copy yet (see
+ *                     seedPages below). Never under Save-Data or on 2g.
  *   `vallo:forget`    sign-out: every kept page is deleted and the viewer
  *                     forgotten. The page deletes them itself too
  *                     (`lib/offline/page-cache.ts`); this is the second hand.
@@ -1237,10 +1263,45 @@ async function warmPage(path) {
   }
 }
 
+/*
+ * `vallo:seed` (31 October 2026, fast-start plan item 3): the main tabs a page
+ * lists, kept now if this viewer has no copy of them yet. A first install (or
+ * a new CACHE_VERSION, which empties the page caches) has a worker that never
+ * saw the tabs, so the first airplane-mode launch or the first slow-link open
+ * found nothing to answer with. A tab already kept is only a cache lookup; one
+ * at a time, so the seed never competes with the page on screen.
+ */
+let seeding = false;
+async function seedPages(paths) {
+  if (seeding || !Array.isArray(paths)) return;
+  seeding = true;
+  try {
+    for (const path of paths.slice(0, 6)) {
+      if (typeof path !== "string" || path.length > 200) continue;
+      try {
+        const url = new URL(path, self.location.origin);
+        if (url.origin !== self.location.origin || !isKeepablePagePath(url.pathname)) continue;
+        const have = await keptPage(url);
+        if (have && have.key === pageCacheKey(url)) continue;
+        await warmPage(path);
+      } catch {
+        /* One tab not seeded; the rest still are. */
+      }
+    }
+  } finally {
+    seeding = false;
+  }
+}
+
 self.addEventListener("message", (event) => {
   const data = event && event.data;
   if (!data || typeof data !== "object") return;
   if (event.origin && event.origin !== self.location.origin) return;
+  if (data.type === "vallo:seed") {
+    const work = seedPages(data.paths);
+    if (typeof event.waitUntil === "function") event.waitUntil(work);
+    return;
+  }
   if (data.type === "vallo:visited") {
     const work = warmPage(data.path);
     if (typeof event.waitUntil === "function") event.waitUntil(work);
