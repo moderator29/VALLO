@@ -61,3 +61,16 @@ Marked DONE where the repository proves it, OPEN where it does not. Do not redo 
 Steps 5 to 8 run on GitHub Actions (`.github/workflows/native-ios.yml`, the signed archive job). The four secrets in `docs/NATIVE_CI.md` exist (the job's presence check passed on 3 October), so no Mac is needed for the build itself.
 
 A device build needs a Mac with Xcode, or a TestFlight install of the uploaded build. The unsigned simulator compile on CI proves the project compiles; it does not prove the app runs on a phone.
+
+## 1.0.1 (31 October 2026): what changed in the repository, and what only Apple's portal can do
+
+Repository (done, needs `npx cap sync` and a build): version 1.0.1 (`npm run sync:versions`, build number 10001000 plus the CI build slot), the `@capacitor/network` plugin for true connectivity (`lib/native/network.ts`), the brief opening on the shell.
+
+Apple portal (founder, cannot be done from the repository):
+
+1. **Push Notifications** must be ticked on the App ID `com.vallospaces.app`, then the provisioning profile regenerated. The 1.0.0 build page listed no `aps-environment` entitlement, which is why an iPhone cannot register for push (and so cannot receive an incoming-call alert). The entitlements file already carries the key (`App.entitlements`, value `development`; automatic signing rewrites it to `production` for an archive); the profile is what was missing. After the build, confirm `aps-environment` on the build's page in App Store Connect.
+2. **Time Sensitive Notifications** (call alerts). The server already sends `interruption-level: time-sensitive` for a call (`lib/push/transport/apns.ts`), but iOS honours it only for an app whose profile has the `com.apple.developer.usernotifications.time-sensitive` entitlement. Tick the capability on the App ID, regenerate the profile, then add the key to `App.entitlements`. It is NOT added to the file yet on purpose: with a profile that lacks it, signing fails.
+3. Do not remove 1.0.0 from review. 1.0.1 is a separate submission after 1.0.0 is approved.
+4. Run rows 35 to 39 of `VALLO_NATIVE_TEST_MATRIX.md` on the TestFlight build.
+
+PushKit and CallKit are not available to a Capacitor web-view shell without a native plugin and a native call UI; until that exists an iPhone call is an alert push (sound, time sensitive) that opens the call screen when tapped.

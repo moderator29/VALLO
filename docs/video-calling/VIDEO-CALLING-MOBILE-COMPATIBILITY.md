@@ -95,3 +95,9 @@ after the web flow is proven. Apple requires CallKit for VoIP pushes.
 | 10 | Push tap after the ring ended: missed-call screen, no dead call | | | |
 | 11 | Photo capture after CAMERA is declared (Android): one prompt, then works | | | |
 | 12 | End call: camera light goes off on both | | | |
+
+## TURN and ICE review (31 October 2026)
+
+Read from the code, not proven on a device. The client sets no ICE servers and no `iceTransportPolicy` on purpose: the LiveKit server returns its TURN servers during the join, and LiveKit Cloud provides them (UDP 3478, TLS 5349 and 443). That fallback to TLS over 443 is what rescues a call behind a mobile carrier that blocks UDP, which is common in Nigeria. So there is nothing to configure in the app. What must be true on the server: `LIVEKIT_URL` is a `wss://<project>.livekit.cloud` address (Cloud), or, if self-hosted, TURN is enabled with a TLS certificate on 443. Check this first if calls connect on Wi-Fi but not on mobile data.
+
+The media settings in `components/calls/media/session.ts` are already the recommended ones: Opus speech preset with DTX and RED for voice, echo cancellation, noise suppression and auto gain asked for, simulcast with dynacast and adaptive stream for video. No change recommended without a device trace.

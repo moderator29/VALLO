@@ -69,3 +69,11 @@ status and findings: `VALLO_NATIVE_RELEASE_AUDIT.md`.
 The job cannot be written usefully until the keystore and Firebase key exist,
 and needs four Actions secrets (`ANDROID_KEYSTORE_BASE64`,
 `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
+
+## 1.0.1 (31 October 2026)
+
+Repository (done, needs `npx cap sync` and a build): `versionName 1.0.1`, `versionCode 10001000` (plus the CI build slot), `@capacitor/network` added (cap sync wires it into `capacitor.settings.gradle`).
+
+Calls: the manifest declares camera, microphone and audio-settings permissions. It does **not** declare `USE_FULL_SCREEN_INTENT` and the project has no native incoming-call service, on purpose: a full-screen call screen needs a native `FirebaseMessagingService` that posts a `fullScreenIntent` notification (and a Play Console declaration for that permission on Android 14). Until that is built, an incoming call is a high-priority push on the loud Calls channel that opens the call when tapped. Battery optimisation can still delay it on some phones; the device test script lists it.
+
+Run rows 35 to 38 of `VALLO_NATIVE_TEST_MATRIX.md`.
