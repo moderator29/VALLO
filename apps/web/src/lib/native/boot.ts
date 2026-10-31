@@ -195,6 +195,14 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
+      /* True connectivity from the operating system, not the browser's guess. */
+      const { startNetworkStatus } = await import("./network");
+      collect(await startNetworkStatus());
+    } catch {
+      /* The browser's own online and offline events stay in charge. */
+    }
+
+    try {
       const { startDeepLinks } = await import("./deep-links");
       collect(await startDeepLinks());
     } catch {

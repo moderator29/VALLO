@@ -13,6 +13,7 @@ import {
   tabsToWarm,
   watchArrivals,
 } from "@/lib/nav/tab-warm";
+import { isOffline } from "@/lib/offline/connectivity";
 
 /**
  * THE MAIN TABS FETCHED AHEAD, AND THE SCREEN KEPT CURRENT (13 October 2026,
@@ -108,7 +109,7 @@ export function KeepWarm({
     let seeded = false;
     let timer: number | undefined;
     const seed = () => {
-      if (seeded || isDataSaver() || !navigator.onLine) return;
+      if (seeded || isDataSaver() || isOffline()) return;
       const paths = tabsRef.current.filter((tab) => tab !== currentRef.current);
       if (seedTabs(paths)) seeded = true;
     };
@@ -160,7 +161,7 @@ export function KeepWarm({
       }
       const away = hiddenAt === null ? 0 : Date.now() - hiddenAt;
       hiddenAt = null;
-      if (away >= REFRESH_AFTER_AWAY_MS && navigator.onLine && !isDataSaver()) {
+      if (away >= REFRESH_AFTER_AWAY_MS && !isOffline() && !isDataSaver()) {
         /* A beat later, so the passcode guard's own return check (it locks
            after five minutes away) has drawn the lock first. */
         window.setTimeout(() => {

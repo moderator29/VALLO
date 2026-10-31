@@ -16,6 +16,7 @@ import { inflightState } from "@/lib/offline/inflight-state";
 import { toggleSave } from "@/lib/saved/actions";
 import { addLocalSave, removeLocalSave } from "@/lib/saved/local";
 import { saveRestaurant, saveStay, unsaveRestaurant, unsaveStay } from "@/lib/saved/places-actions";
+import { isOffline } from "@/lib/offline/connectivity";
 
 /**
  * THE TRAY UNDER THE APP. V-40.
@@ -134,7 +135,7 @@ export function OfflineTray() {
   const toldPending = useRef(new Set<string>());
 
   const run = useCallback(async () => {
-    if (running.current || (typeof navigator !== "undefined" && navigator.onLine === false)) return;
+    if (running.current || isOffline()) return;
     running.current = true;
     try {
       /* 1. The outbox. */

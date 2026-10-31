@@ -1,6 +1,7 @@
 import type { ActionResult } from "../actions/envelope";
 import { withTimeout } from "../media/upload";
 import { enqueue, entryKey, makeCreateEntry, type CreateKind } from "./outbox";
+import { isOffline } from "./connectivity";
 
 /**
  * SEND NOW, OR KEEP IT FOR WHEN THERE IS SIGNAL. V-40.
@@ -29,7 +30,7 @@ export async function sendOrKeep<T>(
     const entry = tapKey ? makeCreateEntry(kind, tapKey, fields, Date.now()) : null;
     return entry && (await enqueue(entry)) ? { state: "kept", key: entryKey(kind, tapKey!) } : { state: "not_kept" };
   };
-  if (typeof navigator !== "undefined" && navigator.onLine === false) return keep();
+  if (isOffline()) return keep();
   try {
     /* A stalled connection never throws, so the wait itself is bounded: past
        SEND_DEADLINE_MS the tap is kept, and its tap key makes a replay of a

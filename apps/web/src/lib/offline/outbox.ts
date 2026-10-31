@@ -21,6 +21,7 @@
  * that UUID travels as the action's idempotency key, so a replay after a
  * half-delivered request answers with the first result instead of a second row.
  */
+import { isOffline } from "./connectivity";
 
 export const SAVE_KINDS = ["save_listing", "save_place"] as const;
 export const CREATE_KINDS = ["send_message", "request_inspection", "submit_review", "drop_post"] as const;
@@ -255,7 +256,7 @@ export async function sessionUserId(): Promise<string | null | undefined> {
   if (id) return id;
   /* Offline, a clean "nobody" may still be a token that could not refresh:
      the tray and sign-out cleanup wait for a clear answer. */
-  if (failed || (typeof navigator !== "undefined" && navigator.onLine === false)) return undefined;
+  if (failed || isOffline()) return undefined;
   forgetOutboxUser();
   return null;
 }

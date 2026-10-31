@@ -1,6 +1,6 @@
 {
   "name": "@vallo/web",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
@@ -28,6 +28,7 @@
     "@capacitor/core": "^8.5.2",
     "@capacitor/haptics": "^8.0.2",
     "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/network": "^8.0.1",
     "@capacitor/push-notifications": "^8.0.4",
     "@capacitor/share": "^8.0.2",
     "@capacitor/splash-screen": "^8.0.2",

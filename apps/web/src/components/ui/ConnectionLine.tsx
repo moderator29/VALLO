@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { heldByPasscode, keptCopyKind, onFreshCopy } from "@/lib/offline/page-cache";
+import { isOffline } from "@/lib/offline/connectivity";
 
 /**
  * THE CONNECTION LINE (details pass; offline pass, 8 October 2026). A small
@@ -94,14 +95,14 @@ export function ConnectionLine() {
     /* The page on screen is the phone's copy: say which kind of wait it is. */
     const kept = () => {
       stale.current = true;
-      setPhase(navigator.onLine ? "kept" : "offline");
+      setPhase(isOffline() ? "offline" : "kept");
     };
     const kind = keptCopyKind();
     if (kind === "instant") {
       /* Answered at once from the phone: refresh in place now and say
          nothing, unless the phone is offline or the refresh is slow. */
       stale.current = true;
-      if (!navigator.onLine) offline();
+      if (isOffline()) offline();
       else {
         refreshIfStale();
         timers.current.push(
@@ -114,8 +115,8 @@ export function ConnectionLine() {
     else if (kind === "frugal") {
       /* Answered at once on a weak or Save-Data link: no refresh behind it,
          so nothing is said unless the phone is offline. */
-      if (!navigator.onLine) offline();
-    } else if (!navigator.onLine) offline();
+      if (isOffline()) offline();
+    } else if (isOffline()) offline();
     /* The worker kept a fresh copy of this page after showing the old one:
        refresh in place, and the slow-connection line goes. */
     const stopFresh = onFreshCopy(() => {

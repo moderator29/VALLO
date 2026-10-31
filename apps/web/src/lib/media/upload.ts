@@ -1,5 +1,6 @@
 import type { BrowserClient } from "@/lib/supabase/load-client";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/env";
+import { isOffline } from "@/lib/offline/connectivity";
 
 /**
  * THE ONE PLACE A PHOTOGRAPH LEAVES THE PHONE.
@@ -115,7 +116,7 @@ function once(url: string, token: string | null, input: UploadInput): Promise<Up
 }
 
 export async function uploadToStorage(input: UploadInput): Promise<UploadResult> {
-  if (typeof navigator !== "undefined" && navigator.onLine === false) return { ok: false, reason: "offline" };
+  if (isOffline()) return { ok: false, reason: "offline" };
   let token: string | null = null;
   /* A signed upload carries its own authority, so it needs no session. */
   if (!input.signedToken) {
@@ -143,7 +144,7 @@ export async function uploadToStorage(input: UploadInput): Promise<UploadResult>
     if (last.reason === "refused" || last.reason === "signed-out") return last;
     if (last.status === 409) return { ok: true };
     if (last.status && last.status >= 400 && last.status < 500) return last;
-    if (navigator.onLine === false) return { ok: false, reason: "offline" };
+    if (isOffline()) return { ok: false, reason: "offline" };
     await pause(800 * 2 ** attempt);
   }
   return last;

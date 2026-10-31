@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
+import { isOffline } from "./connectivity";
 
 /**
  * WHETHER THE PHONE KNOWS IT HAS NO SIGNAL (13 October 2026, the layout and
@@ -23,7 +24,7 @@ function subscribe(onChange: () => void): () => void {
 export function useOffline(): boolean {
   return useSyncExternalStore(
     subscribe,
-    () => navigator.onLine === false,
+    () => isOffline(),
     () => false,
   );
 }
@@ -41,7 +42,7 @@ export function useOfflineBoundary(reset: () => void): boolean {
        the signal go, rather than attaching when the render flips: React's own
        subscription is ahead of this one in the queue and may have torn the
        listener down before the event reaches it. */
-    let wasOffline = navigator.onLine === false;
+    let wasOffline = isOffline();
     const gone = () => {
       wasOffline = true;
     };
