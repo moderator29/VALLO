@@ -48,6 +48,7 @@ const whole = (onInvalidate: () => void) => ({ kind: "full", onInvalidate }) as 
 
 /* How long after the page lands the worker is asked to keep the tabs it lacks. */
 const SEED_AFTER_MS = 4_000;
+const SEEDED_KEY = "nf_tabs_seeded";
 
 /* The browser's idle moment, or a short delay where there is none (Safari). */
 function whenIdle(work: () => void): () => void {
@@ -106,12 +107,25 @@ export function KeepWarm({
   useEffect(() => {
     if (!enabled || process.env.NODE_ENV !== "production") return;
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    /* Once per browser session (the shell's cold start is one session), so a
+       tab the worker cannot keep is never asked for again on every page load. */
     let seeded = false;
+    try {
+      seeded = sessionStorage.getItem(SEEDED_KEY) === "1";
+    } catch {
+      /* Storage refused: once per page load is the fallback. */
+    }
     let timer: number | undefined;
     const seed = () => {
       if (seeded || isDataSaver() || isOffline()) return;
       const paths = tabsRef.current.filter((tab) => tab !== currentRef.current);
-      if (seedTabs(paths)) seeded = true;
+      if (!seedTabs(paths)) return;
+      seeded = true;
+      try {
+        sessionStorage.setItem(SEEDED_KEY, "1");
+      } catch {
+        /* As above. */
+      }
     };
     const later = () => {
       window.clearTimeout(timer);

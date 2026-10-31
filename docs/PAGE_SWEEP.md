@@ -26,6 +26,12 @@ No signed-in account could be used from the build sandbox, so the screens that n
 
 Everything else in the harness is clean at every width tried. What this does **not** prove: a real signed-in page also depends on real data, the page shell and the passcode lock, so a device pass with a QA account is still owed for the 217 pages marked "needs session" above.
 
+## 31 October 2026: light mode and the landing page, looked at again
+
+Looked at (not changed) with the production build and the development harness: `/` at 1440 and 390 px in light and dark; the member home with the desktop rail, the host dashboard at 820 px, the money surfaces and the wallet onboarding sheet at 1440 px, all in light. What the pictures show: white cards on warm paper with a visible edge, solid blue actions, a labelled left rail on desktop, a floating dock on the iPad, no large blank white area and no broken image. The landing hero is photographic in both themes by design. **No defect was found, so nothing was redesigned.** A blind rewrite of `tokens.css` would risk the 217 pages that cannot be opened without a session; the founder's remaining screenshots of a signed-in light page are the evidence needed to change it.
+
+The service-worker and connectivity changes of this session touch no layout.
+
 ## Pages
 
 | Route | Area | 5 widths, light and dark |

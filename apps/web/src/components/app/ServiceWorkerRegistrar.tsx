@@ -53,6 +53,25 @@ function announceHere(): void {
   announceVisit(currentPath());
 }
 
+/**
+ * ASK THE BROWSER NOT TO EVICT WHAT THE PHONE KEPT (fast-start plan item 11).
+ * Kept pages and saved screens are what make the next open instant and the
+ * offline open possible; a browser under storage pressure may delete a
+ * site's storage whole unless the site is "persistent". The request is
+ * silent (no prompt) and answered by the browser from how much the person
+ * uses the site; a refusal changes nothing. Never throws, never waits.
+ */
+async function keepStorage(): Promise<void> {
+  try {
+    const storage = navigator.storage;
+    if (!storage || typeof storage.persist !== "function") return;
+    if (typeof storage.persisted === "function" && (await storage.persisted())) return;
+    await storage.persist();
+  } catch {
+    /* Not supported here, or refused: the copies stay evictable, as before. */
+  }
+}
+
 export function ServiceWorkerRegistrar() {
   const pathname = usePathname();
 
@@ -67,6 +86,7 @@ export function ServiceWorkerRegistrar() {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {
         /* An enhancement that did not land. The app is unaffected. */
       });
+      void keepStorage();
     };
 
     /* The page that loaded before the worker could see it. */

@@ -83,3 +83,41 @@ or a real account can prove it. Nothing here is merged to `main`.
 ## Founder items (section 5, not mine to decide)
 
 Kareem's name order; Apple review result (inquiry due from 28 October 10:00); CAC share transfer filing; Paystack live activation and SCUML; moving the Vercel project; rotating every credential pasted in chat.
+
+## 31 OCTOBER 2026: the fast-start plan and native 1.0.1 (branch `claude/launch-readiness-sweep`, not merged)
+
+Plan: `docs/OFFLINE_AND_FAST_START_PLAN.md` (it was only on another branch; copied here).
+
+| Plan item | State |
+|---|---|
+| 1 Measure cold start | **Built.** `web_vitals_samples` gained `cold` and `start_kind`, and two metrics `BOOT_HIDE` and `BOOT_OPEN` (migrations `20261031090702`, `20261031090713`, applied); `public.admin_cold_start()` gives p50 and p90 by start kind. A cold start always reports. Measured from the page's start: the native process launch before the page exists is device-only. Signed-out pages are still not sampled (proxy list, the proxy owner's call) |
+| 2 Instant answer on weak, 2G, Save-Data links | **Built** (worker v7): the kept copy answers, marked `frugal`, with no network request and no refresh behind it; only while the copy is under a day old |
+| 3 Seed the main tabs after install | **Built**: the page asks the worker (`vallo:seed`) to keep the tabs it lacks, a few seconds after landing; skips tabs already kept, never under data saving or offline |
+| 5 Database work off the document path | **Built**: the proxy no longer counts the detail page for a signed-in person (the true 404 stays for strangers and crawlers) |
+| 10 `home-or-landing` start chain | **Built**: no cookie means no work; a cookie is checked locally (as `/open` does), not by GoTrue |
+| 11 Cache hygiene | **Part built**: `navigator.storage.persist()` asked once. Byte cap and chunk pruning not built |
+| 14 Brief opening on the shell and on kept pages | **Built** (600 ms full opening stays on the website only) |
+| 16 True connectivity | **Built, needs a native build**: `@capacitor/network` in `package.json`; `lib/offline/connectivity.ts` is one verdict used by the outbox, uploader, connection line, offline tray and boundaries |
+| 20 Release plumbing | **Built**: 1.0.1, Android `versionCode 10001000`, iOS build 10001000; checklists and matrix rows 35 to 39 written |
+| 24 Stale comments | **Fixed** |
+| iPhone push entitlement | The key is in `App.entitlements`; the missing piece is the Push Notifications capability and profile in Apple's portal (steps in the iOS checklist). Time-sensitive call alerts need their own capability, listed there |
+| 4, 6, 7, 8, 9, 12, 13, 21, 22 | **Not built.** 6 needs idempotent like and follow actions (the existing ones toggle) plus four-language copy; 7 is largely covered by `useSafeTransition` (173 files); 8, 12, 13 need byte measurements first; 4, 21, 22 are server-architecture changes |
+| 15, 17, 19, 23, 25 | **Not built** (native work or a security review) |
+
+Also done: 12 foreign-key indexes (`20261031091854`); security advisors show 0 errors (the warnings are the known definer-function and leaked-password-protection items; **turn on leaked password protection in the Supabase Auth settings**, a dashboard switch); calls TURN and ICE reviewed (nothing to configure in the app, see `docs/video-calling/VIDEO-CALLING-MOBILE-COMPATIBILITY.md`).
+
+**Reading the cold-start numbers** (Supabase SQL editor; `admin_cold_start()` refuses the editor's role because it checks a staff session, so read the table directly):
+
+```sql
+select coalesce(start_kind,'unknown') as how, coalesce(cold,false) as first_load_of_session, coalesce(effective_type,'unknown') as link,
+       count(*) filter (where metric='LCP') as samples,
+       round(percentile_cont(0.5) within group (order by value) filter (where metric='BOOT_HIDE')) as hide_p50_ms,
+       round(percentile_cont(0.9) within group (order by value) filter (where metric='BOOT_HIDE')) as hide_p90_ms,
+       round(percentile_cont(0.5) within group (order by value) filter (where metric='BOOT_OPEN')) as open_p50_ms,
+       round(percentile_cont(0.9) within group (order by value) filter (where metric='BOOT_OPEN')) as open_p90_ms,
+       round(percentile_cont(0.5) within group (order by value) filter (where metric='LCP')) as lcp_p50_ms,
+       round(percentile_cont(0.9) within group (order by value) filter (where metric='LCP')) as lcp_p90_ms
+  from public.web_vitals_samples where at > now() - interval '14 days' group by 1,2,3 order by 4 desc;
+```
+
+Rows appear only after this branch is merged and a member (signed in: `/api/vitals` is behind the sign-in wall) has opened the app. `BOOT_HIDE` exists on the native shell only.

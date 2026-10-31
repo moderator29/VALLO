@@ -1,8 +1,13 @@
-// @vitest-environment jsdom
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { isOffline, setNativeConnected } from "../offline/connectivity";
 
+beforeEach(() => {
+  vi.stubGlobal("window", new EventTarget());
+  vi.stubGlobal("navigator", { onLine: true });
+});
+
 afterEach(() => {
+  vi.unstubAllGlobals();
   setNativeConnected(null);
   vi.resetModules();
   vi.doUnmock("@capacitor/network");

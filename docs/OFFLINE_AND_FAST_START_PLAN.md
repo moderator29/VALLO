@@ -1,5 +1,7 @@
 # Fast start and weak network: the plan for 1.0.1 and after
 
+> **Status, 31 October 2026:** items 1, 2, 3, 5, 10, 14, 16, 20, 24 and part of 11 are built on `claude/launch-readiness-sweep`; see "31 OCTOBER 2026" at the end of `docs/REMAINING_WORK.md` for each item and what is left.
+
 Written 31 October 2026 from a read-only audit of the repo (HEAD 221327bd0). The founder's goal: the app opens in under 0.5 s with or without network, saved screens always show something real, and the app behaves on a poor connection the way X does. This is the working plan for the next session (see `docs/NEXT_SESSION_PROMPT.md`).
 
 ## The two start paths
