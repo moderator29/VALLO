@@ -104,6 +104,10 @@ Calls do not ring or connect even with notifications on. Audit the whole chain a
 - **Recommend and build 50 to 60 small features and tools** that fit the platform and the market (for example: share-to-WhatsApp everywhere, saved searches with alerts, price-drop alerts, compare listings, recently viewed, map-and-list sync, quick filters, skeleton states, pull to refresh, copy address, calendar add for viewings, report problem, undo toasts, keyboard shortcuts on desktop, command palette, dark and light auto, language, data saver, offline pack, QR for listings, listing completeness meter, host response time, verified-by-mechanism badges, and so on). Write the list in `docs/FEATURE_BACKLOG.md` with value, effort and a priority, then build the cheap, high-value ones, one at a time, to the same bar.
 - **Play Store readiness:** walk `docs/VALLO_ANDROID_RELEASE_CHECKLIST.md`, `docs/MOBILE_READINESS.md` and `docs/STORE_SUBMISSION_NOTES.md`, and close every gap that web or repo changes can close. List what needs a native build.
 
+## 4b. Fast start and weak network: read `docs/OFFLINE_AND_FAST_START_PLAN.md`
+
+The founder's priority: the app opens in under 0.5 s with or without network, and saved screens always show something real, like X. The plan file ranks 25 improvements from a read-only audit, separates web-only work (no store release) from the native 1.0.1 release, and says what to build first (measure real cold start, then web wave 1). It also records that the iOS build has no push entitlement (`aps-environment`), which must be fixed in 1.0.1. Do the web items in the order the plan gives, and report real numbers.
+
 ## 5. Founder items you must not decide (put them in your final report)
 
 - Kareem's name order (Kareem and "Kida" and "Tunde" appear for the 20% holder in different messages; confirm they are one person before any document uses a name).
