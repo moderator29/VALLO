@@ -86,7 +86,8 @@ import {
 } from "@/lib/agent/listings-model";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
-import type { BrandIconName } from "@/design-system/icons/BrandIcon";
+import { BrandIcon, type BrandIconName, type BrandIconProp } from "@/design-system/icons/BrandIcon";
+import { SPACE_OBJECT } from "@/components/app/home/space-types";
 import { Amount } from "@/components/ui/Amount";
 import { moveInLines } from "@/components/app/listing/move-in-lines";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -541,6 +542,12 @@ const STEP_ART: Partial<Record<(typeof STEP_KEYS)[number], Icon3DName>> = {
   submit: "checklist",
 };
 
+/** The realistic objects "Spaces for you" draws on the home, so a type looks the same wherever it appears. */
+const TYPE_REALISTIC: Partial<Record<PropertyType, BrandIconProp>> = {
+  ...SPACE_OBJECT,
+  hotel: "hotel",
+};
+
 /** The 3D object on each property type's card, where the sheets draw one. */
 const TYPE_ART: Partial<Record<PropertyType, Icon3DName>> = {
   apartment: "apartment",
@@ -725,6 +732,7 @@ function Choice({
   sub,
   object,
   art,
+  realistic,
   glyph,
   chosen,
   centred,
@@ -735,6 +743,8 @@ function Choice({
   object?: BrandIconName;
   /** The founder's 3D object, in place of the plate. */
   art?: Icon3DName | undefined;
+  /** The realistic object the home's "Spaces for you" draws, in place of the 3D one. */
+  realistic?: BrandIconProp | undefined;
   glyph?: UiIconName;
   chosen: boolean;
   centred?: boolean;
@@ -747,7 +757,11 @@ function Choice({
       aria-pressed={chosen}
       className={`nf-lw-choice${centred ? " nf-lw-choice--centred" : ""}`}
     >
-      {art ? (
+      {realistic ? (
+        <span className="nf-lw-choice__object grid size-12 place-items-center" aria-hidden="true" data-art={realistic}>
+          <BrandIcon name={realistic} size={48} preferRender />
+        </span>
+      ) : art ? (
         <span className="nf-lw-choice__object grid size-12 place-items-center" aria-hidden="true" data-art={art}>
           <Icon3D name={art} size={48} />
         </span>
@@ -2805,6 +2819,7 @@ export function ListingWizard({
                     name={copy.propertyTypes[type].label}
                     object={TYPE_OBJECT[type]}
                     art={TYPE_ART[type]}
+                    realistic={TYPE_REALISTIC[type]}
                     chosen={values.propertyType === type}
                     onClick={() => set("propertyType", type)}
                   />

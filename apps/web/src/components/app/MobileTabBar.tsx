@@ -513,18 +513,20 @@ export function MobileTabBar({
           );
         })}
       </ul>
-      {/* NO "+" AT THE RIGHT END (29 October 2026, the founder: "that +
-          remove it like remove it in any area in my app"). The Create sheet
-          is still mounted here, and the header's compose button opens it
-          (`openCreateSheet`), so every option it offered is one tap away. */}
-      {createSlot ?? (
-        <CreateDock
-          t={t}
-          side={side}
-          socialOn={socialOn}
-          listHref={side === "stays" ? "/profile/setup?side=stays" : "/profile/setup"}
-        />
-      )}
+      {/* The round "+" at the right end: brand blue with its glow, opening the
+          Create sheet over wherever you are. NEVER AN EMPTY END: a caller that
+          passes no control (a preview harness) gets the real "+" for its side,
+          not a gap. */}
+      <div className="nf-dockcreate">
+        {createSlot ?? (
+          <CreateDock
+            t={t}
+            side={side}
+            socialOn={socialOn}
+            listHref={side === "stays" ? "/profile/setup?side=stays" : "/profile/setup"}
+          />
+        )}
+      </div>
     </AutoHideDock>
   );
 }

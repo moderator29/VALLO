@@ -57,45 +57,45 @@ export function ProgressPath({
 }) {
   const total = steps.length;
   return (
-    <ol className="nf-path">
+    <ol className="nf-ppath">
       {steps.map((step, index) => {
         const state = index < at ? "done" : index === at ? "current" : "upcoming";
         const words = state === "done" ? copy.done : state === "current" ? copy.current : copy.upcoming;
         const number = formatNumber(index + 1, locale);
         const body = (
           <>
-            <span className="nf-path__tile" aria-hidden="true">
+            <span className="nf-ppath__tile" aria-hidden="true">
               {step.tile ? (
                 // A decorative 256px render shown at 32px: a plain img keeps it
                 // out of the image optimiser's queue on every wizard step.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={step.tile} alt="" width={32} height={32} loading="lazy" decoding="async" />
               ) : (
-                <span className="nf-path__tilenum nf-numeric">{number}</span>
+                <span className="nf-ppath__tilenum nf-numeric">{number}</span>
               )}
             </span>
-            <span className="nf-path__text">
-              <span className="nf-path__label">{step.label}</span>
+            <span className="nf-ppath__text">
+              <span className="nf-ppath__label">{step.label}</span>
               {step.caption ? (
-                <span className="nf-path__state">
+                <span className="nf-ppath__state">
                   {words ? <span className="sr-only">{words}. </span> : null}
                   {step.caption}
                 </span>
               ) : words ? (
-                <span className="nf-path__state">{words}</span>
+                <span className="nf-ppath__state">{words}</span>
               ) : null}
             </span>
             <StatusMark state={state} number={number} progress={total > 0 ? (index + 0.5) / total : 0} />
           </>
         );
         return (
-          <li key={step.id} className="nf-path__step" data-state={state} aria-current={state === "current" ? "step" : undefined}>
+          <li key={step.id} className="nf-ppath__step" data-state={state} aria-current={state === "current" ? "step" : undefined}>
             {state === "done" && onJump ? (
-              <button type="button" className="nf-path__row" onClick={() => onJump(index)} disabled={disabled}>
+              <button type="button" className="nf-ppath__row" onClick={() => onJump(index)} disabled={disabled}>
                 {body}
               </button>
             ) : (
-              <div className="nf-path__row">{body}</div>
+              <div className="nf-ppath__row">{body}</div>
             )}
           </li>
         );
@@ -108,18 +108,18 @@ export function ProgressPath({
 function StatusMark({ state, number, progress }: { state: "done" | "current" | "upcoming"; number: string; progress: number }) {
   if (state === "done") {
     return (
-      <span className="nf-path__mark nf-path__mark--done" aria-hidden="true">
+      <span className="nf-ppath__mark nf-ppath__mark--done" aria-hidden="true">
         <UiIcon name="check" size={16} />
       </span>
     );
   }
   return (
-    <span className={`nf-path__mark nf-path__mark--${state}`} aria-hidden="true">
+    <span className={`nf-ppath__mark nf-ppath__mark--${state}`} aria-hidden="true">
       {state === "current" ? (
-        <svg viewBox="0 0 36 36" className="nf-path__ring">
-          <circle className="nf-path__ring-track" cx="18" cy="18" r="16" />
+        <svg viewBox="0 0 36 36" className="nf-ppath__ring">
+          <circle className="nf-ppath__ring-track" cx="18" cy="18" r="16" />
           <circle
-            className="nf-path__ring-arc"
+            className="nf-ppath__ring-arc"
             cx="18"
             cy="18"
             r="16"
@@ -128,7 +128,7 @@ function StatusMark({ state, number, progress }: { state: "done" | "current" | "
           />
         </svg>
       ) : null}
-      <span className="nf-path__marknum nf-numeric">{number}</span>
+      <span className="nf-ppath__marknum nf-numeric">{number}</span>
     </span>
   );
 }
