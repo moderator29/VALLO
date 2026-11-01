@@ -163,3 +163,113 @@ export async function sayRunningLate(input: unknown): Promise<ActionResult<null>
   const sent = await sendMessage({ conversationId: parsed.data.conversationId, body: t.lateMessage.replace("{time}", time) });
   return sent.ok ? ok(null) : fail(t.lateFailed);
 }
+
+/* ------------------------------------------------- the renter's own viewing */
+
+/**
+ * CANCEL OR MOVE MY VIEWING (1 November 2026).
+ *
+ * Cancelling is the withdrawal the renter always had (`closeInspection`, which
+ * the database guard allows the requester alone, and which tells the lister
+ * through the inspection triggers). Moving is `reschedule_my_viewing`: the old
+ * viewing is withdrawn and the new time booked through the same function the
+ * listing page uses, in ONE transaction, so a time that is no longer free
+ * leaves the current viewing exactly where it was. Only the person who asked
+ * for the viewing may do either, only while it is open and still ahead.
+ */
+const myViewingInput = z.object({ id: z.string().uuid() });
+const moveInput = z.object({ id: z.string().uuid(), slotAt: z.string().refine((v) => !Number.isNaN(Date.parse(v))) });
+
+type OwnViewing = { id: string; listing_id: string; requester_id: string; state: string; slot_at: string | null; requested_at: string };
+
+const LIVE = ["REQUESTED", "PROPOSED", "CONFIRMED"];
+
+async function readMine(
+  session: Extract<Awaited<ReturnType<typeof resolveSession>>, { state: "signed-in" }>,
+  id: string,
+): Promise<OwnViewing | null> {
+  const { data, error } = await session.supabase
+    .from("inspection_requests")
+    .select("id, listing_id, requester_id, state, slot_at, requested_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  const row = data as OwnViewing;
+  return row.requester_id === session.user.id ? row : null;
+}
+
+const MOVE_WORDS: Record<string, string> = {
+  viewing_not_found: "That viewing could not be found.",
+  viewing_closed: "That viewing is already closed, so it cannot be moved.",
+  viewing_time_passed: "That viewing's time has passed, so it cannot be moved.",
+  viewing_same_time: "That is already the time of your viewing.",
+  viewing_slot_taken: "That time is no longer free. Pick another.",
+};
+
+/** Cancel the viewing I asked for. The lister is told through the existing notification. */
+export async function cancelMyViewing(input: unknown): Promise<ActionResult<null>> {
+  const parsed = validate(myViewingInput, input);
+  if (!parsed.ok) return fail("That viewing could not be found.");
+  const session = await resolveSession();
+  if (session.state !== "signed-in") return fail("Sign in to change this viewing.");
+  const mine = await readMine(session, parsed.data.id);
+  if (!mine) return fail("That viewing could not be found.");
+  if (!LIVE.includes(mine.state)) return fail("That viewing is already closed.");
+  const { closeInspection } = await import("../inspections/actions");
+  return closeInspection({ id: mine.id, state: "WITHDRAWN" });
+}
+
+/** The open times I could move my viewing to, from the listing's own windows. */
+export async function myViewingMoveOptions(
+  input: unknown,
+): Promise<ActionResult<{ listingId: string; slots: { slotAt: string; label: string }[] }>> {
+  const parsed = validate(myViewingInput, input);
+  if (!parsed.ok) return fail("That viewing could not be found.");
+  const session = await resolveSession();
+  if (session.state !== "signed-in") return fail("Sign in to change this viewing.");
+  const mine = await readMine(session, parsed.data.id);
+  if (!mine || !LIVE.includes(mine.state)) return fail("That viewing cannot be moved.");
+  if (Date.parse(mine.slot_at ?? mine.requested_at) <= Date.now()) return fail(MOVE_WORDS.viewing_time_passed!);
+  const rpc = session.supabase.rpc.bind(session.supabase) as unknown as (
+    fn: "viewing_slots",
+    args: { p_listing: string; p_days: number },
+  ) => PromiseLike<{ data: unknown; error: unknown }>;
+  const { data, error } = await rpc("viewing_slots", { p_listing: mine.listing_id, p_days: 14 });
+  if (error || !Array.isArray(data)) return fail("Open times could not be read just now. Try again in a moment.");
+  const locale = await getLocale();
+  const current = mine.slot_at ? Date.parse(mine.slot_at) : null;
+  const slots = (data as { slot_at: string }[])
+    .filter((s) => typeof s.slot_at === "string" && Date.parse(s.slot_at) !== current)
+    .slice(0, 12)
+    .map((s) => ({
+      slotAt: s.slot_at,
+      label: formatDate(new Date(s.slot_at), locale, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" }),
+    }));
+  if (slots.length === 0) return fail("There are no other open times for this place. You can ask the lister in your chat.");
+  return ok({ listingId: mine.listing_id, slots });
+}
+
+/** Move my viewing to another open time, atomically. */
+export async function rescheduleMyViewing(input: unknown): Promise<ActionResult<{ id: string }>> {
+  const parsed = validate(moveInput, input);
+  if (!parsed.ok) return fail("That time could not be read.");
+  const session = await resolveSession();
+  if (session.state !== "signed-in") return fail("Sign in to change this viewing.");
+  const mine = await readMine(session, parsed.data.id);
+  if (!mine) return fail(MOVE_WORDS.viewing_not_found!);
+  const rpc = session.supabase.rpc.bind(session.supabase) as unknown as (
+    fn: "reschedule_my_viewing",
+    args: { p_inspection: string; p_slot: string },
+  ) => PromiseLike<{ data: unknown; error: { hint?: string } | null }>;
+  const { data, error } = await rpc("reschedule_my_viewing", {
+    p_inspection: mine.id,
+    p_slot: new Date(parsed.data.slotAt).toISOString(),
+  });
+  if (error || typeof data !== "string") {
+    return fail((error?.hint && MOVE_WORDS[error.hint]) || "The viewing could not be moved. Your current time still stands.");
+  }
+  revalidatePath("/bookings");
+  revalidatePath("/agent/inspections");
+  revalidatePath(`/listing/${mine.listing_id}`);
+  return ok({ id: data });
+}
