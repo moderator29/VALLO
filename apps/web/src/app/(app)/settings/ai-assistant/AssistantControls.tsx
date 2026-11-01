@@ -12,6 +12,7 @@ import {
   setLearnedPreference,
 } from "@/lib/assistant/settings-actions";
 import { PERMISSIONS, type AiPermission } from "@/lib/assistant/permissions";
+import { AI_GLYPH, PERMISSION_GLYPH } from "@/lib/assistant/glyphs";
 
 /**
  * The assistant's controls once it is on: the master switch, one switch per
@@ -49,6 +50,8 @@ export function MasterSwitch({ enabled }: { enabled: boolean }) {
 
   return (
     <div className="nf-ai-master" data-testid="ai-master">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={AI_GLYPH.assistant} alt="" width={72} height={72} className="nf-ai-master__glyph" />
       <Switch
         checked={enabled}
         onCheckedChange={onChange}
@@ -114,6 +117,8 @@ export function PermissionRows({ granted }: { granted: readonly AiPermission[] }
           const on = p.floor ? granted.includes(p.key) : granted.includes(p.key);
           return (
             <li key={p.key} className="nf-ai-perm" data-testid={`ai-perm-${p.key}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={PERMISSION_GLYPH[p.key]} alt="" width={28} height={28} className="nf-ai-perm__glyph" />
               <div className="nf-ai-perm__text">
                 <div className="nf-ai-perm__head">
                   <span className="nf-ai-set__title">{p.title}</span>
@@ -201,10 +206,12 @@ export function LearnedList({ items }: { items: readonly { key: string; weight: 
 export function LegalLinks() {
   return (
     <ul className="nf-ai-links">
-      <li><Link href="/ai/terms">AI Assistant Terms of Service</Link></li>
-      <li><Link href="/ai/privacy">AI Privacy Policy</Link></li>
-      <li><Link href="/ai/permissions">Permissions and Data Access</Link></li>
-      <li><Link href="/ai/security">Security and User Protection</Link></li>
+      {/* eslint-disable @next/next/no-img-element */}
+      <li><Link href="/ai/terms"><img src={AI_GLYPH.toggle} alt="" width={22} height={22} className="nf-ai-links__glyph" />AI Assistant Terms of Service</Link></li>
+      <li><Link href="/ai/privacy"><img src={AI_GLYPH.privacy} alt="" width={22} height={22} className="nf-ai-links__glyph" />AI Privacy Policy</Link></li>
+      <li><Link href="/ai/permissions"><img src={AI_GLYPH.permissions} alt="" width={22} height={22} className="nf-ai-links__glyph" />Permissions and Data Access</Link></li>
+      <li><Link href="/ai/security"><img src={AI_GLYPH.security} alt="" width={22} height={22} className="nf-ai-links__glyph" />Security and User Protection</Link></li>
+      {/* eslint-enable @next/next/no-img-element */}
     </ul>
   );
 }

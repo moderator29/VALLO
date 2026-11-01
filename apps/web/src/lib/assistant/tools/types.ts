@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { AssistantListingItem } from "../types";
+import type { AssistantListingItem, AssistantStreamEvent } from "../types";
 import type { AssistantWorkspace } from "../workspace";
 import type { AiPermission, AssistantAccess } from "../permissions";
 
@@ -31,6 +31,8 @@ export type ToolContext = {
    * `requires`. Never the service role.
    */
   supabase?: unknown;
+  /** The signed-in person's id, from the session, for tools that need it. Never from the model. */
+  userId?: string;
 };
 
 /**
@@ -43,13 +45,19 @@ export type ToolOutcome = {
   data: unknown;
   note?: string;
   listings?: AssistantListingItem[];
+  /**
+   * Stream events the SERVER built from this result (cards, slots, summaries,
+   * payment reviews). They reach the screen and never the model, which is what
+   * keeps a button, an amount or a proposal id out of the model's hands.
+   */
+  events?: AssistantStreamEvent[];
 };
 
 /**
  * "read" today. "propose" arrives with approval-bound actions (AI-03); no
  * tool here changes anything.
  */
-export type ToolMode = "read";
+export type ToolMode = "read" | "propose";
 
 /** A tool as the Claude API is told about it. */
 export type ToolDefinition = {

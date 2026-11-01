@@ -1811,4 +1811,47 @@
   .nf-ai-check--agree {
     font-weight: 600;
   }
+
+  /* The founder's glyphs, drawn bare on the assistant's settings screens. */
+  .nf-ai-master__glyph {
+    display: block;
+    inline-size: 4.5rem;
+    block-size: 4.5rem;
+    margin-block-end: var(--nf-space-sm);
+    object-fit: contain;
+  }
+  .nf-ai-perm__glyph {
+    flex: none;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    object-fit: contain;
+  }
+  .nf-ai-links__glyph {
+    inline-size: 1.375rem;
+    block-size: 1.375rem;
+    margin-inline-end: var(--nf-space-xs);
+    vertical-align: middle;
+    object-fit: contain;
+  }
+
+  /* "Ask Vallo AI about this place": a quiet row with the assistant's glyph, bare. */
+  .nf-ai-ask {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-act-well);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-ai-ask__glyph {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    object-fit: contain;
+  }
 }

@@ -1,3 +1,4 @@
+import { AskAiAbout } from "@/components/app/assistant/AskAiAbout";
 import type { Metadata } from "next";
 import { forProofStrip } from "@/lib/i18n/slice";
 import { StillAvailable } from "@/components/app/listing/StillAvailable";
@@ -1036,6 +1037,11 @@ export default async function ListingDetailPage({
           details are the left column and a sticky summary card is the right:
           the price, the lister and the one primary action.
         */}
+        {session.state === "signed-in" && !listing.isDemo ? (
+          <div className="px-gutter pb-xs">
+            <AskAiAbout listingId={listing.id} />
+          </div>
+        ) : null}
         <div className="nf-detail-grid grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-2xl">
           {/* --------------------------------------------- main column */}
           <div className="min-w-0">

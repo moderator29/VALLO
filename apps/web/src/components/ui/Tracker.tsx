@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import "./tracker.css";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
+import { glyphSrc, type GlyphName } from "@/design-system/icons/glyphs";
 import type { StatusTone } from "@/components/ui/StatusPill";
 import type { TrackStep } from "@/components/app/status/StatusTrack";
 import type { TrackState } from "@/components/app/status/tracks";
@@ -41,6 +42,8 @@ export type TrackerProps = {
   /** What this is, on the card's chip ("Agreement", "Booking"). Also the timeline's accessible name prefix. */
   label: string;
   icon?: UiIconName;
+  /** The founder's glyph for this state, drawn bare beside the title. */
+  glyph?: GlyphName;
   /** The status in words: the biggest thing on the card. */
   title: string;
   tone: StatusTone;
@@ -81,6 +84,7 @@ const SPOKEN: Record<TrackState, string> = {
 export function Tracker({
   label,
   icon = "clock",
+  glyph,
   title,
   tone,
   since,
@@ -110,9 +114,15 @@ export function Tracker({
           {label}
         </span>
         <div className="nf-tracker__card">
-          <p className="nf-tracker__title" data-testid={testId ? `${testId}-title` : undefined}>
-            {title}
-          </p>
+          <div className="nf-tracker__titleline">
+            {glyph ? (
+              // eslint-disable-next-line @next/next/no-img-element -- a 256px transparent glyph at 48px
+              <img src={glyphSrc(glyph)} alt="" width={48} height={48} decoding="async" className="nf-tracker__glyph" aria-hidden="true" />
+            ) : null}
+            <p className="nf-tracker__title" data-testid={testId ? `${testId}-title` : undefined}>
+              {title}
+            </p>
+          </div>
           {since ? <p className="nf-tracker__since">{since}</p> : null}
           {cells && cells.length > 0 ? (
             <dl className="nf-tracker__cells">

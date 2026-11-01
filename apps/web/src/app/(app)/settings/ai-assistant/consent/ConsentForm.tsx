@@ -1,5 +1,6 @@
 "use client";
 
+import { AI_GLYPH } from "@/lib/assistant/glyphs";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -52,6 +53,8 @@ export function ConsentForm() {
       data-testid="ai-consent-form"
     >
       <section className="nf-panel nf-panel--card p-card">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={AI_GLYPH.assistant} alt="" width={72} height={72} className="nf-ai-master__glyph" />
         <h2 className="nf-ai-set__title">What you are turning on</h2>
         <p className="nf-ai-set__hint nf-ai-consent__p">
           VALLO AI becomes your personal assistant: it finds and compares places, explains them, and can prepare a viewing or a payment for you to approve. It starts with public listings only. Anything about your account, bookings or money is a separate permission you choose afterwards, one at a time, and you can take any of them back whenever you like.
@@ -65,6 +68,8 @@ export function ConsentForm() {
       </section>
 
       <section className="nf-panel nf-panel--card p-card">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={AI_GLYPH.protection} alt="" width={40} height={40} className="nf-ai-perm__glyph" />
         <h2 className="nf-ai-set__title">Read before you agree</h2>
         <ul className="nf-ai-links">
           <li><Link href="/ai/terms" target="_blank">AI Assistant Terms of Service</Link></li>

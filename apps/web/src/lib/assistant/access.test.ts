@@ -106,7 +106,7 @@ describe("tools that require a permission", () => {
 
   it("run when the database agrees", async () => {
     const c = client({ ai_assistant_can: true });
-    const run = await runTool("list_transactions", {}, { frame: "consumer", supabase: c }, registry);
+    const run = await runTool("list_transactions", {}, { frame: "consumer", supabase: c, userId: "u1" }, registry);
     expect(run.ok).toBe(true);
   });
 

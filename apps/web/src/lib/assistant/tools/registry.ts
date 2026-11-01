@@ -2,7 +2,13 @@ import { areaIntelTool } from "./area-intel";
 import { compareListingsTool } from "./compare-listings";
 import { findScreenTool } from "./find-screen";
 import { searchListingsTool } from "./search-listings";
-import { assertPermission } from "../access";
+import { getListingDetailsTool, getListingPhotosTool } from "./listing-detail";
+import { getViewingOptionsTool, listMyBookingsTool, listMyViewingsTool, proposeViewingTool } from "./viewings";
+import { listSavedListingsTool, pickedForYouTool, proposeSaveListingTool, rememberPreferenceTool } from "./saved";
+import { getRefundStatusTool, getWalletBalanceTool, listMyTransactionsTool, proposePaymentTool, spendSummaryTool } from "./money";
+import { getAccountSummaryTool } from "./account";
+import { consume, subjectForUser } from "@/lib/security/rate-limit";
+import { assertPermission, auditAction } from "../access";
 import { NO_ACCESS, hasPermission, type AssistantAccess } from "../permissions";
 import type { AssistantTool, ToolContext, ToolDefinition, ToolFrame, ToolOutcome } from "./types";
 
@@ -17,7 +23,29 @@ export const TOOL_REGISTRY: readonly AssistantTool[] = [
   compareListingsTool,
   areaIntelTool,
   findScreenTool,
+  /* Public: the real pictures and details of one place. */
+  getListingPhotosTool,
+  getListingDetailsTool,
+  /* Private: each needs a permission the member granted, checked in the database. */
+  pickedForYouTool,
+  rememberPreferenceTool,
+  listSavedListingsTool,
+  proposeSaveListingTool,
+  getViewingOptionsTool,
+  proposeViewingTool,
+  listMyViewingsTool,
+  listMyBookingsTool,
+  listMyTransactionsTool,
+  spendSummaryTool,
+  getRefundStatusTool,
+  getWalletBalanceTool,
+  proposePaymentTool,
+  getAccountSummaryTool,
 ];
+
+/** Private tools are paced separately from chat: forty calls in ten minutes per member. */
+const PRIVATE_TOOL_LIMIT = 40;
+const PRIVATE_TOOL_WINDOW_SECONDS = 600;
 
 /** The tools offered in `frame`. A tool outside its frames is not offered. */
 export function toolsFor(
@@ -74,6 +102,19 @@ export async function runTool(
       return { ok: false, error: `The tool ${name} needs a permission this person has not given. Say so, and point them to Settings, VALLO AI Assistant.` };
     }
   }
+  if (tool.requires) {
+    if (!ctx.userId) return { ok: false, error: `The tool ${name} needs a signed-in person.` };
+    const pace = await consume({
+      bucket: "assistant_private_tool",
+      subject: subjectForUser(ctx.userId),
+      limit: PRIVATE_TOOL_LIMIT,
+      windowSeconds: PRIVATE_TOOL_WINDOW_SECONDS,
+    });
+    if (!pace.allowed) {
+      await auditAction(ctx.supabase, { event: "tool_paced", permission: tool.requires, tool: tool.name, outcome: "refused" });
+      return { ok: false, error: `Private lookups are paused for a moment. Ask the person to try again ${pace.retryIn}.` };
+    }
+  }
   const parsed = tool.input.safeParse(input);
   if (!parsed.success) {
     const problems = parsed.error.issues
@@ -86,8 +127,19 @@ export async function runTool(
     };
   }
   try {
-    return { ok: true, outcome: await tool.run(ctx, parsed.data) };
+    const outcome = await tool.run(ctx, parsed.data);
+    /* Every private call leaves one audit row: who, which permission, which tool, how it went. No payload. */
+    if (tool.requires) {
+      await auditAction(ctx.supabase, {
+        event: "tool_run",
+        permission: tool.requires,
+        tool: tool.name,
+        outcome: (outcome.data as { error?: unknown } | null)?.error ? "failed" : "ok",
+      });
+    }
+    return { ok: true, outcome };
   } catch {
+    if (tool.requires) await auditAction(ctx.supabase, { event: "tool_run", permission: tool.requires, tool: tool.name, outcome: "failed" });
     return { ok: false, error: `${name} could not finish just now. Answer without it and say so.` };
   }
 }

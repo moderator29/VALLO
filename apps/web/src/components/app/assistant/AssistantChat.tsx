@@ -22,6 +22,7 @@ import type {
 } from "@/lib/assistant/types";
 import { hrefForListing } from "@/lib/listings/href";
 import type { ListingKind } from "@/lib/listings/types";
+import type { AssistantCard } from "@/lib/assistant/types";
 import { BackControl } from "@/components/ui/BackControl";
 import { Button } from "@/components/ui/Button";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
@@ -29,6 +30,7 @@ import {
   AssistantSidebar,
 } from "./AssistantSidebar";
 import { AssistantSettingsSheet } from "./AssistantSettingsSheet";
+import { AssistantBlocks, isBlockEvent, type AssistantBlock } from "./AssistantBlocks";
 import { DEFAULT_PREFS, FRESH_AFTER_MS, loadPrefs, savePrefs, type AssistantPrefs } from "@/lib/assistant/prefs";
 import {
   clearStoredThreads,
@@ -184,6 +186,8 @@ export function AssistantChat({
   viewer,
   seed,
   aiConsented = false,
+  privateAccess = false,
+  picks = [],
   workspace,
   t,
 }: {
@@ -198,6 +202,10 @@ export function AssistantChat({
   /** STORE-07: whether this person has agreed to the AI disclosure. The
       server route refuses without it either way. */
   aiConsented?: boolean;
+  /** The member has switched the assistant on and granted more than discovery: say so, quietly. */
+  privateAccess?: boolean;
+  /** "Picked for you by VALLO AI", computed on the server for a member who allowed it. */
+  picks?: AssistantCard[];
   /** The signed-in person, for the mark beside their own bubbles. Absent for a guest. */
   viewer?: { initials: string; avatarUrl: string } | undefined;
   /**
@@ -237,8 +245,14 @@ export function AssistantChat({
   // A question can arrive from anywhere on the platform via ?q=, e.g. the home
   // banner's quick-ask bar. It seeds the composer after mount, never auto-sends.
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
     if (q) setDraft((d) => (d ? d : q));
+    const about = params.get("about");
+    if (about && /^[0-9a-f-]{36}$/i.test(about)) {
+      aboutRef.current = about;
+      setDraft((d) => (d ? d : "Tell me about this place."));
+    }
   }, []);
 
   /* Mobile drawer: `historyOpen` mounts it, `historyShown` slides it in, so
@@ -251,6 +265,8 @@ export function AssistantChat({
   const drawerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  /* "Ask Vallo AI about this place": a listing id from the address, checked by the server. */
+  const aboutRef = useRef<string | null>(null);
   const streamSeq = useRef(0);
 
   /* Restore saved conversations once on mount, then persist every change.
@@ -414,6 +430,9 @@ export function AssistantChat({
           return { ...m, listings: merged };
         });
 
+      const addBlock = (block: AssistantBlock) =>
+        patchMessage(threadId, assistantId, (m) => ({ ...m, blocks: [...(m.blocks ?? []), block] }));
+
       try {
         const res = await fetch("/api/assistant", {
           method: "POST",
@@ -421,6 +440,7 @@ export function AssistantChat({
           body: JSON.stringify({
             messages: history,
             prefs: prefsRef.current,
+            ...(aboutRef.current ? { about: aboutRef.current } : {}),
             ...(serverId ? { threadId: serverId } : {}),
             ...(workspace ? { workspace } : {}),
           }),
@@ -479,6 +499,8 @@ export function AssistantChat({
                 appendText(event.text);
               } else if (event.type === "listings") {
                 addListings(event.items);
+              } else if (isBlockEvent(event)) {
+                addBlock(event);
               } else if (event.type === "thread") {
                 const id = event.id;
                 setThreads((prev) =>
@@ -496,7 +518,7 @@ export function AssistantChat({
 
         // A stream that ended with nothing to show still deserves an answer.
         patchMessage(threadId, assistantId, (m) =>
-          m.text.trim() || (m.listings?.length ?? 0) > 0
+          m.text.trim() || (m.listings?.length ?? 0) > 0 || (m.blocks?.length ?? 0) > 0
             ? m
             : { ...m, text: NETWORK_ERROR_MESSAGE, error: true },
         );
@@ -630,7 +652,7 @@ export function AssistantChat({
     streamingHere &&
     (!lastMessage ||
       lastMessage.role === "user" ||
-      (lastMessage.text === "" && (lastMessage.listings?.length ?? 0) === 0));
+      (lastMessage.text === "" && (lastMessage.listings?.length ?? 0) === 0 && (lastMessage.blocks?.length ?? 0) === 0));
 
   const sidebar = () => (
     <AssistantSidebar
@@ -775,6 +797,11 @@ export function AssistantChat({
                     {copy.emptyBody}
                   </p>
                 </div>
+                {picks.length > 0 ? (
+                  <div className="w-full text-left" data-testid="assistant-picks">
+                    <AssistantBlocks blocks={[{ type: "cards", title: "Picked for you by VALLO AI", items: picks }]} onAsk={(prompt) => send(prompt)} />
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -820,7 +847,7 @@ export function AssistantChat({
                 );
               }
               // An assistant answer appears once it has something to show.
-              if (!m.text.trim() && (m.listings?.length ?? 0) === 0) return null;
+              if (!m.text.trim() && (m.listings?.length ?? 0) === 0 && (m.blocks?.length ?? 0) === 0) return null;
               const thisStreaming = streamingHere && m.id === lastMessage?.id;
               /* The answer card's state is a fact about the turn, never a
                  guess: streaming while the stream is open, error when the
@@ -888,6 +915,7 @@ export function AssistantChat({
                       Retry
                     </Button>
                   )}
+                  {m.blocks && m.blocks.length > 0 && <AssistantBlocks blocks={m.blocks} onAsk={(prompt) => send(prompt)} />}
                   {m.listings && m.listings.length > 0 && (
                     <ul className="nf-ai__results" aria-label="Matching listings">
                       {m.listings.map((l, i) => (
@@ -986,6 +1014,11 @@ export function AssistantChat({
               className="nf-ai__send"
             />
           </form>
+          {privateAccess ? (
+            <p className="nf-ai__note" data-testid="ai-private-banner">
+              Private access is on. <Link href="/settings/ai-assistant">Settings</Link>
+            </p>
+          ) : null}
           <p className="nf-ai__note" data-testid="ai-note">
             Answers are written by AI and can be wrong. Never share passwords or card numbers.
           </p>

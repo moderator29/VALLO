@@ -1,3 +1,4 @@
+import { AskAiAbout } from "@/components/app/assistant/AskAiAbout";
 import { STAYS_INSTANT_PAY_FLAG, flagIsOn } from "@/lib/flags/read";
 import type { Metadata } from "next";
 import { ArrivalChargesLine } from "@/components/stays/ArrivalChargesLine";
@@ -238,6 +239,11 @@ export default async function StayDetailPage({
       photo={detail.photos[0]?.url ?? null}
       href={`/stay/${detail.id}`}
     />
+    {session.state === "signed-in" ? (
+      <div className="px-gutter pb-xs">
+        <AskAiAbout listingId={detail.id} />
+      </div>
+    ) : null}
     <StayDetailView
       detail={detail}
       nights={nights}
