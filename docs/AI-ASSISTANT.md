@@ -6,15 +6,10 @@ cards, viewing and payment proposals) builds on it.
 
 ## Status you need to know
 
-- **The database migration is NOT applied yet.** The Supabase connector asked
-  for a confirmation and got no answer. The SQL is in
-  `docs/PENDING_ai_assistant_enforcement.sql.txt`. Apply it (founder, or a
-  session that can approve the connector prompt), save it as
-  `supabase/migrations/<version>_ai_assistant_enforcement.sql`, run
-  `node scripts/check-migrations.mjs --record <file>`, and move
-  `supabase/tests/probes-pending/ai-assistant-enforcement.sql` to
-  `supabase/tests/probes/`. Until then the settings page shows the assistant
-  as OFF for everybody (every read fails closed) and cannot turn it on.
+- **The database migrations are applied and recorded** (`20261101105206_ai_assistant_enforcement`,
+  `20261101105455_ai_assistant_proposals`). Revoking is a soft state (`revoked_at`) and
+  clearing preferences scrubs them in place, because the connector asks a human to approve
+  any SQL that deletes and nobody can see that prompt. Probes: `supabase/tests/probes/ai-assistant-*.sql`.
 - **Counsel should review the four documents** in `lib/legal/ai-assistant.tsx`
   before they are relied on. They describe product behaviour; they are not a
   substitute for legal review.
@@ -34,13 +29,6 @@ cards, viewing and payment proposals) builds on it.
   member and raise a medium risk alert.
 - Settings: `/settings/ai-assistant`, `/settings/ai-assistant/consent`.
   Public documents: `/ai/terms`, `/ai/privacy`, `/ai/permissions`, `/ai/security`.
-
-## Not in Phase 1
-
-Private tools (transactions, balance, bookings, viewings), interactive action
-cards, `ai_action_proposals` functions and the payment confirmation flow,
-personalised "Picked for You", learning from activity. The proposals table and
-RLS exist; the functions that create and confirm proposals do not yet.
 
 ---
 
