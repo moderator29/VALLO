@@ -1,6 +1,7 @@
 "use client";
 
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
+import { NotifyBanner } from "./notify/NotifyBanner";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { useSwipeToClose } from "@/lib/ui/use-swipe-to-close";
@@ -445,6 +446,9 @@ export function AppShell({
           <div className="nf-shell nf-page-stage py-section-tight">{children}</div>
         )}
       </main>
+
+      {/* A new notification drops down from the top while the app is open. */}
+      {signedIn && !preview ? <NotifyBanner /> : null}
 
       {!immersive && showsTabBar(active) && (
         <ShellDock
