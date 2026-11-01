@@ -13,5 +13,5 @@ begin
     insert into public.ai_learned_preferences (user_id, key, value) values ('2255d905-0f31-437e-b719-aa2e4a18e03d', 'probe:other', '"x"');
     raise exception 'PROBE_FAIL: a member wrote another member''s preference';
   exception when insufficient_privilege then null; end;
-  raise exception 'PROBE_OK preferences bounded and owner-only';
+  raise exception 'PROBE_OK ai-learned-preferences-bounds';
 end $$;

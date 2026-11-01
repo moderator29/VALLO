@@ -219,6 +219,11 @@ function stepOfGateField(field: string): number {
  * with a plot to sell could not choose "Land" and gave up. A market you can
  * browse and cannot list in is worse than one you do not offer.
  */
+/* Hotels and restaurants are listed from the host workspace with their own
+   rooms, rates and tables; the property wizard offers them only to a draft
+   that was already saved as one. */
+const HOST_ONLY: ReadonlySet<PropertyType> = new Set<PropertyType>(["hotel", "restaurant"]);
+
 const TYPE_ORDER: PropertyType[] = [
   "apartment",
   "shortlet",
@@ -546,6 +551,7 @@ const STEP_ART: Partial<Record<(typeof STEP_KEYS)[number], Icon3DName>> = {
 /** The realistic objects "Spaces for you" draws on the home, so a type looks the same wherever it appears. */
 const TYPE_REALISTIC: Partial<Record<PropertyType, BrandIconProp>> = {
   ...SPACE_OBJECT,
+  shortlet: "serviced-block",
   hotel: "hotel",
 };
 
@@ -2818,7 +2824,7 @@ export function ListingWizard({
                 needs it: after choosing, not before.
               */}
               <div className="nf-lw-choices nf-lw-choices--3">
-                {TYPE_ORDER.map((type) => (
+                {TYPE_ORDER.filter((type) => !HOST_ONLY.has(type) || values.propertyType === type).map((type) => (
                   <Choice
                     key={type}
                     centred

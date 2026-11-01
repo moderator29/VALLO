@@ -194,6 +194,11 @@ export type SavedDraft = { id: string; status: ListingStatus };
  * partial save can never eat earlier work; a field sent as null is one the
  * lister emptied, and its column is emptied with it.
  */
+/** Listed from the host workspace, never from the property wizard. */
+const HOST_ONLY_TYPES: ReadonlySet<string> = new Set(["hotel", "restaurant"]);
+const HOST_ONLY_MESSAGE =
+  "Hotels and restaurants are listed from the host workspace, with their rooms, rates or tables. Choose another type here.";
+
 export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDraft>> {
   const gate = await requireAgent();
   if (!gate.ok) return fail(gate.error);
@@ -213,6 +218,17 @@ export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDr
   if (value.id) {
     if (!existing) return fail(NOT_FOUND_MESSAGE);
     if (!EDITABLE.includes(existing.status)) return fail(LOCKED_MESSAGE);
+  }
+
+  /* Hotels and restaurants are run from the host workspace, with the rooms,
+     rates and tables they need; the property wizard never starts one. A draft
+     already saved as one keeps its type so nothing a lister wrote is lost. */
+  if (
+    value.propertyType &&
+    HOST_ONLY_TYPES.has(value.propertyType) &&
+    existing?.property_type !== value.propertyType
+  ) {
+    return fail(HOST_ONLY_MESSAGE, { propertyType: HOST_ONLY_MESSAGE });
   }
 
   const propertyType: PropertyType =
