@@ -1,5 +1,0 @@
--- NOT YET APPLIED: the Supabase connector asked for confirmation (the migration deletes old Vallo posts) and got no answer.
--- Vallo's own notes: at most two a day, sometimes one, from the ONE existing cron job (vallo-daily-note).
--- 1. post_daily_note: allowed = 1 on one day in three, else 2; the second waits for the 15:00 UTC (16:00 Lagos) run.
--- 2. cron schedule '0 5,15 * * *' (06:00 and 16:00 Lagos).
--- 3. delete every SYSTEM post (and its replies) dated before today (Lagos).
