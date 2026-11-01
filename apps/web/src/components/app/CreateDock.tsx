@@ -52,9 +52,7 @@ import { useRootFlag } from "@/lib/ui/root-flag";
  */
 /**
  * The event that opens the Create sheet from anywhere (the header's compose
- * button). The round "+" that used to sit at the dock's right end is gone (29
- * October 2026, the founder: "that + remove it like remove it in any area in
- * my app"); the sheet and every option in it stay, opened from the header.
+ * pencil). The round "+" at the dock's right end stays: it opens the same sheet.
  */
 export const CREATE_OPEN_EVENT = "vallo:create-open";
 
@@ -86,7 +84,7 @@ export function CreateDock({
   /* `data-create-dock` on <html>: the feed's floating bloom steps aside for
      the dock's own plus (social-feed.css, lib/ui/root-flag.ts). */
   useRootFlag("create-dock");
-  /* Opened by the header's compose button (`openCreateSheet`). */
+  /* Opened by the header's compose pencil (`openCreateSheet`). */
   useEffect(() => {
     const onOpen = () => setOpen(true);
     window.addEventListener(CREATE_OPEN_EVENT, onOpen);
@@ -123,6 +121,28 @@ export function CreateDock({
 
   return (
     <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-label={copy.trigger}
+        className="nf-dock-create"
+        data-dock-create=""
+      >
+        {/* THE CENTRE TURNS INTO ITS OWN CLOSE (north star 6.1): the disc
+            rotates 90 degrees as its sheet opens while the plus crossfades
+            to a close mark (nav-island.css). */}
+        <span className="nf-dock-plus" aria-hidden="true">
+          <span className="nf-dock-plus__glyph nf-dock-plus__glyph--open">
+            <UiIcon name="plus" size="md" />
+          </span>
+          <span className="nf-dock-plus__glyph nf-dock-plus__glyph--close">
+            <UiIcon name="close" size="md" />
+          </span>
+        </span>
+      </button>
+
       <Sheet
         open={open}
         onOpenChange={setOpen}

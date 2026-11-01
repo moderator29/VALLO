@@ -1394,10 +1394,18 @@
  * tray cannot disagree about it.
  */
 @layer components {
-  /* The "+" at the right end is gone (29 October 2026): the capsule is the
-     whole row, so nothing is added to it. */
   .nf-dockrow {
-    --nf-dock-round: 0rem;
+    --nf-dock-round: 3.75rem;
+  }
+  @media (max-width: 379.98px) {
+    .nf-dockrow {
+      --nf-dock-round: 3.25rem;
+    }
+  }
+  .nf-dockcreate {
+    display: flex;
+    flex: none;
+    align-items: center;
   }
 
   /* The slot holds the menu; nothing in it is a positioned box, so the tray
@@ -1456,7 +1464,7 @@
   /* The tray: centred above the capsule. `--nf-tray-row` is the whole dock
      row's width in the capsule's own terms (the capsule, the gap, the "+"). */
   .nf-dockmore__tray {
-    --nf-tray-row: 100%;
+    --nf-tray-row: calc(100% + var(--nf-dock-round, 3.75rem) + var(--nf-space-md));
     --nf-tray-w: min(24rem, var(--nf-tray-row));
     right: auto;
     left: clamp(

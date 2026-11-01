@@ -1006,7 +1006,7 @@ function HostTypeStep({ draft, set }: StepProps) {
             >
               {/* The stays door's 3D render (`GOVERNING-09` screen three), on
                   the same plate the learning path's tiles stand on. */}
-              <span className="nf-path__tile" aria-hidden="true">
+              <span className="nf-ppath__tile" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a 256px render at 48px */}
                 <img src={HOST_TYPE_TILES[type]} alt="" width={48} height={48} decoding="async" />
               </span>

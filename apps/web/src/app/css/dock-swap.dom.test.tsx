@@ -56,7 +56,7 @@ const boxes = (page: Page) =>
     };
   });
 
-describe.skipIf(!hasBrowser && !process.env.CI)("the dock (menu in the capsule, no + at the right end)", () => {
+describe.skipIf(!hasBrowser && !process.env.CI)("the dock swap (menu in the capsule, + at the right end)", () => {
   for (const side of ["property", "stays"] as const) {
     for (const theme of ["dark", "light"] as const) {
       it(`${side} side, ${theme}: slots, names, targets and the tray`, async () => {
@@ -75,14 +75,20 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock (menu in the capsule, 
           expect(at.menuLabel).toContain("3");
           expect(at.menuText, "icon only, the unread count aside").toMatch(/^3?$/);
 
-          /* No "+" at all (29 October 2026): the Create sheet opens from the header. */
-          expect(at.create, "no round + in the dock").toBeNull();
+          /* The "+" is outside the capsule, beyond its right edge, and named Create. */
+          expect(at.createInCapsule).toBe(false);
+          expect(at.createLabel).toBe("Create");
+          expect(at.create!.x).toBeGreaterThanOrEqual(at.capsule!.r);
+          expect(at.plusFill, "the + is filled with the brand gradient").toContain("gradient");
 
           /* 44px targets, and the menu sits on the capsule's own centre line. */
           expect(at.menu!.w).toBeGreaterThanOrEqual(44);
           expect(at.menu!.h).toBeGreaterThanOrEqual(44);
+          expect(at.create!.w).toBeGreaterThanOrEqual(44);
+          expect(at.create!.h).toBeGreaterThanOrEqual(44);
           expect(Math.abs(at.menu!.cy - at.capsule!.cy)).toBeLessThanOrEqual(1);
           expect(Math.abs(at.menu!.cx - at.capsule!.cx), "the menu is the capsule's centre").toBeLessThanOrEqual(1);
+          expect(Math.abs(at.create!.cy - at.capsule!.cy)).toBeLessThanOrEqual(1);
 
           /* The tray opens centred on the capsule, on screen, above it. */
           await page.getByRole("button", { name: /^More/ }).click();
@@ -95,7 +101,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock (menu in the capsule, 
           expect(tray.b, "above the capsule").toBeLessThanOrEqual(open.capsule!.y);
           expect(tray.w).toBeLessThanOrEqual(24 * 16 + 1);
           /* Centred on the capsule unless the row's edge clamps it. */
-          const row = open.capsule!.r - open.capsule!.x;
+          const row = open.create!.r - open.capsule!.x;
           if (tray.w < row - 4) expect(Math.abs(tray.cx - open.capsule!.cx)).toBeLessThanOrEqual(1);
 
           /* Escape, which the Android back button dispatches, closes it. */
