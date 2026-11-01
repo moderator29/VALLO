@@ -14,7 +14,7 @@
  * it became a page of its own, the in-app help and support home.
  */
 export const KNOWN_TOP_SEGMENTS: ReadonlySet<string> = new Set([
-  "about", "admin", "agent", "agents", "agreements", "api", "areas", "around", "assistant", "auth", "bookings", "calls",
+  "about", "admin", "agent", "agents", "agreements", "ai", "api", "areas", "around", "assistant", "auth", "bookings", "calls",
   "cancellations", "careers", "check", "checkout", "compare", "contact", "delete-account", "directory", "disclaimer", "docs", "escrow",
   "email", "eula", "first-run", "for-agents", "for-hosts", "for-landlords", "forgot-password", "gallery", "guides", "help", "home", "home-or-landing", "host", "host-agreement", "inspections",
   "join", "landlord", "leaderboard", "legal", "listing", "messages", "move-in-cost", "notifications", "offline", "open", "pay", "payments", "passport", "post",

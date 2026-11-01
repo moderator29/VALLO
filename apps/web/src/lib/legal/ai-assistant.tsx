@@ -289,7 +289,7 @@ export const AI_PERMISSIONS_DOC: AiDoc = {
       body: (
         <>
           <p>
-            Transactions, balance and payment help are never switched on when you activate the assistant. You switch each on yourself, afterwards, and Vallo asks you to unlock your session with your passcode first. A locked session shares no money information.
+            Transactions, balance and payment help are never granted when you activate the assistant. You grant each one yourself, afterwards, and Vallo asks you to unlock your session with your passcode first. A locked session shares no money information.
           </p>
         </>
       ),
@@ -353,7 +353,7 @@ export const AI_SECURITY: AiDoc = {
             <li>Every lookup runs as you, under the database&rsquo;s row level security, so it cannot reach another person&rsquo;s records.</li>
             <li>The assistant receives only the smallest piece of information needed for one answer.</li>
             <li>Passwords, passcodes, sign-in codes, security keys, card numbers and card security codes are never given to the model.</li>
-            <li>Communication is encrypted in transit, and sensitive stored information is protected as the rest of Vallo is.</li>
+            <li>Communication is encrypted in transit, and sensitive stored information is held under the same controls as the rest of Vallo.</li>
           </ul>
         </>
       ),
@@ -363,7 +363,7 @@ export const AI_SECURITY: AiDoc = {
       body: (
         <>
           <p>
-            The assistant cannot pay. It can prepare a summary showing the service, the recipient, the amount and any fees. A payment starts only when you press Confirm, and Vallo then asks for the security check it uses for all money, with your session unlocked. The result you see is the result our licensed provider returns. If a payment fails you are told, and you can retry safely. The assistant never stores card details and never makes a hidden transaction.
+            The assistant cannot pay. It can prepare a summary showing the service, the recipient, the amount and any fees. A payment starts only when you press Confirm, and Vallo then asks for the security check it uses for all money, with your session unlocked. The result you see is the result our licensed provider returns. If a payment fails you are told, and you can try again. The assistant never stores card details and never makes a hidden transaction.
           </p>
         </>
       ),

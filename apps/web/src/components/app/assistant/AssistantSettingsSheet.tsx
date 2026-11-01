@@ -128,7 +128,7 @@ export function AssistantSettingsSheet({
 
         <div className="nf-ai-set__foot">
           <Button variant="dangerQuiet" size="sm" onClick={onClearAll} disabled={threadCount === 0}>
-            {threadCount === 0 ? "No conversations" : `Clear ${threadCount} ${threadCount === 1 ? "conversation" : "conversations"}`}
+            {threadCount === 0 ? "No conversations" : `Clear conversations (${threadCount})`}
           </Button>
           <Button variant="quiet" size="sm" onClick={() => onPrefsChange(DEFAULT_PREFS)} disabled={isDefault}>
             Reset settings

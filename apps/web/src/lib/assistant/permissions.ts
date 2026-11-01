@@ -79,7 +79,7 @@ export const PERMISSIONS: readonly PermissionMeta[] = [
   },
   {
     key: "wallet_balance",
-    title: "Wallet balance",
+    title: "Your balance",
     detail: "Read your Vallo balance and what is pending. Read only: it cannot move money.",
     kind: "read",
     sensitive: true,
