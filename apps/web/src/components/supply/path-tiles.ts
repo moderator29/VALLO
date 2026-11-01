@@ -1,4 +1,3 @@
-import { icon3dSrc, type Icon3DName } from "@/components/ui/icon-3d";
 import { TIERED_OBJECTS, solidSrc, tieredSrc, type TieredObjectName } from "@/design-system/icons/object-assets";
 
 /**
@@ -14,7 +13,6 @@ import { TIERED_OBJECTS, solidSrc, tieredSrc, type TieredObjectName } from "@/de
  * its number instead. The role crops stay on disk, referenced by nothing.
  */
 const tier = (name: TieredObjectName): string => tieredSrc(TIERED_OBJECTS[name]);
-const three = (name: Icon3DName): string => icon3dSrc(name);
 /** The founder's glyph sheet of 1 November 2026, cut into one transparent 256px file each. */
 const glyph = (name: string): string => `/brand/glyphs/${name}.png`;
 
