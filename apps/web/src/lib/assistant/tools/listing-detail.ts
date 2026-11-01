@@ -58,7 +58,7 @@ export const getListingPhotosTool = defineTool({
 export const getListingDetailsTool = defineTool({
   name: "get_listing_details",
   description:
-    "Read the real details of ONE listing by id: kind, place, price, rooms, size, amenities, who verified what, and a short description. Use it to answer questions about a specific place. It also puts the listing card, with its buttons, on screen. Never state a detail it did not return.",
+    "Read the real details of ONE listing by id: kind, place, price, rooms, size, amenities, which checks Vallo recorded, and a short description. Use it to answer questions about a specific place. It also puts the listing card, with its buttons, on screen. Never state a detail it did not return.",
   input: z.object({ listing_id: uuid }),
   inputSchema: {
     type: "object",

@@ -114,7 +114,7 @@ export const getRefundStatusTool = defineTool({
 export const getWalletBalanceTool = defineTool({
   name: "get_wallet_balance",
   description:
-    "Read the person's Vallo balance as reported by our licensed provider. If they have no balance account, or it is not live, say that plainly. Vallo does not hold customer money itself. Read only.",
+    "Read the person's Vallo balance as reported by our licensed provider. If they have no balance account, or it is not open yet, say that plainly. Vallo does not hold customer money itself. Read only.",
   input: z.object({}),
   inputSchema: { type: "object", properties: {} },
   mode: "read",
@@ -128,7 +128,7 @@ export const getWalletBalanceTool = defineTool({
       return { data: { available: false }, note: "The balance feature is not switched on for accounts yet. Say that plainly. Do not invent a figure." };
     }
     if (read.state === "onboarding") {
-      return { data: { available: false }, note: "The person has not opened a balance account yet. Say so and point them to the Wallet screen." };
+      return { data: { available: false }, note: "The person has not opened a balance account yet. Say so and point them to the Balance screen." };
     }
     if (read.state !== "ready" || !read.figures) {
       return { data: { error: "The balance could not be read just now. Nothing is shown rather than a guess." } };
@@ -136,7 +136,7 @@ export const getWalletBalanceTool = defineTool({
     const f = read.figures;
     const rows = [
       { label: "Available", value: naira(f.available.minor), ...(f.available.confirmedAt ? { date: when(f.available.confirmedAt) } : {}) },
-      { label: "Protected", value: naira(f.protected.minor) },
+      { label: "Held for a deal", value: naira(f.protected.minor) },
       { label: "Pending in", value: naira(f.pending.minor) },
       { label: "Processing out", value: naira(f.processing.minor) },
     ];

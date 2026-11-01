@@ -225,7 +225,7 @@ export function scoreCandidate(l: Listing, p: Profile): { score: number; reason:
   const bedHits = l.bedrooms > 0 ? (p.bedrooms.get(l.bedrooms) ?? 0) : 0;
   if (bedHits > 0) {
     score += 1 + bedHits;
-    reasons.push(`it has ${l.bedrooms} bedroom${l.bedrooms === 1 ? "" : "s"}, like the ones you saved`);
+    reasons.push(`it has the same number of bedrooms (${l.bedrooms}) as the ones you saved`);
   }
   if (p.budgetMaxMinor !== null && l.priceMinor > 0 && l.priceMinor <= p.budgetMaxMinor) {
     score += 1;

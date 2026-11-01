@@ -18,7 +18,7 @@ type Q = {
 export const getAccountSummaryTool = defineTool({
   name: "get_account_summary",
   description:
-    "Read a short, safe summary of the person's own account: display name, handle, verification tier, whether their phone is confirmed (yes or no) and when they joined. Never their email or phone number. Read only.",
+    "Read a short summary of the person's own account: display name, handle, verification tier, whether their phone is confirmed (yes or no) and when they joined. Never their email or phone number. Read only.",
   input: z.object({}),
   inputSchema: { type: "object", properties: {} },
   mode: "read",
