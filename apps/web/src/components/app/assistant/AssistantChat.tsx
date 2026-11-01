@@ -27,10 +27,9 @@ import { Button } from "@/components/ui/Button";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import {
   AssistantSidebar,
-  type Language,
-  type Tone,
 } from "./AssistantSidebar";
 import { AssistantSettingsSheet } from "./AssistantSettingsSheet";
+import { DEFAULT_PREFS, FRESH_AFTER_MS, loadPrefs, savePrefs, type AssistantPrefs } from "@/lib/assistant/prefs";
 import {
   clearStoredThreads,
   deriveTitle,
@@ -173,9 +172,6 @@ const TIME = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-/** How long away before the assistant opens on a new chat; the old one stays in history. */
-const FRESH_CHAT_AFTER_MS = 10 * 60 * 1000;
-
 /** Turns a thread's visible messages into the wire history for the route. */
 function toTurns(messages: Message[]): AssistantTurn[] {
   return messages
@@ -223,8 +219,10 @@ export function AssistantChat({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [streamingThread, setStreamingThread] = useState<string | null>(null);
-  const [tone, setTone] = useState<Tone>("Concise");
-  const [language, setLanguage] = useState<Language>("English");
+  const [prefs, setPrefs] = useState<AssistantPrefs>(DEFAULT_PREFS);
+  /* Always the latest, for the restore and visibility effects that run once. */
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
   const [draft, setDraft] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
   /* STORE-07: the first send records the agreement the server checks (see `send`). */
@@ -258,13 +256,18 @@ export function AssistantChat({
   /* Restore saved conversations once on mount, then persist every change.
      A seeded preview restores the fixtures instead and persists nothing. */
   useEffect(() => {
-    const restored = seed ? seed.threads : loadThreads();
+    const stored = seed ? DEFAULT_PREFS : loadPrefs();
+    if (!seed) {
+      setPrefs(stored);
+      prefsRef.current = stored;
+    }
+    const restored = seed ? seed.threads : stored.keep ? loadThreads() : [];
     setThreads(restored);
     const latest = [...restored].sort((a, b) => b.updatedAt - a.updatedAt)[0];
     /* A conversation left for ten minutes stays in history; the screen opens on
        a fresh chat, the way the other assistants do. A seeded preview keeps its
        own. */
-    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_CHAT_AFTER_MS)) setActiveId(latest.id);
+    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_AFTER_MS[stored.freshAfter])) setActiveId(latest.id);
     if (seed?.thinking && latest) setStreamingThread(latest.id);
     setHydrated(true);
   }, [seed]);
@@ -278,7 +281,7 @@ export function AssistantChat({
         hiddenAt = Date.now();
         return;
       }
-      if (hiddenAt !== null && Date.now() - hiddenAt >= FRESH_CHAT_AFTER_MS) setActiveId(null);
+      if (hiddenAt !== null && Date.now() - hiddenAt >= FRESH_AFTER_MS[prefsRef.current.freshAfter]) setActiveId(null);
       hiddenAt = null;
     };
     document.addEventListener("visibilitychange", onVisibility);
@@ -287,8 +290,15 @@ export function AssistantChat({
 
   useEffect(() => {
     if (!hydrated || seed) return;
-    saveThreads(threads);
-  }, [threads, hydrated, seed]);
+    if (prefs.keep) saveThreads(threads);
+    else clearStoredThreads();
+  }, [threads, hydrated, seed, prefs.keep]);
+
+  /* The settings are stored on this device, and travel with every question. */
+  useEffect(() => {
+    if (!hydrated || seed) return;
+    savePrefs(prefs);
+  }, [prefs, hydrated, seed]);
 
   const active = activeId ? threads.find((t) => t.id === activeId) : undefined;
   const messages = active?.messages ?? [];
@@ -410,6 +420,7 @@ export function AssistantChat({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: history,
+            prefs: prefsRef.current,
             ...(serverId ? { threadId: serverId } : {}),
             ...(workspace ? { workspace } : {}),
           }),
@@ -625,14 +636,12 @@ export function AssistantChat({
     <AssistantSidebar
       threads={threads}
       activeId={activeId}
-      tone={tone}
-      language={language}
+      prefs={prefs}
       onSelect={selectThread}
       onNew={newChat}
       onDelete={deleteThread}
       onClearAll={clearAll}
-      onToneChange={setTone}
-      onLanguageChange={setLanguage}
+      onPrefsChange={setPrefs}
     />
   );
 
@@ -986,10 +995,8 @@ export function AssistantChat({
       <AssistantSettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        tone={tone}
-        language={language}
-        onToneChange={setTone}
-        onLanguageChange={setLanguage}
+        prefs={prefs}
+        onPrefsChange={setPrefs}
         onClearAll={clearAll}
         threadCount={threads.length}
       />

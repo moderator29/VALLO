@@ -1,4 +1,5 @@
 import { requestSignal, roundWatchdog } from "@/lib/ai/upstream-deadline";
+import { parsePrefs, styleLines } from "@/lib/assistant/prefs";
 import { parseAssistantWorkspace, WORKSPACE_FRAMES } from "@/lib/assistant/workspace";
 import { isSameOriginRequest } from "@/lib/security/request-origin";
 import { NextRequest } from "next/server";
@@ -486,7 +487,9 @@ export async function POST(req: NextRequest) {
   const workspace = parseAssistantWorkspace(record.workspace);
   const frame: ToolFrame = workspace ?? "consumer";
   const tools = toolDefinitions(frame);
-  const system = workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT;
+  /* The person's own style settings, by key (`lib/assistant/prefs.ts`). */
+  const style = styleLines(parsePrefs(record.prefs));
+  const system = `${workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT}\n\n${style}`;
 
   const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
   if (!apiKey) {

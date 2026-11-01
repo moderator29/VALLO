@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { Thread } from "./threads";
+import type { AssistantPrefs } from "@/lib/assistant/prefs";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
 import { AssistantSettingsSheet } from "./AssistantSettingsSheet";
@@ -19,11 +20,6 @@ import "@/app/css/home.css";
  * still findable.
  */
 
-export const TONES = ["Concise", "Detailed"] as const;
-export const LANGUAGES = ["English", "Pidgin", "Hausa", "Igbo", "Yoruba"] as const;
-
-export type Tone = (typeof TONES)[number];
-export type Language = (typeof LANGUAGES)[number];
 
 /* On the Lagos clock, like the chat's own timestamps: the server runs on UTC
    and a phone on its own zone, so an unzoned time is written two ways. */
@@ -49,25 +45,21 @@ function whenLabel(timestamp: number): string {
 export function AssistantSidebar({
   threads,
   activeId,
-  tone,
-  language,
+  prefs,
   onSelect,
   onNew,
   onDelete,
   onClearAll,
-  onToneChange,
-  onLanguageChange,
+  onPrefsChange,
 }: {
   threads: Thread[];
   activeId: string | null;
-  tone: Tone;
-  language: Language;
+  prefs: AssistantPrefs;
   onSelect: (id: string) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
   onClearAll: () => void;
-  onToneChange: (tone: Tone) => void;
-  onLanguageChange: (language: Language) => void;
+  onPrefsChange: (next: AssistantPrefs) => void;
 }) {
   const [query, setQuery] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -204,7 +196,7 @@ export function AssistantSidebar({
               set to; naming the one they are most likely to be checking
               answers that without a tap. */}
           <span className="shrink-0 text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-            {tone}
+            {prefs.length}
           </span>
           <UiIcon name="chevron-right" size={16} className="shrink-0" />
         </button>
@@ -213,10 +205,8 @@ export function AssistantSidebar({
       <AssistantSettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        tone={tone}
-        language={language}
-        onToneChange={onToneChange}
-        onLanguageChange={onLanguageChange}
+        prefs={prefs}
+        onPrefsChange={onPrefsChange}
         onClearAll={onClearAll}
         threadCount={threads.length}
       />

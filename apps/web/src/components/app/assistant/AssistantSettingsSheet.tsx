@@ -1,187 +1,152 @@
 "use client";
 
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
+import { Segmented } from "@/components/ui/Segmented";
 import { Sheet } from "@/components/ui/Sheet";
-import { TYPE } from "@/components/app/Screen";
-import { LANGUAGES, TONES, type Language, type Tone } from "./AssistantSidebar";
+import { Switch } from "@/components/ui/Switch";
+import {
+  DEFAULT_PREFS,
+  FOCUSES,
+  FORMATS,
+  FRESH_AFTER,
+  LANGUAGES,
+  LENGTHS,
+  type AssistantPrefs,
+} from "@/lib/assistant/prefs";
 import "@/app/css/home.css";
 
 /**
- * The assistant's settings, behind one row at the foot of the sidebar.
+ * The assistant's settings, in one quiet sheet.
  *
- * ---------------------------------------------------------------------------
- * WHY THEY LEFT THE SIDEBAR ITSELF.
+ * Six settings, each one line of label and one small control, in the order a
+ * person reaches for them: how long the answers are, how they are laid out, the
+ * language, what the assistant leans towards, when a conversation starts over,
+ * and what is kept on the device. Every one is sent with the question and
+ * stored on this device (`lib/assistant/prefs.ts`), and none of them can change
+ * the assistant's rules: the route turns each KEY into a style line.
  *
- * Reply style, language and clear-all were all splayed open under the
- * conversation history, permanently. Three controls, a heading each, taking
- * the bottom third of a column whose actual job is showing you which
- * conversation to return to - and on a phone-height drawer that is most of the
- * history gone.
- *
- * They are also settings, which is to say things somebody sets once and then
- * does not look at. Reply style in particular: a person picks Concise or
- * Detailed in their first week and never touches it again, and it was sitting
- * at eye level below every conversation they had ever had.
- *
- * One row at the foot, the way ChatGPT puts its account there, opening the lot
- * in a sheet. The history gets the space back.
- *
- * ---------------------------------------------------------------------------
- * LANGUAGE IS A LIST NOW AND IT WAS A CYCLE BUTTON.
- *
- * It read `Language: English` and each tap advanced to the next of five, so
- * reaching Yoruba from English was four taps past three languages you did not
- * want, and there was no way to see what the options WERE without pressing
- * through them. That is defensible in a cramped strip where a list does not
- * fit. In a sheet it is just worse, so it is five rows with the current one
- * marked.
+ * The controls are the small segmented rail and a wrap of small chips, never
+ * the full-width bars the first version used, so the whole sheet reads at a
+ * glance on a phone without scrolling past five identical blocks.
  */
 export function AssistantSettingsSheet({
   open,
   onOpenChange,
-  tone,
-  language,
-  onToneChange,
-  onLanguageChange,
+  prefs,
+  onPrefsChange,
   onClearAll,
   threadCount,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  tone: Tone;
-  language: Language;
-  onToneChange: (tone: Tone) => void;
-  onLanguageChange: (language: Language) => void;
+  prefs: AssistantPrefs;
+  onPrefsChange: (next: AssistantPrefs) => void;
   onClearAll: () => void;
   /** Drives the clear control's disabled state and its count. */
   threadCount: number;
 }) {
+  const set = <K extends keyof AssistantPrefs>(key: K, value: AssistantPrefs[K]) =>
+    onPrefsChange({ ...prefs, [key]: value });
+  const isDefault = (Object.keys(DEFAULT_PREFS) as (keyof AssistantPrefs)[]).every((k) => prefs[k] === DEFAULT_PREFS[k]);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange} title="Assistant settings">
-      <div className="mx-auto w-full max-w-md space-y-block">
-        <Group
-          title="Reply style"
-          hint="How much the assistant says. Concise answers the question; detailed explains the reasoning around it."
-        >
-          <div role="radiogroup" aria-label="Reply style" className="space-y-row">
-            {TONES.map((option) => (
-              <OptionRow
-                key={option}
-                label={option}
-                detail={
-                  option === "Concise"
-                    ? "Short answers, straight to the listing."
-                    : "Fuller answers, with the costs and caveats spelled out."
-                }
-                selected={tone === option}
-                onSelect={() => onToneChange(option)}
-              />
-            ))}
-          </div>
-        </Group>
-
-        <Group
-          title="Language"
-          hint="The language the assistant replies in. It understands all five whichever one is set."
-        >
-          <div role="radiogroup" aria-label="Language" className="space-y-row">
-            {LANGUAGES.map((option) => (
-              <OptionRow
-                key={option}
-                label={option}
-                selected={language === option}
-                onSelect={() => onLanguageChange(option)}
-              />
-            ))}
-          </div>
-        </Group>
-
-        <Group
-          title="History"
-          hint="Your conversations are kept on this device only. Clearing them here does not leave a copy behind."
-        >
-          <Button
-            variant="dangerQuiet"
+      <div className="nf-ai-set mx-auto w-full max-w-md">
+        <Row title="Reply length" hint="How much it says.">
+          <Segmented
+            size="sm"
             full
-            onClick={onClearAll}
-            disabled={threadCount === 0}
-          >
-            {threadCount === 0
-              ? "No conversations to clear"
-              : `Clear all ${threadCount} conversations`}
+            semantics="radio"
+            label="Reply length"
+            options={LENGTHS.map((value) => ({ value, label: value }))}
+            value={prefs.length}
+            onChange={(next) => set("length", next)}
+          />
+        </Row>
+
+        <Row title="Layout" hint="Sentences or short points.">
+          <Segmented
+            size="sm"
+            full
+            semantics="radio"
+            label="Layout"
+            options={FORMATS.map((value) => ({ value, label: value }))}
+            value={prefs.format}
+            onChange={(next) => set("format", next)}
+          />
+        </Row>
+
+        <Row title="Language" hint="The assistant understands all five.">
+          <div role="radiogroup" aria-label="Language" className="nf-ai-set__chips">
+            {LANGUAGES.map((option) => (
+              <button
+                key={option}
+                type="button"
+                role="radio"
+                aria-checked={prefs.language === option}
+                onClick={() => set("language", option)}
+                className="nf-ai-set__chip nf-tap"
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </Row>
+
+        <Row title="Leans towards" hint="What it mentions first.">
+          <Segmented
+            size="sm"
+            full
+            semantics="radio"
+            label="Leans towards"
+            options={FOCUSES.map((value) => ({ value, label: value }))}
+            value={prefs.focus}
+            onChange={(next) => set("focus", next)}
+          />
+        </Row>
+
+        <Row title="Start a new chat after" hint="The old one stays in history.">
+          <Segmented
+            size="sm"
+            full
+            semantics="radio"
+            label="Start a new chat after"
+            options={FRESH_AFTER.map((value) => ({ value, label: value }))}
+            value={prefs.freshAfter}
+            onChange={(next) => set("freshAfter", next)}
+          />
+        </Row>
+
+        <div className="nf-ai-set__row nf-ai-set__row--switch">
+          <Switch
+            checked={prefs.keep}
+            onCheckedChange={(next) => set("keep", next)}
+            label="Keep conversations on this device"
+            description="Off: nothing is saved, and chats vanish when you leave."
+          />
+        </div>
+
+        <div className="nf-ai-set__foot">
+          <Button variant="dangerQuiet" size="sm" onClick={onClearAll} disabled={threadCount === 0}>
+            {threadCount === 0 ? "No conversations" : `Clear ${threadCount} ${threadCount === 1 ? "conversation" : "conversations"}`}
           </Button>
-        </Group>
+          <Button variant="quiet" size="sm" onClick={() => onPrefsChange(DEFAULT_PREFS)} disabled={isDefault}>
+            Reset settings
+          </Button>
+        </div>
       </div>
     </Sheet>
   );
 }
 
-function Group({
-  title,
-  hint,
-  children,
-}: {
-  title: string;
-  hint: string;
-  children: React.ReactNode;
-}) {
+function Row({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
-    <section>
-      <h3 className="nf-overline">{title}</h3>
-      <p className={`mt-inline-tight ${TYPE.rowMeta}`}>{hint}</p>
-      <div className="mt-heading">{children}</div>
+    <section className="nf-ai-set__row">
+      <div className="nf-ai-set__label">
+        <h3 className="nf-ai-set__title">{title}</h3>
+        <p className="nf-ai-set__hint">{hint}</p>
+      </div>
+      {children}
     </section>
-  );
-}
-
-/**
- * One option, as a row rather than a chip.
- *
- * `role="radio"` INSIDE a `radiogroup` this time, which the chips at the foot
- * of the sidebar could not claim: they announced `aria-pressed` because there
- * was no group element around them and a radio without a group is invalid
- * ARIA. Here there is one, so the honest semantics are available and the
- * screen reader hears "1 of 5" rather than five separate toggles.
- */
-function OptionRow({
-  label,
-  detail,
-  selected,
-  onSelect,
-}: {
-  label: string;
-  detail?: string;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      onClick={onSelect}
-      className={`nf-tap flex w-full items-center gap-md rounded-[var(--nf-radius-control)] border px-sm py-sm text-left transition-colors ${
-        selected
-          ? "nf-ai__row--on"
-          : "border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] hover:border-[var(--nf-selected-edge)]"
-      }`}
-    >
-      <span className="min-w-0 flex-1">
-        <span className={`block ${TYPE.rowTitle}`}>{label}</span>
-        {detail && <span className={`mt-inline-tight block ${TYPE.rowMeta}`}>{detail}</span>}
-      </span>
-      {/* A tick is the only selected marker that survives a colourblind
-          reader; the tint alone is not a state. `verified` is the tick this
-          icon set has - there is no bare `check` - and at 18px it reads as one
-          rather than as a badge. */}
-      {selected && (
-        <UiIcon
-          name="verified"
-          size={20}
-          className="shrink-0 text-[var(--nf-brand-secondary)]"
-        />
-      )}
-    </button>
   );
 }
