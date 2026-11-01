@@ -173,6 +173,9 @@ const TIME = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
+/** How long away before the assistant opens on a new chat; the old one stays in history. */
+const FRESH_CHAT_AFTER_MS = 10 * 60 * 1000;
+
 /** Turns a thread's visible messages into the wire history for the route. */
 function toTurns(messages: Message[]): AssistantTurn[] {
   return messages
@@ -258,9 +261,28 @@ export function AssistantChat({
     const restored = seed ? seed.threads : loadThreads();
     setThreads(restored);
     const latest = [...restored].sort((a, b) => b.updatedAt - a.updatedAt)[0];
-    if (latest) setActiveId(latest.id);
+    /* A conversation left for ten minutes stays in history; the screen opens on
+       a fresh chat, the way the other assistants do. A seeded preview keeps its
+       own. */
+    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_CHAT_AFTER_MS)) setActiveId(latest.id);
     if (seed?.thinking && latest) setStreamingThread(latest.id);
     setHydrated(true);
+  }, [seed]);
+
+  /* Coming back to a page left open for ten minutes or more: a new chat. */
+  useEffect(() => {
+    if (seed) return;
+    let hiddenAt: number | null = null;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+        return;
+      }
+      if (hiddenAt !== null && Date.now() - hiddenAt >= FRESH_CHAT_AFTER_MS) setActiveId(null);
+      hiddenAt = null;
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [seed]);
 
   useEffect(() => {
