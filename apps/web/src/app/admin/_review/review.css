@@ -87,6 +87,20 @@
     flex: none;
     color: var(--nf-content-muted);
   }
+  /* A review's tabs: one page, the evidence one tab at a time. The body gets
+     room to breathe, and its panels sit apart on a clear rhythm. */
+  .nf-rv-tabbody {
+    display: grid;
+    gap: var(--nf-space-lg);
+    min-inline-size: 0;
+  }
+  .nf-rv-tabbody .nf-rv-grid2 {
+    gap: var(--nf-space-lg);
+  }
+  .nf-rv-tabbody .nf-rv-stack {
+    display: grid;
+    gap: var(--nf-space-lg);
+  }
   /* The id line and the one-line summary under a review's title. */
   .nf-rv-lead {
     display: grid;

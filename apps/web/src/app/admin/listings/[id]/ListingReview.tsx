@@ -10,8 +10,7 @@ import type { ListingReviewView } from "@/lib/admin/queries";
 import { SALE_STATUS_LABEL, TENURE_LABEL } from "@/lib/listings/pricing";
 import { compoundFacts } from "@/lib/listings/compound";
 import type { AdminCopy } from "../../_components/copy";
-import { Avatar, Badge, DeskHead, Panel, RoleTag, SectionList, type SectionLink } from "../../_review/parts";
-import { BackControl } from "@/components/ui/BackControl";
+import { Avatar, Badge, DeskHead, Panel, RoleTag, Tabs, type SectionLink } from "../../_review/parts";
 import type { ListingReviewExtras } from "../../_review/contracts";
 import { tileMosaic } from "../../_review/map-tiles";
 import {
@@ -136,24 +135,16 @@ export function ListingReview(props: ListingReviewProps) {
     priceLine(listing, copy, locale),
   ].join(" \u00b7 ");
 
-  /* ------------------------------------------------- a section, on its own page */
-  if (section) {
-    const heading = sectionLinks?.find((link) => link.key === section)?.title ?? "Listing";
-    return (
-      <div className="nf-rv">
-        <DeskHead
-          lead={<BackControl fallback={hubHref ?? "/admin/listings"} label="Back to the listing" />}
-          title={heading}
-          trail={<Badge status={listing.status}>{statusLabel(listing.status)}</Badge>}
-          sub={`${reference} \u00b7 ${listing.title}`}
-        />
-        {section === "photos" ? (
+  const current = section ?? "photos";
+  const body = (
+    <>
+        {current === "photos" ? (
           <>
             <MediaStrip listing={listing} copy={copy} />
             {photoProvenance}
           </>
         ) : null}
-        {section === "details" ? (
+        {current === "details" ? (
           <>
             <div className="nf-rv-grid2">
         <Panel title="Property details" labelledBy="rv-details">
@@ -321,7 +312,7 @@ export function ListingReview(props: ListingReviewProps) {
 
           </>
         ) : null}
-        {section === "location" ? (
+        {current === "location" ? (
           <div className="nf-rv-grid2">
         <Panel title="Location" labelledBy="rv-location">
           <LocationMap
@@ -345,13 +336,13 @@ export function ListingReview(props: ListingReviewProps) {
 
           </div>
         ) : null}
-        {section === "costs" ? (
+        {current === "costs" ? (
         <Panel title={listing.intent === "sale" ? "Purchase costs" : "Move-in costs"} labelledBy="rv-costs">
           <MoneyBlock listing={listing} locale={locale} keepers={keepers} />
         </Panel>
 
         ) : null}
-        {section === "lister" ? (
+        {current === "lister" ? (
           <>
         <Panel title="Lister verification" labelledBy="rv-lister">
           <ListerBlock listing={listing} extras={extras} />
@@ -364,7 +355,7 @@ export function ListingReview(props: ListingReviewProps) {
 
           </>
         ) : null}
-        {section === "checklist" ? (
+        {current === "checklist" ? (
           <>
       <Panel title={copy.checklistTitle} labelledBy="rv-checklist">
         <ul className="nf-rv-ticks">
@@ -401,10 +392,9 @@ export function ListingReview(props: ListingReviewProps) {
 
           </>
         ) : null}
-        {section === "fees" || section === "matches" || section === "notes" ? sectionSlots?.[section] ?? null : null}
-      </div>
-    );
-  }
+        {current === "fees" || current === "matches" || current === "notes" ? sectionSlots?.[current] ?? null : null}
+    </>
+  );
 
   /* ------------------------------------------------- the hub: the decision, then the sections */
   return (
@@ -424,7 +414,14 @@ export function ListingReview(props: ListingReviewProps) {
 
       {actions}
 
-      {sectionLinks ? <SectionList items={sectionLinks} label="Parts of this listing" /> : null}
+      {sectionLinks ? (
+        <Tabs
+          label="Parts of this listing"
+          items={sectionLinks.map((link) => ({ key: link.key, label: link.title, href: link.href, on: link.key === current }))}
+        />
+      ) : null}
+
+      <div className="nf-rv-tabbody">{body}</div>
 
       {sectionSlots?.hub ?? null}
     </div>

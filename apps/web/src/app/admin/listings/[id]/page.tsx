@@ -9,7 +9,10 @@ import { ListingReview } from "./ListingReview";
 import { ReviewActionBar } from "./ReviewActionBar";
 import { ReopenControl } from "./PropertyMatchButtons";
 import { PhotoProvenance } from "./PhotoProvenance";
-import { loadListingReview } from "./review-data";
+import { InternalNotes } from "../../_components/InternalNotes";
+import { PropertyMatchPanel } from "./PropertyMatchPanel";
+import { FeeAcceptancePanel } from "./FeeAcceptancePanel";
+import { isListingSection, loadListingReview } from "./review-data";
 import { listingHubHref, listingSectionLinks } from "./section-links";
 import "../../_review/review.css";
 
@@ -66,6 +69,8 @@ export default async function ListingUnderReviewPage({
   const { closedReason, decidable, nextId, provenance, feeAcceptance, tiles, payeeCtx } = data;
   const { offset: _offset, ...carried } = query;
   const hubHref = listingHubHref(found.id, raw);
+  const tabParam = typeof raw.tab === "string" ? raw.tab : "";
+  const tab = isListingSection(tabParam) ? tabParam : "photos";
 
   return (
     <>
@@ -87,6 +92,18 @@ export default async function ListingUnderReviewPage({
         }}
         compoundCopy={t.shape.compound}
         hubHref={hubHref}
+        section={tab}
+        sectionSlots={{
+          fees: <FeeAcceptancePanel read={feeAcceptance} locale={locale} />,
+          matches: extra?.isDemo ? null : <PropertyMatchPanel listingId={found.id} copy={t.landlord.admin} locale={locale} />,
+          notes: extra?.lister ? (
+            <InternalNotes subjectId={extra.lister.userId} path={`/admin/listings/${found.id}?tab=notes`} />
+          ) : (
+            <Panel>
+              <p className="nf-rv-msg">There is no lister on record to write a note about.</p>
+            </Panel>
+          ),
+        }}
         sectionLinks={listingSectionLinks({ listing: found, extra, provenance, feeAcceptance, raw })}
         exampleNote={
           extra?.isDemo ? (
