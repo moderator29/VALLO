@@ -35,6 +35,7 @@ type Probe = { name: string; selector: string; disc?: boolean; graphic?: boolean
 
 const IMPORTS = `
   import { AssistantSidebar } from "@/components/app/assistant/AssistantSidebar";
+  import { DEFAULT_PREFS } from "@/lib/assistant/prefs";
   import { DecisionCard } from "@/components/app/confirm/DecisionCard";
   import { AgreementChanges } from "@/components/app/agreements/AgreementChanges";
   import { ScamShield } from "@/components/app/messages/ScamShield";
@@ -61,8 +62,8 @@ const BODY = `
     <div data-probe="assistant-row" style={{ width: 280 }}>
       <AssistantSidebar
         threads={[{ id: "a", title: "Show me 2-bed in Lekki under 2m", createdAt: 1, updatedAt: Date.now(), messages: [] }]}
-        activeId="a" tone="Concise" language="English"
-        onSelect={() => {}} onNew={() => {}} onDelete={() => {}} onClearAll={() => {}} onToneChange={() => {}} onLanguageChange={() => {}}
+        activeId="a" prefs={DEFAULT_PREFS}
+        onSelect={() => {}} onNew={() => {}} onDelete={() => {}} onClearAll={() => {}} onPrefsChange={() => {}}
       />
     </div>
     <a data-probe="inbox-time" className="nf-inbox-row" data-unread="true" href="#">

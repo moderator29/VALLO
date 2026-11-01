@@ -174,10 +174,11 @@
     border-radius: var(--nf-radius-circle);
     pointer-events: none;
   }
-  /* The soft halo: a tinted disc with a thin ring round it. */
+  /* No disc and no ring behind the object (founder, 1 November 2026: "remove
+     that circle container behind the 3D icon"): the object stands on its own. */
   .nf-success__halo {
-    background: var(--nf-success-halo);
-    box-shadow: 0 0 0 1px var(--nf-success-ring);
+    background: none;
+    box-shadow: none;
   }
   /* The one ring that goes out at the payoff; nothing at rest. */
   .nf-success__pulse {

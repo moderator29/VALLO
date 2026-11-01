@@ -44,6 +44,47 @@ export function DeskHead({
   );
 }
 
+/* ---------------------------------------------------------- section list */
+
+export type SectionLink = {
+  key: string;
+  href: string;
+  title: string;
+  /** One calm line saying what is inside, so nobody opens a page to find out. */
+  summary?: string | null;
+  icon: UiIconName;
+  /** A small trailing word, such as "2 need a look". */
+  flag?: string | null;
+};
+
+/**
+ * A review's sections, one per row, each opening on its own page. A review
+ * desk used to lay every panel out on one long screen; this is the list that
+ * replaced it, so the page leads with the decision and the evidence is one tap
+ * away, with a way back on every page it opens.
+ */
+export function SectionList({ items, label }: { items: readonly SectionLink[]; label: string }) {
+  return (
+    <ul className="nf-rv-hub" aria-label={label}>
+      {items.map((item) => (
+        <li key={item.key}>
+          <Link href={item.href} className="nf-rv-hub__row">
+            <span className="nf-rv-hub__icon" aria-hidden="true">
+              <UiIcon name={item.icon} size={20} />
+            </span>
+            <span className="nf-rv-hub__text">
+              <span className="nf-rv-hub__title">{item.title}</span>
+              {item.summary ? <span className="nf-rv-hub__summary">{item.summary}</span> : null}
+            </span>
+            {item.flag ? <span className="nf-rv-hub__flag">{item.flag}</span> : null}
+            <UiIcon name="chevron-right" size={16} className="nf-rv-hub__chev" />
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /* ---------------------------------------------------------------- tabs */
 
 export type TabItem = {

@@ -92,7 +92,10 @@ export default async function AdminBusinessesPage({
      controls the actions would refuse them (`isOwnBusiness`). The session is
      read once per request. */
   const session = await resolveSession();
-  const viewerId = session.state === "signed-in" ? session.user.id : null;
+  /* The founder may decide their own business; everybody else's own case is withheld. */
+  const founder =
+    session.state === "signed-in" ? (await session.supabase.rpc("am_i_founder" as never)).data === true : false;
+  const viewerId = session.state === "signed-in" && !founder ? session.user.id : null;
   const queue = await getBusinessQueue({
     ...(query.q ? { q: query.q } : {}),
     ...(query.status ? { status: query.status } : {}),
