@@ -110,7 +110,7 @@ export function IconTiles<T extends string>({
               </span>
             ) : option.art ? (
               <span className="grid size-10 place-items-center" aria-hidden="true" data-art={option.art}>
-                <Icon3D name={option.art} size={40} />
+                <Icon3D classic name={option.art} size={40} />
               </span>
             ) : (
               <span className="nf-icon-tile-option__glyph" aria-hidden="true">

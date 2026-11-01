@@ -48,7 +48,7 @@ export function StayCategoryTiles({ t, active }: { t: Dictionary; active?: strin
               className={panelClass({ variant: "card", className: `nf-stays-tile ${on ? "nf-stays-tile--on" : ""}` })}
             >
               <span className="grid size-12 shrink-0 place-items-center" aria-hidden="true" data-art={tile.art ?? tile.object} data-host-plate>
-                {tile.art ? <Icon3D name={tile.art} size={56} /> : tile.object ? <BrandIcon name={tile.object} size={56} preferRender /> : null}
+                {tile.art ? <Icon3D classic name={tile.art} size={56} /> : tile.object ? <BrandIcon name={tile.object} size={56} preferRender /> : null}
               </span>
               <span>{copy[tile.key]}</span>
               <UiIcon name="arrow-right" size={16} className="nf-stays-tile__go" aria-hidden />

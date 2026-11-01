@@ -71,7 +71,7 @@ export function AppBand({
                 {points.map((p) => (
                   <li key={p.key}>
                     <span className="nf-obj nf-app-band__obj">
-                      <Icon3D name={APP_OBJECTS[p.key]} size={LANDING_OBJECT_SIZE.app} />
+                      <Icon3D classic name={APP_OBJECTS[p.key]} size={LANDING_OBJECT_SIZE.app} />
                     </span>
                     {p.label}
                   </li>

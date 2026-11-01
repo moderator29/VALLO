@@ -105,7 +105,7 @@ export function ObjectField({
           style={{ "--o3-i": i, "--o3-depth": o.depth ?? 1, "--o3-size": `${o.size}px` } as CSSProperties}
         >
           <span className="nf-o3__lean">
-            <Icon3D name={o.name} size={o.size} />
+            <Icon3D classic name={o.name} size={o.size} />
           </span>
         </span>
       ))}

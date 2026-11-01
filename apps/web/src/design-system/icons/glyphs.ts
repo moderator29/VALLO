@@ -48,3 +48,58 @@ export const LISTING_STATUS_GLYPH: Partial<Record<string, GlyphName>> = {
   RENTED: "listing-let",
   SOLD: "listing-let",
 };
+
+/**
+ * The founder's 3D stickers that the glyph set now draws instead (`Icon3D`).
+ * A spot that must keep its older sticker (the landing page, the category and
+ * property-type tiles that match the home's realistic objects) passes
+ * `classic`.
+ */
+export const ICON3D_GLYPH: Partial<Record<string, GlyphName>> = {
+  hotel: "hotel",
+  shortlet: "house",
+  restaurant: "empty-tables",
+  "local-talks": "chat",
+  buy: "house",
+  rent: "rental-key",
+  pay: "empty-payments",
+  list: "listing-draft",
+  bell: "empty-notifications",
+  assistant: "ai-assistant",
+  "calendar-booked": "booking-confirmed",
+  "calendar-pending": "booking-requested",
+  shield: "shield-check",
+  search: "search",
+  explore: "map-pin",
+  verified: "shield-check",
+  "id-check": "ai-permissions",
+  "card-secure": "ai-payment",
+  "home-verified": "listing-approved",
+  "home-small": "house",
+  villa: "villa",
+  city: "apartment",
+  apartment: "apartment",
+  land: "land",
+  "stay-rated": "empty-reviews",
+  earnings: "empty-payouts",
+  coin: "ai-balance",
+  handover: "rental-key",
+  keys: "rental-key",
+  camera: "empty-photos",
+  checklist: "listing-in-review",
+  contract: "empty-agreements",
+  receipt: "empty-payments",
+  boxes: "empty-tenancy",
+  bank: "empty-payouts",
+  support: "empty-support",
+  folder: "listing-draft",
+  clock: "ai-schedule",
+  "report-flag": "booking-disputed",
+  "saved-heart": "saved",
+  envelope: "empty-inbox",
+  "phone-code": "ai-security",
+  "passcode-lock": "ai-security",
+  gift: "empty-rewards",
+  map: "map-pin",
+  power: "listing-live",
+};

@@ -96,7 +96,7 @@ export function Journey({ t }: { t: Dictionary }) {
               </span>
               <article className="nf-step__card">
                 <span className="nf-obj nf-step__obj" style={{ "--o3-i": i } as CSSProperties}>
-                  <Icon3D name={JOURNEY_OBJECTS[i] ?? "search"} size={LANDING_OBJECT_SIZE.journey} />
+                  <Icon3D classic name={JOURNEY_OBJECTS[i] ?? "search"} size={LANDING_OBJECT_SIZE.journey} />
                 </span>
                 <span className="nf-section-label nf-step__label">{step.label}</span>
                 <h3 className="nf-step__title">{step.title}</h3>

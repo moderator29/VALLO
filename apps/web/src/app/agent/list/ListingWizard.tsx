@@ -686,7 +686,7 @@ function StepHead({
       </div>
       {art ? (
         <span className="nf-lw-head__object grid size-14 shrink-0 place-items-center" aria-hidden="true" data-art={art}>
-          <Icon3D name={art} size={56} priority />
+          <Icon3D classic name={art} size={56} priority />
         </span>
       ) : (
         object && (
@@ -764,7 +764,7 @@ function Choice({
         </span>
       ) : art ? (
         <span className="nf-lw-choice__object grid size-12 place-items-center" aria-hidden="true" data-art={art}>
-          <Icon3D name={art} size={48} />
+          <Icon3D classic name={art} size={48} />
         </span>
       ) : object ? (
         <IconPlate size="sm" tone={chosen ? "brand" : "neutral"} className="nf-lw-choice__object">
