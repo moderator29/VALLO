@@ -76,6 +76,7 @@ import {
   listingAccessSchema,
   listingIdSchema,
   isTenancy,
+  asksFact,
   ratePeriodFor,
   removePhotoSchema,
   reorderMediaSchema,
@@ -83,6 +84,7 @@ import {
   setAmenitiesSchema,
   submitRequirements,
   type DraftInput,
+  type ListingFact,
   type ListingAccessInput,
   type PropertyType,
   type RentPeriod,
@@ -301,6 +303,22 @@ export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDr
     );
   }
 
+  /* Facts this type cannot have are cleared on every save, so a draft whose
+     type changed (a flat that became a plot) keeps nothing the new type cannot
+     carry. `bedrooms` and `bathrooms` are NOT NULL and clear to zero. */
+  const asks = (fact: ListingFact) => asksFact(propertyType, fact);
+  const cleared = {
+    ...(asks("bedrooms") ? {} : { bedrooms: 0, ensuite_count: null }),
+    ...(asks("bathrooms") ? {} : { bathrooms: 0 }),
+    ...(asks("toilets") ? {} : { toilets: null }),
+    ...(asks("parking") ? {} : { parking_spaces: null }),
+    ...(asks("furnishing") ? {} : { furnished: null }),
+    ...(asks("floor") ? {} : { floor: null, total_floors: null }),
+    ...(asks("condition") ? {} : { condition: null }),
+    ...(asks("power") ? {} : { power_grid: null, power_backup: null, power_backup_hours: null, prepaid_meter: null }),
+    ...(asks("water") ? {} : { water_supply: null }),
+  };
+
   // Shared column set. Undefined keys are dropped before the request, which is
   // exactly the "leave it as it was" behaviour a forgiving draft needs.
   const columns = {
@@ -392,6 +410,7 @@ export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDr
       value.powerBackup === "NONE" || value.powerBackup === null ? null : value.powerBackupHours,
     water_supply: value.waterSupply,
     prepaid_meter: value.prepaidMeter,
+    ...cleared,
   };
 
   if (value.id && existing) {
@@ -401,7 +420,7 @@ export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDr
       .eq("id", value.id)
       .eq("agent_id", gate.agentId);
     if (error) return fail(SAVE_FAILED_MESSAGE);
-    if (!(await writeCompound(gate.supabase, value.id, gate.agentId, value))) {
+    if (asks("compound") && !(await writeCompound(gate.supabase, value.id, gate.agentId, value))) {
       return fail(SAVE_FAILED_MESSAGE);
     }
     if (!(await writeService(gate.supabase, value.id, gate.agentId, value))) {
@@ -452,7 +471,7 @@ export async function saveDraft(input: DraftInput): Promise<ActionResult<SavedDr
       value.broadcastUnconfirmed !== undefined && value.broadcastUnconfirmed.length > 0
         ? writeBroadcastMarks(gate.supabase, created.id, value.broadcastUnconfirmed)
         : Promise.resolve(true),
-    () => writeCompound(gate.supabase, created.id, gate.agentId, value),
+    () => (asks("compound") ? writeCompound(gate.supabase, created.id, gate.agentId, value) : Promise.resolve(true)),
     () => writeService(gate.supabase, created.id, gate.agentId, value),
     () => writeUnit(gate.supabase, created.id, gate.agentId, value),
     () => writeFlooding(gate.supabase, created.id, gate.agentId, value.flooding),
@@ -1381,7 +1400,8 @@ export async function setAmenities(input: {
     .eq("listing_id", listingId);
   if (clearError) return fail("We could not save the amenities just now. Please try again.");
 
-  const wanted = rows ?? [];
+  /* A type that is not asked amenities (a plot) keeps none. */
+  const wanted = asksFact(listing.property_type as PropertyType, "amenities") ? (rows ?? []) : [];
   if (wanted.length > 0) {
     const { error: insertError } = await gate.supabase
       .from("listing_amenities")

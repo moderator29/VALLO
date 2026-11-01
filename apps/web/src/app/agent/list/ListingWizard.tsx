@@ -63,6 +63,8 @@ import {
   FURNISHING_CHOICES,
   isRental,
   isTenancy,
+  asksFact,
+  type ListingFact,
   LISTING_INTENT_CHOICES,
   parseNairaToKobo,
   POWER_BACKUP_CHOICES,
@@ -1299,6 +1301,8 @@ export function ListingWizard({
    */
   const forSale = values.intent === "sale";
   const tenancy = !forSale && isTenancy(values.propertyType);
+  /* Only the facts this property type can have are asked (`asksFact`). */
+  const asks = (fact: ListingFact) => asksFact(values.propertyType, fact);
   const shortStay = !forSale && !tenancy;
   const perHead = ratePeriodFor(values.propertyType) === "guest";
 
@@ -2904,6 +2908,7 @@ export function ListingWizard({
                 {mark("bedrooms", "bathrooms", "toilets", "parkingSpaces", "furnished")}
               </span>
               <div className="nf-lw-facts">
+                {asks("bedrooms") && (
                 <FactRow
                   glyph="bed"
                   name={copy.basics.counters.bedrooms}
@@ -2920,6 +2925,8 @@ export function ListingWizard({
                     onChange={(v) => set("bedrooms", v)}
                   />
                 </FactRow>
+                )}
+                {asks("bathrooms") && (
                 <FactRow
                   glyph="bath"
                   name={copy.basics.counters.bathrooms}
@@ -2936,9 +2943,11 @@ export function ListingWizard({
                     onChange={(v) => set("bathrooms", v)}
                   />
                 </FactRow>
+                )}
                 {/* Toilets is a count in the render and was a free text box
                     here, which is the one row a Nigerian listing is asked
                     about most and the one that could be typed wrong. */}
+                {asks("toilets") && (
                 <FactRow
                   glyph="bath"
                   name={copy.drawn.rooms.toilets}
@@ -2955,6 +2964,8 @@ export function ListingWizard({
                     onChange={(v) => set("toilets", v === 0 ? "" : String(v))}
                   />
                 </FactRow>
+                )}
+                {asks("parking") && (
                 <FactRow
                   glyph="parking"
                   name={copy.drawn.rooms.parking}
@@ -2971,6 +2982,7 @@ export function ListingWizard({
                     onChange={(v) => set("parkingSpaces", v === 0 ? "" : String(v))}
                   />
                 </FactRow>
+                )}
 
                 <FactRow
                   stacked
@@ -2996,6 +3008,7 @@ export function ListingWizard({
                   )}
                 </FactRow>
 
+                {asks("furnishing") && (
                 <FactRow
                   stacked
                   glyph="home"
@@ -3016,7 +3029,9 @@ export function ListingWizard({
                     ))}
                   </select>
                 </FactRow>
+                )}
 
+                {asks("floor") && (
                 <FactRow
                   stacked
                   glyph="building-apartment"
@@ -3047,6 +3062,7 @@ export function ListingWizard({
                     </span>
                   )}
                 </FactRow>
+                )}
               </div>
             </div>
 
@@ -3066,6 +3082,7 @@ export function ListingWizard({
               terms on the price step, where the date sits beside the shortest
               tenancy it has to agree with.
             */}
+            {asks("condition") && (
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.checkOver.keys.condition}
@@ -3082,6 +3099,7 @@ export function ListingWizard({
                 ))}
               </div>
             </fieldset>
+            )}
           </div>
         )}
 
@@ -3382,7 +3400,14 @@ export function ListingWizard({
         )}
 
         {/* ----------------------------------------------------- 4 amenities */}
-        {step === 3 && (
+        {step === 3 && !asks("amenities") && (
+          <div>
+            <Note>
+              A plot has no amenities to list. Say what the land is good for in the description, and carry on.
+            </Note>
+          </div>
+        )}
+        {step === 3 && asks("amenities") && (
           <div>
             <Note>{copy.amenities.intro}</Note>
             {fieldErrors.amenities && (
@@ -3446,6 +3471,8 @@ export function ListingWizard({
               five choices makes you choose before you can read what you chose.
               Every blurb is on its own card now.
             */}
+            {asks("power") && (
+              <>
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.supply.power}
@@ -3520,6 +3547,11 @@ export function ListingWizard({
               </div>
             )}
 
+              </>
+            )}
+
+            {asks("water") && (
+              <>
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.supply.water}
@@ -3540,7 +3572,11 @@ export function ListingWizard({
                 ))}
               </div>
             </fieldset>
+              </>
+            )}
 
+            {asks("power") && (
+              <>
             {/* The render draws a TOGGLE on this row, and it was a bare 24px
                 checkbox painted with `accent-color`: the one control on this
                 step that the platform's own switch primitive already owned. */}
@@ -3551,6 +3587,8 @@ export function ListingWizard({
               onCheckedChange={(v) => set("prepaidMeter", v)}
             />
             {mark("prepaidMeter")}
+              </>
+            )}
 
             {/* ------------------------ the service charge and the gate (V-68) */}
             {/* What the charge covers is asked only where a charge is stated on
@@ -3572,12 +3610,14 @@ export function ListingWizard({
             )}
 
             {/* ---------------------------------------- the compound (V-28) */}
-            <CompoundQuestions
-              copy={compoundCopy}
-              value={values.compound}
-              onChange={(next) => set("compound", next)}
-              flatsError={fieldErrors.flatsInCompound}
-            />
+            {asks("compound") && (
+              <CompoundQuestions
+                copy={compoundCopy}
+                value={values.compound}
+                onChange={(next) => set("compound", next)}
+                flatsError={fieldErrors.flatsInCompound}
+              />
+            )}
 
             {/* ------------------------------------------------ the gate */}
             <div className="nf-panel nf-panel--card block p-card">
