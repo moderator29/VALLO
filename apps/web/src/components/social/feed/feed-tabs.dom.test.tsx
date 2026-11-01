@@ -14,7 +14,7 @@ describe("the feed's tabs", () => {
     const html = renderToStaticMarkup(<FeedTabs active="for-you" t={t} />);
     expect(html).toContain('data-testid="feed-tab-for-you"');
     expect(html).toContain('data-testid="feed-tab-friends"');
-    expect(html.match(/nf-fv2-seg__link/g)).toHaveLength(2);
+    expect(html.match(/nf-utabs__tab/g)).toHaveLength(2);
     expect(html).toContain(`aria-label="${t.feedV2.feed.tabsLabel}"`);
     expect(html).toContain(">For you<");
     expect(html).toContain(">Friends<");

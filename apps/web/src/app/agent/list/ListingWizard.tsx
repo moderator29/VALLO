@@ -2988,7 +2988,7 @@ export function ListingWizard({
                   stacked
                   glyph="grid"
                   name={copy.drawn.rooms.size}
-                  ask={copy.drawn.rooms.sizeAsk}
+                  ask={values.propertyType === "land" ? "The plot's area, if you know it" : copy.drawn.rooms.sizeAsk}
                   optional={copy.drawn.rooms.optional}
                 >
                   <input

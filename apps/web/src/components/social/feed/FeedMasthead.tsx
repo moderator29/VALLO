@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import "./feed-v2.css";
+import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 
 /**
  * The feed's modes. `for-you` and `friends` are the two the control draws.
@@ -27,12 +27,10 @@ export function liveTab(active: FeedTab): "for-you" | "friends" {
 }
 
 /**
- * For you / Friends: a small capsule control, two compact pills inside one
- * rounded track, the chosen one filled. Each is a link carrying `?tab=`, so
- * the choice survives a reload, puts a real entry in the history and costs no
- * script; `aria-current` marks the live one because nothing is toggled, the
- * row says where the reader already is. The pills look small and are not: each
- * link's tap target is 44px tall (`feed-v2.css`).
+ * For you / Friends, as the underline tab row (founder, 1 November 2026: the
+ * sports app's tabs). Each is a link carrying `?tab=`, so the choice survives
+ * a reload and puts a real entry in the history; `aria-current` marks the
+ * live one. Every tab is 44px tall.
  */
 export function FeedTabs({ active, t }: { active: FeedTab; t: Dictionary }) {
   const words = t.feedV2.feed;
@@ -43,20 +41,13 @@ export function FeedTabs({ active, t }: { active: FeedTab; t: Dictionary }) {
   ] as const;
 
   return (
-    <nav aria-label={words.tabsLabel} className="nf-fv2-seg" data-testid="feed-tabs" data-live={live}>
-      <div className="nf-fv2-seg__track">
-        {segments.map((segment) => (
-          <Link
-            key={segment.tab}
-            href={segment.href}
-            className="nf-fv2-seg__link"
-            aria-current={segment.tab === live ? "page" : undefined}
-            data-testid={`feed-tab-${segment.tab}`}
-          >
-            {segment.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
+    <UnderlineTabs
+      label={words.tabsLabel}
+      active={live}
+      items={segments.map((segment) => ({ key: segment.tab, label: segment.label, href: segment.href }))}
+      data-testid="feed-tabs"
+      itemTestIdPrefix="feed-tab-"
+      className="nf-feed-utabs"
+    />
   );
 }
