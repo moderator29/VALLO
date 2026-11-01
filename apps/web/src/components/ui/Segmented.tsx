@@ -61,6 +61,7 @@ export function Segmented<T extends string>({
   semantics = "tabs",
   size = "md",
   shape = "control",
+  stack = false,
   variant,
   full,
   iconOnly = false,
@@ -85,6 +86,12 @@ export function Segmented<T extends string>({
    * Stay / Invest.
    */
   shape?: "control" | "pill";
+  /**
+   * One option per line, as full-width rows with a radio dot, for a form
+   * question whose answers are sentences or four or more words. A track of
+   * capsules cannot give each of them room on a phone.
+   */
+  stack?: boolean;
   /** `quiet` (default) or `solid`; see the note at the top of this file. */
   variant?: "quiet" | "solid";
   full?: boolean;
@@ -209,6 +216,8 @@ export function Segmented<T extends string>({
     size === "sm"
       ? "h-9 px-sm text-[length:var(--nf-text-caption)]"
       : `${variant === "solid" || (variant === undefined && shape === "pill") ? "h-11" : "h-9"} ${full ? "px-sm" : "px-md"} text-[length:var(--nf-text-body-sm)]`;
+  /* A full-width segment that wraps to two lines grows to fit them rather than
+     clipping the second ("Not answere"). */
   const solid = variant === "solid" || (variant === undefined && shape === "pill");
   /* The solid variant keeps the renders' brand rail (`.nf-segmented--pill`,
      chips.css); the quiet one is the neutral track (buttons.css). */
@@ -223,6 +232,7 @@ export function Segmented<T extends string>({
       className={[
         "nf-segmented relative inline-flex items-center",
         pill ? "nf-segmented--pill nf-segmented--solid" : "nf-segmented--quiet",
+        stack ? "nf-segmented--stack" : "",
         pad,
         full ? "flex w-full" : "",
         className ?? "",
@@ -234,7 +244,7 @@ export function Segmented<T extends string>({
         The travelling capsule. aria-hidden because it carries no meaning of its
         own: the selection is already stated by aria-selected / aria-checked.
       */}
-      {capsule ? (
+      {capsule && !stack ? (
         <span
           ref={capsuleRef}
           aria-hidden="true"
@@ -291,7 +301,7 @@ export function Segmented<T extends string>({
                  target at 44 (base.css). */
               pill ? "rounded-[var(--nf-radius-segment)] font-semibold" : "nf-tap rounded-[var(--nf-radius-segment)] font-semibold",
               seg,
-              full ? "flex-1" : "",
+              full ? "flex-1 !h-auto min-h-9 py-xs" : "",
               /* On the capsule the selected ink is on-brand and comes from the
                  stylesheet, since the segment sits on the filled capsule. */
               /* Reference 55: the selected segment is brand blue in both
@@ -315,6 +325,8 @@ export function Segmented<T extends string>({
               className={
                 iconOnly
                   ? "sr-only"
+                  : stack
+                  ? "min-w-0 text-start leading-snug"
                   : full
                   ? "min-w-0 text-center leading-tight [text-wrap:balance] line-clamp-2"
                   : "min-w-0 truncate"

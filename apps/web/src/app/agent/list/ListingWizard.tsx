@@ -87,6 +87,7 @@ import {
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
 import { BrandIcon, type BrandIconName, type BrandIconProp } from "@/design-system/icons/BrandIcon";
+import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
 import { SPACE_OBJECT } from "@/components/app/home/space-types";
 import { Amount } from "@/components/ui/Amount";
 import { moveInLines } from "@/components/app/listing/move-in-lines";
@@ -1047,6 +1048,7 @@ export function ListingWizard({
   guideCopy,
   initialUnconfirmed = [],
   shotsCopy,
+  viewerCopy = null,
   demandCopy,
   pathCopy,
   listerCopy,
@@ -1071,6 +1073,8 @@ export function ListingWizard({
   success?: SuccessWords;
   /** V-70: the shot list's words. Without them the shot list is not drawn. */
   shotsCopy?: Dictionary["afterTheGate"]["shots"];
+  /** The full-screen viewer's words. Absent, the tiles are not openable. */
+  viewerCopy?: ViewerCopy | null;
   /** V-10: the saved-search count on the last step. Absent in harnesses. */
   demandCopy?: Dictionary["frontDoor"]["demand"];
   /**
@@ -1224,6 +1228,8 @@ export function ListingWizard({
   /** The files the last pick could not upload for a reason a second try can fix. */
   const [retryFiles, setRetryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  /* The tile open in the full-screen viewer, as `${kind}-${id}`. */
+  const [viewerId, setViewerId] = useState<string | null>(null);
   /* STORE-04: the shell's own camera, when the running binary carries it. */
   const [nativeCamera, setNativeCamera] = useState(false);
   useEffect(() => {
@@ -3145,33 +3151,49 @@ export function ListingWizard({
                   data-cover={index === 0 ? "" : undefined}
                   data-kind={item.kind}
                 >
-                  {item.kind === "photo" ? (
-                    <RemoteImage
-                      src={item.url}
-                      alt=""
-                      width={640}
-                      height={480}
-                      sizes="(max-width: 40rem) 50vw, 14rem"
-                      className="nf-lw-shot__img"
-                    />
-                  ) : (
-                    /* Muted and still: a poster when there is one, and nothing
-                       fetched until the lister presses play. */
-                    <video
-                      src={item.url}
-                      poster={item.posterUrl ?? undefined}
-                      preload={item.posterUrl ? "none" : "metadata"}
-                      muted
-                      playsInline
-                      controls={false}
-                      className="nf-lw-shot__img"
-                      aria-label={
-                        item.durationSeconds === null
-                          ? copy.photos.video
-                          : `${copy.photos.video}, ${clockOf(item.durationSeconds)}`
-                      }
-                    />
-                  )}
+                  {(() => {
+                    const face =
+                      item.kind === "photo" ? (
+                        <RemoteImage
+                          src={item.url}
+                          alt=""
+                          width={640}
+                          height={480}
+                          sizes="(max-width: 40rem) 50vw, 14rem"
+                          className="nf-lw-shot__img"
+                        />
+                      ) : (
+                        /* Muted and still: its poster, or its first frame (`#t=0.1`
+                           makes the browser paint one instead of a black box), and
+                           nothing more is fetched until it is opened. */
+                        <video
+                          src={`${item.url}#t=0.1`}
+                          poster={item.posterUrl ?? undefined}
+                          preload="metadata"
+                          muted
+                          playsInline
+                          controls={false}
+                          className="nf-lw-shot__img"
+                          aria-label={
+                            item.durationSeconds === null
+                              ? copy.photos.video
+                              : `${copy.photos.video}, ${clockOf(item.durationSeconds)}`
+                          }
+                        />
+                      );
+                    return viewerCopy ? (
+                      <button
+                        type="button"
+                        className="nf-lw-shot__open"
+                        aria-label={item.kind === "photo" ? viewerCopy.openPhoto : viewerCopy.openVideo}
+                        onClick={() => setViewerId(`${item.kind}-${item.id}`)}
+                      >
+                        {face}
+                      </button>
+                    ) : (
+                      face
+                    );
+                  })()}
                   {index === 0 && <span className="nf-lw-shot__cover">{copy.photos.cover}</span>}
                   {item.kind === "video" && (
                     <span className="nf-lw-shot__kind" aria-hidden="true">
@@ -3249,6 +3271,21 @@ export function ListingWizard({
                 </li>
               )}
             </ul>
+            {viewerCopy && viewerId ? (
+              <MediaViewer
+                items={media.map<ViewerItem>((item) => ({
+                  id: `${item.kind}-${item.id}`,
+                  kind: item.kind,
+                  src: item.url,
+                  alt: "",
+                  name: values.title.trim() || copy.photos.cover,
+                  when: "",
+                }))}
+                startId={viewerId}
+                copy={viewerCopy}
+                onClose={() => setViewerId(null)}
+              />
+            ) : null}
             {/* V-70: say what each photo shows. Additive; drawn only with its copy. */}
             {shotsCopy && (
               <ShotList

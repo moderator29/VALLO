@@ -132,7 +132,7 @@ export const trustVisibleEn = {
     profileSaving: "Saving",
     profileSaved: "Saved. Your number is on your profile.",
     profileInvalid: "That is not a Nigerian mobile number. It has 11 digits and starts 070, 071, 080, 081, 090 or 091.",
-    profileRefused: "We could not use this number. Try a different number, or contact support.",
+    profileRefused: "This number may already be in use. Try a different number, or contact support.",
     profileFailed: "We could not save your number just now. Nothing was changed. Try again in a moment.",
     profileBack: "Continue",
     signedOutTitle: "Sign in to confirm your number",
@@ -168,7 +168,7 @@ export const trustVisibleEn = {
     sendLimited: "That is a lot of codes in a short time. Wait an hour and try again.",
     /** V-50 NO ENUMERATION: the one sentence for every refusal that could tell
        somebody whether a number is on Vallo, so taken and invalid read the same. */
-    numberRefused: "We could not use this number. Try a different number, or contact support.",
+    numberRefused: "This number may already be in use. Try a different number, or contact support.",
     sendAlready: "That number is already confirmed on your account.",
     sendUnconfigured: "We could not send a code just now. Nothing was changed. Try again later.",
     sendFailed: "We could not send a code just now. Nothing was changed. Try again in a moment.",

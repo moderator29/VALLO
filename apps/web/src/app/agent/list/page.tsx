@@ -84,6 +84,7 @@ export default async function Page({
           success={t.success}
           copy={t.agentListings}
           shotsCopy={t.afterTheGate.shots}
+          viewerCopy={t.chatPolish.viewer}
           reference={t.listingReference}
           moveInCopy={t.moveIn}
           compoundCopy={t.shape.compound}
@@ -171,6 +172,7 @@ export default async function Page({
         success={t.success}
         copy={t.agentListings}
           shotsCopy={t.afterTheGate.shots}
+          viewerCopy={t.chatPolish.viewer}
         reference={t.listingReference}
         moveInCopy={t.moveIn}
         compoundCopy={t.shape.compound}
