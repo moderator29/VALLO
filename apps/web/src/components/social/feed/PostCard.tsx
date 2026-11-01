@@ -552,7 +552,14 @@ export function PostCard({
 
         <div className="nf-pc__who">
           {isSystem ? (
-            <span className="nf-pc__name">Vallo</span>
+            /* Vallo's own notes carry the platinum mark, the administrator's
+               tier, a size up from a member's tick so it reads as the house. */
+            <span className="nf-pc__nameline">
+              <span className="nf-pc__name">Vallo</span>
+              <span className="nf-pc__tick nf-pc__tick--house">
+                <TierBadge tier="platinum" size={20} />
+              </span>
+            </span>
           ) : isBot ? (
             <>
               <span className="nf-pc__name">Vallo AI</span>
