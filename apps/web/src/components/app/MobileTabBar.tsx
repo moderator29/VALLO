@@ -414,6 +414,8 @@ export function MobileTabBar({
         { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
         { href: "/settings", label: t.nav.settings, icon: "settings-gear" },
         { href: "/support", label: t.nav.helpSupport, icon: "headset" },
+        /* Report a problem from any screen: the support form opens as a problem report. */
+        { href: "/support/new?kind=problem", label: t.experienceInbox.support.home.reportProblem, icon: "flag" },
       ]
     : [
         { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
