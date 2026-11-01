@@ -123,6 +123,188 @@ const STATE_WORDS: Record<string, string> = {
 };
 export const viewingStateWord = (state: string): string => STATE_WORDS[state] ?? state.toLowerCase();
 
+const LIVE_STATES = ["REQUESTED", "PROPOSED", "CONFIRMED"];
+
+/** Open and still ahead: the only viewings the member can cancel or move. */
+function isChangeable(r: Record<string, unknown>): boolean {
+  const at = Date.parse(String(r.slot_at ?? r.requested_at ?? ""));
+  return LIVE_STATES.includes(String(r.state)) && Number.isFinite(at) && at > Date.now();
+}
+
+export type OwnViewing = { id: string; listingId: string; state: string; at: string; title: string };
+
+/**
+ * One of the member's OWN viewings, read with their client (row level security)
+ * and checked again by requester, so a stranger's id answers null. Never a
+ * service-role read.
+ */
+export async function readOwnViewing(supabase: unknown, userId: string, id: string): Promise<OwnViewing | null> {
+  try {
+    const q = supabase as {
+      from: (t: string) => {
+        select: (c: string) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => { maybeSingle: () => PromiseLike<{ data: unknown; error: unknown }> } } };
+      };
+    };
+    const { data, error } = await q
+      .from("inspection_requests")
+      .select("id, listing_id, requester_id, state, slot_at, requested_at")
+      .eq("id", id)
+      .eq("requester_id", userId)
+      .maybeSingle();
+    if (error || !data) return null;
+    const r = data as Record<string, unknown>;
+    if (String(r.requester_id) !== userId || !isChangeable(r)) return null;
+    const titles = await titlesFor(supabase, [String(r.listing_id)]);
+    return {
+      id: String(r.id),
+      listingId: String(r.listing_id),
+      state: String(r.state),
+      at: String(r.slot_at ?? r.requested_at),
+      title: titles.get(String(r.listing_id)) ?? "Your viewing",
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Open times to move one of the member's own viewings to (the listing's real windows, minus the current time). */
+export async function moveOptionsFor(supabase: unknown, viewing: OwnViewing): Promise<Slot[] | null> {
+  const slots = await readOpenSlots(supabase, viewing.listingId);
+  if (slots === null) return null;
+  const current = Date.parse(viewing.at);
+  return slots.filter((s) => Date.parse(s.slot_at) !== current);
+}
+
+const NOT_YOURS = { data: { error: "That viewing is not one of the person's open, upcoming viewings. Use list_my_viewings for the ids." } } as const;
+
+export const proposeCancelViewingTool = defineTool({
+  name: "propose_cancel_viewing",
+  description:
+    "Prepare the cancellation of ONE of the person's own upcoming viewings (an id from list_my_viewings) for them to CONFIRM. It cancels nothing by itself: a review card with a Confirm button appears. Never say it is cancelled until they confirm.",
+  input: z.object({ inspection_id: uuid }),
+  inputSchema: {
+    type: "object",
+    properties: { inspection_id: { type: "string", description: "The viewing id from list_my_viewings." } },
+    required: ["inspection_id"],
+  },
+  mode: "propose",
+  requires: "bookings_viewings",
+  workspaces: ["consumer"],
+  async run(ctx, input) {
+    const who = callerOf(ctx);
+    if (!who) return NOT_SIGNED_IN;
+    const v = await readOwnViewing(who.supabase, who.userId, input.inspection_id);
+    if (!v) return NOT_YOURS;
+    const made = await createProposal(who.supabase, "cancel_viewing", { inspection_id: v.id, title: v.title, at: v.at });
+    if (!made.ok) return { data: { error: "The cancellation could not be prepared.", reason: made.reason } };
+    return {
+      data: { prepared: true, place: v.title, when: when(v.at) },
+      note: "A review card with a Confirm button is on screen. Say the viewing stands until they confirm.",
+      events: cancelReview(v, made.id, made.payloadHash),
+    };
+  },
+});
+
+export const getMoveOptionsTool = defineTool({
+  name: "get_move_options",
+  description:
+    "Look up the REAL open times one of the person's own upcoming viewings (an id from list_my_viewings) could be moved to. They appear as buttons. Never invent a time.",
+  input: z.object({ inspection_id: uuid }),
+  inputSchema: {
+    type: "object",
+    properties: { inspection_id: { type: "string", description: "The viewing id from list_my_viewings." } },
+    required: ["inspection_id"],
+  },
+  mode: "read",
+  requires: "bookings_viewings",
+  workspaces: ["consumer"],
+  async run(ctx, input) {
+    const who = callerOf(ctx);
+    if (!who) return NOT_SIGNED_IN;
+    const v = await readOwnViewing(who.supabase, who.userId, input.inspection_id);
+    if (!v) return NOT_YOURS;
+    const slots = await moveOptionsFor(who.supabase, v);
+    if (slots === null) return { data: { error: "Open times could not be read just now." } };
+    if (slots.length === 0) {
+      return { data: { place: v.title, openTimes: 0 }, note: "There are no other open times. Say so, and suggest asking the lister in the chat." };
+    }
+    const shown = slots.slice(0, 12);
+    return {
+      data: { place: v.title, openTimes: slots.length },
+      note: "The times are on screen as buttons. Tell the person to tap one. Nothing moves until they confirm.",
+      events: [{ type: "slots", listingId: v.listingId, title: v.title, moveFrom: v.id, slots: shown.map((s) => ({ slotAt: s.slot_at, label: when(s.slot_at) })) }],
+    };
+  },
+});
+
+export const proposeRescheduleViewingTool = defineTool({
+  name: "propose_reschedule_viewing",
+  description:
+    "Prepare moving ONE of the person's own upcoming viewings to one of the real open times from get_move_options, for them to CONFIRM. It moves nothing by itself. Never say it is moved until they confirm.",
+  input: z.object({ inspection_id: uuid, slot_at: z.string().max(40) }),
+  inputSchema: {
+    type: "object",
+    properties: {
+      inspection_id: { type: "string", description: "The viewing id from list_my_viewings." },
+      slot_at: { type: "string", description: "One of the times get_move_options returned." },
+    },
+    required: ["inspection_id", "slot_at"],
+  },
+  mode: "propose",
+  requires: "bookings_viewings",
+  workspaces: ["consumer"],
+  async run(ctx, input) {
+    const who = callerOf(ctx);
+    if (!who) return NOT_SIGNED_IN;
+    const v = await readOwnViewing(who.supabase, who.userId, input.inspection_id);
+    if (!v) return NOT_YOURS;
+    const slots = await moveOptionsFor(who.supabase, v);
+    const wanted = Date.parse(input.slot_at);
+    const match = slots?.find((s) => Date.parse(s.slot_at) === wanted);
+    if (!match) return { data: { error: "That time is not one of the open times. Ask for the options again." } };
+    const made = await createProposal(who.supabase, "reschedule_viewing", { inspection_id: v.id, slot_at: match.slot_at, title: v.title, from: v.at });
+    if (!made.ok) return { data: { error: "The move could not be prepared.", reason: made.reason } };
+    return {
+      data: { prepared: true, place: v.title, from: when(v.at), to: when(match.slot_at) },
+      note: "A review card with a Confirm button is on screen. Say the current time stands until they confirm.",
+      events: moveReview(v, match.slot_at, made.id, made.payloadHash),
+    };
+  },
+});
+
+/** The review card for cancelling one of the member's own viewings. */
+export function cancelReview(v: OwnViewing, proposalId: string, payloadHash: string): AssistantStreamEvent[] {
+  return [
+    { type: "summary", title: "Cancel this viewing?", rows: [{ label: "Place", value: v.title }, { label: "When", value: when(v.at) }], note: "The lister is told. Nothing changes until you confirm." },
+    {
+      type: "actions",
+      items: [
+        { id: `confirm-${proposalId}`, label: "Confirm cancellation", kind: "confirm", proposalId, payloadHash },
+        { id: `cancel-${proposalId}`, label: "Keep my viewing", kind: "cancel", proposalId, payloadHash },
+      ],
+    },
+  ];
+}
+
+/** The review card for moving one of the member's own viewings. */
+export function moveReview(v: OwnViewing, slotAt: string, proposalId: string, payloadHash: string): AssistantStreamEvent[] {
+  return [
+    {
+      type: "summary",
+      title: "Move this viewing?",
+      rows: [{ label: "Place", value: v.title }, { label: "From", value: when(v.at) }, { label: "To", value: when(slotAt) }],
+      note: "The lister is told. Your current time stands until you confirm.",
+    },
+    {
+      type: "actions",
+      items: [
+        { id: `confirm-${proposalId}`, label: "Confirm new time", kind: "confirm", proposalId, payloadHash },
+        { id: `cancel-${proposalId}`, label: "Keep my time", kind: "cancel", proposalId, payloadHash },
+      ],
+    },
+  ];
+}
+
 type Row = Record<string, unknown>;
 type Table = {
   from: (t: string) => {
@@ -168,14 +350,28 @@ export const listMyViewingsTool = defineTool({
       const rows = data as Row[];
       const titles = await titlesFor(who.supabase, rows.map((r) => String(r.listing_id)));
       const items = rows.map((r) => ({
+        id: String(r.id),
         place: titles.get(String(r.listing_id)) ?? "A place",
         when: when(String(r.slot_at ?? r.requested_at ?? "")),
         state: viewingStateWord(String(r.state)),
+        changeable: isChangeable(r),
       }));
       if (items.length === 0) return { data: { viewings: [] }, note: "The person has no viewings yet. Say so." };
+      /* Each open viewing that is still ahead gets its own Cancel and Move buttons. */
+      const buttons = items
+        .filter((i) => i.changeable)
+        .slice(0, 3)
+        .flatMap((i) => [
+          { id: `move-${i.id}`, label: `Move: ${i.place}`, kind: "viewing_move" as const, inspectionId: i.id },
+          { id: `drop-${i.id}`, label: `Cancel: ${i.place}`, kind: "viewing_cancel" as const, inspectionId: i.id },
+        ]);
+      const events: AssistantStreamEvent[] = [
+        { type: "summary", title: "Your viewings", rows: items.map((i) => ({ label: i.place, value: i.when, status: i.state })) },
+      ];
+      if (buttons.length > 0) events.push({ type: "actions", items: buttons });
       return {
-        data: { viewings: items },
-        events: [{ type: "summary", title: "Your viewings", rows: items.map((i) => ({ label: i.place, value: i.when, status: i.state })) }],
+        data: { viewings: items.map(({ changeable, ...rest }) => ({ ...rest, canCancelOrMove: changeable })) },
+        events,
       };
     } catch {
       return { data: { error: "Your viewings could not be read just now." } };

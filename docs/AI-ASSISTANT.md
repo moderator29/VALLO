@@ -90,9 +90,7 @@ keeps them in memory only (they are stripped before local storage).
   never says "paid": the member pays on the provider's page and the chat reads the real
   state back from the booking and its transaction (`assistantPaymentStatus`).
 * Retry creates a NEW proposal; nothing is ever replayed.
-* Cancel and reschedule of a viewing: no existing member action does this, so the
-  proposal kinds exist in the database but are not offered. The assistant says so and
-  points to human support.
+* Cancel and reschedule of a viewing: added in Phase 3 (below).
 
 ### Where it appears
 
@@ -110,12 +108,68 @@ title itself.
   cannot be driven from here. What was run: the live-database probes (Phase 1 and 2), unit
   tests of every tool and action with the database, the model and the provider stood in,
   route tests of what the model is shown OFF and ON, and Chromium DOM tests of every block.
-* "Frequently viewed" cannot be attributed to a member: `listing_view_marks` stores a
-  hashed viewer, not a user. Picks use saved places and what the member told the assistant.
+* "Frequently viewed": `listing_view_marks` stores a hashed viewer, so Phase 3 records the
+  member's own opens separately, only with Saved preferences granted (below).
 * Stay pages use an accommodation id; if it is not a catalogue listing id the "about"
   context is ignored (the question still works).
 * Balance: reported by the licensed provider where the member has an account; otherwise
   the assistant says plainly there is none or it is not live. Vallo holds no customer money.
-* A statement download is not offered (no export exists); receipts are in Settings.
+* Statement download: added in Phase 3 (`/api/statement`, below).
 * New text is English only.
 * Counsel should review the four legal pages.
+
+
+---
+
+## Phase 3: viewings, statement, opened places, security review (1 November 2026)
+
+### Cancel and move a viewing
+
+* Database: `reschedule_my_viewing(p_inspection, p_slot)` (applied, recorded
+  `20261101161935_reschedule_my_viewing`). The requester only, an open viewing still ahead;
+  the old one is withdrawn and the new time booked through `book_viewing_slot_mode` in ONE
+  transaction, so a time that is no longer free leaves the current viewing standing. The
+  lister hears both through the existing inspection triggers. Probe:
+  `supabase/tests/probes/reschedule-my-viewing.sql` (answered `PROBE_OK`).
+* Server actions (`lib/viewings/actions.ts`): `cancelMyViewing` (the existing withdrawal,
+  `closeInspection`), `myViewingMoveOptions`, `rescheduleMyViewing`.
+* The member's own viewing card (`InspectionSheet`) now has "Move to another time" beside
+  Cancel (`MoveViewingSheet`), so it is not assistant-only.
+* Assistant: `propose_cancel_viewing`, `get_move_options`, `propose_reschedule_viewing`
+  (bookings and viewings); `list_my_viewings` now carries Cancel and Move buttons on each open,
+  upcoming viewing. Confirm runs the actions above with the STORED payload.
+
+### Statement download
+
+`GET /api/statement`: the member's own payments as a CSV (date in Lagos, what, to whom by
+role, amount, status, the receipt reference they already see), read with their own client
+through `my_payments_history`, paced (10 an hour), never cached, formula cells defused.
+"Download statement" on Payments and on the assistant's transactions summary (a download
+button the screen draws only for that route).
+
+### Places you opened
+
+With the assistant on and Saved preferences granted, opening a listing records `seen:` keys
+(area, kind, bedrooms, price band; never the listing, its words or its address) in the
+member's own `ai_learned_preferences`, server-checked with `ai_assistant_can`, deduped for six
+hours, capped at 20 keys and weight 5. Off or revoked: nothing is written. Picks use it lightly
+(never above what the member said, and a stated dislike still wins) and say so ("you have been
+opening places in Lekki"). Settings shows them as "From places you opened".
+
+### Security review
+
+| Finding | Fix | Regression test |
+| --- | --- | --- |
+| A prompt injected through a listing or message could make the model name private tools it was never offered; each was checked against the database and logged as "denied", and eight denials switch the assistant off, so an outsider could lock a member's assistant | `runTool` refuses a private tool the request did not offer BEFORE asking the database, logged as "refused" (not counted by the lockout); offered tools are still checked in the database (a revoke mid-request) | `assistant-private-tools.test.ts` (never offered: no `ai_assistant_can`, no "denied"), `access.test.ts` |
+| A listing title (the lister's own words) was placed in the system prompt for "Ask about this place" | Reduced to plain one-line text of at most 80 characters with no markup, fence or brackets, and labelled as the lister's words and not an instruction | `activity.test.ts` (`plainTitle`, label) |
+| Members write `ai_learned_preferences` directly under RLS; the value had no size bound | Database check `octet_length(value) <= 1000` (`20261101164058_ai_learned_preferences_value_small`) | probe `ai-learned-preferences-bounds.sql` (`PROBE_OK`; also owner-only writes) |
+| Cancel/move with somebody else's viewing id | Every read is the caller's client AND filtered by `requester_id`, re-checked in code; the database function checks the requester too | `phase3-tools.test.ts`, `action-actions.test.ts`, `my-viewing.test.ts`, the reschedule probe |
+| A download button from the stream could point anywhere | The screen draws a download only for `/api/statement` | code path in `AssistantBlocks.tsx` |
+
+Reviewed and holding, no change needed: proposals are owner-only, hash-bound, single use,
+ten minutes, epoch-bound (replay, tampering and stale tabs fail closed, `action-actions.test.ts`);
+payment amount drift cancels the proposal before checkout; tool results reach the model fenced;
+browser-sent assistant turns carrying tool output are dropped; the route and every action are
+paced; tool errors carry fixed sentences, not database text; audit details drop password,
+passcode, token, secret, card, cvv, pin and authorization keys; every private read uses the
+member's own client, never the service role.

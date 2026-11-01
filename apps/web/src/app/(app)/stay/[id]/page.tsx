@@ -11,6 +11,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { StayDetailView } from "./StayDetailView";
 import { RecordPlaceVisit } from "@/components/app/listing/RecordPlaceVisit";
+import { RecordAssistantOpen } from "@/components/app/assistant/RecordAssistantOpen";
 import { readStayDates } from "@/components/app/stays/model";
 import type { StayDetail } from "./detail-model";
 
@@ -242,6 +243,7 @@ export default async function StayDetailPage({
     {session.state === "signed-in" ? (
       <div className="px-gutter pb-xs">
         <AskAiAbout listingId={detail.id} />
+        <RecordAssistantOpen listingId={detail.id} />
       </div>
     ) : null}
     <StayDetailView

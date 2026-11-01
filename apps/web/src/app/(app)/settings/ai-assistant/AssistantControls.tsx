@@ -174,7 +174,9 @@ export function LearnedList({ items }: { items: readonly { key: string; weight: 
       <ul className="nf-ai-learned" aria-label="What it has learned about you">
         {items.map((item) => (
           <li key={item.key} className="nf-ai-learned__row">
-            <span className="nf-ai-learned__key">{item.key.replace(/_/g, " ")}</span>
+            <span className="nf-ai-learned__key">
+              {item.key.startsWith("seen:") ? `From places you opened: ${item.key.slice(5).replace(/[_:]/g, " ")}` : item.key.replace(/_/g, " ")}
+            </span>
             <span className="nf-ai-learned__acts">
               <Button size="sm" variant={item.weight > 0 ? "primary" : "quiet"} disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "like" }))}>
                 Like

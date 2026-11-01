@@ -174,17 +174,39 @@ export const rememberPreferenceTool = defineTool({
 
 /* ---------------------------------------------------------- picked for you */
 
-export type Profile = { cities: Map<string, number>; kinds: Map<string, number>; bedrooms: Map<number, number>; budgetMaxMinor: number | null; dislikes: Set<string>; likes: Set<string> };
+export type Profile = {
+  cities: Map<string, number>;
+  kinds: Map<string, number>;
+  bedrooms: Map<number, number>;
+  budgetMaxMinor: number | null;
+  dislikes: Set<string>;
+  likes: Set<string>;
+  /** Areas the member has been opening (`seen:` keys, `activity.ts`), for the reason line. */
+  opened: Set<string>;
+};
 
 export function profileFrom(saved: readonly Listing[], tastes: readonly Taste[]): Profile {
   const bump = <K,>(m: Map<K, number>, k: K, by = 1) => m.set(k, (m.get(k) ?? 0) + by);
-  const p: Profile = { cities: new Map(), kinds: new Map(), bedrooms: new Map(), budgetMaxMinor: null, dislikes: new Set(), likes: new Set() };
+  const p: Profile = { cities: new Map(), kinds: new Map(), bedrooms: new Map(), budgetMaxMinor: null, dislikes: new Set(), likes: new Set(), opened: new Set() };
   for (const l of saved) {
     bump(p.cities, l.city.toLowerCase());
     bump(p.kinds, l.kind);
     if (l.bedrooms > 0) bump(p.bedrooms, l.bedrooms);
   }
   for (const t of tastes) {
+    /* What they opened: a light signal, never stronger than what they said. */
+    if (t.key.startsWith("seen:")) {
+      const [, sdim, ...srest] = t.key.split(":");
+      const svalue = srest.join(":");
+      const w = Math.max(0, Math.min(2, Math.round(t.weight / 2)));
+      if (w === 0) continue;
+      if (sdim === "area") {
+        bump(p.cities, svalue, w);
+        p.opened.add(svalue);
+      } else if (sdim === "kind") bump(p.kinds, svalue, w);
+      else if (sdim === "bedrooms" && Number.isFinite(Number(svalue))) bump(p.bedrooms, Number(svalue), w);
+      continue;
+    }
     const [dim, ...rest] = t.key.split(":");
     const value = rest.join(":");
     if (t.weight < 0) {
@@ -215,7 +237,11 @@ export function scoreCandidate(l: Listing, p: Profile): { score: number; reason:
   const cityHits = p.cities.get(l.city.toLowerCase()) ?? p.cities.get(l.area.toLowerCase()) ?? 0;
   if (cityHits > 0) {
     score += 2 + cityHits;
-    reasons.push(`you keep looking in ${l.city}`);
+    reasons.push(
+      p.opened.has(l.area.toLowerCase()) || p.opened.has(l.city.toLowerCase())
+        ? `you have been opening places in ${l.area || l.city}`
+        : `you keep looking in ${l.city}`,
+    );
   }
   const kindHits = p.kinds.get(l.kind) ?? 0;
   if (kindHits > 0) {

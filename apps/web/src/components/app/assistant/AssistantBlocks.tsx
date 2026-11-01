@@ -6,7 +6,10 @@ import { useCallback, useState } from "react";
 import {
   assistantDecide,
   assistantListingPhotos,
+  assistantMoveSlots,
   assistantPaymentStatus,
+  assistantProposeCancelViewing,
+  assistantProposeMove,
   assistantProposeViewing,
   assistantRetry,
   assistantSave,
@@ -64,6 +67,15 @@ function Buttons({ actions, runner, saved }: { actions: AssistantAction[]; runne
             <Link key={a.id} href={a.href} className="nf-aib__btn nf-aib__btn--link">
               {a.label}
             </Link>
+          );
+        }
+        if (a.kind === "download") {
+          /* Only our own statement route: a download href from anywhere else is not drawn. */
+          if (a.href !== "/api/statement") return null;
+          return (
+            <a key={a.id} href={a.href} download className="nf-aib__btn nf-aib__btn--link">
+              {a.label}
+            </a>
           );
         }
         const isSave = a.kind === "save" || a.kind === "unsave";
@@ -134,12 +146,15 @@ function SlotsBlock({
   listingId,
   title,
   slots,
+  moveFrom,
   runner,
   onProposed,
 }: {
   listingId: string;
   title: string;
   slots: AssistantSlot[];
+  /** Set when these are times to MOVE one of the member's own viewings to. */
+  moveFrom?: string | undefined;
   runner: Runner;
   onProposed: (block: AssistantBlock[]) => void;
 }) {
@@ -148,6 +163,35 @@ function SlotsBlock({
   const choose = async (slot: AssistantSlot) => {
     setPicked(slot.slotAt);
     setStatus({ tone: "busy", text: "Checking that time is still open..." });
+    if (moveFrom) {
+      const moved = await assistantProposeMove({ inspectionId: moveFrom, slotAt: slot.slotAt });
+      if (!moved.ok) {
+        setStatus({ tone: "error", text: moved.error });
+        setPicked(null);
+        return;
+      }
+      setStatus(null);
+      onProposed([
+        {
+          type: "summary",
+          title: "Move this viewing?",
+          rows: [
+            { label: "Place", value: moved.data.title },
+            { label: "From", value: moved.data.fromLabel },
+            { label: "To", value: moved.data.toLabel },
+          ],
+          note: "The lister is told. Your current time stands until you confirm.",
+        },
+        {
+          type: "actions",
+          items: [
+            { id: `confirm-${moved.data.proposalId}`, label: "Confirm new time", kind: "confirm", proposalId: moved.data.proposalId, payloadHash: moved.data.payloadHash },
+            { id: `cancel-${moved.data.proposalId}`, label: "Keep my time", kind: "cancel", proposalId: moved.data.proposalId, payloadHash: moved.data.payloadHash },
+          ],
+        },
+      ]);
+      return;
+    }
     const res = await assistantProposeViewing({ listingId, slotAt: slot.slotAt });
     if (!res.ok) {
       setStatus({ tone: "error", text: res.error });
@@ -173,7 +217,7 @@ function SlotsBlock({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={GLYPH.slots} alt="" width={28} height={28} className="nf-aib__glyph" />
         <div>
-          <h3 className="nf-aib__title">Pick a viewing time</h3>
+          <h3 className="nf-aib__title">{moveFrom ? "Pick a new time" : "Pick a viewing time"}</h3>
           <p className="nf-aib__sub">{title}</p>
         </div>
       </header>
@@ -364,7 +408,7 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
 
   const run = useCallback(
     async (action: AssistantAction) => {
-      if (action.kind === "link") return;
+      if (action.kind === "link" || action.kind === "download") return;
       if (action.kind === "ask") {
         onAsk(action.prompt);
         return;
@@ -380,6 +424,33 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
           const res = await assistantViewingSlots({ listingId: action.listingId });
           if (!res.ok) setStatus({ tone: "error", text: res.error });
           else setExtra((e) => [...e, { type: "slots", listingId: res.data.listingId, title: res.data.title, slots: res.data.slots }]);
+        } else if (action.kind === "viewing_cancel") {
+          const res = await assistantProposeCancelViewing({ inspectionId: action.inspectionId });
+          if (!res.ok) setStatus({ tone: "error", text: res.error });
+          else
+            setExtra((e) => [
+              ...e,
+              {
+                type: "summary",
+                title: "Cancel this viewing?",
+                rows: [
+                  { label: "Place", value: res.data.title },
+                  { label: "When", value: res.data.whenLabel },
+                ],
+                note: "The lister is told. Nothing changes until you confirm.",
+              },
+              {
+                type: "actions",
+                items: [
+                  { id: `confirm-${res.data.proposalId}`, label: "Confirm cancellation", kind: "confirm", proposalId: res.data.proposalId, payloadHash: res.data.payloadHash },
+                  { id: `cancel-${res.data.proposalId}`, label: "Keep my viewing", kind: "cancel", proposalId: res.data.proposalId, payloadHash: res.data.payloadHash },
+                ],
+              },
+            ]);
+        } else if (action.kind === "viewing_move") {
+          const res = await assistantMoveSlots({ inspectionId: action.inspectionId });
+          if (!res.ok) setStatus({ tone: "error", text: res.error });
+          else setExtra((e) => [...e, { type: "slots", listingId: res.data.listingId, title: res.data.title, slots: res.data.slots, moveFrom: res.data.inspectionId }]);
         } else if (action.kind === "save" || action.kind === "unsave") {
           const want = action.kind === "save" ? !(saved[action.listingId] ?? false) : false;
           const res = await assistantSave({ listingId: action.listingId, want: action.kind === "save" ? want : false });
@@ -392,7 +463,7 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
           const res = await assistantDecide({ proposalId: action.proposalId, payloadHash: action.payloadHash, decision: action.kind });
           if (!res.ok) setStatus({ tone: "error", text: res.error });
           else if (res.data.kind === "cancelled") setStatus({ tone: "ok", text: "Cancelled. Nothing was done." });
-          else if (res.data.kind === "viewing_booked") setStatus({ tone: "ok", text: res.data.message });
+          else if (res.data.kind === "viewing_booked" || res.data.kind === "viewing_changed") setStatus({ tone: "ok", text: res.data.message });
         } else if (action.kind === "retry") {
           const res = await assistantRetry({ proposalId: action.proposalId });
           setStatus(res.ok ? { tone: "ok", text: "Set up again. Review it above." } : { tone: "error", text: res.error });
@@ -427,7 +498,17 @@ export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; o
           case "actions":
             return <Buttons key={key} actions={b.items} runner={runner} saved={saved} />;
           case "slots":
-            return <SlotsBlock key={key} listingId={b.listingId} title={b.title} slots={b.slots} runner={runner} onProposed={(more) => setExtra((e) => [...e, ...more])} />;
+            return (
+              <SlotsBlock
+                key={key}
+                listingId={b.listingId}
+                title={b.title}
+                slots={b.slots}
+                moveFrom={b.moveFrom}
+                runner={runner}
+                onProposed={(more) => setExtra((e) => [...e, ...more])}
+              />
+            );
           case "summary":
             return <SummaryBlock key={key} title={b.title} rows={b.rows} {...(b.note ? { note: b.note } : {})} />;
           case "payment_review":

@@ -104,10 +104,22 @@ describe("tools that require a permission", () => {
     expect(c.calls.some((x) => x.fn === "ai_assistant_audit_write")).toBe(true);
   });
 
-  it("run when the database agrees", async () => {
+  it("run when the request offered it and the database agrees", async () => {
+    const c = client({ ai_assistant_can: true });
+    const run = await runTool(
+      "list_transactions",
+      {},
+      { frame: "consumer", supabase: c, userId: "u1", access: { enabled: true, permissions: ["transactions"], epoch: 1 } },
+      registry,
+    );
+    expect(run.ok).toBe(true);
+  });
+
+  it("are refused, without asking the database, when this request never offered them", async () => {
     const c = client({ ai_assistant_can: true });
     const run = await runTool("list_transactions", {}, { frame: "consumer", supabase: c, userId: "u1" }, registry);
-    expect(run.ok).toBe(true);
+    expect(run.ok).toBe(false);
+    expect(c.calls.some((x) => x.fn === "ai_assistant_can")).toBe(false);
   });
 
   it("are refused when there is no client to ask", async () => {

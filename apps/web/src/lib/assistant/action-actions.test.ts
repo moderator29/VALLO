@@ -8,6 +8,9 @@ const seam = vi.hoisted(() => ({
   booking: null as null | Record<string, unknown>,
   locked: null as string | null,
   book: vi.fn(),
+  cancelViewing: vi.fn(),
+  moveViewing: vi.fn(),
+  viewing: null as null | Record<string, unknown>,
   save: vi.fn(),
   checkout: vi.fn(),
 }));
@@ -32,7 +35,11 @@ vi.mock("@/lib/actions/session", () => ({
             from: (table: string) => ({
               select: () => ({
                 eq: () => ({
-                  eq: () => ({ maybeSingle: async () => ({ data: table === "bookings" ? seam.booking : table === "listings" ? { title: "Two bed" } : null }) }),
+                  eq: () => ({
+                    maybeSingle: async () => ({
+                      data: table === "bookings" ? seam.booking : table === "listings" ? { title: "Two bed" } : table === "inspection_requests" ? seam.viewing : null,
+                    }),
+                  }),
                   maybeSingle: async () =>
                     table === "ai_action_proposals"
                       ? { data: seam.proposal }
@@ -48,14 +55,19 @@ vi.mock("@/lib/actions/session", () => ({
       : { state: "signed-out" },
 }));
 vi.mock("@/lib/passcode/money", () => ({ passcodeMoneyRefusal: async () => seam.locked }));
-vi.mock("@/lib/viewings/actions", () => ({ bookViewingSlot: (...a: unknown[]) => seam.book(...a) }));
+vi.mock("@/lib/viewings/actions", () => ({
+  bookViewingSlot: (...a: unknown[]) => seam.book(...a),
+  cancelMyViewing: (...a: unknown[]) => seam.cancelViewing(...a),
+  rescheduleMyViewing: (...a: unknown[]) => seam.moveViewing(...a),
+}));
 vi.mock("@/lib/saved/actions", () => ({ toggleSave: (...a: unknown[]) => seam.save(...a) }));
 vi.mock("@/lib/bookings/checkout", () => ({ startCardCheckout: (...a: unknown[]) => seam.checkout(...a) }));
 vi.mock("@/lib/listings/repository", () => ({
   getListingRepository: () => ({ byId: async (id: string) => ({ id, title: "Two bed", isDemo: false, photos: ["https://x.test/1.jpg"], kind: "apartment" }) }),
 }));
 
-const { assistantDecide, assistantProposeViewing, assistantSave, assistantViewingSlots, assistantRetry } = await import("./action-actions");
+const { assistantDecide, assistantProposeViewing, assistantSave, assistantViewingSlots, assistantRetry, assistantProposeCancelViewing, assistantProposeMove } =
+  await import("./action-actions");
 
 const PID = "33333333-3333-4333-8333-333333333333";
 const LID = "11111111-1111-4111-8111-111111111111";
@@ -71,6 +83,9 @@ beforeEach(() => {
   seam.booking = null;
   seam.locked = null;
   seam.book.mockReset();
+  seam.cancelViewing.mockReset();
+  seam.moveViewing.mockReset();
+  seam.viewing = null;
   seam.save.mockReset();
   seam.checkout.mockReset();
 });
@@ -214,5 +229,68 @@ describe("saving, times and retries", () => {
     expect(await assistantRetry({ proposalId: PID })).toMatchObject({ ok: true, data: { proposalId: "55555555-5555-4555-8555-555555555555" } });
     seam.rpc.ai_proposal_retry = { ok: false, reason: "not_retryable" };
     expect((await assistantRetry({ proposalId: PID })).ok).toBe(false);
+  });
+});
+
+describe("cancelling and moving the member's own viewing", () => {
+  const IID = "55555555-5555-4555-8555-555555555555";
+  const ahead = new Date(Date.now() + 2 * 86_400_000).toISOString();
+  const later = new Date(Date.now() + 4 * 86_400_000).toISOString();
+  const mine = { id: IID, listing_id: LID, requester_id: "u1", state: "CONFIRMED", slot_at: ahead, requested_at: ahead };
+
+  it("refuses a viewing id that is not the member's own (a stranger's id reads as nothing under RLS)", async () => {
+    seam.viewing = null;
+    const out = await assistantProposeCancelViewing({ inspectionId: IID });
+    expect(out.ok).toBe(false);
+    expect(fns()).not.toContain("ai_proposal_create");
+  });
+
+  it("refuses a viewing whose time has passed", async () => {
+    seam.viewing = { ...mine, slot_at: new Date(Date.now() - 3_600_000).toISOString() };
+    const out = await assistantProposeCancelViewing({ inspectionId: IID });
+    expect(out.ok).toBe(false);
+  });
+
+  it("proposes a cancellation, and only the confirmed proposal runs the member's own cancel", async () => {
+    seam.viewing = mine;
+    seam.rpc.ai_proposal_create = { ok: true, id: PID, payload_hash: HASH, expires_at: ahead };
+    const made = await assistantProposeCancelViewing({ inspectionId: IID });
+    expect(made).toMatchObject({ ok: true, data: { proposalId: PID } });
+    expect(seam.cancelViewing).not.toHaveBeenCalled();
+
+    seam.proposal = { id: PID, kind: "cancel_viewing", status: "pending", payload: { inspection_id: IID, title: "Two bed" }, result: null };
+    seam.rpc.ai_proposal_decide = { ok: true, decision: "confirm", kind: "cancel_viewing", payload: { inspection_id: IID, title: "Two bed" } };
+    seam.rpc.ai_proposal_result = { ok: true };
+    seam.cancelViewing.mockResolvedValue({ ok: true, data: null });
+    const out = await assistantDecide({ proposalId: PID, payloadHash: HASH, decision: "confirm" });
+    expect(out).toMatchObject({ ok: true, data: { kind: "viewing_changed" } });
+    expect(seam.cancelViewing).toHaveBeenCalledWith({ id: IID });
+  });
+
+  it("moves only to a real open time, and runs the atomic move with the STORED payload", async () => {
+    seam.viewing = mine;
+    seam.rpc.viewing_slots = [{ slot_at: later, slot_minutes: 30, window_id: "w" }];
+    const invented = await assistantProposeMove({ inspectionId: IID, slotAt: new Date(Date.now() + 9 * 86_400_000).toISOString() });
+    expect(invented.ok).toBe(false);
+
+    seam.rpc.ai_proposal_create = { ok: true, id: PID, payload_hash: HASH, expires_at: later };
+    const real = await assistantProposeMove({ inspectionId: IID, slotAt: later });
+    expect(real).toMatchObject({ ok: true, data: { proposalId: PID } });
+
+    seam.proposal = { id: PID, kind: "reschedule_viewing", status: "pending", payload: { inspection_id: IID, slot_at: later, title: "Two bed" }, result: null };
+    seam.rpc.ai_proposal_decide = { ok: true, decision: "confirm", kind: "reschedule_viewing", payload: { inspection_id: IID, slot_at: later, title: "Two bed" } };
+    seam.rpc.ai_proposal_result = { ok: true };
+    seam.moveViewing.mockResolvedValue({ ok: true, data: { id: "new" } });
+    const out = await assistantDecide({ proposalId: PID, payloadHash: HASH, decision: "confirm" });
+    expect(out).toMatchObject({ ok: true, data: { kind: "viewing_changed" } });
+    expect(seam.moveViewing).toHaveBeenCalledWith({ id: IID, slotAt: later });
+  });
+
+  it("does nothing when the move is refused by the database answer (revoked, replayed)", async () => {
+    seam.proposal = { id: PID, kind: "reschedule_viewing", status: "pending", payload: { inspection_id: IID, slot_at: later }, result: null };
+    seam.rpc.ai_proposal_decide = { ok: false, reason: "revoked" };
+    const out = await assistantDecide({ proposalId: PID, payloadHash: HASH, decision: "confirm" });
+    expect(out.ok).toBe(false);
+    expect(seam.moveViewing).not.toHaveBeenCalled();
   });
 });

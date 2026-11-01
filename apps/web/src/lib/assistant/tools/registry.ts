@@ -3,7 +3,15 @@ import { compareListingsTool } from "./compare-listings";
 import { findScreenTool } from "./find-screen";
 import { searchListingsTool } from "./search-listings";
 import { getListingDetailsTool, getListingPhotosTool } from "./listing-detail";
-import { getViewingOptionsTool, listMyBookingsTool, listMyViewingsTool, proposeViewingTool } from "./viewings";
+import {
+  getMoveOptionsTool,
+  getViewingOptionsTool,
+  listMyBookingsTool,
+  listMyViewingsTool,
+  proposeCancelViewingTool,
+  proposeRescheduleViewingTool,
+  proposeViewingTool,
+} from "./viewings";
 import { listSavedListingsTool, pickedForYouTool, proposeSaveListingTool, rememberPreferenceTool } from "./saved";
 import { getRefundStatusTool, getWalletBalanceTool, listMyTransactionsTool, proposePaymentTool, spendSummaryTool } from "./money";
 import { getAccountSummaryTool } from "./account";
@@ -34,6 +42,9 @@ export const TOOL_REGISTRY: readonly AssistantTool[] = [
   getViewingOptionsTool,
   proposeViewingTool,
   listMyViewingsTool,
+  proposeCancelViewingTool,
+  getMoveOptionsTool,
+  proposeRescheduleViewingTool,
   listMyBookingsTool,
   listMyTransactionsTool,
   spendSummaryTool,
@@ -94,8 +105,21 @@ export async function runTool(
   if (!tool.workspaces.includes(ctx.frame)) {
     return { ok: false, error: `The tool ${name} is not available here.` };
   }
-  /* A private tool is checked against the DATABASE, not against what the model
-     or the browser says, and a refusal is audited there. */
+  /*
+   * NOT OFFERED, NOT RUN (security review, 1 November 2026). A private tool
+   * this request did not offer (the member has not granted it) is refused here,
+   * before the database is asked, and logged as "refused", not "denied". A
+   * listing or a message that talks the model into naming tools it was never
+   * given must not be able to run up eight "denied" rows and so switch the
+   * member's assistant off from the outside.
+   */
+  if (tool.requires && !hasPermission(ctx.access ?? NO_ACCESS, tool.requires)) {
+    if (ctx.supabase) await auditAction(ctx.supabase, { event: "tool_not_offered", permission: tool.requires, tool: tool.name, outcome: "refused" });
+    return { ok: false, error: `The tool ${name} was not offered in this conversation. Do not call it; answer with what you have.` };
+  }
+  /* An offered private tool is checked again against the DATABASE (a revoke
+     since this request began), not against what the model or the browser
+     says, and a refusal there is audited as denied. */
   if (tool.requires) {
     const verdict = await assertPermission(ctx.supabase, tool.requires, tool.name);
     if (!verdict.ok) {

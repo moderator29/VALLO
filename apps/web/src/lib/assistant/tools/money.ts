@@ -56,7 +56,11 @@ export const listMyTransactionsTool = defineTool({
     return {
       data: { period: label, entries: items },
       ...(read.more ? { note: LIMITED } : {}),
-      events: [{ type: "summary", title: `Your payments, ${label}`, rows: items }],
+      events: [
+        { type: "summary", title: `Your payments, ${label}`, rows: items },
+        /* The whole record as a file, read under the member's own session (`/api/statement`). */
+        { type: "actions", items: [{ id: "statement", label: "Download statement", kind: "download", href: "/api/statement" }] },
+      ],
     };
   },
 });

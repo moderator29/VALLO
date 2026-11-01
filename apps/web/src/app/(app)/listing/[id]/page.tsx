@@ -1,4 +1,5 @@
 import { AskAiAbout } from "@/components/app/assistant/AskAiAbout";
+import { RecordAssistantOpen } from "@/components/app/assistant/RecordAssistantOpen";
 import type { Metadata } from "next";
 import { forProofStrip } from "@/lib/i18n/slice";
 import { StillAvailable } from "@/components/app/listing/StillAvailable";
@@ -1040,6 +1041,8 @@ export default async function ListingDetailPage({
         {session.state === "signed-in" && !listing.isDemo ? (
           <div className="px-gutter pb-xs">
             <AskAiAbout listingId={listing.id} />
+            {/* Noted for "Picked for you" only when the member allowed it (server-checked). */}
+            <RecordAssistantOpen listingId={listing.id} />
           </div>
         ) : null}
         <div className="nf-detail-grid grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-2xl">

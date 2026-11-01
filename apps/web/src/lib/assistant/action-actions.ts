@@ -5,7 +5,7 @@ import { resolveSession } from "@/lib/actions/session";
 import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
 import { passcodeMoneyRefusal } from "@/lib/passcode/money";
 import { getListingRepository } from "@/lib/listings/repository";
-import { bookViewingSlot } from "@/lib/viewings/actions";
+import { bookViewingSlot, cancelMyViewing, rescheduleMyViewing } from "@/lib/viewings/actions";
 import { toggleSave } from "@/lib/saved/actions";
 import { startCardCheckout } from "@/lib/bookings/checkout";
 import { consume, subjectForUser } from "@/lib/security/rate-limit";
@@ -20,7 +20,7 @@ import {
   type ProposalKind,
 } from "./proposals";
 import type { AssistantSlot } from "./types";
-import { readOpenSlots } from "./tools/viewings";
+import { moveOptionsFor, readOpenSlots, readOwnViewing } from "./tools/viewings";
 import { readPayable } from "./tools/money";
 import { naira, when } from "./tools/private-common";
 
@@ -137,6 +137,64 @@ export async function assistantSave(input: unknown): Promise<ActionResult<{ save
   return ok({ saved: parsed.data.want });
 }
 
+/* ------------------------------------------------- the member's own viewing */
+
+const viewingInput = z.object({ inspectionId: uuid });
+
+/** "Cancel" on one of the member's own upcoming viewings: a proposal to confirm, never an instant cancel. */
+export async function assistantProposeCancelViewing(
+  input: unknown,
+): Promise<ActionResult<{ proposalId: string; payloadHash: string; title: string; whenLabel: string }>> {
+  const parsed = validate(viewingInput, input);
+  if (!parsed.ok) return fail("That viewing could not be found.");
+  const g = await gate("assistant_action");
+  if ("refusal" in g) return g.refusal;
+  const v = await readOwnViewing(g.session.supabase, g.session.user.id, parsed.data.inspectionId);
+  if (!v) return fail("That is not one of your open, upcoming viewings.");
+  const made = await createProposal(g.session.supabase, "cancel_viewing", { inspection_id: v.id, title: v.title, at: v.at });
+  if (!made.ok) return fail(refusalWords(made.reason));
+  return ok({ proposalId: made.id, payloadHash: made.payloadHash, title: v.title, whenLabel: when(v.at) });
+}
+
+/** "Move" on one of the member's own upcoming viewings: the real open times it could go to. */
+export async function assistantMoveSlots(
+  input: unknown,
+): Promise<ActionResult<{ inspectionId: string; listingId: string; title: string; slots: AssistantSlot[] }>> {
+  const parsed = validate(viewingInput, input);
+  if (!parsed.ok) return fail("That viewing could not be found.");
+  const g = await gate("assistant_action");
+  if ("refusal" in g) return g.refusal;
+  const verdict = await assertPermission(g.session.supabase, "bookings_viewings", "move_slots_button");
+  if (!verdict.ok) return fail(refusalWords("not_granted"));
+  const v = await readOwnViewing(g.session.supabase, g.session.user.id, parsed.data.inspectionId);
+  if (!v) return fail("That is not one of your open, upcoming viewings.");
+  const slots = await moveOptionsFor(g.session.supabase, v);
+  if (slots === null) return fail("Open times could not be read just now. Try again in a moment.");
+  if (slots.length === 0) return fail("There are no other open times for this place. You can ask the lister in your chat.");
+  return ok({ inspectionId: v.id, listingId: v.listingId, title: v.title, slots: slots.slice(0, 12).map((x) => ({ slotAt: x.slot_at, label: when(x.slot_at) })) });
+}
+
+const moveInput = z.object({ inspectionId: uuid, slotAt: z.string().max(40) });
+
+/** A tapped new time for one of the member's own viewings becomes a proposal to confirm. */
+export async function assistantProposeMove(
+  input: unknown,
+): Promise<ActionResult<{ proposalId: string; payloadHash: string; title: string; fromLabel: string; toLabel: string }>> {
+  const parsed = validate(moveInput, input);
+  if (!parsed.ok) return fail("That time could not be read.");
+  const g = await gate("assistant_action");
+  if ("refusal" in g) return g.refusal;
+  const v = await readOwnViewing(g.session.supabase, g.session.user.id, parsed.data.inspectionId);
+  if (!v) return fail("That is not one of your open, upcoming viewings.");
+  const slots = await moveOptionsFor(g.session.supabase, v);
+  const wanted = Date.parse(parsed.data.slotAt);
+  const match = slots?.find((x) => Date.parse(x.slot_at) === wanted);
+  if (!match) return fail("That time is no longer open. Pick another.");
+  const made = await createProposal(g.session.supabase, "reschedule_viewing", { inspection_id: v.id, slot_at: match.slot_at, title: v.title, from: v.at });
+  if (!made.ok) return fail(refusalWords(made.reason));
+  return ok({ proposalId: made.id, payloadHash: made.payloadHash, title: v.title, fromLabel: when(v.at), toLabel: when(match.slot_at) });
+}
+
 /* ----------------------------------------------------------------- decide */
 
 const decideInput = z.object({
@@ -148,6 +206,7 @@ const decideInput = z.object({
 export type DecideAnswer =
   | { kind: "cancelled" }
   | { kind: "viewing_booked"; message: string }
+  | { kind: "viewing_changed"; message: string }
   | { kind: "open_checkout"; url: string; message: string };
 
 /**
@@ -207,6 +266,27 @@ export async function assistantDecide(input: unknown): Promise<ActionResult<Deci
       }
       await recordProposalResult(supabase, proposalId, { ok: true });
       return ok({ kind: "viewing_booked", message: `Booked and confirmed: ${String(out.payload.title ?? "your viewing")}, ${when(String(out.payload.slot_at ?? ""))}. It is on your Plans.` });
+    }
+    case "cancel_viewing": {
+      const result = await cancelMyViewing({ id: String(out.payload.inspection_id ?? "") });
+      if (!result.ok) {
+        await recordProposalResult(supabase, proposalId, { ok: false, reason: "cancel_refused" });
+        return fail(result.error);
+      }
+      await recordProposalResult(supabase, proposalId, { ok: true });
+      return ok({ kind: "viewing_changed", message: `Cancelled: ${String(out.payload.title ?? "your viewing")}. The lister has been told.` });
+    }
+    case "reschedule_viewing": {
+      const result = await rescheduleMyViewing({ id: String(out.payload.inspection_id ?? ""), slotAt: String(out.payload.slot_at ?? "") });
+      if (!result.ok) {
+        await recordProposalResult(supabase, proposalId, { ok: false, reason: "move_refused" });
+        return fail(result.error);
+      }
+      await recordProposalResult(supabase, proposalId, { ok: true });
+      return ok({
+        kind: "viewing_changed",
+        message: `Moved: ${String(out.payload.title ?? "your viewing")} is now ${when(String(out.payload.slot_at ?? ""))}. The lister has been told.`,
+      });
     }
     case "payment_review": {
       const result = await startCardCheckout({ bookingId: String(out.payload.booking_id ?? ""), idempotencyKey: proposalId });

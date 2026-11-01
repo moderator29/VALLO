@@ -68,6 +68,9 @@ const PRIVATE = [
   "get_wallet_balance",
   "get_account_summary",
   "propose_payment",
+  "propose_cancel_viewing",
+  "get_move_options",
+  "propose_reschedule_viewing",
 ];
 
 describe("private tools are hidden and refused without their permission", () => {
@@ -91,11 +94,21 @@ describe("private tools are hidden and refused without their permission", () => 
     expect(names("saved_prefs")).toEqual(expect.arrayContaining(["picked_for_you", "remember_preference", "list_saved_listings", "propose_save_listing"]));
   });
 
-  it.each(PRIVATE)("%s is refused by the database check when the permission is gone, and audited", async (name) => {
+  it.each(PRIVATE)("%s is refused by the database check when the permission was revoked mid-request, and audited", async (name) => {
     const c = client(deny);
-    const out = await runTool(name, {}, ctx(c, []));
+    const tool = TOOL_REGISTRY.find((t) => t.name === name)!;
+    const out = await runTool(name, {}, ctx(c, [tool.requires as string]));
     expect(out.ok).toBe(false);
     expect(c.calls.some((x) => x.fn === "ai_assistant_audit_write" && x.args?.p_outcome === "denied")).toBe(true);
+  });
+
+  it.each(PRIVATE)("%s is refused WITHOUT a database denial when it was never offered (no injected lockout)", async (name) => {
+    const c = client(allow);
+    const out = await runTool(name, {}, ctx(c, []));
+    expect(out.ok).toBe(false);
+    expect(c.calls.some((x) => x.fn === "ai_assistant_can")).toBe(false);
+    expect(c.calls.some((x) => x.fn === "ai_assistant_audit_write" && x.args?.p_outcome === "denied")).toBe(false);
+    expect(c.calls.some((x) => x.fn === "ai_assistant_audit_write" && x.args?.p_outcome === "refused")).toBe(true);
   });
 
   it("never runs a private tool for a signed-out caller", async () => {

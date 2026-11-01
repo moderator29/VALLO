@@ -59,7 +59,8 @@ import { DrawUpAgreement } from "@/components/app/agreements/DrawUpAgreement";
 import { AGREEMENT_STATUS_LABEL } from "@/components/app/agreements/status";
 import { NO_INSPECTION_FEE, PRIVATE_FEE_NOTE, NO_INSPECTION_FEE_HEADLINE } from "@/lib/money/copy";
 import { ViewingDayKit } from "./ViewingDayKit";
-import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
+import { MoveViewingSheet, ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
+import { myViewingMoveOptions, rescheduleMyViewing } from "@/lib/viewings/actions";
 import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -229,7 +230,7 @@ export function InspectionSheet({
   /* The one sheet open over the card, if any: a time to offer, or a final
      move asked before it is made. */
   const [sheet, setSheet] = useState<
-    null | "propose" | "reschedule" | "decline" | "cancelLister" | "withdraw" | "cancelRenter" | "noShow" | "dispute"
+    null | "propose" | "reschedule" | "decline" | "cancelLister" | "withdraw" | "cancelRenter" | "noShow" | "dispute" | "move"
   >(null);
   /* A second tap while the first is in flight is dropped, not sent twice. */
   const inFlight = useRef(false);
@@ -951,6 +952,11 @@ export function InspectionSheet({
                   {VIEWING_WORDS.offerAnother}
                 </Button>
               )}
+              {side === "requester" && (
+                <Button variant="secondary" size="sm" disabled={pending} onClick={() => setSheet("move")} data-testid="inspection-move">
+                  Move to another time
+                </Button>
+              )}
               <Button
                 variant="quiet"
                 size="sm"
@@ -1028,6 +1034,14 @@ export function InspectionSheet({
           onOpenChange={(next) => setSheet(next ? sheet : null)}
           words={sheet === "reschedule" ? RESCHEDULE_WORDS : PROPOSE_WORDS}
           onSubmit={(when, note) => answerWith("PROPOSED", when, note)}
+        />
+      )}
+      {sheet === "move" && (
+        <MoveViewingSheet
+          open
+          onOpenChange={(next) => setSheet(next ? "move" : null)}
+          loadTimes={() => myViewingMoveOptions({ id: inspection.id })}
+          onMove={(slotAt) => rescheduleMyViewing({ id: inspection.id, slotAt }).then(settle)}
         />
       )}
       {(sheet === "decline" || sheet === "cancelLister") && (

@@ -61,7 +61,11 @@ export type AssistantAction =
   | { id: string; label: string; kind: "ask"; prompt: string }
   | { id: string; label: string; kind: "photos" | "slots" | "save" | "unsave"; listingId: string }
   | { id: string; label: string; kind: "confirm" | "cancel" | "retry"; proposalId: string; payloadHash: string }
-  | { id: string; label: string; kind: "status"; proposalId: string };
+  | { id: string; label: string; kind: "status"; proposalId: string }
+  /** The member's own viewing: cancel it, or pick another open time. */
+  | { id: string; label: string; kind: "viewing_cancel" | "viewing_move"; inspectionId: string }
+  /** A file the member downloads from their own records (a statement). */
+  | { id: string; label: string; kind: "download"; href: string };
 
 export type AssistantCard = AssistantListingItem & {
   /** Plain reason this was picked, from the member's own saved or viewed activity. */
@@ -80,7 +84,7 @@ export type AssistantStreamEvent =
   /** Loose buttons under an answer. */
   | { type: "actions"; items: AssistantAction[] }
   /** Real open viewing times for one listing, each a tap. */
-  | { type: "slots"; listingId: string; title: string; slots: AssistantSlot[] }
+  | { type: "slots"; listingId: string; title: string; slots: AssistantSlot[]; moveFrom?: string }
   /** A money summary for the member's own records. Read only. */
   | { type: "summary"; title: string; rows: AssistantSummaryRow[]; note?: string }
   /** A payment for the member to review and approve. The only way money moves from here. */
