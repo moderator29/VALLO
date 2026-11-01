@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { AssistantListingItem } from "../types";
 import type { AssistantWorkspace } from "../workspace";
+import type { AiPermission, AssistantAccess } from "../permissions";
 
 /**
  * ONE SHAPE FOR EVERY ASSISTANT TOOL (AI-01).
@@ -20,6 +21,16 @@ export const TOOL_FRAMES: readonly ToolFrame[] = ["consumer", "agent", "host"];
 /** What a running tool may know about the request. */
 export type ToolContext = {
   frame: ToolFrame;
+  /**
+   * What this person has allowed the assistant, read from the database for
+   * THIS request, never from the browser. Absent reads as off.
+   */
+  access?: AssistantAccess;
+  /**
+   * The caller's own authenticated client, for a tool that declares
+   * `requires`. Never the service role.
+   */
+  supabase?: unknown;
 };
 
 /**
@@ -59,6 +70,12 @@ export type AssistantTool<S extends z.ZodType = z.ZodType> = {
    */
   inputSchema: Readonly<Record<string, unknown>>;
   mode: ToolMode;
+  /**
+   * The permission a member must have granted before this tool is shown to the
+   * model or run. Public discovery tools declare none. Enforced twice: hidden
+   * by `toolsFor`, and checked against the database by `runTool` before `run`.
+   */
+  requires?: AiPermission;
   /** The frames this tool is offered in. Outside them it is neither offered nor run. */
   workspaces: readonly ToolFrame[];
   run(ctx: ToolContext, input: z.output<S>): Promise<ToolOutcome>;

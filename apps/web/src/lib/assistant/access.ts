@@ -1,6 +1,5 @@
 import "server-only";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import {
   AI_PERMISSIONS,
   NO_ACCESS,
@@ -32,8 +31,8 @@ export {
  *
  * Loose client type: these functions are new and not in the generated types.
  */
-type Rpc = SupabaseClient<never, "public", never>;
-const rpc = (supabase: unknown) => supabase as Rpc & { rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }> };
+type Rpc = { rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }> };
+const rpc = (supabase: unknown) => supabase as Rpc;
 
 export type AssistantState = AssistantAccess & {
   signedIn: boolean;

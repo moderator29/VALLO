@@ -33,7 +33,9 @@ import {
   sanitizeClientTurns,
   serverThreadTurns,
 } from "@/lib/assistant/history";
-import { runTool, toolDefinitions } from "@/lib/assistant/tools/registry";
+import { TOOL_REGISTRY, runTool, toolDefinitions } from "@/lib/assistant/tools/registry";
+import { readAssistantState } from "@/lib/assistant/access";
+import { NO_ACCESS, type AssistantAccess } from "@/lib/assistant/permissions";
 import type { ToolDefinition, ToolFrame } from "@/lib/assistant/tools/types";
 import { fenceToolResult, UNTRUSTED_TOOL_LINE } from "@/lib/assistant/untrusted";
 import { consentRefusal } from "@/lib/ai/consent";
@@ -486,7 +488,6 @@ export async function POST(req: NextRequest) {
      the system prompt. Anything that is not a known key is the plain one. */
   const workspace = parseAssistantWorkspace(record.workspace);
   const frame: ToolFrame = workspace ?? "consumer";
-  const tools = toolDefinitions(frame);
   /* The person's own style settings, by key (`lib/assistant/prefs.ts`). */
   const style = styleLines(parsePrefs(record.prefs));
   const system = `${workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT}\n\n${style}`;
@@ -501,6 +502,17 @@ export async function POST(req: NextRequest) {
   }
 
   const caller = await resolveCaller();
+
+  /* WHAT THIS PERSON HAS ALLOWED, FROM THE DATABASE, FOR THIS REQUEST. Off by
+     default: a signed-out visitor, a read that fails and a member who never
+     switched the assistant on all read as no access, and the model is then
+     shown only the public discovery tools. Nothing from the browser changes it. */
+  let access: AssistantAccess = NO_ACCESS;
+  if (caller.signedIn) {
+    const state = await readAssistantState(caller.supabase);
+    access = { enabled: state.enabled, permissions: state.permissions, epoch: state.epoch };
+  }
+  const tools = toolDefinitions(frame, TOOL_REGISTRY, access);
 
   /* STORE-07: nothing is sent to Anthropic without this person's recorded
      agreement. The screen asks first; this is what holds when it did not. */
@@ -600,7 +612,11 @@ export async function POST(req: NextRequest) {
              * or not, goes to the model inside the vallo_tool fence.
              */
             const name = typeof use["name"] === "string" ? use["name"] : "";
-            const run = await runTool(name, use.input, { frame });
+            const run = await runTool(name, use.input, {
+              frame,
+              access,
+              ...(caller.signedIn ? { supabase: caller.supabase } : {}),
+            });
             if (!run.ok) {
               toolResults.push({
                 type: "tool_result",

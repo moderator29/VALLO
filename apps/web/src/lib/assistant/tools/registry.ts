@@ -2,6 +2,8 @@ import { areaIntelTool } from "./area-intel";
 import { compareListingsTool } from "./compare-listings";
 import { findScreenTool } from "./find-screen";
 import { searchListingsTool } from "./search-listings";
+import { assertPermission } from "../access";
+import { NO_ACCESS, hasPermission, type AssistantAccess } from "../permissions";
 import type { AssistantTool, ToolContext, ToolDefinition, ToolFrame, ToolOutcome } from "./types";
 
 /**
@@ -18,16 +20,23 @@ export const TOOL_REGISTRY: readonly AssistantTool[] = [
 ];
 
 /** The tools offered in `frame`. A tool outside its frames is not offered. */
-export function toolsFor(frame: ToolFrame, registry: readonly AssistantTool[] = TOOL_REGISTRY): AssistantTool[] {
-  return registry.filter((tool) => tool.workspaces.includes(frame));
+export function toolsFor(
+  frame: ToolFrame,
+  registry: readonly AssistantTool[] = TOOL_REGISTRY,
+  access: AssistantAccess = NO_ACCESS,
+): AssistantTool[] {
+  return registry.filter(
+    (tool) => tool.workspaces.includes(frame) && (!tool.requires || hasPermission(access, tool.requires)),
+  );
 }
 
 /** The `tools` field of a Claude API request, for `frame`. */
 export function toolDefinitions(
   frame: ToolFrame,
   registry: readonly AssistantTool[] = TOOL_REGISTRY,
+  access: AssistantAccess = NO_ACCESS,
 ): ToolDefinition[] {
-  return toolsFor(frame, registry).map((tool) => ({
+  return toolsFor(frame, registry, access).map((tool) => ({
     name: tool.name,
     description: tool.description,
     input_schema: tool.inputSchema,
@@ -56,6 +65,14 @@ export async function runTool(
   if (!tool) return { ok: false, error: `There is no tool called ${name}.` };
   if (!tool.workspaces.includes(ctx.frame)) {
     return { ok: false, error: `The tool ${name} is not available here.` };
+  }
+  /* A private tool is checked against the DATABASE, not against what the model
+     or the browser says, and a refusal is audited there. */
+  if (tool.requires) {
+    const verdict = await assertPermission(ctx.supabase, tool.requires, tool.name);
+    if (!verdict.ok) {
+      return { ok: false, error: `The tool ${name} needs a permission this person has not given. Say so, and point them to Settings, VALLO AI Assistant.` };
+    }
   }
   const parsed = tool.input.safeParse(input);
   if (!parsed.success) {

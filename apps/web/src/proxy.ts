@@ -162,6 +162,9 @@ const PUBLIC_SEGMENTS = new Set([
   "docs",
   "help",
   // Legal and policy. Never close one of these.
+  // The four VALLO AI Assistant documents (`/ai/terms`, `/ai/privacy`,
+  // `/ai/permissions`, `/ai/security`): read before the assistant is turned on.
+  "ai",
   "cancellations",
   // The disclaimer is a legal page like the other four and was gated by
   // omission: a stranger following a footer link got a sign-in wall.
