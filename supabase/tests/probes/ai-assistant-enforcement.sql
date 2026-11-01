@@ -1,5 +1,5 @@
 -- AI-ASSISTANT-ENFORCEMENT (Phase 1). Needs the ai_assistant_enforcement migration
--- (docs/PENDING_ai_assistant_enforcement.sql.txt until it is applied and recorded).
+-- (20261101105206_ai_assistant_enforcement).
 --  1. a member starts OFF; a stranger's view of them is empty (row level security)
 --  2. activation is refused without both acceptances, on a wrong version, and with a sensitive permission
 --  3. activation grants discovery only; the sensitive ones are separate, deliberate grants
@@ -83,10 +83,9 @@ begin
     update public.ai_assistant_audit set outcome = 'ok' where user_id = m;
     raise exception 'PROBE_FAIL 6c: a member edited the audit';
   exception when insufficient_privilege then null; end;
-  begin
-    delete from public.ai_assistant_audit where user_id = m;
-    raise exception 'PROBE_FAIL 6d: a member deleted audit rows';
-  exception when insufficient_privilege then null; end;
+  if has_table_privilege('authenticated', 'public.ai_assistant_audit', 'DELETE') then
+    raise exception 'PROBE_FAIL 6d: members may delete audit rows';
+  end if;
   begin
     insert into public.ai_assistant_audit (user_id, event) values (m, 'forged');
     raise exception 'PROBE_FAIL 6e: a member wrote an audit row directly';

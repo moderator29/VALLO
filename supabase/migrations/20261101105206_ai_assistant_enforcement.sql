@@ -21,6 +21,7 @@ create table if not exists public.ai_assistant_permissions (
     'transactions', 'wallet_balance', 'payment_assist', 'notifications'
   )),
   granted_at timestamptz not null default now(),
+  revoked_at timestamptz,
   primary key (user_id, permission)
 );
 
@@ -80,14 +81,12 @@ create policy ai_prefs_insert_own on public.ai_learned_preferences
   for insert to authenticated with check (user_id = (select auth.uid()));
 create policy ai_prefs_update_own on public.ai_learned_preferences
   for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
-create policy ai_prefs_delete_own on public.ai_learned_preferences
-  for delete to authenticated using (user_id = (select auth.uid()));
 
 revoke all on public.ai_assistant_settings, public.ai_assistant_permissions, public.ai_assistant_audit,
   public.ai_learned_preferences, public.ai_action_proposals from anon, authenticated;
 grant select on public.ai_assistant_settings, public.ai_assistant_permissions, public.ai_assistant_audit,
   public.ai_action_proposals to authenticated;
-grant select, insert, update, delete on public.ai_learned_preferences to authenticated;
+grant select, insert, update on public.ai_learned_preferences to authenticated;
 
 -- The versions of the two documents a member accepts. The app holds the same
 -- strings (lib/assistant/access.ts); a test keeps them equal.
@@ -140,7 +139,7 @@ begin
   update public.ai_assistant_settings
      set enabled = false, grant_epoch = grant_epoch + 1, updated_at = now()
    where user_id = p_user;
-  delete from public.ai_assistant_permissions where user_id = p_user;
+  update public.ai_assistant_permissions set revoked_at = now() where user_id = p_user and revoked_at is null;
   update public.ai_action_proposals
      set status = 'cancelled', decided_at = now()
    where user_id = p_user and status = 'pending';
@@ -166,7 +165,7 @@ begin
   if uid is null then return jsonb_build_object('signed_in', false); end if;
   select * into s from public.ai_assistant_settings where user_id = uid;
   select coalesce(array_agg(permission order by permission), '{}') into perms
-    from public.ai_assistant_permissions where user_id = uid;
+    from public.ai_assistant_permissions where user_id = uid and revoked_at is null;
   return jsonb_build_object(
     'signed_in', true,
     'enabled', coalesce(s.enabled, false),
@@ -222,9 +221,10 @@ begin
     set enabled = true, terms_version = excluded.terms_version, privacy_version = excluded.privacy_version,
         accepted_at = now(), updated_at = now();
 
-  delete from public.ai_assistant_permissions where user_id = uid;
-  insert into public.ai_assistant_permissions (user_id, permission)
-  select uid, p from (select distinct unnest(array_append(wanted, 'discovery')) as p) x;
+  update public.ai_assistant_permissions set revoked_at = now() where user_id = uid and revoked_at is null;
+  insert into public.ai_assistant_permissions (user_id, permission, granted_at, revoked_at)
+  select uid, p, now(), null from (select distinct unnest(array_append(wanted, 'discovery')) as p) x
+  on conflict (user_id, permission) do update set granted_at = now(), revoked_at = null;
 
   perform private.ai_audit(uid, 'activated', null, null, 'ok',
     jsonb_build_object('terms', p_terms_version, 'privacy', p_privacy_version, 'permissions', to_jsonb(array_append(wanted, 'discovery'))));
@@ -271,13 +271,13 @@ begin
   if p_granted then
     if p_permission = 'payment_assist' and not exists (
       select 1 from public.ai_assistant_permissions
-       where user_id = uid and permission in ('transactions', 'bookings_viewings')
+       where user_id = uid and revoked_at is null and permission in ('transactions', 'bookings_viewings')
     ) then
       perform private.ai_audit(uid, 'permission_refused', p_permission, null, 'refused', jsonb_build_object('reason', 'needs_a_read_permission_first'));
       return jsonb_build_object('ok', false, 'reason', 'needs_a_read_permission_first');
     end if;
     insert into public.ai_assistant_permissions (user_id, permission) values (uid, p_permission)
-    on conflict do nothing;
+    on conflict (user_id, permission) do update set granted_at = now(), revoked_at = null;
     perform private.ai_audit(uid, 'permission_granted', p_permission, null, 'ok', '{}'::jsonb);
   else
     if p_permission = 'discovery' then
@@ -285,13 +285,14 @@ begin
       perform private.ai_switch_off(uid, 'discovery_revoked');
       return jsonb_build_object('ok', true, 'switched_off', true);
     end if;
-    delete from public.ai_assistant_permissions where user_id = uid and permission = p_permission;
-    -- Payment help rests on a read permission; without both it goes too.
+    update public.ai_assistant_permissions set revoked_at = now()
+     where user_id = uid and permission = p_permission and revoked_at is null;
     if not exists (
       select 1 from public.ai_assistant_permissions
-       where user_id = uid and permission in ('transactions', 'bookings_viewings')
+       where user_id = uid and revoked_at is null and permission in ('transactions', 'bookings_viewings')
     ) then
-      delete from public.ai_assistant_permissions where user_id = uid and permission = 'payment_assist';
+      update public.ai_assistant_permissions set revoked_at = now()
+       where user_id = uid and permission = 'payment_assist' and revoked_at is null;
     end if;
     update public.ai_assistant_settings set grant_epoch = grant_epoch + 1, updated_at = now() where user_id = uid;
     update public.ai_action_proposals set status = 'cancelled', decided_at = now()
@@ -313,7 +314,7 @@ as $$
     select 1
       from public.ai_assistant_settings s
       join public.ai_assistant_permissions p on p.user_id = s.user_id
-     where s.user_id = (select auth.uid()) and s.enabled and p.permission = p_permission
+     where s.user_id = (select auth.uid()) and s.enabled and p.permission = p_permission and p.revoked_at is null
   )
 $$;
 
@@ -341,11 +342,31 @@ as $$
 declare uid uuid := (select auth.uid());
 begin
   if uid is null then return jsonb_build_object('ok', false, 'reason', 'signed_out'); end if;
-  delete from public.ai_learned_preferences where user_id = uid;
+  update public.ai_learned_preferences
+     set key = 'cleared:' || gen_random_uuid()::text, value = 'null'::jsonb, weight = 0, updated_at = now()
+   where user_id = uid and key not like 'cleared:%';
   perform private.ai_audit(uid, 'preferences_cleared', 'saved_prefs', null, 'ok', '{}'::jsonb);
   return jsonb_build_object('ok', true);
 end;
 $$;
+
+create or replace function public.ai_assistant_forget_preference(p_key text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare uid uuid := (select auth.uid());
+begin
+  if uid is null then return jsonb_build_object('ok', false, 'reason', 'signed_out'); end if;
+  update public.ai_learned_preferences
+     set key = 'cleared:' || gen_random_uuid()::text, value = 'null'::jsonb, weight = 0, updated_at = now()
+   where user_id = uid and key = p_key;
+  return jsonb_build_object('ok', true);
+end;
+$$;
+revoke all on function public.ai_assistant_forget_preference(text) from public, anon;
+grant execute on function public.ai_assistant_forget_preference(text) to authenticated;
 
 revoke all on function public.ai_assistant_state() from public, anon;
 revoke all on function public.ai_assistant_activate(text, text, boolean, boolean, text[]) from public, anon;

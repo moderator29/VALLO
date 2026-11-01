@@ -143,14 +143,14 @@ export async function setLearnedPreference(input: unknown): Promise<ActionResult
   const db = gate.session.supabase as unknown as {
     from: (t: string) => {
       update: (v: Record<string, unknown>) => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<{ error: unknown }> } };
-      delete: () => { eq: (c: string, v: string) => { eq: (c: string, v: string) => PromiseLike<{ error: unknown }> } };
     };
   };
   const mine = gate.session.user.id;
-  const result =
-    parsed.data.stance === "remove"
-      ? await db.from("ai_learned_preferences").delete().eq("user_id", mine).eq("key", parsed.data.key)
-      : await db
+  /* Forgetting one scrubs its words and weight in the database (a function, never a table delete). */
+  if (parsed.data.stance === "remove") {
+    return call(gate.session, "ai_assistant_forget_preference", { p_key: parsed.data.key });
+  }
+  const result = await db
           .from("ai_learned_preferences")
           .update({ weight: parsed.data.stance === "like" ? 3 : -3, source: "member", updated_at: new Date().toISOString() })
           .eq("user_id", mine)

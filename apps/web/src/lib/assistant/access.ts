@@ -174,7 +174,8 @@ export async function readLearnedPreferences(supabase: unknown): Promise<Learned
       .select("key, value, source, weight, updated_at")
       .order("updated_at", { ascending: false });
     if (error || !Array.isArray(data)) return [];
-    return data as LearnedPreference[];
+    /* A forgotten preference is scrubbed in place and keeps a `cleared:` key; it is never shown. */
+    return (data as LearnedPreference[]).filter((row) => !String(row.key).startsWith("cleared:"));
   } catch {
     return [];
   }
