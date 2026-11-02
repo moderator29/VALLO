@@ -1,0 +1,182 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Liveness Check
+
+> Detect whether a selfie image is of a real, live person — and read face attributes like age range, gender, emotion, and image quality.
+
+POST
+`/api/v1/ml/liveness`
+
+Send a selfie image (Base64) to check whether it’s a real, live person, and get back detailed face attributes — age range, gender, emotions, and image quality.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `image` | string | Yes | The selfie image, Base64-encoded (strip any `data:image/jpeg;base64,` prefix). |
+
+## Response
+
+Returns an `entity` with a `liveness` object — `liveness_check` (whether it passed) and `liveness_probability` — and a `face` object with detection details, attribute confidences, and image quality. The response below is trimmed for readability.
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or the image is malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/ml/liveness" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "/9j/4AAQSkZJRgABAQ…"
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/ml/liveness", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    image: "/9j/4AAQSkZJRgABAQ…"
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/ml/liveness",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "image": "/9j/4AAQSkZJRgABAQ…"
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/ml/liveness theme={null}
+{
+    "entity": {
+        "face": {
+            "face_detected": true,
+            "message": "face detected",
+            "multiface_detected": false,
+            "details": {
+                "age_range": {
+                    "low": 21,
+                    "high": 27
+                },
+                "smile": {
+                    "value": false,
+                    "confidence": 99.40308380126953
+                },
+                "gender": {
+                    "value": "Male",
+                    "confidence": 99.94355773925781
+                },
+                "eyeglasses": {
+                    "value": false,
+                    "confidence": 99.33769989013672
+                },
+                "sunglasses": {
+                    "value": false,
+                    "confidence": 99.07188415527344
+                },
+                "beard": {
+                    "value": true,
+                    "confidence": 99.83099365234375
+                },
+                "mustache": {
+                    "value": true,
+                    "confidence": 94.46673583984375
+                },
+                "eyes_open": {
+                    "value": true,
+                    "confidence": 98.43293762207031
+                },
+                "mouth_open": {
+                    "value": false,
+                    "confidence": 95.88761901855469
+                },
+                "emotions": [
+                    {
+                        "type": "CALM",
+                        "confidence": 98.60491180419922
+                    },
+                    {
+                        "type": "SAD",
+                        "confidence": 0.7328033447265625
+                    },
+                    {
+                        "type": "CONFUSED",
+                        "confidence": 0.07017453014850616
+                    },
+                    {
+                        "type": "SURPRISED",
+                        "confidence": 0.02899765968322754
+                    },
+                    {
+                        "type": "HAPPY",
+                        "confidence": 0.028069814667105675
+                    },
+                    {
+                        "type": "ANGRY",
+                        "confidence": 0.018787384033203125
+                    },
+                    {
+                        "type": "DISGUSTED",
+                        "confidence": 0.004357099533081055
+                    },
+                    {
+                        "type": "FEAR",
+                        "confidence": 0.0009387731552124023
+                    }
+                ]
+            },
+            "quality": {
+                "brightness": 54.561920166015625,
+                "sharpness": 83.14741516113281
+            },
+            "confidence": 99.99991607666016,
+            "bounding_box": {
+                "width": 0.4428365230560303,
+                "height": 0.30233171582221985,
+                "left": 0.2544552981853485,
+                "top": 0.3601169288158417
+            }
+        },
+        "liveness": {
+            "liveness_check": true,
+            "liveness_probability": 98
+        }
+    }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

@@ -139,6 +139,8 @@ describe("contentSecurityPolicy", () => {
     const value = directive(policy(), "frame-src") ?? "";
     expect(value).toContain("https://checkout.paystack.com");
     expect(value).toContain("https://checkout.paystack.co");
+    /* And Dojah's hosted identity check, by name (DOJAH_FRAME_ORIGINS). */
+    expect(value).toContain("https://identity.dojah.io");
 
     expect(value).not.toContain("https://standard.paystack.co");
     expect(value).not.toContain("https://paystack.com ");

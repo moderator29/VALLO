@@ -132,6 +132,8 @@ const HEAVY_SITES: Record<string, string> = {
   "components/app/account/InviteTicket.tsx": "the invite reveal, once per device and on a replay asked for",
   "components/app/referral/WithdrawFlow.tsx": "a withdrawal confirmed by the server",
   "app/agent/listings/ListingsWorkspace.tsx": "a listing the server says is live",
+  "components/auth/SignUpPhoneStep.tsx": "the phone number confirmed, the last step of sign-up",
+  "components/verification/DojahPanel.tsx": "identity confirmed by the selfie check (the server's status, not the frame)",
 };
 
 /** Where the kind is decided from a map or an outcome, never a literal. */

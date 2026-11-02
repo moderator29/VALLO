@@ -1,0 +1,85 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Launch a flow — web widget
+
+> Embed the Dojah Connect web widget — load the script, initialize with your keys and widget_id, and handle the callbacks.
+
+Embed a published EasyOnboard flow on your site with the `Connect` JavaScript widget. Load the script, initialize it with your keys and `widget_id`, and open it on a click.
+
+## Add the widget script
+
+Load the widget from Dojah’s CDN. Don’t add `async` or `defer` — the `Connect` class must be available when you initialize it.
+
+```html HTML theme={null}
+<script src="https://widget.dojah.io/widget.js"></script>
+```
+
+## Initialize Connect
+
+Create a `Connect` instance with your options, then call `setup()` and `open()` — typically on a button click.
+
+```js JavaScript theme={null}
+const options = {
+  app_id: "your_app_id",
+  p_key: "your_public_key",
+  type: "custom",
+  embed: true,
+  container: "#embed-container",
+  config: { widget_id: "your_widget_id" },
+  reference_id: "unique-ref-12345",
+  user_data: {
+    first_name: "John",
+    last_name: "Musa",
+    dob: "1990-05-16",
+    residence_country: "NG",
+    email: "john@example.com",
+  },
+  gov_data: { bvn: "", nin: "" },
+  metadata: { user_id: "121" },
+  onSuccess: function (response) { console.log("Success", response); },
+  onError: function (err) { console.log("Error", err); },
+  onClose: function () { console.log("Widget closed"); },
+};
+
+const connect = new Connect(options);
+document.querySelector("#button-connect").addEventListener("click", function () {
+  connect.setup();
+  connect.open();
+});
+```
+
+## Options
+
+| Option | Type | Description |
+| - | - | - |
+| `app_id` | string | Your application ID from the dashboard. |
+| `p_key` | string | Your public key (safe for client-side use). |
+| `type` | string | Widget variant: `custom`, `verification`, `identification`, `liveness`, or [`vouch`](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/integrate-vouch). |
+| `config.widget_id` | string | The published EasyOnboard flow to load. |
+| `reference_id` | string | Your tracking ID for this session (minimum 10 characters). |
+| `user_data` | object | Pre-fills user fields; a complete set skips the user-data screen. |
+| `gov_data` | object | Pre-fills government identifiers such as `bvn`, `nin`. |
+| `metadata` | object | Custom data echoed back in callbacks and webhooks. |
+| `embed` | boolean | `true` renders inline in `container`; `false` opens a modal overlay. |
+| `container` | string | CSS selector of the host element when `embed` is `true`. |
+
+## Callbacks
+
+| Callback | Fires when |
+| - | - |
+| `onSuccess(response)` | The user completes all verification steps. |
+| `onError(err)` | An error prevents a step from completing. |
+| `onClose()` | The user exits via the close button. |
+
+> [!WARNING]
+>
+> **Don’t decide on the client.** An `onSuccess` means the flow finished — not that the user passed. Confirm the outcome server-side — see [Flow results & webhooks](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/flow-results-webhooks.md).
+
+## Other platforms
+
+To launch the same flow in a mobile or React app, use a [Widget SDK](https://docs.dojah.io/api-reference/widget-sdks/react.md) — those need only the `widget_id`.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

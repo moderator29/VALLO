@@ -1,0 +1,135 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Lookup BVN
+
+> Look up a Nigerian Bank Verification Number (BVN) and return the holder's record.
+
+GET
+`/api/v1/kyc/bvn/full`
+
+Retrieve the record tied to a Bank Verification Number (BVN). Use the advanced variant for enrollment and address details.
+
+> [!WARNING]
+>
+> **For new customers using a direct API integration:** Dojah is no longer selling **BVN Basic** and **BVN Advance**. [BVN Validate](https://docs.dojah.io/api-reference/individual-verification/nigeria/validate-bvn.md) is available via API. **BVN Basic** and **BVN Advance** remain available on the **Government Data** step of the [EasyOnboard](https://docs.dojah.io/dashboard-guide/workflows/easyonboard/workflows.md#steps) widget.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `bvn` | string | Yes | A valid 11-digit Bank Verification Number. |
+
+## Response
+
+Returns an `entity` with the holder’s name, gender, date of birth, registered phone numbers, and a base64 `image`. The `bvn` is masked.
+
+## Advanced lookup
+
+Call `GET /api/v1/kyc/bvn/advance` with the same `bvn` to also get enrollment bank/branch, account level, residence and origin details.
+
+```json 200 — /api/v1/kyc/bvn/advance theme={null}
+{
+  "entity": {
+    "bvn": "2*****234567",
+    "first_name": "JOHN",
+    "last_name": "MUSA",
+    "middle_name": "DOE",
+    "gender": "Male",
+    "date_of_birth": "1997-05-16",
+    "phone_number1": "08012345678",
+    "image": "BASE 64 IMAGE",
+    "email": "johndoe@gmail.com",
+    "enrollment_bank": "GTB",
+    "enrollment_branch": "IKEJA",
+    "level_of_account": "LEVEL 2",
+    "lga_of_origin": "OSOGBO",
+    "lga_of_residence": "IKEJA",
+    "marital_status": "SINGLE",
+    "nationality": "NIGERIAN",
+    "phone_number2": "08012345678",
+    "state_of_origin": "OSUN",
+    "state_of_residence": "LAGOS",
+    "title": "MISS",
+    "watch_listed": "NO"
+  }
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `424` | The upstream source was unavailable — retry shortly. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `bvn=22222222222` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/bvn/full?bvn=22222222222" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "bvn": "22222222222",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/bvn/full?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/bvn/full",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "bvn": "22222222222" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/bvn/full theme={null}
+{
+  "entity": {
+    "bvn": "2*****234567",
+    "first_name": "JOHN",
+    "last_name": "MUSA",
+    "middle_name": "DOE",
+    "gender": "Male",
+    "date_of_birth": "1997-05-16",
+    "phone_number1": "08012345678",
+    "image": "BASE 64 IMAGE",
+    "phone_number2": "08012345678"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

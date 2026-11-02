@@ -1,0 +1,80 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Sandbox & test data
+
+> Test Dojah end-to-end in the sandbox — mock responses, the test OTP, no wallet charges, and moving to production.
+
+The sandbox mirrors the production API but returns predictable mock data and never charges your wallet — so you can build and test the whole flow for free.
+
+## Using the sandbox
+
+Point your requests at the sandbox base URL and use your sandbox keys:
+
+```text Base URL theme={null}
+https://sandbox.dojah.io
+```
+
+Requests, headers, and response shapes match production exactly — only the data is simulated. See [Environments](https://docs.dojah.io/api-reference/get-started/environments.md) for the full comparison.
+
+## Test values
+
+Pass these credentials in sandbox to get deterministic, successful responses. They work only against `https://sandbox.dojah.io` and never return real data.
+
+### Identity & KYC
+
+| Check | Sandbox value |
+| - | - |
+| NIN | `70123456789` |
+| BVN | `22222222222` |
+| Phone number | `09011111111` |
+
+### Business verification
+
+| Check | Sandbox value |
+| - | - |
+| RC / CAC number | `1261103`, `14320749` |
+| TIN | `18609323-0001` |
+
+### Financial
+
+| Check | Sandbox value |
+| - | - |
+| NUBAN (Resolve account) | Account `3046507407`, bank code `011` |
+
+### Messaging & contact
+
+| Check | Sandbox value |
+| - | - |
+| OTP (Validate OTP) | `1234` |
+| Email | `johndoe@gmail.com` |
+
+### User screening & lookups
+
+| Check | Sandbox value |
+| - | - |
+| Account lookup | Phone `08137877844`, BVN `22271325557` |
+
+### Address verification
+
+Address checks expose sample reference IDs that return each lifecycle state — **completed**, **pending**, and **failed** — so you can build and test every branch. See the Address Verification reference for the per-state reference IDs.
+
+> [!NOTE]
+>
+> **No charges.** Sandbox calls never draw from your wallet, so you can run them as often as you need while developing.
+
+> [!TIP]
+>
+> **Tip.** The OTP is always `1234` in sandbox, so you can run send → validate end-to-end without a real device.
+
+## Moving to production
+
+When your flow works in sandbox, follow the [go-live checklist](https://docs.dojah.io/api-reference/get-started/environments.md#going-live): fund your wallet, switch to `https://api.dojah.io`, and swap in your live keys.
+
+> [!NOTE]
+>
+> **Note.** Sandbox results are not real verifications. Never use mock data to make a live trust decision.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

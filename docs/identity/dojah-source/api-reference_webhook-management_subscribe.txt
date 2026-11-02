@@ -1,0 +1,96 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Subscribe to a webhook
+
+> Register a callback URL so Dojah POSTs verification, SMS, address, and AML events to your server in real time.
+
+POST
+`/api/v1/webhook/subscribe`
+
+Register a callback URL so Dojah POSTs events to your server as they happen — verification results, SMS delivery, address checks, and AML monitoring hits. One subscription per service, per environment.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `webhook` | string | Yes | The callback URL where Dojah will `POST` events. Must be publicly reachable over HTTPS. |
+| `service` | string | Yes | Which service to subscribe to. One of `kyc_widget`, `sms`, `address`, or `AML Monitoring`. |
+
+## Response
+
+A `200` returns a confirmation string in `entity`. Dojah then delivers each event as a `POST` to your URL. Payloads arrive at the top level with **no `entity` wrapper** — verify them before trusting the contents.
+
+## Verifying deliveries
+
+Every webhook request carries an `x-dojah-signature` (HMAC-SHA256 of the JSON payload, keyed with the webhook secret from [Developers → Webhooks](https://app.dojah.io/developers/webhooks) — not your API secret key) and an `x-dojah-signature-v2` (SHA256 hash of your secret key on its own), and originates from Dojah’s IP `135.119.89.106`. Confirm the signature on every request before acting on it. See [Webhooks & signatures](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md#verify-events-are-from-dojah) for the full verification recipe and payload reference. Any file URLs inside a payload expire in about an hour — [download them promptly](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md).
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — `webhook` or `service` is missing, or `service` isn't a recognised value. |
+| `401` | Unauthorized — check your secret key and `AppId` (no `Bearer` prefix). |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/webhook/subscribe" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "webhook": "https://yourapp.com/webhooks/dojah",
+    "service": "kyc_widget"
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/webhook/subscribe", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    webhook: "https://yourapp.com/webhooks/dojah",
+    service: "kyc_widget",
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/webhook/subscribe",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "webhook": "https://yourapp.com/webhooks/dojah",
+        "service": "kyc_widget",
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/webhook/subscribe theme={null}
+{
+  "entity": "Webhook added successfully"
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

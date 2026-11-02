@@ -1,0 +1,136 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Lookup CAC Affiliate
+
+> Find the CAC companies a person is affiliated with, and the roles they hold on a given RC number.
+
+GET
+`/api/v1/kyc/cac/affiliate`
+
+Look up a person's affiliations on a Nigerian company. Pass the company's CAC registration (RC) number together with the person's name. The response lists each matching company and the roles that person holds, such as director, shareholder, or person with significant control (PSC).
+
+For the company record itself — including the full affiliates list — use [Lookup CAC Advance](https://docs.dojah.io/api-reference/business-verification/lookup-cac.md#advanced-lookup).
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `rc_number` | string | Yes | The company's CAC registration (RC) number. |
+| `first_name` | string | Yes | First name of the person to match. |
+| `last_name` | string | Yes | Last name of the person to match. |
+| `phone_number` | string | No | Phone number of the person. Omit this parameter when you do not have one. |
+| `email` | string | No | Email address of the person. Omit this parameter when you do not have one. |
+
+## Response
+
+A `200` returns `entity` as an array. Each item is one company the person is affiliated with.
+
+| Field | Type | Description |
+| - | - | - |
+| `first_name` | string | First name on the CAC record. |
+| `last_name` | string | Last name on the CAC record. |
+| `other_name` | string \| null | Other name, when the record has one. |
+| `phone_number` | string \| null | Phone number on the record. |
+| `company_name` | string | Registered company name. |
+| `rc_number` | string | CAC registration (RC) number. |
+| `type_of_company` | string \| null | Company type, when present. |
+| `date_of_registration` | string | Registration date, `YYYY-MM-DD`. |
+| `address` | string \| null | Registered address. |
+| `status` | string | Company status, such as `Active`. |
+| `affiliate_type` | string\[] | Roles held. Values include `SHAREHOLDER`, `PSC`, and `DIRECTOR`. |
+| `nationality` | string \| null | Nationality on the record. |
+| `date_of_birth` | string \| null | Date of birth on the record. |
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `rc_number=1261103`, `first_name=John`, and `last_name=Doe` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/cac/affiliate?rc_number=1261103&first_name=John&last_name=Doe" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  rc_number: "1261103",
+  first_name: "John",
+  last_name: "Doe",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/cac/affiliate?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/cac/affiliate",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={
+        "rc_number": "1261103",
+        "first_name": "John",
+        "last_name": "Doe",
+    },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/cac/affiliate theme={null}
+{
+  "entity": [
+    {
+      "first_name": "JOHN",
+      "last_name": "DOE",
+      "other_name": "ALEX",
+      "phone_number": "09011111111",
+      "company_name": "JOHN DOE LIMITED",
+      "rc_number": "1261103",
+      "type_of_company": "COMPANY",
+      "date_of_registration": "2024-07-19",
+      "address": "12 Example Street, Lagos",
+      "status": "Active",
+      "affiliate_type": [
+        "SHAREHOLDER",
+        "PSC",
+        "DIRECTOR"
+      ],
+      "nationality": "Nigeria",
+      "date_of_birth": "1990-01-15"
+    }
+  ]
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

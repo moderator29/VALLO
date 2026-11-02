@@ -1,0 +1,113 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Utility Bill analysis
+
+> Extract the name, address, provider and issue date from a utility bill, and check whether the bill is recent, with the Dojah Document Analysis API.
+
+POST
+`/api/v1/document/analysis/utility_bill`
+
+Extract the name, address, provider, and issue date from a utility bill — a common proof-of-address document — and check whether the bill is recent.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `input_type` | string | Yes | `url`. Defaults to `url`. |
+| `input_value` | string | Yes | Image URL of the utility bill. |
+
+## Response
+
+A `200` returns the parsed bill under `entity` — `identity_info` (name and meter number), `address_info`, the `provider_name`, the `bill_issue_date`, and a `metadata.is_recent` flag you can use to enforce a recency policy on proof of address.
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or the image can't be read. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `424` | Failed dependency — the analysis engine couldn't process the document. |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/document/analysis/utility_bill" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input_type": "url",
+    "input_value": "https://example.com/bill.jpg"
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/document/analysis/utility_bill", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    input_type: "url",
+    input_value: "https://example.com/bill.jpg"
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/document/analysis/utility_bill",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "input_type": "url",
+        "input_value": "https://example.com/bill.jpg"
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/document/analysis/utility_bill theme={null}
+{
+  "entity": {
+    "result": { "status": "success", "message": "" },
+    "identity_info": {
+      "full_name": "JOHN DOE MUSA",
+      "meter_number": "SBX12345678"
+    },
+    "address_info": {
+      "street": "123 Sandbox Street SBX001",
+      "city": "Testville",
+      "state": "SB",
+      "country": "Sandbox Country"
+    },
+    "provider_name": "Sandbox Power Company",
+    "bill_issue_date": "2025-01-15",
+    "amount_paid": "100",
+    "metadata": {
+      "extraction_date": "2025-08-15T00:00:00.000Z",
+      "is_recent": true
+    }
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

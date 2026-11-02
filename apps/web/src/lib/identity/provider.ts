@@ -1,3 +1,7 @@
+import { randomUUID } from "node:crypto";
+import { dojahClient, type DojahClient } from "./dojah/client";
+import { dojahConfig } from "./dojah/config";
+
 /**
  * THE IDENTITY AGGREGATOR (V-49), AS AN INTERFACE.
  *
@@ -56,7 +60,34 @@ export function stubProvider(fixtures: Record<string, VninAnswer>): IdentityProv
   };
 }
 
-/** The provider this deployment uses. No aggregator is contracted yet. */
+/**
+ * DOJAH (2 November 2026), the aggregator Vallo signed with: GET
+ * /api/v1/kyc/vnin. Dojah returns no reference of its own for a lookup, so
+ * the audit reference is ours, prefixed so the desk can tell where it came from.
+ */
+export function dojahVninProvider(client: Pick<DojahClient, "vnin">): IdentityProvider {
+  return {
+    name: "dojah",
+    async verifyVnin({ vnin }) {
+      const answer = await client.vnin(vnin);
+      if (!answer.ok) {
+        if (answer.reason === "not_found" || answer.reason === "invalid") return { ok: false, reason: "not_found" };
+        return { ok: false, reason: "failed" };
+      }
+      const e = answer.entity;
+      const nin = (e.nin ?? "").replace(/\D/g, "");
+      const legalName = [e.first_name ?? e.firstname, e.middle_name ?? e.middlename, e.last_name ?? e.surname]
+        .map((part) => (part ?? "").trim())
+        .filter(Boolean)
+        .join(" ");
+      if (!/^\d{11}$/.test(nin) || legalName.length < 2) return { ok: false, reason: "failed" };
+      return { ok: true, nin, legalName, reference: `dojah-vnin:${randomUUID()}` };
+    },
+  };
+}
+
+/** The provider this deployment uses: Dojah when its keys are present, otherwise none. */
 export function identityProvider(): IdentityProvider {
-  return unconfiguredProvider;
+  const config = dojahConfig();
+  return config ? dojahVninProvider(dojahClient(config)) : unconfiguredProvider;
 }

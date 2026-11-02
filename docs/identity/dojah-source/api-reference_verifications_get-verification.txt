@@ -1,0 +1,135 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Get verification
+
+> Fetch the complete result of a single verification by its reference ID — every check that ran, with its data, status, and message.
+
+GET
+`/api/v1/kyc/verification`
+
+Fetch the complete result of a single verification by its reference ID — every check that ran (ID, selfie, government data, AML, address) with its data, status, and message.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `reference_id` | string | Yes | The verification's reference ID, as shown on the dashboard or returned by [List verifications](https://docs.dojah.io/api-reference/verifications/list-verifications.md) (e.g. `DJ-31038041E0`). |
+
+## Response
+
+Returns the full verification record. The top-level fields summarise the verification; the nested `data` object holds each individual check that ran, keyed by type — each with its own `data`, `status`, and `message`.
+
+| Field | Type | Description |
+| - | - | - |
+| `reference_id` | string | The verification’s unique reference. |
+| `status` | boolean | Whether the verification completed successfully overall. |
+| `verification_status` | string | Status label — `Ongoing`, `Pending`, `Completed`, `Failed`, or `Abandoned`. See [Verification statuses](https://docs.dojah.io/api-reference/core-concepts/verification-statuses.md). |
+| `verification_type` | string | The identity type checked (e.g. `RC-NUMBER`, `BVN`, `NIN`). |
+| `verification_mode` | string | How the user was captured (e.g. `LIVENESS`). |
+| `id_type` | string | The government ID type used (e.g. `BVN`). |
+| `data` | object | Per-check breakdown — `id`, `email`, `selfie`, `government_data`, `business_data`, `additional_document`, and more. |
+| `aml` | object | AML screening result for the subject. |
+| `metadata` | object | Capture context — `ipinfo` (geo/ISP) and `device_info` (user agent). |
+| `selfie_url`, `id_url`, `back_url` | string | Links to captured media. **Expire \~1 hour** — see [File links & expiry](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md). |
+| `verification_pdf` | string | Pre-signed link to the verification report PDF. **Expires \~1 hour** — see [File links & expiry](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md). |
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — `reference_id` is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `404` | No verification found for the supplied `reference_id`. |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/verification?reference_id=DJ-31038041E0" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "reference_id": "DJ-31038041E0",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/verification?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/verification",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "reference_id": "DJ-31038041E0" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/verification theme={null}
+{
+  "status": true,
+  "verification_pdf": "https://files.dojah.io/dojah-files/1788185624685-25170.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+  "reference_id": "DJ-31038041E0",
+  "id_type": "BVN",
+  "verification_status": "Completed",
+  "verification_type": "RC-NUMBER",
+  "verification_mode": "LIVENESS",
+  "message": "Successfully completed the verification.",
+  "aml": { "status": false },
+  "data": {
+    "id": {
+      "data": {
+        "id_url": "https://images.dojah.io/id_sample_id.jpg",
+        "id_data": {
+          "last_name": "Musa",
+          "first_name": "John",
+          "document_type": "National ID",
+          "document_number": "123456789"
+        }
+      },
+      "status": true,
+      "message": "Successfully verified your id"
+    },
+    "selfie": {
+      "data": { "selfie_url": "https://images.dojah.io/selfie.jpg" },
+      "status": true,
+      "message": "Successfully validated your liveness"
+    },
+    "government_data": {
+      "data": { "bvn": { … }, "nin": { … } },
+      "status": true
+    }
+  },
+  "metadata": {
+    "ipinfo": { "city": "Lagos", "country": "Nigeria" },
+    "device_info": "Mozilla/5.0 …"
+  },
+  "selfie_url": "https://images.dojah.io/selfie.jpg",
+  "verification_url": "https://app.dojah.io/verifications/bio-data/49fd74a4-…"
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

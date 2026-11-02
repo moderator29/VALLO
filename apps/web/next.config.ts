@@ -350,7 +350,14 @@ const nextConfig: NextConfig = {
              * for when a person starts or answers a call.
              */
             key: "Permissions-Policy",
-            value: "camera=(self), microphone=(self), geolocation=(self), interest-cohort=()",
+            /* Dojah (2 November 2026): the hosted identity check in the
+               /verification frame takes a selfie and reads the location it
+               reports, so camera and geolocation are delegated to that one
+               origin as well. The frame's `allow` attribute names the same
+               two; no other origin can ask. */
+            value:
+              'camera=(self "https://identity.dojah.io"), microphone=(self), geolocation=(self "https://identity.dojah.io"), interest-cohort=()',
+
           },
           {
             key: "Strict-Transport-Security",

@@ -13,6 +13,8 @@ import { buildPath } from "@/components/verification/verification-path";
 import { VPASS_COOKIE, vpassSeen } from "@/components/verification/payoff-seen";
 import { approvedRecently } from "@/lib/ui/recent-approval";
 import { VninPanel } from "@/components/verification/VninPanel";
+import { DojahPanel } from "@/components/verification/DojahPanel";
+import { dojahCheckReady, dojahCheckStatus } from "@/lib/identity/dojah-actions";
 import { PepQuestionPanel } from "@/components/compliance/PepQuestionPanel";
 import { vninIdentityOn } from "@/lib/identity/flag";
 import {
@@ -112,6 +114,18 @@ export default async function VerificationPage({
         copy={getDictionary(locale).trustVisible.vnin}
         success={getDictionary(locale).success}
         merchantCode={merchantCode}
+      />
+    ) : null;
+  /* Dojah: the selfie + NIN/BVN check, only when its flag is on and Dojah is
+     fully configured (lib/identity/dojah-actions.ts). The document route
+     below stays, for anybody the check cannot settle. */
+  const dojahStatus = (await dojahCheckReady()) ? await dojahCheckStatus() : null;
+  const dojah =
+    dojahStatus && dojahStatus.ok ? (
+      <DojahPanel
+        copy={getDictionary(locale).trustVisible.dojah}
+        initial={dojahStatus.data.status}
+        initialNote={dojahStatus.data.note}
       />
     ) : null;
   const [ladder, documents, mine] = await Promise.all([
@@ -329,6 +343,7 @@ export default async function VerificationPage({
           </p>
         )}
         {pep}
+        {dojah}
         {vnin}
         <KycFlow
           submit={submitVerification}
@@ -352,6 +367,7 @@ export default async function VerificationPage({
           <KycStatus status={status} locale={locale} />
           <div className="mt-block">{path}</div>
           {pep}
+          {dojah}
           {/* NO SHEET OVER THE PLATE (round 5). The approval used to open a
               "Documents approved" sheet here as well, and the plate's payoff
               waited behind it: two celebrations of one decision, the first a
@@ -373,6 +389,7 @@ export default async function VerificationPage({
           <PageHeader title={t.agent.nav.verification} fallback="/profile" />
           <div className="mb-block">{path}</div>
           {pep}
+          {dojah}
           {vnin}
           <KycFlow submit={submitVerification} success={getDictionary(locale).success} copy={t.experienceAccount.kyc} askBusiness={askBusiness} />
         </>

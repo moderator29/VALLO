@@ -1,0 +1,64 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# How hosted flows work
+
+> How Dojah EasyOnboard hosted flows work — build a verification flow in the dashboard, embed the widget, and receive the result.
+
+A hosted flow is a ready-made, mobile-friendly verification journey you build in **EasyOnboard** — no backend required to get started. Design it once in the dashboard, then drop it into web or mobile.
+
+> [!TIP]
+>
+> **Most teams start here.** Hosted flows handle ID capture, liveness, and document upload UI for you — you only handle the result.
+
+## The lifecycle
+
+**1. Build the flow**
+
+In EasyOnboard, drag and arrange verification steps — ID types, liveness, document upload — and set rules. No code.
+
+**2. Publish & get a widget ID**
+
+Publishing the flow produces a `widget_id` that identifies it.
+
+**3. Embed or share it**
+
+Launch the flow with the web widget, a mobile SDK, or a hosted link — all driven by that `widget_id`.
+
+**4. User completes it**
+
+The user moves through the branded flow; Dojah runs the checks.
+
+**5. Receive the result**
+
+You get the outcome via client callbacks and — authoritatively — via a [webhook](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md). Always confirm server-side.
+
+## Widget types
+
+The `type` you launch with sets which experience loads:
+
+| Type | Use it for |
+| - | - |
+| `custom` | A flow you’ve configured in EasyOnboard (the usual choice). |
+| `verification` | A standard verification experience. |
+| `identification` | Identity capture and lookup. |
+| `liveness` | A liveness-only check. |
+| `vouch` | A [Vouch](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/integrate-vouch.md) flow — the user grants access to an identity they already hold. |
+
+## Ways to run a flow
+
+> [card] [Web widget](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/launch-a-flow.md)
+>
+> Embed the JavaScript `Connect` widget on your site.
+
+> [card] [Mobile & React SDKs](https://docs.dojah.io/api-reference/widget-sdks/react.md)
+>
+> Launch the same flow from React, React Native, Flutter, iOS, or Android.
+
+> [card] [Results & webhooks](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/flow-results-webhooks.md)
+>
+> Receive and verify the outcome server-side.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

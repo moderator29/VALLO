@@ -14,6 +14,8 @@ import { KIND_LABEL, SUBTYPE_LABEL, SubjectCard } from "./SubjectCard";
 import { InternalNotes } from "../_components/InternalNotes";
 import { notesOf, readMemberNotesFor } from "@/lib/admin/notes";
 import { VerificationDesk, type RecentDecision, type VerificationRow } from "./VerificationDesk";
+import { getIdentityChecks } from "@/lib/admin/identity-checks";
+import { IdentityChecksPanel } from "./IdentityChecksPanel";
 import "../_review/review.css";
 
 export const metadata: Metadata = {
@@ -64,14 +66,17 @@ export default async function AdminKycPage({
   /* Not `queueNarrowed`, which counts `q`: there is no search box here, so a
      hand-typed `?q=` must not light up the no-match state. */
   const narrowed = Boolean(query.status || query.from || query.to);
-  const [read, summary] = await Promise.all([
+  const [read, summary, selfie] = await Promise.all([
     getKycQueue({
       ...(query.status ? { status: query.status } : {}),
       ...(query.from ? { from: query.from } : {}),
       ...(query.to ? { to: query.to } : {}),
     }),
     getVerificationSummary(),
+    getIdentityChecks(),
   ]);
+  const selfieChecks =
+    selfie.state === "ok" ? <IdentityChecksPanel waiting={selfie.waiting} decided={selfie.decided} /> : null;
   const summaryData = summary.state === "ok" ? summary.data : null;
 
   const filters = (
@@ -92,6 +97,7 @@ export default async function AdminKycPage({
         empty={{ title: "Nothing to show", body: "" }}
         summary={summaryData}
         recent={null}
+        selfieChecks={selfieChecks}
         unavailable
       />
     );
@@ -171,6 +177,7 @@ export default async function AdminKycPage({
         }
         summary={summaryData}
         recent={recent}
+        selfieChecks={selfieChecks}
         decided={
           decided.length > 0 ? (
             <Panel title="Recently decided" labelledBy="rv-kyc-decided">

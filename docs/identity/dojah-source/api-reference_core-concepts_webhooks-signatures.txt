@@ -1,0 +1,553 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Webhooks & signatures
+
+> Receive real-time Dojah events, subscribe to services, and verify webhook authenticity with HMAC SHA256 signatures.
+
+Get notified the moment a verification, screening, or message event happens — instead of polling. Dojah POSTs each event to a URL you register, and signs it so you can confirm it’s genuine.
+
+## How webhooks work
+
+You subscribe a URL to a **service**. When a matching event occurs, Dojah sends an HTTP `POST` with a JSON body to that URL. Respond `200` to acknowledge receipt.
+
+## Subscribe to a service
+
+Register a callback URL against a service with `POST /api/v1/webhook/subscribe`. You can also fetch and delete subscriptions.
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/webhook/subscribe" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{ "webhook": "https://yourapp.com/dojah/webhook", "service": "kyc_widget" }'
+```
+
+Documented services include `kyc_widget`, `address`, `sms`, and `AML Monitoring`, spanning verification, fraud, AML, and messaging events.
+
+## Event payload
+
+Events arrive as JSON with the event fields at the top level — unlike REST responses, webhook payloads don’t use the `entity` wrapper. Always look the event up against your own records using its reference before acting on it.
+
+### KYC widget (EasyOnboard) event
+
+Subscribers to the `kyc_widget` service receive an event when a [hosted flow](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/how-hosted-flows-work.md) session ends. Its shape follows the flow you built, so expect these three layers:
+
+* **Top level** — the summary: `reference_id`, `verification_status`, the overall `status`, the ID captured (`id_type`, `value`), and links to the selfie, ID images, signed PDF, and `verification_pdf` report.
+* **`data`** — one key per step the user went through (`user_data`, `government_data`, `id`, `selfie`, `address`, and so on), each with its own `status`, `message`, and `data`.
+* **`metadata`** — context about the session, including geo-IP details and anything you passed in when launching the flow.
+
+Match the event to your user with `reference_id`, which is the value you supplied when you launched the flow.
+
+> [accordion] Sample kyc\_widget event payload
+>
+> ```json theme={null}
+> {
+>   "metadata": {
+>     "ipinfo": {
+>       "status": "success",
+>       "country": "Nigeria",
+>       "city": "Lagos",
+>       "district": "",
+>       "zip": "",
+>       "lat": 6.45415,
+>       "lon": 3.39472,
+>       "timezone": "",
+>       "isp": "Mtn Nigeria Communication Limited",
+>       "org": "",
+>       "as": 29465,
+>       "mobile": false,
+>       "proxy": false,
+>       "hosting": false,
+>       "query": "203.0.113.43",
+>       "region_name": "Lagos"
+>     },
+>     "device_info": ""
+>   },
+>   "data": {
+>     "index": {
+>       "data": {},
+>       "message": "Successfully continued to the main checks.",
+>       "status": true
+>     },
+>     "user_data": {
+>       "data": {
+>         "first_name": "John",
+>         "last_name": "Doe",
+>         "dob": "1990-01-01",
+>         "email": null
+>       },
+>       "message": "",
+>       "status": true
+>     },
+>     "countries": {
+>       "data": { "country": "Nigeria" },
+>       "message": "Successfully continued to the next step.",
+>       "status": true
+>     },
+>     "government_data": {
+>       "data": {
+>         "nin": {
+>           "entity": {
+>             "customer": "6bb82c41-e15e-4308-b99d-e9640818eca9",
+>             "app_id": null,
+>             "nin": "1234567890",
+>             "first_name": "JOHN",
+>             "last_name": "DOE",
+>             "middle_name": "DOE",
+>             "gender": "Male",
+>             "date_of_birth": "1992-10-10",
+>             "phone_number": null,
+>             "image_url": "https://images.dojah.io/id_John_Doe_1720615487.jpg",
+>             "email": null,
+>             "employment_status": null,
+>             "marital_status": "Single",
+>             "birth_country": "Nigeria",
+>             "birth_lga": null,
+>             "birth_state": null,
+>             "educational_level": null,
+>             "maiden_name": "PAUL",
+>             "nspoken_lang": null,
+>             "profession": null,
+>             "religion": null,
+>             "residence_address_line_1": null,
+>             "residence_address_line_2": null,
+>             "residence_status": null,
+>             "residence_town": null,
+>             "residence_lga": null,
+>             "residence_state": "ONDO",
+>             "ospoken_lang": null,
+>             "origin_lga": "OSE",
+>             "origin_place": "Ondo",
+>             "origin_state": null,
+>             "height": null,
+>             "p_first_name": null,
+>             "p_middle_name": null,
+>             "p_last_name": null,
+>             "nok_first_name": null,
+>             "nok_middle_name": null,
+>             "nok_last_name": null,
+>             "nok_town": null,
+>             "nok_lga": null,
+>             "nok_address_line_1": null,
+>             "sc": true,
+>             "createdAt": "2024-11-23T21:07:53.000Z",
+>             "updatedAt": "2024-11-23T21:07:53.000Z",
+>             "firstname": "JOHN",
+>             "surname": "DOE",
+>             "birthdate": "1992-10-10",
+>             "telephoneno": null,
+>             "middlename": "DOE"
+>           }
+>         }
+>       },
+>       "message": "",
+>       "status": true
+>     },
+>     "business_data": {
+>       "business_name": null,
+>       "business_number": null,
+>       "business_type": "BN",
+>       "registration_date": null,
+>       "business_address": null
+>     },
+>     "phone_number": {
+>       "data": { "phone": "2348000000000" },
+>       "message": "2348000000000 validation Collected",
+>       "status": true
+>     },
+>     "id": {
+>       "data": {
+>         "id_url": "https://files.dojah.io/dojah-images/id_sample_id_1720624047.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>         "back_url": "https://files.dojah.io/dojah-images/id_sample_id_back_1720624047.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>         "id_data": {
+>           "first_name": "Doe",
+>           "last_name": "John",
+>           "middle_name": "",
+>           "nationality": "Nigerian",
+>           "mrz_status": "",
+>           "expiry_date": "2020-01-01",
+>           "document_type": "Driving License",
+>           "document_number": "123456789",
+>           "date_of_birth": "1990-01-01",
+>           "date_issued": "2019-01-01",
+>           "extras": ""
+>         }
+>       },
+>       "status": true,
+>       "message": "Successfully verified your id"
+>     },
+>     "business_id": {
+>       "business_name": "ABC Company LIMITED",
+>       "business_type": "Business",
+>       "business_number": "1237654",
+>       "business_address": "",
+>       "registration_date": "",
+>       "image_url": "https://files.dojah.io/dojah-images/selfie_sample_image_1720624219.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=..."
+>     },
+>     "address": {
+>       "message": "Address Verification Failed",
+>       "status": false,
+>       "data": {
+>         "location": {
+>           "address_location": {
+>             "latitude": "7.289996299999999",
+>             "longitude": "5.163955",
+>             "name": "12 Example Close, Akure South, Nigeria",
+>             "landmark": ""
+>           },
+>           "user_location": {
+>             "latitude": "6.4474",
+>             "longitude": "3.3903",
+>             "distance": "217065.6"
+>           },
+>           "address_pdf": ""
+>         }
+>       }
+>     },
+>     "selfie": {
+>       "data": {
+>         "selfie_url": "https://files.dojah.io/dojah-images/selfie_sample_image_1720624219.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>         "liveness_score": null,
+>         "match_score": null
+>       },
+>       "message": "Successfully validated your liveness",
+>       "status": true
+>     },
+>     "additional_document": [
+>       {
+>         "document_type": "image",
+>         "document_url": "https://files.dojah.io/dojah-images/image_6a85d0e3_1787154912.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=..."
+>       }
+>     ]
+>   },
+>   "id_type": "NIN",
+>   "value": "123456789",
+>   "id_url": "https://files.dojah.io/dojah-images/id_sample_id_1720624047.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>   "back_url": "https://files.dojah.io/dojah-images/id_sample_id_back_1720624047.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>   "signature": "https://files.dojah.io/1787155022412-14300.pdf",
+>   "message": "Successfully completed the verification.",
+>   "verification_pdf": "https://files.dojah.io/dojah-files/1788185624685-25170.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>   "reference_id": "DJ-92F24FA662",
+>   "widget_id": "6a551c4bd6d8a5b39c456c0a",
+>   "verification_mode": "LIVENESS",
+>   "verification_type": "DL_ID",
+>   "verification_value": "123456789",
+>   "verification_url": "https://app.dojah.io/easy-onboard/verifications/981835b4-8f7d-43d5-9321-53fe4d694eb0",
+>   "selfie_url": "https://files.dojah.io/dojah-images/selfie_sample_image_1720624219.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600&X-Amz-Signature=...",
+>   "status": true,
+>   "aml": { "status": false },
+>   "verification_status": "Completed"
+> }
+> ```
+
+> [!NOTE]
+>
+> **The file URLs above are truncated and expire.** Real payloads carry full pre-signed links that stop working after about an hour — download the files as soon as the event arrives. See [File links & expiry](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md).
+
+### Verification status values
+
+The `verification_status` field describes where the session sits in its lifecycle. Only `Completed`, `Failed`, and `Abandoned` are terminal — the other two mean another event is still coming.
+
+| Value | What it means | What to do |
+| - | - | - |
+| `Ongoing` | The user started the flow and is still working through it. | Nothing yet. Wait for a terminal event. |
+| `Pending` | Every step was submitted and the outcome is awaiting a check or manual review. | Hold the user in review. Don’t grant access. |
+| `Completed` | The session finished and a result is available. | Inspect the result before deciding — see the warning below. |
+| `Failed` | The verification could not be completed. | Don’t grant access. Let the user try again. |
+| `Abandoned` | The user left the flow before finishing. | Prompt them to resume. |
+
+> [!WARNING]
+>
+> **`Completed` means finished, not passed.** It only tells you the session ran to the end. Check the top-level `status` and each step’s `status` inside `data` before granting access — in the sample above the session is `Completed` while `address.status` and `aml.status` are both `false`.
+
+The same values apply across Dojah verifications, not just the widget — see [Verification statuses](https://docs.dojah.io/api-reference/core-concepts/verification-statuses.md).
+
+## Verify events are from Dojah
+
+Before trusting a payload, confirm it came from Dojah using any of these:
+
+**1. IP allowlisting**
+
+Accept webhook calls only from Dojah’s IP: `135.119.89.106`.
+
+**2. Signature with payload and secret key (x-dojah-signature)**
+
+HMAC SHA256 of the JSON body, keyed with the webhook secret from [Developers → Webhooks](https://app.dojah.io/developers/webhooks). Recompute and compare.
+
+**3. Signature with secret key only (x-dojah-signature-v2)**
+
+SHA256 hash of your secret key alone. Recompute and compare.
+
+Every delivery carries **both** signature headers, so pick whichever fits your stack — you don’t need to check both.
+
+### Signature validation with payload and secret key
+
+Events from Dojah carry the `x-dojah-signature` header. Its value is a HMAC SHA256 signature of the event payload, signed with the **webhook secret** for that subscription — the value in the **Secret** column on [Developers → Webhooks](https://app.dojah.io/developers/webhooks). This is not your API secret key. Reveal it with the eye icon, then verify the header before processing the event:
+
+![The Secret column on the Developers Webhooks tab](https://mintcdn.com/dojah/oJ9NPd-xeopsqazf/images/dashboard-guide/developers-webhook-secret.png?fit=max\&auto=format\&n=oJ9NPd-xeopsqazf\&q=85\&s=1ab9ec812012654eda012262f9eb1813)
+
+> [!NOTE]
+>
+> **Use the webhook secret, not your API secret key.** Each subscription has its own secret. Copy it from the **Secret** column and store it as `DOJAH_WEBHOOK_SECRET`. Signing with the API secret key will not match `x-dojah-signature`.
+
+```js Node.js theme={null}
+const crypto = require('crypto');
+const secret = process.env.DOJAH_WEBHOOK_SECRET;
+
+// Keep the exact bytes — re-serialising changes them.
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf } }));
+
+app.post('/webhookurl', (req, res) => {
+  const expected = crypto.createHmac('sha256', secret)
+    .update(req.rawBody)
+    .digest('hex');
+  const got = req.headers['x-dojah-signature'] || '';
+
+  if (got.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(expected))) {
+    return res.sendStatus(401);
+  }
+
+  const event = req.body;
+  // Do something with event
+  res.sendStatus(200);
+});
+```
+
+```python Python theme={null}
+import hashlib, hmac, os
+from flask import Flask, request
+
+app = Flask(__name__)
+SECRET = os.environ['DOJAH_WEBHOOK_SECRET'].encode()
+
+@app.post('/webhookurl')
+def webhook():
+    body = request.get_data()   # raw bytes — never request.json
+    got = request.headers.get('x-dojah-signature', '')
+
+    expected = hmac.new(SECRET, body, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, got):
+        return '', 401
+
+    event = request.get_json()
+    # Do something with event
+    return '', 200
+```
+
+```php PHP theme={null}
+<?php
+$secret = getenv('DOJAH_WEBHOOK_SECRET');
+$body   = file_get_contents('php://input');   // raw bytes
+$got    = $_SERVER['HTTP_X_DOJAH_SIGNATURE'] ?? '';   // x-dojah-signature
+
+$expected = hash_hmac('sha256', $body, $secret);
+if (!hash_equals($expected, $got)) {
+    http_response_code(401);
+    exit;
+}
+
+$event = json_decode($body, true);
+// Do something with $event
+http_response_code(200);
+```
+
+```go Go theme={null}
+func webhook(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body) // raw bytes
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	m := hmac.New(sha256.New, []byte(os.Getenv("DOJAH_WEBHOOK_SECRET")))
+	m.Write(body)
+	expected := hex.EncodeToString(m.Sum(nil))
+
+	if !hmac.Equal([]byte(r.Header.Get("x-dojah-signature")), []byte(expected)) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	var event map[string]any
+	json.Unmarshal(body, &event)
+	// Do something with event
+	w.WriteHeader(http.StatusOK)
+}
+```
+
+```ruby Ruby theme={null}
+class WebhooksController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
+  def create
+    body = request.raw_post   # raw bytes — never params
+    got  = request.headers['x-dojah-signature'].to_s
+
+    expected = OpenSSL::HMAC.hexdigest('sha256', ENV['DOJAH_WEBHOOK_SECRET'], body)
+    unless ActiveSupport::SecurityUtils.secure_compare(expected, got)
+      return head :unauthorized
+    end
+
+    event = JSON.parse(body)
+    # Do something with event
+    head :ok
+  end
+end
+```
+
+```java Java theme={null}
+// Spring Boot. byte[] keeps the exact bytes; a DTO would re-serialize them.
+@PostMapping("/webhookurl")
+ResponseEntity<Void> webhook(@RequestBody byte[] body,
+                             @RequestHeader(name = "x-dojah-signature", required = false) String got)
+        throws Exception {
+    Mac mac = Mac.getInstance("HmacSHA256");
+    mac.init(new SecretKeySpec(System.getenv("DOJAH_WEBHOOK_SECRET").getBytes(UTF_8), "HmacSHA256"));
+    String expected = HexFormat.of().formatHex(mac.doFinal(body));   // Java 17+
+
+    if (got == null || !MessageDigest.isEqual(expected.getBytes(UTF_8), got.getBytes(UTF_8))) {
+        return ResponseEntity.status(401).build();
+    }
+
+    // Parse body yourself — e.g. new ObjectMapper().readTree(body)
+    return ResponseEntity.ok().build();
+}
+```
+
+> [!NOTE]
+>
+> **Hash the payload exactly as received.** Re-serialising the JSON can reorder keys or change spacing, which produces a different signature, so hash the raw request body. Compare the result with a constant-time function (`timingSafeEqual`, `hmac.compare_digest`, `hash_equals`, `hmac.Equal`, `secure_compare`, `MessageDigest.isEqual`) rather than `==`, and reject mismatches with `401`.
+
+### Signature validation with secret key only
+
+Events from Dojah also carry the `x-dojah-signature-v2` header. Its value is a SHA256 hash of your secret key — the payload isn’t part of the hash, so this check works even if you can’t access the raw request body. Verify it before processing the event:
+
+```js Node.js theme={null}
+const crypto = require('crypto');
+const secret = process.env.DOJAH_SECRET_KEY;
+
+app.post('/webhookurl', (req, res) => {
+  const expected = crypto.createHash('sha256').update(secret).digest('hex');
+  const got = req.headers['x-dojah-signature-v2'] || '';
+
+  if (got.length !== expected.length ||
+      !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(expected))) {
+    return res.sendStatus(401);
+  }
+
+  const event = req.body;
+  // Do something with event
+  res.sendStatus(200);
+});
+```
+
+```python Python theme={null}
+import hashlib, hmac, os
+from flask import Flask, request
+
+app = Flask(__name__)
+SECRET = os.environ['DOJAH_SECRET_KEY'].encode()
+
+@app.post('/webhookurl')
+def webhook():
+    got = request.headers.get('x-dojah-signature-v2', '')
+
+    expected = hashlib.sha256(SECRET).hexdigest()
+    if not hmac.compare_digest(expected, got):
+        return '', 401
+
+    event = request.get_json()
+    # Do something with event
+    return '', 200
+```
+
+```php PHP theme={null}
+<?php
+$secret = getenv('DOJAH_SECRET_KEY');
+$got    = $_SERVER['HTTP_X_DOJAH_SIGNATURE_V2'] ?? '';   // x-dojah-signature-v2
+
+$expected = hash('sha256', $secret);
+if (!hash_equals($expected, $got)) {
+    http_response_code(401);
+    exit;
+}
+
+$event = json_decode(file_get_contents('php://input'), true);
+// Do something with $event
+http_response_code(200);
+```
+
+```go Go theme={null}
+func webhook(w http.ResponseWriter, r *http.Request) {
+	sum := sha256.Sum256([]byte(os.Getenv("DOJAH_SECRET_KEY")))
+	expected := hex.EncodeToString(sum[:])
+
+	if !hmac.Equal([]byte(r.Header.Get("x-dojah-signature-v2")), []byte(expected)) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var event map[string]any
+	json.Unmarshal(body, &event)
+	// Do something with event
+	w.WriteHeader(http.StatusOK)
+}
+```
+
+```ruby Ruby theme={null}
+class WebhooksController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
+  def create
+    got = request.headers['x-dojah-signature-v2'].to_s
+
+    expected = Digest::SHA256.hexdigest(ENV['DOJAH_SECRET_KEY'])
+    unless ActiveSupport::SecurityUtils.secure_compare(expected, got)
+      return head :unauthorized
+    end
+
+    event = JSON.parse(request.raw_post)
+    # Do something with event
+    head :ok
+  end
+end
+```
+
+```java Java theme={null}
+// Spring Boot.
+@PostMapping("/webhookurl")
+ResponseEntity<Void> webhook(@RequestBody byte[] body,
+                             @RequestHeader(name = "x-dojah-signature-v2", required = false) String got)
+        throws Exception {
+    byte[] sum = MessageDigest.getInstance("SHA-256")
+        .digest(System.getenv("DOJAH_SECRET_KEY").getBytes(UTF_8));
+    String expected = HexFormat.of().formatHex(sum);   // Java 17+
+
+    if (got == null || !MessageDigest.isEqual(expected.getBytes(UTF_8), got.getBytes(UTF_8))) {
+        return ResponseEntity.status(401).build();
+    }
+
+    // Parse body yourself — e.g. new ObjectMapper().readTree(body)
+    return ResponseEntity.ok().build();
+}
+```
+
+> [!WARNING]
+>
+> **Always verify.** Treat unverified webhook calls as untrusted — never grant access or update records from a payload you haven’t authenticated.
+
+> [!NOTE]
+>
+> **File links expire.** Any file URLs inside a webhook payload are temporary — see [File links & expiry](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md).
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

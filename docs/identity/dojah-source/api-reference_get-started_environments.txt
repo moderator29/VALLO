@@ -1,0 +1,49 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Environments
+
+> Dojah sandbox vs production — base URLs, what each returns, and the checklist for going live.
+
+Dojah has two environments. You choose between them by the base URL you call — the headers, request bodies, and response shapes are identical.
+
+## Base URLs
+
+| Environment | Base URL | Data | Charges |
+| - | - | - | - |
+| Sandbox | `https://sandbox.dojah.io` | Mock / deterministic | None |
+| Production | `https://api.dojah.io` | Live results | Per call, from your wallet |
+
+> [!NOTE]
+>
+> **Same code, different host.** To switch environments you only change the base URL and use that environment’s keys — nothing else about the request changes.
+
+## Sandbox
+
+Use sandbox to build and test end-to-end without spending credits. It returns predictable mock responses so you can exercise success and error paths — for example, the OTP in sandbox is always `1234`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md).
+
+## Production
+
+Production returns real data from the underlying sources and draws from your prepaid wallet on each successful call. A low balance returns `402 Payment Required` — keep the wallet funded to avoid interruptions.
+
+## Going live
+
+**1. Fund your wallet**
+
+Top up so production calls don’t hit `402`. See the [Fund your wallet](https://docs.dojah.io/dashboard-guide/getting-started/fund-your-wallet.md) guide.
+
+**2. Swap the base URL**
+
+Point requests at `https://api.dojah.io`.
+
+**3. Use your live keys**
+
+Replace sandbox `AppId` and keys with the live values from your dashboard.
+
+**4. Re-test the critical paths**
+
+Run your main flows once against production to confirm keys, wallet, and webhooks all work.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

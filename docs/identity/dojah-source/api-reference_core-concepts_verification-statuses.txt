@@ -1,0 +1,30 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Verification statuses
+
+> What each Dojah verification status means — Ongoing, Pending, Completed, Failed, and Abandoned — across the verification lifecycle.
+
+A verification moves through a lifecycle. Its status tells you where it is and whether a result is ready — useful when tracking flows and handling webhook events.
+
+## The statuses
+
+| Status | What it means |
+| - | - |
+| Ongoing | The verification has started and is actively in progress. |
+| Pending | Submitted and awaiting a result or review. |
+| Completed | Finished — a result is available. |
+| Failed | The verification could not be completed. |
+| Abandoned | The user left the flow before finishing. |
+
+## Statuses vs HTTP codes
+
+These are different things. An [HTTP status code](https://docs.dojah.io/api-reference/core-concepts/errors-status-codes.md) describes the result of a single API call; a verification status describes where the verification itself sits in its lifecycle. A call can return `200` while the verification is still **Ongoing**.
+
+## Tracking status
+
+Track status changes in real time with [webhooks](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md), or look one up with the [Get verification](https://docs.dojah.io/api-reference/verifications/get-verification.md) endpoint.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

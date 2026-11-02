@@ -1,0 +1,187 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Web (JavaScript)
+
+> Drop Dojah's hosted verification flow into any web page with the Connect widget — a single script tag, no framework required.
+
+Drop Dojah’s hosted verification flow into any web page with the `Connect` widget — a single script, no framework required.
+
+> [!NOTE]
+>
+> This is a **widget SDK** — it renders Dojah’s UI with your **widget\_id** and **public\_key**. The [Options](#options) below are the reference for every web widget; response events and the API-client alternative are covered in [Choosing an SDK](https://docs.dojah.io/api-reference/widget-sdks/choosing-an-sdk.md).
+
+## Install
+
+Add the widget script to your page. Don’t use `async`/`defer` — the inline code may run before the library loads.
+
+```html index.html theme={null}
+<script src="https://widget.dojah.io/widget.js"></script>
+```
+
+## Initialize
+
+Create a `Connect` instance with your credentials and callbacks, then open it on a click:
+
+```js app.js theme={null}
+const options = {
+  app_id: "your_app_id",
+  p_key: "your_public_key",
+  type: "custom",
+  config: { widget_id: "your_widget_id" },
+  reference_id: "unique-ref-12345",
+  metadata: { user_id: "121" },
+  onSuccess: function (response) { console.log("Success", response) },
+  onError: function (err) { console.log("Error", err) },
+  onClose: function () { console.log("Widget closed") },
+}
+
+const connect = new Connect(options)
+document.querySelector("#button-connect").addEventListener("click", function () {
+  connect.setup()
+  connect.open()
+})
+```
+
+`type` can be `custom`, `vouch`, `register`, or `authenticate`. Use `custom` for the EasyOnboard KYC widget, `vouch` for a [Vouch](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/integrate-vouch.md) flow, and `register` or `authenticate` for [EasyAuthentication](https://docs.dojah.io/api-reference/easyauthentication.md).
+
+That is everything a flow needs — the widget collects the user’s details itself. To skip screens for data you already hold, add the prefill options below.
+
+## Prefill known data
+
+`user_data`, `gov_data`, and `gov_id` exist purely to skip screens: `user_data` for name and date of birth, `gov_data` for BVN/NIN numbers, `gov_id` for ID images by URL. Add a key only when you already have a real value for it.
+
+```js app.js theme={null}
+const options = {
+  app_id: "your_app_id",
+  p_key: "your_public_key",
+  type: "custom",
+  config: { widget_id: "your_widget_id" },
+  reference_id: "unique-ref-12345",
+
+  user_data: {
+    first_name: "John",
+    last_name: "Musa",
+    dob: "1990-05-16",
+    residence_country: "NG",
+    email: "john@example.com",
+  },
+  gov_data: { bvn: "22222222222" },
+  gov_id: { passport: "https://example.com/passport.jpg" },
+
+  metadata: { user_id: "121" },
+  onSuccess: function (response) { console.log("Success", response) },
+  onError: function (err) { console.log("Error", err) },
+  onClose: function () { console.log("Widget closed") },
+}
+```
+
+`gov_id` also accepts `national`, `dl`, `permit`, `voter`, and `custom`. The values above are the sandbox test BVN and a placeholder host — see [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for the full set of test values.
+
+> [!WARNING]
+>
+> **Omit a key rather than sending it empty.** A `gov_data: { bvn: "", nin: "" }` prefills the screen with blanks instead of skipping it, and the user may be unable to correct it. Every field you do send is PII travelling through the browser, so send only what you actually hold.
+
+## Options
+
+| Option | Type | Required | Description |
+| - | - | - | - |
+| `app_id` | string | Yes | Your application’s App ID from the dashboard. |
+| `p_key` | string | Yes | Your public key (safe to use on the client). |
+| `type` | string | Yes | Widget type — `custom` (EasyOnboard KYC), [`vouch`](https://docs.dojah.io/api-reference/hosted-flows-easyonboard/integrate-vouch), or `register` / `authenticate` ([EasyAuthentication](https://docs.dojah.io/api-reference/easyauthentication.md)). |
+| `config` | object | No | Flow config, primarily `{ widget_id }` from EasyOnboard. |
+| `reference_id` | string | No | Your tracking ID for this session (minimum 10 characters). Comes back in the callback and the [webhook](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md) so you can match the result to a user. Required when `type` is `authenticate`. |
+| `user_data` | object | No | Prefills `first_name`, `last_name`, `dob`, `residence_country`, `email`. A complete set skips the user-data screen. |
+| `gov_data` | object | No | Prefills government identifiers such as `bvn`, `nin`. |
+| `gov_id` | object | No | Prefills ID **images** by URL — `passport`, `national`, `dl`, `permit`, `voter`, `custom`. Skips the ID-upload screen for the types you supply. |
+| `metadata` | object | No | Any key/value pairs echoed back to you and in webhooks. |
+| `embed` | boolean | No | `true` renders the flow inline in `container`; `false` (default) opens a modal overlay. |
+| `container` | string | No | CSS selector of the host element when `embed` is `true`. |
+
+See [Handling the response](https://docs.dojah.io/api-reference/widget-sdks/choosing-an-sdk.md#handling-the-response) for the callback model shared by every web widget.
+
+> [!WARNING]
+>
+> **Don’t store PII in `metadata` or `reference_id`.** Both are echoed back to the client and appear in URLs — use your own opaque identifiers, never a BVN, NIN, or phone number.
+
+## Embed inline
+
+By default the widget opens as a modal overlay. Set `embed: true` with a `container` selector to render it inside an element on your page instead:
+
+```js app.js theme={null}
+const connect = new Connect({
+  ...options,
+  embed: true,
+  container: "#embed-container",
+})
+```
+
+## TypeScript
+
+`Connect` is attached to `window` at runtime, so declare it to keep TypeScript happy. Add a `types/index.d.ts` file and point `compilerOptions.typeRoots` at that folder:
+
+```ts types/index.d.ts theme={null}
+export {}
+
+declare global {
+  interface Window {
+    Connect: any
+  }
+}
+```
+
+Then instantiate it from `window`:
+
+```ts app.ts theme={null}
+const connect = new window.Connect(options)
+```
+
+## Resources
+
+> [accordion] Camera permission denied on Android
+>
+> Loading the [hosted flow](https://identity.dojah.io) in an iframe can fail in Chrome on Android with **Camera permission denied or unavailable**, even after the user allows the camera. The flow runs on `identity.dojah.io`, so the browser only grants the camera and location when your page delegates those permissions.
+>
+> Apply both changes below, deploy, then retry verification in an Android mobile browser.
+>
+> ### Permissions-Policy header
+>
+> On the server or CDN that serves your site, allow `https://identity.dojah.io` to use the camera and geolocation:
+>
+> ```http theme={null}
+> Permissions-Policy: camera=(self "https://identity.dojah.io"), geolocation=(self "https://identity.dojah.io")
+> ```
+>
+> Nginx:
+>
+> ```nginx nginx.conf theme={null}
+> add_header Permissions-Policy 'camera=(self "https://identity.dojah.io"), geolocation=(self "https://identity.dojah.io")' always;
+> ```
+>
+> Apache:
+>
+> ```apache httpd.conf theme={null}
+> Header always set Permissions-Policy "camera=(self \"https://identity.dojah.io\"), geolocation=(self \"https://identity.dojah.io\")"
+> ```
+>
+> ### Iframe `allow` attribute
+>
+> The element that embeds the hosted flow must declare the same features:
+>
+> ```html index.html theme={null}
+> <iframe
+>   src="https://identity.dojah.io/?widget_id=your_widget_id"
+>   allow="camera; geolocation"
+>   allowfullscreen>
+> </iframe>
+> ```
+>
+> You can still prefill the flow with query parameters such as `user_data[first_name]`, `user_data[last_name]`, `user_data[dob]`, `gov_data[bvn]`, `gov_data[nin]`, and `metadata[user_id]`. Send a value only when you already have one — an empty parameter prefills the screen with a blank.
+
+* [Widget script — widget.dojah.io/widget.js](https://widget.dojah.io/widget.js)
+* [Hosted flow — identity.dojah.io](https://identity.dojah.io) · [EasyOnboard](https://docs.dojah.io/dashboard-guide/workflows/easyonboard)
+* Framework wrappers: [React](https://docs.dojah.io/api-reference/widget-sdks/react.md) · [React Native](https://docs.dojah.io/api-reference/widget-sdks/react-native.md) · [Flutter](https://docs.dojah.io/api-reference/widget-sdks/flutter.md)
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

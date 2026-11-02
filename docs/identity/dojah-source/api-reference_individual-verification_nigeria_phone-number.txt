@@ -1,0 +1,116 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Phone number
+
+> Look up the identity linked to a Nigerian phone number.
+
+GET
+`/api/v1/kyc/phone_number/basic`
+
+Resolve the identity registered to a Nigerian phone number. A basic and an advanced variant are available.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `phone_number` | string | Yes | A valid Nigerian phone number. |
+
+## Response
+
+The basic variant returns name, gender, nationality, date of birth, and the MSISDN.
+
+## Advanced lookup
+
+Call `GET /api/v1/kyc/phone_number` for an extended record that also includes a base64 `photo` and a `customer` reference.
+
+```json 200 — /api/v1/kyc/phone_number theme={null}
+{
+  "entity": {
+    "first_name": "JOHN",
+    "last_name": "MUSA",
+    "middle_name": "DOE",
+    "date_of_birth": "1960-12-12",
+    "phone_number": "08012345678",
+    "photo": "BASE 64 IMAGE",
+    "gender": "M",
+    "customer": "9b2ac137-5360-4050-b412-4fa6728a31fb"
+  }
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `424` | The upstream source was unavailable — retry shortly. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `phone_number=09011111111` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/phone_number/basic?phone_number=09011111111" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "phone_number": "09011111111",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/phone_number/basic?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/phone_number/basic",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "phone_number": "09011111111" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/phone_number/basic theme={null}
+{
+  "entity": {
+    "first_name": "JOHN",
+    "middle_name": "DOE",
+    "last_name": "MUSA",
+    "gender": "Male",
+    "nationality": "NGA",
+    "date_of_birth": "1990-05-16",
+    "msisdn": "23481222222222"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

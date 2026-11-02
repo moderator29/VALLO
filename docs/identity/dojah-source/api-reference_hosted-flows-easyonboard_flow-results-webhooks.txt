@@ -1,0 +1,43 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Flow results & webhooks
+
+> Receive hosted-flow results the right way — client callbacks for UX, webhooks for the authoritative outcome, confirmed via reference_id.
+
+A hosted flow reports its outcome two ways. Use client callbacks to update your UI — but treat the **webhook** as the source of truth before granting access.
+
+## Two ways to get the result
+
+| Channel | Use it for |
+| - | - |
+| Client callbacks (`onSuccess` / `onError` / `onClose`) | Reacting in the UI — show a spinner, a thank-you, or an error. |
+| [Webhook](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md) (`kyc_widget` service) | The authoritative, tamper-proof result, delivered to your backend. |
+
+> [!WARNING]
+>
+> **Never trust the client for the decision.** A user can manipulate the browser. Grant access only after your backend receives and [verifies](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md#verify-events-are-from-dojah) the webhook.
+
+## Tie sessions together with reference\_id
+
+Pass a `reference_id` (minimum 10 characters) when you launch the flow. It comes back in the callback and the webhook, so you can match the result to the right user. Store it when you start the session.
+
+## Receive the webhook
+
+Subscribe your backend URL to the `kyc_widget` service, then verify every event is genuinely from Dojah before acting on it.
+
+* [Subscribe to the `kyc_widget` service](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures#subscribe-to-a-service)
+* [Verify the event signature](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md#verify-events-are-from-dojah)
+* [See a sample `kyc_widget` payload](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures#kyc-widget-easyonboard-event)
+
+## Check the verification status
+
+The event carries the flow’s status in `verification_status`. See [what each value means](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md#verification-status-values) and the fuller [Verification statuses](https://docs.dojah.io/api-reference/core-concepts/verification-statuses.md) reference, or look one up later with the [Get verification](https://docs.dojah.io/api-reference/verifications/get-verification.md) endpoint.
+
+> [!NOTE]
+>
+> **File links expire.** Selfies and documents in the result are temporary URLs — copy them to your own storage right away. See [File links & expiry](https://docs.dojah.io/api-reference/core-concepts/file-links-expiry.md).
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

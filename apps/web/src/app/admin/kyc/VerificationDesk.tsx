@@ -64,6 +64,8 @@ export type VerificationDeskProps = {
   recent: RecentDecision[] | null;
   notes?: ReactNode;
   decided?: ReactNode;
+  /** Dojah selfie checks that need a person, drawn above the document queue. */
+  selfieChecks?: ReactNode;
   unavailable?: boolean;
 };
 
@@ -125,6 +127,8 @@ export function VerificationDesk(props: VerificationDeskProps) {
       </div>
 
       {filters}
+
+      {props.selfieChecks}
 
       <div className="nf-rv-split">
         <div className="nf-rv-stack">

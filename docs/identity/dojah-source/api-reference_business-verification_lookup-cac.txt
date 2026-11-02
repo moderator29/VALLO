@@ -1,0 +1,136 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Lookup CAC
+
+> Verify a Nigerian company with its CAC registration (RC) number — confirm its name, status, registration details, and (advanced) its directors and shareholders.
+
+GET
+`/api/v1/kyc/cac/basic`
+
+Verify a Nigerian company with its CAC registration (RC) number — confirm its name, status, and registration details. The advanced variant also returns the company’s affiliates (directors and shareholders).
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `rc_number` | string | Yes | The company's CAC registration (RC) number. |
+| `company_type` | string | Yes | One of `BUSINESS_NAME`, `COMPANY`, `INCORPORATED_TRUSTEES`, `LIMITED_PARTNERSHIP`, or `LIMITED_LIABILITY_PARTNERSHIP`. |
+
+## Response
+
+The basic lookup (`/api/v1/kyc/cac/basic`) returns an `entity` with the company name, type, status, and location.
+
+## Advanced lookup
+
+For the fuller record — registration date, registered address, share details, and the company’s **affiliates** (directors, proprietors, shareholders) — call `GET /api/v1/kyc/cac/advance` with the same parameters.
+
+To check one person against an RC number and see every role they hold, use [Lookup CAC Affiliate](https://docs.dojah.io/api-reference/business-verification/lookup-cac-affiliate.md).
+
+```json 200 — /api/v1/kyc/cac/advance theme={null}
+{
+  "entity": {
+    "company_name": "JOHN DOE LIMITED",
+    "rc_number": "1234567",
+    "address": "John doe street opposite dunamis church",
+    "state": "Plateau",
+    "city": "Jos Town (Capital)",
+    "lga": "Jos south",
+    "email": "abc@gmail.com",
+    "type_of_company": "BUSINESS_NAME",
+    "date_of_registration": "2024-07-19T08:00:06.224+00:00",
+    "nature_of_business": null,
+    "share_capital": null,
+    "share_details": {},
+    "affiliates": [
+      {
+        "first_name": "JOHN",
+        "last_name": "MUSA",
+        "affiliate_type": "PROPRIETOR",
+        "gender": "MALE",
+        "phone_number": "+2348132464910",
+        "nationality": "Nigeria",
+        "country": "NIGERIA"
+      }
+    ]
+  }
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `rc_number=1261103` or `rc_number=14320749` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/cac/basic?rc_number=1261103&company_type=COMPANY" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "rc_number": "1261103",
+  "company_type": "COMPANY",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/cac/basic?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/cac/basic",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "rc_number": "1261103", "company_type": "COMPANY" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/cac/basic theme={null}
+{
+  "entity": {
+    "company_name": "JOHN DOE LIMITED",
+    "type_of_company": "BUSINESS_NAME",
+    "status": "Not Active",
+    "rc_number": "1234567",
+    "business_number": "1234567",
+    "state": "Lagos",
+    "city": "Lagos",
+    "lga": "Kosofe",
+    "business": "7a666454-8ce0-44e2-ac32-3e8cb04b6b72"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

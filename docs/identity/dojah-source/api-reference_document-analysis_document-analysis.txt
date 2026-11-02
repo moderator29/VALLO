@@ -1,0 +1,164 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Analyse an identity document
+
+> Analyse an ID document — passport, driver's licence, national ID — for authenticity and extract every field, across 11,000+ document types in 200 countries.
+
+POST
+`/api/v1/document/analysis`
+
+Submit the front (and optionally back) of an ID — passport, driver’s licence, national ID, residence permit — and get back authenticity signals, the detected document type, cropped images, and every extracted field. Supports 11,000+ document types across 200 countries.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `input_type` | string | Yes | `url` or `base64` of an image. Defaults to `url`. |
+| `imagefrontside` | string | Yes | Base64 or URL of the document. If Base64, strip the `data:image/jpeg;base64,` prefix. |
+| `imagebackside` | string | No | Base64 or URL of the document's back side. |
+| `images` | string | No | Base64 or URL of an additional document image. |
+| `document_type` | string | No | Type of document to analyse. One of `PASSPORT`, `DRIVING_LICENSE`, `NIN_SLIP`, `VOTER_CARD`, `NATIONAL_ID`, `RESIDENCE_PERMIT`, or `OTHERS`. |
+
+## Response fields
+
+The `entity.status` object summarises the checks; `document_type`, `document_images`, and `text_data` carry the extracted data.
+
+| Field | Type | Description |
+| - | - | - |
+| `overall_status` | integer | `1` means VALID, `0` means INVALID. |
+| `reason` | string | `VALID` or `INVALID`. |
+| `document_type` | string | `Yes` if the document has a recognised type (e.g. PASSPORT, DRIVER’S LICENCE), else `No`. |
+| `document_images` | string | `Yes` if a holder’s image was found, else `No`. |
+| `text` | string | `Yes` if readable text was found, else `No`. |
+| `expiry` | string | `Yes` if an expiry date was found, else `No`. |
+
+## Response
+
+A `200` returns the analysis under `entity` — see the panel on the right. Each item in `text_data` has a `status` of `1` (read), `0` (not present), or `2` (present but unreadable). The `text_data` array is trimmed below; the live response returns every detected field.
+
+## Business documents
+
+To analyse a registration certificate or other business document instead of a personal ID, call `POST /api/v1/document/analysis/business_document`. It accepts `input_type` (`url`, the default) and `input_value` (the image URL of the business document), and extracts the registration number, legal name, entity type, and registered address across 11,000+ business document types in 200 countries.
+
+```json 200 — /api/v1/document/analysis/business_document theme={null}
+{
+  "entity": {
+    "result": { "status": "success", "message": "" },
+    "document_type": "Business Registration Certificate",
+    "issuing_country": "Sandbox Country",
+    "issuing_authority": "Sandbox State Business Authority",
+    "registration_number": "SBX-0000",
+    "business": {
+      "legal_name": "Sandbox Demo Company Ltd.",
+      "entity_type": "Incorporated",
+      "nature_of_business": ["Software Development", "Testing Services"]
+    },
+    "principal_place_of_business": {
+      "street": "123 Sandbox Street",
+      "city": "Testville",
+      "lga": "",
+      "state": "SB",
+      "country": "Sandbox Country"
+    },
+    "registration_date": "2025-01-01"
+  }
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or the image can't be read. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `424` | Failed dependency — the analysis engine couldn't process the document. |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/document/analysis" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input_type": "base64",
+    "imagefrontside": "/9j/4AAQSkZJRgABAQ…"
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/document/analysis", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    input_type: "base64",
+    imagefrontside: "/9j/4AAQSkZJRgABAQ…"
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/document/analysis",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "input_type": "base64",
+        "imagefrontside": "/9j/4AAQSkZJRgABAQ…"
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/document/analysis theme={null}
+{
+  "entity": {
+    "status": {
+      "overall_status": 0,
+      "reason": "NOT_VALID",
+      "document_images": "Yes",
+      "text": "Yes",
+      "document_type": "Yes",
+      "expiry": "No"
+    },
+    "document_type": {
+      "document_name": "United States - Permanent Resident Card (2010)",
+      "document_country_name": "United States",
+      "document_country_code": "USA"
+    },
+    "document_images": {
+      "portrait": "[base64 image data]",
+      "document_front_side": "[base64 image data]",
+      "document_back_side": "[base64 image data]"
+    },
+    "text_data": [
+      { "field_name": "Document Number", "field_key": "document_number", "status": 1, "value": "12345678" },
+      { "field_name": "Sex", "field_key": "sex", "status": 1, "value": "M" },
+      { "field_name": "Date of Birth", "field_key": "dob", "status": 1, "value": "1990-08-01" },
+      { "field_name": "Date of Expiry", "field_key": "expiry_date", "status": 0, "value": "" }
+    ]
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

@@ -1,0 +1,24 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Verifications
+
+> Every session users have run through your workflows, with its status, submitted data, per-step results, and cost.
+
+**Verifications** lists every session a user has run through your workflows. Headline cards count **Successful**, **Failed**, **In Progress**, and **Abandoned** sessions; the table shows each session’s name, reference ID, status, reason, and date. Switch between **All Verifications** and **My Pending Verifications**, and search, filter, or export.
+
+![The EasyOnboard verifications session log](https://mintcdn.com/dojah/LZxS1bz_9Y9K9GSQ/images/dashboard-guide/easyonboard-verifications.png?fit=max\&auto=format\&n=LZxS1bz_9Y9K9GSQ\&q=85\&s=c8a2340ba739f42837c4e96241f6a703)
+
+| Status | Meaning |
+| - | - |
+| Successful | The user completed the flow and passed its checks. |
+| Failed | A check didn’t pass — the reason is shown on the row and in detail. |
+| Ongoing | The user is partway through the flow. |
+| Pending | Awaiting a result — for example, a manual review, or a government check such as NIN or BVN that could not be completed because the provider was unavailable. [Retry](https://docs.dojah.io/dashboard-guide/workflows/easyonboard/retry.md) the session instead of starting again. |
+| Abandoned | The user started but left before finishing. |
+
+Open a session to see the data the user submitted and the result of each step, plus a sidebar with the **overview**, any **failure reason**, a **timeline**, **webhook** status, related **sessions**, and the **cost** breakdown. From here you can **Download Report** or **Reverify** the user.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

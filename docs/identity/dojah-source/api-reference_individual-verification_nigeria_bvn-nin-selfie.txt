@@ -1,0 +1,148 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Verify BVN or NIN with a selfie
+
+> Match a selfie against the photo on file for a Nigerian BVN or NIN, and pull the identity record in the same call.
+
+POST
+`/api/v1/kyc/bvn/verify`
+
+Match a user’s selfie against the photo held for their Nigerian BVN or NIN, and retrieve the full identity record in the same call.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+Applies to both `POST /api/v1/kyc/bvn/verify` and `POST /api/v1/kyc/nin/verify`.
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `bvn / nin` | string | Yes | The identifier to verify — `bvn` for the BVN endpoint, `nin` for the NIN endpoint. |
+| `selfie_image` | string | Yes | The selfie image, Base64-encoded (strip the `data:image/jpeg;base64,` prefix). |
+| `threshold` | number | No | Minimum selfie-match score (`50`–`100`) required for `match` to be `true`. Defaults to **90**. [Read more](#match-threshold). |
+
+## Response
+
+The BVN endpoint returns the BVN identity record with a nested `selfie_verification` object (`confidence_value` and `match`). Response trimmed for readability.
+
+## Verify NIN with a selfie
+
+Call `POST /api/v1/kyc/nin/verify` with `nin` and `selfie_image` (and optional `first_name` / `last_name` / `threshold`) to match a selfie against the photo on file for a NIN. It returns the NIN identity record with the same `selfie_verification` object.
+
+```json POST /api/v1/kyc/nin/verify theme={null}
+{
+  "nin": "70123456789",
+  "selfie_image": "/9j/4AAQSkZJRgABAQ…",
+  "threshold": 90
+}
+```
+
+```json 200 — /api/v1/kyc/nin/verify theme={null}
+{
+  "entity": {
+    "nin": "7*****83753",
+    "firstname": "JOHN",
+    "surname": "MUSA",
+    "gender": "m",
+    "birthdate": "10-06-1983",
+    "selfie_verification": { "confidence_value": 99.81, "match": true }
+  }
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or the image is malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `429` | Too many requests — back off and retry. |
+
+> [card] Default threshold is 90%
+>
+> If you omit `threshold`, Dojah uses **90**. `selfie_verification.match` is `true` only when `confidence_value` is at or above that cutoff.
+>
+> **90% is a strict default** — it keeps impersonation risk low, but genuine users can fail when lighting, camera angle, or an older ID photo is weaker. If that is too strict for your flow, set `threshold` yourself anywhere from **50 to 100**, based on your risk tolerance:
+>
+> * **Closer to 100** — stricter match. Fewer false accepts; more genuine users may fail.
+> * **Closer to 50** — more selfies pass, including weaker matches. **Lower threshold means higher risk.**
+>
+> Values below 50 are rejected. Leave `threshold` unset if 90 matches your risk appetite.
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/kyc/bvn/verify" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "bvn": "22222222222",
+    "selfie_image": "/9j/4AAQSkZJRgABAQ…",
+    "threshold": 90
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/kyc/bvn/verify", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    bvn: "22222222222",
+    selfie_image: "/9j/4AAQSkZJRgABAQ…",
+    threshold: 90
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/kyc/bvn/verify",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "bvn": "22222222222",
+        "selfie_image": "/9j/4AAQSkZJRgABAQ…",
+        "threshold": 90
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/kyc/bvn/verify theme={null}
+{
+  "entity": {
+    "bvn": "2*****41123",
+    "first_name": "JOHN",
+    "middle_name": "DOE",
+    "last_name": "MUSA",
+    "date_of_birth": "15-Apr-1985",
+    "phone_number1": "08134720263",
+    "gender": "Male",
+    "image": "[base64 image data]",
+    "selfie_verification": {
+      "confidence_value": 99.99,
+      "match": true
+    }
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

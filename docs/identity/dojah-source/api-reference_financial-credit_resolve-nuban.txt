@@ -1,0 +1,96 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Resolve NUBAN
+
+> Resolve a Nigerian NUBAN account number to the registered account holder's name with the Dojah API — pass an account number and bank code.
+
+GET
+`/api/v1/general/account`
+
+Resolve a Nigerian bank account number (NUBAN) to the name registered on the account. A lightweight name check — pass an account number and its bank code, get back the account holder’s name.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `account_number` | string | Yes | A valid 10-digit NUBAN account number. |
+| `bank_code` | string | Yes | The bank's numeric code (e.g. `011`). Get the full list from [Fetch Banks](https://docs.dojah.io/api-reference/financial-credit/fetch-banks.md). |
+
+## Response
+
+Returns an `entity` with the confirmed `account_number` and the resolved `account_name`.
+
+> [!NOTE]
+>
+> This is a name-resolution check only. For a full identity payload (BVN-linked names, date of birth, address) tied to the account, use the KYC NUBAN lookup (`GET /api/v1/kyc/nuban`).
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Invalid request parameters — `account_number` or `bank_code` missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `404` | Could not resolve the account name. Check the parameters or try again. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `account_number=3046507407` and `bank_code=011` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/general/account?account_number=3046507407&bank_code=011" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "account_number": "3046507407",
+  "bank_code": "011",
+});
+
+const url = "https://api.dojah.io/api/v1/general/account?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/general/account",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "account_number": "3046507407", "bank_code": "011" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/general/account theme={null}
+{
+  "entity": {
+    "account_number": "3046507407",
+    "account_name": "FEMI ADEWALE KOLAWOLE"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

@@ -202,6 +202,15 @@ const PAYSTACK_FRAME_ORIGINS: readonly string[] = [
 ];
 
 /**
+ * Dojah's hosted identity check (EasyOnboard), framed on /verification so a
+ * person can take a selfie and confirm their NIN or BVN without leaving the
+ * app. One named host. The camera is delegated to this origin alone by the
+ * Permissions-Policy header in next.config.ts; nothing else may ask for it
+ * from inside a frame.
+ */
+export const DOJAH_FRAME_ORIGINS: readonly string[] = ["https://identity.dojah.io"];
+
+/**
  * The policy, for one request.
  *
  * Every directive below is either the strictest value that works or carries the
@@ -410,7 +419,7 @@ export function contentSecurityPolicy(nonce: string): string {
     // The in-app checkout's iframe, and nothing else in the world. Two named
     // Paystack checkout hosts, never a wildcard, and the full reason is
     // written beside PAYSTACK_FRAME_ORIGINS above.
-    ["frame-src", [...PAYSTACK_FRAME_ORIGINS]],
+    ["frame-src", [...PAYSTACK_FRAME_ORIGINS, ...DOJAH_FRAME_ORIGINS]],
 
     // A `<base>` tag rewrite turns every relative URL on the page into an
     // attacker's, which is why this is pinned even though nothing sets one.

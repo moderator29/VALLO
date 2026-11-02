@@ -1,0 +1,77 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Errors & status codes
+
+> Every Dojah API status code explained — 400, 401, 402, 424, 429 and more — plus how to handle each.
+
+Every response carries a standard HTTP status code. Use it to tell what happened and how your integration should react. For identity endpoints such as BVN and NIN, the codes developers handle most often are `400`, `401`, `402`, `404`, and `424`.
+
+## Reading a response
+
+**2xx** means success, **4xx** means something about your request, credentials, wallet, or supplied identifier needs attention, and **5xx** means the problem is on Dojah’s side. A `404` can still be a valid verification outcome — it may mean the identifier was not found at the source.
+
+## Status codes
+
+| Code | Meaning | What your integration should do |
+| - | - | - |
+| `200` OK | The request was processed. The body contains the expected data. | Continue the flow and read the `entity` object. |
+| `400` Bad Request | The payload is malformed, missing required fields, or the supplied value cannot be processed. | Fix validation before retrying. For BVN/NIN, confirm the identifier length and query/body field names. |
+| `401` Unauthorized | The API key is missing, invalid, expired, or sent with a `Bearer` prefix. | Check `Authorization` and `AppId`. Send the secret key raw, not as `Bearer {{secret_key}}`. |
+| `402` Payment Required | The request cannot complete because the wallet balance is too low. | Stop production retries until the wallet is funded. |
+| `403` Forbidden | You do not have permission to access this resource. | Confirm the account has access to the product or environment. |
+| `404` Not Found | The endpoint or identifier was not found. | Confirm the URL first. If the URL is correct, ask the user to confirm the identifier or use another verification path. |
+| `405` Method Not Allowed | The request method is not allowed for this endpoint. | Check whether the endpoint expects `GET`, `POST`, or another method. |
+| `408` Request Timeout | Your request took longer than expected. | Retry with backoff. |
+| `424` Failed Dependency | A dependent source, such as a government or identity provider, did not respond or failed. | Retry after a short delay and show a temporary-unavailable message if it persists. |
+| `429` Too Many Requests | Too many requests were sent in a short period. | Slow down and retry with exponential backoff. |
+| `500` Internal Server Error | Something went wrong on Dojah’s side. | Retry with backoff; contact support if it persists. |
+| `504` Gateway Timeout | The system did not respond in time. | Retry with backoff. |
+
+## Common integration failures
+
+| Symptom | Likely cause | Fix |
+| - | - | - |
+| `401` on every request | Secret key is missing, wrong, or sent as `Bearer ...`. | Send `Authorization: {{secret_key}}` and `AppId: {{app_id}}`. |
+| Works in sandbox but fails in production | Base URL, credentials, product access, or wallet balance differs between environments. | Check [Environments](https://docs.dojah.io/api-reference/get-started/environments.md) and [Wallet & billing](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| BVN/NIN request returns `400` | Identifier is malformed, missing, or not accepted by the source. | Send the identifier as a string and confirm the endpoint’s required parameter name. |
+| BVN/NIN request returns `404` | No record was found for that identifier. | Ask the user to confirm the identifier or try another verification path. |
+| Intermittent `424` | Upstream identity source is temporarily unavailable. | Retry later; do not ask the user to repeatedly re-enter the same details. |
+
+## Retry behavior
+
+Only retry failures that can recover without changing the request.
+
+| Code | Retry? | Notes |
+| - | - | - |
+| `400` | No | Fix the request first. |
+| `401` | No | Fix credentials first. |
+| `402` | No | Fund the wallet first. |
+| `404` | No | Confirm the endpoint URL or identifier first. |
+| `408` | Yes | Retry with backoff. |
+| `424` | Yes | Retry after a short delay; the source may recover. |
+| `429` | Yes | Retry with exponential backoff and reduce request rate. |
+| `500` / `504` | Yes | Retry with exponential backoff. |
+
+## Handling errors
+
+* **4xx** — fix the request, credentials, wallet, or identifier before retrying; retrying unchanged usually will not help.
+* **402** — fund your wallet, then retry.
+* **429 and 5xx** — retry with exponential backoff.
+* **424** — retry after a delay; the dependency may be temporarily down.
+
+```ts Minimal retry policy theme={null}
+const retryable = new Set([408, 424, 429, 500, 504]);
+
+if (!response.ok) {
+  if (retryable.has(response.status)) {
+    // Retry with exponential backoff.
+  } else {
+    // Fix request data, credentials, wallet balance, or identifier first.
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

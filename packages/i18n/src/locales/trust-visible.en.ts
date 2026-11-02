@@ -197,6 +197,27 @@ export const trustVisibleEn = {
     submit: "Confirm with NIMC",
     checking: "Checking with NIMC",
   },
+  /** Dojah: the selfie and government ID check on /verification (2 November 2026). */
+  dojah: {
+    title: "Confirm who you are with a selfie",
+    lede: "Enter your NIN or BVN and take a photo of your face. It takes about two minutes, and a clean match confirms you straight away. Vallo never stores your NIN or BVN.",
+    start: "Start the check",
+    again: "Try the check again",
+    opening: "Opening the check",
+    frameTitle: "Identity check",
+    close: "Close",
+    waiting: "Checking your result. This usually takes under a minute.",
+    passed: "Your identity is confirmed. Thank you.",
+    review: "Thank you. A person on our team will look at your check and tell you.",
+    retry: "The check could not finish. Try again in good light, with your whole face in the frame.",
+    abandoned: "You left the check before the end. Start again when you are ready.",
+    /** `{note}` is the reviewer's own words. */
+    refused: "Our team could not accept your last check: {note}",
+    limit: "That is three tries today. Try again tomorrow, or upload your ID document below.",
+    closed: "The selfie check is not open at the moment. Upload your ID document below instead.",
+    failed: "We could not open the check just now. Try again in a moment.",
+    privacy: "The check is run by Dojah, Vallo's identity partner. Your photo and ID are used only to confirm it is you.",
+  },
   /** V-23: the line about the other person under a thread's header. */
   person: {
     label: "About the person in this conversation",

@@ -1,0 +1,95 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Lookup TIN
+
+> Look up a Nigerian company's Tax Identification Number (TIN) from its CAC registration (RC) number.
+
+GET
+`/api/v1/kyc/cac/tin`
+
+Look up a Nigerian company’s Tax Identification Number (TIN) directly from its CAC registration (RC) number.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `rc_number` | string | Yes | The company's CAC registration (RC) number. |
+| `company_type` | string | Yes | One of `BUSINESS_NAME`, `COMPANY`, `INCORPORATED_TRUSTEES`, `LIMITED_PARTNERSHIP`, or `LIMITED_LIABILITY_PARTNERSHIP`. |
+
+## Response
+
+Returns an `entity` with the company’s name, its `tax_id`, type, and RC number.
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `rc_number=1261103` or `rc_number=14320749` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/cac/tin?rc_number=1261103&company_type=COMPANY" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "rc_number": "1261103",
+  "company_type": "COMPANY",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/cac/tin?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/cac/tin",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "rc_number": "1261103", "company_type": "COMPANY" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/cac/tin theme={null}
+{
+  "entity": {
+    "company_name": "ANON LIMITED",
+    "tax_id": "123456789987",
+    "company_type": "COMPANY",
+    "rc_number": "1261103"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

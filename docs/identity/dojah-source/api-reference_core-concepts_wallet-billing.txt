@@ -1,0 +1,32 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Wallet & billing
+
+> How Dojah billing works — a prepaid pay-as-you-go wallet, the 402 low-balance response, and checking your balance.
+
+Dojah is pay-as-you-go. Each production call draws from a prepaid wallet — keep it funded and your integration keeps running.
+
+## How billing works
+
+Every successful production request charges your wallet. Costs vary by the check you call. Sandbox calls are always free, so you can build and test without spending anything — see [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md).
+
+## Checking your balance
+
+Read your current wallet balance programmatically with the [Get Balance](https://docs.dojah.io/api-reference/wallet-utilities/get-balance.md) endpoint, or from the dashboard.
+
+## Low balance (402)
+
+If your balance can’t cover a call, the request returns `402 Payment Required` and isn’t processed. Top up to resume — see [Errors & status codes](https://docs.dojah.io/api-reference/core-concepts/errors-status-codes.md).
+
+> [!TIP]
+>
+> **Avoid surprises.** Monitor your balance and set up alerts so production traffic never stalls on a `402`.
+
+## Funding your wallet
+
+Add funds from the dashboard. For the step-by-step walkthrough, see the [Fund your wallet](https://docs.dojah.io/dashboard-guide/getting-started/fund-your-wallet.md) guide.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

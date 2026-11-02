@@ -1,0 +1,118 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Validate BVN
+
+> Match a name and date of birth against a BVN record and get per-field confidence scores.
+
+GET
+`/api/v1/kyc/bvn`
+
+Confirm that a name and date of birth match a BVN — without pulling the full record. Returns a per-field match status and confidence score.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+
+## Query parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `bvn` | string | Yes | A valid BVN number. |
+| `first_name` | string | No | First name to match against the record. |
+| `last_name` | string | No | Last name to match against the record. |
+| `dob` | string | No | Date of birth to match, in yyyy-mm-dd format. |
+
+## Response
+
+Each supplied field comes back with a `status` (matched or not) and, for names, a `confidence_value` from 0–100. Use this when you only need to verify identity, not retrieve it.
+
+## When the BVN isn’t found
+
+An unknown BVN returns `400` with an error message:
+
+```json 400 — Bad Request theme={null}
+{
+  "error": "BVN not found"
+}
+```
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required parameter is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `404` | No record found for the supplied identifier. |
+| `424` | The upstream source was unavailable — retry shortly. |
+| `429` | Too many requests — back off and retry. |
+
+## Sandbox
+
+Test with `bvn=22222222222` against `https://sandbox.dojah.io`. See [Sandbox & test data](https://docs.dojah.io/api-reference/get-started/sandbox-test-data.md) for every test value.
+
+```bash cURL theme={null}
+curl --request GET \
+  "https://api.dojah.io/api/v1/kyc/bvn?bvn=22222222222&first_name=John&last_name=Musa&dob=1997-05-16" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}"
+```
+
+```js Node.js theme={null}
+const params = new URLSearchParams({
+  "bvn": "22222222222",
+  "first_name": "John",
+  "last_name": "Musa",
+  "dob": "1997-05-16",
+});
+
+const url = "https://api.dojah.io/api/v1/kyc/bvn?" + params;
+const res = await fetch(url, {
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+  },
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.get(
+    "https://api.dojah.io/api/v1/kyc/bvn",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    params={ "bvn": "22222222222", "first_name": "John", "last_name": "Musa", "dob": "1997-05-16" },
+)
+data = res.json()
+```
+
+```json GET /api/v1/kyc/bvn theme={null}
+{
+  "entity": {
+    "bvn": {
+      "value": "2*****89012",
+      "status": true
+    },
+    "first_name": {
+      "confidence_value": 100,
+      "status": true
+    },
+    "last_name": {
+      "confidence_value": 100,
+      "status": true
+    }
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

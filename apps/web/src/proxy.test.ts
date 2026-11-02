@@ -407,6 +407,7 @@ const EXPECTED_PUBLIC = new Set([
   "/api/cron/store-readiness",
   "/api/cron/new-match-alerts",
   "/api/csp-report",
+  "/api/dojah/webhook",
   /* V-31: a landlord's SMS reply from the aggregator, behind its own bearer. */
   "/api/landlord/inbound",
   "/api/paystack/reconcile",
@@ -556,6 +557,7 @@ describe("who may see the platform with no session", () => {
     for (const path of [
       "/api/paystack/webhook",
       "/api/payluk/webhook",
+      "/api/dojah/webhook",
       "/api/yellowcard/webhook",
       "/api/auth/email-hook",
       "/api/cron/email-outbox",

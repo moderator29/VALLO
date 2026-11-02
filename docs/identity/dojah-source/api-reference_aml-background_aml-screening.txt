@@ -1,0 +1,304 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# AML screening
+
+> Screen an individual against global PEP, sanctions, warning and adverse-media lists. Match details come back on the same response.
+
+POST
+`/api/v2/aml/screening`
+
+Screen an individual against global PEP, sanctions, warning and adverse-media lists — across 200+ countries and 40,000+ databases. The response includes every match.
+
+This is the same endpoint as [Business AML screening](https://docs.dojah.io/api-reference/aml-background/business-screening.md). Set `schema` to `"individual"` here, and to `"organization"` when you are screening a business.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `schema` | string | Yes | `"individual"` for a person. Use `"organization"` to [screen a business](https://docs.dojah.io/api-reference/aml-background/business-screening.md). |
+| `unique_reference` | string | No | Your own reference for the request, echoed back for reconciliation. |
+| `properties.names` | string | Yes | The full name to screen (e.g. `"David Ukpo"`). |
+| `properties.gender` | string | No | e.g. `"male"` — narrows the candidate set. |
+| `properties.date_of_birth` | string | No | e.g. `"12-10-2000"`. Strengthens match scoring. |
+| `properties.nationality` | string | No | The subject's nationality (e.g. `"Nigerian"`). |
+| `properties.id_number` | string | No | A government-issued ID number. Send `""` when you don't have one. |
+| `screening_options.pep_check` | boolean | No | Screen against politically-exposed-person registries. |
+| `screening_options.sanction` | boolean | No | Screen against sanctions lists. |
+| `screening_options.adverse_media_check` | boolean | No | Screen against adverse media. |
+| `screening_options.watchlists` | array | No | Specific [watchlist codes](#watchlist-codes). Omit the field or send `[]` to search all lists. |
+| `screening_options.match_threshold` | number | No | Minimum match score to return. `1` is the highest (e.g. `0.85`). |
+
+## What gets screened
+
+Every result carries a `source_type` identifying which kind of list it came from:
+
+| Category | What it covers |
+| - | - |
+| `PEP` | Politically exposed persons — current and former office-holders and their close associates. |
+| `Sanctions` | Global and regional sanctions and embargo lists (OFAC, UN, EU and more). |
+| `Adverse Media` | Negative news — grouped by `media_category` (e.g. `violent_crime`, `terrorism`, `political`, `financial_crime`, `organized_crime`) with the underlying articles. |
+| `Warning` | Regulatory and law-enforcement warning lists. |
+
+The overall record is graded with a `risk_level` (e.g. Low / Medium / High) and a `match_status` — one of **No Match**, **Partially Matched**, **Potential Match** or **Confirmed Match**.
+
+## Watchlist codes
+
+Pass these values in `screening_options.watchlists`. Omit the field or send `[]` to search every list.
+
+| Code | List |
+| - | - |
+| `OFAC_SDN` | US Treasury OFAC Specially Designated Nationals. |
+| `EU_Terrorist` | European Union terrorist sanctions list. |
+| `IndSancList` | Nigeria Sanctions Committee list of designated individuals. |
+
+## Response
+
+Returns an `entity` with the `search_query`, `total_results` / `total_articles` counts, an overall `risk_level` and `match_status`, a `match_level`, a `weak_results` count, and a `results` array.
+
+A **profile match** (`source_type` such as `"PEP"` or `"OTHER"`) can include `name`, `titles`, `alias_names`, `given_names`, `last_names`, `gender`, `date_of_birth`, `place_of_birth`, `country`, `address`, `positions`, `education`, `other_information`, `urls`, and `relations`. Each profile has `match` and `match_strength` (e.g. `"confirmed"`).
+
+**Adverse-media** hits are grouped by `source_type: "ADVERSE_MEDIA"` and `media_category`. Each article has a `timestamp`, `headline`, `source`, and HTML `body`. The example opposite is trimmed; the live response includes every profile, every article, and the full body.
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v2/aml/screening" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema": "individual",
+    "unique_reference": "123450987qwergoidavid",
+    "properties": {
+      "names": "David Ukpo",
+      "gender": "male",
+      "date_of_birth": "12-10-2000",
+      "nationality": "Nigerian",
+      "id_number": ""
+    },
+    "screening_options": {
+      "pep_check": true,
+      "sanction": true,
+      "adverse_media_check": true,
+      "watchlists": ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+      "match_threshold": 0.85
+    }
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v2/aml/screening", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    schema: "individual",
+    unique_reference: "123450987qwergoidavid",
+    properties: {
+      names: "David Ukpo",
+      gender: "male",
+      date_of_birth: "12-10-2000",
+      nationality: "Nigerian",
+      id_number: "",
+    },
+    screening_options: {
+      pep_check: true,
+      sanction: true,
+      adverse_media_check: true,
+      watchlists: ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+      match_threshold: 0.85,
+    },
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v2/aml/screening",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "schema": "individual",
+        "unique_reference": "123450987qwergoidavid",
+        "properties": {
+            "names": "David Ukpo",
+            "gender": "male",
+            "date_of_birth": "12-10-2000",
+            "nationality": "Nigerian",
+            "id_number": "",
+        },
+        "screening_options": {
+            "pep_check": True,
+            "sanction": True,
+            "adverse_media_check": True,
+            "watchlists": ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+            "match_threshold": 0.85,
+        },
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v2/aml/screening theme={null}
+{
+  "entity": {
+    "entity_type": "individual",
+    "entity_id": "123450987qwergoidavid",
+    "date": "2026-10-16T10:37:17.077Z",
+    "total_results": 48,
+    "total_articles": 43,
+    "search_query": "David Ukpo",
+    "risk_level": "Medium",
+    "match_status": "Confirmed Match",
+    "results": [
+      {
+        "name": [ "David Ukpo" ],
+        "entity_type": "individual",
+        "source_type": "PEP",
+        "titles": [ "Mr" ],
+        "alias_names": [ "Ukpo David", "David Adoza Ukpo" ],
+        "country": [ "ng" ],
+        "positions": [ "Governor of Example State" ],
+        "urls": [
+          "https://example.com/entities/david-ukpo"
+        ],
+        "relations": [],
+        "match": true,
+        "match_strength": "confirmed"
+      },
+      {
+        "name": [ "David Adoza Ukpo", "David Ukpo" ],
+        "entity_type": "individual",
+        "source_type": "PEP",
+        "last_names": [ "Ukpo" ],
+        "place_of_birth": [ "Example Town" ],
+        "date_of_birth": [ "1975-06-18" ],
+        "gender": [ "male" ],
+        "positions": [ "Governor of Example State (2016-)" ],
+        "education": [ "Example University" ],
+        "other_information": [ "Example politician" ],
+        "relations": [],
+        "match": true,
+        "match_strength": "confirmed"
+      },
+      {
+        "name": [ "David Ukpo" ],
+        "entity_type": "individual",
+        "source_type": "OTHER",
+        "last_names": [ "Ukpo" ],
+        "given_names": [ "David" ],
+        "gender": [ "male" ],
+        "country": [ "ng" ],
+        "positions": [ "Example party candidate for House of Rep." ],
+        "relations": [],
+        "match": true,
+        "match_strength": "confirmed"
+      },
+      {
+        "name": [ "Ukpo David" ],
+        "entity_type": "individual",
+        "source_type": "PEP",
+        "titles": [ "Mr" ],
+        "last_names": [ "David" ],
+        "given_names": [ "Ukpo" ],
+        "gender": [ "male" ],
+        "address": [ "14 Harbour Road, GRA, Example City" ],
+        "country": [ "ng" ],
+        "relations": [],
+        "match": true,
+        "match_strength": "confirmed"
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "violent_crime",
+        "articles": [
+          {
+            "timestamp": "2024-01-30T09:04:44Z",
+            "headline": "Police arrest suspect after an alleged assault",
+            "source": "https://example.news/alleged-assault",
+            "body": "<p>Police said a suspect was arrested after an alleged assault. A later social post mentioned David Ukpo among unrelated names.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "terrorism",
+        "articles": [
+          {
+            "timestamp": "2023-04-03T19:04:52Z",
+            "headline": "Example State vows to punish attackers after a community raid",
+            "source": "https://example.news/community-raid",
+            "body": "<p>The state government, led by David Ukpo, said security teams had been sent to the affected communities.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "political",
+        "articles": [
+          {
+            "timestamp": "2024-08-20T17:12:33Z",
+            "headline": "Appeal court orders David Ukpo to appear for trial",
+            "source": "https://example.news/ukpo-court-order",
+            "body": "<p>An appeal court directed David Ukpo to present himself for arraignment on charges filed after he left office.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "financial_crime",
+        "articles": [
+          {
+            "timestamp": "2024-09-25T21:35:02Z",
+            "headline": "Anti-graft agency files fresh fraud charges against David Ukpo",
+            "source": "https://example.news/ukpo-fraud-charges",
+            "body": "<p>Prosecutors alleged David Ukpo and two others agreed to breach trust over public funds entrusted to them.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "organized_crime",
+        "articles": [
+          {
+            "timestamp": "2024-04-18T07:01:36Z",
+            "headline": "Court grants warrant tied to David Ukpo",
+            "source": "https://example.news/ukpo-warrant",
+            "body": "<p>A court granted a warrant as investigators prepared to arraign David Ukpo on money-laundering charges.</p>"
+          }
+        ]
+      }
+    ],
+    "weak_results": 0,
+    "match_level": "confirmed"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

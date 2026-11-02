@@ -747,6 +747,8 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/paystack/reconcile": "processor reconciliation.",
   "/api/paystack/webhook": "processor webhook.",
   "/api/payluk/webhook": "processor webhook.",
+  "/api/dojah/webhook": "identity provider webhook.",
+  "/api/identity-checks/[id]/[file]": "a staff-only identity file stream, not a page.",
   "/api/push/drain": "scheduled job, bearer token.",
   "/api/push/key": "the public VAPID key as JSON.",
   "/api/push/register": "POST only, a subscription write.",

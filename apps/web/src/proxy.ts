@@ -340,6 +340,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/cron/sanctions-lists",
   "/api/cron/sanctions-screen",
   "/api/csp-report",
+  /* Dojah identity results, behind the HMAC-SHA256 webhook signature. */
+  "/api/dojah/webhook",
   /* A12: RFC 8058 one-click unsubscribe. A mailbox provider POSTs it with no
      cookie; the HMAC-signed token in the query is the whole authorisation. */
   "/api/email/unsubscribe",

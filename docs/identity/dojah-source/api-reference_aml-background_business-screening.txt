@@ -1,0 +1,211 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Business AML screening
+
+> Screen a business against sanctions, watchlists, PEP and adverse media. Match details come back on the same response.
+
+POST
+`/api/v2/aml/screening`
+
+Screen a business against sanctions, watchlists, PEP and adverse-media sources. The response includes every match.
+
+This is the same endpoint as [AML screening](https://docs.dojah.io/api-reference/aml-background/aml-screening.md). Set `schema` to `"organization"` here, and to `"individual"` when you are screening a person.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `schema` | string | Yes | `"organization"` for a business. Use `"individual"` to [screen a person](https://docs.dojah.io/api-reference/aml-background/aml-screening.md). |
+| `unique_reference` | string | No | Your own reference for the request, echoed back for reconciliation. |
+| `properties.names` | string | Yes | The business name to screen (e.g. `"Northwind Payments"`). |
+| `properties.nationality` | string | No | Country of the business (e.g. `"Nigerian"`). |
+| `properties.id_number` | string | No | A registration or tax identifier. Send `""` when you don't have one. |
+| `screening_options.pep_check` | boolean | No | Screen against politically-exposed-person registries. |
+| `screening_options.sanction` | boolean | No | Screen against sanctions lists. |
+| `screening_options.adverse_media_check` | boolean | No | Screen against adverse media. |
+| `screening_options.watchlists` | array | No | Specific [watchlist codes](#watchlist-codes). Omit the field or send `[]` to search all lists. |
+| `screening_options.match_threshold` | number | No | Minimum match score to return. `1` is the highest (e.g. `0.85`). |
+
+## What gets screened
+
+Every result carries a `source_type` identifying which kind of list it came from:
+
+| Category | What it covers |
+| - | - |
+| `PEP` | Politically exposed persons linked to the business — office-holders and their close associates. |
+| `Sanctions` | Global and regional sanctions and embargo lists (OFAC, UN, EU and more). |
+| `Adverse Media` | Negative news — grouped by `media_category` (e.g. `political`, `financial_crime`, `organized_crime`) with the underlying articles. |
+| `Warning` | Regulatory and law-enforcement warning lists. |
+
+The overall record is graded with a `risk_level` (e.g. Low / Medium / High) and a `match_status` — one of **No Match**, **Partially Matched**, **Potential Match** or **Confirmed Match**.
+
+## Watchlist codes
+
+Pass these values in `screening_options.watchlists`. Omit the field or send `[]` to search every list.
+
+| Code | List |
+| - | - |
+| `OFAC_SDN` | US Treasury OFAC Specially Designated Nationals. |
+| `EU_Terrorist` | European Union terrorist sanctions list. |
+| `IndSancList` | Nigeria Sanctions Committee list of designated individuals. |
+
+## Response
+
+Returns an `entity` with the `search_query`, `total_results` / `total_articles` counts, an overall `risk_level` and `match_status`, a `match_level`, a `weak_results` count, and a `results` array. Adverse-media hits are grouped by `source_type: "ADVERSE_MEDIA"` and `media_category`. Each article has a `timestamp`, `headline`, `source`, and HTML `body`. The example opposite is trimmed; the live response includes every article and the full body.
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v2/aml/screening" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schema": "organization",
+    "unique_reference": "123450987qwergoidavid",
+    "properties": {
+      "names": "Northwind Payments",
+      "nationality": "Nigerian",
+      "id_number": ""
+    },
+    "screening_options": {
+      "pep_check": true,
+      "sanction": true,
+      "adverse_media_check": true,
+      "watchlists": ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+      "match_threshold": 0.85
+    }
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v2/aml/screening", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    schema: "organization",
+    unique_reference: "123450987qwergoidavid",
+    properties: {
+      names: "Northwind Payments",
+      nationality: "Nigerian",
+      id_number: "",
+    },
+    screening_options: {
+      pep_check: true,
+      sanction: true,
+      adverse_media_check: true,
+      watchlists: ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+      match_threshold: 0.85,
+    },
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v2/aml/screening",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "schema": "organization",
+        "unique_reference": "123450987qwergoidavid",
+        "properties": {
+            "names": "Northwind Payments",
+            "nationality": "Nigerian",
+            "id_number": "",
+        },
+        "screening_options": {
+            "pep_check": True,
+            "sanction": True,
+            "adverse_media_check": True,
+            "watchlists": ["OFAC_SDN", "EU_Terrorist", "IndSancList"],
+            "match_threshold": 0.85,
+        },
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v2/aml/screening theme={null}
+{
+  "entity": {
+    "entity_type": "organization",
+    "entity_id": "123450987qwergoidavid",
+    "date": "2026-10-16T10:54:48.076Z",
+    "total_results": 29,
+    "total_articles": 29,
+    "search_query": "Northwind Payments",
+    "risk_level": "Medium",
+    "match_status": "Potential Match",
+    "results": [
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "political",
+        "articles": [
+          {
+            "timestamp": "2025-03-30T12:52:04Z",
+            "headline": "Startups like Northwind Payments reshape the local payments market",
+            "source": "https://example.news/northwind-payments-market",
+            "body": "<p>A commentary on the payments market mentions Northwind Payments alongside other local startups.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "financial_crime",
+        "articles": [
+          {
+            "timestamp": "2023-09-24T20:40:14Z",
+            "headline": "Northwind Payments investigates unusual transactions after a reported breach",
+            "source": "https://example.news/northwind-payments-incident",
+            "body": "<p>Customers reported frozen accounts after Northwind Payments flagged unusual transactions. The company said user funds were not lost.</p>"
+          }
+        ]
+      },
+      {
+        "source_type": "ADVERSE_MEDIA",
+        "media_category": "organized_crime",
+        "articles": [
+          {
+            "timestamp": "2025-01-28T18:12:49Z",
+            "headline": "Police recover funds after a cyberattack on Northwind Payments",
+            "source": "https://example.news/northwind-payments-recovery",
+            "body": "<p>Investigators said an operation into a cyberattack on Northwind Payments led to arrests and the recovery of diverted funds.</p>"
+          }
+        ]
+      }
+    ],
+    "weak_results": 0,
+    "match_level": "confirmed"
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

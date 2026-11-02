@@ -1,0 +1,123 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# Face - Doc Compare
+
+> Match a selfie against a government-issued photo ID and read the ID's details.
+
+POST
+`/api/v1/kyc/photoid/verify`
+
+Match a user’s selfie against a government-issued photo ID (passport, NIN, voter’s card, or driver’s licence) and read the details extracted from the ID.
+
+## Headers
+
+| Header | Required | Description |
+| - | - | - |
+| `Authorization` | Yes | Your app's secret key, sent as-is — *not* `Bearer`. |
+| `AppId` | Yes | The App ID from your dashboard. |
+| `Content-Type` | Yes | `application/json` |
+
+## Body parameters
+
+| Parameter | Type | Required | Description |
+| - | - | - | - |
+| `photoid_image` | string | Yes | The photo ID image, Base64-encoded (passport, NIN, voter's card, or driver's licence). |
+| `selfie_image` | string | Yes | The selfie image, Base64-encoded (strip the `data:image/jpeg;base64,` prefix). |
+| `first_name` | string | No | Expected first name, to cross-check against the ID. |
+| `last_name` | string | No | Expected last name, to cross-check against the ID. |
+
+## Response
+
+Returns an `entity.selfie` object with the face-match `confidence_value` (0–100) and a boolean `match`, plus image-quality flags, estimated `age_range`, and the detected `card_type`.
+
+> [!NOTE]
+>
+> As a guide, a `confidence_value` of **90+** is a strong match and **60+** is a successful match. Tune the threshold to your risk tolerance.
+
+| Field | Type | Description |
+| - | - | - |
+| `age_range` | string | Estimated age range of the person in the selfie. |
+| `card_type` | string | Detected ID type, e.g. `Driver's License`. |
+| `confidence_value` | number | Face-match score from `0` to `100`. |
+| `match` | boolean | `true` when the selfie matches the photo on the ID. |
+| `photoId_glare` | boolean | `true` if glare was detected on the photo ID. |
+| `photoId_image_blurry` | boolean | `true` if the photo ID image is blurry. |
+| `selfie_glare` | boolean | `true` if glare was detected on the selfie. |
+| `selfie_image_blurry` | boolean | `true` if the selfie image is blurry. |
+| `sunglasses` | boolean | `true` if sunglasses were detected in the selfie. |
+
+## Errors
+
+| Code | Meaning |
+| - | - |
+| `400` | Bad request — a required field is missing or the image is malformed. |
+| `401` | Unauthorized — check your key and `AppId` (no `Bearer` prefix). |
+| `402` | Insufficient wallet balance. [Fund your wallet](https://docs.dojah.io/api-reference/core-concepts/wallet-billing.md). |
+| `429` | Too many requests — back off and retry. |
+
+```bash cURL theme={null}
+curl -X POST "https://api.dojah.io/api/v1/kyc/photoid/verify" \
+  -H "Authorization: {{secret_key}}" \
+  -H "AppId: {{app_id}}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "photoid_image": "/9j/4AAQSkZJRgABAQ…",
+    "selfie_image": "/9j/4AAQSkZJRgABAQ…"
+  }'
+```
+
+```js Node.js theme={null}
+const res = await fetch("https://api.dojah.io/api/v1/kyc/photoid/verify", {
+  method: "POST",
+  headers: {
+    Authorization: process.env.DOJAH_SECRET_KEY,
+    AppId: process.env.DOJAH_APP_ID,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    photoid_image: "/9j/4AAQSkZJRgABAQ…",
+    selfie_image: "/9j/4AAQSkZJRgABAQ…"
+  }),
+});
+const data = await res.json();
+```
+
+```python Python theme={null}
+import os, requests
+
+res = requests.post(
+    "https://api.dojah.io/api/v1/kyc/photoid/verify",
+    headers={
+        "Authorization": os.environ["DOJAH_SECRET_KEY"],
+        "AppId": os.environ["DOJAH_APP_ID"],
+    },
+    json={
+        "photoid_image": "/9j/4AAQSkZJRgABAQ…",
+        "selfie_image": "/9j/4AAQSkZJRgABAQ…"
+    },
+)
+data = res.json()
+```
+
+```json POST /api/v1/kyc/photoid/verify theme={null}
+{
+  "entity": {
+    "selfie": {
+      "age_range": "22-34 Years",
+      "card_type": "Driver's License",
+      "confidence_value": 99.30563354492188,
+      "match": true,
+      "photoId_glare": true,
+      "photoId_image_blurry": false,
+      "selfie_glare": true,
+      "selfie_image_blurry": false,
+      "sunglasses": false
+    }
+  }
+}
+```
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

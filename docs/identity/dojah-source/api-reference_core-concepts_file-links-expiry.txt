@@ -1,0 +1,26 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# File links & expiry
+
+> File URLs returned by Dojah (selfies, documents) are temporary and expire within about an hour — copy them to your own storage.
+
+When a response or webhook includes a file — a selfie, an ID image, a document scan — it’s a temporary URL, not permanent storage. Save it before it expires.
+
+## Links are short-lived
+
+File URLs Dojah returns expire within about **one hour**. After that the link stops working and the file is no longer reachable from it.
+
+## What to do
+
+* **Download immediately.** When you receive a file URL, fetch the file and store it in your own system right away.
+* **Don’t persist the URL.** Saving the link instead of the file means a broken reference within the hour.
+* **Re-fetch if needed.** If you only have the verification reference, call the endpoint again to get a fresh link.
+
+> [!WARNING]
+>
+> **Applies to webhooks too.** File URLs inside [webhook](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md) payloads expire on the same schedule — copy them as soon as the event arrives.
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

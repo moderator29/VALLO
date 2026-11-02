@@ -1,0 +1,121 @@
+> ## Documentation Index
+> Fetch the complete documentation index at: https://docs.dojah.io/llms.txt
+> Use this file to discover all available pages before exploring further.
+
+# React
+
+> Launch Dojah's hosted verification flow inside a React app with the Dojah React SDK.
+
+Drop Dojah’s hosted verification flow into a React app with the `dojah-kyc-sdk-react` component. You design the flow once in [EasyOnboard](https://docs.dojah.io/dashboard-guide/workflows/easyonboard), then render it by passing your keys and widget type.
+
+> [!NOTE]
+>
+> **Which SDK?** This is the *widget* SDK — it renders Dojah’s UI. To call endpoints directly from your server, use an [API client](https://docs.dojah.io/api-reference/widget-sdks/choosing-an-sdk.md#widget-sdks-vs-api-clients) instead. Not sure? See [Choosing an SDK](https://docs.dojah.io/api-reference/widget-sdks/choosing-an-sdk.md).
+
+## Requirements
+
+* **React 19** or later (declared as a peer dependency).
+* An **App ID** and **public key** from your [dashboard](https://docs.dojah.io/dashboard-guide/integrations/developers.md#api-tokens).
+* A published **widget** (EasyOnboard flow) whose `widget_id` you’ll pass in.
+
+## Install
+
+Add the package with npm or yarn:
+
+```bash Terminal theme={null}
+# npm
+npm install dojah-kyc-sdk-react --save
+
+# or yarn
+yarn add dojah-kyc-sdk-react
+```
+
+## Initialize
+
+Import the component and render it with your credentials and a `response` handler. Passing all of `userData` auto-skips the user-data screen.
+
+```jsx App.jsx theme={null}
+import React from 'react'
+import Dojah from 'dojah-kyc-sdk-react'
+
+const App = () => {
+  const appID     = "your_app_id"
+  const publicKey = "your_public_key"
+  const type      = "custom"
+
+  const config   = { widget_id: "your_widget_id" }
+  const userData = { first_name: "Chijioke", last_name: "", dob: "2022-05-01" }
+  const govData  = { bvn: "", nin: "" }
+  const metadata = { user_id: "121" }
+  const referenceId = "unique-ref-12345"
+
+  const response = (type, data) => {
+    if (type === "success") console.log("verified", data)
+    if (type === "error")   console.log("failed", data)
+    if (type === "close")   console.log("widget closed")
+  }
+
+  return (
+    <Dojah
+      response={response}
+      appID={appID}
+      publicKey={publicKey}
+      type={type}
+      config={config}
+      userData={userData}
+      govData={govData}
+      metadata={metadata}
+      referenceId={referenceId}
+    />
+  )
+}
+
+export default App
+```
+
+## Props
+
+| Prop | Type | Required | Description |
+| - | - | - | - |
+| `appID` | string | Yes | Your application’s App ID. |
+| `publicKey` | string | Yes | Your account public key (safe for the client). |
+| `type` | string | Yes | Widget type — `custom` (EasyOnboard KYC), or `register` / `authenticate` ([EasyAuthentication](https://docs.dojah.io/api-reference/easyauthentication.md)). |
+| `response` | function | Yes | Callback `(type, data)` for flow events — see below. |
+| `config` | object | No | Flow config, primarily `{ widget_id }` from EasyOnboard. |
+| `userData` | object | No | Prefill `first_name`, `last_name`, `dob`. Full set skips the user-data screen. |
+| `govData` | object | No | Prefill government IDs such as `bvn`, `nin`. |
+| `metadata` | object | No | Any key/value pairs echoed back to you and in webhooks. |
+| `referenceId` | string | No | Your unique reference for this session (use >10 chars). |
+
+## Handling the response
+
+The `response` callback fires with a `type` string as the user moves through the flow:
+
+| `type` | When it fires |
+| - | - |
+| `loading` | The widget is initializing. |
+| `begin` | The user has started the flow. |
+| `success` | The flow finished and submitted. |
+| `error` | Something failed during the flow. |
+| `close` | The user closed the widget. |
+
+> [!WARNING]
+>
+> **Don’t trust the client for the final decision.** A `success` event means the flow completed — not that the user passed. Confirm the outcome from your backend using the `reference_id` (via [Get verification](https://docs.dojah.io/api-reference/verifications/get-verification.md) or a [webhook](https://docs.dojah.io/api-reference/core-concepts/webhooks-signatures.md)) before granting access.
+
+## Theming & branding
+
+Colors, logo, and which steps appear are configured on the **flow itself** in EasyOnboard, not in code — the component just renders the published `widget_id`. To restyle the flow, edit it in the dashboard and republish; no app changes needed.
+
+> [!NOTE]
+>
+> **Note.** Switch `appID` and `publicKey` to your live keys before shipping to production — sandbox keys won’t bill or return real data.
+
+## Resources
+
+* [GitHub — dojah-inc/React-Js-sdk](https://github.com/dojah-inc/React-Js-sdk)
+* [npm — dojah-kyc-sdk-react](https://www.npmjs.com/package/dojah-kyc-sdk-react)
+* [Choosing an SDK](https://docs.dojah.io/api-reference/widget-sdks/choosing-an-sdk.md) · Hosted flows (EasyOnboard)
+
+
+This documentation is built and hosted on [Mintlify](https://mintlify.com), a developer documentation platform.

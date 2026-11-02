@@ -29,3 +29,13 @@ export function ninHmac(nin: string, key: string): string {
   if (!isNin(nin)) throw new Error("not a NIN");
   return createHmac("sha256", key).update(nin).digest("hex");
 }
+
+/**
+ * HMAC-SHA256 of a BVN, hex, under the same key with its own prefix, so a BVN
+ * and a NIN that happened to share digits never collide. Never stored raw.
+ */
+export function bvnHmac(bvn: string, key: string): string {
+  if (key.length < 32) throw new Error("NIN HMAC key missing or too short");
+  if (!/^\d{11}$/.test(bvn)) throw new Error("not a BVN");
+  return createHmac("sha256", key).update(`bvn:${bvn}`).digest("hex");
+}
