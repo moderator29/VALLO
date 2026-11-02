@@ -205,6 +205,7 @@ export function EmailAuthForm({
     if (!email) errors.email = t.signUp.emailRequired;
     else if (!EMAIL_SHAPE.test(email)) errors.email = t.signUp.emailInvalid;
     if (password.length < 8) errors.password = t.signUp.passwordShort;
+    if (!phone.trim()) errors.phone = t.signUp.phoneRequired;
     return errors;
   }
 
@@ -344,15 +345,19 @@ export function EmailAuthForm({
               check={signUpMethodForEmail}
               initialEmail={initialEmail}
             />
-            {/* Optional, any country, Nigeria first (2 November 2026). */}
+            {/* Required, any country, Nigeria first (2 November 2026). */}
             <PhoneField
               id="phone"
               name="phone"
               label={t.signUp.phoneLabel}
               hint={t.signUp.phoneHint}
               value={phone}
-              onChange={setPhone}
+              onChange={(next) => {
+                setPhone(next);
+                if (localErrors.phone) setLocalErrors((e) => ({ ...e, phone: undefined }));
+              }}
               autoComplete="tel"
+              required
               error={fieldError("phone")}
             />
             <div>

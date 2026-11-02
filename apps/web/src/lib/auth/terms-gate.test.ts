@@ -61,6 +61,7 @@ function signUpForm(termsVersion: string | null, age: string | null = "18+"): Fo
   data.set("lgaCode", "fc_amac");
   data.set("occupationCode", "other");
   data.set("hearAbout", "Friend or family");
+  data.set("phone", "0803 123 4567");
   if (termsVersion !== null) data.set("termsVersion", termsVersion);
   if (age !== null) data.set("ageConfirmed", age);
   return data;

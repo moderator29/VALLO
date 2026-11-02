@@ -32,9 +32,9 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
  * opens a searchable list (the platform `Sheet`, a page on a phone and a panel
  * on a wide screen), Nigeria and the countries Vallo's people live in first.
  *
- * NIGERIA BEHAVES EXACTLY AS IT ALWAYS DID: the number groups as `803 123
- * 4567`, the network is named, and an unknown range is accepted with a
- * sentence (`lib/phone.ts` argues that out). Every other country groups in its
+ * NIGERIA BEHAVES AS IT ALWAYS DID: the number groups as `803 123 4567` and
+ * an unknown network range is still accepted (`lib/phone.ts` argues that out).
+ * A good number gets no remark under it; only the hint, or a problem. Every other country groups in its
  * own style and is checked against Google's mobile ranges (`lib/phone-intl.ts`).
  *
  * A PASTE OR AN AUTOFILL OF `+44 7911 123456` switches the country to the
@@ -80,12 +80,8 @@ function nigerianAdvice(reading: PhoneReading, locale: Locale): Note {
     case "invalid":
       return { tone: "error", text: reading.reason };
     case "valid":
-      return reading.carrier
-        ? { tone: "muted", text: `${reading.carrier} number.` }
-        : {
-            tone: "muted",
-            text: "We do not recognise that network, but the number is the right shape, so it will be saved as typed.",
-          };
+      /* A good number needs no remark: the hint stays (the founder, 2 November 2026). */
+      return null;
   }
 }
 
@@ -99,7 +95,7 @@ function foreignAdvice(reading: IntlReading, country: CountryCode): Note {
     case "invalid":
       return { tone: "error", text: `That is not a mobile number in ${name}. Check the digits, or change the country.` };
     case "valid":
-      return { tone: "muted", text: `${name} mobile number.` };
+      return null;
   }
 }
 
