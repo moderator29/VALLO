@@ -28,7 +28,7 @@ function messages(result: { success: boolean; error?: { issues: { path: Property
 describe("the host wizard's field messages", () => {
   it("say in English exactly what the schema module used to say", () => {
     expect(messages(hostDraftSchema(EN).safeParse({ phone: "12", email: "nope", cacNumber: "x", tin: "ab" }))).toEqual({
-      phone: "That does not look like a Nigerian mobile number. Enter it as 0803 123 4567.",
+      phone: "That does not look like a mobile number. Check the digits and the country.",
       email: "Enter an email address we can actually write to.",
       cacNumber: "That is not an RC or BN number. It is the one on your CAC certificate, like RC 1234567.",
       tin: "A TIN is digits, with or without dashes.",

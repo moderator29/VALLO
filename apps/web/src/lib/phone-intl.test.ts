@@ -55,3 +55,28 @@ describe("helpers", () => {
     expect(isNigerian("+447911123456")).toBe(false);
   });
 });
+
+import { formatPhone, normalisePhone } from "./phone";
+
+describe("normalisePhone across countries", () => {
+  it("keeps every Nigerian spelling exactly as before", () => {
+    for (const raw of ["0803 123 4567", "08031234567", "+234 803 123 4567", "2348031234567", "803 123 4567", "+234 (0) 803 123 4567"]) {
+      expect(normalisePhone(raw)).toBe("+2348031234567");
+    }
+    expect(normalisePhone("0803 123 4567", "NG")).toBe("+2348031234567");
+  });
+  it("reads a foreign number written with a plus or 00, or with its country chosen", () => {
+    expect(normalisePhone("+44 7911 123456")).toBe("+447911123456");
+    expect(normalisePhone("0044 7911 123456")).toBe("+447911123456");
+    expect(normalisePhone("07911 123456", "GB")).toBe("+447911123456");
+    expect(normalisePhone("(415) 555-2671", "US")).toBe("+14155552671");
+  });
+  it("refuses a foreign landline or nonsense", () => {
+    expect(normalisePhone("+44 20 7946 0958")).toBeNull();
+    expect(normalisePhone("12", "GB")).toBeNull();
+  });
+  it("formats a stored number in its own country's style", () => {
+    expect(formatPhone("+2348031234567")).toBe("+234 803 123 4567");
+    expect(formatPhone("+447911123456")).toBe("+44 7911 123456");
+  });
+});

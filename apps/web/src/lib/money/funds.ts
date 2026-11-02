@@ -25,6 +25,9 @@ export const ONBOARDING_STATES = [
 export type OnboardingState = (typeof ONBOARDING_STATES)[number];
 
 /** What a member must still give before a provider account can open. */
+import { normalisePhone as normaliseAnyPhone } from "../phone";
+import { countryOfNumber } from "../phone-intl";
+
 export type ProfileGap = "first_name" | "last_name" | "phone" | "email";
 
 export type OnboardingInput = {
@@ -65,7 +68,7 @@ export function profileGaps(p: { firstName: string | null; lastName: string | nu
   const gaps: ProfileGap[] = [];
   if (!p.firstName?.trim()) gaps.push("first_name");
   if (!p.lastName?.trim()) gaps.push("last_name");
-  if (!normalisePhone(p.phone ?? "")) gaps.push("phone");
+  if (!paylukPhone(p.phone ?? "")) gaps.push("phone");
   if (!p.email?.trim()) gaps.push("email");
   return gaps;
 }
@@ -81,6 +84,45 @@ export function normalisePhone(raw: string): string | null {
   if (/^234[789][01]\d{8}$/.test(digits)) return `0${digits.slice(3)}`;
   if (/^[789][01]\d{8}$/.test(digits)) return `0${digits}`;
   return null;
+}
+
+/**
+ * THE NUMBER THE PAYMENTS PARTNER IS GIVEN (2 November 2026), for any country.
+ *
+ * A Nigerian mobile goes as before: the local form, no country (Payluk falls
+ * back to the merchant account's country, Nigeria). A number from another
+ * country goes only when Payluk has given us its internal id for that country
+ * (`PAYLUK_COUNTRY_IDS`, `GB:<24-hex id>,US:<id>`): its live API refuses a
+ * two-letter code, and which countries it serves is not documented (OPEN in
+ * docs/payments/PAYLUK_LIVE_DOCS_FINDINGS.md section 10). Until a country is
+ * listed, a member whose profile number is foreign is told the wallet needs a
+ * Nigerian number for now, and nothing is sent.
+ */
+export type PaylukPhone = { phone: string; country?: string };
+
+export function paylukCountryIds(env: Record<string, string | undefined> = process.env): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const pair of (env.PAYLUK_COUNTRY_IDS ?? "").split(",")) {
+    const [iso, id] = pair.split(":").map((part) => part.trim());
+    if (iso && id && /^[A-Z]{2}$/.test(iso) && /^[0-9a-f]{24}$/i.test(id)) out[iso] = id;
+  }
+  return out;
+}
+
+export function paylukPhone(raw: string, env: Record<string, string | undefined> = process.env): PaylukPhone | null {
+  const local = normalisePhone(raw);
+  if (local) return { phone: local };
+  const e164 = normaliseAnyPhone(raw);
+  if (!e164 || e164.startsWith("+234")) return null;
+  const country = countryOfNumber(e164);
+  const id = country ? paylukCountryIds(env)[country] : undefined;
+  return id ? { phone: e164.slice(1), country: id } : null;
+}
+
+/** Is this a valid mobile number from outside Nigeria (so the wallet can say why it waits)? */
+export function isForeignMobile(raw: string): boolean {
+  const e164 = normaliseAnyPhone(raw);
+  return e164 !== null && !e164.startsWith("+234");
 }
 
 /* ----------------------------------------------------------- movements */

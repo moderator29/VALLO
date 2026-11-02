@@ -1,60 +1,63 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo, useRef, useState } from "react";
+import type { CountryCode } from "libphonenumber-js/mobile";
 import { maskNational, readPhone, type PhoneReading } from "@/lib/phone";
+import {
+  DEFAULT_COUNTRY,
+  allCountries,
+  callingCode,
+  countryName,
+  flagOf,
+  formatInternational,
+  isCountryCode,
+  maskInternational,
+  readInternational,
+  splitInternational,
+  type IntlReading,
+} from "@/lib/phone-intl";
 import { countOf, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { Sheet } from "@/components/ui/Sheet";
+import { TextField } from "@/components/ui/Field";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 
 /**
- * A Nigerian mobile number field.
+ * A MOBILE NUMBER FIELD, NIGERIA FIRST AND EVERY COUNTRY AFTER IT
+ * (2 November 2026).
  *
- * WHAT IT FIXES. Every phone input on the platform was a bare text box that
- * accepted anything and said "Enter a valid Nigerian phone number." only after
- * the form came back from the server. Two separate rules decided what valid
- * meant and they disagreed (see `lib/phone.ts`). Nothing anywhere told the
- * person what shape was wanted, and eleven unbroken digits is not a thing
- * anybody can check by eye, so the commonest failure was a transposed pair
- * that reached the host as an unreachable number and was discovered at the
- * gate.
+ * The shape every large product uses (WhatsApp, Airbnb, Revolut): one field,
+ * with the country as a button at its start showing the flag and the calling
+ * code, and the number beside it. Nigeria is the default. Tapping the country
+ * opens a searchable list (the platform `Sheet`, a page on a phone and a panel
+ * on a wide screen), Nigeria and the countries Vallo's people live in first.
  *
- * THREE THINGS, IN ORDER OF HOW MUCH THEY MATTER:
+ * NIGERIA BEHAVES EXACTLY AS IT ALWAYS DID: the number groups as `803 123
+ * 4567`, the network is named, and an unknown range is accepted with a
+ * sentence (`lib/phone.ts` argues that out). Every other country groups in its
+ * own style and is checked against Google's mobile ranges (`lib/phone-intl.ts`).
  *
- * 1. The country code is stated and is not typeable. `+234` sits beside the
- *    box as text, so the field is unambiguous about what it wants and there is
- *    no way to half-type a country code. Somebody who pastes `+234803...` or
- *    `0803...` anyway gets the same result: the paste is normalised, not
- *    refused. A form that rejects a correctly copied number is worse than one
- *    that never mentioned the format.
+ * A PASTE OR AN AUTOFILL OF `+44 7911 123456` switches the country to the
+ * United Kingdom and keeps the number, instead of mangling it.
  *
- * 2. It groups as you type: `803 123 4567`. That is how the number is read
- *    aloud, and it makes a wrong digit visible.
- *
- * 3. It names the network as soon as it can. An unrecognised range is said to
- *    be unrecognised rather than refused, because the NCC issues new ranges
- *    and a shipped allow-list goes stale; `lib/phone.ts` argues that out in
- *    full.
- *
- * SUBMISSION. The visible box carries the `name` and posts the masked national
- * digits, `803 123 4567`.
- *
- * The first version of this posted a canonical `+234...` from a hidden field
- * beside a nameless visible one, on the reasoning that the server should not
- * have to re-derive anything. That was wrong twice over. It broke the contract
- * every other field on the platform keeps, that the input you can see is the
- * input that posts, which a spec caught immediately by no longer being able to
- * type into the field. And it was pointless: the server already runs
- * `normalisePhone` on whatever arrives, and `normalisePhone("803 123 4567")`
- * is `+2348031234567`, because the masked form is one of the six shapes it
- * was written to accept. Two sources for one value, where one of them was
- * already sufficient, is exactly the arrangement that drifts.
+ * THE VALUE. For Nigeria the value is the grouped national number, `803 123
+ * 4567`, exactly as before, and the visible box carries `name`. For every
+ * other country the value is the international form, `+44 7911 123456`: the
+ * box shows only the national part and a hidden input carries `name` with the
+ * full value. So every server path that already runs `normalisePhone(value)`
+ * reads a foreign number correctly with no change, because a number written
+ * with a plus is read by its own country. `<name>Country` is posted too.
  */
 
 export type PhoneFieldProps = {
-  /** Field name the FORM posts. The visible input is nameless. */
+  /** Field name the FORM posts. `<name>Country` is posted beside it. */
   name: string;
   label: string;
   value: string;
   onChange: (next: string) => void;
+  /** Controlled country; when omitted the field keeps its own, Nigeria first. */
+  country?: string;
+  onCountryChange?: (next: CountryCode) => void;
   /** A message from the server that outranks anything worked out here. */
   error?: string | undefined;
   /** Sentence under the field explaining what the number is used for. */
@@ -62,19 +65,18 @@ export type PhoneFieldProps = {
   required?: boolean;
   autoComplete?: string;
   id?: string;
+  disabled?: boolean;
 };
 
-function advice(reading: PhoneReading, locale: Locale): { tone: "muted" | "error"; text: string } | null {
+type Note = { tone: "muted" | "error"; text: string } | null;
+
+function nigerianAdvice(reading: PhoneReading, locale: Locale): Note {
   switch (reading.state) {
     case "empty":
       return null;
     case "incomplete":
-      /* Counting DOWN rather than up: "three more digits" is an instruction,
-         "seven of ten" is a status report the person has to do sums on. */
-      return {
-        tone: "muted",
-        text: countOf(10 - reading.digits, "digitsToGo", locale),
-      };
+      /* Counting DOWN rather than up: "three more digits" is an instruction. */
+      return { tone: "muted", text: countOf(10 - reading.digits, "digitsToGo", locale) };
     case "invalid":
       return { tone: "error", text: reading.reason };
     case "valid":
@@ -87,76 +89,217 @@ function advice(reading: PhoneReading, locale: Locale): { tone: "muted" | "error
   }
 }
 
+function foreignAdvice(reading: IntlReading, country: CountryCode): Note {
+  const name = countryName(country);
+  switch (reading.state) {
+    case "empty":
+      return null;
+    case "incomplete":
+      return { tone: "muted", text: `Keep going: a full mobile number in ${name}.` };
+    case "invalid":
+      return { tone: "error", text: `That is not a mobile number in ${name}. Check the digits, or change the country.` };
+    case "valid":
+      return { tone: "muted", text: `${name} mobile number.` };
+  }
+}
+
 export function PhoneField({
   name,
   label,
   value,
   onChange,
+  country: controlledCountry,
+  onCountryChange,
   error,
   hint,
   required,
   autoComplete = "tel",
   id,
+  disabled,
 }: PhoneFieldProps) {
   const locale = useClientLocale();
   const generated = useId();
   const fieldId = id ?? `${generated}-phone`;
   const noteId = `${fieldId}-note`;
+  const [ownCountry, setOwnCountry] = useState<CountryCode>(() => splitInternational(value)?.country ?? DEFAULT_COUNTRY);
+  const country: CountryCode = isCountryCode(controlledCountry) ? controlledCountry : ownCountry;
+  const [picking, setPicking] = useState(false);
+  const [query, setQuery] = useState("");
+  const input = useRef<HTMLInputElement | null>(null);
+  const nigeria = country === "NG";
+  const prefix = `+${callingCode(country)}`;
+  /* The national part of a foreign value (`+44 7911 123456` is `7911 123456`). */
+  const national = nigeria ? value : value.startsWith(prefix) ? value.slice(prefix.length).trim() : value.replace(/^\+\d*\s*/, "");
 
-  const reading = readPhone(value);
-  const note = advice(reading, locale);
+  const setCountry = (next: CountryCode) => {
+    setOwnCountry(next);
+    onCountryChange?.(next);
+  };
+  const emit = (target: CountryCode, typed: string) => {
+    const digits = typed.trim();
+    if (target === "NG") {
+      onChange(maskNational(digits));
+      return;
+    }
+    if (digits === "") {
+      onChange("");
+      return;
+    }
+    /* A complete number is stored in its clean international form (the trunk
+       zero people type at home is dropped); a partial one as typed. */
+    const reading = readInternational(digits, target);
+    onChange(reading.state === "valid" ? formatInternational(reading.e164) : `+${callingCode(target)} ${digits}`);
+  };
+
+  const note = nigeria
+    ? nigerianAdvice(readPhone(value), locale)
+    : foreignAdvice(readInternational(national, country), country);
   /* The server's word beats ours: it has seen things this field has not. */
-  const shown = error ? { tone: "error" as const, text: error } : note;
-  const invalid = Boolean(error) || reading.state === "invalid";
+  const shown: Note = error ? { tone: "error", text: error } : note;
+  const invalid = Boolean(error) || note?.tone === "error";
+
+  const options = useMemo(
+    () => allCountries().map((code) => ({ code, name: countryName(code), dial: `+${callingCode(code)}` })),
+    [],
+  );
+  const q = query.trim().toLowerCase().replace(/^\+/, "");
+  const filtered = q
+    ? options.filter((o) => o.name.toLowerCase().includes(q) || o.dial.slice(1).startsWith(q) || o.code.toLowerCase() === q)
+    : options;
+
+  function change(raw: string) {
+    /* A pasted or autofilled full international number picks its own country. */
+    const split = splitInternational(raw);
+    if (split && !raw.replace(/\D/g, "").startsWith("234")) {
+      setCountry(split.country);
+      emit(split.country, split.national);
+      return;
+    }
+    emit(country, raw);
+  }
 
   return (
     <div>
       <label htmlFor={fieldId} className="nf-label">
         {label}
       </label>
-      <div className="flex items-stretch gap-xs">
-        {/*
-          `aria-hidden`, because the code is announced as part of the input's
-          own description instead. A screen reader hitting a stray "+234" as a
-          separate stop before the field would be reading furniture.
-        */}
-        <span
-          aria-hidden="true"
-          className="nf-field flex w-[4.25rem] shrink-0 items-center justify-center text-[var(--nf-content-muted)]"
+      {/* A grid, so the country button takes only its own width and the number
+          box the rest, whatever width a screen's own field styles set. */}
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-stretch gap-xs">
+        <button
+          type="button"
+          className="nf-field flex items-center gap-2xs px-sm text-[var(--nf-content-primary)]"
+          style={{ width: "auto", minWidth: "6.5rem" }}
+          onClick={() => {
+            setQuery("");
+            setPicking(true);
+          }}
+          disabled={disabled}
+          aria-haspopup="dialog"
+          aria-label={`Country: ${countryName(country)}, +${callingCode(country)}. Change the country`}
+          data-testid="phone-country"
         >
-          +234
-        </span>
+          <span aria-hidden="true" className="text-[1.15em] leading-none">
+            {flagOf(country)}
+          </span>
+          <span className="nf-numeric text-[var(--nf-content-secondary)]">+{callingCode(country)}</span>
+          <UiIcon name="chevron-down" size={14} className="text-[var(--nf-content-muted)]" />
+        </button>
         <input
+          ref={input}
           id={fieldId}
-          name={name}
+          name={nigeria ? name : undefined}
           type="tel"
           inputMode="tel"
           autoComplete={autoComplete}
-          /* No maxLength (UX-12): browsers clip a paste or an autofill to
-             maxlength BEFORE onChange, so "+234 803 123 4567" arrived as
-             "+234 803 123". `maskNational` strips 234 or 0 and keeps the ten
-             digits that matter, which is the only limit the field needs. */
-          value={maskNational(value)}
-          onChange={(event) => onChange(maskNational(event.target.value))}
-          placeholder="803 123 4567"
+          /* No maxLength (UX-12): a browser clips a paste before onChange. */
+          value={nigeria ? maskNational(value) : (splitInternational(value)?.national ?? maskInternational(national, country))}
+          onChange={(event) => change(event.target.value)}
+          placeholder={nigeria ? "803 123 4567" : undefined}
           aria-describedby={noteId}
           aria-invalid={invalid ? true : undefined}
           required={required}
-          className="nf-field min-w-0 flex-1"
+          disabled={disabled}
+          className="nf-field min-w-0"
+          style={{ width: "100%" }}
         />
+        {!nigeria && <input type="hidden" name={name} value={value} />}
+        <input type="hidden" name={`${name}Country`} value={country} />
       </div>
 
       <p
         id={noteId}
         role={shown?.tone === "error" ? "alert" : undefined}
         className={`mt-2xs text-[length:var(--nf-text-overline)] leading-relaxed ${
-          shown?.tone === "error"
-            ? "text-[var(--nf-state-error)]"
-            : "text-[var(--nf-content-muted)]"
+          shown?.tone === "error" ? "text-[var(--nf-state-error)]" : "text-[var(--nf-content-muted)]"
         }`}
       >
         {shown ? shown.text : (hint ?? "")}
       </p>
+
+      <Sheet
+        open={picking}
+        onOpenChange={(next) => {
+          setPicking(next);
+          if (!next) window.setTimeout(() => input.current?.focus(), 0);
+        }}
+        title="Choose your country"
+        closeLabel="Close"
+        fullPage
+        sideOnWide
+        testId="phone-country-picker"
+      >
+        <div className="sticky top-0 z-20 -mx-gutter flex h-[4rem] items-center border-b border-[var(--nf-border-subtle)] bg-[var(--nf-panel-fill)] px-gutter">
+          <TextField
+            className="w-full"
+            label="Search countries"
+            hideLabel
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
+            leadingIcon="search"
+            clearable="Clear the search"
+            onClear={() => setQuery("")}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search by country or code"
+            autoComplete="off"
+            spellCheck={false}
+          />
+        </div>
+        {filtered.length === 0 ? (
+          <p className="py-xl text-center text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">
+            No country matches that. Try its name or its calling code.
+          </p>
+        ) : (
+          <ul className="divide-y divide-[var(--nf-border-subtle)] pt-xs" aria-label="Countries">
+            {filtered.map((option) => {
+              const active = option.code === country;
+              return (
+                <li key={option.code}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCountry(option.code);
+                      emit(option.code, national);
+                      setPicking(false);
+                    }}
+                    aria-pressed={active}
+                    className="flex min-h-11 w-full items-center gap-sm py-sm text-left text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
+                  >
+                    <span aria-hidden="true" className="text-[1.25em] leading-none">
+                      {flagOf(option.code)}
+                    </span>
+                    <span className="min-w-0 flex-1">{option.name}</span>
+                    <span className="nf-numeric text-[var(--nf-content-muted)]">{option.dial}</span>
+                    {active && <UiIcon name="verified" size={16} className="shrink-0 text-[var(--nf-state-success)]" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </Sheet>
     </div>
   );
 }

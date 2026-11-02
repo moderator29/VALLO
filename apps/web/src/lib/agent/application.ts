@@ -141,7 +141,7 @@ export async function submitAgentApplication(
   const phone = get("phone");
   if (phone && normalisePhone(phone) === null) {
     fieldErrors.phone =
-      "That does not look like a Nigerian mobile number. Enter it as 0803 123 4567.";
+      "That does not look like a mobile number. Check the digits and the country beside them.";
   }
 
   const account = get("accountNumber");

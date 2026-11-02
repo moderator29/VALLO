@@ -125,13 +125,13 @@ export const trustVisibleEn = {
        for the things that need one on file (a wallet opened in the member's own name). */
     profileTitle: "Your mobile number",
     profileBody: "Saved to your profile so anything opened in your own name, like your payments account, can use it. It is never shown to anybody. We will ask you to confirm it with a code later.",
-    profileHint: "A Nigerian mobile number, for example 0803 123 4567.",
+    profileHint: "Your mobile number. Nigeria is chosen first; tap the flag for another country.",
     /** `{last}` is the last four digits. */
     profileCurrent: "On your profile: the number ending {last}.",
     profileSave: "Save number",
     profileSaving: "Saving",
     profileSaved: "Saved. Your number is on your profile.",
-    profileInvalid: "That is not a Nigerian mobile number. It has 11 digits and starts 070, 071, 080, 081, 090 or 091.",
+    profileInvalid: "That is not a mobile number we can use. Check the digits and the country beside them.",
     profileRefused: "We could not use this number. Try a different number, or contact support.",
     profileFailed: "We could not save your number just now. Nothing was changed. Try again in a moment.",
     profileBack: "Continue",
@@ -144,7 +144,6 @@ export const trustVisibleEn = {
     change: "Use a different number",
     numberLabel: "Mobile number",
     numberHint: "A mobile number from any country. We send a six-digit code to it.",
-    countryLabel: "Country",
     /** A number that is not a mobile number in the country chosen (any country but Nigeria). */
     numberInvalid: "That does not look like a mobile number for the country you chose. Check the digits, or pick another country.",
     send: "Send the code",

@@ -672,7 +672,7 @@ export const experienceHostEn = {
      * built per request from these. `{time}` is an example clock time.
      */
     schema: {
-      phoneBad: "That does not look like a Nigerian mobile number. Enter it as 0803 123 4567.",
+      phoneBad: "That does not look like a mobile number. Check the digits and the country.",
       emailBad: "Enter an email address we can actually write to.",
       cacBad: "That is not an RC or BN number. It is the one on your CAC certificate, like RC 1234567.",
       tinBad: "A TIN is digits, with or without dashes.",

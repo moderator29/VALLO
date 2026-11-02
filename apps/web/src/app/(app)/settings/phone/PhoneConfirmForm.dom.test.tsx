@@ -142,11 +142,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("confirming a phone number", () 
       },
     });
     try {
-      await page.getByLabel("Country").selectOption("GB");
+      await page.getByTestId("phone-country").click();
+      await page.getByLabel("Search countries").fill("United Kingdom");
+      await page.getByRole("button", { name: /United Kingdom/ }).click();
       await page.getByLabel("Mobile number").fill("07911 123456");
       await page.getByRole("button", { name: "Send the code" }).click();
       await page.getByLabel("Code").waitFor();
-      expect(await page.evaluate(() => (window as unknown as { __sent: unknown }).__sent)).toEqual({ phone: "07911 123456", country: "GB" });
+      expect(await page.evaluate(() => (window as unknown as { __sent: unknown }).__sent)).toEqual({ phone: "+44 7911 123456", country: "GB" });
       expect(await page.getByText(/We sent a six-digit code to/).textContent()).toContain("+44 7911 123456");
     } finally {
       await close();

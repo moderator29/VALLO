@@ -1,5 +1,6 @@
 "use server";
 
+import { normalisePhone as normaliseAnyPhone } from "../phone";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { fail, ok, type ActionResult } from "../actions/envelope";
@@ -22,6 +23,7 @@ import {
   lastFour,
   movementReference,
   normalisePhone,
+  paylukPhone,
   onboardingStateFor,
   openFailureKind,
   profileGaps,
@@ -162,11 +164,14 @@ export async function openBalanceAccount(): Promise<ActionResult<OpenResult>> {
       firstName: profile.firstName!.trim(),
       lastName: profile.lastName!.trim(),
       email,
-      phone: normalisePhone(profile.phone ?? "")!,
-      /* No countryId: Payluk's live API refuses "NG" (it casts the field to its
-         own internal id, despite the docs), and an omitted country inherits the
-         merchant account's, which is Nigeria (create-merchant-customer). Seen
-         live 9 October 2026: "Cast to ObjectId failed for value NG". */
+      /* A Nigerian number goes with no countryId: Payluk's live API refuses "NG"
+         (it casts the field to its own internal id, despite the docs), and an
+         omitted country inherits the merchant account's, which is Nigeria
+         (create-merchant-customer). Seen live 9 October 2026: "Cast to ObjectId
+         failed for value NG". A foreign number goes only with the Payluk id for
+         its country (`paylukPhone`, PAYLUK_COUNTRY_IDS); profileGaps already
+         stopped any other before this point. */
+      ...paylukPhone(profile.phone ?? "")!,
     });
     if (!created.ok) {
       /* A refusal is a real answer; anything else is not, and the next try looks up first. */
@@ -528,6 +533,11 @@ function phoneVariants(local: string): string[] {
   return [local, `234${rest}`, `+234${rest}`, rest];
 }
 
+/** A foreign number as the profile may hold it: `+447911123456` or `447911123456`. */
+function foreignVariants(e164: string): string[] {
+  return [e164, e164.slice(1)];
+}
+
 function maskedName(full: string): string {
   const parts = full.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "Vallo member";
@@ -538,8 +548,10 @@ function maskedName(full: string): string {
 
 async function findRecipientRow(db: Db, phone: string, selfId: string): Promise<{ recipient: Recipient } | { error: string }> {
   const local = normalisePhone(phone);
-  if (!local) return { error: REFUSAL.noRecipient };
-  const { data } = await db.from("profiles").select("id, first_name, surname").in("phone", phoneVariants(local)).limit(2);
+  const foreign = local ? null : normaliseAnyPhone(phone);
+  if (!local && !foreign) return { error: REFUSAL.noRecipient };
+  const variants = local ? phoneVariants(local) : foreignVariants(foreign!);
+  const { data } = await db.from("profiles").select("id, first_name, surname").in("phone", variants).limit(2);
   const rows = (data ?? []) as { id: string; first_name: string | null; surname: string | null }[];
   /* Two members on one number is a question for a person, never a guess. */
   if (rows.length !== 1) return { error: REFUSAL.noRecipient };

@@ -235,7 +235,7 @@ export const PHONE_TAKEN_COPY = {
 export const GAP_LABEL: Record<ProfileGap, string> = {
   first_name: "Your first name",
   last_name: "Your surname",
-  phone: "A Nigerian mobile number",
+  phone: "A Nigerian mobile number (payments for numbers outside Nigeria are coming)",
   email: "Your email address",
 };
 

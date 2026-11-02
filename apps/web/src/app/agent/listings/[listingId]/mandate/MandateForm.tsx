@@ -1,5 +1,6 @@
 "use client";
 
+import { PhoneField } from "@/components/app/PhoneField";
 import { useState, useTransition } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -93,18 +94,13 @@ export function MandateForm({
         required
         onChange={(e) => setName(e.target.value)}
       />
-      <label className="nf-label" htmlFor="mandate-phone">
-        {copy.phone}
-      </label>
-      <input
+      <PhoneField
         id="mandate-phone"
-        className="nf-field"
-        type="tel"
-        inputMode="tel"
+        name="principalPhone"
+        label={copy.phone}
         value={phone}
+        onChange={setPhone}
         autoComplete="off"
-        onChange={(e) => setPhone(e.target.value)}
-        aria-describedby="mandate-phone-hint"
       />
       <p id="mandate-phone-hint" className="nf-caption text-[var(--nf-content-secondary)]">
         {copy.phoneHint}

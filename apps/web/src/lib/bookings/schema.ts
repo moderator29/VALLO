@@ -132,7 +132,7 @@ export const reserveInputSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["guestPhone"],
-        message: "That does not look like a Nigerian mobile number. Try 0803 123 4567.",
+        message: "That does not look like a mobile number. Check the digits and the country beside them.",
       });
     }
     if (email.length > 0 && !/^[^\s@]+@[^\s@.]+\.[^\s@]+$/.test(email)) {

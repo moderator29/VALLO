@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "../locale";
 import { normalisePhone } from "../money/funds";
+import { normalisePhone as normaliseAnyPhone } from "../phone";
 import { fail, ok, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
 
@@ -24,7 +25,13 @@ export async function saveProfilePhone(raw: string): Promise<ActionResult<{ last
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state !== "signed-in") return fail(SIGNED_OUT_MESSAGE);
 
-  const phone = normalisePhone(typeof raw === "string" ? raw : "");
+  /* A Nigerian number is kept in the local form the payments partner stores
+     (`08031234567`), as before; a number from any other country in E.164
+     (`+447911123456`), which `paylukPhone` reads when a wallet is opened. */
+  const text = typeof raw === "string" ? raw : "";
+  const local = normalisePhone(text);
+  const any = local ? null : normaliseAnyPhone(text);
+  const phone = local ?? (any && !any.startsWith("+234") ? any : null);
   if (!phone) return fail(copy.profileInvalid, { phone: copy.profileInvalid });
 
   const { error } = await session.supabase.from("profiles").update({ phone }).eq("id", session.user.id);

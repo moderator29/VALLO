@@ -1,4 +1,5 @@
 "use client";
+import { PhoneField } from "@/components/app/PhoneField";
 import "@/app/css/auth.css";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
@@ -28,7 +29,7 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 const SIGNUP_DRAFT_KEY = "vallo_signup_draft";
 
-type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password", string>>;
+type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password" | "phone", string>>;
 
 /**
  * The email form, on its own screen, in the Slate dress.
@@ -180,6 +181,7 @@ export function EmailAuthForm({
   }, [isSignUp]);
 
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   /*
    * THE ACCEPTANCE, AND WHY IT IS STATE RATHER THAN A `required` ATTRIBUTE.
    *
@@ -341,6 +343,17 @@ export function EmailAuthForm({
               error={fieldError("email")}
               check={signUpMethodForEmail}
               initialEmail={initialEmail}
+            />
+            {/* Optional, any country, Nigeria first (2 November 2026). */}
+            <PhoneField
+              id="phone"
+              name="phone"
+              label={t.signUp.phoneLabel}
+              hint={t.signUp.phoneHint}
+              value={phone}
+              onChange={setPhone}
+              autoComplete="tel"
+              error={fieldError("phone")}
             />
             <div>
               <PasswordField

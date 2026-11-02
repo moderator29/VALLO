@@ -195,7 +195,7 @@ export const publicDoorsEn = {
     codeLabel: "{count}-digit code",
     verify: "Continue",
     resend: "Send a new code",
-    badPhone: "Enter a Nigerian mobile number, like 0803 123 4567.",
+    badPhone: "Enter your mobile number. Nigeria is first; tap the flag for another country.",
     badCode: "Enter the {count} digits you were sent.",
     wrongCode: "That code did not work. Type the code from your newest message; your last try is selected, so typing replaces it.",
     verifyLimited: "Too many tries at the code. Wait ten minutes, then type it again.",

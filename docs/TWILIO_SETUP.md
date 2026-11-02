@@ -26,5 +26,5 @@ Built 2 November 2026. Nigerian numbers (+234) still go through Termii. Every ot
 ## Cost (estimates, check Twilio's rate card)
 Delivery only is about $0.04 per UK SMS. So $50 is about 1,250 messages, or about 1,000 people allowing for resends.
 
-## Still Nigerian-only on purpose
-Booking contacts, agent and owner registration, listing mandates, and the wallet's phone use `lib/phone.ts` and database checks that require a Nigerian mobile. The profile number (`ProfilePhoneForm`) is the wallet's number and stays Nigerian too. Sign-in by phone uses Supabase's own phone provider and needs its own setup (see `docs/PHONE_SIGNIN.md`).
+## Every phone field, every country (updated 2 November 2026)
+One field everywhere (`components/app/PhoneField.tsx`): Nigeria first, the flag and calling code as a button, a searchable list of every country. It is on sign-up (optional), confirming a number, the profile and wallet number, phone sign-in, booking contacts, agent and owner registration, the agent application and listing mandates. The database checks on those tables accept any E.164 mobile (migrations `20261102104659` to `20261102104703`). The wallet opens on a foreign number only when Payluk's id for that country is set (`PAYLUK_COUNTRY_IDS`); see `docs/payments/DIASPORA_PAYMENTS.md`. The agent-lookup door and the landlord SMS line stay Nigerian by design.

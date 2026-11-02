@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { TextField } from "@/components/ui/Field";
-import { PhoneNumberInput } from "@/components/app/PhoneNumberInput";
+import { PhoneField } from "@/components/app/PhoneField";
 import type { CountryCode } from "libphonenumber-js/mobile";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { DEFAULT_COUNTRY, formatInternational, guessCountry } from "@/lib/phone-intl";
@@ -159,14 +159,15 @@ export function PhoneConfirmForm({
         </div>
       ) : sentTo === null ? (
         <>
-          <PhoneNumberInput
+          <PhoneField
+            name="phone"
             label={copy.numberLabel}
-            countryLabel={copy.countryLabel}
             hint={copy.numberHint}
+            autoComplete="tel"
             country={country}
             onCountryChange={setCountry}
             value={phone}
-            onValueChange={setPhone}
+            onChange={setPhone}
           />
           <Button type="button" variant="primary" full loading={pending} onClick={send} disabled={phone.trim() === ""}>
             {pending ? copy.sending : copy.send}

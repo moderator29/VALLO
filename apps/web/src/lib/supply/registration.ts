@@ -31,7 +31,7 @@ const fullName = trimmed
 const phone = trimmed
   .min(1, "We need a number that reaches you.")
   .refine((value) => normalisePhone(value) !== null, {
-    message: "That does not look like a Nigerian mobile number. Enter it as 0803 123 4567.",
+    message: "That does not look like a mobile number. Check the digits and the country beside them.",
   });
 
 /**

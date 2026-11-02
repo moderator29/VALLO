@@ -102,3 +102,30 @@ export function maskInternational(raw: string, country: CountryCode): string {
 export function isNigerian(e164: string): boolean {
   return e164.startsWith("+234");
 }
+
+/**
+ * A pasted or autofilled `+44 7911 123456`: its country and the national
+ * number to show in the field, or null when it is not a full international
+ * number. Lets the phone field switch country on a paste instead of mangling it.
+ */
+export function splitInternational(raw: string): { country: CountryCode; national: string } | null {
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("+")) return null;
+  const parsed = parsePhoneNumberFromString(trimmed);
+  if (!parsed?.country) return null;
+  return { country: parsed.country, national: parsed.formatNational() };
+}
+
+/** A country's name in English, falling back to its code. */
+export function countryName(country: CountryCode): string {
+  try {
+    return new Intl.DisplayNames(["en"], { type: "region" }).of(country) ?? country;
+  } catch {
+    return country;
+  }
+}
+
+/** The country of an E.164 number, or null. */
+export function countryOfNumber(e164: string): CountryCode | null {
+  return parsePhoneNumberFromString(e164)?.country ?? null;
+}

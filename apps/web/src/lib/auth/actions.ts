@@ -1,5 +1,7 @@
 "use server";
 
+import { normalisePhone } from "@/lib/phone";
+import { normalisePhone as paylukLocalPhone } from "@/lib/money/funds";
 import { safeReturnPath } from "@/lib/security/return-path";
 import { withNext } from "./next-link";
 import { emailFromQuery } from "@/components/auth/auth-intent";
@@ -122,6 +124,16 @@ function validateCredentials(
   return errors;
 }
 
+/** The sign-up form's optional number, in the form `profiles.phone` keeps, or null. */
+function signUpPhone(formData: FormData): string | null {
+  const raw = field(formData, "phone").trim();
+  if (!raw) return null;
+  const local = paylukLocalPhone(raw);
+  if (local) return local;
+  const any = normalisePhone(raw, field(formData, "phoneCountry"));
+  return any && !any.startsWith("+234") ? any : null;
+}
+
 function validateSignUp(formData: FormData, w: Refusals): Partial<Record<AuthField, string>> {
   const errors = validateCredentials(formData, w);
 
@@ -183,6 +195,11 @@ function validateSignUp(formData: FormData, w: Refusals): Partial<Record<AuthFie
      stood in front of it was reading markup as text. */
   const refusal = termsRefusal(field(formData, "termsVersion"));
   if (refusal) errors.acceptTerms = refusal;
+
+  /* The mobile number is optional; one that is typed must be a real mobile. */
+  if (field(formData, "phone").trim() && signUpPhone(formData) === null) {
+    errors.phone = "That does not look like a mobile number. Check the digits and the country beside them, or leave it empty.";
+  }
   const underAge = ageRefusal(field(formData, "ageConfirmed"));
   if (underAge) errors.ageConfirmed = underAge;
 
@@ -451,6 +468,10 @@ export async function signUpWithEmail(
         occupation_code: field(formData, "occupationCode").trim().toLowerCase() || null,
         display_name: nickname.length > 0 ? nickname : [firstName, surname].join(" ").trim(),
         hear_about: field(formData, "hearAbout") || null,
+        /* The optional mobile number (any country), which handle_new_user
+           writes to profiles.phone: Nigerian numbers in the local form the
+           payments partner stores, every other country in E.164. */
+        phone: signUpPhone(formData),
         /* A11: the language this form was read in, so the confirmation code
            email arrives in it before the person has a setting of their own. */
         locale: await getLocale(),

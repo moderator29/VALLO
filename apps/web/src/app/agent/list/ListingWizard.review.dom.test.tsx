@@ -191,8 +191,21 @@ describe.runIf(hasBrowser)("the wizard's way back, its save of an emptied box, a
         "sitting-room.png: That photo did not finish uploading.",
       );
 
-      /* The connection comes back: storage takes the file this time. */
+      /* The connection comes back: storage takes the file this time. Photos
+         upload through `lib/media/upload.ts` (XMLHttpRequest with the member's
+         session token), so the session answers and the request lands. */
       await page.evaluate(() => {
+        Object.defineProperty(Object.prototype, "auth", {
+          value: { getSession: async () => ({ data: { session: { access_token: "token" } } }) },
+          configurable: true,
+          writable: true,
+        });
+        XMLHttpRequest.prototype.open = function () {};
+        XMLHttpRequest.prototype.setRequestHeader = function () {};
+        XMLHttpRequest.prototype.send = function (this: XMLHttpRequest) {
+          Object.defineProperty(this, "status", { value: 200 });
+          window.setTimeout(() => this.onload?.(new ProgressEvent("load")), 0);
+        };
         Object.defineProperty(Object.prototype, "upload", { value: async () => ({ error: null }), configurable: true, writable: true });
         Object.defineProperty(Object.prototype, "getPublicUrl", {
           value: () => ({ data: { publicUrl: "http://localhost/sitting-room.jpg" } }),

@@ -29,6 +29,8 @@
  * first time somebody rings it and the real one is a lost booking.
  */
 
+import { formatInternational, isCountryCode, readInternational } from "./phone-intl";
+
 export type Carrier =
   | "MTN"
   | "Glo"
@@ -96,9 +98,37 @@ export function nationalDigits(raw: string): string | null {
  * E.164. This is what is stored and what a database check constraint enforces,
  * so a host reading two bookings sees the same number written the same way.
  */
-export function normalisePhone(raw: string): string | null {
+export function normalisePhone(raw: string, country?: string | null): string | null {
+  /* EVERY COUNTRY (2 November 2026). A number written with a plus that is not
+     +234, or one typed with another country chosen beside it, is read by the
+     international rules (`phone-intl.ts`, mobile ranges only). Everything else
+     is the Nigerian reading below, unchanged, so a Nigerian number written any
+     of its six ways still becomes `+234...`. */
+  const intl = foreignReading(raw, country);
+  if (intl !== undefined) return intl;
   const national = nationalDigits(raw);
   return national === null ? null : `+234${national}`;
+}
+
+/**
+ * The international reading when the number is not Nigerian: an E.164 string,
+ * null when it is not a mobile number, or `undefined` when the Nigerian rules
+ * should read it instead.
+ */
+function foreignReading(raw: string, country?: string | null): string | null | undefined {
+  const trimmed = raw.trim();
+  const plus = trimmed.startsWith("+") || trimmed.startsWith("00");
+  const digits = trimmed.replace(/\D/g, "");
+  const chosen = country && isCountryCode(country) && country !== "NG" ? country : null;
+  if (plus) {
+    const international = trimmed.startsWith("00") ? `+${digits.slice(2)}` : trimmed;
+    if (international.replace(/\D/g, "").startsWith("234")) return undefined;
+    const reading = readInternational(international);
+    return reading.state === "valid" ? reading.e164 : null;
+  }
+  if (!chosen) return undefined;
+  const reading = readInternational(trimmed, chosen);
+  return reading.state === "valid" ? reading.e164 : null;
 }
 
 /** Which network, or null when the range is not one we know of. */
@@ -170,6 +200,7 @@ export function maskNational(raw: string): string {
 
 /** `+234 803 123 4567`, for reading back a stored number. */
 export function formatPhone(raw: string): string {
+  if (/^\+(?!234)\d{7,15}$/.test(raw.trim())) return formatInternational(raw.trim());
   const national = nationalDigits(raw);
   if (national === null) return raw;
   return `+234 ${maskNational(national)}`;

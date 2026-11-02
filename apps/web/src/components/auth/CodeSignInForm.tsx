@@ -1,4 +1,5 @@
 "use client";
+import { PhoneField } from "@/components/app/PhoneField";
 import "@/app/css/auth.css";
 
 import { useActionState, useEffect, useRef, useState } from "react";
@@ -47,6 +48,7 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
     CODE_START,
   );
   const [code, setCode] = useState("");
+  const [phoneValue, setPhoneValue] = useState("");
   const verifyForm = useRef<HTMLFormElement>(null);
   /* One shake per refusal, counted as the answer arrives, as
      VerifyCodeForm does. */
@@ -117,15 +119,13 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
               error={state.error === "badTarget" ? t.publicDoors.emailCode.badEmail : undefined}
             />
           ) : (
-            <Field
-              t={t}
+            <PhoneField
               id="code-phone"
               name="phone"
-              type="tel"
-              inputMode="tel"
-              label={`${t.publicDoors.phone.phoneLabel} (${t.publicDoors.phone.prefix})`}
-              placeholder={t.publicDoors.phone.placeholder}
-              autoComplete="tel-national"
+              label={t.publicDoors.phone.phoneLabel}
+              value={phoneValue}
+              onChange={setPhoneValue}
+              autoComplete="tel"
               error={state.error === "badTarget" ? t.publicDoors.phone.badPhone : undefined}
             />
           )}

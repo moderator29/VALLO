@@ -33,7 +33,7 @@ const FAILED = "That was not saved. Nothing has changed. Try again in a moment."
 const FIELD_MESSAGE: Record<MandateFormField, string> = {
   kind: "Say what the owner asked you to do.",
   principalName: "Write the owner's full name.",
-  principalPhone: "Write a Nigerian mobile number we can ring, or leave it empty.",
+  principalPhone: "Write a mobile number we can ring, from any country, or leave it empty.",
   relationship: "Say how this person stands to the property.",
   dates: "The end date cannot be before the signing date.",
   endsInThePast: "The end date has already passed. Give the date the owner's new instruction ends, or leave it empty.",

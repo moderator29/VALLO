@@ -1454,6 +1454,8 @@ export const en = {
     firstNamePlaceholder: "Ada",
     surnameLabel: "Surname",
     surnamePlaceholder: "Okafor",
+    phoneLabel: "Mobile number (optional)",
+    phoneHint: "For your account and payments. Nigeria is first; tap the flag for another country. You confirm it with a code later.",
     nicknameLabel: "Nickname",
     nicknamePlaceholder: "What friends call you",
     passwordMismatch: "Passwords do not match.",

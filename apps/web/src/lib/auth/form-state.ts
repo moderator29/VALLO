@@ -29,6 +29,8 @@ export type AuthField =
   | "lgaCode"
   | "occupationCode"
   | "referralCode"
+  /* The optional mobile number on sign-up, any country (2 November 2026). */
+  | "phone"
   /* The six digits from the confirmation email. Part of the same union so the
      verify screen reports a bad code exactly the way every other field on
      every other auth form reports a bad value. */

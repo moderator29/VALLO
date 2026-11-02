@@ -4,9 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
-import { TextField } from "@/components/ui/Field";
+import { PhoneField } from "@/components/app/PhoneField";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { maskNational } from "@/lib/phone";
 import { saveProfilePhone } from "@/lib/settings/profile-phone";
 
 /**
@@ -50,15 +49,14 @@ export function ProfilePhoneForm({
           {savedLast ? copy.profileSaved : copy.profileCurrent.replace("{last}", last)}
         </p>
       ) : null}
-      <TextField
+      <PhoneField
+        name="phone"
         label={copy.numberLabel}
         hint={copy.profileHint}
         error={error ?? undefined}
-        inputMode="tel"
-        autoComplete="tel-national"
-        value={maskNational(phone)}
-        onChange={(event) => setPhone(event.target.value)}
-        leadingIcon="phone"
+        autoComplete="tel"
+        value={phone}
+        onChange={setPhone}
       />
       <Button type="button" variant="primary" full loading={pending} onClick={save} disabled={phone.trim() === ""}>
         {pending ? copy.profileSaving : copy.profileSave}
