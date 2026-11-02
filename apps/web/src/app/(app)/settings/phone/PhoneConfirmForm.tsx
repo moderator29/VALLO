@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { TextField } from "@/components/ui/Field";
+import { PhoneNumberInput } from "@/components/app/PhoneNumberInput";
+import type { CountryCode } from "libphonenumber-js/mobile";
 import { Button, ButtonLink } from "@/components/ui/Button";
-import { maskNational } from "@/lib/phone";
+import { DEFAULT_COUNTRY, formatInternational, guessCountry } from "@/lib/phone-intl";
 import { feedback } from "@/lib/ui/feedback";
 import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
@@ -52,6 +54,7 @@ export function PhoneConfirmForm({
 }) {
   const router = useRouter();
   const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState<CountryCode>(DEFAULT_COUNTRY);
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
   /* The server said confirmed (the control morphs to the tick)... */
@@ -64,6 +67,14 @@ export function PhoneConfirmForm({
   const codeField = useRef<HTMLDivElement | null>(null);
   const resend = useRef<HTMLButtonElement | null>(null);
   const next = useRef<"code" | "resend" | null>(null);
+
+  /* A browser in the UK or the US starts on its own country; everyone else on Nigeria. */
+  useEffect(() => {
+    const guessed = guessCountry(navigator.language);
+    /* A one-time read of the browser's language after hydration, so the server and client first render match. */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (guessed) setCountry(guessed);
+  }, []);
 
   /* The payoff: the haptic on the pop, the face turns when the pop ends (at
      once in a quiet mode, where there is no pop). */
@@ -106,7 +117,7 @@ export function PhoneConfirmForm({
   function send() {
     setError(null);
     startTransition(async () => {
-      const result = await sendPhoneCode({ phone });
+      const result = await sendPhoneCode({ phone, country });
       if (!result.ok) {
         setError(result.error);
         return;
@@ -148,14 +159,14 @@ export function PhoneConfirmForm({
         </div>
       ) : sentTo === null ? (
         <>
-          <TextField
+          <PhoneNumberInput
             label={copy.numberLabel}
+            countryLabel={copy.countryLabel}
             hint={copy.numberHint}
-            inputMode="tel"
-            autoComplete="tel-national"
-            value={maskNational(phone)}
-            onChange={(event) => setPhone(event.target.value)}
-            leadingIcon="phone"
+            country={country}
+            onCountryChange={setCountry}
+            value={phone}
+            onValueChange={setPhone}
           />
           <Button type="button" variant="primary" full loading={pending} onClick={send} disabled={phone.trim() === ""}>
             {pending ? copy.sending : copy.send}
@@ -164,7 +175,7 @@ export function PhoneConfirmForm({
       ) : (
         <>
           <p className="nf-body-sm text-[var(--nf-content-secondary)]">
-            {copy.sentTo.replace("{number}", `+234 ${maskNational(sentTo)}`)}
+            {copy.sentTo.replace("{number}", formatInternational(sentTo))}
           </p>
           <div ref={codeField}>
             <TextField

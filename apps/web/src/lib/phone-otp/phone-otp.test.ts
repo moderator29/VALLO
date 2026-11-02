@@ -194,7 +194,7 @@ describe("the wiring", () => {
 
   it("the code is never returned by the send action", () => {
     const src = readFileSync(join(root, "lib/phone-otp/actions.ts"), "utf8");
-    expect(src).toContain("return ok({ sentTo: reading.e164 });");
+    expect(src).toContain("return ok({ sentTo: e164 });");
     expect(src).not.toMatch(/ok\(\{[^}]*code/);
   });
 });

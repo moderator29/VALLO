@@ -40,6 +40,7 @@
     "@vallo/i18n": "*",
     "framer-motion": "^12.43.0",
     "leaflet": "^1.9.4",
+    "libphonenumber-js": "^1.13.15",
     "livekit-client": "2.22.3",
     "next": "^16.3.8",
     "react": "^19.3.0",

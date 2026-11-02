@@ -7,6 +7,7 @@ import { getDictionary, type Dictionary } from "@vallo/i18n";
 import { z } from "zod";
 import { getLocale } from "../locale";
 import { readPhone } from "../phone";
+import { isCountryCode, readInternational } from "../phone-intl";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
 import { consume, subjectForUser } from "../security/rate-limit";
@@ -97,14 +98,32 @@ export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sent
   const messages = sendMessages(copy);
   if (!(await phoneConfirmationOn())) return fail(copy.closed);
 
-  const parsed = validate(z.object({ phone: z.string().trim().min(1, copy.numberEmpty) }), input);
+  const parsed = validate(
+    z.object({ phone: z.string().trim().min(1, copy.numberEmpty), country: z.string().max(2).optional() }),
+    input,
+  );
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
-  const reading = readPhone(parsed.data.phone);
-  if (reading.state !== "valid") {
-    /* The shape of a Nigerian number, said about the digits typed: it is the
-       same for every person and says nothing about who holds the number. */
-    const words = reading.state === "invalid" ? reading.reason : copy.profileInvalid;
-    return fail(words, { phone: words });
+  const country = isCountryCode(parsed.data.country) ? parsed.data.country : "NG";
+  const typed = parsed.data.phone;
+  /* A number typed with a plus is read as written; one without is read in the
+     chosen country. Nigerian numbers keep their own reading (carrier names, NCC
+     ranges) and go to Termii; every other country is read by the international
+     rules and goes to Twilio (`transport.ts`). */
+  const nigerian = typed.startsWith("+") ? typed.replace(/\D/g, "").startsWith("234") : country === "NG";
+  let e164: string;
+  if (nigerian) {
+    const reading = readPhone(typed);
+    if (reading.state !== "valid") {
+      /* The shape of a Nigerian number, said about the digits typed: it is the
+         same for every person and says nothing about who holds the number. */
+      const words = reading.state === "invalid" ? reading.reason : copy.profileInvalid;
+      return fail(words, { phone: words });
+    }
+    e164 = reading.e164;
+  } else {
+    const reading = readInternational(typed, country);
+    if (reading.state !== "valid") return fail(copy.numberInvalid, { phone: copy.numberInvalid });
+    e164 = reading.e164;
   }
   if (!hasServiceRole()) return fail(messages.unconfigured);
 
@@ -124,7 +143,7 @@ export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sent
         (await allowed("phone_otp_number_day", `phone:${phone}`, 20, 86_400)),
     },
     session.user.id,
-    reading.e164,
+    e164,
   );
   if (!result.ok) {
     if (result.reason === "refused") {
@@ -135,7 +154,7 @@ export async function sendPhoneCode(input: unknown): Promise<ActionResult<{ sent
     }
     return fail(messages[result.reason]);
   }
-  return ok({ sentTo: reading.e164 });
+  return ok({ sentTo: e164 });
 }
 
 export async function confirmPhoneCode(input: unknown): Promise<ActionResult<{ confirmed: true }>> {

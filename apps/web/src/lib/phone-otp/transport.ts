@@ -1,4 +1,5 @@
 import { termiiConfig, termiiTransport } from "./termii";
+import { twilioConfig, twilioTransport } from "./twilio";
 /**
  * HOW A CODE REACHES A PHONE (V-50): AN INTERFACE, AND THE FOUNDER'S VENDOR
  * BEHIND IT.
@@ -14,8 +15,9 @@ import { termiiConfig, termiiTransport } from "./termii";
  *   capturing     for tests: it records what it was asked to send, so the
  *                 whole flow (issue, deliver, confirm) is proven end to end.
  *
- * THE ONE SWAP. Implement `OtpTransport` for the chosen aggregator, return it
- * from `otpTransport()` when its key is present, and turn the flag on.
+ * THE TWO VENDORS. `termii.ts` for Nigeria, `twilio.ts` for everywhere else,
+ * chosen by the number in `routedTransport`. To add another, implement
+ * `OtpTransport` and route to it from `otpTransport()`.
  *
  * NEVER TO A LOCK SCREEN. A code is not sent as a push notification, because a
  * lock screen is readable by whoever holds the phone. SMS and WhatsApp are the
@@ -48,10 +50,28 @@ export function capturingTransport(outbox: CapturedMessage[]): OtpTransport {
   };
 }
 
-/** The transport this deployment uses. No vendor is wired yet. */
+/**
+ * ROUTED BY COUNTRY (2 November 2026). A Nigerian number (+234) goes through
+ * Termii and every other number through Twilio. Each leg is "unconfigured"
+ * until its own keys are set, so turning one on never changes the other, and a
+ * number is never sent through the wrong vendor.
+ */
+export function routedTransport(nigerian: OtpTransport, abroad: OtpTransport): OtpTransport {
+  return {
+    name: `${nigerian.name}+${abroad.name}`,
+    send(phoneE164, message) {
+      return (phoneE164.startsWith("+234") ? nigerian : abroad).send(phoneE164, message);
+    },
+  };
+}
+
+/** The transport this deployment uses. */
 export function otpTransport(): OtpTransport {
-  /* A2: Termii when its key and sender id are set; otherwise nothing is sent
-     and every caller says so. Never a fake success. */
   const termii = termiiConfig();
-  return termii ? termiiTransport(termii) : unconfiguredTransport;
+  const twilio = twilioConfig();
+  if (!termii && !twilio) return unconfiguredTransport;
+  return routedTransport(
+    termii ? termiiTransport(termii) : unconfiguredTransport,
+    twilio ? twilioTransport(twilio) : unconfiguredTransport,
+  );
 }

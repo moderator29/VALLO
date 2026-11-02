@@ -143,7 +143,10 @@ export const trustVisibleEn = {
     confirmed: "Your mobile number ending {last} was confirmed on {date}.",
     change: "Use a different number",
     numberLabel: "Mobile number",
-    numberHint: "A Nigerian mobile number. We send a six-digit code to it.",
+    numberHint: "A mobile number from any country. We send a six-digit code to it.",
+    countryLabel: "Country",
+    /** A number that is not a mobile number in the country chosen (any country but Nigeria). */
+    numberInvalid: "That does not look like a mobile number for the country you chose. Check the digits, or pick another country.",
     send: "Send the code",
     sending: "Sending",
     /** `{number}` is the masked number. */
