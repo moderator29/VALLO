@@ -34,6 +34,15 @@ export async function saveProfilePhone(raw: string): Promise<ActionResult<{ last
   const phone = local ?? (any && !any.startsWith("+234") ? any : null);
   if (!phone) return fail(copy.profileInvalid, { phone: copy.profileInvalid });
 
+  /* A confirmed number is the account's identity and never changes
+     (2 November 2026): once confirmed, the profile number is that one. */
+  const { data: confirmed } = await session.supabase
+    .from("confirmed_phones")
+    .select("phone")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+  if ((confirmed as { phone?: string } | null)?.phone) return fail(copy.numberFixed, { phone: copy.numberFixed });
+
   const { error } = await session.supabase.from("profiles").update({ phone }).eq("id", session.user.id);
   if (error) {
     /* The denylist trigger raises check_violation / a raise exception: a refusal, not a fault. */

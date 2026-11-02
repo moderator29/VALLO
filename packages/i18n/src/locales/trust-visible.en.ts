@@ -149,10 +149,11 @@ export const trustVisibleEn = {
     /** `{number}` is the number, written in full: it is the person's own, on their own screen. */
     signUpSentTo: "We sent a six-digit code to {number}.",
     signUpSending: "Sending a six-digit code to {number}.",
-    changeNumber: "Change number",
-    keepNumber: "Keep this number",
-    sendToNew: "Send the code to this number",
     later: "Do this later",
+    /* A confirmed number is the account's identity and never changes (2 November 2026). */
+    numberFixed: "Your mobile number is confirmed and cannot be changed. If it is wrong, contact support.",
+    wrongNumber: "Wrong number?",
+    contactSupport: "Contact support",
     /** A number that is not a mobile number in the country chosen (any country but Nigeria). */
     numberInvalid: "That does not look like a mobile number for the country you chose. Check the digits, or pick another country.",
     send: "Send the code",

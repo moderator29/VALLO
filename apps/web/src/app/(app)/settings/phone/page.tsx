@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
@@ -129,8 +130,18 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
                 </p>
               </div>
             )}
-            {data && <h2 className="nf-group-label">{copy.change}</h2>}
-            <PhoneConfirmForm copy={copy} next={next} />
+            {/* A confirmed number never changes (2 November 2026): no form, only
+                the way to support for a number that is wrong. */}
+            {data ? (
+              <p className={TYPE.body} data-testid="phone-fixed">
+                {copy.numberFixed}{" "}
+                <Link href="/support" className="nf-link">
+                  {copy.contactSupport}
+                </Link>
+              </p>
+            ) : (
+              <PhoneConfirmForm copy={copy} next={next} />
+            )}
           </>
         )}
       </div>

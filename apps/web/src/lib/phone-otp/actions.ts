@@ -56,6 +56,7 @@ function sendMessages(copy: PhoneCopy): Record<Exclude<SendOutcome, { ok: true }
     limited: copy.sendLimited,
     refused: copy.numberRefused,
     already: copy.sendAlready,
+    fixed: copy.numberFixed,
     unconfigured: copy.sendUnconfigured,
     failed: copy.sendFailed,
   };

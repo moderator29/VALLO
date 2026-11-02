@@ -31,7 +31,7 @@ export type SendDeps = {
 export type SendOutcome =
   | { ok: true }
   | { ok: false; reason: "refused"; staffReason: "taken" | "invalid" }
-  | { ok: false; reason: "limited" | "already" | "unconfigured" | "failed" };
+  | { ok: false; reason: "limited" | "already" | "fixed" | "unconfigured" | "failed" };
 
 export async function runSendCode(deps: SendDeps, userId: string, phoneE164: string): Promise<SendOutcome> {
   if (!(await deps.allow(userId, phoneE164))) return { ok: false, reason: "limited" };
@@ -44,6 +44,7 @@ export async function runSendCode(deps: SendDeps, userId: string, phoneE164: str
     return { ok: false, reason: "failed" };
   }
   if (issued === "already") return { ok: false, reason: "already" };
+  if (issued === "fixed") return { ok: false, reason: "fixed" };
   if (issued === "taken" || issued === "invalid") return { ok: false, reason: "refused", staffReason: issued };
   const sent = await deps.transport.send(phoneE164, otpMessage(code));
   return sent.ok ? { ok: true } : { ok: false, reason: sent.reason };

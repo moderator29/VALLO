@@ -126,9 +126,10 @@ export function phoneGateNeeded(input: {
  * number is already confirmed on the member's OWN account is their own data
  * and is said plainly (`already`).
  */
-export type MemberIssueRefusal = "refused" | "already";
+export type MemberIssueRefusal = "refused" | "already" | "fixed";
 
 export function memberIssueRefusal(outcome: Exclude<IssueOutcome, "issued">): MemberIssueRefusal {
+  if (outcome === "fixed") return "fixed";
   return outcome === "already" ? "already" : "refused";
 }
 
@@ -140,10 +141,12 @@ export function memberConfirmRefusal(outcome: Exclude<ConfirmOutcome, "confirmed
 }
 
 /** What `public.phone_otp_issue` and `public.confirm_phone` answer. */
-export type IssueOutcome = "issued" | "taken" | "already" | "invalid";
+/* `fixed`: the account already has a confirmed number and asked for a different one;
+   a confirmed number never changes (2 November 2026). */
+export type IssueOutcome = "issued" | "taken" | "already" | "invalid" | "fixed";
 export type ConfirmOutcome = "confirmed" | "wrong" | "expired" | "locked" | "no_code" | "taken" | "signed_out";
 
-export const ISSUE_OUTCOMES: readonly IssueOutcome[] = ["issued", "taken", "already", "invalid"];
+export const ISSUE_OUTCOMES: readonly IssueOutcome[] = ["issued", "taken", "already", "invalid", "fixed"];
 export const CONFIRM_OUTCOMES: readonly ConfirmOutcome[] = [
   "confirmed",
   "wrong",
