@@ -156,7 +156,7 @@ export function SubjectCard({
           >
             <div className="flex flex-wrap items-center gap-xs">
               <span className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">
-                {KIND_LABEL[doc.kind] ?? doc.kind}
+                {doc.answersRequest ? "Selfie holding their ID (asked for)" : (KIND_LABEL[doc.kind] ?? doc.kind)}
               </span>
               {doc.subtype && (
                 <span className="text-[length:var(--nf-text-overline)] text-[var(--nf-content-secondary)]">

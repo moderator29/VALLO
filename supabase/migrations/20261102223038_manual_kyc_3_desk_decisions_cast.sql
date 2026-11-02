@@ -1,18 +1,11 @@
--- Run in the Supabase SQL editor, the whole file at once (2 November 2026).
---
--- PART 1, A FIX THAT MATTERS NOW. The function behind "Approve" and "Reject"
--- on the verification desk assigned a text value to the review_status enum
--- column, which Postgres refuses: every decision on /admin/kyc has failed
--- with "service down" since 25 September 2026. This is the same function as
--- migration 20261102214610 with the one cast added. Tested in a rolled-back
--- transaction: needs a name to approve an ID, waits for the selfie, ignores a
--- replaced selfie, then confirms the identity for anyone (not only agents).
---
--- PART 2. New verification documents tell the people who review them, once
--- per person per submission. (The connector stopped for approval on the DROP
--- TRIGGER line, which is why this is a file.)
 set lock_timeout = '5s';
 
+-- THE VERIFICATION DESK COULD NOT DECIDE ANYTHING (found 2 November 2026).
+-- review_kyc_document assigned a text CASE to the review_status enum column,
+-- which Postgres refuses ("column is of type document_review_status but
+-- expression is of type text"), so every Approve and Reject on /admin/kyc has
+-- answered "service down" since 25 September 2026. The same function as
+-- 20261102214610 with the one cast added; tested in a rolled-back transaction.
 create or replace function private.review_kyc_document(acting_admin uuid, p_document uuid, p_approve boolean, p_reason text)
 returns jsonb
 language plpgsql
@@ -129,39 +122,3 @@ begin
   return jsonb_build_object('status', 'ok', 'document_id', doc.id, 'approved', p_approve);
 end;
 $function$;
-
-create or replace function private.announce_kyc_documents()
-returns trigger
-language plpgsql
-security definer
-set search_path to ''
-as $fn$
-declare
-  who uuid;
-begin
-  begin
-    for who in
-      select distinct coalesce(n.uploader_id,
-               (select a.user_id from public.agent_applications a where a.id = n.application_id))
-        from added n
-       where n.kind in ('identity', 'selfie', 'address', 'business')
-         and n.review_status = 'pending'
-    loop
-      if who is not null then
-        perform private.tell_scope('kyc_review', 'Someone is waiting to be verified',
-          'New ID documents were sent. Open the verification desk to review them.', '/admin/kyc',
-          array[who]);
-      end if;
-    end loop;
-  exception when others then
-    raise warning 'announce_kyc_documents: %', sqlerrm;
-  end;
-  return null;
-end;
-$fn$;
-revoke all on function private.announce_kyc_documents() from public, anon, authenticated;
-
-drop trigger if exists zz_announce_kyc_documents on public.agent_documents;
-create trigger zz_announce_kyc_documents after insert on public.agent_documents
-  referencing new table as added
-  for each statement execute function private.announce_kyc_documents();

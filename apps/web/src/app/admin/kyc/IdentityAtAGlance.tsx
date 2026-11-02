@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RequestSelfieWithId } from "./RequestSelfieWithId";
 import type { KycDocumentView, KycSubjectView } from "@/lib/admin/kyc-queries";
 
 /**
@@ -57,7 +58,7 @@ export const REVIEW_CHECKLIST: readonly string[] = [
   "The selfie is a live photo of a real face, not a photo of a photo, and it is the same person as the photo on the ID.",
   "The name on the ID is the name on the account. A different order or a missing middle name is fine; a different person is not.",
   "The proof of address is dated in the last three months and shows the same name.",
-  "If anything feels wrong, do not guess. Reject it with a clear reason, or book a video call from Review calls.",
+  "If you cannot confirm it, do not guess: ask for a selfie holding their ID (below), reject with a clear reason, or book a video call from Review calls.",
 ];
 
 export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectView; decidable: boolean }) {
@@ -72,7 +73,7 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
         <Face doc={id} label="Their ID" missing="No ID filed yet." />
         <Face
           doc={selfie}
-          label="Their selfie"
+          label={selfie?.answersRequest ? "Their selfie holding the ID" : "Their selfie"}
           missing="No selfie. Older sign-ups came without one: approve on the ID only if its photo is clear, or book a video call."
         />
       </div>
@@ -101,6 +102,19 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
           {bank.match ? "Bank name matches" : "Bank name differs: look closer"}
         </p>
       )}
+
+      {/* Not trusted: ask for a selfie holding the ID. Never a step of the flow. */}
+      {decidable && subject.userId ? (
+        <RequestSelfieWithId
+          subjectId={subject.userId}
+          open={subject.request?.status === "open" ? { requestedAt: subject.request.requestedAt, message: subject.request.message } : null}
+        />
+      ) : null}
+      {subject.request?.status === "answered" && selfie?.answersRequest ? (
+        <p className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]" data-testid="request-answered">
+          They sent the selfie holding their ID that was asked for. Compare both faces and the ID in their hand.
+        </p>
+      ) : null}
 
       <details className="mt-sm" open={decidable} data-testid="review-checklist">
         <summary className="cursor-pointer text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-primary)]">

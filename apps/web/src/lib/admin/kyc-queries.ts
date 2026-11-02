@@ -6,6 +6,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { Constants, type Database } from "../supabase/database.types";
 import { documentMedia, type DocumentMedia } from "./documents";
 import { requireAdmin } from "./guard";
+import { createAdminClient } from "../supabase/admin";
 import { lagosDayEnd, lagosDayStart, pickStatus, type AdminQueueFilter } from "./queue-filter";
 import type { AdminRead } from "./money-queries";
 import { personName, type ConsentRow } from "./member-file-rules";
@@ -58,6 +59,8 @@ export type KycDocumentView = {
   isResubmission: boolean;
   /** The name as printed on an approved ID, typed by the reviewer. Null otherwise. */
   nameOnDocument: string | null;
+  /** True for a selfie sent back because a reviewer asked for one holding the ID. */
+  answersRequest: boolean;
   /**
    * True when a proof of address states an issue date older than the rule
    * allows, or states none at all. Computed rather than stored, because the
@@ -104,6 +107,8 @@ export type KycSubjectView = {
   namesOnRecord: { account: string | null; application: string | null };
   /** The name printed on their approved ID, once a reviewer has typed it. */
   identityName: string | null;
+  /** The latest request for a selfie holding their ID, if a reviewer made one. */
+  request: { status: "open" | "answered" | "closed"; message: string; requestedAt: string; answeredAt: string | null } | null;
   /**
    * The consent receipt: every agreement this person gave on `/verification`
    * (`kyc_consents`: accuracy, terms, processing), newest first. A reviewer
@@ -242,11 +247,16 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
       consentsFor(access.supabase, userIds),
     ]);
 
-    const [legalNames, idNames] = await Promise.all([
+    const [legalNames, idNames, requests, answering] = await Promise.all([
       legalNamesFor(access.supabase, userIds),
       namesOnDocuments(
         access.supabase,
         documents.filter((d) => d.kind === "identity").map((d) => d.id),
+      ),
+      requestsFor(userIds),
+      answeringDocuments(
+        access.supabase,
+        documents.filter((d) => d.kind === "selfie").map((d) => d.id),
       ),
     ]);
 
@@ -292,6 +302,7 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
             application: application?.full_name?.trim() || null,
           },
           identityName: idNameFor(documents, idNames, owner),
+          request: owner ? (requests.get(owner) ?? null) : null,
           consents: owner ? (consents.rows.get(owner) ?? []) : [],
           consentsRead: consents.ok,
         };
@@ -312,6 +323,7 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
         isResubmission: doc.supersedes_id !== null,
         tooOld: isTooOld(doc.kind, doc.issued_on),
         nameOnDocument: idNames.get(doc.id) ?? null,
+        answersRequest: answering.has(doc.id),
       });
     }
 
@@ -373,6 +385,52 @@ async function namesOnDocuments(supabase: SupabaseClient<Database>, ids: string[
   if (error || !Array.isArray(data)) return out;
   for (const row of data as { id: string; name_on_document: string | null }[]) {
     if (row.name_on_document?.trim()) out.set(row.id, row.name_on_document.trim());
+  }
+  return out;
+}
+
+/** Which selfies answer a reviewer's request (a selfie holding the ID). */
+async function answeringDocuments(supabase: SupabaseClient<Database>, ids: string[]): Promise<Set<string>> {
+  const out = new Set<string>();
+  if (ids.length === 0) return out;
+  const { data, error } = await (supabase as unknown as LooseRead)
+    .from("agent_documents")
+    .select("id, request_id")
+    .in("id", ids);
+  if (error || !Array.isArray(data)) return out;
+  for (const row of data as { id: string; request_id: string | null }[]) if (row.request_id) out.add(row.id);
+  return out;
+}
+
+/**
+ * The newest request for a selfie holding the ID, per person. The table's
+ * policy lets a person read only their own, so the desk reads it with the
+ * service role, behind the `kyc_review` door `getKycQueue` already passed.
+ */
+async function requestsFor(userIds: string[]): Promise<Map<string, NonNullable<KycSubjectView["request"]>>> {
+  const out = new Map<string, NonNullable<KycSubjectView["request"]>>();
+  if (userIds.length === 0) return out;
+  try {
+    const { data, error } = await (createAdminClient() as unknown as {
+      from: (t: string) => {
+        select: (c: string) => {
+          in: (c: string, v: string[]) => {
+            order: (c: string, o: { ascending: boolean }) => PromiseLike<{ data: unknown; error: unknown }>;
+          };
+        };
+      };
+    })
+      .from("verification_requests")
+      .select("subject_id, status, message, requested_at, answered_at")
+      .in("subject_id", userIds)
+      .order("requested_at", { ascending: false });
+    if (error || !Array.isArray(data)) return out;
+    for (const row of data as { subject_id: string; status: "open" | "answered" | "closed"; message: string; requested_at: string; answered_at: string | null }[]) {
+      if (out.has(row.subject_id)) continue;
+      out.set(row.subject_id, { status: row.status, message: row.message, requestedAt: row.requested_at, answeredAt: row.answered_at });
+    }
+  } catch {
+    /* No request read: the card offers to ask, and the database refuses a second open one. */
   }
   return out;
 }

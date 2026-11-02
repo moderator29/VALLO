@@ -232,6 +232,23 @@ export const experienceAccountEn = {
     sentBody: "A person on our team reads every submission by hand. Most decisions come back within one working day, and we email you either way.",
     sentMeanwhile: "You can keep drafting listings while you wait. They publish the moment you are approved. If anything is wrong with a document we tell you exactly what and you replace just that one.",
     sentAction: "Back to your profile",
+    /* A reviewer's request for one more photo (2 November 2026): never a step,
+       only when the team cannot confirm a document. */
+    request: {
+      title: "Our team needs one more photo",
+      from: "From the Vallo verification team",
+      cameraTitle: "Take a selfie holding your ID",
+      tips: [
+        "Hold the same ID you sent next to your face, with the photo side towards the camera.",
+        "Your face and the ID must both be clear and in focus.",
+        "Find good light, and take off sunglasses or a hat.",
+      ],
+      send: "Send to our team",
+      sending: "Sending",
+      sent: "Sent. A person on our team will look at it and tell you.",
+      failed: "That did not send. Nothing was lost. Try again in a moment.",
+      closed: "This request is already answered. Thank you.",
+    },
     nextTitle: "What happens next",
     nextReview: "A person checks your ID, your selfie and your address. Most decisions come back within one working day.",
     nextPayout: "Add the bank account you will be paid into. We check that the name on the account matches your ID.",

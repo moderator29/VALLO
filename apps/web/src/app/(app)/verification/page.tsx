@@ -14,6 +14,8 @@ import { VPASS_COOKIE, vpassSeen } from "@/components/verification/payoff-seen";
 import { approvedRecently } from "@/lib/ui/recent-approval";
 import { VninPanel } from "@/components/verification/VninPanel";
 import { DojahPanel } from "@/components/verification/DojahPanel";
+import { RequestedPhotoPanel } from "@/components/verification/RequestedPhotoPanel";
+import { readOpenVerificationRequest } from "@/lib/identity/verification-request";
 import { dojahCheckReady, dojahCheckStatus } from "@/lib/identity/dojah-actions";
 import { PepQuestionPanel } from "@/components/compliance/PepQuestionPanel";
 import { vninIdentityOn } from "@/lib/identity/flag";
@@ -23,7 +25,7 @@ import {
 } from "@/components/verification/KycStatus";
 import { resolveSession } from "@/lib/actions/session";
 import { readMyApplication } from "@/lib/agent/application-status";
-import { submitVerification } from "./actions";
+import { answerVerificationRequest, submitVerification } from "./actions";
 
 /**
  * Where the caller's own filed identity and address documents stand: the
@@ -116,6 +118,17 @@ export default async function VerificationPage({
         merchantCode={merchantCode}
       />
     ) : null;
+  /* A reviewer's request for one more photo (a selfie holding the ID), only
+     when one is open. Never a step of the flow; it sits above everything. */
+  const openRequest = await readOpenVerificationRequest();
+  const requested = openRequest ? (
+    <RequestedPhotoPanel
+      copy={getDictionary(locale).experienceAccount.kyc}
+      requestId={openRequest.id}
+      message={openRequest.message}
+      submit={answerVerificationRequest}
+    />
+  ) : null;
   /* Dojah: the selfie + NIN/BVN check, only when its flag is on and Dojah is
      fully configured (lib/identity/dojah-actions.ts). The document route
      below stays, for anybody the check cannot settle. */
@@ -342,6 +355,7 @@ export default async function VerificationPage({
             <span className="mt-inline-tight block">{whatWasSaid}</span>
           </p>
         )}
+        {requested}
         {pep}
         {dojah}
         {vnin}
@@ -367,6 +381,7 @@ export default async function VerificationPage({
           </div>
           <KycStatus status={status} locale={locale} />
           <div className="mt-block">{path}</div>
+          {requested}
           {pep}
           {dojah}
           {/* NO SHEET OVER THE PLATE (round 5). The approval used to open a
@@ -389,6 +404,7 @@ export default async function VerificationPage({
               for it to sit behind. */}
           <PageHeader title={t.agent.nav.verification} fallback="/profile" />
           <div className="mb-block">{path}</div>
+          {requested}
           {pep}
           {dojah}
           {vnin}

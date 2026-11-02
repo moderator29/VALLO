@@ -12,6 +12,9 @@ import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBro
 import { IdentityAtAGlance, REVIEW_CHECKLIST } from "./IdentityAtAGlance";
 import { GUIDE_SECTIONS } from "./guide/guide-content";
 
+/* The request button is a client component; rendered to markup here, it needs a router. */
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh() {}, push() {}, replace() {} }) }));
+
 vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
@@ -31,6 +34,7 @@ function doc(over: Partial<KycSubjectView["documents"][number]>): KycSubjectView
     isResubmission: false,
     tooOld: false,
     nameOnDocument: null,
+    answersRequest: false,
     ...over,
   };
 }
@@ -53,6 +57,7 @@ function subject(over: Partial<KycSubjectView> = {}): KycSubjectView {
     payoutNameCheck: null,
     namesOnRecord: { account: "Chidi Okeke", application: null },
     identityName: null,
+    request: null,
     consents: [],
     consentsRead: true,
     ...over,
@@ -98,10 +103,44 @@ describe("identity at a glance", () => {
   });
 });
 
+describe("asking for a selfie holding the ID, only when not trusted", () => {
+  it("offers the request on every person, and is never part of the member's steps", () => {
+    const html = renderToStaticMarkup(<IdentityAtAGlance subject={subject()} decidable />);
+    expect(html).toContain("Ask for a selfie holding their ID");
+    const steps = readFileSync(join(process.cwd(), "src/components/verification/kyc.ts"), "utf8");
+    expect(steps).not.toMatch(/selfie.with.id|holding (your|their) id/i);
+  });
+
+  it("says a request is waiting instead of offering a second one", () => {
+    const html = renderToStaticMarkup(
+      <IdentityAtAGlance
+        subject={subject({ request: { status: "open", message: "Please take a selfie holding your ID.", requestedAt: "2026-11-02T10:00:00Z", answeredAt: null } })}
+        decidable
+      />,
+    );
+    expect(html).toContain("Waiting for them to send it");
+    expect(html).not.toContain("Ask for a selfie holding their ID</button>");
+  });
+
+  it("labels the photo they sent back", () => {
+    const html = renderToStaticMarkup(
+      <IdentityAtAGlance
+        subject={subject({
+          documents: [doc({}), doc({ id: "00000000-0000-4000-8000-000000000009", kind: "selfie", subtype: null, answersRequest: true, uploadedAt: "2026-11-03T10:00:00Z" })],
+          request: { status: "answered", message: "Please take a selfie holding your ID.", requestedAt: "2026-11-02T10:00:00Z", answeredAt: "2026-11-03T10:00:00Z" },
+        })}
+        decidable
+      />,
+    );
+    expect(html).toContain("Their selfie holding the ID");
+    expect(html).toContain("They sent the selfie holding their ID that was asked for");
+  });
+});
+
 describe("the reviewer guide", () => {
   it("covers the flow, each document, names, sending back, reporting and privacy", () => {
     const ids = GUIDE_SECTIONS.map((s) => s.id);
-    for (const id of ["flow", "id", "selfie", "names", "address", "business", "bank", "reasons", "video", "report", "privacy"]) {
+    for (const id of ["flow", "id", "selfie", "names", "address", "business", "bank", "reasons", "ask", "video", "report", "privacy"]) {
       expect(ids).toContain(id);
     }
     const report = GUIDE_SECTIONS.find((s) => s.id === "report")!.points.join(" ");
@@ -151,6 +190,35 @@ describe.skipIf(!hasBrowser && !process.env.CI)("approving an ID", () => {
       expect(await page.getByTestId("name-on-id").count()).toBe(0);
       expect(await page.getByTestId("document-approve").innerText()).toBe("Same person, approve");
       expect(await page.getByTestId("document-approve").isDisabled()).toBe(false);
+    } finally {
+      await close();
+    }
+  });
+
+  it("asks for a selfie holding the ID with the reviewer's own words", async () => {
+    const { page, close } = await mountInBrowser({
+      entry: `
+        import { mount } from "@/lib/testing/browser-root";
+        import { RequestSelfieWithId } from "@/app/admin/kyc/RequestSelfieWithId";
+        mount(<RequestSelfieWithId subjectId="00000000-0000-4000-8000-0000000000aa" open={null} />);
+      `,
+      actions: { requestSelfieWithId: `async () => ({ ok: true, data: null })` },
+    });
+    try {
+      await page.getByTestId("request-start").click();
+      const box = page.getByTestId("request-message-input");
+      expect(await box.inputValue()).toContain("selfie holding the same ID");
+      await box.fill("Your ID photo is too blurry to compare. Please take a selfie holding your ID next to your face.");
+      await page.getByTestId("request-send-button").click();
+      await page.waitForFunction(() => ((window as unknown as { __calls?: unknown[] }).__calls ?? []).length > 0);
+      const calls = await page.evaluate(() => (window as unknown as { __calls: unknown[][] }).__calls);
+      expect(calls[0]).toEqual([
+        "requestSelfieWithId",
+        {
+          subjectId: "00000000-0000-4000-8000-0000000000aa",
+          message: "Your ID photo is too blurry to compare. Please take a selfie holding your ID next to your face.",
+        },
+      ]);
     } finally {
       await close();
     }

@@ -129,3 +129,44 @@ export async function reviewKycDocument(input: {
     return fail(SERVICE_DOWN);
   }
 }
+
+/**
+ * ASK FOR A SELFIE HOLDING THE ID (2 November 2026). Only when a reviewer
+ * cannot confirm a document; never a step of the flow. The person is sent the
+ * reviewer's words and answers with one photo from /verification. The acting
+ * reviewer is auth.uid() inside `request_selfie_with_id`, which also writes
+ * the audit row and refuses a request about the reviewer themself.
+ */
+const requestSchema = z.object({
+  subjectId: z.string().trim().uuid("We could not identify that person."),
+  message: z
+    .string()
+    .trim()
+    .min(12, "Say what you need and why. The person is sent this, word for word.")
+    .max(600, "Keep the message under 600 characters."),
+});
+
+export async function requestSelfieWithId(input: { subjectId: string; message: string }): Promise<ActionResult<null>> {
+  const access = await requireAdmin("kyc_review");
+  if (access.state !== "admin") return fail(ADMIN_FORBIDDEN_MESSAGE);
+  const parsed = validate(requestSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  try {
+    const { data, error } = await (access.userClient as unknown as {
+      rpc(fn: string, args: Record<string, unknown>): Promise<{ data: unknown; error: unknown }>;
+    }).rpc("request_selfie_with_id", { p_subject: parsed.data.subjectId, p_message: parsed.data.message });
+    if (error) return fail(SERVICE_DOWN);
+    const status = data && typeof data === "object" ? String((data as { status?: unknown }).status ?? "") : "";
+    if (status === "ok") {
+      revalidatePath("/admin/kyc");
+      return ok(null);
+    }
+    if (status === "already_asked") return fail("They have already been asked and have not answered yet.");
+    if (status === "own_document") return fail("This is your own account, so somebody else has to review it.");
+    if (status === "needs_a_message") return fail("Say what you need and why.", { message: "The person is sent this, word for word." });
+    if (status === "forbidden") return fail(ADMIN_FORBIDDEN_MESSAGE);
+    return fail(SERVICE_DOWN);
+  } catch {
+    return fail(SERVICE_DOWN);
+  }
+}

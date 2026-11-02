@@ -50,6 +50,24 @@ their own documents. Each person shows:
 
 The Verification menu row carries a count of documents waiting.
 
+## When a reviewer does not trust it: one more photo
+
+Never a step of the flow (most people do not have their ID in hand). Only for
+a person the reviewer cannot confirm:
+
+1. On the person, the reviewer presses **Ask for a selfie holding their ID**
+   and writes why (a starting sentence is filled in to edit).
+2. The person is notified with those words, and finds the request at the top
+   of `/verification`: the message, the same camera, and **Send to our team**.
+3. The photo comes back to the desk as **Selfie holding their ID (asked for)**,
+   in place of the selfie in doubt. Approving it as the same person completes
+   the identity step; rejecting it sends the reason back as usual.
+
+One open request per person; nobody can ask about themselves; the photo must be
+in the person's own folder. Database: `verification_requests`,
+`request_selfie_with_id` (staff), `answer_verification_request` (the person),
+`agent_documents.request_id`.
+
 ## What a decision does (database)
 
 `public.review_kyc_document` (wrapper) and `private.review_kyc_document`:
@@ -69,14 +87,12 @@ The Verification menu row carries a count of documents waiting.
 
 ## Still to run in the SQL editor
 
-`docs/sql-editor/05-verification-desk-fix-and-alerts.sql`:
-
-1. **A fix that matters now.** The review function assigned text to the
-   `review_status` enum, which Postgres refuses: every Approve and Reject on
-   the desk has failed with "service down" since 25 September 2026. The file
-   adds the cast. Tested in a rolled-back transaction.
-2. The staff alert when documents arrive (the connector stopped for approval on
-   its `drop trigger` line).
+`docs/sql-editor/05-staff-alert-on-new-documents.sql`: the staff alert when
+documents arrive (the connector stopped for approval on its `drop trigger`
+line). The desk fix found on 2 November 2026 (the review function assigned
+text to the `review_status` enum, so every Approve and Reject had failed since
+25 September 2026) is applied: migration
+`20261102223038_manual_kyc_3_desk_decisions_cast`.
 
 ## Cost
 

@@ -255,3 +255,42 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
   return { ok: true };
 }
 
+
+/**
+ * ONE MORE PHOTO, SENT BACK FROM A REVIEWER'S REQUEST (2 November 2026).
+ *
+ * Never a step of the flow: only when a reviewer could not confirm a
+ * document and asked, in their own words, for a selfie holding the ID. The
+ * photo is already in the caller's own folder (the camera on the request
+ * panel put it there); `answer_verification_request` files it as their new
+ * selfie, replacing the one in doubt, and it goes back to the desk.
+ */
+export async function answerVerificationRequest(input: {
+  requestId: string;
+  path: string;
+}): Promise<{ ok: true } | { ok: false; message: string }> {
+  const session = await resolveSession();
+  if (session.state !== "signed-in") {
+    return { ok: false, message: "Sign in again to send your photo. Nothing was lost." };
+  }
+  if (
+    typeof input?.requestId !== "string" ||
+    !/^[0-9a-f-]{36}$/i.test(input.requestId) ||
+    typeof input.path !== "string" ||
+    !input.path.startsWith(`${session.user.id}/`)
+  ) {
+    return { ok: false, message: NOT_YOURS };
+  }
+  const { data, error } = await (session.supabase as unknown as {
+    rpc(fn: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: unknown }>;
+  }).rpc("answer_verification_request", { p_request: input.requestId, p_path: input.path });
+  const status = data && typeof data === "object" ? String((data as { status?: unknown }).status ?? "") : "";
+  if (error) return { ok: false, message: FAILED };
+  if (status === "ok") {
+    revalidatePath("/verification");
+    return { ok: true };
+  }
+  if (status === "closed") return { ok: false, message: "This request is already answered. Thank you." };
+  if (status === "not_yours") return { ok: false, message: NOT_YOURS };
+  return { ok: false, message: FAILED };
+}

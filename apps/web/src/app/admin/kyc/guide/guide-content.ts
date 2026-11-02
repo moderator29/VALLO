@@ -116,6 +116,20 @@ export const GUIDE_SECTIONS: readonly GuideSection[] = [
     ],
   },
   {
+    id: "ask",
+    title: "When you do not trust it: ask for a selfie holding their ID",
+    lede: "This is never a step people go through. Use it only for a person you cannot confirm.",
+    ordered: true,
+    points: [
+      "On the person, press Ask for a selfie holding their ID.",
+      "Write why, in plain words. A starting sentence is filled in for you to edit. They are sent your words exactly.",
+      "They get a notification and find your request at the top of Get verified, with a camera to take the photo and one button to send it.",
+      "The photo comes back to the queue marked Selfie holding their ID (asked for), in place of the selfie you doubted.",
+      "Compare three things: the face in the photo, the photo on the ID in their hand, and the ID they sent first. Approve it as the same person, or reject it with a reason.",
+      "If it still does not settle it, book a video call. If it looks forged, follow When something looks wrong.",
+    ],
+  },
+  {
     id: "video",
     title: "When to book a video call",
     points: [

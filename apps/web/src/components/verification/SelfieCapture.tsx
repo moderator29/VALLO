@@ -44,13 +44,19 @@ export function SelfieCapture({
   batchId,
   selfie,
   onChange,
+  words,
+  fileStem = "selfie",
 }: {
   copy: KycCopy;
   batchId: string;
   selfie: KycSelfie | null;
   onChange: (selfie: KycSelfie | null) => void;
+  /** Other words for the same camera: the photo a reviewer asked for. */
+  words?: Partial<KycCopy["selfie"]>;
+  /** The stored file's name, before its id: `selfie` or `selfie-with-id`. */
+  fileStem?: string;
 }) {
-  const s = copy.selfie;
+  const s = { ...copy.selfie, ...words };
   const video = useRef<HTMLVideoElement | null>(null);
   const stream = useRef<MediaStream | null>(null);
   const fileInput = useRef<HTMLInputElement | null>(null);
@@ -147,7 +153,7 @@ export function SelfieCapture({
         return;
       }
       const extension = type === "image/png" ? "png" : type === "image/webp" ? "webp" : type === "image/heic" ? "heic" : "jpg";
-      const path = `${user.id}/kyc-${batchId}/selfie-${randomId()}.${extension}`;
+      const path = `${user.id}/kyc-${batchId}/${fileStem}-${randomId()}.${extension}`;
       const upload = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: type, upsert: false });
       if (upload.error) throw new Error("upload failed");
       if (selfie?.path && selfie.path !== path) void supabase.storage.from(BUCKET).remove([selfie.path]);
