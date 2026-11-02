@@ -75,3 +75,12 @@ export function otpTransport(): OtpTransport {
     twilio ? twilioTransport(twilio) : unconfiguredTransport,
   );
 }
+
+/**
+ * Can a code reach this number from this deployment? Nigerian numbers need
+ * Termii's keys and every other number Twilio's. The sign-up phone step asks
+ * this first, so it never asks for a code that cannot arrive.
+ */
+export function canSendTo(phoneE164: string): boolean {
+  return phoneE164.startsWith("+234") ? termiiConfig() !== null : twilioConfig() !== null;
+}

@@ -178,6 +178,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/sign-up": "/welcome",
   "/sign-up/email": "/sign-up",
   "/sign-up/verify": "/sign-up/email",
+  "/sign-up/phone": ROOT,
   /* B-2: the terms and 18+ step for a new Google or Apple account. The
      person is already signed in and every app route leads back here until
      it is done, so there is nothing above it to go back to: a root, like

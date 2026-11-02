@@ -333,6 +333,7 @@ const EXPECTED_PUBLIC = new Set([
   "/sign-up",
   "/sign-up/email",
   "/sign-up/verify",
+  "/sign-up/phone",
   /* B-2: "Finish setting up". Public like every door so it can never loop;
      the page itself sends somebody signed out to sign in. */
   "/sign-up/finish",

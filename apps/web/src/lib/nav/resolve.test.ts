@@ -78,7 +78,9 @@ describe("the map itself", () => {
        gate holds there has nothing above it to go back to. */
     /* `/home-or-landing` is a redirect, declared so the browsing screens can
        name it as their parent; it only ever lands on `/` or `/home`. */
-    expect(roots.sort()).toEqual(["/", "/home", "/home-or-landing", "/sign-up/finish", "/stays", "/welcome"]);
+    /* `/sign-up/phone` is a root for the same reason as `/sign-up/finish`: the
+       account exists, and the email code before it is not a place to go back to. */
+    expect(roots.sort()).toEqual(["/", "/home", "/home-or-landing", "/sign-up/finish", "/sign-up/phone", "/stays", "/welcome"]);
   });
 
   it("puts a dynamic route under the shelf it came off, not under home", () => {

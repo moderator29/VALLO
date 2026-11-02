@@ -144,6 +144,15 @@ export const trustVisibleEn = {
     change: "Use a different number",
     numberLabel: "Mobile number",
     numberHint: "A mobile number from any country. We send a six-digit code to it.",
+    /* The phone step of sign-up (after the email code). */
+    signUpTitle: "Confirm your mobile number",
+    /** `{number}` is the number, written in full: it is the person's own, on their own screen. */
+    signUpSentTo: "We sent a six-digit code to {number}.",
+    signUpSending: "Sending a six-digit code to {number}.",
+    changeNumber: "Change number",
+    keepNumber: "Keep this number",
+    sendToNew: "Send the code to this number",
+    later: "Do this later",
     /** A number that is not a mobile number in the country chosen (any country but Nigeria). */
     numberInvalid: "That does not look like a mobile number for the country you chose. Check the digits, or pick another country.",
     send: "Send the code",

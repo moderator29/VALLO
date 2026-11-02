@@ -124,6 +124,11 @@ function validateCredentials(
   return errors;
 }
 
+/** A new account's next stop: the phone step, which passes straight on to `next` when it has nothing to ask. */
+function phoneStepThen(next: string): string {
+  return `/sign-up/phone?next=${encodeURIComponent(next)}`;
+}
+
 /** The sign-up form's number, in the form `profiles.phone` keeps, or null. */
 function signUpPhone(formData: FormData): string | null {
   const raw = field(formData, "phone").trim();
@@ -743,7 +748,10 @@ export async function verifySignUpCode(
      than a first name, and nothing when the metadata holds none. */
   const given = data.user?.user_metadata?.first_name;
   const name = typeof given === "string" && given.trim() ? given.trim().slice(0, 40) : undefined;
-  return { ok: true, verified: landingAfterAuth(formData), ...(name ? { name } : {}) };
+  /* Form, email code, then the phone code. `/sign-up/phone` decides whether a
+     code can be sent to this account's number and goes straight on when not
+     (the sign-up phone step module), so nothing about phones is asked here. */
+  return { ok: true, verified: phoneStepThen(landingAfterAuth(formData)), ...(name ? { name } : {}) };
 }
 
 /**
@@ -935,6 +943,9 @@ export async function completeEmailVerification(input: {
   // The session cookies are set. Drop every cached render so the shell picks
   // the signed-in tree rather than the anonymous one behind this screen.
   revalidatePath("/", "layout");
+  /* A new account confirmed by the link goes through the same phone step as one
+     confirmed by the code. */
+  if (moment === "account-created" && confirmed.user) return { ok: true, next: phoneStepThen(next) };
   return { ok: true, next };
 }
 
