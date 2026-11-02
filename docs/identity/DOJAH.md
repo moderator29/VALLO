@@ -1,5 +1,10 @@
 # Dojah on Vallo
 
+> **STATUS: BUILT AND PARKED (founder decision, 2 November 2026).** Verification
+> is manual for now (`docs/identity/MANUAL_VERIFICATION.md`). Everything below
+> is in the repository and switched off; nothing is billed. To add Dojah later,
+> follow section 5. Do not remove it.
+
 Written 2 November 2026. Dojah's own pages are saved word for word in
 `docs/identity/dojah-source/` (from docs.dojah.io, as `.txt`).
 

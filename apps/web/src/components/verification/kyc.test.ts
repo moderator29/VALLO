@@ -17,9 +17,12 @@ import {
 const ID = { name: "id.jpg", size: 1024, type: "image/jpeg", path: "u/kyc-b/identity-1.jpg", subtype: "passport", issuedOn: null };
 const BILL = { name: "bill.pdf", size: 1024, type: "application/pdf", path: "u/kyc-b/address-1.pdf", subtype: "utility_bill", issuedOn: lagosToday() };
 
+const SELFIE = { path: "u/kyc-b/selfie-1.jpg", size: 2048, type: "image/jpeg" };
+
 function submission(over: Partial<KycSubmission> = {}): KycSubmission {
   return {
     documents: { identity: ID, address: BILL },
+    selfie: SELFIE,
     business: false,
     businessDetails: {},
     consents: ["accuracy", "terms", "processing"],
@@ -29,9 +32,10 @@ function submission(over: Partial<KycSubmission> = {}): KycSubmission {
 
 describe("stepsFor", () => {
   /* The branch is the only hard thing in this flow, so it is the thing tested. */
-  it("is five steps before the business question is answered", () => {
+  it("is six steps before the business question is answered: the ID, then the face, then the address", () => {
     expect(stepsFor(null).map((s) => s.id)).toEqual([
       "identity-document",
+      "selfie",
       "address-document",
       "business-question",
       "consent",
@@ -39,14 +43,14 @@ describe("stepsFor", () => {
     ]);
   });
 
-  it("stays five when they say they do not run a business", () => {
-    expect(stepsFor(false)).toHaveLength(5);
+  it("stays six when they say they do not run a business", () => {
+    expect(stepsFor(false)).toHaveLength(6);
   });
 
-  it("grows to six, with business details in the middle, when they say yes", () => {
+  it("grows to seven, with business details in the middle, when they say yes", () => {
     const ids = stepsFor(true).map((s) => s.id);
-    expect(ids).toHaveLength(6);
-    expect(ids[3]).toBe("business-details");
+    expect(ids).toHaveLength(7);
+    expect(ids[4]).toBe("business-details");
   });
 
   it("never puts review anywhere but last", () => {
@@ -56,10 +60,11 @@ describe("stepsFor", () => {
     }
   });
 
-  it("is four steps, with no business question, when the answers could not be filed", () => {
+  it("is five steps, with no business question, when the answers could not be filed", () => {
     for (const answer of [null, true, false] as const) {
       expect(stepsFor(answer, false).map((s) => s.id)).toEqual([
         "identity-document",
+        "selfie",
         "address-document",
         "consent",
         "review",
@@ -115,6 +120,23 @@ describe("missingFrom", () => {
   it("names the document rather than saying something is missing", () => {
     const gaps = missingFrom(submission({ documents: { address: BILL } }));
     expect(gaps).toEqual(["Government issued ID"]);
+  });
+
+  it("asks for the selfie, by name, when there is none", () => {
+    expect(missingFrom(submission({ selfie: null }))).toEqual(["A selfie"]);
+  });
+
+  it("files the selfie beside the ID in one insert, under the caller's own folder", () => {
+    const action = readFileSync(join(process.cwd(), "src/app/(app)/verification/actions.ts"), "utf8");
+    expect(action).toContain('kind: "selfie"');
+    expect(action).toContain("selfie.path.startsWith(prefix)");
+    expect(action).toContain("insert([...rows, selfieRow])");
+  });
+
+  it("never asks anyone to hold their ID up to the camera", () => {
+    const step = readFileSync(join(process.cwd(), "src/components/verification/SelfieCapture.tsx"), "utf8");
+    expect(step).toContain('facingMode: "user"');
+    expect(step).toContain('capture="user"');
   });
 
   it("names every unticked consent separately", () => {

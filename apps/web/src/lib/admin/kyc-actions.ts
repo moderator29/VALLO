@@ -29,6 +29,8 @@ const reviewSchema = z
     documentId: z.string().trim().uuid("We could not identify that document."),
     approve: z.boolean(),
     reason: z.string().trim().max(500, "Keep the reason under 500 characters.").optional(),
+    /** The name exactly as printed on an ID, typed by the reviewer approving it. */
+    nameOnId: z.string().trim().max(200, "Keep the name under 200 characters.").optional(),
   })
   .refine((value) => value.approve || (value.reason ?? "").length >= 12, {
     message: "Say what is wrong with it. The person is sent this, word for word.",
@@ -39,6 +41,7 @@ export async function reviewKycDocument(input: {
   documentId: string;
   approve: boolean;
   reason?: string;
+  nameOnId?: string;
 }): Promise<ActionResult<null>> {
   const access = await requireAdmin("kyc_review");
   if (access.state !== "admin") return fail(ADMIN_FORBIDDEN_MESSAGE);
@@ -47,6 +50,22 @@ export async function reviewKycDocument(input: {
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
 
   try {
+    /* An ID is approved with the name printed on it (manual verification,
+       2 November 2026): that name is what the bank account name is matched
+       against and what the person's confirmed identity carries. Saved first;
+       the review function refuses an ID approval without it. */
+    if (parsed.data.approve && parsed.data.nameOnId) {
+      const named = await (access.userClient as unknown as {
+        rpc(fn: string, args: Record<string, unknown>): Promise<{ data: unknown; error: unknown }>;
+      }).rpc("set_document_name", { p_document: parsed.data.documentId, p_name: parsed.data.nameOnId });
+      const namedStatus =
+        named.data && typeof named.data === "object" ? String((named.data as { status?: unknown }).status ?? "") : "";
+      if (named.error) return fail(SERVICE_DOWN);
+      if (namedStatus === "invalid_name") return fail("Type the full name as it is printed on the ID.", { nameOnId: "Type the full name as it is printed on the ID." });
+      if (namedStatus === "own_document") return fail("This is your own document, so somebody else has to review it. Leave it in the queue for another reviewer.");
+      if (namedStatus === "forbidden") return fail(ADMIN_FORBIDDEN_MESSAGE);
+      if (namedStatus !== "ok" && namedStatus !== "not_identity") return fail(SERVICE_DOWN);
+    }
     /*
      * NO acting_admin ARGUMENT, AND THAT IS THE POINT.
      *
@@ -93,6 +112,11 @@ export async function reviewKycDocument(input: {
     if (status === "needs_a_reason") {
       return fail("Say what is wrong with it.", {
         reason: "The person is sent this, word for word.",
+      });
+    }
+    if (status === "needs_a_name") {
+      return fail("Type the name exactly as it is printed on the ID, then approve.", {
+        nameOnId: "Type the name exactly as it is printed on the ID.",
       });
     }
     if (status === "not_found") {

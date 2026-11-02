@@ -11,6 +11,7 @@ import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
 import { Icon3D } from "@/components/ui/Icon3D";
 import type { Icon3DName } from "@/components/ui/icon-3d";
 import { DocumentUploader } from "./DocumentUploader";
+import { SelfieCapture } from "./SelfieCapture";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -30,6 +31,7 @@ import {
   type ConsentId,
   type DocumentKind,
   type KycDocument,
+  type KycSelfie,
   type KycSubmission,
   type KycSubmitResult,
   type StepId,
@@ -67,6 +69,7 @@ export function KycFlow({
   copy,
   askBusiness = true,
   acceptCopy,
+  payoutHref,
 }: {
   /** The flow's words, from the server page. */
   copy: KycCopy;
@@ -91,10 +94,17 @@ export function KycFlow({
    * an application is actually sent).
    */
   acceptCopy?: Pick<Dictionary["payChoice"], "accept">;
+  /**
+   * Where the person adds the bank account they are paid into, when they
+   * have one (listers). The submitted screen names it as the next step: the
+   * name on that account is checked against the ID.
+   */
+  payoutHref?: string;
 }) {
   const [at, setAt] = useState(0);
   const [business, setBusiness] = useState<boolean | null>(null);
   const [documents, setDocuments] = useState<Partial<Record<DocumentKind, KycDocument>>>({});
+  const [selfie, setSelfie] = useState<KycSelfie | null>(null);
   /* One storage folder per visit, so a replaced photo lands beside the one
      it replaces rather than in a new folder every time. */
   const [batchId] = useState(() => {
@@ -116,6 +126,7 @@ export function KycFlow({
   const step = steps[Math.min(at, steps.length - 1)]!;
   const submission: KycSubmission = {
     documents,
+    selfie,
     business: business === true,
     businessDetails,
     consents,
@@ -127,7 +138,7 @@ export function KycFlow({
   if (sent)
     return (
       <>
-        <Submitted copy={copy} />
+        <Submitted copy={copy} payoutHref={payoutHref} />
         {success ? <KycSentSheet copy={success} /> : null}
       </>
     );
@@ -150,6 +161,8 @@ export function KycFlow({
     switch (step.id) {
       case "identity-document":
         return Boolean(documents.identity) && isSubtypeOf("identity", documents.identity?.subtype);
+      case "selfie":
+        return Boolean(selfie?.path);
       case "address-document":
         return (
           Boolean(documents.address) &&
@@ -246,6 +259,10 @@ export function KycFlow({
               setDocuments((d) => ({ ...d, ...(file ? { identity: file } : { identity: undefined }) }))
             }
           />
+        )}
+
+        {step.id === "selfie" && (
+          <SelfieCapture copy={copy} batchId={batchId} selfie={selfie} onChange={setSelfie} />
         )}
 
         {step.id === "address-document" && (
@@ -404,6 +421,7 @@ export function KycFlow({
           <>
             <ul className="nf-panel nf-panel--card block divide-y divide-[var(--nf-divider)] p-0">
               <ReviewRow label={copy.identityRow} value={documents.identity?.name ?? copy.missing} />
+              <ReviewRow label={copy.selfieRow} value={selfie ? copy.selfieTaken : copy.missing} />
               <ReviewRow label={copy.addressRow} value={documents.address?.name ?? copy.missing} />
               {askBusiness ? <ReviewRow label={copy.businessRow} value={business ? copy.yes : copy.no} /> : null}
               {business &&
@@ -489,6 +507,7 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
 /** Each step's object: the ID, the home, the business, the consent. */
 const STEP_ART: Record<StepId, Icon3DName> = {
   "identity-document": "id-check",
+  selfie: "camera",
   "address-document": "home-small",
   "business-question": "city",
   "business-details": "folder",
@@ -496,7 +515,7 @@ const STEP_ART: Record<StepId, Icon3DName> = {
   review: "verified",
 };
 
-function Submitted({ copy }: { copy: KycCopy }) {
+function Submitted({ copy, payoutHref }: { copy: KycCopy; payoutHref?: string }) {
   return (
     <div className="mx-auto max-w-md py-xl text-center">
       <span className="mx-auto grid size-[5.5rem] place-items-center" aria-hidden="true" data-art="calendar-pending">
@@ -509,6 +528,25 @@ function Submitted({ copy }: { copy: KycCopy }) {
       <p className="mt-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
         {copy.sentMeanwhile}
       </p>
+      {/* What happens next, in order: the review, then the bank account whose
+          name is checked against the ID (listers only). */}
+      <ol className="nf-panel nf-panel--card mt-lg block space-y-sm p-md text-left" data-testid="kyc-next-steps" aria-label={copy.nextTitle}>
+        <li className="flex items-start gap-sm">
+          <span className="nf-numeric grid size-6 shrink-0 place-items-center rounded-full bg-[var(--nf-surface-secondary)] text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-primary)]">1</span>
+          <span className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{copy.nextReview}</span>
+        </li>
+        {payoutHref ? (
+          <li className="flex items-start gap-sm">
+            <span className="nf-numeric grid size-6 shrink-0 place-items-center rounded-full bg-[var(--nf-surface-secondary)] text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-primary)]">2</span>
+            <span className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+              {copy.nextPayout}{" "}
+              <Link href={payoutHref} className="font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline" data-testid="kyc-next-payout">
+                {copy.nextPayoutAction}
+              </Link>
+            </span>
+          </li>
+        ) : null}
+      </ol>
       <Link
         href="/profile"
         className="mt-lg inline-flex items-center gap-2xs text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"
@@ -533,6 +571,8 @@ function gapWords(item: MissingItem, copy: KycCopy): string {
   switch (item.kind) {
     case "document":
       return copy.documents[item.document].title;
+    case "selfie":
+      return copy.gapSelfie;
     case "which-id":
       return copy.gapWhichId;
     case "which-address":

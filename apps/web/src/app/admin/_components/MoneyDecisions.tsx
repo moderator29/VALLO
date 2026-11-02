@@ -38,21 +38,29 @@ function Refusal({ message }: { message: string | null }) {
 
 /* ------------------------------------------------------------ KYC decision */
 
-export function DocumentDecision({ documentId }: { documentId: string }) {
+export function DocumentDecision({ documentId, kind }: { documentId: string; kind?: string }) {
   const router = useRouter();
   const [reason, setReason] = useState("");
+  const [nameOnId, setNameOnId] = useState("");
   const [showReason, setShowReason] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  /* An ID is approved with the name printed on it; the bank account name is
+     matched against that name, so the reviewer types it, exactly. */
+  const isId = kind === "identity";
+  const isSelfie = kind === "selfie";
+  const nameReady = !isId || nameOnId.trim().length >= 2;
 
   function decide(approve: boolean) {
     setError(null);
     start(async () => {
       const result = await reviewKycDocument(
-        approve ? { documentId, approve: true } : { documentId, approve: false, reason },
+        approve
+          ? { documentId, approve: true, ...(isId ? { nameOnId: nameOnId.trim() } : {}) }
+          : { documentId, approve: false, reason },
       );
       if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.error);
+        setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"] ?? result.error);
         return;
       }
       setReason("");
@@ -62,7 +70,25 @@ export function DocumentDecision({ documentId }: { documentId: string }) {
   }
 
   return (
-    <div className="nf-admin-decision mt-row">
+    <div className="nf-admin-decision mt-row" data-testid="document-decision">
+      {isId && !showReason && (
+        <label className="block">
+          <span className="nf-label">Name exactly as printed on the ID</span>
+          <input
+            className="nf-field"
+            value={nameOnId}
+            maxLength={200}
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(e) => setNameOnId(e.target.value)}
+            placeholder="OKEKE CHIDI EMMANUEL"
+            data-testid="name-on-id"
+          />
+          <span className="nf-caption mt-inline-tight block">
+            Surname and given names as the ID writes them. The bank account they are paid into must match this name.
+          </span>
+        </label>
+      )}
       {showReason && (
         <label className="block">
           <span className="nf-label">What is wrong with it</span>
@@ -71,7 +97,11 @@ export function DocumentDecision({ documentId }: { documentId: string }) {
             value={reason}
             maxLength={500}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="The name is covered by a thumb. Photograph it again with all four corners visible."
+            placeholder={
+              isSelfie
+                ? "Your selfie is too dark to compare with your ID. Take it again facing a window, with your whole face in the oval."
+                : "The name is covered by a thumb. Photograph it again with all four corners visible."
+            }
           />
           <span className="nf-caption mt-inline-tight block">
             This is sent to them word for word, so it has to be something they
@@ -80,9 +110,11 @@ export function DocumentDecision({ documentId }: { documentId: string }) {
         </label>
       )}
       <div className="nf-admin-decision__buttons mt-row flex flex-wrap gap-inline">
-        <Button type="button" size="md" disabled={pending} onClick={() => decide(true)}>
-          Approve
-        </Button>
+        {!showReason && (
+          <Button type="button" size="md" disabled={pending || !nameReady} onClick={() => decide(true)} data-testid="document-approve">
+            {isSelfie ? "Same person, approve" : isId ? "Approve ID" : "Approve"}
+          </Button>
+        )}
         {showReason ? (
           <Button
             type="button"
@@ -100,6 +132,7 @@ export function DocumentDecision({ documentId }: { documentId: string }) {
             variant="secondary"
             disabled={pending}
             onClick={() => setShowReason(true)}
+            data-testid="document-reject"
           >
             Reject
           </Button>

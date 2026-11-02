@@ -8,6 +8,7 @@ import type { StatusTone } from "@/components/ui/StatusPill";
 import { DocumentDecision } from "../_components/MoneyDecisions";
 import { DocumentViewer } from "../_components/DocumentViewer";
 import { CredentialForm } from "./CredentialForm";
+import { IdentityAtAGlance } from "./IdentityAtAGlance";
 import { getDictionary } from "@vallo/i18n";
 import { consentReceipt } from "@/lib/admin/member-file-rules";
 
@@ -107,6 +108,10 @@ export function SubjectCard({
         </ul>
       )}
 
+      {/* Manual verification: the ID beside the selfie, the names to compare,
+          the bank account name, and the checklist, before any document. */}
+      <IdentityAtAGlance subject={subject} decidable={decidable} />
+
       {/* V-49: the Nigerian-name matcher's suggestion for the payout rung,
           both names side by side, marked as a suggestion. A person decides. */}
       {subject.payoutNameCheck && (
@@ -187,6 +192,12 @@ export function SubjectCard({
                 : ""}
             </p>
 
+            {doc.nameOnDocument && (
+              <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-secondary)]">
+                Name on the ID: <span className="font-semibold text-[var(--nf-content-primary)]">{doc.nameOnDocument}</span>
+              </p>
+            )}
+
             {doc.rejectionReason && (
               <p className="mt-2xs text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-secondary)]">
                 Sent back: {doc.rejectionReason}
@@ -208,7 +219,7 @@ export function SubjectCard({
             />
 
             {decidable && doc.reviewStatus === "pending" && (
-              <DocumentDecision documentId={doc.id} />
+              <DocumentDecision documentId={doc.id} kind={doc.kind} />
             )}
           </li>
         ))}

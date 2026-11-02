@@ -189,6 +189,7 @@ export function rejectFile(file: { type: string; size: number }): string | null 
 
 export type StepId =
   | "identity-document"
+  | "selfie"
   | "address-document"
   | "business-question"
   | "business-details"
@@ -208,6 +209,11 @@ const STEPS: Record<StepId, Step> = {
     id: "identity-document",
     title: "Your ID",
     hint: "One government issued document that shows your face and your name.",
+  },
+  selfie: {
+    id: "selfie",
+    title: "A quick selfie",
+    hint: "We compare it with the photo on your ID, so we know the ID is yours.",
   },
   "address-document": {
     id: "address-document",
@@ -247,7 +253,10 @@ const STEPS: Record<StepId, Step> = {
  * is not going to be asked.
  */
 export function stepsFor(business: boolean | null, askBusiness = true): Step[] {
-  const ids: StepId[] = ["identity-document", "address-document"];
+  /* The order the big platforms use: the ID, then the face that matches it,
+     then everything else. The selfie is a plain photo of the face, taken
+     live; nobody is asked to hold their ID up to the camera. */
+  const ids: StepId[] = ["identity-document", "selfie", "address-document"];
   /* `askBusiness` is false when the answers could not be filed: the business
      details live on the application, and an application that is submitted,
      under review or decided cannot be edited by its applicant, so the eight
@@ -387,9 +396,17 @@ export type KycDocument = {
   issuedOn: string | null;
 };
 
+/** The selfie as the flow holds it: uploaded, so `path` is real. */
+export type KycSelfie = { path: string; size: number; type: string };
+
 /** What the UI produces, and what `submitVerification` files. */
 export type KycSubmission = {
   documents: Partial<Record<DocumentKind, KycDocument>>;
+  /**
+   * The live selfie (2 November 2026), already in the private bucket under
+   * the person's own folder. Compared by a person with the photo on the ID.
+   */
+  selfie?: KycSelfie | null;
   business: boolean;
   businessDetails: Record<string, string>;
   consents: ConsentId[];
@@ -417,6 +434,7 @@ export type KycSubmitResult = { ok: true } | { ok: false; message: string };
  */
 export type MissingItem =
   | { kind: "document"; document: DocumentKind }
+  | { kind: "selfie" }
   | { kind: "which-id" }
   | { kind: "which-address" }
   | { kind: "address-date" }
@@ -429,6 +447,7 @@ export function missingItems(submission: KycSubmission, today: string = lagosTod
   const address = submission.documents.address;
   if (!identity) missing.push({ kind: "document", document: "identity" });
   else if (!isSubtypeOf("identity", identity.subtype)) missing.push({ kind: "which-id" });
+  if (!submission.selfie?.path) missing.push({ kind: "selfie" });
   if (!address) missing.push({ kind: "document", document: "address" });
   else {
     if (!isSubtypeOf("address", address.subtype)) missing.push({ kind: "which-address" });
@@ -458,6 +477,8 @@ export function missingFrom(submission: KycSubmission, today: string = lagosToda
     switch (item.kind) {
       case "document":
         return DOCUMENT_SPECS[item.document].title;
+      case "selfie":
+        return SELFIE;
       case "which-id":
         return WHICH_ID;
       case "which-address":
@@ -472,6 +493,7 @@ export function missingFrom(submission: KycSubmission, today: string = lagosToda
   });
 }
 
+const SELFIE = "A selfie";
 const WHICH_ID = "Which ID you uploaded";
 const WHICH_ADDRESS = "Which proof of address you uploaded";
 const ADDRESS_DATE = "The date on your proof of address, within the last three months";

@@ -85,6 +85,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     href: "/admin/kyc",
     icon: glyph("check-square"),
     label: "Verification",
+    countKeys: ["verification"],
+    countLabel: "ID, selfie and address documents waiting on a decision",
     /* SCUML: the AML/CFT duties, one lane each. */
     children: [
       { key: "compliance", href: "/admin/compliance", icon: glyph("shield-lock"), label: "Compliance" },

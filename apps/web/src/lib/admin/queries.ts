@@ -105,6 +105,8 @@ export type QueueCounts = {
   referrals: number;
   /** The referral desk: reward payouts sent to a person (status under_review). Admins only. */
   payouts: number;
+  /** The verification desk: ID, selfie, address and business documents nobody has decided yet. */
+  verification?: number;
 };
 
 /**
@@ -165,6 +167,7 @@ export const getQueueCounts = cache(async (): Promise<AdminRead<QueueCounts>> =>
       agreements,
       claims,
       referralWork,
+      verification,
     ] = await Promise.all([
       !may("moderation") ? none : admin.from("message_flags").select("id", { count: "exact", head: true }).eq("status", "open"),
       !may("operations") ? none : admin.from("risk_alerts").select("id", { count: "exact", head: true }).eq("status", "open"),
@@ -200,6 +203,11 @@ export const getQueueCounts = cache(async (): Promise<AdminRead<QueueCounts>> =>
       !may("guarantee") ? none : admin.from("guarantee_claims").select("id", { count: "exact", head: true }).eq("status", "submitted"),
       /* The referral desk's two queues. The deciding functions need an admin role, so a scoped staff member counts zero. */
       !isAdmin ? Promise.resolve(null) : countReferralWork(admin),
+      !may("kyc_review") ? none : admin
+        .from("agent_documents")
+        .select("id", { count: "exact", head: true })
+        .eq("review_status", "pending")
+        .in("kind", ["identity", "selfie", "address", "business"]),
     ]);
 
     return {
@@ -222,6 +230,7 @@ export const getQueueCounts = cache(async (): Promise<AdminRead<QueueCounts>> =>
         /* An unreadable referral count is 0 on the badge, never a number made up; the desk itself says when it cannot read. */
         referrals: referralWork?.referrals ?? 0,
         payouts: referralWork?.payouts ?? 0,
+        verification: verification.count ?? 0,
       },
     };
   } catch {

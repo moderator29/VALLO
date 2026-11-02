@@ -351,6 +351,7 @@ export default async function VerificationPage({
           copy={t.experienceAccount.kyc}
           askBusiness={askBusiness}
           acceptCopy={t.payChoice}
+          payoutHref={context.state === "agent" ? "/agent/earnings" : undefined}
         />
       </div>
     );
@@ -391,7 +392,13 @@ export default async function VerificationPage({
           {pep}
           {dojah}
           {vnin}
-          <KycFlow submit={submitVerification} success={getDictionary(locale).success} copy={t.experienceAccount.kyc} askBusiness={askBusiness} />
+          <KycFlow
+            submit={submitVerification}
+            success={getDictionary(locale).success}
+            copy={t.experienceAccount.kyc}
+            askBusiness={askBusiness}
+            payoutHref={context.state === "agent" ? "/agent/earnings" : undefined}
+          />
         </>
       )}
     </div>

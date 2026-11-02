@@ -104,6 +104,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/bookings/[bookingId]": "the booking",
   "/admin/handbook": "the handbook",
   "/admin/kyc": "KYC",
+  "/admin/kyc/guide": "the reviewer guide",
   "/admin/listings": "Listings",
   "/admin/listings/[id]": "the listing",
   "/admin/operations": "Operations",

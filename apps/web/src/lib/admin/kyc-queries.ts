@@ -56,6 +56,8 @@ export type KycDocumentView = {
   media: DocumentMedia;
   /** True when this replaces an earlier attempt. */
   isResubmission: boolean;
+  /** The name as printed on an approved ID, typed by the reviewer. Null otherwise. */
+  nameOnDocument: string | null;
   /**
    * True when a proof of address states an issue date older than the rule
    * allows, or states none at all. Computed rather than stored, because the
@@ -94,6 +96,14 @@ export type KycSubjectView = {
    * is no resolved payout name or no application name to compare.
    */
   payoutNameCheck: { match: boolean; reason: string; holder: string; onRecord: string } | null;
+  /**
+   * The names a reviewer compares with the ID (manual verification,
+   * 2 November 2026): the legal name the person gave when signing up, and the
+   * name on their application, if they filed one.
+   */
+  namesOnRecord: { account: string | null; application: string | null };
+  /** The name printed on their approved ID, once a reviewer has typed it. */
+  identityName: string | null;
   /**
    * The consent receipt: every agreement this person gave on `/verification`
    * (`kyc_consents`: accuracy, terms, processing), newest first. A reviewer
@@ -232,6 +242,14 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
       consentsFor(access.supabase, userIds),
     ]);
 
+    const [legalNames, idNames] = await Promise.all([
+      legalNamesFor(access.supabase, userIds),
+      namesOnDocuments(
+        access.supabase,
+        documents.filter((d) => d.kind === "identity").map((d) => d.id),
+      ),
+    ]);
+
     const bySubject = new Map<string, KycSubjectView>();
     for (const doc of documents) {
       const owner = ownerOf(doc);
@@ -264,9 +282,16 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
           documents: [],
           payoutNameCheck: payoutSuggestion(
             agent ? payoutNames.get(agent.id) : undefined,
-            application?.full_name ?? null,
+            /* The name printed on the approved ID wins: it is the identity the
+               bank account has to belong to. */
+            idNameFor(documents, idNames, owner) ?? application?.full_name ?? (owner ? (legalNames.get(owner) ?? null) : null),
             application?.business_name ?? null,
           ),
+          namesOnRecord: {
+            account: owner ? (legalNames.get(owner) ?? null) : null,
+            application: application?.full_name?.trim() || null,
+          },
+          identityName: idNameFor(documents, idNames, owner),
           consents: owner ? (consents.rows.get(owner) ?? []) : [],
           consentsRead: consents.ok,
         };
@@ -286,6 +311,7 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
         media: documentMedia(doc.storage_path),
         isResubmission: doc.supersedes_id !== null,
         tooOld: isTooOld(doc.kind, doc.issued_on),
+        nameOnDocument: idNames.get(doc.id) ?? null,
       });
     }
 
@@ -308,6 +334,60 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
   } catch {
     return UNAVAILABLE;
   }
+}
+
+/* ------------------------------------------- the names a reviewer compares */
+
+type LooseRead = {
+  from: (t: string) => {
+    select: (c: string) => {
+      in: (c: string, v: string[]) => PromiseLike<{ data: unknown; error: unknown }>;
+    };
+  };
+};
+
+/** First name and surname as the person gave them at sign-up, by user id. */
+async function legalNamesFor(supabase: SupabaseClient<Database>, userIds: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (userIds.length === 0) return out;
+  const { data, error } = await (supabase as unknown as LooseRead)
+    .from("profiles")
+    .select("id, first_name, surname")
+    .in("id", userIds);
+  if (error || !Array.isArray(data)) return out;
+  for (const row of data as { id: string; first_name: string | null; surname: string | null }[]) {
+    const name = [row.first_name, row.surname].map((part) => (part ?? "").trim()).filter(Boolean).join(" ");
+    if (name) out.set(row.id, name);
+  }
+  return out;
+}
+
+/** The reviewer-typed name on each identity document, by document id. */
+async function namesOnDocuments(supabase: SupabaseClient<Database>, ids: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (ids.length === 0) return out;
+  const { data, error } = await (supabase as unknown as LooseRead)
+    .from("agent_documents")
+    .select("id, name_on_document")
+    .in("id", ids);
+  if (error || !Array.isArray(data)) return out;
+  for (const row of data as { id: string; name_on_document: string | null }[]) {
+    if (row.name_on_document?.trim()) out.set(row.id, row.name_on_document.trim());
+  }
+  return out;
+}
+
+/** The newest approved ID's name for one person, or null. */
+function idNameFor(
+  documents: readonly { id: string; kind: string; uploader_id: string | null; review_status: string; reviewed_at: string | null }[],
+  idNames: Map<string, string>,
+  owner: string | null,
+): string | null {
+  if (!owner) return null;
+  const approved = documents
+    .filter((d) => d.kind === "identity" && d.uploader_id === owner && d.review_status === "approved" && idNames.has(d.id))
+    .sort((a, b) => (b.reviewed_at ?? "").localeCompare(a.reviewed_at ?? ""));
+  return approved[0] ? (idNames.get(approved[0].id) ?? null) : null;
 }
 
 /* ------------------------------------------------ V-49 payout suggestion */

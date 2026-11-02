@@ -33,6 +33,7 @@ const routeOf = (file: string) => {
 /** Pages that are a view inside a desk the rail already opens, named so a new one cannot hide here. */
 const SUB_PAGES: Record<string, string> = {
   "/admin/handbook/position": "the staff member's own role, linked from the handbook and the staff frame",
+  "/admin/kyc/guide": "the reviewer guide, linked from the verification desk and from every person's checklist",
 };
 
 const routes = pages(ADMIN_DIR).map(routeOf);

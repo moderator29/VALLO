@@ -115,6 +115,17 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
     }
     if (!isSubtypeOf(kind, doc.subtype)) return { ok: false, message: FAILED };
   }
+  /* The live selfie, under the same rule: the caller's own folder, a photo. */
+  const selfie = submission.selfie;
+  if (
+    !selfie ||
+    typeof selfie.path !== "string" ||
+    !selfie.path.startsWith(prefix) ||
+    selfie.path.includes("..") ||
+    !/\.(jpg|jpeg|png|webp|heic|heif)$/i.test(selfie.path)
+  ) {
+    return { ok: false, message: NOT_YOURS };
+  }
 
   /* --------------------------- ruling 6, before anything is written */
   /* A submission that files or resends a workspace application records the
@@ -181,7 +192,7 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
     .from("agent_documents")
     .select("id, kind, review_status, supersedes_id, uploaded_at")
     .eq("uploader_id", user.id)
-    .in("kind", KINDS)
+    .in("kind", [...KINDS, "selfie"])
     .order("uploaded_at", { ascending: false });
   const filed: FiledDocument[] = (earlier ?? []).map((row) => ({
     id: String(row.id),
@@ -189,7 +200,7 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
     review_status: typeof row.review_status === "string" ? row.review_status : null,
     supersedes_id: typeof row.supersedes_id === "string" ? row.supersedes_id : null,
   }));
-  const latestOf = (kind: DocumentKind): string | null =>
+  const latestOf = (kind: DocumentKind | "selfie"): string | null =>
     documentToSupersede(filed, kind, { fallbackToLatest: true });
 
   /* ------------------------------------------------ the documents */
@@ -205,7 +216,18 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
       supersedes_id: latestOf(kind),
     };
   });
-  const documentWrite = await supabase.from("agent_documents").insert(rows);
+  const selfieRow = {
+    uploader_id: user.id,
+    application_id: applicationId,
+    kind: "selfie",
+    subtype: null,
+    issued_on: null,
+    storage_path: selfie.path,
+    supersedes_id: latestOf("selfie"),
+  };
+  /* One insert for all three, so the reviewers are told once and a person is
+     never half filed (an ID with no selfie beside it). */
+  const documentWrite = await supabase.from("agent_documents").insert([...rows, selfieRow]);
   if (documentWrite.error) {
     console.error("[verification] agent_documents insert refused", documentWrite.error);
     return { ok: false, message: FAILED };

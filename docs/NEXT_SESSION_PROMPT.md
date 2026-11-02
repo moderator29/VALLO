@@ -108,6 +108,12 @@ Calls do not ring or connect even with notifications on. Audit the whole chain a
 
 The founder's priority: the app opens in under 0.5 s with or without network, and saved screens always show something real, like X. The plan file ranks 25 improvements from a read-only audit, separates web-only work (no store release) from the native 1.0.1 release, and says what to build first (measure real cold start, then web wave 1). It also records that the iOS build has no push entitlement (`aps-environment`), which must be fixed in 1.0.1. Do the web items in the order the plan gives, and report real numbers.
 
+## 4c. Identity verification: manual now, Dojah later (founder decision, 2 November 2026)
+
+Verification is MANUAL for now (no budget for a paid provider). Read `docs/identity/MANUAL_VERIFICATION.md`. The lister sends an ID photo, a live selfie (never the ID held up) and a proof of address on `/verification`; a reviewer with `kyc_review` decides on `/admin/kyc`, typing the name printed on the ID; the payout bank account name is matched free through Paystack. The reviewer guide is `/admin/kyc/guide`.
+
+DOJAH IS BUILT AND PARKED. All of it is in the repository and switched off (`docs/identity/DOJAH.md`): the selfie + NIN/BVN check, the signed webhook, the desk panel, the database (`identity_checks`, flag `dojah_identity` false). Do not remove it and do not switch it on. When the founder says to add Dojah, follow section 5 of `DOJAH.md` (env, widget, webhook, flag). A cheaper middle step the founder may choose first: a staff-only "check this NIN" button for doubtful cases only (one lookup, about N100 to N150).
+
 ## 5. Founder items you must not decide (put them in your final report)
 
 - Kareem's name order (Kareem and "Kida" and "Tunde" appear for the 20% holder in different messages; confirm they are one person before any document uses a name).

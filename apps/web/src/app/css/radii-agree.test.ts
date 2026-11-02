@@ -32,6 +32,7 @@ const ALLOWED: Record<string, [number, string]> = {
   "app/css/passcode.css": [1, "the founder's restoration (7 October 2026): the login, sign-up and passcode screens back exactly as they were before the redesign: the dome across the top is a shape (an ellipse on its lower edge), not a corner"],
 };
 const ALLOWED_TSX: Record<string, [number, string]> = {
+  "components/verification/SelfieCapture.tsx": [1, "the oval face guide over the camera is a shape (an ellipse the face fits inside), not a corner"],
   "components/ui/charts/Bars.tsx": [2, "a 2px corner on an 8px bar: the smallest rung would make it a pill, and the component refuses a pill on purpose (a pill reads as a control)"],
 };
 

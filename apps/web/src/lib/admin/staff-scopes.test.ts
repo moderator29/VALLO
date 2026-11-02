@@ -23,6 +23,7 @@ const DOORS: { file: string; scope: string; calls: number; userClientRpc: boolea
   { file: "../compliance/beneficial-ownership-actions.ts", scope: "listing_approval", calls: 1, userClientRpc: true },
   { file: "../trust/credentials-actions.ts", scope: "kyc_review", calls: 1, userClientRpc: true },
   { file: "./kyc-actions.ts", scope: "kyc_review", calls: 1, userClientRpc: true },
+  { file: "./identity-check-actions.ts", scope: "kyc_review", calls: 1, userClientRpc: true },
   { file: "./support-desk-actions.ts", scope: "support", calls: 2, userClientRpc: true },
   { file: "./moderation-actions.ts", scope: "moderation", calls: 1, userClientRpc: true },
   { file: "./agreements-actions.ts", scope: "agreements", calls: 1, userClientRpc: true },

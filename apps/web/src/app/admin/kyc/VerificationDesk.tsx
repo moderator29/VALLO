@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PersonTier } from "@/app/admin/_components/PersonTier";
 import type { ReactNode } from "react";
 import {
@@ -127,6 +128,13 @@ export function VerificationDesk(props: VerificationDeskProps) {
       </div>
 
       {filters}
+
+      <p className="mb-block text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]" data-testid="kyc-guide-link">
+        New to the desk, or unsure about one?{" "}
+        <Link href="/admin/kyc/guide" className="font-semibold text-[var(--nf-content-primary)] underline">
+          Read how we verify people
+        </Link>
+      </p>
 
       {props.selfieChecks}
 
