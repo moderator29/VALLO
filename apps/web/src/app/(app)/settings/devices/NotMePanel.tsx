@@ -8,6 +8,7 @@ import { ResultSheet } from "@/components/app/ResultSheet";
 import { reportNotMe, type NotMeResult } from "@/lib/security/device-alert-actions";
 import { formatHoldUntil } from "@/lib/security/account-hold";
 import { notMeConsequence } from "@/lib/security/not-me-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "THIS WAS NOT ME". V-19.
@@ -62,13 +63,17 @@ export function NotMePanel({
     }
     setArmed(false);
     startTransition(async () => {
-      const result = await reportNotMe();
-      if (result.ok) setOutcome({ kind: "held", result: result.data });
-      else
-        setOutcome({
-          kind: "failed",
-          message: result.error || copy.failedConsequence,
-        });
+      try {
+        const result = await reportNotMe();
+        if (result.ok) setOutcome({ kind: "held", result: result.data });
+        else
+          setOutcome({
+            kind: "failed",
+            message: result.error || copy.failedConsequence,
+          });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

@@ -19,6 +19,7 @@ import {
   type DepositSettings,
 } from "@/lib/reservations/deposit-rules";
 import type { DeskDeposits, DeskWindow } from "@/lib/reservations/deposit-settings";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE RESTAURANT'S TABLE DEPOSIT SETTINGS (track/restaurant-deposits), on the
@@ -126,16 +127,20 @@ export function DepositSettingsCard({
   };
   const save = () =>
     start(async () => {
-      setMessage(null);
-      const result = await saveDepositSettings({ businessId: venue.businessId, settings: current });
-      if (!result.ok) {
-        setMessage({ ok: false, text: result.error });
-        return;
+      try {
+        setMessage(null);
+        const result = await saveDepositSettings({ businessId: venue.businessId, settings: current });
+        if (!result.ok) {
+          setMessage({ ok: false, text: result.error });
+          return;
+        }
+        setSaved((all) => ({ ...all, [venue.businessId]: result.data.settings }));
+        setDraft(result.data.settings);
+        setMessage({ ok: true, text: words.saved });
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSaved((all) => ({ ...all, [venue.businessId]: result.data.settings }));
-      setDraft(result.data.settings);
-      setMessage({ ok: true, text: words.saved });
-      router.refresh();
     });
 
   const shown = saved[venue.businessId] ?? venue.settings;

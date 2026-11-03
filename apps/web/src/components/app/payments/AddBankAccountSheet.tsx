@@ -11,6 +11,7 @@ import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { NUBAN_LENGTH, digitsOnly, groupNuban } from "@/lib/agent/payout-model";
 import { addBankAccount, listBanks, resolveBankAccount } from "@/lib/payments/bank-accounts-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type PaymentsCopy = Dictionary["paymentsPage"];
 type Bank = { name: string; code: string };
@@ -86,13 +87,17 @@ export function AddBankAccountSheet({
     if (!bank) return;
     setError(null);
     startTransition(async () => {
-      const result = await resolveBankAccount({ bankCode: bank.code, accountNumber: digits });
-      if (!result.ok) {
-        setError(result.fieldErrors?.accountNumber ?? result.error);
-        return;
+      try {
+        const result = await resolveBankAccount({ bankCode: bank.code, accountNumber: digits });
+        if (!result.ok) {
+          setError(result.fieldErrors?.accountNumber ?? result.error);
+          return;
+        }
+        setName(result.data.accountName);
+        setBeat("confirm");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setName(result.data.accountName);
-      setBeat("confirm");
     });
   };
 
@@ -103,19 +108,23 @@ export function AddBankAccountSheet({
     if (!bank) return;
     setError(null);
     startTransition(async () => {
-      /* V-81: a new account to be paid into asks for the phone lock, when there is one. */
-      const result = await lock.guard({ kind: "bank_add", target: `${bank.code}:${digits}` }, (stepUp) =>
-        addBankAccount({ bankCode: bank.code, accountNumber: digits, idempotencyKey, stepUp }),
-      );
-      if (result === null) {
-        setError(lockWords.notConfirmed);
-        return;
+      try {
+        /* V-81: a new account to be paid into asks for the phone lock, when there is one. */
+        const result = await lock.guard({ kind: "bank_add", target: `${bank.code}:${digits}` }, (stepUp) =>
+          addBankAccount({ bankCode: bank.code, accountNumber: digits, idempotencyKey, stepUp }),
+        );
+        if (result === null) {
+          setError(lockWords.notConfirmed);
+          return;
+        }
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        onSaved();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      onSaved();
     });
   };
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { answerOwnerHeartbeat } from "@/lib/landlord/close-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-31 FOR A LISTING ITS OWNER PUT UP: "Is this still available?"
@@ -50,13 +51,17 @@ export function OwnerAskStrip({
           data-testid="owner-ask-yes"
           onClick={() =>
             startTransition(async () => {
-              const result = await answerOwnerHeartbeat({ listingId });
-              if (!result.ok) {
-                setState("failed");
-                return;
+              try {
+                const result = await answerOwnerHeartbeat({ listingId });
+                if (!result.ok) {
+                  setState("failed");
+                  return;
+                }
+                setState("done");
+                router.refresh();
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
               }
-              setState("done");
-              router.refresh();
             })
           }
         >

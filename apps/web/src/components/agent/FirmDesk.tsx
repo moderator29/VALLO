@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { assignFirmListing, setFirmRouting } from "@/lib/firm/actions";
 import type { FirmListing, FirmMember, FirmRouting } from "@/lib/firm/queries";
 import { Icon3D } from "@/components/ui/Icon3D";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-99: THE FIRM DESK. Every open listing under the firm with who handles it
@@ -39,10 +40,14 @@ function AssignRow({ listing, team, copy }: { listing: FirmListing; team: FirmMe
             setValue(next);
             setNote(copy.saving);
             start(async () => {
-              const result = await assignFirmListing({ listingId: listing.listingId, agentId: next === "" ? null : next });
-              setNote(result.ok ? copy.saved : result.error);
-              if (result.ok) router.refresh();
-              else setValue(listing.assignedAgentId ?? "");
+              try {
+                const result = await assignFirmListing({ listingId: listing.listingId, agentId: next === "" ? null : next });
+                setNote(result.ok ? copy.saved : result.error);
+                if (result.ok) router.refresh();
+                else setValue(listing.assignedAgentId ?? "");
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             });
           }}
         >
@@ -193,9 +198,13 @@ export function FirmDesk({
           onClick={() => {
             setNote(null);
             start(async () => {
-              const result = await setFirmRouting({ firmId, mode, areaAgents, officeStart, officeEnd });
-              setNote(result.ok ? copy.saved : result.error);
-              if (result.ok) router.refresh();
+              try {
+                const result = await setFirmRouting({ firmId, mode, areaAgents, officeStart, officeEnd });
+                setNote(result.ok ? copy.saved : result.error);
+                if (result.ok) router.refresh();
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             });
           }}
         >

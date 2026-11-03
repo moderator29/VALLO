@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { type BadgeTier } from "@/lib/trust/badge-tier";
 import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** The picker's words, `experienceInbox.share.picker`, from the server page. */
 export type ShareCopy = Dictionary["experienceInbox"]["share"]["picker"];
@@ -229,12 +230,16 @@ function ConfirmSend({
   const send = () => {
     setError(null);
     start(async () => {
-      const result = await sendMessage({ conversationId, body: shareBody(target) });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await sendMessage({ conversationId, body: shareBody(target) });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.replace(`/messages/${conversationId}`);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.replace(`/messages/${conversationId}`);
     });
   };
 

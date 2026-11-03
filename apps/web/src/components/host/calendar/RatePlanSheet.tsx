@@ -9,6 +9,7 @@ import { TextField } from "@/components/ui/Field";
 import { updateRatePlan } from "@/lib/host/calendar-actions";
 import { nairaToMinor, type RatePlanLite } from "@/lib/host/rate-calendar";
 import { useHostPageCopy } from "../host-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * EDIT A PUBLISHED RATE (C1). Before this there was no way to change a rate
@@ -45,22 +46,26 @@ export function RatePlanSheet({
 
   const save = () =>
     start(async () => {
-      setError(null);
-      setFields({});
-      const result = await updateRatePlan({
-        ratePlanId: plan.id,
-        rateMinor: rateMinor ?? 0,
-        minStayNights: Number.isFinite(min) ? min : 1,
-        maxStayNights: max !== null && Number.isFinite(max) ? max : null,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        setFields(result.fieldErrors ?? {});
-        return;
+      try {
+        setError(null);
+        setFields({});
+        const result = await updateRatePlan({
+          ratePlanId: plan.id,
+          rateMinor: rateMinor ?? 0,
+          minStayNights: Number.isFinite(min) ? min : 1,
+          maxStayNights: max !== null && Number.isFinite(max) ? max : null,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          setFields(result.fieldErrors ?? {});
+          return;
+        }
+        onDone(w.rateDone.replace("{plan}", plan.name).replace("{rate}", formatMoney(rateMinor ?? 0, locale)));
+        onOpenChange(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onDone(w.rateDone.replace("{plan}", plan.name).replace("{rate}", formatMoney(rateMinor ?? 0, locale)));
-      onOpenChange(false);
-      router.refresh();
     });
 
   return (

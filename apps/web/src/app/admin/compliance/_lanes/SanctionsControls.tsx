@@ -12,6 +12,7 @@ import {
 } from "@/lib/compliance/sanctions/actions";
 import type { SanctionsHit, WaitingList } from "@/lib/compliance/sanctions/desk";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["compliance"]["sanctions"];
 
@@ -22,15 +23,19 @@ export function SanctionsUpload({ copy }: { copy: Copy }) {
   const [pending, start] = useTransition();
   const act = (form: FormData) =>
     start(async () => {
-      const file = form.get("file");
-      if (file instanceof File && file.size > 4 * 1024 * 1024) {
-        setAnswer({ ok: false, error: "too_large" });
-        return;
+      try {
+        const file = form.get("file");
+        if (file instanceof File && file.size > 4 * 1024 * 1024) {
+          setAnswer({ ok: false, error: "too_large" });
+          return;
+        }
+        const response = await fetch("/api/compliance/sanctions-upload", { method: "POST", body: form }).catch(() => null);
+        const body = (await response?.json().catch(() => null)) as DeskAnswer | null;
+        setAnswer(body ?? { ok: false, error: "failed" });
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const response = await fetch("/api/compliance/sanctions-upload", { method: "POST", body: form }).catch(() => null);
-      const body = (await response?.json().catch(() => null)) as DeskAnswer | null;
-      setAnswer(body ?? { ok: false, error: "failed" });
-      router.refresh();
     });
   const said =
     answer === null
@@ -98,11 +103,15 @@ function useDeskRun(copy: Copy) {
   const [pending, start] = useTransition();
   const run = (work: () => Promise<DeskAnswer>) =>
     start(async () => {
-      setError(null);
-      setNote(null);
-      const answer = await work().catch(() => ({ ok: false as const, error: "failed" }));
-      if (!answer.ok) setError(deskRefusal(copy, answer.error));
-      else if (answer.message === "proposed") setNote(copy.listProposed);
+      try {
+        setError(null);
+        setNote(null);
+        const answer = await work().catch(() => ({ ok: false as const, error: "failed" }));
+        if (!answer.ok) setError(deskRefusal(copy, answer.error));
+        else if (answer.message === "proposed") setNote(copy.listProposed);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   return { error, note, pending, run };
 }

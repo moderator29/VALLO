@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { pauseRelease, resolveHeldPayment, resumeRelease } from "@/lib/admin/agreements-actions";
 import { signalWords, type WatchRow } from "@/lib/admin/watch-list";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * D68d: the watch list over live deals, riskiest first. A deal waiting for a
@@ -64,8 +65,12 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
               disabled={pending}
               onClick={() =>
                 start(async () => {
-                  const r = await resumeRelease({ arrangementId: row.arrangementId! });
-                  setMessage(r.ok ? "Release resumed." : r.error);
+                  try {
+                    const r = await resumeRelease({ arrangementId: row.arrangementId! });
+                    setMessage(r.ok ? "Release resumed." : r.error);
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
+                  }
                 })
               }
             >
@@ -86,8 +91,12 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
                 disabled={pending || reason.trim().length < 10}
                 onClick={() =>
                   start(async () => {
-                    const r = await pauseRelease({ arrangementId: row.arrangementId!, reason });
-                    setMessage(r.ok ? "Release paused. The money stays held." : r.error);
+                    try {
+                      const r = await pauseRelease({ arrangementId: row.arrangementId!, reason });
+                      setMessage(r.ok ? "Release paused. The money stays held." : r.error);
+                    } catch (error) {
+                      if (!tapFailedOffline(error)) throw error;
+                    }
                   })
                 }
               >
@@ -117,8 +126,12 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
             disabled={pending || note.trim().length < 10}
             onClick={() =>
               start(async () => {
-                const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "refund", note });
-                setResolveMessage(r.ok ? "Refund asked of the partner. It shows as refunded when the partner confirms." : r.error);
+                try {
+                  const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "refund", note });
+                  setResolveMessage(r.ok ? "Refund asked of the partner. It shows as refunded when the partner confirms." : r.error);
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
+                }
               })
             }
           >
@@ -130,8 +143,12 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
             disabled={pending || note.trim().length < 10}
             onClick={() =>
               start(async () => {
-                const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "release", note });
-                setResolveMessage(r.ok ? "Release asked of the partner. It shows as released when the partner confirms." : r.error);
+                try {
+                  const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "release", note });
+                  setResolveMessage(r.ok ? "Release asked of the partner. It shows as released when the partner confirms." : r.error);
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
+                }
               })
             }
           >

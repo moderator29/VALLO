@@ -7,6 +7,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { adjustInterest } from "@/lib/interests/actions";
 import type { IntentDirection, PropertyType } from "@/lib/interests/model";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "More like this" / "Not for me", on the card itself.
@@ -97,20 +98,24 @@ export function IntentTune({
     );
 
     startTransition(async () => {
-      const result = await adjustInterest({ type, direction });
-      if (!result.ok) {
-        // Nothing was written, so the screen goes back to what is true.
-        setRanked(before);
-        setNote("");
-        setError(result.error);
-        return;
+      try {
+        const result = await adjustInterest({ type, direction });
+        if (!result.ok) {
+          // Nothing was written, so the screen goes back to what is true.
+          setRanked(before);
+          setNote("");
+          setError(result.error);
+          return;
+        }
+        setRanked(result.data.interests.includes(type));
+        setNote(
+          result.data.changed
+            ? say(wants ? copy.movedUp : copy.steppedBack)
+            : say(wants ? copy.alreadyUp : copy.alreadyBack),
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setRanked(result.data.interests.includes(type));
-      setNote(
-        result.data.changed
-          ? say(wants ? copy.movedUp : copy.steppedBack)
-          : say(wants ? copy.alreadyUp : copy.alreadyBack),
-      );
     });
   };
 

@@ -6,6 +6,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { closeListingWithReason, type CloseReason } from "@/lib/landlord/close-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type CloseCopy = Dictionary["landlord"]["close"];
 
@@ -47,13 +48,17 @@ export function CloseListingSheet({
     }
     setError(null);
     startTransition(async () => {
-      const result = await closeListingWithReason({ listingId, reason });
-      if (!result.ok) {
-        setError(result.fieldErrors?.reason === "no-rent" ? copy.noRent : copy.failed);
-        return;
+      try {
+        const result = await closeListingWithReason({ listingId, reason });
+        if (!result.ok) {
+          setError(result.fieldErrors?.reason === "no-rent" ? copy.noRent : copy.failed);
+          return;
+        }
+        onClose();
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onClose();
-      router.refresh();
     });
   }
 

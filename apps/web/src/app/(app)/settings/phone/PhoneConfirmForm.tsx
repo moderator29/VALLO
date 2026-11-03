@@ -13,6 +13,7 @@ import { feedback } from "@/lib/ui/feedback";
 import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
 import "@/components/verification/verified-face.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** The button morph's payoff pop (`buttons.css`, "THE ACTION MORPH"). */
 const POP = "nf-btn-pop";
@@ -117,27 +118,35 @@ export function PhoneConfirmForm({
   function send() {
     setError(null);
     startTransition(async () => {
-      const result = await sendPhoneCode({ phone, country });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await sendPhoneCode({ phone, country });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setSentTo(result.data.sentTo);
+        setCode("");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSentTo(result.data.sentTo);
-      setCode("");
     });
   }
 
   function confirm() {
     setError(null);
     startTransition(async () => {
-      const result = await confirmPhoneCode({ code });
-      if (!result.ok) {
-        feedback("error");
-        next.current = [copy.confirmExpired, copy.confirmLocked, copy.confirmNoCode].includes(result.error) ? "resend" : "code";
-        setError(result.error);
-        return;
+      try {
+        const result = await confirmPhoneCode({ code });
+        if (!result.ok) {
+          feedback("error");
+          next.current = [copy.confirmExpired, copy.confirmLocked, copy.confirmNoCode].includes(result.error) ? "resend" : "code";
+          setError(result.error);
+          return;
+        }
+        setDone(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(true);
     });
   }
 

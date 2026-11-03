@@ -9,6 +9,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { initial } from "@/lib/text/initial";
 import { sendDirectMessage } from "@/lib/messages/direct-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE FIRST MESSAGE TO A MEMBER, from their profile. It opens as a chat, not a
@@ -40,11 +41,15 @@ export function DirectFirstMessage({
     setError(null);
     setPhoneGate(false);
     start(async () => {
-      const result = await sendDirectMessage({ handle, body });
-      if (result.ok) router.replace(`/messages/${result.data.conversationId}`);
-      else {
-        setError(result.error);
-        setPhoneGate(isPhoneGate(result));
+      try {
+        const result = await sendDirectMessage({ handle, body });
+        if (result.ok) router.replace(`/messages/${result.data.conversationId}`);
+        else {
+          setError(result.error);
+          setPhoneGate(isPhoneGate(result));
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

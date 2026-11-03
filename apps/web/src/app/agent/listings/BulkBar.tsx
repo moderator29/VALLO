@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { submitListing, unpublishListing } from "@/lib/agent/listings-actions";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
 import { bulkSummary, type BulkPlan } from "./bulk";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * C5: the bar that appears while listings are selected. Every action loops
@@ -22,17 +23,21 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
 
   const loop = (ids: string[], act: (id: string) => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
-      let done = 0;
-      const failures: string[] = [];
-      for (const id of ids) {
-        const result = await act(id);
-        if (result.ok) done += 1;
-        else failures.push(result.error ?? "That did not go through.");
+      try {
+        let done = 0;
+        const failures: string[] = [];
+        for (const id of ids) {
+          const result = await act(id);
+          if (result.ok) done += 1;
+          else failures.push(result.error ?? "That did not go through.");
+        }
+        setMessage(bulkSummary(done, failures));
+        setArmed(false);
+        onClear();
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setMessage(bulkSummary(done, failures));
-      setArmed(false);
-      onClear();
-      router.refresh();
     });
 
   return (
@@ -53,11 +58,15 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
           disabled={pending || plan.confirm.length === 0}
           onClick={() =>
             start(async () => {
-              const result = await confirmListingsAvailable({ listingIds: plan.confirm });
-              setMessage(result.ok ? bulkSummary(result.data.confirmed, []) : result.error);
-              if (result.ok) {
-                onClear();
-                router.refresh();
+              try {
+                const result = await confirmListingsAvailable({ listingIds: plan.confirm });
+                setMessage(result.ok ? bulkSummary(result.data.confirmed, []) : result.error);
+                if (result.ok) {
+                  onClear();
+                  router.refresh();
+                }
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
               }
             })
           }

@@ -141,6 +141,7 @@ import { DetailGlyph } from "@/components/app/listing/DetailGlyph";
 import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/lister-publish.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The List Apartment wizard: eight steps, canon reference 03.
@@ -1830,27 +1831,35 @@ export function ListingWizard({
       field?.querySelector("input")?.focus();
       feedback("error");
       startTransition(async () => {
-        await persist();
+        try {
+          await persist();
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
+        }
       });
       return;
     }
     titleGateOpen.current = false;
 
     startTransition(async () => {
-      await persist();
-      /* Moving forward from a step whose save was refused left the refusal
-         on a step no longer shown, and every later autosave failed on the
-         same field. Stay, and show why. Going back is always allowed. */
-      if (!lastSaveOk.current && target > step) {
-        /* The refusal is at the top: shown at once, never scrolled to slowly. */
-        window.scrollTo({ top: 0, behavior: "instant" });
-        feedback("error");
-        return;
+      try {
+        await persist();
+        /* Moving forward from a step whose save was refused left the refusal
+           on a step no longer shown, and every later autosave failed on the
+           same field. Stay, and show why. Going back is always allowed. */
+        if (!lastSaveOk.current && target > step) {
+          /* The refusal is at the top: shown at once, never scrolled to slowly. */
+          window.scrollTo({ top: 0, behavior: "instant" });
+          feedback("error");
+          return;
+        }
+        setTravel({ dir: target < step ? "back" : "forward", moved: true });
+        setStep(target);
+        /* Arriving at (or past) the step an Edit came from ends the way back. */
+        setReturnTo((prev) => (prev !== null && target >= prev ? null : prev));
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setTravel({ dir: target < step ? "back" : "forward", moved: true });
-      setStep(target);
-      /* Arriving at (or past) the step an Edit came from ends the way back. */
-      setReturnTo((prev) => (prev !== null && target >= prev ? null : prev));
     });
   }
 
@@ -2310,40 +2319,44 @@ export function ListingWizard({
     setMedia(next);
     if (!canPersist || !listingId) return;
     startTransition(async () => {
-      let result: Awaited<ReturnType<typeof reorderMedia>>;
       try {
-        result = await reorderMedia({
-          listingId,
-          items: next.map((item) => ({ kind: item.kind, id: item.id })),
-        });
-      } catch {
-        setMedia(before);
-        setPhotoNotice(copy.wizard.saveUnreached);
-        return;
+        let result: Awaited<ReturnType<typeof reorderMedia>>;
+        try {
+          result = await reorderMedia({
+            listingId,
+            items: next.map((item) => ({ kind: item.kind, id: item.id })),
+          });
+        } catch {
+          setMedia(before);
+          setPhotoNotice(copy.wizard.saveUnreached);
+          return;
+        }
+        if (!result.ok) {
+          setMedia(before);
+          setPhotoNotice(result.error);
+          return;
+        }
+        setPhotoNotice(null);
+        /* Adopt the ids the platform settled on: at the ten photo ceiling one
+           photo row is rewritten, and a stale id would break the next move. */
+        setMedia((prev) =>
+          mergeMedia(
+            result.data.photos.map((photo) => ({
+              ...photo,
+              url: prev.find((item) => item.kind === "photo" && item.path === photo.path)?.url ?? "",
+            })),
+            result.data.videos.map((video) => ({ ...video })),
+          ).map((entry): Media => {
+            if (entry.kind === "photo") {
+              return { kind: "photo", id: entry.item.id, path: entry.item.path, url: entry.item.url };
+            }
+            const held = prev.find((item) => item.kind === "video" && item.id === entry.item.id);
+            return held ?? { kind: "video", id: entry.item.id, url: "", posterUrl: null, durationSeconds: null };
+          }),
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (!result.ok) {
-        setMedia(before);
-        setPhotoNotice(result.error);
-        return;
-      }
-      setPhotoNotice(null);
-      /* Adopt the ids the platform settled on: at the ten photo ceiling one
-         photo row is rewritten, and a stale id would break the next move. */
-      setMedia((prev) =>
-        mergeMedia(
-          result.data.photos.map((photo) => ({
-            ...photo,
-            url: prev.find((item) => item.kind === "photo" && item.path === photo.path)?.url ?? "",
-          })),
-          result.data.videos.map((video) => ({ ...video })),
-        ).map((entry): Media => {
-          if (entry.kind === "photo") {
-            return { kind: "photo", id: entry.item.id, path: entry.item.path, url: entry.item.url };
-          }
-          const held = prev.find((item) => item.kind === "video" && item.id === entry.item.id);
-          return held ?? { kind: "video", id: entry.item.id, url: "", posterUrl: null, durationSeconds: null };
-        }),
-      );
     });
   }
 
@@ -2369,22 +2382,26 @@ export function ListingWizard({
     setMedia(photoFirst(media.filter((_, i) => i !== index)));
     if (!canPersist || !listingId) return;
     startTransition(async () => {
-      /* A refused removal put the item back on screen nowhere: the grid
-         showed it gone while the listing still held it, and the count the
-         submit gate reads disagreed with the one the lister saw. */
-      let error: string | null = null;
       try {
-        const result =
-          chosen.kind === "photo"
-            ? await removePhoto({ listingId, photoId: chosen.id })
-            : await removeVideo({ listingId, videoId: chosen.id });
-        if (!result.ok) error = result.error;
-      } catch {
-        error = copy.wizard.saveUnreached;
-      }
-      if (error) {
-        setMedia(before);
-        setPhotoNotice(error);
+        /* A refused removal put the item back on screen nowhere: the grid
+           showed it gone while the listing still held it, and the count the
+           submit gate reads disagreed with the one the lister saw. */
+        let error: string | null = null;
+        try {
+          const result =
+            chosen.kind === "photo"
+              ? await removePhoto({ listingId, photoId: chosen.id })
+              : await removeVideo({ listingId, videoId: chosen.id });
+          if (!result.ok) error = result.error;
+        } catch {
+          error = copy.wizard.saveUnreached;
+        }
+        if (error) {
+          setMedia(before);
+          setPhotoNotice(error);
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }
@@ -2394,67 +2411,71 @@ export function ListingWizard({
   function send() {
     setPhoneGate(false);
     startTransition(async () => {
-      /* Saved first, always: the draft and its unconfirmed set (V-09) must be
-         what the server checks, not what it held before the last tap. */
-      const id = (await persist()) ?? listingId;
-      /* A refused save leaves the stored row behind the screen, and the
-         review team would be sent the older version. Stop with the save's
-         own refusal on screen instead. */
-      if (!lastSaveOk.current) return;
-      if (!id) {
-        setNotice(canPersist ? copy.submit.needsTitle : copy.submit.needsKeys);
-        return;
-      }
-      /* D60: ONLY WITH THE BLOCKING FLAG ON is the acceptance recorded first,
-         and a listing whose acceptance was not recorded is not sent (D51).
-         With it off nothing is recorded and nothing waits. */
-      if (feeGateBlocking) {
-        if (!feeAcceptance || !feeAccepted) return;
-        const recorded = await recordListerFeeAcceptance({ listingId: id, ...feeAcceptance }).catch(() => null);
-        if (!recorded || !recorded.ok) {
-          setNotice(recorded && !recorded.ok ? recorded.error : copy.wizard.saveUnreached);
-          if (recorded && !recorded.ok) setFeeAcceptance(null);
+      try {
+        /* Saved first, always: the draft and its unconfirmed set (V-09) must be
+           what the server checks, not what it held before the last tap. */
+        const id = (await persist()) ?? listingId;
+        /* A refused save leaves the stored row behind the screen, and the
+           review team would be sent the older version. Stop with the save's
+           own refusal on screen instead. */
+        if (!lastSaveOk.current) return;
+        if (!id) {
+          setNotice(canPersist ? copy.submit.needsTitle : copy.submit.needsKeys);
           return;
         }
+        /* D60: ONLY WITH THE BLOCKING FLAG ON is the acceptance recorded first,
+           and a listing whose acceptance was not recorded is not sent (D51).
+           With it off nothing is recorded and nothing waits. */
+        if (feeGateBlocking) {
+          if (!feeAcceptance || !feeAccepted) return;
+          const recorded = await recordListerFeeAcceptance({ listingId: id, ...feeAcceptance }).catch(() => null);
+          if (!recorded || !recorded.ok) {
+            setNotice(recorded && !recorded.ok ? recorded.error : copy.wizard.saveUnreached);
+            if (recorded && !recorded.ok) setFeeAcceptance(null);
+            return;
+          }
+        }
+        let result: Awaited<ReturnType<typeof submitListing>>;
+        try {
+          result = await submitListing({ listingId: id });
+        } catch {
+          setNotice(copy.wizard.saveUnreached);
+          feedback("error");
+          return;
+        }
+        if (!result.ok) {
+          /* The server's gate reads the STORED listing, so it can refuse what
+             the checklist here passed (a cover left at a gap after a removed
+             photo, a save that did not land). Its summary says "each one is
+             listed below", so the reasons are listed, in the checklist's own
+             words, rather than leaving a green checklist under a refusal. */
+          const reasons = Object.entries(result.fieldErrors ?? {}).map(([field, message]) => gateText(field, message));
+          setNotice([result.error, ...new Set(reasons)].join(" "));
+          setPhoneGate(result.gate === "phone");
+          setFieldErrors(result.fieldErrors ?? {});
+          feedback("error");
+          return;
+        }
+        setNotice(null);
+        setFieldErrors({});
+        /* ACCEPTED, and only now: the card the lister built stays where it is,
+           its status turns to the server's word, the step's controls give way to
+           the chain, and the hand feels one medium beat because a commit was
+           accepted. Nothing pops and nothing is heavy: the listing is not live,
+           and the payoff waits for the day it is (lister-live). */
+        setSent({ status: result.data.status, at: result.data.submittedAt ?? null, now: true });
+        setTravel((prev) => ({ ...prev, moved: true }));
+        feedback("confirm");
+        try {
+          const draftKey = listingDraftKey(userId);
+          if (draftKey) localStorage.removeItem(draftKey);
+        } catch {
+          /* nothing depends on this */
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      let result: Awaited<ReturnType<typeof submitListing>>;
-      try {
-        result = await submitListing({ listingId: id });
-      } catch {
-        setNotice(copy.wizard.saveUnreached);
-        feedback("error");
-        return;
-      }
-      if (!result.ok) {
-        /* The server's gate reads the STORED listing, so it can refuse what
-           the checklist here passed (a cover left at a gap after a removed
-           photo, a save that did not land). Its summary says "each one is
-           listed below", so the reasons are listed, in the checklist's own
-           words, rather than leaving a green checklist under a refusal. */
-        const reasons = Object.entries(result.fieldErrors ?? {}).map(([field, message]) => gateText(field, message));
-        setNotice([result.error, ...new Set(reasons)].join(" "));
-        setPhoneGate(result.gate === "phone");
-        setFieldErrors(result.fieldErrors ?? {});
-        feedback("error");
-        return;
-      }
-      setNotice(null);
-      setFieldErrors({});
-      /* ACCEPTED, and only now: the card the lister built stays where it is,
-         its status turns to the server's word, the step's controls give way to
-         the chain, and the hand feels one medium beat because a commit was
-         accepted. Nothing pops and nothing is heavy: the listing is not live,
-         and the payoff waits for the day it is (lister-live). */
-      setSent({ status: result.data.status, at: result.data.submittedAt ?? null, now: true });
-      setTravel((prev) => ({ ...prev, moved: true }));
-      feedback("confirm");
-      try {
-        const draftKey = listingDraftKey(userId);
-        if (draftKey) localStorage.removeItem(draftKey);
-      } catch {
-        /* nothing depends on this */
-      }
-      router.refresh();
     });
   }
 

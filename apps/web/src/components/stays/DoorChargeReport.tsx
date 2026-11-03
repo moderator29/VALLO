@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { reportDoorCharge } from "@/lib/stays/arrival-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** V-57. One tap from a paid stay: "I was asked for money at the door." */
 export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy: Dictionary["afterTheGate"]["arrival"] }) {
@@ -27,12 +28,16 @@ export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy:
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await reportDoorCharge({ bookingId, askedNaira: asked });
-          if (!result.ok) {
-            setError(result.error);
-            return;
+          try {
+            const result = await reportDoorCharge({ bookingId, askedNaira: asked });
+            if (!result.ok) {
+              setError(result.error);
+              return;
+            }
+            setDone(true);
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setDone(true);
         });
       }}
     >

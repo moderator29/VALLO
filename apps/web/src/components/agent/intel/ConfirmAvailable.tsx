@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "STILL AVAILABLE", FOR ONE LISTING, FROM ITS HEALTH PAGE (C5's action).
@@ -36,12 +37,16 @@ export function ConfirmAvailable({
 
   const confirm = () =>
     start(async () => {
-      const result = await confirmListingsAvailable({ listingIds: [listingId] }).catch(() => null);
-      if (result?.ok) {
-        setState("done");
-        router.refresh();
-      } else {
-        setState("failed");
+      try {
+        const result = await confirmListingsAvailable({ listingIds: [listingId] }).catch(() => null);
+        if (result?.ok) {
+          setState("done");
+          router.refresh();
+        } else {
+          setState("failed");
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

@@ -19,6 +19,7 @@ import { Keypad, PasscodeDots } from "./Keypad";
 import { PasskeyUnlockKey } from "./PasskeyUnlockKey";
 import { PasscodeFrame } from "./PasscodeFrame";
 import { OPEN_HOLD_MS, OPEN_LEAVE_MS, arriveThroughOpenDoor } from "./open-door";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export type PasscodeCopy = Dictionary["passcode"];
 
@@ -360,10 +361,14 @@ export function PasscodeLock({
   /* Another account on this device: end this session here, then sign in. */
   const switchAccount = () =>
     startLeaving(async () => {
-      await signOut();
-      /* The pages this phone kept for offline go with the session. */
-      await forgetKeptPages();
-      window.location.assign("/sign-in");
+      try {
+        await signOut();
+        /* The pages this phone kept for offline go with the session. */
+        await forgetKeptPages();
+        window.location.assign("/sign-in");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   /*

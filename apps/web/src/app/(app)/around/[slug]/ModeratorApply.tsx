@@ -15,6 +15,7 @@ import {
   MODERATOR_REASON_MIN,
   MODERATOR_REASON_MAX,
 } from "@/lib/social/areas-model";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Apply to look after a place.
@@ -57,9 +58,13 @@ export function ModeratorApply({
           disabled={pending}
           onClick={() =>
             startTransition(async () => {
-              const result = await withdrawModeratorApplication({ areaId });
-              if (result.ok) router.refresh();
-              else setError(result.error);
+              try {
+                const result = await withdrawModeratorApplication({ areaId });
+                if (result.ok) router.refresh();
+                else setError(result.error);
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             })
           }
         >
@@ -103,15 +108,19 @@ export function ModeratorApply({
         setError(null);
         setFieldErrors({});
         startTransition(async () => {
-          const result = await applyToModerate({ areaId, reason });
-          if (result.ok) {
-            setOpen(false);
-            setReason("");
-            router.refresh();
-            return;
+          try {
+            const result = await applyToModerate({ areaId, reason });
+            if (result.ok) {
+              setOpen(false);
+              setReason("");
+              router.refresh();
+              return;
+            }
+            setError(result.error);
+            setFieldErrors(result.fieldErrors ?? {});
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setError(result.error);
-          setFieldErrors(result.fieldErrors ?? {});
         });
       }}
     >

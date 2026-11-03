@@ -7,6 +7,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { duplicateListing } from "@/lib/agent/duplicate-actions";
 import { MAX_COPIES } from "@/lib/agent/duplicate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-29: "List another like this", on a row of the lister's own listings. A
@@ -80,14 +81,18 @@ export function DuplicateListing({
               onClick={() => {
                 setError(null);
                 start(async () => {
-                  const result = await duplicateListing({ listingId, copies: count });
-                  if (!result.ok) {
-                    setError(result.error);
-                    return;
+                  try {
+                    const result = await duplicateListing({ listingId, copies: count });
+                    if (!result.ok) {
+                      setError(result.error);
+                      return;
+                    }
+                    setMade(result.data.ids);
+                    setAsked(result.data.asked);
+                    router.refresh();
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
                   }
-                  setMade(result.data.ids);
-                  setAsked(result.data.asked);
-                  router.refresh();
                 });
               }}
             >

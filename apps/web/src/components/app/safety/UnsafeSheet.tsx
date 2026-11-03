@@ -8,6 +8,7 @@ import { feelUnsafe } from "@/lib/safety/unsafe-actions";
 import { responseTimeFor } from "@/lib/trust/standards";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "I FEEL UNSAFE" (V-63): one control in every thread and on every
@@ -78,17 +79,21 @@ export function UnsafeSheet({
     setNote(null);
     setChoice(block ? "leave" : "tell");
     startTransition(async () => {
-      const result = await feelUnsafe({
-        ...(conversationId ? { conversationId } : { inspectionId }),
-        block,
-      });
-      if (!result.ok) {
-        setNote({ ok: false, text: result.error });
-        return;
+      try {
+        const result = await feelUnsafe({
+          ...(conversationId ? { conversationId } : { inspectionId }),
+          block,
+        });
+        if (!result.ok) {
+          setNote({ ok: false, text: result.error });
+          return;
+        }
+        const said = (block ? copy.left : copy.told).replace("{clock}", clock);
+        setNote({ ok: true, text: result.data.held && filerIsLister ? `${said} ${copy.heldNote}` : said });
+        if (block && afterLeave) window.setTimeout(() => window.location.assign(afterLeave), 2500);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const said = (block ? copy.left : copy.told).replace("{clock}", clock);
-      setNote({ ok: true, text: result.data.held && filerIsLister ? `${said} ${copy.heldNote}` : said });
-      if (block && afterLeave) window.setTimeout(() => window.location.assign(afterLeave), 2500);
     });
   }
 

@@ -12,6 +12,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
 import { PassportThreadRows, type PassportSheet } from "@/components/passport/PassportThreadRows";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The conversation's options sheet, behind the kebab in the header.
@@ -127,16 +128,20 @@ export function ThreadOptionsSheet({
   function doBlock() {
     if (!counterpartId) return;
     startBlocking(async () => {
-      const result = await blockUserSafely({ userId: counterpartId });
-      if (!result.ok) {
-        setBlockNote(result.error);
-        return;
+      try {
+        const result = await blockUserSafely({ userId: counterpartId });
+        if (!result.ok) {
+          setBlockNote(result.error);
+          return;
+        }
+        /* The thread is gone for both of them now, so the sheet does not stay
+           open over a conversation that no longer exists. */
+        setConfirmingBlock(false);
+        closeEverything();
+        window.location.assign("/messages");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The thread is gone for both of them now, so the sheet does not stay
-         open over a conversation that no longer exists. */
-      setConfirmingBlock(false);
-      closeEverything();
-      window.location.assign("/messages");
     });
   }
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { answerBrief } from "@/lib/briefs/actions";
 import { briefLine } from "@/lib/briefs/brief";
 import type { DeskBrief } from "@/lib/briefs/queries";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-95: THE BRIEFS A LISTER CAN ANSWER, on the inbox behind its Briefs
@@ -47,13 +48,17 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
             onClick={() => {
               setError(null);
               start(async () => {
-                const result = await answerBrief({ briefId: brief.id, listingId: choice });
-                if (!result.ok) {
-                  setError(result.error);
-                  return;
+                try {
+                  const result = await answerBrief({ briefId: brief.id, listingId: choice });
+                  if (!result.ok) {
+                    setError(result.error);
+                    return;
+                  }
+                  setSent(true);
+                  router.refresh();
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
                 }
-                setSent(true);
-                router.refresh();
               });
             }}
           >

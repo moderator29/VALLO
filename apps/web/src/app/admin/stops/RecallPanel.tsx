@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { previewRecall, sendRecall } from "@/lib/admin/recall-actions";
 import { recallReason, reportRef, willTell, type RecallPreview } from "@/lib/admin/recall";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-60 ON THE STOPS DESK: recall a standing stop for fraud.
@@ -34,31 +35,39 @@ export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk
   function count() {
     setMessage(null);
     startTransition(async () => {
-      const result = await previewRecall({ suspensionId });
-      if (result.ok) setPreview(result.data);
-      else setMessage({ ok: false, text: result.error });
+      try {
+        const result = await previewRecall({ suspensionId });
+        if (result.ok) setPreview(result.data);
+        else setMessage({ ok: false, text: result.error });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 
   function send() {
     setMessage(null);
     startTransition(async () => {
-      /* The report the desk was shown: the database sends only on it. */
-      const reportId = preview?.report?.id;
-      if (!reportId) return;
-      const result = await sendRecall({ suspensionId, reportId });
-      if (result.ok) {
-        const today = day(new Date().toISOString());
-        setMessage({
-          ok: true,
-          text:
-            result.data.recipients === 1
-              ? desk.recallSentOne.replace("{date}", today)
-              : desk.recallSent.replace("{count}", String(result.data.recipients)).replace("{date}", today),
-        });
-        setPreview(null);
-      } else {
-        setMessage({ ok: false, text: result.error });
+      try {
+        /* The report the desk was shown: the database sends only on it. */
+        const reportId = preview?.report?.id;
+        if (!reportId) return;
+        const result = await sendRecall({ suspensionId, reportId });
+        if (result.ok) {
+          const today = day(new Date().toISOString());
+          setMessage({
+            ok: true,
+            text:
+              result.data.recipients === 1
+                ? desk.recallSentOne.replace("{date}", today)
+                : desk.recallSent.replace("{count}", String(result.data.recipients)).replace("{date}", today),
+          });
+          setPreview(null);
+        } else {
+          setMessage({ ok: false, text: result.error });
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

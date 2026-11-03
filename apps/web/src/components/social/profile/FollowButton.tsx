@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { useRequireAuth } from "@/components/auth/AuthGate";
 import { toggleFollow } from "@/lib/social/follows-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Follow, and unfollow.
@@ -108,16 +109,20 @@ export function FollowButton({
     setError(null);
 
     startTransition(async () => {
-      const result = await toggleFollow({ handle });
-      if (!result.ok) {
-        setFollowing(!next);
-        setError(result.error);
-        return;
+      try {
+        const result = await toggleFollow({ handle });
+        if (!result.ok) {
+          setFollowing(!next);
+          setError(result.error);
+          return;
+        }
+        /* The database is the authority even when it agrees with us: a second tab
+           may already have done this. */
+        setFollowing(result.data.following);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The database is the authority even when it agrees with us: a second tab
-         may already have done this. */
-      setFollowing(result.data.following);
-      router.refresh();
     });
   };
 

@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { revokeAllPushDevices, revokePushDevice } from "@/lib/push/devices-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE LIST THAT MAKES THE PERMISSION REVERSIBLE.
@@ -70,7 +71,11 @@ export function PushDevices({
     }
     setArmed(null);
     startTransition(async () => {
-      setOutcome(await work());
+      try {
+        setOutcome(await work());
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export type StillAvailableItem = { id: string; title: string; days: number | null };
 
@@ -24,12 +25,16 @@ export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
 
   const confirm = (ids: string[]) =>
     start(async () => {
-      setError(null);
-      const result = await confirmListingsAvailable({ listingIds: ids });
-      if (!result.ok) setError(result.error);
-      else {
-        setDone((prev) => [...prev, ...ids]);
-        router.refresh();
+      try {
+        setError(null);
+        const result = await confirmListingsAvailable({ listingIds: ids });
+        if (!result.ok) setError(result.error);
+        else {
+          setDone((prev) => [...prev, ...ids]);
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

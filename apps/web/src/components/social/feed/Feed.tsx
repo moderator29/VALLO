@@ -39,6 +39,7 @@ import type { FeedPage } from "@/lib/social/posts-queries";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { POST_COPY, POST_REPORT_REASONS } from "@/lib/social/posts-model";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The heading when a caller has not given one.
@@ -317,13 +318,17 @@ export function Feed({
     const reposted = !post.reposted;
     patch(post.id, { reposted, repostCount: post.repostCount + (reposted ? 1 : -1) });
     startTransition(async () => {
-      const result = await toggleRepost({ postId: post.id });
-      if (!result.ok) {
-        patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-        setNotice(result.error);
-        return;
+      try {
+        const result = await toggleRepost({ postId: post.id });
+        if (!result.ok) {
+          patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
+          setNotice(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -338,13 +343,17 @@ export function Feed({
     if (liked) feedback("select");
     patch(post.id, { liked, likeCount: post.likeCount + (liked ? 1 : -1) });
     startTransition(async () => {
-      const result = await toggleMark({ postId: post.id, mark: "LIKE" });
-      if (!result.ok) {
-        patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-        setNotice(result.error);
-        return;
+      try {
+        const result = await toggleMark({ postId: post.id, mark: "LIKE" });
+        if (!result.ok) {
+          patch(post.id, { liked: post.liked, likeCount: post.likeCount });
+          setNotice(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -418,42 +427,50 @@ export function Feed({
       if (saved) feedback("select");
       patch(post.id, { saved });
       startTransition(async () => {
-        const result = await toggleMark({ postId: post.id, mark: "SAVE" });
-        if (!result.ok) {
-          patch(post.id, { saved: post.saved });
-          setNotice(result.error);
+        try {
+          const result = await toggleMark({ postId: post.id, mark: "SAVE" });
+          if (!result.ok) {
+            patch(post.id, { saved: post.saved });
+            setNotice(result.error);
+          }
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
         }
       });
       return;
     }
 
     startTransition(async () => {
-      // Both of these act on a PERSON, so they need the author's user id and
-      // not the post's. Passing the post id would have blocked a uuid that is
-      // nobody, silently succeeded, and shown "Blocked" for an action that did
-      // nothing at all.
-      // A "hide" key used to live here writing the identical mute behind a row
-      // labelled "Not interested". One key now, named for what it does.
-      if (action === "mute" || action === "block") {
-        const target = post.author?.id;
-        if (!target) return setNotice("There is nobody to do that to on this post.");
-        const result =
-          action === "block"
-            ? await blockUser({ userId: target })
-            : await muteTarget({ targetKind: "USER", targetId: target });
-        setNotice(
-          result.ok
-            ? action === "block"
-              ? POST_COPY.blockedDone
-              : POST_COPY.mutedDone
-            : result.error,
-        );
-        /* Their posts leave the list now. The refresh re-reads only the first
-           page, so anything of theirs on a page read further down stayed on
-           screen after the block said it was done. */
-        if (result.ok) setPosts((all) => all.filter((p) => p.author?.id !== target));
-        router.refresh();
-        return;
+      try {
+        // Both of these act on a PERSON, so they need the author's user id and
+        // not the post's. Passing the post id would have blocked a uuid that is
+        // nobody, silently succeeded, and shown "Blocked" for an action that did
+        // nothing at all.
+        // A "hide" key used to live here writing the identical mute behind a row
+        // labelled "Not interested". One key now, named for what it does.
+        if (action === "mute" || action === "block") {
+          const target = post.author?.id;
+          if (!target) return setNotice("There is nobody to do that to on this post.");
+          const result =
+            action === "block"
+              ? await blockUser({ userId: target })
+              : await muteTarget({ targetKind: "USER", targetId: target });
+          setNotice(
+            result.ok
+              ? action === "block"
+                ? POST_COPY.blockedDone
+                : POST_COPY.mutedDone
+              : result.error,
+          );
+          /* Their posts leave the list now. The refresh re-reads only the first
+             page, so anything of theirs on a page read further down stayed on
+             screen after the block said it was done. */
+          if (result.ok) setPosts((all) => all.filter((p) => p.author?.id !== target));
+          router.refresh();
+          return;
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

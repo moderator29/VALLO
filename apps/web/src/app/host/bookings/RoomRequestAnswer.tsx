@@ -9,6 +9,7 @@ import { acceptRoomRequest, declineRoomRequest } from "@/lib/host/room-booking-a
 import { bookingAcceptedPreview } from "@/lib/email/everyone-gets";
 import type { Dictionary } from "@vallo/i18n/core";
 import { HOST_ROOM_GUEST_PAYS_NEXT, HOST_ROOM_TOTAL_LABEL, PAYOUT_ANSWER } from "@/lib/money/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** What the confirm panel names: the request as the row already shows it. */
 export type RoomRequestSummary = {
@@ -57,12 +58,16 @@ export function RoomRequestAnswer({
 
   const run = (act: () => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
-      setError(null);
-      const result = await act();
-      if (!result.ok) setError(result.error ?? words.failed);
-      else {
-        setOpen(null);
-        router.refresh();
+      try {
+        setError(null);
+        const result = await act();
+        if (!result.ok) setError(result.error ?? words.failed);
+        else {
+          setOpen(null);
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

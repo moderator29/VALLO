@@ -15,6 +15,7 @@ import {
 } from "@/lib/host/photos";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { useHostPageCopy } from "./host-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * AN OWNER'S PHOTOGRAPHS, ONE SURFACE FOR BOTH SPINES.
@@ -130,12 +131,16 @@ export function PhotoManager({
   function takeDown(photoId: string) {
     setError(null);
     startRemoving(async () => {
-      const result = await removeAction({ photoId });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await removeAction({ photoId });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   }
 

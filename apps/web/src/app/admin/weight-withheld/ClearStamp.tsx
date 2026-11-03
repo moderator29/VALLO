@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { clearWeightWithheld } from "@/lib/admin/desk-reads/weight-withheld-actions";
 import { fill } from "../_components/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type ClearCopy = {
   clearAction: string;
@@ -55,13 +56,17 @@ export function ClearStamp({ kind, subject, copy }: { kind: "review" | "report";
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await clearWeightWithheld({ kind, subject, note });
-          if (!result.ok) {
-            setError(result.fieldErrors?.["note"] ?? result.error);
-            return;
+          try {
+            const result = await clearWeightWithheld({ kind, subject, note });
+            if (!result.ok) {
+              setError(result.fieldErrors?.["note"] ?? result.error);
+              return;
+            }
+            setDone(true);
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setDone(true);
-          router.refresh();
         });
       }}
     >

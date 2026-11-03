@@ -35,6 +35,7 @@ import { markSeen, seenOnce } from "@/lib/ui/seen-once";
 import { feedback } from "@/lib/ui/feedback";
 import { motionQuiet } from "@/lib/motion/gate";
 import "@/app/css/lister-live.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The agent's listings workspace.
@@ -168,26 +169,30 @@ function ConfirmSheet({
     setError(null);
     setUnmet([]);
     startTransition(async () => {
-      const input = { listingId: state.listing.id };
-      const result =
-        state.kind === "submit" ? await submitListing(input) : await unpublishListing(input);
+      try {
+        const input = { listingId: state.listing.id };
+        const result =
+          state.kind === "submit" ? await submitListing(input) : await unpublishListing(input);
 
-      if (!result.ok) {
-        setError(result.error);
-        setUnmet(
-          Object.entries(result.fieldErrors ?? {}).map(([field, message]) =>
-            requirementText(t, field, message, state.listing.pricePeriod === "year"),
-          ),
-        );
-        return;
-      }
-      onClose();
-      /* A listing sent for review lands back here with the moment named; the
-         page checks it is really in review before the sheet opens. */
-      if (state.kind === "submit") {
-        router.replace(withDone("/agent/listings", "listing-submitted", { listing: state.listing.id }), { scroll: false });
-      } else {
-        router.refresh();
+        if (!result.ok) {
+          setError(result.error);
+          setUnmet(
+            Object.entries(result.fieldErrors ?? {}).map(([field, message]) =>
+              requirementText(t, field, message, state.listing.pricePeriod === "year"),
+            ),
+          );
+          return;
+        }
+        onClose();
+        /* A listing sent for review lands back here with the moment named; the
+           page checks it is really in review before the sheet opens. */
+        if (state.kind === "submit") {
+          router.replace(withDone("/agent/listings", "listing-submitted", { listing: state.listing.id }), { scroll: false });
+        } else {
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

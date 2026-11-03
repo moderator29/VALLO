@@ -3,6 +3,7 @@
 import { useId, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { upholdStopAsFraud } from "@/lib/admin/person-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-90: a senior reviewer upholds a standing stop as fraud. The note is what a
@@ -21,12 +22,16 @@ export function UpholdControl({ suspensionId, userId }: { suspensionId: string; 
       onSubmit={(event) => {
         event.preventDefault();
         start(async () => {
-          const r = await upholdStopAsFraud({ suspensionId, userId, note });
-          setResult(
-            r.ok
-              ? { tone: "ok", text: `Upheld. ${r.data.keys} identity keys are now on the deny-list; lifting the stop removes them.` }
-              : { tone: "error", text: r.error },
-          );
+          try {
+            const r = await upholdStopAsFraud({ suspensionId, userId, note });
+            setResult(
+              r.ok
+                ? { tone: "ok", text: `Upheld. ${r.data.keys} identity keys are now on the deny-list; lifting the stop removes them.` }
+                : { tone: "error", text: r.error },
+            );
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
+          }
         });
       }}
     >

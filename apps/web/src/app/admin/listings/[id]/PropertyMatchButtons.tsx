@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decidePropertyMatch, reopenClosedListing, splitFromProperty } from "@/lib/landlord/admin-actions";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-37. The reviewer's one-tap decision on a proposed match: "Same property"
@@ -28,9 +29,13 @@ export function PropertyMatchButtons({
   function decide(decision: "join" | "apart") {
     setError(null);
     startTransition(async () => {
-      const result = await decidePropertyMatch({ listingId, otherId, decision });
-      if (!result.ok) setError(result.error);
-      else router.refresh();
+      try {
+        const result = await decidePropertyMatch({ listingId, otherId, decision });
+        if (!result.ok) setError(result.error);
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 
@@ -66,9 +71,13 @@ export function PropertySplitButton({ listingId, label }: { listingId: string; l
         loading={pending}
         onClick={() =>
           startTransition(async () => {
-            const result = await splitFromProperty({ listingId });
-            if (!result.ok) setError(result.error);
-            else router.refresh();
+            try {
+              const result = await splitFromProperty({ listingId });
+              if (!result.ok) setError(result.error);
+              else router.refresh();
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           })
         }
       >
@@ -115,9 +124,13 @@ export function ReopenControl({ listingId, copy }: { listingId: string; copy: Di
           disabled={note.trim().length < 8}
           onClick={() =>
             startTransition(async () => {
-              const result = await reopenClosedListing({ listingId, note });
-              if (!result.ok) setError(result.error);
-              else router.refresh();
+              try {
+                const result = await reopenClosedListing({ listingId, note });
+                if (!result.ok) setError(result.error);
+                else router.refresh();
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             })
           }
         >

@@ -8,6 +8,7 @@ import {
   setAreaPaused,
 } from "@/lib/social/admin-actions";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The decision controls for Around.
@@ -35,12 +36,16 @@ function useDecision() {
   const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => {
     setError(null);
     startTransition(async () => {
-      const result = await fn();
-      if (!result.ok) {
-        setError(result.error ?? "That did not go through. Try again.");
-        return;
+      try {
+        const result = await fn();
+        if (!result.ok) {
+          setError(result.error ?? "That did not go through. Try again.");
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 

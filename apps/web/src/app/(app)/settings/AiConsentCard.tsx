@@ -7,6 +7,7 @@ import { RowButton, RowLink, SettingsGroup } from "@/components/app/account/rows
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { withdrawAiConsent } from "@/lib/ai/consent-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * STORE-07: the AI disclosure a person agreed to in the assistant, stated on
@@ -32,14 +33,18 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
   const withdraw = () => {
     setFailed(false);
     startTransition(async () => {
-      const result = await withdrawAiConsent().catch(() => ({ ok: false }));
-      if (!result.ok) {
-        setFailed(true);
-        return;
+      try {
+        const result = await withdrawAiConsent().catch(() => ({ ok: false }));
+        if (!result.ok) {
+          setFailed(true);
+          return;
+        }
+        setWithdrawn(true);
+        setAsking(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setWithdrawn(true);
-      setAsking(false);
-      router.refresh();
     });
   };
 

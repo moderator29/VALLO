@@ -19,6 +19,7 @@ import type {
 } from "@/lib/business-transfer/queries";
 import { countOf, formatDate, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The route out of the business precondition, drawn as the two doors it is.
@@ -167,18 +168,22 @@ function BusinessRow({
   const send = () => {
     setError(null);
     start(async () => {
-      const result = await offerBusinessTransfer({
-        businessId: business.id,
-        email,
-        note: note.length > 0 ? note : undefined,
-      });
-      if (!result.ok) {
-        setError(result.fieldErrors?.email ?? result.error);
-        return;
+      try {
+        const result = await offerBusinessTransfer({
+          businessId: business.id,
+          email,
+          note: note.length > 0 ? note : undefined,
+        });
+        if (!result.ok) {
+          setError(result.fieldErrors?.email ?? result.error);
+          return;
+        }
+        setSent(result.data.expiresAt);
+        setOpen(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSent(result.data.expiresAt);
-      setOpen(false);
-      router.refresh();
     });
   };
 
@@ -186,27 +191,35 @@ function BusinessRow({
     if (!offer) return;
     setError(null);
     start(async () => {
-      const result = await respondToBusinessTransfer({
-        transferId: offer.transferId,
-        decision: "withdraw",
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await respondToBusinessTransfer({
+          transferId: offer.transferId,
+          decision: "withdraw",
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
   const close = () => {
     setError(null);
     start(async () => {
-      const result = await closeBusiness({ businessId: business.id });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await closeBusiness({ businessId: business.id });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -362,15 +375,19 @@ function IncomingRow({ offer }: { offer: TransferOffer }) {
   const answer = (decision: "accept" | "decline") => {
     setError(null);
     start(async () => {
-      const result = await respondToBusinessTransfer({
-        transferId: offer.transferId,
-        decision,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await respondToBusinessTransfer({
+          transferId: offer.transferId,
+          decision,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 

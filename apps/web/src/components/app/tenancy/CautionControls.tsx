@@ -13,6 +13,7 @@ import {
   proposeCautionDeduction,
   recordCautionReturn,
 } from "@/lib/tenancy/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
 
@@ -34,12 +35,16 @@ function useRun() {
   function run(work: () => Promise<{ ok: boolean; error?: string }>) {
     setError(null);
     start(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? null);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? null);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   }
   return { pending, error, run };
@@ -258,23 +263,27 @@ export function RecordReturn({
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await recordCautionReturn({
-            tenancyId,
-            obligationId,
-            amountNaira: amount,
-            returnedOn,
-            method,
-            reference,
-            idempotencyKey: key,
-          });
-          if (!result.ok) {
-            setError(result.error ?? null);
-            return;
+          try {
+            const result = await recordCautionReturn({
+              tenancyId,
+              obligationId,
+              amountNaira: amount,
+              returnedOn,
+              method,
+              reference,
+              idempotencyKey: key,
+            });
+            if (!result.ok) {
+              setError(result.error ?? null);
+              return;
+            }
+            setSent(copy.returnSent);
+            setAmount("");
+            setKey(crypto.randomUUID());
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setSent(copy.returnSent);
-          setAmount("");
-          setKey(crypto.randomUUID());
-          router.refresh();
         });
       }}
     >

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { useState, useTransition } from "react";
 import { unblockUserSafely } from "@/lib/safety/blocks-actions";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** Nobody blocked yet: what the list is for, and where Block lives. */
 export function BlockedEmpty({ title, body }: { title: string; body: string }) {
@@ -52,13 +53,17 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
       return;
     }
     startTransition(async () => {
-      const result = await unblockUserSafely({ userId: row.userId });
-      if (result.ok) {
-        setGone((prev) => new Set(prev).add(row.userId));
-        /* Only clear the arm if it is still this row's. */
-        setArmed((a) => (a === row.userId ? null : a));
-      } else {
-        setFailed(row.userId);
+      try {
+        const result = await unblockUserSafely({ userId: row.userId });
+        if (result.ok) {
+          setGone((prev) => new Set(prev).add(row.userId));
+          /* Only clear the arm if it is still this row's. */
+          setArmed((a) => (a === row.userId ? null : a));
+        } else {
+          setFailed(row.userId);
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

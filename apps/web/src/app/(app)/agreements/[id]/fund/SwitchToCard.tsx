@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { switchEscrowToCard } from "@/lib/money/fund-fallback-actions";
 import { PAY_CHOICE_CARD_REVIEW, SWITCH_TO_CARD_LABEL, SWITCH_TO_CARD_LEAD } from "@/lib/money/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The calm way from the escrow step to card (founder instruction, 13 October
@@ -26,13 +27,17 @@ export function SwitchToCard({ agreementId }: { agreementId: string }) {
         onClick={() => {
           setMessage(null);
           startTransition(async () => {
-            const result = await switchEscrowToCard({ agreementId });
-            if (!result.ok) {
-              setMessage(result.error);
-              return;
+            try {
+              const result = await switchEscrowToCard({ agreementId });
+              if (!result.ok) {
+                setMessage(result.error);
+                return;
+              }
+              if (result.data.review) setMessage(PAY_CHOICE_CARD_REVIEW);
+              router.push(result.data.next);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            if (result.data.review) setMessage(PAY_CHOICE_CARD_REVIEW);
-            router.push(result.data.next);
           });
         }}
       >

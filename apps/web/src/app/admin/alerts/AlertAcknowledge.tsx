@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { acknowledgeRiskAlert } from "@/lib/admin/actions";
 import { ACK_COPY } from "./ack-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * C13: "I have this" on an open alert.
@@ -29,13 +30,17 @@ export function AlertAcknowledge({ alertId }: { alertId: string }) {
         disabled={pending}
         onClick={() =>
           start(async () => {
-            setError(null);
-            const result = await acknowledgeRiskAlert({ alertId });
-            if (!result.ok) {
-              setError(result.error);
-              return;
+            try {
+              setError(null);
+              const result = await acknowledgeRiskAlert({ alertId });
+              if (!result.ok) {
+                setError(result.error);
+                return;
+              }
+              router.refresh();
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            router.refresh();
           })
         }
       >

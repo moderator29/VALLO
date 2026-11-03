@@ -22,6 +22,7 @@ import { BIO_ENROL_HREF, markBioOfferSeen, readBioOfferSeen, shouldOfferBiometri
 import { Keypad, PasscodeDots } from "./Keypad";
 import { PasscodeFrame } from "./PasscodeFrame";
 import type { PasscodeCopy } from "./PasscodeLock";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Step = "current" | "enter" | "confirm";
 
@@ -340,10 +341,14 @@ export function PasscodeSetup({
             disabled={leaving}
             onClick={() =>
               startLeaving(async () => {
-                await signOut();
-                /* The pages this phone kept for offline go with the session. */
-                await forgetKeptPages();
-                window.location.assign("/");
+                try {
+                  await signOut();
+                  /* The pages this phone kept for offline go with the session. */
+                  await forgetKeptPages();
+                  window.location.assign("/");
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
+                }
               })
             }
           >

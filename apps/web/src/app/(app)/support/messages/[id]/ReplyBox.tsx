@@ -9,6 +9,7 @@ import { PhotoField } from "@/components/support/PhotoField";
 import { uploadTicketPhoto, type PreparedPhoto } from "@/components/support/photo";
 import { replyToMyTicket } from "@/lib/support/ticket-reply";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 const draftKey = (ticketId: string) => `nf_support_reply_${ticketId}`;
 
@@ -61,20 +62,24 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
     setError(undefined);
     setNote("");
     start(async () => {
-      const result = await replyToMyTicket({ ticketId, body, withPhoto: Boolean(photo) });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await replyToMyTicket({ ticketId, body, withPhoto: Boolean(photo) });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        if (photo) {
+          const uploaded = await uploadTicketPhoto(ticketId, photo, result.data.messageId);
+          if (!uploaded.ok) setNote(uploaded.error);
+          URL.revokeObjectURL(photo.previewUrl);
+          setPhoto(null);
+        }
+        keep("");
+        if (!photo) setNote(copy.sent);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (photo) {
-        const uploaded = await uploadTicketPhoto(ticketId, photo, result.data.messageId);
-        if (!uploaded.ok) setNote(uploaded.error);
-        URL.revokeObjectURL(photo.previewUrl);
-        setPhoto(null);
-      }
-      keep("");
-      if (!photo) setNote(copy.sent);
-      router.refresh();
     });
   };
 

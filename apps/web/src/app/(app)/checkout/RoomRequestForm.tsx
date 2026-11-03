@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { requestRoomStay } from "@/lib/stays/room-booking-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * ROOM BOOKINGS 1: "Request this room". Writes the PENDING booking (priced
@@ -49,16 +50,20 @@ export function RoomRequestForm({
         setError(null);
         setPhoneGate(false);
         start(async () => {
-          const result = await requestRoomStay({ stayId, roomTypeId, ratePlanId, checkIn, checkOut, guests, rooms });
-          if (!result.ok) {
-            setError(result.error);
-            setPhoneGate(isPhoneGate(result));
-            return;
+          try {
+            const result = await requestRoomStay({ stayId, roomTypeId, ratePlanId, checkIn, checkOut, guests, rooms });
+            if (!result.ok) {
+              setError(result.error);
+              setPhoneGate(isPhoneGate(result));
+              return;
+            }
+            /* Replace, not push (navigation audit): the request is made, so
+               browser, Android and iOS back never re-enter the submitted form
+               and offer to ask for the same room twice. */
+            router.replace(`/checkout/${result.data.bookingId}`);
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          /* Replace, not push (navigation audit): the request is made, so
-             browser, Android and iOS back never re-enter the submitted form
-             and offer to ask for the same room twice. */
-          router.replace(`/checkout/${result.data.bookingId}`);
         });
       }}
     >

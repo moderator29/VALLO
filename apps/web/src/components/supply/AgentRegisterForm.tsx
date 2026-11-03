@@ -25,6 +25,7 @@ import { CalmPanel, RegisterDone, RegisterShell } from "./RegisterShell";
 import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * GOVERNING-04, THE AGENT FORM.
@@ -164,32 +165,36 @@ export function AgentRegisterForm({
     }
     if (experience === "") return;
     startTransition(async () => {
-      const result = await submitSupplyRegistration({
-        role: "agent",
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        nin: nin.trim(),
-        experience,
-        agencyFeeBps,
-        legalFeeBps,
-        idPath: idDoc?.path ?? "",
-        selfiePath: selfie?.path ?? "",
-        acceptTerms,
-        acceptPayOnVallo: acceptPay,
-      });
-      if (!result.ok) {
-        setErrors(result.fieldErrors ?? {});
-        setScreenError(result.error);
-        const walkBack = earliestStep(result.fieldErrors);
-        if (walkBack !== null) setStep(walkBack);
-        return;
+      try {
+        const result = await submitSupplyRegistration({
+          role: "agent",
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          nin: nin.trim(),
+          experience,
+          agencyFeeBps,
+          legalFeeBps,
+          idPath: idDoc?.path ?? "",
+          selfiePath: selfie?.path ?? "",
+          acceptTerms,
+          acceptPayOnVallo: acceptPay,
+        });
+        if (!result.ok) {
+          setErrors(result.fieldErrors ?? {});
+          setScreenError(result.error);
+          const walkBack = earliestStep(result.fieldErrors);
+          if (walkBack !== null) setStep(walkBack);
+          return;
+        }
+        setErrors({});
+        setFiled({
+          reference: result.data.reference,
+          attached: result.data.documentsAttached,
+        });
+        setStep(3);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setErrors({});
-      setFiled({
-        reference: result.data.reference,
-        attached: result.data.documentsAttached,
-      });
-      setStep(3);
     });
   }
 

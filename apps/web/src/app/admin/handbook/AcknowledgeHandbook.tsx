@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { acknowledgeHandbook } from "@/lib/admin/staff-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export function AcknowledgeHandbook({ version }: { version: string }) {
   const [read, setRead] = useState(false);
@@ -24,13 +25,17 @@ export function AcknowledgeHandbook({ version }: { version: string }) {
           data-testid="handbook-acknowledge"
           onClick={() =>
             start(async () => {
-              const result = await acknowledgeHandbook({ version });
-              if (!result.ok) setError(result.error);
-              else {
-                /* Straight into the console, where their desks and their
-                   position are now open, rather than staying on this page. */
-                router.replace("/admin");
-                router.refresh();
+              try {
+                const result = await acknowledgeHandbook({ version });
+                if (!result.ok) setError(result.error);
+                else {
+                  /* Straight into the console, where their desks and their
+                     position are now open, rather than staying on this page. */
+                  router.replace("/admin");
+                  router.refresh();
+                }
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
               }
             })
           }

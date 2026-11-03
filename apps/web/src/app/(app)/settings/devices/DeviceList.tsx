@@ -10,6 +10,7 @@ import { endOtherSessions, endSession } from "@/lib/security/sessions-actions";
 import { endSessionGroup } from "@/lib/security/device-alert-actions";
 import { NotMePanel, type NotMeCopy } from "./NotMePanel";
 import { signOutEverywhere } from "@/lib/profile/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The list, and the buttons that end things.
@@ -127,7 +128,11 @@ export function DeviceList({
     }
     setArmed(null);
     startTransition(async () => {
-      setOutcome(await work());
+      try {
+        setOutcome(await work());
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

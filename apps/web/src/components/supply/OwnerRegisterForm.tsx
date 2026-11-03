@@ -23,6 +23,7 @@ import { CalmPanel, RegisterDone, RegisterShell } from "./RegisterShell";
 import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * GOVERNING-03, THE OWNER FORM, AND IT IS THE ONE THAT MATTERS.
@@ -207,34 +208,38 @@ export function OwnerRegisterForm({
     }
     if (held === null) return;
     startTransition(async () => {
-      const result = await submitSupplyRegistration({
-        role: "owner",
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        nin: nin.trim(),
-        stateCode,
-        lgaCode,
-        area: area.trim(),
-        ownershipDocument: held,
-        /* A document goes only with an answer that names one. */
-        ownershipPath: held !== "none" ? (proof?.path ?? "") : "",
-        acceptTerms,
-        acceptPayOnVallo: acceptPay,
-      });
-      if (!result.ok) {
-        setErrors(result.fieldErrors ?? {});
-        setScreenError(result.error);
-        const walkBack = earliestStep(result.fieldErrors, "owner");
-        if (walkBack !== null) setStep(walkBack);
-        return;
+      try {
+        const result = await submitSupplyRegistration({
+          role: "owner",
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          nin: nin.trim(),
+          stateCode,
+          lgaCode,
+          area: area.trim(),
+          ownershipDocument: held,
+          /* A document goes only with an answer that names one. */
+          ownershipPath: held !== "none" ? (proof?.path ?? "") : "",
+          acceptTerms,
+          acceptPayOnVallo: acceptPay,
+        });
+        if (!result.ok) {
+          setErrors(result.fieldErrors ?? {});
+          setScreenError(result.error);
+          const walkBack = earliestStep(result.fieldErrors, "owner");
+          if (walkBack !== null) setStep(walkBack);
+          return;
+        }
+        setErrors({});
+        setFiled({
+          reference: result.data.reference,
+          mark: result.data.canEarnOwnershipMark,
+          attached: result.data.documentsAttached,
+        });
+        setStep(3);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setErrors({});
-      setFiled({
-        reference: result.data.reference,
-        mark: result.data.canEarnOwnershipMark,
-        attached: result.data.documentsAttached,
-      });
-      setStep(3);
     });
   }
 

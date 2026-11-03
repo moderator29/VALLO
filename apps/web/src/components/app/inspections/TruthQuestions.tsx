@@ -12,6 +12,7 @@ import {
   type TruthAnswer,
   type TruthAnswers,
 } from "@/lib/inspections/truth";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * FOUR TRUTH QUESTIONS CLOSE EVERY INSPECTION (V-05): the renter's side.
@@ -77,12 +78,16 @@ export function TruthQuestions({
     }
     const complete = answers;
     startTransition(async () => {
-      const result = await answerTruthQuestions({ inspectionId, answers: complete });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await answerTruthQuestions({ inspectionId, answers: complete });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setDone({ at: new Date().toISOString(), reportOpened: result.data.reportOpened });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone({ at: new Date().toISOString(), reportOpened: result.data.reportOpened });
     });
   }
 

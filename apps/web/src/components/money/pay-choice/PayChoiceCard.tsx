@@ -18,6 +18,7 @@ import { payChoiceView, payNextHref, readChoiceRefusal, type PayChoice, type Pay
 import { choosePaymentRail } from "@/lib/payments/rail-choice-actions";
 import type { ActionResult } from "@/lib/actions/envelope";
 import "./pay-choice.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export type PayChoiceAgreement = { id: string; kind: string; bookingId: string | null; inspectionId: string | null };
 
@@ -82,20 +83,24 @@ export function PayChoiceCard({
       return;
     }
     startTransition(async () => {
-      const result = await choose({ agreementId: agreement.id, choice: selected });
-      if (!result.ok) {
-        const code = readChoiceRefusal(result.error);
-        setError(code === "unavailable" && !(result.error in copy.refused) ? result.error : copy.refused[code]);
-        return;
+      try {
+        const result = await choose({ agreementId: agreement.id, choice: selected });
+        if (!result.ok) {
+          const code = readChoiceRefusal(result.error);
+          setError(code === "unavailable" && !(result.error in copy.refused) ? result.error : copy.refused[code]);
+          return;
+        }
+        /* The gate read the new rail and a person looks first: say so, and stay
+           here so the payer can go back to escrow (pov04, never a dead end). */
+        if (result.data.review) {
+          setReview(true);
+          router.refresh();
+          return;
+        }
+        go(result.data.choice);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The gate read the new rail and a person looks first: say so, and stay
-         here so the payer can go back to escrow (pov04, never a dead end). */
-      if (result.data.review) {
-        setReview(true);
-        router.refresh();
-        return;
-      }
-      go(result.data.choice);
     });
   };
 

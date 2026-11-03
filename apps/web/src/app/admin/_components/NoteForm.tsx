@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addMemberNote } from "@/lib/admin/notes-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export function NoteForm({
   subjectId,
@@ -30,12 +31,16 @@ export function NoteForm({
         e.preventDefault();
         setError(null);
         start(async () => {
-          const result = await addMemberNote({ subjectId, body, scope: scope || null, path });
-          if (!result.ok) setError(result.error);
-          else {
-            setBody("");
-            setScope("");
-            router.refresh();
+          try {
+            const result = await addMemberNote({ subjectId, body, scope: scope || null, path });
+            if (!result.ok) setError(result.error);
+            else {
+              setBody("");
+              setScope("");
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}

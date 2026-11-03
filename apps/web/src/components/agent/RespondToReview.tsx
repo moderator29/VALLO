@@ -9,6 +9,7 @@ import { UploadCard, newBatchId, type UploadState } from "@/components/supply/Up
 import { respondToReview } from "@/lib/agent/application-respond";
 import { RESPONSE_MAX_CHARS } from "@/lib/agent/application-respond-model";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * SUP-05: the way forward from "Needs more information".
@@ -58,9 +59,13 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
       ...(business && registration ? [{ kind: "business" as const, path: registration.path }] : []),
     ];
     startTransition(async () => {
-      const result = await respondToReview({ answer, documents, acceptTerms, acceptPayOnVallo: acceptPay });
-      if (result.ok) setSent(true);
-      else setError(result.error);
+      try {
+        const result = await respondToReview({ answer, documents, acceptTerms, acceptPayOnVallo: acceptPay });
+        if (result.ok) setSent(true);
+        else setError(result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 

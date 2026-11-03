@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { askStillAvailable } from "@/lib/availability/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-14: "STILL AVAILABLE?", the first button on a rental page.
@@ -51,12 +52,16 @@ export function StillAvailable({
         onClick={() => {
           setError(null);
           start(async () => {
-            const result = await askStillAvailable({ listingId });
-            if (!result.ok) {
-              setError(result.error);
-              return;
+            try {
+              const result = await askStillAvailable({ listingId });
+              if (!result.ok) {
+                setError(result.error);
+                return;
+              }
+              router.push(`/messages/${result.data.conversationId}`);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            router.push(`/messages/${result.data.conversationId}`);
           });
         }}
       >

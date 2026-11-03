@@ -23,6 +23,7 @@ import { TextField } from "@/components/ui/Field";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { previewLine } from "@/components/app/messages/preview";
 import { type BadgeTier } from "@/lib/trust/badge-tier";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The Inbox.
@@ -381,28 +382,36 @@ export function Inbox({
     setArchiveNote(null);
     setArchivedLocal((current) => ({ ...current, [row.id]: next }));
     startArchiving(async () => {
-      const result = next
-        ? await archiveConversation({ conversationId: row.id })
-        : await unarchiveConversation({ conversationId: row.id });
-      if (!result.ok) {
-        setArchivedLocal((current) => ({ ...current, [row.id]: !next }));
-        setArchiveNote(result.error);
-        return;
+      try {
+        const result = next
+          ? await archiveConversation({ conversationId: row.id })
+          : await unarchiveConversation({ conversationId: row.id });
+        if (!result.ok) {
+          setArchivedLocal((current) => ({ ...current, [row.id]: !next }));
+          setArchiveNote(result.error);
+          return;
+        }
+        setArchiveNote(next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setArchiveNote(next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote);
-      router.refresh();
     });
   };
 
   const markAllRead = () => {
     setMarkError(null);
     startMarking(async () => {
-      const result = await markInboxRead();
-      if (result.ok) {
-        router.refresh();
-        return;
+      try {
+        const result = await markInboxRead();
+        if (result.ok) {
+          router.refresh();
+          return;
+        }
+        setMarkError(result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setMarkError(result.error);
     });
   };
 

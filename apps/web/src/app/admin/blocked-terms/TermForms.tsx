@@ -4,6 +4,7 @@ import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { putBlockedTerm, retireBlockedTerm } from "@/lib/admin/blocked-terms-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Option = { value: string; label: string };
 
@@ -59,24 +60,28 @@ export function TermForm({
         setErrors({});
         setSaved(false);
         start(async () => {
-          const result = await putBlockedTerm({
-            term,
-            category,
-            action,
-            severity,
-            reason,
-            ...(action === "refuse" ? { refusalReason } : {}),
-          });
-          if (!result.ok) {
-            setErrors(result.fieldErrors ?? {});
-            setError(result.error);
-            return;
+          try {
+            const result = await putBlockedTerm({
+              term,
+              category,
+              action,
+              severity,
+              reason,
+              ...(action === "refuse" ? { refusalReason } : {}),
+            });
+            if (!result.ok) {
+              setErrors(result.fieldErrors ?? {});
+              setError(result.error);
+              return;
+            }
+            setSaved(true);
+            setTerm("");
+            setReason("");
+            setRefusalReason("");
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setSaved(true);
-          setTerm("");
-          setReason("");
-          setRefusalReason("");
-          router.refresh();
         });
       }}
     >
@@ -199,13 +204,17 @@ export function RetireTerm({ term, copy }: { term: string; copy: RetireCopy }) {
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await retireBlockedTerm({ term, reason });
-          if (!result.ok) {
-            setError(result.fieldErrors?.["reason"] ?? result.error);
-            return;
+          try {
+            const result = await retireBlockedTerm({ term, reason });
+            if (!result.ok) {
+              setError(result.fieldErrors?.["reason"] ?? result.error);
+              return;
+            }
+            setDone(true);
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setDone(true);
-          router.refresh();
         });
       }}
     >

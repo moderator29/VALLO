@@ -23,6 +23,7 @@ import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * GOVERNING-05, THE FIRM FORM, WHICH IS A BRANCH AND NOT A THIRD ROLE.
@@ -154,33 +155,37 @@ export function FirmRegisterForm({
     }
     if (proof === null) return;
     startTransition(async () => {
-      const result = await submitSupplyRegistration({
-        role: "firm",
-        fullName: fullName.trim(),
-        businessName: businessName.trim(),
-        rcNumber: rcNumber.trim(),
-        officeAddress: officeAddress.trim(),
-        lasreraNumber: lasreraNumber.trim(),
-        associationProof: proof,
-        principalEmail: principalEmail.trim(),
-        letterPath: letter?.path ?? "",
-        team,
-        acceptTerms,
-        acceptPayOnVallo: acceptPay,
-      });
-      if (!result.ok) {
-        setErrors(result.fieldErrors ?? {});
-        setScreenError(result.error);
-        const walkBack = earliestStep(result.fieldErrors);
-        if (walkBack !== null) setStep(walkBack);
-        return;
+      try {
+        const result = await submitSupplyRegistration({
+          role: "firm",
+          fullName: fullName.trim(),
+          businessName: businessName.trim(),
+          rcNumber: rcNumber.trim(),
+          officeAddress: officeAddress.trim(),
+          lasreraNumber: lasreraNumber.trim(),
+          associationProof: proof,
+          principalEmail: principalEmail.trim(),
+          letterPath: letter?.path ?? "",
+          team,
+          acceptTerms,
+          acceptPayOnVallo: acceptPay,
+        });
+        if (!result.ok) {
+          setErrors(result.fieldErrors ?? {});
+          setScreenError(result.error);
+          const walkBack = earliestStep(result.fieldErrors);
+          if (walkBack !== null) setStep(walkBack);
+          return;
+        }
+        setErrors({});
+        setFiled({
+          reference: result.data.reference,
+          attached: result.data.documentsAttached,
+        });
+        setStep(3);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setErrors({});
-      setFiled({
-        reference: result.data.reference,
-        attached: result.data.documentsAttached,
-      });
-      setStep(3);
     });
   }
 

@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { Anchor, CommuteResult } from "@/lib/listings/commute";
 import { reportCommute } from "@/lib/listings/commute-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "How long did it take you?" (V-43), for members of an Around place. One
@@ -44,7 +45,11 @@ export function CommuteCard({
           onSubmit={(event) => {
             event.preventDefault();
             startTransition(async () => {
-              setResult(await reportCommute(areaId, anchor, Number(minutes)));
+              try {
+                setResult(await reportCommute(areaId, anchor, Number(minutes)));
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             });
           }}
         >

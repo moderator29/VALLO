@@ -8,6 +8,7 @@ import { updatePlace } from "@/lib/places/actions";
 import { PlaceFields, type PlaceValues } from "@/components/app/place/PlaceFields";
 import type { StateOption } from "@/lib/places/reference";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * WHAT THE SIGN-UP FORM NO LONGER ASKS (A1, 30 September).
@@ -53,8 +54,12 @@ export function ArrivalAsks({
     setHeard(value);
     setHeardState("idle");
     start(async () => {
-      const result = await rememberHearAbout(value);
-      setHeardState(result.ok ? "saved" : "failed");
+      try {
+        const result = await rememberHearAbout(value);
+        setHeardState(result.ok ? "saved" : "failed");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 
@@ -63,8 +68,12 @@ export function ArrivalAsks({
     setPlaceState("idle");
     if (!next.stateCode) return;
     start(async () => {
-      const result = await updatePlace(next);
-      setPlaceState(result.ok ? "saved" : "failed");
+      try {
+        const result = await updatePlace(next);
+        setPlaceState(result.ok ? "saved" : "failed");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

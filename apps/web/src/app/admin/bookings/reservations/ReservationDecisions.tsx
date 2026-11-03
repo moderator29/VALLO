@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideReservationAsAdmin } from "@/lib/admin/bookings-actions";
 import type { ReservationDecision } from "@/lib/admin/schema";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The three things an operator can do to a table, and the sentence first.
@@ -63,23 +64,27 @@ export function ReservationDecisions({
     if (!chosen) return;
     setError(null);
     start(async () => {
-      const result = await decideReservationAsAdmin({
-        reservationId,
-        decision: chosen,
-        reason: reason.trim(),
-      });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.error);
-        return;
+      try {
+        const result = await decideReservationAsAdmin({
+          reservationId,
+          decision: chosen,
+          reason: reason.trim(),
+        });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["reason"] ?? result.error);
+          return;
+        }
+        setDone(
+          chosen === "confirm"
+            ? "Confirmed. The guest has been told."
+            : "Cancelled. The guest has been told, with your reason, and the decision is in the audit log.",
+        );
+        setChosen(null);
+        setReason("");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(
-        chosen === "confirm"
-          ? "Confirmed. The guest has been told."
-          : "Cancelled. The guest has been told, with your reason, and the decision is in the audit log.",
-      );
-      setChosen(null);
-      setReason("");
-      router.refresh();
     });
   }
 

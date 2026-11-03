@@ -8,6 +8,7 @@ import { withDone, type RecordDoneFlag } from "@/lib/ui/success-moments";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The controls on an agreement page (Track A): confirm the exact version,
@@ -27,15 +28,19 @@ function useAction() {
    */
   const run = (work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void, done?: RecordDoneFlag) =>
     start(async () => {
-      setError(null);
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? "That did not go through.");
-        return;
+      try {
+        setError(null);
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? "That did not go through.");
+          return;
+        }
+        after?.();
+        if (done) router.replace(withDone(window.location.pathname, done), { scroll: false });
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      after?.();
-      if (done) router.replace(withDone(window.location.pathname, done), { scroll: false });
-      else router.refresh();
     });
   return { pending, error, run };
 }

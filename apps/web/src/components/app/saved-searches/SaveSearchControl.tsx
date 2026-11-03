@@ -6,6 +6,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveSearch } from "@/lib/saved/searches-actions";
 import type { SavedSearchParams, SavedSearchView } from "@/lib/saved/searches";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * SAVE THIS SEARCH, ON THE SEARCH ITSELF.
@@ -61,14 +62,18 @@ export function SaveSearchControl({
     if (pending) return;
     setError(null);
     startTransition(async () => {
-      const result = await saveSearch({ params });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await saveSearch({ params });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        /* The row the database returned, so the name and the alert state on
+           screen are the stored ones rather than this component's guess. */
+        setRow(result.data);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The row the database returned, so the name and the alert state on
-         screen are the stored ones rather than this component's guess. */
-      setRow(result.data);
     });
   }, [params, pending]);
 

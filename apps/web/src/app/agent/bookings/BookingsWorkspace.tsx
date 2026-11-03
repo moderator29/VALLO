@@ -24,6 +24,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { TextArea } from "@/components/ui/Field";
 import { Icon3D } from "@/components/ui/Icon3D";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The host's bookings console: requests that need a decision, plus the stays
@@ -81,18 +82,22 @@ function DecisionSheet({
     setError(null);
     setReasonError(null);
     startTransition(async () => {
-      const result =
-        state.kind === "accept"
-          ? await acceptBooking({ bookingId: state.booking.id })
-          : await declineBooking({ bookingId: state.booking.id, reason: reason.trim() });
+      try {
+        const result =
+          state.kind === "accept"
+            ? await acceptBooking({ bookingId: state.booking.id })
+            : await declineBooking({ bookingId: state.booking.id, reason: reason.trim() });
 
-      if (!result.ok) {
-        setError(result.error);
-        if (result.fieldErrors?.reason) setReasonError(result.fieldErrors.reason);
-        return;
+        if (!result.ok) {
+          setError(result.error);
+          if (result.fieldErrors?.reason) setReasonError(result.fieldErrors.reason);
+          return;
+        }
+        onClose();
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onClose();
-      router.refresh();
     });
   }
 

@@ -7,6 +7,7 @@ import { decideAgreement } from "@/lib/admin/agreements-actions";
 import type { QueueRow } from "@/lib/admin/reads/agreements";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE QUEUE, BUILT TO BE WORKED AT SPEED.
@@ -45,16 +46,20 @@ function Row({ row, locale, now }: { row: QueueRow; locale: Locale; now: number 
 
   const act = (decision: "approve" | "reject") =>
     start(async () => {
-      const result = await decideAgreement({
-        agreementId: row.id,
-        decision,
-        ...(decision === "reject" ? { reason } : {}),
-      });
-      setOutcome(
-        result.ok
-          ? { kind: "done", text: decision === "approve" ? "Approved. Both parties told; payment is open." : "Sent back. Both parties told with your reason." }
-          : { kind: "error", text: result.error },
-      );
+      try {
+        const result = await decideAgreement({
+          agreementId: row.id,
+          decision,
+          ...(decision === "reject" ? { reason } : {}),
+        });
+        setOutcome(
+          result.ok
+            ? { kind: "done", text: decision === "approve" ? "Approved. Both parties told; payment is open." : "Sent back. Both parties told with your reason." }
+            : { kind: "error", text: result.error },
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   if (outcome?.kind === "done") {

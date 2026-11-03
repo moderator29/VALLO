@@ -17,6 +17,7 @@ import {
   type AreaKind,
 } from "@/lib/social/areas-model";
 import { useDisplayHost } from "@/lib/ui/use-display-host";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Suggest a place.
@@ -99,14 +100,18 @@ export function ProposeAreaForm({
     setError(null);
     setFieldErrors({});
     startTransition(async () => {
-      const result = await proposeArea({ name, kind, stateCode, city, blurb });
-      if (result.ok) {
-        setDone(true);
-        router.refresh();
-        return;
+      try {
+        const result = await proposeArea({ name, kind, stateCode, city, blurb });
+        if (result.ok) {
+          setDone(true);
+          router.refresh();
+          return;
+        }
+        setError(result.error);
+        setFieldErrors(result.fieldErrors ?? {});
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setError(result.error);
-      setFieldErrors(result.fieldErrors ?? {});
     });
   };
 

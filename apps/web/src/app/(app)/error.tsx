@@ -51,6 +51,8 @@ export default function AppError({
      to quote and no "tell support", and loads itself again when the signal
      returns. The same words in the agent and host boundaries. */
   const offline = useSignalBoundary(error, reset);
+  /* A weak signal: no page, a short line at the bottom, and the screen again. */
+  if (offline === "retrying") return null;
   if (offline) {
     return (
       <StateMoment

@@ -12,6 +12,7 @@ import type {
   ResolvedProfileSettings,
 } from "@/lib/profile/model";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * NOTIFICATION SETTINGS AS A REAL MATRIX (R3-14): event by channel, and quiet
@@ -118,14 +119,18 @@ export function NotificationMatrix({
   ) => {
     setNote(null);
     start(async () => {
-      const result = await updateSettings(patch);
-      if (result.ok) {
-        setFlags(result.data.notifications);
-        setNote({ tone: "ok", text: copy.saved });
-        return;
+      try {
+        const result = await updateSettings(patch);
+        if (result.ok) {
+          setFlags(result.data.notifications);
+          setNote({ tone: "ok", text: copy.saved });
+          return;
+        }
+        revert();
+        setNote({ tone: "error", text: result.error });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      revert();
-      setNote({ tone: "error", text: result.error });
     });
   };
 

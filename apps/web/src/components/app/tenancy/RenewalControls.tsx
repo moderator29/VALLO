@@ -7,6 +7,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { answerExitAccount, answerRenewal, offerRenewal, relistFromTenancy } from "@/lib/tenancy/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
 
@@ -25,13 +26,17 @@ function useRun() {
   function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void) {
     setError(null);
     start(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? null);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? null);
+          return;
+        }
+        if (after) after(result.data);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (after) after(result.data);
-      router.refresh();
     });
   }
   return { pending, error, run };

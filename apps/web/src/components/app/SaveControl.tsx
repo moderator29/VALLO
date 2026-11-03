@@ -21,6 +21,7 @@ import {
 import { addLocalSave, readLocalSaves, removeLocalSave } from "@/lib/saved/local";
 import { enqueue, makeEntry } from "@/lib/offline/outbox";
 import { useClientCopy } from "@/lib/i18n/client-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 
 /**
@@ -236,15 +237,19 @@ export function useSaveControl(
     };
 
     startTransition(async () => {
-      if (typeof navigator !== "undefined" && navigator.onLine === false) {
-        await keepForLater();
-        return;
-      }
       try {
-        await sendNow();
-      } catch {
-        /* The request never came back: the network dropped under it. */
-        await keepForLater();
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          await keepForLater();
+          return;
+        }
+        try {
+          await sendNow();
+        } catch {
+          /* The request never came back: the network dropped under it. */
+          await keepForLater();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

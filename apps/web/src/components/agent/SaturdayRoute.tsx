@@ -5,6 +5,7 @@ import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { sayRunningLate } from "@/lib/viewings/actions";
 import type { RouteLeg } from "@/lib/viewings/route";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-94: THE DAY AS A ROUTE. Booked viewings in time order, a heading each
@@ -75,9 +76,13 @@ export function SaturdayRoute({
           onClick={() => {
             setError(null);
             start(async () => {
-              const result = await sayRunningLate({ conversationId: next.conversationId, slotAt: next.slotAt });
-              if (!result.ok) setError(result.error);
-              else setSaid(copy.lateSent.replace("{name}", next.counterpartName ?? copy.someone));
+              try {
+                const result = await sayRunningLate({ conversationId: next.conversationId, slotAt: next.slotAt });
+                if (!result.ok) setError(result.error);
+                else setSaid(copy.lateSent.replace("{name}", next.counterpartName ?? copy.someone));
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             });
           }}
         >

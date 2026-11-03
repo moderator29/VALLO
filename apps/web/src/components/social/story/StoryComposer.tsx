@@ -24,6 +24,7 @@ import { initial as initialOf } from "@/lib/text/initial";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
 import "../feed/feed-v2.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Writing a story.
@@ -192,66 +193,70 @@ export function StoryComposer({
     setError(null);
 
     startTransition(async () => {
-      /* A throw (a dropped connection, a server action that did not answer)
-         is said here in the composer, never handed to the error boundary with
-         the person's writing still in it. */
-      let stage: "upload" | "publish" = "upload";
       try {
-        let path = uploaded.current?.blob === blob ? uploaded.current.path : null;
-        if (!path) {
-          const supabase = await loadBrowserClient();
-          if (!supabase) {
-            setError(STORY_FAILURE.upload);
+        /* A throw (a dropped connection, a server action that did not answer)
+           is said here in the composer, never handed to the error boundary with
+           the person's writing still in it. */
+        let stage: "upload" | "publish" = "upload";
+        try {
+          let path = uploaded.current?.blob === blob ? uploaded.current.path : null;
+          if (!path) {
+            const supabase = await loadBrowserClient();
+            if (!supabase) {
+              setError(STORY_FAILURE.upload);
+              return;
+            }
+            /* The post id is not known yet, so the object goes under a fresh uuid in
+               the person's own folder. The bucket's insert policy only checks the
+               first path segment; the read policy resolves the post id out of the
+               second, which the server action fills in when it writes the media row. */
+            const fresh = `${userId}/${crypto.randomUUID()}.jpg`;
+            const upload = await uploadToStorage({
+              supabase,
+              bucket: "social-media",
+              path: fresh,
+              body: blob,
+              contentType: "image/jpeg",
+              onProgress: setSent,
+            });
+            if (!upload.ok) {
+              setSent(null);
+              setError(uploadFailureText(upload.reason));
+              return;
+            }
+            uploaded.current = { blob, path: fresh };
+            path = fresh;
+          }
+
+          stage = "publish";
+          setSent(null);
+          const result = await withTimeout(
+            publishStory({
+              areaId,
+              headline: finalHeadline,
+              standfirst: finalStandfirst,
+              placeLabel: place.trim(),
+              imagePath: path,
+              ...(size ? { width: size.width, height: size.height } : {}),
+            }),
+            30_000,
+          );
+
+          if (!result.ok) {
+            setError(result.error);
             return;
           }
-          /* The post id is not known yet, so the object goes under a fresh uuid in
-             the person's own folder. The bucket's insert policy only checks the
-             first path segment; the read policy resolves the post id out of the
-             second, which the server action fills in when it writes the media row. */
-          const fresh = `${userId}/${crypto.randomUUID()}.jpg`;
-          const upload = await uploadToStorage({
-            supabase,
-            bucket: "social-media",
-            path: fresh,
-            body: blob,
-            contentType: "image/jpeg",
-            onProgress: setSent,
-          });
-          if (!upload.ok) {
-            setSent(null);
-            setError(uploadFailureText(upload.reason));
+          if (result.data.held) {
+            setHeld(true);
             return;
           }
-          uploaded.current = { blob, path: fresh };
-          path = fresh;
+          router.replace(`/stories/${result.data.storyId}`);
+        } catch {
+          setSent(null);
+          setError(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down);
         }
-
-        stage = "publish";
-        setSent(null);
-        const result = await withTimeout(
-          publishStory({
-            areaId,
-            headline: finalHeadline,
-            standfirst: finalStandfirst,
-            placeLabel: place.trim(),
-            imagePath: path,
-            ...(size ? { width: size.width, height: size.height } : {}),
-          }),
-          30_000,
-        );
-
-        if (!result.ok) {
-          setError(result.error);
-          return;
-        }
-        if (result.data.held) {
-          setHeld(true);
-          return;
-        }
-        router.replace(`/stories/${result.data.storyId}`);
-      } catch {
-        setSent(null);
-        setError(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

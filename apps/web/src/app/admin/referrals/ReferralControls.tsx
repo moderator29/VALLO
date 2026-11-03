@@ -9,6 +9,7 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { decidePayout, decideReferral, setReferralBudget } from "@/lib/admin/referral-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE REFERRAL DESK'S HANDS: set the budget, decide a referral, decide a
@@ -77,12 +78,16 @@ function ReasonSheet(p: ReasonSheetProps) {
     }
     setError(null);
     start(async () => {
-      const result = await p.run(trimmed);
-      if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.error);
-        return;
+      try {
+        const result = await p.run(trimmed);
+        if (!result.ok) {
+          setError(result.fieldErrors?.["reason"] ?? result.error);
+          return;
+        }
+        setDone(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(true);
     });
   }
 
@@ -401,13 +406,17 @@ export function BudgetControl({
   function save() {
     if (capMinor === null) return;
     start(async () => {
-      const result = await setReferralBudget({ month, capMinor, reason: reason.trim() });
-      if (!result.ok) {
-        setStage("form");
-        setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["capMinor"] ?? result.fieldErrors?.["month"] ?? result.error);
-        return;
+      try {
+        const result = await setReferralBudget({ month, capMinor, reason: reason.trim() });
+        if (!result.ok) {
+          setStage("form");
+          setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["capMinor"] ?? result.fieldErrors?.["month"] ?? result.error);
+          return;
+        }
+        setStage("done");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setStage("done");
     });
   }
 

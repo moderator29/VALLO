@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { destroyExpiredMoneyRecords } from "@/lib/admin/desk-reads/retention-actions";
 import { confirmationMatches } from "@/lib/admin/desk-reads/retention";
 import { fill } from "../_components/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type DestroyCopy = {
   destroyBody: string;
@@ -48,15 +49,19 @@ export function DestroyRecords({
   function run() {
     setError(null);
     start(async () => {
-      const result = await destroyExpiredMoneyRecords({ confirm: typed, expected });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["confirm"] ?? result.error);
-        return;
+      try {
+        const result = await destroyExpiredMoneyRecords({ confirm: typed, expected });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["confirm"] ?? result.error);
+          return;
+        }
+        setOpen(false);
+        setTyped("");
+        setMessage("redacted" in result.data ? fill(copy.done, { count: result.data.redacted }) : copy.nothingToDo);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setOpen(false);
-      setTyped("");
-      setMessage("redacted" in result.data ? fill(copy.done, { count: result.data.redacted }) : copy.nothingToDo);
-      router.refresh();
     });
   }
 

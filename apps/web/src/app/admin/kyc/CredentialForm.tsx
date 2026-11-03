@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { recordCredential } from "@/lib/trust/credentials-actions";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-87: record a LASRERA or ESVARBON entry checked by hand on the public
@@ -28,8 +29,12 @@ export function CredentialForm({ subjectId, desk }: { subjectId: string; desk: D
   function submit() {
     setNote(null);
     startTransition(async () => {
-      const result = await recordCredential({ subjectId, kind, number, registerName });
-      setNote(result.ok ? { ok: true, text: desk.credentialRecorded } : { ok: false, text: result.error });
+      try {
+        const result = await recordCredential({ subjectId, kind, number, registerName });
+        setNote(result.ok ? { ok: true, text: desk.credentialRecorded } : { ok: false, text: result.error });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 

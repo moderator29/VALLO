@@ -9,6 +9,7 @@ import { setEnquiryStage } from "@/lib/enquiry/actions";
 import { setEnquiryFollowup } from "@/lib/enquiry/followup-actions";
 import { addDays, FOLLOWUP_MAX_DAYS, FOLLOWUP_NOTE_MAX } from "@/lib/enquiry/followup";
 import { LOST_REASONS, STAGES, type DeskStage, type LostReason, type Stage } from "@/lib/enquiry/stage";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-72: THE STAGE, AT THE TOP OF A LISTING THREAD, FOR THE LISTER ONLY.
@@ -64,17 +65,21 @@ function FollowupRow({
   function send(nextDue: string | null, nextNote: string | null) {
     setError(null);
     start(async () => {
-      const result = await setEnquiryFollowup({ conversationId, dueOn: nextDue, note: nextNote });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await setEnquiryFollowup({ conversationId, dueOn: nextDue, note: nextNote });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setOpen(false);
+        if (nextDue === null) {
+          setDueOn("");
+          setNote("");
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setOpen(false);
-      if (nextDue === null) {
-        setDueOn("");
-        setNote("");
-      }
-      router.refresh();
     });
   }
 
@@ -178,17 +183,21 @@ export function StageControl({
   function save() {
     setError(null);
     start(async () => {
-      const result = await setEnquiryStage({
-        conversationId,
-        stage: next,
-        ...(next === "lost" && reason ? { reason } : {}),
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await setEnquiryStage({
+          conversationId,
+          stage: next,
+          ...(next === "lost" && reason ? { reason } : {}),
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setOpen(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setOpen(false);
-      router.refresh();
     });
   }
 

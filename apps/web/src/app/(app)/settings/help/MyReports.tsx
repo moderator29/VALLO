@@ -9,6 +9,7 @@ import { SettingsGroup } from "@/components/app/account/rows";
 import { StatusPill, type StatusTone } from "@/components/ui/StatusPill";
 import type { MyReports as MyReportsList } from "@/lib/reports/my-reports";
 import { withdrawMyReport } from "@/lib/reports/withdraw-action";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * YOUR REPORTS. V-89, and A1-035 (the reporter could not see the outcome).
@@ -43,9 +44,13 @@ export function MyReports({ list, locale }: { list: MyReportsList; locale: Local
     }
     setArmed(null);
     start(async () => {
-      const result = await withdrawMyReport({ id });
-      setMessage(result.state === "ok" ? copy.withdrawn : result.state === "closed" ? copy.withdrawClosed : copy.withdrawFailed);
-      if (result.state === "ok") router.refresh();
+      try {
+        const result = await withdrawMyReport({ id });
+        setMessage(result.state === "ok" ? copy.withdrawn : result.state === "closed" ? copy.withdrawClosed : copy.withdrawFailed);
+        if (result.state === "ok") router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

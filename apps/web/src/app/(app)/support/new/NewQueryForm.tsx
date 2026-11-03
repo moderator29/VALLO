@@ -30,6 +30,7 @@ import {
 import { expectedResponse } from "@/lib/support/tickets";
 import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type FormCopy = Dictionary["experienceInbox"]["support"]["form"];
 
@@ -136,27 +137,31 @@ export function NewQueryForm({
       return;
     }
     start(async () => {
-      const result = await fileSupportTicket({
-        topic: draft.topic ?? "other",
-        kind: draft.kind,
-        body: draft.body.trim(),
-        ...(draft.related ? { related: { kind: draft.related.kind, id: draft.related.id } } : {}),
-      });
-      if (!result.ok) {
-        setServerError(result.error);
-        return;
-      }
-      let photoNote: string | undefined;
-      if (photo && result.data.id) {
-        const uploaded = await uploadTicketPhoto(result.data.id, photo);
-        if (!uploaded.ok) photoNote = uploaded.error;
-      }
       try {
-        window.localStorage.removeItem(DRAFT_KEY);
-      } catch {
-        // Nothing to clear.
+        const result = await fileSupportTicket({
+          topic: draft.topic ?? "other",
+          kind: draft.kind,
+          body: draft.body.trim(),
+          ...(draft.related ? { related: { kind: draft.related.kind, id: draft.related.id } } : {}),
+        });
+        if (!result.ok) {
+          setServerError(result.error);
+          return;
+        }
+        let photoNote: string | undefined;
+        if (photo && result.data.id) {
+          const uploaded = await uploadTicketPhoto(result.data.id, photo);
+          if (!uploaded.ok) photoNote = uploaded.error;
+        }
+        try {
+          window.localStorage.removeItem(DRAFT_KEY);
+        } catch {
+          // Nothing to clear.
+        }
+        setFiled({ reference: result.data.reference, id: result.data.id, photoNote });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setFiled({ reference: result.data.reference, id: result.data.id, photoNote });
     });
   };
 

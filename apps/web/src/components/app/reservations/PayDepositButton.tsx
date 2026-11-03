@@ -5,6 +5,7 @@ import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState, useTransition } from "react";
 import { payReservationDeposit } from "@/lib/reservations/deposit-actions";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * D75: pay a restaurant's table deposit, by card. Opens Paystack's hosted
@@ -42,16 +43,20 @@ export function PayDepositButton({
         data-testid="trip-pay-deposit"
         onClick={() =>
           start(async () => {
-            setError(null);
-            setPhoneGate(false);
-            const result = await payReservationDeposit(reservationId);
-            if (!result.ok) {
-              setError(result.error);
-              setPhoneGate(isPhoneGate(result));
-              return;
+            try {
+              setError(null);
+              setPhoneGate(false);
+              const result = await payReservationDeposit(reservationId);
+              if (!result.ok) {
+                setError(result.error);
+                setPhoneGate(isPhoneGate(result));
+                return;
+              }
+              setRedirecting(true);
+              window.location.assign(result.data.authorizationUrl);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            setRedirecting(true);
-            window.location.assign(result.data.authorizationUrl);
           })
         }
       >

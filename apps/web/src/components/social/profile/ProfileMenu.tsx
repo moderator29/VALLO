@@ -21,6 +21,7 @@ import { Toast, useToast } from "@/components/ui/Toast";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import "./social-profile.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The `…` on a person's page. The sibling of the one on every card.
@@ -190,48 +191,60 @@ export function ProfileMenu({
     if (requireSignIn()) return;
     const next = !muted;
     startTransition(async () => {
-      const result = next
-        ? await muteTarget({ targetKind: "USER", targetId: userId })
-        : await unmuteTarget({ targetKind: "USER", targetId: userId });
-      if (!result.ok) {
-        show(result.error, "error");
-        return;
+      try {
+        const result = next
+          ? await muteTarget({ targetKind: "USER", targetId: userId })
+          : await unmuteTarget({ targetKind: "USER", targetId: userId });
+        if (!result.ok) {
+          show(result.error, "error");
+          return;
+        }
+        setMuted(next);
+        show(
+          next
+            ? POST_COPY.mutedDone
+            : `Unmuted. ${who} will show up in your feeds again.`,
+        );
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setMuted(next);
-      show(
-        next
-          ? POST_COPY.mutedDone
-          : `Unmuted. ${who} will show up in your feeds again.`,
-      );
-      router.refresh();
     });
   };
 
   const doBlock = () => {
     startTransition(async () => {
-      const result = await blockUser({ userId });
-      if (!result.ok) {
+      try {
+        const result = await blockUser({ userId });
+        if (!result.ok) {
+          setConfirmBlock(false);
+          /* The sheet's own return aims at the Block row, which left with the
+             menu; the `…` is where the keyboard belongs. */
+          openerRef.current?.focus();
+          show(result.error, "error");
+          return;
+        }
         setConfirmBlock(false);
-        /* The sheet's own return aims at the Block row, which left with the
-           menu; the `…` is where the keyboard belongs. */
-        openerRef.current?.focus();
-        show(result.error, "error");
-        return;
+        setBlocked(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setConfirmBlock(false);
-      setBlocked(true);
     });
   };
 
   const undoBlock = () => {
     startTransition(async () => {
-      const result = await unblockUser({ userId });
-      if (!result.ok) {
-        show(result.error, "error");
-        return;
+      try {
+        const result = await unblockUser({ userId });
+        if (!result.ok) {
+          show(result.error, "error");
+          return;
+        }
+        setBlocked(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setBlocked(false);
-      router.refresh();
     });
   };
 

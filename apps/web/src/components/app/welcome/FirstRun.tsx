@@ -34,6 +34,7 @@ import {
   skipPlan,
   swipeStep,
 } from "./onboarding-flow";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Get started IN MOTION (30 September), to the founder's onboarding video
@@ -482,13 +483,17 @@ export function FirstRun({
   const onDone = () => {
     setError("");
     start(async () => {
-      remember();
-      await markWelcomeSeen();
-      if (askQuestion) {
-        setBeat("question");
-        return;
+      try {
+        remember();
+        await markWelcomeSeen();
+        if (askQuestion) {
+          setBeat("question");
+          return;
+        }
+        leave(next ?? "/home");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      leave(next ?? "/home");
     });
   };
 
@@ -505,14 +510,18 @@ export function FirstRun({
       return;
     }
     start(async () => {
-      remember();
-      const [, skipped] = await Promise.all([markWelcomeSeen(), skipInterests()]);
-      if (!skipped.ok) {
-        setError(skipped.error);
-        return;
+      try {
+        remember();
+        const [, skipped] = await Promise.all([markWelcomeSeen(), skipInterests()]);
+        if (!skipped.ok) {
+          setError(skipped.error);
+          return;
+        }
+        forgetFirstInterest();
+        leave(plan.to);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      forgetFirstInterest();
-      leave(plan.to);
     });
   };
 

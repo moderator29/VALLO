@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { decideListingMandate } from "@/lib/compliance/beneficial-ownership-actions";
 import { ID_DOCUMENT_KINDS, RELATIONSHIPS, VERIFIED_HOW, looksLikeNin } from "@/lib/compliance/beneficial-ownership";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["complianceBeneficialOwnership"];
 
@@ -43,20 +44,24 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
   function run(decision: "approve" | "reject") {
     setError(null);
     startTransition(async () => {
-      const result = await decideListingMandate({
-        mandateId,
-        decision,
-        relationship: relationship || null,
-        verifiedHow: how || null,
-        idDocumentKind: idKind || null,
-        idDocumentRef: idRef.trim() || null,
-        reason: decision === "reject" ? reason : null,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await decideListingMandate({
+          mandateId,
+          decision,
+          relationship: relationship || null,
+          verifiedHow: how || null,
+          idDocumentKind: idKind || null,
+          idDocumentRef: idRef.trim() || null,
+          reason: decision === "reject" ? reason : null,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setDone(decision === "approve" ? "approved" : "rejected");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(decision === "approve" ? "approved" : "rejected");
     });
   }
 

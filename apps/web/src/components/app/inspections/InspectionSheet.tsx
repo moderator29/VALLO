@@ -62,6 +62,7 @@ import { ViewingDayKit } from "./ViewingDayKit";
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
 import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * ONE INSPECTION, EXACTLY IN THE ANATOMY OF F6A8A482 / founder/inspection-target.jpg.
@@ -277,15 +278,19 @@ export function InspectionSheet({
     setError(null);
     startTransition(async () => {
       try {
-        const result = await work();
-        if (!result.ok) {
-          setError(result.error ?? w.failed);
-          return;
+        try {
+          const result = await work();
+          if (!result.ok) {
+            setError(result.error ?? w.failed);
+            return;
+          }
+          after?.();
+          router.refresh();
+        } finally {
+          inFlight.current = false;
         }
-        after?.();
-        router.refresh();
-      } finally {
-        inFlight.current = false;
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }
@@ -314,19 +319,23 @@ export function InspectionSheet({
   function saveReport(body: { items?: { item: RoomItem; checked: boolean }[]; submit?: boolean }) {
     setError(null);
     startTransition(async () => {
-      const result = await saveInspectionReport({
-        inspectionId: inspection.id,
-        items: body.items ?? [],
-        notes: notes.trim().length > 0 ? notes : null,
-        submit: body.submit ?? false,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await saveInspectionReport({
+          inspectionId: inspection.id,
+          items: body.items ?? [],
+          notes: notes.trim().length > 0 ? notes : null,
+          submit: body.submit ?? false,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setSaved((now) => fromSaved(result.data, now.photoCount));
+        if (body.submit === true) setDone("inspectionReportSubmitted");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSaved((now) => fromSaved(result.data, now.photoCount));
-      if (body.submit === true) setDone("inspectionReportSubmitted");
-      router.refresh();
     });
   }
 

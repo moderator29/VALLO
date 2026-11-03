@@ -7,6 +7,7 @@ import { setFeeRate } from "@/lib/admin/money-actions";
 import { reviewKycDocument } from "@/lib/admin/kyc-actions";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The two decisions the money side of the console takes here (the escrow
@@ -54,18 +55,22 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   function decide(approve: boolean) {
     setError(null);
     start(async () => {
-      const result = await reviewKycDocument(
-        approve
-          ? { documentId, approve: true, ...(isId ? { nameOnId: nameOnId.trim() } : {}) }
-          : { documentId, approve: false, reason },
-      );
-      if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"] ?? result.error);
-        return;
+      try {
+        const result = await reviewKycDocument(
+          approve
+            ? { documentId, approve: true, ...(isId ? { nameOnId: nameOnId.trim() } : {}) }
+            : { documentId, approve: false, reason },
+        );
+        if (!result.ok) {
+          setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"] ?? result.error);
+          return;
+        }
+        setReason("");
+        setShowReason(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setReason("");
-      setShowReason(false);
-      router.refresh();
     });
   }
 
@@ -215,26 +220,30 @@ export function FeeRateForm({
     const percentValue = Number(percent);
     const flatValue = Number(flatNaira);
     start(async () => {
-      const result = await setFeeRate({
-        kind,
-        basisPoints: Math.round(percentValue * 100),
-        flatMinor: Math.round(flatValue * 100),
-        /* Empty means now. The database refuses anything in the past, so an
-           operator who leaves this blank gets the earliest legal start. */
-        effectiveFrom: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
-        note,
-      });
-      if (!result.ok) {
+      try {
+        const result = await setFeeRate({
+          kind,
+          basisPoints: Math.round(percentValue * 100),
+          flatMinor: Math.round(flatValue * 100),
+          /* Empty means now. The database refuses anything in the past, so an
+             operator who leaves this blank gets the earliest legal start. */
+          effectiveFrom: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
+          note,
+        });
+        if (!result.ok) {
+          setConfirming(false);
+          setError(
+            result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"] ?? result.error,
+          );
+          return;
+        }
+        setNote("");
         setConfirming(false);
-        setError(
-          result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"] ?? result.error,
-        );
-        return;
+        setDone(true);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNote("");
-      setConfirming(false);
-      setDone(true);
-      router.refresh();
     });
   }
 

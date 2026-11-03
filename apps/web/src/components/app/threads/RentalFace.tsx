@@ -25,6 +25,7 @@ import {
 } from "@/components/app/inspections/ViewingSheets";
 import { viewingWords } from "@/components/app/inspections/viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE RENTAL FACE: the inspection request, inside the chat it was made in.
@@ -121,15 +122,19 @@ export function RentalFace({
     setError(null);
     startTransition(async () => {
       try {
-        const result = await work();
-        if (!result.ok) {
-          setError(result.error ?? copy.failed);
-          return;
+        try {
+          const result = await work();
+          if (!result.ok) {
+            setError(result.error ?? copy.failed);
+            return;
+          }
+          then();
+          router.refresh();
+        } finally {
+          inFlight.current = false;
         }
-        then();
-        router.refresh();
-      } finally {
-        inFlight.current = false;
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

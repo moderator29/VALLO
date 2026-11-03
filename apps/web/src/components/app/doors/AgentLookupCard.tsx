@@ -4,6 +4,7 @@ import { useId, useState, useTransition } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { setCheckableNumber } from "@/lib/doors/agent-check-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type CardCopy = Dictionary["trustDoors"]["agentCard"];
 
@@ -34,14 +35,18 @@ export function AgentLookupCard({
   const save = (phone: string | null) => {
     setError(null);
     start(async () => {
-      const result = await setCheckableNumber({ phone });
-      if (result.ok) {
-        setHint(result.data.hint);
-        setValue("");
-        return;
+      try {
+        const result = await setCheckableNumber({ phone });
+        if (result.ok) {
+          setHint(result.data.hint);
+          setValue("");
+          return;
+        }
+        const reason = result.fieldErrors?.phone ?? result.error;
+        setError(reason === "taken" ? copy.taken : reason === "invalid" ? copy.invalid : copy.failed);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const reason = result.fieldErrors?.phone ?? result.error;
-      setError(reason === "taken" ? copy.taken : reason === "invalid" ? copy.invalid : copy.failed);
     });
   };
 

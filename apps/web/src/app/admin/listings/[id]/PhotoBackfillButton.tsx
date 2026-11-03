@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { runPhotoBackfill } from "@/lib/photo-hash/backfill-action";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-45: hash the next batch of old photographs, so the desk can compare them.
@@ -26,12 +27,16 @@ export function PhotoBackfillButton({
         loading={pending}
         onClick={() =>
           startTransition(async () => {
-            const result = await runPhotoBackfill();
-            setNote(
-              result.ok
-                ? { ok: true, text: copy.backfilled.replace("{count}", String(result.data.hashed)) }
-                : { ok: false, text: result.error },
-            );
+            try {
+              const result = await runPhotoBackfill();
+              setNote(
+                result.ok
+                  ? { ok: true, text: copy.backfilled.replace("{count}", String(result.data.hashed)) }
+                  : { ok: false, text: result.error },
+              );
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           })
         }
       >

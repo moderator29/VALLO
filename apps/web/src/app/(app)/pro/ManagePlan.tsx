@@ -9,6 +9,7 @@ import { StatusPill, type StatusTone } from "@/components/ui/StatusPill";
 import { cancelSubscription } from "@/lib/subscriptions/actions";
 import type { LiveSubscription, SubscriptionsCopy } from "@/lib/subscriptions/state";
 import { fill, longDate, money } from "./plan-format";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE PLAN A MEMBER HOLDS THROUGH A SUBSCRIPTION, AND THE WAY OUT OF IT.
@@ -66,15 +67,19 @@ export function ManagePlan({
 
   const cancel = () =>
     start(async () => {
-      setError(null);
-      const result = await cancelSubscription(live.id);
-      if (!result.ok) return setError(result.error);
-      if (!result.data.cancelled) {
-        return setError(copy.errors[result.data.reason as keyof typeof copy.errors] ?? copy.errors.cancel_failed);
+      try {
+        setError(null);
+        const result = await cancelSubscription(live.id);
+        if (!result.ok) return setError(result.error);
+        if (!result.data.cancelled) {
+          return setError(copy.errors[result.data.reason as keyof typeof copy.errors] ?? copy.errors.cancel_failed);
+        }
+        setAsking(false);
+        setDone(m.cancelled);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setAsking(false);
-      setDone(m.cancelled);
-      router.refresh();
     });
 
   return (

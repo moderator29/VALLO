@@ -7,6 +7,7 @@ import { TextField } from "@/components/ui/Field";
 import { beginConsoleStepUp, finishConsoleStepUp } from "@/lib/security/console-step-up";
 import { beginEnrol, finishEnrol, sendFallbackCode } from "@/lib/security/money-step-up-actions";
 import { assertPlatformKey, createPlatformKey } from "@/lib/security/webauthn-client";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE CONSOLE'S SECOND FACTOR, AS STAFF SEE IT.
@@ -33,65 +34,77 @@ export function ConsoleStepUp({ name }: { name: string }) {
 
   const confirm = () =>
     start(async () => {
-      setMessage(null);
-      const begun = await beginConsoleStepUp();
-      if (begun.state === "enrol") {
-        setNeedsKey(begun.method);
-        return;
+      try {
+        setMessage(null);
+        const begun = await beginConsoleStepUp();
+        if (begun.state === "enrol") {
+          setNeedsKey(begun.method);
+          return;
+        }
+        if (begun.state !== "ready") {
+          setMessage("That did not start. Try again in a moment.");
+          return;
+        }
+        const proof = await assertPlatformKey({ challenge: begun.challenge, rpId: begun.rpId, allow: begun.credentialIds });
+        if (!proof) {
+          setMessage("Your key did not answer. Try again, on the device where you set it up.");
+          return;
+        }
+        const done = await finishConsoleStepUp({ challenge: begun.challenge, ...proof });
+        if ("ok" in done) router.refresh();
+        else setMessage(done.error === "rejected" ? "That key was not accepted. Try again." : "That did not go through. Try again.");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (begun.state !== "ready") {
-        setMessage("That did not start. Try again in a moment.");
-        return;
-      }
-      const proof = await assertPlatformKey({ challenge: begun.challenge, rpId: begun.rpId, allow: begun.credentialIds });
-      if (!proof) {
-        setMessage("Your key did not answer. Try again, on the device where you set it up.");
-        return;
-      }
-      const done = await finishConsoleStepUp({ challenge: begun.challenge, ...proof });
-      if ("ok" in done) router.refresh();
-      else setMessage(done.error === "rejected" ? "That key was not accepted. Try again." : "That did not go through. Try again.");
     });
 
   const sendCode = () =>
     start(async () => {
-      setMessage(null);
-      const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-      if ("ok" in sent) setCodeSent(true);
-      else setMessage("The code did not send. Try again in a moment.");
+      try {
+        setMessage(null);
+        const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
+        if ("ok" in sent) setCodeSent(true);
+        else setMessage("The code did not send. Try again in a moment.");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   const enrolHere = () =>
     start(async () => {
-      setMessage(null);
-      const begun = await beginEnrol({ code: code.trim(), password: needsKey === "password" ? password : undefined }).catch(
-        () => ({ error: "failed" as const }),
-      );
-      if ("error" in begun) {
-        setMessage(
-          begun.error === "password_recent"
-            ? "Your password changed in the last day, so it cannot vouch for a new key yet. Ask a super admin, or try tomorrow."
-            : begun.error === "rejected"
-              ? "That code or password was not accepted. Check both and try again."
-              : "That did not go through. Try again.",
+      try {
+        setMessage(null);
+        const begun = await beginEnrol({ code: code.trim(), password: needsKey === "password" ? password : undefined }).catch(
+          () => ({ error: "failed" as const }),
         );
-        return;
+        if ("error" in begun) {
+          setMessage(
+            begun.error === "password_recent"
+              ? "Your password changed in the last day, so it cannot vouch for a new key yet. Ask a super admin, or try tomorrow."
+              : begun.error === "rejected"
+                ? "That code or password was not accepted. Check both and try again."
+                : "That did not go through. Try again.",
+          );
+          return;
+        }
+        const made = await createPlatformKey({ challenge: begun.challenge, userId: begun.userId, email: begun.email, rpId: begun.rpId, rpName: "Vallo", exclude: [] });
+        if (!made) {
+          setMessage("Your device did not make a key. Use the device you will keep, and allow its screen lock.");
+          return;
+        }
+        const done = await finishEnrol({ challenge: begun.challenge, ...made, label: "Console" }).catch(() => ({ error: "failed" as const }));
+        if (!("ok" in done)) {
+          setMessage("The new key was not saved. Try again.");
+          return;
+        }
+        setNeedsKey(null);
+        setCode("");
+        setPassword("");
+        setCodeSent(false);
+        confirm();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const made = await createPlatformKey({ challenge: begun.challenge, userId: begun.userId, email: begun.email, rpId: begun.rpId, rpName: "Vallo", exclude: [] });
-      if (!made) {
-        setMessage("Your device did not make a key. Use the device you will keep, and allow its screen lock.");
-        return;
-      }
-      const done = await finishEnrol({ challenge: begun.challenge, ...made, label: "Console" }).catch(() => ({ error: "failed" as const }));
-      if (!("ok" in done)) {
-        setMessage("The new key was not saved. Try again.");
-        return;
-      }
-      setNeedsKey(null);
-      setCode("");
-      setPassword("");
-      setCodeSent(false);
-      confirm();
     });
 
   return (

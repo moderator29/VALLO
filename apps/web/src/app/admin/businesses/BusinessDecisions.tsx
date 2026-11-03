@@ -13,6 +13,7 @@ import {
 import type { BusinessRung } from "@/lib/admin/business-queries";
 import type { BusinessDecision } from "@/lib/admin/business-decision";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The three hands this desk offers, and nothing else.
@@ -71,18 +72,22 @@ export function BusinessReviewDecision({
   const run = (decision: "approve" | "more_info" | "reject") => {
     setError(null);
     startTransition(async () => {
-      const result =
-        decision === "approve"
-          ? await approveBusiness({ businessId })
-          : decision === "more_info"
-            ? await requestMoreInfo({ businessId, note: note.trim() })
-            : await rejectBusiness({ businessId, note: note.trim() });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result =
+          decision === "approve"
+            ? await approveBusiness({ businessId })
+            : decision === "more_info"
+              ? await requestMoreInfo({ businessId, note: note.trim() })
+              : await rejectBusiness({ businessId, note: note.trim() });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setNote("");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNote("");
-      router.refresh();
     });
   };
 
@@ -169,15 +174,19 @@ export function PublishControl({
   const run = () => {
     setError(null);
     startTransition(async () => {
-      const result =
-        target.kind === "restaurant"
-          ? await publishRestaurant({ businessId: target.businessId })
-          : await publishAccommodation({ accommodationId: target.accommodationId });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result =
+          target.kind === "restaurant"
+            ? await publishRestaurant({ businessId: target.businessId })
+            : await publishAccommodation({ accommodationId: target.accommodationId });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -227,18 +236,22 @@ export function RungDecision({
   const run = (status: "passed" | "failed") => {
     setError(null);
     startTransition(async () => {
-      const result = await recordBusinessRung({
-        businessId,
-        rung,
-        status,
-        ...(note.trim().length > 0 ? { note: note.trim() } : {}),
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await recordBusinessRung({
+          businessId,
+          rung,
+          status,
+          ...(note.trim().length > 0 ? { note: note.trim() } : {}),
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setNote("");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNote("");
-      router.refresh();
     });
   };
 

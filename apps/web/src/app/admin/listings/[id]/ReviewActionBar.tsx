@@ -7,6 +7,7 @@ import { reviewListing } from "@/lib/admin/actions";
 import { Chip } from "@/components/ui/Chip";
 import { REVIEW_REASONS, composeReviewNote } from "@/lib/admin/review-reasons";
 import "../../_components/admin-material.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Decision = "approve" | "publish" | "request_changes" | "reject";
 
@@ -80,30 +81,34 @@ export function ReviewActionBar({
   const run = (decision: Decision) => {
     setError(null);
     startTransition(async () => {
-      const sendsReasons = decision === "reject" || decision === "request_changes";
-      const result = await reviewListing({
-        listingId,
-        decision,
-        ...(reason.length > 0 ? { notes: reason } : {}),
-        ...(sendsReasons && codes.length > 0 ? { reasons: codes } : {}),
-      });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["notes"] ?? result.error);
-        return;
+      try {
+        const sendsReasons = decision === "reject" || decision === "request_changes";
+        const result = await reviewListing({
+          listingId,
+          decision,
+          ...(reason.length > 0 ? { notes: reason } : {}),
+          ...(sendsReasons && codes.length > 0 ? { reasons: codes } : {}),
+        });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["notes"] ?? result.error);
+          return;
+        }
+        setDone(
+          decision === "approve"
+            ? "Approved. The lister has been told."
+            : decision === "publish"
+              ? "Live in search. The lister has been told."
+              : decision === "reject"
+                ? "Rejected. The lister has your reason."
+                : "Sent back. The lister has your note.",
+        );
+        setNotes("");
+        setCodes([]);
+        router.push(nextHref ?? queueHref);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(
-        decision === "approve"
-          ? "Approved. The lister has been told."
-          : decision === "publish"
-            ? "Live in search. The lister has been told."
-            : decision === "reject"
-              ? "Rejected. The lister has your reason."
-              : "Sent back. The lister has your note.",
-      );
-      setNotes("");
-      setCodes([]);
-      router.push(nextHref ?? queueHref);
-      router.refresh();
     });
   };
 

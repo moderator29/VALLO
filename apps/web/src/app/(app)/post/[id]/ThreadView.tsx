@@ -31,6 +31,7 @@ import {
 import { POST_COPY, POST_REPORT_REASONS } from "@/lib/social/posts-model";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type ThreadReply = PostView & { depth: number; parentId: string | null; mutedAuthor: boolean };
 
@@ -134,13 +135,17 @@ export function ThreadView({
     if (liked) feedback("select");
     patch(post.id, { liked, likeCount: post.likeCount + (liked ? 1 : -1) });
     startTransition(async () => {
-      const result = await toggleMark({ postId: post.id, mark: "LIKE" });
-      if (!result.ok) {
-        patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-        setNotice(result.error);
-        return;
+      try {
+        const result = await toggleMark({ postId: post.id, mark: "LIKE" });
+        if (!result.ok) {
+          patch(post.id, { liked: post.liked, likeCount: post.likeCount });
+          setNotice(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -149,13 +154,17 @@ export function ThreadView({
     const reposted = !post.reposted;
     patch(post.id, { reposted, repostCount: post.repostCount + (reposted ? 1 : -1) });
     startTransition(async () => {
-      const result = await toggleRepost({ postId: post.id });
-      if (!result.ok) {
-        patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-        setNotice(result.error);
-        return;
+      try {
+        const result = await toggleRepost({ postId: post.id });
+        if (!result.ok) {
+          patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
+          setNotice(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -219,34 +228,42 @@ export function ThreadView({
       if (saved) feedback("select");
       patch(post.id, { saved });
       startTransition(async () => {
-        const result = await toggleMark({ postId: post.id, mark: "SAVE" });
-        if (!result.ok) {
-          patch(post.id, { saved: post.saved });
-          setNotice(result.error);
+        try {
+          const result = await toggleMark({ postId: post.id, mark: "SAVE" });
+          if (!result.ok) {
+            patch(post.id, { saved: post.saved });
+            setNotice(result.error);
+          }
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
         }
       });
       return;
     }
 
     startTransition(async () => {
-      // A "hide" key used to live here writing the identical mute behind a row
-      // labelled "Not interested". One key now, named for what it does.
-      if (action === "mute" || action === "block") {
-        const target = post.author?.id;
-        if (!target) return setNotice("There is nobody to do that to on this post.");
-        const result =
-          action === "block"
-            ? await blockUser({ userId: target })
-            : await muteTarget({ targetKind: "USER", targetId: target });
-        setNotice(
-          result.ok
-            ? action === "block"
-              ? POST_COPY.blockedDone
-              : POST_COPY.mutedDone
-            : result.error,
-        );
-        router.refresh();
-        return;
+      try {
+        // A "hide" key used to live here writing the identical mute behind a row
+        // labelled "Not interested". One key now, named for what it does.
+        if (action === "mute" || action === "block") {
+          const target = post.author?.id;
+          if (!target) return setNotice("There is nobody to do that to on this post.");
+          const result =
+            action === "block"
+              ? await blockUser({ userId: target })
+              : await muteTarget({ targetKind: "USER", targetId: target });
+          setNotice(
+            result.ok
+              ? action === "block"
+                ? POST_COPY.blockedDone
+                : POST_COPY.mutedDone
+              : result.error,
+          );
+          router.refresh();
+          return;
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

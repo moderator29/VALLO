@@ -19,6 +19,7 @@ import {
   type SavedSearchView,
   type SearchChipCopy,
 } from "@/lib/saved/searches";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE KEPT SEARCHES, AND EVERY WRITE THAT CAN REACH THEM.
@@ -148,20 +149,24 @@ function SavedSearchRow({
     const next = !alertOn;
     setAlertOverride(next);
     startTransition(async () => {
-      const result = await setSavedSearchAlert({ id: row.id, enabled: next });
-      if (!result.ok) {
-        setAlertOverride(!next);
-        say(result.error, "error");
-        return;
+      try {
+        const result = await setSavedSearchAlert({ id: row.id, enabled: next });
+        if (!result.ok) {
+          setAlertOverride(!next);
+          say(result.error, "error");
+          return;
+        }
+        /* The row the database returned, not the row this component guessed. */
+        onReplace(result.data);
+        setAlertOverride(null);
+        say(
+          result.data.alertEnabled
+            ? copy.alertsOn
+            : copy.alertsOff,
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* The row the database returned, not the row this component guessed. */
-      onReplace(result.data);
-      setAlertOverride(null);
-      say(
-        result.data.alertEnabled
-          ? copy.alertsOn
-          : copy.alertsOff,
-      );
     });
   }, [alertOn, copy.alertsOff, copy.alertsOn, onReplace, pending, row.id, say]);
 
@@ -173,27 +178,35 @@ function SavedSearchRow({
       return;
     }
     startTransition(async () => {
-      const result = await renameSavedSearch({ id: row.id, label });
-      if (!result.ok) {
-        say(result.error, "error");
-        return;
+      try {
+        const result = await renameSavedSearch({ id: row.id, label });
+        if (!result.ok) {
+          say(result.error, "error");
+          return;
+        }
+        onReplace(result.data);
+        setRenaming(false);
+        say(copy.renamed);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onReplace(result.data);
-      setRenaming(false);
-      say(copy.renamed);
     });
   }, [copy.nameNeeded, copy.renamed, draft, onReplace, pending, row.id, say]);
 
   const remove = useCallback(() => {
     if (pending) return;
     startTransition(async () => {
-      const result = await deleteSavedSearch({ id: row.id });
-      if (!result.ok) {
-        setConfirming(false);
-        say(result.error, "error");
-        return;
+      try {
+        const result = await deleteSavedSearch({ id: row.id });
+        if (!result.ok) {
+          setConfirming(false);
+          say(result.error, "error");
+          return;
+        }
+        onDrop(row.id);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onDrop(row.id);
     });
   }, [onDrop, pending, row.id, say]);
 

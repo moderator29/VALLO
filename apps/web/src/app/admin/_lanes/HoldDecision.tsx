@@ -7,6 +7,7 @@ import {
   type ModerationTarget,
 } from "@/lib/admin/moderation-actions";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Let it through, or take it down.
@@ -38,12 +39,16 @@ export function HoldDecision({
   const run = (decision: "RELEASE" | "REMOVE") => {
     setError(null);
     startTransition(async () => {
-      const result = await decideHeldItem({ target, id, decision, reason });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await decideHeldItem({ target, id, decision, reason });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 

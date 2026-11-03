@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { declineRefundRequest } from "@/lib/after-gate/refund-decision-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-24. Declining a guest's refund request, with the reason the guest reads.
@@ -36,12 +37,16 @@ export function DeclineRefundRequest({
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await declineRefundRequest({ requestId, reason });
-          if (!result.ok) {
-            setError(result.error);
-            return;
+          try {
+            const result = await declineRefundRequest({ requestId, reason });
+            if (!result.ok) {
+              setError(result.error);
+              return;
+            }
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          router.refresh();
         });
       }}
     >

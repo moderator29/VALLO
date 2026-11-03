@@ -10,6 +10,7 @@ import { markStay } from "@/lib/host/front-desk-actions";
 import type { DeskStay, FrontDesk, StayEventKind } from "@/lib/host/front-desk";
 import type { StayMarksRead } from "@/lib/host/tape-chart-read";
 import "./dashboard.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Words = Dictionary["hostDash"]["desk"];
 
@@ -85,10 +86,14 @@ export function FrontDeskPanel({
       return rest;
     });
     startTransition(async () => {
-      const result = await markStay({ bookingId: id, kind });
-      if (result.ok) setDone((now) => ({ ...now, [`${id}:${kind}`]: result.at }));
-      else setFailed((now) => ({ ...now, [id]: words.errors[result.reason] }));
-      setBusy(null);
+      try {
+        const result = await markStay({ bookingId: id, kind });
+        if (result.ok) setDone((now) => ({ ...now, [`${id}:${kind}`]: result.at }));
+        else setFailed((now) => ({ ...now, [id]: words.errors[result.reason] }));
+        setBusy(null);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 

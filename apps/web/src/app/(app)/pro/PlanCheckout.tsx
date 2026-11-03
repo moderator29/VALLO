@@ -16,6 +16,7 @@ import type { PlanOffer, SubscriptionsCopy } from "@/lib/subscriptions/state";
 import { fill, longDate, money } from "./plan-format";
 import type { PaidPlan } from "./pro-state";
 import { nativePlatform } from "@/lib/native/platform";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /* Founder, 8 October 2026 (option A): the iPhone app shows no trial and no
    checkout, so App Review never meets a purchase outside Apple's in-app
@@ -107,30 +108,38 @@ export function PlanCheckout({
 
   const startTrial = () =>
     start(async () => {
-      setError(null);
-      setNotice(null);
-      const result = await startSubscriptionTrial(plan.key);
-      if (!result.ok) return setError(result.error);
-      if (!result.data.started) return setError(refusal(result.data.reason));
-      setNotice(fill(copy.offer.trialStarted, { plan: plan.name, date: longDate(result.data.trialEndsAt, locale) }));
-      router.refresh();
+      try {
+        setError(null);
+        setNotice(null);
+        const result = await startSubscriptionTrial(plan.key);
+        if (!result.ok) return setError(result.error);
+        if (!result.data.started) return setError(refusal(result.data.reason));
+        setNotice(fill(copy.offer.trialStarted, { plan: plan.name, date: longDate(result.data.trialEndsAt, locale) }));
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   const pay = () =>
     start(async () => {
-      setError(null);
-      const result = await startSubscriptionCheckout(plan.key);
-      if (!result.ok) {
+      try {
+        setError(null);
+        const result = await startSubscriptionCheckout(plan.key);
+        if (!result.ok) {
+          setReviewing(false);
+          return setError(result.error);
+        }
+        if (!result.data.opened) {
+          setReviewing(false);
+          return setError(refusal(result.data.reason));
+        }
+        const { reference, amountMinor, accessCode, authorizationUrl } = result.data;
         setReviewing(false);
-        return setError(result.error);
+        setOpened({ reference, amountMinor, accessCode, authorizationUrl });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (!result.data.opened) {
-        setReviewing(false);
-        return setError(refusal(result.data.reason));
-      }
-      const { reference, amountMinor, accessCode, authorizationUrl } = result.data;
-      setReviewing(false);
-      setOpened({ reference, amountMinor, accessCode, authorizationUrl });
     });
 
   return (

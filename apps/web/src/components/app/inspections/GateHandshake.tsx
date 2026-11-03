@@ -12,6 +12,7 @@ import { buildPack, type InspectionPack } from "@/lib/offline/pack";
 import { deletePack, forgetCheckin, queueCheckin, readCheckins, readPack, savePack } from "@/lib/offline/pack-store";
 import { hexToBytes, matchesCode, secondsLeft, totp } from "@/lib/offline/totp";
 import { answerDelegation, nameDelegate, prepareHandshake, recordCheckins } from "@/lib/inspections/handshake-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE GATE HANDSHAKE. V-35.
@@ -286,19 +287,23 @@ function Invite({
     : "";
   const answer = (accept: boolean) =>
     startTransition(async () => {
-      const result = await answerDelegation({ inspectionId, accept });
-      setMessage(
-        result.state === "accepted"
-          ? copy.inviteAccepted
-          : result.state === "declined"
-            ? copy.inviteDeclined
-            : result.state === "too_late"
-              ? copy.delegateTooLate
-              : result.state === "gone"
-                ? copy.inviteGone
-                : copy.delegateFailed,
-      );
-      if (result.state === "accepted") await onAnswered();
+      try {
+        const result = await answerDelegation({ inspectionId, accept });
+        setMessage(
+          result.state === "accepted"
+            ? copy.inviteAccepted
+            : result.state === "declined"
+              ? copy.inviteDeclined
+              : result.state === "too_late"
+                ? copy.delegateTooLate
+                : result.state === "gone"
+                  ? copy.inviteGone
+                  : copy.delegateFailed,
+        );
+        if (result.state === "accepted") await onAnswered();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   return (
     <div className="mt-group" data-testid="gate-invite">
@@ -342,11 +347,15 @@ function CheckCode({ pack, copy }: { pack: InspectionPack; copy: Copy }) {
 
   const check = () =>
     startChecking(async () => {
-      const key = hexToBytes(pack.seed);
-      const ok = key ? await matchesCode(key, typed, Date.now()) : false;
-      setVerdict(ok ? "match" : "mismatch");
-      feedback(ok ? "success" : "error");
-      record(ok ? "match" : "mismatch");
+      try {
+        const key = hexToBytes(pack.seed);
+        const ok = key ? await matchesCode(key, typed, Date.now()) : false;
+        setVerdict(ok ? "match" : "mismatch");
+        feedback(ok ? "success" : "error");
+        record(ok ? "match" : "mismatch");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   const name = pack.shownByName ?? copy.unnamed;
@@ -462,28 +471,32 @@ function DelegateForm({
 
   const submit = (value: string) =>
     startTransition(async () => {
-      const answer = await nameDelegate({ inspectionId, email: value });
-      if (answer.state === "asked") {
-        setMessage({ tone: "done", text: copy.delegateNamed });
-        setEmail("");
-        await onChanged();
-      } else if (answer.state === "cleared" || answer.state === "cleared_rotated") {
-        setMessage({ tone: "done", text: answer.state === "cleared_rotated" ? copy.delegateClearedRotated : copy.delegateCleared });
-        await onChanged();
-      } else {
-        setMessage({
-          tone: "problem",
-          text:
-            answer.state === "invalid"
-              ? copy.delegateInvalid
-              : answer.state === "closed"
-                ? copy.delegateClosed
-                : answer.state === "too_late"
-                  ? copy.delegateTooLate
-                  : answer.state === "rate_limited"
-                    ? copy.delegateRateLimited
-                    : copy.delegateFailed,
-        });
+      try {
+        const answer = await nameDelegate({ inspectionId, email: value });
+        if (answer.state === "asked") {
+          setMessage({ tone: "done", text: copy.delegateNamed });
+          setEmail("");
+          await onChanged();
+        } else if (answer.state === "cleared" || answer.state === "cleared_rotated") {
+          setMessage({ tone: "done", text: answer.state === "cleared_rotated" ? copy.delegateClearedRotated : copy.delegateCleared });
+          await onChanged();
+        } else {
+          setMessage({
+            tone: "problem",
+            text:
+              answer.state === "invalid"
+                ? copy.delegateInvalid
+                : answer.state === "closed"
+                  ? copy.delegateClosed
+                  : answer.state === "too_late"
+                    ? copy.delegateTooLate
+                    : answer.state === "rate_limited"
+                      ? copy.delegateRateLimited
+                      : copy.delegateFailed,
+          });
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

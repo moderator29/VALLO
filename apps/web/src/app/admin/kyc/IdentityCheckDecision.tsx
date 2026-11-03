@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideIdentityCheck } from "@/lib/admin/identity-check-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Approve or refuse one Dojah check, the same shape as `DocumentDecision`:
@@ -19,14 +20,18 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
   function decide(approve: boolean) {
     setError(null);
     start(async () => {
-      const result = await decideIdentityCheck(approve ? { checkId, approve: true } : { checkId, approve: false, reason });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.error);
-        return;
+      try {
+        const result = await decideIdentityCheck(approve ? { checkId, approve: true } : { checkId, approve: false, reason });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["reason"] ?? result.error);
+          return;
+        }
+        setReason("");
+        setShowReason(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setReason("");
-      setShowReason(false);
-      router.refresh();
     });
   }
 

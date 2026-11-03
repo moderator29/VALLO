@@ -5,6 +5,7 @@ import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { createSafetyShare, markSafetyDone, stopSafetyShare } from "@/lib/doors/safety-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** The first segment of the trusted contact's page (`app/safe/[token]`). */
 const SAFE_DOOR = "safe";
@@ -60,57 +61,69 @@ export function SafetyShareControl({
   const make = () => {
     setError(null);
     start(async () => {
-      const result = await createSafetyShare({ inspectionId });
-      if (!result.ok) {
-        setError(copy.failed);
-        return;
-      }
-      const url = new URL(`/${SAFE_DOOR}/${result.data.token}`, window.location.origin).toString();
-      const area = result.data.area ?? "";
-      const text = result.data.firstName
-        ? copy.shareText.replace("{name}", result.data.firstName).replace("{area}", area)
-        : copy.shareTextNoName.replace("{area}", area);
-      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-        try {
-          await navigator.share({ title: copy.shareTitle, text, url });
-          setPhase({ kind: "shared" });
-          return;
-        } catch {
-          /* Dismissed or refused: fall through to the link on screen. */
-        }
-      }
-      let copied = false;
       try {
-        await navigator.clipboard.writeText(`${text} ${url}`);
-        copied = true;
-      } catch {
-        copied = false;
+        const result = await createSafetyShare({ inspectionId });
+        if (!result.ok) {
+          setError(copy.failed);
+          return;
+        }
+        const url = new URL(`/${SAFE_DOOR}/${result.data.token}`, window.location.origin).toString();
+        const area = result.data.area ?? "";
+        const text = result.data.firstName
+          ? copy.shareText.replace("{name}", result.data.firstName).replace("{area}", area)
+          : copy.shareTextNoName.replace("{area}", area);
+        if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+          try {
+            await navigator.share({ title: copy.shareTitle, text, url });
+            setPhase({ kind: "shared" });
+            return;
+          } catch {
+            /* Dismissed or refused: fall through to the link on screen. */
+          }
+        }
+        let copied = false;
+        try {
+          await navigator.clipboard.writeText(`${text} ${url}`);
+          copied = true;
+        } catch {
+          copied = false;
+        }
+        setPhase({ kind: "made", url, text, copied });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setPhase({ kind: "made", url, text, copied });
     });
   };
 
   const done = () => {
     setError(null);
     start(async () => {
-      const result = await markSafetyDone({ inspectionId });
-      if (!result.ok) {
-        setError(copy.failed);
-        return;
+      try {
+        const result = await markSafetyDone({ inspectionId });
+        if (!result.ok) {
+          setError(copy.failed);
+          return;
+        }
+        setPhase({ kind: "done" });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setPhase({ kind: "done" });
     });
   };
 
   const stop = () => {
     setError(null);
     start(async () => {
-      const result = await stopSafetyShare({ inspectionId });
-      if (!result.ok) {
-        setError(copy.failed);
-        return;
+      try {
+        const result = await stopSafetyShare({ inspectionId });
+        if (!result.ok) {
+          setError(copy.failed);
+          return;
+        }
+        setPhase({ kind: "stopped" });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setPhase({ kind: "stopped" });
     });
   };
 

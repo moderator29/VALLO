@@ -22,6 +22,7 @@ import {
   type StrCase,
   type StrSource,
 } from "@/lib/admin/str";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * SCUML item 6: the STR lane's controls. Every button calls a server action
@@ -82,17 +83,21 @@ export function StrOpenForm({
   function submit() {
     setSaid(null);
     start(async () => {
-      const result = await openStrCase({
-        sourceKind: from,
-        sourceId,
-        subjectId: subject,
-        grounds,
-      });
-      if (!result.ok) return setSaid({ ok: false, text: result.error });
-      const due =
-        (result.data.data as { due_at?: string } | null)?.due_at ?? "";
-      setSaid({ ok: true, text: copy.opened.replace("{due}", lagosTime(due)) });
-      setGrounds("");
+      try {
+        const result = await openStrCase({
+          sourceKind: from,
+          sourceId,
+          subjectId: subject,
+          grounds,
+        });
+        if (!result.ok) return setSaid({ ok: false, text: result.error });
+        const due =
+          (result.data.data as { due_at?: string } | null)?.due_at ?? "";
+        setSaid({ ok: true, text: copy.opened.replace("{due}", lagosTime(due)) });
+        setGrounds("");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 
@@ -183,12 +188,16 @@ export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; wo
   ) {
     setSaid(null);
     start(async () => {
-      const result = await action();
-      setSaid(
-        result.ok
-          ? { ok: true, text: result.data.text }
-          : { ok: false, text: result.error }
-      );
+      try {
+        const result = await action();
+        setSaid(
+          result.ok
+            ? { ok: true, text: result.data.text }
+            : { ok: false, text: result.error }
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 

@@ -14,6 +14,7 @@ import {
 import { settleShareReturn, startShareCheckout } from "@/lib/tenancy/share-checkout";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, withoutDone, type SuccessWords } from "@/lib/ui/success-moments";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["flatmates"];
 
@@ -33,13 +34,17 @@ function useRun() {
   function run(work: () => Promise<{ ok: boolean; error?: string }>, onOk?: () => void) {
     setError(null);
     start(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? null);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? null);
+          return;
+        }
+        if (onOk) onOk();
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (onOk) onOk();
-      else router.refresh();
     });
   }
   return { pending, error, run };
@@ -199,12 +204,16 @@ export function PayShare({
         onClick={() => {
           setError(null);
           start(async () => {
-            const result = await startShareCheckout({ tenancyId, contributorId: contributorId ?? null, idempotencyKey: key });
-            if (!result.ok || !result.data) {
-              setError(result.ok ? null : (result.error ?? null));
-              return;
+            try {
+              const result = await startShareCheckout({ tenancyId, contributorId: contributorId ?? null, idempotencyKey: key });
+              if (!result.ok || !result.data) {
+                setError(result.ok ? null : (result.error ?? null));
+                return;
+              }
+              window.location.assign(result.data.authorizationUrl);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            window.location.assign(result.data.authorizationUrl);
           });
         }}
       >

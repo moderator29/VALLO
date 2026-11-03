@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { tapFailedOffline } from "./tap-failed";
 
 /**
  * WHETHER THE PHONE KNOWS IT HAS NO SIGNAL (13 October 2026, the layout and
@@ -82,28 +83,40 @@ export function isNetworkError(error: unknown): boolean {
 }
 
 /**
- * The error boundary's view of the signal: no signal, or a request that died
- * on a weak one. A weak-signal failure tries the segment again by itself once,
- * three seconds later, before it asks the person to.
+ * The error boundary's view of the signal (3 November 2026, the founder: an
+ * error page for a weak signal is a website's answer, not an app's).
+ *
+ *   "retrying"  a request died on a weak signal: no page at all. The short
+ *               line at the bottom says it could not connect, and the screen
+ *               is drawn again at once (the boundary renders nothing for that
+ *               moment). Once a minute per screen, so it cannot loop.
+ *   "weak"      it failed again inside that minute: the calm weak-signal
+ *               screen, which tries again by itself when the signal returns.
+ *   "offline"   no signal at all: the calm offline screen, as before.
+ *   null        a real fault: the error screen, as before.
  */
-export function useSignalBoundary(error: unknown, reset: () => void): "offline" | "weak" | null {
+export function useSignalBoundary(error: unknown, reset: () => void): "offline" | "weak" | "retrying" | null {
   const offline = useOfflineBoundary(reset);
   const weak = !offline && isNetworkError(error);
-  useEffect(() => {
-    if (!weak) return;
-    const key = "nf_weak_retry";
-    /* Once a minute per screen, so a page that keeps failing cannot loop. */
-    let tried = false;
+  const [retrying] = useState(() => {
+    if (!weak || typeof window === "undefined") return false;
     try {
-      const [path, at] = (sessionStorage.getItem(key) ?? "").split("@");
-      tried = path === location.pathname && Date.now() - Number(at || 0) < 60_000;
-      sessionStorage.setItem(key, `${location.pathname}@${Date.now()}`);
+      const [path, at] = (sessionStorage.getItem(WEAK_KEY) ?? "").split("@");
+      if (path === location.pathname && Date.now() - Number(at || 0) < 60_000) return false;
+      sessionStorage.setItem(WEAK_KEY, `${location.pathname}@${Date.now()}`);
     } catch {
-      /* No storage: one retry per mount. */
+      /* No storage: retry this once. */
     }
-    if (tried) return;
-    const timer = window.setTimeout(reset, 3_000);
-    return () => window.clearTimeout(timer);
-  }, [weak, reset]);
-  return offline ? "offline" : weak ? "weak" : null;
+    return true;
+  });
+  useEffect(() => {
+    if (!retrying) return;
+    tapFailedOffline(error);
+    reset();
+  }, [retrying, error, reset]);
+  if (offline) return "offline";
+  if (retrying) return "retrying";
+  return weak ? "weak" : null;
 }
+
+const WEAK_KEY = "nf_weak_retry";

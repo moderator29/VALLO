@@ -26,6 +26,8 @@ export default function HostError({
   /* No signal is not a fault: the same calm words as the app's boundary, and
      the segment loads itself again when the signal returns. */
   const offline = useSignalBoundary(error, reset);
+  /* A weak signal: no page, a short line at the bottom, and the screen again. */
+  if (offline === "retrying") return null;
   if (offline) {
     return (
       <main id="main" className="flex min-h-dvh flex-col items-center justify-center px-gutter py-section">

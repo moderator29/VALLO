@@ -6,6 +6,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { approveThresholdDecision, decideThresholdEvent } from "@/lib/compliance/threshold-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["complianceThreshold"];
 
@@ -16,12 +17,16 @@ function useRun() {
   const run = (work: () => Promise<{ ok: boolean; error?: string }>) => {
     setError(null);
     start(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setError(result.error ?? null);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setError(result.error ?? null);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
   return { pending, error, run };

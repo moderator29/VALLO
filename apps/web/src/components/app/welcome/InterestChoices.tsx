@@ -14,6 +14,7 @@ import {
 import type { Dictionary } from "@vallo/i18n/core";
 import { PROPERTY_TYPES, type PropertyType } from "@/lib/interests/model";
 import { forgetFirstInterest } from "./first-run-seen";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The one question worth asking at the door.
@@ -124,14 +125,18 @@ export function InterestChoices({
   const onSkip = () => {
     setSkipError("");
     startSkip(async () => {
-      const result = await skipInterests();
-      if (!result.ok) {
-        setSkipError(result.error);
-        return;
+      try {
+        const result = await skipInterests();
+        if (!result.ok) {
+          setSkipError(result.error);
+          return;
+        }
+        forgetFirstInterest();
+        router.replace("/home");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      forgetFirstInterest();
-      router.replace("/home");
-      router.refresh();
     });
   };
 

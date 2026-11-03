@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { postBrief } from "@/lib/briefs/actions";
 import { koboToNaira, nairaToKobo } from "@/lib/listings/search-params";
 import { BRIEF_PROPERTY_TYPES, briefAreasFor, briefDraftFrom, type BriefDraft, type BriefPropertyType } from "@/lib/briefs/brief";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-95: POST A BRIEF. Facts only, chosen rather than typed: a state, one to
@@ -64,20 +65,24 @@ export function BriefComposer({
       return;
     }
     start(async () => {
-      const result = await postBrief({
-        ...draft,
-        /* Whole naira to kobo, integer only. */
-        maxMinor: naira === null ? null : nairaToKobo(naira),
-        moveFrom: moveFrom === "" ? null : moveFrom,
-        savedSearchId,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await postBrief({
+          ...draft,
+          /* Whole naira to kobo, integer only. */
+          maxMinor: naira === null ? null : nairaToKobo(naira),
+          moveFrom: moveFrom === "" ? null : moveFrom,
+          savedSearchId,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setDone(true);
+        setOpen(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(true);
-      setOpen(false);
-      router.refresh();
     });
   }
 

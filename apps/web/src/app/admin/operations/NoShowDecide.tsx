@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { resolveNoShow } from "@/lib/inspections/no-show-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Staff decide a disputed no-show: it stands, or it comes off the record
@@ -23,14 +24,18 @@ export function NoShowDecide({ inspectionId }: { inspectionId: string }) {
     setError(null);
     start(async () => {
       try {
-        const result = await resolveNoShow({ id: inspectionId, upheld });
-        if (!result.ok) {
-          setError(result.error);
-          return;
+        try {
+          const result = await resolveNoShow({ id: inspectionId, upheld });
+          if (!result.ok) {
+            setError(result.error);
+            return;
+          }
+          router.refresh();
+        } finally {
+          inFlight.current = false;
         }
-        router.refresh();
-      } finally {
-        inFlight.current = false;
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

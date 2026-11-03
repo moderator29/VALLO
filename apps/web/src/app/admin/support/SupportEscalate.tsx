@@ -9,6 +9,7 @@ import {
   type EscalationTarget,
 } from "@/lib/admin/support-workspace";
 import { escalateSupportTicket, returnSupportEscalation } from "@/lib/admin/support-workbench-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * HAND A TICKET TO ANOTHER DESK. Support routes money, safety and identity;
@@ -58,12 +59,16 @@ export function SupportEscalate({
             e.preventDefault();
             if (!scope) return;
             start(async () => {
-              const r = await escalateSupportTicket({ ticketId, scope, reason });
-              if (!r.ok) setMessage({ ok: false, text: r.error });
-              else {
-                setMessage({ ok: true, text: `Handed to the ${ESCALATION_TARGET_LABEL[scope].name.toLowerCase()} desk. They have been told.` });
-                setReason("");
-                router.refresh();
+              try {
+                const r = await escalateSupportTicket({ ticketId, scope, reason });
+                if (!r.ok) setMessage({ ok: false, text: r.error });
+                else {
+                  setMessage({ ok: true, text: `Handed to the ${ESCALATION_TARGET_LABEL[scope].name.toLowerCase()} desk. They have been told.` });
+                  setReason("");
+                  router.refresh();
+                }
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
               }
             });
           }}
@@ -138,12 +143,16 @@ export function ReturnEscalation({ ticketId, escalationId, label }: { ticketId: 
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const r = await returnSupportEscalation({ ticketId, escalationId, note });
-          if (!r.ok) setError(r.error);
-          else {
-            setOpen(false);
-            setNote("");
-            router.refresh();
+          try {
+            const r = await returnSupportEscalation({ ticketId, escalationId, note });
+            if (!r.ok) setError(r.error);
+            else {
+              setOpen(false);
+              setNote("");
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addToSupport, removeFromSupport } from "@/lib/admin/staff-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE SUPPORT TEAM, on the team console. Who answers members, what else
@@ -78,18 +79,22 @@ function AddToSupport() {
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const r = await addToSupport({ email });
-          if (!r.ok) setMessage({ ok: false, text: r.error });
-          else {
-            setMessage({
-              ok: true,
-              text:
-                r.data.scopes.join(",") === "support"
-                  ? "Added as a Support Agent. They have been told by email and in the app."
-                  : "Support added to their access. They have been told.",
-            });
-            setEmail("");
-            router.refresh();
+          try {
+            const r = await addToSupport({ email });
+            if (!r.ok) setMessage({ ok: false, text: r.error });
+            else {
+              setMessage({
+                ok: true,
+                text:
+                  r.data.scopes.join(",") === "support"
+                    ? "Added as a Support Agent. They have been told by email and in the app."
+                    : "Support added to their access. They have been told.",
+              });
+              setEmail("");
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}
@@ -144,9 +149,13 @@ function RemoveFromSupport({ userId, ends }: { userId: string; ends: boolean }) 
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const r = await removeFromSupport({ userId, reason });
-          if (!r.ok) setError(r.error);
-          else router.refresh();
+          try {
+            const r = await removeFromSupport({ userId, reason });
+            if (!r.ok) setError(r.error);
+            else router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
+          }
         });
       }}
     >

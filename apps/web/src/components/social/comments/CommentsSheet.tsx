@@ -26,6 +26,7 @@ import { Expand } from "@/components/social/Expand";
 import { ActionPill } from "@/components/social/feed/ActionPill";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Comments, as a sheet.
@@ -184,10 +185,14 @@ export function CommentsSheet({
     const liked = !comment.liked;
     patch(comment.id, { liked, likeCount: comment.likeCount + (liked ? 1 : -1) });
     startTransition(async () => {
-      const result = await onLike(comment.id);
-      if (!result.ok) {
-        patch(comment.id, { liked: comment.liked, likeCount: comment.likeCount });
-        setNotice(result.error);
+      try {
+        const result = await onLike(comment.id);
+        if (!result.ok) {
+          patch(comment.id, { liked: comment.liked, likeCount: comment.likeCount });
+          setNotice(result.error);
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };
@@ -197,15 +202,19 @@ export function CommentsSheet({
     const text = body.trim();
     if (text.length === 0) return;
     startTransition(async () => {
-      const result = await onSend({ parentId: draft?.parentId ?? null, body: text });
-      if (!result.ok) {
-        setNotice(result.error);
-        return;
+      try {
+        const result = await onSend({ parentId: draft?.parentId ?? null, body: text });
+        if (!result.ok) {
+          setNotice(result.error);
+          return;
+        }
+        setBody("");
+        setDraft(null);
+        setNotice(result.data.held ? POST_COPY.held : null);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setBody("");
-      setDraft(null);
-      setNotice(result.data.held ? POST_COPY.held : null);
-      router.refresh();
     });
   };
 
@@ -224,28 +233,32 @@ export function CommentsSheet({
     }
 
     startTransition(async () => {
-      const target = comment.authorId;
-      if (!target) {
-        setNotice("There is nobody to do that to on this comment.");
-        return;
+      try {
+        const target = comment.authorId;
+        if (!target) {
+          setNotice("There is nobody to do that to on this comment.");
+          return;
+        }
+        const result =
+          action === "block"
+            ? await blockUser({ userId: target })
+            : await muteTarget({ targetKind: "USER", targetId: target });
+        setNotice(
+          result.ok
+            ? action === "block"
+              ? POST_COPY.blockedDone
+              : POST_COPY.mutedDone
+            : result.error,
+        );
+        /* Their comments leave this sheet now. The rows are held here, and the
+           refresh below re-reads the page behind the sheet, so without this the
+           person just blocked kept talking in the open sheet until it closed.
+           A reply to one of theirs keeps its place and loses its connector. */
+        if (result.ok) setRows((all) => all.filter((row) => row.authorId !== target));
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const result =
-        action === "block"
-          ? await blockUser({ userId: target })
-          : await muteTarget({ targetKind: "USER", targetId: target });
-      setNotice(
-        result.ok
-          ? action === "block"
-            ? POST_COPY.blockedDone
-            : POST_COPY.mutedDone
-          : result.error,
-      );
-      /* Their comments leave this sheet now. The rows are held here, and the
-         refresh below re-reads the page behind the sheet, so without this the
-         person just blocked kept talking in the open sheet until it closed.
-         A reply to one of theirs keeps its place and loses its connector. */
-      if (result.ok) setRows((all) => all.filter((row) => row.authorId !== target));
-      router.refresh();
     });
   };
 

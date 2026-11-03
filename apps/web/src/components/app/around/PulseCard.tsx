@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { recordPulse } from "@/lib/around/pulse-actions";
 import { PULSE_ANSWERS, type PulseKind, type PulseResult } from "@/lib/around/pulse";
 import "@/app/css/catalogue.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * One tap for the neighbours' account (V-41), on an Around place a member
@@ -55,7 +56,11 @@ export function PulseCard({
               data-testid={`pulse-${kind}-${answer}`}
               onClick={() =>
                 startTransition(async () => {
-                  setResult(await recordPulse(areaId, kind, answer));
+                  try {
+                    setResult(await recordPulse(areaId, kind, answer));
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
+                  }
                 })
               }
               className="nf-filters__tile min-h-11"

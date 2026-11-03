@@ -13,6 +13,7 @@ import { beginEnrol, finishEnrol, removeMoneyCredential, sendFallbackCode } from
 import { createPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
 import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * LOCK MONEY WITH THIS PHONE. V-81.
@@ -63,68 +64,76 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
 
   const enrol = () =>
     start(async () => {
-      setError(null);
-      let proof: { code?: string; password?: string; stepUp?: string };
-      if (staffHasKey) {
-        const stepUp = await lock.prove({ kind: "add_lock" });
-        if (stepUp === null) return;
-        proof = { stepUp };
-      } else if (staff) {
-        proof = { code: code.trim(), password: staffNeedsPassword ? password : undefined };
-      } else {
-        proof = byCode ? { code: password.trim() } : { password };
-      }
-      const begun = await beginEnrol(proof).catch(() => ({ error: "failed" as const }));
-      if ("error" in begun) {
-        const refused = staffHasKey ? copy.staffAnotherKey : copy.rejected;
-        setError(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
-        if (begun.error === "password_recent") {
-          setForceCode(true);
-          setCodeSent(false);
-          setPassword("");
+      try {
+        setError(null);
+        let proof: { code?: string; password?: string; stepUp?: string };
+        if (staffHasKey) {
+          const stepUp = await lock.prove({ kind: "add_lock" });
+          if (stepUp === null) return;
+          proof = { stepUp };
+        } else if (staff) {
+          proof = { code: code.trim(), password: staffNeedsPassword ? password : undefined };
+        } else {
+          proof = byCode ? { code: password.trim() } : { password };
         }
-        return;
+        const begun = await beginEnrol(proof).catch(() => ({ error: "failed" as const }));
+        if ("error" in begun) {
+          const refused = staffHasKey ? copy.staffAnotherKey : copy.rejected;
+          setError(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
+          if (begun.error === "password_recent") {
+            setForceCode(true);
+            setCodeSent(false);
+            setPassword("");
+          }
+          return;
+        }
+        const made = await createPlatformKey({
+          challenge: begun.challenge,
+          userId: begun.userId,
+          email: begun.email,
+          rpId: begun.rpId,
+          rpName: "Vallo",
+          exclude: [],
+        });
+        if (!made) {
+          setError(copy.rejected);
+          return;
+        }
+        const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
+          error: "failed" as const,
+        }));
+        if ("error" in done) {
+          setError(done.error === "rejected" ? copy.rejected : copy.failed);
+          return;
+        }
+        setEnrolling(false);
+        setPassword("");
+        setCode("");
+        setNote(MONEY_LOCK_DONE);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      const made = await createPlatformKey({
-        challenge: begun.challenge,
-        userId: begun.userId,
-        email: begun.email,
-        rpId: begun.rpId,
-        rpName: "Vallo",
-        exclude: [],
-      });
-      if (!made) {
-        setError(copy.rejected);
-        return;
-      }
-      const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
-        error: "failed" as const,
-      }));
-      if ("error" in done) {
-        setError(done.error === "rejected" ? copy.rejected : copy.failed);
-        return;
-      }
-      setEnrolling(false);
-      setPassword("");
-      setCode("");
-      setNote(MONEY_LOCK_DONE);
-      router.refresh();
     });
 
   const remove = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const id = String(new FormData(event.currentTarget).get("id") ?? "");
     start(async () => {
-      /* Removing a phone asks for a proof for exactly that. */
-      const stepUp = await lock.prove({ kind: "remove_lock", target: id });
-      if (stepUp === null) return;
-      const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ error: "failed" as const }));
-      if ("error" in done) {
-        setError(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
-        return;
+      try {
+        /* Removing a phone asks for a proof for exactly that. */
+        const stepUp = await lock.prove({ kind: "remove_lock", target: id });
+        if (stepUp === null) return;
+        const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ error: "failed" as const }));
+        if ("error" in done) {
+          setError(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
+          return;
+        }
+        setNote(MONEY_LOCK_REMOVED);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNote(MONEY_LOCK_REMOVED);
-      router.refresh();
     });
   };
 
@@ -206,9 +215,13 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                   disabled={pending}
                   onClick={() =>
                     start(async () => {
-                      const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                      if ("error" in sent) setError(copy.failed);
-                      else setCodeSent(true);
+                      try {
+                        const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
+                        if ("error" in sent) setError(copy.failed);
+                        else setCodeSent(true);
+                      } catch (error) {
+                        if (!tapFailedOffline(error)) throw error;
+                      }
                     })
                   }
                 >
@@ -225,9 +238,13 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
               disabled={pending}
               onClick={() =>
                 start(async () => {
-                  const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                  if ("error" in sent) setError(copy.failed);
-                  else setCodeSent(true);
+                  try {
+                    const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
+                    if ("error" in sent) setError(copy.failed);
+                    else setCodeSent(true);
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
+                  }
                 })
               }
             >

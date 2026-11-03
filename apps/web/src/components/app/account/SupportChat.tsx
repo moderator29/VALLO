@@ -21,6 +21,7 @@ import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
 /* The answer card's fit (the words keep the line breaks, the stopped note, the
    thinking orb) is the assistant's; support's answers are the same card. */
 import "@/components/app/assistant/assistant-answer.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Help and support, AI first.
@@ -871,21 +872,25 @@ function EscalationCard({
 
     setNote(null);
     startTransition(async () => {
-      const result = await fileSupportTicket({
-        ...(signedIn ? {} : { name: name.trim(), email: email.trim() }),
-        topic: "other",
-        kind: "question",
-        body: question,
-        summary,
-      });
-      if (result.ok) {
-        onFiled(result.data.reference, result.data.id);
-      } else {
-        setFieldErrors({
-          ...(result.fieldErrors?.name ? { name: result.fieldErrors.name } : {}),
-          ...(result.fieldErrors?.email ? { email: result.fieldErrors.email } : {}),
+      try {
+        const result = await fileSupportTicket({
+          ...(signedIn ? {} : { name: name.trim(), email: email.trim() }),
+          topic: "other",
+          kind: "question",
+          body: question,
+          summary,
         });
-        setNote(result.error);
+        if (result.ok) {
+          onFiled(result.data.reference, result.data.id);
+        } else {
+          setFieldErrors({
+            ...(result.fieldErrors?.name ? { name: result.fieldErrors.name } : {}),
+            ...(result.fieldErrors?.email ? { email: result.fieldErrors.email } : {}),
+          });
+          setNote(result.error);
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

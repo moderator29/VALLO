@@ -10,6 +10,7 @@ import { formatMoneyDate } from "@/lib/money/dates";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import type { TenancyReportView } from "@/lib/tenancy/queries";
 import { addTenancyReportPhoto, countersignTenancyReport, saveTenancyReport } from "@/lib/tenancy/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
 
@@ -74,18 +75,22 @@ export function TenancyReportCard({
   function save(submit: boolean) {
     setError(null);
     start(async () => {
-      const result = await saveTenancyReport({
-        tenancyId,
-        stage: report.stage,
-        items: ROOM_ITEMS.map((room) => ({ item: room, checked: items[room] === true })),
-        notes,
-        submit,
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await saveTenancyReport({
+          tenancyId,
+          stage: report.stage,
+          items: ROOM_ITEMS.map((room) => ({ item: room, checked: items[room] === true })),
+          notes,
+          submit,
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   }
 
@@ -226,9 +231,13 @@ export function TenancyReportCard({
           onClick={() => {
             setError(null);
             start(async () => {
-              const result = await countersignTenancyReport({ tenancyId, reportId: report.id as string });
-              if (!result.ok) setError(result.error);
-              else router.refresh();
+              try {
+                const result = await countersignTenancyReport({ tenancyId, reportId: report.id as string });
+                if (!result.ok) setError(result.error);
+                else router.refresh();
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             });
           }}
         >

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { joinArea, leaveArea } from "@/lib/social/areas-actions";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Join or leave a place.
@@ -55,15 +56,19 @@ export function JoinButton({
     setError(null);
 
     startTransition(async () => {
-      const result = next
-        ? await joinArea({ areaId })
-        : await leaveArea({ areaId });
-      if (!result.ok) {
-        setIsJoined(!next);
-        setError(result.error);
-        return;
+      try {
+        const result = next
+          ? await joinArea({ areaId })
+          : await leaveArea({ areaId });
+        if (!result.ok) {
+          setIsJoined(!next);
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 

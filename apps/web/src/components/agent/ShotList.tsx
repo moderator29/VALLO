@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { missingRequired, offeredSlots, type ShotSlot, type UtilityClaims } from "@/lib/listings/shot-list";
 import { readPhotoSlots, setPhotoSlot } from "@/lib/listings/shot-list-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["shots"];
 
@@ -73,15 +74,19 @@ export function ShotList({
                   return next;
                 });
                 start(async () => {
-                  const result = await setPhotoSlot({ photoId: photo.id, slot });
-                  if (!result.ok) {
-                    setError(result.error);
-                    setLabels((now) => {
-                      const next = { ...now };
-                      if (before) next[photo.id] = before;
-                      else delete next[photo.id];
-                      return next;
-                    });
+                  try {
+                    const result = await setPhotoSlot({ photoId: photo.id, slot });
+                    if (!result.ok) {
+                      setError(result.error);
+                      setLabels((now) => {
+                        const next = { ...now };
+                        if (before) next[photo.id] = before;
+                        else delete next[photo.id];
+                        return next;
+                      });
+                    }
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
                   }
                 });
               }}

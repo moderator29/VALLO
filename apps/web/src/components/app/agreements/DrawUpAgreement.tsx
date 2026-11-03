@@ -6,6 +6,7 @@ import { openRentAgreement } from "@/lib/agreements/actions";
 import { PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
 import { withDone } from "@/lib/ui/success-moments";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The step after the inspection report (Track A).
@@ -32,13 +33,17 @@ export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: strin
         event.preventDefault();
         setError(null);
         start(async () => {
-          const result = await openRentAgreement({ inspectionId, moveIn, handoverOn: handover, notes });
-          if (!result.ok) {
-            setError(result.error);
-            return;
+          try {
+            const result = await openRentAgreement({ inspectionId, moveIn, handoverOn: handover, notes });
+            if (!result.ok) {
+              setError(result.error);
+              return;
+            }
+            /* The agreement page checks the record before it shows the moment. */
+            router.push(withDone(`/agreements/${result.data.agreementId}`, "agreement-drawn"));
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          /* The agreement page checks the record before it shows the moment. */
-          router.push(withDone(`/agreements/${result.data.agreementId}`, "agreement-drawn"));
         });
       }}
     >

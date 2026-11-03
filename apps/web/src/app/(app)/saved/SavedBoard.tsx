@@ -34,6 +34,7 @@ import { changeLine, type SavedChange, type SavedChangeCopy } from "@/lib/saved/
 import Link from "next/link";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The shortlist, made interactive.
@@ -272,16 +273,20 @@ export function SavedBoard({
     if (item.mode === "local") removeLocalSave(item.id);
 
     startTransition(async () => {
-      const result = await write(item, false);
-      if (result.ok) return;
-      // Nothing was removed, so the card goes back exactly as it was.
-      if (item.mode === "local") addLocalSave(item.id, item.savedAt);
-      setPhase((prev) => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
-      setMessage(key, result.error);
+      try {
+        const result = await write(item, false);
+        if (result.ok) return;
+        // Nothing was removed, so the card goes back exactly as it was.
+        if (item.mode === "local") addLocalSave(item.id, item.savedAt);
+        setPhase((prev) => {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        });
+        setMessage(key, result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 
@@ -294,14 +299,18 @@ export function SavedBoard({
     if (item.mode === "local") addLocalSave(id, item.savedAt);
 
     startTransition(async () => {
-      const result = await write({ id, place: item.place }, true);
-      if (!result.ok) {
-        if (item.mode === "local") removeLocalSave(id);
-        setPhase((prev) => ({ ...prev, [key]: "removed" }));
-        setMessage(key, result.error);
-        return;
+      try {
+        const result = await write({ id, place: item.place }, true);
+        if (!result.ok) {
+          if (item.mode === "local") removeLocalSave(id);
+          setPhase((prev) => ({ ...prev, [key]: "removed" }));
+          setMessage(key, result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   }
 

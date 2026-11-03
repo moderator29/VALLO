@@ -30,6 +30,7 @@ import { countOf, formatNumber } from "@vallo/i18n/core";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import "./discovery.css";
 import "./search-v2.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The discovery map.
@@ -545,31 +546,35 @@ export function MapCanvas({
       }
 
       startSave(async () => {
-        const result = await toggleSave({ listingId: listing.id });
-        if (result.ok) {
-          if (result.data.mode === "db") {
-            // The database, not the tap, decides what the shortlist holds.
-            const truth = result.data.saved;
-            setSavedIds((previous) => {
-              const next = new Set(previous);
-              if (truth) next.add(listing.id);
-              else next.delete(listing.id);
-              return next;
-            });
+        try {
+          const result = await toggleSave({ listingId: listing.id });
+          if (result.ok) {
+            if (result.data.mode === "db") {
+              // The database, not the tap, decides what the shortlist holds.
+              const truth = result.data.saved;
+              setSavedIds((previous) => {
+                const next = new Set(previous);
+                if (truth) next.add(listing.id);
+                else next.delete(listing.id);
+                return next;
+              });
+            }
+            return;
           }
-          return;
+          if (onDevice) {
+            if (wasSaved) addLocalSave(listing.id);
+            else removeLocalSave(listing.id);
+          }
+          setSavedIds((previous) => {
+            const next = new Set(previous);
+            if (wasSaved) next.add(listing.id);
+            else next.delete(listing.id);
+            return next;
+          });
+          setSaveMessage(result.error);
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
         }
-        if (onDevice) {
-          if (wasSaved) addLocalSave(listing.id);
-          else removeLocalSave(listing.id);
-        }
-        setSavedIds((previous) => {
-          const next = new Set(previous);
-          if (wasSaved) next.add(listing.id);
-          else next.delete(listing.id);
-          return next;
-        });
-        setSaveMessage(result.error);
       });
     },
     [savedIds],

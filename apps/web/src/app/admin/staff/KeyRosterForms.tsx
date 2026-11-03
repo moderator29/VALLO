@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
 import { clearConsoleKeys, markInternalByEmail, setInternalAccount } from "@/lib/admin/key-roster-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * C14 break-glass: a SECOND super admin revokes a person's keys FOR THE
@@ -32,14 +33,18 @@ export function ClearKeysForm({ userId, name }: { userId: string; name: string }
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const result = await clearConsoleKeys({ userId, reason });
-          if (!result.ok) setMessage({ ok: false, text: result.error });
-          else {
-            setMessage({
-              ok: true,
-              text: `${countOf(result.data.removed, "keysRevoked", "en")} ${name} sets up a new key at their next console visit.`,
-            });
-            router.refresh();
+          try {
+            const result = await clearConsoleKeys({ userId, reason });
+            if (!result.ok) setMessage({ ok: false, text: result.error });
+            else {
+              setMessage({
+                ok: true,
+                text: `${countOf(result.data.removed, "keysRevoked", "en")} ${name} sets up a new key at their next console visit.`,
+              });
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}
@@ -85,11 +90,15 @@ export function InternalSwitch({ userId, name, initial }: { userId: string; name
         onCheckedChange={(next) => {
           setOn(next);
           start(async () => {
-            const result = await setInternalAccount({ userId, internal: next, reason: next ? "Marked internal on the staff page" : "" });
-            if (!result.ok) {
-              setOn(!next);
-              setError(result.error);
-            } else setError(null);
+            try {
+              const result = await setInternalAccount({ userId, internal: next, reason: next ? "Marked internal on the staff page" : "" });
+              if (!result.ok) {
+                setOn(!next);
+                setError(result.error);
+              } else setError(null);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           });
         }}
       />
@@ -114,12 +123,16 @@ export function MarkInternalForm() {
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const result = await markInternalByEmail({ email });
-          if (!result.ok) setMessage({ ok: false, text: result.error });
-          else {
-            setMessage({ ok: true, text: "Left out of figures from now on." });
-            setEmail("");
-            router.refresh();
+          try {
+            const result = await markInternalByEmail({ email });
+            if (!result.ok) setMessage({ ok: false, text: result.error });
+            else {
+              setMessage({ ok: true, text: "Left out of figures from now on." });
+              setEmail("");
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}

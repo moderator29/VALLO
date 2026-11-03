@@ -14,6 +14,7 @@ import {
 } from "@/lib/social/places-model";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The way in.
@@ -185,13 +186,17 @@ export function PlacePicker({
 
     setPendingCode(lga.code);
     startTransition(async () => {
-      const result = await enterPlace({ lgaCode: lga.code });
-      if (!result.ok) {
-        setPendingCode(null);
-        setError(result.error);
-        return;
+      try {
+        const result = await enterPlace({ lgaCode: lga.code });
+        if (!result.ok) {
+          setPendingCode(null);
+          setError(result.error);
+          return;
+        }
+        router.replace(`/around/${result.data.slug}`);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.replace(`/around/${result.data.slug}`);
     });
   };
 

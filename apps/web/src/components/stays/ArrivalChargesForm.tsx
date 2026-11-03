@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ARRIVAL_KEYS, ARRIVAL_UNITS, type ArrivalCharges, type ArrivalKey, type ArrivalUnit } from "@/lib/stays/arrival-charges";
 import { declareArrivalCharges } from "@/lib/stays/arrival-actions";
 import { koboToNairaInput } from "@/lib/agent/listings-model";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["arrival"];
 type Row = { mode: "none" | "amount" | null; naira: string; per: ArrivalUnit };
@@ -54,17 +55,21 @@ export function ArrivalChargesForm({
         setNote(null);
         const answers = answersFrom(rows);
         start(async () => {
-          const result = await declareArrivalCharges({
-            listingId: target.listingId ?? null,
-            accommodationId: target.accommodationId ?? null,
-            answers,
-          });
-          if (!result.ok) {
-            setError(result.error);
-            return;
+          try {
+            const result = await declareArrivalCharges({
+              listingId: target.listingId ?? null,
+              accommodationId: target.accommodationId ?? null,
+              answers,
+            });
+            if (!result.ok) {
+              setError(result.error);
+              return;
+            }
+            setNote(copy.saved);
+            router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setNote(copy.saved);
-          router.refresh();
         });
       }}
     >

@@ -8,6 +8,7 @@ import { signOut } from "@/lib/profile/actions";
 import { AcceptTerms } from "./AcceptTerms";
 import { Field } from "./fields";
 import { AuthPillButton } from "./slate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -147,8 +148,12 @@ export function FinishSetupForm({
           disabled={leaving}
           onClick={() =>
             startLeaving(async () => {
-              await signOut();
-              window.location.assign("/sign-in?notice=signed-out");
+              try {
+                await signOut();
+                window.location.assign("/sign-in?notice=signed-out");
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
+              }
             })
           }
         >

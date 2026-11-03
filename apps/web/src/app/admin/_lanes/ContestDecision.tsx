@@ -9,6 +9,7 @@ import { criterionLabel } from "@/lib/host/review-contest";
 import { decideReviewContest } from "@/lib/admin/review-contest-actions";
 import { CONTEST_PUBLIC_NOTE_MAX, suggestedPublicNote, type ContestOutcome } from "@/lib/admin/review-contest-decision";
 import type { ContestView } from "@/lib/admin/reads/review-contests";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * A LISTER ASKED VALLO TO LOOK AT A REVIEW: the decision, on the report that
@@ -39,14 +40,18 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
   const decide = (outcome: ContestOutcome) => {
     setError(null);
     start(async () => {
-      const result = await decideReviewContest({ contestId: contest.id, outcome, publicNote: outcome === "hide" ? note : null });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await decideReviewContest({ contestId: contest.id, outcome, publicNote: outcome === "hide" ? note : null });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setOpen(null);
+        setDone(outcome === "hide" ? "Hidden, with your note in its place. The lister and the reviewer are told." : "Kept up. The lister and the reviewer are told.");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setOpen(null);
-      setDone(outcome === "hide" ? "Hidden, with your note in its place. The lister and the reviewer are told." : "Kept up. The lister and the reviewer are told.");
-      router.refresh();
     });
   };
 

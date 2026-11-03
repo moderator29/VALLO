@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
 import { markMyTicketRead, rateMyTicket, reopenMyTicket, resolveMyTicket } from "@/lib/support/ticket-reply";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["experienceInbox"]["support"]["actions"];
 
@@ -40,9 +41,13 @@ export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy
         data-testid="support-resolve"
         onClick={() =>
           start(async () => {
-            const result = await resolveMyTicket(ticketId);
-            if (!result.ok) setError(result.error);
-            else router.refresh();
+            try {
+              const result = await resolveMyTicket(ticketId);
+              if (!result.ok) setError(result.error);
+              else router.refresh();
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           })
         }
       >
@@ -108,11 +113,15 @@ export function RateResolution({
         }
         setError(null);
         start(async () => {
-          const result = await rateMyTicket(ticketId, { rating: stars, comment: text });
-          if (!result.ok) setError(result.error);
-          else {
-            setEditing(false);
-            router.refresh();
+          try {
+            const result = await rateMyTicket(ticketId, { rating: stars, comment: text });
+            if (!result.ok) setError(result.error);
+            else {
+              setEditing(false);
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}
@@ -183,9 +192,13 @@ export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; unti
         disabled={pending}
         onClick={() =>
           start(async () => {
-            const result = await reopenMyTicket(ticketId);
-            if (!result.ok) setError(result.error);
-            else router.refresh();
+            try {
+              const result = await reopenMyTicket(ticketId);
+              if (!result.ok) setError(result.error);
+              else router.refresh();
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           })
         }
       >

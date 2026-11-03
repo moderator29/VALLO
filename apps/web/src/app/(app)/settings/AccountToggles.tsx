@@ -7,6 +7,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { updateSettings } from "@/lib/profile/actions";
 import type { NotifyToggleCopy, PrivacyToggleCopy, SettingsOf } from "@/components/app/account/settings-copy";
 import type { ResolvedProfileSettings, SettingsPatch } from "@/lib/profile/schema";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Account-backed preference groups.
@@ -34,14 +35,18 @@ function useSettingsSaver() {
   const save = useCallback((patch: SettingsPatch, revert: () => void) => {
     setError(null);
     startTransition(async () => {
-      const result = await updateSettings(patch);
-      if (result.ok) {
-        setSavedAt(Date.now());
-        return;
+      try {
+        const result = await updateSettings(patch);
+        if (result.ok) {
+          setSavedAt(Date.now());
+          return;
+        }
+        revert();
+        setSavedAt(0);
+        setError(result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      revert();
-      setSavedAt(0);
-      setError(result.error);
     });
   }, []);
 

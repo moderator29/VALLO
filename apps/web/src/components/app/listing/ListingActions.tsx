@@ -26,6 +26,7 @@ import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The two controls that float over the gallery: share and save.
@@ -198,54 +199,58 @@ export function ListingActions({
     setSignInPrompt(false);
 
     startTransition(async () => {
-      if (place) {
-        /* The other shelf. Save and unsave are separate intents, as the
-           actions are written, so a double tap cannot flip a shortlist the
-           wrong way. There is no device half here: `saved_items` takes
-           listing ids only, so a signed-out tap is answered by the sign-in
-           prompt the envelope already carries rather than by a local save
-           that could never be reconciled. */
-        const result =
-          place.kind === "accommodation"
-            ? next
-              ? await saveStay({ accommodationId: place.id })
-              : await unsaveStay({ accommodationId: place.id })
-            : next
-              ? await saveRestaurant({ restaurantId: place.id })
-              : await unsaveRestaurant({ restaurantId: place.id });
+      try {
+        if (place) {
+          /* The other shelf. Save and unsave are separate intents, as the
+             actions are written, so a double tap cannot flip a shortlist the
+             wrong way. There is no device half here: `saved_items` takes
+             listing ids only, so a signed-out tap is answered by the sign-in
+             prompt the envelope already carries rather than by a local save
+             that could never be reconciled. */
+          const result =
+            place.kind === "accommodation"
+              ? next
+                ? await saveStay({ accommodationId: place.id })
+                : await unsaveStay({ accommodationId: place.id })
+              : next
+                ? await saveRestaurant({ restaurantId: place.id })
+                : await unsaveRestaurant({ restaurantId: place.id });
+          if (!result.ok) {
+            setSaved(!next);
+            say(result.error, result.error.startsWith("Sign in"));
+            return;
+          }
+          say(next ? "Saved to your shortlist" : "Removed from saved");
+          return;
+        }
+
+        const result = await toggleSave({ listingId });
         if (!result.ok) {
+          // Nothing changed anywhere, so the heart goes back exactly as it was.
           setSaved(!next);
           say(result.error, result.error.startsWith("Sign in"));
           return;
         }
-        say(next ? "Saved to your shortlist" : "Removed from saved");
-        return;
+        if (result.data.mode === "local") {
+          // A catalogue id can never be a row, so the device owns this save.
+          if (next) addLocalSave(listingId);
+          else removeLocalSave(listingId);
+          if (next) feedback("select");
+          /* And the store is told, so every other heart for this listing on the
+             page behind this one moves with it rather than waiting for a reload. */
+          deviceSavesChanged();
+          say(next ? "Saved to your shortlist" : "Removed from saved");
+          return;
+        }
+        setSaved(result.data.saved);
+        /* B14: a save is felt once the server ACCEPTS it, as the toggle it
+           is: the light beat (CRAFT_DOCTRINE 6: light for a toggle). "success"
+           is kept for payoffs, so a heart never feels like a settled payment. */
+        if (result.data.saved) feedback("select");
+        say(result.data.saved ? "Saved to your shortlist" : "Removed from saved");
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-
-      const result = await toggleSave({ listingId });
-      if (!result.ok) {
-        // Nothing changed anywhere, so the heart goes back exactly as it was.
-        setSaved(!next);
-        say(result.error, result.error.startsWith("Sign in"));
-        return;
-      }
-      if (result.data.mode === "local") {
-        // A catalogue id can never be a row, so the device owns this save.
-        if (next) addLocalSave(listingId);
-        else removeLocalSave(listingId);
-        if (next) feedback("select");
-        /* And the store is told, so every other heart for this listing on the
-           page behind this one moves with it rather than waiting for a reload. */
-        deviceSavesChanged();
-        say(next ? "Saved to your shortlist" : "Removed from saved");
-        return;
-      }
-      setSaved(result.data.saved);
-      /* B14: a save is felt once the server ACCEPTS it, as the toggle it
-         is: the light beat (CRAFT_DOCTRINE 6: light for a toggle). "success"
-         is kept for payoffs, so a heart never feels like a settled payment. */
-      if (result.data.saved) feedback("select");
-      say(result.data.saved ? "Saved to your shortlist" : "Removed from saved");
     });
   }
 

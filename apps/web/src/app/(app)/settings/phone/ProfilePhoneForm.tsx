@@ -7,6 +7,7 @@ import { panelClass } from "@/components/ui/Panel";
 import { PhoneField } from "@/components/app/PhoneField";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveProfilePhone } from "@/lib/settings/profile-phone";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE NUMBER ON FILE, while codes are not sent. One field, one save; the
@@ -31,13 +32,17 @@ export function ProfilePhoneForm({
 
   const save = () =>
     start(async () => {
-      setError(null);
-      const result = await saveProfilePhone(phone);
-      if (!result.ok) return setError(result.fieldErrors?.phone ?? result.error);
-      setSavedLast(result.data.last);
-      setPhone("");
-      if (next) router.push(next);
-      else router.refresh();
+      try {
+        setError(null);
+        const result = await saveProfilePhone(phone);
+        if (!result.ok) return setError(result.fieldErrors?.phone ?? result.error);
+        setSavedLast(result.data.last);
+        setPhone("");
+        if (next) router.push(next);
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   return (

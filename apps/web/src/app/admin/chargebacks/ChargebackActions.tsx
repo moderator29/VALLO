@@ -17,6 +17,7 @@ import {
   type RecoveryState,
 } from "@/lib/admin/reads/chargebacks-model";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE CHARGEBACKS DESK'S CONTROLS: the next moves on a case, recording a new
@@ -173,9 +174,13 @@ function OverrideSheet({
   const blocked = reason.trim().length < REASON_MIN;
   const submit = () =>
     startTransition(async () => {
-      const outcome = await overrideChargebackHold({ kind: item.kind, subjectId: item.id, reason: reason.trim() });
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      try {
+        const outcome = await overrideChargebackHold({ kind: item.kind, subjectId: item.id, reason: reason.trim() });
+        setResult(outcome);
+        if (outcome.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   return (
     <Sheet
@@ -267,18 +272,22 @@ function MoveSheet({ row, offer, copy, locale, onClose }: { row: MoveCase; offer
 
   const submit = () =>
     startTransition(async () => {
-      const outcome = await moveChargeback({
-        chargebackId: row.id,
-        move: offer.key,
-        note: note.trim(),
-        fromState: row.state,
-        fromRecovery: row.recoveryState,
-        ...(offer.asksRecovered ? { recoveredNow } : {}),
-        ...(offer.offersAlreadyRecovered && alreadyRecovered ? { alreadyRecovered: true } : {}),
-        ...(offer.asksDeadline && due ? { evidenceDueAt: due } : {}),
-      });
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      try {
+        const outcome = await moveChargeback({
+          chargebackId: row.id,
+          move: offer.key,
+          note: note.trim(),
+          fromState: row.state,
+          fromRecovery: row.recoveryState,
+          ...(offer.asksRecovered ? { recoveredNow } : {}),
+          ...(offer.offersAlreadyRecovered && alreadyRecovered ? { alreadyRecovered: true } : {}),
+          ...(offer.asksDeadline && due ? { evidenceDueAt: due } : {}),
+        });
+        setResult(outcome);
+        if (outcome.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   return (
@@ -398,17 +407,21 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
 
   const submit = () =>
     startTransition(async () => {
-      const outcome = await openChargeback({
-        reference: reference.trim(),
-        provider: provider as (typeof CHARGEBACK_PROVIDERS)[number],
-        disputeId: disputeId.trim(),
-        amount,
-        evidenceDueAt: due,
-        providerStatus: status.trim(),
-        note: note.trim(),
-      });
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      try {
+        const outcome = await openChargeback({
+          reference: reference.trim(),
+          provider: provider as (typeof CHARGEBACK_PROVIDERS)[number],
+          disputeId: disputeId.trim(),
+          amount,
+          evidenceDueAt: due,
+          providerStatus: status.trim(),
+          note: note.trim(),
+        });
+        setResult(outcome);
+        if (outcome.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   const fieldError = (key: string) =>
@@ -510,11 +523,15 @@ export function ChargebackNoteForm({ chargebackId, copy }: { chargebackId: strin
   const [pending, startTransition] = useTransition();
   const submit = () =>
     startTransition(async () => {
-      const outcome = await addChargebackNote({ chargebackId, note: note.trim() });
-      setResult(outcome);
-      if (outcome.ok) {
-        setNote("");
-        router.refresh();
+      try {
+        const outcome = await addChargebackNote({ chargebackId, note: note.trim() });
+        setResult(outcome);
+        if (outcome.ok) {
+          setNote("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   return (

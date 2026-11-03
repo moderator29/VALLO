@@ -19,6 +19,7 @@ import {
 import { FEED_SOURCES, type FeedSource } from "@/lib/host/ical";
 import type { CalendarRoom } from "@/lib/host/rate-calendar";
 import type { CalendarImport, SyncState } from "@/lib/host/rate-calendar-queries";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * CALENDAR SYNC FOR ONE ROOM TYPE (C2, 30 September 2026).
@@ -75,15 +76,19 @@ export function CalendarSync({
 
   const act = (fn: () => Promise<{ ok: boolean; error?: string }>, success: string, after?: () => void) =>
     start(async () => {
-      setMessage(null);
-      const result = await fn();
-      if (!result.ok) {
-        setMessage({ tone: "error", text: result.error ?? w.failed });
-        return;
+      try {
+        setMessage(null);
+        const result = await fn();
+        if (!result.ok) {
+          setMessage({ tone: "error", text: result.error ?? w.failed });
+          return;
+        }
+        setMessage({ tone: "ok", text: success });
+        after?.();
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setMessage({ tone: "ok", text: success });
-      after?.();
-      router.refresh();
     });
 
   const copy = async () => {

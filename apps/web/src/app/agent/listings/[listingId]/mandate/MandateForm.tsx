@@ -6,6 +6,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { fileListingMandate } from "@/lib/compliance/beneficial-ownership-actions";
 import { MANDATE_KINDS, RELATIONSHIPS, type MyMandate } from "@/lib/compliance/beneficial-ownership";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["complianceBeneficialOwnership"]["lister"];
 
@@ -50,15 +51,19 @@ export function MandateForm({
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await fileListingMandate({
-        listingId,
-        form: { kind, principalName: name, principalPhone: phone, relationship, exclusive, signedOn, expiresOn },
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await fileListingMandate({
+          listingId,
+          form: { kind, principalName: name, principalPhone: phone, relationship, exclusive, signedOn, expiresOn },
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setSent(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSent(true);
     });
   }
 

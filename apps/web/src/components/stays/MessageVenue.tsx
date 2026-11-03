@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { messageVenue } from "@/lib/venue-messages/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * "Message" on a hotel or a restaurant: the same first-message box a property
@@ -36,13 +37,17 @@ export function MessageVenue({
     setError(null);
     setPhoneGate(false);
     startTransition(async () => {
-      const result = await messageVenue({ businessId, body });
-      if (result.ok) {
-        setOpen(false);
-        router.push(`/messages/${result.data.conversationId}`);
-      } else {
-        setError(result.error);
-        setPhoneGate(isPhoneGate(result));
+      try {
+        const result = await messageVenue({ businessId, body });
+        if (result.ok) {
+          setOpen(false);
+          router.push(`/messages/${result.data.conversationId}`);
+        } else {
+          setError(result.error);
+          setPhoneGate(isPhoneGate(result));
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

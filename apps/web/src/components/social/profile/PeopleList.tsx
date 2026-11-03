@@ -11,6 +11,7 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * A list of people.
@@ -77,19 +78,23 @@ export function PeopleList({
     if (!cursor) return;
     setError(null);
     startTransition(async () => {
-      const result = await moreFollows({ handle, direction, before: cursor });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await moreFollows({ handle, direction, before: cursor });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        /* Appended rather than replaced, and de-duplicated on the way in, so a
+           follow arriving between two pages cannot put the same person on the
+           screen twice. */
+        setPeople((current) => {
+          const seen = new Set(current.map((person) => person.userId));
+          return [...current, ...result.data.people.filter((p) => !seen.has(p.userId))];
+        });
+        setCursor(result.data.cursor);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* Appended rather than replaced, and de-duplicated on the way in, so a
-         follow arriving between two pages cannot put the same person on the
-         screen twice. */
-      setPeople((current) => {
-        const seen = new Set(current.map((person) => person.userId));
-        return [...current, ...result.data.people.filter((p) => !seen.has(p.userId))];
-      });
-      setCursor(result.data.cursor);
     });
   };
 

@@ -30,6 +30,7 @@ import { successCopy } from "@/lib/ui/success-moments";
 import { PaystackCheckout, type ConfirmOutcome } from "./PaystackCheckout";
 import { panelClass } from "@/components/ui/Panel";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * PAYMENT METHODS, to the block at the foot of the settings render
@@ -155,17 +156,21 @@ export function PaymentMethodsPanel({
     setAddingCard(true);
     setChooser(false);
     startTransition(async () => {
-      const result = await startCardSetup({ idempotencyKey: setupKey });
-      if (!result.ok) {
-        setAddingCard(false);
-        setError(result.error);
-        return;
+      try {
+        const result = await startCardSetup({ idempotencyKey: setupKey });
+        if (!result.ok) {
+          setAddingCard(false);
+          setError(result.error);
+          return;
+        }
+        setSetup({
+          accessCode: result.data.accessCode,
+          reference: result.data.reference,
+          authorizationUrl: result.data.authorizationUrl,
+        });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSetup({
-        accessCode: result.data.accessCode,
-        reference: result.data.reference,
-        authorizationUrl: result.data.authorizationUrl,
-      });
     });
   };
 

@@ -6,6 +6,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import type { ReportReason } from "@/lib/social/posts-model";
 import type { ReportWords } from "./sheet-words";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Reporting something, with a reason.
@@ -58,12 +59,16 @@ export function ReportSheet({
     if (!reason) return;
     setError(null);
     startTransition(async () => {
-      const result = await submit({ reason, detail: detail.trim() });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await submit({ reason, detail: detail.trim() });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setSent(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setSent(true);
     });
   };
 

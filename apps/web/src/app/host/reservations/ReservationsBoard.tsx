@@ -25,6 +25,7 @@ import { countOf, plural, type Dictionary, type Locale } from "@vallo/i18n/core"
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useHostPageCopy } from "@/components/host/host-copy";
 import { venueDepositLine } from "@/lib/reservations/deposits";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The venue's table desk (`/host/reservations`).
@@ -231,14 +232,18 @@ function Outcome({ table }: { table: HostReservationView }) {
   const router = useRouter();
   const mark = (outcome: "COMPLETED" | "NO_SHOW") =>
     start(async () => {
-      setError(null);
-      const result = await markReservationOutcome({ reservationId: table.id, outcome });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        setError(null);
+        const result = await markReservationOutcome({ reservationId: table.id, outcome });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setDone(result.data.disputed ? "DISPUTED" : outcome);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(result.data.disputed ? "DISPUTED" : outcome);
-      router.refresh();
     });
 
   if (done) {
@@ -293,15 +298,19 @@ function SeatByCode() {
         onSubmit={(event) => {
           event.preventDefault();
           start(async () => {
-            setMessage(null);
-            const result = await seatByCode(code);
-            if (!result.ok) {
-              setMessage({ ok: false, text: result.error });
-              return;
+            try {
+              setMessage(null);
+              const result = await seatByCode(code);
+              if (!result.ok) {
+                setMessage({ ok: false, text: result.error });
+                return;
+              }
+              setCode("");
+              setMessage({ ok: true, text: w.done });
+              router.refresh();
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
             }
-            setCode("");
-            setMessage({ ok: true, text: w.done });
-            router.refresh();
           });
         }}
       >
@@ -355,14 +364,18 @@ function HostBill({ table }: { table: HostReservationView }) {
   const money = (minor: number) => formatMoney(minor, locale, "NGN");
   const act = (job: () => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
-      setError(null);
-      const result = await job();
-      if (!result.ok) {
-        setError(result.error ?? w.failed);
-        return;
+      try {
+        setError(null);
+        const result = await job();
+        if (!result.ok) {
+          setError(result.error ?? w.failed);
+          return;
+        }
+        setAmount("");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setAmount("");
-      router.refresh();
     });
 
   if (bill?.status === "paid") {

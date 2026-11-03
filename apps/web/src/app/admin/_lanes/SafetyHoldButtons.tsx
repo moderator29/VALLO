@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { decideSafetyHold } from "@/lib/admin/safety-holds";
 import { Button } from "@/components/ui/Button";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-63: Clear or Extend one safety hold. The three words come from the server
@@ -21,8 +22,12 @@ export function SafetyHoldButtons({
   function act(action: "clear" | "extend") {
     setError(null);
     startTransition(async () => {
-      const result = await decideSafetyHold({ holdId, action });
-      if (!result.ok) setError(result.error);
+      try {
+        const result = await decideSafetyHold({ holdId, action });
+        if (!result.ok) setError(result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 

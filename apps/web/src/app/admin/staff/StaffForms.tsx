@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Check";
 import { grantStaff, revokeStaff } from "@/lib/admin/staff-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export type PositionOption = { value: string; label: string; summary: string; scopes: string[] };
 
@@ -28,15 +29,19 @@ export function GrantStaffForm({
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const result = await grantStaff({ email, scopes: picked, position: position || null, note });
-          if (!result.ok) setMessage({ ok: false, text: result.error });
-          else {
-            setMessage({ ok: true, text: "Access given. They have been told by email and in the app." });
-            setEmail("");
-            setPosition("");
-            setPicked([]);
-            setNote("");
-            router.refresh();
+          try {
+            const result = await grantStaff({ email, scopes: picked, position: position || null, note });
+            if (!result.ok) setMessage({ ok: false, text: result.error });
+            else {
+              setMessage({ ok: true, text: "Access given. They have been told by email and in the app." });
+              setEmail("");
+              setPosition("");
+              setPicked([]);
+              setNote("");
+              router.refresh();
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}
@@ -117,9 +122,13 @@ export function RevokeStaffForm({ userId }: { userId: string }) {
       onSubmit={(e) => {
         e.preventDefault();
         start(async () => {
-          const result = await revokeStaff({ userId, reason });
-          if (!result.ok) setError(result.error);
-          else router.refresh();
+          try {
+            const result = await revokeStaff({ userId, reason });
+            if (!result.ok) setError(result.error);
+            else router.refresh();
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
+          }
         });
       }}
     >

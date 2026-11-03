@@ -12,6 +12,7 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { submitTenancyReview } from "@/lib/tenancy/review-actions";
 import { EXTRA_TO } from "@/lib/tenancy/review-model";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Tri = "yes" | "no" | "not_sure";
 
@@ -93,22 +94,26 @@ export function TenancyReviewForm({
       return;
     }
     startTransition(async () => {
-      const result = await submitTenancyReview({
-        paymentId,
-        paidExtra,
-        ...(paidExtra === "yes" ? { extraNaira: naira, extraTo } : {}),
-        asListed,
-        agentOnTime,
-        again,
-        rating: Number(rating),
-        ...(body.trim() ? { body: body.trim() } : {}),
-      });
-      if (!result.ok) {
-        setError(result.error);
-        setPhoneGate(isPhoneGate(result));
-        return;
+      try {
+        const result = await submitTenancyReview({
+          paymentId,
+          paidExtra,
+          ...(paidExtra === "yes" ? { extraNaira: naira, extraTo } : {}),
+          asListed,
+          agentOnTime,
+          again,
+          rating: Number(rating),
+          ...(body.trim() ? { body: body.trim() } : {}),
+        });
+        if (!result.ok) {
+          setError(result.error);
+          setPhoneGate(isPhoneGate(result));
+          return;
+        }
+        setDone(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(true);
     });
   }
 

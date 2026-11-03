@@ -35,6 +35,7 @@ import {
   POST_MEDIA_MAX,
   type ComposableKind,
 } from "@/lib/social/posts-model";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Writing something.
@@ -353,114 +354,122 @@ export function Composer({
     if (!strandedPost) return;
     setError(null);
     startTransition(async () => {
-      const done = await attach(strandedPost, pictures);
-      if (!done) {
-        setError(POST_FAILURE.pictureUpload);
-        return;
+      try {
+        const done = await attach(strandedPost, pictures);
+        if (!done) {
+          setError(POST_FAILURE.pictureUpload);
+          return;
+        }
+        forget();
+        setStrandedPost(null);
+        onDone?.();
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      forget();
-      setStrandedPost(null);
-      onDone?.();
-      router.refresh();
     });
   };
 
   const send = () => {
     setError(null);
     startTransition(async () => {
-      /* V-40: a new post with no signal and no pictures is kept and posted
-         when the signal returns. Replies and pictures need the connection. */
-      let result: Awaited<ReturnType<typeof dropPost>>;
       try {
-        if (parentId) {
-          result = await withTimeout(replyToPost({ parentId, body }), 30_000);
-        } else if (pictures.length === 0) {
-          const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
-          const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
-          if (done.state === "kept") {
-            setBody("");
-            setError(null);
-            setKeptNote(OUTBOX.waiting);
-            return;
+        /* V-40: a new post with no signal and no pictures is kept and posted
+           when the signal returns. Replies and pictures need the connection. */
+        let result: Awaited<ReturnType<typeof dropPost>>;
+        try {
+          if (parentId) {
+            result = await withTimeout(replyToPost({ parentId, body }), 30_000);
+          } else if (pictures.length === 0) {
+            const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
+            const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
+            if (done.state === "kept") {
+              setBody("");
+              setError(null);
+              setKeptNote(OUTBOX.waiting);
+              return;
+            }
+            if (done.state === "not_kept") {
+              setError(OUTBOX.couldNotKeep);
+              return;
+            }
+            result = done.result;
+          } else {
+            result = await withTimeout(dropPost(areaId ? { areaId, kind, body } : { kind, body }), 30_000);
           }
-          if (done.state === "not_kept") {
-            setError(OUTBOX.couldNotKeep);
-            return;
-          }
-          result = done.result;
-        } else {
-          result = await withTimeout(dropPost(areaId ? { areaId, kind, body } : { kind, body }), 30_000);
-        }
 
-      } catch {
-        setError(POST_FAILURE.down);
-        return;
-      }
-
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-
-      /*
-       * The pictures, now that there is a post to put them under. A held post
-       * still takes them: it is with a moderator, not gone, and it should carry
-       * what it was written with when it goes up.
-       */
-      if (pictures.length > 0) {
-        const done = await attach(result.data.postId, pictures);
-        if (!done) {
-          setBody("");
-          setStrandedPost(result.data.postId);
-          setError(POST_COPY.pictureLost);
-          router.refresh();
+        } catch {
+          setError(POST_FAILURE.down);
           return;
         }
-        forget();
-      }
 
-      if (result.data.held) {
-        setHeld(true);
-        return;
-      }
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
 
-      /*
-       * The summon.
-       *
-       * It runs after the post has landed rather than inside the write, because
-       * a model call inside `dropPost` would make every ordinary post wait on an
-       * API this product does not need to say a sentence. The post appears
-       * immediately, the assistant's reply arrives a moment later on the refresh,
-       * and a failed summon can never cost somebody their words: it is already
-       * saved by the time this line runs.
-       *
-       * `summonBot` answers its own refusals as replies, so nothing is shown
-       * here. A person who is over their allowance sees the assistant say so in
-       * the thread, which is where they were looking.
-       */
-      const summoned = mentionsBot(body);
-      const postId = result.data.postId;
+        /*
+         * The pictures, now that there is a post to put them under. A held post
+         * still takes them: it is with a moderator, not gone, and it should carry
+         * what it was written with when it goes up.
+         */
+        if (pictures.length > 0) {
+          const done = await attach(result.data.postId, pictures);
+          if (!done) {
+            setBody("");
+            setStrandedPost(result.data.postId);
+            setError(POST_COPY.pictureLost);
+            router.refresh();
+            return;
+          }
+          forget();
+        }
 
-      /* A new post (not a reply) flies from here into the top of the feed
-         when it lands there (`FreshArrival`). */
-      if (!parentId) notePublished(postId, formRef.current?.getBoundingClientRect() ?? null);
-      /* THE SUCCESS MOMENT, AT THE SIZE OF THE THING (ONE-PRODUCT-DECISIONS,
-         recommendation 2; SuccessSheet's own rule: small news keeps a quiet
-         toast). The payoff is the card itself landing at the top of the feed;
-         this is the one plain sentence of what happened, said once. */
-      toast.success(
-        parentId
-          ? "Replied."
-          : areaId && areaName
-            ? `Posted in ${areaName}.`
-            : "Posted. Everyone on Vallo can see it.",
-      );
-      setBody("");
-      onDone?.();
-      router.refresh();
+        if (result.data.held) {
+          setHeld(true);
+          return;
+        }
 
-      if (summoned) {
-        void summonBot({ postId }).then(() => router.refresh());
+        /*
+         * The summon.
+         *
+         * It runs after the post has landed rather than inside the write, because
+         * a model call inside `dropPost` would make every ordinary post wait on an
+         * API this product does not need to say a sentence. The post appears
+         * immediately, the assistant's reply arrives a moment later on the refresh,
+         * and a failed summon can never cost somebody their words: it is already
+         * saved by the time this line runs.
+         *
+         * `summonBot` answers its own refusals as replies, so nothing is shown
+         * here. A person who is over their allowance sees the assistant say so in
+         * the thread, which is where they were looking.
+         */
+        const summoned = mentionsBot(body);
+        const postId = result.data.postId;
+
+        /* A new post (not a reply) flies from here into the top of the feed
+           when it lands there (`FreshArrival`). */
+        if (!parentId) notePublished(postId, formRef.current?.getBoundingClientRect() ?? null);
+        /* THE SUCCESS MOMENT, AT THE SIZE OF THE THING (ONE-PRODUCT-DECISIONS,
+           recommendation 2; SuccessSheet's own rule: small news keeps a quiet
+           toast). The payoff is the card itself landing at the top of the feed;
+           this is the one plain sentence of what happened, said once. */
+        toast.success(
+          parentId
+            ? "Replied."
+            : areaId && areaName
+              ? `Posted in ${areaName}.`
+              : "Posted. Everyone on Vallo can see it.",
+        );
+        setBody("");
+        onDone?.();
+        router.refresh();
+
+        if (summoned) {
+          void summonBot({ postId }).then(() => router.refresh());
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

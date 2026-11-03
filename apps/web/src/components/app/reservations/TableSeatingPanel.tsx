@@ -24,6 +24,7 @@ import {
   leaveTableReview,
   payTableBill,
 } from "@/lib/reservations/seating-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE DINER'S SIDE OF A TABLE (founder decision D).
@@ -53,15 +54,19 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
   const money = (minor: number) => formatMoney(minor, "en", "NGN");
   const run = (job: () => Promise<{ ok: boolean; error?: string } | { ok: true; data: unknown }>, done?: string) =>
     start(async () => {
-      setError(null);
-      setNote(null);
-      const result = (await job()) as { ok: boolean; error?: string };
-      if (!result.ok) {
-        setError(result.error ?? "That did not go through. Please try again.");
-        return;
+      try {
+        setError(null);
+        setNote(null);
+        const result = (await job()) as { ok: boolean; error?: string };
+        if (!result.ok) {
+          setError(result.error ?? "That did not go through. Please try again.");
+          return;
+        }
+        if (done) setNote(done);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (done) setNote(done);
-      router.refresh();
     });
 
   const bill = table.bill ?? null;
@@ -127,13 +132,17 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
             data-testid="pay-table-bill"
             onClick={() =>
               start(async () => {
-                setError(null);
-                const result = await payTableBill(bill.id);
-                if (!result.ok) {
-                  setError(result.error);
-                  return;
+                try {
+                  setError(null);
+                  const result = await payTableBill(bill.id);
+                  if (!result.ok) {
+                    setError(result.error);
+                    return;
+                  }
+                  window.location.assign(result.data.authorizationUrl);
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
                 }
-                window.location.assign(result.data.authorizationUrl);
               })
             }
           >

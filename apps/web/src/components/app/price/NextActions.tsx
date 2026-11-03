@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveSearch } from "@/lib/saved/searches-actions";
 import { listingSearchHref, listingSearchParams, type CheckFacts } from "@/lib/price-check/next-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * WHAT NEXT, beneath an answered Price Check (track L). Three steps a person
@@ -32,11 +33,15 @@ export function NextActions({
   const setAlert = () => {
     setError(null);
     startTransition(async () => {
-      const result = await saveSearch({ params: listingSearchParams(facts) });
-      if (result.ok) setState("saved");
-      else {
-        setState("failed");
-        setError(result.error);
+      try {
+        const result = await saveSearch({ params: listingSearchParams(facts) });
+        if (result.ok) setState("saved");
+        else {
+          setState("failed");
+          setError(result.error);
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };

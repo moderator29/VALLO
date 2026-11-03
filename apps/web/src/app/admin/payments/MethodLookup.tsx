@@ -9,6 +9,7 @@ import {
   removeBankAccountAsAdmin,
   removePaymentMethodAsAdmin,
 } from "@/lib/admin/payments-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Removing a saved card or a bank account for somebody who asked.
@@ -43,17 +44,21 @@ export function RemoveSavedMethod({
   function run() {
     setError(null);
     start(async () => {
-      const result =
-        kind === "card"
-          ? await removePaymentMethodAsAdmin({ id, reason: reason.trim() })
-          : await removeBankAccountAsAdmin({ id, reason: reason.trim() });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["reason"] ?? result.error);
-        return;
+      try {
+        const result =
+          kind === "card"
+            ? await removePaymentMethodAsAdmin({ id, reason: reason.trim() })
+            : await removeBankAccountAsAdmin({ id, reason: reason.trim() });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["reason"] ?? result.error);
+          return;
+        }
+        setDone(true);
+        setOpen(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setDone(true);
-      setOpen(false);
-      router.refresh();
     });
   }
 

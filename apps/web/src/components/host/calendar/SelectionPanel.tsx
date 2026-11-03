@@ -17,6 +17,7 @@ import {
   type RatePlanLite,
 } from "@/lib/host/rate-calendar";
 import { useHostPageCopy } from "../host-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * WHAT A HOST CAN DO TO THE NIGHTS THEY SELECTED: price them, put a number
@@ -81,14 +82,18 @@ export function SelectionPanel({
     word: (n: number, extra?: { heldBack?: number }) => string,
   ) =>
     start(async () => {
-      setError(null);
-      const result = await act();
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        setError(null);
+        const result = await act();
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        onDone(word(result.data.nights, result.data));
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      onDone(word(result.data.nights, result.data));
-      router.refresh();
     });
 
   const count = (n: number) => countOf(n, "nights", locale);

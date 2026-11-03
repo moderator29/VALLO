@@ -10,6 +10,7 @@ import { Chip } from "@/components/ui/Chip";
 import { addQuestion, removeQuestion } from "@/lib/enquiry/renter-questions";
 import type { QuickReply } from "@/lib/enquiry/quick-replies";
 import type { Dictionary } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * UX-P2-03: the first message, written before any thread exists. Sending it
@@ -53,11 +54,15 @@ export function FirstMessage({
     setError(null);
     setPhoneGate(false);
     startTransition(async () => {
-      const result = await startConversationWithMessage({ listingId, body });
-      if (result.ok) router.replace(`/messages/${result.data.conversationId}${suffix}`);
-      else {
-        setError(result.error);
-        setPhoneGate(isPhoneGate(result));
+      try {
+        const result = await startConversationWithMessage({ listingId, body });
+        if (result.ok) router.replace(`/messages/${result.data.conversationId}${suffix}`);
+        else {
+          setError(result.error);
+          setPhoneGate(isPhoneGate(result));
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

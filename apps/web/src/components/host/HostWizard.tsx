@@ -63,6 +63,7 @@ import { TablesStep } from "./stays/TablesStep";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { HOST_AGREEMENT_VERSION, PAY_ON_VALLO_VERSION } from "@/lib/legal/versions";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE HOST WIZARD, ON `lib/host`.
@@ -384,14 +385,18 @@ export function HostWizard({
       setNotice(null);
       setFieldErrors({});
       start(async () => {
-        const result = await work();
-        if (!result.ok) {
-          setNotice({ tone: "error", text: result.error, phoneGate: result.gate === "phone" });
-          if (result.fieldErrors) setFieldErrors(result.fieldErrors);
-          return;
+        try {
+          const result = await work();
+          if (!result.ok) {
+            setNotice({ tone: "error", text: result.error, phoneGate: result.gate === "phone" });
+            if (result.fieldErrors) setFieldErrors(result.fieldErrors);
+            return;
+          }
+          then?.(result.data);
+          router.refresh();
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
         }
-        then?.(result.data);
-        router.refresh();
       });
     },
     [router],

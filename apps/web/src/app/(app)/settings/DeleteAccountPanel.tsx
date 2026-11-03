@@ -21,6 +21,7 @@ import {
   startDeletionAction,
 } from "@/lib/account-deletion/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The deletion control, and everything behind it.
@@ -347,12 +348,16 @@ function DeleteDrawer({
   const askForCode = () => {
     setCodeError(null);
     startSending(async () => {
-      const result = await sendDeletionCode();
-      if (!result.ok) {
-        setCodeError(result.error);
-        return;
+      try {
+        const result = await sendDeletionCode();
+        if (!result.ok) {
+          setCodeError(result.error);
+          return;
+        }
+        setCodeSent(true);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setCodeSent(true);
     });
   };
 

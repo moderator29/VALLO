@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { pinTenancyMessage } from "@/lib/tenancy/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-47. Pin a message from the thread with the other party to the tenancy,
@@ -50,12 +51,16 @@ export function PinMessages({
               onClick={() => {
                 setError(null);
                 start(async () => {
-                  const result = await pinTenancyMessage({ tenancyId, messageId: message.id });
-                  if (!result.ok) {
-                    setError(result.error);
-                    return;
+                  try {
+                    const result = await pinTenancyMessage({ tenancyId, messageId: message.id });
+                    if (!result.ok) {
+                      setError(result.error);
+                      return;
+                    }
+                    router.refresh();
+                  } catch (error) {
+                    if (!tapFailedOffline(error)) throw error;
                   }
-                  router.refresh();
                 });
               }}
             >

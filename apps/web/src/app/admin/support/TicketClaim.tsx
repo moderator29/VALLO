@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { releaseTicket, takeTicket } from "@/lib/admin/support-desk-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Who has this ticket, and the one button that changes it: Take it when it is
@@ -24,10 +25,14 @@ export function TicketClaim({
 
   const run = (verb: "take" | "release") =>
     start(async () => {
-      setError(null);
-      const r = verb === "take" ? await takeTicket({ ticketId }) : await releaseTicket({ ticketId });
-      if (r.ok) router.refresh();
-      else setError(r.error);
+      try {
+        setError(null);
+        const r = verb === "take" ? await takeTicket({ ticketId }) : await releaseTicket({ ticketId });
+        if (r.ok) router.refresh();
+        else setError(r.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
 
   return (

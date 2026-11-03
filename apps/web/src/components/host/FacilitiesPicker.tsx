@@ -10,6 +10,7 @@ import { STAY_FACILITIES } from "@/lib/host/facilities";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import "@/app/css/catalogue.css";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * WHAT THE PROPERTY OFFERS. `GOVERNING-10` screen four, the facilities half.
@@ -79,22 +80,26 @@ export function FacilitiesPicker({
   function save() {
     setNotice(null);
     start(async () => {
-      const result = await setAccommodationFacilities({
-        accommodationId,
-        codes: [...picked],
-      });
-      if (!result.ok) {
-        setNotice({ tone: "error", text: result.error });
-        return;
+      try {
+        const result = await setAccommodationFacilities({
+          accommodationId,
+          codes: [...picked],
+        });
+        if (!result.ok) {
+          setNotice({ tone: "error", text: result.error });
+          return;
+        }
+        setNotice({
+          tone: "ok",
+          text:
+            result.data.codes.length === 0
+              ? "Saved. This property claims no facilities, so none is shown to a guest."
+              : `Saved. ${countOf(result.data.codes.length, "facilities", locale)} on record.`,
+        });
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNotice({
-        tone: "ok",
-        text:
-          result.data.codes.length === 0
-            ? "Saved. This property claims no facilities, so none is shown to a guest."
-            : `Saved. ${countOf(result.data.codes.length, "facilities", locale)} on record.`,
-      });
-      router.refresh();
     });
   }
 

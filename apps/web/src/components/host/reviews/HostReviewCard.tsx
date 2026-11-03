@@ -11,6 +11,7 @@ import { answerHotelReview, contestHotelReview, withdrawHotelReviewAnswer } from
 import { CONTEST_CRITERIA, CONTEST_NOTE_MAX, contestWords, type ContestCriterion } from "@/lib/host/review-contest";
 import type { HostReview } from "@/lib/host/reviews";
 import { useHostPageCopy } from "@/components/host/host-copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * ONE REVIEW OF THE HOST'S HOTEL (C4): what the guest wrote, the host's one
@@ -33,37 +34,49 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
 
   const saveReply = () =>
     start(async () => {
-      setError(null);
-      const result = await answerHotelReview({ reviewId: review.id, body: reply });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        setError(null);
+        const result = await answerHotelReview({ reviewId: review.id, body: reply });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setWriting(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setWriting(false);
-      router.refresh();
     });
 
   const withdraw = () =>
     start(async () => {
-      setError(null);
-      const result = await withdrawHotelReviewAnswer({ reviewId: review.id });
-      if (!result.ok) setError(result.error);
-      else {
-        setReply("");
-        router.refresh();
+      try {
+        setError(null);
+        const result = await withdrawHotelReviewAnswer({ reviewId: review.id });
+        if (!result.ok) setError(result.error);
+        else {
+          setReply("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 
   const sendContest = () =>
     start(async () => {
-      setContestError(null);
-      const result = await contestHotelReview({ reviewId: review.id, criterion, note: note.trim() || undefined });
-      if (!result.ok) {
-        setContestError(result.error);
-        return;
+      try {
+        setContestError(null);
+        const result = await contestHotelReview({ reviewId: review.id, criterion, note: note.trim() || undefined });
+        if (!result.ok) {
+          setContestError(result.error);
+          return;
+        }
+        setContesting(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setContesting(false);
-      router.refresh();
     });
 
   const openContest = review.contest?.status === "open";

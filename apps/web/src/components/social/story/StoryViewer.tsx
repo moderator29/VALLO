@@ -36,6 +36,7 @@ import { Toast, useToast } from "@/components/ui/Toast";
 import { countOf, formatNumber } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * A story, full bleed.
@@ -158,19 +159,23 @@ export function StoryViewer({
       setSaveCount((n) => n + (on ? 1 : -1));
     }
     startTransition(async () => {
-      const result = await toggleStoryMark({ storyId: story.id, mark: kind });
-      if (!result.ok) {
-        if (kind === "LIKE") {
-          setLiked(!on);
-          setLikeCount((n) => n + (on ? -1 : 1));
-        } else {
-          setSaved(!on);
-          setSaveCount((n) => n + (on ? -1 : 1));
+      try {
+        const result = await toggleStoryMark({ storyId: story.id, mark: kind });
+        if (!result.ok) {
+          if (kind === "LIKE") {
+            setLiked(!on);
+            setLikeCount((n) => n + (on ? -1 : 1));
+          } else {
+            setSaved(!on);
+            setSaveCount((n) => n + (on ? -1 : 1));
+          }
+          show(result.error, "error");
+          return;
         }
-        show(result.error, "error");
-        return;
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -195,24 +200,28 @@ export function StoryViewer({
       return;
     }
     startTransition(async () => {
-      const result =
-        action === "block"
-          ? await blockUser({ userId: target })
-          : await muteTarget({ targetKind: "USER", targetId: target });
-      if (!result.ok) {
-        show(result.error, "error");
-        return;
+      try {
+        const result =
+          action === "block"
+            ? await blockUser({ userId: target })
+            : await muteTarget({ targetKind: "USER", targetId: target });
+        if (!result.ok) {
+          show(result.error, "error");
+          return;
+        }
+        if (action === "block") {
+          /* A block hides this author's work in both directions the instant it
+             lands, so this page stops existing for the person who wrote the
+             block. Leaving them here would answer the next refresh with a 404 and
+             no explanation, so it leaves for a real destination itself. */
+          router.replace("/around");
+          return;
+        }
+        show(POST_COPY.mutedDone);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (action === "block") {
-        /* A block hides this author's work in both directions the instant it
-           lands, so this page stops existing for the person who wrote the
-           block. Leaving them here would answer the next refresh with a 404 and
-           no explanation, so it leaves for a real destination itself. */
-        router.replace("/around");
-        return;
-      }
-      show(POST_COPY.mutedDone);
-      router.refresh();
     });
   };
 

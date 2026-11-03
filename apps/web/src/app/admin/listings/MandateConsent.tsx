@@ -5,6 +5,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { CONSENT_SENTENCE } from "@/lib/landlord/consent";
 import { recordPrincipalConsent } from "@/lib/landlord/admin-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type AdminCopy = Dictionary["landlord"]["admin"];
 
@@ -62,16 +63,20 @@ export function MandateConsent({
   function run(answer: "given" | "withdrawn") {
     setError(null);
     startTransition(async () => {
-      const result = await recordPrincipalConsent({ mandateId, answer, note: answer === "given" ? note : null });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await recordPrincipalConsent({ mandateId, answer, note: answer === "given" ? note : null });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setStatus(
+          answer === "given"
+            ? { state: "given", line: copy.consentRecordedNow }
+            : { state: "withdrawn", line: copy.consentWithdrawnNow },
+        );
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setStatus(
-        answer === "given"
-          ? { state: "given", line: copy.consentRecordedNow }
-          : { state: "withdrawn", line: copy.consentWithdrawnNow },
-      );
     });
   }
 

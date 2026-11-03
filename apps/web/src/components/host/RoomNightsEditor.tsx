@@ -11,6 +11,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { setRoomNights } from "@/lib/host/actions";
 import type { MyRoomType } from "@/lib/host/queries";
 import { isoDate } from "@/lib/stays/inventory";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * HOW MANY ROOMS ARE ON SALE, AND FOR WHICH NIGHTS.
@@ -71,24 +72,28 @@ function RoomCard({ room, locale }: { room: MyRoomType; locale: Locale }) {
   function apply() {
     setNotice(null);
     start(async () => {
-      const result = await setRoomNights({
-        roomTypeId: room.id,
-        from,
-        to,
-        unitsOpen: unitsNumber,
-      });
-      if (!result.ok) {
-        setNotice({ tone: "error", text: result.error });
-        return;
+      try {
+        const result = await setRoomNights({
+          roomTypeId: room.id,
+          from,
+          to,
+          unitsOpen: unitsNumber,
+        });
+        if (!result.ok) {
+          setNotice({ tone: "error", text: result.error });
+          return;
+        }
+        setNotice({
+          tone: "ok",
+          text:
+            unitsNumber === 0
+              ? w.closedDone.replace("{nights}", countOf(result.data.nights, "nights", locale))
+              : w.onSaleDone.replace("{units}", String(unitsNumber)).replace("{nights}", countOf(result.data.nights, "nights", locale)),
+        });
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setNotice({
-        tone: "ok",
-        text:
-          unitsNumber === 0
-            ? w.closedDone.replace("{nights}", countOf(result.data.nights, "nights", locale))
-            : w.onSaleDone.replace("{units}", String(unitsNumber)).replace("{nights}", countOf(result.data.nights, "nights", locale)),
-      });
-      router.refresh();
     });
   }
 

@@ -6,6 +6,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { formatReceiptCode } from "@/lib/receipts/code";
 import { createReceiptCode, revokeReceiptCode } from "@/lib/receipts/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-55. The tenant's proof of payment: a code anybody can check at /r.
@@ -35,13 +36,17 @@ export function ReceiptCodePanel({
   function run(work: () => Promise<{ ok: boolean; error?: string }>, done?: string) {
     setNote(null);
     start(async () => {
-      const result = await work();
-      if (!result.ok) {
-        setNote(result.error ?? copy.failed);
-        return;
+      try {
+        const result = await work();
+        if (!result.ok) {
+          setNote(result.error ?? copy.failed);
+          return;
+        }
+        if (done) setNote(done);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      if (done) setNote(done);
-      router.refresh();
     });
   }
 
@@ -117,13 +122,17 @@ export function ReceiptCodePanel({
             onClick={() => {
               setNote(null);
               start(async () => {
-                const result = await createReceiptCode({ tenancyId });
-                if (!result.ok) {
-                  setNote(result.error ?? copy.failed);
-                  return;
+                try {
+                  const result = await createReceiptCode({ tenancyId });
+                  if (!result.ok) {
+                    setNote(result.error ?? copy.failed);
+                    return;
+                  }
+                  setFresh(result.data.code);
+                  router.refresh();
+                } catch (error) {
+                  if (!tapFailedOffline(error)) throw error;
                 }
-                setFresh(result.data.code);
-                router.refresh();
               });
             }}
           >

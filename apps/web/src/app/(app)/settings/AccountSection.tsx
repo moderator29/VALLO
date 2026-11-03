@@ -19,6 +19,7 @@ import { playThreshold } from "@/lib/motion/threshold";
 import { DeleteAccountPanel } from "./DeleteAccountPanel";
 import type { Blocker } from "@/lib/account-deletion/preconditions";
 import type { Locale } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The account block: who you are signed in as, sign out, and deletion.
@@ -67,30 +68,34 @@ export function AccountSection({
   const leave = () => {
     setSignOutError(null);
     startSignOut(async () => {
-      /* V-98: the widget stops reading this account before the session ends. */
-      await revokeWidgetTokens().catch(() => undefined);
-      /* The push row for THIS device is retired with the session. */
-      const result = await signOut(readLocalDevice()?.deviceRef);
-      if (!result.ok) {
-        setSignOutError(result.error);
-        return;
+      try {
+        /* V-98: the widget stops reading this account before the session ends. */
+        await revokeWidgetTokens().catch(() => undefined);
+        /* The push row for THIS device is retired with the session. */
+        const result = await signOut(readLocalDevice()?.deviceRef);
+        if (!result.ok) {
+          setSignOutError(result.error);
+          return;
+        }
+        /* V-35, V-77: a shared phone keeps neither somebody else's gate code
+           nor their shortlist. */
+        await clearPacks();
+        await clearShelf();
+        /* SUP-16: a listing draft never outlives the session that wrote it. */
+        clearListingDrafts();
+        await clearOutbox();
+        /* The pages this phone kept for offline go with the session. */
+        await forgetKeptPages();
+        await forgetWidget();
+        clearAllInflight();
+        clearLocalDevice();
+        /* Track M: the page recedes and the panels close on the mark. */
+        await playThreshold("leave");
+        router.replace("/");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* V-35, V-77: a shared phone keeps neither somebody else's gate code
-         nor their shortlist. */
-      await clearPacks();
-      await clearShelf();
-      /* SUP-16: a listing draft never outlives the session that wrote it. */
-      clearListingDrafts();
-      await clearOutbox();
-      /* The pages this phone kept for offline go with the session. */
-      await forgetKeptPages();
-      await forgetWidget();
-      clearAllInflight();
-      clearLocalDevice();
-      /* Track M: the page recedes and the panels close on the mark. */
-      await playThreshold("leave");
-      router.replace("/");
-      router.refresh();
     });
   };
 

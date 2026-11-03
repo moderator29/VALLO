@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { addMemberNote } from "@/lib/admin/member-actions";
 import { NOTE_MAX, NOTE_MIN } from "@/lib/admin/member-file-rules";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Write a note on this person's file. Notes cannot be edited or deleted, by
@@ -25,13 +26,17 @@ export function NoteForm({ userId }: { userId: string }) {
       onSubmit={(event) => {
         event.preventDefault();
         start(async () => {
-          const r = await addMemberNote({ userId, body });
-          if (r.ok) {
-            setBody("");
-            setResult({ tone: "ok", text: "Note saved. It is on the file and in the audit log." });
-            router.refresh();
-          } else {
-            setResult({ tone: "error", text: r.error });
+          try {
+            const r = await addMemberNote({ userId, body });
+            if (r.ok) {
+              setBody("");
+              setResult({ tone: "ok", text: "Note saved. It is on the file and in the audit log." });
+              router.refresh();
+            } else {
+              setResult({ tone: "error", text: r.error });
+            }
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
         });
       }}

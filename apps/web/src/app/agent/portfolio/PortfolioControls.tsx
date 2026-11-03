@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { withDone } from "@/lib/ui/success-moments";
 import { awardMandate, inviteAgents, pitchForMandate, withdrawInvitation } from "@/lib/landlord/portfolio-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["landlord"]["portfolio"];
 
@@ -26,22 +27,26 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
         event.preventDefault();
         setNote(null);
         start(async () => {
-          const result = await inviteAgents({ listingId, min, max });
-          if (result.ok) {
-            setNote({
-              tone: "ok",
-              text: result.data.told > 0 ? copy.inviteSent.replace("{n}", String(result.data.told)) : copy.inviteSentNone,
-            });
-            /* "Invitation sent" only when the database told somebody; the
-               portfolio checks the invitation is open on this unit before
-               it shows (arrival-moments.ts), and the form itself gives way
-               to the invitation as the page refreshes. */
-            if (result.data.told > 0) {
-              router.replace(withDone("/agent/portfolio", "agents-invited", { listing: listingId }), { scroll: false });
+          try {
+            const result = await inviteAgents({ listingId, min, max });
+            if (result.ok) {
+              setNote({
+                tone: "ok",
+                text: result.data.told > 0 ? copy.inviteSent.replace("{n}", String(result.data.told)) : copy.inviteSentNone,
+              });
+              /* "Invitation sent" only when the database told somebody; the
+                 portfolio checks the invitation is open on this unit before
+                 it shows (arrival-moments.ts), and the form itself gives way
+                 to the invitation as the page refreshes. */
+              if (result.data.told > 0) {
+                router.replace(withDone("/agent/portfolio", "agents-invited", { listing: listingId }), { scroll: false });
+              }
+              return;
             }
-            return;
+            setNote({ tone: "error", text: result.error === "band" ? copy.inviteBand : copy.inviteFailed });
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
           }
-          setNote({ tone: "error", text: result.error === "band" ? copy.inviteBand : copy.inviteFailed });
         });
       }}
     >
@@ -93,8 +98,12 @@ export function AwardButton({ pitchId, copy }: { pitchId: string; copy: Copy }) 
         onClick={() => {
           setError(false);
           start(async () => {
-            const result = await awardMandate({ pitchId });
-            if (!result.ok) setError(true);
+            try {
+              const result = await awardMandate({ pitchId });
+              if (!result.ok) setError(true);
+            } catch (error) {
+              if (!tapFailedOffline(error)) throw error;
+            }
           });
         }}
       >
@@ -139,8 +148,12 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
       onSubmit={(event) => {
         event.preventDefault();
         start(async () => {
-          const result = await pitchForMandate({ invitationId, note: text });
-          setState(result.ok ? "sent" : result.error === "short" ? "short" : "failed");
+          try {
+            const result = await pitchForMandate({ invitationId, note: text });
+            setState(result.ok ? "sent" : result.error === "short" ? "short" : "failed");
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
+          }
         });
       }}
     >

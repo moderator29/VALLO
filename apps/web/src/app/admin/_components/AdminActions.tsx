@@ -22,6 +22,7 @@ import {
   setTicketStatus,
   toggleFeatureFlag,
 } from "@/lib/admin/actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Every hand the console offers, in one client module.
@@ -88,9 +89,13 @@ function ActionSheet({
 
   const submit = () => {
     startTransition(async () => {
-      const outcome = await run(notes.trim());
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      try {
+        const outcome = await run(notes.trim());
+        setResult(outcome);
+        if (outcome.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 
@@ -585,11 +590,15 @@ export function TicketReply({
 
   const send = () => {
     startTransition(async () => {
-      const outcome = await replySupportTicket({ ticketId, body });
-      setResult(outcome);
-      if (outcome.ok) {
-        setBody("");
-        router.refresh();
+      try {
+        const outcome = await replySupportTicket({ ticketId, body });
+        setResult(outcome);
+        if (outcome.ok) {
+          setBody("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };
@@ -660,12 +669,16 @@ export function TicketStatusControl({
       return;
     }
     startTransition(async () => {
-      const outcome = await setTicketStatus({ ticketId, status: next, ...(note ? { note } : {}) });
-      setResult(outcome);
-      if (outcome.ok) {
-        setClosing(false);
-        setClosingNote("");
-        router.refresh();
+      try {
+        const outcome = await setTicketStatus({ ticketId, status: next, ...(note ? { note } : {}) });
+        setResult(outcome);
+        if (outcome.ok) {
+          setClosing(false);
+          setClosingNote("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   };
@@ -749,9 +762,13 @@ export function SwitchControl({
 
   const turnOn = () => {
     startTransition(async () => {
-      const outcome = await toggleFeatureFlag({ key: flagKey, enabled: true });
-      setResult(outcome);
-      if (outcome.ok) router.refresh();
+      try {
+        const outcome = await toggleFeatureFlag({ key: flagKey, enabled: true });
+        setResult(outcome);
+        if (outcome.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   };
 
@@ -828,8 +845,12 @@ export function StayCancel({
     if (!open) return;
     setPreview(null);
     startPreview(async () => {
-      const outcome = await previewCancellation({ bookingId, reason });
-      if (outcome.ok && outcome.data) setPreview(outcome.data);
+      try {
+        const outcome = await previewCancellation({ bookingId, reason });
+        if (outcome.ok && outcome.data) setPreview(outcome.data);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }, [open, reason, bookingId]);
 

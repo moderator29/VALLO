@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { fillMacro, SUPPORT_MACROS, type SupportMacro } from "@/lib/admin/support-macros";
 import { sendSupportReply } from "@/lib/admin/support-workbench-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE REPLY BOX. Saved replies fill it (never send it); the agent reads,
@@ -44,18 +45,22 @@ export function SupportComposer({
   const send = (then: "keep" | "resolve") => {
     if (body.trim().length < 2 || pending) return;
     start(async () => {
-      const result = await sendSupportReply({ ticketId, body, then, status });
-      if (!result.ok) {
-        setMessage({ ok: false, text: result.error });
-        return;
+      try {
+        const result = await sendSupportReply({ ticketId, body, then, status });
+        if (!result.ok) {
+          setMessage({ ok: false, text: result.error });
+          return;
+        }
+        setBody("");
+        setPicked(null);
+        setMessage({
+          ok: true,
+          text: then === "resolve" ? "Sent, and the ticket is resolved." : "Sent. It is on their thread now.",
+        });
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setBody("");
-      setPicked(null);
-      setMessage({
-        ok: true,
-        text: then === "resolve" ? "Sent, and the ticket is resolved." : "Sent. It is on their thread now.",
-      });
-      router.refresh();
     });
   };
 

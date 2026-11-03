@@ -17,6 +17,7 @@ import {
   type SignalChecks,
 } from "@/lib/admin/risk-settings";
 import { parseNairaToKobo } from "@/lib/money/amount";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * D77: the risk settings, one form, and the incident switch apart from it, as
@@ -43,9 +44,13 @@ export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings;
   function save() {
     setMessage(null);
     start(async () => {
-      const r = await saveRiskSettings({ thresholdNaira: threshold, recentChangeDays: daysNumber ?? -1, checks });
-      setMessage(r.ok ? { tone: "ok", text: "Saved. The next deal both parties agree is read against these settings." } : { tone: "error", text: r.error });
-      if (r.ok) router.refresh();
+      try {
+        const r = await saveRiskSettings({ thresholdNaira: threshold, recentChangeDays: daysNumber ?? -1, checks });
+        setMessage(r.ok ? { tone: "ok", text: "Saved. The next deal both parties agree is read against these settings." } : { tone: "error", text: r.error });
+        if (r.ok) router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
     });
   }
 
@@ -165,11 +170,15 @@ function KillSwitch({ on, note }: { on: boolean; note: string | null }) {
           disabled={reason.trim().length < 10}
           onClick={() =>
             start(async () => {
-              const r = await setReviewKillSwitch({ on: next, reason });
-              setMessage(r.ok ? (next ? "Every deal now waits for review." : "Back to the signals.") : r.error);
-              if (r.ok) {
-                setReason("");
-                router.refresh();
+              try {
+                const r = await setReviewKillSwitch({ on: next, reason });
+                setMessage(r.ok ? (next ? "Every deal now waits for review." : "Back to the signals.") : r.error);
+                if (r.ok) {
+                  setReason("");
+                  router.refresh();
+                }
+              } catch (error) {
+                if (!tapFailedOffline(error)) throw error;
               }
             })
           }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { closeBrief } from "@/lib/briefs/actions";
 import { briefLine } from "@/lib/briefs/brief";
 import type { MyBrief } from "@/lib/briefs/queries";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-95: THE RENTER'S BRIEFS AND THEIR ANSWERS. Each answer is a published
@@ -83,9 +84,13 @@ export function MyBriefs({
                 disabled={pending}
                 onClick={() =>
                   start(async () => {
-                    const result = await closeBrief({ id: brief.id });
-                    if (!result.ok) setError(result.error);
-                    else router.refresh();
+                    try {
+                      const result = await closeBrief({ id: brief.id });
+                      if (!result.ok) setError(result.error);
+                      else router.refresh();
+                    } catch (error) {
+                      if (!tapFailedOffline(error)) throw error;
+                    }
                   })
                 }
               >

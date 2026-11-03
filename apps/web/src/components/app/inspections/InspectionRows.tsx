@@ -19,6 +19,7 @@ import { waitingOn, type Inspection, type InspectionState } from "@/lib/inspecti
 import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
 import { viewingWords } from "./viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * INSPECTIONS, AS ROWS, WITH THE STATE VISIBLE ON BOTH SIDES.
@@ -196,15 +197,19 @@ function InspectionRow({
     setError(null);
     startTransition(async () => {
       try {
-        const result = await work();
-        if (!result.ok) {
-          setError(result.error ?? flowCopy.failed);
-          return;
+        try {
+          const result = await work();
+          if (!result.ok) {
+            setError(result.error ?? flowCopy.failed);
+            return;
+          }
+          setJustChanged(true);
+          router.refresh();
+        } finally {
+          inFlight.current = false;
         }
-        setJustChanged(true);
-        router.refresh();
-      } finally {
-        inFlight.current = false;
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
   }

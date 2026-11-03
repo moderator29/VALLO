@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { removeViewingWindow, saveViewingWindow } from "@/lib/viewings/actions";
 import { windowProblem } from "@/lib/viewings/route";
 import type { ViewingWindow } from "@/lib/viewings/queries";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-94: THE LISTER'S VIEWING WINDOWS, on /agent/inspections. The windows in
@@ -57,14 +58,18 @@ export function ViewingWindows({
     }
     setError(null);
     start(async () => {
-      const result = await saveViewingWindow({ listingIds: chosen, weekday, starts, ends, slotMinutes });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await saveViewingWindow({ listingIds: chosen, weekday, starts, ends, slotMinutes });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setAdding(false);
+        setChosen([]);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setAdding(false);
-      setChosen([]);
-      router.refresh();
     });
   }
 
@@ -97,9 +102,13 @@ export function ViewingWindows({
                 disabled={pending}
                 onClick={() =>
                   start(async () => {
-                    const result = await removeViewingWindow({ id: w.id });
-                    if (!result.ok) setError(result.error);
-                    else router.refresh();
+                    try {
+                      const result = await removeViewingWindow({ id: w.id });
+                      if (!result.ok) setError(result.error);
+                      else router.refresh();
+                    } catch (error) {
+                      if (!tapFailedOffline(error)) throw error;
+                    }
                   })
                 }
               >

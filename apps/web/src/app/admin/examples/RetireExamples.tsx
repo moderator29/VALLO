@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { retireExampleListings } from "@/lib/admin/payments-actions";
 import type { ExampleListingView } from "@/lib/admin/examples-queries";
 import { countOf } from "@vallo/i18n/core";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * Taking the example properties off the catalogue.
@@ -40,16 +41,20 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
   function run() {
     setError(null);
     start(async () => {
-      const result = await retireExampleListings({
-        listingIds: live.map((listing) => listing.id),
-      });
-      if (!result.ok) {
-        setError(result.fieldErrors?.["listingIds"] ?? result.error);
-        return;
+      try {
+        const result = await retireExampleListings({
+          listingIds: live.map((listing) => listing.id),
+        });
+        if (!result.ok) {
+          setError(result.fieldErrors?.["listingIds"] ?? result.error);
+          return;
+        }
+        setConfirming(false);
+        setDone(result.data.retired);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setConfirming(false);
-      setDone(result.data.retired);
-      router.refresh();
     });
   }
 

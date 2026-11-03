@@ -6,6 +6,7 @@ import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { answerStillAvailable } from "@/lib/availability/actions";
 import { laterWindow, type AvailabilityAnswer, type AvailabilityCheck } from "@/lib/availability/check";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-14: THE "STILL AVAILABLE?" CARD at the top of a listing thread.
@@ -50,13 +51,17 @@ export function AvailabilityCard({
   function answer(value: AvailabilityAnswer, date?: string) {
     setError(null);
     start(async () => {
-      const result = await answerStillAvailable({ checkId: check.id, answer: value, ...(date ? { from: date } : {}) });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await answerStillAvailable({ checkId: check.id, answer: value, ...(date ? { from: date } : {}) });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setPicking(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setPicking(false);
-      router.refresh();
     });
   }
 

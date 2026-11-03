@@ -11,6 +11,7 @@ import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { REFUND_ROUTE } from "@/lib/money/copy";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * V-24. The dated ask for a paid stay to be cancelled.
@@ -55,15 +56,19 @@ export function RefundRequestForm({
   function submit() {
     setError(null);
     start(async () => {
-      const result = await requestRefund({ bookingId, reason, note });
-      setConfirming(false);
-      if (!result.ok) {
-        setError(result.error || copy.askFailed);
-        return;
+      try {
+        const result = await requestRefund({ bookingId, reason, note });
+        setConfirming(false);
+        if (!result.ok) {
+          setError(result.error || copy.askFailed);
+          return;
+        }
+        /* With no sheet to hold it open, the page refreshes straight away. */
+        if (words) setFiled(true);
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      /* With no sheet to hold it open, the page refreshes straight away. */
-      if (words) setFiled(true);
-      else router.refresh();
     });
   }
 
