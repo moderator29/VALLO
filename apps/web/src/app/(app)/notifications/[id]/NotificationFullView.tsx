@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { warmTitle } from "@/lib/notify/voice";
 import type { CSSProperties } from "react";
 import { formatDate, getDictionary, type Dictionary, type Locale } from "@vallo/i18n";
 import { Amount } from "@/components/ui/Amount";
@@ -75,14 +76,14 @@ export function NotificationFullView({
   const timeline = [...before, row, ...after];
 
   return (
-    <article className="nf-nview" aria-label={row.title} data-family={family} data-testid="notification-view">
+    <article className="nf-nview" aria-label={warmTitle(row.title)} data-family={family} data-testid="notification-view">
       {/* ----------------------------------------------------- what happened */}
       <header className="nf-island nf-nview__hero" style={stepStyle(0)}>
         <span className="nf-nview__object" aria-hidden="true">
           <Icon3D name={FAMILY_OBJECT[family]} size={56} />
         </span>
         <p className="nf-nview__family nf-overline">{copy.notifications.families[family]}</p>
-        <h1 className="nf-nview__title nf-h2">{row.title}</h1>
+        <h1 className="nf-nview__title nf-h2">{warmTitle(row.title)}</h1>
         <p className="nf-nview__when nf-body-sm nf-numeric">{whenOf(row.created_at, locale)}</p>
         {family === "money" && minor !== null ? (
           <div className="nf-nview__figure" data-testid="notification-view-figure">
@@ -166,10 +167,10 @@ export function NotificationFullView({
                   {n.id === row.id ? (
                     <>
                       <span className="sr-only">{v.timelineNow}: </span>
-                      {n.title}
+                      {warmTitle(n.title)}
                     </>
                   ) : (
-                    <Link href={`/notifications/${n.id}`}>{n.title}</Link>
+                    <Link href={`/notifications/${n.id}`}>{warmTitle(n.title)}</Link>
                   )}
                 </p>
                 <p className="nf-nview__step-time nf-caption nf-numeric">{whenOf(n.created_at, locale)}</p>
