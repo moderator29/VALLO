@@ -373,9 +373,9 @@ export const CONSENTS: readonly Consent[] = [
   },
   {
     id: "processing",
-    label: "Vallo may process my details for identity and fraud checks",
+    label: "Vallo may process my details and my selfie for identity and fraud checks",
     detail:
-      "A person at Vallo checks your name, date of birth and document numbers against the documents you upload. Your documents are not sold, and not used for anything else.",
+      "A person on Vallo's verification team checks your documents, compares your selfie with the photo on your ID, and checks that the name on the bank account you are paid into matches your ID. Your documents and your photo are not sold, not shared with other members, and not used for anything else.",
   },
 ] as const;
 

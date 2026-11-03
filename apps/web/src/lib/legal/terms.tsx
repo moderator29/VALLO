@@ -400,6 +400,21 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
             you who somebody is rather than how they will behave.
           </li>
           <li>
+            <strong>Verifying.</strong> To list property or be paid on{" "}
+            {COMPANY_TRADING_NAME} you verify who you are: a photo of your government ID,
+            a selfie taken in the app, a recent proof of address, and the bank account you
+            are paid into, whose account name must match the name on your ID. A person on
+            our verification team reviews them, usually within one working day, and if
+            they cannot accept a document they tell you why so you can replace it. If we
+            cannot confirm who you are, we may ask for one more photo of you holding your
+            ID. Renters and buyers are not asked to verify.
+          </li>
+          <li>
+            <strong>Your documents must be yours and true.</strong> Sending another
+            person&rsquo;s documents, or documents that have been altered, ends your
+            account, and we may report it to the authorities.
+          </li>
+          <li>
             Badges are earned and are never for sale.
           </li>
         </ul>

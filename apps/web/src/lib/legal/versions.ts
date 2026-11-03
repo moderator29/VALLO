@@ -29,7 +29,9 @@
 /* 2026-10-13: Terms section 6 states the fee position in the product's own words (free to list, nothing added for
    renters and guests, the platform fee comes out of the lister's share only on a completed deal, a fixed fee per
    seated restaurant table) and the Host Agreement applies to hosts. */
-export const TERMS_VERSION = "2026-10-13";
+/* 2026-11-03: section 7 says what verifying involves, who reviews it, the
+   photo holding the ID a reviewer may ask for, and what false documents lead to. */
+export const TERMS_VERSION = "2026-11-03";
 
 /**
  * The privacy notice moves with them today and has its own constant anyway,
@@ -41,7 +43,12 @@ export const TERMS_VERSION = "2026-10-13";
    claim removed, the deletion section brought to the purge that now runs. */
 /* 2026-09-25 (Track A/B): no wallet or balance is held; payment data now
    describes split settlement, agreements and Guarantee claims. */
-export const PRIVACY_VERSION = "2026-09-25";
+/* 2026-11-03: verification described as it now runs (ID, selfie, proof of
+   address, the reviewer-recorded name, the bank name check, a photo holding
+   the ID on request, decided by a person); the selfie's explicit consent; the
+   phone-code senders (Termii, Twilio) and the wallet provider (Payluk) named;
+   who can open verification documents and how. */
+export const PRIVACY_VERSION = "2026-11-03";
 
 /**
  * The Host Agreement (`lib/legal/host-agreement.tsx`, page /host-agreement),

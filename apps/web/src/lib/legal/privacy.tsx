@@ -123,9 +123,16 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
             and evidence you upload, and the decision.
           </li>
           <li>
-            <strong>Verification data.</strong> If you apply to list as an agent or a
-            host: your government ID or NIN, business registration documents where
-            they apply, and the bank account you nominate for payouts.
+            <strong>Verification data.</strong> If you list property or get paid on
+            Vallo (as an agent, landlord, owner, host or firm): a photo of your
+            government ID (an international passport, a driver&rsquo;s licence, a NIN
+            slip or card, or a voter&rsquo;s card), a selfie we compare with the photo on
+            your ID, a recent proof of address, business registration details where they
+            apply, the name printed on your ID as our reviewer records it, and the bank
+            account you nominate for payouts with the account holder&rsquo;s name your
+            bank returns. If our team cannot confirm your identity from these, we may ask
+            you for one more photo of you holding your ID. Renters and buyers are never
+            asked for any of this.
           </li>
           <li>
             <strong>Location.</strong> Your device location is read only when you ask
@@ -188,8 +195,13 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         <li>To create and run your account and show the platform in your language.</li>
         <li>To process bookings, take payments, issue refunds and pay people out.</li>
         <li>
-          To check the identity of the people who list and keep fraudulent listings off
-          the platform.
+          To check the identity of the people who list and get paid, and keep fraudulent
+          listings off the platform. A trained member of our verification team looks at
+          your ID, compares your selfie with the photo on it, checks your proof of
+          address, and checks that the name on the bank account you are paid into
+          matches the name on your ID. No decision about your identity is made by a
+          machine alone: a person decides, and if they cannot accept a document they tell
+          you why.
         </li>
         <li>
           To carry messages between you and the people who list, about listings and
@@ -225,8 +237,10 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
             provide the service you signed up for.
           </li>
           <li>
-            <strong>Legal obligation.</strong> Identity verification, financial record
-            keeping and responding to lawful requests from Nigerian authorities.
+            <strong>Legal obligation.</strong> Identity verification of the people who
+            list and get paid (customer due diligence under the Money Laundering
+            (Prevention and Prohibition) Act 2022), financial record keeping and
+            responding to lawful requests from Nigerian authorities.
           </li>
           <li>
             <strong>Legitimate interest.</strong> Fraud prevention, new-device warnings,
@@ -235,7 +249,11 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           <li>
             <strong>Consent.</strong> The AI assistant and support chat, notifications,
             reading your device location, and marketing. Each can be withdrawn at any
-            time without affecting the rest of the platform.
+            time without affecting the rest of the platform. The selfie you take to
+            verify, which shows your face, is also processed with your explicit consent,
+            given separately on the verification screen; if you withdraw it we can no
+            longer confirm your identity, so you cannot list or be paid until you verify
+            again.
           </li>
         </ul>
       </>
@@ -266,7 +284,19 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
               <li>Vercel (United States): hosting the website and app.</li>
               <li>
                 Paystack (Nigeria): card and bank payments, splitting each payment to the
-                lister&rsquo;s bank account and the Guarantee reserve, and refunds.
+                lister&rsquo;s bank account and the Guarantee reserve, refunds, and
+                confirming the account holder&rsquo;s name on the bank account you
+                nominate for payouts.
+              </li>
+              <li>
+                Payluk (Nigeria): where the Vallo wallet is offered, the payment provider
+                that holds and moves that money. It receives your name, email address and
+                phone number.
+              </li>
+              <li>
+                Termii (Nigeria) and Twilio (United States): sending the one-time codes
+                that confirm your phone number. They receive your phone number and the
+                message with the code.
               </li>
               <li>
                 Yellow Card (Nigeria): where crypto payment is offered, converting it to
@@ -296,6 +326,11 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
                 which gives it your IP address.
               </li>
             </ul>
+          </li>
+          <li>
+            <strong>Your verification documents and selfie are not shared</strong> with
+            other members or with any of the providers above except Supabase, which
+            stores them. Only our verification team sees them.
           </li>
           <li>
             <strong>Authorities.</strong> Where Nigerian law requires it, or to protect
@@ -398,7 +433,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           approved as an agent, you were a customer under the same anti money laundering
           law, which requires us to keep your identification. So when you delete your
           account we keep, for five years after it closes, your identity and agency
-          documents, your name, residential address, ID type and number, business
+          documents (including the selfie you took to verify), your name, residential address, ID type and number, business
           registration and payout account details. Only our staff can read them, and at
           the end of the five years they are destroyed. If you applied and were not
           approved, none of this is kept: the documents and the numbers are destroyed with
@@ -506,12 +541,22 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
   {
     title: "11. Security",
     body: (
-      <p>
-        We protect personal data with encryption in transit, access controls, hashed
-        passwords and payment processing through licensed providers. No system is
-        perfectly secure, so if we ever discover a breach that puts your rights at risk
-        we will notify the NDPC and affected users as the NDPA requires.
-      </p>
+      <>
+        <p>
+          We protect personal data with encryption in transit, access controls, hashed
+          passwords and payment processing through licensed providers. No system is
+          perfectly secure, so if we ever discover a breach that puts your rights at risk
+          we will notify the NDPC and affected users as the NDPA requires.
+        </p>
+        <p>
+          Identity documents and selfies are kept in private storage that is never
+          public. Only members of our verification team, who have agreed to our staff
+          rules on confidentiality, can open them, and only inside Vallo&rsquo;s staff
+          console: they are never downloaded, forwarded or sent by email or messaging
+          apps. Every time one is opened, who opened it and when is recorded. Nobody on
+          our team can review their own documents.
+        </p>
+      </>
     ),
   },
   {

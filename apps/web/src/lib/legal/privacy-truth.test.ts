@@ -27,6 +27,9 @@ const code = files(src).map((path) => readFileSync(path, "utf8")).join("\n");
 const PROCESSORS: Array<[RegExp, string]> = [
   [/supabase\.co/, "Supabase"],
   [/api\.paystack\.co|checkout\.paystack\.com/, "Paystack"],
+  [/api\.ng\.termii\.com/, "Termii"],
+  [/api\.twilio\.com/, "Twilio"],
+  [/api\.payluk\.ng/, "Payluk"],
   [/api\.resend\.com/, "Resend"],
   [/api\.anthropic\.com/, "Anthropic"],
   [/api\.maptiler\.com/, "MapTiler"],
@@ -62,6 +65,12 @@ describe("the notice claims nothing the code does not do", () => {
 
   it("describes location, push, device records, AI and crash data", () => {
     for (const phrase of ["Location.", "notification", "new device", "Anthropic", "crash report"]) {
+      expect(privacy).toContain(phrase);
+    }
+  });
+
+  it("describes verification as it runs: the selfie, the bank name check, a person deciding", () => {
+    for (const phrase of ["a selfie we compare with the photo on your ID", "proof of address", "No decision about your identity is made by a machine alone", "holding your ID", "explicit consent"]) {
       expect(privacy).toContain(phrase);
     }
   });
