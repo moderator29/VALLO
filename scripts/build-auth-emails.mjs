@@ -155,6 +155,29 @@ const LOCKUP_WIDTH = 198;
 const LOCKUP_HEIGHT = 56;
 const WORDMARK_ALT = "Vallo";
 
+/* Our accounts, as apps/web/src/lib/email/socials.ts: a mark only for an
+   account that is set in the environment, https only. */
+const SOCIALS = [
+  ["x", "X", "NEXT_PUBLIC_VALLO_X_URL"],
+  ["instagram", "Instagram", "NEXT_PUBLIC_VALLO_INSTAGRAM_URL"],
+  ["linkedin", "LinkedIn", "NEXT_PUBLIC_VALLO_LINKEDIN_URL"],
+  ["facebook", "Facebook", "NEXT_PUBLIC_VALLO_FACEBOOK_URL"],
+  ["telegram", "Telegram", "NEXT_PUBLIC_VALLO_TELEGRAM_URL"],
+  ["tiktok", "TikTok", "NEXT_PUBLIC_VALLO_TIKTOK_URL"],
+].flatMap(([key, label, env]) => {
+  const url = (process.env[env] ?? "").trim();
+  return /^https:\/\/[^\s"<>]+$/i.test(url) ? [{ key, label, url }] : [];
+});
+
+function socialRow() {
+  if (SOCIALS.length === 0) return "";
+  const cells = SOCIALS.map(
+    (s) =>
+      `<td style="padding:0 10px 0 0;"><a href="${s.url}" target="_blank" style="text-decoration:none;"><img src="{{ .SiteURL }}/brand/email/social/${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;font-family:${FONT_SANS};font-size:11px;line-height:36px;color:${MUTED};" /></a></td>`,
+  ).join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+}
+
 /* The footer links, as FOOTER_LINKS in render.ts. */
 const FOOTER_LINKS = [
   ["Help and support", "{{ .SiteURL }}/support"],
@@ -566,7 +589,7 @@ ${
             <tr>
               <td class="rm-pad" style="padding:26px ${PAD_X}px 0;">
                 <p class="rm-muted" style="margin:0 0 8px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${footnote}</p>
-                <p class="rm-muted" style="margin:14px 0 14px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${links}</p>
+                ${socialRow() ? socialRow() + "\n                " : ""}<p class="rm-muted" style="margin:14px 0 14px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${links}</p>
                 <p class="rm-title" style="margin:0;font-family:${FONT_SANS};font-size:13px;line-height:20px;font-weight:700;letter-spacing:0.02em;color:${TEXT};">${SIGN_OFF}</p>
                 <!-- The legal line. The brand is Vallo everywhere a person
                      reads; the company appears only where the law asks who
@@ -606,6 +629,7 @@ function shellText({ purpose, blocks, facts, footnote }) {
   parts.push(
     wrap(footnote),
     "",
+    ...(SOCIALS.length > 0 ? [["Follow us:", ...SOCIALS.map((x) => `${x.label}: ${x.url}`)].join("\n"), ""] : []),
     FOOTER_LINKS.map(([label, href]) => `${label}: ${href}`).join("\n"),
     "",
     SIGN_OFF,

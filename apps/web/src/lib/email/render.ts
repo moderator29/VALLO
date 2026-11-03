@@ -23,6 +23,7 @@ import {
   WORDMARK_ALT,
 } from "./theme";
 import { BRAND_ORIGIN } from "@/lib/brand-domain";
+import { configuredSocials, SOCIAL_ICON_PATH } from "./socials";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import {
   EMAIL_GLYPH_SIZE,
@@ -1219,6 +1220,30 @@ export function footerLinksText(options: { skipSettings?: boolean } = {}): strin
 }
 
 /**
+ * THE SOCIAL ROW (3 November 2026): round marks for the accounts that are set
+ * (`socials.ts`), one linked circle each, the footer's only pictures. Nothing
+ * is drawn when no account is set, so a deployment without any prints the
+ * footer it always did.
+ */
+export function socialRowHtml(): string {
+  const socials = configuredSocials();
+  if (socials.length === 0) return "";
+  const cells = socials
+    .map(
+      (s) =>
+        `<td style="padding:0 10px 0 0;"><a href="${escapeHtml(s.url)}" target="_blank" style="text-decoration:none;"><img src="${siteUrl()}${SOCIAL_ICON_PATH}${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;${TEXT}font-size:11px;line-height:36px;color:${LIGHT.muted};" /></a></td>`,
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+}
+
+/** The same accounts in the text part, one "Label: url" per line, or nothing. */
+export function socialLinksText(): string {
+  const socials = configuredSocials();
+  return socials.length === 0 ? "" : ["Follow us:", ...socials.map((s) => `${s.label}: ${s.url}`)].join("\n");
+}
+
+/**
  * THE FOOTER (the redesign of 13 October 2026): why this arrived, then ONE
  * row of links (notification settings, help, privacy, terms), then who sent
  * it: the sign-off and the company's full legal line with its registered
@@ -1239,6 +1264,7 @@ export function footerRows(lines: readonly string[], link?: { label: string; hre
   return `<tr>
               <td class="rm-pad" style="padding:26px ${PAD_X}px 0;">
                 ${reason}
+                ${socialRowHtml()}
                 ${p(links, "6px 0 18px")}
                 <p class="rm-title" style="margin:0;${TEXT}font-size:13px;line-height:20px;font-weight:700;letter-spacing:0.02em;color:${LIGHT.text};">${SIGN_OFF}</p>
                 <p class="rm-muted" style="margin:4px 0 0;${TEXT}font-size:12px;line-height:18px;color:${LIGHT.muted};">${LEGAL_LINE}</p>
@@ -1353,6 +1379,7 @@ export function compose(options: ComposeOptions): Composed {
       ...(options.footerLink
         ? [`${options.footerLink.label}: ${options.footerLink.href}`, ""]
         : []),
+      ...(socialLinksText() ? [socialLinksText(), ""] : []),
       footerLinksText({ skipSettings: options.footerLink !== undefined }),
       "",
       SIGN_OFF,
