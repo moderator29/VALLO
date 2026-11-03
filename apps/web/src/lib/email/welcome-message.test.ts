@@ -72,7 +72,7 @@ function appRoutes(): Set<string> {
 function hrefs(html: string): string[] {
   const base = siteUrl();
   /* The footer's round account marks link to our own social pages, not to routes. */
-  return [...html.replace(/<a class="rm-social"[^>]*>/g, "").matchAll(/href="([^"]+)"/g)]
+  return [...html.replace(/<a class="[^"]*rm-social[^"]*"[^>]*>/g, "").matchAll(/href="([^"]+)"/g)]
     .map((m) => (m[1] ?? "").replace(/&amp;/g, "&"))
     .filter((h) => !h.startsWith("urn:") && !h.startsWith("http://www.w3.org"))
     .map((h) => {
@@ -257,8 +257,8 @@ describe("it is built to survive a mail client", () => {
   });
 
   it.each(ALL)("$role puts no words in a picture and gives every image alt text", ({ message }) => {
-    /* The footer's round account marks are their own tier (`socials.ts`). */
-    const images = (message.html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/social/"));
+    /* The banner under the lockup is its own tier (`banners.ts`). */
+    const images = (message.html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/banners/"));
     // The lockup, and (only when the layout shows it, EMAIL_SHOWS_OBJECT in
     // icons.ts) the role's 3D object above the hero, whose alt is its family
     // word so a blocked image still says something.

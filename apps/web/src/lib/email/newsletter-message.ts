@@ -15,8 +15,8 @@
  * every cell paints its own ground. It adds four banner pictures between the
  * sections and one phone stylesheet. Nothing here depends on the style block.
  *
- * THE BANNERS. Three 1200x480 pictures at
- * `/brand/email/newsletter/<name>.png`, shown at the card's inner width. They
+ * THE BANNERS. Three 1200x350 pictures at
+ * `/brand/email/banners/<name>.jpg`, shown at the card's inner width. They
  * are NOT one of the sanctioned tiers in `images.ts` (lockup, one 3D object,
  * glyphs, photos), which is why this message is not in `fixtures.ts`'
  * catalogue and `newsletter-message.test.ts` holds the banners to their own
@@ -82,12 +82,12 @@ export const NEWSLETTER_LANDING: NewsletterRoute = "/home";
 /* ---------------------------------------------------------------- banners */
 
 export const BANNER_WIDTH = 1200;
-export const BANNER_HEIGHT = 480;
+export const BANNER_HEIGHT = 350;
 /** The card is 600 wide with 40 either side, so a banner is shown 520 wide. */
 export const BANNER_SHOWN_WIDTH = 520;
 export const BANNER_SHOWN_HEIGHT = Math.round((BANNER_SHOWN_WIDTH * BANNER_HEIGHT) / BANNER_WIDTH);
 
-export const BANNER_DIR = "/brand/email/newsletter";
+export const BANNER_DIR = "/brand/email/banners";
 
 export type BannerName =
   | "newsletter-1"
@@ -121,7 +121,7 @@ export const BANNERS: Readonly<Record<BannerName, Banner>> = {
 };
 
 export function bannerPath(name: BannerName): string {
-  return `${BANNER_DIR}/${name}.png`;
+  return `${BANNER_DIR}/${name}.jpg`;
 }
 
 /* ------------------------------------------------------------------ words */

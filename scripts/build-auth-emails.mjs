@@ -168,11 +168,11 @@ const SOCIALS = [
 
 function socialRow() {
   if (SOCIALS.length === 0) return "";
-  const cells = SOCIALS.map(
-    (s) =>
-      `<td style="padding:0 10px 0 0;"><a class="rm-social" href="${s.url}" target="_blank" style="text-decoration:none;"><img src="{{ .SiteURL }}/brand/email/social/${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;font-family:${FONT_SANS};font-size:11px;line-height:36px;color:${MUTED};" /></a></td>`,
-  ).join("");
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+  const links = SOCIALS.map(
+    (x) =>
+      `<a class="rm-link rm-social" href="${x.url}" target="_blank" style="color:${SKY};text-decoration:underline;white-space:nowrap;">${x.label}</a>`,
+  ).join("&nbsp;&nbsp;&middot;&nbsp;&nbsp;");
+  return `<p class="rm-muted" style="margin:0 0 8px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">Follow us: ${links}</p>`;
 }
 
 /* The footer links, as FOOTER_LINKS in render.ts. */

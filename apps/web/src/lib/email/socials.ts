@@ -5,11 +5,9 @@ import { liveSocials } from "@/lib/brand/socials";
  *
  * The same list the site footer, Contact, Help and Settings read
  * (`lib/brand/socials.ts`), so an account is never on one surface and missing
- * from another. An account with no address is never drawn. The icons are 72px
- * circles in `public/brand/email/social/`, shown at 36px.
+ * from another. An account with no address is never drawn. Shown as plain
+ * clickable words in the footer ("Follow us: Facebook, Instagram ...").
  */
-export const SOCIAL_ICON_PATH = "/brand/email/social/";
-
 export type SocialLink = { key: "x" | "instagram" | "linkedin" | "facebook" | "telegram" | "tiktok"; label: string; url: string };
 
 /** The accounts that exist, in the shared order. */

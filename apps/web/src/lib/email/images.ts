@@ -17,20 +17,20 @@ export type EmailImages = {
   object: string[];
   glyphs: string[];
   photos: string[];
-  /** The round account marks in the footer (`socials.ts`), alt the platform name. */
-  social: string[];
+  /** The wide banner under the lockup (`banners.ts`), alt its headline. */
+  banner: string[];
   other: string[];
 };
 
 export function sortEmailImages(html: string): EmailImages {
   const images = html.match(/<img\b[^>]*>/g) ?? [];
-  const out: EmailImages = { lockup: null, object: [], glyphs: [], photos: [], social: [], other: [] };
+  const out: EmailImages = { lockup: null, object: [], glyphs: [], photos: [], banner: [], other: [] };
   for (const image of images) {
     const src = /\bsrc="([^"]+)"/.exec(image)?.[1] ?? "";
     if (src.includes(LOCKUP_PATH) && out.lockup === null) out.lockup = image;
     else if (src.includes("/brand/3d/email/")) out.object.push(image);
     else if (src.includes("/brand/email/glyphs/")) out.glyphs.push(image);
-    else if (src.includes("/brand/email/social/")) out.social.push(image);
+    else if (src.includes("/brand/email/banners/")) out.banner.push(image);
     else if (/\bdata-space-photo\b/.test(image)) out.photos.push(image);
     else out.other.push(image);
   }

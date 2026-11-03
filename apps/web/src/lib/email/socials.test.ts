@@ -3,27 +3,26 @@ import { configuredSocials } from "./socials";
 import { socialLinksText, socialRowHtml } from "./render";
 import { sortEmailImages } from "./images";
 import { liveSocials } from "@/lib/brand/socials";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 
-describe("the social row in every email footer", () => {
-  it("draws the same accounts as the site footer, one linked mark each", () => {
+describe("the follow-us line in every email footer", () => {
+  it("lists the same accounts as the site footer, as plain clickable words", () => {
     const keys = configuredSocials().map((s) => s.key);
     expect(keys).toEqual(liveSocials().map((s) => s.key));
     expect(keys.length).toBeGreaterThan(0);
     const html = socialRowHtml();
+    expect(html).toContain("Follow us:");
     for (const s of configuredSocials()) {
       expect(html).toContain(`href="${s.url}"`);
-      expect(html).toContain(`alt="${s.label}"`);
-      expect(existsSync(join(process.cwd(), "public/brand/email/social", `${s.key}.png`))).toBe(true);
+      expect(html).toContain(`>${s.label}</a>`);
     }
-    expect(html).toContain('width="36" height="36"');
+    /* No pictures: words only. */
+    expect(sortEmailImages(html).other).toEqual([]);
+    expect(html).not.toContain("<img");
   });
 
-  it("sorts as the social tier, never as an unsanctioned picture, and has a text line each", () => {
-    const sorted = sortEmailImages(socialRowHtml());
-    expect(sorted.social).toHaveLength(configuredSocials().length);
-    expect(sorted.other).toEqual([]);
-    expect(socialLinksText().split("\n")[0]).toBe("Follow us:");
+  it("is also printed in the plain text, one line per account", () => {
+    const lines = socialLinksText().split("\n");
+    expect(lines[0]).toBe("Follow us:");
+    expect(lines).toHaveLength(configuredSocials().length + 1);
   });
 });

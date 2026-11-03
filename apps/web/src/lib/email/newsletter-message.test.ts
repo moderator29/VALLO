@@ -54,7 +54,7 @@ function appRoutes(): Set<string> {
 function hrefs(html: string): string[] {
   const base = siteUrl();
   /* The footer's round account marks link to our own social pages, not to routes. */
-  return [...html.replace(/<a class="rm-social"[^>]*>/g, "").matchAll(/href="([^"]+)"/g)]
+  return [...html.replace(/<a class="[^"]*rm-social[^"]*"[^>]*>/g, "").matchAll(/href="([^"]+)"/g)]
     .map((x) => (x[1] ?? "").replace(/&amp;/g, "&"))
     .filter((h) => !h.startsWith("urn:") && !h.startsWith("http://www.w3.org"))
     .map((h) => {
@@ -149,7 +149,7 @@ describe("banners", () => {
   const images = m.html.match(/<img\b[^>]*>/g) ?? [];
 
   it("references the three banners by absolute url, with size and real alt", () => {
-    const banners = images.filter((i) => i.includes("/brand/email/newsletter/"));
+    const banners = images.filter((i) => i.includes("/brand/email/banners/"));
     expect(banners).toHaveLength(3);
     for (const b of Object.values(BANNERS)) {
       const tag = banners.find((i) => i.includes(`src="${siteUrl()}${bannerPath(b.name)}"`));
@@ -160,13 +160,13 @@ describe("banners", () => {
     }
   });
 
-  it.each(Object.values(BANNERS))("$name exists on disk as a 1200x480 png", ({ name }) => {
-    const file = join(PUBLIC, "brand", "email", "newsletter", `${name}.png`);
+  it.each(Object.values(BANNERS))("$name exists on disk as a 1200x350 jpeg", async ({ name }) => {
+    const file = join(PUBLIC, "brand", "email", "banners", `${name}.jpg`);
     expect(existsSync(file)).toBe(true);
-    const buf = readFileSync(file);
-    expect(buf.subarray(1, 4).toString()).toBe("PNG");
-    expect(buf.readUInt32BE(16)).toBe(BANNER_WIDTH);
-    expect(buf.readUInt32BE(20)).toBe(BANNER_HEIGHT);
+    const meta = await (await import("sharp")).default(readFileSync(file)).metadata();
+    expect(meta.format).toBe("jpeg");
+    expect(meta.width).toBe(BANNER_WIDTH);
+    expect(meta.height).toBe(BANNER_HEIGHT);
   });
 
   it("reads completely with every image removed", () => {

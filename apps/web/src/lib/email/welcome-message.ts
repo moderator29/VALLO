@@ -44,6 +44,7 @@ import {
   escapeHtml,
   footerLinksText,
   footerRows,
+  bannerRowHtml,
   socialLinksText,
   greetingName,
   hello,
@@ -363,7 +364,7 @@ const TEXT = `font-family:${FONT_SANS};`;
 const PHONE_STYLE = `
       @media only screen and (max-width: 480px) {
         .wm-h1    { font-size: 27px !important; }
-        .wm-hero  { padding: 22px 18px 18px !important; }
+        .wm-hero  { padding: 0 !important; }
         .wm-value { padding: 16px 16px 16px 14px !important; }
         .wm-plate { width: 36px !important; padding-right: 10px !important; }
       }`;
@@ -398,7 +399,7 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
     headExtra:
       "\n    <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->",
     extraStyle: PHONE_STYLE,
-    card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : ""}
+    card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : bannerRowHtml("welcome-2")}
                 ${hero}
                 ${litButton(BUTTON_LABEL, appUrl(WELCOME_LANDING))}
                 <p class="rm-muted" style="margin:14px 0 30px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">${escapeHtml(BUTTON_AFTER)}</p>

@@ -23,7 +23,8 @@ import {
   WORDMARK_ALT,
 } from "./theme";
 import { BRAND_ORIGIN } from "@/lib/brand-domain";
-import { configuredSocials, SOCIAL_ICON_PATH } from "./socials";
+import { configuredSocials } from "./socials";
+import { BANNER_ALT, BANNER_SHOWN_HEIGHT, BANNER_SHOWN_WIDTH, bannerFilePath, bannerFor, type BannerFile } from "./banners";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import {
   EMAIL_GLYPH_SIZE,
@@ -1221,21 +1222,31 @@ export function footerLinksText(options: { skipSettings?: boolean } = {}): strin
 }
 
 /**
- * THE SOCIAL ROW (3 November 2026): round marks for the accounts that are set
- * (`socials.ts`), one linked circle each, the footer's only pictures. Nothing
- * is drawn when no account is set, so a deployment without any prints the
- * footer it always did.
+ * THE SOCIAL LINE (3 November 2026): "Follow us" and our accounts as plain
+ * clickable words, in the footer's own link style (no icons, no pictures),
+ * read from the one shared list (`socials.ts`). Nothing when none is set.
  */
 export function socialRowHtml(): string {
   const socials = configuredSocials();
   if (socials.length === 0) return "";
-  const cells = socials
+  const links = socials
     .map(
       (s) =>
-        `<td style="padding:0 10px 0 0;"><a class="rm-social" href="${escapeHtml(s.url)}" target="_blank" style="text-decoration:none;"><img src="${siteUrl()}${SOCIAL_ICON_PATH}${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;${TEXT}font-size:11px;line-height:36px;color:${LIGHT.muted};" /></a></td>`,
+        `<a class="rm-link rm-social" href="${escapeHtml(s.url)}" target="_blank" style="color:${LINK};text-decoration:underline;white-space:nowrap;">${escapeHtml(s.label)}</a>`,
     )
-    .join("");
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+    .join(" &nbsp;&middot;&nbsp; ");
+  return `<p class="rm-muted" style="margin:0 0 8px;${TEXT}font-size:13px;line-height:20px;color:${LIGHT.muted};">Follow us: ${links}</p>`;
+}
+
+/** A banner under the lockup: decoration with a real alt, never a link. */
+export function bannerRowHtml(file: BannerFile): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;">
+                  <tr>
+                    <td style="font-size:0;line-height:0;mso-line-height-rule:exactly;border-radius:14px;">
+                      <img src="${siteUrl()}${bannerFilePath(file)}" width="${BANNER_SHOWN_WIDTH}" height="${BANNER_SHOWN_HEIGHT}" alt="${escapeHtml(BANNER_ALT[file])}" border="0" style="display:block;width:100%;max-width:${BANNER_SHOWN_WIDTH}px;height:auto;border:0;outline:none;text-decoration:none;border-radius:14px;${TEXT}font-size:15px;line-height:20px;color:${LIGHT.muted};" />
+                    </td>
+                  </tr>
+                </table>`;
 }
 
 /** The same accounts in the text part, one "Label: url" per line, or nothing. */
@@ -1348,7 +1359,11 @@ export function compose(options: ComposeOptions): Composed {
   const register = emailRegisterOf(options.icon);
   const ink = inkFor(register);
 
-  const mark = EMAIL_SHOWS_OBJECT ? heroMarkHtml(options.icon, ink) : "";
+  const mark = EMAIL_SHOWS_OBJECT
+    ? heroMarkHtml(options.icon, ink)
+    : register === "shell"
+      ? bannerRowHtml(bannerFor(options.icon))
+      : "";
   const body = (mark ? mark + "\n                " : "") + blocks.map((block) => htmlBlock(block, ink)).join("\n                ");
 
   const html = documentHtml({
