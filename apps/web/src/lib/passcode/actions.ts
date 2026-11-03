@@ -103,7 +103,14 @@ async function endThisSession(): Promise<void> {
   revalidatePath("/", "layout");
 }
 
-export async function verifyPasscodeAction(code: string): Promise<VerifyResult> {
+const ATTEMPT_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * `attemptId` (2 November 2026): one id per typed code, so the lock can ask
+ * again on a weak connection without the same code being counted twice
+ * (`public.passcode_verify(p_code, p_attempt)`).
+ */
+export async function verifyPasscodeAction(code: string, attemptId?: string): Promise<VerifyResult> {
   const session = await readPasscodeSession();
   if (session.state !== "signed-in") return { status: "signed-out" };
   if (typeof code !== "string" || !(isWellFormed(code, 6) || isWellFormed(code, 4))) {
@@ -116,7 +123,10 @@ export async function verifyPasscodeAction(code: string): Promise<VerifyResult> 
   let outcome: VerifyOutcome;
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (session.supabase as any).rpc("passcode_verify", { p_code: code });
+    const { data, error } = await (session.supabase as any).rpc(
+      "passcode_verify",
+      typeof attemptId === "string" && ATTEMPT_ID.test(attemptId) ? { p_code: code, p_attempt: attemptId } : { p_code: code },
+    );
     outcome = error ? { status: "error" } : parseVerify(data);
   } catch {
     outcome = { status: "error" };

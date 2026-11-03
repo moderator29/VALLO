@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useId, useRef, useState, useTransition } from "react";
+import { forgetLocalPasscode, rememberPasscode } from "@/lib/passcode/local-verifier";
 import { useRouter } from "next/navigation";
 import { plural, type Locale } from "@vallo/i18n/core";
 import { forgotPasscodeAction, setPasscodeAction } from "@/lib/passcode/actions";
@@ -48,6 +49,7 @@ export function PasscodeSetup({
   initialLength = DEFAULT_PASSCODE_LENGTH,
   onDone,
   offerBiometric = false,
+  userId,
 }: {
   copy: PasscodeCopy;
   locale: Locale;
@@ -66,6 +68,8 @@ export function PasscodeSetup({
    * The offer links to the enrolment; it unlocks nothing.
    */
   offerBiometric?: boolean;
+  /** The signed-in member: the new code is also kept as the phone's own check (`local-verifier.ts`). */
+  userId?: string;
 }) {
   const titleId = useId();
   const router = useRouter();
@@ -116,6 +120,10 @@ export function PasscodeSetup({
              success haptic. */
           showSuccess(result.event === "set" ? "passcode-set" : "passcode-changed");
           markTabUnlocked();
+          /* A new code replaces the phone's own check; where the member is not
+             named here (Settings), the old check is simply forgotten. */
+          if (userId) void rememberPasscode(userId, first, length);
+          else forgetLocalPasscode();
           setMessage(result.event === "change" ? copy.changed : copy.saved);
           put("");
           setFirst("");
@@ -181,7 +189,7 @@ export function PasscodeSetup({
         setBusy(false);
       }
     },
-    [askCurrent, copy, current, first, length, locale, offerBiometric, onDone, overlay, put, refuse, router],
+    [askCurrent, copy, current, first, length, locale, offerBiometric, onDone, overlay, put, refuse, router, userId],
   );
 
   /* The last digit moves the flow on, from the key press itself. */

@@ -1,3 +1,4 @@
+import { forgetLocalPasscode } from "@/lib/passcode/local-verifier";
 /**
  * THE PAGE'S SIDE OF THE KEPT PAGES (8 October 2026). `public/sw.js` keeps
  * every page a member opens so it opens again with no signal; this module is
@@ -51,6 +52,8 @@ export function announceVisit(path: string): void {
 /** Sign-out: delete every kept page, here and in the worker. */
 export async function forgetKeptPages(): Promise<void> {
   post({ type: "vallo:forget" });
+  /* The phone's own check of the passcode goes with the session too. */
+  forgetLocalPasscode();
   try {
     if (typeof caches === "undefined") return;
     const names = await caches.keys();

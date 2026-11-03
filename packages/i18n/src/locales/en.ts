@@ -7046,6 +7046,11 @@ export const en = {
       title: "You are offline",
       body: "Vallo cannot reach the network right now. This screen loads again by itself when you are back online.",
     },
+    /* A weak signal rather than none (2 November 2026). */
+    weakSignal: {
+      title: "Weak connection",
+      body: "This screen did not finish loading on the connection you have. Vallo tries again by itself in a moment, or tap Try again.",
+    },
   },
   /*
    * Restaurant table deposits (track/restaurant-deposits, 13 October 2026).

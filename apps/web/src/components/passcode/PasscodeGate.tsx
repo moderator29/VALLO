@@ -50,7 +50,7 @@ export async function PasscodeGate({
   avatarUrl: string;
   children: ReactNode;
 }) {
-  const { view } = await resolvePasscodeGate();
+  const { view, userId } = await resolvePasscodeGate();
   const copy = t.passcode;
   /* C14: one read of whether this member holds a platform key; only asked
      when a lock can be drawn, or a first passcode set (for the one-time Face
@@ -73,6 +73,7 @@ export async function PasscodeGate({
           name={name}
           avatarUrl={avatarUrl}
           passkey={passkey}
+          userId={userId ?? undefined}
         >
           {children}
         </PasscodeGuard>
@@ -89,6 +90,7 @@ export async function PasscodeGate({
           avatarUrl={avatarUrl}
           overlay
           offerBiometric={view.mode === "first" && !passkey}
+          userId={userId ?? undefined}
         />
       );
     case "locked":
@@ -102,6 +104,7 @@ export async function PasscodeGate({
           name={name}
           avatarUrl={avatarUrl}
           passkey={passkey && view.mode === "code"}
+          userId={userId ?? undefined}
         />
       );
   }

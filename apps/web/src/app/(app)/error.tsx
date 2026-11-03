@@ -4,7 +4,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { useErrorReport } from "@/lib/observability/use-error-report";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { StateMoment } from "@/components/ui/StateMoment";
-import { useOfflineBoundary } from "@/lib/offline/use-offline";
+import { useSignalBoundary } from "@/lib/offline/use-offline";
 
 /**
  * Personal Mode's error boundary: the brand moment, inside the chrome.
@@ -50,7 +50,7 @@ export default function AppError({
      because the phone is offline says so in one calm line, with no reference
      to quote and no "tell support", and loads itself again when the signal
      returns. The same words in the agent and host boundaries. */
-  const offline = useOfflineBoundary(reset);
+  const offline = useSignalBoundary(error, reset);
   if (offline) {
     return (
       <StateMoment
@@ -59,8 +59,8 @@ export default function AppError({
         homeLabel={clientCopy.a11y.logoHome}
         inset
         overline={COPY.offlineOverline}
-        title={clientCopy.fixesV2.offline.title}
-        body={clientCopy.fixesV2.offline.body}
+        title={clientCopy.fixesV2[offline === "weak" ? "weakSignal" : "offline"].title}
+        body={clientCopy.fixesV2[offline === "weak" ? "weakSignal" : "offline"].body}
         actions={
           <div className="nf-system__actions">
             <Button variant="primary" size="lg" full onClick={reset}>

@@ -11,6 +11,9 @@ import { thresholdAllowed } from "@/lib/motion/threshold";
 import { signOut } from "@/lib/profile/actions";
 import { forgetKeptPages } from "@/lib/offline/page-cache";
 import { feedback } from "@/lib/ui/feedback";
+import { sleepUntilOnline, verifyPatiently } from "@/lib/passcode/patient-verify";
+import { canCheckLocally, checkLocally, forgetLocalPasscode, rememberPasscode } from "@/lib/passcode/local-verifier";
+import { catchUpWithServer } from "@/lib/passcode/server-catch-up";
 import { Button } from "@/components/ui/Button";
 import { Keypad, PasscodeDots } from "./Keypad";
 import { PasskeyUnlockKey } from "./PasskeyUnlockKey";
@@ -19,8 +22,30 @@ import { OPEN_HOLD_MS, OPEN_LEAVE_MS, arriveThroughOpenDoor } from "./open-door"
 
 export type PasscodeCopy = Dictionary["passcode"];
 
+/** One id per typed code, so asking again never counts it twice. */
+function newAttemptId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    const hex = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+  }
+}
+
 /** How long an accepted unlock waits for the page before loading it outright. */
 const UNLOCK_GIVE_UP_MS = 6000;
+/** On a slow link the refresh is still on its way at six seconds; a reload then only starts it again. */
+const UNLOCK_GIVE_UP_SLOW_MS = 20000;
+
+function giveUpAfterMs(): number {
+  try {
+    const connection = (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean } }).connection;
+    if (connection?.saveData || /(^|-)2g$|^3g$/.test(connection?.effectiveType ?? "")) return UNLOCK_GIVE_UP_SLOW_MS;
+  } catch {
+    /* No connection hint: the usual wait. */
+  }
+  return UNLOCK_GIVE_UP_MS;
+}
 
 /**
  * "HELLO, ADA": the lock. docs/PASSCODE.md; the founder's reference 6
@@ -66,6 +91,8 @@ export function PasscodeLock({
   onUnlocked,
   verify = verifyPasscodeAction,
   passkey = false,
+  userId,
+  retryGaps,
 }: {
   copy: PasscodeCopy;
   locale: Locale;
@@ -77,9 +104,16 @@ export function PasscodeLock({
   /** Called after a right code. Without it the route is refreshed from the server. */
   onUnlocked?: () => void;
   /** The check. Always the real action in the app; the preview harness passes a fixture. */
-  verify?: (code: string) => Promise<VerifyResult>;
+  verify?: (code: string, attemptId?: string) => Promise<VerifyResult>;
   /** C14: this member has a platform key, so the lock offers Face ID or fingerprint. */
   passkey?: boolean;
+  /**
+   * The signed-in member (2 November 2026): binds the phone's own check of the
+   * code (`local-verifier.ts`). Without it the server is the only check.
+   */
+  userId?: string;
+  /** The gaps between asks on a lost answer (`RETRY_GAPS_MS`); a test passes short ones. */
+  retryGaps?: readonly number[];
 }) {
   const titleId = useId();
   const router = useRouter();
@@ -94,6 +128,8 @@ export function PasscodeLock({
   const [now, setNow] = useState(() => Date.now());
   const [leaving, startLeaving] = useTransition();
   const sending = useRef(false);
+  /* The code the network did not answer, kept for Try again with its attempt id. */
+  const [stranded, setStranded] = useState<{ code: string; attemptId: string } | null>(null);
   /* Biometric first where the member has a platform key; the keypad after. */
   const [door, setDoor] = useState<"biometric" | "keypad">(passkey ? "biometric" : "keypad");
   /* The right answer has landed and the door is opening. */
@@ -134,7 +170,7 @@ export function PasscodeLock({
       /* If the refreshed page has not replaced the lock in a few seconds (a
          dropped request), load it outright rather than leave somebody at an
          open door. The server has already accepted the unlock. */
-      stuck.current = window.setTimeout(() => window.location.reload(), UNLOCK_GIVE_UP_MS);
+      stuck.current = window.setTimeout(() => window.location.reload(), giveUpAfterMs());
     };
     if (!thresholdAllowed()) {
       finish();
@@ -164,19 +200,68 @@ export function PasscodeLock({
     return () => window.clearInterval(timer);
   }, [waitUntil]);
 
+  /* Unlocked on the phone: the page behind is already here; the server catches up. */
+  const unlockOnPhone = useCallback(
+    (attempt: string) => {
+      markTabUnlocked();
+      setMessage(null);
+      opened.current = true;
+      catchUpWithServer(attempt, verify);
+      if (onUnlocked) onUnlocked();
+    },
+    [onUnlocked, verify],
+  );
+
   const submit = useCallback(
-    async (attempt: string) => {
+    async (attempt: string, attemptId: string = newAttemptId()) => {
       if (sending.current) return;
       sending.current = true;
       setBusy(true);
+      setStranded(null);
+      let keepForRetry = false;
       try {
-        const result = await verify(attempt);
+        /* Patient on a weak signal (2 November 2026): a lost answer is asked
+           again under the same attempt id, so the database counts it once. */
+        const result = await verifyPatiently(
+          {
+            verify,
+            isOnline: () => navigator.onLine !== false,
+            sleep: sleepUntilOnline,
+            onRetry: () => setMessage(copy.slow),
+            ...(retryGaps ? { gaps: retryGaps } : {}),
+          },
+          attempt,
+          attemptId,
+        );
         switch (result.status) {
           case "ok":
             feedback("confirm");
+            if (userId) void rememberPasscode(userId, attempt, length);
             unlock();
             /* The row stays full through the hold and the door. */
             return;
+          case "unreachable": {
+            /* No answer at all. Over a page that is already on this phone, the
+               phone's own check opens it; otherwise the code waits for Try again. */
+            if (onUnlocked && userId && canCheckLocally(userId)) {
+              const local = await checkLocally(userId, attempt);
+              if (local === "ok") {
+                feedback("confirm");
+                unlockOnPhone(attempt);
+                return;
+              }
+              if (local === "wrong") {
+                feedback("error");
+                setShake((n) => n + 1);
+                setMessage(copy.wrongOffline);
+                break;
+              }
+            }
+            keepForRetry = true;
+            setStranded({ code: attempt, attemptId });
+            setMessage(copy.unreachable);
+            return;
+          }
           case "wrong":
             feedback("error");
             setShake((n) => n + 1);
@@ -197,6 +282,7 @@ export function PasscodeLock({
             break;
           }
           case "signed-out": {
+            forgetLocalPasscode();
             const query = new URLSearchParams({
               notice: "passcode-locked",
               next: herePath(),
@@ -215,15 +301,28 @@ export function PasscodeLock({
       } finally {
         setBusy(false);
         /* A right code keeps its full row and the send lock through the
-           door; anything else clears for the next try. */
+           door; a code the network never answered stays for Try again;
+           anything else clears for the next try. */
         if (!opened.current) {
           sending.current = false;
-          setCode("");
+          if (!keepForRetry) setCode("");
         }
       }
     },
-    [copy, locale, router, unlock, verify]
+    [copy, length, locale, onUnlocked, retryGaps, router, unlock, unlockOnPhone, userId, verify]
   );
+
+  const tryAgain = useCallback(() => {
+    if (stranded) void submit(stranded.code, stranded.attemptId);
+  }, [stranded, submit]);
+
+  /* The signal is back while a code waits: send it again by itself. */
+  useEffect(() => {
+    if (!stranded) return;
+    const back = () => tryAgain();
+    window.addEventListener("online", back);
+    return () => window.removeEventListener("online", back);
+  }, [stranded, tryAgain]);
 
   const onDigit = useCallback(
     (digit: string) => {
@@ -231,16 +330,31 @@ export function PasscodeLock({
       /* A digit typed while the biometric door is offered is the person
          choosing the keypad. */
       setDoor("keypad");
+      if (stranded) {
+        setStranded(null);
+        setMessage(null);
+        setCode(digit);
+        return;
+      }
       setCode((current) => (current.length >= length ? current : current + digit));
     },
-    [length]
+    [length, stranded]
   );
 
   /* The last digit sends the code. */
   useEffect(() => {
-    if (code.length === length && !sending.current) void submit(code);
-  }, [code, length, submit]);
-  const onDelete = useCallback(() => setCode((current) => current.slice(0, -1)), []);
+    if (code.length === length && !sending.current && !stranded) void submit(code);
+  }, [code, length, stranded, submit]);
+  const onDelete = useCallback(() => {
+    /* Deleting a code the network never answered starts again. */
+    if (stranded) {
+      setStranded(null);
+      setMessage(null);
+      setCode("");
+      return;
+    }
+    setCode((current) => current.slice(0, -1));
+  }, [stranded]);
 
   const usePassword = () => startLeaving(() => forgotPasscodeAction(herePath()));
   /* Another account on this device: end this session here, then sign in. */
@@ -376,6 +490,11 @@ export function PasscodeLock({
           <p className="nf-passcode__message" role="status" aria-live="polite" data-testid="passcode-message">
             {status ?? (busy ? copy.checking : "")}
           </p>
+          {stranded && !busy ? (
+            <button type="button" className="nf-passcode__link" onClick={tryAgain} data-testid="passcode-try-again">
+              {copy.tryAgain}
+            </button>
+          ) : null}
           <Keypad
             onDigit={onDigit}
             onDelete={onDelete}

@@ -8,6 +8,7 @@ import { idleLimitMs, readLongIdle } from "@/lib/passcode/idle-setting";
 import { markTabUnlocked, tabWasUnlocked } from "@/lib/passcode/tab";
 import { servedFromKeptCopy } from "@/lib/offline/page-cache";
 import { PasscodeLock, type PasscodeCopy } from "./PasscodeLock";
+import { LOCK_AGAIN_EVENT } from "@/lib/passcode/server-catch-up";
 
 /**
  * THE INACTIVITY TIMER, AROUND AN UNLOCKED PAGE. docs/PASSCODE.md.
@@ -63,6 +64,7 @@ export function PasscodeGuard({
   name,
   avatarUrl,
   passkey = false,
+  userId,
   children,
 }: {
   copy: PasscodeCopy;
@@ -74,6 +76,8 @@ export function PasscodeGuard({
   avatarUrl?: string | null;
   /** C14: the member has a platform key (the lock offers it; the longer idle setting can apply). */
   passkey?: boolean;
+  /** The signed-in member, for the phone's own check of the code when Vallo cannot be reached. */
+  userId?: string;
   children: ReactNode;
 }) {
   const [locked, setLocked] = useState(false);
@@ -151,6 +155,17 @@ export function PasscodeGuard({
     };
   }, [lock, touch, passkey]);
 
+  /* A code accepted on the phone that the server later refused (it was
+     changed on another device): lock again (`server-catch-up.ts`). */
+  useEffect(() => {
+    const again = () => {
+      lockedRef.current = false;
+      lock();
+    };
+    window.addEventListener(LOCK_AGAIN_EVENT, again);
+    return () => window.removeEventListener(LOCK_AGAIN_EVENT, again);
+  }, [lock]);
+
   const unlocked = useCallback(() => {
     lockedRef.current = false;
     lastActivity.current = Date.now();
@@ -173,6 +188,7 @@ export function PasscodeGuard({
           avatarUrl={avatarUrl}
           onUnlocked={unlocked}
           passkey={passkey}
+          userId={userId}
         />
       ) : null}
     </>

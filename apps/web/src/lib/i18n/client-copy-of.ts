@@ -51,7 +51,7 @@ const AUTH_FLOW_KEYS = [
  *   details                    the toast, copy, connection line, pull to
  *                              refresh, back to top, the card menu
  *   socialProfile.accountPage  the profile's hero and rows
- *   fixesV2.offline            the error boundaries' calm offline words
+ *   fixesV2.offline, weakSignal the error boundaries' calm offline and weak-signal words
  *   success (chrome, and the   the success sheet's own words, and only the
  *   moments below)             moments whose components have no server
  *                              parent to hand them copy: the account moments
@@ -81,7 +81,7 @@ export type ClientCopy = {
   details: Dictionary["details"];
   socialProfile: Pick<Dictionary["socialProfile"], "accountPage">;
   /** The error boundaries' calm offline words. */
-  fixesV2: Pick<Dictionary["fixesV2"], "offline">;
+  fixesV2: Pick<Dictionary["fixesV2"], "offline" | "weakSignal">;
   success: Pick<Dictionary["success"], "continue" | "close" | "detail"> & {
     moments: Pick<Dictionary["success"]["moments"], (typeof SLICED_MOMENTS)[number]>;
   };
@@ -122,7 +122,7 @@ export function clientCopyOf(t: Dictionary): ClientCopy {
     offPlatform: t.offPlatform,
     details: t.details,
     socialProfile: { accountPage: t.socialProfile.accountPage },
-    fixesV2: { offline: t.fixesV2.offline },
+    fixesV2: { offline: t.fixesV2.offline, weakSignal: t.fixesV2.weakSignal },
     success: {
       continue: t.success.continue,
       close: t.success.close,

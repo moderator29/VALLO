@@ -54,6 +54,11 @@ export const passcodeEn = {
   passwordOnly: "Your passcode was entered wrongly too many times. Sign in again to set a new one.",
   signInAgain: "Sign in again",
   error: "That did not go through. Check your connection and try again.",
+  /* A weak signal (2 November 2026): the lock keeps asking instead of giving up. */
+  slow: "Weak connection. Still checking your passcode.",
+  unreachable: "We could not reach Vallo. Your passcode is still entered: check your signal and tap Try again.",
+  tryAgain: "Try again",
+  wrongOffline: "That is not your passcode.",
   usePassword: "Use your password instead",
   /** C14 and MOTION_SYSTEM section 6: the biometric door, offered before the keypad where the member has a platform key. */
   passkeyUnlock: "Unlock with Face ID or fingerprint",
