@@ -55,9 +55,9 @@ template = 'platform.newsletter' group by 1;`.
 
 Four placeholder pictures, 1200 x 480 PNG, shown 520 wide:
 
-- `apps/web/public/brand/email/newsletter/newsletter-1.png`
-- `apps/web/public/brand/email/newsletter/newsletter-2.png`
-- `apps/web/public/brand/email/newsletter/newsletter-3.png`
+- `apps/web/public/brand/email/banners/newsletter-1.jpg`
+- `apps/web/public/brand/email/banners/newsletter-2.jpg`
+- `apps/web/public/brand/email/banners/newsletter-3.jpg`
 
 Save the new art over the file of the same name, at exactly 1200 x 480 (the test
 checks the size). Prompts are in `docs/EMAIL_BANNER_PROMPTS.md`. Keep the text

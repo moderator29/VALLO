@@ -1,26 +1,29 @@
 /**
- * THE BANNERS (3 November 2026): wide pictures under the lockup, made from the
- * founder's art. The art arrives 2.5 to 1 with the logo at the top; the logo
- * is cropped off because the lockup band is right above it, leaving 1200x350
- * JPEGs (about 50 KB each) in `public/brand/email/banners/`.
+ * THE BANNERS (3 November 2026): the wide picture at the top of the card, made
+ * from the founder's art and shown WHOLE (logo included, never cropped). It
+ * takes the place of the small lockup band, so there is one logo, not two.
+ * 1200x480 JPEGs (60 to 90 KB each) in `public/brand/email/banners/`.
  *
  *   email-banner-1   "Space, without the runaround." every ordinary email
  *   email-banner-2   "Safe from the first tap."      security and sign-in emails
  *   welcome-N        the welcome email
  *   newsletter-N     the newsletter
  *
- * Money and document emails (the paper register) carry none: a receipt is not
- * the place for a picture. A banner is decoration with a real alt, never the
+ * Money and document emails (the paper register) carry none and keep the
+ * small lockup band: a receipt is not the place for a picture. A banner is decoration with a real alt, never the
  * words of a message, and it is never a link.
  */
 import type { EmailKind } from "./icons";
 
 export const BANNER_DIR = "/brand/email/banners";
 export const BANNER_FILE_WIDTH = 1200;
-export const BANNER_FILE_HEIGHT = 350;
+export const BANNER_FILE_HEIGHT = 480;
 /** The card's inner width: 600 less 40 of padding each side. */
 export const BANNER_SHOWN_WIDTH = 520;
 export const BANNER_SHOWN_HEIGHT = Math.round((BANNER_SHOWN_WIDTH * BANNER_FILE_HEIGHT) / BANNER_FILE_WIDTH);
+/** The card is 600 wide and the banner runs edge to edge. */
+export const BANNER_SHOWN_WIDTH_FULL = 598;
+export const BANNER_SHOWN_HEIGHT_FULL = Math.round((BANNER_SHOWN_WIDTH_FULL * BANNER_FILE_HEIGHT) / BANNER_FILE_WIDTH);
 
 export type BannerFile =
   | "email-banner-1"

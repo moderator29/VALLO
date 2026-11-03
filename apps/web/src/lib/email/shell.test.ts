@@ -175,7 +175,7 @@ describe("every rendered email survives a real mail client", () => {
     expect(afterStyle).toContain(`color:${theme.LIGHT.text}`);
     expect(afterStyle).toContain(`color:${theme.LIGHT.body}`);
     // The wordmark's slogan, quiet beneath it, as live text (D1, 16.5).
-    expect(afterStyle).toContain(theme.SLOGAN);
+    if (!afterStyle.includes("/brand/email/banners/")) expect(afterStyle).toContain(theme.SLOGAN);
     // The support and legal links are in every footer.
     expect(afterStyle).toMatch(/\/support"/);
     expect(afterStyle).toMatch(/\/legal\/privacy"/);
@@ -209,6 +209,8 @@ describe("every rendered email survives a real mail client", () => {
 describe("every rendered email reads completely with images blocked", () => {
   it.each(CATALOGUE_HTML)("$name carries the lockup, at most one sized object, its row glyphs, and nothing else in a picture", ({ html }) => {
     const images = sortEmailImages(html);
+    /* The banner (`banners.ts`) stands in for the lockup band on a shell message. */
+    expect(images.lockup !== null || images.banner.length >= 1).toBe(true);
     /*
      * The 3D object (`icons.ts`) names the message's family, so its alt
      * is that word: with images off a reader sees "Payment" or "Account" in
@@ -243,6 +245,12 @@ describe("every rendered email reads completely with images blocked", () => {
      * The lockup IS the brand name, so its alt is the brand name and nothing
      * more: with images off a reader sees "Vallo" once, in its place.
      */
+    if (images.lockup === null) {
+      /* A banner message: the founder's picture carries the logo, with a real alt. */
+      expect(images.banner).toHaveLength(1);
+      expect(images.banner[0]).toMatch(/alt="[^"]{8,}"/);
+      return;
+    }
     const lockup = String(images.lockup);
     expect(lockup).toContain(theme.LOCKUP_PATH);
     expect(lockup).toContain(`alt="${theme.WORDMARK_ALT}"`);
@@ -755,7 +763,8 @@ describe("the password reset always leaves a way through", () => {
     // act, looks like a different act.
     const codeEmail = EVERY_MESSAGE.find((m) => m.name === "verificationCode");
     expect(String(codeEmail?.message.html)).not.toContain("<a href");
-    expect(String(reset?.message.html)).toContain("<a href");
+    // The reset has one bold text link to press (no button); the code email has none.
+    expect(String(reset?.message.html)).toMatch(/font-weight:700[^"]*"><a class="rm-link" href=/);
   });
 });
 

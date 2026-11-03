@@ -100,8 +100,8 @@ describe("the platform newsletter renders", () => {
     expect(NEWSLETTER_COPY.today.items.length).toBeLessThanOrEqual(5);
     expect(NEWSLETTER_COPY.roadmap.items.length).toBeGreaterThanOrEqual(4);
     expect(NEWSLETTER_COPY.roadmap.items.length).toBeLessThanOrEqual(6);
-    expect(m.html.split(">Open Vallo").length - 1).toBe(2);
-    expect(m.html).toContain("v:roundrect");
+    expect(m.html.split(">Open Vallo").length - 1).toBe(1);
+    expect(m.html).not.toContain("v:roundrect");
   });
 
   it("closes with the sign-off and legal line in both renderings", () => {

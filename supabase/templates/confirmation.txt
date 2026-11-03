@@ -34,12 +34,6 @@ This confirmation was requested for {{ .Email }}. If it was not you,
 ignore this message. No account is activated and nothing further
 happens.
 
-Follow us:
-Facebook: https://www.facebook.com/profile.php?id=61595844516966
-Instagram: https://www.instagram.com/vallospaces
-TikTok: https://www.tiktok.com/@vallo.spaces
-LinkedIn: https://ng.linkedin.com/in/vallo-home-ltd-088688447
-
 Help and support: {{ .SiteURL }}/support
 Privacy: {{ .SiteURL }}/legal/privacy
 Terms: {{ .SiteURL }}/legal/terms

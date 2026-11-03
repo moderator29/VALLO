@@ -1,7 +1,6 @@
 import { formatDate, formatMoney } from "@vallo/i18n/core";
 
 import {
-  BRAND,
   DARK,
   FONT_MONO,
   FONT_SANS,
@@ -23,8 +22,7 @@ import {
   WORDMARK_ALT,
 } from "./theme";
 import { BRAND_ORIGIN } from "@/lib/brand-domain";
-import { configuredSocials } from "./socials";
-import { BANNER_ALT, BANNER_SHOWN_HEIGHT, BANNER_SHOWN_WIDTH, bannerFilePath, bannerFor, type BannerFile } from "./banners";
+import { BANNER_ALT, BANNER_SHOWN_HEIGHT_FULL, BANNER_SHOWN_WIDTH_FULL, bannerFilePath, bannerFor, type BannerFile } from "./banners";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import {
   EMAIL_GLYPH_SIZE,
@@ -805,26 +803,12 @@ function receiptHtml(receipt: ReceiptModel, ink: Ink): string {
  * The colour is written #FFFFFF rather than through the palette because it is
  * the text ON the brand blue in both schemes, not a themed value.
  */
-export function buttonHtml(label: string, url: string, options: { arrow?: boolean; margin?: string } = {}): string {
-  const safeUrl = escapeHtml(url);
-  const safeLabel = escapeHtml(label);
-  const shown = options.arrow ? `${safeLabel}&nbsp;&nbsp;&rarr;` : safeLabel;
-  const width = Math.min(380, Math.max(190, Math.round(label.length * 9.6 + 72)));
-  return `<!--[if mso]>
-                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${safeUrl}" style="height:50px;v-text-anchor:middle;width:${width}px;" arcsize="24%" strokecolor="${BRAND}" strokeweight="1px" fillcolor="${BRAND}">
-                    <w:anchorlock/>
-                    <center style="color:#FFFFFF;font-family:'Segoe UI',Arial,sans-serif;font-size:16px;font-weight:600;">${shown}</center>
-                  </v:roundrect>
-                  <![endif]-->
-                  <!--[if !mso]><!-->
-                  <table role="presentation" class="rm-btn" cellpadding="0" cellspacing="0" style="margin:${options.margin ?? "10px 0 12px"};">
-                    <tr>
-                      <td align="center" bgcolor="${BRAND}" style="border-radius:12px;background-color:${BRAND};">
-                        <a href="${safeUrl}" target="_blank" style="display:inline-block;padding:15px 34px;${TEXT}font-size:16px;line-height:20px;font-weight:600;letter-spacing:-0.01em;color:#FFFFFF;text-decoration:none;border-radius:12px;">${shown}</a>
-                      </td>
-                    </tr>
-                  </table>
-                  <!--<![endif]-->`;
+export function buttonHtml(label: string, url: string, options: { arrow?: boolean; margin?: string; ink?: Ink } = {}): string {
+  /* NO BUTTON (3 November 2026, the founder: "remove all this blue button,
+     make it clean like GetEquity"): the action is one bold line of text, a
+     link with an arrow, on its own row. */
+  const shown = options.arrow ? `${escapeHtml(label)}&nbsp;&rarr;` : escapeHtml(label);
+  return `<p style="margin:${options.margin ?? "10px 0 12px"};${TEXT}font-size:18px;line-height:26px;font-weight:700;letter-spacing:-0.01em;"><a class="${(options.ink ?? SHELL_INK).link}" href="${escapeHtml(url)}" target="_blank" style="color:${LINK};text-decoration:underline;">${shown}</a></p>`;
 }
 
 function htmlBlock(block: Block, ink: Ink): string {
@@ -892,7 +876,7 @@ function htmlBlock(block: Block, ink: Ink): string {
        * and gateways that strip a styled anchor, so no button is ever the only
        * way through.
        */
-      return `${buttonHtml(block.label, block.href)}${
+      return `${buttonHtml(block.label, block.href, { ink })}${
                     block.showUrl
                       ? `
                   <p class="${ink.muted}" style="margin:0 0 6px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">If the button does not work, copy this address into your browser:</p>
@@ -1222,37 +1206,16 @@ export function footerLinksText(options: { skipSettings?: boolean } = {}): strin
 }
 
 /**
- * THE SOCIAL LINE (3 November 2026): "Follow us" and our accounts as plain
- * clickable words, in the footer's own link style (no icons, no pictures),
- * read from the one shared list (`socials.ts`). Nothing when none is set.
+ * THE BANNER, TOP OF THE CARD (3 November 2026): the founder's wide picture
+ * shown whole, in place of the small lockup band (it carries the logo itself).
+ * Decoration with a real alt, never a link.
  */
-export function socialRowHtml(): string {
-  const socials = configuredSocials();
-  if (socials.length === 0) return "";
-  const links = socials
-    .map(
-      (s) =>
-        `<a class="rm-link rm-social" href="${escapeHtml(s.url)}" target="_blank" style="color:${LINK};text-decoration:underline;white-space:nowrap;">${escapeHtml(s.label)}</a>`,
-    )
-    .join(" &nbsp;&middot;&nbsp; ");
-  return `<p class="rm-muted" style="margin:0 0 8px;${TEXT}font-size:13px;line-height:20px;color:${LIGHT.muted};">Follow us: ${links}</p>`;
-}
-
-/** A banner under the lockup: decoration with a real alt, never a link. */
-export function bannerRowHtml(file: BannerFile): string {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;">
-                  <tr>
-                    <td style="font-size:0;line-height:0;mso-line-height-rule:exactly;border-radius:14px;">
-                      <img src="${siteUrl()}${bannerFilePath(file)}" width="${BANNER_SHOWN_WIDTH}" height="${BANNER_SHOWN_HEIGHT}" alt="${escapeHtml(BANNER_ALT[file])}" border="0" style="display:block;width:100%;max-width:${BANNER_SHOWN_WIDTH}px;height:auto;border:0;outline:none;text-decoration:none;border-radius:14px;${TEXT}font-size:15px;line-height:20px;color:${LIGHT.muted};" />
-                    </td>
-                  </tr>
-                </table>`;
-}
-
-/** The same accounts in the text part, one "Label: url" per line, or nothing. */
-export function socialLinksText(): string {
-  const socials = configuredSocials();
-  return socials.length === 0 ? "" : ["Follow us:", ...socials.map((s) => `${s.label}: ${s.url}`)].join("\n");
+export function bannerTopRow(file: BannerFile): string {
+  return `<tr>
+              <td style="padding:0;font-size:0;line-height:0;mso-line-height-rule:exactly;border-radius:19px 19px 0 0;">
+                <img src="${siteUrl()}${bannerFilePath(file)}" width="${BANNER_SHOWN_WIDTH_FULL}" height="${BANNER_SHOWN_HEIGHT_FULL}" alt="${escapeHtml(BANNER_ALT[file])}" border="0" style="display:block;width:100%;max-width:${BANNER_SHOWN_WIDTH_FULL}px;height:auto;border:0;outline:none;text-decoration:none;border-radius:19px 19px 0 0;${TEXT}font-size:18px;line-height:24px;font-weight:700;color:${LIGHT.text};" />
+              </td>
+            </tr>`;
 }
 
 /**
@@ -1276,7 +1239,6 @@ export function footerRows(lines: readonly string[], link?: { label: string; hre
   return `<tr>
               <td class="rm-pad" style="padding:26px ${PAD_X}px 0;">
                 ${reason}
-                ${socialRowHtml()}
                 ${p(links, "6px 0 18px")}
                 <p class="rm-title" style="margin:0;${TEXT}font-size:13px;line-height:20px;font-weight:700;letter-spacing:0.02em;color:${LIGHT.text};">${SIGN_OFF}</p>
                 <p class="rm-muted" style="margin:4px 0 0;${TEXT}font-size:12px;line-height:18px;color:${LIGHT.muted};">${LEGAL_LINE}</p>
@@ -1310,6 +1272,8 @@ export function documentHtml(options: {
   htmlAttrs?: string;
   cardClass?: string;
   register?: EmailRegister;
+  /** The founder's banner at the top of the card, in place of the lockup band. */
+  banner?: BannerFile;
 }): string {
   const ink = inkFor(options.register ?? "shell");
   return `<!doctype html>
@@ -1326,7 +1290,7 @@ export function documentHtml(options: {
             <tr>
               <td class="${ink.card}" bgcolor="${LIGHT.card}" style="background-color:${LIGHT.card};border:1px solid ${LIGHT.edge};border-radius:20px;">
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-radius:19px;">
-                  ${brandBandRow(ink)}
+                  ${options.banner ? bannerTopRow(options.banner) : brandBandRow(ink)}
                   <tr>
                     <td class="${ink.card} rm-pad${options.cardClass ? " " + options.cardClass : ""}" bgcolor="${LIGHT.card}" style="background-color:${LIGHT.card};border-radius:0 0 19px 19px;padding:30px ${PAD_X}px 36px;">
                       ${options.card}
@@ -1359,11 +1323,8 @@ export function compose(options: ComposeOptions): Composed {
   const register = emailRegisterOf(options.icon);
   const ink = inkFor(register);
 
-  const mark = EMAIL_SHOWS_OBJECT
-    ? heroMarkHtml(options.icon, ink)
-    : register === "shell"
-      ? bannerRowHtml(bannerFor(options.icon))
-      : "";
+  const mark = EMAIL_SHOWS_OBJECT ? heroMarkHtml(options.icon, ink) : "";
+  const banner = register === "shell" ? bannerFor(options.icon) : undefined;
   const body = (mark ? mark + "\n                " : "") + blocks.map((block) => htmlBlock(block, ink)).join("\n                ");
 
   const html = documentHtml({
@@ -1372,6 +1333,7 @@ export function compose(options: ComposeOptions): Composed {
     card: body,
     footer: footerRows(footerLines, options.footerLink),
     register,
+    banner,
   });
 
   /*
@@ -1395,7 +1357,6 @@ export function compose(options: ComposeOptions): Composed {
       ...(options.footerLink
         ? [`${options.footerLink.label}: ${options.footerLink.href}`, ""]
         : []),
-      ...(socialLinksText() ? [socialLinksText(), ""] : []),
       footerLinksText({ skipSettings: options.footerLink !== undefined }),
       "",
       SIGN_OFF,

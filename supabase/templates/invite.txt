@@ -38,12 +38,6 @@ account.
 If you were not expecting an invitation, ignore this message. No account
 is created and nothing further happens.
 
-Follow us:
-Facebook: https://www.facebook.com/profile.php?id=61595844516966
-Instagram: https://www.instagram.com/vallospaces
-TikTok: https://www.tiktok.com/@vallo.spaces
-LinkedIn: https://ng.linkedin.com/in/vallo-home-ltd-088688447
-
 Help and support: {{ .SiteURL }}/support
 Privacy: {{ .SiteURL }}/legal/privacy
 Terms: {{ .SiteURL }}/legal/terms

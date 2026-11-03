@@ -15,7 +15,7 @@
  * every cell paints its own ground. It adds four banner pictures between the
  * sections and one phone stylesheet. Nothing here depends on the style block.
  *
- * THE BANNERS. Three 1200x350 pictures at
+ * THE BANNERS. Three 1200x480 pictures at
  * `/brand/email/banners/<name>.jpg`, shown at the card's inner width. They
  * are NOT one of the sanctioned tiers in `images.ts` (lockup, one 3D object,
  * glyphs, photos), which is why this message is not in `fixtures.ts`'
@@ -82,7 +82,7 @@ export const NEWSLETTER_LANDING: NewsletterRoute = "/home";
 /* ---------------------------------------------------------------- banners */
 
 export const BANNER_WIDTH = 1200;
-export const BANNER_HEIGHT = 350;
+export const BANNER_HEIGHT = 480;
 /** The card is 600 wide with 40 either side, so a banner is shown 520 wide. */
 export const BANNER_SHOWN_WIDTH = 520;
 export const BANNER_SHOWN_HEIGHT = Math.round((BANNER_SHOWN_WIDTH * BANNER_HEIGHT) / BANNER_WIDTH);
@@ -379,8 +379,8 @@ function renderHtml(greeting: string): string {
     headExtra:
       "\n    <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->",
     extraStyle: PHONE_STYLE,
-    card: `${bannerHtml(BANNERS["newsletter-1"], "0 0 22px")}
-                ${hero}
+    banner: "newsletter-1",
+    card: `${hero}
                 ${why}
                 ${sectionGap()}
                 ${today}

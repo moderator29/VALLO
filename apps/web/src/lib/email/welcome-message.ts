@@ -44,8 +44,6 @@ import {
   escapeHtml,
   footerLinksText,
   footerRows,
-  bannerRowHtml,
-  socialLinksText,
   greetingName,
   hello,
   heroMarkHtml,
@@ -399,7 +397,8 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
     headExtra:
       "\n    <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->",
     extraStyle: PHONE_STYLE,
-    card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : bannerRowHtml("welcome-2")}
+    banner: "welcome-2",
+    card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : ""}
                 ${hero}
                 ${litButton(BUTTON_LABEL, appUrl(WELCOME_LANDING))}
                 <p class="rm-muted" style="margin:14px 0 30px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">${escapeHtml(BUTTON_AFTER)}</p>
@@ -449,7 +448,6 @@ function renderText(version: Version, greetingLine: string): string {
       wrap(FOOTER_REASON),
       `${FOOTER_LINK_LABEL}: ${appUrl("/settings/notifications")}`,
       "",
-      ...(socialLinksText() ? [socialLinksText(), ""] : []),
       footerLinksText({ skipSettings: true }),
       "",
       SIGN_OFF,

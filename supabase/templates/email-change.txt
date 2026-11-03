@@ -24,12 +24,6 @@ If the button does not work, copy this link into your browser:
 This request was made on the account for {{ .Email }}. The change only
 takes effect once it is confirmed from this message.
 
-Follow us:
-Facebook: https://www.facebook.com/profile.php?id=61595844516966
-Instagram: https://www.instagram.com/vallospaces
-TikTok: https://www.tiktok.com/@vallo.spaces
-LinkedIn: https://ng.linkedin.com/in/vallo-home-ltd-088688447
-
 Help and support: {{ .SiteURL }}/support
 Privacy: {{ .SiteURL }}/legal/privacy
 Terms: {{ .SiteURL }}/legal/terms

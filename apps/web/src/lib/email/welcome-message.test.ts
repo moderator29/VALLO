@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { siteUrl } from "./render";
 import { EMAIL_SHOWS_OBJECT } from "./icons";
-import { BRAND, LEGAL_LINE, LOCKUP_PATH, MAX_WIDTH, SIGN_OFF, WORDMARK_ALT } from "./theme";
+import { BRAND, LEGAL_LINE, MAX_WIDTH, SIGN_OFF } from "./theme";
 import {
   WELCOME_LANDING,
   WELCOME_ROUTES,
@@ -144,11 +144,9 @@ describe("every role gets its own version", () => {
   });
 
   it.each(ALL)("$role keeps to a greeting, one line and one lit button", ({ message }) => {
-    // One primary action, drawn twice: once as VML for classic Outlook and
-    // once as the HTML anchor everyone else gets.
+    // One primary action: a bold text link with an arrow, no button.
     expect(message.html).toContain("Step inside");
-    expect(message.html).toContain("v:roundrect");
-    expect(message.html).toContain("<!--[if !mso]><!-->");
+    expect(message.html).not.toContain("v:roundrect");
   });
 });
 
@@ -257,12 +255,13 @@ describe("it is built to survive a mail client", () => {
   });
 
   it.each(ALL)("$role puts no words in a picture and gives every image alt text", ({ message }) => {
-    /* The banner under the lockup is its own tier (`banners.ts`). */
-    const images = (message.html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/banners/"));
+    /* The founder's banner (`banners.ts`) is the first picture and carries the logo. */
+    const images = message.html.match(/<img\b[^>]*>/g) ?? [];
     // The lockup, and (only when the layout shows it, EMAIL_SHOWS_OBJECT in
     // icons.ts) the role's 3D object above the hero, whose alt is its family
     // word so a blocked image still says something.
     expect(images).toHaveLength(EMAIL_SHOWS_OBJECT ? 2 : 1);
+    expect(images[0]).toContain("/brand/email/banners/welcome-2.jpg");
     if (EMAIL_SHOWS_OBJECT) {
       expect(images[1]).toContain("/brand/3d/email/");
       expect(images[1]).toContain('alt="Welcome"');
@@ -272,8 +271,6 @@ describe("it is built to survive a mail client", () => {
       expect(image).toMatch(/\bwidth="\d+"/);
       expect(image).toMatch(/\bheight="\d+"/);
     }
-    expect(images[0]).toContain(LOCKUP_PATH);
-    expect(images[0]).toContain(`alt="${WORDMARK_ALT}"`);
   });
 
   it.each(ALL)("$role reads completely with images off", ({ message }) => {
@@ -283,17 +280,11 @@ describe("it is built to survive a mail client", () => {
     expect(blind.length).toBeGreaterThan(150);
   });
 
-  it.each(ALL)("$role draws the one flat brand-blue button, with a Word fallback", ({ message }) => {
+  it.each(ALL)("$role has no button: the action is one bold text link", ({ message }) => {
     const html = message.html;
-    // A solid fill, as an attribute and as an inline colour; no gradient and no glow.
-    expect(html).toContain(`bgcolor="${BRAND}" style="border-radius:12px;background-color:${BRAND};"`);
-    expect(html).toMatch(/color:#FFFFFF;text-decoration:none;border-radius:12px;">Step inside/);
-    expect(html).not.toContain("linear-gradient(180deg");
-    expect(html).not.toMatch(/box-shadow:0 10px/);
-    // Outlook's Word engine gets a VML round rectangle with the same fill.
-    expect(html).toContain(`fillcolor="${BRAND}"`);
-    // 12px on a 50px button: a rounded rectangle, never a capsule.
-    expect(html).toContain("border-radius:12px");
+    expect(html).toMatch(/font-weight:700[^"]*"><a class="rm-link" href="[^"]*\/welcome" target="_blank" style="color:#[0-9A-Fa-f]{6};text-decoration:underline;">Step inside/);
+    expect(html).not.toContain(`bgcolor="${BRAND}"`);
+    expect(html).not.toContain("fillcolor=");
   });
 
   it.each(ALL)("$role stays light", ({ message }) => {

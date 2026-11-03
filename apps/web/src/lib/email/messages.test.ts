@@ -160,8 +160,14 @@ describe("every message in the catalogue", () => {
      * somebody has put words in a picture.
      */
     const images = sortEmailImages(message.html);
-    expect(images.lockup).toContain(LOCKUP_PATH);
-    expect(images.lockup).toContain(`alt="${WORDMARK_ALT}"`);
+    /* A shell message opens with the founder's banner (`banners.ts`) in place of the lockup band. */
+    if (images.lockup !== null) {
+      expect(images.lockup).toContain(LOCKUP_PATH);
+      expect(images.lockup).toContain(`alt="${WORDMARK_ALT}"`);
+    } else {
+      expect(images.banner).toHaveLength(1);
+      expect(images.banner[0]).toMatch(/alt="[^"]{8,}"/);
+    }
     expect(images.object.length).toBeLessThanOrEqual(1);
     for (const image of images.object) expect(image).toMatch(new RegExp(`alt="(${FAMILY_ALTS.join("|")})"`));
     for (const image of images.glyphs) expect(image).toContain('alt=""');

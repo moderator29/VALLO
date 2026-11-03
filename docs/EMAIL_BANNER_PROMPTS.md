@@ -21,7 +21,7 @@ Shared brand notes (already in every prompt):
 ## Newsletter
 
 ### newsletter-1
-Path: `apps/web/public/brand/email/newsletter/newsletter-1.png`
+Path: `apps/web/public/brand/email/banners/newsletter-1.jpg`
 
 ```
 Create a wide email banner image, exactly 1200 x 480 pixels (5:2). Deep dark navy background (#010118) with a soft glow of electric blue (#0C6AEF) rising from the bottom centre. In the centre, the headline in clean white bold sans-serif (Poppins style): "A first letter from Vallo". Around it, a few floating glassy 3D objects in translucent blue glass with a bright top edge (a small house, a key, a calendar), arranged symmetrically toward the left and right but leaving the middle 60 percent clear for the text. Premium, calm, modern. Colours only from this family: #010118, #000030, #000040, #102D55, #2768C4, #0C6AEF, #0056D0, #5C9FFF, white and #D5DEFF. No people, no faces, no stock photography, no extra logos, no small text. Text must be spelled exactly as given.
@@ -33,14 +33,14 @@ Create a wide email banner image, exactly 1200 x 480 pixels (5:2). Deep dark nav
 ```
 
 ### newsletter-2
-Path: `apps/web/public/brand/email/newsletter/newsletter-2.png`
+Path: `apps/web/public/brand/email/banners/newsletter-2.jpg`
 
 ```
 Create a wide email banner image, exactly 1200 x 480 pixels (5:2). Dark navy background (#010118) with a sweeping, subtle electric blue (#0C6AEF) light path curving from the lower left to the upper right, like a road toward the horizon. The headline in clean white bold sans-serif, centred: "Where we are going". Small glassy 3D objects in translucent blue glass along the path at the far left and far right (a map pin, a compass, a rocket-free simple arrow). Keep the middle 60 percent clear for the text. Forward-looking, confident, not hype. Colours only from: #010118, #000030, #000040, #102D55, #2768C4, #0C6AEF, #0056D0, #5C9FFF, white and #D5DEFF. No people, no faces, no stock photography, no extra logos, no small text. Spell the headline exactly.
 ```
 
 ### newsletter-3
-Path: `apps/web/public/brand/email/newsletter/newsletter-3.png`
+Path: `apps/web/public/brand/email/banners/newsletter-3.jpg`
 
 ```
 Create a wide email banner image, exactly 1200 x 480 pixels (5:2). Dark navy background (#010118) with a calm electric blue (#0C6AEF) glow from beneath. The headline in clean white bold sans-serif, centred: "Ready for the market". At the far left and far right only, glassy 3D objects in translucent blue glass with a bright top edge: a padlock, a lightning bolt for speed, a chat bubble for support. Keep the middle 60 percent clear for the text. Steady, prepared, premium. Colours only from: #010118, #000030, #000040, #102D55, #2768C4, #0C6AEF, #0056D0, #5C9FFF, white and #D5DEFF. No people, no faces, no stock photography, no extra logos, no small text. Spell the headline exactly.
