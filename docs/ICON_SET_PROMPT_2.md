@@ -1,0 +1,23 @@
+# Icon brief 2: empty states, listing states, booking states, the AI assistant
+
+Same style as the sheet already delivered (deep royal blue clay and glass, one warm orange accent). The first brief (`docs/ICON_SET_PROMPT.md`) still covers condition, furnishing, floor, power, water and tenure; this one covers everything else the platform draws today with a plain glyph or the old 3D set. It comes from an audit of 114 empty states across the member app, the agent console, the host console and the admin desk.
+
+## The prompt (paste once, then send one group at a time)
+
+> Continue the same icon set as the previous sheet: soft, clean, mature 3D clay and glass objects, deep royal blue as the main colour, one small warm orange accent per icon, one rounded object per icon, gentle depth, one soft highlight from the top left, no text, no letters, no outline, no baked-in shadow. Each icon is a single object, centred, on a fully transparent background, 1024 x 1024 px, about 10 percent padding, crisp when shrunk to 32 px. Same lighting and level of detail across the whole group. No black or white as the main colour, and no plate, tile or circle behind the object. Give me each group as a 4 by 4 sheet on a transparent background, in the order listed, so I can cut them.
+
+## Group A: empty states, first sheet (16)
+1 `empty-inbox` (an open empty tray with a small envelope), 2 `empty-support` (a headset with a quiet chat bubble), 3 `empty-notifications` (a calm bell), 4 `empty-bookings` (a suitcase with a calendar tag), 5 `empty-viewings` (a door key with a clock), 6 `empty-saved` (an empty bookmark outline with a small heart), 7 `empty-payments` (a receipt with a check), 8 `empty-refunds` (a coin returning along an arrow), 9 `empty-agreements` (a contract with a pen), 10 `empty-reviews` (a star in a speech bubble), 11 `empty-rewards` (a gift box), 12 `empty-payouts` (a bank building with a coin), 13 `empty-calendar` (a calendar grid with open nights), 14 `empty-rooms` (a door with a bed behind it), 15 `empty-tables` (a table setting with a cloche), 16 `empty-photos` (a camera with a picture frame).
+
+## Group B: empty states, second sheet (16)
+17 `empty-listings` (a house with a plus), 18 `empty-search` (a magnifier over an empty map), 19 `sign-in-needed` (a padlock with a key), 20 `not-found` (a house with a question mark), 21 `went-wrong` (a warning triangle, soft), 22 `offline` (a cloud with a small break), 23 `waiting-review` (an hourglass), 24 `approved` (a rosette with a check), 25 `verified-person` (an ID card with a shield), 26 `devices-security` (a phone with a shield), 27 `card-locked` (a card with a padlock), 28 `area-stats` (a map pin over a small bar chart), 29 `price-check` (a house with a price tag), 30 `growth` (an upward arrow chart), 31 `tenancy` (a house with a calendar page), 32 `statement` (a ledger book with a coin).
+
+## Group C: booking states (8) and listing states (8), one sheet
+Booking: `booking-requested` (a paper plane), `booking-confirmed` (a calendar with a check), `booking-arrived` (a key in a door), `booking-completed` (a flag on a house), `booking-cancelled` (a calendar with a cross), `booking-refunded` (a coin with a return arrow), `booking-disputed` (a balance scale), `booking-held` (a padlock on a coin).
+Listing: `listing-draft` (a house outline and pencil), `listing-in-review` (a house under a magnifier), `listing-approved` (a house with a check), `listing-live` (a house with a signal), `listing-needs-changes` (a house with a speech bubble), `listing-rejected` (a house with a cross), `listing-paused` (a house with a pause mark), `listing-let` (a house with a key and a tick).
+
+## Group D: the AI assistant (16)
+`ai-assistant` (a friendly spark orb with a small house inside, the assistant's identity), `ai-picked-for-you` (a house with a sparkle and a heart), `ai-viewing` (a calendar with a clock and a key), `ai-payment` (a wallet with a shield check), `ai-permissions` (a toggle switch with a shield), `ai-privacy` (an eye with a shield), `ai-security` (a vault door), `ai-compare` (two houses on a scale), `ai-photos` (a stack of photos), `ai-transactions` (a ledger with a magnifier), `ai-balance` (a wallet with a coin), `ai-reminder` (a bell with a clock), `ai-saved` (a bookmark with a heart), `ai-share` (a house with an arrow leaving it), `ai-human-help` (a person with a headset), `ai-off` (the orb, quiet and greyed in blue).
+
+## When the sheets come back
+Send the sheets as they are. I cut each one into transparent 256 px files in `apps/web/public/brand/glyphs/` (as I did with the first sheet) and replace the plain or old 3D glyph on every empty state, booking card, listing card and assistant screen listed above.

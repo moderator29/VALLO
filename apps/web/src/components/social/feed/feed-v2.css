@@ -294,6 +294,11 @@
     display: inline-flex;
     flex: none;
   }
+  /* The house mark: a size up from a member's tick, with a hairline of its own
+     colour so it reads bolder against the dark ground. */
+  .nf-pc__tick--house svg {
+    filter: drop-shadow(0 0 0.5px currentColor);
+  }
   .nf-pc__handle {
     overflow: hidden;
     color: var(--nf-content-muted);

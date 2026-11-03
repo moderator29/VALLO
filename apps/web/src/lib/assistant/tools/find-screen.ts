@@ -72,6 +72,7 @@ const HINTS: Readonly<Record<string, string>> = {
   "/support": "help support ticket complaint contact",
   "/settings": "setting settings account preferences",
   "/settings/privacy/ai": "assistant ai agreement consent",
+  "/settings/ai-assistant": "assistant ai personal permissions turn on off settings",
 };
 
 const STOP_WORDS = new Set(

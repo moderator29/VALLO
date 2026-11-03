@@ -1,4 +1,7 @@
 import { requestSignal, roundWatchdog } from "@/lib/ai/upstream-deadline";
+import { parsePrefs, styleLines } from "@/lib/assistant/prefs";
+import { privateLines } from "@/lib/assistant/private-prompt";
+import { getListingRepository } from "@/lib/listings/repository";
 import { parseAssistantWorkspace, WORKSPACE_FRAMES } from "@/lib/assistant/workspace";
 import { isSameOriginRequest } from "@/lib/security/request-origin";
 import { NextRequest } from "next/server";
@@ -32,7 +35,9 @@ import {
   sanitizeClientTurns,
   serverThreadTurns,
 } from "@/lib/assistant/history";
-import { runTool, toolDefinitions } from "@/lib/assistant/tools/registry";
+import { TOOL_REGISTRY, runTool, toolDefinitions } from "@/lib/assistant/tools/registry";
+import { readAssistantState } from "@/lib/assistant/access";
+import { NO_ACCESS, type AssistantAccess } from "@/lib/assistant/permissions";
 import type { ToolDefinition, ToolFrame } from "@/lib/assistant/tools/types";
 import { fenceToolResult, UNTRUSTED_TOOL_LINE } from "@/lib/assistant/untrusted";
 import { consentRefusal } from "@/lib/ai/consent";
@@ -485,8 +490,9 @@ export async function POST(req: NextRequest) {
      the system prompt. Anything that is not a known key is the plain one. */
   const workspace = parseAssistantWorkspace(record.workspace);
   const frame: ToolFrame = workspace ?? "consumer";
-  const tools = toolDefinitions(frame);
-  const system = workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT;
+  /* The person's own style settings, by key (`lib/assistant/prefs.ts`). */
+  const style = styleLines(parsePrefs(record.prefs));
+  const baseSystem = `${workspace ? `${SYSTEM_PROMPT}\n\n${WORKSPACE_FRAMES[workspace].system}` : SYSTEM_PROMPT}\n\n${style}`;
 
   const apiKey = process.env.ANTHROPIC_API_KEY ?? "";
   if (!apiKey) {
@@ -498,6 +504,27 @@ export async function POST(req: NextRequest) {
   }
 
   const caller = await resolveCaller();
+
+  /* WHAT THIS PERSON HAS ALLOWED, FROM THE DATABASE, FOR THIS REQUEST. Off by
+     default: a signed-out visitor, a read that fails and a member who never
+     switched the assistant on all read as no access, and the model is then
+     shown only the public discovery tools. Nothing from the browser changes it. */
+  let access: AssistantAccess = NO_ACCESS;
+  if (caller.signedIn) {
+    const state = await readAssistantState(caller.supabase);
+    access = { enabled: state.enabled, permissions: state.permissions, epoch: state.epoch };
+  }
+  const tools = toolDefinitions(frame, TOOL_REGISTRY, access);
+
+  /* "Ask about this place": a verified listing id, never trusted text. The id must be a real
+     listing; its title is read from the catalogue, not taken from the browser. */
+  let about: { id: string; title: string } | null = null;
+  if (typeof record.about === "string" && /^[0-9a-f-]{36}$/i.test(record.about)) {
+    const found = await getListingRepository().byId(record.about).catch(() => null);
+    if (found) about = { id: found.id, title: found.title.slice(0, 120) };
+  }
+  const privateText = privateLines(access, about);
+  const system = privateText ? `${baseSystem}\n\n${privateText}` : baseSystem;
 
   /* STORE-07: nothing is sent to Anthropic without this person's recorded
      agreement. The screen asks first; this is what holds when it did not. */
@@ -597,7 +624,11 @@ export async function POST(req: NextRequest) {
              * or not, goes to the model inside the vallo_tool fence.
              */
             const name = typeof use["name"] === "string" ? use["name"] : "";
-            const run = await runTool(name, use.input, { frame });
+            const run = await runTool(name, use.input, {
+              frame,
+              access,
+              ...(caller.signedIn ? { supabase: caller.supabase, userId: caller.userId } : {}),
+            });
             if (!run.ok) {
               toolResults.push({
                 type: "tool_result",
@@ -607,8 +638,11 @@ export async function POST(req: NextRequest) {
               });
               continue;
             }
-            const { data, note, listings } = run.outcome;
+            const { data, note, listings, events } = run.outcome;
             if (listings && listings.length > 0) emit({ type: "listings", items: listings });
+            /* Cards, slots, summaries and payment reviews are built by the server from the
+               tool's own result, so the model can never fabricate a button or an amount. */
+            for (const event of events ?? []) emit(event);
             toolResults.push({
               type: "tool_result",
               tool_use_id: use.id,

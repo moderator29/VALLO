@@ -1,3 +1,4 @@
+import { PickedForYouStream } from "@/components/app/assistant/PickedForYouStream";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
@@ -214,6 +215,13 @@ export default async function HomePage() {
         </Suspense>
       ) : null}
       <HomeScreen
+      pickedForYou={
+        overview.signedIn ? (
+          <Suspense fallback={null}>
+            <PickedForYouStream />
+          </Suspense>
+        ) : null
+      }
       t={t}
       locale={locale}
       overview={overview}

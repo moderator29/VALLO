@@ -1,0 +1,211 @@
+@layer components {
+  /* THE ASSISTANT'S INTERACTIVE BLOCKS: cards on a rail, times as chips, money as rows. */
+  .nf-aib {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-aib__panel {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-panel-edge);
+    border-radius: var(--nf-container-radius);
+    background: var(--nf-panel-fill-card);
+    box-shadow: var(--nf-panel-rim);
+  }
+  .nf-aib__panel--pay {
+    border-color: var(--nf-selected-edges);
+  }
+  .nf-aib__head {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+  }
+  .nf-aib__glyph {
+    flex: none;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    object-fit: contain;
+  }
+  .nf-aib__title {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  .nf-aib__sub,
+  .nf-aib__note,
+  .nf-aib__facts {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-aib__rows {
+    display: grid;
+    margin: 0;
+  }
+  .nf-aib__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    padding-block: var(--nf-space-xs);
+    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-aib__row dt {
+    display: grid;
+    color: var(--nf-content-secondary);
+  }
+  .nf-aib__row dd {
+    display: grid;
+    margin: 0;
+    justify-items: end;
+    text-align: end;
+    color: var(--nf-content-primary);
+    font-weight: 600;
+  }
+  .nf-aib__row--total {
+    border-block-end: 0;
+  }
+  .nf-aib__row--total dd {
+    font-size: var(--nf-text-body);
+  }
+  .nf-aib__date,
+  .nf-aib__state {
+    font-size: var(--nf-text-caption);
+    font-weight: 400;
+    color: var(--nf-content-muted);
+  }
+  .nf-aib__rail {
+    display: flex;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block-end: var(--nf-space-2xs);
+  }
+  .nf-aib__rail-item {
+    flex: 0 0 min(17.5rem, 82%);
+    scroll-snap-align: start;
+    min-inline-size: 0;
+  }
+  .nf-aib__card {
+    block-size: 100%;
+  }
+  .nf-aib__card-body {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-sm);
+  }
+  .nf-aib__why {
+    justify-self: start;
+    min-block-size: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-brand-secondary);
+    font: inherit;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .nf-aib__reason {
+    margin: 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-inset);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-aib__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  .nf-aib__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-act-well);
+    color: var(--nf-content-primary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .nf-aib__btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  .nf-aib__btn--primary,
+  .nf-aib__btn--on {
+    background: var(--nf-act-fill);
+    box-shadow: var(--nf-act-shadow);
+    color: var(--nf-act-on);
+  }
+  .nf-aib__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  .nf-aib__chip {
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-act-well);
+    color: var(--nf-content-primary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    cursor: pointer;
+  }
+  .nf-aib__chip--on {
+    background: var(--nf-act-fill);
+    color: var(--nf-act-on);
+  }
+  .nf-aib__chip:disabled {
+    cursor: default;
+  }
+  .nf-aib__status {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+  }
+  .nf-aib__status--ok {
+    color: var(--nf-state-success);
+  }
+  .nf-aib__status--error {
+    color: var(--nf-state-error);
+  }
+  .nf-aib__status--busy {
+    color: var(--nf-content-muted);
+  }
+  .nf-aib__strip {
+    display: flex;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .nf-aib__shot {
+    position: relative;
+    flex: 0 0 min(20rem, 82%);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    scroll-snap-align: start;
+    border-radius: var(--nf-radius-control);
+    background: linear-gradient(180deg, var(--nf-media-ground-from), var(--nf-media-ground-to));
+  }
+  .nf-aib__shot img {
+    object-fit: contain;
+  }
+}

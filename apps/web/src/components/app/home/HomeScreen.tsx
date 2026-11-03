@@ -87,6 +87,7 @@ export function HomeScreen({
   roles,
   manageHref,
   upNext = null,
+  pickedForYou = null,
   lead = null,
   interests = [],
   intentApplied = false,
@@ -113,6 +114,8 @@ export function HomeScreen({
    * preview harness leaves it out.
    */
   upNext?: ReactNode;
+  /** "Picked for you by VALLO AI": a streamed rail for a member who allowed it, else nothing. */
+  pickedForYou?: ReactNode;
   /**
    * The figure home leads with (`HomeFigure.tsx`), or null when there is no
    * real one to draw and the greeting leads instead. Session 3, W2.
@@ -306,6 +309,8 @@ export function HomeScreen({
 
       {/* ------------------------------------------------------- up next */}
       {upNext}
+
+      {pickedForYou}
 
       {/* B2: the places this phone opened lately, one tap back. Hidden
           when there are none; beside "Up next", never instead of it. */}

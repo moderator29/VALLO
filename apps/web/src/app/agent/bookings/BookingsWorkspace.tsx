@@ -1,5 +1,7 @@
 "use client";
 
+import "@/components/ui/underline-tabs.css";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -472,7 +474,7 @@ export function BookingsWorkspace({
       <div
         role="tablist"
         aria-label={t.tabsLabel}
-        className="flex gap-xs overflow-x-auto pb-2xs"
+        className="nf-utabs nf-utabs__row"
       >
         {TAB_KEYS.map((key) => (
           <button
@@ -489,10 +491,10 @@ export function BookingsWorkspace({
             */
             aria-controls={active === key ? `bookings-panel-${key}` : undefined}
             onClick={() => setActive(key)}
-            className={`nf-chip shrink-0 whitespace-nowrap ${active === key ? "nf-chip--active" : ""}`}
+            className="nf-utabs__tab"
           >
             {t.groups[key].title}
-            <span className="nf-numeric">{board[key].length}</span>
+            <span className="nf-utabs__count nf-numeric">{board[key].length}</span>
           </button>
         ))}
       </div>

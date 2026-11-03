@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { icon3dSrc, type Icon3DName } from "./icon-3d";
+import { ICON3D_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
 
 /**
  * THE FOUNDER'S 3D ICONS (30 September): soft clay objects in royal blue with
@@ -99,8 +100,11 @@ export function Icon3D({
   label,
   className,
   priority,
+  classic = false,
 }: {
   name: Icon3DName;
+  /** Keep the older 3D sticker instead of the founder's glyph set (landing, category tiles). */
+  classic?: boolean;
   /** The drawn size in CSS pixels (square). */
   size?: number;
   /** An accessible name, only when no visible label sits beside it. */
@@ -118,6 +122,8 @@ export function Icon3D({
   }, []);
 
   const classes = ["nf-icon3d", className ?? ""].filter(Boolean).join(" ");
+  /* The founder's glyph set (1 November 2026) where it has this object. */
+  const glyph = classic ? undefined : ICON3D_GLYPH[name];
   const sized = { "--nf-icon3d-default": `${size}px` } as CSSProperties;
   const sticker = failed ? (
     <span
@@ -137,7 +143,7 @@ export function Icon3D({
       <Image
         ref={ref}
         onError={() => setFailed(true)}
-        src={icon3dSrc(name)}
+        src={glyph ? glyphSrc(glyph) : icon3dSrc(name)}
         alt={label ?? ""}
         aria-hidden={label ? undefined : true}
         width={256}

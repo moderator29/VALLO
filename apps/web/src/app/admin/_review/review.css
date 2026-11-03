@@ -29,6 +29,84 @@
     min-width: 0;
   }
 
+  /* THE SECTION LIST: one row per section, each opening its own page. */
+  .nf-rv-hub {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: var(--nf-border-width) solid var(--nf-panel-edge);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-panel-fill-card);
+    overflow: hidden;
+  }
+  .nf-rv-hub > li + li {
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-rv-hub__row {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3.5rem;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  .nf-rv-hub__row:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: -2px;
+  }
+  .nf-rv-hub__icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--nf-brand-secondary);
+  }
+  .nf-rv-hub__text {
+    display: grid;
+    flex: 1;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-rv-hub__title {
+    font-size: var(--nf-text-row);
+    font-weight: 600;
+  }
+  .nf-rv-hub__summary {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+    overflow-wrap: anywhere;
+  }
+  .nf-rv-hub__flag {
+    flex: none;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-state-error);
+  }
+  .nf-rv-hub__chev {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+  /* A review's tabs: one page, the evidence one tab at a time. The body gets
+     room to breathe, and its panels sit apart on a clear rhythm. */
+  .nf-rv-tabbody {
+    display: grid;
+    gap: var(--nf-space-lg);
+    min-inline-size: 0;
+  }
+  .nf-rv-tabbody .nf-rv-grid2 {
+    gap: var(--nf-space-lg);
+  }
+  .nf-rv-tabbody .nf-rv-stack {
+    display: grid;
+    gap: var(--nf-space-lg);
+  }
+  /* The id line and the one-line summary under a review's title. */
+  .nf-rv-lead {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+
   .nf-rv-split {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -1095,22 +1173,27 @@
   /* ------------------------------------------------------------ action bar */
   .nf-rv-actionbar {
     display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-rv-actionbar__lead,
+  .nf-rv-actionbar__alt {
+    display: grid;
     gap: var(--nf-space-sm);
   }
-
-  @media (min-width: 900px) {
-    .nf-rv-actionbar {
-      grid-template-columns: minmax(0, 1fr) auto;
-      align-items: center;
-    }
-
-    .nf-rv-actionbar > [aria-live] {
-      grid-column: 1 / -1;
-    }
-
-    .nf-rv-actionbar__buttons {
-      justify-content: flex-end;
-    }
+  .nf-rv-actionbar__alt {
+    padding-block-start: var(--nf-space-md);
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-rv-actionbar__title {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+  }
+  .nf-rv-actionbar__sub {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
   }
 
   .nf-rv-field {

@@ -25,6 +25,7 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
+import { LISTING_STATUS_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
 import { CloseListingSheet } from "./CloseListingSheet";
 import { OwnerAskStrip } from "./OwnerAskStrip";
 import { ListingMeter } from "@/components/agent/ListingMeter";
@@ -454,7 +455,13 @@ function ListingRow({
                    the pop until the page has settled). */
                 onAnimationStart={payoff ? (event) => event.animationName === "nf-success-payoff" && feedback("success") : undefined}
               >
-                <StatusPill tone={toneForStatus(listing.status)}>{t.workspace.status[listing.status]}</StatusPill>
+                <span className="inline-flex items-center gap-2xs">
+                  {LISTING_STATUS_GLYPH[listing.status] ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- a 256px transparent glyph at 24px
+                    <img src={glyphSrc(LISTING_STATUS_GLYPH[listing.status]!)} alt="" width={24} height={24} decoding="async" className="size-6 object-contain" aria-hidden="true" />
+                  ) : null}
+                  <StatusPill tone={toneForStatus(listing.status)}>{t.workspace.status[listing.status]}</StatusPill>
+                </span>
               </span>
             )}
           </div>

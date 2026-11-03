@@ -23,12 +23,33 @@ describe("the registry", () => {
       "compare_listings",
       "area_intel",
       "find_screen",
+      "get_listing_photos",
+      "get_listing_details",
+      "picked_for_you",
+      "remember_preference",
+      "list_saved_listings",
+      "propose_save_listing",
+      "get_viewing_options",
+      "propose_viewing",
+      "list_my_viewings",
+      "propose_cancel_viewing",
+      "get_move_options",
+      "propose_reschedule_viewing",
+      "list_my_bookings",
+      "list_my_transactions",
+      "spend_summary",
+      "get_refund_status",
+      "get_wallet_balance",
+      "propose_payment",
+      "get_account_summary",
     ]);
   });
 
-  it("holds read tools only, each offered in at least one known frame", () => {
+  it("holds read and propose tools only (none writes), each offered in at least one known frame", () => {
     for (const tool of TOOL_REGISTRY) {
-      expect(tool.mode, tool.name).toBe("read");
+      expect(["read", "propose"], tool.name).toContain(tool.mode);
+      /* A proposing tool needs a permission: it can only ever prepare something for the member to approve. */
+      if (tool.mode === "propose") expect(tool.requires, tool.name).toBeDefined();
       expect(tool.workspaces.length, tool.name).toBeGreaterThan(0);
       for (const frame of tool.workspaces) expect(TOOL_FRAMES).toContain(frame);
     }
@@ -45,14 +66,16 @@ describe("the registry", () => {
   });
 
   it("builds the API tools list as name, description and input_schema only", () => {
+    /* With nothing granted the model sees the public tools only. */
     const defs = toolDefinitions("consumer");
-    expect(defs.map((d) => d.name)).toEqual(TOOL_REGISTRY.map((t) => t.name));
+    expect(defs.map((d) => d.name)).toEqual(TOOL_REGISTRY.filter((t) => !t.requires).map((t) => t.name));
     for (const def of defs) expect(Object.keys(def)).toEqual(["name", "description", "input_schema"]);
   });
 
   it("carries no em dash in anything the model reads", () => {
     for (const tool of TOOL_REGISTRY) {
-      expect(JSON.stringify(toolDefinitions("consumer").find((d) => d.name === tool.name))).not.toContain("—");
+      const all = toolDefinitions("consumer", TOOL_REGISTRY, { enabled: true, permissions: ["discovery", "saved_prefs", "bookings_viewings", "account_info", "transactions", "wallet_balance", "payment_assist", "notifications"], epoch: 1 });
+      expect(JSON.stringify(all.find((d) => d.name === tool.name))).not.toContain("\u2014");
     }
   });
 });

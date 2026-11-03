@@ -1442,6 +1442,46 @@
     color: var(--nf-act-on);
     box-shadow: var(--nf-act-shadow);
   }
+  /* STACKED: one answer per row, for questions whose answers are sentences.
+     Each row is a full-width 48px target with a radio dot, the chosen one lit
+     in the shared selected fill. */
+  .nf-segmented.nf-segmented--stack {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .nf-segmented--stack .nf-segmented__item {
+    justify-content: flex-start;
+    gap: var(--nf-space-sm);
+    min-height: 3rem;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    text-align: start;
+    background: var(--nf-act-well);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+  }
+  .nf-segmented--stack .nf-segmented__item::before {
+    content: "";
+    flex: none;
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    border-radius: var(--nf-radius-circle);
+    box-shadow: inset 0 0 0 2px var(--nf-act-well-edge);
+  }
+  .nf-segmented--stack .nf-segmented__item[aria-checked="true"] {
+    background: var(--nf-act-fill);
+    box-shadow: var(--nf-act-shadow);
+  }
+  .nf-segmented--stack .nf-segmented__item[aria-checked="true"]::before {
+    background: var(--nf-act-on);
+    box-shadow: inset 0 0 0 5px var(--nf-act-fill);
+    outline: 2px solid var(--nf-act-on);
+    outline-offset: -2px;
+  }
   @media (prefers-reduced-motion: reduce) {
     .nf-segmented .nf-segmented__capsule {
       transition: none;

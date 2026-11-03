@@ -252,15 +252,15 @@ describe.skipIf(!hasBrowser && !process.env.CI)("SuccessSheet", () => {
   });
 
   it.each([
-    ["success", "verified"],
-    ["submitted", "clock"],
-    ["approved", "verified"],
-  ] as const)("draws the %s variant with its default object", async (variant, object) => {
+    ["success", "verified", "shield-check"],
+    ["submitted", "clock", "ai-schedule"],
+    ["approved", "verified", "shield-check"],
+  ] as const)("draws the %s variant with its default object", async (variant, object, glyph) => {
     const { page, close } = await mountInBrowser({ entry: entry(variant), css: CSS });
     try {
       await page.waitForSelector(`.nf-success[data-variant="${variant}"]`);
       expect(await page.locator(".nf-success__mark").getAttribute("data-object")).toBe(object);
-      expect(await page.locator(".nf-success__mark img").getAttribute("src")).toContain(`/brand/3d/${object}@2x.webp`);
+      expect(await page.locator(".nf-success__mark img").getAttribute("src")).toContain(`/brand/glyphs/${glyph}.png`);
     } finally {
       await close();
     }

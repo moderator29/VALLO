@@ -35,6 +35,10 @@ const seam = vi.hoisted(() => ({
   byId: new Map<string, Row>(),
   areas: [] as Row[],
   posts: [] as Row[],
+  /** What ai_assistant_state answers; null reads as OFF. */
+  assistantState: null as unknown,
+  /** What ai_assistant_can answers. */
+  can: false,
 }));
 
 vi.mock("@/lib/flags", () => ({ isFeatureEnabled: async () => true }));
@@ -103,6 +107,10 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: { getUser: async () => ({ data: { user: seam.signedIn ? { id: "u1", app_metadata: {} } : null } }) },
     from: (table: string) => query(table),
+    rpc: async (fn: string) => ({
+      data: fn === "ai_assistant_state" ? seam.assistantState : fn === "ai_assistant_can" ? seam.can : null,
+      error: null,
+    }),
   }),
 }));
 
@@ -133,6 +141,8 @@ function textScript(text: string): string {
 }
 
 beforeEach(() => {
+  seam.assistantState = null;
+  seam.can = false;
   seam.bodies = [];
   seam.scripts = [];
   seam.signedIn = false;
@@ -312,7 +322,58 @@ describe("one search round", () => {
     for (const original of ORIGINAL_TOOL_DEFINITIONS) {
       expect(tools.find((t) => t.name === original.name)).toEqual(original);
     }
-    expect(tools.map((t) => t.name)).toEqual(["search_listings", "compare_listings", "area_intel", "find_screen"]);
+    /* Nothing granted: the public tools only, the two newer ones last. */
+    expect(tools.map((t) => t.name)).toEqual([
+      "search_listings",
+      "compare_listings",
+      "area_intel",
+      "find_screen",
+      "get_listing_photos",
+      "get_listing_details",
+    ]);
+  });
+
+  it("shows the model no private tool while the assistant is OFF, signed in or not", async () => {
+    seam.signedIn = true;
+    seam.assistantState = { signed_in: true, enabled: false, permissions: ["transactions"], grant_epoch: 3 };
+    await events({ messages: [{ role: "user", content: "How much have I spent?" }] });
+    const names = (body(0).tools as { name: string }[]).map((t) => t.name);
+    expect(names).not.toContain("list_my_transactions");
+    expect(names).not.toContain("propose_payment");
+    expect(String(body(0).system)).not.toMatch(/switched on the VALLO AI Assistant/);
+  });
+
+  it("offers a private tool only for a permission the database says is granted, and tells the model the rules", async () => {
+    seam.signedIn = true;
+    seam.assistantState = { signed_in: true, enabled: true, permissions: ["discovery", "transactions"], grant_epoch: 3 };
+    await events({ messages: [{ role: "user", content: "How much have I spent?" }] });
+    const names = (body(0).tools as { name: string }[]).map((t) => t.name);
+    expect(names).toEqual(expect.arrayContaining(["list_my_transactions", "spend_summary", "get_refund_status"]));
+    expect(names).not.toContain("propose_payment");
+    expect(names).not.toContain("get_wallet_balance");
+    expect(String(body(0).system)).toMatch(/PROPOSE and they decide/);
+    expect(String(body(0).system)).toMatch(/exactly as a tool returned it|quote its figures exactly/i);
+  });
+
+  it("emits server-built events and keeps them out of what the model is told", async () => {
+    seam.signedIn = true;
+    seam.can = true;
+    seam.assistantState = { signed_in: true, enabled: true, permissions: ["discovery", "saved_prefs"], grant_epoch: 1 };
+    seam.scripts = [toolUseScript("picked_for_you", {}), textScript("Here you go.")];
+    const out = await events({ messages: [{ role: "user", content: "Pick for me" }] });
+    expect(out.some((e) => e.type === "error")).toBe(false);
+    /* Private tools were never given a fake: with nothing saved the tool answers its own note. */
+    const result = firstResult(1);
+    const fenced = JSON.parse(result.content) as Record<string, unknown>;
+    expect(fenced.source).toBe("vallo_tool");
+    expect(result.content).not.toMatch(/payload_hash|proposal/);
+  });
+
+  it("reads the listing for an about= id itself and ignores anything that is not a real listing", async () => {
+    seam.signedIn = true;
+    seam.assistantState = { signed_in: true, enabled: true, permissions: ["discovery"], grant_epoch: 1 };
+    await events({ messages: [{ role: "user", content: "Hi" }], about: "not-a-real-id-<script>" });
+    expect(String(body(0).system)).not.toContain("not-a-real-id");
   });
 
   it("tells the model the fence is data, in the system prompt", async () => {

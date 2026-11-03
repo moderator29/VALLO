@@ -27,7 +27,7 @@ export function CheckCard({ t, locale }: { t: Dictionary; locale: Locale }) {
     <div className="nf-pd-card nf-check-card" data-chapter="check">
       <div className="nf-check-card__head">
         <span className="nf-obj nf-check-card__obj">
-          <Icon3D name="id-check" size={LANDING_OBJECT_SIZE.check} />
+          <Icon3D classic name="id-check" size={LANDING_OBJECT_SIZE.check} />
         </span>
         <div className="nf-check-card__heading">
           <p className="nf-section-label">{c.label}</p>

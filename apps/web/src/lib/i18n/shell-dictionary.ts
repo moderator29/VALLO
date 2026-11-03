@@ -37,6 +37,8 @@ export type ShellDictionary = Pick<Dictionary, "a11y" | "common" | "nav" | "side
   homeV2: Pick<Dictionary["homeV2"], (typeof CREATE_KEYS)[number]>;
   /** The People row's label, beside Feed: the page's own word, so the two cannot drift. */
   feedV2: { people: Pick<Dictionary["feedV2"]["people"], "navPeople"> };
+  /** "Report a problem", the support home's own words, for the More menu on every screen. */
+  experienceInbox: { support: { home: Pick<Dictionary["experienceInbox"]["support"]["home"], "reportProblem"> } };
 };
 
 const CREATE_KEYS = [
@@ -97,6 +99,7 @@ export function shellDictionary(t: Dictionary): ShellDictionary {
     },
     passportV2: { navLabel: t.passportV2.navLabel },
     experienceRewards: { title: t.experienceRewards.title },
+    experienceInbox: { support: { home: { reportProblem: t.experienceInbox.support.home.reportProblem } } },
     homeV2: Object.fromEntries(CREATE_KEYS.map((key) => [key, t.homeV2[key]])) as ShellDictionary["homeV2"],
   };
   cache.set(t, shell);

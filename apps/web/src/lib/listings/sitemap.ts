@@ -88,6 +88,10 @@ export const PUBLIC_PAGES: readonly {
   { path: "/terms", changeFrequency: "yearly" },
   { path: "/host-agreement", changeFrequency: "yearly" },
   { path: "/privacy", changeFrequency: "yearly" },
+  { path: "/ai/terms", changeFrequency: "yearly" },
+  { path: "/ai/privacy", changeFrequency: "yearly" },
+  { path: "/ai/permissions", changeFrequency: "yearly" },
+  { path: "/ai/security", changeFrequency: "yearly" },
 ];
 
 /**

@@ -49,9 +49,58 @@ export type AssistantListingItem = {
   photo?: string;
 };
 
+/**
+ * A button the assistant draws. THE SERVER builds every one from a tool result
+ * (never the model), so the model cannot fabricate a button, an amount or a
+ * proposal id. `link` opens a real address; `ask` sends a fixed prompt back as
+ * the person's own words; the rest call a server action that re-verifies the
+ * person and their permission.
+ */
+export type AssistantAction =
+  | { id: string; label: string; kind: "link"; href: string }
+  | { id: string; label: string; kind: "ask"; prompt: string }
+  | { id: string; label: string; kind: "photos" | "slots" | "save" | "unsave"; listingId: string }
+  | { id: string; label: string; kind: "confirm" | "cancel" | "retry"; proposalId: string; payloadHash: string }
+  | { id: string; label: string; kind: "status"; proposalId: string }
+  /** The member's own viewing: cancel it, or pick another open time. */
+  | { id: string; label: string; kind: "viewing_cancel" | "viewing_move"; inspectionId: string }
+  /** A file the member downloads from their own records (a statement). */
+  | { id: string; label: string; kind: "download"; href: string };
+
+export type AssistantCard = AssistantListingItem & {
+  /** Plain reason this was picked, from the member's own saved or viewed activity. */
+  reason?: string;
+  actions: AssistantAction[];
+};
+
+export type AssistantSlot = { slotAt: string; label: string };
+export type AssistantSummaryRow = { label: string; value: string; date?: string; status?: string };
+
 export type AssistantStreamEvent =
   | { type: "text"; text: string }
   | { type: "listings"; items: AssistantListingItem[] }
+  /** Listing cards with their buttons. */
+  | { type: "cards"; title?: string; items: AssistantCard[] }
+  /** Loose buttons under an answer. */
+  | { type: "actions"; items: AssistantAction[] }
+  /** Real open viewing times for one listing, each a tap. */
+  | { type: "slots"; listingId: string; title: string; slots: AssistantSlot[]; moveFrom?: string }
+  /** A money summary for the member's own records. Read only. */
+  | { type: "summary"; title: string; rows: AssistantSummaryRow[]; note?: string }
+  /** A payment for the member to review and approve. The only way money moves from here. */
+  | {
+      type: "payment_review";
+      proposalId: string;
+      payloadHash: string;
+      service: string;
+      recipient: string;
+      amount: string;
+      fees: { label: string; value: string }[];
+      total: string;
+      expiresAt: string;
+    }
+  /** A swipeable strip of one listing's real photos. */
+  | { type: "photos"; listingId: string; title: string; urls: string[] }
   | { type: "thread"; id: string }
   | { type: "error"; message: string }
   | { type: "done" };

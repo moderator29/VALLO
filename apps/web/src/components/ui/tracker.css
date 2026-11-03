@@ -62,6 +62,19 @@
   .nf-tracker__chip .nf-ui-icon {
     color: var(--nf-tracker-tone);
   }
+  /* The state's glyph, bare, beside the title. */
+  .nf-tracker__titleline {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-tracker__glyph {
+    flex: none;
+    inline-size: 3rem;
+    block-size: 3rem;
+    object-fit: contain;
+  }
   .nf-tracker__card {
     align-self: stretch;
     display: flex;

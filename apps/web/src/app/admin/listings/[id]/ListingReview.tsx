@@ -10,7 +10,7 @@ import type { ListingReviewView } from "@/lib/admin/queries";
 import { SALE_STATUS_LABEL, TENURE_LABEL } from "@/lib/listings/pricing";
 import { compoundFacts } from "@/lib/listings/compound";
 import type { AdminCopy } from "../../_components/copy";
-import { Avatar, Badge, DeskHead, Panel, RoleTag } from "../../_review/parts";
+import { Avatar, Badge, DeskHead, Panel, RoleTag, Tabs, type SectionLink } from "../../_review/parts";
 import type { ListingReviewExtras } from "../../_review/contracts";
 import { tileMosaic } from "../../_review/map-tiles";
 import {
@@ -76,6 +76,14 @@ export type ListingReviewProps = {
   photoProvenance?: ReactNode;
   /** V-28: the compound's words, for the reviewer's view of the five answers. */
   compoundCopy?: Dictionary["shape"]["compound"];
+  /** Set on a section's own page; absent on the hub. */
+  section?: "photos" | "details" | "location" | "costs" | "lister" | "checklist" | "fees" | "matches" | "notes";
+  /** Where the hub is, for the back control on a section page. */
+  hubHref?: string;
+  /** The section rows the hub lists, in order. */
+  sectionLinks?: readonly SectionLink[];
+  /** Server-built panels the page hands in: the three section bodies, and extras for the hub. */
+  sectionSlots?: { fees?: ReactNode; matches?: ReactNode; notes?: ReactNode; hub?: ReactNode };
 };
 
 /** The payee of each cost line, keyed as `lib/listings/pricing` keys them. */
@@ -115,35 +123,29 @@ export function ListingReview(props: ListingReviewProps) {
     keepers,
     exampleNote,
     photoProvenance,
+    section,
+    sectionLinks,
+    sectionSlots,
   } = props;
   const type = copy.propertyType[listing.propertyType];
   const summary = [
     listing.bedrooms > 0 ? `${listing.bedrooms} bedroom ${type.toLowerCase()}` : type,
     placeLine(listing) || copy.locationMissing,
     priceLine(listing, copy, locale),
-  ].join(" · ");
+  ].join(" \u00b7 ");
 
-  return (
-    <div className="nf-rv">
-      <DeskHead
-        title="Listing under review"
-        trail={<Badge status={listing.status}>{statusLabel(listing.status)}</Badge>}
-      />
-
-      <div>
-        <p className="nf-rv-idline">{reference}</p>
-        <p className="nf-rv-summary">{summary}</p>
-        <p className="nf-rv-panel__note" style={{ marginTop: "var(--nf-space-2xs)" }}>
-          {listing.title}
-        </p>
-      </div>
-
-      {exampleNote}
-
-      <MediaStrip listing={listing} copy={copy} />
-      {photoProvenance}
-
-      <div className="nf-rv-grid2">
+  const current = section ?? "photos";
+  const body = (
+    <>
+        {current === "photos" ? (
+          <>
+            <MediaStrip listing={listing} copy={copy} />
+            {photoProvenance}
+          </>
+        ) : null}
+        {current === "details" ? (
+          <>
+            <div className="nf-rv-grid2">
         <Panel title="Property details" labelledBy="rv-details">
           <dl className="nf-rv-facts">
             <Fact icon="house" label="Property type" value={type} />
@@ -211,6 +213,7 @@ export function ListingReview(props: ListingReviewProps) {
             ) : null}
           </dl>
         </Panel>
+
 
         <div className="nf-rv-stack">
           {/* V-28 review: the five compound answers, as the renter reads them. */}
@@ -295,9 +298,21 @@ export function ListingReview(props: ListingReviewProps) {
             )}
           </Panel>
         </div>
-      </div>
 
-      <div className="nf-rv-grid2">
+            </div>
+      {listing.description ? (
+        <Panel title="Description" labelledBy="rv-description">
+          <p className="nf-rv-msg" style={{ whiteSpace: "pre-wrap", color: "var(--nf-content-primary)" }}>
+            {listing.description}
+          </p>
+        </Panel>
+      ) : null}
+
+
+          </>
+        ) : null}
+        {current === "location" ? (
+          <div className="nf-rv-grid2">
         <Panel title="Location" labelledBy="rv-location">
           <LocationMap
             place={placeLine(listing) || copy.locationMissing}
@@ -317,31 +332,30 @@ export function ListingReview(props: ListingReviewProps) {
           ) : null}
         </Panel>
 
+
+          </div>
+        ) : null}
+        {current === "costs" ? (
         <Panel title={listing.intent === "sale" ? "Purchase costs" : "Move-in costs"} labelledBy="rv-costs">
           <MoneyBlock listing={listing} locale={locale} keepers={keepers} />
         </Panel>
-      </div>
 
-      <div className="nf-rv-grid2">
+        ) : null}
+        {current === "lister" ? (
+          <>
         <Panel title="Lister verification" labelledBy="rv-lister">
           <ListerBlock listing={listing} extras={extras} />
         </Panel>
 
+
         <Panel title="Reason for review" labelledBy="rv-reason-panel">
           <ReasonBlock listing={listing} copy={copy} locale={locale} />
         </Panel>
-      </div>
 
-      {actions}
-
-      {listing.description ? (
-        <Panel title="Description" labelledBy="rv-description">
-          <p className="nf-rv-msg" style={{ whiteSpace: "pre-wrap", color: "var(--nf-content-primary)" }}>
-            {listing.description}
-          </p>
-        </Panel>
-      ) : null}
-
+          </>
+        ) : null}
+        {current === "checklist" ? (
+          <>
       <Panel title={copy.checklistTitle} labelledBy="rv-checklist">
         <ul className="nf-rv-ticks">
           {listing.checks.map((check) => {
@@ -374,6 +388,41 @@ export function ListingReview(props: ListingReviewProps) {
           </p>
         ) : null}
       </Panel>
+
+          </>
+        ) : null}
+        {current === "fees" || current === "matches" || current === "notes" ? sectionSlots?.[current] ?? null : null}
+    </>
+  );
+
+  /* ------------------------------------------------- the hub: the decision, then the sections */
+  return (
+    <div className="nf-rv">
+      <DeskHead
+        title="Listing under review"
+        trail={<Badge status={listing.status}>{statusLabel(listing.status)}</Badge>}
+      />
+
+      <div className="nf-rv-lead">
+        <p className="nf-rv-idline">{reference}</p>
+        <p className="nf-rv-summary">{summary}</p>
+        <p className="nf-rv-panel__note">{listing.title}</p>
+      </div>
+
+      {exampleNote}
+
+      {actions}
+
+      {sectionLinks ? (
+        <Tabs
+          label="Parts of this listing"
+          items={sectionLinks.map((link) => ({ key: link.key, label: link.title, href: link.href, on: link.key === current }))}
+        />
+      ) : null}
+
+      <div className="nf-rv-tabbody">{body}</div>
+
+      {sectionSlots?.hub ?? null}
     </div>
   );
 }

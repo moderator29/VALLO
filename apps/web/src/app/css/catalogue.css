@@ -3330,10 +3330,31 @@
     border-color: var(--nf-selected-edges);
     box-shadow: var(--nf-selected-shadow-inline);
   }
+  /* The WHOLE picture, whatever its shape: a tall screenshot or a wide shot is
+     letterboxed on the dark ground rather than cropped to 4 by 3. The upload
+     still takes any picture that clears the size floor; only the viewing is
+     made even. */
   .nf-lw-shot__img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+  }
+  /* The tap target is the whole tile, under the cover mark, the cross and the
+     move arrows, which stay above it. */
+  .nf-lw-shot__open {
+    position: absolute;
+    inset: 0;
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+  .nf-lw-shot__open:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: -2px;
   }
   /* The Cover mark is a capsule in the render and ships as a rectangle. */
   .nf-lw-shot__cover {

@@ -38,6 +38,7 @@ export function FloodQuestion({
         onChange={(next) => onChange(next)}
         semantics="radio"
         full
+        stack
         label={copy.wizardLabel}
       />
     </fieldset>

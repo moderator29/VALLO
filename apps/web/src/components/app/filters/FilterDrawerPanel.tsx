@@ -247,7 +247,11 @@ const KIND_ART: Partial<Record<ListingKind, Icon3DName>> = {
 };
 /** The realistic 3D object for each property type: the "Spaces for you" set. */
 function kindObject(kind: ListingKind): BrandIconProp | undefined {
-  return (SPACE_OBJECT as Partial<Record<string, BrandIconProp>>)[kind];
+  /* The stays' types draw the same realistic family as the property types:
+     the serviced block for a shortlet and the hotel the Stays tiles draw. A
+     restaurant has no realistic object and keeps its 3D one. */
+  const stays: Partial<Record<string, BrandIconProp>> = { shortlet: "serviced-block", hotel: "hotel" };
+  return (SPACE_OBJECT as Partial<Record<string, BrandIconProp>>)[kind] ?? stays[kind];
 }
 const SHAPE_ICON: Record<UnitShape, UiIconName> = {
   self_contain: "door",

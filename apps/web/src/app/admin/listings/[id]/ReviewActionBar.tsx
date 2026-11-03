@@ -121,7 +121,24 @@ export function ReviewActionBar({
 
   return (
     <div className="nf-panel nf-rv-panel nf-rv-actionbar nf-admin-decision">
-      <div className="flex flex-wrap gap-2xs" role="group" aria-label="Reasons the lister will read" data-testid="rv-reasons">
+      <div className="nf-rv-actionbar__lead">
+        <h2 className="nf-rv-actionbar__title">Your decision</h2>
+        <Button
+          full
+          variant="primary"
+          size="md"
+          leadingIcon="verified"
+          data-desk-approve
+          disabled={pending || withLister}
+          title={withLister ? "With the lister for changes. Approve it once they send it back." : undefined}
+          onClick={() => run(approving)}
+        >
+          {approving === "publish" ? "Publish" : "Approve"}
+        </Button>
+      </div>
+      <div className="nf-rv-actionbar__alt">
+      <h3 className="nf-rv-actionbar__sub">Or send it back, or reject it</h3>
+      <div className="flex flex-wrap gap-xs" role="group" aria-label="Reasons the lister will read" data-testid="rv-reasons">
         {REVIEW_REASONS.map((r) => (
           <Chip
             key={r.code}
@@ -157,17 +174,6 @@ export function ReviewActionBar({
       />
       <div className="nf-rv-actionbar__buttons">
         <Button
-          variant="primary"
-          size="sm"
-          leadingIcon="verified"
-          data-desk-approve
-          disabled={pending || withLister}
-          title={withLister ? "With the lister for changes. Approve it once they send it back." : undefined}
-          onClick={() => run(approving)}
-        >
-          {approving === "publish" ? "Publish" : "Approve"}
-        </Button>
-        <Button
           variant="secondary"
           size="sm"
           leadingIcon="info"
@@ -191,6 +197,7 @@ export function ReviewActionBar({
         >
           {armed ? "Press again to reject" : "Reject"}
         </Button>
+      </div>
       </div>
       <div aria-live="polite">
         {withLister ? (

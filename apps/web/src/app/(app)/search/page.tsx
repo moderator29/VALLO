@@ -17,6 +17,10 @@ import { RealMap } from "@/components/app/search/RealMap";
 import { ShelfBar } from "@/components/app/search/ShelfBar";
 import { ShelfCount } from "@/components/app/search/ShelfCount";
 import { MapListPill } from "@/components/app/search/MapListPill";
+import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
+
+/** The kinds offered as tabs on a search, in the order people look for them. */
+const SEARCH_TAB_KINDS: readonly ListingKind[] = ["rental", "apartment", "shortlet", "hotel", "home", "villa", "land", "shop", "office", "restaurant"];
 import { ResultsFade } from "@/components/app/search/ResultsFade";
 import {
   clearedShelf,
@@ -51,7 +55,7 @@ import { savedSearchSignal } from "@/lib/search/saved-search-signal";
 import { SearchForYou } from "@/components/app/search/SearchForYou";
 import { WideOnly } from "@/components/app/search/WideOnly";
 import { SaveSearchControl } from "@/components/app/saved-searches/SaveSearchControl";
-import { type SortKey } from "@/lib/listings/search-params";
+import { type SortKey, toSearchHref } from "@/lib/listings/search-params";
 import { rankRecommended } from "@/lib/listings/ranking";
 import { feeSortKey } from "@/lib/listings/fee-share";
 import { readListingReference } from "@/lib/listings/reference";
@@ -569,6 +573,28 @@ export default async function SearchPage({
         leading={<BackButton fallback="/" surface="round" />}
       />
       <ReadAs query={query} said={said} locale={locale} copy={t.shape.unit} />
+
+      {/* THE KINDS AS TABS (founder, 1 November 2026: the sports app's tab
+          row): All, then each kind, each a real address on this search. */}
+      <UnderlineTabs
+        className="mt-inline"
+        label={t.experienceDiscover.search.headingAll}
+        active={query.kind ?? "all"}
+        data-testid="search-kind-tabs"
+        itemTestIdPrefix="search-kind-"
+        items={[
+          (() => {
+            const { kind: _drop, ...rest } = query;
+            void _drop;
+            return { key: "all", label: sentenceCase(t.experienceLabels.anyKind.many), href: toSearchHref(rest) };
+          })(),
+          ...SEARCH_TAB_KINDS.map((kind) => ({
+            key: kind,
+            label: sentenceCase(t.experienceLabels.kinds[kind].many),
+            href: toSearchHref({ ...query, kind }),
+          })),
+        ]}
+      />
 
       <h1 className="sr-only">
         {query.q

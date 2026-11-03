@@ -287,6 +287,18 @@ export function SettingsHub({
         />
       </SettingsGroup>
 
+      {signedIn && (
+        <SettingsGroup label="VALLO AI">
+          <RowLink
+            href="/settings/ai-assistant"
+            glyph={<HubGlyph name="bot" />}
+            label="VALLO AI Assistant"
+            sub="Your personal assistant. Off until you turn it on"
+            testId="hub-ai-assistant"
+          />
+        </SettingsGroup>
+      )}
+
       <SettingsGroup label="Privacy and security">
         <RowLink
           href="/settings/privacy"
@@ -349,6 +361,7 @@ export function SettingsHub({
         />
         <RowLink href="/terms" glyph={<HubGlyph name="document" />} label={about.terms} testId="hub-terms" />
         <RowLink href="/privacy" glyph={<HubGlyph name="eye-off" />} label={about.privacy} testId="hub-privacy-policy" />
+        <RowLink href="/ai/terms" glyph={<HubGlyph name="bot" />} label="VALLO AI terms and privacy" testId="hub-ai-terms" />
         <RowLink href="/disclaimer" glyph={<HubGlyph name="info" />} label={about.disclaimer} testId="hub-disclaimer" />
       </SettingsGroup>
 
