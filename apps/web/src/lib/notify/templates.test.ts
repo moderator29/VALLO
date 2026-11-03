@@ -105,6 +105,8 @@ const TEMPLATES_THE_TRIGGERS_WRITE = [
   "stay.review_request",
   "message.unread",
   "booking.request_closed",
+  /* 3 November: the founder-run newsletter (public.newsletter_enqueue). */
+  "platform.newsletter",
 ] as const;
 
 
@@ -166,6 +168,7 @@ const PAYLOADS: Record<(typeof TEMPLATES_THE_TRIGGERS_WRITE)[number], Payload> =
   "stay.review_request": LIFECYCLE_PAYLOADS["stay.review_request"]!,
   "message.unread": LIFECYCLE_PAYLOADS["message.unread"]!,
   "booking.request_closed": LIFECYCLE_PAYLOADS["booking.request_closed"]!,
+  "platform.newsletter": { campaign: "2026-11-launch" },
 };
 
 describe("the lifecycle templates (29 September)", () => {

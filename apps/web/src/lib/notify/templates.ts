@@ -43,6 +43,7 @@ import {
 import type { EmailChannel } from "../email/recipients";
 import type { MailLanguage } from "../email/messages";
 import { scamRecall } from "../email/safety-messages";
+import { platformNewsletter } from "../email/newsletter-message";
 
 /**
  * WHAT A ROW IN THE OUTBOX MEANS, AND THE ONLY PLACE THAT DECIDES.
@@ -413,6 +414,20 @@ export const OUTBOX_TEMPLATES: Readonly<Record<string, OutboxTemplate>> = {
         name: context.recipient.name,
         role: context.lookups.signupRole(context.recipientId),
       }),
+  },
+
+  /**
+   * The platform newsletter, one row per member.
+   *
+   * WRITTEN BY `public.newsletter_enqueue(campaign)`, run by hand by the
+   * founder from the SQL editor. NEVER BY A TRIGGER OR A CRON: nothing sends
+   * this automatically. Its channel is `marketing`, so the drain refuses a
+   * member who switched marketing off and adds the List-Unsubscribe headers.
+   */
+  "platform.newsletter": {
+    channel: "marketing",
+    needs: (_payload, recipientId) => ({ users: [recipientId] }),
+    build: (_payload, context) => platformNewsletter({ name: context.recipient.name }),
   },
 
   /* ----------------------------------------------------------- agreements */

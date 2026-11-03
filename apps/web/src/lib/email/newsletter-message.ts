@@ -15,7 +15,7 @@
  * every cell paints its own ground. It adds four banner pictures between the
  * sections and one phone stylesheet. Nothing here depends on the style block.
  *
- * THE BANNERS. Four 1200x480 pictures at
+ * THE BANNERS. Three 1200x480 pictures at
  * `/brand/email/newsletter/<name>.png`, shown at the card's inner width. They
  * are NOT one of the sanctioned tiers in `images.ts` (lockup, one 3D object,
  * glyphs, photos), which is why this message is not in `fixtures.ts`'
@@ -90,10 +90,9 @@ export const BANNER_SHOWN_HEIGHT = Math.round((BANNER_SHOWN_WIDTH * BANNER_HEIGH
 export const BANNER_DIR = "/brand/email/newsletter";
 
 export type BannerName =
-  | "newsletter-hero"
-  | "newsletter-why"
-  | "newsletter-roadmap"
-  | "newsletter-ready";
+  | "newsletter-1"
+  | "newsletter-2"
+  | "newsletter-3";
 
 export type Banner = {
   name: BannerName;
@@ -104,23 +103,18 @@ export type Banner = {
 };
 
 export const BANNERS: Readonly<Record<BannerName, Banner>> = {
-  "newsletter-hero": {
-    name: "newsletter-hero",
+  "newsletter-1": {
+    name: "newsletter-1",
     headline: "A first letter from Vallo",
     alt: "Vallo. A first letter to everyone who has an account.",
   },
-  "newsletter-why": {
-    name: "newsletter-why",
-    headline: "Why Vallo exists",
-    alt: "Why Vallo exists.",
-  },
-  "newsletter-roadmap": {
-    name: "newsletter-roadmap",
+  "newsletter-2": {
+    name: "newsletter-2",
     headline: "Where we are going",
     alt: "Where we are going.",
   },
-  "newsletter-ready": {
-    name: "newsletter-ready",
+  "newsletter-3": {
+    name: "newsletter-3",
     headline: "Ready for the market",
     alt: "Ready for the market.",
   },
@@ -354,21 +348,21 @@ function renderHtml(greeting: string): string {
                   </tr>
                 </table>`;
 
-  const why = [bannerHtml(BANNERS["newsletter-why"]), headingHtml(c.why.heading), ...c.why.paragraphs.map((p) => paragraphHtml(p))].join(
+  const why = [headingHtml(c.why.heading), ...c.why.paragraphs.map((p) => paragraphHtml(p))].join(
     "\n                ",
   );
 
   const today = [headingHtml(c.today.heading), ...c.today.items.map(itemHtml)].join("\n                ");
 
   const roadmap = [
-    bannerHtml(BANNERS["newsletter-roadmap"]),
+    bannerHtml(BANNERS["newsletter-2"]),
     headingHtml(c.roadmap.heading),
     paragraphHtml(c.roadmap.lede, "0 0 16px"),
     ...c.roadmap.items.map(itemHtml),
   ].join("\n                ");
 
   const ready = [
-    bannerHtml(BANNERS["newsletter-ready"]),
+    bannerHtml(BANNERS["newsletter-3"]),
     headingHtml(c.ready.heading),
     paragraphHtml(c.ready.lede, "0 0 16px"),
     ...c.ready.items.map(itemHtml),
@@ -385,7 +379,7 @@ function renderHtml(greeting: string): string {
     headExtra:
       "\n    <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->",
     extraStyle: PHONE_STYLE,
-    card: `${bannerHtml(BANNERS["newsletter-hero"], "0 0 22px")}
+    card: `${bannerHtml(BANNERS["newsletter-1"], "0 0 22px")}
                 ${hero}
                 ${why}
                 ${sectionGap()}

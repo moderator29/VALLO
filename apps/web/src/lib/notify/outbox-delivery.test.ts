@@ -235,6 +235,7 @@ const AGREEMENT_BASE = {
 
 const EVERY_PAYLOAD: Record<string, Payload> = {
   "account.welcome": { at: "2026-09-23T13:05:00.000Z" },
+  "platform.newsletter": { campaign: "2026-11-launch" },
   "agreement.waiting": { ...AGREEMENT_BASE },
   "agreement.approved": { ...AGREEMENT_BASE, viewer: "owner" },
   "agreement.rejected": { ...AGREEMENT_BASE, reason: "The move-in date is before the handover date." },
