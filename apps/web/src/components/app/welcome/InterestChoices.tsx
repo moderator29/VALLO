@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition, type ReactNode } from "react";
+import { useActionState, useEffect, useState, type ReactNode } from "react";
 import { DataSaverRow } from "@/components/app/account/DataSaverRow";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -14,6 +14,7 @@ import {
 import type { Dictionary } from "@vallo/i18n/core";
 import { PROPERTY_TYPES, type PropertyType } from "@/lib/interests/model";
 import { forgetFirstInterest } from "./first-run-seen";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -84,7 +85,7 @@ export function InterestChoices({
   const firstRun = mode === "welcome";
   const [chosen, setChosen] = useState<PropertyType[]>(initial);
   const [saved, setSaved] = useState(false);
-  const [skipping, startSkip] = useTransition();
+  const [skipping, startSkip] = useSafeTransition();
   const [skipError, setSkipError] = useState("");
   const [state, formAction, saving] = useActionState<
     ActionResult<InterestsSaved> | null,

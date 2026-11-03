@@ -25,6 +25,7 @@ import {
   documentExtension,
   rejectFileIssue,
 } from "@/components/verification/kyc";
+import { uploadToStorage } from "@/lib/media/upload";
 
 const EMPTY: ApplicationResult = { ok: false };
 const DRAFT_KEY = "nf_agent_application_draft";
@@ -378,11 +379,9 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
          re-choosing a slot is a new object, and only the path handed to the
          submit is filed. */
       const path = `${user.id}/${batchId.current}/${name}-${crypto.randomUUID()}.${documentExtension(file.type)}`;
-      const upload = await supabase.storage
-        .from(DOCUMENT_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false });
+      const upload = await uploadToStorage({ supabase, bucket: DOCUMENT_BUCKET, path, body: file, contentType: file.type });
 
-      if (upload.error) {
+      if (!upload.ok) {
         refuse(UPLOAD_FAILED, isPdf, preview);
         return;
       }

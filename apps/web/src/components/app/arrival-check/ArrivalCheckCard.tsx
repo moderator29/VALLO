@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +12,8 @@ import {
   reportReady,
   type ArrivalReportReason,
 } from "@/lib/stays/arrival-check";
+import { uploadToStorage } from "@/lib/media/upload";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * V-91. The two answers, and the camera-first report behind "No".
@@ -44,7 +46,7 @@ export function ArrivalCheckCard({
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const input = useRef<HTMLInputElement | null>(null);
 
   const send = (answer: "as_listed" | ArrivalReportReason) => {
@@ -75,12 +77,12 @@ export function ArrivalCheckCard({
     const added: string[] = [];
     try {
       const { createClient } = await import("@/lib/supabase/client");
-      const storage = createClient().storage.from("arrival-evidence");
+      const supabase = createClient();
       const room = MAX_ARRIVAL_PHOTOS - photos.length;
       for (const file of Array.from(files).slice(0, Math.max(0, room))) {
         const path = arrivalPhotoPath(bookingId, file.name, crypto.randomUUID());
-        const uploaded = await storage.upload(path, file, { contentType: file.type });
-        if (uploaded.error) {
+        const uploaded = await uploadToStorage({ supabase, bucket: "arrival-evidence", path, body: file, contentType: file.type });
+        if (!uploaded.ok) {
           setError(copy.uploadFailed);
           break;
         }

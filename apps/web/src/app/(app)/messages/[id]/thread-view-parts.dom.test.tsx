@@ -92,10 +92,29 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the thread's new parts", () => 
     }
   });
 
+  it("draws the time once under a bubble, never inside it, and reads my message as read once they have replied", async () => {
+    const { page, close } = await mountInBrowser({ entry: entry(false), css: CSS });
+    try {
+      expect(await page.locator(".nf-bubble .nf-numeric").count()).toBe(0);
+      const mine = page.locator(".nf-msg--mine", { hasText: "Yes, it is." });
+      const status = mine.getByTestId("msg-status");
+      expect((await status.textContent())?.trim()).toBe("10:30");
+      /* After the bubble in the document, right aligned, and a reply makes it read. */
+      expect(await mine.locator(".nf-swipe-reply + .nf-msg__status").count()).toBe(1);
+      expect(await status.evaluate((el) => getComputedStyle(el).justifyContent)).toMatch(/end/);
+      expect(await status.getByRole("img", { name: "Read" }).getAttribute("data-state")).toBe("read");
+      /* A short message is a small box, not the column. */
+      const w = await mine.locator(".nf-bubble").evaluate((el) => el.getBoundingClientRect().width);
+      expect(w).toBeLessThan(160);
+    } finally {
+      await close();
+    }
+  });
+
   it("heads each run of bubbles with the person's photo, or their initial when there is none", async () => {
     const { page, close } = await mountInBrowser({ entry: entry(false), css: CSS });
     try {
-      const theirs = page.locator(".nf-msg:not(.nf-msg--mine) > .nf-msg__avatar").first();
+      const theirs = page.locator(".nf-msg:not(.nf-msg--mine) .nf-msg__avatar").first();
       expect(await theirs.locator("img").count()).toBe(1);
       const mine = page.locator(".nf-msg--mine .nf-msg__avatar").first();
       expect(await mine.locator("img").count()).toBe(0);

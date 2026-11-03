@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { countOf, formatMoney, intlTag, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -19,6 +19,7 @@ import {
   type DepositSettings,
 } from "@/lib/reservations/deposit-rules";
 import type { DeskDeposits, DeskWindow } from "@/lib/reservations/deposit-settings";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -102,7 +103,7 @@ export function DepositSettingsCard({
   const [draft, setDraft] = useState<DepositSettings>(venue?.settings ?? deposits.venues[0]!.settings);
   const [amount, setAmount] = useState(String(Math.round((venue?.settings.amountMinor ?? 0) / 100)));
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   const windows = venue?.windows ?? [];

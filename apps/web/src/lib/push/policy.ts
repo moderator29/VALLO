@@ -121,6 +121,20 @@ export function isIncomingCallPath(path: string): boolean {
 }
 
 /**
+ * A MISSED CALL IS A QUIET ROW, NOT A RING (29 October 2026, the founder: it
+ * should look like X's, a quiet row). `private.call_on_terminal` links the
+ * notice with `?missed=<call>`, which is the only thing that writes that
+ * parameter. It arrives without sound or vibration (`quiet`), on the normal
+ * channel, never the loud calls channel, under its own tag so a chat message
+ * after it does not replace it, and it opens the thread.
+ */
+const MISSED_CALL_PATH = /^\/(?:agent\/messages|messages)\/[0-9a-f-]{36}\?missed=[0-9a-f-]{36}$/;
+
+export function isMissedCallPath(path: string): boolean {
+  return MISSED_CALL_PATH.test(path);
+}
+
+/**
  * Decide the fate of one queued push.
  *
  * The order of the tests is the policy, and it is deliberate:
@@ -182,11 +196,17 @@ export function decide(input: {
       /* And no account or phone number in full (`maskLongDigitRuns`). */
       ...fitPush(lockScreenSafe(text)),
       href: safeHref(notification.href),
-      tag: collapseTag(notification.kind),
+      tag: isMissedCallPath(safeHref(notification.href)) ? "vallo-missed-call" : collapseTag(notification.kind),
       urgent,
-      /* B11: an fyi never wakes the phone: it arrives silent. */
-      quiet: !urgent && severityOf(notification).severity === "fyi",
+      /* B11: an fyi never wakes the phone: it arrives silent. A missed call
+         is as quiet as an fyi. */
+      quiet: !urgent && (severityOf(notification).severity === "fyi" || isMissedCallPath(safeHref(notification.href))),
       actions: actionsFor(notification.kind, notification.href, locale),
+      /* An incoming call's ring: held no longer than the ring itself, and
+         drawn on the calls channel. */
+      ...(isIncomingCallPath(safeHref(notification.href))
+        ? { call: true, ttlSeconds: Math.max(1, Math.min(45, Math.ceil((notification.expiresAt.getTime() - now.getTime()) / 1000))) }
+        : {}),
     },
   };
 }

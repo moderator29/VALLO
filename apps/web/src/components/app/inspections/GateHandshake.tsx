@@ -1,7 +1,7 @@
 "use client";
 
 import { loadBrowserClient } from "@/lib/supabase/load-client";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { formatDate, plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
@@ -12,6 +12,7 @@ import { buildPack, type InspectionPack } from "@/lib/offline/pack";
 import { deletePack, forgetCheckin, queueCheckin, readCheckins, readPack, savePack } from "@/lib/offline/pack-store";
 import { hexToBytes, matchesCode, secondsLeft, totp } from "@/lib/offline/totp";
 import { answerDelegation, nameDelegate, prepareHandshake, recordCheckins } from "@/lib/inspections/handshake-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -274,7 +275,7 @@ function Invite({
   onAnswered: () => Promise<void>;
 }) {
   const [message, setMessage] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const when = phase.slotAt
     ? formatDate(new Date(phase.slotAt), locale, {
         weekday: "long",
@@ -337,7 +338,7 @@ function Invite({
 function CheckCode({ pack, copy }: { pack: InspectionPack; copy: Copy }) {
   const [typed, setTyped] = useState("");
   const [verdict, setVerdict] = useState<Verdict>(null);
-  const [checking, startChecking] = useTransition();
+  const [checking, startChecking] = useSafeTransition();
 
   const record = (result: "match" | "mismatch" | "skipped") => {
     void queueCheckin({ ownerId: pack.userId, inspectionId: pack.inspectionId, result, observedAt: new Date().toISOString() }).then(
@@ -467,7 +468,7 @@ function DelegateForm({
 }) {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<{ tone: "done" | "problem"; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const submit = (value: string) =>
     startTransition(async () => {

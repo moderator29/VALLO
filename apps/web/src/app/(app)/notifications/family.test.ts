@@ -84,3 +84,22 @@ describe("objectOf and grouping", () => {
     expect(groups[0]!.lead.id).toBe("1");
   });
 });
+
+describe("calls are not messages", () => {
+  it("recognises a ring and a missed call by their trigger titles", async () => {
+    const { isCallRow, glyphOf, groupByObject } = await import("./family");
+    expect(isCallRow({ title: "Incoming video call" })).toBe(true);
+    expect(isCallRow({ title: "Missed voice call from Ada" })).toBe(true);
+    expect(isCallRow({ title: "New message" })).toBe(false);
+    expect(glyphOf({ kind: "message", title: "Incoming video call", href: "/messages/x" })).toBe("phone");
+    expect(glyphOf({ kind: "message", title: "New message", href: "/messages/x" })).toBe("chat-bubble");
+    const id = "11111111-1111-4111-8111-111111111111";
+    const href = `/messages/${id}`;
+    const groups = groupByObject([
+      { id: "a", href, title: "Missed voice call from Ada" },
+      { id: "b", href, title: "New message" },
+      { id: "c", href, title: "New message" },
+    ]);
+    expect(groups.map((g) => g.rows.length)).toEqual([1, 2]);
+  });
+});

@@ -2,11 +2,12 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { messageVenue } from "@/lib/venue-messages/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -30,7 +31,7 @@ export function MessageVenue({
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const field = useRef<HTMLTextAreaElement | null>(null);
 
   function send() {

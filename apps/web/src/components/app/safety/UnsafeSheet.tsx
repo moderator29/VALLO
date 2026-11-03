@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -8,6 +8,7 @@ import { feelUnsafe } from "@/lib/safety/unsafe-actions";
 import { responseTimeFor } from "@/lib/trust/standards";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -68,7 +69,7 @@ export function UnsafeSheet({
 }) {
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* Which of the two was pressed, so only that one says it is working: a
      frightened person must see the thing they chose answer, not both. */
   const [choice, setChoice] = useState<"leave" | "tell" | null>(null);

@@ -33,10 +33,8 @@
     height: 8rem;
     border-radius: var(--nf-tier-plate-radius);
   }
-  :root[data-theme="light"] .nf-dempty__ground {
-    background: var(--nf-icon-plate-day);
-    box-shadow: var(--nf-elevation-raised);
-  }
+  /* No plate behind the object in either theme (founder, 1 November 2026:
+     "no container surrounding or around any of it"). */
 
   /* Motion 21: the object drops 12px onto its ground and settles on `drift`. */
   .nf-dempty__object {

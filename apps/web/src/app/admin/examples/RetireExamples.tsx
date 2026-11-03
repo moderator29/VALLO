@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { retireExampleListings } from "@/lib/admin/payments-actions";
 import type { ExampleListingView } from "@/lib/admin/examples-queries";
 import { countOf } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -32,7 +33,7 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<number | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const cities = new Set(
     live.map((listing) => listing.city).filter((city): city is string => !!city),

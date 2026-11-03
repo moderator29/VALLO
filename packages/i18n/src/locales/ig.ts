@@ -3540,7 +3540,7 @@ export const ig: Dictionary = withFallback({
           name: "Aha zuru ezu",
           phone: "Nọmba ekwentị",
           nin: "Nọmba Njirimara Mba (NIN)",
-          ninHint: "Ọnụọgụ iri na otu. Ị nwere ike itinye ya ma emechaa ma ọ bụrụ na ị nweghị ya ugbu a.",
+          ninHint: "Ọnụọgụ iri na otu.",
           assurance: "Otu onye na Vallo na-agụ akwụkwọ arịrịọ gị, na ndepụta ọ bụla, tupu e bipụta ihe ọ bụla.",
         },
         where: {
@@ -4593,7 +4593,7 @@ export const ig: Dictionary = withFallback({
       body: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji {amount}.",
       bodyNoAmount: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji ego ahụ.",
       meansTitle: "Ihe ọ pụtara",
-      means: "Ka ọ ka dị n'ụgwọ, Vallo na-akwụsịtụ ịhapụ ego Payluk jidere maka gị, iwepụ ego na Rewards Balance gị, na ịkwụ gị ego arịrịọ Vallo Guarantee. Ego e ji kaadị kwụọ ka na-abata n'akaụntụ ịkwụ ụgwọ gị n'oge a kwụrụ ya. Ọ dịghị ihe ọzọ na-agbanwe n'akaụntụ gị.",
+      means: "Ka ọ ka dị n'ụgwọ, Vallo na-akwụsịtụ ịhapụ ego onye mmekọ anyị nwere ikikere jidere maka gị, iwepụ ego na Rewards Balance gị, na ịkwụ gị ego arịrịọ Vallo Guarantee. Ego e ji kaadị kwụọ ka na-abata n'akaụntụ ịkwụ ụgwọ gị n'oge a kwụrụ ya. Ọ dịghị ihe ọzọ na-agbanwe n'akaụntụ gị.",
       nextTitle: "Ihe na-esote",
       next: "Ndị otu ego Vallo ga-akpọtụrụ gị iji dozie ya. Ozugbo e doziri ya ma ọ bụ mechie ya, ọkwa a ga-apụ n'onwe ya.",
       help: "Jụọ ndị nkwado maka ya",

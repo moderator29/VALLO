@@ -3,7 +3,7 @@
 import type { AccountCopy } from "@/components/app/account/settings-copy";
 import { withNext } from "@/lib/auth/next-link";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RowLink, RowValue, RowButton, SettingsGroup } from "@/components/app/account/rows";
 import { clearPacks } from "@/lib/offline/pack-store";
@@ -19,6 +19,7 @@ import { playThreshold } from "@/lib/motion/threshold";
 import { DeleteAccountPanel } from "./DeleteAccountPanel";
 import type { Blocker } from "@/lib/account-deletion/preconditions";
 import type { Locale } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -62,7 +63,7 @@ export function AccountSection({
 }) {
   const router = useRouter();
   const copy = t.settings.account;
-  const [signingOut, startSignOut] = useTransition();
+  const [signingOut, startSignOut] = useSafeTransition();
   const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const leave = () => {

@@ -271,7 +271,16 @@ export type RecentListing = {
   price?: string | null;
   priceNote?: string;
   mark?: CardGlanceMark;
+  /** Where a stay or a restaurant opens. Absent means `/listing/<id>`. */
+  href?: string;
 };
+
+/** Only the three place pages, only by id, so a stored value can never be an off-site link. */
+const SAFE_HREF = /^\/(listing|stay|restaurant)\/[A-Za-z0-9._-]+$/;
+
+export function recentHref(entry: Pick<RecentListing, "id" | "href">): string {
+  return entry.href && SAFE_HREF.test(entry.href) ? entry.href : `/listing/${entry.id}`;
+}
 
 function optionalShort(value: unknown, max: number): boolean {
   return value === undefined || value === null || (typeof value === "string" && value.length <= max);
@@ -293,6 +302,7 @@ function isRecentListing(value: unknown): value is RecentListing {
     (entry.photo === undefined || entry.photo === null || isSafePhoto(entry.photo)) &&
     optionalShort(entry.price, 40) &&
     optionalShort(entry.priceNote, 40) &&
+    (entry.href === undefined || (typeof entry.href === "string" && SAFE_HREF.test(entry.href))) &&
     (entry.mark === undefined || entry.mark === null || entry.mark === "verified" || entry.mark === "example")
   );
 }

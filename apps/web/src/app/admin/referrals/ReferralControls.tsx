@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,7 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { decidePayout, decideReferral, setReferralBudget } from "@/lib/admin/referral-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -55,7 +56,7 @@ function ReasonSheet(p: ReasonSheetProps) {
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const reset = () => {
     setReason("");
@@ -370,7 +371,7 @@ export function BudgetControl({
   const [naira, setNaira] = useState(picked.capMinor !== null ? String(picked.capMinor / 100) : "");
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const ids = { month: useId(), cap: useId(), reason: useId() };
 
   const nairaWhole = /^\d{1,12}$/.test(naira.trim()) ? Number(naira.trim()) : null;

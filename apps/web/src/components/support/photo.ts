@@ -3,6 +3,7 @@
 import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachToMyTicket } from "@/lib/support/ticket-reply";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * A screenshot or photo on its way to a support ticket.
@@ -52,10 +53,8 @@ export async function uploadTicketPhoto(
     const userId = data.session?.user.id;
     if (!userId) return { ok: false, error: "Sign in again to attach a photo." };
     const path = `${userId}/${ticketId}/${crypto.randomUUID()}.jpg`;
-    const { error } = await supabase.storage
-      .from("support-attachments")
-      .upload(path, photo.blob, { contentType: "image/jpeg", upsert: false });
-    if (error) return { ok: false, error: failed };
+    const uploaded = await uploadToStorage({ supabase, bucket: "support-attachments", path, body: photo.blob, contentType: "image/jpeg" });
+    if (!uploaded.ok) return { ok: false, error: failed };
     const result = await attachToMyTicket({
       ticketId,
       messageId,

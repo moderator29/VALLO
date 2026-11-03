@@ -10,6 +10,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ListingPitch } from "../list/ListingPitch";
 import { readMyAgentLookup } from "@/lib/doors/queries";
 import { IconPlate } from "@/components/ui/IconPlate";
+import { readMyAgentHours, readMyReplyTemplates } from "@/lib/agent/tools-read";
 import { AgentSettingsBody } from "./AgentSettingsBody";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -66,7 +67,13 @@ export default async function Page() {
     );
   }
 
-  const [account, payout, lookup] = await Promise.all([loadSettingsState(), getPayoutAccounts(), readMyAgentLookup()]);
+  const [account, payout, lookup, templates, hours] = await Promise.all([
+    loadSettingsState(),
+    getPayoutAccounts(),
+    readMyAgentLookup(),
+    readMyReplyTemplates(),
+    readMyAgentHours(),
+  ]);
   const agent = context.agent;
   const accounts = payout.state === "ready" ? payout.accounts : [];
 
@@ -78,6 +85,8 @@ export default async function Page() {
         accounts={accounts}
         notifications={account.state === "signed-in" ? account.settings.notifications : null}
         lookup={lookup}
+        templates={templates}
+        hours={hours}
       />
     </AgentShell>
   );

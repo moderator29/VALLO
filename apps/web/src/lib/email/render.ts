@@ -1198,11 +1198,12 @@ export function heroMarkHtml(kind: EmailKind, ink: Ink = SHELL_INK): string {
  * screen does ("Notification settings", not "turn this off"): a security
  * notice says on its own that it cannot be switched off.
  */
-export const SETTINGS_LINK = { label: "Notification settings", path: "/settings/notifications" } as const;
+export const SETTINGS_LINK = { label: "Settings", path: "/settings/notifications" } as const;
 
+/* Short words, one quiet row (29 October 2026: brief and mature). */
 export const FOOTER_LINKS: readonly { label: string; path: string }[] = [
   SETTINGS_LINK,
-  { label: "Help and support", path: "/support" },
+  { label: "Help", path: "/support" },
   { label: "Privacy", path: "/legal/privacy" },
   { label: "Terms", path: "/legal/terms" },
 ];

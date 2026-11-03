@@ -134,7 +134,7 @@ const CHROME = {
   eyebrow: "Welcome to Vallo",
   /** The second line of the headline, under "Hello <name>." */
   headlineTwo: "Make yourself at home.",
-  lede: "Vallo is one account with two sides to it, and you can flip between them whenever you like.",
+  lede: "One account for homes and stays. Step inside to begin.",
   worlds: [
     { name: "Property", line: "Homes to rent, buy or sell." },
     { name: "Stays", line: "Hotels, shortlets and restaurant tables." },
@@ -155,11 +155,8 @@ const CHROME = {
   subjectPlain: "Welcome to Vallo",
 } as const;
 
-const HEADLINE_TWO = CHROME.headlineTwo;
 const EYEBROW = CHROME.eyebrow;
 const WHAT_VALLO_IS = CHROME.lede;
-const WORLDS = CHROME.worlds;
-const SECTION_LABEL = CHROME.sectionLabel;
 const BUTTON_LABEL = CHROME.button;
 const BUTTON_AFTER = CHROME.buttonAfter;
 
@@ -326,10 +323,6 @@ const VERSIONS: Record<SignupRole | "general", Version> = {
 /** The whole of the welcome's words: the shared lines and every version. */
 export const WELCOME_COPY = { ...CHROME, versions: VERSIONS } as const;
 
-function href(link: Step["link"]): string {
-  return appUrl(link.path) + (link.query ? `?${link.query}` : "");
-}
-
 /**
  * The name to greet by: the first name, else the handle, else nobody.
  * `hello()` owns the fallback, so "Hello ," cannot happen here either.
@@ -375,27 +368,6 @@ const PHONE_STYLE = `
         .wm-plate { width: 36px !important; padding-right: 10px !important; }
       }`;
 
-function valueCard(step: Step, index: number): string {
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 12px;">
-                  <tr>
-                    <td class="rm-panel wm-value" bgcolor="${LIGHT.panel}" style="background-color:${LIGHT.panel};border:1px solid ${LIGHT.edge};border-radius:16px;padding:18px 20px 18px 18px;">
-                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;"><tr>
-                        <td class="wm-plate" width="50" valign="top" style="width:50px;vertical-align:top;padding-right:14px;">
-                          <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-                            <td class="rm-card rm-link" align="center" valign="middle" width="36" height="36" bgcolor="${LIGHT.card}" style="width:36px;height:36px;background-color:${LIGHT.card};border:1px solid ${LIGHT.edge};border-top:1px solid ${LINK};border-radius:10px;${TEXT}font-size:15px;line-height:36px;font-weight:700;text-align:center;color:${LINK};mso-line-height-rule:exactly;">${index + 1}</td>
-                          </tr></table>
-                        </td>
-                        <td valign="top" style="vertical-align:top;">
-                          <p class="rm-title" style="margin:0 0 6px;${TEXT}font-size:16px;line-height:1.4;font-weight:700;letter-spacing:-0.01em;color:${LIGHT.text};">${escapeHtml(step.title)}</p>
-                          <p class="rm-body" style="margin:0 0 10px;${TEXT}font-size:15px;line-height:1.6;color:${LIGHT.body};">${escapeHtml(step.body)}</p>
-                          <p class="rm-link" style="margin:0;${TEXT}font-size:14px;line-height:20px;font-weight:600;color:${LINK};"><a class="rm-link" href="${escapeHtml(href(step.link))}" target="_blank" style="color:${LINK};text-decoration:underline;text-underline-offset:3px;">${escapeHtml(step.link.label)}&nbsp;&rarr;</a></p>
-                        </td>
-                      </tr></table>
-                    </td>
-                  </tr>
-                </table>`;
-}
-
 function litButton(label: string, url: string): string {
   return buttonHtml(label, url, { arrow: true, margin: "6px 0 0" });
 }
@@ -405,29 +377,19 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
      one-sentence lede and the two sides of the account as two labelled lines.
      The panel is a solid navy rung for every client and carries a brand-blue
      glow only where a gradient is honoured. */
-  const worldLines = WORLDS.map(
-    (world) => `<tr>
-                          <td width="92" valign="top" class="rm-link" style="width:92px;vertical-align:top;padding:8px 12px 0 0;${TEXT}font-size:12px;line-height:18px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:${LINK};">${escapeHtml(world.name)}</td>
-                          <td valign="top" class="rm-body" style="vertical-align:top;padding:8px 0 0;${TEXT}font-size:14px;line-height:18px;color:${LIGHT.body};">${escapeHtml(world.line)}</td>
-                        </tr>`,
-  ).join("\n                        ");
-  const hero = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 26px;">
+  /* BRIEF (29 October 2026, the founder: "short, clean, mature"): the
+     greeting, one line of what Vallo is, one button and one safety line. The
+     three step cards, the two sides and the section label are gone; the
+     person is one tap from the app, where those live. */
+  const hero = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 22px;">
                   <tr>
-                    <td class="rm-panel wm-hero" bgcolor="${LIGHT.panel}" style="background-color:${LIGHT.panel};border:1px solid ${LIGHT.edge};border-radius:16px;padding:26px 24px 22px;">
-                      <p class="rm-link" style="margin:0 0 12px;${TEXT}font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${LINK};">${escapeHtml(EYEBROW)}</p>
-                      <h1 class="wm-h1" style="margin:0 0 14px;${TEXT}font-size:31px;line-height:1.18;font-weight:700;letter-spacing:-0.025em;color:${LIGHT.text};"><span class="rm-title" style="color:${LIGHT.text};">${escapeHtml(greetingLine)}</span><br /><span class="rm-link" style="color:${LINK};">${escapeHtml(HEADLINE_TWO)}</span></h1>
-                      <p class="rm-body" style="margin:0 0 10px;${TEXT}font-size:17px;line-height:1.6;color:${LIGHT.body};">${escapeHtml(WHAT_VALLO_IS)}</p>
-                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid ${LIGHT.edge};margin-top:12px;">
-                        ${worldLines}
-                      </table>
+                    <td class="wm-hero" style="padding:0;">
+                      <p class="rm-link" style="margin:0 0 10px;${TEXT}font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${LINK};">${escapeHtml(EYEBROW)}</p>
+                      <h1 class="wm-h1" style="margin:0 0 12px;${TEXT}font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-0.025em;color:${LIGHT.text};"><span class="rm-title" style="color:${LIGHT.text};">${escapeHtml(greetingLine)}</span></h1>
+                      <p class="rm-body" style="margin:0;${TEXT}font-size:16px;line-height:1.6;color:${LIGHT.body};">${escapeHtml(WHAT_VALLO_IS)}</p>
                     </td>
                   </tr>
                 </table>`;
-
-  /* THREE VALUE BLOCKS, one card each: a numbered plate, the step, one
-     sentence or two, and a text link. They stack at every width, so a phone
-     and a desktop read the same order. */
-  const valueCards = version.steps.map((step, index) => valueCard(step, index)).join("\n                ");
 
   return documentHtml({
     title: "Welcome to Vallo",
@@ -438,10 +400,6 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
     extraStyle: PHONE_STYLE,
     card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : ""}
                 ${hero}
-                <p class="rm-body" style="margin:0 0 24px;${TEXT}font-size:16px;line-height:1.65;color:${LIGHT.body};">${escapeHtml(version.opening)}</p>
-                <p class="rm-muted" style="margin:0 0 12px;${TEXT}font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:${LIGHT.muted};">${escapeHtml(SECTION_LABEL)}</p>
-                ${valueCards}
-                <div style="height:14px;line-height:14px;font-size:0;mso-line-height-rule:exactly;">&nbsp;</div>
                 ${litButton(BUTTON_LABEL, appUrl(WELCOME_LANDING))}
                 <p class="rm-muted" style="margin:14px 0 30px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">${escapeHtml(BUTTON_AFTER)}</p>
                 <!-- The calm panel: one safety sentence and a small round glyph. -->
@@ -470,13 +428,6 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
 /* ------------------------------------------------------------------- text */
 
 function renderText(version: Version, greetingLine: string): string {
-  const steps = version.steps
-    .map(
-      (step, i) =>
-        `${i + 1}. ${step.title}\n${wrap(step.body, 72, "   ")}\n   ${step.link.label}: ${href(step.link)}`,
-    )
-    .join("\n\n");
-
   return (
     [
       "Vallo",
@@ -485,18 +436,8 @@ function renderText(version: Version, greetingLine: string): string {
       "-".repeat(EYEBROW.length),
       "",
       greetingLine,
-      HEADLINE_TWO,
       "",
       wrap(WHAT_VALLO_IS),
-      "",
-      ...WORLDS.map((w) => `${w.name}: ${w.line}`),
-      "",
-      wrap(version.opening),
-      "",
-      SECTION_LABEL,
-      "-".repeat(SECTION_LABEL.length),
-      "",
-      steps,
       "",
       `${BUTTON_LABEL}:`,
       appUrl(WELCOME_LANDING),

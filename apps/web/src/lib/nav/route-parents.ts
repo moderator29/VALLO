@@ -128,6 +128,10 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/docs": "/",
   "/docs/[slug]": "/docs",
   "/eula": "/",
+  "/ai/terms": "/",
+  "/ai/privacy": "/",
+  "/ai/permissions": "/",
+  "/ai/security": "/",
   "/help": "/",
   "/r": "/",
   "/r/[code]": "/r",
@@ -186,6 +190,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
      app down rather than bouncing between the gate and this screen. Its own
      "Not you? Sign out" is the way out. */
   "/sign-up/finish": ROOT,
+  /* The phone step of signing up (29 October 2026): reached once, from the
+     app layout, with the account already signed in. A root, like finish. */
   "/forgot-password": "/sign-in",
   "/forgot-password/code": "/forgot-password",
   "/reset-password": "/sign-in",
@@ -252,6 +258,9 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/listing/[id]/visit": "/listing/[id]",
   "/listing/[id]/visit/[inspectionId]": "/listing/[id]",
   "/saved": "/home",
+  /* The compare tray's table (29 October 2026): places set aside from the
+     catalogue, so back is the home screen like Saved. */
+  "/compare": "/home",
   "/saved/searches": "/saved",
   /* V-35: the gate code for one inspection, where a named delegate lands.
      Its parent is Plans, where inspections now live (V-76). */
@@ -406,6 +415,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/settings/notifications": "/settings",
   "/settings/payments": "/settings",
   "/settings/place": "/settings",
+  "/settings/ai-assistant": "/settings",
+  "/settings/ai-assistant/consent": "/settings/ai-assistant",
   "/settings/privacy": "/settings",
   /* DB2: the people you blocked, one level inside Privacy & Security. */
   "/settings/privacy/blocked": "/settings/privacy",
@@ -687,6 +698,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/agent/listings/[listingId]/board/image": "V-08: the board as a PNG, not a page.",
   "/s/[token]/status": "V-71: the door's card as a Status PNG, not a page.",
   "/api/account/export": "the member's own data as a JSON download, not a page.",
+  "/api/statement": "the member's own payments as a CSV download, not a page.",
   "/admin/audit/export": "the audit log for a period as a CSV download, not a page.",
   "/admin/money/export": "the platform payments history as a CSV download for the finance scope, not a page.",
   "/admin/oversight/export": "the oversight tables as a CSV download, not a page.",
@@ -751,6 +763,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/dojah/webhook": "identity provider webhook.",
   "/api/identity-checks/[id]/[file]": "a staff-only identity file stream, not a page.",
   "/api/push/drain": "scheduled job, bearer token.",
+  "/api/push/enrol-log": "POST only, a device reports how its push enrolment went (a reference, never a token).",
   "/api/push/key": "the public VAPID key as JSON.",
   "/api/push/register": "POST only, a subscription write.",
   "/api/push/revoke": "POST only, a subscription delete.",

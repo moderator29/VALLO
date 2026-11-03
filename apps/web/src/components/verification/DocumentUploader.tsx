@@ -19,6 +19,7 @@ import {
   type KycDocument,
 } from "./kyc";
 import type { KycCopy } from "./KycFlow";
+import { uploadToStorage } from "@/lib/media/upload";
 
 /**
  * The private bucket identity documents live in, under `<auth uid>/…`, which
@@ -114,10 +115,8 @@ export function DocumentUploader({
       /* A new object for every file chosen, never an overwrite: a filed
          document is fixed, so choosing again is a new path. */
       const path = `${user.id}/kyc-${batchId}/${kind}-${randomId()}.${documentExtension(chosen.type)}`;
-      const upload = await supabase.storage
-        .from(DOCUMENT_BUCKET)
-        .upload(path, chosen, { contentType: chosen.type, upsert: false });
-      if (upload.error) {
+      const upload = await uploadToStorage({ supabase, bucket: DOCUMENT_BUCKET, path, body: chosen, contentType: chosen.type });
+      if (!upload.ok) {
         setError(copy.uploadFailed);
         return;
       }

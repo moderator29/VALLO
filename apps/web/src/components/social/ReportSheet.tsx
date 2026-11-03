@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import type { ReportReason } from "@/lib/social/posts-model";
 import type { ReportWords } from "./sheet-words";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -53,7 +54,7 @@ export function ReportSheet({
   const [detail, setDetail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const send = () => {
     if (!reason) return;

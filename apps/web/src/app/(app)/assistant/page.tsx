@@ -5,6 +5,12 @@ import { getLocale } from "@/lib/locale";
 import { readAssistantViewer } from "@/lib/assistant/viewer";
 import { AssistantChat } from "@/components/app/assistant/AssistantChat";
 import { aiConsentForViewer } from "@/lib/ai/consent-server";
+import { resolveSession } from "@/lib/actions/session";
+import { readAssistantState } from "@/lib/assistant/access";
+import { computePicks } from "@/lib/assistant/tools/saved";
+import { cardFor } from "@/lib/assistant/cards";
+import { listingItemOf } from "@/lib/assistant/tools/listing-detail";
+import type { AssistantCard } from "@/lib/assistant/types";
 
 export const metadata: Metadata = { title: "Vallo AI" };
 
@@ -25,10 +31,28 @@ export default async function AssistantPage() {
      or a price in the assistant's result cards must group its digits the same
      way as the same figure on the search page. */
   const [locale, viewer] = await Promise.all([getLocale(), readAssistantViewer()]);
+  /* What the member has allowed, from the database. The rail and the banner exist only for a member
+     whose assistant is on; "Picked for you" needs discovery and saved_prefs. */
+  let privateAccess = false;
+  let picks: AssistantCard[] = [];
+  const session = await resolveSession();
+  if (session.state === "signed-in") {
+    const state = await readAssistantState(session.supabase);
+    privateAccess = state.enabled && state.permissions.some((p) => p !== "discovery");
+    if (state.enabled && state.permissions.includes("discovery") && state.permissions.includes("saved_prefs")) {
+      const result = await computePicks(session.supabase, session.user.id, 5);
+      if (result.state === "ok") {
+        const viewings = state.permissions.includes("bookings_viewings");
+        picks = result.picks.map((x) => cardFor(listingItemOf(x.listing), { reason: x.reason, viewings }));
+      }
+    }
+  }
   return (
     <AssistantChat
       locale={locale}
       viewer={viewer}
+      privateAccess={privateAccess}
+      picks={picks}
       aiConsented={await aiConsentForViewer()}
       t={assistantCopyOf(getDictionary(locale))}
     />

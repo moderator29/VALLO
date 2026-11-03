@@ -1,7 +1,7 @@
 "use client";
 
 import { PhoneField } from "@/components/app/PhoneField";
-import { useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
 import type { OwnerCopy } from "./supply-copy";
@@ -23,6 +23,7 @@ import { CalmPanel, RegisterDone, RegisterShell } from "./RegisterShell";
 import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -126,7 +127,7 @@ export function OwnerRegisterForm({
     mark: boolean;
     attached: boolean;
   } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* Ruling 6 (13 October 2026): the two ticks before this is sent. */
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);
@@ -189,12 +190,11 @@ export function OwnerRegisterForm({
    *
    * The server validates everything again and is the authority; this exists so
    * that pressing Continue with an empty name does not make somebody walk
-   * three more screens before being told. The NIN is never gated on, because
-   * it is optional on this form and a person who does not have it to hand must
-   * be able to finish.
+   * three more screens before being told. The NIN is required, so the first
+   * screen holds Continue until it is eleven digits.
    */
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "";
+    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || !/^\d{11}$/.test(nin.trim());
     if (step === 1) return stateCode === "" || lgaCode === "";
     if (step === 2) return held === null || !acceptTerms || !acceptPay;
     return false;
@@ -284,15 +284,7 @@ export function OwnerRegisterForm({
                 error={errors.phone}
               />
             </RegField>
-            {/*
-              OPTIONAL, AND IT IS BACK IN THE CORNER THE IMAGE DRAWS IT IN.
-              `GOVERNING-05` draws "Optional" as a capsule at the top right of
-              the field's own container. The corner is the target and the capsule
-              is not: it ships at 6px on a 24px box, which is 0.250 and a
-              rectangle by the only test that counts. The word is not passed down
-              to the primitive as well, or it would be drawn twice.
-            */}
-            <RegField optional={copy.optional}>
+            <RegField>
               <TextField
                 label={own.you.nin}
                 hint={own.you.ninHint}
@@ -302,6 +294,7 @@ export function OwnerRegisterForm({
                 /* Never autofilled, never remembered by the browser, and never
                    logged anywhere by this platform. */
                 autoComplete="off"
+                required
                 {...(errors.nin ? { error: errors.nin } : {})}
               />
             </RegField>

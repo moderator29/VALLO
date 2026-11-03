@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
+import { State } from "@/components/ui/State";
 import { answerBrief } from "@/lib/briefs/actions";
 import { briefLine } from "@/lib/briefs/brief";
 import type { DeskBrief } from "@/lib/briefs/queries";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -23,7 +25,7 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
   const [choice, setChoice] = useState(homes[0]?.id ?? "");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const full = brief.answered >= 3;
   return (
     <li className="nf-panel nf-panel--card p-card-sm">
@@ -97,7 +99,7 @@ export function BriefsDesk({
       {briefs === null || homes === null ? (
         <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>
       ) : briefs.length === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.deskEmpty}</p>
+        <State compact kind="empty" icon="home-search" title={copy.deskEmpty} className="mt-group" />
       ) : (
         <ul className="mt-group flex flex-col gap-row">
           {briefs.map((brief) => (

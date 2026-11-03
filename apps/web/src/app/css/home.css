@@ -269,6 +269,62 @@
     box-shadow: var(--nf-selected-shadow-inline);
     color: var(--nf-content-on-brand);
   }
+  /*
+   * THE ASSISTANT READS LIKE CHATGPT AND CLAUDE (29 October 2026, the founder:
+   * "the containers are too big on all ends"). The answer is text on the page,
+   * full width, with no card round it, a small mark and name above it and a
+   * quiet copy action below. The question is a compact bubble on the right,
+   * with no avatar and no stamp beside it.
+   */
+  .nf-ai.nf-ai-answer {
+    gap: var(--nf-space-2xs);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__head > :first-child {
+    display: none;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__who {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-ai.nf-ai-answer .nf-ai__body {
+    line-height: 1.6;
+  }
+  .nf-ai.nf-ai-answer .nf-ai__actions {
+    gap: 0;
+    margin-inline-start: calc(-1 * var(--nf-space-xs));
+  }
+  .nf-ai.nf-ai-answer .nf-ai__actions .nf-btn {
+    min-block-size: 2.25rem;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-ai__turn--mine .nf-ai__me {
+    display: none;
+  }
+  .nf-ai__turn--mine .nf-ai__bubble--mine {
+    max-width: 78%;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-lg);
+    border-bottom-right-radius: var(--nf-radius-xs);
+    box-shadow: none;
+  }
+  .nf-ai__bubble--mine .nf-ai__stamp {
+    display: none;
+  }
+  /* The one line under the box that says what answers are. */
+  .nf-ai__note {
+    margin: var(--nf-space-2xs) 0 0;
+    text-align: center;
+    font-size: var(--nf-text-overline);
+    color: var(--nf-content-muted);
+  }
+
   /* The chosen row in the history list and the chosen answer in the
      settings sheet: the shared selected state, as the console's nav row on. */
   .nf-ai__row--on {
@@ -931,6 +987,58 @@
     margin-bottom: var(--nf-space-3xs);
   }
 
+  /* TABLET AND DESKTOP (27 October brief): two doors across left a wide page
+     half empty. From 640px the four Stays doors go four across, the object
+     beside its words, so the row fills the content width the way a
+     marketplace's category strip does. */
+  @media (min-width: 640px) {
+    .nf-cat-row[data-columns="2"] {
+      --nf-cat-cols: 4;
+      gap: var(--nf-gap-inline);
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile {
+      grid-template-columns: auto minmax(0, 1fr);
+      grid-template-areas: "plate label" "plate meaning";
+      align-items: center;
+      align-content: center;
+      column-gap: var(--nf-space-sm);
+      row-gap: 0;
+      padding: var(--nf-space-sm) var(--nf-space-md);
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__plate {
+      grid-area: plate;
+      margin-bottom: 0;
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__label {
+      grid-area: label;
+      align-self: end;
+    }
+    .nf-cat-row[data-columns="2"] .nf-cat-tile__meaning {
+      grid-area: meaning;
+      align-self: start;
+    }
+  }
+
+  /* The featured stays: the swipe stack on a phone, a card grid from 640px. */
+  .nf-feature-grid {
+    display: none;
+  }
+  @media (min-width: 640px) {
+    .nf-feature-stack {
+      display: none;
+    }
+    .nf-feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--nf-space-md);
+    }
+  }
+  @media (min-width: 1024px) {
+    .nf-feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   /* ------------------------------------------------------ the featured band */
   .nf-feature-head {
     display: flex;
@@ -1505,5 +1613,245 @@
     align-items: center;
     gap: var(--nf-space-sm) var(--nf-space-md);
     margin-top: var(--nf-space-2xs);
+  }
+
+  /* THE ASSISTANT'S SETTINGS SHEET: six quiet rows, a label over a small
+     control, hairlines between them, nothing boxed. */
+  .nf-ai-set {
+    display: grid;
+  }
+  .nf-ai-set__row {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding-block: var(--nf-space-sm);
+    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-ai-set__row--switch {
+    padding-block: var(--nf-space-xs);
+  }
+  .nf-ai-set__label {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  .nf-ai-set__title {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  .nf-ai-set__hint {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+    text-align: end;
+  }
+  .nf-ai-set__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-ai-set__chip {
+    min-block-size: 2.25rem;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-act-well);
+    color: var(--nf-content-secondary);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-ai-set__chip[aria-checked="true"] {
+    background: var(--nf-act-fill);
+    box-shadow: var(--nf-act-shadow);
+    color: var(--nf-act-on);
+  }
+  .nf-ai-set__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+    padding-block-start: var(--nf-space-sm);
+  }
+
+  /* VALLO AI ASSISTANT SETTINGS: the master switch, the permission rows, what
+     it learned, what it did, and the agreement screen. Quiet rows, hairlines,
+     small badges; nothing boxed inside a box. */
+  .nf-ai-master {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  .nf-ai-confirm {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding-block-start: var(--nf-space-sm);
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-ai-confirm__list,
+  .nf-ai-consent__list {
+    margin: 0;
+    padding-inline-start: var(--nf-space-md);
+    display: grid;
+    gap: var(--nf-space-2xs);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+  .nf-ai-section {
+    margin: 0 0 var(--nf-space-sm);
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+  }
+  .nf-ai-note {
+    margin: var(--nf-space-sm) 0 0;
+    text-align: start;
+  }
+  .nf-ai-perms,
+  .nf-ai-learned,
+  .nf-ai-activity,
+  .nf-ai-links {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-ai-perm,
+  .nf-ai-learned__row,
+  .nf-ai-activity__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-md);
+    padding-block: var(--nf-space-sm);
+  }
+  .nf-ai-perm + .nf-ai-perm,
+  .nf-ai-learned__row + .nf-ai-learned__row,
+  .nf-ai-activity__row + .nf-ai-activity__row {
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-ai-perm__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-ai-perm__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-ai-perm__detail {
+    margin: 0;
+    text-align: start;
+  }
+  .nf-ai-badge {
+    padding: 0.0625rem var(--nf-space-2xs);
+    border-radius: var(--nf-radius-control);
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    background: var(--nf-act-well);
+    color: var(--nf-content-secondary);
+  }
+  .nf-ai-badge--act {
+    color: var(--nf-brand-secondary);
+  }
+  .nf-ai-badge--sensitive {
+    color: var(--nf-state-error);
+  }
+  .nf-ai-learned__key {
+    font-size: var(--nf-text-body-sm);
+    text-transform: capitalize;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  .nf-ai-learned__acts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-2xs);
+    justify-content: flex-end;
+  }
+  .nf-ai-activity__row {
+    font-size: var(--nf-text-body-sm);
+    align-items: flex-start;
+  }
+  .nf-ai-links {
+    gap: var(--nf-space-2xs);
+    margin-block-end: var(--nf-space-sm);
+  }
+  .nf-ai-links a {
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-link);
+  }
+  .nf-ai-consent {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-ai-consent__p {
+    margin: var(--nf-space-xs) 0 var(--nf-space-sm);
+    text-align: start;
+  }
+  .nf-ai-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nf-space-sm);
+    min-block-size: 2.75rem;
+    padding-block: var(--nf-space-xs);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+  }
+  .nf-ai-check input {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin-block-start: 0.125rem;
+    accent-color: var(--nf-brand-primary);
+  }
+  .nf-ai-check--agree {
+    font-weight: 600;
+  }
+
+  /* The founder's glyphs, drawn bare on the assistant's settings screens. */
+  .nf-ai-master__glyph {
+    display: block;
+    inline-size: 4.5rem;
+    block-size: 4.5rem;
+    margin-block-end: var(--nf-space-sm);
+    object-fit: contain;
+  }
+  .nf-ai-perm__glyph {
+    flex: none;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    object-fit: contain;
+  }
+  .nf-ai-links__glyph {
+    inline-size: 1.375rem;
+    block-size: 1.375rem;
+    margin-inline-end: var(--nf-space-xs);
+    vertical-align: middle;
+    object-fit: contain;
+  }
+
+  /* "Ask Vallo AI about this place": a quiet row with the assistant's glyph, bare. */
+  .nf-ai-ask {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-act-well-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-act-well);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-ai-ask__glyph {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    object-fit: contain;
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { PhoneField } from "@/components/app/PhoneField";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
 import { formatMoney, intlTag, type Locale } from "@vallo/i18n/core";
@@ -25,6 +25,7 @@ import { CalmPanel, RegisterDone, RegisterShell } from "./RegisterShell";
 import { RegistrationFiledSheet } from "./RegistrationFiledSheet";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -105,7 +106,7 @@ export function AgentRegisterForm({
     reference: string;
     attached: boolean;
   } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* Ruling 6 (13 October 2026): the two ticks before this is sent. */
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);
@@ -144,7 +145,7 @@ export function AgentRegisterForm({
   }
 
   function blocked(): boolean {
-    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "";
+    if (step === 0) return fullName.trim().length < 2 || phone.trim() === "" || experience === "" || !/^\d{11}$/.test(nin.trim());
     /*
      * SCREEN TWO IS NOT GATED ON THE UPLOADS, and that is deliberate rather
      * than an oversight. An agent standing in a compound with no ID to hand
@@ -306,7 +307,7 @@ export function AgentRegisterForm({
             {...(errors.selfiePath ? { error: errors.selfiePath } : {})}
           />
           <RegFieldGroup>
-            <RegField optional={copy.optional}>
+            <RegField>
               <TextField
                 label={mine.identity.nin}
                 placeholder={mine.identity.ninPlaceholder}
@@ -315,6 +316,7 @@ export function AgentRegisterForm({
                 onChange={(e) => setNin(e.target.value.replace(/\D/g, "").slice(0, 11))}
                 inputMode="numeric"
                 autoComplete="off"
+                required
                 {...(errors.nin ? { error: errors.nin } : {})}
               />
             </RegField>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -30,6 +30,7 @@ import {
 import { expectedResponse } from "@/lib/support/tickets";
 import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type FormCopy = Dictionary["experienceInbox"]["support"]["form"];
@@ -76,7 +77,7 @@ export function NewQueryForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<"topic" | "record" | null>(null);
   const [filed, setFiled] = useState<Filed | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const online = useOnline();
   const bodyRef = useRef<HTMLDivElement | null>(null);
 

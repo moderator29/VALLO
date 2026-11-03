@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { reportDoorCharge } from "@/lib/stays/arrival-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** V-57. One tap from a paid stay: "I was asked for money at the door." */
 export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy: Dictionary["afterTheGate"]["arrival"] }) {
   const [asked, setAsked] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   if (done) {

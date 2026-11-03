@@ -2,10 +2,11 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { requestRoomStay } from "@/lib/stays/room-booking-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -37,7 +38,7 @@ export function RoomRequestForm({
   const [rooms, setRooms] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const router = useRouter();
   const choices = Array.from({ length: Math.max(1, Math.min(10, maxRooms)) }, (_, i) => i + 1);
 

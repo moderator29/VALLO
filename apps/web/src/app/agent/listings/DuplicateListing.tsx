@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { duplicateListing } from "@/lib/agent/duplicate-actions";
 import { MAX_COPIES } from "@/lib/agent/duplicate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -28,7 +29,7 @@ export function DuplicateListing({
   const [made, setMade] = useState<string[] | null>(null);
   const [asked, setAsked] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <>

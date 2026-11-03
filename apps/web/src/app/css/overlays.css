@@ -333,6 +333,42 @@
     }
   }
 
+  /*
+   * A LAPTOP OR DESKTOP DOES NOT GET A BOTTOM SHEET (28 October 2026, the
+   * founder: the desktop reads as a stretched phone). With a mouse and a wide
+   * window a sheet is a centred dialog: it rises a little and fades, no longer
+   * hangs off the bottom edge, and has no drag grip (a mouse closes it with the
+   * X, Escape or a click outside). The phone and tablet sheet, the side panel
+   * and the page-shaped sheet keep their own geometry and motion.
+   */
+  @media (min-width: 64rem) and (pointer: fine) {
+    .nf-sheet:not(.nf-sheet--page):not(.nf-sheet--side) {
+      bottom: auto;
+      top: 50%;
+      max-height: min(86dvh, 46rem);
+      border-radius: var(--nf-tier-sheet-radius);
+      border-bottom: var(--nf-border-width) solid var(--nf-tier-sheet-edge);
+      opacity: 0;
+      transform: translateY(calc(-50% + 1.5rem));
+      transition:
+        transform var(--nf-duration-base) var(--nf-ease-exit),
+        opacity var(--nf-duration-base) var(--nf-ease-exit);
+    }
+    .nf-sheet[data-open="true"]:not(.nf-sheet--page):not(.nf-sheet--side) {
+      opacity: 1;
+      transform: translateY(calc(-50% + var(--nf-sheet-y, 0px)));
+      transition:
+        transform var(--nf-duration-slow) var(--nf-ease-entrance),
+        opacity var(--nf-duration-slow) var(--nf-ease-entrance);
+    }
+    .nf-sheet[data-dragging="true"]:not(.nf-sheet--page):not(.nf-sheet--side) {
+      transition: none;
+    }
+    .nf-sheet:not(.nf-sheet--page):not(.nf-sheet--side) .nf-sheet__grip {
+      display: none;
+    }
+  }
+
   .nf-sheet__body {
     flex: 1 1 auto;
     min-height: 0;
@@ -365,6 +401,11 @@
     .nf-sheet[data-dragging="true"],
     .nf-sheet-backdrop,
     .nf-sheet-backdrop[data-open="true"] {
+      transition: none;
+    }
+    /* The desktop dialog's states (see "A LAPTOP OR DESKTOP DOES NOT GET A BOTTOM SHEET"). */
+    .nf-sheet:not(.nf-sheet--page):not(.nf-sheet--side),
+    .nf-sheet[data-open="true"]:not(.nf-sheet--page):not(.nf-sheet--side) {
       transition: none;
     }
   }

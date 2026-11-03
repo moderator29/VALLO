@@ -664,7 +664,7 @@ export const PROTECTED_WORD =
 
 /** Who holds both figures, named, with the governing sentence. */
 export function heldBySentence(heldBy: string): string {
-  return `Both figures are held in your own account at ${heldBy}, a licensed payment partner. ${GOVERNING_SENTENCE}`;
+  return `Both figures are held in your own account with ${heldBy}. ${GOVERNING_SENTENCE}`;
 }
 
 /** When the partner said so. A balance without a time is never shown. */
@@ -1003,7 +1003,7 @@ export const PROMOTION_REFUNDED =
 /* -------------------------------------------------------------------------- */
 
 /** The licensed provider that holds a protected payment, as members read it. */
-export const HELD_PROVIDER_NAME = "Payluk";
+export const HELD_PROVIDER_NAME = "our licensed provider";
 
 /** The renter's headline once the money is held. */
 export const HELD_TITLE_RENTER = "Your money is held, not paid";
@@ -1012,20 +1012,20 @@ export const HELD_TITLE_LISTER = "The renter's payment is held for you";
 
 /** Who holds it, in one line, for both sides. Vallo never holds it. */
 export const HELD_BY_LINE =
-  "Held by Payluk, a licensed payment provider, until the move-in is confirmed. Vallo never holds it.";
+  "Held by our licensed provider until the move-in is confirmed. Vallo never holds it.";
 
 /** What releases it, in the order it happens. */
 export const HELD_RELEASE_STEPS: readonly { title: string; body: string }[] = [
   { title: "You move in", body: "Inspect the home on the move-in date and collect the keys." },
   { title: "You confirm", body: "Only you can release it, with a deliberate swipe. Nobody else can confirm for you." },
-  { title: "The lister is paid", body: "Payluk pays the lister. Payluk's fee comes out of the lister's share, not yours." },
+  { title: "The lister is paid", body: "Our licensed provider pays the lister. Its fee comes out of the lister's share, not yours." },
 ];
 
 /** The lister's view of the same steps. */
 export const HELD_RELEASE_STEPS_LISTER: readonly { title: string; body: string }[] = [
   { title: "The renter moves in", body: "Hand over the keys on the move-in date." },
   { title: "The renter confirms", body: "Their confirmation releases the payment to you." },
-  { title: "You are paid", body: "Payluk pays you, less its fee for holding it." },
+  { title: "You are paid", body: "Our licensed provider pays you, less its fee for holding it." },
 ];
 
 /** If something is wrong, before release. */
@@ -1034,7 +1034,7 @@ export const HELD_IF_WRONG =
 
 /** Vallo has paused the release while it looks at the deal. */
 export const HELD_PAUSED =
-  "Vallo is looking at this deal. The money stays held by Payluk until it is done; nothing moves meanwhile.";
+  "Vallo is looking at this deal. The money stays held by our licensed provider until it is done; nothing moves meanwhile.";
 
 /** The swipe that releases it. */
 export const RELEASE_SWIPE_LABEL = "Swipe to release to the lister";
@@ -1047,13 +1047,13 @@ export const RELEASE_ARMED_LABEL = "Press again to release";
 /** The renter's headline before paying. */
 export const FUND_TITLE = "Pay it into escrow";
 /** Under the figure: who will hold it, and until when. */
-export const FUND_BY_LINE = "Payluk, a licensed payment provider, holds it until you confirm the move-in. Vallo never holds it.";
+export const FUND_BY_LINE = "Our licensed provider holds it until you confirm the move-in. Vallo never holds it.";
 /** The renter pays exactly the agreed rent; the escrow fee is the lister's (VALLO_PRICING section 6). */
-export const FUND_NO_FEE_LINE = "No fee for you. Payluk's fee comes out of the lister's share.";
+export const FUND_NO_FEE_LINE = "No fee for you. The partner's fee comes out of the lister's share.";
 /** What happens, in order, from this screen. */
 export const FUND_STEPS: readonly { title: string; body: string }[] = [
   { title: "You pay it in", body: "From Wallet: the agreed rent, and nothing more." },
-  { title: "Payluk holds it", body: "The lister can see it is there, and cannot touch it." },
+  { title: "Our partner holds it", body: "The lister can see it is there, and cannot touch it." },
   { title: "You confirm the move-in", body: "Only your swipe releases it to the lister." },
 ];
 /** The swipe. */
@@ -1083,9 +1083,9 @@ export const FUND_REFUSED: Record<string, string> = {
   review_required: FUND_CLOSED.review_required,
   buyer_not_onboarded: "Open Wallet first, then pay from it.",
   seller_not_onboarded: "The lister has not finished setting up to receive this payment. Nothing has been taken.",
-  below_provider_minimum: "This amount is below what Payluk can hold. Talk to the lister about how to pay.",
-  move_in_unreadable: "The agreement has no move-in date Payluk can hold it against. Ask the lister to add one.",
-  provider_refused: "Payluk did not take the payment. Check that your balance covers it; nothing has moved.",
+  below_provider_minimum: "This amount is below what our licensed provider can hold. Talk to the lister about how to pay.",
+  move_in_unreadable: "The agreement has no move-in date our licensed provider can hold it against. Ask the lister to add one.",
+  provider_refused: "Our licensed provider did not take the payment. Check that your balance covers it; nothing has moved.",
   unavailable: "That could not be done just now. Nothing has been taken; try again in a moment.",
   /* pov05: the payer chose card, so this deal is never also held. */
   not_escrow: "This payment is set to Pay by card, not escrow. Nothing has been taken. Go back to choose escrow.",
@@ -1095,7 +1095,7 @@ export const FUND_REFUSED: Record<string, string> = {
    steps, in a guest's words. */
 export const FUND_STEPS_STAY: readonly { title: string; body: string }[] = [
   { title: "You pay it in", body: "The price of the stay, and nothing more." },
-  { title: "Payluk holds it", body: "The host can see it is there, and cannot touch it." },
+  { title: "Our partner holds it", body: "The host can see it is there, and cannot touch it." },
   { title: "You confirm your check-in", body: "Only your swipe releases it to the host." },
 ];
 

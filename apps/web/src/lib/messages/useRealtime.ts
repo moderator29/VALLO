@@ -21,16 +21,21 @@ export type LiveMessageRow = Database["public"]["Tables"]["messages"]["Row"];
 export type LiveNotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
 
 /**
- * Subscribe to message inserts in one conversation. Pass null to stay inert.
- * The callback is kept in a ref so a new render never tears the socket down.
+ * Subscribe to message inserts in one conversation, and to updates of its
+ * rows (the other side opening the thread sets `read_at`, which flips my
+ * ticks). Pass null to stay inert. The callbacks are kept in refs so a new
+ * render never tears the socket down.
  */
 export function useThreadRealtime(
   conversationId: string | null,
   onInsert: (row: LiveMessageRow) => void,
+  onUpdate?: (row: LiveMessageRow) => void,
 ): void {
   const handler = useRef(onInsert);
+  const updateHandler = useRef(onUpdate);
   useEffect(() => {
     handler.current = onInsert;
+    updateHandler.current = onUpdate;
   });
 
   useEffect(() => {
@@ -48,6 +53,18 @@ export function useThreadRealtime(
         },
         (payload) => {
           handler.current(payload.new as LiveMessageRow);
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          updateHandler.current?.(payload.new as LiveMessageRow);
         },
       )
       .subscribe();

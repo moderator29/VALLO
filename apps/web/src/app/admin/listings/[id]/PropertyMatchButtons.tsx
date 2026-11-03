@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decidePropertyMatch, reopenClosedListing, splitFromProperty } from "@/lib/landlord/admin-actions";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -23,7 +24,7 @@ export function PropertyMatchButtons({
   labels: { join: string; apart: string };
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   function decide(decision: "join" | "apart") {
@@ -60,7 +61,7 @@ export function PropertyMatchButtons({
 
 export function PropertySplitButton({ listingId, label }: { listingId: string; label: string }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="grid gap-2xs">
@@ -100,7 +101,7 @@ export function PropertySplitButton({ listingId, label }: { listingId: string; l
 export function ReopenControl({ listingId, copy }: { listingId: string; copy: Dictionary["landlord"]["admin"] }) {
   const router = useRouter();
   const [note, setNote] = useState("");
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="mt-sm grid gap-xs">

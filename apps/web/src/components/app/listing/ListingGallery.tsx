@@ -8,6 +8,7 @@ import { useClientCopy } from "@/lib/i18n/client-copy";
 import { ListingActions } from "./ListingActions";
 import type { SavePlaceTarget } from "@/components/app/SaveControl";
 import type { SharedKind } from "@/components/app/messages/share";
+import type { ShareQrCopy } from "@/components/app/messages/ShareSheet";
 import type { ListingKind } from "@/lib/listings/types";
 import { PhotoFrame } from "./PhotoFrame";
 import { aimPhotoMorph } from "@/lib/motion/photo-morph";
@@ -16,6 +17,7 @@ import { usePhotoViewer } from "./PhotoViewer";
 import { clockOf, type GalleryMedia } from "./gallery-media";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * The immersive media hero.
@@ -53,6 +55,7 @@ export function ListingGallery({
   backFallback = "/home",
   mark,
   shareKind = "listing",
+  shareQr,
   place,
   shareTitle,
   floatingBack = true,
@@ -131,6 +134,8 @@ export function ListingGallery({
    * straight to `ListingActions`, which owns the sheet.
    */
   shareKind?: SharedKind;
+  /** The words of the QR row in the share sheet (backlog row 13). */
+  shareQr?: ShareQrCopy;
   /**
    * The shortlist target when this hero belongs to a catalogue place rather
    * than to a platform listing: an accommodation on `/stay`, a business venue
@@ -393,7 +398,7 @@ export function ListingGallery({
             {video && playing === i && (
               /* Muted until the viewer unmutes, with its controls, and never
                  on its own: it starts only because "Watch video" was pressed. */
-              <video
+              <SafeVideo
                 src={video.src}
                 poster={video.poster ?? undefined}
                 controls
@@ -487,6 +492,7 @@ export function ListingGallery({
         initialSaved={initialSaved}
         shareKind={shareKind}
         place={place}
+        {...(shareQr ? { shareQr } : {})}
       />
 
       {/*

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
@@ -25,6 +25,7 @@ import {
 } from "@/components/app/inspections/ViewingSheets";
 import { viewingWords } from "@/components/app/inspections/viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -105,7 +106,7 @@ export function RentalFace({
     REASON_LABEL,
   } = viewingWords(copy);
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [state, setState] = useState<InspectionState>(inspection.state);
   const [slotAt, setSlotAt] = useState<string | null>(inspection.slotAt);
   const [settled, setSettled] = useState<string | null>(null);

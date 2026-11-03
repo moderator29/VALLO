@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { setFeeRate } from "@/lib/admin/money-actions";
@@ -8,6 +8,7 @@ import { reviewKycDocument } from "@/lib/admin/kyc-actions";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The two decisions the money side of the console takes here (the escrow
@@ -45,7 +46,7 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   const [nameOnId, setNameOnId] = useState("");
   const [showReason, setShowReason] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   /* An ID is approved with the name printed on it; the bank account name is
      matched against that name, so the reviewer types it, exactly. */
   const isId = kind === "identity";
@@ -194,7 +195,7 @@ export function FeeRateForm({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function submit() {
     setError(null);

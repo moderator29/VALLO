@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useLayoutEffect, useRef, useState, useTransition, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
@@ -11,6 +11,8 @@ import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { initial as initialOf } from "@/lib/text/initial";
+/* The composer's own look (`nf-compose-who` and the page bar) lives here. It used to arrive only with a PostCard, so a composer opened before any post had loaded drew unstyled: the face collapsed into a bare "?" beside "You" (29 October 2026). */
+import "./feed-v2.css";
 import { Segmented } from "@/components/ui/Segmented";
 import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
@@ -35,6 +37,7 @@ import {
   POST_MEDIA_MAX,
   type ComposableKind,
 } from "@/lib/social/posts-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -154,7 +157,7 @@ export function Composer({
 }) {
   const router = useRouter();
   const words = useClientCopy().feedV2.composer;
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [kind, setKind] = useState<ComposableKind>(initialKind);
   /* The words live with the caller when it asks to hold them, so a sheet that
      is closed by a stray drag or Back does not throw a half-written post
@@ -516,7 +519,9 @@ export function Composer({
             {you?.avatarUrl ? (
               <RemoteImage src={you.avatarUrl} alt="" width={88} height={88} sizes="44px" />
             ) : (
-              <span className="nf-compose-who__monogram">{initialOf(you?.label)}</span>
+              <span className="nf-compose-who__monogram">
+                {you?.label ? initialOf(you.label) : <UiIcon name="user" size={20} />}
+              </span>
             )}
           </span>
           <span className="nf-compose-who__text">

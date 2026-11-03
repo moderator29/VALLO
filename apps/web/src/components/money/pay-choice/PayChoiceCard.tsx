@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -18,6 +18,7 @@ import { payChoiceView, payNextHref, readChoiceRefusal, type PayChoice, type Pay
 import { choosePaymentRail } from "@/lib/payments/rail-choice-actions";
 import type { ActionResult } from "@/lib/actions/envelope";
 import "./pay-choice.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 export type PayChoiceAgreement = { id: string; kind: string; bookingId: string | null; inspectionId: string | null };
@@ -62,7 +63,7 @@ export function PayChoiceCard({
   const [selected, setSelected] = useState<PayRail | null>(view.selected);
   const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const router = useRouter();
   const titleId = useId();
 

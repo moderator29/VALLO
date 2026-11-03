@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { plural, type Locale } from "@vallo/i18n/core";
 import type { Dictionary } from "@vallo/i18n/core";
 import { ResultSheet } from "@/components/app/ResultSheet";
 import { reportNotMe, type NotMeResult } from "@/lib/security/device-alert-actions";
 import { formatHoldUntil } from "@/lib/security/account-hold";
 import { notMeConsequence } from "@/lib/security/not-me-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -54,7 +55,7 @@ export function NotMePanel({
 }) {
   const [armed, setArmed] = useState(false);
   const [outcome, setOutcome] = useState<Outcome>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const press = () => {
     if (!armed) {

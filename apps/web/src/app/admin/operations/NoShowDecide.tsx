@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { resolveNoShow } from "@/lib/inspections/no-show-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -14,7 +15,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 export function NoShowDecide({ inspectionId }: { inspectionId: string }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
 

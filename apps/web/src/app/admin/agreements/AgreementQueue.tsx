@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { decideAgreement } from "@/lib/admin/agreements-actions";
 import type { QueueRow } from "@/lib/admin/reads/agreements";
 import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -39,7 +40,7 @@ function waited(since: string | null, now: number): string {
 }
 
 function Row({ row, locale, now }: { row: QueueRow; locale: Locale; now: number }) {
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [outcome, setOutcome] = useState<{ kind: "done"; text: string } | { kind: "error"; text: string } | null>(null);

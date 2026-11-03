@@ -155,19 +155,16 @@ const LOCKUP_WIDTH = 198;
 const LOCKUP_HEIGHT = 56;
 const WORDMARK_ALT = "Vallo";
 
-/* Our accounts, as apps/web/src/lib/email/socials.ts: a mark only for an
-   account that is set in the environment, https only. */
+/* Our accounts, read from apps/web/src/lib/brand/socials.ts (the one list the
+   site, Settings and the email renderer all use). This generator is plain Node
+   with no TypeScript loader, so it reads the list as text: every entry whose
+   `url` is a quoted https address. */
+import { readFileSync as readSource } from "node:fs";
 const SOCIALS = [
-  ["x", "X", "NEXT_PUBLIC_VALLO_X_URL"],
-  ["instagram", "Instagram", "NEXT_PUBLIC_VALLO_INSTAGRAM_URL"],
-  ["linkedin", "LinkedIn", "NEXT_PUBLIC_VALLO_LINKEDIN_URL"],
-  ["facebook", "Facebook", "NEXT_PUBLIC_VALLO_FACEBOOK_URL"],
-  ["telegram", "Telegram", "NEXT_PUBLIC_VALLO_TELEGRAM_URL"],
-  ["tiktok", "TikTok", "NEXT_PUBLIC_VALLO_TIKTOK_URL"],
-].flatMap(([key, label, env]) => {
-  const url = (process.env[env] ?? "").trim();
-  return /^https:\/\/[^\s"<>]+$/i.test(url) ? [{ key, label, url }] : [];
-});
+  ...readSource(new URL("../apps/web/src/lib/brand/socials.ts", import.meta.url), "utf8").matchAll(
+    /key:\s*"(\w+)",\s*label:\s*"([^"]+)",\s*url:\s*"(https:\/\/[^"]+)"/g,
+  ),
+].map(([, key, label, url]) => ({ key, label, url }));
 
 function socialRow() {
   if (SOCIALS.length === 0) return "";

@@ -1,5 +1,16 @@
 import type { ReactNode } from "react";
 import { BrandIcon, type BrandIconProp } from "@/design-system/icons/BrandIcon";
+import { glyphSrc, type GlyphName } from "@/design-system/icons/glyphs";
+
+/** The founder's glyph for each object these empties name; anything else keeps its render. */
+const DEMPTY_GLYPH: Partial<Record<string, GlyphName>> = {
+  "search-pin": "empty-search",
+  "apartment-block": "apartment",
+  "cup-saucer": "empty-tables",
+  "doc-search": "listing-in-review",
+  "house-heart": "empty-saved",
+  suitcase: "hotel",
+};
 import { ButtonLink } from "@/components/ui/Button";
 import "./discovery.css";
 
@@ -63,7 +74,12 @@ export function DiscoveryEmpty({
     >
       <span className="nf-dempty__ground" aria-hidden="true">
         <span className="nf-dempty__object">
-          <BrandIcon name={object} size={96} />
+          {DEMPTY_GLYPH[String(object)] ? (
+            // eslint-disable-next-line @next/next/no-img-element -- a transparent glyph at 96px
+            <img src={glyphSrc(DEMPTY_GLYPH[String(object)]!)} alt="" width={96} height={96} decoding="async" className="size-24 object-contain" />
+          ) : (
+            <BrandIcon name={object} size={96} />
+          )}
         </span>
       </span>
       <div className="nf-dempty__words">

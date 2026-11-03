@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { RespondCopy } from "./agent-copy";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
@@ -9,6 +9,7 @@ import { UploadCard, newBatchId, type UploadState } from "@/components/supply/Up
 import { respondToReview } from "@/lib/agent/application-respond";
 import { RESPONSE_MAX_CHARS } from "@/lib/agent/application-respond-model";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -35,7 +36,7 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);
   const [askedTicks, setAskedTicks] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   if (sent) {
     return (

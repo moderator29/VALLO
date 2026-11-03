@@ -9,46 +9,46 @@
  * A done card is a button and presses like one (0.985, `press`).
  */
 @layer components {
-  .nf-path {
-    --nf-path-tile: 3rem;
-    --nf-path-pad: var(--nf-space-sm);
-    --nf-path-gap: var(--nf-space-sm);
+  .nf-ppath {
+    --nf-ppath-tile: 2rem;
+    --nf-ppath-pad: var(--nf-space-sm);
+    --nf-ppath-gap: var(--nf-space-sm);
     display: grid;
-    gap: var(--nf-path-gap);
+    gap: var(--nf-ppath-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  .nf-path__step {
+  .nf-ppath__step {
     position: relative;
   }
   /* The connector, across the gap from this card to the next, on the tile
      column. It spans the gap only, so cards of different heights (a need
      line that wraps to four lines) never leave it short or overlong. */
-  .nf-path__step:not(:last-child)::after {
+  .nf-ppath__step:not(:last-child)::after {
     content: "";
     position: absolute;
     z-index: 2;
     inset-block-start: 100%;
-    block-size: var(--nf-path-gap);
-    inset-inline-start: calc(var(--nf-path-pad) + var(--nf-path-tile) / 2 - 1px);
+    block-size: var(--nf-ppath-gap);
+    inset-inline-start: calc(var(--nf-ppath-pad) + var(--nf-ppath-tile) / 2 - 1px);
     inline-size: 2px;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-border-default);
     pointer-events: none;
   }
-  .nf-path__step[data-state="done"]:not(:last-child)::after {
+  .nf-ppath__step[data-state="done"]:not(:last-child)::after {
     background: linear-gradient(var(--nf-brand-primary), color-mix(in oklab, var(--nf-brand-primary) 55%, transparent));
   }
-  .nf-path__row {
+  .nf-ppath__row {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
     gap: var(--nf-space-sm);
     inline-size: 100%;
-    min-block-size: 4rem;
-    padding: var(--nf-space-xs) var(--nf-path-pad);
+    min-block-size: 3.5rem;
+    padding: var(--nf-space-xs) var(--nf-ppath-pad);
     border: 1px solid var(--nf-border-subtle);
     border-radius: var(--nf-radius-card);
     background: var(--nf-surface-raised);
@@ -56,84 +56,78 @@
     font: inherit;
     text-align: start;
   }
-  .nf-path__step[data-state="current"] .nf-path__row {
+  .nf-ppath__step[data-state="current"] .nf-ppath__row {
     border-color: var(--nf-brand-edge);
     box-shadow:
       0 0 0 1px color-mix(in oklab, var(--nf-brand-primary) 18%, transparent),
       var(--nf-elevation-raised);
   }
-  button.nf-path__row {
+  button.nf-ppath__row {
     cursor: pointer;
     transition:
       background-color var(--nf-duration-fast) var(--nf-ease-standard),
       transform var(--nf-duration-press) var(--nf-ease-press);
   }
-  button.nf-path__row:hover {
+  button.nf-ppath__row:hover {
     background: color-mix(in oklab, var(--nf-surface-raised) 88%, var(--nf-content-primary));
   }
-  button.nf-path__row:active {
+  button.nf-ppath__row:active {
     transform: scale(0.985);
   }
-  button.nf-path__row:focus-visible {
+  button.nf-ppath__row:focus-visible {
     outline: 2px solid var(--nf-brand-primary);
     outline-offset: 2px;
   }
 
-  /* The tile: the 3D render on a soft plate, the same plate at every step. */
-  .nf-path__tile {
+  /* The tile: the bare render, small, with no plate or container round it
+     (30 October 2026, the founder: "too big, remove it from the container,
+     clean smaller and mature"). */
+  .nf-ppath__tile {
     display: grid;
     flex: none;
     place-items: center;
-    inline-size: var(--nf-path-tile, 3rem);
-    block-size: var(--nf-path-tile, 3rem);
-    overflow: hidden;
-    border-radius: var(--nf-radius-control);
-    background: radial-gradient(
-      circle at 50% 40%,
-      color-mix(in oklab, var(--nf-brand-primary) 24%, var(--nf-surface-raised)),
-      color-mix(in oklab, var(--nf-brand-primary) 6%, var(--nf-surface-raised)) 72%
-    );
-    box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--nf-brand-primary) 22%, transparent);
+    inline-size: var(--nf-ppath-tile, 2rem);
+    block-size: var(--nf-ppath-tile, 2rem);
+    overflow: visible;
+    background: none;
+    box-shadow: none;
   }
-  /* The renders carry their own breathing room; scaled past it so the
-     object, not the padding, fills the tile. */
-  .nf-path__tile img {
+  .nf-ppath__tile img {
     inline-size: 100%;
     block-size: 100%;
     object-fit: contain;
-    transform: scale(1.2);
   }
-  .nf-path__step[data-state="upcoming"] .nf-path__tile img {
+  .nf-ppath__step[data-state="upcoming"] .nf-ppath__tile img {
     opacity: 0.72;
   }
-  .nf-path__tilenum {
+  .nf-ppath__tilenum {
     font-size: var(--nf-text-row);
     font-weight: 600;
     color: var(--nf-content-secondary);
   }
 
-  .nf-path__text {
+  .nf-ppath__text {
     display: grid;
     flex: 1;
     gap: 0.125rem;
     min-inline-size: 0;
   }
-  .nf-path__label {
+  .nf-ppath__label {
     font-size: var(--nf-text-row);
     font-weight: 600;
     line-height: 1.3;
     overflow-wrap: anywhere;
   }
-  .nf-path__step[data-state="upcoming"] .nf-path__label {
+  .nf-ppath__step[data-state="upcoming"] .nf-ppath__label {
     color: var(--nf-content-secondary);
   }
-  .nf-path__state {
+  .nf-ppath__state {
     font-size: var(--nf-text-caption);
     color: var(--nf-content-muted);
   }
 
   /* The round status control on the right. */
-  .nf-path__mark {
+  .nf-ppath__mark {
     position: relative;
     display: grid;
     flex: none;
@@ -142,38 +136,38 @@
     block-size: 2.25rem;
     border-radius: var(--nf-radius-circle);
   }
-  .nf-path__mark--done {
+  .nf-ppath__mark--done {
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     box-shadow: var(--nf-elevation-raised);
   }
-  .nf-path__mark--upcoming {
+  .nf-ppath__mark--upcoming {
     box-shadow: inset 0 0 0 1.5px var(--nf-border-default);
   }
-  .nf-path__ring {
+  .nf-ppath__ring {
     position: absolute;
     inset: 0;
     inline-size: 100%;
     block-size: 100%;
     transform: rotate(-90deg);
   }
-  .nf-path__ring circle {
+  .nf-ppath__ring circle {
     fill: none;
     stroke-width: 3;
   }
-  .nf-path__ring-track {
+  .nf-ppath__ring-track {
     stroke: var(--nf-border-default);
   }
-  .nf-path__ring-arc {
+  .nf-ppath__ring-arc {
     stroke: var(--nf-brand-primary);
     stroke-linecap: round;
   }
-  .nf-path__marknum {
+  .nf-ppath__marknum {
     font-size: var(--nf-text-caption);
     font-weight: 600;
     color: var(--nf-content-secondary);
   }
-  .nf-path__mark--current .nf-path__marknum {
+  .nf-ppath__mark--current .nf-ppath__marknum {
     color: var(--nf-content-primary);
   }
 
@@ -218,7 +212,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    button.nf-path__row,
+    button.nf-ppath__row,
     .nf-pring__arc {
       transition: none;
     }

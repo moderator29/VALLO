@@ -46,6 +46,38 @@ export function isFirstRunSeen(value: string | null | undefined): boolean {
   return value === FIRST_RUN_SEEN || value === FIRST_RUN_SHOWN;
 }
 
+/**
+ * THE FIRST-RUN COOKIE, READ FROM EVERY COPY THE REQUEST CARRIES (29 October
+ * 2026, the founder: Skip and Continue sent him back to the slides, and the
+ * sign-in screen flickered without end).
+ *
+ * A browser can hold two cookies of the same name: one at `/` and a stale one
+ * at another path or on the parent domain, left by an earlier visit or a
+ * webview. It sends both, and a plain `cookies.get` reads whichever comes
+ * first, so the door and the welcome page could each read a different copy and
+ * send the person back and forth for ever. Every reader goes through here: the
+ * strongest word any copy says wins (`seen`, then `shown`), so all of them
+ * agree whatever the browser kept.
+ */
+export function firstRunCookieFrom(cookieHeader: string | null | undefined): string | undefined {
+  if (!cookieHeader) return undefined;
+  let found: string | undefined;
+  for (const part of cookieHeader.split(";")) {
+    const at = part.indexOf("=");
+    if (at < 0 || part.slice(0, at).trim() !== FIRST_RUN_COOKIE) continue;
+    let value = part.slice(at + 1).trim();
+    try {
+      value = decodeURIComponent(value);
+    } catch {
+      /* Not encoded: taken as it is. */
+    }
+    if (value === FIRST_RUN_SEEN) return FIRST_RUN_SEEN;
+    if (value === FIRST_RUN_SHOWN) found = FIRST_RUN_SHOWN;
+    else found ??= value;
+  }
+  return found;
+}
+
 /** `/welcome` itself: the person went THROUGH the slides (or skipped them) this sitting. */
 export function isFirstRunLeft(value: string | null | undefined): boolean {
   return value === FIRST_RUN_SEEN;
@@ -70,6 +102,9 @@ export function firstRunCookieString(secure: boolean): string {
 export function rememberFirstRunSeen(): boolean {
   if (typeof document === "undefined") return false;
   try {
+    /* Stale copies at another path or on the parent domain go first, so the
+       one at `/` is the only one left (see `firstRunCookieFrom`). */
+    for (const stale of staleFirstRunCookies(window.location.hostname)) document.cookie = stale;
     document.cookie = firstRunCookieString(window.location.protocol === "https:");
     return document.cookie
       .split(";")
@@ -77,6 +112,21 @@ export function rememberFirstRunSeen(): boolean {
   } catch {
     return false;
   }
+}
+
+/** Expiry strings for every copy of the cookie that is not the one at `/` on this host. */
+export function staleFirstRunCookies(hostname: string): string[] {
+  const out = [`${FIRST_RUN_COOKIE}=; Path=/welcome; Max-Age=0; SameSite=Lax`];
+  const parts = hostname.split(".");
+  /* The parent domain (`.vallospaces.com` from `www.vallospaces.com`), never an IP or a single label. */
+  if (parts.length > 2 && !/^\d+$/.test(parts[parts.length - 1]!)) {
+    const parent = parts.slice(1).join(".");
+    out.push(`${FIRST_RUN_COOKIE}=; Path=/; Domain=.${parent}; Max-Age=0; SameSite=Lax`);
+  }
+  if (parts.length > 1 && !/^\d+$/.test(parts[parts.length - 1]!)) {
+    out.push(`${FIRST_RUN_COOKIE}=; Path=/; Domain=.${hostname}; Max-Age=0; SameSite=Lax`);
+  }
+  return out;
 }
 
 /**

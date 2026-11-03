@@ -2,7 +2,7 @@
 
 import "@/app/css/inspection.css";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -59,9 +59,12 @@ import { DrawUpAgreement } from "@/components/app/agreements/DrawUpAgreement";
 import { AGREEMENT_STATUS_LABEL } from "@/components/app/agreements/status";
 import { NO_INSPECTION_FEE, PRIVATE_FEE_NOTE, NO_INSPECTION_FEE_HEADLINE } from "@/lib/money/copy";
 import { ViewingDayKit } from "./ViewingDayKit";
-import { ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
+import { MoveViewingSheet, ViewingStepSheet, ViewingTimeSheet, type StepResult } from "./ViewingSheets";
+import { myViewingMoveOptions, rescheduleMyViewing } from "@/lib/viewings/actions";
 import { viewingWords } from "./viewing-words";
 import { disputeNoShow, reportNoShow } from "@/lib/inspections/no-show-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { uploadToStorage } from "@/lib/media/upload";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -223,12 +226,12 @@ export function InspectionSheet({
   } = viewingWords(viewingCopy);
   const w = flowCopy;
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the card, if any: a time to offer, or a final
      move asked before it is made. */
   const [sheet, setSheet] = useState<
-    null | "propose" | "reschedule" | "decline" | "cancelLister" | "withdraw" | "cancelRenter" | "noShow" | "dispute"
+    null | "propose" | "reschedule" | "decline" | "cancelLister" | "withdraw" | "cancelRenter" | "noShow" | "dispute" | "move"
   >(null);
   /* A second tap while the first is in flight is dropped, not sent twice. */
   const inFlight = useRef(false);
@@ -381,10 +384,15 @@ export function InspectionSheet({
         setError(w.photoFailed);
         return;
       }
-      const upload = await client
-        .storage.from("inspection-photos")
-        .uploadToSignedUrl(target.data.path, target.data.token, file, { contentType });
-      if (upload.error) {
+      const upload = await uploadToStorage({
+        supabase: client,
+        bucket: "inspection-photos",
+        path: target.data.path,
+        body: file,
+        contentType,
+        signedToken: target.data.token,
+      });
+      if (!upload.ok) {
         setError(w.photoFailed);
         return;
       }
@@ -953,6 +961,11 @@ export function InspectionSheet({
                   {VIEWING_WORDS.offerAnother}
                 </Button>
               )}
+              {side === "requester" && (
+                <Button variant="secondary" size="sm" disabled={pending} onClick={() => setSheet("move")} data-testid="inspection-move">
+                  Move to another time
+                </Button>
+              )}
               <Button
                 variant="quiet"
                 size="sm"
@@ -1030,6 +1043,14 @@ export function InspectionSheet({
           onOpenChange={(next) => setSheet(next ? sheet : null)}
           words={sheet === "reschedule" ? RESCHEDULE_WORDS : PROPOSE_WORDS}
           onSubmit={(when, note) => answerWith("PROPOSED", when, note)}
+        />
+      )}
+      {sheet === "move" && (
+        <MoveViewingSheet
+          open
+          onOpenChange={(next) => setSheet(next ? "move" : null)}
+          loadTimes={() => myViewingMoveOptions({ id: inspection.id })}
+          onMove={(slotAt) => rescheduleMyViewing({ id: inspection.id, slotAt }).then(settle)}
         />
       )}
       {(sheet === "decline" || sheet === "cancelLister") && (

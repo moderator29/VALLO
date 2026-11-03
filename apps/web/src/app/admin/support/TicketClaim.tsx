@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { releaseTicket, takeTicket } from "@/lib/admin/support-desk-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -20,7 +21,7 @@ export function TicketClaim({
   holder: { name: string | null; mine: boolean } | null;
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   const run = (verb: "take" | "release") =>

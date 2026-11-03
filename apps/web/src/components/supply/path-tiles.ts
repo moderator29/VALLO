@@ -1,4 +1,3 @@
-import { icon3dSrc, type Icon3DName } from "@/components/ui/icon-3d";
 import { TIERED_OBJECTS, solidSrc, tieredSrc, type TieredObjectName } from "@/design-system/icons/object-assets";
 
 /**
@@ -14,37 +13,38 @@ import { TIERED_OBJECTS, solidSrc, tieredSrc, type TieredObjectName } from "@/de
  * its number instead. The role crops stay on disk, referenced by nothing.
  */
 const tier = (name: TieredObjectName): string => tieredSrc(TIERED_OBJECTS[name]);
-const three = (name: Icon3DName): string => icon3dSrc(name);
+/** The founder's glyph sheet of 1 November 2026, cut into one transparent 256px file each. */
+const glyph = (name: string): string => `/brand/glyphs/${name}.png`;
 
 /** The listing wizard's eight steps (`ListingWizard` STEP_KEYS). */
 export const LISTING_STEP_TILES: Readonly<Record<string, string>> = {
-  basics: three("home-small"),
-  photos: tier("camera"),
-  location: tier("map-pin"),
+  basics: glyph("house"),
+  photos: glyph("empty-photos"),
+  location: glyph("map-pin"),
   amenities: tier("estate-gate"),
-  utilities: three("power"),
-  pricing: three("price-tag"),
-  guestView: three("search"),
-  submit: tier("paper-plane"),
+  utilities: glyph("listing-live"),
+  pricing: glyph("wallet"),
+  guestView: glyph("search"),
+  submit: glyph("shield-check"),
 };
 
 /** The host wizard's steps (`HostStepId`, `lib/host/onboarding.ts`). */
 export const HOST_STEP_TILES: Readonly<Record<string, string>> = {
-  "host-type": three("hotel"),
-  business: tier("office-tower"),
-  registration: tier("seal-plus"),
-  representative: three("id-check"),
-  hotel: three("hotel"),
-  "room-types": three("stay-rated"),
-  rates: three("price-tag"),
-  place: three("shortlet"),
-  "house-rules": three("checklist"),
-  facilities: tier("villa-pool"),
-  restaurant: three("restaurant"),
-  tables: tier("cup-saucer"),
-  payout: three("bank"),
-  consent: three("contract"),
-  review: tier("paper-plane"),
+  "host-type": glyph("hotel"),
+  business: glyph("apartment"),
+  registration: glyph("shield-check"),
+  representative: glyph("ai-permissions"),
+  hotel: glyph("hotel"),
+  "room-types": glyph("bed"),
+  rates: glyph("wallet"),
+  place: glyph("house"),
+  "house-rules": glyph("listing-draft"),
+  facilities: glyph("villa"),
+  restaurant: glyph("shop"),
+  tables: glyph("empty-tables"),
+  payout: glyph("wallet"),
+  consent: glyph("handshake"),
+  review: glyph("shield-check"),
 };
 
 /**
@@ -52,9 +52,9 @@ export const HOST_STEP_TILES: Readonly<Record<string, string>> = {
  * let, a hotel, a restaurant.
  */
 export const HOST_TYPE_TILES: Readonly<Record<string, string>> = {
-  individual: three("shortlet"),
-  business: three("hotel"),
-  restaurant: three("restaurant"),
+  individual: glyph("house"),
+  business: glyph("hotel"),
+  restaurant: glyph("shop"),
 };
 
 /**

@@ -78,10 +78,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the lock's Face ID or fingerpri
   it(
     "enrolled: the biometric is the primary, the passcode the second, and the keypad waits for it",
     async () => {
-      const { page, close } = await mountInBrowser({ entry: entry(true), reducedMotion: true });
+      const { page, close } = await mountInBrowser({ entry: entry(true), reducedMotion: true, init: device("cancel") });
       try {
         await page.getByTestId("passcode-passkey").waitFor();
-        expect(await page.getByTestId("passcode-passkey").textContent()).toContain(copy.passkeyUnlock);
+        expect(await page.getByTestId("passcode-passkey").textContent()).toContain(copy.passkeyUnlockBy["this-device"]);
         expect(await page.getByTestId("passcode-keypad").count()).toBe(0);
         await page.getByTestId("passcode-use-keypad").click();
         await page.getByTestId("passcode-keypad").waitFor();

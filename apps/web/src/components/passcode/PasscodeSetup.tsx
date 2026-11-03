@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useId, useRef, useState, useTransition } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { forgetLocalPasscode, rememberPasscode } from "@/lib/passcode/local-verifier";
 import { useRouter } from "next/navigation";
 import { plural, type Locale } from "@vallo/i18n/core";
@@ -23,6 +23,7 @@ import { Keypad, PasscodeDots } from "./Keypad";
 import { PasscodeFrame } from "./PasscodeFrame";
 import type { PasscodeCopy } from "./PasscodeLock";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type Step = "current" | "enter" | "confirm";
 
@@ -83,7 +84,7 @@ export function PasscodeSetup({
   const [needsProof, setNeedsProof] = useState(false);
   const [shake, setShake] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [leaving, startLeaving] = useTransition();
+  const [leaving, startLeaving] = useSafeTransition();
   const sending = useRef(false);
   /* The passcode is saved and the one-time Face ID offer is on screen. */
   const [offering, setOffering] = useState(false);

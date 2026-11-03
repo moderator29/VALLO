@@ -188,12 +188,12 @@ function Avatar({ author }: { author: PostAuthor | null }) {
 }
 
 /**
- * THE WORDS OF A POST, IN THE SHAPE THEIR LENGTH ASKS FOR (founder, 13 October:
- * "text posts must look as neat as photo posts").
+ * THE WORDS OF A POST, IN THE SHAPE THEIR LENGTH ASKS FOR.
  *
- *   frame    a post with no picture: the words sit INSIDE the rounded
- *            container the pictures use. A short line is set large; a long
- *            one at body size, folded to a few lines with "Read more".
+ *   frame    a post with no picture: the words ARE the post, at reading size,
+ *            as tall as they are, the way X sets one (29 October 2026; it used
+ *            to sit in a rounded box with a short line set large). A long one
+ *            folds to eight lines with "Read more".
  *   caption  a post with pictures: the words sit ABOVE the picture, folded to
  *            a few lines the same way.
  *
@@ -201,15 +201,16 @@ function Avatar({ author }: { author: PostAuthor | null }) {
  * it keeps its own tap and does not open the post. On the post's own page
  * (`detail`) nothing is folded: that page is where the whole post is read.
  */
-const SHORT_MAX = 90;
 const FOLD = { frame: { chars: 320, lines: 8 }, caption: { chars: 200, lines: 5 } } as const;
 
 export function shapeOfText(text: string, mode: "frame" | "caption", detail: boolean) {
   const plain = text.trim();
   const lines = plain.split("\n").length;
-  const big = mode === "frame" && plain.length <= SHORT_MAX && lines <= 2;
+  /* A text post reads at reading size, the way X sets one (29 October 2026,
+     the founder: "Hey" sat alone in a big box). Nothing is blown up. */
+  const big = false;
   const fold = FOLD[mode];
-  const long = !detail && !big && (plain.length > fold.chars || lines > fold.lines);
+  const long = !detail && (plain.length > fold.chars || lines > fold.lines);
   return { big, long };
 }
 
@@ -227,7 +228,7 @@ function PostText({
   system: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const { big, long } = shapeOfText(text, mode, detail);
+  const { long } = shapeOfText(text, mode, detail);
   const clamped = long && !open;
   return (
     <>
@@ -235,7 +236,6 @@ function PostText({
         text={text}
         className={[
           "nf-post__body nf-pc__text",
-          big ? "nf-pc__text--big" : "",
           clamped ? "nf-pc__text--clamped" : "",
           system ? "nf-post__body--system" : "",
         ]
@@ -552,7 +552,14 @@ export function PostCard({
 
         <div className="nf-pc__who">
           {isSystem ? (
-            <span className="nf-pc__name">Vallo</span>
+            /* Vallo's own notes carry the platinum mark, the administrator's
+               tier, a size up from a member's tick so it reads as the house. */
+            <span className="nf-pc__nameline">
+              <span className="nf-pc__name">Vallo</span>
+              <span className="nf-pc__tick nf-pc__tick--house">
+                <TierBadge tier="platinum" size={20} />
+              </span>
+            </span>
           ) : isBot ? (
             <>
               <span className="nf-pc__name">Vallo AI</span>
@@ -666,13 +673,16 @@ export function PostCard({
           </div>
         </>
       ) : textFrame ? (
-        <div className="nf-pc__frame nf-pc__textframe" ref={mediaRef}>
+        /* WORDS ALONE ARE WORDS (29 October 2026, the founder: "Hey" sat in
+           a big gradient box). A text post is the text, at reading size, as
+           tall as it is, the way X sets one: no frame around it. */
+        <div className="nf-pc__plaintext" ref={mediaRef}>
           {editor ? (
             editor
           ) : (
             <PostText text={post.body as string} mode="frame" detail={detail} words={words} system={isSystem} />
           )}
-          {place ? <div className="nf-pc__chips nf-pc__chips--text">{place}</div> : null}
+          {place ? <div className="nf-pc__plainplace">{place}</div> : null}
         </div>
       ) : place ? (
         <div className="nf-pc__plainplace">{place}</div>

@@ -1016,6 +1016,9 @@ export const en = {
            reader and a search engine all read it as one. */
         registeredOfficeLabel: "Registered office",
         stayConnected: "Stay connected",
+        followUs: "Follow Vallo",
+        /** The accessible name of a social link; `{network}` is the network. */
+        onNetwork: "Vallo on {network}",
         newsletterBody: "New listings, product news and the occasional honest update.",
         emailLabel: "Email address",
         emailPlaceholder: "Enter your email",
@@ -1368,19 +1371,19 @@ export const en = {
     backToHome: "Back to home",
     otherWays: "Other ways to continue",
     resetTitle: "Reset your password",
-    resetLead: "Type the email address on your account and we will send you a link to set a new password.",
-    resetSend: "Send the reset link",
-    resetSentLead: "Check your inbox.",
-    resetNotArrived: "Nothing after a few minutes? Look in spam, and check the address you typed. You can ask again from the sign-in screen.",
+    resetLead: "Type the email on your account and we will send you a six digit code.",
+    resetSend: "Send the code",
+    resetSentLead: "We sent a code to your inbox.",
+    resetNotArrived: "Nothing after a few minutes? Look in spam, or ask again from the sign-in screen.",
     resetExpiredTitle: "That link has expired",
     resetExpiredLead: "A reset link lasts an hour and works once. Ask for a new one and open it on the same device.",
     /* The code fallback for a reset link opened somewhere else: another
        phone, another browser, or a mail app's own browser. The code works
        on any device, where the link only works where it was asked for. */
-    resetHaveCode: "Opened the email somewhere else? Type the code from it instead.",
+    resetHaveCode: "Type the six digits from the email to set a new password.",
     resetEnterCode: "Enter the code",
     resetCodeTitle: "Enter your reset code",
-    resetCodeLead: "Type your email address and the code from the reset email. The code works on any device, once.",
+    resetCodeLead: "Type your email and the six digit code we sent you.",
     resetCodeLabel: "Code",
     resetCodeSubmit: "Check the code",
     resetCodeAskAgain: "Ask for a new code",
@@ -2954,6 +2957,22 @@ export const en = {
       },
       photoCount: "{count} photos",
       photoCountOne: "1 photo",
+      /* The completeness meter on a listing card: steps done out of steps, never a score. */
+      completeness: {
+        label: "Listing steps done",
+        progress: "{done} of {total} done",
+        allDone: "Everything in place",
+        next: {
+          details: "Next: finish the details",
+          price: "Next: set the price",
+          description: "Next: describe the property",
+          photos: "Next: add photos",
+          amenities: "Next: choose the amenities",
+          video: "Next: add a walkthrough video",
+          utilities: "Next: say how power and water work",
+          landmark: "Next: add a landmark",
+        },
+      },
       actions: {
         edit: "Edit",
         submit: "Send for review",
@@ -5045,6 +5064,15 @@ export const en = {
       similar: "See similar nearby",
     },
     /* B3: the Saved compare (lib/saved/compare.ts). */
+    /* The income line on a rental (backlog row 26): arithmetic, no verdict. */
+    affordability: {
+      title: "Rent against your income",
+      label: "Your monthly income",
+      hint: "Typed here and kept on this phone. It is never sent.",
+      rentShare: "The rent is about {share} of one month of your income.",
+      moveInMonths: "The move-in total is about {months} months of your income.",
+      note: "Arithmetic only. It does not say whether this place suits you.",
+    },
     compare: {
       open: "Compare",
       openLabel: "Compare your saved places side by side",
@@ -5068,6 +5096,19 @@ export const en = {
       from: "from",
       view: "Open",
       close: "Close",
+      /* The /compare page (backlog row 7). */
+      page: {
+        title: "Compare places",
+        lede: "Side by side, each fact from the listing's own record.",
+        emptyTitle: "Nothing to compare yet",
+        emptyBody: "Choose Add to compare on two or more places and they open here side by side.",
+        emptyAction: "Browse places",
+        oneTitle: "Add one more place",
+        oneBody: "A comparison needs at least two places. Add another from search or your saved places.",
+        missing: "{count} of these places are no longer available and are left out.",
+        browse: "Back to search",
+        pick: "Choose two of these places to set side by side.",
+      },
     },
     shelf: {
       searchPlaceholder: "Area, city or landmark",
@@ -5281,6 +5322,8 @@ export const en = {
         tabMap: "Map",
         mapLead: "The area. The exact address comes with your confirmation.",
         mapLeadTable: "The area. The full address is in your reservation.",
+        copyAddress: "Copy address",
+        openInMaps: "Open in Maps",
         area: "Area",
         photoTour: "Photo tour",
         photos: "{count} photographs",
@@ -5782,7 +5825,7 @@ export const en = {
           name: "Full name",
           phone: "Phone number",
           nin: "National identity number (NIN)",
-          ninHint: "Eleven digits. You can add it later if you do not have it to hand.",
+          ninHint: "Eleven digits.",
           assurance: "A person at Vallo reads your application, and every listing, before anything is published.",
         },
         where: {
@@ -6912,6 +6955,18 @@ export const en = {
       minutes: "{n} min",
       seconds: "{n} s",
       callBack: "Call {name} back, {call}",
+      /**
+       * The quiet one-line row in the thread (`callRowText`): no name, the
+       * kind first, then what became of it. `{outcome}` is one of the
+       * `outcome*` words above. English until translated; other locales
+       * fall back.
+       */
+      rowMissed: "Missed {call}",
+      rowEnded: "{Call} ended",
+      rowEndedFor: "{Call} ended, {duration}",
+      rowOutcome: "{Call} {outcome}",
+      rowOutcomeSoft: "{Call}, {outcome}",
+      callBackShort: "Call back",
     },
     viewer: {
       label: "Photos and videos in this chat",

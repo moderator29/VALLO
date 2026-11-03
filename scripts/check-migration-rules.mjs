@@ -181,6 +181,9 @@ export const KNOWN = new Map([
   /* RLS for the five story tables was enabled one file later, in
      20260804143318_stories_rules_counters_and_safety.sql. */
   ["20260804143149_stories_are_their_own_thing.sql:M3", "RLS enabled in 20260804143318"],
+  /* The listing page now reads lister_confirmed_at for "Confirmed available";
+     the grant to anon, on that one date column only, is 20261029134320. */
+  ["20260930102453_c5_lister_confirms_still_available.sql:M2", "anon read of the date column granted in 20261029134320"],
 ]);
 
 /**

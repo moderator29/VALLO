@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink, type ButtonVariant } from "@/components/ui/Button";
@@ -17,6 +17,7 @@ import {
   type RecoveryState,
 } from "@/lib/admin/reads/chargebacks-model";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -169,7 +170,7 @@ function OverrideSheet({
   const router = useRouter();
   const [reason, setReason] = useState("");
   const [result, setResult] = useState<ActionResult<unknown> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const succeeded = Boolean(result?.ok);
   const blocked = reason.trim().length < REASON_MIN;
   const submit = () =>
@@ -264,7 +265,7 @@ function MoveSheet({ row, offer, copy, locale, onClose }: { row: MoveCase; offer
   const [recoveredNow, setRecoveredNow] = useState("");
   const [alreadyRecovered, setAlreadyRecovered] = useState(false);
   const [result, setResult] = useState<ActionResult<unknown> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const nowKobo = /^\d{1,12}(\.\d{1,2})?$/.test(recoveredNow.replace(/[,\s]/g, "")) ? Math.round(Number(recoveredNow.replace(/[,\s]/g, "")) * 100) : 0;
   const blocked = note.trim().length < REASON_MIN || (offer.asksRecovered === true && nowKobo <= 0);
@@ -399,7 +400,7 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
   const [status, setStatus] = useState("");
   const [note, setNote] = useState("");
   const [result, setResult] = useState<Awaited<ReturnType<typeof openChargeback>> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const blocked = reference.trim().length < 3 || disputeId.trim().length === 0 || amount.trim().length === 0 || note.trim().length < REASON_MIN;
   const succeeded = result?.ok === true ? result.data : null;
@@ -520,7 +521,7 @@ export function ChargebackNoteForm({ chargebackId, copy }: { chargebackId: strin
   const d = copy.detail;
   const [note, setNote] = useState("");
   const [result, setResult] = useState<ActionResult<null> | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const submit = () =>
     startTransition(async () => {
       try {

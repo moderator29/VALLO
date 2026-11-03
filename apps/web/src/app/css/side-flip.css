@@ -565,14 +565,22 @@
     box-shadow: var(--nf-plate-shadow);
     perspective: 400px;
   }
+  /* THE COIN IS BRAND BLUE AT NIGHT AND BARE IN PAPER (30 October 2026, the
+     founder: "don't make it black on dark mode, our dark mode branding colour;
+     on light mode only the icon"). No black disc, no grey ring. */
+  .nf-side-switch__ring {
+    background: var(--nf-brand-tint-3);
+    border-color: var(--nf-brand-tint-4);
+    box-shadow: none;
+  }
   .nf-side-switch__coin {
     display: grid;
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
     border-radius: var(--nf-radius-circle);
-    background: var(--nf-glass-fill-strong);
-    box-shadow: inset 0 0 0 1px var(--nf-glass-rim);
+    background: var(--nf-brand-tint-2);
+    box-shadow: none;
     transform-style: preserve-3d;
     transition: transform var(--nf-duration-base) var(--nf-ease-spring);
   }

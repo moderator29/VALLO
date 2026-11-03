@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { readMyPayments } from "@/lib/money/history";
+import { RowDownload } from "@/components/app/account/rows";
 import { parseBefore } from "@/lib/money/history-model";
 import { HISTORY_NOT_A_BALANCE } from "@/lib/money/copy";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -67,6 +68,17 @@ export default async function PaymentsPage({
           <HistoryUnavailable retryHref="/payments" />
         </div>
       ) : (
+        <>
+        {/* The member's own payments as a CSV, read under their own session (`/api/statement`). */}
+        <div className="mt-inline">
+          <RowDownload
+            href="/api/statement"
+            icon="arrow-down"
+            label="Download statement"
+            sub="Your payments and refunds as a spreadsheet file (CSV)."
+            testId="payments-statement"
+          />
+        </div>
         <PaymentsView
           summary={read.summary}
           entries={read.entries}
@@ -76,6 +88,7 @@ export default async function PaymentsPage({
           locale={locale}
           show={typeof params.show === "string" ? params.show : null}
         />
+        </>
       )}
     </main>
   );

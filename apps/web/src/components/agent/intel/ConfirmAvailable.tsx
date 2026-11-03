@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -32,7 +33,7 @@ export function ConfirmAvailable({
   failed: string;
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [state, setState] = useState<"idle" | "done" | "failed">("idle");
 
   const confirm = () =>

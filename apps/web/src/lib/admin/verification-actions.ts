@@ -83,7 +83,7 @@ export async function recordVerificationCheck(
      `refuse_self_review` trigger and `review_kyc_document`); the four rungs
      were the one decision a member of staff who is also an agent could take
      about themselves, and each one raises the tier guests read. */
-  if (agent.user_id === access.user.id) {
+  if (agent.user_id === access.user.id && !access.isFounder) {
     return fail("You cannot record a check on your own verification. Leave it for another reviewer.");
   }
 

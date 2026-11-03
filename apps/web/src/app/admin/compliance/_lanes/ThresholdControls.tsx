@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { approveThresholdDecision, decideThresholdEvent } from "@/lib/compliance/threshold-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["complianceThreshold"];
 
 function useRun() {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const run = (work: () => Promise<{ ok: boolean; error?: string }>) => {
     setError(null);

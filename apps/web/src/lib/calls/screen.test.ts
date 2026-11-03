@@ -228,3 +228,16 @@ describe("the staff forms", () => {
     expect(fill("{missing} stays", {})).toBe("{missing} stays");
   });
 });
+
+describe("mediaErrorKind on a phone's own wording (29 October 2026)", () => {
+  it("reads Safari's missing media devices as unsupported, not as an unnamed failure", () => {
+    expect(mediaErrorKind(new TypeError("undefined is not an object (evaluating 'navigator.mediaDevices.getUserMedia')"))).toBe("insecure");
+    const unsupported = new Error("device is unsupported");
+    unsupported.name = "DeviceUnsupportedError";
+    expect(mediaErrorKind(unsupported)).toBe("insecure");
+  });
+  it("still calls a refusal a refusal", () => {
+    expect(mediaErrorKind(new DOMException("denied", "NotAllowedError"))).toBe("denied");
+    expect(mediaErrorKind(new Error("something else entirely"))).toBe("other");
+  });
+});

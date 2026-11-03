@@ -93,6 +93,8 @@ export async function messageVenue(input: {
   if (existing.error) return fail(schemaOrDown(existing.error.code));
 
   let conversationId: string | null = (existing.data as { id: string } | null)?.id ?? null;
+  /* True only for a thread THIS call made: the one that may be taken back. */
+  let createdHere = false;
   if (!conversationId) {
     /* FULL GATE: the first message to a venue opens a new conversation. */
     const phoneGate = await phoneGateFor(session.supabase, session.user.id, "message");
@@ -127,13 +129,43 @@ export async function messageVenue(input: {
       }
     } else {
       conversationId = (created.data as { id: string }).id;
+      createdHere = true;
     }
   }
   if (!conversationId) return fail("We could not open this conversation just now. Please try again.");
 
-  const sent = await sendMessage({ conversationId, body });
+  let sent: Awaited<ReturnType<typeof sendMessage>>;
+  try {
+    sent = await sendMessage({ conversationId, body });
+  } catch (error) {
+    if (createdHere) await discardEmptyThread(conversationId, session.user.id);
+    throw error;
+  }
+  /* The first message did not go: do not leave an empty conversation in both
+     inboxes (27 October 2026 audit). */
+  if (!sent.ok && createdHere) await discardEmptyThread(conversationId, session.user.id);
   if (!sent.ok) return sent;
   return ok({ conversationId });
+}
+
+/**
+ * Take back a conversation this request created whose first message failed.
+ * Only ever the caller's own thread, and only while it holds no message at
+ * all, so a thread that somebody has since written in is never touched.
+ * Best effort: a failure here leaves the empty thread exactly as it was.
+ */
+async function discardEmptyThread(conversationId: string, guestId: string): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { count, error } = await admin
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("conversation_id", conversationId);
+    if (error || (count ?? 0) > 0) return;
+    await admin.from("conversations").delete().eq("id", conversationId).eq("guest_id", guestId);
+  } catch {
+    /* Left as it was. */
+  }
 }
 
 /** 42703 / PGRST204 / 22P02: the column or the enum value is not live yet. */

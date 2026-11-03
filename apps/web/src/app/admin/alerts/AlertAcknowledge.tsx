@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { acknowledgeRiskAlert } from "@/lib/admin/actions";
 import { ACK_COPY } from "./ack-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -18,7 +19,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 export function AlertAcknowledge({ alertId }: { alertId: string }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   return (

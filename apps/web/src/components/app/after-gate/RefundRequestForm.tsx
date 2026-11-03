@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,7 @@ import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { REFUND_ROUTE } from "@/lib/money/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -40,7 +41,7 @@ export function RefundRequestForm({
   const [reason, setReason] = useState(reasons[0]?.code ?? "guest_choice");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   /*
    * The request is filed. The page refreshes when the sheet CLOSES rather
    * than now: the refreshed page draws the dated ask in place of this form,

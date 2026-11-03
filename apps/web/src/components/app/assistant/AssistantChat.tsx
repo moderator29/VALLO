@@ -22,15 +22,16 @@ import type {
 } from "@/lib/assistant/types";
 import { hrefForListing } from "@/lib/listings/href";
 import type { ListingKind } from "@/lib/listings/types";
+import type { AssistantCard } from "@/lib/assistant/types";
 import { BackControl } from "@/components/ui/BackControl";
 import { Button } from "@/components/ui/Button";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import {
   AssistantSidebar,
-  type Language,
-  type Tone,
 } from "./AssistantSidebar";
 import { AssistantSettingsSheet } from "./AssistantSettingsSheet";
+import { AssistantBlocks, isBlockEvent, type AssistantBlock } from "./AssistantBlocks";
+import { DEFAULT_PREFS, FRESH_AFTER_MS, loadPrefs, savePrefs, type AssistantPrefs } from "@/lib/assistant/prefs";
 import {
   clearStoredThreads,
   deriveTitle,
@@ -41,7 +42,7 @@ import {
   type Thread,
 } from "./threads";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { AiConsentSheet } from "@/components/app/ai/AiConsentSheet";
+import { recordAiConsent } from "@/lib/ai/consent-actions";
 import { AI_CONSENT_REQUIRED_CODE } from "@/lib/ai/consent";
 import { WORKSPACE_FRAMES, type AssistantWorkspace } from "@/lib/assistant/workspace";
 import { Icon3D } from "@/components/ui/Icon3D";
@@ -185,6 +186,8 @@ export function AssistantChat({
   viewer,
   seed,
   aiConsented = false,
+  privateAccess = false,
+  picks = [],
   workspace,
   t,
 }: {
@@ -199,6 +202,10 @@ export function AssistantChat({
   /** STORE-07: whether this person has agreed to the AI disclosure. The
       server route refuses without it either way. */
   aiConsented?: boolean;
+  /** The member has switched the assistant on and granted more than discovery: say so, quietly. */
+  privateAccess?: boolean;
+  /** "Picked for you by VALLO AI", computed on the server for a member who allowed it. */
+  picks?: AssistantCard[];
   /** The signed-in person, for the mark beside their own bubbles. Absent for a guest. */
   viewer?: { initials: string; avatarUrl: string } | undefined;
   /**
@@ -220,15 +227,14 @@ export function AssistantChat({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false);
   const [streamingThread, setStreamingThread] = useState<string | null>(null);
-  const [tone, setTone] = useState<Tone>("Concise");
-  const [language, setLanguage] = useState<Language>("English");
+  const [prefs, setPrefs] = useState<AssistantPrefs>(DEFAULT_PREFS);
+  /* Always the latest, for the restore and visibility effects that run once. */
+  const prefsRef = useRef(prefs);
+  prefsRef.current = prefs;
   const [draft, setDraft] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  /* STORE-07: nothing is sent until this person has agreed to the disclosure.
-     `pending` is the question they asked before agreeing, sent on agreement. */
+  /* STORE-07: the first send records the agreement the server checks (see `send`). */
   const [consent, setConsent] = useState<"yes" | "ask" | "declined">(aiConsented ? "yes" : "ask");
-  const [consentSheet, setConsentSheet] = useState(false);
-  const [pending, setPending] = useState<string | null>(null);
   /* Which answer was just copied (its label says so for a moment), and
      whether the reader has scrolled away from the newest part of the thread,
      which is when a streaming answer gets its island. */
@@ -239,8 +245,14 @@ export function AssistantChat({
   // A question can arrive from anywhere on the platform via ?q=, e.g. the home
   // banner's quick-ask bar. It seeds the composer after mount, never auto-sends.
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
     if (q) setDraft((d) => (d ? d : q));
+    const about = params.get("about");
+    if (about && /^[0-9a-f-]{36}$/i.test(about)) {
+      aboutRef.current = about;
+      setDraft((d) => (d ? d : "Tell me about this place."));
+    }
   }, []);
 
   /* Mobile drawer: `historyOpen` mounts it, `historyShown` slides it in, so
@@ -253,23 +265,56 @@ export function AssistantChat({
   const drawerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  /* "Ask Vallo AI about this place": a listing id from the address, checked by the server. */
+  const aboutRef = useRef<string | null>(null);
   const streamSeq = useRef(0);
 
   /* Restore saved conversations once on mount, then persist every change.
      A seeded preview restores the fixtures instead and persists nothing. */
   useEffect(() => {
-    const restored = seed ? seed.threads : loadThreads();
+    const stored = seed ? DEFAULT_PREFS : loadPrefs();
+    if (!seed) {
+      setPrefs(stored);
+      prefsRef.current = stored;
+    }
+    const restored = seed ? seed.threads : stored.keep ? loadThreads() : [];
     setThreads(restored);
     const latest = [...restored].sort((a, b) => b.updatedAt - a.updatedAt)[0];
-    if (latest) setActiveId(latest.id);
+    /* A conversation left for ten minutes stays in history; the screen opens on
+       a fresh chat, the way the other assistants do. A seeded preview keeps its
+       own. */
+    if (latest && (seed || Date.now() - latest.updatedAt < FRESH_AFTER_MS[stored.freshAfter])) setActiveId(latest.id);
     if (seed?.thinking && latest) setStreamingThread(latest.id);
     setHydrated(true);
   }, [seed]);
 
+  /* Coming back to a page left open for ten minutes or more: a new chat. */
+  useEffect(() => {
+    if (seed) return;
+    let hiddenAt: number | null = null;
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        hiddenAt = Date.now();
+        return;
+      }
+      if (hiddenAt !== null && Date.now() - hiddenAt >= FRESH_AFTER_MS[prefsRef.current.freshAfter]) setActiveId(null);
+      hiddenAt = null;
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [seed]);
+
   useEffect(() => {
     if (!hydrated || seed) return;
-    saveThreads(threads);
-  }, [threads, hydrated, seed]);
+    if (prefs.keep) saveThreads(threads);
+    else clearStoredThreads();
+  }, [threads, hydrated, seed, prefs.keep]);
+
+  /* The settings are stored on this device, and travel with every question. */
+  useEffect(() => {
+    if (!hydrated || seed) return;
+    savePrefs(prefs);
+  }, [prefs, hydrated, seed]);
 
   const active = activeId ? threads.find((t) => t.id === activeId) : undefined;
   const messages = active?.messages ?? [];
@@ -385,12 +430,17 @@ export function AssistantChat({
           return { ...m, listings: merged };
         });
 
+      const addBlock = (block: AssistantBlock) =>
+        patchMessage(threadId, assistantId, (m) => ({ ...m, blocks: [...(m.blocks ?? []), block] }));
+
       try {
         const res = await fetch("/api/assistant", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             messages: history,
+            prefs: prefsRef.current,
+            ...(aboutRef.current ? { about: aboutRef.current } : {}),
             ...(serverId ? { threadId: serverId } : {}),
             ...(workspace ? { workspace } : {}),
           }),
@@ -407,9 +457,9 @@ export function AssistantChat({
              Nothing was sent to the AI; ask now. */
           const j = (await res.json().catch(() => null)) as { code?: string; message?: string } | null;
           if (j?.code === AI_CONSENT_REQUIRED_CODE) {
-            setText(j.message ?? "Agree to how the assistant works before asking it anything.");
+            /* The record did not reach the server: ask again quietly on the next send. */
+            setText(j.message ?? "Something went wrong. Send it again.");
             setConsent("ask");
-            setConsentSheet(true);
             return;
           }
         }
@@ -449,6 +499,8 @@ export function AssistantChat({
                 appendText(event.text);
               } else if (event.type === "listings") {
                 addListings(event.items);
+              } else if (isBlockEvent(event)) {
+                addBlock(event);
               } else if (event.type === "thread") {
                 const id = event.id;
                 setThreads((prev) =>
@@ -466,7 +518,7 @@ export function AssistantChat({
 
         // A stream that ended with nothing to show still deserves an answer.
         patchMessage(threadId, assistantId, (m) =>
-          m.text.trim() || (m.listings?.length ?? 0) > 0
+          m.text.trim() || (m.listings?.length ?? 0) > 0 || (m.blocks?.length ?? 0) > 0
             ? m
             : { ...m, text: NETWORK_ERROR_MESSAGE, error: true },
         );
@@ -493,9 +545,17 @@ export function AssistantChat({
       const text = raw.trim();
       if (!text) return;
       if ((decided ?? consent) !== "yes") {
-        /* Asked before anything leaves the device. The draft stays put. */
-        setPending(text);
-        setConsentSheet(true);
+        /* SENDING IS AGREEING (29 October 2026, the founder: no "Before you
+           ask" card in the chat). The quiet line under the box says answers
+           are written by AI; the first send records the agreement the server
+           checks, then goes. The draft stays put if it cannot be recorded. */
+        setConsent("yes");
+        void recordAiConsent()
+          .then((result) => {
+            if (result.ok) send(text, "yes");
+            else setConsent("ask");
+          })
+          .catch(() => setConsent("ask"));
         return;
       }
       setDraft("");
@@ -592,20 +652,18 @@ export function AssistantChat({
     streamingHere &&
     (!lastMessage ||
       lastMessage.role === "user" ||
-      (lastMessage.text === "" && (lastMessage.listings?.length ?? 0) === 0));
+      (lastMessage.text === "" && (lastMessage.listings?.length ?? 0) === 0 && (lastMessage.blocks?.length ?? 0) === 0));
 
   const sidebar = () => (
     <AssistantSidebar
       threads={threads}
       activeId={activeId}
-      tone={tone}
-      language={language}
+      prefs={prefs}
       onSelect={selectThread}
       onNew={newChat}
       onDelete={deleteThread}
       onClearAll={clearAll}
-      onToneChange={setTone}
-      onLanguageChange={setLanguage}
+      onPrefsChange={setPrefs}
     />
   );
 
@@ -739,6 +797,11 @@ export function AssistantChat({
                     {copy.emptyBody}
                   </p>
                 </div>
+                {picks.length > 0 ? (
+                  <div className="w-full text-left" data-testid="assistant-picks">
+                    <AssistantBlocks blocks={[{ type: "cards", title: "Picked for you by VALLO AI", items: picks }]} onAsk={(prompt) => send(prompt)} />
+                  </div>
+                ) : null}
               </div>
             )}
 
@@ -784,7 +847,7 @@ export function AssistantChat({
                 );
               }
               // An assistant answer appears once it has something to show.
-              if (!m.text.trim() && (m.listings?.length ?? 0) === 0) return null;
+              if (!m.text.trim() && (m.listings?.length ?? 0) === 0 && (m.blocks?.length ?? 0) === 0) return null;
               const thisStreaming = streamingHere && m.id === lastMessage?.id;
               /* The answer card's state is a fact about the turn, never a
                  guess: streaming while the stream is open, error when the
@@ -852,6 +915,7 @@ export function AssistantChat({
                       Retry
                     </Button>
                   )}
+                  {m.blocks && m.blocks.length > 0 && <AssistantBlocks blocks={m.blocks} onAsk={(prompt) => send(prompt)} />}
                   {m.listings && m.listings.length > 0 && (
                     <ul className="nf-ai__results" aria-label="Matching listings">
                       {m.listings.map((l, i) => (
@@ -914,33 +978,6 @@ export function AssistantChat({
             ))}
           </div>
 
-          {consentSheet ? (
-            <AiConsentSheet
-              onAgreed={() => {
-                /* Agreeing sends the question they had asked; declining
-                   leaves the draft where it was and the assistant off. */
-                setConsentSheet(false);
-                setConsent("yes");
-                if (pending) send(pending, "yes");
-                setPending(null);
-              }}
-              onDeclined={() => {
-                setConsentSheet(false);
-                setConsent("declined");
-                setPending(null);
-              }}
-            />
-          ) : null}
-          {consent === "declined" && !consentSheet ? (
-            <p className="nf-body-sm text-[var(--nf-content-secondary)]" data-testid="ai-declined">
-              The assistant stays off, and nothing you typed was sent. Search is live, and{" "}
-              <Link href="/contact" className="underline">
-                a person at support
-              </Link>{" "}
-              will answer you without any AI.
-            </p>
-          ) : null}
-
           {/* ----------------------------------------------------- composer */}
           <form
             onSubmit={(e) => {
@@ -977,16 +1014,22 @@ export function AssistantChat({
               className="nf-ai__send"
             />
           </form>
+          {privateAccess ? (
+            <p className="nf-ai__note" data-testid="ai-private-banner">
+              Private access is on. <Link href="/settings/ai-assistant">Settings</Link>
+            </p>
+          ) : null}
+          <p className="nf-ai__note" data-testid="ai-note">
+            Answers are written by AI and can be wrong. Never share passwords or card numbers.
+          </p>
         </section>
       </div>
 
       <AssistantSettingsSheet
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        tone={tone}
-        language={language}
-        onToneChange={setTone}
-        onLanguageChange={setLanguage}
+        prefs={prefs}
+        onPrefsChange={setPrefs}
         onClearAll={clearAll}
         threadCount={threads.length}
       />

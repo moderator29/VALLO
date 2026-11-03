@@ -37,6 +37,15 @@ export type PushPayload = {
   urgent: boolean;
   /** B11: an fyi (a like, a follow): shown without sound or vibration. */
   quiet?: boolean;
+  /**
+   * How long the push service may hold this for a phone that is off or out of
+   * reach, in seconds. Set only for an incoming call's ring (it stops ringing
+   * after 45 s, and a push that arrives later must not open a dead call). Left
+   * unset, each transport keeps its own long default (four hours).
+   */
+  ttlSeconds?: number;
+  /** True for the ring of an incoming call: its own channel, loud, time sensitive. */
+  call?: boolean;
   /** V-53: up to two buttons, each a destination on our origin. */
   actions?: import("./actions").PushAction[];
 };

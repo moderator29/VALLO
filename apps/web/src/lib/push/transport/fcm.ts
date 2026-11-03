@@ -239,11 +239,13 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
           data: { href: payload.href, tag: payload.tag, actions: actionsAsData(payload.actions) },
           android: {
             priority: payload.urgent ? "HIGH" : "NORMAL",
+            /* An incoming call's ring is not worth delivering late. */
+            ...(payload.ttlSeconds ? { ttl: `${payload.ttlSeconds}s` } : {}),
             notification: {
               /* The channel must already exist on the handset or Android 8
                  and above drops the notification silently. It is created by
                  the shell; the name here has to match. */
-              channel_id: "vallo_default",
+              channel_id: payload.call ? "vallo_calls" : payload.quiet && payload.tag === "vallo-missed-call" ? "vallo_missed" : "vallo_default",
               /* Android's own collapsing, so one conversation is one row in
                  the shade rather than eleven. */
               tag: payload.tag,

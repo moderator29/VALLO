@@ -3,6 +3,7 @@ import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { fill } from "@/app/agent/_copy";
 import type { ListingFunnelRead } from "@/app/agent/_intel/space-read";
 import { stageOf } from "./space-model";
+import { State } from "@/components/ui/State";
 
 /**
  * EACH LISTING'S WEEK, ONE ROW EACH (D25: the per-listing funnel is an inner
@@ -32,7 +33,7 @@ export function ListingWeeks({
       <h2 className="nf-h3">{copy.title}</h2>
       <p className="nf-caption mt-2xs max-w-[68ch] text-[var(--nf-content-secondary)]">{copy.blurb}</p>
       {listings.length === 0 ? (
-        <p className="nf-caption mt-md text-[var(--nf-content-secondary)]">{t.shape.funnel.empty}</p>
+        <State compact kind="empty" icon="report-stats" title={t.shape.funnel.empty} className="mt-md" />
       ) : (
         <ListGroup className="mt-md">
           {listings.map((listing) => (

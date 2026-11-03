@@ -35,7 +35,7 @@ import {
   URL_PATH_HEADER,
 } from "@/lib/i18n/public-locale";
 import { LOCALE_COOKIE } from "@/lib/locale.constants";
-import { FIRST_RUN_COOKIE, FIRST_RUN_MAX_AGE, FIRST_RUN_SHOWN, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
+import { FIRST_RUN_COOKIE, FIRST_RUN_MAX_AGE, FIRST_RUN_SHOWN, firstRunCookieFrom, isFirstRunSeen } from "@/components/app/welcome/first-run-seen";
 import { doorFirstRunRedirect } from "@/app/(auth)/sign-in/first-run-gate";
 import { ANON_VIEWER, VIEWER_HEADER, VIEWER_PATH_HEADER, viewerStamp, wantsViewerStamp } from "@/lib/offline/viewer-stamp";
 import {
@@ -162,6 +162,9 @@ const PUBLIC_SEGMENTS = new Set([
   "docs",
   "help",
   // Legal and policy. Never close one of these.
+  // The four VALLO AI Assistant documents (`/ai/terms`, `/ai/privacy`,
+  // `/ai/permissions`, `/ai/security`): read before the assistant is turned on.
+  "ai",
   "cancellations",
   // The disclaimer is a legal page like the other four and was gated by
   // omission: a stranger following a footer link got a sign-in wall.
@@ -630,7 +633,7 @@ export async function proxy(request: NextRequest) {
     if (
       request.method === "GET" &&
       (pathname.replace(/\/+$/, "") || "/") === "/welcome" &&
-      !isFirstRunSeen(request.cookies.get(FIRST_RUN_COOKIE)?.value)
+      !isFirstRunSeen(firstRunCookieFrom(request.headers.get("cookie")))
     ) {
       response.cookies.set(FIRST_RUN_COOKIE, FIRST_RUN_SHOWN, {
         path: "/",
@@ -702,7 +705,7 @@ export async function proxy(request: NextRequest) {
   if (request.method === "GET" && (pathname === "/sign-in" || pathname === "/sign-up") && isDocumentRequest(request)) {
     const firstRun = doorFirstRunRedirect({
       door: pathname,
-      cookie: request.cookies.get(FIRST_RUN_COOKIE)?.value,
+      cookie: firstRunCookieFrom(request.headers.get("cookie")),
       params: searchParamsRecord(request.nextUrl.searchParams),
     });
     if (firstRun) return finish(NextResponse.redirect(new URL(firstRun, request.url), 307));

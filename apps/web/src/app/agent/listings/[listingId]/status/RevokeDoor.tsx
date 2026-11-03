@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { revokeShareLink } from "@/lib/share/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -19,7 +20,7 @@ export function RevokeDoor({ token, copy }: { token: string; copy: Copy }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   return (
     <div className="flex flex-col gap-row" data-testid="revoke-door">

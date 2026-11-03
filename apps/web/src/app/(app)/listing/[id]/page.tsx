@@ -1,7 +1,10 @@
+import { AskAiAbout } from "@/components/app/assistant/AskAiAbout";
+import { RecordAssistantOpen } from "@/components/app/assistant/RecordAssistantOpen";
 import type { Metadata } from "next";
 import { forProofStrip } from "@/lib/i18n/slice";
 import { StillAvailable } from "@/components/app/listing/StillAvailable";
 import { readRecentlyLet } from "@/lib/availability/queries";
+import { readListingAgentHoursLine } from "@/lib/agent/hours-read";
 import { readViewingSlots } from "@/lib/viewings/queries";
 import { readOpenInspectionFor } from "@/lib/inspections/queries";
 import { ViewingSlots } from "@/components/app/inspections/ViewingSlots";
@@ -26,7 +29,13 @@ import {
   type RentPeriod,
 } from "@/lib/listings/pricing";
 import { formatDate, formatNumber } from "@vallo/i18n";
-import { listedAge, listedAgeText, staleMonthOptions } from "@/lib/listings/listed-age";
+import {
+  confirmedAge,
+  confirmedAgeText,
+  listedAgeBesideConfirmation,
+  listedAgeText,
+  staleMonthOptions,
+} from "@/lib/listings/listed-age";
 import { isModestExample } from "@/lib/listings/example-imagery";
 import { ListingCompound } from "@/components/app/listing/ListingCompound";
 import { ListingService } from "@/components/app/listing/ListingService";
@@ -63,6 +72,7 @@ import { OwnershipSeenMark } from "@/components/trust/OwnershipSeenMark";
 import { ValloRecord } from "@/components/app/trust/ValloRecord";
 import { readListingCredentials } from "@/lib/trust/credentials-read";
 import { ListingMoveInBlock } from "@/components/app/listing/ListingMoveInBlock";
+import { AffordabilityLine } from "@/components/app/listing/AffordabilityLine";
 import { OwnerAvailabilityLine, PropertyOffers } from "@/components/app/listing/LandlordFacts";
 import { ExactPlace } from "@/components/app/listing/ExactPlace";
 import { ListingCodeRow } from "@/components/app/listing/ListingCode";
@@ -399,6 +409,7 @@ export default async function ListingDetailPage({
     neighboursFlag,
     access,
     recentlyLet,
+    agentHours,
     doorDeclared,
     listerCard,
     ownershipSeen,
@@ -449,6 +460,8 @@ export default async function ListingDetailPage({
     /* V-14's "recently let" line, for a rental. PERF-SWEEP 3: read with the
        rest rather than in series while the page renders. */
     isRental ? readRecentlyLet(listing.id) : Promise.resolve(null),
+    /* An agent's own "usually available" hours, when they set any. */
+    listing.listerRole === "agent" ? readListingAgentHoursLine(listing.id) : Promise.resolve(null),
     /* V-57: what a nightly stay declared for the door, so the reserve panel
        states every cost before booking, as the hotel stay page does. */
     isBookable && !listing.isDemo ? readDeclaration({ listingId: listing.id }) : Promise.resolve(null),
@@ -605,7 +618,15 @@ export default async function ListingDetailPage({
 
   /* V-22: the listed age, from the same pure rule the card uses. */
   const ageNow = new Date();
-  const age = isExample ? null : listedAge(listing.publishedAt, ageNow);
+  const confirmed = isExample ? null : confirmedAge(listing.listerConfirmedAt, listing.publishedAt, ageNow);
+  const age = isExample ? null : listedAgeBesideConfirmation(listing.publishedAt, confirmed, ageNow);
+  const confirmedLine = confirmed
+    ? confirmedAgeText(confirmed, {
+        today: t.shape.listed.confirmedToday,
+        yesterday: t.shape.listed.confirmedYesterday,
+        days: t.shape.listed.confirmedDays,
+      })
+    : null;
   const listedLine = age
     ? listedAgeText(
         age,
@@ -972,6 +993,7 @@ export default async function ListingDetailPage({
       listingRole={listing.listerRole ?? null}
       lister={listerCard}
       call={callButton}
+      hours={agentHours}
     />
   );
 
@@ -1016,6 +1038,13 @@ export default async function ListingDetailPage({
           details are the left column and a sticky summary card is the right:
           the price, the lister and the one primary action.
         */}
+        {session.state === "signed-in" && !listing.isDemo ? (
+          <div className="px-gutter pb-xs">
+            <AskAiAbout listingId={listing.id} />
+            {/* Noted for "Picked for you" only when the member allowed it (server-checked). */}
+            <RecordAssistantOpen listingId={listing.id} />
+          </div>
+        ) : null}
         <div className="nf-detail-grid grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-2xl">
           {/* --------------------------------------------- main column */}
           <div className="min-w-0">
@@ -1039,6 +1068,7 @@ export default async function ListingDetailPage({
           media={media}
           drawn={isModestExample(listing)}
           initialSaved={initialSaved}
+          shareQr={t.frontDoor.shareQr}
           backFallback="/home"
           /* The market is no longer a mark on the photograph: it is the
              status chip above the title, where the reference puts it. The
@@ -1099,6 +1129,13 @@ export default async function ListingDetailPage({
                   {listedLine && (
                     <p className={`mt-inline-tight ${TYPE.body}`} data-testid="detail-listed-age">
                       {listedLine}
+                      {confirmedLine ? (
+                        <>
+                          {" "}
+                          <span aria-hidden="true">·</span>{" "}
+                          <span data-testid="detail-confirmed-age">{confirmedLine}</span>
+                        </>
+                      ) : null}
                     </p>
                   )}
 
@@ -1180,6 +1217,17 @@ export default async function ListingDetailPage({
                     <div data-testid="detail-lead-move-in">
                       <ListingMoveInBlock listing={listing} locale={locale} t={t} />
                     </div>
+                    {/* Backlog row 26: rent and move-in total against the
+                        reader's own income, on their device, never an example. */}
+                    {!listing.isDemo && (
+                      <AffordabilityLine
+                        rentMinor={listing.priceMinor}
+                        period={listing.pricePeriod === "month" || listing.pricePeriod === "quarter" ? listing.pricePeriod : "year"}
+                        moveInMinor={listing.moveInCostMinor ?? null}
+                        copy={t.catalogue.affordability}
+                        locale={locale}
+                      />
+                    )}
                     {/* V-69: ask for one clip before crossing Lagos. Behind the
                         show_me flag; never on an example, which has nobody to
                         film anything. */}
@@ -1658,6 +1706,7 @@ export default async function ListingDetailPage({
                       messageHref={messageHref}
                       lister={listerCard}
                       call={callButton}
+                      hours={agentHours}
                       className="nf-lister--flat"
                     />
                   ) : null}

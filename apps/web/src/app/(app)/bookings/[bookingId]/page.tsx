@@ -10,6 +10,16 @@ import { TenancyCard } from "@/components/app/bookings/TenancyCard";
 import { BookingDetailCard } from "./BookingDetailCard";
 import { Tracker } from "@/components/ui/Tracker";
 import type { StatusTone } from "@/components/ui/StatusPill";
+import type { GlyphName } from "@/design-system/icons/glyphs";
+
+/** The founder's glyph for each stay state. */
+const BOOKING_GLYPH: Record<string, GlyphName> = {
+  PENDING: "booking-requested",
+  CONFIRMED: "booking-confirmed",
+  COMPLETED: "booking-completed",
+  CANCELLED: "booking-cancelled",
+  NO_SHOW: "booking-disputed",
+};
 import { deriveBookingSteps } from "@/components/app/threads/booking-steps";
 import { lagosDay, lagosWhen } from "@/components/app/threads/when";
 import { readBookingStateEvents } from "@/lib/bookings/state-events";
@@ -205,6 +215,7 @@ export default async function BookingDetailPage({
         className="mt-inline"
         label={bookingWords.label}
         icon="bed"
+        glyph={BOOKING_GLYPH[booking.status] ?? "booking-requested"}
         title={statusWords}
         tone={BOOKING_TONE[booking.status] ?? "neutral"}
         since={latest ? `${t.threads.reservation.status[latest.to] ?? latest.to} · ${lagosWhen(latest.at, locale)}` : null}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { matchesSearch } from "@/lib/places/reference";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/social/places-model";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -63,7 +64,7 @@ export function PlacePicker({
   const locale = useClientLocale();
   const router = useRouter();
   const [pendingCode, setPendingCode] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);

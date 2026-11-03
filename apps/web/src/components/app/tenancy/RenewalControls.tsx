@@ -1,12 +1,13 @@
 "use client";
 
 import { NairaField } from "@/components/ui/NairaField";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { answerExitAccount, answerRenewal, offerRenewal, relistFromTenancy } from "@/lib/tenancy/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["tenancy"];
@@ -21,7 +22,7 @@ type Copy = Dictionary["afterTheGate"]["tenancy"];
  */
 function useRun() {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void) {
     setError(null);

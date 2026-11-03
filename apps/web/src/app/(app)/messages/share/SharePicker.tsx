@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { sendMessage } from "@/lib/messages/actions";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/Button";
 import { type BadgeTier } from "@/lib/trust/badge-tier";
 import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /** The picker's words, `experienceInbox.share.picker`, from the server page. */
@@ -224,7 +225,7 @@ function ConfirmSend({
   copy: ShareCopy;
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   const send = () => {

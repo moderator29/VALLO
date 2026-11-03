@@ -1,15 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reveal } from "@/components/site/Reveal";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toggleSave } from "@/lib/saved/actions";
@@ -34,6 +26,7 @@ import { changeLine, type SavedChange, type SavedChangeCopy } from "@/lib/saved/
 import Link from "next/link";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -76,6 +69,8 @@ export type SavedBoardItem = {
   card: ReactNode;
   /** B13: what moved on this listing lately (lib/saved/changes.ts). */
   changes?: SavedChange[];
+  /** Under the card: which lists it is in, and the sheet to change that (signed in, saved to the account). */
+  lists?: ReactNode;
   /** B13: where "See similar nearby" goes when it is no longer available. */
   similarHref?: string;
 };
@@ -138,7 +133,7 @@ export function SavedBoard({
 }) {
   const locale = useClientLocale();
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [phase, setPhase] = useState<Record<string, Phase>>({});
   const [messages, setMessages] = useState<Record<string, string>>({});
   const [hydrating, setHydrating] = useState(false);
@@ -412,6 +407,7 @@ export function SavedBoard({
                         <UiIcon name="heart" size={16} filled />
                       </button>
                     </div>
+                    {item.lists ?? null}
                     {changeCopy && lastSaved !== undefined ? (
                       <ChangeLine item={item} since={lastSaved} locale={locale} copy={changeCopy} />
                     ) : null}

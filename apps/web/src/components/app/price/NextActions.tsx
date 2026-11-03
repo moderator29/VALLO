@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveSearch } from "@/lib/saved/searches-actions";
 import { listingSearchHref, listingSearchParams, type CheckFacts } from "@/lib/price-check/next-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -28,7 +29,7 @@ export function NextActions({
   const href = listingSearchHref(facts);
   const [state, setState] = useState<"idle" | "saved" | "failed">("idle");
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const setAlert = () => {
     setError(null);

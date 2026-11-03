@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { missingRequired, offeredSlots, type ShotSlot, type UtilityClaims } from "@/lib/listings/shot-list";
 import { readPhotoSlots, setPhotoSlot } from "@/lib/listings/shot-list-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["shots"];
@@ -29,7 +30,7 @@ export function ShotList({
 }) {
   const [labels, setLabels] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const ids = photos.map((photo) => photo.id).join(",");
 
   useEffect(() => {

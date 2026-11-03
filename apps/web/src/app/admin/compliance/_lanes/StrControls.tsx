@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
@@ -22,6 +22,7 @@ import {
   type StrCase,
   type StrSource,
 } from "@/lib/admin/str";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -78,7 +79,7 @@ export function StrOpenForm({
   const [subject, setSubject] = useState(prefill.subject);
   const [grounds, setGrounds] = useState("");
   const [said, setSaid] = useState<Said>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function submit() {
     setSaid(null);
@@ -167,7 +168,7 @@ export function StrOpenForm({
 
 export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; words: StrSlideWords }) {
   const [said, setSaid] = useState<Said>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [reasons, setReasons] = useState("");
   const [note, setNote] = useState("");
   const [reference, setReference] = useState("");

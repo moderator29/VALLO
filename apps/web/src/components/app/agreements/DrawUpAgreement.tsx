@@ -1,11 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { openRentAgreement } from "@/lib/agreements/actions";
 import { PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
 import { withDone } from "@/lib/ui/success-moments";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -19,7 +20,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: string; minDate: string }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [moveIn, setMoveIn] = useState(minDate);
   const [handover, setHandover] = useState(minDate);
   const [notes, setNotes] = useState("");

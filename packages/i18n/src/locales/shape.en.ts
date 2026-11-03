@@ -34,6 +34,10 @@ export const shapeEn = {
     days: "Listed {n} days ago",
     stale: "Listed in {month}, not confirmed since",
     basis: "Newest first, by the day each listing went live.",
+    /* The lister's own recent "still available" (backlog row 33). */
+    confirmedToday: "Confirmed available today",
+    confirmedYesterday: "Confirmed available yesterday",
+    confirmedDays: "Confirmed available {n} days ago",
     newMark: "New",
     newMarkLabel: "New since your last visit",
   },
@@ -282,6 +286,7 @@ export const shapeEn = {
       expired: "That ask ran out after 48 hours.",
       "bad-path": "That clip did not upload to the right place. Try again.",
       "too-long": "The clip must be 30 seconds or shorter.",
+      "too-big": "That clip is too large. Film it again a little shorter, or at a lower quality, and send it.",
       failed: "That did not work. Try again.",
     },
   },

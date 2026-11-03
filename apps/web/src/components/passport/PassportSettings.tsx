@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import type { RoleLineCopy } from "@/lib/profile/role-line";
 import { RowSwitch, SettingsGroup } from "@/components/app/account/rows";
@@ -15,6 +15,7 @@ import {
 } from "@/lib/passport/model";
 import { buildPassportView, type PassportCopy } from "@/lib/passport/view";
 import { PassportBook } from "./PassportBook";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 const LINE_ICON = {
   photo: "user",
@@ -52,7 +53,7 @@ export function PassportSettings({
 }) {
   const [settings, setSettings] = useState<Settings>(initial);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const confirmed = useRef<Settings>(initial);
   const recorded = new Set(recordedLines(facts));
 

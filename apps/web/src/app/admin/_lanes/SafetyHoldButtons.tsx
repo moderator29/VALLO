@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { decideSafetyHold } from "@/lib/admin/safety-holds";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -17,7 +18,7 @@ export function SafetyHoldButtons({
   copy: { working: string; clear: string; extend: string };
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function act(action: "clear" | "extend") {
     setError(null);

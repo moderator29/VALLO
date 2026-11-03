@@ -3,12 +3,14 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { FirstRun } from "@/components/app/welcome/FirstRun";
 import { WelcomeStage } from "@/components/app/welcome/WelcomeStage";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   FIRST_INTEREST_COOKIE,
-  FIRST_RUN_COOKIE,
+  firstRunCookieFrom,
+  isAuthDoor,
   isFirstRunLeft,
+  withPassedFlag,
   firstRunNext,
   isSignUpForm,
 } from "@/components/app/welcome/first-run-seen";
@@ -75,12 +77,14 @@ export default async function WelcomePage({
   const carried = isPropertyType(carriedRaw) ? carriedRaw : null;
   /* Only `seen` (the click that left the slides) skips them; the proxy's
      `shown` opens the doors but still shows the slides here. */
-  const seen = isFirstRunLeft(jar.get(FIRST_RUN_COOKIE)?.value);
+  const seen = isFirstRunLeft(firstRunCookieFrom((await headers()).get("cookie")));
 
   const tour = (Array.isArray(params.tour) ? params.tour[0] : params.tour) === "1";
   const plan = planFirstRun({ session, next, carried, seen, tour });
   /* Seen once, then out of the way (the founder, 29 September). */
-  if (plan.kind === "skip") redirect(plan.to);
+  /* A door is always handed the passed flag, so it can never send the person
+     back here whatever cookie it reads (29 October 2026). */
+  if (plan.kind === "skip") redirect(isAuthDoor(plan.to) ? withPassedFlag(plan.to) : plan.to);
 
   if (plan.kind === "guest") {
     return (

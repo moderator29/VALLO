@@ -1,3 +1,4 @@
+import { State } from "@/components/ui/State";
 import { Amount } from "@/components/ui/Amount";
 import { EmptyState, Section, TYPE } from "@/components/app/Screen";
 import { DiscoveryEmpty } from "@/components/app/search/DiscoveryEmpty";
@@ -251,7 +252,7 @@ export function NeighbourhoodFacts({
   if (facts === null || facts.listingCount === 0) {
     return (
       <Section title={copy.heading}>
-        <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.empty}</p>
+        <State compact kind="empty" icon="report-stats" title={copy.empty} className="" />
       </Section>
     );
   }

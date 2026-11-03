@@ -8876,35 +8876,6 @@ export type Database = {
           },
         ]
       }
-      passport_shares: {
-        Row: {
-          conversation_id: string
-          revoked_at: string | null
-          shared_at: string
-          user_id: string
-        }
-        Insert: {
-          conversation_id: string
-          revoked_at?: string | null
-          shared_at?: string
-          user_id: string
-        }
-        Update: {
-          conversation_id?: string
-          revoked_at?: string | null
-          shared_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "passport_shares_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
-            referencedRelation: "conversations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       payluk_commission_sweeps: {
         Row: {
           currency: string | null
@@ -11586,24 +11557,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      renter_passports: {
-        Row: {
-          enabled: boolean
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          enabled?: boolean
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          enabled?: boolean
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
       }
       reports: {
         Row: {
@@ -17079,18 +17032,6 @@ export type Database = {
         }[]
       }
       my_rent_share: { Args: { p_contributor: string }; Returns: Json }
-      my_renter_passport: {
-        Args: never
-        Returns: {
-          enabled: boolean
-          inspections_attended: number
-          member_since: string
-          nimc_matched_at: string
-          phone_confirmed: boolean
-          shared_in: number
-          tenancies: number
-        }[]
-      }
       my_reports: {
         Args: never
         Returns: {
@@ -17208,10 +17149,6 @@ export type Database = {
       }
       passcode_status: { Args: never; Returns: Json }
       passcode_verify: { Args: { p_code: string }; Returns: Json }
-      passport_shared_here: {
-        Args: { p_conversation: string }
-        Returns: boolean
-      }
       payment_attempts_due_for_check: {
         Args: { p_limit?: number; p_mode: string }
         Returns: {
@@ -17649,16 +17586,6 @@ export type Database = {
         Args: { p_actor: string; p_note?: string; p_rent_payment: string }
         Returns: Json
       }
-      renter_passport_for_thread: {
-        Args: { p_conversation: string }
-        Returns: {
-          inspections_attended: number
-          member_since: string
-          nimc_matched_at: string
-          phone_confirmed: boolean
-          tenancies: number
-        }[]
-      }
       reopen_edd_review: { Args: { p_user: string }; Returns: string }
       reopen_listing: {
         Args: { p_listing: string; p_note: string }
@@ -17923,7 +17850,6 @@ export type Database = {
         Args: { p_photo: string; p_slot: string }
         Returns: Json
       }
-      set_renter_passport: { Args: { p_enabled: boolean }; Returns: boolean }
       settle_booking_charge: {
         Args: {
           p_amount_minor: number
@@ -17969,10 +17895,6 @@ export type Database = {
           total_move_in_cost_minor: number
           water_supply: string
         }[]
-      }
-      share_renter_passport: {
-        Args: { p_conversation: string; p_share: boolean }
-        Returns: string
       }
       shell_context: { Args: never; Returns: Json }
       signup_method_for_email: { Args: { p_email: string }; Returns: string }

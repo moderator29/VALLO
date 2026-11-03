@@ -3,13 +3,14 @@
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { Button } from "@/components/ui/Button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { startConversationWithMessage } from "@/lib/messages/actions";
 import { Chip } from "@/components/ui/Chip";
 import { addQuestion, removeQuestion } from "@/lib/enquiry/renter-questions";
 import type { QuickReply } from "@/lib/enquiry/quick-replies";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -47,7 +48,7 @@ export function FirstMessage({
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

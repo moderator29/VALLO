@@ -9,6 +9,7 @@ import { AuthHeroLine } from "./AuthHeroLine";
 import { KeepPillInView } from "./KeepPillInView";
 import { AuthMain } from "./AuthMain";
 import { ForgetOnSignOut } from "@/components/app/offline/ForgetOnSignOut";
+import { DropPassedFlag } from "./DropPassedFlag";
 
 /**
  * Auth shell: one full-height screen, to the Slate references of 29
@@ -38,6 +39,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       {/* V-35, V-77: a phone at the way in keeps nobody's gate code or shortlist. */}
       <ForgetOnSignOut />
       <KeepPillInView />
+      <DropPassedFlag />
       <AuthCurveBlock
         brandLabel={t.a11y.logoHome}
         wordmark={t.auth.wordmark}

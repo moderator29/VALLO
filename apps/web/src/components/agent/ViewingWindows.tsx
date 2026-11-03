@@ -1,12 +1,14 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { removeViewingWindow, saveViewingWindow } from "@/lib/viewings/actions";
 import { windowProblem } from "@/lib/viewings/route";
 import type { ViewingWindow } from "@/lib/viewings/queries";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -48,7 +50,7 @@ export function ViewingWindows({
   const [slotMinutes, setSlotMinutes] = useState<(typeof LENGTHS)[number]>(20);
   const [chosen, setChosen] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function save() {
     const problem = windowProblem({ starts, ends, listingIds: chosen });
@@ -83,7 +85,7 @@ export function ViewingWindows({
       {windows === null || homes === null ? (
         <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>
       ) : windows.length === 0 ? (
-        <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.windowsEmpty}</p>
+        <State compact kind="empty" icon="calendar-check" title={copy.windowsEmpty} className="mt-group" />
       ) : (
         <ul className="mt-group flex flex-col gap-row">
           {windows.map((w) => (

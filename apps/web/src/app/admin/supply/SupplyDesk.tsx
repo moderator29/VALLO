@@ -163,7 +163,7 @@ export function SupplyDesk({
           {!supply ? (
             <Waiting title={c.unreadTitle} body={c.unreadTable} />
           ) : supply.rows.length === 0 ? (
-            <table className="nf-md-table">
+            <div className="nf-md-scroll"><table className="nf-md-table">
               <SupplyHead c={c} />
               <tbody>
                 <TableNote
@@ -180,10 +180,10 @@ export function SupplyDesk({
                   }}
                 />
               </tbody>
-            </table>
+            </table></div>
           ) : (
             <>
-              <table className="nf-md-table">
+              <div className="nf-md-scroll"><table className="nf-md-table">
                 <SupplyHead c={c} />
                 <tbody>
                   {supply.rows.map((row) => (
@@ -222,7 +222,7 @@ export function SupplyDesk({
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
               <NumberedPager
                 base="/admin/supply"
                 params={params}
@@ -353,7 +353,7 @@ function RostersPanel({
         ]}
       />
       {rosters.firms.length === 0 ? (
-        <table className="nf-md-table mt-md">
+        <div className="nf-md-scroll"><table className="nf-md-table mt-md">
           <caption className="sr-only">{c.rostersTitle}</caption>
           <thead>
             <tr>
@@ -374,7 +374,7 @@ function RostersPanel({
               }}
             />
           </tbody>
-        </table>
+        </table></div>
       ) : (
         rosters.firms.map((firm) => (
           <section key={firm.firmId} className="nf-md-roster mt-md" aria-label={firm.firmName ?? c.aFirm}>
@@ -384,7 +384,7 @@ function RostersPanel({
                 {fill(c.firmCounts, { pending: firm.counts.pending, active: firm.counts.active, revoked: firm.counts.revoked })}
               </span>
             </div>
-            <table className="nf-md-table">
+            <div className="nf-md-scroll"><table className="nf-md-table">
               <caption className="sr-only">{fill(c.membersOf, { firm: firm.firmName ?? c.thisFirm })}</caption>
               <thead>
                 <tr>
@@ -414,7 +414,7 @@ function RostersPanel({
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </section>
         ))
       )}

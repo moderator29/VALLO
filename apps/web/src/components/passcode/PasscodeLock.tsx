@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { forgotPasscodeAction, verifyPasscodeAction, type VerifyResult } from "@/lib/passcode/actions";
@@ -17,9 +17,12 @@ import { catchUpWithServer } from "@/lib/passcode/server-catch-up";
 import { Button } from "@/components/ui/Button";
 import { Keypad, PasscodeDots } from "./Keypad";
 import { PasskeyUnlockKey } from "./PasskeyUnlockKey";
+import { readDeviceLock, type DeviceLock } from "@/lib/security/device-lock";
+import { platformLockAvailable } from "@/lib/security/webauthn-client";
 import { PasscodeFrame } from "./PasscodeFrame";
 import { OPEN_HOLD_MS, OPEN_LEAVE_MS, arriveThroughOpenDoor } from "./open-door";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 export type PasscodeCopy = Dictionary["passcode"];
 
@@ -91,7 +94,7 @@ export function PasscodeLock({
   avatarUrl,
   onUnlocked,
   verify = verifyPasscodeAction,
-  passkey = false,
+  passkey: passkeyKept = false,
   userId,
   retryGaps,
 }: {
@@ -118,6 +121,29 @@ export function PasscodeLock({
 }) {
   const titleId = useId();
   const router = useRouter();
+  /* The member holds a platform key, but this device may not be able to ask
+     for it (a desktop browser with no Hello or Touch ID): never offer a method
+     the device lacks (27 October 2026). Optimistic until the browser answers,
+     so a phone does not see the keypad flash first. */
+  /* Biometric first where the member has a platform key; the keypad after. */
+  const [door, setDoor] = useState<"biometric" | "keypad">(passkeyKept ? "biometric" : "keypad");
+  const [deviceCanAsk, setDeviceCanAsk] = useState(true);
+  const [deviceLock, setDeviceLock] = useState<DeviceLock>("this-device");
+  useEffect(() => {
+    if (!passkeyKept) return;
+    setDeviceLock(readDeviceLock());
+    let live = true;
+    void platformLockAvailable().then((ok) => {
+      if (!live) return;
+      setDeviceCanAsk(ok);
+      if (!ok) setDoor("keypad");
+    });
+    return () => {
+      live = false;
+    };
+  }, [passkeyKept]);
+  const passkey = passkeyKept && deviceCanAsk;
+  const passkeyLabel = copy.passkeyUnlockBy[deviceLock];
   const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | null>(mode === "unavailable" ? copy.unavailable : null);
   const [shake, setShake] = useState(0);
@@ -127,12 +153,10 @@ export function PasscodeLock({
     return seconds > 0 ? Date.now() + seconds * 1000 : 0;
   });
   const [now, setNow] = useState(() => Date.now());
-  const [leaving, startLeaving] = useTransition();
+  const [leaving, startLeaving] = useSafeTransition();
   const sending = useRef(false);
   /* The code the network did not answer, kept for Try again with its attempt id. */
   const [stranded, setStranded] = useState<{ code: string; attemptId: string } | null>(null);
-  /* Biometric first where the member has a platform key; the keypad after. */
-  const [door, setDoor] = useState<"biometric" | "keypad">(passkey ? "biometric" : "keypad");
   /* The right answer has landed and the door is opening. */
   const [opening, setOpening] = useState(false);
   const opened = useRef(false);
@@ -458,7 +482,8 @@ export function PasscodeLock({
         <div className="nf-passcode__offer">
           <PasskeyUnlockKey
             variant="door"
-            label={copy.passkeyUnlock}
+            label={passkeyLabel}
+            lock={deviceLock}
             disabled={busy || leaving || opening}
             onUnlocked={() => {
               feedback("confirm");
@@ -509,7 +534,8 @@ export function PasscodeLock({
             accessory={
               passkey && !cooling ? (
                 <PasskeyUnlockKey
-                  label={copy.passkeyUnlock}
+                  label={passkeyLabel}
+            lock={deviceLock}
                   disabled={busy || leaving || opening}
                   onUnlocked={() => {
                     feedback("confirm");

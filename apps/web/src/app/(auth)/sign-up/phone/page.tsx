@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { safeReturnPath } from "@/lib/security/return-path";
+import { resolveSession } from "@/lib/actions/session";
 import { withNext } from "@/lib/auth/next-link";
-import { SIGN_UP_PHONE_PATH, signUpPhoneToConfirm } from "@/lib/phone-otp/signup-step";
-import { SignUpPhoneStep } from "@/components/auth/SignUpPhoneStep";
+import { phoneOwedAtSignup } from "@/lib/phone-otp/signup-gate-server";
+import { SIGNUP_PHONE_PATH } from "@/lib/phone-otp/signup-gate";
+import { safeReturnPath } from "@/lib/security/return-path";
+import { PhoneConfirmForm } from "@/app/(app)/settings/phone/PhoneConfirmForm";
 
 export const metadata: Metadata = {
   title: "Confirm your mobile number",
@@ -15,32 +15,29 @@ export const metadata: Metadata = {
 };
 
 /**
- * SIGN-UP, STEP THREE (2 November 2026): form, email code, THIS, in.
- *
- * Reached from the email code (or the email link) only when a code can reach
- * the number (`lib/phone-otp/signup-step.ts`). Opened any other time it goes
- * straight on: signed out to sign in, already confirmed or nothing to send to
- * onwards to `next`.
+ * THE PHONE STEP OF SIGNING UP (29 October 2026). A new account lands here
+ * after its email is confirmed and stays until a mobile number is confirmed
+ * with a code (`lib/phone-otp/signup-gate.ts` has the rule). Never loops:
+ * signed out goes to sign in; nothing owed goes straight on.
  */
 export const dynamic = "force-dynamic";
 
-export default async function SignUpPhonePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ next?: string | string[] }>;
-}) {
-  const { next: raw } = await searchParams;
-  const candidate = typeof raw === "string" ? safeReturnPath(raw, "") : null;
-  const next = candidate && !candidate.startsWith(SIGN_UP_PHONE_PATH) ? candidate : "/home";
+export default async function SignUpPhonePage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
+  const raw = (await searchParams).next;
+  const candidate = typeof raw === "string" ? safeReturnPath(raw, "") : "";
+  const next = candidate && !candidate.startsWith("/sign-up/phone") ? candidate : "/home";
 
-  if (!isSupabaseConfigured()) redirect("/sign-in?notice=unconfigured");
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-  if (!data.user) redirect(withNext("/sign-in", `${SIGN_UP_PHONE_PATH}?next=${encodeURIComponent(next)}`));
+  const session = await resolveSession();
+  if (session.state === "signed-out") redirect(withNext("/sign-in", SIGNUP_PHONE_PATH));
+  if (session.state !== "signed-in") redirect("/sign-in?notice=unconfigured");
+  if (!(await phoneOwedAtSignup(session.supabase, session.user))) redirect(next);
 
-  const phone = await signUpPhoneToConfirm(supabase, data.user.id);
-  if (!phone) redirect(next);
-
-  const t = getDictionary(await getLocale());
-  return <SignUpPhoneStep t={t} phone={phone} next={next} />;
+  const copy = getDictionary(await getLocale()).trustVisible.phone;
+  return (
+    <section className="mx-auto w-full max-w-md space-y-block px-gutter py-block" data-testid="signup-phone">
+      <h1 className="nf-h2 text-[var(--nf-content-primary)]">{copy.title}</h1>
+      <p className="nf-body text-[var(--nf-content-secondary)]">{copy.why}</p>
+      <PhoneConfirmForm copy={copy} next={next} />
+    </section>
+  );
 }

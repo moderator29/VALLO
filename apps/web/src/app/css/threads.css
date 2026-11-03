@@ -43,6 +43,23 @@
     flex-direction: column;
     min-height: 0;
     height: 100%;
+    width: 100%;
+    max-width: 48rem;
+    margin-inline: auto;
+  }
+  /* Beside the inbox on a desktop the conversation is the whole pane: the
+     header, the messages and the composer run to its edges, as X and
+     WhatsApp Web draw it (29 October 2026, the founder). A phone and a
+     tablet keep the readable column. */
+  .nf-msg-split__thread .nf-thread {
+    max-width: none;
+    margin-inline: 0;
+  }
+  /* The scroller's own scrollbar sits at the pane's edge, thin and quiet,
+     not a bright bar in the middle of the screen. */
+  .nf-thread__scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--nf-border-default) transparent;
   }
 
   /* ------------------------------------------------------------- header */
@@ -165,6 +182,47 @@
     gap: var(--nf-gap-inline-tight);
     flex-shrink: 0;
   }
+  /* X's header: the call and the options are bare glyphs, not plates (29
+     October 2026, the founder: "reduce them to be small how X does it"). The
+     tap target stays 44px; only what is drawn gets quieter. */
+  .nf-thread__actions .nf-btn--icon {
+    background: none;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--nf-brand-quiet);
+  }
+  .nf-thread__actions .nf-thread__call svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+  /* Call and options sit together, and the tap targets overlap their empty
+     margins rather than drawing wide gaps. */
+  .nf-thread__actions {
+    gap: 0;
+  }
+  .nf-thread__actions .nf-btn--icon,
+  .nf-thread__actions .nf-thread__call {
+    margin-inline: -0.375rem;
+  }
+  .nf-thread__title > a {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: inherit;
+  }
+  .nf-thread__back {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    margin-inline-start: -0.5rem;
+    color: var(--nf-content-primary);
+  }
+  .nf-thread__back svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
 
   /* -------------------------------------------------------- the scroller */
 
@@ -219,9 +277,10 @@
      stack under one name the way the render stacks the greeting and the
      card. Sits closer to the bubble above than a new turn does. */
   .nf-msg--cont {
-    margin-top: calc(var(--nf-space-2xs) - var(--nf-gap-row));
+    margin-top: calc(var(--nf-space-3xs) - var(--nf-gap-row));
   }
   .nf-msg--cont > .nf-msg__avatar,
+  .nf-msg--cont > .nf-msg__hit,
   .nf-msg--cont > .nf-msg__side {
     visibility: hidden;
   }
@@ -233,6 +292,7 @@
    * than removed, the way a continuation keeps it.
    */
   .nf-msg--card > .nf-msg__avatar,
+  .nf-msg--card > .nf-msg__hit,
   .nf-msg--card > .nf-msg__side {
     visibility: hidden;
   }
@@ -240,7 +300,9 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    max-width: 84%;
+    max-width: 80%;
+    /* A bubble hugs its words and never stretches to the column. */
+    align-items: flex-start;
   }
   .nf-msg--mine .nf-msg__stack {
     align-items: flex-end;
@@ -263,6 +325,16 @@
   /* The small avatar beside a bubble, in a thinner ring than the header's:
      the person's photo, or their initial on the brand tint (founder, 11
      October 2026). */
+  /* The avatar is a profile link: a 44px target around the 36px photo,
+     pulled back so the row keeps its measure. */
+  .nf-msg__hit {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: -0.25rem;
+  }
   .nf-msg__avatar {
     display: grid;
     place-items: center;
@@ -365,7 +437,7 @@
     padding: var(--nf-space-xs) var(--nf-space-sm);
     border-radius: var(--nf-radius-lg);
     font-size: var(--nf-text-body-sm);
-    line-height: 1.45;
+    line-height: 1.4;
     overflow-wrap: anywhere;
   }
   /* Theirs: a dark glass well with a brand hairline and a faint inner bloom.
@@ -446,33 +518,33 @@
   .nf-bubble__body {
     white-space: pre-wrap;
   }
-  /* Time and the read ticks, on the bubble's last line, right-aligned. */
-  .nf-bubble__foot {
+  /*
+   * THE TIME AND THE TICKS live under the LAST bubble of a run, never inside a
+   * bubble: one small muted line, right aligned for mine and left for theirs,
+   * the way X draws a direct message. The bubble is its words and nothing else,
+   * so "Hii" is a small box. Read ticks take the brand blue; sent and
+   * delivered stay muted, so the blue is the only loud state.
+   */
+  .nf-msg__status {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: var(--nf-space-3xs);
-    margin-top: var(--nf-space-2xs);
+    gap: var(--nf-space-2xs);
+    margin-top: var(--nf-space-3xs);
+    padding-inline: var(--nf-space-2xs);
     font-size: var(--nf-text-overline);
+    line-height: 1.3;
     font-variant-numeric: tabular-nums;
-    opacity: 0.78;
-  }
-  .nf-bubble--theirs .nf-bubble__foot {
     color: var(--nf-content-muted);
-    opacity: 1;
   }
-  /* On the blue sent bubble the time is small text on a fill, so it takes the
-     full on-brand ink: at 0.78 it measured 3.4:1 at night and 3.95:1 in paper
-     (4.5 needed). The hierarchy is the size and the right alignment. */
-  .nf-bubble--mine .nf-bubble__foot {
-    opacity: 1;
+  .nf-msg--mine .nf-msg__status {
+    justify-content: flex-end;
   }
-  .nf-bubble__ticks {
+  .nf-msg__ticks {
     display: inline-flex;
     flex-shrink: 0;
   }
-  .nf-bubble__ticks--read {
-    color: var(--nf-content-on-brand);
+  .nf-msg__ticks--read {
+    color: var(--nf-brand-primary);
   }
   /* The photos in a bubble are `PhotoGroup` and their rules are the "PHOTOS
      IN A BUBBLE" block at the end of this sheet, after the row spec, so the
@@ -1598,28 +1670,12 @@
      past them: it adds nothing to the bubble's own width. */
   .nf-bubble--media > .nf-bubble__body {
     contain: inline-size;
-    padding: var(--nf-space-xs) var(--nf-space-sm) 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
   }
-  .nf-bubble--media > .nf-bubble__foot {
-    margin-top: 0;
-    padding: var(--nf-space-2xs) var(--nf-space-sm) var(--nf-space-xs);
-  }
-  /* Photos with no words: the photos are the whole bubble. The time rides on
-     the photo's lower corner on the media plate, so no strip of bubble fill is
-     left under the picture. */
+  /* Photos with no words: the photos are the whole bubble; the time sits
+     under it like any other, so no strip of bubble fill shows. */
   .nf-bubble--photos {
     background: transparent;
-  }
-  .nf-bubble--photos > .nf-bubble__foot {
-    position: absolute;
-    right: var(--nf-space-2xs);
-    bottom: var(--nf-space-2xs);
-    margin: 0;
-    padding: var(--nf-space-3xs) var(--nf-space-2xs);
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-overlay-media-strong);
-    color: var(--nf-content-on-media);
-    opacity: 1;
   }
   /* A received photo bubble hugs its photo rather than stretching to the
      width of the name row above it. */

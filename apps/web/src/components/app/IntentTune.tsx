@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { adjustInterest } from "@/lib/interests/actions";
 import type { IntentDirection, PropertyType } from "@/lib/interests/model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -76,7 +77,7 @@ export function IntentTune({
   const [ranked, setRanked] = useState(() => interests.includes(type));
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const say = (line: string) => line.replace("{market}", market);
 

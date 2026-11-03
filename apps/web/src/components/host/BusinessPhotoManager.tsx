@@ -1,6 +1,6 @@
 "use client";
 
-import { addBusinessPhoto, removeBusinessPhoto } from "@/lib/host/actions";
+import { addBusinessPhoto, removeBusinessPhoto, reorderBusinessPhotos } from "@/lib/host/actions";
 import { MAX_BUSINESS_PHOTOS } from "@/lib/host/photos";
 import { PhotoManager } from "./PhotoManager";
 import { useHostPageCopy } from "./host-copy";
@@ -39,6 +39,7 @@ export function BusinessPhotoManager({
       }}
       add={({ storagePath }) => addBusinessPhoto({ businessId, storagePath })}
       remove={({ photoId }) => removeBusinessPhoto({ photoId })}
+      reorder={(photoIds) => reorderBusinessPhotos({ subjectId: businessId, photoIds })}
     />
   );
 }

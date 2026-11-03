@@ -30,6 +30,7 @@
  * cannot claim somebody else's object.
  */
 
+import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { withBusinessPrivate } from "../supabase/private-fields";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
@@ -41,7 +42,8 @@ import {
 } from "../actions/session";
 import type { Database } from "../supabase/database.types";
 import { SCRUB_REFUSED_MESSAGE, scrubPublicPhoto } from "../images/scrub";
-import { branchFor, documentPathBelongsTo, missingFrom, type HostType } from "./onboarding";
+import { wrongBranch } from "./branch-guard";
+import { HOST_TYPE_DEFINITIONS, branchFor, documentPathBelongsTo, missingFrom, type HostType } from "./onboarding";
 import { HOST_PHOTO_BUCKET, MAX_BUSINESS_PHOTOS, nextPhotoPosition } from "./photos";
 import { MAX_NIGHTS_IN_ONE_ACT, nightsBetween } from "../stays/inventory";
 import { readMyHostDraft } from "./queries";
@@ -194,9 +196,24 @@ export async function saveHostDraft(input: unknown): Promise<ActionResult<HostDr
      reservation trigger and the admin chip both key on, so the branch answer
      decides the kind rather than sitting beside it. */
   const kindFromType: Partial<Record<HostType, BusinessKind>> = { restaurant: "restaurant" };
+  /* A host type changed without a kind keeps the stored kind only when the
+     new type offers it; otherwise it takes the new type's first kind, so a
+     restaurant that became a shortlet host is never left a restaurant. */
+  const storedKind = (existing?.kind as BusinessKind | null | undefined) ?? null;
+  const switchedKind =
+    data.hostType && !data.kind && storedKind && !HOST_TYPE_DEFINITIONS[data.hostType].kinds.includes(storedKind)
+      ? HOST_TYPE_DEFINITIONS[data.hostType].kinds[0]
+      : undefined;
   const kind: BusinessKind | undefined =
     (data.hostType ? kindFromType[data.hostType] : undefined) ??
-    (data.kind as BusinessKind | undefined);
+    (data.kind as BusinessKind | undefined) ??
+    switchedKind;
+  /* The kind has to be one the host type offers: an individual is never a
+     hotel, and only the restaurant branch is a restaurant. */
+  const typeForKind = (data.hostType ?? (existing?.host_type as HostType | null | undefined)) ?? null;
+  if (kind && typeForKind && !HOST_TYPE_DEFINITIONS[typeForKind].kinds.includes(kind)) {
+    return fail("That kind of business does not match the kind of host you chose. Pick it again on the first step.");
+  }
 
   const now = new Date().toISOString();
   const consents: Record<string, unknown> = {
@@ -448,7 +465,7 @@ export async function submitHostApplication(): Promise<ActionResult<{ businessId
 /** The caller's editable application, or the sentence that says why not. */
 async function editableBusiness(): Promise<
   | { ok: false; result: ActionResult<never> }
-  | { ok: true; businessId: string; userId: string }
+  | { ok: true; businessId: string; userId: string; kind: string | null }
 > {
   const session = await resolveSession();
   if (session.state === "unconfigured") {
@@ -458,7 +475,7 @@ async function editableBusiness(): Promise<
 
   const { data, error } = await session.supabase
     .from("businesses")
-    .select("id, status")
+    .select("id, status, kind")
     .eq("owner_id", session.user.id)
     .in("status", [...APPLICATION_STATUSES])
     .order("created_at", { ascending: false })
@@ -467,8 +484,10 @@ async function editableBusiness(): Promise<
   if (error) return { ok: false, result: fail((await words()).serviceDown) };
   if (!data) return { ok: false, result: fail((await words()).noDraft) };
   if (!EDITABLE.includes(data.status)) return { ok: false, result: fail((await words()).notEditable) };
-  return { ok: true, businessId: data.id, userId: session.user.id };
+  return { ok: true, businessId: data.id, userId: session.user.id, kind: (data as { kind?: string | null }).kind ?? null };
 }
+
+
 
 /**
  * Create or update the property this business lets.
@@ -483,6 +502,8 @@ export async function addAccommodationDraft(
 ): Promise<ActionResult<{ accommodationId: string }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "stay");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(accommodationDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -550,6 +571,8 @@ export async function addRoomTypeDraft(
 ): Promise<ActionResult<{ roomTypeId: string }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "stay");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(roomTypeDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -597,6 +620,8 @@ export async function addRatePlanDraft(
 ): Promise<ActionResult<{ ratePlanId: string }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "stay");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(ratePlanDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -640,6 +665,8 @@ export async function addServiceWindowDraft(
 ): Promise<ActionResult<{ serviceWindowId: string }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "restaurant");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(serviceWindowDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -680,6 +707,8 @@ export async function setRestaurantProfileDraft(
 ): Promise<ActionResult<{ rulesKept: boolean }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "restaurant");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(restaurantProfileDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -1010,6 +1039,55 @@ export async function removeAccommodationPhoto(input: unknown): Promise<ActionRe
   return ok(null);
 }
 
+/* ------------------------------------------------ the order of photographs */
+
+const reorderSchema = z.object({
+  subjectId: z.uuid(),
+  photoIds: z.array(z.uuid()).min(1).max(10),
+});
+
+const REORDER_FAILED = "We could not save the new order just now. Please try again in a moment.";
+
+async function reorderPhotos(
+  fn: "reorder_accommodation_photos" | "reorder_business_photos",
+  input: unknown,
+): Promise<ActionResult<null>> {
+  const parsed = validate(reorderSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  if (new Set(parsed.data.photoIds).size !== parsed.data.photoIds.length) return fail(REORDER_FAILED);
+
+  const session = await resolveSession();
+  if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
+  if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  /* One statement inside the caller's own RLS (the function is security
+     invoker and the positions' unique is deferred), so another host's
+     photographs do not move and a half-applied order cannot be saved. */
+  const rpc = session.supabase.rpc as unknown as (
+    name: string,
+    args: Record<string, unknown>,
+  ) => PromiseLike<{ error: unknown }>;
+  const { error } = await rpc.call(session.supabase, fn, {
+    ...(fn === "reorder_business_photos" ? { p_business: parsed.data.subjectId } : { p_accommodation: parsed.data.subjectId }),
+    p_ids: parsed.data.photoIds,
+  });
+  if (error) return fail(REORDER_FAILED);
+
+  if (fn === "reorder_business_photos") refreshVenueSurfaces();
+  else refreshPropertySurfaces();
+  return ok(null);
+}
+
+/** Save the order of a property's photographs; the first is the cover. */
+export async function reorderAccommodationPhotos(input: unknown): Promise<ActionResult<null>> {
+  return reorderPhotos("reorder_accommodation_photos", input);
+}
+
+/** Save the order of a venue's photographs; the first is the cover. */
+export async function reorderBusinessPhotos(input: unknown): Promise<ActionResult<null>> {
+  return reorderPhotos("reorder_business_photos", input);
+}
+
 /* ------------------------------------------------------ nightly inventory */
 
 /**
@@ -1218,6 +1296,8 @@ export async function setShortletPlaceDraft(
 ): Promise<ActionResult<{ roomTypeId: string }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "stay");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(shortletPlaceDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
@@ -1335,6 +1415,8 @@ export async function setShortletPlaceDraft(
 export async function syncPropertyRatesDraft(): Promise<ActionResult<{ rates: number }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "stay");
+  if (branchRefusal) return branchRefusal;
   const session = await resolveSession();
   if (session.state !== "signed-in") return fail(SIGNED_OUT_MESSAGE);
 
@@ -1410,6 +1492,8 @@ export async function setOpeningHoursDraft(
 ): Promise<ActionResult<{ days: number }>> {
   const guarded = await editableBusiness();
   if (!guarded.ok) return guarded.result;
+  const branchRefusal = wrongBranch(guarded.kind, "restaurant");
+  if (branchRefusal) return branchRefusal;
 
   const parsed = validate(openingHoursDraftSchema(await schemaWords()), input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);

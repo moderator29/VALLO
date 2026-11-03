@@ -72,6 +72,8 @@ beforeEach(() => {
     },
   });
   vi.stubGlobal("fetch", async (url: string) => {
+    /* The attempt report (`reportAttempt`) is telemetry, not part of enrolment. */
+    if (url === "/api/push/enrol-log") return { ok: true, status: 200, json: async () => ({ ok: true }) };
     calls.push(url);
     const reply = replies[url];
     if (reply instanceof Error) throw reply;

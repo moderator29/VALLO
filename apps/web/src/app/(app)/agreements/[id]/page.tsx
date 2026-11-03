@@ -263,6 +263,7 @@ export default async function AgreementPage({
         className="mt-inline"
         label={pw.liveStatus}
         icon={a.kind === "rent" ? "key" : "bed"}
+        glyph={a.status === "cancelled" || a.status === "rejected" ? "listing-rejected" : a.status === "paid" ? "booking-completed" : "empty-agreements"}
         title={statusWords}
         tone={agreementStatusTone(a.status)}
         since={sinceLine}

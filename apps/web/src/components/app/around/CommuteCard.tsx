@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { Anchor, CommuteResult } from "@/lib/listings/commute";
 import { reportCommute } from "@/lib/listings/commute-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -27,7 +28,7 @@ export function CommuteCard({
   const [anchor, setAnchor] = useState(anchors[0]?.id ?? "");
   const [minutes, setMinutes] = useState("");
   const [result, setResult] = useState<CommuteResult | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   if (anchors.length === 0) return null;
   const fill = (text: string) => text.replace("{area}", areaName);
 

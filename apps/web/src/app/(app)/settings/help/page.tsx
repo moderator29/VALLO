@@ -7,6 +7,7 @@ import { SupportChat } from "@/components/app/account/SupportChat";
 import { aiConsentForViewer } from "@/lib/ai/consent-server";
 import { loadMyReports } from "@/lib/reports/my-reports";
 import { MyReports } from "./MyReports";
+import { ReportProblemRow } from "@/components/app/account/ReportProblem";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,6 +42,11 @@ export default async function HelpSettingsPage() {
         {/* V-89: what this person reported, where it stands, and a way to take it back. */}
         <section id="settings-reports" className="scroll-mt-28">
           <MyReports list={reports} locale={locale} />
+        </section>
+        <section id="settings-problem" className="scroll-mt-28">
+          <SettingsGroup label="Something wrong?">
+            <ReportProblemRow />
+          </SettingsGroup>
         </section>
         <section id="settings-about" className="scroll-mt-28">
           <div id="legal">

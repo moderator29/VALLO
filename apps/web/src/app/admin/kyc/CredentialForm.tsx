@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { recordCredential } from "@/lib/trust/credentials-actions";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -24,7 +25,7 @@ export function CredentialForm({ subjectId, desk }: { subjectId: string; desk: D
   const [number, setNumber] = useState("");
   const [registerName, setRegisterName] = useState("");
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   function submit() {
     setNote(null);

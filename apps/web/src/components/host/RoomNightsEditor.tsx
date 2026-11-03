@@ -1,7 +1,7 @@
 "use client";
 
 import { useHostCopy, useHostPageCopy } from "@/components/host/host-copy";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatMoney, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { setRoomNights } from "@/lib/host/actions";
 import type { MyRoomType } from "@/lib/host/queries";
 import { isoDate } from "@/lib/stays/inventory";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -64,7 +65,7 @@ function RoomCard({ room, locale }: { room: MyRoomType; locale: Locale }) {
   const [to, setTo] = useState(today);
   const [units, setUnits] = useState(String(room.unitsTotal));
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const unitsNumber = Number.parseInt(units, 10);
   const valid = Number.isFinite(unitsNumber) && unitsNumber >= 0 && to >= from;

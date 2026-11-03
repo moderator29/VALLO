@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { HEAR_ABOUT_OPTIONS } from "@/lib/auth/signup-options";
 import { rememberHearAbout } from "@/lib/auth/arrival-asks";
@@ -8,6 +8,7 @@ import { updatePlace } from "@/lib/places/actions";
 import { PlaceFields, type PlaceValues } from "@/components/app/place/PlaceFields";
 import type { StateOption } from "@/lib/places/reference";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -48,7 +49,7 @@ export function ArrivalAsks({
   const [heardState, setHeardState] = useState<"idle" | "saved" | "failed">("idle");
   const [place, setPlace] = useState<PlaceValues>({ stateCode: "", lgaCode: "", occupationCode: "" });
   const [placeState, setPlaceState] = useState<"idle" | "saved" | "failed">("idle");
-  const [, start] = useTransition();
+  const [, start] = useSafeTransition();
 
   const chooseHeard = (value: string) => {
     setHeard(value);

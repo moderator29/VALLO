@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { Sheet } from "@/components/ui/Sheet";
@@ -9,6 +9,7 @@ import { TextField } from "@/components/ui/Field";
 import { updateRatePlan } from "@/lib/host/calendar-actions";
 import { nairaToMinor, type RatePlanLite } from "@/lib/host/rate-calendar";
 import { useHostPageCopy } from "../host-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -33,7 +34,7 @@ export function RatePlanSheet({
 }) {
   const router = useRouter();
   const w = useHostPageCopy().calendarUi;
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [rate, setRate] = useState(String(plan.rateMinor / 100));
   const [minStay, setMinStay] = useState(String(plan.minStayNights ?? 1));
   const [maxStay, setMaxStay] = useState(plan.maxStayNights ? String(plan.maxStayNights) : "");

@@ -2,7 +2,7 @@
 
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import type { Side } from "@/lib/side.constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -50,6 +50,16 @@ import { useRootFlag } from "@/lib/ui/root-flag";
  * `data-dock-create` marks the button for tests and screenshots, so neither
  * depends on a class name.
  */
+/**
+ * The event that opens the Create sheet from anywhere (the header's compose
+ * pencil). The round "+" at the dock's right end stays: it opens the same sheet.
+ */
+export const CREATE_OPEN_EVENT = "vallo:create-open";
+
+export function openCreateSheet(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(CREATE_OPEN_EVENT));
+}
+
 export function CreateDock({
   t,
   listHref,
@@ -74,6 +84,12 @@ export function CreateDock({
   /* `data-create-dock` on <html>: the feed's floating bloom steps aside for
      the dock's own plus (social-feed.css, lib/ui/root-flag.ts). */
   useRootFlag("create-dock");
+  /* Opened by the header's compose pencil (`openCreateSheet`). */
+  useEffect(() => {
+    const onOpen = () => setOpen(true);
+    window.addEventListener(CREATE_OPEN_EVENT, onOpen);
+    return () => window.removeEventListener(CREATE_OPEN_EVENT, onOpen);
+  }, []);
   const copy = t.nav.create;
   const stays = side === "stays";
 

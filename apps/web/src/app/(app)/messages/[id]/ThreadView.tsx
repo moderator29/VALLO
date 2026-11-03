@@ -73,6 +73,7 @@ import type { CallPillWords } from "@/components/calls/call-pill-words";
 import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
 import { placeCall } from "@/components/calls/place-call";
 import { callMarkerView, type CallMarkerView } from "@/lib/calls/screen";
+import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 
 /**
  * The conversation thread, one component for both data sources.
@@ -113,6 +114,11 @@ export type ThreadBubble = {
    * only ever drawn on my own bubbles, and only as the second tick.
    */
   read?: boolean;
+  /**
+   * True once the other side's device or inbox took it. The messages table has
+   * no column for it yet, so no row carries it today (`lib/messages/delivery.ts`).
+   */
+  delivered?: boolean;
   /** The card a share expands into, resolved by the page. Absent otherwise. */
   card?: ThreadCardData;
   /** The row's timestamp, when known. Read by the account card's "checking" window. */
@@ -351,20 +357,23 @@ function retryLabel(message: { body?: string | null; imageUrl?: string | null },
 type ViewWords = Dictionary["experienceInbox"]["thread"]["view"];
 
 /**
- * The read ticks. One tick is delivered (the platform holds it), two is read
- * (the other side opened it). Drawn inline so the two states are one shape
- * apart, which no glyph in the stroked set is.
+ * The ticks under my last message of a run. One tick is sent (the platform
+ * holds it), two muted ticks are delivered, two ticks in the brand blue are
+ * read (`deliveryStates`). Drawn inline so the states are one shape apart,
+ * which no glyph in the stroked set is.
  */
-function Ticks({ read }: { read: boolean }) {
+function Ticks({ state, view }: { state: Delivery; view: ViewWords }) {
+  const two = state !== "sent";
   return (
     <span
-      className={`nf-bubble__ticks${read ? " nf-bubble__ticks--read" : ""}`}
-      aria-label={read ? "Read" : "Delivered"}
+      className={`nf-msg__ticks${state === "read" ? " nf-msg__ticks--read" : ""}`}
+      aria-label={state === "read" ? view.tickRead : state === "delivered" ? view.tickDelivered : view.tickSent}
       role="img"
+      data-state={state}
     >
-      <svg width="18" height="12" viewBox="0 0 18 12" fill="none" aria-hidden="true">
+      <svg width="16" height="11" viewBox="0 0 18 12" fill="none" aria-hidden="true">
         <path d="M1 6.5l3.2 3.2L10.5 3.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        {read && (
+        {two && (
           <path d="M7 6.5l3.2 3.2L16.5 3.4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         )}
       </svg>
@@ -403,9 +412,9 @@ function roleTags(
  * brand tint when there is no photo (founder, 11 October 2026). Decorative:
  * the name is in the row above the bubble, and the run is announced by it.
  */
-function BubbleHead({ name, photoUrl }: { name: string | null; photoUrl: string | null }) {
-  return (
-    <span className="nf-msg__avatar" aria-hidden="true">
+function BubbleHead({ name, photoUrl, href }: { name: string | null; photoUrl: string | null; href?: string | null }) {
+  const face = (
+    <>
       {photoUrl ? (
         <RemoteImage src={photoUrl} alt="" width={36} height={36} sizes="36px" className="h-full w-full object-cover" />
       ) : name ? (
@@ -413,6 +422,18 @@ function BubbleHead({ name, photoUrl }: { name: string | null; photoUrl: string 
       ) : (
         <UiIcon name="user" size={20} />
       )}
+    </>
+  );
+  if (href) {
+    return (
+      <a href={href} className="nf-msg__hit" aria-label={name ? `Open ${name}'s profile` : "Open profile"}>
+        <span className="nf-msg__avatar">{face}</span>
+      </a>
+    );
+  }
+  return (
+    <span className="nf-msg__avatar" aria-hidden="true">
+      {face}
     </span>
   );
 }
@@ -448,7 +469,7 @@ export function ThreadView({
   scamCopy,
   dayKitCopy,
   sheetCopy,
-  personLine = [],
+  personLine: personLineRaw = [],
   personLabel,
   sinceLine = null,
   recordLine = [],
@@ -676,6 +697,11 @@ export function ThreadView({
         }
       });
     }
+  }, (row: LiveMessageRow) => {
+    /* The other side opened the thread: `read_at` was set on my messages, so
+       the ticks flip without a reload. */
+    if (!row.read_at) return;
+    setItems((prev) => prev.map((m) => (m.id === row.id && !m.read ? { ...m, read: true } : m)));
   });
 
   /* The safety education moment: the first money-shaped draft in a session
@@ -922,6 +948,8 @@ export function ThreadView({
      words are on the context card below, so they come from one place. In seed
      mode there is no dictionary, and the English is the fallback rather than
      the source. */
+  /* "Phone confirmed" is not said inside a conversation (29 October 2026, the founder: clean and mature): the header names who it is. */
+  const personLine = personLineRaw.filter((fact) => fact.key !== "phone");
   const words = threadCopy?.context;
   const contextLine =
     context?.kind === "reservation" && context.reservation && threadCopy
@@ -966,6 +994,8 @@ export function ThreadView({
     context?.kind === "booking" ? "bed" : context?.kind === "reservation" ? "calendar-clock" : "chat-bubble";
   const tags = roleTags(context, role, view);
   const bundles = bundlePhotos(items);
+  /* Sent, delivered or read, per message of mine; a reply counts as read. */
+  const delivery = deliveryStates(items);
   /* THE VIEWER'S LIST: every photo and video in the thread, in thread order, so
      a swipe in the full-screen viewer moves on through the conversation. Each
      carries who sent it and when, for the line at the top. A deleted message
@@ -1022,7 +1052,7 @@ export function ThreadView({
   };
 
   return (
-    <div className="nf-thread mx-auto w-full max-w-3xl px-gutter">
+    <div className="nf-thread px-gutter">
       {/* ------------------------------------------------------- header */}
       <header
         className={`nf-thread__head${inspected || ceremony ? " nf-page-header--verified" : ""}`}
@@ -1030,7 +1060,7 @@ export function ThreadView({
         {/* The shared back control. A thread is the most deep-linked screen in
             the product (every push lands here): opened cold it goes to the
             inbox, opened from a listing or a booking it goes back there. */}
-        <BackControl fallback="/messages" surface="plate" />
+        <BackControl fallback="/messages" surface="bare" className="nf-thread__back" />
         {/*
           The mark in the lit ring. On a stay thread it is the counterpart and
           it carries their verified state, because the person you are talking
@@ -1077,7 +1107,11 @@ export function ThreadView({
         )}
         <div className="min-w-0 flex-1">
           <h1 className={`nf-thread__title${propertyFace ? " nf-thread__title--place" : ""}`}>
-            <span className="min-w-0">{propertyFace && listing ? listing.title : counterpartName}</span>
+            {!propertyFace && counterpartHandle ? (
+              <a href={`/u/${counterpartHandle}`} className="min-w-0">{counterpartName}</a>
+            ) : (
+              <span className="min-w-0">{propertyFace && listing ? listing.title : counterpartName}</span>
+            )}
             {/* The one shared renderer, from the one published tier. It used to be a
                 `verified-badge` glyph gated on a boolean that was actually the
                 LISTING's verified flag; see the note at this call site in
@@ -1088,7 +1122,8 @@ export function ThreadView({
           </h1>
           {/* Said once. The context card under a property header already
               carries "Rental enquiry", and the render does not repeat it. */}
-          {!propertyFace && (
+          {/* A plain direct message names no context: "Direct message" under every name said nothing. */}
+          {!propertyFace && (context?.kind === "booking" || context?.kind === "reservation" || context?.kind === "listing") && (
             <p className="nf-thread__context">
               {contextGlyph !== "chat-bubble" ? (
                 <UiIcon name={contextGlyph} size={14} className="shrink-0" />
@@ -1313,6 +1348,19 @@ export function ThreadView({
              not words, so no caption and no camera glyph under the picture. */
           const words = run.length === 1 ? (isPhotoOnly(m) ? "" : m.body) : (caption?.body ?? "");
           const last = run[run.length - 1]!;
+          /* The time and the ticks are drawn once, under the LAST bubble of a
+             run from one side in one minute, not inside every bubble. */
+          const following = index < bundles.length - 1 ? bundles[index + 1]!.lead : null;
+          const endsRun = !(
+            following !== null &&
+            !following.call &&
+            !following.card &&
+            following.mine === m.mine &&
+            following.timeLabel === m.timeLabel &&
+            !following.state &&
+            !m.state &&
+            !dayBreaks.has(index + 1)
+          );
           /* V-04: the first message in this run from the other side that
              carries an account number gets the receiver's card above it. */
           /* Only where a check can run: a listing thread, read by the renter,
@@ -1377,12 +1425,12 @@ export function ThreadView({
               }${continues ? " nf-msg--cont" : ""}`}
             >
               {m.mine ? (
-                <span className="nf-msg__side" aria-hidden="true">
-                  <BubbleHead name={meName} photoUrl={meAvatarUrl} />
+                <span className="nf-msg__side">
+                  <BubbleHead name={meName} photoUrl={meAvatarUrl} href="/profile" />
                   {tags && <span>{tags.mine}</span>}
                 </span>
               ) : (
-                <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} />
+                <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} href={counterpartHandle ? `/u/${counterpartHandle}` : null} />
               )}
 
               <div
@@ -1390,11 +1438,10 @@ export function ThreadView({
                   !wide && photos.length > 0 ? " nf-msg__stack--media" : ""
                 }`}
               >
-                {!m.mine && !continues && (
+                {/* A direct message names nobody above a bubble: the header already says who it is (X does the same). Only the role tag, when there is one, stays. */}
+                {!m.mine && !continues && tags && (
                   <p className="nf-msg__meta">
-                    <span className="nf-msg__sender">{counterpartName}</span>
-                    {tags && <span className="nf-role-tag">{tags.theirs}</span>}
-                    <span className="nf-numeric">{m.timeLabel}</span>
+                    <span className="nf-role-tag">{tags.theirs}</span>
                   </p>
                 )}
 
@@ -1480,23 +1527,23 @@ export function ThreadView({
                     ) : (
                       words && <p className="nf-bubble__body">{words}</p>
                     )}
-                    <p className="nf-bubble__foot">
-                      {/*
-                        Delivered is a fact about the system; read is the
-                        other side's `read_at`, which the row carries and
-                        which costs nobody a new obligation because it is
-                        the state the platform already keeps.
-                      */}
-                      {m.state === "sending" ? (
-                        <span>{view.sending}</span>
-                      ) : m.state === "waiting" ? (
-                        <span data-testid="bubble-waiting">{waitingShort}</span>
-                      ) : (
-                        <span className="nf-numeric">{m.timeLabel}</span>
-                      )}
-                      {m.mine && !m.state && <Ticks read={Boolean(last.read)} />}
-                    </p>
                   </BubbleGestures>
+                )}
+
+                {!m.card && endsRun && (
+                  /* Under the last bubble of the run, small and muted: the
+                     time (or "Sending"), then my ticks. It follows the bubble
+                     in the document, so a screen reader reads it with it. */
+                  <p className="nf-msg__status" data-testid="msg-status">
+                    {m.state === "sending" ? (
+                      <span>{view.sending}</span>
+                    ) : m.state === "waiting" ? (
+                      <span data-testid="bubble-waiting">{waitingShort}</span>
+                    ) : m.state === "failed" ? null : (
+                      <span className="nf-numeric">{last.timeLabel}</span>
+                    )}
+                    {m.mine && !m.state && <Ticks state={delivery.get(last.id) ?? "sent"} view={view} />}
+                  </p>
                 )}
 
                 {shielded?.ask && scamCopy && (
@@ -1541,7 +1588,7 @@ export function ThreadView({
             a reply lands in, driven by the real broadcast above. */}
         {counterpartTyping && (
           <div className="nf-msg nf-msg-in--theirs">
-            <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} />
+            <BubbleHead name={counterpartName} photoUrl={counterpartAvatarUrl} href={counterpartHandle ? `/u/${counterpartHandle}` : null} />
             <div
               className="nf-bubble nf-bubble--theirs flex items-center gap-inline-tight"
               role="status"

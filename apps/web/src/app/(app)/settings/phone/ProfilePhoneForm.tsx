@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { PhoneField } from "@/components/app/PhoneField";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveProfilePhone } from "@/lib/settings/profile-phone";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * THE NUMBER ON FILE, while codes are not sent. One field, one save; the
@@ -27,22 +27,18 @@ export function ProfilePhoneForm({
   const [phone, setPhone] = useState("");
   const [savedLast, setSavedLast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const last = savedLast ?? currentLast;
 
   const save = () =>
     start(async () => {
-      try {
-        setError(null);
-        const result = await saveProfilePhone(phone);
-        if (!result.ok) return setError(result.fieldErrors?.phone ?? result.error);
-        setSavedLast(result.data.last);
-        setPhone("");
-        if (next) router.push(next);
-        else router.refresh();
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
-      }
+      setError(null);
+      const result = await saveProfilePhone(phone);
+      if (!result.ok) return setError(result.fieldErrors?.phone ?? result.error);
+      setSavedLast(result.data.last);
+      setPhone("");
+      if (next) router.push(next);
+      else router.refresh();
     });
 
   return (

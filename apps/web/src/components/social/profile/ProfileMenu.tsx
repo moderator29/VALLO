@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReportSheet } from "@/components/social/ReportSheet";
@@ -21,6 +21,7 @@ import { Toast, useToast } from "@/components/ui/Toast";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import "./social-profile.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -77,7 +78,7 @@ export function ProfileMenu({
   const [blocked, setBlocked] = useState(false);
   const [reporting, setReporting] = useState(false);
   const { toast, show } = useToast(5000);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const menuRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
   const blockedRef = useRef<HTMLDivElement>(null);

@@ -542,6 +542,13 @@ async function readFeedPage(
 
   if (authorIds) query = query.in("author_id", authorIds);
 
+  /* Vallo's own notes show for today only (founder, 1 November 2026): the
+     older ones stay in the database and are simply not drawn. A day is the
+     Lagos day, one hour ahead of UTC all year. */
+  const lagosHour = 60 * 60 * 1000;
+  const lagosDayStart = new Date(Math.floor((Date.now() + lagosHour) / 86_400_000) * 86_400_000 - lagosHour).toISOString();
+  query = query.or(`author_kind.neq.SYSTEM,created_at.gte.${lagosDayStart}`);
+
   /* A TOTAL order, newest first. `id` is the primary key, so the pair can
      never tie and a keyset cursor over it can never skip or repeat a row. */
   query = query

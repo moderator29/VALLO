@@ -42,10 +42,9 @@ const phone = trimmed
  * prints it, and the error messages describe the SHAPE rather than echoing the
  * value, which is the only way an error message can be safe with one of these.
  */
-const nin = trimmed
-  .regex(/^\d{11}$/, "A National Identity Number is eleven digits.")
-  .optional()
-  .or(z.literal(""));
+/* COMPULSORY for an owner and an agent (30 October 2026, the founder: "it is
+   compulsory"). Said in words about the shape, never echoing the value. */
+const nin = trimmed.regex(/^\d{11}$/, "Enter your 11-digit National Identity Number.");
 
 /*
  * Ruling 6 (13 October 2026): every registration is sent with both ticks, the

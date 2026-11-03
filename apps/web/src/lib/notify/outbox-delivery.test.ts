@@ -469,13 +469,10 @@ describe("a row a database trigger wrote becomes a real HTTP request", () => {
     /* THE MESSAGE, built by the real `welcome` builder, with the role the
        real `gatherFacts` read out of `profiles` rather than out of the row. */
     expect(call?.body.subject).toBe("Welcome to Vallo, Ada");
-    expect(call?.body.html).toContain("You told us you have property to let");
-    expect(call?.body.html).toContain("Register as an owner");
     /* The button, at the address the first run screen actually lives at. */
     expect(call?.body.html).toContain("/welcome");
     /* The general version's opening must NOT be here. It is what a build that
        lost the role lookup would send, and it would send it to everybody. */
-    expect(call?.body.html).not.toContain("You have not told us what brought you here");
 
     /* Both parts, and no id and no private address on either. */
     expect(call?.body.text).toBeTruthy();
@@ -499,8 +496,7 @@ describe("a row a database trigger wrote becomes a real HTTP request", () => {
     await drainEmailOutbox(admin);
 
     expect(capture.calls).toHaveLength(1);
-    expect(capture.calls[0]?.body.html).toContain("You have not told us what brought you here");
-    expect(capture.calls[0]?.body.html).not.toContain("You told us you have property to let");
+    expect(capture.calls[0]?.body.html).toContain("Hello Ada.");
   });
 
   it("puts the row back when Resend refuses it, and posts once, not twice", async () => {

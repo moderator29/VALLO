@@ -1,12 +1,14 @@
 "use client";
 
+import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { assignFirmListing, setFirmRouting } from "@/lib/firm/actions";
 import type { FirmListing, FirmMember, FirmRouting } from "@/lib/firm/queries";
 import { Icon3D } from "@/components/ui/Icon3D";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -22,7 +24,7 @@ function AssignRow({ listing, team, copy }: { listing: FirmListing; team: FirmMe
   const router = useRouter();
   const [value, setValue] = useState(listing.assignedAgentId ?? "");
   const [note, setNote] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   return (
     <li className="flex flex-col gap-2xs border-t border-[var(--nf-border-subtle)] pt-row first:border-t-0 first:pt-0">
       <p className="nf-body-sm font-semibold text-[var(--nf-content-primary)]">{listing.title}</p>
@@ -86,7 +88,7 @@ export function FirmDesk({
   const [officeStart, setOfficeStart] = useState(routing?.officeStart ?? "09:00");
   const [officeEnd, setOfficeEnd] = useState(routing?.officeEnd ?? "17:00");
   const [note, setNote] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (listings === null || team === null) {
     return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>;
@@ -104,7 +106,7 @@ export function FirmDesk({
           </h2>
         </div>
         {listings.length === 0 ? (
-          <p className="mt-group nf-body-sm text-[var(--nf-content-muted)]">{copy.listingsEmpty}</p>
+          <State compact kind="empty" icon="keys-home" title={copy.listingsEmpty} className="mt-group" />
         ) : (
           <ul className="mt-group flex flex-col gap-row">
             {listings.map((listing) => (

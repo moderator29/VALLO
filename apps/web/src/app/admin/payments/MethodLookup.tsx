@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,7 @@ import {
   removeBankAccountAsAdmin,
   removePaymentMethodAsAdmin,
 } from "@/lib/admin/payments-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -39,7 +40,7 @@ export function RemoveSavedMethod({
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function run() {
     setError(null);

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
@@ -25,7 +25,7 @@ import { reach } from "./reach";
  * inside the second. Each of the seven states has its own words.
  */
 const WHO_DOES_WHAT: { icon: "shield-lock" | "user-check" | "eye-off"; title: string; sub: string }[] = [
-  { icon: "shield-lock", title: "Payluk holds the money", sub: "Our licensed payments partner, in an account in your name. Vallo never holds it." },
+  { icon: "shield-lock", title: "Our licensed partner holds the money", sub: "In an account in your name. Vallo never holds it." },
   { icon: "user-check", title: "Vallo keeps the record", sub: "Every movement, with where it is and when the partner confirmed it." },
   { icon: "eye-off", title: "Only what is needed is shared", sub: "Your name, email and phone. Nothing else, and no card or bank details." },
 ];
@@ -84,6 +84,30 @@ export function BalanceOnboarding({
     if (r.data.state === "ACTIVE") router.refresh();
   };
 
+  /* THE WALLET OPENS BY ITSELF (27 October 2026, founder: no extra button).
+     Once the details are in, the first visit tries to open it, and a request
+     the partner has not answered is checked once more after a short wait.
+     Further tries stay with the button: the opening is rate limited and a
+     refusal is a real answer. `open` looks the customer up before it creates
+     one, so a second tab or the phone-confirm step racing it is harmless. */
+  const autoOpened = useRef(false);
+  useEffect(() => {
+    if (autoOpened.current) return;
+    autoOpened.current = true;
+    if (canOpen && (current === "NOT_STARTED" || current === "VERIFICATION_REQUIRED" || current === "PENDING")) void open();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on arrival
+  }, []);
+  const rechecked = useRef(false);
+  useEffect(() => {
+    if (current !== "PENDING" || busy || rechecked.current) return;
+    const timer = window.setTimeout(() => {
+      rechecked.current = true;
+      void open();
+    }, 15_000);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one re-check per arrival
+  }, [current, busy]);
+
   return (
     <div className="nf-onboard mt-inline space-y-block" data-testid="balance-onboarding" data-state={current}>
       <div className="nf-mhead">
@@ -92,8 +116,10 @@ export function BalanceOnboarding({
             <UiIcon name="wallet" size={ICON_PLATE_GLYPH.lg} />
           </IconPlate>
         </span>
-        <h2 className="nf-mhead__title">{copy.title}</h2>
-        <p className="nf-mhead__body">{copy.body}</p>
+        <h2 className="nf-mhead__title">{busy ? "Setting up your balance" : copy.title}</h2>
+        <p className="nf-mhead__body" role={busy ? "status" : undefined}>
+          {busy ? "This takes a few seconds. You do not need to do anything." : copy.body}
+        </p>
       </div>
 
       <StepPath
@@ -126,13 +152,13 @@ export function BalanceOnboarding({
           },
           {
             key: "open",
-            title: "Open your account with Payluk",
+            title: "Open your account with our partner",
             sub:
               current === "PENDING"
                 ? "Asked. Waiting for their answer; this updates on its own."
                 : current === "RESTRICTED" || current === "SUSPENDED"
                   ? "On hold with our partner. Support can find out why."
-                  : "Our licensed payments partner opens it in your name. Nothing is charged.",
+                  : "Our licensed provider opens it in your name. Nothing is charged.",
             state: opening,
             children: phoneTaken ? (
               <div className="space-y-row">

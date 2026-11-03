@@ -3,7 +3,7 @@
 import { Money } from "@/components/ui/Money";
 import { useAppliedTheme } from "@/lib/theme/theme-client";
 import { tileProvider, warnIfNonCommercialTiles } from "@/lib/maps/tiles";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import "leaflet/dist/leaflet.css";
 /* C12: the pins and the zoom control, out of `globals.css`. */
@@ -30,6 +30,7 @@ import { countOf, formatNumber } from "@vallo/i18n/core";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import "./discovery.css";
 import "./search-v2.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -149,7 +150,7 @@ export function MapCanvas({
 
   const [savedIds, setSavedIds] = useState<ReadonlySet<string>>(() => new Set<string>());
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [savePending, startSave] = useTransition();
+  const [savePending, startSave] = useSafeTransition();
 
   /*
    * The city the search landed on. Computed once, from the props the page

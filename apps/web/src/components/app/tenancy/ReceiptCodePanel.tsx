@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { formatReceiptCode } from "@/lib/receipts/code";
 import { createReceiptCode, revokeReceiptCode } from "@/lib/receipts/actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -27,7 +28,7 @@ export function ReceiptCodePanel({
   copy: Dictionary["afterTheGate"]["receipt"];
 }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [note, setNote] = useState<string | null>(null);
   // The code as minted, held only in this page: it is shown once.
   const [fresh, setFresh] = useState<string | null>(null);

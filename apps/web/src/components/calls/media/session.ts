@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AudioPresets,
   ConnectionQuality,
   DisconnectReason,
   Room,
@@ -15,6 +16,7 @@ import {
   type RemoteParticipant,
   type RemoteTrack,
 } from "livekit-client";
+import { callLog, errorSummary } from "@/lib/calls/diagnostics";
 import { EMPTY_MEDIA, type CallMedia, type MediaSnapshot } from "./types";
 
 export { EMPTY_MEDIA, type CallMedia, type MediaSnapshot };
@@ -61,10 +63,46 @@ export function canPickOutput(): boolean {
  * the rest), which `mediaErrorKind` turns into the recovery screen.
  */
 export async function captureLocal(wantVideo: boolean): Promise<LocalTrack[]> {
-  return createLocalTracks({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-    video: wantVideo ? { facingMode: "user", resolution: VideoPresets.h540.resolution } : false,
-  });
+  const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+  const setSession = (type: string) => {
+    try {
+      if (session) session.type = type;
+    } catch {
+      /* Read-only on some builds. */
+    }
+  };
+  const ask = () =>
+    createLocalTracks({
+      audio: {
+        echoCancellation: { ideal: true },
+        noiseSuppression: { ideal: true },
+        autoGainControl: { ideal: true },
+        channelCount: { ideal: 1 },
+      },
+      video: wantVideo ? { facingMode: "user", resolution: VideoPresets.h540.resolution } : false,
+    });
+  /* Safari and WKWebView refuse the microphone ("AudioSession category is not
+     compatible with audio capture") while the page's audio session is
+     playback-only or ambient. A call plays and records, so say so first, and
+     if the browser still refuses, hand the session back to the system ("auto")
+     and ask once more before giving up. */
+  setSession("play-and-record");
+  try {
+    const tracks = await ask();
+    for (const t of tracks) {
+      if (t.kind !== Track.Kind.Audio) continue;
+      const got = t.mediaStreamTrack.getSettings();
+      callLog("capture.audio", `aec=${got.echoCancellation} ns=${got.noiseSuppression} agc=${got.autoGainControl}`);
+    }
+    return tracks;
+  } catch (error) {
+    if (!(error instanceof Error) || error.name !== "InvalidStateError") throw error;
+    callLog("capture.retry", errorSummary(error));
+    setSession("auto");
+    await new Promise((resolve) => setTimeout(resolve, 120));
+    setSession("play-and-record");
+    return ask();
+  }
 }
 
 export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnapshot) => void): CallMedia {
@@ -84,11 +122,38 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
   let videoTracks = local.filter((t) => t.kind === Track.Kind.Video) as LocalVideoTrack[];
   const audioTracks = local.filter((t) => t.kind === Track.Kind.Audio) as LocalAudioTrack[];
 
+  /* A phone's WebView plays no sound that a tap did not allow, and the answer
+     goes through several network round trips before the first remote audio
+     arrives, which is long after the tap. So the room is told to start audio
+     once connected, and if the page still refuses, the very next touch,
+     click or key anywhere on the screen allows it (LiveKit's own rule:
+     `startAudio` must run inside a user gesture). */
+  let unlockArmed = false;
+  const armAudioUnlock = () => {
+    if (unlockArmed || typeof document === "undefined") return;
+    unlockArmed = true;
+    const events = ["pointerdown", "touchend", "keydown"] as const;
+    const unlock = () => {
+      for (const name of events) document.removeEventListener(name, unlock, true);
+      unlockArmed = false;
+      void room
+        .startAudio()
+        .then(() => callLog("audio.unlocked"))
+        .catch((error: unknown) => callLog("audio.unlock_failed", errorSummary(error)));
+    };
+    for (const name of events) document.addEventListener(name, unlock, { capture: true, passive: true } as AddEventListenerOptions);
+  };
+
   const room = new Room({
     adaptiveStream: true,
     dynacast: true,
     videoCaptureDefaults: { facingMode: "user", resolution: VideoPresets.h540.resolution },
-    publishDefaults: { simulcast: true },
+    /* Voice first (27 October 2026): the speech preset is Opus at 24 kbps,
+       which holds on a weak Nigerian mobile connection where the default
+       music preset stutters; DTX stops sending during silence and RED repeats
+       the last frame so one lost packet is not a dropped word. Video keeps
+       simulcast so the server can step a weak receiver down. */
+    publishDefaults: { simulcast: true, audioPreset: AudioPresets.speech, dtx: true, red: true },
     disconnectOnPageLeave: true,
   });
 
@@ -130,6 +195,13 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
   room
     .on(RoomEvent.TrackSubscribed, (track: RemoteTrack) => {
       if (track.kind === Track.Kind.Audio) {
+        /* One element per remote audio track: a second subscription for the
+           same track (a reconnect) must not play the voice twice, which
+           sounds like an echo. */
+        for (const old of track.detach()) {
+          old.remove();
+          audioEls.delete(old);
+        }
         const el = track.attach();
         el.setAttribute("data-vallo-call-audio", "");
         el.hidden = true;
@@ -158,13 +230,22 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
     })
     .on(RoomEvent.ParticipantConnected, () => refreshRemote())
     .on(RoomEvent.ParticipantDisconnected, () => refreshRemote())
-    .on(RoomEvent.Reconnecting, () => emit({ connection: "reconnecting" }))
+    .on(RoomEvent.Reconnecting, () => {
+      callLog("room.reconnecting");
+      emit({ connection: "reconnecting" });
+    })
     .on(RoomEvent.SignalReconnecting, () => emit({ connection: "reconnecting" }))
+    .on(RoomEvent.AudioPlaybackStatusChanged, () => {
+      callLog("audio.playback", room.canPlaybackAudio ? "allowed" : "blocked");
+      if (!room.canPlaybackAudio) armAudioUnlock();
+    })
     .on(RoomEvent.Reconnected, () => {
+      callLog("room.reconnected");
       emit({ connection: "connected" });
       refreshRemote();
     })
     .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
+      callLog("room.disconnected", reason === undefined ? "unknown" : (DisconnectReason[reason] ?? String(reason)));
       const why =
         reason === DisconnectReason.CLIENT_INITIATED
           ? "local"
@@ -184,7 +265,13 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
     async connect(credentials) {
       if (closed) return;
       emit({ connection: "connecting", disconnectReason: null });
+      callLog("room.connecting");
       await room.connect(credentials.serverUrl, credentials.token, { autoSubscribe: true });
+      callLog("room.connected");
+      /* Allowed by the answer tap where the platform lets it; otherwise armed
+         for the next touch (see `armAudioUnlock`). */
+      await room.startAudio().catch(() => undefined);
+      if (!room.canPlaybackAudio) armAudioUnlock();
       for (const track of [...audioTracks, ...videoTracks]) {
         if (!credentials.canPublishVideo && track.kind === Track.Kind.Video) {
           track.stop();
@@ -258,6 +345,14 @@ export function createCallMedia(local: LocalTrack[], onChange: (next: MediaSnaps
       for (const el of audioEls) el.remove();
       audioEls.clear();
       await room.disconnect(true).catch(() => undefined);
+      /* The call is over: hand the audio session back to the system so the next
+         sound the app makes (a ring, a video) is not stuck in call mode. */
+      try {
+        const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+        if (session) session.type = "auto";
+      } catch {
+        /* Read-only on some builds. */
+      }
     },
   };
 }

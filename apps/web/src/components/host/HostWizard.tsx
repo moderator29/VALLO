@@ -2,7 +2,7 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { useHostCopy, useHostPageCopy } from "@/components/host/host-copy";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useBack } from "@/lib/nav/use-back";
@@ -63,6 +63,7 @@ import { TablesStep } from "./stays/TablesStep";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { HOST_AGREEMENT_VERSION, PAY_ON_VALLO_VERSION } from "@/lib/legal/versions";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -254,7 +255,7 @@ export function HostWizard({
     if (opened >= 0) return opened;
     return door && initial.hostType === null && initial.kind === null ? 1 : 0;
   });
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [notice, setNotice] = useState<Notice>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   /*
@@ -1010,7 +1011,7 @@ function HostTypeStep({ draft, set }: StepProps) {
             >
               {/* The stays door's 3D render (`GOVERNING-09` screen three), on
                   the same plate the learning path's tiles stand on. */}
-              <span className="nf-path__tile" aria-hidden="true">
+              <span className="nf-ppath__tile" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element -- a 256px render at 48px */}
                 <img src={HOST_TYPE_TILES[type]} alt="" width={48} height={48} decoding="async" />
               </span>

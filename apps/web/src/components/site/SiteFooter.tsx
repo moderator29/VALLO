@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Logo } from "@/design-system/brand/Logo";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 import { COMPANY_REGISTERED_OFFICE } from "@/lib/legal/company";
 import { NewsletterForm } from "./NewsletterForm";
 import "@/app/css/site.css";
@@ -14,9 +14,9 @@ import "@/app/css/site.css";
  * line. VALLO SPACES LTD appears here and in the copyright because a footer's
  * legal line is a legal surface; it appears nowhere else on the page.
  *
- * No social icons. The render shows five; the company has no published
- * handles, and five glyphs linking to nothing is the kind of picture of a
- * feature this platform does not ship.
+ * The social row is `SocialLinks`, read from `lib/brand/socials.ts`: Facebook,
+ * Instagram and TikTok today, LinkedIn the day its page address is set. A
+ * network with no address is not drawn.
  */
 export function SiteFooter({ t }: { t: Dictionary }) {
   const f = t.landing.footer;
@@ -95,28 +95,6 @@ export function SiteFooter({ t }: { t: Dictionary }) {
     },
   ];
 
-  /*
-   * THE SOCIAL ROW, on the same ruling: X and Telegram.
-   *
-   * Each handle is read from the environment and a glyph is drawn only for a
-   * handle that exists, because a social mark that opens nothing is the
-   * clearest possible picture of a feature. Set `NEXT_PUBLIC_VALLO_X_URL` and
-   * `NEXT_PUBLIC_VALLO_TELEGRAM_URL` and the two marks appear, with no code
-   * change. `rel="me"` states the account is ours, which is what X and
-   * Telegram read for verification, and `noopener` is the usual precaution on
-   * a new tab.
-   */
-  const socials = [
-    { url: process.env.NEXT_PUBLIC_VALLO_X_URL, icon: "x-social" as const, label: "X" },
-    {
-      url: process.env.NEXT_PUBLIC_VALLO_TELEGRAM_URL,
-      icon: "telegram" as const,
-      label: "Telegram",
-    },
-  ].filter((row): row is { url: string; icon: "x-social" | "telegram"; label: string } =>
-    Boolean(row.url),
-  );
-
   const year = new Date().getFullYear();
 
   return (
@@ -182,22 +160,7 @@ export function SiteFooter({ t }: { t: Dictionary }) {
               note={face.footer.newsletterNote}
               done={face.footer.subscribed}
             />
-            {socials.length > 0 && (
-              <ul className="nf-site-footer-social">
-                {socials.map((row) => (
-                  <li key={row.label}>
-                    <a
-                      href={row.url}
-                      className="nf-site-footer-social__link"
-                      target="_blank"
-                      rel="me noopener noreferrer"
-                    >
-                      <UiIcon name={row.icon} size={20} label={row.label} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <SocialLinks className="mt-group" heading={face.footer.followUs} template={face.footer.onNetwork} />
           </div>
         </div>
 

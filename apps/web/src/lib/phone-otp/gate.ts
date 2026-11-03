@@ -63,6 +63,14 @@ function head(db: Loose, table: string, column = "id") {
  * How many earlier actions of this kind the member has. Zero means this is
  * the first, which is the moment that asks.
  */
+async function paidDepositsAndPlans(db: Loose): Promise<number> {
+  const { data, error } = await (db as unknown as {
+    rpc(fn: string): PromiseLike<{ data: unknown; error: unknown }>;
+  }).rpc("my_paid_deposits_and_plans_count");
+  if (error) throw new Error("paid count read failed");
+  return typeof data === "number" ? data : 0;
+}
+
 async function priorCount(db: Loose, userId: string, moment: PhoneMoment, options: PhoneGateOptions): Promise<number> {
   switch (moment) {
     case "inspection":
@@ -110,9 +118,11 @@ async function priorCount(db: Loose, userId: string, moment: PhoneMoment, option
          but unpaid charge never counts as a first payment made. */
       const counts = await Promise.all([
         headCount(head(db, "bookings").eq("guest_id", userId).in("status", ["CONFIRMED", "COMPLETED", "NO_SHOW"])),
-        headCount(head(db, "reservation_deposits").eq("guest_id", userId).not("paid_at", "is", null)),
         headCount(head(db, "crypto_payments").eq("payer_id", userId).not("settled_at", "is", null)),
-        headCount(head(db, "member_subscriptions").eq("user_id", userId).not("current_period_start", "is", null)),
+        /* Paid table deposits and paid plans: tables a member cannot read
+           directly, so the caller's own count comes from one definer function
+           (29 October 2026: the direct read failed and the gate refused). */
+        paidDepositsAndPlans(db),
       ]);
       return counts.reduce((a, b) => a + b, 0);
     }

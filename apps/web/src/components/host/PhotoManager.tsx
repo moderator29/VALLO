@@ -1,7 +1,7 @@
 "use client";
 
 import { uploadToStorage } from "@/lib/media/upload";
-import { useId, useRef, useState, useTransition } from "react";
+import { useId, useRef, useState, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +15,8 @@ import {
 } from "@/lib/host/photos";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { useHostPageCopy } from "./host-copy";
+import { moveId } from "./photo-order";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -48,6 +50,13 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * at ten photographs. Removing the cover promotes the next one, which is a
  * reorder anybody can perform and nobody has to be taught.
  */
+const ORDER_WORDS = {
+  earlier: "Move earlier",
+  later: "Move later",
+  makeCover: "Make cover",
+  hint: "Drag a photograph to reorder, or use the buttons. The first is the cover.",
+};
+
 export function PhotoManager({
   /** The row the photographs hang on: a business, or an accommodation. */
   subjectId,
@@ -56,6 +65,7 @@ export function PhotoManager({
   copy,
   add,
   remove: removeAction,
+  reorder,
 }: {
   subjectId: string;
   userId: string;
@@ -73,6 +83,8 @@ export function PhotoManager({
   };
   add: (input: { storagePath: string }) => Promise<ActionResult<{ id: string }>>;
   remove: (input: { photoId: string }) => Promise<ActionResult<null>>;
+  /** Save a new order (every photograph id, cover first). Absent, the grid is fixed. */
+  reorder?: (photoIds: string[]) => Promise<ActionResult<null>>;
 }) {
   const w = useHostPageCopy().photoManager.controls;
   const router = useRouter();
@@ -80,9 +92,41 @@ export function PhotoManager({
   const input = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [removing, startRemoving] = useTransition();
+  const [removing, startRemoving] = useSafeTransition();
 
   const full = photos.length >= MAX_BUSINESS_PHOTOS;
+
+  /* The order the host sees while a save is in flight, so a drop lands at once
+     and a failed save puts the grid back. */
+  const [order, setOrder] = useState<string[] | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  const shown = order
+    ? order.map((id) => photos.find((p) => p.id === id)).filter((p): p is { id: string; url: string } => Boolean(p))
+    : photos;
+
+  function move(photoId: string, to: number) {
+    if (!reorder) return;
+    const ids = shown.map((p) => p.id);
+    const toIndex = Math.max(0, Math.min(ids.length - 1, to));
+    const next = moveId(ids, photoId, toIndex);
+    if (next === ids) return;
+    setError(null);
+    setOrder(next);
+    startRemoving(async () => {
+      try {
+        const result = await reorder(next);
+        if (!result.ok) {
+          setError(result.error);
+          setOrder(null);
+          return;
+        }
+        router.refresh();
+        setOrder(null);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
 
   async function pick(chosen: File | undefined) {
     if (!chosen) return;
@@ -148,12 +192,35 @@ export function PhotoManager({
     <section className="nf-panel nf-panel--card block nf-host-group">
       <h2 className="nf-host-group__title">{copy.title}</h2>
       <p className="nf-host-group__note">{copy.guidance}</p>
+      {reorder && photos.length > 1 ? <p className="nf-caption mt-inline">{ORDER_WORDS.hint}</p> : null}
       <p className="nf-caption mt-inline">{w.coverNote.replace("{max}", String(MAX_BUSINESS_PHOTOS))}</p>
 
       {photos.length > 0 && (
         <ul className="mt-group grid grid-cols-2 gap-row sm:grid-cols-3">
-          {photos.map((photo, index) => (
-            <li key={photo.id} className="min-w-0">
+          {shown.map((photo, index) => (
+            <li
+              key={photo.id}
+              className="min-w-0"
+              data-testid="host-photo"
+              {...(reorder
+                ? {
+                    draggable: true,
+                    onDragStart: (event: DragEvent<HTMLLIElement>) => {
+                      setDragging(photo.id);
+                      event.dataTransfer.effectAllowed = "move";
+                    },
+                    onDragOver: (event: DragEvent<HTMLLIElement>) => {
+                      if (dragging) event.preventDefault();
+                    },
+                    onDrop: (event: DragEvent<HTMLLIElement>) => {
+                      event.preventDefault();
+                      if (dragging && dragging !== photo.id) move(dragging, index);
+                      setDragging(null);
+                    },
+                    onDragEnd: () => setDragging(null),
+                  }
+                : {})}
+            >
               <RemoteImage
                 src={photo.url}
                 alt={
@@ -184,6 +251,28 @@ export function PhotoManager({
                     the rose destructive treatment, because three rose buttons
                     in a grid of three photographs shout at an owner tidying
                     their own pictures. */}
+                {reorder && shown.length > 1 ? (
+                  <div className="mb-inline flex gap-xs">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      full
+                      disabled={removing || busy || index === 0}
+                      onClick={() => move(photo.id, index === 1 ? 0 : index - 1)}
+                    >
+                      {index === 1 ? ORDER_WORDS.makeCover : ORDER_WORDS.earlier}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      full
+                      disabled={removing || busy || index === shown.length - 1}
+                      onClick={() => move(photo.id, index + 1)}
+                    >
+                      {ORDER_WORDS.later}
+                    </Button>
+                  </div>
+                ) : null}
                 <Button
                   variant="secondary"
                   size="sm"

@@ -1,6 +1,8 @@
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
+import { PickedForYouStream } from "@/components/app/assistant/PickedForYouStream";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { redirect } from "next/navigation";
 import { getDictionary, type Locale } from "@vallo/i18n";
@@ -209,54 +211,68 @@ export default async function HomePage() {
   return (
     /* Pull down to refresh, as on every app home (2 November 2026). */
     <PullToRefresh>
+    <>
+      {overview.signedIn ? (
+        <Suspense fallback={null}>
+          <InviteStepNudge back="/home" />
+        </Suspense>
+      ) : null}
       <HomeScreen
-        t={t}
-        locale={locale}
-        overview={overview}
-        listings={listings}
-        roles={roles}
-        manageHref={manageHref}
-        lead={lead}
-        interests={tuning.interests}
-        intentApplied={intentApplied}
-        featuredMore={featuredMore}
-        /* BEST MATCHES: for a signed-in person only, built from what they said
-           and kept (their stated kinds, saved searches, saved places). A guest
-           has said and kept nothing, so a guest sees Premium, Featured and New.
-           Streamed behind a skeleton in the list's own shape. */
-        bestMatches={
-          overview.signedIn ? (
-            <Suspense
-              fallback={<HomeListSkeleton shape="tiles" title={t.homeV2.bestTitle} label={t.homeV2.loadingBest} />}
-            >
-              <BestMatchesStream
-                t={t}
-                locale={locale}
-                interests={tuning.interests}
-                pool={ordered}
-                saved={savedEntries.map((entry) => entry.listing)}
-                onScreen={new Set([...listings, ...featuredMore].map((listing) => listing.id))}
-              />
-            </Suspense>
-          ) : null
-        }
-        newListings={
-          <Suspense
-            fallback={<HomeListSkeleton shape="rows" title={t.homeV2.newTitle} label={t.homeV2.loadingNew} />}
-          >
-            <NewListingsStream t={t} locale={locale} />
+      pickedForYou={
+        overview.signedIn ? (
+          <Suspense fallback={null}>
+            <PickedForYouStream />
           </Suspense>
-        }
-        upNext={
-          /* Streamed, so its three reads never hold up the first paint; it
-             draws nothing when there is nothing next (plan item 15). */
-          overview.signedIn ? (
-            <Suspense fallback={null}>
-              <UpNext t={t} locale={locale} />
-            </Suspense>
-          ) : null
-        }
-      />
+        ) : null
+      }
+      t={t}
+      locale={locale}
+      overview={overview}
+      listings={listings}
+      roles={roles}
+      manageHref={manageHref}
+      lead={lead}
+      interests={tuning.interests}
+      intentApplied={intentApplied}
+      featuredMore={featuredMore}
+      /* BEST MATCHES: for a signed-in person only, built from what they said
+         and kept (their stated kinds, saved searches, saved places). A guest
+         has said and kept nothing, so a guest sees Premium, Featured and New.
+         Streamed behind a skeleton in the list's own shape. */
+      bestMatches={
+        overview.signedIn ? (
+          <Suspense
+            fallback={<HomeListSkeleton shape="tiles" title={t.homeV2.bestTitle} label={t.homeV2.loadingBest} />}
+          >
+            <BestMatchesStream
+              t={t}
+              locale={locale}
+              interests={tuning.interests}
+              pool={ordered}
+              saved={savedEntries.map((entry) => entry.listing)}
+              onScreen={new Set([...listings, ...featuredMore].map((listing) => listing.id))}
+            />
+          </Suspense>
+        ) : null
+      }
+      newListings={
+        <Suspense
+          fallback={<HomeListSkeleton shape="rows" title={t.homeV2.newTitle} label={t.homeV2.loadingNew} />}
+        >
+          <NewListingsStream t={t} locale={locale} />
+        </Suspense>
+      }
+      upNext={
+        /* Streamed, so its three reads never hold up the first paint; it
+           draws nothing when there is nothing next (plan item 15). */
+        overview.signedIn ? (
+          <Suspense fallback={null}>
+            <UpNext t={t} locale={locale} />
+          </Suspense>
+        ) : null
+      }
+    />
+    </>
     </PullToRefresh>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { postBrief } from "@/lib/briefs/actions";
 import { koboToNaira, nairaToKobo } from "@/lib/listings/search-params";
 import { BRIEF_PROPERTY_TYPES, briefAreasFor, briefDraftFrom, type BriefDraft, type BriefPropertyType } from "@/lib/briefs/brief";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -44,7 +45,7 @@ export function BriefComposer({
   const [moveFrom, setMoveFrom] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const areas = briefAreasFor(draft.stateCode);
 
   function fromSaved(id: string) {

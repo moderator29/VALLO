@@ -202,6 +202,10 @@ export const experienceInboxEn = {
       deleted: "This message was deleted",
       open: "Open",
       sending: "Sending",
+      /** The ticks under my last message of a run: sent, delivered, read. */
+      tickSent: "Sent",
+      tickDelivered: "Delivered",
+      tickRead: "Read",
       notSent: "Not sent.",
       retry: "Retry",
       /** `{text}` is the start of the message that failed. */

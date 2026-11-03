@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { ARRIVAL_KEYS, ARRIVAL_UNITS, type ArrivalCharges, type ArrivalKey, type ArrivalUnit } from "@/lib/stays/arrival-charges";
 import { declareArrivalCharges } from "@/lib/stays/arrival-actions";
 import { koboToNairaInput } from "@/lib/agent/listings-model";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["afterTheGate"]["arrival"];
@@ -40,7 +41,7 @@ export function ArrivalChargesForm({
 }) {
   const router = useRouter();
   const [rows, setRows] = useState(() => initialRows(existing));
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const open = openKeys(rows);

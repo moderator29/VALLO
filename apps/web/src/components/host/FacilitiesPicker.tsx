@@ -1,7 +1,7 @@
 "use client";
 
 import { useHostCopy } from "@/components/host/host-copy";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { STAY_FACILITIES } from "@/lib/host/facilities";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import "@/app/css/catalogue.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -66,7 +67,7 @@ export function FacilitiesPicker({
   const [ownPicked, setOwnPicked] = useState<Set<string>>(() => new Set(chosen));
   const picked = heldPicked ? new Set(heldPicked) : ownPicked;
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function toggle(code: string) {
     setNotice(null);

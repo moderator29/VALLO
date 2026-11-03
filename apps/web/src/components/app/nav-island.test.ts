@@ -105,7 +105,7 @@ describe("the side navigation", () => {
     expect(tree).toContain("title={collapsed ? item.label : undefined}");
   });
 
-  it("keeps the workspace coin on its dark ground by day", () => {
-    expect(css).toMatch(/:root\[data-theme="light"\] \.nf-nav \.nf-side-switch__coin \{\s*background: var\(--nf-surface-artwork\);/);
+  it("draws only the bare icon for the workspace coin by day", () => {
+    expect(css).toMatch(/:root\[data-theme="light"\] \.nf-nav \.nf-side-switch__coin \{\s*background: none;/);
   });
 });

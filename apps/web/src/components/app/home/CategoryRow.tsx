@@ -97,7 +97,7 @@ export function CategoryRow({
                       className="grid size-12 place-items-center transition-transform duration-[var(--nf-duration-press,120ms)] group-active:scale-[0.94] motion-reduce:transition-none"
                       data-art={category.art}
                     >
-                      <Icon3D name={category.art} size={48} />
+                      <Icon3D classic name={category.art} size={48} />
                     </span>
                   ) : (
                     <IconPlate size="md" tone="neutral">
@@ -127,7 +127,7 @@ export function CategoryRow({
               >
                 <span className="nf-cat-tile__plate" aria-hidden="true" {...(category.art ? { "data-art": category.art } : {})}>
                   {category.art ? (
-                    <Icon3D name={category.art} size={64} className="[--nf-icon3d-size:100%]" />
+                    <Icon3D classic name={category.art} size={64} className="[--nf-icon3d-size:100%]" />
                   ) : (
                     <BrandIcon name={category.icon} fill drawn={64} />
                   )}

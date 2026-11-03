@@ -58,6 +58,13 @@ export type CallSnapshot = {
   /** The other person's display name, or "Vallo review team" for a review subject. */
   otherName: string | null;
   otherState: ParticipantState | null;
+  /** The other person's profile photo (a public URL), when they have one. */
+  otherAvatarUrl?: string | null;
+  /**
+   * True once the other person's own app has the ring on screen
+   * (`call_ring_delivered`). Until then the caller reads "Calling", not "Ringing".
+   */
+  otherRinging?: boolean;
   scheduledFor: string | null;
   createdAt: string;
   ringingAt: string | null;

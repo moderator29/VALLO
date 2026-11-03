@@ -401,7 +401,7 @@ export async function reviewAgentApplication(input: {
   if (!application) return fail(GONE);
 
   /* Nobody decides their own application, whatever their access. */
-  if (application.user_id === access.user.id) {
+  if (application.user_id === access.user.id && !access.isFounder) {
     return fail("You cannot decide your own application. Leave it for another reviewer.");
   }
 
@@ -781,7 +781,7 @@ export async function reviewListing(input: {
   if (!listerUserId) {
     return fail("We could not confirm who listed this, so nothing was decided. Refresh and try again.");
   }
-  if (listerUserId === access.user.id) {
+  if (listerUserId === access.user.id && !access.isFounder) {
     return fail("You cannot review your own listing. Leave it for another reviewer.");
   }
   if (listing.status === "DRAFT") {

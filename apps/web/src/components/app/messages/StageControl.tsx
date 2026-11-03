@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import "@/components/workspace/dashboard/dashboard.css";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,7 @@ import { setEnquiryStage } from "@/lib/enquiry/actions";
 import { setEnquiryFollowup } from "@/lib/enquiry/followup-actions";
 import { addDays, FOLLOWUP_MAX_DAYS, FOLLOWUP_NOTE_MAX } from "@/lib/enquiry/followup";
 import { LOST_REASONS, STAGES, type DeskStage, type LostReason, type Stage } from "@/lib/enquiry/stage";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -60,7 +61,7 @@ function FollowupRow({
   const [dueOn, setDueOn] = useState(followup.dueOn ?? "");
   const [note, setNote] = useState(followup.note ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function send(nextDue: string | null, nextNote: string | null) {
     setError(null);
@@ -178,7 +179,7 @@ export function StageControl({
   const [next, setNext] = useState<Stage>(stage.stage);
   const [reason, setReason] = useState<LostReason | null>(stage.lostReason);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   function save() {
     setError(null);

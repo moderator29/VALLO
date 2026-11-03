@@ -207,6 +207,32 @@ describe.runIf(hasBrowser)("the wizard's way back, its save of an emptied box, a
           window.setTimeout(() => this.onload?.(new ProgressEvent("load")), 0);
         };
         Object.defineProperty(Object.prototype, "upload", { value: async () => ({ error: null }), configurable: true, writable: true });
+        /* Photos leave through the resilient uploader (XMLHttpRequest with the
+           session's token), not `storage.upload`: give it a session and a
+           request that succeeds. */
+        Object.defineProperty(Object.prototype, "auth", {
+          value: { getSession: async () => ({ data: { session: { access_token: "test-token" } } }) },
+          configurable: true,
+          writable: true,
+        });
+        class FakeRequest {
+          status = 0;
+          upload: { onprogress?: (event: unknown) => void } = {};
+          onload?: () => void;
+          onerror?: () => void;
+          onabort?: () => void;
+          open() {}
+          setRequestHeader() {}
+          abort() {}
+          send() {
+            window.setTimeout(() => {
+              this.status = 200;
+              this.upload.onprogress?.({ lengthComputable: true, loaded: 1, total: 1 });
+              this.onload?.();
+            }, 0);
+          }
+        }
+        (window as unknown as { XMLHttpRequest: unknown }).XMLHttpRequest = FakeRequest;
         Object.defineProperty(Object.prototype, "getPublicUrl", {
           value: () => ({ data: { publicUrl: "http://localhost/sitting-room.jpg" } }),
           configurable: true,

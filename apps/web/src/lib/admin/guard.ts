@@ -44,6 +44,12 @@ export type AdminAccess =
       user: User;
       isAdmin: true;
       isSuperAdmin: boolean;
+      /**
+       * The founder's own account (a named super admin, `private.is_founder`):
+       * the one person who may decide their own listing, application or
+       * business. Absent or false for everybody else.
+       */
+      isFounder?: boolean;
       /** True when this door was passed on a staff scope, not an admin role. */
       isStaff: boolean;
     };
@@ -189,6 +195,12 @@ export async function requireAdmin(scope?: StaffScope): Promise<AdminAccess> {
     const own = await staffAccessForRequest();
     if (!own) return { state: "not-admin" };
     if (!own.consoleVerified) return { state: "step-up" };
+    /* Asked only of a super admin, and answered by the database. */
+    let isFounder = false;
+    if (isSuperAdmin) {
+      const { data: founder } = await session.supabase.rpc("am_i_founder" as never);
+      isFounder = founder === true;
+    }
     return {
       state: "admin",
       supabase: session.supabase,
@@ -196,6 +208,7 @@ export async function requireAdmin(scope?: StaffScope): Promise<AdminAccess> {
       user: session.user,
       isAdmin: true,
       isSuperAdmin,
+      isFounder,
       isStaff: false,
     };
   }

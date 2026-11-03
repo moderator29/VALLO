@@ -35,6 +35,7 @@ type Probe = { name: string; selector: string; disc?: boolean; graphic?: boolean
 
 const IMPORTS = `
   import { AssistantSidebar } from "@/components/app/assistant/AssistantSidebar";
+  import { DEFAULT_PREFS } from "@/lib/assistant/prefs";
   import { DecisionCard } from "@/components/app/confirm/DecisionCard";
   import { AgreementChanges } from "@/components/app/agreements/AgreementChanges";
   import { ScamShield } from "@/components/app/messages/ScamShield";
@@ -46,8 +47,8 @@ const BODY = `
     <div data-probe="chat-time">
       <div className="nf-bubble nf-bubble--mine" style={{ maxWidth: 260 }}>
         <p className="nf-bubble__body">Is Saturday by 2pm okay?</p>
-        <p className="nf-bubble__foot"><span className="nf-numeric">09:31</span></p>
       </div>
+      <p className="nf-msg__status"><span className="nf-numeric">09:31</span></p>
     </div>
     <div data-probe="assistant-time" className="nf-ai__turn nf-ai__turn--mine">
       <div className="nf-ai__bubble nf-ai__bubble--mine">
@@ -61,8 +62,8 @@ const BODY = `
     <div data-probe="assistant-row" style={{ width: 280 }}>
       <AssistantSidebar
         threads={[{ id: "a", title: "Show me 2-bed in Lekki under 2m", createdAt: 1, updatedAt: Date.now(), messages: [] }]}
-        activeId="a" tone="Concise" language="English"
-        onSelect={() => {}} onNew={() => {}} onDelete={() => {}} onClearAll={() => {}} onToneChange={() => {}} onLanguageChange={() => {}}
+        activeId="a" prefs={DEFAULT_PREFS}
+        onSelect={() => {}} onNew={() => {}} onDelete={() => {}} onClearAll={() => {}} onPrefsChange={() => {}}
       />
     </div>
     <a data-probe="inbox-time" className="nf-inbox-row" data-unread="true" href="#">
@@ -86,9 +87,7 @@ const BODY = `
 `;
 
 const PROBES: Probe[] = [
-  { name: "the sent bubble's time (chat)", selector: '[data-probe="chat-time"] .nf-bubble__foot .nf-numeric' },
-  { name: "the sent bubble's time (assistant)", selector: '[data-probe="assistant-time"] .nf-ai__stamp' },
-  { name: "the assistant's 'answered' tick (graphic, 3:1)", selector: '[data-probe="assistant-time"] .nf-ai__ticks', graphic: true },
+  { name: "the time under a bubble (chat)", selector: '[data-probe="chat-time"] .nf-msg__status .nf-numeric' },
   { name: "the chosen history row's title", selector: '[data-probe="assistant-row"] .nf-ai__row--on > span:first-child' },
   { name: "the chosen history row's time", selector: '[data-probe="assistant-row"] .nf-ai__row--on > span:nth-child(2)' },
   { name: "the unread time on an inbox row", selector: '[data-probe="inbox-time"] .nf-inbox-row__when' },

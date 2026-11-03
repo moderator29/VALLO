@@ -171,6 +171,12 @@ export type Listing = {
    */
   publishedAt?: string;
   /**
+   * When the lister last said it is still available (`listings.lister_confirmed_at`).
+   * Absent when they never have. The page says it as "Confirmed available 3
+   * days ago" while it is recent (`confirmedAge`).
+   */
+  listerConfirmedAt?: string;
+  /**
    * The compound's five answers (V-28): parking, how many homes share it,
    * whether the landlord lives there, how rubbish leaves, and whether a car
    * gets in. Absent when the lister answered none of them.

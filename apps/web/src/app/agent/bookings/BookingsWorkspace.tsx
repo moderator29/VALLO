@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import "@/components/ui/underline-tabs.css";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   formatMoney,
@@ -24,6 +26,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { TextArea } from "@/components/ui/Field";
 import { Icon3D } from "@/components/ui/Icon3D";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -72,7 +75,7 @@ function DecisionSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
@@ -476,7 +479,7 @@ export function BookingsWorkspace({
       <div
         role="tablist"
         aria-label={t.tabsLabel}
-        className="flex gap-xs overflow-x-auto pb-2xs"
+        className="nf-utabs nf-utabs__row"
       >
         {TAB_KEYS.map((key) => (
           <button
@@ -493,10 +496,10 @@ export function BookingsWorkspace({
             */
             aria-controls={active === key ? `bookings-panel-${key}` : undefined}
             onClick={() => setActive(key)}
-            className={`nf-chip shrink-0 whitespace-nowrap ${active === key ? "nf-chip--active" : ""}`}
+            className="nf-utabs__tab"
           >
             {t.groups[key].title}
-            <span className="nf-numeric">{board[key].length}</span>
+            <span className="nf-utabs__count nf-numeric">{board[key].length}</span>
           </button>
         ))}
       </div>

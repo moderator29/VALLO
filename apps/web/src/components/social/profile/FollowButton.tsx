@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { useRequireAuth } from "@/components/auth/AuthGate";
 import { toggleFollow } from "@/lib/social/follows-actions";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * Follow, and unfollow.
@@ -70,7 +71,7 @@ export function FollowButton({
   const { gateHref } = useRequireAuth();
   const [following, setFollowing] = useState(initialFollowing);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   /*
    * SIGNED OUT IT IS STILL A LINK, and it now remembers what it was for.

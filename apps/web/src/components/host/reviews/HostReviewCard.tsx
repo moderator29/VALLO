@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
@@ -11,6 +11,7 @@ import { answerHotelReview, contestHotelReview, withdrawHotelReviewAnswer } from
 import { CONTEST_CRITERIA, CONTEST_NOTE_MAX, contestWords, type ContestCriterion } from "@/lib/host/review-contest";
 import type { HostReview } from "@/lib/host/reviews";
 import { useHostPageCopy } from "@/components/host/host-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -23,7 +24,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 export function HostReviewCard({ review, when }: { review: HostReview; when: string }) {
   const router = useRouter();
   const w = useHostPageCopy().reviewCard;
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [writing, setWriting] = useState(false);
   const [reply, setReply] = useState(review.reply?.body ?? "");
   const [error, setError] = useState<string | null>(null);

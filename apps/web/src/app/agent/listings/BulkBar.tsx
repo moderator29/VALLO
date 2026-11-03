@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { submitListing, unpublishListing } from "@/lib/agent/listings-actions";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
 import { bulkSummary, type BulkPlan } from "./bulk";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -17,7 +18,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: number; onClear: () => void }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [armed, setArmed] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 

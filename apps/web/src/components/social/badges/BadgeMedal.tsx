@@ -1,3 +1,4 @@
+/* eslint-disable nf/no-raw-colour -- the medal is fixed-colour brand artwork (metal, orange ring, pale centre): the same in light and dark, like the logo, so its colours are not theme tokens */
 import { useId } from "react";
 
 /**

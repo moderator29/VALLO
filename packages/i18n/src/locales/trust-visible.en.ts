@@ -164,7 +164,13 @@ export const trustVisibleEn = {
     confirm: "Confirm",
     confirming: "Confirming",
     resend: "Send a new code",
+    /** `{s}` is whole seconds until a new code may be asked for. */
+    resendIn: "Send a new code in {s}s",
+    /** The code cells' description for a screen reader. */
+    codeCells: "Six digit code",
     done: "Confirmed. Your number is never shown to anybody.",
+    /** Under `done`: the wallet opens with the confirmed number, by itself. */
+    walletNote: "Your Vallo balance is being set up now.",
     /** The sentence a gated action refuses with. */
     required:
       "Confirm your mobile number first. It is asked once, it is never shown to anybody, and it keeps one person to one account. Open Settings, then Phone.",
@@ -174,7 +180,7 @@ export const trustVisibleEn = {
     sendLimited: "That is a lot of codes in a short time. Wait an hour and try again.",
     /** V-50 NO ENUMERATION: the one sentence for every refusal that could tell
        somebody whether a number is on Vallo, so taken and invalid read the same. */
-    numberRefused: "We could not use this number. Try a different number, or contact support.",
+    numberRefused: "This number may already be in use. Try a different number, or contact support.",
     sendAlready: "That number is already confirmed on your account.",
     sendUnconfigured: "We could not send a code just now. Nothing was changed. Try again later.",
     sendFailed: "We could not send a code just now. Nothing was changed. Try again in a moment.",

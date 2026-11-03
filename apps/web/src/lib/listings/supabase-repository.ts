@@ -213,6 +213,7 @@ const LISTING_SELECT = `
   latitude,
   longitude,
   published_at,
+  lister_confirmed_at,
   created_at,
   address_verified_at,
   physically_inspected_at,
@@ -286,6 +287,7 @@ const LISTING_DETAIL_SELECT = `
   latitude,
   longitude,
   published_at,
+  lister_confirmed_at,
   created_at,
   address_verified_at,
   physically_inspected_at,
@@ -361,6 +363,8 @@ export type ListingRow = {
   latitude: number | null;
   longitude: number | null;
   published_at: string | null;
+  /** The lister's last "still available" (public since 20261029134320). */
+  lister_confirmed_at?: string | null;
   created_at: string;
   address_verified_at: string | null;
   physically_inspected_at: string | null;
@@ -994,6 +998,7 @@ export function mapRow(
     ...(listerNames.has(row.id) ? { listerName: listerNames.get(row.id) } : {}),
     isDemo: row.is_demo,
     ...(row.published_at ? { publishedAt: row.published_at } : {}),
+    ...(row.lister_confirmed_at ? { listerConfirmedAt: row.lister_confirmed_at } : {}),
     /* Instant book is gone from the schema. The whole product moved from
        "reserve a room tonight" to "rent or buy a property", and no property in
        either of those markets changes hands without a person on both sides.

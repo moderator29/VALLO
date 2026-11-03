@@ -2,7 +2,7 @@
 
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
 import { useMoneyStepUp } from "@/components/app/money/MoneyStepUp";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { RowButton, Sheet } from "@/components/app/account/rows";
 import { ICON, TYPE } from "@/components/app/Screen";
@@ -11,6 +11,7 @@ import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { NUBAN_LENGTH, digitsOnly, groupNuban } from "@/lib/agent/payout-model";
 import { addBankAccount, listBanks, resolveBankAccount } from "@/lib/payments/bank-accounts-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type PaymentsCopy = Dictionary["paymentsPage"];
@@ -48,7 +49,7 @@ export function AddBankAccountSheet({
   const [number, setNumber] = useState("");
   const [name, setName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [reload, setReload] = useState(0);
   /* ONE KEY PER SHEET. Saving an account is a paid resolution at Paystack and
      the allowance is five an hour, so a dropped response followed by a second

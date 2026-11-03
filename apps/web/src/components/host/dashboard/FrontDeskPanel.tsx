@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { countOf, plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { markStay } from "@/lib/host/front-desk-actions";
 import type { DeskStay, FrontDesk, StayEventKind } from "@/lib/host/front-desk";
 import type { StayMarksRead } from "@/lib/host/tape-chart-read";
 import "./dashboard.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Words = Dictionary["hostDash"]["desk"];
@@ -72,7 +73,7 @@ export function FrontDeskPanel({
   );
   const dateOf = (day: string) => dayLong.format(new Date(`${day}T12:00:00Z`));
 
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [busy, setBusy] = useState<string | null>(null);
   const [done, setDone] = useState<Record<string, string>>({});
   const [failed, setFailed] = useState<Record<string, string>>({});

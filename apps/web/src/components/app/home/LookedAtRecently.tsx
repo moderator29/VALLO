@@ -8,6 +8,7 @@ import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { drawnSrcIn, handOff } from "@/lib/listings/handoff";
 import {
   clearRecentListings,
+  recentHref,
   recentListingsServerSnapshot,
   recentListingsSnapshot,
   subscribeRecent,
@@ -96,7 +97,7 @@ function LookbackCard({ entry, copy }: { entry: RecentListing; copy: { verified:
   return (
     <SpaceCard
       variant="compact"
-      href={`/listing/${entry.id}`}
+      href={recentHref(entry)}
       title={entry.title}
       photos={entry.photo ? [entry.photo] : []}
       /* D24: no example mark; the glance's "example" mark draws nothing, and
@@ -106,6 +107,8 @@ function LookbackCard({ entry, copy }: { entry: RecentListing; copy: { verified:
       price={entry.price ? { amount: entry.price, unit: entry.priceNote || null } : null}
       mediaId={entry.id}
       onOpen={(event, media) => {
+        /* The one-frame hand-off is the listing shell's; a stay or a venue has its own. */
+        if (entry.href && !entry.href.startsWith("/listing/")) return;
         if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
         handOff(
           {

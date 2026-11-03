@@ -1,0 +1,69 @@
+@layer components {
+  /* THE UNDERLINE TAB ROW: words on a hairline, the current one bold with a
+     brand bar under it. Used by link tabs (UnderlineTabs) and by any state
+     tab row that takes the `nf-utabs` classes. */
+  .nf-utabs {
+    min-inline-size: 0;
+    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-utabs__row {
+    display: flex;
+    gap: var(--nf-space-lg);
+    margin: 0;
+    padding: 0 var(--nf-space-2xs);
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nf-utabs__row::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-utabs__tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-content-muted);
+    font: inherit;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-utabs__tab:hover {
+    color: var(--nf-content-secondary);
+  }
+  .nf-utabs__tab:is([aria-current="page"], [aria-selected="true"]) {
+    color: var(--nf-content-primary);
+    font-weight: 700;
+  }
+  .nf-utabs__tab:is([aria-current="page"], [aria-selected="true"])::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -1px;
+    block-size: 3px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+  }
+  .nf-utabs__tab:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: 2px;
+  }
+  .nf-utabs__count {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-utabs__tab {
+      transition: none;
+    }
+  }
+}

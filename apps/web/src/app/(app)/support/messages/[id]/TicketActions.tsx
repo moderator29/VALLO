@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
 import { markMyTicketRead, rateMyTicket, reopenMyTicket, resolveMyTicket } from "@/lib/support/ticket-reply";
 import type { Dictionary } from "@vallo/i18n/core";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 type Copy = Dictionary["experienceInbox"]["support"]["actions"];
@@ -29,7 +30,7 @@ export function MarkRead({ ticketId, unread }: { ticketId: string; unread: boole
 /** "Sorted? Mark it resolved", the quiet exit under the reply box. */
 export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="text-center">
@@ -85,7 +86,7 @@ export function RateResolution({
   const [stars, setStars] = useState(rating ?? 0);
   const [text, setText] = useState(comment ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   if (!editing && rating) {
     return (
@@ -176,7 +177,7 @@ export function RateResolution({
 /** Not sorted after all: reopen inside the window, with the date it closes. */
 export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; until: string; copy: Copy }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="nf-panel nf-panel--card block p-card-sm" data-testid="support-reopen">

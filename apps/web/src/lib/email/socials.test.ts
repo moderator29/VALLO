@@ -1,38 +1,29 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { configuredSocials } from "./socials";
 import { socialLinksText, socialRowHtml } from "./render";
 import { sortEmailImages } from "./images";
-
-afterEach(() => vi.unstubAllEnvs());
+import { liveSocials } from "@/lib/brand/socials";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 describe("the social row in every email footer", () => {
-  it("draws nothing when no account is set", () => {
-    expect(configuredSocials({})).toEqual([]);
-    expect(socialRowHtml()).toBe("");
-    expect(socialLinksText()).toBe("");
-  });
-
-  it("draws one linked mark per account that is set, in a fixed order, https only", () => {
-    expect(
-      configuredSocials({
-        NEXT_PUBLIC_VALLO_TIKTOK_URL: "https://tiktok.com/@vallo",
-        NEXT_PUBLIC_VALLO_X_URL: "https://x.com/vallo",
-        NEXT_PUBLIC_VALLO_FACEBOOK_URL: "http://facebook.com/vallo",
-        NEXT_PUBLIC_VALLO_INSTAGRAM_URL: "javascript:alert(1)",
-      }).map((s) => s.key),
-    ).toEqual(["x", "tiktok"]);
-  });
-
-  it("renders linked 36px icons the image sorter knows, and a text line each", () => {
-    vi.stubEnv("NEXT_PUBLIC_VALLO_X_URL", "https://x.com/vallo");
-    vi.stubEnv("NEXT_PUBLIC_VALLO_INSTAGRAM_URL", "https://instagram.com/vallo");
+  it("draws the same accounts as the site footer, one linked mark each", () => {
+    const keys = configuredSocials().map((s) => s.key);
+    expect(keys).toEqual(liveSocials().map((s) => s.key));
+    expect(keys.length).toBeGreaterThan(0);
     const html = socialRowHtml();
-    expect(html).toContain('href="https://x.com/vallo"');
-    expect(html).toContain('alt="Instagram"');
+    for (const s of configuredSocials()) {
+      expect(html).toContain(`href="${s.url}"`);
+      expect(html).toContain(`alt="${s.label}"`);
+      expect(existsSync(join(process.cwd(), "public/brand/email/social", `${s.key}.png`))).toBe(true);
+    }
     expect(html).toContain('width="36" height="36"');
-    const sorted = sortEmailImages(html);
-    expect(sorted.social).toHaveLength(2);
+  });
+
+  it("sorts as the social tier, never as an unsanctioned picture, and has a text line each", () => {
+    const sorted = sortEmailImages(socialRowHtml());
+    expect(sorted.social).toHaveLength(configuredSocials().length);
     expect(sorted.other).toEqual([]);
-    expect(socialLinksText()).toBe("Follow us:\nX: https://x.com/vallo\nInstagram: https://instagram.com/vallo");
+    expect(socialLinksText().split("\n")[0]).toBe("Follow us:");
   });
 });

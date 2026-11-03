@@ -42,7 +42,7 @@ describe("the money centre: Available and Protected never look alike", () => {
   });
 
   it("names who holds both, says Vallo does not, and says when", () => {
-    expect(html).toContain("your own account at Partner Name");
+    expect(html).toContain("your own account with Partner Name");
     expect(html).toContain("Vallo does not hold customer funds.");
     expect(html).toContain("As Partner Name reported it");
   });

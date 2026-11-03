@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate, plural, type Locale } from "@vallo/i18n/core";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
@@ -13,6 +13,7 @@ import { beginEnrol, finishEnrol, removeMoneyCredential, sendFallbackCode } from
 import { createPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
 import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -42,7 +43,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const [forceCode, setForceCode] = useState(false);
   const [note, setNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   useEffect(() => {
     let live = true;

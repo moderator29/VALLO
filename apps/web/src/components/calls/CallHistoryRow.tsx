@@ -3,22 +3,20 @@
 import "@/app/css/calls.css";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { fill, type CallMarkerView } from "@/lib/calls/screen";
-import { callNouns, callPillSentence, type CallPillWords } from "./call-pill-words";
+import { callNouns, callPillSentence, callRowText, type CallPillWords } from "./call-pill-words";
 
 /**
- * A FINISHED CALL IN THE THREAD: a compact, centred system pill, the way
- * WhatsApp and Telegram draw one. It is not a bubble and not a card.
+ * A FINISHED CALL IN THE THREAD, drawn the way X draws one: a quiet, centred,
+ * single line of muted text with a small phone or video glyph and the time
+ * ("Voice call ended, 12 min · 21:09", "Missed video call · 20:31"). No box, no
+ * pill, no filled button. A call this reader missed takes the error ink for
+ * the text only.
  *
- * Left to right: a small glyph that says the direction (a call you placed, a
- * call that came in) or the one status that matters (a missed call, in red),
- * one plain line that says who and what ("Missed video call from Nora",
- * "You called Nora, cancelled", "Video call with Nora, 12 min"), the time, and
- * a small call-back button. The button is drawn only where calls are open (the
- * page passes `onCallBack`) and starts the same kind of call, through the
- * existing calls feature (`placeCall`), never a second path.
- *
- * The line is built by `callPillSentence` from the call's own recorded facts:
- * a length is only said when the call recorded one.
+ * The visible line is short (`callRowText`); the row's spoken label is the
+ * full sentence with the name (`callPillSentence`), so a screen reader still
+ * hears who and what. "Call back" is a small text action, drawn only where
+ * calls are open (the page passes `onCallBack`); it starts the same kind of
+ * call through the existing calls feature (`placeCall`), never a second path.
  */
 export function CallHistoryRow({
   view,
@@ -38,7 +36,7 @@ export function CallHistoryRow({
 }) {
   const sentence = callPillSentence(view, name, words);
   const nouns = callNouns(view, words);
-  const glyph: UiIconName = view.missed ? "phone-missed" : view.outgoing ? "phone-outgoing" : "phone-incoming";
+  const glyph: UiIconName = view.kind === "VIDEO" ? "video" : view.missed ? "phone-missed" : "phone";
   return (
     <div className="nf-call-event-row" data-testid="call-pill-row">
       <div
@@ -50,11 +48,11 @@ export function CallHistoryRow({
         {...(view.missed ? { "data-missed": "" } : {})}
       >
         <span className="nf-call-event__glyph" aria-hidden="true">
-          <UiIcon name={glyph} size={16} filled />
+          <UiIcon name={glyph} size={14} />
         </span>
         <span className="nf-call-event__text">
-          <span className="nf-call-event__line">{sentence}</span>
-          {timeLabel ? <span className="nf-call-event__time">{timeLabel}</span> : null}
+          <span className="nf-call-event__line">{callRowText(view, words)}</span>
+          {timeLabel ? <span className="nf-call-event__time">{`\u00b7 ${timeLabel}`}</span> : null}
         </span>
         {onCallBack ? (
           <button
@@ -65,9 +63,7 @@ export function CallHistoryRow({
             aria-label={fill(words.callBack, { name, call: nouns.call })}
             data-testid="call-history-callback"
           >
-            <span className="nf-call-event__go" aria-hidden="true">
-              <UiIcon name={view.kind === "VIDEO" ? "video" : "phone"} size={16} filled />
-            </span>
+            {words.callBackShort}
           </button>
         ) : null}
       </div>

@@ -29,7 +29,19 @@ export type CallsCopy = Dictionary["calls"];
 
 /* -------------------------------------------------------------- parts */
 
-export function CallAvatar({ name, ringing = false, small = false }: { name: string; ringing?: boolean; small?: boolean }) {
+export function CallAvatar({
+  name,
+  photo,
+  ringing = false,
+  small = false,
+}: {
+  name: string;
+  /** The person's profile photo (a public URL). The initial shows until it loads, or if it never does. */
+  photo?: string | null;
+  ringing?: boolean;
+  small?: boolean;
+}) {
+  const [broken, setBroken] = useState(false);
   return (
     <span
       className={`nf-call__avatar${small ? " nf-call__avatar--sm" : ""}`}
@@ -37,6 +49,10 @@ export function CallAvatar({ name, ringing = false, small = false }: { name: str
       {...(ringing ? { "data-ringing": "" } : {})}
     >
       {initial(name)}
+      {photo && !broken ? (
+        // eslint-disable-next-line @next/next/no-img-element -- a small profile photo that is already a public URL
+        <img className="nf-call__avatar-img" src={photo} alt="" decoding="async" onError={() => setBroken(true)} />
+      ) : null}
     </span>
   );
 }
@@ -144,12 +160,14 @@ export function CallFrame({
 
 function Hero({
   name,
+  photo,
   ringing,
   context,
   status,
   children,
 }: {
   name: string;
+  photo?: string | null;
   ringing?: boolean;
   context?: string | null;
   status?: string;
@@ -157,7 +175,7 @@ function Hero({
 }) {
   return (
     <div className="nf-call__hero">
-      <CallAvatar name={name} ringing={ringing} />
+      <CallAvatar name={name} photo={photo} ringing={ringing} />
       <h2 className="nf-call__name">{name}</h2>
       {context ? <p className="nf-call__context">{context}</p> : null}
       {status ? (
@@ -175,6 +193,7 @@ function Hero({
 export function IncomingCallView({
   copy,
   name,
+  photo,
   kind,
   review = false,
   context,
@@ -186,6 +205,7 @@ export function IncomingCallView({
 }: {
   copy: CallsCopy;
   name: string;
+  photo?: string | null;
   kind: CallKind;
   review?: boolean;
   context?: string | null;
@@ -204,6 +224,7 @@ export function IncomingCallView({
       </p>
       <Hero
         name={name}
+        photo={photo}
         ringing={!busy}
         context={context}
         status={busy ? copy.incoming.answering : undefined}
@@ -261,6 +282,7 @@ export function IncomingCallView({
 export function OutgoingView({
   copy,
   name,
+  photo,
   kind,
   context,
   status,
@@ -273,6 +295,7 @@ export function OutgoingView({
 }: {
   copy: CallsCopy;
   name: string;
+  photo?: string | null;
   kind: CallKind;
   context?: string | null;
   /** "Ringing", "Calling", "Connecting": already worded. */
@@ -289,7 +312,7 @@ export function OutgoingView({
     <CallFrame label={`${kind === "VIDEO" ? copy.outgoing.video : copy.outgoing.voice}: ${name}`} media={localVideoOn} testId="call-outgoing">
       {localVideoOn ? (
         <>
-          <video ref={localVideoRef} className="nf-call__remote" autoPlay playsInline muted aria-label={copy.inCall.selfView} />
+          <video ref={localVideoRef} className="nf-call__remote nf-call__preview" autoPlay playsInline muted aria-label={copy.inCall.selfView} />
           <div className="nf-call__placeholder" style={{ background: "var(--nf-scrim-media)" }} />
         </>
       ) : null}
@@ -298,7 +321,7 @@ export function OutgoingView({
           <UiIcon name={kind === "VIDEO" ? "video" : "phone"} size={16} filled />
           {kind === "VIDEO" ? copy.outgoing.video : copy.outgoing.voice}
         </p>
-        <Hero name={name} ringing={ringing} context={context} status={status}>
+        <Hero name={name} photo={photo} ringing={ringing} context={context} status={status}>
           {error ? (
             <p className="nf-call__error" role="alert">
               {error}
@@ -331,6 +354,8 @@ export type CallBanner = "reconnecting" | "remote_left" | "weak" | "camera_pause
 export type InCallProps = {
   copy: CallsCopy;
   name: string;
+  /** The other person's profile photo, drawn while their camera is off. */
+  photo?: string | null;
   /** The call's kind: a voice call draws no camera controls at all. */
   kind: CallKind;
   /** "4:12", already counted on the server's clock. */
@@ -347,9 +372,10 @@ export type InCallProps = {
   /** The token may publish a camera (a video call). */
   canCamera: boolean;
   canSwitchCamera: boolean;
-  /** `setSinkId` exists and there is more than one output. */
+  /** A phone with more than one audio output: the speaker button shows. A computer shows none. */
   canChooseOutput: boolean;
-  outputLabel?: string;
+  /** The loudspeaker is the current output: the button is lit. */
+  speakerOn?: boolean;
   rearCamera?: boolean;
   ending?: boolean;
   onToggleMic: () => void;
@@ -365,6 +391,7 @@ export type InCallProps = {
 export function InCallView({
   copy,
   name,
+  photo,
   kind,
   clock,
   quality,
@@ -378,7 +405,7 @@ export function InCallView({
   canCamera,
   canSwitchCamera,
   canChooseOutput,
-  outputLabel,
+  speakerOn = false,
   rearCamera,
   ending,
   onToggleMic,
@@ -413,7 +440,7 @@ export function InCallView({
         />
       ) : (
         <div className="nf-call__placeholder">
-          <CallAvatar name={name} />
+          <CallAvatar name={name} photo={photo} />
           <h2 className="nf-call__name">{name}</h2>
           <p className="nf-call__status">{kind === "VIDEO" ? copy.inCall.cameraIsOff : copy.inCall.voiceCall}</p>
         </div>
@@ -503,9 +530,10 @@ export function InCallView({
         {canChooseOutput ? (
           <CallControl
             icon="volume"
-            label={`${copy.inCall.speaker}: ${outputLabel ?? ""}`}
-            caption={outputLabel ?? copy.inCall.speakerOn}
+            label={`${copy.inCall.speaker}: ${speakerOn ? copy.inCall.speakerOn : copy.inCall.speakerOff}`}
+            caption={speakerOn ? copy.inCall.speakerOn : copy.inCall.speakerOff}
             variant="media"
+            pressed={speakerOn}
             onClick={onNextOutput}
             testId="call-output"
           />
@@ -639,6 +667,7 @@ export function ConfirmEnd({ copy, onConfirm, onCancel }: { copy: CallsCopy; onC
 export function EndedView({
   copy,
   name,
+  photo,
   kind,
   words,
   duration,
@@ -650,6 +679,7 @@ export function EndedView({
 }: {
   copy: CallsCopy;
   name: string;
+  photo?: string | null;
   kind: CallKind;
   /** `endReasonWords` for this viewer. */
   words: string;
@@ -667,7 +697,7 @@ export function EndedView({
         <UiIcon name={missed ? "phone-missed" : kind === "VIDEO" ? "video" : "phone"} size={16} filled />
         {kind === "VIDEO" ? copy.outgoing.video : copy.outgoing.voice}
       </p>
-      <Hero name={name} status={words}>
+      <Hero name={name} photo={photo} status={words}>
         {duration ? <p className="nf-call__note">{fill(copy.ended.lasted, { duration })}</p> : null}
       </Hero>
       <div className="nf-call__stack">
@@ -694,6 +724,7 @@ export function RecoveryView({
   title,
   body,
   name,
+  photo,
   primaryLabel,
   onPrimary,
   onCallBack,
@@ -703,6 +734,7 @@ export function RecoveryView({
   title: string;
   body?: string;
   name?: string;
+  photo?: string | null;
   primaryLabel: string;
   onPrimary: () => void;
   onCallBack?: () => void;
@@ -711,7 +743,7 @@ export function RecoveryView({
   return (
     <CallFrame label={title} testId="call-recovery" onKeyDown={(e) => e.key === "Escape" && onClose()}>
       <div className="nf-call__hero">
-        {name ? <CallAvatar name={name} /> : <span className="nf-call-row__glyph" style={{ width: "4.5rem", height: "4.5rem" }}><UiIcon name="phone-missed" size={32} filled /></span>}
+        {name ? <CallAvatar name={name} photo={photo} /> : <span className="nf-call-row__glyph" style={{ width: "4.5rem", height: "4.5rem" }}><UiIcon name="phone-missed" size={32} filled /></span>}
         <h2 className="nf-call__name">{title}</h2>
         {body ? <p className="nf-call__note">{body}</p> : null}
       </div>
@@ -738,6 +770,7 @@ export function PermissionView({
   copy,
   error,
   wantedVideo,
+  detail,
   platform,
   onRetry,
   onVoiceOnly,
@@ -746,6 +779,8 @@ export function PermissionView({
   copy: CallsCopy;
   error: MediaErrorKind;
   wantedVideo: boolean;
+  /** The browser's own error, short and token free, shown when the cause is not one we can name. */
+  detail?: string;
   platform: MediaPlatform;
   onRetry: () => void;
   /** Offered when the camera was part of the ask. */
@@ -778,6 +813,11 @@ export function PermissionView({
         </span>
         <h2 className="nf-call__name">{title}</h2>
         <p className="nf-call__note">{body}</p>
+        {error === "other" && detail ? (
+          <p className="nf-caption" data-testid="call-permission-reference">
+            {fill(copy.permission.reference, { detail })}
+          </p>
+        ) : null}
         {error === "denied" ? (
           <>
             <p className="nf-review-call__label">{copy.permission.stepsTitle}</p>

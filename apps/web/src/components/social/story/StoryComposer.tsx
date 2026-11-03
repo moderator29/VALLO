@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,11 +19,9 @@ import {
   STORY_STANDFIRST_MAX,
 } from "@/lib/social/stories-model";
 import { IconPlate } from "@/components/ui/IconPlate";
-import { RemoteImage } from "@/components/ui/RemoteImage";
-import { initial as initialOf } from "@/lib/text/initial";
-import { useClientCopy } from "@/lib/i18n/client-copy";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
 import "../feed/feed-v2.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -52,15 +50,13 @@ export function StoryComposer({
   areas,
   userId,
   signedIn,
-  you = null,
 }: {
   areas: { id: string; name: string; city: string }[];
   userId: string | null;
   signedIn: boolean;
-  /** Who is writing: the face and name shown at the top, as the post composer does. */
+  /** Kept for callers; the full-page composer shows no author line. */
   you?: { label: string; avatarUrl: string } | null;
 }) {
-  const words = useClientCopy().feedV2.composer;
   const signInHref = useSignInHref();
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
@@ -74,7 +70,7 @@ export function StoryComposer({
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /* 0 to 1 while the picture is on its way, so "Publishing" is never a
      spinner that might be stuck. */
   const [sent, setSent] = useState<number | null>(null);
@@ -263,25 +259,20 @@ export function StoryComposer({
 
   return (
     <form
-      className="nf-story-form flex flex-col gap-md"
+      className="nf-story-form"
       onSubmit={(event) => {
         event.preventDefault();
         if (canPublish) publish();
       }}
     >
-      {/* Who is writing, the same top line the post composer has. */}
-      <div className="nf-compose-who" data-testid="story-who">
-        <span className="nf-compose-who__face" aria-hidden="true">
-          {you?.avatarUrl ? (
-            <RemoteImage src={you.avatarUrl} alt="" width={88} height={88} sizes="44px" />
-          ) : (
-            <span className="nf-compose-who__monogram">{initialOf(you?.label)}</span>
-          )}
-        </span>
-        <span className="nf-compose-who__text">
-          <span className="nf-compose-who__name">{you?.label || words.you}</span>
-        </span>
-      </div>
+      <button
+        type="button"
+        className="nf-story-form__close"
+        aria-label="Close"
+        onClick={() => router.back()}
+      >
+        <UiIcon name="close" size={22} />
+      </button>
 
       {/*
         WHAT YOU WRITE IS WHAT POSTS (D74; the founder: posting a story was
@@ -376,7 +367,7 @@ export function StoryComposer({
         </p>
       ) : null}
 
-      <Button type="submit" variant="primary" full loading={pending} disabled={!canPublish}>
+      <Button type="submit" variant="primary" className="nf-story-form__share" loading={pending} disabled={!canPublish}>
         {pending
           ? sent !== null && sent < 1
             ? `${STORY_COPY.publishing} ${Math.round(sent * 100)}%`

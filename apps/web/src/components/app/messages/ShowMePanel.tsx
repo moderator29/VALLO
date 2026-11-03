@@ -1,7 +1,7 @@
 "use client";
 
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { useDataSaver } from "@/lib/ui/data-saver";
 import { answerShowMe, requestShowMe } from "@/lib/messages/show-me-actions";
 import {
   SHOW_ME_ITEMS,
+  SHOW_ME_MAX_BYTES,
   SHOW_ME_MAX_SECONDS,
   clipPath,
   elapsedText,
@@ -20,24 +21,9 @@ import {
   type ShowMeResult,
 } from "@/lib/messages/show-me";
 import "@/app/css/catalogue.css";
-
-/** The clip's length, read by the browser from the file's own metadata. */
-function durationOf(file: File): Promise<number | null> {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file);
-    const video = document.createElement("video");
-    video.preload = "metadata";
-    video.onloadedmetadata = () => {
-      URL.revokeObjectURL(url);
-      resolve(Number.isFinite(video.duration) ? video.duration : null);
-    };
-    video.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve(null);
-    };
-    video.src = url;
-  });
-}
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { scrubVideoLocation, videoDuration, videoMime } from "@/lib/agent/video-prep";
+import { SafeVideo } from "@/components/app/media/SafeVideo";
 
 /**
  * "Show me" in a listing thread (V-69). The renter asks for one thing from a
@@ -76,7 +62,7 @@ export function ShowMePanel({
   const [played, setPlayed] = useState<string[]>([]);
   const [other, setOther] = useState("");
   const [result, setResult] = useState<ShowMeResult | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const fileFor = useRef<string | null>(null);
   const input = useRef<HTMLInputElement | null>(null);
   const at = new Date(now);
@@ -107,18 +93,26 @@ export function ShowMePanel({
   const answer = (requestId: string, file: File) =>
     startTransition(async () => {
       try {
-        const seconds = await durationOf(file);
+        if (file.size > SHOW_ME_MAX_BYTES) {
+          setResult("too-big");
+          return;
+        }
+        /* Read with a deadline: a phone that never reports the length must not
+           leave the button spinning for good. */
+        const seconds = await videoDuration(file);
         if (seconds === null || seconds > SHOW_ME_MAX_SECONDS) {
           setResult("too-long");
           return;
         }
+        /* The place the clip was filmed is taken out before it is sent, as on a listing video. */
+        const body = new File([await scrubVideoLocation(file)], file.name, { type: videoMime(file), lastModified: file.lastModified });
         const path = clipPath(requestId, crypto.randomUUID(), file.name);
         const uploaded = await uploadToStorage({
           supabase: createClient(),
           bucket: "show-me-clips",
           path,
-          body: file,
-          contentType: file.type || "video/mp4",
+          body,
+          contentType: videoMime(file),
         });
         if (!uploaded.ok) {
           setResult("failed");
@@ -217,13 +211,13 @@ export function ShowMePanel({
                         {playLabel(request.clipBytes, copy, locale)}
                       </Button>
                     ) : (
-                      <video
+                      <SafeVideo
                         className="mt-xs w-full rounded-[var(--nf-radius-md)]"
                         controls
                         /* The tap that loaded it also plays it (review). */
                         autoPlay={saver}
                         playsInline
-                        preload={saver ? "auto" : "none"}
+                        preload={saver ? "auto" : "metadata"}
                         src={request.clipUrl}
                       />
                     )}

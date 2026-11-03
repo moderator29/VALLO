@@ -5,6 +5,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ICON } from "@/components/app/Screen";
 import { SwipeStack } from "@/components/app/listing/SwipeStack";
 import { StayStackCard } from "./StayStackCard";
+import { StayCard } from "./StayCard";
 import { forStayCard } from "@/lib/i18n/slice";
 import type { StayCardData } from "./stay-card-model";
 import "@/app/css/home.css";
@@ -58,20 +59,40 @@ export function StaysFeatured({
         empty
       ) : (
         <div className="mt-row">
-          <SwipeStack label={title} copy={copy.stack}>
+          {/* A phone swipes a stack; from 640px the same six places are a grid
+              of cards, because one card in a wide empty row was the founder's
+              "half-empty phone page" (27 October 2026). CSS shows one of the
+              two (`.nf-feature-stack`, `.nf-feature-grid` in home.css). */}
+          <div className="nf-feature-stack">
+            <SwipeStack label={title} copy={copy.stack}>
+              {shown.map((stay, index) => (
+                <StayStackCard
+                  key={stay.id}
+                  stay={stay}
+                  locale={locale}
+                  t={cardT}
+                  index={index}
+                  eager={index === 0}
+                  saved={isSaved(stay)}
+                  canSavePlaces={canSavePlaces}
+                />
+              ))}
+            </SwipeStack>
+          </div>
+          <ul className="nf-feature-grid" data-testid={`${testId}-grid`}>
             {shown.map((stay, index) => (
-              <StayStackCard
-                key={stay.id}
-                stay={stay}
-                locale={locale}
-                t={cardT}
-                index={index}
-                eager={index === 0}
-                saved={isSaved(stay)}
-                canSavePlaces={canSavePlaces}
-              />
+              <li key={stay.id} className="min-w-0">
+                <StayCard
+                  stay={stay}
+                  locale={locale}
+                  t={cardT}
+                  index={index}
+                  saved={isSaved(stay)}
+                  canSavePlaces={canSavePlaces}
+                />
+              </li>
             ))}
-          </SwipeStack>
+          </ul>
         </div>
       )}
     </section>

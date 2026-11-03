@@ -394,6 +394,7 @@ export function StayDetailView({
               lead={catalogue.place.mapLead}
               coords={detail.areaPoint ?? null}
               area={where}
+              actions={{ copyLabel: catalogue.place.copyAddress, mapsLabel: catalogue.place.openInMaps }}
               unavailable={catalogue.place.mapUnavailable.replace("{area}", where)}
               facts={placeFacts}
               photoTour={

@@ -5,6 +5,8 @@ import { getLocale } from "@/lib/locale";
 import { getListingRepository } from "@/lib/listings/repository";
 import { listStaysShelf } from "@/lib/stays/queries";
 import type { Listing, ListingKind } from "@/lib/listings/types";
+import { Suspense } from "react";
+import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
 import { StaysFeatured } from "@/components/app/stays/StaysFeatured";
 import { STAY_KINDS } from "@/components/app/stays/model";
 import { stayCardFromListing, stayCardFromRow, type StayCardData } from "@/components/app/stays/stay-card-model";
@@ -195,6 +197,11 @@ export default async function StaysHomePage() {
           signedIn={overview.signedIn}
         />
       </section>
+
+      {/* An invited member's one step left (renders nothing for anyone else). */}
+      <Suspense fallback={null}>
+        <InviteStepNudge back="/stays" />
+      </Suspense>
 
       {/* ------------------------------------- the figure hero for the area */}
       {areaSummary ? (

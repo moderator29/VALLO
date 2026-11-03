@@ -1,15 +1,18 @@
 "use client";
 import "@/app/css/auth.css";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { AuthFormState } from "@/lib/auth/form-state";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Field } from "./fields";
+import { CodeInput } from "./CodeInput";
 import { AuthPillButton } from "./slate";
 import {
+  CONFIRMATION_CODE_LENGTH,
   CONFIRMATION_CODE_PLACEHOLDER,
+  codeLengthWord,
   readCode,
   surplusMessage,
 } from "@/lib/auth/confirmation-code";
@@ -47,6 +50,11 @@ export function ResetCodeForm({
   const [code, setCode] = useState("");
   const [surplus, setSurplus] = useState<string | null>(null);
   const form = useRef<HTMLFormElement>(null);
+  /* Each refusal shakes the cells once, as on the sign-up code. */
+  const [wrongCount, setWrongCount] = useState(0);
+  useEffect(() => {
+    if (state.fieldErrors?.code) setWrongCount((n) => n + 1);
+  }, [state]);
 
   function onCode(value: string) {
     const reading = readCode(value);
@@ -75,21 +83,20 @@ export function ResetCodeForm({
           value={address}
           onChange={setAddress}
         />
-        <Field
-          t={t}
+        {/* The same square cells as every other code on the platform; one
+            real input underneath, so the phone still offers the code from
+            the email above the keyboard. */}
+        <CodeInput
           id="reset-code"
           name="code"
-          type="text"
           label={t.auth.resetCodeLabel}
-          placeholder={CONFIRMATION_CODE_PLACEHOLDER}
-          /* Lets iOS and Android offer the code from the email above the
-             keyboard. */
-          autoComplete="one-time-code"
-          inputMode="numeric"
-          error={surplus ?? state.fieldErrors?.code}
+          length={CONFIRMATION_CODE_LENGTH}
           value={code}
           onChange={onCode}
-          className="nf-numeric tracking-[0.32em]"
+          error={surplus ?? state.fieldErrors?.code}
+          wrongCount={wrongCount}
+          placeholder={CONFIRMATION_CODE_PLACEHOLDER}
+          cellsLabel={t.authFlow.codeCells.replace("{count}", codeLengthWord())}
         />
 
         {state.message && (

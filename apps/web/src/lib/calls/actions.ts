@@ -170,6 +170,62 @@ export async function heartbeatCall(input: { callId: string }): Promise<ActionRe
   return second.ok ? snapshotResult(second.data) : ok(snapshot);
 }
 
+/**
+ * THE CALL RINGING THIS PERSON RIGHT NOW, IF ANY (29 October 2026, the founder:
+ * "when I call someone it will not show on their end until they call me back").
+ *
+ * The incoming screen used to depend on one realtime message and nothing
+ * else: if that message was missed (a socket that dropped on a phone, a tab
+ * that slept) the call rang in the database and nowhere else until something
+ * else made the app look, such as the callee calling back. This is the look.
+ * It reads only the caller's own participant row (the row security rules), and
+ * only a call that is still inside its ring window, so a stale row can never
+ * resurrect a finished call; the heartbeat that follows is still the truth.
+ */
+export async function incomingCallNow(): Promise<ActionResult<{ callId: string } | null>> {
+  const auth = await signedIn();
+  if (!auth.ok) return fail(auth.error);
+  const { data, error } = await (auth.session.supabase as unknown as {
+    from(table: string): {
+      select(columns: string): {
+        eq(column: string, value: string): {
+          eq(column: string, value: string): {
+            eq(column: string, value: string): {
+              gt(column: string, value: string): {
+                limit(count: number): Promise<{ data: { call_id: string }[] | null; error: unknown }>;
+              };
+            };
+          };
+        };
+      };
+    };
+  })
+    .from("call_participants")
+    .select("call_id, calls!inner(state, ring_expires_at)")
+    .eq("user_id", auth.session.user.id)
+    .eq("state", "RINGING")
+    .eq("calls.state", "RINGING")
+    .gt("calls.ring_expires_at", new Date().toISOString())
+    .limit(1);
+  if (error) return fail(wordsForToken("call:not_found"));
+  const callId = data?.[0]?.call_id;
+  return ok(callId ? { callId } : null);
+}
+
+/**
+ * The callee's app says the ring is on its screen, so the caller can read
+ * "Ringing" instead of "Calling" (29 October 2026). Stamps the callee's own
+ * participant row once; a call that is not ringing for this person is a no-op.
+ */
+export async function ringDelivered(input: { callId: string }): Promise<ActionResult<null>> {
+  const auth = await signedIn();
+  if (!auth.ok) return fail(auth.error);
+  const parsed = validate(callIdSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const answer = await callRpc(auth.session.supabase, "call_ring_delivered", { p_call: parsed.data.callId });
+  return answer.ok ? ok(null) : fail(answer.words);
+}
+
 /** One conversation's calls, newest first, as the person asking sees them. */
 export async function callHistory(input: { conversationId: string; limit?: number }): Promise<ActionResult<CallSnapshot[]>> {
   const auth = await signedIn();

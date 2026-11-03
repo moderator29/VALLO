@@ -170,7 +170,7 @@ async function decide(
   if (readError) return fail(SERVICE_DOWN);
   if (!business) return fail(GONE);
 
-  if (isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
+  if (!access.isFounder && isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
   const refusal = decisionRefusal(business.status, decision);
   if (refusal) return fail(refusal);
 
@@ -306,7 +306,7 @@ export async function publishAccommodation(input: {
   if (!property || !property.businesses) return fail(GONE);
 
   const business = property.businesses;
-  if (isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
+  if (!access.isFounder && isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
   if (business.status !== "APPROVED" && business.status !== "PUBLISHED") {
     return fail("Approve the business first, then publish its property.");
   }
@@ -561,7 +561,7 @@ export async function publishRestaurant(input: {
   const [business] = await withBusinessPrivate(access.supabase, [publicRow], ["phone"] as const).catch(() => [null]);
   if (!business) return fail(SERVICE_DOWN);
 
-  if (isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
+  if (!access.isFounder && isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
   if (business.kind !== "restaurant") {
     return fail(
       "This is not a restaurant. A stay goes live from its property, which carries the pin and the rooms.",
@@ -681,7 +681,7 @@ export async function recordBusinessRung(input: {
   /* The identity rung is the verified mark, so passing your own is lighting
      your own badge. Failing your own is refused too: it is still a decision
      about a business you own. */
-  if (isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
+  if (!access.isFounder && isOwnBusiness(business.owner_id, access.user.id)) return fail(SELF_REVIEW_REFUSAL);
   if (business.source !== "first_party") {
     return fail("Only a first-party business carries a verification ladder, so this one has no tier to set. Nothing was changed.");
   }

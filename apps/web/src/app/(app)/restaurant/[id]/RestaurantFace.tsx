@@ -166,6 +166,7 @@ export function RestaurantFace({
                 lead={placeCopy.mapLeadTable}
                 coords={areaPoint ?? null}
                 area={where}
+                actions={{ copyLabel: placeCopy.copyAddress, mapsLabel: placeCopy.openInMaps }}
                 unavailable={placeCopy.mapUnavailable.replace("{area}", where)}
                 facts={[
                   ...(where ? [{ key: "area", icon: "location" as const, label: placeCopy.area, value: where }] : []),

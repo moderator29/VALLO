@@ -1,13 +1,14 @@
 "use client";
 import "@/app/css/auth.css";
 
-import { startTransition, useActionState, useEffect, useRef, useState, useTransition } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { AuthFormState } from "@/lib/auth/form-state";
 import { signOut } from "@/lib/profile/actions";
 import { AcceptTerms } from "./AcceptTerms";
 import { Field } from "./fields";
 import { AuthPillButton } from "./slate";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 const EMPTY: AuthFormState = { ok: false };
@@ -46,7 +47,7 @@ export function FinishSetupForm({
   const [adult, setAdult] = useState(false);
   const [adultError, setAdultError] = useState(false);
   const [refused, setRefused] = useState(0);
-  const [leaving, startLeaving] = useTransition();
+  const [leaving, startLeaving] = useSafeTransition();
   const formRef = useRef<HTMLFormElement>(null);
 
   /* F-12: a refused submit puts the cursor on the first thing to fix. */

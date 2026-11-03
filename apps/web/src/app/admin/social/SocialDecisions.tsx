@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   decideArea,
@@ -8,6 +8,7 @@ import {
   setAreaPaused,
 } from "@/lib/social/admin-actions";
 import { Button } from "@/components/ui/Button";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -30,7 +31,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 function useDecision() {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => {

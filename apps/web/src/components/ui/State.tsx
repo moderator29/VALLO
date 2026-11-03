@@ -6,7 +6,8 @@ import { EmptyActions } from "@/components/app/EmptyActions";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { IconPlate } from "@/components/ui/IconPlate";
 import type { Icon3DName } from "@/components/ui/icon-3d";
-import { stateArtFor } from "@/components/ui/state-art";
+import { stateArtFor, stateGlyphFor } from "@/components/ui/state-art";
+import { glyphSrc } from "@/design-system/icons/glyphs";
 import { SkeletonText } from "@/components/ui/Skeleton";
 import { STATE_TONE, stateRole, type StateKind } from "@/lib/design/voice";
 
@@ -83,6 +84,13 @@ export type StateProps = {
    * coming, drawn in place of the three default lines.
    */
   children?: ReactNode;
+  /**
+   * A quiet empty inside a card or a section (a short list with nothing in
+   * it yet): the 36px plate and the words in one left-aligned row, no
+   * object, no centring. Where a screen is the empty (a whole list or page)
+   * leave it off and the full kit draws. One way, two sizes.
+   */
+  compact?: boolean;
   className?: string;
   "data-testid"?: string;
 };
@@ -97,6 +105,7 @@ export function State({
   secondary,
   action,
   footnote,
+  compact,
   className,
   children,
   "data-testid": testId,
@@ -104,6 +113,14 @@ export function State({
   const role = stateRole(kind);
   /* Objects are for empty and done; an error or offline keeps its glyph. */
   const object = kind === "empty" || kind === "done" ? stateArtFor(icon, art) : undefined;
+  /* The founder's glyph set wins where it has one: bare, no plate. An error
+     names the shield with the exclamation. */
+  const glyph =
+    kind === "empty" || kind === "done"
+      ? stateGlyphFor(icon, art)
+      : kind === "error"
+        ? ("booking-disputed" as const)
+        : undefined;
 
   if (kind === "loading") {
     /* The title is read out, not shown: a live region announces its text, and
@@ -125,6 +142,41 @@ export function State({
     );
   }
 
+  if (compact) {
+    return (
+      <div
+        data-testid={testId}
+        data-state-kind={kind}
+        data-state-size="compact"
+        role={role}
+        className={`flex items-start gap-md py-sm ${className ?? ""}`}
+      >
+        {glyph ? (
+          // eslint-disable-next-line @next/next/no-img-element -- a 256px transparent glyph at 40px
+          <img src={glyphSrc(glyph)} alt="" width={40} height={40} decoding="async" className="size-10 shrink-0 object-contain" aria-hidden="true" />
+        ) : (
+          <IconPlate size="sm" tone={STATE_TONE[kind]}>
+            <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={20} />
+          </IconPlate>
+        )}
+        <div className="min-w-0 flex-1 self-center">
+          {/* Words only (no `body`): the one sentence is the state, quiet. */}
+          <p className={body ? "nf-body font-semibold text-[var(--nf-content-primary)]" : "nf-body-sm text-[var(--nf-content-secondary)]"}>
+            {title}
+          </p>
+          {body && <p className="nf-body-sm text-[var(--nf-content-muted)]">{body}</p>}
+          {primary ? (
+            <div className="mt-sm">
+              <EmptyActions primary={primary} {...(secondary ? { secondary } : {})} />
+            </div>
+          ) : (
+            action && <div className="mt-sm">{action}</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid={testId}
@@ -136,17 +188,22 @@ export function State({
           lean line glyph on the kind's flat plate. A state that names a
           glass object draws that object's line twin (`glass-to-line.ts`);
           the glass objects no longer stand in a state. */}
-      {object ? (
-        /* The founder's 3D object (30 September): an empty or done state
-           that names one draws it, 88px in a fixed box (lazy, no shift). */
-        <span className="grid size-[5.5rem] place-items-center" data-art={object}>
+      {/* ONE STICKER BOX. The 3D object and the line-glyph plate both stand in
+          the same 5.5rem square, centred, so the title starts at the same
+          height whichever one a state draws (an audit found 88px objects and
+          56px plates side by side with titles at different heights). */}
+      <span className="grid size-[5.5rem] place-items-center" data-art={glyph ?? object} aria-hidden="true">
+        {glyph ? (
+          // eslint-disable-next-line @next/next/no-img-element -- a 256px transparent glyph at 88px
+          <img src={glyphSrc(glyph)} alt="" width={88} height={88} decoding="async" className="size-[5.5rem] object-contain" />
+        ) : object ? (
           <Icon3D name={object} size={88} />
-        </span>
-      ) : (
-        <IconPlate size="lg" tone={STATE_TONE[kind]}>
-          <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={24} />
-        </IconPlate>
-      )}
+        ) : (
+          <IconPlate size="lg" tone={STATE_TONE[kind]}>
+            <UiIcon name={icon ? lineGlyphFor(icon) : KIND_GLYPH[kind]} size={24} />
+          </IconPlate>
+        )}
+      </span>
       {/* `balance` stops a centred two-line title leaving a one-word orphan. */}
       <p className={`mt-block ${STATE_TITLE_CLASS} [text-wrap:balance]`}>{title}</p>
       {body && <p className={`mt-inline max-w-[42ch] ${STATE_BODY_CLASS}`}>{body}</p>}

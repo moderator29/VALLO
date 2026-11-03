@@ -318,6 +318,53 @@ export function pricePeriodLabel(type: PropertyType | null | undefined, words: P
   return isTenancy(type) ? words.year : words.night;
 }
 
+/* ------------------------------------------------- what each type is asked */
+
+/**
+ * THE FACTS A TYPE CAN HAVE (1 November 2026, the founder: "only the options
+ * that belong to its type"). A plot has no bedrooms, toilets, furnishing,
+ * floor, amenities, light or water to describe; a shop or an office has no
+ * bedrooms or bathrooms and no compound of homes. The wizard asks only these,
+ * the gate requires only these, and `saveDraft` clears any other on save so a
+ * type changed mid-draft leaves nothing behind that the new type cannot have.
+ */
+export type ListingFact =
+  | "bedrooms"
+  | "bathrooms"
+  | "toilets"
+  | "parking"
+  | "furnishing"
+  | "floor"
+  | "condition"
+  | "amenities"
+  | "power"
+  | "water"
+  | "compound";
+
+const HOME_FACTS: ReadonlySet<ListingFact> = new Set<ListingFact>([
+  "bedrooms", "bathrooms", "toilets", "parking", "furnishing", "floor", "condition", "amenities", "power", "water", "compound",
+]);
+const WORKSPACE_FACTS: ReadonlySet<ListingFact> = new Set<ListingFact>([
+  "toilets", "parking", "floor", "condition", "amenities", "power", "water",
+]);
+const FACTS_FOR: Record<PropertyType, ReadonlySet<ListingFact>> = {
+  apartment: HOME_FACTS,
+  shortlet: HOME_FACTS,
+  home: HOME_FACTS,
+  villa: HOME_FACTS,
+  rental: HOME_FACTS,
+  hotel: HOME_FACTS,
+  restaurant: HOME_FACTS,
+  shop: WORKSPACE_FACTS,
+  office: new Set<ListingFact>([...WORKSPACE_FACTS, "furnishing"]),
+  land: new Set<ListingFact>(),
+};
+
+/** True when a listing of this type is asked this fact. No type yet asks everything. */
+export function asksFact(type: PropertyType | null | undefined, fact: ListingFact): boolean {
+  return type ? FACTS_FOR[type].has(fact) : true;
+}
+
 /* ------------------------------------------------------- intent and money */
 
 export const LISTING_INTENT_CHOICES: {
@@ -669,7 +716,7 @@ export function submitRequirements(subject: SubmitSubject): GateRequirement[] {
     unmet.push({ field: "area", message: "Enter the area, for example Lekki Phase 1." });
   }
 
-  if (subject.amenityCount < 1) {
+  if (asksFact(subject.propertyType, "amenities") && subject.amenityCount < 1) {
     unmet.push({ field: "amenities", message: "Choose at least one amenity guests will find." });
   }
 
@@ -748,10 +795,9 @@ export function submitRequirements(subject: SubmitSubject): GateRequirement[] {
   if ((subject.bedrooms ?? -1) < 0) {
     unmet.push({ field: "bedrooms", message: "Say how many bedrooms the property has." });
   }
-  /* A plot of land has no bathroom. Asking would be a gate no land listing
-     could ever pass, which is a worse failure than a missing field: the
-     category would exist in search and be impossible to supply. */
-  if (subject.propertyType !== "land" && (subject.bathrooms ?? 0) < 1) {
+  /* A plot, a shop or an office is not asked for a bathroom. Asking would be a
+     gate those listings could never honestly pass. */
+  if (asksFact(subject.propertyType, "bathrooms") && (subject.bathrooms ?? 0) < 1) {
     unmet.push({ field: "bathrooms", message: "Say how many bathrooms the property has." });
   }
 

@@ -8,7 +8,7 @@
  * the array on first load so nobody loses an existing conversation.
  */
 
-import type { AssistantListingItem } from "@/lib/assistant/types";
+import type { AssistantListingItem, AssistantStreamEvent } from "@/lib/assistant/types";
 
 export type Role = "user" | "assistant";
 
@@ -18,6 +18,12 @@ export type Message = {
   text: string;
   /** Real catalogue results streamed alongside this assistant turn. */
   listings?: AssistantListingItem[];
+  /**
+   * Interactive blocks (cards with buttons, times, summaries, a payment to
+   * review) for this turn. In memory only: they hold money figures and offers
+   * that were true at one moment, so `saveThreads` never writes them down.
+   */
+  blocks?: Extract<AssistantStreamEvent, { type: "cards" | "actions" | "slots" | "summary" | "payment_review" | "photos" }>[];
   /** The turn failed and the bubble should offer a retry. */
   error?: boolean;
   /** The person stopped this answer (or sent again) while it streamed. What arrived is kept. */
@@ -124,7 +130,9 @@ export function loadThreads(): Thread[] {
 
 export function saveThreads(threads: Thread[]): void {
   try {
-    window.localStorage.setItem(THREADS_KEY, JSON.stringify(threads));
+    /* Blocks carry figures and offers; they stay in memory (see Message.blocks). */
+    const slim = threads.map((t) => ({ ...t, messages: t.messages.map(({ blocks: _blocks, ...m }) => m) }));
+    window.localStorage.setItem(THREADS_KEY, JSON.stringify(slim));
   } catch {
     /* Storage full or blocked: the conversations simply live in memory. */
   }

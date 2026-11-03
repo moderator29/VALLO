@@ -1,7 +1,7 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatDate, formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { ShotList } from "@/components/agent/ShotList";
@@ -63,6 +63,8 @@ import {
   FURNISHING_CHOICES,
   isRental,
   isTenancy,
+  asksFact,
+  type ListingFact,
   LISTING_INTENT_CHOICES,
   parseNairaToKobo,
   POWER_BACKUP_CHOICES,
@@ -86,7 +88,9 @@ import {
 } from "@/lib/agent/listings-model";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BackControl } from "@/components/ui/BackControl";
-import type { BrandIconName } from "@/design-system/icons/BrandIcon";
+import { BrandIcon, type BrandIconName, type BrandIconProp } from "@/design-system/icons/BrandIcon";
+import { MediaViewer, type ViewerCopy, type ViewerItem } from "@/components/app/messages/MediaViewer";
+import { SPACE_OBJECT } from "@/components/app/home/space-types";
 import { Amount } from "@/components/ui/Amount";
 import { moveInLines } from "@/components/app/listing/move-in-lines";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -141,6 +145,7 @@ import { DetailGlyph } from "@/components/app/listing/DetailGlyph";
 import { feedback } from "@/lib/ui/feedback";
 import "@/app/css/catalogue.css";
 import "@/app/css/lister-publish.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -217,6 +222,11 @@ function stepOfGateField(field: string): number {
  * with a plot to sell could not choose "Land" and gave up. A market you can
  * browse and cannot list in is worse than one you do not offer.
  */
+/* Hotels and restaurants are listed from the host workspace with their own
+   rooms, rates and tables; the property wizard offers them only to a draft
+   that was already saved as one. */
+const HOST_ONLY: ReadonlySet<PropertyType> = new Set<PropertyType>(["hotel", "restaurant"]);
+
 const TYPE_ORDER: PropertyType[] = [
   "apartment",
   "shortlet",
@@ -541,6 +551,13 @@ const STEP_ART: Partial<Record<(typeof STEP_KEYS)[number], Icon3DName>> = {
   submit: "checklist",
 };
 
+/** The realistic objects "Spaces for you" draws on the home, so a type looks the same wherever it appears. */
+const TYPE_REALISTIC: Partial<Record<PropertyType, BrandIconProp>> = {
+  ...SPACE_OBJECT,
+  shortlet: "serviced-block",
+  hotel: "hotel",
+};
+
 /** The 3D object on each property type's card, where the sheets draw one. */
 const TYPE_ART: Partial<Record<PropertyType, Icon3DName>> = {
   apartment: "apartment",
@@ -678,7 +695,7 @@ function StepHead({
       </div>
       {art ? (
         <span className="nf-lw-head__object grid size-14 shrink-0 place-items-center" aria-hidden="true" data-art={art}>
-          <Icon3D name={art} size={56} priority />
+          <Icon3D classic name={art} size={56} priority />
         </span>
       ) : (
         object && (
@@ -725,6 +742,7 @@ function Choice({
   sub,
   object,
   art,
+  realistic,
   glyph,
   chosen,
   centred,
@@ -735,6 +753,8 @@ function Choice({
   object?: BrandIconName;
   /** The founder's 3D object, in place of the plate. */
   art?: Icon3DName | undefined;
+  /** The realistic object the home's "Spaces for you" draws, in place of the 3D one. */
+  realistic?: BrandIconProp | undefined;
   glyph?: UiIconName;
   chosen: boolean;
   centred?: boolean;
@@ -747,9 +767,13 @@ function Choice({
       aria-pressed={chosen}
       className={`nf-lw-choice${centred ? " nf-lw-choice--centred" : ""}`}
     >
-      {art ? (
+      {realistic ? (
+        <span className="nf-lw-choice__object grid size-12 place-items-center" aria-hidden="true" data-art={realistic}>
+          <BrandIcon name={realistic} size={48} preferRender />
+        </span>
+      ) : art ? (
         <span className="nf-lw-choice__object grid size-12 place-items-center" aria-hidden="true" data-art={art}>
-          <Icon3D name={art} size={48} />
+          <Icon3D classic name={art} size={48} />
         </span>
       ) : object ? (
         <IconPlate size="sm" tone={chosen ? "brand" : "neutral"} className="nf-lw-choice__object">
@@ -1033,6 +1057,7 @@ export function ListingWizard({
   guideCopy,
   initialUnconfirmed = [],
   shotsCopy,
+  viewerCopy = null,
   demandCopy,
   pathCopy,
   listerCopy,
@@ -1057,6 +1082,8 @@ export function ListingWizard({
   success?: SuccessWords;
   /** V-70: the shot list's words. Without them the shot list is not drawn. */
   shotsCopy?: Dictionary["afterTheGate"]["shots"];
+  /** The full-screen viewer's words. Absent, the tiles are not openable. */
+  viewerCopy?: ViewerCopy | null;
   /** V-10: the saved-search count on the last step. Absent in harnesses. */
   demandCopy?: Dictionary["frontDoor"]["demand"];
   /**
@@ -1210,6 +1237,8 @@ export function ListingWizard({
   /** The files the last pick could not upload for a reason a second try can fix. */
   const [retryFiles, setRetryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  /* The tile open in the full-screen viewer, as `${kind}-${id}`. */
+  const [viewerId, setViewerId] = useState<string | null>(null);
   /* STORE-04: the shell's own camera, when the running binary carries it. */
   const [nativeCamera, setNativeCamera] = useState(false);
   useEffect(() => {
@@ -1237,7 +1266,7 @@ export function ListingWizard({
      blocking flag is on: with it off there is no accept to hold. */
   const [feePolicy, setFeePolicy] = useState<ListerFeePolicy | null | undefined>(initialFeePolicy);
   const [feeAcceptance, setFeeAcceptance] = useState<ListerFeeAcceptance | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   /** Whether the last `persist` reached the server and was accepted. */
   const lastSaveOk = useRef(true);
   /** Whether step one's title refusal is currently being shown. */
@@ -1273,6 +1302,8 @@ export function ListingWizard({
    */
   const forSale = values.intent === "sale";
   const tenancy = !forSale && isTenancy(values.propertyType);
+  /* Only the facts this property type can have are asked (`asksFact`). */
+  const asks = (fact: ListingFact) => asksFact(values.propertyType, fact);
   const shortStay = !forSale && !tenancy;
   const perHead = ratePeriodFor(values.propertyType) === "guest";
 
@@ -2273,10 +2304,8 @@ export function ListingWizard({
     if (poster) {
       const stillPath = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
       try {
-        const upload = await supabase.storage
-          .from("listing-photos")
-          .upload(stillPath, poster, { contentType: "image/jpeg", upsert: false });
-        if (!upload.error) posterPath = stillPath;
+        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster, contentType: "image/jpeg" });
+        if (upload.ok) posterPath = stillPath;
       } catch {
         /* no still */
       }
@@ -2820,13 +2849,14 @@ export function ListingWizard({
                 needs it: after choosing, not before.
               */}
               <div className="nf-lw-choices nf-lw-choices--3">
-                {TYPE_ORDER.map((type) => (
+                {TYPE_ORDER.filter((type) => !HOST_ONLY.has(type) || values.propertyType === type).map((type) => (
                   <Choice
                     key={type}
                     centred
                     name={copy.propertyTypes[type].label}
                     object={TYPE_OBJECT[type]}
                     art={TYPE_ART[type]}
+                    realistic={TYPE_REALISTIC[type]}
                     chosen={values.propertyType === type}
                     onClick={() => set("propertyType", type)}
                   />
@@ -2899,6 +2929,7 @@ export function ListingWizard({
                 {mark("bedrooms", "bathrooms", "toilets", "parkingSpaces", "furnished")}
               </span>
               <div className="nf-lw-facts">
+                {asks("bedrooms") && (
                 <FactRow
                   glyph="bed"
                   name={copy.basics.counters.bedrooms}
@@ -2915,6 +2946,8 @@ export function ListingWizard({
                     onChange={(v) => set("bedrooms", v)}
                   />
                 </FactRow>
+                )}
+                {asks("bathrooms") && (
                 <FactRow
                   glyph="bath"
                   name={copy.basics.counters.bathrooms}
@@ -2931,9 +2964,11 @@ export function ListingWizard({
                     onChange={(v) => set("bathrooms", v)}
                   />
                 </FactRow>
+                )}
                 {/* Toilets is a count in the render and was a free text box
                     here, which is the one row a Nigerian listing is asked
                     about most and the one that could be typed wrong. */}
+                {asks("toilets") && (
                 <FactRow
                   glyph="bath"
                   name={copy.drawn.rooms.toilets}
@@ -2950,6 +2985,8 @@ export function ListingWizard({
                     onChange={(v) => set("toilets", v === 0 ? "" : String(v))}
                   />
                 </FactRow>
+                )}
+                {asks("parking") && (
                 <FactRow
                   glyph="parking"
                   name={copy.drawn.rooms.parking}
@@ -2966,12 +3003,13 @@ export function ListingWizard({
                     onChange={(v) => set("parkingSpaces", v === 0 ? "" : String(v))}
                   />
                 </FactRow>
+                )}
 
                 <FactRow
                   stacked
                   glyph="grid"
                   name={copy.drawn.rooms.size}
-                  ask={copy.drawn.rooms.sizeAsk}
+                  ask={values.propertyType === "land" ? "The plot's area, if you know it" : copy.drawn.rooms.sizeAsk}
                   optional={copy.drawn.rooms.optional}
                 >
                   <input
@@ -2991,6 +3029,7 @@ export function ListingWizard({
                   )}
                 </FactRow>
 
+                {asks("furnishing") && (
                 <FactRow
                   stacked
                   glyph="home"
@@ -3011,7 +3050,9 @@ export function ListingWizard({
                     ))}
                   </select>
                 </FactRow>
+                )}
 
+                {asks("floor") && (
                 <FactRow
                   stacked
                   glyph="building-apartment"
@@ -3042,6 +3083,7 @@ export function ListingWizard({
                     </span>
                   )}
                 </FactRow>
+                )}
               </div>
             </div>
 
@@ -3061,6 +3103,7 @@ export function ListingWizard({
               terms on the price step, where the date sits beside the shortest
               tenancy it has to agree with.
             */}
+            {asks("condition") && (
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.checkOver.keys.condition}
@@ -3077,6 +3120,7 @@ export function ListingWizard({
                 ))}
               </div>
             </fieldset>
+            )}
           </div>
         )}
 
@@ -3152,33 +3196,49 @@ export function ListingWizard({
                   data-cover={index === 0 ? "" : undefined}
                   data-kind={item.kind}
                 >
-                  {item.kind === "photo" ? (
-                    <RemoteImage
-                      src={item.url}
-                      alt=""
-                      width={640}
-                      height={480}
-                      sizes="(max-width: 40rem) 50vw, 14rem"
-                      className="nf-lw-shot__img"
-                    />
-                  ) : (
-                    /* Muted and still: a poster when there is one, and nothing
-                       fetched until the lister presses play. */
-                    <video
-                      src={item.url}
-                      poster={item.posterUrl ?? undefined}
-                      preload={item.posterUrl ? "none" : "metadata"}
-                      muted
-                      playsInline
-                      controls={false}
-                      className="nf-lw-shot__img"
-                      aria-label={
-                        item.durationSeconds === null
-                          ? copy.photos.video
-                          : `${copy.photos.video}, ${clockOf(item.durationSeconds)}`
-                      }
-                    />
-                  )}
+                  {(() => {
+                    const face =
+                      item.kind === "photo" ? (
+                        <RemoteImage
+                          src={item.url}
+                          alt=""
+                          width={640}
+                          height={480}
+                          sizes="(max-width: 40rem) 50vw, 14rem"
+                          className="nf-lw-shot__img"
+                        />
+                      ) : (
+                        /* Muted and still: its poster, or its first frame (`#t=0.1`
+                           makes the browser paint one instead of a black box), and
+                           nothing more is fetched until it is opened. */
+                        <video
+                          src={`${item.url}#t=0.1`}
+                          poster={item.posterUrl ?? undefined}
+                          preload="metadata"
+                          muted
+                          playsInline
+                          controls={false}
+                          className="nf-lw-shot__img"
+                          aria-label={
+                            item.durationSeconds === null
+                              ? copy.photos.video
+                              : `${copy.photos.video}, ${clockOf(item.durationSeconds)}`
+                          }
+                        />
+                      );
+                    return viewerCopy ? (
+                      <button
+                        type="button"
+                        className="nf-lw-shot__open"
+                        aria-label={item.kind === "photo" ? viewerCopy.openPhoto : viewerCopy.openVideo}
+                        onClick={() => setViewerId(`${item.kind}-${item.id}`)}
+                      >
+                        {face}
+                      </button>
+                    ) : (
+                      face
+                    );
+                  })()}
                   {index === 0 && <span className="nf-lw-shot__cover">{copy.photos.cover}</span>}
                   {item.kind === "video" && (
                     <span className="nf-lw-shot__kind" aria-hidden="true">
@@ -3256,6 +3316,21 @@ export function ListingWizard({
                 </li>
               )}
             </ul>
+            {viewerCopy && viewerId ? (
+              <MediaViewer
+                items={media.map<ViewerItem>((item) => ({
+                  id: `${item.kind}-${item.id}`,
+                  kind: item.kind,
+                  src: item.url,
+                  alt: "",
+                  name: values.title.trim() || copy.photos.cover,
+                  when: "",
+                }))}
+                startId={viewerId}
+                copy={viewerCopy}
+                onClose={() => setViewerId(null)}
+              />
+            ) : null}
             {/* V-70: say what each photo shows. Additive; drawn only with its copy. */}
             {shotsCopy && (
               <ShotList
@@ -3346,7 +3421,14 @@ export function ListingWizard({
         )}
 
         {/* ----------------------------------------------------- 4 amenities */}
-        {step === 3 && (
+        {step === 3 && !asks("amenities") && (
+          <div>
+            <Note>
+              A plot has no amenities to list. Say what the land is good for in the description, and carry on.
+            </Note>
+          </div>
+        )}
+        {step === 3 && asks("amenities") && (
           <div>
             <Note>{copy.amenities.intro}</Note>
             {fieldErrors.amenities && (
@@ -3410,6 +3492,8 @@ export function ListingWizard({
               five choices makes you choose before you can read what you chose.
               Every blurb is on its own card now.
             */}
+            {asks("power") && (
+              <>
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.supply.power}
@@ -3484,6 +3568,11 @@ export function ListingWizard({
               </div>
             )}
 
+              </>
+            )}
+
+            {asks("water") && (
+              <>
             <fieldset>
               <legend className="nf-label mb-inline">
                 {copy.drawn.supply.water}
@@ -3504,7 +3593,11 @@ export function ListingWizard({
                 ))}
               </div>
             </fieldset>
+              </>
+            )}
 
+            {asks("power") && (
+              <>
             {/* The render draws a TOGGLE on this row, and it was a bare 24px
                 checkbox painted with `accent-color`: the one control on this
                 step that the platform's own switch primitive already owned. */}
@@ -3515,6 +3608,8 @@ export function ListingWizard({
               onCheckedChange={(v) => set("prepaidMeter", v)}
             />
             {mark("prepaidMeter")}
+              </>
+            )}
 
             {/* ------------------------ the service charge and the gate (V-68) */}
             {/* What the charge covers is asked only where a charge is stated on
@@ -3536,12 +3631,14 @@ export function ListingWizard({
             )}
 
             {/* ---------------------------------------- the compound (V-28) */}
-            <CompoundQuestions
-              copy={compoundCopy}
-              value={values.compound}
-              onChange={(next) => set("compound", next)}
-              flatsError={fieldErrors.flatsInCompound}
-            />
+            {asks("compound") && (
+              <CompoundQuestions
+                copy={compoundCopy}
+                value={values.compound}
+                onChange={(next) => set("compound", next)}
+                flatsError={fieldErrors.flatsInCompound}
+              />
+            )}
 
             {/* ------------------------------------------------ the gate */}
             <div className="nf-panel nf-panel--card block p-card">

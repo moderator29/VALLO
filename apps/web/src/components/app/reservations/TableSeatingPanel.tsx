@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useCopyFlash, useCopyLabels } from "@/lib/ui/use-copy";
@@ -24,6 +24,7 @@ import {
   leaveTableReview,
   payTableBill,
 } from "@/lib/reservations/seating-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -36,7 +37,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 export function TableSeatingPanel({ table }: { table: ReservationView }) {
   const router = useRouter();
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [billOpenForm, setBillOpenForm] = useState(false);

@@ -452,6 +452,17 @@ export const frontDoorEn = {
     elsewhere: "Share elsewhere",
     elsewhereLink: "The link, for anywhere off Vallo.",
   },
+  /* The QR code row in the listing's share sheet (backlog row 13). Not under
+     `share`, so the words every screen carries do not grow. */
+  shareQr: {
+    show: "Show QR code",
+    hide: "Hide QR code",
+    body: "Scan it with a phone camera to open this place. Good for a flyer or a board outside.",
+    label: "QR code for this place",
+    failed: "Could not make the QR code just now. Try again.",
+    whatsapp: "Send to a WhatsApp group",
+    whatsappBody: "Opens WhatsApp with a short link. Never the address.",
+  },
   /** V-72: the enquiry desk. */
   desk: {
     stages: {

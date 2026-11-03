@@ -3,7 +3,7 @@
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PostCard, type PostView } from "./PostCard";
 import { ReportSheet } from "../ReportSheet";
@@ -44,6 +44,7 @@ import { setOrKeep } from "@/lib/offline/send-or-keep";
 
 /** The phone could not keep a tap for later (storage refused): the change goes back. */
 const OUTBOX_KEEP_FAILED = "You are offline, and this phone could not keep that for later.";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
  * The heading when a caller has not given one.
@@ -195,7 +196,7 @@ export function Feed({
     const timer = window.setTimeout(() => setLeadSettled(true), LEAD_SETTLE_MS);
     return () => window.clearTimeout(timer);
   }, []);
-  const [, startTransition] = useTransition();
+  const [, startTransition] = useSafeTransition();
 
   /*
    * The server is the truth. When a refresh brings new props, take them.

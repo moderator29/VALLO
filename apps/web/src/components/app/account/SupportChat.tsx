@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@vallo/i18n/core";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { findFaqEntry } from "@/lib/support/faq";
@@ -13,11 +13,12 @@ import { ICON } from "@/components/app/Screen";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
 import { useDeviceIdentity } from "./device-identity";
-import { AiConsentSheet } from "@/components/app/ai/AiConsentSheet";
+import { recordAiConsent } from "@/lib/ai/consent-actions";
 import { AI_CONSENT_REQUIRED_CODE } from "@/lib/ai/consent";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { AIResponse, type AIResponseStatus } from "@/components/ui/AIResponse";
 import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 /* The answer card's fit (the words keep the line breaks, the stopped note, the
    thinking orb) is the assistant's; support's answers are the same card. */
 import "@/components/app/assistant/assistant-answer.css";
@@ -175,8 +176,6 @@ export function SupportChat({
      the disclosure; declining keeps the chat, answered from the help pages
      and a person, with no AI. The route refuses without agreement anyway. */
   const [consent, setConsent] = useState<"yes" | "ask" | "declined">(aiConsented ? "yes" : "ask");
-  const [consentSheet, setConsentSheet] = useState(false);
-  const [pending, setPending] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   /* The reference `fileSupportTicket` just answered with, for the success sheet. */
   const [justFiled, setJustFiled] = useState<string | null>(null);
@@ -294,9 +293,12 @@ export function SupportChat({
       const text = raw.trim();
       if (!text || streaming) return;
       if (!keywordOnly && answer === "ask") {
-        setPending(text);
-        setConsentSheet(true);
-        return;
+        /* Sending is agreeing (29 October 2026): no card in the chat. The
+           agreement is recorded, then the message goes. */
+        setConsent("yes");
+        const recorded = await recordAiConsent().catch(() => ({ ok: false }));
+        if (!recorded.ok) setConsent("ask");
+        return send(raw, recorded.ok ? "yes" : "declined");
       }
       setDraft("");
 
@@ -340,7 +342,6 @@ export function SupportChat({
             /* Nothing went to the AI. Ask, and answer this one from the help
                pages meanwhile. */
             setConsent("ask");
-            setConsentSheet(true);
             answerFromKeywords(replyId, text);
             return;
           }
@@ -655,24 +656,6 @@ export function SupportChat({
               )}
             </div>
 
-            {consentSheet ? (
-              <div className="p-row">
-                <AiConsentSheet
-                  onAgreed={() => {
-                    setConsentSheet(false);
-                    setConsent("yes");
-                    if (pending) void send(pending, "yes");
-                    setPending(null);
-                  }}
-                  onDeclined={() => {
-                    setConsentSheet(false);
-                    setConsent("declined");
-                    if (pending) void send(pending, "declined");
-                    setPending(null);
-                  }}
-                />
-              </div>
-            ) : null}
             {/* In the sheet the composer stays on screen while the thread
                 scrolls under it, the way a messaging app's does. */}
             <div className={embedded ? "sticky bottom-0 bg-[var(--nf-surface-elevated)]" : ""}>
@@ -858,7 +841,7 @@ function EscalationCard({
   const [email, setEmail] = useState(defaultEmail);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string }>({});
   const [note, setNote] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
 
   const submit = () => {
     if (!signedIn) {

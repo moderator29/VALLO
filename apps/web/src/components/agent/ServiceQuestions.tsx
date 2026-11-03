@@ -108,6 +108,7 @@ export function ServiceQuestions({
                 onChange={(next) => onChange({ ...value, reconciled: next })}
                 semantics="radio"
                 full
+                stack
                 label={copy.reconciledLabel}
               />
             </div>

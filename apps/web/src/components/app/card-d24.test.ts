@@ -30,6 +30,7 @@ const CARD_RENDERERS = [
   "components/app/search/MapDock.tsx",
   "components/app/home/LookedAtRecently.tsx",
   "app/(app)/saved/SavedCompare.tsx",
+  "components/app/compare/CompareBody.tsx",
 ] as const;
 
 describe("D24: no example label on a discovery card", () => {
@@ -60,6 +61,6 @@ describe("D24: no unearned trust signal on an example", () => {
   });
 
   it("the comparison draws only an earned Verified mark", () => {
-    expect(read("app/(app)/saved/SavedCompare.tsx")).toMatch(/column\.mark\s*===\s*"verified"/);
+    expect(read("components/app/compare/CompareBody.tsx")).toMatch(/column\.mark\s*===\s*"verified"/);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { DuplicateListing } from "./DuplicateListing";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type Dictionary, type Locale, formatMoneyGlance } from "@vallo/i18n/core";
 import { fill } from "../_copy";
@@ -25,8 +25,10 @@ import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
+import { LISTING_STATUS_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
 import { CloseListingSheet } from "./CloseListingSheet";
 import { OwnerAskStrip } from "./OwnerAskStrip";
+import { ListingMeter } from "@/components/agent/ListingMeter";
 import { BulkBar } from "./BulkBar";
 import { planBulk, rangeToggle } from "./bulk";
 import { livePayoffFor, liveSeenKey } from "@/lib/agent/lister-live";
@@ -35,6 +37,7 @@ import { markSeen, seenOnce } from "@/lib/ui/seen-once";
 import { feedback } from "@/lib/ui/feedback";
 import { motionQuiet } from "@/lib/motion/gate";
 import "@/app/css/lister-live.css";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -160,7 +163,7 @@ function ConfirmSheet({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
   const [unmet, setUnmet] = useState<string[]>([]);
   const copy = t.workspace.sheets[state.kind];
@@ -457,7 +460,13 @@ function ListingRow({
                    the pop until the page has settled). */
                 onAnimationStart={payoff ? (event) => event.animationName === "nf-success-payoff" && feedback("success") : undefined}
               >
-                <StatusPill tone={toneForStatus(listing.status)}>{t.workspace.status[listing.status]}</StatusPill>
+                <span className="inline-flex items-center gap-2xs">
+                  {LISTING_STATUS_GLYPH[listing.status] ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- a 256px transparent glyph at 24px
+                    <img src={glyphSrc(LISTING_STATUS_GLYPH[listing.status]!)} alt="" width={24} height={24} decoding="async" className="size-6 object-contain" aria-hidden="true" />
+                  ) : null}
+                  <StatusPill tone={toneForStatus(listing.status)}>{t.workspace.status[listing.status]}</StatusPill>
+                </span>
               </span>
             )}
           </div>
@@ -498,6 +507,10 @@ function ListingRow({
               ? t.workspace.photoCountOne
               : fill(t.workspace.photoCount, { count: listing.photoCount })}
           </p>
+
+          {listing.completeness ? (
+            <ListingMeter completeness={listing.completeness} listingId={listing.id} editable={editable} copy={t.workspace.completeness} locale={locale} />
+          ) : null}
 
           {/* THE CODE, ON THE ROW, the moment the listing has one. This is
               where a lister will be standing when somebody asks them for it

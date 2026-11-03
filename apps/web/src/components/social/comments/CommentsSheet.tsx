@@ -1,7 +1,7 @@
 "use client";
 
 import { initial } from "@/lib/text/initial";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReportSheet } from "@/components/social/ReportSheet";
@@ -26,6 +26,7 @@ import { Expand } from "@/components/social/Expand";
 import { ActionPill } from "@/components/social/feed/ActionPill";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -121,7 +122,7 @@ export function CommentsSheet({
   const [reporting, setReporting] = useState<CommentRow | null>(null);
   /* The comment the delete slide is open for. */
   const [deleting, setDeleting] = useState<CommentRow | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const headRef = useRef<HTMLButtonElement>(null);
 

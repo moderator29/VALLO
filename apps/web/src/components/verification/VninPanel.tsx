@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
 import { TextField } from "@/components/ui/Field";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { verifyIdentityWithVnin } from "@/lib/identity/actions";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -28,7 +29,7 @@ export function VninPanel({
 }) {
   const [vnin, setVnin] = useState("");
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, startTransition] = useSafeTransition();
   const [matched, setMatched] = useState(false);
   const matchedWords = success ? successCopy(success, "identityMatched") : null;
 
