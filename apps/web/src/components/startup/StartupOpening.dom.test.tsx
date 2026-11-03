@@ -212,7 +212,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the app opening, in a browser",
       const hides = await page.evaluate(() => (window as unknown as { __hides: { plugin: string; method: string; frames: number; loaded: boolean }[] }).__hides);
       expect(hides[0]).toMatchObject({ plugin: "SplashScreen", method: "hide", frames: 0, loaded: false });
       const trace = await page.evaluate((k) => localStorage.getItem(k), BOOT_TRACE_KEY);
-      for (const stage of ["parse@", "hide:sent:parse@", "hide:answered:parse@", "opening:full@", "wait:lifted@", "opening:done@"]) {
+      /* The app always opens briefly (fast-start item 14): the full opening is longer than the half second. */
+      for (const stage of ["parse@", "hide:sent:parse@", "hide:answered:parse@", "opening:brief@", "wait:lifted@", "opening:done@"]) {
         expect(trace).toContain(stage);
       }
     } finally {

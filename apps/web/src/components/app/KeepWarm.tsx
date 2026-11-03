@@ -3,10 +3,12 @@
 import { startTransition, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { isDataSaver } from "@/lib/ui/data-saver";
-import { heldByPasscode } from "@/lib/offline/page-cache";
+import { announceVisit, heldByPasscode } from "@/lib/offline/page-cache";
 import type { Side } from "@/lib/side.constants";
 import {
+  FIRST_INSTALL_WARM_GAP_MS,
   REFRESH_AFTER_AWAY_MS,
+  firstInstallWarmPlan,
   arrivedAt,
   forgetArrival,
   mainTabs,
@@ -87,6 +89,32 @@ export function KeepWarm({
     /* Each new screen lands with its own idle moment to warm in. */
     scheduleRef.current?.();
   }, [tabs, current]);
+
+  /*
+   * THE FIRST TIME THE WORKER TAKES CONTROL (a fresh install, a cleared
+   * phone), it has kept nothing but the screen in front of the person. So the
+   * other main tabs are kept too, one at a time and well apart, as documents
+   * the worker fetches itself (`firstInstallWarmPlan`). Never on data saver,
+   * never for a guest, and never again once a worker was already in control.
+   */
+  useEffect(() => {
+    if (!enabled || process.env.NODE_ENV !== "production") return;
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+    const container = navigator.serviceWorker;
+    if (container.controller) return;
+    const timers: number[] = [];
+    const onControl = () => {
+      if (isDataSaver()) return;
+      firstInstallWarmPlan(tabsRef.current, currentRef.current).forEach((tab, index) => {
+        timers.push(window.setTimeout(() => announceVisit(tab), FIRST_INSTALL_WARM_GAP_MS * (index + 1)));
+      });
+    };
+    container.addEventListener("controllerchange", onControl, { once: true });
+    return () => {
+      container.removeEventListener("controllerchange", onControl);
+      for (const timer of timers) window.clearTimeout(timer);
+    };
+  }, [enabled]);
 
   /* Only for a member: a guest's tab tap is never held (`shouldHold`). */
   useEffect(() => {

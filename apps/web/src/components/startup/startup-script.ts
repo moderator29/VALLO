@@ -163,6 +163,12 @@ export const STARTUP_SCRIPT = [
 export const STARTUP_GATE_SCRIPT =
   "(function(){var W=window,d=document.documentElement,m=W.__nfMark||function(){};try{if(!sessionStorage.getItem('nf_entered')){sessionStorage.setItem('nf_entered','1');" +
   "var full=true;try{var l=+localStorage.getItem('nf_entered')||0;full=!(Date.now()-l<" + RETURNING_WITHIN_MS + ");localStorage.setItem('nf_entered',String(Date.now()))}catch(e){}" +
+  /* Item 14 of the fast-start plan (2 November 2026): the app and a page the
+     phone kept always get the brief opening. The full one is 600ms, longer
+     than the half-second the app is meant to open in. The attribute is
+     KEPT_MARK_ATTRIBUTE in lib/offline/page-cache.ts, written out because this
+     script is a string run before anything is imported. */
+  "try{if(/VALLO-NATIVE/.test(navigator.userAgent)||d.hasAttribute('data-vallo-kept'))full=false}catch(e){}" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "if(!still&&d.dataset.saveData!=='on'&&d.dataset.motionSplash!=='off'&&d.dataset.motion!=='calm'&&d.dataset.motion!=='off'&&!/^\\/(admin|auth|api|offline|open|s|r)(\\/|$)/.test(location.pathname)){d.dataset.splash='on';d.dataset.opening=full?'full':'brief'}" +
   "else m('opening:settled')}}catch(e){}})();" +

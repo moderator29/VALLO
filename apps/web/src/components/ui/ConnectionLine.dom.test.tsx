@@ -42,6 +42,13 @@ const INSTANT_DOCUMENT = `
     type === "navigation" ? [{ serverTiming: [{ name: "vallo-kept", description: "instant", duration: 0 }] }] : original(type);
 `;
 
+/* The mark on a page answered at once on Save-Data or 2G (2 November 2026). */
+const INSTANT_LIGHT_DOCUMENT = `
+  const original = performance.getEntriesByType.bind(performance);
+  performance.getEntriesByType = (type) =>
+    type === "navigation" ? [{ serverTiming: [{ name: "vallo-kept", description: "instant-light", duration: 0 }] }] : original(type);
+`;
+
 const OFFLINE_FROM_THE_START = `Object.defineProperty(Navigator.prototype, "onLine", { configurable: true, get: () => false });`;
 
 const refreshCalls = (page: import("playwright-core").Page) =>
@@ -111,6 +118,27 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the connection line", () => {
       expect(await page.getByTestId("connection-line").count()).toBe(0);
       /* The worker's word that its own copy is fresh does not refresh twice. */
       await page.evaluate(() => navigator.serviceWorker?.dispatchEvent?.(new MessageEvent("message", { data: { type: "vallo:page-fresh", path: location.pathname } })));
+      expect(await refreshCalls(page)).toBe(1);
+    } finally {
+      await close();
+    }
+  });
+
+  it("on Save-Data or 2G, a page answered at once waits for the network's copy and refreshes once, quietly", async () => {
+    /* The test page has no worker; a stand-in channel carries the worker's word. */
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init: INSTANT_LIGHT_DOCUMENT + `Object.defineProperty(navigator, "serviceWorker", { value: new EventTarget(), configurable: true });`,
+    });
+    try {
+      await page.waitForTimeout(400);
+      expect(await refreshCalls(page)).toBe(0);
+      expect(await page.getByTestId("connection-line").count()).toBe(0);
+      await page.evaluate(() => navigator.serviceWorker?.dispatchEvent?.(new MessageEvent("message", { data: { type: "vallo:page-fresh", path: location.pathname } })));
+      await page.waitForFunction(
+        () => ((window as unknown as { __router?: { calls: unknown[][] } }).__router?.calls ?? []).some(([name]) => name === "refresh"),
+      );
       expect(await refreshCalls(page)).toBe(1);
     } finally {
       await close();

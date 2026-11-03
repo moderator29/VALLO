@@ -83,7 +83,7 @@
    October 2026) when a kept page began answering at once, carrying the
    `data-vallo-kept` mark and a note of whether its assets are all on the
    phone, and the hashed build output went cache first. */
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;
@@ -273,6 +273,11 @@ const VIEWER_PATTERN = /^(anon|[a-f0-9]{16,64})$/;
    keeps quiet about unless the refresh is slow. */
 const FROM_CACHE_TIMING = 'vallo-kept;desc="kept"';
 const INSTANT_TIMING = 'vallo-kept;desc="instant"';
+/* An instant answer on Save-Data or a 2G link (item 2 of the fast-start plan,
+   2 November 2026): shown at once like any other, but the page does not ask
+   for a second render straight away; it refreshes once, when the copy the
+   network is already fetching has been kept. */
+const INSTANT_LIGHT_TIMING = 'vallo-kept;desc="instant-light"';
 
 /* Where the shell's own start (`/open`, and `/` for the shell) lands offline,
    in order: the first of these this viewer has kept. */
@@ -936,13 +941,18 @@ let lastInstantAt = 0;
  * Whether a kept copy may answer before the network does. Only a whole copy
  * (every script and stylesheet it needs is on the phone, so it draws and
  * becomes interactive with no signal), younger than INSTANT_MAX_AGE_MS, not
- * on a reload, not under Save-Data (the refresh behind it is a second
- * download, which is exactly what Save-Data asks us not to spend), and not
- * moments after the last instant answer.
+ * on a reload, and not moments after the last instant answer.
+ *
+ * SAVE-DATA AND 2G ARE ALLOWED (2 November 2026). They used to be refused, on
+ * the grounds that the refresh behind an instant answer is a second download,
+ * so the people on the weakest links were the ones made to wait up to
+ * NAVIGATION_TIMEOUT_MS for the copy they would have been shown anyway. Now
+ * they get it at once, marked INSTANT_LIGHT_TIMING, and the page skips the
+ * immediate refresh (`ConnectionLine`): one refresh, when the network's copy
+ * has been kept, which is the same spending as the slow path, without the wait.
  */
 async function mayAnswerInstantly(request, kept, now, pathname) {
   if (askedForNetwork(request)) return false;
-  if (saveDataRequested(request)) return false;
   if (now - lastInstantAt < INSTANT_COOLDOWN_MS) return false;
   const headers = kept.headers;
   if (headers.get(WHOLE_HEADER) !== "1") return false;
@@ -1050,7 +1060,7 @@ function handleNavigation(event) {
       settled = "instant";
       lastInstantAt = now;
       event.waitUntil(tell());
-      return markKept(kept.response, INSTANT_TIMING);
+      return markKept(kept.response, saveDataRequested(request) ? INSTANT_LIGHT_TIMING : INSTANT_TIMING);
     }
 
     let timer;

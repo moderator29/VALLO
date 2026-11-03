@@ -52,6 +52,16 @@ Value H/M/L, effort S/M/L, risk. "Web" = no store release. "Native" = needs a bu
 
 Anything that changes `public/sw.js` must bump `CACHE_VERSION` (currently `v6`) and update `src/lib/offline/sw-*.test.ts`.
 
+## Done so far (2 November 2026)
+
+- **2**: Save-Data and 2G now get the instant answer too (`INSTANT_LIGHT_TIMING`); the page skips the immediate refresh and refreshes once when the network's copy is kept. `CACHE_VERSION` is `v7`.
+- **3**: the first time the worker takes control, the other main tabs are kept as documents, 1.5 s apart, members only, never on data saver (`firstInstallWarmPlan`, `KeepWarm.tsx`).
+- **14**: the app shell and kept pages always get the brief 400 ms opening.
+- **24**: the stale comments in `capacitor.config.ts` and `lib/offline/shelf.ts`.
+- Pull to refresh on Home and Saved (it was on Messages and Bookings only). The native share sheet (`share-bridge.ts`) and the branded offline screens (`/offline`, `native-shell/index.html`) already existed.
+
+Next: 1 (measure real cold start), 10, 5, 7, 6, 9, then 8 and 4.
+
 ## Suggested order for the next session
 
 1. **Measure first** (item 1) and fix the stale comments (24).

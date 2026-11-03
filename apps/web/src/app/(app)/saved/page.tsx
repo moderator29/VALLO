@@ -1,3 +1,4 @@
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -133,7 +134,7 @@ export default async function SavedPage() {
   ].sort((a, b) => b.savedAt - a.savedAt);
 
   return (
-    <div className="nf-cat-surface mx-auto max-w-3xl">
+    <PullToRefresh className="nf-cat-surface mx-auto max-w-3xl">
       <div className="relative">
         <PageScene art="globe-pin" />
       {/* The saved SEARCHES live one tap from the saved places, because they
@@ -198,7 +199,7 @@ export default async function SavedPage() {
           />
         }
       />
-    </div>
+    </PullToRefresh>
   );
 }
 

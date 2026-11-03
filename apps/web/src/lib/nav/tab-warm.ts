@@ -202,3 +202,28 @@ export function resetTabWarmForTests(): void {
 export function markWatchingForTests(): void {
   watching = true;
 }
+
+/** The gap between first-install warms, so they never queue in front of the screen's own fetches. */
+export const FIRST_INSTALL_WARM_GAP_MS = 1_500;
+
+/**
+ * WHICH TABS THE WORKER SHOULD KEEP RIGHT AFTER IT FIRST TAKES CONTROL
+ * (item 3 of docs/OFFLINE_AND_FAST_START_PLAN.md, 2 November 2026).
+ *
+ * On a fresh install the worker has kept nothing, so the first open of every
+ * other tab waits on the network, and a phone that loses signal after the
+ * first screen has only that screen. The main tabs other than the one on
+ * screen, in rail order, each once; the worker fetches and keeps each as a
+ * document (`vallo:visited`), under the viewer the server names.
+ */
+export function firstInstallWarmPlan(tabs: readonly string[], current: string): string[] {
+  const here = current.split("?")[0] ?? current;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const tab of tabs) {
+    if (tab === here || seen.has(tab)) continue;
+    seen.add(tab);
+    out.push(tab);
+  }
+  return out.slice(0, 4);
+}

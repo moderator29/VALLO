@@ -19,8 +19,9 @@ import type { PeriodSlashWords as PeriodUnitWords } from "@/lib/listings/pricing
  * card carries). NOT the title: the lister's own words are shown only on
  * the listing's page, so a copy is named by its rooms and area instead.
  * No address, no lister contact, no photograph (photographs are the heavy
- * part and the service worker does not cache images; the row says what it
- * has rather than drawing an empty frame).
+ * part; the service worker keeps only images it has already shown, in its own
+ * capped cache, and none is promised here; the row says what it has rather
+ * than drawing an empty frame).
  *
  * WAS AND IS NOW. The first figure the phone ever stored for a listing is
  * kept beside the current one, with the date it stored it. When a refresh

@@ -120,3 +120,12 @@ describe("waiting for a copy, and when a tap holds", () => {
     expect(shouldHold("/profile", Date.now())).toBe(true);
   });
 });
+
+describe("firstInstallWarmPlan", () => {
+  it("keeps every main tab but the one on screen, in rail order, each once", async () => {
+    const { firstInstallWarmPlan, mainTabs } = await import("./tab-warm");
+    expect(firstInstallWarmPlan(mainTabs("property", false), "/home")).toEqual(["/search", "/messages", "/profile", "/agreements"]);
+    expect(firstInstallWarmPlan(mainTabs("property", true), "/search?q=lekki")).toEqual(["/home", "/messages", "/profile", "/around"]);
+    expect(firstInstallWarmPlan(["/home", "/home", "/messages"], "/elsewhere")).toEqual(["/home", "/messages"]);
+  });
+});

@@ -79,14 +79,23 @@ export const KEPT_MARK_ATTRIBUTE = "data-vallo-kept";
  *
  * Null for a document the network answered.
  */
-export type KeptCopyKind = "instant" | "kept";
+/**
+ * "instant" a whole, recent copy shown at once; "instant-light" the same on
+ * Save-Data or 2G, which waits for the network's copy before refreshing;
+ * "kept" the network was too slow and the copy was shown after the wait.
+ */
+export type KeptCopyKind = "instant" | "instant-light" | "kept";
 
 export function keptCopyKind(): KeptCopyKind | null {
   try {
     if (typeof performance !== "undefined" && typeof performance.getEntriesByType === "function") {
       const [entry] = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
       const timing = (entry?.serverTiming ?? []).find((item) => item.name === KEPT_TIMING_NAME);
-      if (timing) return timing.description === "instant" ? "instant" : "kept";
+      if (timing) {
+        if (timing.description === "instant") return "instant";
+        if (timing.description === "instant-light") return "instant-light";
+        return "kept";
+      }
     }
   } catch {
     /* Fall through to the mark. */

@@ -110,6 +110,12 @@ export function ConnectionLine() {
           }, INSTANT_SLOW_MS),
         );
       }
+    } else if (kind === "instant-light") {
+      /* Answered at once on Save-Data or 2G: no second render now. The page
+         refreshes once, when the copy the network is already fetching has
+         been kept (`onFreshCopy` below), and says nothing meanwhile. */
+      stale.current = true;
+      if (!navigator.onLine) offline();
     } else if (kind === "kept") kept();
     else if (!navigator.onLine) offline();
     /* The worker kept a fresh copy of this page after showing the old one:

@@ -92,3 +92,12 @@ describe("the opening's gate", () => {
     expect(gate({ path: "/welcome" }).splash).toBe("on");
   });
 });
+
+describe("item 14: the app and a kept page always open briefly", () => {
+  it("forces the brief opening in the shell and on a page the phone kept", async () => {
+    const { STARTUP_GATE_SCRIPT } = await import("./startup-script");
+    const { KEPT_MARK_ATTRIBUTE } = await import("@/lib/offline/page-cache");
+    expect(STARTUP_GATE_SCRIPT).toContain("/VALLO-NATIVE/.test(navigator.userAgent)");
+    expect(STARTUP_GATE_SCRIPT).toContain(`d.hasAttribute('${KEPT_MARK_ATTRIBUTE}')`);
+  });
+});
