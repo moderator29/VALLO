@@ -23,10 +23,19 @@
  */
 
 export const SAVE_KINDS = ["save_listing", "save_place"] as const;
+/**
+ * A state on the social side (3 November 2026): follow someone, like, save or
+ * repost a post. Like a save, each is keyed by what it is about and carries
+ * the state wanted, so the latest tap wins and a replay sets rather than flips
+ * (`toggleFollow`, `toggleMark` and `toggleRepost` take `want`).
+ */
+export const SOCIAL_KINDS = ["follow", "like_post", "save_post", "repost_post", "read_notification"] as const;
+export const STATE_KINDS = [...SAVE_KINDS, ...SOCIAL_KINDS] as const;
 export const CREATE_KINDS = ["send_message", "request_inspection", "submit_review", "drop_post"] as const;
-export const OUTBOX_KINDS = [...SAVE_KINDS, ...CREATE_KINDS] as const;
+export const OUTBOX_KINDS = [...STATE_KINDS, ...CREATE_KINDS] as const;
 export type OutboxKind = (typeof OUTBOX_KINDS)[number];
 export type CreateKind = (typeof CREATE_KINDS)[number];
+export type StateKind = (typeof STATE_KINDS)[number];
 
 /**
  * What each create carries: named strings only, each bounded, the required
@@ -87,8 +96,15 @@ export function entryKey(kind: OutboxKind, target: string): string {
 
 /** A new intent, or null for anything this outbox does not carry. */
 export function makeEntry(kind: string, target: string, want: boolean, now: number): OutboxEntry | null {
-  if (!(SAVE_KINDS as readonly string[]).includes(kind)) return null;
-  if (kind === "save_place") {
+  if (!(STATE_KINDS as readonly string[]).includes(kind)) return null;
+  if (kind === "follow") {
+    if (!/^[a-z0-9_.]{1,40}$/i.test(target)) return null;
+  } else if (kind === "like_post" || kind === "save_post" || kind === "repost_post") {
+    if (!UUID.test(target)) return null;
+  } else if (kind === "read_notification") {
+    /* One notice by its id, or every unread one ("all"); only ever "read". */
+    if (target !== "all" && !UUID.test(target)) return null;
+  } else if (kind === "save_place") {
     const [placeKind, id] = target.split(":");
     if ((placeKind !== "accommodation" && placeKind !== "restaurant") || !id || !UUID.test(id)) return null;
   } else if (target.length === 0 || target.length > 120) {

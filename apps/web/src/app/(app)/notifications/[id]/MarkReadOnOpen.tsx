@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { markNotificationsRead } from "@/lib/messages/notifications-actions";
+import { setOrKeep } from "@/lib/offline/send-or-keep";
 
 /**
  * Opening the full view is what reads the notification.
@@ -18,8 +19,8 @@ export function MarkReadOnOpen({ id, unread }: { id: string; unread: boolean }) 
   useEffect(() => {
     if (!unread || sent.current) return;
     sent.current = true;
-    void markNotificationsRead({ ids: [id] }).then((result) => {
-      if (result.ok) router.refresh();
+    void setOrKeep("read_notification", id, true, () => markNotificationsRead({ ids: [id] })).then((out) => {
+      if (out.state === "sent" && out.result.ok) router.refresh();
     });
   }, [id, unread, router]);
   return null;

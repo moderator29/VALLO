@@ -11,6 +11,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { DEFAULT_COUNTRY, formatInternational, guessCountry } from "@/lib/phone-intl";
 import { feedback } from "@/lib/ui/feedback";
 import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
+import { retryLost } from "@/lib/offline/retry-lost";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
 import "@/components/verification/verified-face.css";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
@@ -136,7 +137,7 @@ export function PhoneConfirmForm({
     setError(null);
     startTransition(async () => {
       try {
-        const result = await confirmPhoneCode({ code });
+        const result = await retryLost(() => confirmPhoneCode({ code }));
         if (!result.ok) {
           feedback("error");
           next.current = [copy.confirmExpired, copy.confirmLocked, copy.confirmNoCode].includes(result.error) ? "resend" : "code";

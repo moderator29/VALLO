@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useClientCopy } from "@/lib/i18n/client-copy";
-import { heldByPasscode, keptCopyKind, onFreshCopy } from "@/lib/offline/page-cache";
+import { agoWords, heldByPasscode, keptCopyAt, keptCopyKind, onFreshCopy } from "@/lib/offline/page-cache";
 
 /**
  * THE CONNECTION LINE (details pass; offline pass, 8 October 2026). A small
@@ -56,6 +56,14 @@ export function ConnectionLine() {
      fresh render replaces it, and `refreshing` says when that has happened. */
   const [refreshing, startRefresh] = useTransition();
   const refreshingRef = useRef(false);
+  /* "Updated 2 h ago": how old the copy on screen is, read once the line shows. */
+  const [updatedText, setUpdatedText] = useState("");
+
+  const showing = phase !== "online";
+  useEffect(() => {
+    const at = showing ? keptCopyAt() : null;
+    setUpdatedText(at ? `Updated ${agoWords(at, Date.now())}.` : "");
+  }, [showing]);
 
   useEffect(() => {
     refreshingRef.current = refreshing;
@@ -138,6 +146,7 @@ export function ConnectionLine() {
   if (phase === "online" || (phase === "slow" && !refreshing)) return null;
   const back = phase === "back" || phase === "leaving";
   const keptLine = phase === "kept" || phase === "slow";
+  const updated = !back && updatedText ? ` ${updatedText}` : "";
   return (
     <div
       className="nf-connection"
@@ -148,7 +157,7 @@ export function ConnectionLine() {
     >
       <span className="nf-connection__pill">
         <span className="nf-connection__dot" aria-hidden="true" />
-        {back ? copy.back : keptLine ? copy.kept : copy.offline}
+        {back ? copy.back : (keptLine ? copy.kept : copy.offline) + updated}
       </span>
     </div>
   );

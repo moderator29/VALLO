@@ -6,7 +6,7 @@ const ID = "3653d202-e498-4db0-ab71-882649f7f446";
 
 describe("the outbox (V-40)", () => {
   it("never carries money", () => {
-    expect(OUTBOX_KINDS).toEqual(["save_listing", "save_place", "send_message", "request_inspection", "submit_review", "drop_post"]);
+    expect(OUTBOX_KINDS).toEqual(["save_listing", "save_place", "follow", "like_post", "save_post", "repost_post", "read_notification", "send_message", "request_inspection", "submit_review", "drop_post"]);
     for (const kind of OUTBOX_KINDS) expect(kind).not.toMatch(/pay|money|withdraw|transfer|fund|card|wallet/);
     expect(makeEntry("withdraw", ID, true, 0)).toBeNull();
     expect(makeEntry("send_money", ID, true, 0)).toBeNull();
@@ -18,6 +18,17 @@ describe("the outbox (V-40)", () => {
     expect(second.want).toBe(false);
     expect(entryKey("save_place", `accommodation:${ID}`)).toBe(`save_place:accommodation:${ID}`);
     expect(makeEntry("save_place", "hotel:x", true, 0)).toBeNull();
+  });
+  it("carries the social states, each checked by what it is about", () => {
+    expect(makeEntry("like_post", ID, true, 0)?.key).toBe(`like_post:${ID}`);
+    expect(makeEntry("like_post", "not-a-uuid", true, 0)).toBeNull();
+    expect(makeEntry("follow", "ada_o", true, 0)?.target).toBe("ada_o");
+    expect(makeEntry("follow", "a b/../c", true, 0)).toBeNull();
+    expect(makeEntry("read_notification", "all", true, 0)).not.toBeNull();
+    expect(makeEntry("read_notification", ID, true, 0)).not.toBeNull();
+    expect(makeEntry("read_notification", "everything", true, 0)).toBeNull();
+    /* The latest tap wins: like then unlike leaves one entry wanting false. */
+    expect(makeEntry("like_post", ID, true, 1)!.key).toBe(makeEntry("like_post", ID, false, 2)!.key);
   });
   it("replays oldest first, only what is due, and backs off", () => {
     const a = { ...makeEntry("save_listing", "a", true, 10)!, nextAt: 10 };

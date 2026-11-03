@@ -14,6 +14,7 @@ import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { ListGroup } from "@/components/ui/ListGroup";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { markNotificationsRead } from "@/lib/messages/notifications-actions";
+import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { loadOlderNotifications } from "@/lib/notify/inbox-actions";
 import { toNotificationItem, type NotificationItem } from "@/lib/notify/links";
 import { lagosTimeLabel } from "@/lib/messages/time";
@@ -134,8 +135,10 @@ export function LiveNotifications({
   const markOne = useCallback(
     (id: string) => {
       setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-      void markNotificationsRead({ ids: [id] }).then((result) => {
-        if (result.ok) {
+      /* A dropped signal keeps the read to send later: it stays read here. */
+      void setOrKeep("read_notification", id, true, () => markNotificationsRead({ ids: [id] })).then((out) => {
+        if (out.state === "kept") return;
+        if (out.state === "sent" && out.result.ok) {
           router.refresh();
           return;
         }
@@ -149,8 +152,9 @@ export function LiveNotifications({
     const before = items;
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
     setProblem(null);
-    void markNotificationsRead({}).then((result) => {
-      if (result.ok) {
+    void setOrKeep("read_notification", "all", true, () => markNotificationsRead({})).then((out) => {
+      if (out.state === "kept") return;
+      if (out.state === "sent" && out.result.ok) {
         router.refresh();
         return;
       }
@@ -158,7 +162,7 @@ export function LiveNotifications({
          over realtime in the meantime keeps its own state. */
       const unread = new Set(before.filter((n) => !n.read).map((n) => n.id));
       setItems((prev) => prev.map((n) => (unread.has(n.id) ? { ...n, read: false } : n)));
-      setProblem(result.error);
+      setProblem(out.state === "sent" && !out.result.ok ? out.result.error : "Could not mark them read. Try again.");
     });
   }, [items, router]);
 

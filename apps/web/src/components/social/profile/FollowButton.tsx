@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { useRequireAuth } from "@/components/auth/AuthGate";
 import { toggleFollow } from "@/lib/social/follows-actions";
+import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
@@ -110,10 +111,13 @@ export function FollowButton({
 
     startTransition(async () => {
       try {
-        const result = await toggleFollow({ handle });
-        if (!result.ok) {
+        /* Follow shows at once; with no signal it is kept and sent later. */
+        const sent = await setOrKeep("follow", handle, next, () => toggleFollow({ handle, want: next }));
+        if (sent.state === "kept") return;
+        const result = sent.state === "sent" ? sent.result : null;
+        if (!result || !result.ok) {
           setFollowing(!next);
-          setError(result.error);
+          setError(result && !result.ok ? result.error : "You are offline, and this phone could not keep that for later.");
           return;
         }
         /* The database is the authority even when it agrees with us: a second tab

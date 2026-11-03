@@ -1,6 +1,6 @@
 import type { ActionResult } from "../actions/envelope";
 import { withTimeout } from "../media/upload";
-import { enqueue, entryKey, makeCreateEntry, type CreateKind } from "./outbox";
+import { enqueue, entryKey, makeCreateEntry, makeEntry, type CreateKind, type StateKind } from "./outbox";
 
 /**
  * SEND NOW, OR KEEP IT FOR WHEN THERE IS SIGNAL. V-40.
@@ -37,6 +37,36 @@ export async function sendOrKeep<T>(
     return { state: "sent", result: await withTimeout(send(tapKey ?? ""), SEND_DEADLINE_MS) };
   } catch {
     /* The request never came back: the network dropped or stalled under it. */
+    return keep();
+  }
+}
+
+/**
+ * THE SAME, FOR A STATE (3 November 2026): follow, like, save or repost. The
+ * screen has already changed on the tap (the Instagram heart); this sends the
+ * state wanted, and if the request never comes back (no signal, a stall past
+ * STATE_DEADLINE_MS, a dropped connection) keeps it in the outbox, keyed by
+ * what it is about, to be sent as that state when the signal returns. The
+ * person sees nothing go wrong, because nothing has: the tap is kept.
+ */
+const STATE_DEADLINE_MS = 12_000;
+
+export type StateSendOrKeep<T> = { state: "sent"; result: ActionResult<T> } | { state: "kept" } | { state: "not_kept" };
+
+export async function setOrKeep<T>(
+  kind: StateKind,
+  target: string,
+  want: boolean,
+  send: () => Promise<ActionResult<T>>,
+): Promise<StateSendOrKeep<T>> {
+  const keep = async (): Promise<StateSendOrKeep<T>> => {
+    const entry = makeEntry(kind, target, want, Date.now());
+    return entry && (await enqueue(entry)) ? { state: "kept" } : { state: "not_kept" };
+  };
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return keep();
+  try {
+    return { state: "sent", result: await withTimeout(send(), STATE_DEADLINE_MS) };
+  } catch {
     return keep();
   }
 }

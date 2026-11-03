@@ -72,8 +72,11 @@ const followInputSchema = z.object({ handle: handleSchema });
 
 export async function toggleFollow(input: {
   handle: string;
+  /** The state wanted. Given, a tap sets rather than flips (the outbox replays with it). */
+  want?: boolean;
 }): Promise<ActionResult<FollowOutcome>> {
   if (!(await isSocialEnabled())) return fail(SOCIAL_OFF_MESSAGE);
+  const want = typeof input?.want === "boolean" ? input.want : undefined;
   const parsed = validate(followInputSchema, input);
   if (!parsed.ok) return fail(GONE_MESSAGE);
   const { handle } = parsed.data;
@@ -105,6 +108,8 @@ export async function toggleFollow(input: {
     .eq("followee_id", target.user_id)
     .maybeSingle();
   if (readError) return fail(SERVICE_DOWN_MESSAGE);
+
+  if (want !== undefined && Boolean(existing) === want) return settle(supabase, handle, target.user_id, want);
 
   if (existing) {
     /* Unfollowing is deliberately not metered. A limit that can trap somebody

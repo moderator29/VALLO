@@ -60,6 +60,13 @@ Anything that changes `public/sw.js` must bump `CACHE_VERSION` (currently `v6`) 
 - **24**: the stale comments in `capacitor.config.ts` and `lib/offline/shelf.ts`.
 - Pull to refresh on Home and Saved (it was on Messages and Bookings only). The native share sheet (`share-bridge.ts`) and the branded offline screens (`/offline`, `native-shell/index.html`) already existed.
 
+### Done 3 November 2026
+
+- Likes, reposts, saves, follows and mark-read change on screen at once and, on a weak or no signal, wait in the outbox and replay as the state wanted (`setOrKeep`, kinds `follow`, `like_post`, `save_post`, `repost_post`, `read_notification`). A real refusal still puts the control back and says why.
+- The offline and slow-connection pill now adds "Updated 2 h ago", read from the `vallo-kept-at` Server-Timing entry the worker adds to a kept page.
+- Phone codes count once: a retry after a lost answer finds the number confirmed and says so (`confirmPhoneCode`), and the screens ask again with growing gaps (`retryLost`).
+- Email codes are NOT made retry-safe on the server: a spent email code cannot be told apart from a stolen one without a session, so a lost answer there is solved by "Send a new code".
+
 Next: 1 (measure real cold start), 10, 5, 7, 6, 9, then 8 and 4.
 
 ## Suggested order for the next session

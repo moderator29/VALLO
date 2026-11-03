@@ -254,11 +254,13 @@ export async function attachPostMedia(input: {
 export async function toggleMark(input: {
   postId: string;
   mark: "LIKE" | "SAVE";
+  /** The state wanted. Given, a tap sets rather than flips, so a replay or a second tab cannot undo it. */
+  want?: boolean;
 }): Promise<ActionResult<{ marked: boolean }>> {
   if (!(await isSocialEnabled())) return fail(SOCIAL_OFF_MESSAGE);
   const parsed = validate(markSchema, input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
-  const { postId, mark } = parsed.data;
+  const { postId, mark, want } = parsed.data;
 
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
@@ -277,6 +279,8 @@ export async function toggleMark(input: {
     .eq("user_id", session.user.id)
     .eq("mark", mark)
     .maybeSingle();
+
+  if (want !== undefined && Boolean(existing) === want) return ok({ marked: want });
 
   if (existing) {
     const { error } = await session.supabase
@@ -305,8 +309,11 @@ export async function toggleMark(input: {
 /** Repost, or undo one. */
 export async function toggleRepost(input: {
   postId: string;
+  /** The state wanted. Given, a tap sets rather than flips (the outbox replays with it). */
+  want?: boolean;
 }): Promise<ActionResult<{ reposted: boolean }>> {
   if (!(await isSocialEnabled())) return fail(SOCIAL_OFF_MESSAGE);
+  const want = typeof input?.want === "boolean" ? input.want : undefined;
   const parsed = validate(postIdSchema, input);
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
 
@@ -326,6 +333,8 @@ export async function toggleRepost(input: {
     .eq("post_id", parsed.data.postId)
     .eq("user_id", session.user.id)
     .maybeSingle();
+
+  if (want !== undefined && Boolean(existing) === want) return ok({ reposted: want });
 
   if (existing) {
     const { error } = await session.supabase

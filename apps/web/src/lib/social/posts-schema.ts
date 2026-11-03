@@ -88,6 +88,8 @@ export const postIdSchema = z.object({ postId: z.string().uuid() });
 export const markSchema = z.object({
   postId: z.string().uuid(),
   mark: z.enum(["LIKE", "SAVE"]),
+  /** The state wanted (3 November 2026): a replay from the phone's outbox sets, never flips. */
+  want: z.boolean().optional(),
 });
 
 const reasonEnum = z.enum(REPORT_REASONS);

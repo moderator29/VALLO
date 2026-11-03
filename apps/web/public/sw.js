@@ -803,7 +803,9 @@ async function keptPage(url) {
    and which way it came: `timing` is FROM_CACHE_TIMING or INSTANT_TIMING. */
 function markKept(response, timing) {
   const headers = new Headers(response.headers);
-  headers.set("server-timing", timing || FROM_CACHE_TIMING);
+  /* When this copy was kept rides along, so the page can say "Updated 2h ago". */
+  const keptAt = Number(headers.get("x-vallo-kept-at") || "0");
+  headers.set("server-timing", (timing || FROM_CACHE_TIMING) + (keptAt > 0 ? ', vallo-kept-at;desc="' + keptAt + '"' : ""));
   headers.set("cache-control", "no-store");
   headers.delete(WHOLE_HEADER);
   headers.delete(VARIANT_HEADER);

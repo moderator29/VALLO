@@ -12,6 +12,7 @@ import { confirmPhoneCode, sendPhoneCode } from "@/lib/phone-otp/actions";
 import { formatPhone } from "@/lib/phone";
 import { resendLabel, RESEND_WAIT_SECONDS } from "@/lib/auth/mail-app";
 import { feedback } from "@/lib/ui/feedback";
+import { retryLost } from "@/lib/offline/retry-lost";
 
 const CODE_LENGTH = 6;
 
@@ -81,7 +82,7 @@ export function SignUpPhoneStep({ t, phone, next }: { t: Dictionary; phone: stri
     setError(null);
     start(async () => {
       try {
-        const result = await confirmPhoneCode({ code: value });
+        const result = await retryLost(() => confirmPhoneCode({ code: value }));
         if (!result.ok) {
           feedback("error");
           setWrongCount((n) => n + 1);

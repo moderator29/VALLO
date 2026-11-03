@@ -113,6 +113,29 @@ export function keptCopyKind(): KeptCopyKind | null {
   return null;
 }
 
+/** When the phone kept the copy on screen (ms since 1970), or null when unknown. */
+export function keptCopyAt(): number | null {
+  try {
+    const [entry] = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+    const timing = (entry?.serverTiming ?? []).find((item) => item.name === "vallo-kept-at");
+    const at = Number(timing?.description);
+    return Number.isFinite(at) && at > 0 && at <= Date.now() + 60_000 ? at : null;
+  } catch {
+    return null;
+  }
+}
+
+/** "5 min ago", "2 h ago", "3 days ago": how old a kept copy is. */
+export function agoWords(at: number, now: number): string {
+  const min = Math.max(0, Math.round((now - at) / 60_000));
+  if (min < 1) return "just now";
+  if (min < 60) return `${min} min ago`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `${h} h ago`;
+  const d = Math.round(h / 24);
+  return d === 1 ? "yesterday" : `${d} days ago`;
+}
+
 /** Whether this document was answered from the phone rather than the network. */
 export function servedFromKeptCopy(): boolean {
   return keptCopyKind() !== null;

@@ -173,6 +173,17 @@ export async function confirmPhoneCode(input: unknown): Promise<ActionResult<{ c
   });
   if (error || !isConfirmOutcome(data)) return fail(copy.sendFailed);
   if (data !== "confirmed") {
+    /* THE ANSWER THAT NEVER ARRIVED (3 November 2026). A code counts once. If
+       the first answer was lost on a weak signal, the retry finds the code
+       spent ("no_code", "expired" or "wrong") although the number is now
+       confirmed. Say so rather than telling a confirmed person they failed. */
+    if (data === "no_code" || data === "expired" || data === "wrong") {
+      const { data: row } = await session.supabase.from("confirmed_phones").select("user_id").eq("user_id", session.user.id).maybeSingle();
+      if (row) {
+        revalidatePath("/settings/phone");
+        return ok({ confirmed: true });
+      }
+    }
     if (data === "taken") {
       const userId = session.user.id;
       after(() => recordNumberRefused(userId, "taken_on_confirm"));

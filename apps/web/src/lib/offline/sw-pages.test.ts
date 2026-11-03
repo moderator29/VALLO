@@ -461,7 +461,7 @@ describe("answering at once from the phone (the startup track)", () => {
     /* No timer is advanced: the answer does not wait for the network at all. */
     const { response, settled } = await sw.request("/home");
     expect(await response!.text()).toContain("old");
-    expect(response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant"');
+    expect((response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant"');
     expect(response!.headers.get("x-vallo-whole")).toBeNull();
     release(html(ALICE, { body: "fresh", assets: ASSETS }));
     await settled();
@@ -528,7 +528,7 @@ describe("answering at once from the phone (the startup track)", () => {
     sw.setNetwork(() => new Promise<Response>((resolve) => (release = resolve)));
     const { response, settled } = await sw.request("/home", { headers: { "save-data": "on" } });
     expect(await response!.text()).toContain("old");
-    expect(response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant-light"');
+    expect((response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant-light"');
     release(html(ALICE, { body: "fresh", assets: ASSETS }));
     await settled();
     const kept = await sw.caches.stores.get(`vallo-pages-v7-${ALICE}`)!.match(`${ORIGIN}/home`);
@@ -577,7 +577,7 @@ describe("answering at once from the phone (the startup track)", () => {
     vi.setSystemTime(new Date("2026-10-13T08:01:00Z"));
     sw.setNetwork(() => new Promise<Response>(() => undefined));
     const later = await sw.request("/home");
-    expect(later.response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant"');
+    expect((later.response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant"');
   });
 
   it("the shell's start redirects at once to the viewer's kept home, with no round trip", async () => {
@@ -592,7 +592,7 @@ describe("answering at once from the phone (the startup track)", () => {
     await start.settled();
     const home = await sw.request("/home");
     expect(await home.response!.text()).toContain("alice home");
-    expect(home.response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant"');
+    expect((home.response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant"');
   });
 
   it("the welcome screen answers at once only when it was kept the way the first-run cookie draws it now", async () => {
@@ -602,7 +602,7 @@ describe("answering at once from the phone (the startup track)", () => {
     sw.setNetwork(() => new Promise<Response>(() => undefined));
     const same = await sw.request("/welcome");
     expect(await same.response!.text()).toContain("the slides");
-    expect(same.response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant"');
+    expect((same.response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant"');
 
     /* The device saw the slides since: the server now draws the choice, so the network answers. */
     const other = load({ cookies });
@@ -617,7 +617,7 @@ describe("answering at once from the phone (the startup track)", () => {
     await keepWhole(third, "/welcome", "the choice");
     third.setNetwork(() => new Promise<Response>(() => undefined));
     const again = await third.request("/welcome");
-    expect(again.response!.headers.get("server-timing")).toBe('vallo-kept;desc="instant"');
+    expect((again.response!.headers.get("server-timing") ?? "").split(", ")[0]).toBe('vallo-kept;desc="instant"');
   });
 
   it("the welcome screen never answers at once where the worker cannot read cookies", async () => {

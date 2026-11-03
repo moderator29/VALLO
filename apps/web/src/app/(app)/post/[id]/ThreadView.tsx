@@ -32,6 +32,10 @@ import { POST_COPY, POST_REPORT_REASONS } from "@/lib/social/posts-model";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { setOrKeep } from "@/lib/offline/send-or-keep";
+
+/** The phone could not keep a tap for later (storage refused): the change goes back. */
+const OUTBOX_KEEP_FAILED = "You are offline, and this phone could not keep that for later.";
 
 type ThreadReply = PostView & { depth: number; parentId: string | null; mutedAuthor: boolean };
 
@@ -136,13 +140,16 @@ export function ThreadView({
     patch(post.id, { liked, likeCount: post.likeCount + (liked ? 1 : -1) });
     startTransition(async () => {
       try {
-        const result = await toggleMark({ postId: post.id, mark: "LIKE" });
-        if (!result.ok) {
+        /* The heart has already moved. No signal, or a stall: the like is kept
+           on the phone and sent when the signal returns, and nothing goes back. */
+        const sent = await setOrKeep("like_post", post.id, liked, () => toggleMark({ postId: post.id, mark: "LIKE", want: liked }));
+        if (sent.state === "kept") return;
+        const result = sent.state === "sent" ? sent.result : null;
+        if (!result || !result.ok) {
           patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-          setNotice(result.error);
+          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
-        router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -155,13 +162,14 @@ export function ThreadView({
     patch(post.id, { reposted, repostCount: post.repostCount + (reposted ? 1 : -1) });
     startTransition(async () => {
       try {
-        const result = await toggleRepost({ postId: post.id });
-        if (!result.ok) {
+        const sent = await setOrKeep("repost_post", post.id, reposted, () => toggleRepost({ postId: post.id, want: reposted }));
+        if (sent.state === "kept") return;
+        const result = sent.state === "sent" ? sent.result : null;
+        if (!result || !result.ok) {
           patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-          setNotice(result.error);
+          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
-        router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -229,10 +237,12 @@ export function ThreadView({
       patch(post.id, { saved });
       startTransition(async () => {
         try {
-          const result = await toggleMark({ postId: post.id, mark: "SAVE" });
-          if (!result.ok) {
+          const sent = await setOrKeep("save_post", post.id, saved, () => toggleMark({ postId: post.id, mark: "SAVE", want: saved }));
+          if (sent.state === "kept") return;
+          const result = sent.state === "sent" ? sent.result : null;
+          if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
-            setNotice(result.error);
+            setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           }
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;

@@ -10,7 +10,9 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { sendMessage } from "@/lib/messages/actions";
 import { requestInspection } from "@/lib/inspections/actions";
 import { submitReview } from "@/lib/reviews/actions";
-import { dropPost } from "@/lib/social/posts-actions";
+import { dropPost, toggleMark, toggleRepost } from "@/lib/social/posts-actions";
+import { markNotificationsRead } from "@/lib/messages/notifications-actions";
+import { toggleFollow } from "@/lib/social/follows-actions";
 import { clearInflight, listInflight } from "@/lib/offline/inflight";
 import { inflightState } from "@/lib/offline/inflight-state";
 import { toggleSave } from "@/lib/saved/actions";
@@ -44,7 +46,7 @@ type News =
   | null;
 
 type WhatKey = keyof Copy["outbox"]["what"];
-const WHAT: Record<Exclude<OutboxEntry["kind"], "save_listing" | "save_place">, WhatKey> = {
+const WHAT: Record<Exclude<OutboxEntry["kind"], "save_listing" | "save_place" | "follow" | "like_post" | "save_post" | "repost_post" | "read_notification">, WhatKey> = {
   send_message: "message",
   request_inspection: "inspection",
   submit_review: "review",
@@ -57,6 +59,11 @@ const NEVER_STARTED_MS = 30 * 60 * 1000;
 function whatOf(entry: OutboxEntry): WhatKey {
   if (entry.kind === "save_listing") return entry.want ? "saveListing" : "unsaveListing";
   if (entry.kind === "save_place") return entry.want ? "save" : "unsave";
+  if (entry.kind === "follow") return entry.want ? "follow" : "unfollow";
+  if (entry.kind === "like_post") return entry.want ? "like" : "unlike";
+  if (entry.kind === "save_post") return entry.want ? "savePost" : "unsavePost";
+  if (entry.kind === "repost_post") return entry.want ? "repost" : "unrepost";
+  if (entry.kind === "read_notification") return "readNotification";
   return WHAT[entry.kind];
 }
 
@@ -102,6 +109,23 @@ async function replayCreate(entry: OutboxEntry & { payload: Record<string, strin
 async function replayOne(entry: OutboxEntry): Promise<Outcome> {
   try {
     if (isCreate(entry)) return await replayCreate(entry);
+    /* The social states, sent as the state wanted (3 November 2026). */
+    if (entry.kind === "follow") {
+      const result = await toggleFollow({ handle: entry.target, want: entry.want });
+      return result.ok ? "sent" : { refused: result.error };
+    }
+    if (entry.kind === "like_post" || entry.kind === "save_post") {
+      const result = await toggleMark({ postId: entry.target, mark: entry.kind === "like_post" ? "LIKE" : "SAVE", want: entry.want });
+      return result.ok ? "sent" : { refused: result.error };
+    }
+    if (entry.kind === "read_notification") {
+      const result = await markNotificationsRead(entry.target === "all" ? {} : { ids: [entry.target] });
+      return result.ok ? "sent" : { refused: result.error };
+    }
+    if (entry.kind === "repost_post") {
+      const result = await toggleRepost({ postId: entry.target, want: entry.want });
+      return result.ok ? "sent" : { refused: result.error };
+    }
     if (entry.kind === "save_listing") {
       const result = await toggleSave({ listingId: entry.target, want: entry.want });
       const deviceOwns = (result.ok && result.data.mode === "local") || (!result.ok && result.error.startsWith("Sign in"));
