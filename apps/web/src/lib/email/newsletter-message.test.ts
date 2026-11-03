@@ -53,7 +53,8 @@ function appRoutes(): Set<string> {
 
 function hrefs(html: string): string[] {
   const base = siteUrl();
-  return [...html.matchAll(/href="([^"]+)"/g)]
+  /* The footer's round account marks link to our own social pages, not to routes. */
+  return [...html.replace(/<a class="rm-social"[^>]*>/g, "").matchAll(/href="([^"]+)"/g)]
     .map((x) => (x[1] ?? "").replace(/&amp;/g, "&"))
     .filter((h) => !h.startsWith("urn:") && !h.startsWith("http://www.w3.org"))
     .map((h) => {

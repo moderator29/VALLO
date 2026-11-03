@@ -170,7 +170,7 @@ function socialRow() {
   if (SOCIALS.length === 0) return "";
   const cells = SOCIALS.map(
     (s) =>
-      `<td style="padding:0 10px 0 0;"><a href="${s.url}" target="_blank" style="text-decoration:none;"><img src="{{ .SiteURL }}/brand/email/social/${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;font-family:${FONT_SANS};font-size:11px;line-height:36px;color:${MUTED};" /></a></td>`,
+      `<td style="padding:0 10px 0 0;"><a class="rm-social" href="${s.url}" target="_blank" style="text-decoration:none;"><img src="{{ .SiteURL }}/brand/email/social/${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;font-family:${FONT_SANS};font-size:11px;line-height:36px;color:${MUTED};" /></a></td>`,
   ).join("");
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
 }

@@ -251,7 +251,8 @@ describe("every rendered email reads completely with images blocked", () => {
   });
 
   it.each(authHtml)("auth:$name carries the lockup and at most one sized 3D mark", ({ html }) => {
-    const images = html.match(/<img\b[^>]*>/g) ?? [];
+    /* The footer's round account marks are their own tier (`socials.ts`). */
+    const images = (html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/social/"));
     expect(images.length).toBeGreaterThanOrEqual(1);
     expect(images.length).toBeLessThanOrEqual(2);
     const [lockup, mark] = images;

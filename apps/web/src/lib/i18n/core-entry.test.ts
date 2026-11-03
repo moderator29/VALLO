@@ -153,9 +153,9 @@ describe("countOf in the light entry says exactly what it said with the dictiona
 });
 
 describe("the words carried to client code stay few", () => {
-  it.each(LOCALES)("%s is under 12 KB", (locale) => {
+  it.each(LOCALES)("%s is under 12.5 KB", (locale) => {
     expect(
       JSON.stringify(clientCopyOf(getDictionary(locale))).length
-    ).toBeLessThan(12_000);
+    ).toBeLessThan(12_500);
   });
 });

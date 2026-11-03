@@ -13,6 +13,7 @@ import {
 } from "@/lib/assistant/settings-actions";
 import { PERMISSIONS, type AiPermission } from "@/lib/assistant/permissions";
 import { AI_GLYPH, PERMISSION_GLYPH } from "@/lib/assistant/glyphs";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The assistant's controls once it is on: the master switch, one switch per
@@ -39,13 +40,17 @@ export function MasterSwitch({ enabled }: { enabled: boolean }) {
 
   const turnOff = () =>
     start(async () => {
-      const result = await deactivateAssistant();
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await deactivateAssistant();
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setConfirming(false);
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      setConfirming(false);
-      router.refresh();
     });
 
   return (
@@ -101,12 +106,16 @@ export function PermissionRows({ granted }: { granted: readonly AiPermission[] }
   const toggle = (permission: AiPermission, next: boolean) => {
     setError(null);
     start(async () => {
-      const result = await setAssistantPermission({ permission, granted: next });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await setAssistantPermission({ permission, granted: next });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
   };
 
@@ -157,13 +166,17 @@ export function LearnedList({ items }: { items: readonly { key: string; weight: 
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
-      setError(null);
-      const result = await fn();
-      if (!result.ok) {
-        setError(result.error ?? "That did not go through.");
-        return;
+      try {
+        setError(null);
+        const result = await fn();
+        if (!result.ok) {
+          setError(result.error ?? "That did not go through.");
+          return;
+        }
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.refresh();
     });
 
   if (items.length === 0) {

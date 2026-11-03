@@ -132,7 +132,7 @@ export const trustVisibleEn = {
     profileSaving: "Saving",
     profileSaved: "Saved. Your number is on your profile.",
     profileInvalid: "That is not a mobile number we can use. Check the digits and the country beside them.",
-    profileRefused: "We could not use this number. Try a different number, or contact support.",
+    profileRefused: "This number may already be in use. Try a different number, or contact support.",
     profileFailed: "We could not save your number just now. Nothing was changed. Try again in a moment.",
     profileBack: "Continue",
     signedOutTitle: "Sign in to confirm your number",

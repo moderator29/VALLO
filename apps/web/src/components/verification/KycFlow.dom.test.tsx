@@ -30,7 +30,7 @@ const ENTRY = `
 const INIT = `
   window.__uploads = [];
   Object.defineProperty(Object.prototype, "auth", {
-    value: { getUser: async () => ({ data: { user: { id: "user-9" } } }) },
+    value: { getUser: async () => ({ data: { user: { id: "user-9" } } }), getSession: async () => ({ data: { session: { access_token: "t" } } }) },
     configurable: true, writable: true,
   });
   Object.defineProperty(Object.prototype, "upload", {
@@ -123,6 +123,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the verification flow, end to e
   it("will not move past the selfie step without a selfie", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, init: INIT });
     try {
+      await page.route("**/storage/v1/object/**", (route) => route.fulfill({ status: 200, body: "{}" }));
       await page.locator('input[type="file"]').first().setInputFiles({ name: "passport.jpg", mimeType: "image/jpeg", buffer: JPEG });
       await page.getByLabel("Which ID is this?").selectOption("passport");
       await page.getByRole("button", { name: "Continue" }).click();

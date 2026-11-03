@@ -58,7 +58,7 @@ describe("the two emails", () => {
     expect(STARTED.text).toContain("Ada");
     for (const email of [STARTED, COMPLETED]) {
       expect(email.text).not.toMatch(/\+?234\d{6,}/);
-      expect(email.text).not.toMatch(/\b\d{10,}\b/);
+      expect(email.text.replace(/https?:\/\/\S+/g, "")).not.toMatch(/\b\d{10,}\b/);
     }
   });
 

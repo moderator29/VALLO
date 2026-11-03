@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { activateAssistant } from "@/lib/assistant/settings-actions";
 import { AI_PRIVACY_VERSION, AI_TERMS_VERSION } from "@/lib/assistant/permissions";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * The agreement screen. Activation stays disabled until the Terms, the
@@ -26,20 +27,24 @@ export function ConsentForm() {
     if (!ready) return;
     setError(null);
     start(async () => {
-      const result = await activateAssistant({
-        acceptTerms: terms,
-        acceptPrivacy: privacy,
-        agree,
-        termsVersion: AI_TERMS_VERSION,
-        privacyVersion: AI_PRIVACY_VERSION,
-        permissions: ["discovery"],
-      });
-      if (!result.ok) {
-        setError(result.error);
-        return;
+      try {
+        const result = await activateAssistant({
+          acceptTerms: terms,
+          acceptPrivacy: privacy,
+          agree,
+          termsVersion: AI_TERMS_VERSION,
+          privacyVersion: AI_PRIVACY_VERSION,
+          permissions: ["discovery"],
+        });
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.push("/settings/ai-assistant");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
-      router.push("/settings/ai-assistant");
-      router.refresh();
     });
   };
 
