@@ -125,15 +125,15 @@ export function keptCopyAt(): number | null {
   }
 }
 
-/** "5 min ago", "2 h ago", "3 days ago": how old a kept copy is. */
+/** "5 minutes ago", "2 hours ago", "yesterday": how old a kept copy is. */
 export function agoWords(at: number, now: number): string {
+  const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
   const min = Math.max(0, Math.round((now - at) / 60_000));
   if (min < 1) return "just now";
-  if (min < 60) return `${min} min ago`;
+  if (min < 60) return rtf.format(-min, "minute");
   const h = Math.round(min / 60);
-  if (h < 24) return `${h} h ago`;
-  const d = Math.round(h / 24);
-  return d === 1 ? "yesterday" : `${d} days ago`;
+  if (h < 24) return rtf.format(-h, "hour");
+  return rtf.format(-Math.round(h / 24), "day");
 }
 
 /** Whether this document was answered from the phone rather than the network. */

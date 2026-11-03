@@ -45,8 +45,24 @@ type News =
   | { kind: "outbox_failed"; reasons: { what: WhatKey; reason: string }[] }
   | null;
 
-type WhatKey = keyof Copy["outbox"]["what"];
-const WHAT: Record<Exclude<OutboxEntry["kind"], "save_listing" | "save_place" | "follow" | "like_post" | "save_post" | "repost_post" | "read_notification">, WhatKey> = {
+type DictWhatKey = keyof Copy["outbox"]["what"];
+/* The social states are named in English here, not in the dictionary: the
+   words are only seen when a server refuses one, and the dictionary the
+   client carries has a size budget (core-entry.test.ts). */
+const SOCIAL_WHAT = {
+  follow: "Following them",
+  unfollow: "Unfollowing them",
+  like: "Your like",
+  unlike: "Undoing your like",
+  savePost: "Saving the post",
+  unsavePost: "Unsaving the post",
+  repost: "Your repost",
+  unrepost: "Undoing your repost",
+  readNotification: "Marking as read",
+} as const;
+type WhatKey = DictWhatKey | keyof typeof SOCIAL_WHAT;
+const whatWords = (copy: Copy, key: WhatKey): string => (key in SOCIAL_WHAT ? SOCIAL_WHAT[key as keyof typeof SOCIAL_WHAT] : copy.outbox.what[key as DictWhatKey]);
+const WHAT: Record<Exclude<OutboxEntry["kind"], "save_listing" | "save_place" | "follow" | "like_post" | "save_post" | "repost_post" | "read_notification">, DictWhatKey> = {
   send_message: "message",
   request_inspection: "inspection",
   submit_review: "review",
@@ -249,7 +265,7 @@ export function OfflineTray() {
         state="failed"
         verdict={copy.outbox.failedTitle}
         consequence={news.reasons
-          .map((r) => copy.outbox.failedItem.replace("{what}", copy.outbox.what[r.what]).replace("{reason}", r.reason))
+          .map((r) => copy.outbox.failedItem.replace("{what}", whatWords(copy, r.what)).replace("{reason}", r.reason))
           .join(" ")}
         actions={[{ label: copy.outbox.close, onClick: close, tone: "quiet" }]}
       />
