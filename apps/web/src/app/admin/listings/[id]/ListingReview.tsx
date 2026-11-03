@@ -124,7 +124,6 @@ export function ListingReview(props: ListingReviewProps) {
     exampleNote,
     photoProvenance,
     section,
-    hubHref,
     sectionLinks,
     sectionSlots,
   } = props;
