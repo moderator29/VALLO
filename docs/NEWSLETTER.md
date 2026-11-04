@@ -30,6 +30,11 @@ width and the plain-text part. The images load from `public/`.
    and is UNIQUE). A new letter needs a new campaign name.
 5. The outbox cron (`/api/cron/email-outbox`) sends the queued rows in batches.
 
+News and updates are ON by default (4 November 2026). Email sign-up shows a
+ticked box that can be unticked; the old default `marketing: false` is gone from
+`SETTINGS_DEFAULTS`. The one-time data fix and the send are in
+`supabase/migrations/pending/newsletter_default_on_2026-11-launch.sql`.
+
 Who gets a row: every account that is not anonymous, not deleted, has a
 confirmed email and has not switched marketing email off. The send step checks
 that switch again, so someone who turns it off after queueing is skipped.

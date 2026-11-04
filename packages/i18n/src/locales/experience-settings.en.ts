@@ -72,7 +72,7 @@ export const experienceSettingsEn = {
       messages: { label: "Messages", sub: "New replies from hosts and agents" },
       payments: { label: "Payments", sub: "Payments, refunds, receipts and payouts" },
       savedPriceDrops: { label: "Price drops", sub: "A place you saved comes down in price" },
-      marketing: { label: "Ideas and offers", sub: "Occasional highlights. Off unless you turn it on" },
+      marketing: { label: "Ideas and offers", sub: "Occasional news and highlights. On unless you turn it off" },
     },
     quiet: {
       title: "Quiet hours",

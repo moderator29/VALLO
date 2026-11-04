@@ -84,7 +84,7 @@ const ALL_ON: ResolvedProfileSettings["notifications"] = {
   bookings: true,
   messages: true,
   wallet: true,
-  marketing: false,
+  marketing: true,
 };
 
 function ProfileRow({

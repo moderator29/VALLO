@@ -219,8 +219,9 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         <li>To answer support requests and investigate reports and disputes.</li>
         <li>To keep the service secure, prevent abuse and comply with Nigerian law.</li>
         <li>
-          Marketing messages are sent only with your consent, and every one includes a
-          way to opt out.
+          News and updates by email are on when you sign up, with a box you can untick
+          there, and you can switch them off at any time in Settings. Every one includes
+          a way to opt out.
         </li>
       </ul>
     ),

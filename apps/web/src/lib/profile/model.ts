@@ -103,8 +103,12 @@ export type ResolvedProfileSettings = Required<ProfileSettings>;
 
 export const SETTINGS_DEFAULTS: ResolvedProfileSettings = {
   /* B13: savedPriceDrops, the push for a price drop on a saved place, is on
-     by default (the founder, 30 September 2026). */
-  notifications: { bookings: true, messages: true, wallet: true, marketing: false, savedPriceDrops: true },
+     by default (the founder, 30 September 2026). Marketing email is on by
+     default too (the founder, 4 November 2026): the sign-up form shows it as a
+     ticked box that can be unticked, and Settings can turn it off at any time.
+     It used to be false, and every save of settings (the interests step, for
+     one) wrote that false into the member's own row as if they had chosen it. */
+  notifications: { bookings: true, messages: true, wallet: true, marketing: true, savedPriceDrops: true },
   /* V-64: occupation and home town are private until the member turns each
      one on. `public.profile_public_facts` reads these two keys. */
   privacy: { hideActivity: false, showOccupation: false, showHomeTown: false },

@@ -87,7 +87,9 @@ export function pushFor(row: Row, flags: Flags): boolean {
   const topic = PUSH_TOPIC[row] as NotificationTopic;
   const explicit = flags.channels?.[topic]?.push;
   if (typeof explicit === "boolean") return explicit;
-  const legacy = flags[STORED_FLAG[row as keyof typeof STORED_FLAG]];
+  /* Not for marketing: that boolean is the email switch (on by default) and
+     must not open marketing pushes. See `wantsPush`. */
+  const legacy = row === "marketing" ? undefined : flags[STORED_FLAG[row as keyof typeof STORED_FLAG]];
   if (typeof legacy === "boolean") return legacy;
   return row !== "marketing";
 }
@@ -215,9 +217,7 @@ export function NotificationMatrix({
                     ) : (
                       <span className="inline-flex justify-center">
                         <Switch
-                          checked={
-                            flags[STORED_FLAG[row]] ?? row !== "marketing"
-                          }
+                          checked={flags[STORED_FLAG[row]] ?? true}
                           onCheckedChange={(next) => setEmail(row, next)}
                           aria-label={`${words.label}: ${copy.colEmail}`}
                           disabled={pending}

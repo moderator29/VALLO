@@ -151,7 +151,7 @@ export const publicDoorsEn = {
       bookings: { title: "Bookings and viewings", body: "Requests, confirmations and changes to your bookings and inspections." },
       messages: { title: "Messages", body: "When somebody writes to you on Vallo." },
       wallet: { title: "Payments and agreements", body: "Updates on agreements and payments you are part of." },
-      marketing: { title: "News from Vallo", body: "Occasional news about new features. Off unless you turn it on." },
+      marketing: { title: "News from Vallo", body: "Occasional news about new features. On unless you turn it off." },
     },
   },
 

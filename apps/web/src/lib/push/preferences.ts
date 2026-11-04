@@ -137,7 +137,10 @@ export function wantsPush(settings: unknown, kind: NotificationKind): boolean {
 
   /* RULE 2. The old boolean, which governed every channel there was. */
   const legacyKey = LEGACY_KEY_BY_TOPIC[topic];
-  if (legacyKey && notifications && typeof notifications[legacyKey] === "boolean") {
+  /* Not for marketing (4 November 2026): the old `marketing` boolean is the
+     marketing EMAIL switch and is now on by default, so it must not also open
+     marketing pushes. A push needs its own explicit channel answer (rule 1). */
+  if (topic !== "marketing" && legacyKey && notifications && typeof notifications[legacyKey] === "boolean") {
     return notifications[legacyKey] as boolean;
   }
 

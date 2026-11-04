@@ -130,6 +130,26 @@ export function AcceptTerms({
         </Link>
       </p>
 
+      {/* NEWS AND UPDATES, TICKED BY DEFAULT (the founder, 4 November 2026).
+          Uncontrolled on purpose: it starts ticked and the person can untick
+          it. The hidden `marketingAsked` marks that this form showed the box,
+          so the server can tell "unticked" (a no) from "a request that never
+          carried the box" (no answer, the default stands). */}
+      <input type="hidden" name="marketingAsked" value="1" />
+      <label className="nf-tap mt-sm flex cursor-pointer items-start gap-sm">
+        <input
+          type="checkbox"
+          name="marketingEmail"
+          value="yes"
+          defaultChecked
+          data-testid="marketing-email"
+          className="mt-3xs h-5 w-5 shrink-0 accent-[var(--nf-brand-primary)]"
+        />
+        <span className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
+          Send me news and updates from Vallo by email. You can switch this off any time.
+        </span>
+      </label>
+
       {/* The version travels with the form, so the trigger records WHAT was
           accepted rather than only that something was. */}
       {accepted && <input type="hidden" name="termsVersion" value={TERMS_VERSION} />}

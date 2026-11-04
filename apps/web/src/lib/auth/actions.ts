@@ -13,6 +13,7 @@ import { passwordChangeProof } from "./password-change-proof";
 import { reauthenticate } from "@/lib/account-deletion/reauthenticate";
 import { createClientWithAgent } from "@/lib/security/agent-client";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mergeSettings } from "@/lib/profile/schema";
 import {
   consume,
   ipFromHeaders,
@@ -542,6 +543,13 @@ export async function signUpWithEmail(
    * naming a version they were not shown, so no receipt is written: a wrong
    * receipt is worse than a missing one, and the missing one raises an alert.
    */
+  /* NEWS AND UPDATES. The default is on, so only a NO is written: the box was
+     shown (`marketingAsked`) and left unticked. A request that never carried the
+     box says nothing and the default stands. */
+  if (data.user && field(formData, "marketingAsked") === "1" && field(formData, "marketingEmail") !== "yes") {
+    await switchMarketingOff(data.user.id);
+  }
+
   if (data.user) {
     const submitted = field(formData, "termsVersion").trim();
     if (submitted === TERMS_VERSION) {
@@ -1449,3 +1457,25 @@ export async function updatePassword(
 
 // Signing out lives in lib/profile/actions.ts, which the settings screen
 // already calls. One session-ending path, one place.
+
+/**
+ * Record "no news and updates" for an account that was just created.
+ *
+ * The profile row is made by the sign-up trigger in the same transaction as
+ * the auth user, so it is there by the time signUp answers. Best effort: the
+ * account exists either way, and a failure here only leaves the default (on),
+ * which Settings and every email's unsubscribe link can still turn off.
+ */
+async function switchMarketingOff(userId: string): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data } = await admin.from("profiles").select("settings").eq("id", userId).maybeSingle();
+    if (!data) return;
+    await admin
+      .from("profiles")
+      .update({ settings: mergeSettings(data.settings, { notifications: { marketing: false } }) })
+      .eq("id", userId);
+  } catch {
+    // Nothing further to do: the default stands and the person can switch it off.
+  }
+}

@@ -1992,7 +1992,7 @@ export const en = {
         paymentsSub:
           "Emails when you pay, when a refund is on its way, your receipts, and decisions on your agreements. Anything about your money's safety still appears in the app.",
         marketing: "Ideas and offers",
-        marketingSub: "Occasional highlights from around Nigeria. Off by default.",
+        marketingSub: "Occasional news and highlights from Vallo. On unless you turn it off.",
         /* B13: the push for a price drop on a place you saved. */
         savedPriceDrops: "Price drops on places you saved",
         savedPriceDropsSub: "A push when a place you saved comes down in price. Changes also show in Saved and here in the app.",
@@ -2008,7 +2008,7 @@ export const en = {
         paymentsSub:
           "Emails when a renter or guest pays you, and when your share settles to your bank. Anything about your money's safety still appears in the app.",
         marketing: "Ideas and offers",
-        marketingSub: "Hosting tips and what is moving in your area. Off by default.",
+        marketingSub: "Hosting tips and what is moving in your area. On unless you turn it off.",
         savedPriceDrops: "Price drops on places you saved",
         savedPriceDropsSub: "A push when a place you saved comes down in price. Changes also show in Saved and here in the app.",
       },
