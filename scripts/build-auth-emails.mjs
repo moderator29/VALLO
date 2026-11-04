@@ -155,6 +155,25 @@ const LOCKUP_WIDTH = 198;
 const LOCKUP_HEIGHT = 56;
 const WORDMARK_ALT = "Vallo";
 
+/* Our accounts, read from apps/web/src/lib/brand/socials.ts (the one list the
+   site, Settings and the email renderer all use). This generator is plain Node
+   with no TypeScript loader, so it reads the list as text. */
+import { readFileSync as readSource } from "node:fs";
+const SOCIALS = [
+  ...readSource(new URL("../apps/web/src/lib/brand/socials.ts", import.meta.url), "utf8").matchAll(
+    /key:\s*"(\w+)",\s*label:\s*"([^"]+)",\s*url:\s*"(https:\/\/[^"]+)"/g,
+  ),
+].map(([, key, label, url]) => ({ key, label, url }));
+
+function socialRow() {
+  if (SOCIALS.length === 0) return "";
+  const cells = SOCIALS.map(
+    (x) =>
+      `<td style="padding:0 10px 0 0;"><a class="rm-social" href="${x.url}" target="_blank" style="text-decoration:none;"><img src="{{ .SiteURL }}/brand/email/social/${x.key}.png" width="36" height="36" alt="${x.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;font-family:${FONT_SANS};font-size:11px;line-height:36px;color:${MUTED};" /></a></td>`,
+  ).join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+}
+
 /* The footer links, as FOOTER_LINKS in render.ts. */
 const FOOTER_LINKS = [
   ["Help and support", "{{ .SiteURL }}/support"],
@@ -566,7 +585,7 @@ ${
             <tr>
               <td class="rm-pad" style="padding:26px ${PAD_X}px 0;">
                 <p class="rm-muted" style="margin:0 0 8px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${footnote}</p>
-                <p class="rm-muted" style="margin:14px 0 14px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${links}</p>
+                ${socialRow() ? socialRow() + "\n                " : ""}<p class="rm-muted" style="margin:14px 0 14px;font-family:${FONT_SANS};font-size:13px;line-height:20px;color:${MUTED};">${links}</p>
                 <p class="rm-title" style="margin:0;font-family:${FONT_SANS};font-size:13px;line-height:20px;font-weight:700;letter-spacing:0.02em;color:${TEXT};">${SIGN_OFF}</p>
                 <!-- The legal line. The brand is Vallo everywhere a person
                      reads; the company appears only where the law asks who
@@ -606,6 +625,7 @@ function shellText({ purpose, blocks, facts, footnote }) {
   parts.push(
     wrap(footnote),
     "",
+    ...(SOCIALS.length > 0 ? [["Follow us:", ...SOCIALS.map((x) => `${x.label}: ${x.url}`)].join("\n"), ""] : []),
     FOOTER_LINKS.map(([label, href]) => `${label}: ${href}`).join("\n"),
     "",
     SIGN_OFF,

@@ -256,7 +256,7 @@ describe("it is built to survive a mail client", () => {
 
   it.each(ALL)("$role puts no words in a picture and gives every image alt text", ({ message }) => {
     /* The founder's banner (`banners.ts`) is the first picture and carries the logo. */
-    const images = message.html.match(/<img\b[^>]*>/g) ?? [];
+    const images = (message.html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/social/"));
     // The lockup, and (only when the layout shows it, EMAIL_SHOWS_OBJECT in
     // icons.ts) the role's 3D object above the hero, whose alt is its family
     // word so a blocked image still says something.

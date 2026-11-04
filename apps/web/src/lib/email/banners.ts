@@ -9,8 +9,8 @@
  *   welcome-N        the welcome email
  *   newsletter-N     the newsletter
  *
- * Money and document emails (the paper register) carry none and keep the
- * small lockup band: a receipt is not the place for a picture. A banner is decoration with a real alt, never the
+ * Every email carries one, receipts and agreements included (4 November 2026,
+ * the founder: no small logo bar anywhere). A banner is decoration with a real alt, never the
  * words of a message, and it is never a link.
  */
 import type { EmailKind } from "./icons";
@@ -33,7 +33,15 @@ export type BannerFile =
   | "welcome-3"
   | "newsletter-1"
   | "newsletter-2"
-  | "newsletter-3";
+  | "newsletter-3"
+  | "listing-review"
+  | "listing-live"
+  | "verification"
+  | "viewing"
+  | "stay"
+  | "table"
+  | "support"
+  | "message";
 
 export function bannerFilePath(name: BannerFile): string {
   return `${BANNER_DIR}/${name}.jpg`;
@@ -48,9 +56,17 @@ export const BANNER_ALT: Readonly<Record<BannerFile, string>> = {
   "newsletter-1": "Why we are here.",
   "newsletter-2": "Where we are going.",
   "newsletter-3": "Ready to serve you.",
+  "listing-review": "Vallo. Your listing is in review.",
+  "listing-live": "Vallo. Your listing is live.",
+  verification: "Vallo. Verified, step by step.",
+  viewing: "Vallo. See it before you commit.",
+  stay: "Vallo. Your stay, sorted.",
+  table: "Vallo. Your table is waiting.",
+  support: "Vallo. We have your message.",
+  message: "Vallo. You have a new message.",
 };
 
-/** Security and sign-in messages get the "safe" banner; the rest the general one. */
+/** Security and sign-in messages get the "safe" banner. */
 const SECURITY_KINDS = new Set<string>([
   "verificationCode",
   "passwordReset",
@@ -66,6 +82,41 @@ const SECURITY_KINDS = new Set<string>([
   "staffAccessGranted",
 ]);
 
+const BY_KIND: Readonly<Record<string, BannerFile>> = {
+  listingApproved: "listing-live",
+  listingSubmitted: "listing-review",
+  listingPassedReview: "listing-review",
+  listingChangesRequested: "listing-review",
+  listingRejected: "listing-review",
+  agentApplicationApproved: "verification",
+  agentApplicationRejected: "verification",
+  agentApplicationNeedsMore: "verification",
+  verificationRungPassed: "verification",
+  verificationRungFailed: "verification",
+  inspectionScheduled: "viewing",
+  inspectionProposed: "viewing",
+  inspectionDeclined: "viewing",
+  inspectionWithdrawn: "viewing",
+  inspectionCompleted: "viewing",
+  bookingRequested: "stay",
+  bookingRequestedHost: "stay",
+  bookingConfirmed: "stay",
+  stayArrivalDetails: "stay",
+  bookingCancelled: "stay",
+  bookingRefunded: "stay",
+  refundRequested: "stay",
+  bookingRequestClosed: "stay",
+  stayReviewRequest: "stay",
+  reservationConfirmed: "table",
+  reservationCancelled: "table",
+  newEnquiry: "support",
+  supportTicketFiled: "support",
+  supportReplied: "support",
+  unreadMessages: "message",
+};
+
+/** Every email carries one: its own family's banner, the "safe" one for security, else the general one. */
 export function bannerFor(kind: EmailKind): BannerFile {
-  return SECURITY_KINDS.has(kind) ? "email-banner-2" : "email-banner-1";
+  if (SECURITY_KINDS.has(kind)) return "email-banner-2";
+  return BY_KIND[kind] ?? "email-banner-1";
 }

@@ -22,6 +22,7 @@ import {
   WORDMARK_ALT,
 } from "./theme";
 import { BRAND_ORIGIN } from "@/lib/brand-domain";
+import { configuredSocials, SOCIAL_ICON_PATH } from "./socials";
 import { BANNER_ALT, BANNER_SHOWN_HEIGHT, BANNER_SHOWN_WIDTH, BANNER_SHOWN_HEIGHT_FULL, BANNER_SHOWN_WIDTH_FULL, bannerFilePath, bannerFor, type BannerFile } from "./banners";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import {
@@ -881,10 +882,7 @@ function htmlBlock(block: Block, ink: Ink): string {
                       ? `
                   <p class="${ink.muted}" style="margin:0 0 6px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">If the button does not work, copy this address into your browser:</p>
                   <p class="${ink.link}" style="margin:0 0 20px;font-family:${FONT_MONO};font-size:13px;line-height:1.6;word-break:break-all;color:${LINK};">${escapeHtml(block.href)}</p>`
-                      : /* The whole address, scheme included, as the copy-this line above
-                           prints it: a bare "vallo.ng/messages/<id>" reads as copy and
-                           puts a record's id in the visible text (outbox-delivery). */ `
-                  <p class="${ink.link}" style="margin:0 0 22px;${TEXT}font-size:12px;line-height:1.6;word-break:break-all;color:${LINK};"><a class="${ink.link}" href="${escapeHtml(block.href)}" target="_blank" style="color:${LINK};text-decoration:underline;">${escapeHtml(block.href)}</a></p>`
+                      : "" /* No printed copy of the address under the link: one link, once (4 November 2026). */
                   }`;
 
     case "code":
@@ -1230,6 +1228,30 @@ export function bannerBodyRow(file: BannerFile, margin = "26px 0 20px"): string 
 }
 
 /**
+ * THE ACCOUNT ICONS (4 November 2026): round marks for our social accounts, one
+ * linked 36px circle each, above the footer links. The list is the one the site
+ * footer reads (`lib/brand/socials.ts`); an account with no address is never
+ * drawn. They are links to our pages, never a button inside the message.
+ */
+export function socialRowHtml(): string {
+  const socials = configuredSocials();
+  if (socials.length === 0) return "";
+  const cells = socials
+    .map(
+      (s) =>
+        `<td style="padding:0 10px 0 0;"><a class="rm-social" href="${escapeHtml(s.url)}" target="_blank" style="text-decoration:none;"><img src="${siteUrl()}${SOCIAL_ICON_PATH}${s.key}.png" width="36" height="36" alt="${s.label}" border="0" style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;${TEXT}font-size:11px;line-height:36px;color:${LIGHT.muted};" /></a></td>`,
+    )
+    .join("");
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 18px;"><tr>${cells}</tr></table>`;
+}
+
+/** The same accounts in the text part, one "Label: url" per line, or nothing. */
+export function socialLinksText(): string {
+  const socials = configuredSocials();
+  return socials.length === 0 ? "" : ["Follow us:", ...socials.map((s) => `${s.label}: ${s.url}`)].join("\n");
+}
+
+/**
  * THE FOOTER (the redesign of 13 October 2026): why this arrived, then ONE
  * row of links (notification settings, help, privacy, terms), then who sent
  * it: the sign-off and the company's full legal line with its registered
@@ -1250,6 +1272,7 @@ export function footerRows(lines: readonly string[], link?: { label: string; hre
   return `<tr>
               <td class="rm-pad" style="padding:26px ${PAD_X}px 0;">
                 ${reason}
+                ${socialRowHtml()}
                 ${p(links, "6px 0 18px")}
                 <p class="rm-title" style="margin:0;${TEXT}font-size:13px;line-height:20px;font-weight:700;letter-spacing:0.02em;color:${LIGHT.text};">${SIGN_OFF}</p>
                 <p class="rm-muted" style="margin:4px 0 0;${TEXT}font-size:12px;line-height:18px;color:${LIGHT.muted};">${LEGAL_LINE}</p>
@@ -1335,7 +1358,7 @@ export function compose(options: ComposeOptions): Composed {
   const ink = inkFor(register);
 
   const mark = EMAIL_SHOWS_OBJECT ? heroMarkHtml(options.icon, ink) : "";
-  const banner = register === "shell" ? bannerFor(options.icon) : undefined;
+  const banner = bannerFor(options.icon);
   const body = (mark ? mark + "\n                " : "") + blocks.map((block) => htmlBlock(block, ink)).join("\n                ");
 
   const html = documentHtml({
@@ -1368,6 +1391,7 @@ export function compose(options: ComposeOptions): Composed {
       ...(options.footerLink
         ? [`${options.footerLink.label}: ${options.footerLink.href}`, ""]
         : []),
+      ...(socialLinksText() ? [socialLinksText(), ""] : []),
       footerLinksText({ skipSettings: options.footerLink !== undefined }),
       "",
       SIGN_OFF,

@@ -47,10 +47,10 @@ describe.each([
     expect(message.html).toContain(`border-top:2px solid ${LIGHT.text};`);
   });
 
-  it("puts the address under the button as a plain link", () => {
-    /* The whole address, scheme included: a bare one reads as copy, and a
-       record's id in it would then be visible text (outbox-delivery). */
-    expect(message.html).toMatch(/href="https:\/\/vallospaces.com\/bookings"[^>]*>https:\/\/vallospaces.com\/bookings<\/a>/);
+  it("has one link to the page and does not print its address again under it", () => {
+    /* 4 November 2026, the founder: one clean link, no scattered addresses. */
+    expect(message.html.split('href="https://vallospaces.com/bookings"').length - 1).toBe(1);
+    expect(message.html).not.toMatch(/>https:\/\/vallospaces.com\/bookings<\/a>/);
   });
 
   it("draws no photograph for a space that has none, and initials rather than a face", () => {

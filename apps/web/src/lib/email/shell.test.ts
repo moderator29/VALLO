@@ -260,7 +260,7 @@ describe("every rendered email reads completely with images blocked", () => {
 
   it.each(authHtml)("auth:$name carries the lockup and at most one sized 3D mark", ({ html }) => {
     /* The banner under the lockup is its own tier (`banners.ts`). */
-    const images = (html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/banners/"));
+    const images = (html.match(/<img\b[^>]*>/g) ?? []).filter((img) => !img.includes("/brand/email/banners/") && !img.includes("/brand/email/social/"));
     expect(images.length).toBeGreaterThanOrEqual(1);
     expect(images.length).toBeLessThanOrEqual(2);
     const [lockup, mark] = images;
