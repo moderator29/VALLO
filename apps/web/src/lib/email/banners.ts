@@ -49,7 +49,7 @@ export function bannerFilePath(name: BannerFile): string {
 
 export const BANNER_ALT: Readonly<Record<BannerFile, string>> = {
   "email-banner-1": "Vallo. Space, without the runaround.",
-  "email-banner-2": "Vallo. Safe from the first tap.",
+  "email-banner-2": "Vallo. A notice about your account.",
   "welcome-1": "Vallo. Welcome to Vallo.",
   "welcome-2": "Two worlds. One account.",
   "welcome-3": "Your first three steps.",
@@ -58,7 +58,7 @@ export const BANNER_ALT: Readonly<Record<BannerFile, string>> = {
   "newsletter-3": "Ready to serve you.",
   "listing-review": "Vallo. Your listing is in review.",
   "listing-live": "Vallo. Your listing is live.",
-  verification: "Vallo. Verified, step by step.",
+  verification: "Vallo. Your verification, step by step.",
   viewing: "Vallo. See it before you commit.",
   stay: "Vallo. Your stay, sorted.",
   table: "Vallo. Your table is waiting.",

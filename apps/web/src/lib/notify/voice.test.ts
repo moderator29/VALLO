@@ -4,7 +4,7 @@ import { warmTitle } from "./voice";
 describe("the voice of an in-app notification", () => {
   it("says the known facts more warmly", () => {
     expect(warmTitle("New follower")).toBe("You have a new follower");
-    expect(warmTitle("Wallet credited")).toBe("Money has landed in your wallet");
+    expect(warmTitle("Withdrawal could not complete")).toBe("Your withdrawal did not go through");
     expect(warmTitle("You earned Neighbour")).toBe("Congratulations, you earned Neighbour");
     expect(warmTitle("Table requested at Vallo House Kitchen")).toBe("Your table request is with Vallo House Kitchen");
   });

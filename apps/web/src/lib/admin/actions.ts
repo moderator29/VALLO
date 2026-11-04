@@ -762,7 +762,7 @@ export async function reviewListing(input: ListingDecisionInput): Promise<Action
   if (live.ok) return live;
   const held = await heldReasons(input.listingId);
   await tellListerHeld(input.listingId, held);
-  return fail(`Approved, but it is not live yet. ${held.length > 0 ? held.join(" ") : live.error}`);
+  return fail(`Approved, but it is not published yet. ${held.length > 0 ? held.join(" ") : live.error}`);
 }
 
 /** Every rule that still holds an approved listing back, said once, so nobody fixes one and meets the next. */
