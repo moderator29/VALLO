@@ -1,4 +1,5 @@
-import { fitPush, lockScreenSafe } from "./copy";
+import { fitPush, lockScreenSafe, PUSH_TITLE_MAX } from "./copy";
+import { warmTitle } from "@/lib/notify/voice";
 import { isUrgentKind, wantsPush, type NotificationKind } from "./preferences";
 import { sameOriginPath } from "./same-origin";
 import { quietVerdict, readQuietHours } from "./quiet-hours";
@@ -187,7 +188,10 @@ export function decide(input: {
   /* A11: the database wrote this in English; the lock screen shows it in the
      recipient's language where the catalogue has it (machine drafts for ha,
      yo and ig, awaiting native review), and in English otherwise. */
-  const text = localizePush({ title: notification.title, body: notification.body }, locale);
+  const localised = localizePush({ title: notification.title, body: notification.body }, locale);
+  /* THE VOICE (3 November 2026): English lock screens say it the way the app
+     does ("You have a new follower"), held to the 40-character title limit. */
+  const text = locale === "en" ? { ...localised, title: warmTitle(localised.title, PUSH_TITLE_MAX) } : localised;
   return {
     action: "send",
     payload: {

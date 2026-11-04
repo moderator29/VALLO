@@ -28,6 +28,7 @@ export const BANNER_SHOWN_HEIGHT_FULL = Math.round((BANNER_SHOWN_WIDTH_FULL * BA
 export type BannerFile =
   | "email-banner-1"
   | "email-banner-2"
+  | "welcome-1"
   | "welcome-2"
   | "welcome-3"
   | "newsletter-1"
@@ -41,6 +42,7 @@ export function bannerFilePath(name: BannerFile): string {
 export const BANNER_ALT: Readonly<Record<BannerFile, string>> = {
   "email-banner-1": "Vallo. Space, without the runaround.",
   "email-banner-2": "Vallo. Safe from the first tap.",
+  "welcome-1": "Vallo. Welcome to Vallo.",
   "welcome-2": "Two worlds. One account.",
   "welcome-3": "Your first three steps.",
   "newsletter-1": "Why we are here.",

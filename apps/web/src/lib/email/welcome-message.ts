@@ -44,6 +44,7 @@ import {
   escapeHtml,
   footerLinksText,
   footerRows,
+  bannerBodyRow,
   greetingName,
   hello,
   heroMarkHtml,
@@ -371,24 +372,37 @@ function litButton(label: string, url: string): string {
   return buttonHtml(label, url, { arrow: true, margin: "6px 0 0" });
 }
 
+function h2(text: string): string {
+  return `<h2 class="rm-title" style="margin:0 0 12px;${TEXT}font-size:22px;line-height:1.3;font-weight:700;letter-spacing:-0.02em;color:${LIGHT.text};">${escapeHtml(text)}</h2>`;
+}
+
+function para(text: string, margin = "0 0 14px"): string {
+  return `<p class="rm-body" style="margin:${margin};${TEXT}font-size:16px;line-height:1.7;color:${LIGHT.body};">${text}</p>`;
+}
+
+function strong(text: string): string {
+  return `<strong class="rm-title" style="font-weight:700;color:${LIGHT.text};">${escapeHtml(text)}</strong>`;
+}
+
+/** One link in the letter's single style: bold, blue, underlined, with an arrow. */
+function stepLink(label: string, href: string): string {
+  return `<a class="rm-link" href="${escapeHtml(href)}" target="_blank" style="color:${LINK};font-weight:700;text-decoration:underline;">${escapeHtml(label)}&nbsp;&rarr;</a>`;
+}
+
 function renderHtml(version: Version, greetingLine: string, icon: EmailKind): string {
-  /* THE HERO: a quiet panel carrying the eyebrow, the greeting headline, the
-     one-sentence lede and the two sides of the account as two labelled lines.
-     The panel is a solid navy rung for every client and carries a brand-blue
-     glow only where a gradient is honoured. */
-  /* BRIEF (29 October 2026, the founder: "short, clean, mature"): the
-     greeting, one line of what Vallo is, one button and one safety line. The
-     three step cards, the two sides and the section label are gone; the
-     person is one tap from the app, where those live. */
-  const hero = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 22px;">
-                  <tr>
-                    <td class="wm-hero" style="padding:0;">
-                      <p class="rm-link" style="margin:0 0 10px;${TEXT}font-size:12px;line-height:16px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:${LINK};">${escapeHtml(EYEBROW)}</p>
-                      <h1 class="wm-h1" style="margin:0 0 12px;${TEXT}font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-0.025em;color:${LIGHT.text};"><span class="rm-title" style="color:${LIGHT.text};">${escapeHtml(greetingLine)}</span></h1>
-                      <p class="rm-body" style="margin:0;${TEXT}font-size:16px;line-height:1.6;color:${LIGHT.body};">${escapeHtml(WHAT_VALLO_IS)}</p>
-                    </td>
-                  </tr>
-                </table>`;
+  /* THE LETTER (3 November 2026, the founder: "like the GetEquity emails"):
+     the banner whole at the top, a greeting, what Vallo is, the two sides of
+     the account, the three first steps for the role, one bold link inside and
+     the one safety line. Bold lead-ins, long line height, one link style, no
+     button. Every step still resolves to a real route (WELCOME_ROUTES). */
+  const worlds = CHROME.worlds.map((w) => para(`${strong(w.name)}. ${escapeHtml(w.line)}`, "0 0 8px")).join("\n                ");
+  const steps = version.steps
+    .map(
+      (step, i) => `<p class="rm-title" style="margin:0 0 4px;${TEXT}font-size:17px;line-height:1.4;font-weight:700;color:${LIGHT.text};">${i + 1}. ${escapeHtml(step.title)}</p>
+                ${para(escapeHtml(step.body), "0 0 6px")}
+                <p style="margin:0 0 20px;${TEXT}font-size:16px;line-height:1.6;">${stepLink(step.link.label, appUrl(step.link.path + (step.link.query ? `?${step.link.query}` : "")))}</p>`,
+    )
+    .join("\n                ");
 
   return documentHtml({
     title: "Welcome to Vallo",
@@ -397,11 +411,19 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
     headExtra:
       "\n    <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->",
     extraStyle: PHONE_STYLE,
-    banner: "welcome-2",
+    banner: "welcome-1",
     card: `${EMAIL_SHOWS_OBJECT ? heroMarkHtml(icon) : ""}
-                ${hero}
+                <h1 class="wm-h1 rm-title" style="margin:0 0 14px;${TEXT}font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-0.025em;color:${LIGHT.text};">${escapeHtml(greetingLine)}</h1>
+                ${para(escapeHtml(WHAT_VALLO_IS))}
+                ${para(escapeHtml(version.opening), "0 0 4px")}
+                ${bannerBodyRow("welcome-2")}
+                ${h2("What you can do here")}
+                ${worlds}
+                ${bannerBodyRow("welcome-3")}
+                ${h2("Where to start")}
+                ${steps}
                 ${litButton(BUTTON_LABEL, appUrl(WELCOME_LANDING))}
-                <p class="rm-muted" style="margin:14px 0 30px;${TEXT}font-size:13px;line-height:1.6;color:${LIGHT.muted};">${escapeHtml(BUTTON_AFTER)}</p>
+                <p class="rm-muted" style="margin:6px 0 30px;${TEXT}font-size:14px;line-height:1.6;color:${LIGHT.muted};">${escapeHtml(BUTTON_AFTER)}</p>
                 <!-- The calm panel: one safety sentence and a small round glyph. -->
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;">
                   <tr>
@@ -424,10 +446,15 @@ function renderHtml(version: Version, greetingLine: string, icon: EmailKind): st
   });
 }
 
-
 /* ------------------------------------------------------------------- text */
 
 function renderText(version: Version, greetingLine: string): string {
+  const steps = version.steps.flatMap((step, i) => [
+    `${i + 1}. ${step.title}`,
+    wrap(step.body, 72, "   "),
+    `   ${step.link.label}: ${appUrl(step.link.path + (step.link.query ? `?${step.link.query}` : ""))}`,
+    "",
+  ]);
   return (
     [
       "Vallo",
@@ -439,6 +466,14 @@ function renderText(version: Version, greetingLine: string): string {
       "",
       wrap(WHAT_VALLO_IS),
       "",
+      wrap(version.opening),
+      "",
+      "What you can do here",
+      ...CHROME.worlds.map((w) => wrap(`${w.name}. ${w.line}`)),
+      "",
+      "Where to start",
+      "",
+      ...steps,
       `${BUTTON_LABEL}:`,
       appUrl(WELCOME_LANDING),
       wrap(BUTTON_AFTER),

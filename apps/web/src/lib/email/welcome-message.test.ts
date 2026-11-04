@@ -260,8 +260,9 @@ describe("it is built to survive a mail client", () => {
     // The lockup, and (only when the layout shows it, EMAIL_SHOWS_OBJECT in
     // icons.ts) the role's 3D object above the hero, whose alt is its family
     // word so a blocked image still says something.
-    expect(images).toHaveLength(EMAIL_SHOWS_OBJECT ? 2 : 1);
-    expect(images[0]).toContain("/brand/email/banners/welcome-2.jpg");
+    /* Three banners: the top one, "two worlds" and "first three steps". */
+    expect(images).toHaveLength(EMAIL_SHOWS_OBJECT ? 4 : 3);
+    expect(images[0]).toContain("/brand/email/banners/welcome-1.jpg");
     if (EMAIL_SHOWS_OBJECT) {
       expect(images[1]).toContain("/brand/3d/email/");
       expect(images[1]).toContain('alt="Welcome"');

@@ -1,4 +1,5 @@
-import { fitPush } from "../push/copy";
+import { fitPush, PUSH_TITLE_MAX } from "../push/copy";
+import { warmTitle } from "../notify/voice";
 import { agreementSubmitted } from "./lifecycle-messages";
 import { bookingConfirmed, inspectionScheduled, stayArrivalDetails, type ArrivingGuest } from "./messages";
 
@@ -50,7 +51,7 @@ function card(
     name: name?.trim() || null,
     channel,
     email: email ? { subject: email.subject, preheader: email.preheader } : null,
-    push: push ? fitPush(push) : null,
+    push: push ? fitPush({ ...push, title: warmTitle(push.title, PUSH_TITLE_MAX) }) : null,
   };
 }
 

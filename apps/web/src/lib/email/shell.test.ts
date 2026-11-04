@@ -247,7 +247,7 @@ describe("every rendered email reads completely with images blocked", () => {
      */
     if (images.lockup === null) {
       /* A banner message: the founder's picture carries the logo, with a real alt. */
-      expect(images.banner).toHaveLength(1);
+      expect(images.banner.length).toBeGreaterThanOrEqual(1);
       expect(images.banner[0]).toMatch(/alt="[^"]{8,}"/);
       return;
     }

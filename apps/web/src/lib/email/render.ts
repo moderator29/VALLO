@@ -22,7 +22,7 @@ import {
   WORDMARK_ALT,
 } from "./theme";
 import { BRAND_ORIGIN } from "@/lib/brand-domain";
-import { BANNER_ALT, BANNER_SHOWN_HEIGHT_FULL, BANNER_SHOWN_WIDTH_FULL, bannerFilePath, bannerFor, type BannerFile } from "./banners";
+import { BANNER_ALT, BANNER_SHOWN_HEIGHT, BANNER_SHOWN_WIDTH, BANNER_SHOWN_HEIGHT_FULL, BANNER_SHOWN_WIDTH_FULL, bannerFilePath, bannerFor, type BannerFile } from "./banners";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import {
   EMAIL_GLYPH_SIZE,
@@ -820,7 +820,7 @@ function htmlBlock(block: Block, ink: Ink): string {
       return `<h1 class="${ink.title}" style="margin:0 0 14px;${TEXT}font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-0.022em;color:${LIGHT.text};">${escapeHtml(block.text)}</h1>`;
 
     case "paragraph":
-      return `<p class="${ink.body}" style="margin:0 0 20px;${TEXT}font-size:16px;line-height:1.65;color:${LIGHT.body};">${escapeHtml(block.text)}</p>`;
+      return `<p class="${ink.body}" style="margin:0 0 20px;${TEXT}font-size:16px;line-height:1.7;color:${LIGHT.body};">${escapeHtml(block.text)}</p>`;
 
     case "bullets": {
       const items = block.items
@@ -1216,6 +1216,17 @@ export function bannerTopRow(file: BannerFile): string {
                 <img src="${siteUrl()}${bannerFilePath(file)}" width="${BANNER_SHOWN_WIDTH_FULL}" height="${BANNER_SHOWN_HEIGHT_FULL}" alt="${escapeHtml(BANNER_ALT[file])}" border="0" style="display:block;width:100%;max-width:${BANNER_SHOWN_WIDTH_FULL}px;height:auto;border:0;outline:none;text-decoration:none;border-radius:19px 19px 0 0;${TEXT}font-size:18px;line-height:24px;font-weight:700;color:${LIGHT.text};" />
               </td>
             </tr>`;
+}
+
+/** A banner inside the card, between sections: whole, rounded, never a link. */
+export function bannerBodyRow(file: BannerFile, margin = "26px 0 20px"): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;margin:${margin};">
+                  <tr>
+                    <td style="font-size:0;line-height:0;mso-line-height-rule:exactly;border-radius:14px;">
+                      <img src="${siteUrl()}${bannerFilePath(file)}" width="${BANNER_SHOWN_WIDTH}" height="${BANNER_SHOWN_HEIGHT}" alt="${escapeHtml(BANNER_ALT[file])}" border="0" style="display:block;width:100%;max-width:${BANNER_SHOWN_WIDTH}px;height:auto;border:0;outline:none;text-decoration:none;border-radius:14px;${TEXT}font-size:16px;line-height:22px;font-weight:700;color:${LIGHT.text};" />
+                    </td>
+                  </tr>
+                </table>`;
 }
 
 /**

@@ -101,7 +101,7 @@ describe("the plan", () => {
 describe("every rendered message", () => {
   it.each(EVERY_MESSAGE)("$name carries the lockup and at most one 3D object, named by its family", ({ message }) => {
     const images = sortEmailImages(message.html);
-    expect(images.lockup !== null || images.banner.length === 1).toBe(true);
+    expect(images.lockup !== null || images.banner.length >= 1).toBe(true);
     expect(images.object.length).toBeLessThanOrEqual(1);
     for (const object of images.object) {
       const src = /\bsrc="([^"]+)"/.exec(object)?.[1] ?? "";

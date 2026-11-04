@@ -38,13 +38,23 @@ const PATTERNS: readonly (readonly [RegExp, (m: RegExpMatchArray) => string])[] 
   [/^Table requested at (.+)$/, (m) => `Your table request is with ${m[1]}`],
 ];
 
-/** The title as Vallo says it on screen. Unknown titles come back unchanged. */
-export function warmTitle(stored: string): string {
+/**
+ * The title as Vallo says it. Unknown titles come back unchanged. `maxLength`
+ * is for the lock screen (40 characters): a warm line that would not fit is
+ * not cut, the stored fact is used instead.
+ */
+export function warmTitle(stored: string, maxLength?: number): string {
+  let warm = stored;
   const exact = EXACT[stored];
-  if (exact !== undefined) return exact;
-  for (const [pattern, say] of PATTERNS) {
-    const m = pattern.exec(stored);
-    if (m) return say(m);
+  if (exact !== undefined) warm = exact;
+  else {
+    for (const [pattern, say] of PATTERNS) {
+      const m = pattern.exec(stored);
+      if (m) {
+        warm = say(m);
+        break;
+      }
+    }
   }
-  return stored;
+  return maxLength !== undefined && warm.length > maxLength ? stored : warm;
 }

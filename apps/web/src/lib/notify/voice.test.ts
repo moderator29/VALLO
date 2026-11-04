@@ -12,6 +12,10 @@ describe("the voice of an in-app notification", () => {
     expect(warmTitle("Staff sign-in from a new place")).toBe("Staff sign-in from a new place");
     expect(warmTitle("")).toBe("");
   });
+  it("keeps the stored fact on the lock screen when the warm line would not fit", () => {
+    expect(warmTitle("Your agent application is approved", 40)).toBe("Your agent application is approved");
+    expect(warmTitle("New follower", 40)).toBe("You have a new follower");
+  });
   it("adds no dash, no exclamation and no promise", () => {
     for (const title of ["New message", "Missed voice call", "Your table is confirmed", "We have your question"]) {
       expect(warmTitle(title)).not.toMatch(/[!—–]|guarantee|insured/i);

@@ -165,7 +165,7 @@ describe("every message in the catalogue", () => {
       expect(images.lockup).toContain(LOCKUP_PATH);
       expect(images.lockup).toContain(`alt="${WORDMARK_ALT}"`);
     } else {
-      expect(images.banner).toHaveLength(1);
+      expect(images.banner.length).toBeGreaterThanOrEqual(1);
       expect(images.banner[0]).toMatch(/alt="[^"]{8,}"/);
     }
     expect(images.object.length).toBeLessThanOrEqual(1);
