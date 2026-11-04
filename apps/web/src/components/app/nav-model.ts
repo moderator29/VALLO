@@ -1,4 +1,5 @@
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
+import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { Side } from "@/lib/side.constants";
 
@@ -435,7 +436,7 @@ export function buildNav({
        Settings. "Pro" is the plan's name and reads the same in every
        language (the dictionary's own `experienceFeatures.pro.label` is
        "Pro"), so the shell slice is not widened for one word. */
-    tail.push({ href: "/pro", label: "Pro", icon: "crown" });
+    if (SUBSCRIPTIONS_OPEN) tail.push({ href: "/pro", label: "Pro", icon: "crown" });
     tail.push({ href: "/settings", label: t.nav.settings, icon: "settings-gear" });
   }
   if (tail.length > 0) sections.push({ heading: null, items: tail });

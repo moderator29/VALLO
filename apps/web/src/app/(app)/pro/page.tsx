@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import { getDictionary } from "@vallo/i18n";
 import { resolveSession } from "@/lib/actions/session";
 import { getLocale } from "@/lib/locale";
@@ -73,6 +75,8 @@ type LooseDb = {
  * never shown a second one.
  */
 export default async function ProPage() {
+  /* Plans are not offered (`lib/subscriptions/open.ts`): App Review 3.1.1. */
+  if (!SUBSCRIPTIONS_OPEN) redirect("/home");
   const [session, locale] = await Promise.all([resolveSession(), getLocale()]);
   const now = planClock();
 

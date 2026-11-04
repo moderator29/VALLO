@@ -30,6 +30,7 @@ import { fail, ok, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, resolveSession } from "../actions/session";
 import { phoneGateFor } from "../phone-otp/gate";
 import { SUBSCRIPTIONS_CHECKOUT_FLAG, flagIsOn } from "../flags/read";
+import { SUBSCRIPTIONS_OPEN } from "./open";
 import { recordMoneyAudit } from "../money/audit";
 import { logMoney } from "../payments/observability";
 import {
@@ -88,6 +89,7 @@ const TRIAL_REASONS: ReadonlySet<SubscriptionRefusal> = new Set([
 ]);
 
 export async function startSubscriptionTrial(planKey: string): Promise<ActionResult<TrialOutcome>> {
+  if (!SUBSCRIPTIONS_OPEN) return ok({ started: false, reason: "unavailable" });
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return ok({ started: false, reason: "signed_out" });
@@ -110,6 +112,7 @@ export async function startSubscriptionTrial(planKey: string): Promise<ActionRes
 }
 
 export async function startSubscriptionCheckout(planKey: string): Promise<ActionResult<CheckoutOutcome>> {
+  if (!SUBSCRIPTIONS_OPEN) return ok({ opened: false, reason: "closed" });
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return ok({ opened: false, reason: "signed_out" });

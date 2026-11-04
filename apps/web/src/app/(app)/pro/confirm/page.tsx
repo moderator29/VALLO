@@ -1,6 +1,7 @@
 import "../pro-page.css";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import { getDictionary } from "@vallo/i18n";
 import { PageHeader } from "@/components/app/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
@@ -56,6 +57,8 @@ export default async function ProConfirmPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  /* Plans are not offered (`lib/subscriptions/open.ts`). */
+  if (!SUBSCRIPTIONS_OPEN) redirect("/home");
   const [session, locale, params] = await Promise.all([resolveSession(), getLocale(), searchParams]);
   const copy = getDictionary(locale).subscriptions;
   const c = copy.confirm;

@@ -16,15 +16,16 @@
 		will see, which is also what `userVisibleOnly` promises on the web
 		side in `components/app/push/enrol.ts`.
 
-		`audio` (VC1, 8 October 2026): a voice or video call the member is
-		in keeps its sound when they lock the screen or switch apps, as on
-		every calling app. It is used only while a call is live; nothing
-		plays or records in the background otherwise.
+		`audio` IS NOT DECLARED (5 November 2026, App Review 2.5.4 on build
+		10000126): the mode was declared for calls kept going while the phone is
+		locked, but Apple found no persistent-audio feature and rejected the
+		build. A call now carries its sound while Vallo is on screen only. If
+		calls in the background are wanted later, add the key back WITH a screen
+		recording for App Review.
 	-->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
-		<string>audio</string>
 	</array>
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>

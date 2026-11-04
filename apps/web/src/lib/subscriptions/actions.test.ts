@@ -20,6 +20,7 @@ const paystack = vi.hoisted(() => ({
 vi.mock("../actions/session", () => ({ ...session, NOT_CONFIGURED_MESSAGE: "not configured" }));
 vi.mock("../flags/read", () => ({ ...flags, SUBSCRIPTIONS_CHECKOUT_FLAG: "subscriptions_checkout" }));
 vi.mock("../security/money-limits", () => limits);
+vi.mock("./open", () => ({ SUBSCRIPTIONS_OPEN: true }));
 vi.mock("../supabase/service", () => service);
 vi.mock("./checkout", () => checkout);
 vi.mock("../money/audit", () => ({ recordMoneyAudit: vi.fn(async () => {}) }));
