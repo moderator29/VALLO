@@ -14,7 +14,7 @@ import {
   bestMatchRows,
 } from "@/components/app/home/HomeLists";
 import { hasSignals, pickBestMatches } from "@/components/app/home/best-matches";
-import { newestFirst } from "@/components/app/home/new-listings";
+import { newShelf } from "@/components/app/home/new-listings";
 
 /**
  * THE TWO LISTS HOME STREAMS (13 October 2026).
@@ -86,8 +86,10 @@ export async function BestMatchesStream({
 export async function NewListingsStream({ t, locale }: { t: Dictionary; locale: Locale }) {
   let listings: Listing[] = [];
   try {
-    const rows = await getListingRepository().search({ propertySide: true }, { limit: NEW_READ });
-    listings = newestFirst(rows.filter(isProperty), NEW_SHOWN);
+    /* Property and stays together: a real shortlet that just went live is as
+       new as a flat. Real ones first (`newShelf`). */
+    const rows = await getListingRepository().search({}, { limit: NEW_READ });
+    listings = newShelf(rows, NEW_SHOWN, Date.now());
   } catch {
     listings = [];
   }

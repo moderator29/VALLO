@@ -307,6 +307,11 @@ export function HomeScreen({
       <CategoryRow categories={categories} label={t.home.markets.label} variant="plates" />
       </HeroBand>
 
+      {/* ------------------------------------------------- just listed */}
+      {/* The newest listings, real ones first, as a small sideways row high on
+          Home (4 November 2026): noticed at once, never big. */}
+      {newListings}
+
       {/* ------------------------------------------------------- up next */}
       {upNext}
 
@@ -403,7 +408,6 @@ export function HomeScreen({
       {/* ----------------- featured listings, best matches, new listings */}
       <FeaturedListings listings={featuredMore} t={t} locale={locale} />
       {bestMatches}
-      {newListings}
     </div>
   );
 }

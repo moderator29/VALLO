@@ -23,3 +23,25 @@ export function newestFirst(listings: readonly Listing[], limit: number): Listin
     .slice(0, limit)
     .map((entry) => entry.listing);
 }
+
+/** A listing is "just listed" for this long after it first went live. */
+export const JUST_LISTED_DAYS = 30;
+
+/**
+ * THE NEW SHELF, REAL LISTINGS FIRST (4 November 2026, the founder: real
+ * listings go to the top, and new ones are noticed on Home).
+ *
+ * Real listings that went live within `JUST_LISTED_DAYS` come first, newest
+ * first; examples only fill what is left, so the shelf is never empty on a
+ * young platform but a real listing always outranks an example.
+ */
+export function newShelf(listings: readonly Listing[], limit: number, now: number): Listing[] {
+  const cutoff = now - JUST_LISTED_DAYS * 24 * 60 * 60 * 1000;
+  const real = newestFirst(
+    listings.filter((l) => !l.isDemo && publishedAt(l) >= cutoff),
+    limit,
+  );
+  if (real.length >= limit) return real;
+  const taken = new Set(real.map((l) => l.id));
+  return [...real, ...newestFirst(listings.filter((l) => !taken.has(l.id)), limit - real.length)];
+}

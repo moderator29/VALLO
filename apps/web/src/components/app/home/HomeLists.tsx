@@ -174,10 +174,12 @@ export function NewListings({ listings, t, locale }: Shared & { listings: Listin
       testId="new-listings"
       empty={<HomeEmpty testId="new-listings-empty" title={t.homeV2.newEmptyTitle} body={t.homeV2.newEmptyBody} />}
       body={
-        <ul className="nf-sc-grid" data-testid="new-listings" data-phone-cap="4">
+        /* A sideways row of small cards, high on Home (4 November 2026): the
+           newest listings are seen at once without taking the screen. */
+        <ul className="nf-feature-row nf-scroll-x nf-scroll-x--gutter" data-testid="new-listings">
           {listings.map((listing) => (
-            <li key={listing.id}>
-              <HomeListingCard listing={listing} locale={locale} copy={copy} layout="card" />
+            <li key={listing.id} className="nf-feature-row__item">
+              <HomeListingCard listing={listing} locale={locale} copy={copy} layout="compact" />
             </li>
           ))}
         </ul>
