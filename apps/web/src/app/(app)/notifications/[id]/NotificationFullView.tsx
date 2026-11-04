@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { warmTitle } from "@/lib/notify/voice";
+import { warmBody, warmTitle } from "@/lib/notify/voice";
 import type { CSSProperties } from "react";
 import { formatDate, getDictionary, type Dictionary, type Locale } from "@vallo/i18n";
 import { Amount } from "@/components/ui/Amount";
@@ -101,7 +101,7 @@ export function NotificationFullView({
           className={`nf-nview__lead nf-body${family === "messages" ? " nf-nview__lead--quote" : ""}${family === "account" ? " nf-nview__lead--calm" : ""}`}
           style={stepStyle(1)}
         >
-          {row.body}
+          {warmBody(row.body)}
         </p>
       ) : null}
 

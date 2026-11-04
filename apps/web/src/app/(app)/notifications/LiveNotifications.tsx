@@ -14,7 +14,7 @@ import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { ListGroup } from "@/components/ui/ListGroup";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { markNotificationsRead } from "@/lib/messages/notifications-actions";
-import { warmTitle } from "@/lib/notify/voice";
+import { warmBody, warmTitle } from "@/lib/notify/voice";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { loadOlderNotifications } from "@/lib/notify/inbox-actions";
 import { toNotificationItem, type NotificationItem } from "@/lib/notify/links";
@@ -503,7 +503,7 @@ function RowBody({ n, c, locale, family }: { n: NotificationItem; c: Copy; local
       <span className="nf-list-row__lead">{plateFor(family, n)}</span>
       <span className="nf-list-row__text">
         <span className="nf-list-row__title">{warmTitle(n.title)}</span>
-        {n.body ? <span className="nf-list-row__sub nf-notif__body">{n.body}</span> : null}
+        {n.body ? <span className="nf-list-row__sub nf-notif__body">{warmBody(n.body)}</span> : null}
         <span className="nf-notif__meta">
           <span className="nf-notif__kind">{c.families[family]}</span>
           <FigureLine n={n} locale={locale} />
@@ -582,7 +582,7 @@ function GroupRow({
         <span className="nf-list-row__lead">{plateFor(family, lead)}</span>
         <span className="nf-list-row__text">
           <span className="nf-list-row__title">{title}</span>
-          <span className="nf-list-row__sub nf-notif__body">{lead.body || warmTitle(lead.title)}</span>
+          <span className="nf-list-row__sub nf-notif__body">{warmBody(lead.body) || warmTitle(lead.title)}</span>
           <span className="nf-notif__meta">
             <span className="nf-notif__kind">{plural(rows.length, c.group.updates, locale)}</span>
             <span className="nf-notif__time nf-numeric">{lagosTimeLabel(lead.createdAt)}</span>

@@ -56,3 +56,16 @@ export function warmTitle(stored: string, maxLength?: number): string {
   }
   return maxLength !== undefined && warm.length > maxLength ? stored : warm;
 }
+
+/**
+ * The body as Vallo says it. A shared listing arrives stored as the line
+ * "Shared a listing" and the listing's path (an internal address with an id),
+ * which is not something to read on a screen or a lock screen; it is drawn as
+ * a sentence. Everything else is the stored text, untouched.
+ */
+export function warmBody(stored: string | null): string | null {
+  if (stored === null) return null;
+  if (/^Shared a listing\s*\n\s*\/listing\/[0-9a-f-]{8,}\s*$/i.test(stored)) return "Shared a listing with you.";
+  if (/^Shared a (?:place|stay|table)\s*\n\s*\/[\w/-]+\s*$/i.test(stored)) return stored.split("\n")[0]!.trim() + " with you.";
+  return stored;
+}
