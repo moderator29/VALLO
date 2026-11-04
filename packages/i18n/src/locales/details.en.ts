@@ -30,7 +30,7 @@ export const detailsEn = {
     offline: "You are offline. Showing what you saw last.",
     /* The phone reports signal but the network was too slow to wait for, so
        the kept copy is on screen while the fresh one loads. */
-    kept: "Slow connection. Showing what you saw last.",
+    kept: "Slow connection",
     back: "Back online",
   },
   refresh: {

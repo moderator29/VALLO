@@ -52,7 +52,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock is icon only", () => {
     ["/home", "property", "Home"],
     ["/stays", "stays", "Stays"],
   ] as const) {
-    it(`draws no word on the chosen tab (${side} side, ${name} chosen), keeps its pill, name and 44px`, async () => {
+    it(`draws no word on the chosen tab (${side} side, ${name} chosen), keeps its name and 44px, with no pill`, async () => {
       const { page, close } = await fitMount({ locale: "en", imports: IMPORTS, body: dock(active, side), css: await appCss(), bleed: true });
       try {
         await page.waitForTimeout(400);
@@ -67,7 +67,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock is icon only", () => {
         const chosen = tabs.filter((tab) => tab.current);
         expect(chosen).toHaveLength(1);
         expect(chosen[0]!.label).toBe(name);
-        expect(chosen[0]!.pill, "the chosen tab's pill is drawn").toBe("1");
+        expect(chosen[0]!.pill, "no pill behind the chosen tab (founder, 4 November 2026)").toBe("0");
         /* The round search disc carries its optical overshoot (7 October). */
         expect(await page.evaluate(() => getComputedStyle(document.querySelector('.nf-tabbar [data-glyph="search-disc"]')!).scale)).toBe("1.12");
         const resting = tabs.find((tab) => !tab.current)!;

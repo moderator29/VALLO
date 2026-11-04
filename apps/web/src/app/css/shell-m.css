@@ -1129,7 +1129,8 @@
   }
   .nf-dockrow:not([data-dock-pending]) .nf-tabbar .nf-tab__link[aria-current="page"]::before,
   .nf-tabbar .nf-tab__link[data-on]::before {
-    opacity: 1;
+    /* NO PILL (4 November 2026, the founder: no circle behind the chosen tab). */
+    opacity: 0;
     transform: none;
   }
   /*

@@ -36,8 +36,10 @@
 
   /* The dock: a spark under the chosen glyph, inside the blue pill. A dot is a
      shape, not a control (DESIGN_DIRECTION 1.4). */
+  /* NO SPARK DOT (4 November 2026, the founder: remove the small dot under
+     the chosen tab): the chosen tab is shown by its blue glyph alone. */
   :root .nf-tabbar :is(.nf-tab__link[aria-current="page"], .nf-tab__link[data-on])::after {
-    content: "";
+    content: none;
     position: absolute;
     bottom: 0.125rem;
     left: 50%;

@@ -59,7 +59,7 @@ vi.mock("../stays/arrival-gate", () => ({
   arrivalChargesDeclared: async () => true,
 }));
 
-const { reviewListing } = await import("./actions");
+const { reviewListingOnce: reviewListing } = await import("./actions");
 
 const LISTING = {
   id: "5f2504e0-4f89-41d3-9a0c-0305e82c3301",

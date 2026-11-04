@@ -41,6 +41,19 @@ const BACK_MS = 2200;
 const EXIT_MS = 220;
 /* An instant copy whose refresh is still going after this long is named, like the slow answer. */
 const INSTANT_SLOW_MS = 4000;
+/* "Slow connection" stays this long, then goes by itself. */
+const SLOW_WORD_MS = 2200;
+
+/** Whether the phone itself reports a poor connection (2G, data saver, a long round trip). */
+function signalIsPoor(): boolean {
+  try {
+    const c = (navigator as Navigator & { connection?: { effectiveType?: string; saveData?: boolean; rtt?: number; downlink?: number } }).connection;
+    if (!c) return false;
+    return Boolean(c.saveData) || c.effectiveType === "slow-2g" || c.effectiveType === "2g" || (c.rtt ?? 0) > 1500 || (c.downlink ?? 9) < 0.4;
+  } catch {
+    return false;
+  }
+}
 
 /* "slow" is an instant copy whose refresh is taking long: drawn as "kept". */
 type Phase = "online" | "offline" | "kept" | "slow" | "back" | "leaving";
@@ -100,9 +113,24 @@ export function ConnectionLine() {
       );
     };
     /* The page on screen is the phone's copy: say which kind of wait it is. */
+    /* A SLOW CONNECTION IS A PASSING WORD, NOT A NOTICE (4 November 2026, the
+       founder: "just a small text that says slow connection, and it leaves
+       immediately"). It shows for a moment and goes by itself even when the
+       signal stays bad; only "offline" stays up until the signal returns. */
+    const briefly = () => {
+      timers.current.push(
+        window.setTimeout(() => setPhase((p) => (p === "kept" ? "leaving" : p)), SLOW_WORD_MS),
+        window.setTimeout(() => setPhase((p) => (p === "leaving" ? "online" : p)), SLOW_WORD_MS + EXIT_MS),
+      );
+    };
     const kept = () => {
       stale.current = true;
-      setPhase(navigator.onLine ? "kept" : "offline");
+      if (!navigator.onLine) {
+        setPhase("offline");
+        return;
+      }
+      setPhase("kept");
+      briefly();
     };
     const kind = keptCopyKind();
     if (kind === "instant") {
@@ -114,7 +142,11 @@ export function ConnectionLine() {
         refreshIfStale();
         timers.current.push(
           window.setTimeout(() => {
-            if (refreshingRef.current) setPhase((p) => (p === "online" ? "slow" : p));
+            /* Said only when the signal is truly bad, and then only briefly. */
+            if (refreshingRef.current && signalIsPoor()) {
+              setPhase((p) => (p === "online" ? "kept" : p));
+              briefly();
+            }
           }, INSTANT_SLOW_MS),
         );
       }
@@ -146,11 +178,13 @@ export function ConnectionLine() {
   if (phase === "online" || (phase === "slow" && !refreshing)) return null;
   const back = phase === "back" || phase === "leaving";
   const keptLine = phase === "kept" || phase === "slow";
-  const updated = !back && updatedText ? ` ${updatedText}` : "";
+  /* "Updated 2 h ago" belongs to being offline; a slow connection is one word. */
+  const updated = !back && !keptLine && updatedText ? ` ${updatedText}` : "";
   return (
     <div
       className="nf-connection"
       data-state={back ? "back" : keptLine ? "kept" : "offline"}
+      data-brief={keptLine || undefined}
       data-leaving={phase === "leaving" || undefined}
       data-testid="connection-line"
       role="status"

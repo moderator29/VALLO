@@ -731,13 +731,36 @@ function reviewNoticeLine(title: string, notes: string): string {
   return `${title}: ${flat}`;
 }
 
-export async function reviewListing(input: {
+type ListingDecisionInput = {
   listingId: string;
   decision: "approve" | "publish" | "reject" | "request_changes";
   notes?: string;
   /** C8: reason codes; their lister-facing sentences are composed into the note here, on the server. */
   reasons?: string[];
-}): Promise<ActionResult<null>> {
+};
+
+/**
+ * APPROVING PUBLISHES (4 November 2026, the founder: "I approved my listing and
+ * it does not show in the app").
+ *
+ * Approval and going live were two separate decisions, and the second one was
+ * never taken: the listing sat as "Approved, not yet live", out of search, out
+ * of the assistant's reach, with an email telling the lister "we put it live
+ * next". Now an approval goes straight on to publishing, in the same press.
+ * Every publish gate still applies (the owner's mandate for an agent or firm
+ * listing, a stay's arrival charges, the fee acceptance, a cleared review for
+ * a high-risk lister). When one of them holds it back, the listing stays
+ * approved and the reviewer is told exactly why, instead of nothing at all.
+ */
+export async function reviewListing(input: ListingDecisionInput): Promise<ActionResult<null>> {
+  const approved = await reviewListingOnce(input);
+  if (!approved.ok || input.decision !== "approve") return approved;
+  const live = await reviewListingOnce({ listingId: input.listingId, decision: "publish", notes: input.notes });
+  if (live.ok) return live;
+  return fail(`Approved, but it is not live yet. ${live.error}`);
+}
+
+export async function reviewListingOnce(input: ListingDecisionInput): Promise<ActionResult<null>> {
   const access = await requireAdmin("listing_approval");
   if (access.state !== "admin") return fail(adminRefusal(access));
 

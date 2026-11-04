@@ -96,7 +96,7 @@ export function ReviewActionBar({
         }
         setDone(
           decision === "approve"
-            ? "Approved. The lister has been told."
+            ? "Approved and live. The lister has been told."
             : decision === "publish"
               ? "Live in search. The lister has been told."
               : decision === "reject"
