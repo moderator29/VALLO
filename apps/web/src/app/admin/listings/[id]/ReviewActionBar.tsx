@@ -92,6 +92,8 @@ export function ReviewActionBar({
         });
         if (!result.ok) {
           setError(result.fieldErrors?.["notes"] ?? result.error);
+          /* An approval that could not go live has still moved the status. */
+          router.refresh();
           return;
         }
         setDone(

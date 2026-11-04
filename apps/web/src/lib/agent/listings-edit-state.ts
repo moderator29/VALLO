@@ -46,7 +46,7 @@ export function lockedSentence(status: ListingStatus): string {
     /* Approved is not live: publishing is the review team's next step, and
        this sentence used to tell the lister their listing was in search. */
     case "APPROVED":
-      return "This listing passed review and our team puts it live next; there is nothing for you to do. To change it first, take it down from My listings: it returns to your drafts and goes back for review when you send it.";
+      return "This listing passed review but is not live yet. An agent or firm listing needs the owner's mandate approved, and a stay needs its charges at the door declared; the notice we sent says which. To change it first, take it down from My listings: it returns to your drafts and goes back for review when you send it.";
     case "PUBLISHED":
       return "This listing is live. To change it, take it down from My listings: it returns to your drafts, you edit it there and send it back for review.";
     case "SUSPENDED":

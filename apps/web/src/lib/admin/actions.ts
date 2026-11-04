@@ -753,14 +753,74 @@ type ListingDecisionInput = {
  * approved and the reviewer is told exactly why, instead of nothing at all.
  */
 export async function reviewListing(input: ListingDecisionInput): Promise<ActionResult<null>> {
-  const approved = await reviewListingOnce(input);
-  if (!approved.ok || input.decision !== "approve") return approved;
-  const live = await reviewListingOnce({ listingId: input.listingId, decision: "publish", notes: input.notes });
+  if (input.decision !== "approve") return decideListing(input, {});
+  /* The "passed review, we put it live next" notice is held back: it is only
+     true when the publish that follows goes through, and that one says "live". */
+  const approved = await decideListing(input, { quiet: true });
+  if (!approved.ok) return approved;
+  const live = await decideListing({ listingId: input.listingId, decision: "publish", notes: input.notes }, {});
   if (live.ok) return live;
-  return fail(`Approved, but it is not live yet. ${live.error}`);
+  const held = await heldReasons(input.listingId);
+  await tellListerHeld(input.listingId, held);
+  return fail(`Approved, but it is not live yet. ${held.length > 0 ? held.join(" ") : live.error}`);
+}
+
+/** Every rule that still holds an approved listing back, said once, so nobody fixes one and meets the next. */
+async function heldReasons(listingId: string): Promise<string[]> {
+  const reasons: string[] = [];
+  try {
+    const admin = createAdminClient();
+    if (!(await arrivalChargesDeclared(admin, { listingId }))) {
+      reasons.push("The host has not declared the charges at the door (all five, an amount or none).");
+    }
+    const { data: listing } = await admin.from("listings").select("listing_role").eq("id", listingId).maybeSingle();
+    if (listing && (listing.listing_role === "agent" || listing.listing_role === "firm")) {
+      const { count } = await admin
+        .from("listing_mandates")
+        .select("id", { count: "exact", head: true })
+        .eq("listing_id", listingId)
+        .eq("review_status", "approved");
+      if (!count) {
+        reasons.push("An agent or firm listing needs the owner's written mandate filed and approved.");
+      }
+    }
+  } catch {
+    /* The caller falls back to the refusal it already has. */
+  }
+  return reasons;
+}
+
+/** The lister is told what is missing, in place of a promise that it is going live. */
+async function tellListerHeld(listingId: string, reasons: string[]): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { data: listing } = await admin
+      .from("listings")
+      .select("title, agents!listings_agent_id_fkey( user_id )")
+      .eq("id", listingId)
+      .maybeSingle();
+    const ownerId = listing?.agents?.user_id;
+    if (!listing || !ownerId) return;
+    await announce(admin, {
+      recipient: { kind: "user", userId: ownerId },
+      notice: {
+        kind: "listing",
+        href: "/agent/listings",
+        title: "Listing approved, one step left",
+        body: `${listing.title} passed review. To go live it still needs: ${reasons.length > 0 ? reasons.join(" ") : "a last check from us."}`,
+      },
+      email: null,
+    });
+  } catch {
+    /* Best effort, like every notice. */
+  }
 }
 
 export async function reviewListingOnce(input: ListingDecisionInput): Promise<ActionResult<null>> {
+  return decideListing(input, {});
+}
+
+async function decideListing(input: ListingDecisionInput, opts: { quiet?: boolean }): Promise<ActionResult<null>> {
   const access = await requireAdmin("listing_approval");
   if (access.state !== "admin") return fail(adminRefusal(access));
 
@@ -946,7 +1006,7 @@ export async function reviewListingOnce(input: ListingDecisionInput): Promise<Ac
        * a message that would tell somebody their property is in search when it
        * is not.
        */
-      await announce(admin, {
+      if (!(opts.quiet && decision === "approve")) await announce(admin, {
         recipient: { kind: "user", userId: ownerId },
         /* An approval or a publish carries its success moment on the link, with
            the listing it names; the lister's page checks that listing's status
