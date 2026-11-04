@@ -83,13 +83,18 @@ export async function BestMatchesStream({
   );
 }
 
+/** Outside the component: the shelf is cut against the clock at read time. */
+function shelfNow(rows: Listing[]): Listing[] {
+  return newShelf(rows, NEW_SHOWN, Date.now());
+}
+
 export async function NewListingsStream({ t, locale }: { t: Dictionary; locale: Locale }) {
   let listings: Listing[] = [];
   try {
     /* Property and stays together: a real shortlet that just went live is as
        new as a flat. Real ones first (`newShelf`). */
     const rows = await getListingRepository().search({}, { limit: NEW_READ });
-    listings = newShelf(rows, NEW_SHOWN, Date.now());
+    listings = shelfNow(rows);
   } catch {
     listings = [];
   }
