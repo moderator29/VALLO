@@ -242,11 +242,15 @@ jobs:
             | tee "$RUNNER_TEMP/archive.log" | grep -E "error:|ARCHIVE (SUCCEEDED|FAILED)" || true
           grep -q "ARCHIVE SUCCEEDED" "$RUNNER_TEMP/archive.log"
 
-      - name: Export the IPA
+      # EXPORT TWICE, CHECK BETWEEN (5 November 2026). Build 10000150 went
+      # straight to App Store Connect, so no IPA was ever on the runner to
+      # inspect, and the phone answered "no valid aps-environment entitlement".
+      # The IPA is now always exported to the runner first and checked; only a
+      # build that carries the entitlement is uploaded.
+      - name: Write the export options
         run: |
-          destination=export
-          if [ "${{ inputs.upload }}" = "true" ]; then destination=upload; fi
-          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          for destination in export upload; do
+          cat > "$RUNNER_TEMP/ExportOptions-$destination.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -259,9 +263,20 @@ jobs:
           </dict>
           </plist>
           PLIST
+          done
+
+      - name: What the unsigned archive carries
+        run: |
+          app=$(ls -d "$RUNNER_TEMP"/Vallo.xcarchive/Products/Applications/*.app | head -n 1)
+          echo "archive app: $app"
+          find "$RUNNER_TEMP/Vallo.xcarchive" -name "*.xcent" -print -exec cat {} \; || true
+          codesign -d --entitlements :- "$app" 2>&1 | head -40 || true
+
+      - name: Export the IPA to the runner
+        run: |
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Vallo.xcarchive" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions-export.plist" \
             -exportPath "$RUNNER_TEMP/export" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey.p8" \
@@ -269,26 +284,40 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID"
 
       # THE PUSH PERMISSION CHECK. A build whose profile lacks aps-environment
-      # installs fine and then can never register for notifications (the
-      # phone answers "no valid aps-environment entitlement"). Refuse to hand
-      # over such an IPA. Only checkable when the IPA is kept; an upload
-      # export does not leave one on the runner.
+      # installs fine and then can never register for notifications. Refuse to
+      # hand over (or upload) such an IPA, and say what the profile did carry.
       - name: Check the IPA carries the push entitlement
-        if: ${{ success() && !inputs.upload }}
         run: |
           ipa=$(ls "$RUNNER_TEMP"/export/*.ipa | head -n 1)
           mkdir -p "$RUNNER_TEMP/ipa-check"
           unzip -q "$ipa" -d "$RUNNER_TEMP/ipa-check"
           app=$(ls -d "$RUNNER_TEMP"/ipa-check/Payload/*.app | head -n 1)
           codesign -d --entitlements :- "$app" 2>/dev/null | tee "$RUNNER_TEMP/ents.xml" >/dev/null
+          echo "--- entitlements in the signed IPA ---"
+          cat "$RUNNER_TEMP/ents.xml"
+          echo "--- keys in the embedded provisioning profile ---"
+          security cms -D -i "$app/embedded.mobileprovision" > "$RUNNER_TEMP/profile.plist" 2>/dev/null || true
+          grep -o "<key>[a-zA-Z.\-]*</key>" "$RUNNER_TEMP/profile.plist" | sort -u || true
           if ! grep -q "aps-environment" "$RUNNER_TEMP/ents.xml"; then
-            echo "::error::The signed IPA has no aps-environment entitlement. Tick Push Notifications on the App ID com.vallospaces.app in the Apple Developer portal, then run this again."
+            echo "::error::The signed IPA has no aps-environment entitlement. Nothing was uploaded. See the entitlement lists above."
             exit 1
           fi
           grep -A1 "aps-environment" "$RUNNER_TEMP/ents.xml" | grep -o "<string>[a-z]*</string>"
 
+      - name: Upload to App Store Connect
+        if: ${{ success() && inputs.upload }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Vallo.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions-upload.plist" \
+            -exportPath "$RUNNER_TEMP/uploaded" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
       - name: Keep the IPA
-        if: ${{ success() && !inputs.upload }}
+        if: ${{ success() }}
         uses: actions/upload-artifact@v7
         with:
           name: vallo-ios-${{ github.run_number }}
