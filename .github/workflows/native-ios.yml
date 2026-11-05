@@ -247,6 +247,23 @@ jobs:
       # inspect, and the phone answered "no valid aps-environment entitlement".
       # The IPA is now always exported to the runner first and checked; only a
       # build that carries the entitlement is uploaded.
+      # THE FIX FOR "no valid aps-environment entitlement" (5 November 2026).
+      # The archive above is unsigned on purpose, and an unsigned build makes
+      # Xcode skip App.entitlements entirely: the IPA that came out carried
+      # only application-identifier, team-identifier and get-task-allow, with
+      # no push, no Sign in with Apple and no associated domains, although the
+      # provisioning profile allowed all of them. So the entitlements are put
+      # onto the archived app by an ad-hoc signature here. The export step then
+      # re-signs for distribution and keeps them, taking the production value
+      # of aps-environment from the distribution profile.
+      - name: Put the entitlements on the archived app
+        run: |
+          app=$(ls -d "$RUNNER_TEMP"/Vallo.xcarchive/Products/Applications/*.app | head -n 1)
+          cp apps/web/ios/App/App/App.entitlements "$RUNNER_TEMP/App.entitlements"
+          /usr/libexec/PlistBuddy -c "Set :aps-environment production" "$RUNNER_TEMP/App.entitlements"
+          codesign --force --sign - --timestamp=none --entitlements "$RUNNER_TEMP/App.entitlements" "$app"
+          codesign -d --entitlements :- "$app" 2>/dev/null | grep -o "<key>[a-zA-Z.\-]*</key>" | sort -u
+
       - name: Write the export options
         run: |
           for destination in export upload; do
