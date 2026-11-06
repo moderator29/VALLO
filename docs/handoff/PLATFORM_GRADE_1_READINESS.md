@@ -235,6 +235,65 @@ as a reference for PATTERN, not for copying. What has already been seen:
 - Hauslet shows offline status and saved content clearly when the connection
   drops (the founder liked this; see their earlier screenshot).
 
+**Second batch of screenshots (seen by the previous session, 6 November).**
+The founder will send ALL of these again, and many more, in the new session.
+Expect well over 60. Record every one in `REFERENCE_PATTERNS.md`.
+- **Sign-in completion as stacked bottom sheets over a blurred page.** A top
+  success banner "Signed in successfully." with an X, then a sheet "Confirm
+  your information": note "Private Apple Email Detected" (relay address shown,
+  change it later in Account Settings), Full name field ("make sure your name
+  matches your government-issued ID"), "Save and continue" / "Skip for now".
+  Next banner "Thanks, your profile is confirmed." and a sheet "Add a profile
+  photo" (optional, big avatar circle, "Choose a photo" / "Skip for now").
+- **Community commitment** full page: brand mark, eyebrow "COMMUNITY
+  COMMITMENT", big headline, a tinted card with a tick and the
+  non-discrimination pledge, "Learn more", bottom bar Decline / Agree and
+  continue. Vallo should have its own commitment page in its own words.
+- **Personal information** page: tabs (Basic information, Travel companions);
+  rows Legal name, Display name, Email (masked), Phone number(s) "Not provided"
+  with why it is needed ("for confirmed guests, hosts, agents and us to get in
+  touch"), ID verification "Not started", Residential address, Emergency
+  contact; each with a grey "Edit / Change / Add / Start" pill. This is where
+  phone and ID live instead of sign-up.
+- **Agent dashboard cards**: workspace switcher pill ("Personal, Vallo
+  Spaces") with chevron, bell with a count badge; task cards with icon, title,
+  one line, and inline actions ("Set up payout / Dismiss / Snooze...",
+  "Verify your phone number"); "Workspace finances" horizontal cards (Next
+  payout, Pending, naira with small decimals); a bold accent "Find leads"
+  promo card with a white pill button.
+- **Your Listings**: segmented filter with counts (All 1, Shortlets 0,
+  Rentals 1, Sales 0), icon buttons (filter, live, location) and a search
+  field, listing cards with an image placeholder, type label, title, Status
+  "Draft", Published "Not Published", and a floating plus button.
+- **Explore** home: big pill search "Find your next place", tabs Shortlets /
+  Rentals / Sales with an underline, heading "Explore Shortlets." (accent full
+  stop), rails "Near Lagos >" and "Trending in Lagos >" of large rounded photo
+  cards with a glass type chip, heart, and a glass pill of beds / baths /
+  guests; title, area, price "per 1 Night".
+- **Listing detail**: hero photo with glass back, share and heart buttons and a
+  glass chip "Shortlet . Lekki phase 1, Lagos"; thumbnail strip with the active
+  one lifted and tilted; centred title and subtitle; three-column facts
+  (Service type, Property type, Occupancy type); a bordered pill of guests,
+  bedrooms, bathrooms; host card with verified badge and a black round message
+  button; sticky bottom bar with price, dates and "Book Now".
+- **Move-in charges step**: chips with radio circles (None, Caution, Legal,
+  Agency, Service Charge, Registration, Estate Maintenance, Cleaning), "Add
+  another charge"; selected charges become cards (amount, naira or percent,
+  Once / Yearly / Monthly) and a live total.
+- **ID capture**: "Capture 1 of 2, Front of document", "Keep all four corners
+  visible. Rotate the guide for a vertical card", live camera with a rounded
+  guide frame, "Auto capture" checkbox, big shutter, "Upload instead", "Rotate
+  guide"; then "Review your documents" (Zoom in, Retake front, Retake back,
+  "Continue to upload"); then "Review and submit" with Captured badges,
+  "Selfie check complete / Retake selfie", "Submit for verification", and
+  "Verification begins immediately once submitted."
+- **Help guide** page with "Before you start" bullets and a row of action chips
+  (Add listing, Applications, Find leads, Calendar).
+
+Privacy note for the new session: some screenshots show the founder's real
+identity document and number. Never copy them into the repository, docs or
+help pages. Help-centre screenshots must use demo data only.
+
 **The founder also referenced X (Twitter)** for: the success banner at the top
 ("Your post was sent" style), the bottom navigation efficiency, thin icons.
 And **ChatGPT's composer**: a slim rounded input with a mic (voice) icon and a
