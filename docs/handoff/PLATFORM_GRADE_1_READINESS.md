@@ -1,0 +1,723 @@
+# VALLO: PLATFORM GRADE 1 READINESS (HANDOFF)
+
+Written 6 November 2026 by the session that shipped the 1.0.0 App Store
+release, the push entitlement fix, the bell crash fix and the deploy watcher.
+This is the brief for the next session. Read ALL of it before touching code.
+Then read it again when you finish each phase.
+
+The founder writes fast, informally and with a lot of energy. Read for the
+intent, not the spelling. When something is ambiguous, pick the reading that
+makes Vallo cleaner, more native and more trustworthy, and say what you chose.
+
+---
+
+## 0. THE ONE-PARAGRAPH VERSION
+
+Vallo is LIVE on the App Store (version 1.0.0, 146 countries, Nigeria
+included). It is a Next.js 16 web platform shown inside a Capacitor shell on
+iOS and Android. The founder has studied a competitor, **Hauslet** (App Store,
+"Shortlets, Rentals & Homes", about 16 ratings, version 1.0.3), and wants Vallo
+to feel at least as native, calm and premium as Hauslet, and then better:
+more features, better flows, a stronger identity. **This is an UPGRADE, not a
+rebuild.** Keep Capacitor, keep the backend, keep every working feature, keep
+the data. Elevate every single page: typography, spacing, containers, motion,
+feedback, navigation, offline behaviour, native integrations. The goal is
+launch readiness on iOS, Android and the web, without delaying the next App
+Store submission.
+
+---
+
+## 1. THE FOUNDER'S RULES (NON-NEGOTIABLE)
+
+1. **Branch.** All work goes on a new branch named
+   `platform-grade-1-readiness`, cut from the latest `main`. Never push to
+   `main` unless the founder's message contains the words "push to main".
+   An automated safety check has blocked pushes to main without that phrase
+   before, and it will again.
+2. **No Vercel previews. No Vercel spending.** The founder paid about 96 USD
+   for preview builds nobody asked for. `apps/web/vercel.json` now carries
+   `git.deploymentEnabled` with `platform-grade-1-readiness`, `claude/**` and
+   `dependabot/**` switched OFF, so pushes to those branches build nothing on
+   Vercel. Keep it that way. Do not run `vercel` CLI deploys. Do not open
+   preview links. Verify locally (`next build`, `next start`, Playwright in the
+   sandbox) and on GitHub only.
+3. **GitHub Actions minutes are exhausted** for the account (100 percent of the
+   included minutes, 6 November 2026). CI on `main` will not start until the
+   founder fixes billing or the month resets. Do NOT trigger workflows. Do not
+   rely on CI for verification: run the gates yourself (section 9). iOS builds
+   (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
+   tell the founder before any new iOS build is needed.
+4. **Agents: 4 maximum at any one time.** The founder said so explicitly. Use
+   one lead (you) plus up to three parallel subagents, or four if the lead does
+   not write code. Brief each one fully; they know nothing you do not tell them.
+   Never let two agents edit the same files.
+5. **Re-audit every piece of work.** After each workstream: re-read the diff
+   adversarially, run the gates, look at the screens at phone width (390 x 844
+   and 360 x 800) in light and dark, then fix what you find. Only then move on.
+6. **No em dashes anywhere** (code, copy, docs, commits). The repo enforces it:
+   `node apps/web/scripts/check-no-em-dash.mjs`. Use a colon, a comma or two
+   sentences.
+7. **English only for new copy** unless a translation is verified. Do not
+   invent Yoruba, Hausa or Igbo strings.
+8. **Never print, paste or commit credentials.** Keys go in Vercel or Supabase
+   settings by the founder, never in chat.
+9. **No model identifiers** in commits, PR text, code comments or docs.
+10. **Do not copy Hauslet's (or X's) branding, logos, exact screens, text or
+    assets.** Learn the patterns, then build a distinct Vallo version that is
+    better. Vallo keeps its own identity, colours and voice.
+11. **Never claim something works unless you ran it.** Say "built, not tested
+    on a device" when that is the truth. The founder tests on a real iPhone.
+12. **Company payments need all three founders' approval.** Never add a paid
+    service, plan or dependency with a running cost without asking.
+13. **Keep the email system's dark/light theme rules** (`lib/email/theme.ts`:
+    inline LIGHT, `rm-*` classes repaint to DARK).
+14. Industry-standard mobile behaviour always beats a clever web pattern. The
+    founder rejected a full-page "Weak connection" screen before: brief,
+    small, in-place signals only.
+15. Commit in small, well-described commits. Push the branch often (it no
+    longer costs Vercel money). Never rewrite history on `main`.
+
+---
+
+## 2. CURRENT STATE YOU INHERIT (VERIFY EACH ONE)
+
+| Item | State on 6 November 2026 |
+|---|---|
+| App Store | 1.0.0 approved and live. Availability set to 146 countries. 29 cannot sell: Afghanistan (Apple) and the EU (Trader Status not declared, App Store Connect, Business, Compliance). |
+| Build 1.0.1 | Uploaded to App Store Connect by Native iOS run #156, build number 10001156. Push entitlement verified inside the IPA. Founder is installing it through TestFlight internal testing to test push. Version page 1.0.1 must be created in App Store Connect (the plus next to iOS App) before submitting. Screenshots for 1.0.1 wait until this upgrade is done. |
+| Push | Server side ready (APNS_KEY_ID, APNS_TEAM_ID, APNS_PRIVATE_KEY, APNS_PRODUCTION=true in Vercel). Old builds lacked `aps-environment`; fixed in the workflow (entitlements are now put on the archived app, then checked). `push_enrol_log` records each attempt and its failing step. |
+| Notification bell | Crash fixed (`lib/supabase/channel-name.ts`, unique names for database-listening channels). Confirmed on the founder's phone after a reinstall. |
+| Stale code on phones | The service worker kept page copies for up to 7 days with old script names, so fixes reached phones late. Commit `2ca5b9013` adds `components/app/DeployWatch.tsx`, `lib/deploy/watch.ts`, `app/api/build/route.ts`, `NEXT_PUBLIC_BUILD_ID` and cache version v8. On the branch `claude/rentme-v2-platform-audit-xuvg0a`, NOT yet on main unless the founder said "push to main". Check `git log origin/main`. |
+| Crash recorder | Browser crashes are stored as scrubbed alerts in `public.risk_alerts` (description starts `client.error`, `entity_id` is the `C-XXXXXX` reference shown on the error screen). Use it. |
+| CI | Red on main for days before the minutes ran out (Build, Typecheck, npm audit, accessibility gates, database probes; Test cancelled at 35 minutes). Root cause not yet found. Not caused by recent work. Worth fixing once minutes are back. |
+| Newsletter | Built, not sent. SQL ready in `supabase/migrations/pending/newsletter_default_on_2026-11-launch.sql` (backfill 17 default-off members, check count of 23, then enqueue). Founder runs it. |
+| Real listing | "2bedroom in okitipupa" approved, unpublished: needs charges at the door declared and an approved mandate (or recreate as owner listing). |
+
+---
+
+## 3. THE CODEBASE, IN ONE PAGE
+
+- Monorepo. Web app: `apps/web` (Next.js 16 App Router, Turbopack, React 19).
+  **Read `apps/web/AGENTS.md` first: this Next.js has breaking changes; read
+  `node_modules/next/dist/docs/` before writing framework code.**
+- Shared packages: `packages/i18n` (dictionaries, `*.en.ts`).
+- Database: Supabase project `uccixoonmbhrnyczyigt`. 752 migrations, recorded
+  in `supabase/migrations/APPLIED.txt` (`node scripts/check-migrations.mjs
+  --record` after applying). Row-level security everywhere. Apply with the
+  Supabase MCP tools, then commit the file under the version the server stamped.
+- Size: about 559 pages, 903 component files, 189 server-action files, 55 API
+  routes. Huge test suite (vitest unit + browser DOM tests; full run about 25
+  minutes, run it in the background).
+- Native: `apps/web/ios` and `apps/web/android` (Capacitor 8). The app loads
+  `https://www.vallospaces.com`. Service worker `apps/web/public/sw.js` keeps
+  pages and assets for instant and offline opens. Plugins: app, browser,
+  camera, haptics, keyboard, push-notifications, share, splash-screen,
+  status-bar, plus native SignInWithApple and a widget.
+- **Capacitor plugin trap (learned the hard way):** never return a plugin object
+  from an `async` function or resolve a promise with it. The promise machinery
+  reads `.then` and the plugin Proxy throws "X.then() is not implemented on
+  ios". Carry it inside an object (`{ plugin }`). See `lib/native/device.ts`.
+- **Realtime trap:** a database-listening channel must use
+  `ownChannelName()`; broadcast channels (typing, calls) keep shared names.
+  A guard test enforces it.
+- Shell and navigation: `components/app/AppShell.tsx`, `ShellDock.tsx`,
+  `AutoHideDock.tsx`, `CreateDock.tsx`, `DockMore.tsx`, `NavTree.tsx`,
+  `SideSwitch.tsx`, `nav-model.ts`, side nav CSS `app/side-nav.css`.
+- Feedback today: `components/ui/Toast.tsx`, `DetailsHost` (one toast, the
+  connection line, back to top), `ConnectionLine.tsx` (brief "Slow
+  connection"), success moments (`docs/SUCCESS_MOMENTS.md`, `SuccessFlagHost`).
+- Offline: `lib/offline/*` (outbox in IndexedDB `vallo-outbox`, `setOrKeep`,
+  `sendOrKeep`, `retryLost`), `components/app/OfflineTray.tsx`,
+  `docs/OFFLINE_AND_FAST_START_PLAN.md`.
+- Passcode: `components/passcode/PasscodeGate.tsx` is mounted in
+  `app/(app)/layout.tsx`. `docs/PASSCODE.md`.
+- Phone at sign-up: `app/(auth)/sign-up/phone/page.tsx`,
+  `lib/phone-otp/signup-gate*.ts`, `SIGNUP_PHONE_PATH`.
+- Listing wizard: `app/agent/list/ListingWizard.tsx` (+ actions, steps tests).
+- Identity checks: `app/(app)/verification`, manual KYC with live selfie,
+  admin desk `app/admin/kyc`. `docs/identity`.
+- Messages: `app/(app)/messages`, `components/app/messages/*` (VoiceNote,
+  voice.ts, QuotedReply, BubbleGestures, forward), calls `lib/calls/*`.
+  Audit what exists before building: voice notes exist in part; confirm
+  reactions in the schema before adding a table.
+- AI assistant: `app/(app)/assistant`, `docs/AI-ASSISTANT.md`, consent in
+  `lib/ai/consent.ts`. Support: `app/(app)/support` (+ messages, new),
+  `docs/SUPPORT_STAFF.md`.
+- Admin: `app/admin/*` (staff, support, social, kyc, listings, queue, money,
+  oversight and more). `docs/ADMIN_CONSOLE.md`.
+- Maps: Leaflet with Carto basemaps today. CSP allows `api.maptiler.com`.
+- Icons: `design-system/icons` (`UiIcon`, glyphs), `docs/ICON_SYSTEM.md`.
+- Docs worth reading before design work: `docs/DESIGN_DIRECTION.md`,
+  `docs/PRODUCT.md`, `docs/MOBILE.md`, `docs/PAGE_SWEEP.md`,
+  `docs/RESPONSIVE_RESEARCH.md`, `docs/SOCIAL_DESIGN.md`,
+  `docs/NOTIFICATIONS_MAP.md`, `docs/RULINGS.md`.
+
+---
+
+## 4. WHAT THE HAUSLET SCREENSHOTS SHOW (STUDY THESE PATTERNS)
+
+The founder will send about 60 more screenshots in the new session. Treat each
+as a reference for PATTERN, not for copying. What has already been seen:
+
+**Look and feel**
+- Very calm, light, mostly white and soft grey surfaces; one accent colour
+  (purple) used sparingly for the active state, progress and key labels.
+- Large bold page titles ("Profile", "Calendar", "How to list your property on
+  Hauslet"), generous spacing, big rounded containers (about 24 to 28 px
+  radius), thin 1 px borders instead of heavy shadows.
+- Thin, consistent line icons with labels in the bottom tab bar (Explore,
+  Hausmates, Search, Messages, Account). Active tab tinted, avatar as the
+  Account tab.
+- Primary buttons are full-width, tall (about 56 px), pill shaped, black or
+  accent; secondary buttons are pale grey pills.
+- Small uppercase accent "eyebrow" labels above step titles (LOCATION,
+  PHOTOS, FINISH, THE BASICS).
+
+**Flows**
+- **Role switch.** A floating dark pill "Switch to Agent Tools" on the
+  profile, and a "Switch account" bottom sheet (personal account, create
+  organization). The agent side has its own tab bar (Dashboard, Listings,
+  Activity, Calendar, Account). **The founder wants Vallo's version in the
+  SIDE NAV** (and reachable on mobile), with a smooth switch that also works on
+  low or no data from cache.
+- **"What do you manage?"** sheet on first entry to the agent side: Rentals,
+  Shortlets, Sales, A mix of services; each with a one-line explanation; a
+  selected card shows a tinted fill, border and tick; "Continue" plus "Skip
+  for now (use All)". It tailors the dashboard.
+- **Calendar** for agents: month grid of rounded day cells, today tinted,
+  legend chips (Check-in, Check-out, Viewing, Blocked with counts), filter
+  "All" and a property picker.
+- **Listing wizard: one question per screen, 12 steps.** Top bar: back, a green
+  "Saved" tick (autosave), close. A thin progress bar under it. Bottom bar:
+  "Step N of 12" and a big Continue. Steps: what you are listing (Shortlet,
+  Property for rent, Property for sale), your connection to it (landlord,
+  agent, developer, independent), property kind and type (grid of tiles:
+  Apartment, Flat, Duplex, Studio, Room, Serviced Apartment, Guesthouse,
+  Penthouse, Bungalow, Terrace, Maisonette, Mansion, Fully Detached,
+  Semi-Detached), location (search or fill State, Area, Street; house number
+  optional; "you don't need to be there"), "Is the pin on the entrance?" with
+  a full-screen map pin picker ("Place pin here", "Use my location is only for
+  someone standing at the property", "Use this pin"), rooms (number chips for
+  bedrooms, bathrooms, toilets optional), pricing with extra charges (cards
+  with amount, naira or percent toggle, Once / Yearly / Monthly segmented
+  control, "Add another charge", and a live summary "A tenant pays to move in:
+  N250,000 (one rental period plus these charges)"), photos ("At least 3. We
+  sort them into rooms, the first is your cover", cover crown badge, progress
+  banner "Add 2 more photos, 1 ready"), description (title with 0/150
+  counter, description with "73 / 50 min" counter turning green, "Write with
+  AI", "Rewrite from my answers", a consent dialog naming the AI provider and
+  exactly what is shared), and a final "Check your listing" review page
+  (summary card, every answer with a "Change" pill, a red "1 thing to fix"
+  banner such as "Verify your identity before submitting", then "Submit for
+  review").
+- **Identity verification** (opens in the in-app browser on
+  verify.hauslet.com): intro screen with what will happen (where your ID was
+  issued, photo of your ID, a live selfie, privacy protected: "Any ID number
+  you enter is encrypted and never shown back to you or to reviewers"),
+  Continue / "Cancel and return to app"; a 7-step stepper (Country, Document,
+  ID number, Capture, Upload, Selfie, Review); country list with search and
+  POPULAR (Nigeria, Ghana) then all countries; document choice cards
+  (National ID card, Passport, NIN slip, Driver's licence); capture with
+  "Review your documents", Zoom in, Retake; a live "Quick selfie check" with
+  an oval face guide and "Start video check"; "Review and submit" with a
+  "Final step, submission required" notice. Verification is required BEFORE
+  any deal (submitting a listing), not at sign-up.
+- **Help articles** ("Pages / Resources for hosts / How to list your
+  property"): long-form guides with real screenshots of each step, tips in
+  tinted callouts, "Before you start" checklists. **Vallo needs its own help
+  centre in this style, with Vallo's own screenshots and flows.**
+- **Permissions in context**: the notification prompt appears on the profile
+  after sign-in, not on first launch.
+- **Privacy choices** sheet: "Help us improve your experience", Accept all /
+  Only necessary / Manage preferences, plain language.
+- **Policy pages** open as bottom sheets with a grabber, a close button and a
+  "Go Back" button.
+- Hauslet shows offline status and saved content clearly when the connection
+  drops (the founder liked this; see their earlier screenshot).
+
+**The founder also referenced X (Twitter)** for: the success banner at the top
+("Your post was sent" style), the bottom navigation efficiency, thin icons.
+And **ChatGPT's composer**: a slim rounded input with a mic (voice) icon and a
+send button. Vallo's message composer and AI assistant composer should feel
+like that.
+
+---
+
+## 5. THE WORK, IN PRIORITY ORDER
+
+Each item lists: goal, where, acceptance. Re-audit after each.
+
+### P0. Do first (they block launch quality)
+
+**P0.1 Passcode is optional, not a gate.** Today `PasscodeGate` sits in the
+member layout. A new member must be able to create an account, sign in and use
+the app without ever setting a passcode. Replace the forced setup with a slim,
+dismissible alert banner at the top of the dashboard: "Protect your account
+with a passcode and Face ID", "Set up", and an X. Dismissal is remembered (per
+device, with a gentle re-offer after a long interval, never nagging). A member
+who HAS a passcode keeps the lock exactly as now. Money actions keep their own
+lock (`MoneyLockGroup`). Update `docs/PASSCODE.md` and the tests.
+
+**P0.2 Phone number out of sign-up.** Remove the phone step from sign-up (email
+form, Google, Apple, phone sign-in stays as a sign-in method if it exists).
+Ask for and confirm the phone number at the moment it is needed, like
+Hauslet's "verify before you submit": before the first booking request,
+listing submission, wallet or payout, or a deal. Keep `confirmed_phones` and
+the all-countries `PhoneField`. Make sure no server path still requires
+`phone` at account creation (`handle_new_user`, `signUpWithEmail`,
+`signup-gate`).
+
+**P0.3 Verification before deals, upgraded.** Keep Vallo's manual KYC (live
+selfie, admin face check) and rebuild its screens as a premium stepper in the
+spirit of section 4: intro "what will happen", country (search, Popular:
+Nigeria first), document cards, ID number (encrypted, never shown back),
+capture with review, zoom and retake, live selfie with a face oval, review and
+submit, then a clear "under review" state with expected time. Make it a
+sequence of full pages with a top stepper, bottom-sheet explanations and
+slide transitions. Gate deals (listing submit, booking, payout) on it with a
+friendly "1 thing to fix" card linking straight to it.
+
+**P0.4 Global feedback banner.** One central system for success, info, warning
+and error: a wide rounded banner under the status bar (safe-area aware), icon
+plus specific text ("Saved to your list", "Message sent", "Listing submitted
+for review", "Welcome to Vallo"), smooth slide and fade, auto-dismiss, swipe or
+X to dismiss, a queue that replaces instead of stacking, retry action on
+failure, accurate states (queued is not sent). Migrate every existing toast and
+ad-hoc success line to it. Respect reduced motion. Works on iOS and Android.
+
+**P0.5 Native polish basics.** Status bar style per screen (light/dark),
+safe areas everywhere (top, bottom, notch, home indicator), haptics on taps and
+success (via the fixed `lib/ui/feedback.ts`), keyboard: composer stays above
+the keyboard, focused inputs scroll into view, Next/Done actions, no layout
+jumps. Android: edge to edge, back button and predictive back, window resize.
+
+### P1. The Hauslet-level upgrades
+
+**P1.1 Listing wizard: one question per screen.** Re-flow
+`app/agent/list/ListingWizard.tsx` into Hauslet-style single-question pages
+with autosave ("Saved"), progress bar, "Step N of M", Back, Close, a final
+"Check your listing" page with Change pills and a "things to fix" list. Keep
+every existing Vallo rule (supply proof gate, SCUML mandate, charges at the
+door for stays, photo rules, moderation). Add the live "a tenant pays to move
+in" summary, the extra-charges cards (amount, naira/percent, once/yearly/
+monthly), the property type tile grid, the full-screen pin picker, the
+AI writer with a clear consent dialog and an undo of the AI change.
+
+**P1.2 Role switch in the side nav.** A "Switch to agent tools / Exit agent
+tools" control in the side nav (desktop and the mobile drawer), plus the
+mobile pill where it fits. The agent side gets the "What do you manage?" sheet
+on first entry and its own calm dashboard (Dashboard, Listings, Activity,
+Calendar). The switch must be instant and work on weak or no data from the
+cached shell (the service worker keeps both sides' pages).
+
+**P1.3 Messages, like a great chat app.** Composer like ChatGPT's: slim rounded
+field, mic for a voice note (hold or tap to record, cancel by sliding, waveform,
+playback speed), send button that appears when there is text. Reactions on
+any message, voice note, call record and video call entry (long-press menu
+with a reaction row, counts under bubbles, realtime). Sent / delivered / read /
+failed states that are true, retry on failure, image upload progress, typing
+indicator, smooth scroll and new-message pill. Confirm what exists first
+(VoiceNote, BubbleGestures) and finish rather than duplicate.
+
+**P1.4 AI assistant and support inside Messages.** A permanent pinned
+conversation at the top of the inbox, "Vallo Assistant", always present even
+when the member has no other chats. It opens like a normal chat. Inside it, a
+clear button "Talk to a person" opens a support chat as an inner page, clean
+and sharp, connected to the existing support desk (`app/(app)/support`,
+`app/admin/support`). Update `docs/AI-ASSISTANT.md` so the assistant's
+knowledge matches the platform as it is now.
+
+**P1.5 Offline and connection.** Build on `lib/offline` and `sw.js`:
+connected, slow, unstable, offline, reconnected states shown briefly and in
+place (never a full-screen error for a weak signal). An offline page with
+saved listings, recently viewed, saved stays and restaurants, "Saved on your
+device. Price and availability may have changed", Retry, and a route home.
+Queued actions replay safely (never duplicate a booking, message or payment;
+never auto-submit a payment). Images cached sensibly. Tell people when queued
+items succeed or fail. Keep the DeployWatch reload behaviour.
+
+**P1.6 Map.** Replace the raster look with a clean, light vector map
+(MapLibre GL with a calm style, or the cleanest option the CSP and budget allow:
+MapTiler is already allowed in the CSP but check its pricing with the founder
+before using a paid key). Full-screen pin picker like section 4. Low-end
+Android must stay smooth: keep a lightweight fallback.
+
+**P1.7 Help centre with real screenshots.** A "Pages / Resources" area
+(hosts, guests, agents, restaurants): "How to list", "How verification works",
+"How bookings and payments work", "How to report a listing or a person", each
+with step screenshots of Vallo's own new screens, tips callouts and "Before you
+start" lists. Screenshots are taken AFTER the upgrade, at 2x, with demo data
+(never real people's IDs).
+
+### P2. Identity, motion, admin, depth
+
+**P2.1 Vallo's own signature feature (like Hauslet's "Hausmates").** Hausmates
+is roommate matching ("share a home with someone verified, only when you both
+say yes"). Vallo needs its own, better, named feature. Propose 3 to 5 names to
+the founder before building; candidates: **Vallo Kin**, **Vallo Circle**,
+**Nest by Vallo**, **Yardmates**, **Vallo Crew**. It should combine verified
+co-renting with Vallo's social side (feed, follows, stays, tables), with mutual
+consent and strong safety.
+
+**P2.2 Motion system.** A shared motion vocabulary (durations, easings,
+spring for sheets, slide for steps, fade-scale for banners, shared-element-like
+transitions for listing card to detail, success animations on key moments:
+listing submitted, booking confirmed, verification sent, first message).
+Respect reduced motion and the in-app Motion setting. Fast, never blocking.
+Explore a simple Vallo mascot or animated brand mark for success and empty
+states; if a mascot is not feasible to do well, use animated brand
+illustrations instead. Ask the founder before committing to a mascot style.
+
+**P2.3 Containers, glass, typography, icons.** Unify the whole platform:
+bigger rounded containers, thin borders, generous spacing, one type scale,
+thin consistent line icons (audit `UiIcon`), selective glass only on floating
+surfaces (dock, sheets, banners), with a non-blur fallback on low-end Android.
+Every single page gets the pass (use `docs/PAGE_SWEEP.md` as the checklist).
+Not too much, not too little: calm, serious, premium.
+
+**P2.4 Face ID where it belongs.** Offer Face ID (WebAuthn passkey, already
+wired: `lib/passcode/passkey-unlock.ts`) for: unlocking when a passcode is set,
+money actions (withdraw, send, pay), viewing sensitive documents, changing
+security settings, deleting the account. Never as a forced first-run step.
+
+**P2.5 Admin desks.** Create in `app/admin`:
+- **Support / business developer desk.** The founder adds a staff member by
+  their Vallo account. Tools: approve and review listings, onboard users met in
+  real life or online (help them finish verification and a first listing),
+  see and resolve issues, reply to support messages, view reports routed to
+  them. Least privilege, audit log for every action.
+- **Social media manager desk.** Upload and schedule everything a platform of
+  this size posts (feed posts, stories, announcements, banners), premium
+  access to the AI assistant for drafting, access to support replies, analytics
+  of their posts. Audit log.
+- Make sure every report (listing, person, message, transaction) routes to the
+  right desk and queue.
+- Update `docs/ADMIN_CONSOLE.md` and `docs/SUPPORT_STAFF.md`.
+
+**P2.6 Performance.** Measure before and after (cold start, warm start, time to
+usable home, bundle sizes, memory during long browsing) on iOS WKWebView and
+Android WebView separately; budget Android first. Lazy load, paginate,
+skeletons that match the real layout, image sizes, fewer duplicate requests.
+Never invent numbers; say what was measured and how.
+
+**P2.7 Docs.** Bring every doc the AI assistant and support rely on up to date
+with the new flows. Add `docs/UX_SYSTEM.md` (the design and motion system) and
+a page map of the platform.
+
+---
+
+## 6. HOW TO WORK (THE PROCESS THE FOUNDER WANTS)
+
+1. **Setup.** Fetch `main`, create `platform-grade-1-readiness`, confirm
+   `apps/web/vercel.json` has the `deploymentEnabled` block (section 1.2).
+   Load the Supabase MCP and confirm access to project `uccixoonmbhrnyczyigt`.
+   Do not deploy anything to Vercel.
+2. **Audit (read only, up to 3 parallel Explore agents).** Map every route,
+   the shell, the design tokens, the toasts, the offline layer, the passcode
+   gate, the phone gate, the wizard, KYC, messages, assistant, support, admin.
+   Write `docs/handoff/AUDIT_2026-11.md`: what exists, what is broken, what is
+   duplicated.
+3. **Reference analysis.** When the founder sends the ~60 screenshots, write
+   `docs/handoff/REFERENCE_PATTERNS.md`: one entry per screenshot (what it is,
+   the pattern, what Vallo should do, better). Number them as the founder
+   sends them.
+4. **Recommendations (Agent 1, UX lead).** At least 100 specific, grounded
+   recommendations in the 20 categories of the founder's brief (appendix A),
+   each with what, why, where, how, and which layer (frontend, backend, API,
+   Capacitor, native), prioritised by impact, effort and business value. Show
+   the founder the top 30 before building anything large.
+5. **Architecture.** Decide the shared pieces first (feedback banner, motion
+   tokens, sheet component, stepper component, page frame, connection state),
+   so every page uses the same parts.
+6. **Implement in groups** (P0, then P1, then P2), with the agent split:
+   - Agent 1: UX research, recommendations, design quality review of every
+     change.
+   - Agent 2: native iOS and Android behaviour (Capacitor, status bar,
+     keyboard, haptics, back button, deep links, push).
+   - Agent 3: performance and offline architecture.
+   - Agent 4 (or the lead): UI implementation of shared components and pages.
+   The lead reviews every change and prevents conflicts. 4 agents maximum.
+7. **Re-audit each group** (section 9) before the next.
+8. **Report** to the founder after each group in plain language: what changed,
+   screenshots taken locally, what they must test on the phone.
+
+---
+
+## 7. THINGS THAT MUST NOT HAPPEN
+
+- Rebuilding screens from scratch when an upgrade will do. Deleting features.
+- Mock data replacing real data. Hard-coded content that should come from the
+  database.
+- A second design system next to the first. Duplicate pages or navigation.
+- Breaking payments, bookings, KYC, the ledger, RLS or the money rules.
+- New paid services without the founder's approval.
+- Changes to the iOS project that need a new native build, unless planned with
+  the founder (a new build means a new App Store review and macOS minutes).
+  Prefer web-side changes; batch native changes into one planned 1.0.x build.
+- Claiming native features "done" without a device test.
+- Vercel previews, Vercel CLI deploys, triggering GitHub workflows.
+
+---
+
+## 8. NATIVE BUILD IMPLICATIONS
+
+Most of this upgrade is web code and reaches the app instantly (the app loads
+the live site; DeployWatch reloads phones onto new deploys). Things that need a
+NEW native build and App Store review: new Capacitor plugins, Info.plist or
+entitlement changes, splash or icon changes, Android manifest changes. Collect
+them in `docs/handoff/NATIVE_BUILD_QUEUE.md` and ship them together in one
+planned build, only when the founder agrees and Actions minutes are available.
+
+---
+
+## 9. VERIFICATION GATES (RUN THEM YOURSELF)
+
+From `apps/web`:
+- `npx tsc --noEmit -p .`
+- `npx eslint <changed files>`
+- `node scripts/check-no-em-dash.mjs`
+- `node scripts/check-css-tokens.mjs` (and the other `scripts/check-*.mjs`
+  that apply)
+- `node ../../scripts/check-migrations.mjs` for database changes
+- targeted vitest runs for what you touched; the full suite in the background
+- `npx next build` with dummy env
+  (`NEXT_PUBLIC_SUPABASE_URL=https://uccixoonmbhrnyczyigt.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY=dummy NEXT_PUBLIC_SITE_URL=https://www.vallospaces.com`)
+- Playwright screenshots at 390 x 844 and 360 x 800, light and dark, of every
+  changed screen (Chromium is preinstalled; do not run playwright install)
+- After deploys the founder approves: check `public.risk_alerts` for new
+  `client.error` rows.
+
+---
+
+## 10. THE FIRST MESSAGE TO PASTE INTO THE NEW SESSION
+
+```
+You are continuing work on Vallo (repo moderator29/read-it-well, Supabase
+project uccixoonmbhrnyczyigt). Before anything else:
+
+1. git fetch origin main claude/rentme-v2-platform-audit-xuvg0a
+2. If origin/main does not contain docs/handoff/PLATFORM_GRADE_1_READINESS.md,
+   create the branch from the session branch instead:
+   git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
+   otherwise: git checkout -b platform-grade-1-readiness origin/main
+3. Read docs/handoff/PLATFORM_GRADE_1_READINESS.md completely, then
+   apps/web/AGENTS.md, then the docs it lists in section 3.
+4. Load the Supabase MCP tools and confirm you can query the project.
+5. Confirm apps/web/vercel.json switches Vercel deployments OFF for
+   platform-grade-1-readiness. Never deploy to Vercel, never open previews,
+   never trigger GitHub Actions (the minutes are used up).
+
+Rules: 4 agents maximum at once. No em dashes. Push only to
+platform-grade-1-readiness; never to main unless my message says
+"push to main". Re-audit every piece of work. Never claim something works
+without running it. This is an UPGRADE of the existing platform, not a
+rebuild: keep Capacitor, the backend, every feature and the data.
+
+Start with the read-only audit (section 6, step 2) and the P0 items
+(passcode optional with a dismissible dashboard banner, phone number out of
+sign-up and asked before the first deal, verification before deals, the
+global feedback banner, native polish basics). I will send about 60
+screenshots of the Hauslet app and other references: number them as they
+arrive and record each in docs/handoff/REFERENCE_PATTERNS.md. Show me the top
+30 recommendations before any large build. Tell me what you plan before each
+group, and report in plain language after it.
+```
+
+---
+
+## APPENDIX A. THE FOUNDER'S OWN WORDS (FULL BRIEF)
+
+The founder asked that the whole message be passed on. Em dashes in the
+original were replaced with colons to satisfy the repository's dash check;
+nothing else was changed in meaning. Read it all; it is the source of truth
+when this handoff and the brief disagree.
+
+> Okay perfect I think we go back to my biggest issues and worries because
+> this is getting over me. With our capacitor we continue but we upgrade it
+> all to work and clean like hauslet stuffs like "Native feel: Smooth
+> transitions, proper iOS status bars, safe areas, gestures and navigation.
+> Performance: Fast startup, lazy loading, image optimisation and caching.
+> Premium design: Consistent typography, spacing, animations and polished
+> screens. Native integration: Push notifications, camera, location, deep links
+> and other relevant native capabilities. Reliability: Proper error handling,
+> offline states, secure authentication and crash monitoring." And I would send
+> you a lot of that hauslet platform screenshot so we have our steps similar
+> like that but ours should even be more better. Go through the entire codebase
+> and give a plan so we can get how hauslet works offline etc, then write a
+> masterminded handoff that does everything so a new session can work on it, so
+> you know how I feel and what I want and my rules. I will be sending a lot of
+> screenshots that it should copy. Use 4 agents max. In the screenshots the
+> verification steps: ours should look similar to theirs, more pages, more
+> stuff, and copy many UX they have. We need something even more slick: we copy
+> their exit agent tools and switch to agent tools buttons but ours should be in
+> the side nav, and the switch must work fine, also on low data or no data with
+> the cache. Add voice messages to messaging and reactions too. More
+> animations. The verification takes you to our website in the in-app browser
+> like theirs. The documents part that says how to list etc. It is not
+> rebuilding our platform but upgrading it, the slightest detail to the iOS
+> feel.
+>
+> [The founder then pasted a long structured brief. Its sections, kept in full
+> intent:]
+>
+> VALLO: PREMIUM NATIVE iOS EXPERIENCE AND PLATFORM UPGRADE. Upgrade the
+> existing platform (properties, accommodation, stays, restaurant reservations)
+> to a premium native-feeling mobile experience. Do not rebuild, do not replace
+> Capacitor, preserve everything that works.
+> 1. Native iOS experience: native navigation and transitions, status bar and
+> safe areas, page transitions and gestures, scrolling, touch feedback, loading
+> animations, natural tabs, native bottom navigation, no web-like behaviour.
+> 2. Navigation, tabs and pages: better tab structure, dedicated pages and
+> subpages, intuitive movement between Property, Vallo Stays, restaurants,
+> bookings and accounts; better search, filters, saved, booking history,
+> notifications, profile; every feature discoverable; no clutter or duplicates.
+> 3. Premium UI/UX: spacing, typography, icons, buttons, consistency,
+> micro-interactions, better cards, listings, galleries, search and detail
+> pages, professional empty, loading and error states, keep the brand, excellent
+> on all iPhone sizes; improve, do not randomly redesign.
+> 4. Native integrations: push, universal links and deep links, camera and
+> photos, location, share, haptics, status bar and splash, keyboard, app
+> lifecycle; permissions only when needed.
+> 5. Deep linking: listings, stays, restaurants, bookings, categories, search
+> results, notification destinations; web fallback; works cold, warm and in
+> background.
+> 6. Performance: startup, lazy loading, pagination, images, fewer requests,
+> bundle size, skeletons, safe caching, offline handling; never sacrifice
+> accuracy.
+> 7. Security and reliability: auth, sessions, permissions, errors, no crashes,
+> expired sessions, sensitive data, memory leaks, crash reporting, payments and
+> bookings stay reliable.
+> 8. QA across launch, onboarding, sign-up, sign-in, discovery, stays,
+> restaurants, search, saved, notifications, account, deep links, tabs,
+> background and reopen, on several iPhone sizes.
+> 9. Rules: inspect, audit, find problems, plan, then implement; no removed
+> features, no broken integrations, no mock data, no needless dependencies, no
+> duplicate pages, no hard-coding, no false claims, keep App Store compatibility;
+> name every plugin, permission, entitlement or service needed.
+> 10. Deliverables: summary, new pages and navigation, native integrations,
+> performance work, bugs fixed, remaining issues, required plugins and Apple
+> configuration, tests and results, steps before the next App Store submission.
+> 11. Cross-platform: iOS AND Android equally; one codebase; platform-aware
+> behaviour (iOS transitions, safe areas, haptics, sheets, universal links;
+> Android system bars, edge to edge, back and predictive back, keyboard resize,
+> Material-style touch feedback, App Links, densities); test both.
+> 12. Deep performance audit: iOS WKWebView and Android WebView separately;
+> startup, JS cost, memory, scrolling, animation, images, navigation,
+> background recovery; budget Android phones common in Nigeria; real devices
+> or clearly labelled emulation; startup and loading optimisation; memory and
+> resource management; budgets and before/after measurements; network and data
+> efficiency for slow Nigerian connections; separate final reports.
+> COMPLETE NATIVE MOBILE EXPERIENCE TRANSFORMATION: study the Hauslet and X
+> screenshots. Agent 1 is a UX research and recommendation lead producing 100+
+> grounded recommendations in 20 categories (navigation, native iOS, native
+> Android, notifications and feedback, offline, saving and collections,
+> property discovery, Vallo Stays, restaurants, messaging, booking management,
+> property publishing, forms, search and filtering, accounts and profiles,
+> onboarding and auth, loading and performance, visual design and animation,
+> accessibility, security and reliability), each with what, why, where, how and
+> layer, prioritised, and then responsible for seeing them implemented.
+> Global feedback system: polished top banners for every action ("Property
+> saved", "Message sent", "Booking confirmed", "Welcome to Vallo", "Your profile
+> has been updated"), wide, rounded, subtle border, icon, readable, smooth
+> in and out, below the status bar, safe areas, auto-dismiss, manual dismiss,
+> never blocking, queue or replace, specific messages, true failure messages
+> with retry ("Message couldn't be sent. Check your connection and try
+> again."), one central system on both platforms.
+> Native keyboard and typing: keep the system keyboard sound behaviour, never
+> add artificial sounds, respect system settings; better focus, scroll to
+> field, dismissal, Next and Done, search fields, paste, multiline, resizing;
+> the message composer stays above the keyboard.
+> Offline and connection: connected, slow, unstable, disconnected, reconnected;
+> no browser errors; saved and recently viewed content offline; "Saved on your
+> device. Price and availability may have changed."; never show cached prices
+> or availability as live; a polished offline screen with retry, saved content,
+> recent content, home; on reconnect refresh, retry safe requests, sync queued
+> actions without duplicates, tell people what succeeded; never auto-submit a
+> payment or booking.
+> Glass and premium containers used selectively (floating nav, panels, sheets,
+> some overlays, notifications), readable, with low-end Android fallbacks.
+> Icon system: thin, elegant, consistent line icons; subtle feedback and
+> haptics on taps, saves, tabs, menus, sends, bookings, filters, favourites;
+> respect reduced motion.
+> Bottom navigation: clear structure inspired by X's efficiency; not every
+> feature in the bar; badges; safe areas; no keyboard overlap; state kept;
+> deep links land correctly.
+> Property publishing and forms: Hauslet-quality progress, layout, labels,
+> borders, focus, validation, counters, description editing, photos, AI help,
+> save and continue, drafts, confirmations, undo; show what the AI changed and
+> allow undo; same standard for registration, profile, booking and reservation
+> forms.
+> Messages: immediate sending feedback, sending, sent and failed states, retry,
+> unread, clean lists, timestamps, typing, attachments, upload progress,
+> keyboard-aware composer, smooth scroll, empty states, offline handling; never
+> claim delivered when only queued.
+> Loading and startup: no five-second waits; splash, bridge, WebView, bundle,
+> session restore, API dependencies, first render; skeletons where they help;
+> progressive loading; measure before and after; no fake loading animations.
+> Accessibility and finishing details: font sizes, dynamic text, touch targets,
+> labels, contrast, reduced motion, form errors, focus, empty states, errors,
+> spacing, orientation, sizes and densities.
+> Implementation strategy in phases: audit, reference analysis,
+> recommendations, architecture, implementation, performance, testing, polish;
+> agents for UX, native, performance and offline, UI, QA, with one lead.
+> Final quality standard: premium, native, immediate, intuitive, clear,
+> consistent, offline-aware, good on budget Android, as polished as established
+> apps, nothing website-like. Keep Vallo's identity; do not copy Hauslet's or
+> X's branding, screens or assets. The finished product should feel like Vallo.
+>
+> [The founder's further instructions, after the brief:]
+>
+> First thing: remove the passcode from the first page of the platform to get
+> in, and remove the phone number from sign-up, like Hauslet did it (image 2):
+> verification is compulsory before making any deal. All of it clean. Videos
+> should work and cache like native iOS and Android. Use subagents for deeper
+> clean work. Re-audit in each work. All work on a new branch named platform
+> grade 1 readiness. Never use Vercel previews: everything stays in GitHub,
+> because previews cost real money and the budget is thin. The end goal is
+> Vallo better and cleaner on Android, iOS and the web. Do not change our
+> platform into theirs: take ideas from their screenshots, then elevate, add
+> ours, and be better in features, tools, positioning and UX, so they look like
+> the small platform in comparison, in flows and user friendliness, industry
+> standard for everyone. The end goal is launch readiness, without delaying
+> the App Store submission. Upgrade our docs in UX and UI beyond Hauslet's.
+> Make our identity attractive and more serious looking: wide platform glass
+> containers where they fit, clean, unified looks, bigger containers, prettier
+> areas. Think about our feed, the whole flow and vibe. Create an identity
+> feature for Vallo like Hauslet's Hausmates, with a unique name, legendary,
+> slick and high quality. Impress me. Arrange the platform properly: API,
+> pipeline, backend, frontend, uniform, like a project that had a proper PRD
+> before starting, covering everything we have, so every future addition just
+> makes it lovelier. More animations on pages, success pages and chats, more
+> motion in many areas. Frontend UX/UI more disciplined and clean, more pages,
+> 2030 generation. Every single page in the platform gets the uniform
+> enhancement, not too much, not too little, high end; Hauslet is the big
+> reference in UI, UX, approach and quality. Use the same type of map and flow
+> they use. Cleaner containers. In the support screenshots, support chat looks
+> like chatting with a normal person: add an AI assistant chat that users can
+> open like a normal chat, with a button inside that takes them to a real
+> support chat, clean and sharp, as an inner page inside the AI assistant, in
+> the messages inbox, permanently there even if no user-to-user chat exists.
+> Make the message composer like ChatGPT's bottom: slim input, voice message
+> icon, send button, in our users' chats too. Make the AI assistant and AI
+> support docs detailed and up to date with the new platform. Create in the
+> admin panel a support and business developer desk (I add them by their
+> account; tools and access to approve and review listings, onboard users met
+> in real life or online, fix issues, reply to support) and a social media
+> manager desk (upload everything a social media team of a platform this size
+> needs, premium AI access, support access and replies). Reporting of
+> listings, users, messages and transactions must reach the right desk. Rebuild
+> identity verification like Hauslet's but as an upgrade of ours, more 2030,
+> slick, clean, full step pages, sheets that rise from below or drop from
+> above, more fast, clean motion like native apps. Load the Supabase session and
+> approve things; same for Vercel, but nothing runs on Vercel until I say push
+> to main: all previews and fitting stay in the working branch. Users can react
+> to messages in chats, to voice notes, voice calls and video calls. More places
+> where Face ID is used when appropriate. The passcode is NOT on by default: you
+> can create an account, sign in and use the app without it; instead a small
+> dismissible alert at the top of the dashboard recommends it (essential, not
+> compulsory). Face ID where it is needed. Many more motions and animations, a
+> mascot for motion if possible (if a mascot is too hard, more moving, cleaner
+> motion), images of flows in the docs, and help pages that show users each
+> screen. Be specific and detailed so the next session does not scatter the
+> platform while claiming to upgrade it.
