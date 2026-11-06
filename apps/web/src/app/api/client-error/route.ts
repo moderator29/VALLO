@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { recordAlert } from "@/lib/alerts";
 import { reportError } from "@/lib/observability/report";
+import { scrubError } from "@/lib/observability/scrub";
 import { consume, ipFromHeaders, subjectForIp } from "@/lib/security/rate-limit";
 
 /**
@@ -132,6 +134,32 @@ export async function POST(request: Request): Promise<NextResponse> {
       componentStack: field(record.componentStack) || undefined,
     },
   });
+
+  /* A READABLE COPY ON THE ADMIN DESK (5 November 2026). With no SENTRY_DSN a
+     browser crash left only a reference on the person's screen and nothing the
+     team could read: the notification bell crashed on a founder's phone and the
+     cause could not be found. The scrubbed type, message and the top of the
+     stack are kept as an alert, found by the reference the screen showed.
+     Best effort, like everything here: a failure changes nothing for the caller. */
+  try {
+    const clean = scrubError(error);
+    const top = (clean.stack ?? "").split("\n").slice(0, 4).join(" | ");
+    await recordAlert({
+      kind: "client.error",
+      severity: "warning",
+      detail: {
+        type: clean.type,
+        text: clean.value.slice(0, 300),
+        stack_top: top.slice(0, 600),
+        where: area,
+        ref: field(record.digest, 80) || null,
+      },
+      subjectId: field(record.digest, 80) || undefined,
+      subjectKind: "client_error",
+    });
+  } catch {
+    // Nothing further to do: the report above already went to the reporter.
+  }
 
   return acknowledged;
 }
