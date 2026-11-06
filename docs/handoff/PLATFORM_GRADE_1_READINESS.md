@@ -561,7 +561,9 @@ project uccixoonmbhrnyczyigt). Before anything else:
    git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
    otherwise: git checkout -b platform-grade-1-readiness origin/main
 3. Read docs/handoff/PLATFORM_GRADE_1_READINESS.md completely, then
-   apps/web/AGENTS.md, then the docs it lists in section 3.
+   docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely (my full message,
+   word for word: it is the source of truth), then apps/web/AGENTS.md,
+   then the docs listed in section 3.
 4. Load the Supabase MCP tools and confirm you can query the project.
 5. Confirm apps/web/vercel.json switches Vercel deployments OFF for
    platform-grade-1-readiness. Never deploy to Vercel, never open previews,
@@ -585,7 +587,11 @@ group, and report in plain language after it.
 
 ---
 
-## APPENDIX A. THE FOUNDER'S OWN WORDS (FULL BRIEF)
+## APPENDIX A. THE FOUNDER'S OWN WORDS
+
+**The full message, word for word, is in `docs/handoff/FOUNDER_BRIEF_VERBATIM.md`. Read that file in full before starting; it wins over this summary.** Below is a condensed reading guide only.
+
+### Condensed reading guide
 
 The founder asked that the whole message be passed on. Em dashes in the
 original were replaced with colons to satisfy the repository's dash check;
