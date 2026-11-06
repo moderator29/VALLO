@@ -82,8 +82,13 @@
    viewer, and listing photographs and fonts joined the kept assets. v6 (13
    October 2026) when a kept page began answering at once, carrying the
    `data-vallo-kept` mark and a note of whether its assets are all on the
-   phone, and the hashed build output went cache first. */
-const CACHE_VERSION = "v7";
+   phone, and the hashed build output went cache first. v8 (6 November 2026):
+   a phone kept running the notification bell's OLD script for hours after the
+   fix was deployed, because a kept page copy (up to a week old) answers at
+   once with the script names it was kept with. Bumping the version makes the
+   activate step delete every kept page and script, so the next open takes the
+   deployed code. */
+const CACHE_VERSION = "v8";
 const SHELL_CACHE = `vallo-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `vallo-assets-${CACHE_VERSION}`;
 const IMAGE_CACHE = `vallo-images-${CACHE_VERSION}`;

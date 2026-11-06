@@ -313,6 +313,7 @@ const PUBLIC_API_PATHS = new Set([
   /* C2: a room's calendar for Airbnb or Booking.com to subscribe to. The
      64-character token in the query is the whole key; it returns dates only. */
   "/api/calendar/feed",
+  "/api/build",
   "/api/client-error",
   "/api/calls/webhook",
   "/api/cron/account-purge",

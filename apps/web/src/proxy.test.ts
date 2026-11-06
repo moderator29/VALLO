@@ -383,6 +383,9 @@ const EXPECTED_PUBLIC = new Set([
   "/api/auth/email-hook",
   /* A2: the Send SMS hook, signed, and off by default. */
   "/api/auth/sms-hook",
+  /* Which deploy is live, one opaque id, so a phone running an older copy of
+     the site can reload itself (lib/deploy/watch.ts). */
+  "/api/build",
   "/api/client-error",
   /* A12: RFC 8058 one-click unsubscribe, by signed token. A6: the
      first-party funnel beacon, rate limited, recording no person. */

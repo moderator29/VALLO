@@ -27,6 +27,7 @@ import { clientCopyOf } from "@/lib/i18n/client-copy-of";
 import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
 import { DetailsHost } from "@/components/ui/DetailsHost";
 import { ImageFallbackGuard } from "@/components/app/ImageFallbackGuard";
+import { DeployWatch } from "@/components/app/DeployWatch";
 
 /*
  * The fonts are declared in `css/fonts.css` and served from `public/fonts`,
@@ -544,6 +545,8 @@ export default async function RootLayout({
           <DetailsHost />
           {/* A failed picture becomes a quiet tile, never the browser's glyph. */}
           <ImageFallbackGuard />
+          {/* A phone still running an older deploy reloads itself once (lib/deploy/watch.ts). */}
+          <DeployWatch />
         </ClientCopyProvider>
         <ThresholdStage welcome={t.authFlow.welcomeThrough} />
       </body>

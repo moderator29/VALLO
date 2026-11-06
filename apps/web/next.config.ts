@@ -33,6 +33,8 @@ const supabaseImageHost = (() => {
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  /* The deploy this build belongs to, so a running page can tell when it is out of date (lib/deploy/watch.ts). */
+  env: { NEXT_PUBLIC_BUILD_ID: process.env.VERCEL_DEPLOYMENT_ID ?? "" },
   /* SEC-17: no `X-Powered-By: Next.js` on every response. */
   poweredByHeader: false,
 
