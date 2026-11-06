@@ -1,5 +1,11 @@
 # VALLO: PLATFORM GRADE 1 READINESS (HANDOFF)
 
+> **MAIN SOURCE OF TRUTH: `docs/handoff/FOUNDER_BRIEF_VERBATIM.md`.**
+> It is the founder's own message, word for word. Read it fully FIRST and
+> work from it. This handoff is support: repo facts, current state, patterns
+> and process. Wherever the two differ, or this file leaves something out,
+> the founder's brief wins. Re-read the brief at the start of every phase.
+
 Written 6 November 2026 by the session that shipped the 1.0.0 App Store
 release, the push entitlement fix, the bell crash fix and the deploy watcher.
 This is the brief for the next session. Read ALL of it before touching code.
@@ -560,10 +566,12 @@ project uccixoonmbhrnyczyigt). Before anything else:
    create the branch from the session branch instead:
    git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
    otherwise: git checkout -b platform-grade-1-readiness origin/main
-3. Read docs/handoff/PLATFORM_GRADE_1_READINESS.md completely, then
-   docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely (my full message,
-   word for word: it is the source of truth), then apps/web/AGENTS.md,
-   then the docs listed in section 3.
+3. FIRST read docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. It is my
+   full message, word for word, and it is your MAIN SOURCE OF TRUTH: work
+   from it, and where anything else differs, it wins. Then read
+   docs/handoff/PLATFORM_GRADE_1_READINESS.md (repo facts, state, patterns,
+   process), then apps/web/AGENTS.md, then the docs listed in its section 3.
+   Re-read my brief at the start of every phase.
 4. Load the Supabase MCP tools and confirm you can query the project.
 5. Confirm apps/web/vercel.json switches Vercel deployments OFF for
    platform-grade-1-readiness. Never deploy to Vercel, never open previews,
