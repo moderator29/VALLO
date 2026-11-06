@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { isInspectionHref } from "./live";
+import { ownChannelName } from "@/lib/supabase/channel-name";
 
 /**
  * THE OTHER SIDE MOVED: re-read without anybody pressing refresh.
@@ -35,7 +36,7 @@ export function InspectionsLive({ userId }: { userId: string | null }) {
     void loadBrowserClient().then((supabase) => {
       if (!live || !supabase) return;
       const channel = supabase
-        .channel(`inspections-${userId}`)
+        .channel(ownChannelName(`inspections-${userId}`))
         .on(
           "postgres_changes",
           { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` },

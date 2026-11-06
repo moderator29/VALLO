@@ -36,6 +36,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { isSupabaseConfigured } from "../supabase/env";
 import type { createClient } from "../supabase/client";
 import { unreadFromRows } from "./unread";
+import { ownChannelName } from "../supabase/channel-name";
 
 type Listener = () => void;
 
@@ -103,7 +104,7 @@ function start() {
       const supabase = client;
       void read();
       const channel = supabase
-        .channel("unread-conversations")
+        .channel(ownChannelName("unread-conversations"))
         .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
           refreshUnreadConversations();
         })

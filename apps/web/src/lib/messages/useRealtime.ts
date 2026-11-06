@@ -16,6 +16,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Database } from "../supabase/database.types";
 import { isSupabaseConfigured } from "../supabase/env";
 import { createClient } from "../supabase/client";
+import { ownChannelName } from "@/lib/supabase/channel-name";
 
 export type LiveMessageRow = Database["public"]["Tables"]["messages"]["Row"];
 export type LiveNotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
@@ -42,7 +43,7 @@ export function useThreadRealtime(
     if (!conversationId || !isSupabaseConfigured()) return;
     const supabase = createClient();
     const channel = supabase
-      .channel(`thread-${conversationId}`)
+      .channel(ownChannelName(`thread-${conversationId}`))
       .on(
         "postgres_changes",
         {
@@ -152,7 +153,7 @@ export function useNotificationsRealtime(
     if (!userId || !isSupabaseConfigured()) return;
     const supabase = createClient();
     const channel = supabase
-      .channel(`notifications-${userId}`)
+      .channel(ownChannelName(`notifications-${userId}`))
       .on(
         "postgres_changes",
         {
