@@ -17,12 +17,19 @@ import { looksNative } from "./platform";
 
 type Registry = { registerPlugin: <T>(name: string) => T; isPluginAvailable: (name: string) => boolean };
 
-async function plugin<T>(name: string): Promise<T | null> {
+/* A Capacitor plugin is a Proxy that THROWS when anything reads `.then` on it
+   ("Haptics.then() is not implemented on ios"). An async function that returns
+   one hands it to the promise machinery, which reads `.then`, so the promise
+   rejects and the caller never gets the plugin. It is therefore carried inside
+   a plain object, and only ever read out of it after the await. */
+type Held<T> = { readonly plugin: T };
+
+async function plugin<T>(name: string): Promise<Held<T> | null> {
   if (!looksNative()) return null;
   try {
     const { Capacitor } = (await import("@capacitor/core")) as unknown as { Capacitor: Registry };
     if (!Capacitor.isPluginAvailable(name)) return null;
-    return Capacitor.registerPlugin<T>(name);
+    return { plugin: Capacitor.registerPlugin<T>(name) };
   } catch {
     return null;
   }
@@ -42,8 +49,9 @@ export async function nativeShare(input: {
   text?: string;
   url?: string;
 }): Promise<"shared" | "cancelled" | "unhandled"> {
-  const share = await plugin<SharePlugin>("Share");
-  if (!share) return "unhandled";
+  const heldShare = await plugin<SharePlugin>("Share");
+  if (!heldShare) return "unhandled";
+  const share = heldShare.plugin;
   try {
     await share.share({ ...input, dialogTitle: "Share" });
     return "shared";
@@ -66,8 +74,9 @@ type HapticsPlugin = {
  * Returns true when the native engine took it.
  */
 export async function nativeHaptic(kind: "tap" | "success" | "warning" = "tap"): Promise<boolean> {
-  const haptics = await plugin<HapticsPlugin>("Haptics");
-  if (!haptics) return false;
+  const heldHaptics = await plugin<HapticsPlugin>("Haptics");
+  if (!heldHaptics) return false;
+  const haptics = heldHaptics.plugin;
   try {
     if (kind === "tap") await haptics.impact({ style: "LIGHT" });
     else await haptics.notification({ type: kind === "success" ? "SUCCESS" : "WARNING" });
@@ -103,8 +112,9 @@ export async function canCapturePhoto(): Promise<boolean> {
  * read back.
  */
 export async function capturePhoto(): Promise<File | null> {
-  const camera = await plugin<CameraPlugin>("Camera");
-  if (!camera) return null;
+  const heldCamera = await plugin<CameraPlugin>("Camera");
+  if (!heldCamera) return null;
+  const camera = heldCamera.plugin;
   try {
     const photo = await camera.getPhoto({
       quality: 85,

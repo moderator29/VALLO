@@ -30,11 +30,12 @@ function readMarker(): string | null {
   }
 }
 
-async function plugin(): Promise<WidgetPlugin | null> {
+/* Carried in an object: a Capacitor plugin throws when a promise reads `.then` on it. */
+async function plugin(): Promise<{ readonly plugin: WidgetPlugin } | null> {
   if (typeof window === "undefined" || !looksNative()) return null;
   const { Capacitor } = await import("@capacitor/core");
   if (!Capacitor.isNativePlatform() || !Capacitor.isPluginAvailable("ValloWidget")) return null;
-  return Capacitor.registerPlugin<WidgetPlugin>("ValloWidget");
+  return { plugin: Capacitor.registerPlugin<WidgetPlugin>("ValloWidget") };
 }
 
 /* The marker is "<user id>:<token id>": whose token, and which one. */
@@ -49,8 +50,9 @@ export async function handWidgetToken(
     /* The widget's token was revoked (a 401 for the widget): mint afresh. */
     if ((await live(markedToken).catch(() => null)) !== false) return "skipped";
   }
-  const widget = await plugin().catch(() => null);
-  if (!widget) return "skipped";
+  const heldWidget = await plugin().catch(() => null);
+  if (!heldWidget) return "skipped";
+  const widget = heldWidget.plugin;
   const minted = await mint().catch(() => ({ error: "failed" }));
   if (!("token" in minted)) return "skipped";
   try {
@@ -70,6 +72,6 @@ export async function forgetWidget(): Promise<void> {
   } catch {
     /* Nothing stored, nothing to drop. */
   }
-  const widget = await plugin().catch(() => null);
-  await widget?.clearToken?.().catch(() => undefined);
+  const heldWidget = await plugin().catch(() => null);
+  await heldWidget?.plugin.clearToken?.().catch(() => undefined);
 }

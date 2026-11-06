@@ -146,16 +146,19 @@ type HapticsPlugin = {
   notification(options: { type: string }): Promise<void>;
 };
 
-let nativeHaptics: HapticsPlugin | null | undefined;
+/* Held in an object: a Capacitor plugin throws when a promise reads `.then` on
+   it, and an async function that returns one does exactly that. */
+type HeldHaptics = { readonly plugin: HapticsPlugin } | null;
+let nativeHaptics: HeldHaptics | undefined;
 
 /* Resolved once, lazily, and only in the shell. `null` means "asked and the
    shell has no plugin", which is remembered so nothing is asked twice. */
-async function haptics(): Promise<HapticsPlugin | null> {
+async function haptics(): Promise<HeldHaptics> {
   if (nativeHaptics !== undefined) return nativeHaptics;
   try {
     const { Capacitor } = await import("@capacitor/core");
     nativeHaptics = Capacitor.isPluginAvailable("Haptics")
-      ? Capacitor.registerPlugin<HapticsPlugin>("Haptics")
+      ? { plugin: Capacitor.registerPlugin<HapticsPlugin>("Haptics") }
       : null;
   } catch {
     nativeHaptics = null;
@@ -209,7 +212,7 @@ export function feedback(kind: FeedbackKind): void {
     run(null);
     return;
   }
-  void haptics().then(run, () => run(null));
+  void haptics().then((held) => run(held ? held.plugin : null), () => run(null));
 }
 
 /**

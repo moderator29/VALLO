@@ -13,15 +13,28 @@ const seam = vi.hoisted(() => ({
   getPhoto: vi.fn(),
 }));
 
+/* Capacitor's plugins are Proxies that THROW when a promise reads `.then` on
+   them ("Haptics.then() is not implemented on ios"). The fakes behave the same
+   way, so any helper that resolves a promise WITH a plugin fails here as it did
+   on a phone (the Home screen crash of 6 November 2026). */
+function likeCapacitor<T extends object>(name: string, plugin: T): T {
+  return new Proxy(plugin, {
+    get(target, key, receiver) {
+      if (key === "then") throw new Error(`"${name}.then()" is not implemented on ios`);
+      return Reflect.get(target, key, receiver);
+    },
+  });
+}
+
 vi.mock("@capacitor/core", () => ({
   Capacitor: {
     isPluginAvailable: (name: string) => seam.available.has(name),
     registerPlugin: (name: string) =>
       name === "Share"
-        ? { share: seam.share }
+        ? likeCapacitor(name, { share: seam.share })
         : name === "Haptics"
-          ? { impact: seam.impact, notification: seam.notification }
-          : { getPhoto: seam.getPhoto },
+          ? likeCapacitor(name, { impact: seam.impact, notification: seam.notification })
+          : likeCapacitor(name, { getPhoto: seam.getPhoto }),
   },
 }));
 
