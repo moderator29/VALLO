@@ -131,3 +131,32 @@ gate would refuse (`verifyFirst`, read in `app/agent/list/page.tsx`).
 
 **The switch.** `feature_flags.listing_verification` set to false turns the
 gate off with no deploy (flags fail open: no row means on).
+
+## Grade 1, part 2 (7 November 2026): country, document, front and back
+
+The ID part of the flow is now three screens instead of one:
+
+1. **Which country issued your ID?** (`CountryPicker`): search, Popular
+   (Nigeria, Ghana), every country with its flag. Stored as
+   `agent_documents.issuing_country` (ISO alpha-2).
+2. **Which document will you use?** (`OptionCards`): Nigeria offers NIN slip or
+   card, international passport, driver's licence, permanent voter's card;
+   every other country offers passport, national ID card (`national_id`, a new
+   `document_subtype` value), driver's licence.
+3. **Photograph your ID** (`IdCapture`, once per side): a live rear camera with
+   a card guide and a rotate control, or Upload instead; then Check your
+   capture (Zoom in, Retake, Use photo). The back is required for a driver's
+   licence, a voter's card and a national ID card, optional for a NIN card,
+   never asked for a passport. Stored as `agent_documents.back_storage_path`
+   on the same row; the database refuses a back outside the uploader's folder.
+
+The review shows each photo with a Captured badge and Retake, the document and
+the country with Change, and a "Final step: nothing is sent yet" notice.
+
+**Reviewers.** "Identity at a glance" shows the back beside the front and the
+selfie, and the issuing country in the ID's caption. The back is streamed by
+the same staff-only route (`/api/documents/<id>?side=back`) and every view is
+written to the audit with `side: back`. The checklist names the back.
+
+**Migration.** `20261107143359_grade1_verification_country_and_back_of_id`
+(applied; additive and nullable).

@@ -552,5 +552,374 @@
     animation: none;
   }
 }
+
+/* OPTION CARDS (`components/ui/OptionCards.tsx`; references R18, R29). */
+.nf-g1-options {
+  display: grid;
+  gap: var(--nf-space-sm);
+}
+@media (min-width: 40rem) {
+  .nf-g1-options[data-columns="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.nf-g1-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "icon radio" "text text";
+  row-gap: var(--nf-space-sm);
+  padding: var(--nf-space-md);
+  /* A control at rest carries the brand edge, never a grey hairline (the
+     founder's ruling, check-css-tokens rule "dull controls"). */
+  border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--nf-duration-fast) var(--nf-ease-standard),
+    background-color var(--nf-duration-fast) var(--nf-ease-standard),
+    scale var(--nf-duration-press) var(--nf-ease-press);
+}
+.nf-g1-option:active {
+  scale: 0.99;
+}
+.nf-g1-option:has(:focus-visible) {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: 2px;
+}
+.nf-g1-option[data-on] {
+  border-color: var(--nf-brand-primary);
+  border-width: var(--nf-border-width-strong);
+  background: var(--nf-brand-tint-1);
+}
+.nf-g1-option__icon {
+  grid-area: icon;
+  color: var(--nf-content-primary);
+}
+.nf-g1-option[data-on] .nf-g1-option__icon {
+  color: var(--nf-brand-primary);
+}
+.nf-g1-option:not(:has(.nf-g1-option__icon)) {
+  grid-template-areas: "text radio";
+  align-items: center;
+}
+.nf-g1-option__text {
+  grid-area: text;
+  display: grid;
+  gap: var(--nf-space-3xs);
+}
+.nf-g1-option__label {
+  font-size: var(--nf-text-body);
+  font-weight: 600;
+}
+.nf-g1-option__detail {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.4;
+}
+.nf-g1-option__radio {
+  grid-area: radio;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: var(--nf-border-width-strong) solid var(--nf-act-mark-edge);
+  border-radius: var(--nf-radius-circle);
+}
+.nf-g1-option[data-on] .nf-g1-option__radio {
+  border: 0.4375rem solid var(--nf-brand-primary);
+  background: var(--nf-content-on-brand);
+}
+
+/* THE COUNTRY PICKER (reference R36). */
+.nf-g1-search {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  min-block-size: 3.25rem;
+  padding-inline: var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-md);
+  background: var(--nf-surface-inset);
+  color: var(--nf-content-secondary);
+}
+.nf-g1-search:focus-within {
+  border-color: var(--nf-brand-primary);
+}
+.nf-g1-search input {
+  flex: 1;
+  min-inline-size: 0;
+  background: transparent;
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body);
+  outline: none;
+}
+.nf-g1-countries {
+  display: grid;
+  gap: var(--nf-space-sm);
+}
+.nf-g1-countries__list {
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  padding-block: var(--nf-space-xs);
+}
+.nf-g1-countries__group {
+  padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-2xs);
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-overline);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nf-g1-countries__none {
+  padding: var(--nf-space-md);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-country {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--nf-space-sm);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  padding-inline: var(--nf-space-md);
+  text-align: start;
+}
+.nf-g1-country:active,
+.nf-g1-country[aria-pressed="true"] {
+  background: var(--nf-brand-tint-1);
+}
+.nf-g1-country__flag {
+  font-size: 1.375rem;
+  line-height: 1;
+}
+.nf-g1-country__name {
+  font-size: var(--nf-text-body);
+}
+.nf-g1-country__code {
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-caption);
+}
+.nf-g1-country__tick {
+  color: var(--nf-brand-primary);
+}
+
+/* ONE SIDE OF AN ID (`IdCapture`; references R37, R39). */
+.nf-g1-capture {
+  display: grid;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+}
+.nf-g1-capture__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-sm);
+}
+.nf-g1-capture__side {
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-capture__zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-2xs);
+  min-block-size: 2.75rem;
+  color: var(--nf-content-link);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-capture__stage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-inverse);
+}
+.nf-g1-capture__video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+/* The card guide: the ID-1 ratio (85.6 by 54mm), rotated for a vertical card. */
+.nf-g1-capture__guide {
+  position: absolute;
+  inset-inline: 8%;
+  inset-block-start: 50%;
+  aspect-ratio: 85.6 / 54;
+  translate: 0 -50%;
+  border: 2px solid var(--nf-content-on-media);
+  border-radius: var(--nf-radius-md);
+  box-shadow: 0 0 0 100vmax var(--nf-media-silhouette);
+}
+.nf-g1-capture__stage[data-vertical] .nf-g1-capture__guide {
+  inset-inline: auto;
+  inset-block: 6%;
+  left: 50%;
+  translate: -50% 0;
+  aspect-ratio: 54 / 85.6;
+}
+.nf-g1-capture__tip {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: var(--nf-space-sm);
+  color: var(--nf-content-on-media);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+  text-align: center;
+}
+.nf-g1-capture__shot,
+.nf-g1-capture__empty,
+.nf-g1-capture__file {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-inset);
+}
+.nf-g1-capture__shot img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+.nf-g1-capture__file {
+  gap: var(--nf-space-xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-capture__frame {
+  inline-size: 72%;
+  aspect-ratio: 85.6 / 54;
+  border: 2px dashed var(--nf-border-strong);
+  border-radius: var(--nf-radius-md);
+}
+.nf-g1-capture__check-title {
+  font-size: var(--nf-text-body);
+  font-weight: 600;
+}
+.nf-g1-capture__check-hint {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-capture__badge,
+.nf-g1-shot__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-2xs);
+  justify-self: start;
+  padding: var(--nf-space-3xs) var(--nf-space-xs);
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-state-success-surface);
+  color: var(--nf-state-success);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+}
+.nf-g1-capture__actions {
+  /* Clear of the step frame's sticky foot when scrolled into view. */
+  scroll-margin-block-end: 7rem;
+  display: grid;
+  gap: var(--nf-space-xs);
+  justify-items: center;
+}
+.nf-g1-capture__actions > * {
+  inline-size: 100%;
+}
+.nf-g1-capture__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--nf-space-xs);
+}
+.nf-g1-capture__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--nf-space-xs);
+}
+.nf-g1-capture__shutter {
+  justify-self: center;
+  inline-size: 4.5rem !important;
+  block-size: 4.5rem;
+  border: 4px solid var(--nf-content-primary);
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+  box-shadow: inset 0 0 0 3px var(--nf-surface-secondary);
+}
+.nf-g1-capture__shutter:active {
+  scale: var(--nf-press-scale-sm);
+}
+.nf-g1-capture__shutter:disabled {
+  opacity: 0.5;
+}
+.nf-g1-capture__optional {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-capture__error {
+  color: var(--nf-state-error);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-capture__zoomed {
+  overflow: auto;
+  touch-action: pinch-zoom pan-x pan-y;
+}
+.nf-g1-capture__zoomed img {
+  inline-size: 200%;
+  max-inline-size: none;
+}
+
+/* THE REVIEW'S PHOTOS (references R41, R42) and the final-step notice. */
+.nf-g1-shot {
+  display: grid;
+  gap: var(--nf-space-xs);
+  padding: var(--nf-space-sm) var(--nf-space-md);
+}
+.nf-g1-shot__label {
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-caption);
+}
+.nf-g1-shot__img {
+  inline-size: 100%;
+  max-block-size: 14rem;
+  object-fit: contain;
+  border-radius: var(--nf-radius-md);
+  background: var(--nf-surface-inset);
+}
+.nf-g1-shot__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-sm);
+}
+.nf-g1-shot__missing {
+  color: var(--nf-state-warning);
+  font-size: var(--nf-text-caption);
+}
+.nf-g1-final {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width-strong) solid var(--nf-border-strong);
+  border-radius: var(--nf-radius-xl);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-final__title {
+  display: block;
+  color: var(--nf-content-primary);
+  font-weight: 600;
+}
+.nf-g1-final__body {
+  display: block;
+}
 }
 

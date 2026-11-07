@@ -525,6 +525,8 @@ export type Database = {
       agent_documents: {
         Row: {
           application_id: string | null
+          back_storage_path: string | null
+          issuing_country: string | null
           id: string
           issued_on: string | null
           kind: string
@@ -541,6 +543,8 @@ export type Database = {
         }
         Insert: {
           application_id?: string | null
+          back_storage_path?: string | null
+          issuing_country?: string | null
           id?: string
           issued_on?: string | null
           kind: string
@@ -557,6 +561,8 @@ export type Database = {
         }
         Update: {
           application_id?: string | null
+          back_storage_path?: string | null
+          issuing_country?: string | null
           id?: string
           issued_on?: string | null
           kind?: string
@@ -18479,6 +18485,7 @@ export type Database = {
         | "drivers_licence"
         | "nin_card"
         | "voters_card"
+        | "national_id"
         | "utility_bill"
         | "bank_statement"
         | "tenancy_agreement"
@@ -18854,6 +18861,7 @@ export const Constants = {
         "drivers_licence",
         "nin_card",
         "voters_card",
+        "national_id",
         "utility_bill",
         "bank_statement",
         "tenancy_agreement",

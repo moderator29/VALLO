@@ -22,13 +22,26 @@ function newest(documents: readonly KycDocumentView[], kind: string): KycDocumen
   );
 }
 
-function Face({ doc, label, missing }: { doc: KycDocumentView | null; label: string; missing: string }) {
+function Face({
+  doc,
+  label,
+  missing,
+  side = "front",
+}: {
+  doc: KycDocumentView | null;
+  label: string;
+  missing: string;
+  /** Grade 1: the back of a two-sided ID, streamed by the same route. */
+  side?: "front" | "back";
+}) {
+  const media = side === "back" ? doc?.backMedia : doc?.media;
+  const src = side === "back" ? `/api/documents/${doc?.id}?side=back` : `/api/documents/${doc?.id}`;
   return (
     <figure className="grid gap-2xs" data-testid={`glance-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
       <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-secondary)]">
-        {doc && doc.media === "image" ? (
+        {doc && media === "image" ? (
           // eslint-disable-next-line @next/next/no-img-element -- streamed from our own origin behind staff auth, never optimised or cached
-          <img src={`/api/documents/${doc.id}`} alt={label} className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
+          <img src={src} alt={label} className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
         ) : (
           <p className="absolute inset-0 grid place-items-center p-sm text-center text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
             {doc ? "A PDF. Open it below to look at it." : missing}
@@ -53,7 +66,7 @@ function NameRow({ label, value, note }: { label: string; value: string | null; 
 }
 
 export const REVIEW_CHECKLIST: readonly string[] = [
-  "The ID is a real passport, driver's licence, NIN slip or card, or voter's card: a photo of the document itself, not a screenshot or a photo of a screen, with all four corners in view.",
+  "The ID is a real passport, driver's licence, NIN slip or card, voter's card, or another country's national ID card: the front and, for a card, the back, each a photo of the document itself, not a screenshot or a photo of a screen, with all four corners in view.",
   "It is not expired, and the photo, the name and the numbers are sharp, readable and not edited.",
   "The selfie is a live photo of a real face, not a photo of a photo, and it is the same person as the photo on the ID.",
   "The name on the ID is the name on the account. A different order or a missing middle name is fine; a different person is not.",
@@ -70,12 +83,13 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
     <section className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm" aria-label="Identity at a glance" data-testid="identity-at-a-glance">
       <h4 className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">Identity at a glance</h4>
       <div className="mt-xs grid max-w-md grid-cols-2 gap-sm">
-        <Face doc={id} label="Their ID" missing="No ID filed yet." />
+        <Face doc={id} label={id?.issuingCountry ? `Their ID (issued in ${id.issuingCountry})` : "Their ID"} missing="No ID filed yet." />
         <Face
           doc={selfie}
           label={selfie?.answersRequest ? "Their selfie holding the ID" : "Their selfie"}
           missing="No selfie. Older sign-ups came without one: approve on the ID only if its photo is clear, or book a video call."
         />
+        {id?.backMedia ? <Face doc={id} side="back" label="Back of their ID" missing="No back filed." /> : null}
       </div>
 
       <dl className="mt-sm grid grid-cols-1 gap-sm sm:grid-cols-2">

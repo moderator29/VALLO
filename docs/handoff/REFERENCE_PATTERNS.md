@@ -295,3 +295,101 @@ draft exists, then a green "Saved".
     one thing that blocks (verification) named there.
 17. **Help articles show the real screens** with the same demo data, and end
     with "What happens next" and a link straight into the flow.
+
+---
+
+## Batch 3 (7 November 2026, 16 images): the wizard's inner steps, the ID check, the agent dashboard
+
+Privacy: R37 to R42 show the founder's real NIN slip, face and number. Only
+the PATTERN is recorded here; no name, number, date or photo is copied.
+
+### R32. Rooms (step 7 of 12)
+Number chip grids, two rows of five, for Bedrooms and Bathrooms (1 to 10+),
+Toilets optional (0 to 9+), Floor area optional as a field with an "m2"
+suffix. Top bar: back, green "Saved", close. Vallo: the wizard's rooms step
+(group 3) uses the same chips on `OptionCards`' sibling, number chips.
+
+### R33. Move-in charges (step 9 of 12, a rental)
+Each charge a card with an X: amount field, a naira or "% of rent" switch, a
+Once / Yearly / Monthly segmented control; "Add another charge"; a tinted
+info card "A tenant pays to move in: N250,000 (one rental period plus these
+charges)". Vallo: the live move-in total is the headline of the step.
+
+### R34. Photos (step 10 of 12)
+Tinted info banner "Add 2 more photos, 1 ready", a grey "Photos ready" row,
+a grid with the cover crowned, a menu dot on each photo, a dashed add tile.
+
+### R35. The AI consent dialog
+A system-style alert naming the provider, exactly what is shared (titles,
+city, details, amenities, the text you choose), that it covers future uses on
+this device, how to withdraw (Profile, Privacy), "Only continue if you agree",
+Agree and continue / Keep editing manually. Vallo: the same honesty in a
+Vallo sheet (`lib/ai/consent.ts` already records consent), naming Vallo's
+actual provider.
+
+### R36. ID check: country (verify.hauslet.com in the in-app browser)
+A five-dot labelled stepper (Country, Document, Capture, Upload, Review), Back,
+"Which country issued your ID?", "This decides which documents we can accept
+and how your identity is checked", a search field, POPULAR (Nigeria, Ghana),
+ALL COUNTRIES with flags and codes, a disabled Continue until chosen, and
+"Protected by Hauslet . Your data is transmitted securely".
+**Vallo: BUILT (group 3).** `CountryPicker`, step 1 of the flow.
+
+### R37. "Check your capture" (capture 1 of 2)
+The photo large on a grey stage, "Front of document" with "Zoom in", the hint
+"Check every edge and all the text. Retake if anything is cut off, blurry or
+covered by glare", "Choose another file" and a strong "Use photo".
+**Vallo: BUILT.** `IdCapture`'s check moment.
+
+### R38. "Quick selfie check"
+"Center your face", an oval live camera, "Start video check", "Back to
+documents". Vallo already has the oval live selfie (`SelfieCapture`).
+
+### R39 and R40. "Review and submit"
+A seven-dot stepper all ticked to Review, a bordered notice "Final step,
+submission required: your documents are uploaded, but have not been submitted
+yet", document type and the ID number with Change, each photo (front, back)
+in a card with Zoom in, a green "Captured" badge and Retake, "Selfie check
+complete / Retake selfie", the primary "Submit for verification" and "Verification
+begins immediately once submitted".
+**Vallo: BUILT**, with one deliberate difference: Vallo never shows an ID
+number back on screen (Hauslet prints it in full).
+
+### R41. Personal information
+Big title, tabs (Basic information, Travel companions), rows: Legal name,
+Display name, Email (masked), Phone number(s) "Not provided" with why it is
+needed, ID verification "Not started", Residential address, Emergency
+contact, each with a grey "Edit / Change / Add / Start >" pill.
+Vallo: group 4, the account's personal information page in this shape, with
+ID verification and phone as rows (the place they live now that sign-up no
+longer asks).
+
+### R42 to R43. Agent Listings with one draft, and "Filter by status"
+A listing card (image placeholder, type label with a spark, title, Status
+"Draft", Published "Not Published"); a status filter sheet (All statuses, All
+good, Pending Review, Changes Required, Draft, Deactivated, Archived) with a
+tick on the chosen one.
+
+### R44 to R47. Agent dashboard
+Workspace pill "Personal, Vallo Spaces" with chevron, bell with a count;
+"Welcome back, Vallo!" with the date and "Customize"; a "Getting started"
+card, "2 of 4 complete", a progress bar, struck-through done rows with green
+ticks, open rows with an arrow (Add payout details, Verify your identity);
+quick action chips (Add listing, Applications, Find leads); "Overview." cards
+with counts and tiny status glyphs; "Needs attention. (4)" cards (Verify your
+identity, Set up a payout account with Set up / Dismiss / Snooze, Verify your
+phone number); "Workspace finances." cards (Next payout, Pending N0.00); a
+week strip calendar with a legend (Check-in, Check-out, Viewing, Rent due,
+Sales Closing, Move-in); a "Choose your bank" sheet with search and bank
+logos in round tiles.
+Vallo: group 4, the agent dashboard's "Getting started" and "Needs attention"
+cards fed by real state (phone, identity, payout, first listing), and the
+bank chooser sheet on the payout screen.
+
+### Patterns this batch adds
+18. A labelled stage stepper for a long check (Country, Document, Capture,
+    Review), next to the thin bar.
+19. Every photo of a document has its own Zoom in, Captured badge and Retake.
+20. A "Final step: nothing is sent yet" notice before the one button that sends.
+21. Task cards with inline actions (Do it / Dismiss / Snooze), counted in a
+    "Needs attention (N)" heading.

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  isCountryCode,
   CONSENTS,
   addressDateProblem,
   isSubtypeOf,
@@ -115,6 +116,16 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
     }
     if (!isSubtypeOf(kind, doc.subtype)) return { ok: false, message: FAILED };
   }
+  /* GRADE 1 (P0.3): the back of the ID, when there is one, under the same
+     rule as the front (the database checks the folder too, migration
+     20261107143359), and the issuing country as an ISO code or nothing. */
+  const identityDoc = submission.documents.identity;
+  const backPath = identityDoc?.backPath ?? null;
+  if (backPath !== null && (typeof backPath !== "string" || !backPath.startsWith(prefix) || backPath.includes(".."))) {
+    return { ok: false, message: NOT_YOURS };
+  }
+  const issuingCountry = identityDoc?.country ?? null;
+  if (issuingCountry !== null && !isCountryCode(issuingCountry)) return { ok: false, message: FAILED };
   /* The live selfie, under the same rule: the caller's own folder, a photo. */
   const selfie = submission.selfie;
   if (
@@ -214,6 +225,7 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
       issued_on: kind === "address" ? doc.issuedOn : null,
       storage_path: doc.path,
       supersedes_id: latestOf(kind),
+      ...(kind === "identity" ? { issuing_country: issuingCountry, back_storage_path: backPath } : {}),
     };
   });
   const selfieRow = {

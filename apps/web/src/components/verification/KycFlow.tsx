@@ -10,6 +10,10 @@ import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
 import { Icon3D } from "@/components/ui/Icon3D";
 import type { Icon3DName } from "@/components/ui/icon-3d";
 import { DocumentUploader } from "./DocumentUploader";
+import { IdCapture, type CapturedSide } from "./IdCapture";
+import { CountryPicker } from "./CountryPicker";
+import { countryName, flagOf } from "./countries";
+import { OptionCards } from "@/components/ui/OptionCards";
 import { SelfieCapture } from "./SelfieCapture";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
@@ -22,6 +26,9 @@ import {
   BUSINESS_SECTIONS,
   CONSENTS,
   addressDateIssue,
+  backRuleFor,
+  idTypesFor,
+  isCountryCode,
   isSubtypeOf,
   lagosToday,
   missingItems,
@@ -109,7 +116,13 @@ export function KycFlow({
   const [opened, setOpened] = useState(false);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [business, setBusiness] = useState<boolean | null>(null);
+  /* The proof of address. The ID is held as its parts below (Grade 1). */
   const [documents, setDocuments] = useState<Partial<Record<DocumentKind, KycDocument>>>({});
+  /* GRADE 1 (P0.3): the ID as country, document, front and back. */
+  const [idCountry, setIdCountry] = useState<string | null>(null);
+  const [idType, setIdType] = useState<string | null>(null);
+  const [front, setFront] = useState<CapturedSide | null>(null);
+  const [backSide, setBackSide] = useState<CapturedSide | null>(null);
   const [selfie, setSelfie] = useState<KycSelfie | null>(null);
   /* One storage folder per visit, so a replaced photo lands beside the one
      it replaces rather than in a new folder every time. */
@@ -130,8 +143,23 @@ export function KycFlow({
 
   const steps = stepsFor(business, askBusiness);
   const step = steps[Math.min(at, steps.length - 1)]!;
+  const backRule = backRuleFor(idType);
+  const identity: KycDocument | undefined = front
+    ? {
+        name: front.name,
+        size: front.size,
+        type: front.type,
+        path: front.path,
+        subtype: idType,
+        issuedOn: null,
+        country: idCountry,
+        backPath: backRule === "none" ? null : backSide?.path ?? null,
+        previewUrl: front.previewUrl,
+        backPreviewUrl: backRule === "none" ? null : backSide?.previewUrl ?? null,
+      }
+    : undefined;
   const submission: KycSubmission = {
-    documents,
+    documents: { ...documents, ...(identity ? { identity } : {}) },
     selfie,
     business: business === true,
     businessDetails,
@@ -167,8 +195,12 @@ export function KycFlow({
    */
   const canAdvance = (() => {
     switch (step.id) {
+      case "id-country":
+        return isCountryCode(idCountry);
+      case "id-type":
+        return isSubtypeOf("identity", idType);
       case "identity-document":
-        return Boolean(documents.identity) && isSubtypeOf("identity", documents.identity?.subtype);
+        return Boolean(front) && (backRule !== "required" || Boolean(backSide));
       case "selfie":
         return Boolean(selfie?.path);
       case "address-document":
@@ -214,9 +246,9 @@ export function KycFlow({
     setFailure(result.message);
   }
 
-  const gaps = missingItems(submission).map((item) => gapWords(item, copy));
+  const gaps = missingItems(submission).map((item) => gapWords(item, copy, flowCopy));
   const progress = copy.progress.replace("{n}", String(at + 1)).replace("{total}", String(steps.length));
-  const stepWords = copy.steps[step.id];
+  const stepWords = (flowCopy.steps as Partial<Record<StepId, { title: string; hint: string }>>)[step.id] ?? copy.steps[step.id as keyof typeof copy.steps];
 
   /* GRADE 1: the review's Change jumps straight back to that step. */
   const changeTo = (id: StepId) => {
@@ -224,7 +256,7 @@ export function KycFlow({
     if (index < 0) return undefined;
     return { label: flowCopy.change, run: () => { setDirection("back"); setAt(index); } };
   };
-  const startedAlready = at > 0 || Boolean(documents.identity) || Boolean(selfie);
+  const startedAlready = at > 0 || Boolean(front) || Boolean(selfie);
 
   /* ------------------------------------------------- the intro, on the page */
   if (!opened) {
@@ -262,7 +294,9 @@ export function KycFlow({
       eyebrow={flowCopy.eyebrows[step.id]}
       title={stepWords.title}
       subtitle={stepWords.hint}
-      art={<Icon3D name={STEP_ART[step.id]} size={56} priority />}
+      /* The section's object on its first screen only: on the inner screens the
+         room goes to the task (the capture's buttons stay in view). */
+      art={SECTION_OPENERS.has(step.id) ? <Icon3D name={STEP_ART[step.id]} size={56} priority /> : undefined}
       direction={direction}
       onBack={at > 0 ? back : undefined}
       backLabel={copy.back}
@@ -275,16 +309,42 @@ export function KycFlow({
       }
     >
       <div className="space-y-md">
-        {step.id === "identity-document" && (
-          <DocumentUploader
-            kind="identity"
-            copy={copy}
-            batchId={batchId}
-            file={documents.identity ?? null}
-            onChange={(file) =>
-              setDocuments((d) => ({ ...d, ...(file ? { identity: file } : { identity: undefined }) }))
-            }
+        {step.id === "id-country" && (
+          <CountryPicker
+            value={idCountry}
+            onChange={(code) => {
+              setIdCountry(code);
+              /* A document chosen for another country may not exist here. */
+              if (idType && !idTypesFor(code).some((t) => t.value === idType)) setIdType(null);
+            }}
+            words={flowCopy.country}
           />
+        )}
+
+        {step.id === "id-type" && (
+          <OptionCards
+            label={stepWords.title}
+            testId="id-type"
+            value={idType}
+            onChange={(value) => {
+              setIdType(value);
+              /* A passport has no back; drop one taken for a card. */
+              if (backRuleFor(value) === "none") setBackSide(null);
+            }}
+            options={idTypesFor(idCountry).map((t) => ({ value: t.value, label: t.label, detail: t.detail, icon: t.glyph }))}
+          />
+        )}
+
+        {step.id === "identity-document" && (
+          <>
+            <IdCapture side="front" batchId={batchId} value={front} onChange={setFront} words={flowCopy.capture} />
+            {backRule !== "none" && front ? (
+              <>
+                {backRule === "optional" ? <p className="nf-g1-capture__optional">{flowCopy.backOptional}</p> : null}
+                <IdCapture side="back" batchId={batchId} value={backSide} onChange={setBackSide} words={flowCopy.capture} />
+              </>
+            ) : null}
+          </>
         )}
 
         {step.id === "selfie" && (
@@ -447,7 +507,23 @@ export function KycFlow({
         {step.id === "review" && (
           <>
             <ul className="nf-panel nf-panel--card block divide-y divide-[var(--nf-divider)] p-0">
-              <ReviewRow label={copy.identityRow} value={documents.identity?.name ?? copy.missing} change={changeTo("identity-document")} />
+              <ReviewRow
+                label={flowCopy.review.document}
+                value={idType ? (idTypesFor(idCountry).find((t) => t.value === idType)?.label ?? copy.missing) : copy.missing}
+                change={changeTo("id-type")}
+              />
+              <ReviewRow
+                label={flowCopy.review.country}
+                value={idCountry ? `${flagOf(idCountry)} ${countryName(idCountry)}` : copy.missing}
+                change={changeTo("id-country")}
+              />
+              <ReviewShots
+                front={front}
+                back={backRule === "none" ? null : backSide}
+                words={flowCopy}
+                retake={changeTo("identity-document")}
+                missing={copy.missing}
+              />
               <ReviewRow label={copy.selfieRow} value={selfie ? copy.selfieTaken : copy.missing} change={changeTo("selfie")} />
               <ReviewRow label={copy.addressRow} value={documents.address?.name ?? copy.missing} change={changeTo("address-document")} />
               {askBusiness ? <ReviewRow label={copy.businessRow} value={business ? copy.yes : copy.no} change={changeTo("business-question")} /> : null}
@@ -461,6 +537,16 @@ export function KycFlow({
                 ))}
             </ul>
 
+            {/* Grade 1 (reference R41): the final-step notice. */}
+            {gaps.length === 0 ? (
+              <div className="nf-g1-final" role="note">
+                <UiIcon name="info" size={20} />
+                <span>
+                  <span className="nf-g1-final__title">{flowCopy.review.finalTitle}</span>
+                  <span className="nf-g1-final__body">{flowCopy.review.finalBody}</span>
+                </span>
+              </div>
+            ) : null}
             {/* Never "complete all required fields". The gaps are named. */}
             {gaps.length > 0 && (
               <div role="alert" className="nf-panel nf-panel--card block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)]">
@@ -485,6 +571,56 @@ export function KycFlow({
       </div>
 
     </StepFrame>
+  );
+}
+
+/**
+ * GRADE 1 (reference R41 and R42): the ID photos on the review, each with a
+ * "Captured" badge and Retake (which goes back to the capture step).
+ */
+function ReviewShots({
+  front,
+  back,
+  words,
+  retake,
+  missing,
+}: {
+  front: CapturedSide | null;
+  back: CapturedSide | null;
+  words: Dictionary["verifyFlow"];
+  retake: { label: string; run: () => void } | undefined;
+  missing: string;
+}) {
+  const shot = (side: CapturedSide | null, label: string) => (
+    <li className="nf-g1-shot">
+      <span className="nf-g1-shot__label">{label}</span>
+      {side?.previewUrl ? (
+        /* The person's own photo, as a local object URL on this device. */
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img className="nf-g1-shot__img" src={side.previewUrl} alt={label} />
+      ) : null}
+      <span className="nf-g1-shot__row">
+        {side ? (
+          <span className="nf-g1-shot__badge">
+            <UiIcon name="circle-check" size={16} />
+            {words.capture.captured}
+          </span>
+        ) : (
+          <span className="nf-g1-shot__missing">{missing}</span>
+        )}
+        {retake ? (
+          <button type="button" className="nf-g1-change" onClick={retake.run}>
+            {words.capture.retake}
+          </button>
+        ) : null}
+      </span>
+    </li>
+  );
+  return (
+    <>
+      {shot(front, words.capture.front)}
+      {back ? shot(back, words.capture.back) : null}
+    </>
   );
 }
 
@@ -525,7 +661,19 @@ function ReviewRow({
  * can plan around.
  */
 /** Each step's object: the ID, the home, the business, the consent. */
+/** The first screen of each section, which carries the section's object. */
+const SECTION_OPENERS: ReadonlySet<StepId> = new Set<StepId>([
+  "id-country",
+  "selfie",
+  "address-document",
+  "business-question",
+  "consent",
+  "review",
+]);
+
 const STEP_ART: Record<StepId, Icon3DName> = {
+  "id-country": "id-check",
+  "id-type": "id-check",
   "identity-document": "id-check",
   selfie: "camera",
   "address-document": "home-small",
@@ -587,12 +735,16 @@ function fieldWords(name: string, copy: KycCopy): { label: string; hint?: string
   return (copy.fields as Record<string, { label: string; hint?: string }>)[name] ?? { label: name };
 }
 
-function gapWords(item: MissingItem, copy: KycCopy): string {
+function gapWords(item: MissingItem, copy: KycCopy, flowCopy: Dictionary["verifyFlow"]): string {
   switch (item.kind) {
     case "document":
       return copy.documents[item.document].title;
     case "selfie":
       return copy.gapSelfie;
+    case "country":
+      return flowCopy.gaps.country;
+    case "back":
+      return flowCopy.gaps.back;
     case "which-id":
       return copy.gapWhichId;
     case "which-address":
