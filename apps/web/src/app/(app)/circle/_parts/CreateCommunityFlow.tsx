@@ -31,6 +31,7 @@ export function CreateCommunityFlow() {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the device draft is read after hydration, so server and first client render agree
       if (raw) setDraft({ ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) });
     } catch {
       /* No storage: start clean. */

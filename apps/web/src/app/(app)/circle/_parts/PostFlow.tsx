@@ -67,6 +67,7 @@ export function PostFlow({
   useEffect(() => {
     const kept = readDraft(key);
     if (kept && (kept.title || kept.body)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the device draft is read after hydration, so server and first client render agree
       setDraft((d) => ({ ...kept, communityId: presetCommunityId ?? kept.communityId ?? d.communityId }));
     }
   }, [key, presetCommunityId]);

@@ -25,7 +25,7 @@ export function CirclePostCard({ post, now }: { post: CirclePostView; now: numbe
       <span className="nf-circle-card__meta">
         <span>{post.author?.label ?? "Member"}</span>
         <span>{agoShort(post.createdAt, { now })}</span>
-        <span>{countWords(post.answers, ...(isQuestion ? C.answers : C.replies))}</span>
+        <span>{countWords(post.answers, ...(isQuestion ? C.answers : C.replies) as [string, string])}</span>
         {post.helpful > 0 ? <span>{countWords(post.helpful, ...C.helpful)}</span> : null}
       </span>
     </Link>

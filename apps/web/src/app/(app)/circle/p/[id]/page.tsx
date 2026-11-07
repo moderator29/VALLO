@@ -51,7 +51,7 @@ export default async function CircleThreadPage({ params }: Props) {
           <span className="nf-circle-card__meta">
             <span>{post.author?.label ?? "Member"}</span>
             <span>{agoShort(post.createdAt, { now })}</span>
-            <span>{countWords(post.answers, ...(question ? CIRCLE_COPY.card.answers : CIRCLE_COPY.card.replies))}</span>
+            <span>{countWords(post.answers, ...(question ? CIRCLE_COPY.card.answers : CIRCLE_COPY.card.replies) as [string, string])}</span>
           </span>
           {question && thread.signedIn && !thread.isAsker ? <span><FollowToggle questionId={post.id} initial={thread.following} /></span> : null}
         </article>

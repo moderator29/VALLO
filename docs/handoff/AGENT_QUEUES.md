@@ -30,7 +30,10 @@ agents never commit, push, deploy, open a preview or trigger Actions.
    founder said many pages get forgotten. Every page you pass you tick there
    in the same change (Frame, Light, Dark, 360, a note). A job is not done
    while a page it touched is unticked.
-8. **Hand-off after each job** is a short message to the lead (files
+8. **Every file saved in `apps/web/src` type-checks at all times.** Four
+   agents build from one tree, so one half-written file blocks everyone's
+   production build. Draft in your scratchpad, save to `src` when it compiles.
+9. **Hand-off after each job** is a short message to the lead (files
    changed, gates run with results, Also improved, Recommend next), then
    go straight on to the next job in your queue without waiting for a reply.
 
