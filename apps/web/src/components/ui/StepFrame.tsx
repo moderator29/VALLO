@@ -23,7 +23,8 @@ import { Button } from "@/components/ui/Button";
  *               line of subtitle
  *   content     the one question, sliding in from the side it came from
  *   bottom bar  "Step N of M" and the primary (Continue), sticky, above the
- *               home indicator and the keyboard (`--nf-keyboard-inset`)
+ *               home indicator, and on the keys when the keyboard is up
+ *               (the web view shrinks to the space above it, N3)
  *
  * It owns no data and no navigation: the flow decides what Back, Close and
  * Continue do. The save state is whatever the flow can TRULY say: "Saved"

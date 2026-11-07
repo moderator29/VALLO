@@ -407,7 +407,10 @@
 }
 .nf-g1step__foot {
   position: sticky;
-  bottom: var(--nf-keyboard-inset, 0px);
+  /* N3: the native keyboard shrinks the web view (`resize: "native"`,
+     chrome.css), so bottom 0 already sits on the keys. Lifting by
+     --nf-keyboard-inset as well floated Continue a keyboard above them. */
+  bottom: 0;
   z-index: var(--nf-z-sticky);
   display: flex;
   align-items: center;
@@ -416,6 +419,11 @@
   padding: var(--nf-space-sm) var(--nf-space-md) calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-sm));
   border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
   background: var(--nf-surface-canvas);
+}
+/* With the keyboard up the bottom of the view is the top of the keys, where
+   no home indicator lives: no safe-area padding wedged above them. */
+:root[data-keyboard="open"] .nf-g1step__foot {
+  padding-block-end: var(--nf-space-sm);
 }
 .nf-g1step__count {
   color: var(--nf-content-secondary);
