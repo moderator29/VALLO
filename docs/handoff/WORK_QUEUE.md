@@ -10,6 +10,32 @@ always on separate files. Every round ends with the lead's gates: tsc, eslint,
 the em dash and CSS checks, the touched tests, a production build and
 screenshots at 390 and 360 wide in light and dark.
 
+## THE TEAM (founder, 7 November 2026)
+
+Three at most, always on separate files:
+
+| Who | Owns | Queue |
+|---|---|---|
+| Lead (this session) | ALL native iOS and Android work (section 11 of the brief: status bar, safe areas, edge to edge, keyboard and window resize, Android back and predictive back, deep links and App Links, push speed, splash, lifecycle, haptics, permissions, WKWebView and Android WebView performance), plus coordination, review, gates and every commit | "Native" below |
+| Agent FE (frontend upgrade) | Every frontend page and shared component outside messages: banner sweep, PageFrame, StepFrame, sheets, empty and loading states, listing wizard, workspaces, admin desks, saved collections, Activity Centre, design consistency | Rounds 1 to 3, 5 to 7 |
+| Agent MSG (messages) | Messages only: the composer with the mic that becomes Send, voice notes, reactions, true delivery states, the pinned assistant with Talk to a person, support as an inner page | Round 4 |
+
+New frontend ideas from the founder go into Agent FE's queue with a clear
+brief; new native ideas go to the Lead. Hauslet screenshots are references
+for the JOB a screen does, never a design to copy: Vallo's version must look
+like Vallo and differ from theirs.
+
+## Native (Lead)
+- N1 push in seconds (pending SQL), N2 status bar per screen and theme, N3
+  keyboard: composer and step foot ride the keyboard, Android adjustResize,
+  N4 Android back and predictive back, N5 edge to edge and system bars on
+  Android, N6 deep links and App Links for listings, stays, restaurants,
+  bookings, threads and notifications (cold, warm, background), N7 haptics on
+  taps, saves, tabs, sends, N8 permissions asked only in context (camera,
+  location, microphone, notifications), N9 resume refresh (done), N10 startup
+  and WebView performance on budget Android and older iPhones, measured.
+- Native build queue (needs one planned 1.0.x build): see NATIVE_BUILD_QUEUE.md.
+
 ## Round 1: one feedback system, one sheet, smaller controls (IN PROGRESS)
 - DONE (lead): compact banner; 40 / 44 / 50px button ladder platform-wide;
   smaller step-screen type; every sheet gets a close X by default (SW3);
