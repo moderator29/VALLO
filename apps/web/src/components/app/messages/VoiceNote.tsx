@@ -67,6 +67,29 @@ export function VoiceNote({
   const [decoded, setDecoded] = useState<number[] | null>(null);
   const [failed, setFailed] = useState(false);
   const [rate, setRate] = useState<(typeof VOICE_RATES)[number]>(1);
+  /*
+   * GRADE 1 (job 9): THE LINK CHANGES, THE SOUND DOES NOT. A thread left open
+   * swaps in a fresh signed link before the old one runs out. Swapping an
+   * audio element's source restarts it, so a note that is playing keeps the
+   * link it is playing from and takes the new one the moment it is paused or
+   * ends; a paused note takes it at once and is put back where it was.
+   */
+  const [src, setSrc] = useState(note.url);
+  const [seenUrl, setSeenUrl] = useState(note.url);
+  const [restoreMs, setRestoreMs] = useState<number | null>(null);
+  if (note.url !== seenUrl) {
+    setSeenUrl(note.url);
+    if (!playing) {
+      setSrc(note.url);
+      setRestoreMs(position > 0 ? position : null);
+    }
+  }
+  /* Paused or ended with a newer link waiting: take it now. */
+  const adoptWaiting = (at: number) => {
+    if (src === note.url) return;
+    setSrc(note.url);
+    setRestoreMs(at > 0 ? at : null);
+  };
 
   const durationMs = note.durationMs ?? measured;
   const peaks = note.peaks && note.peaks.length > 0 ? note.peaks : decoded;
@@ -84,7 +107,7 @@ export function VoiceNote({
       observer.disconnect();
       void (async () => {
         try {
-          const res = await fetch(note.url);
+          const res = await fetch(src);
           const size = Number(res.headers.get("content-length") ?? 0);
           if (!res.ok || size > MAX_DECODE_BYTES) return;
           const bytes = await res.arrayBuffer();
@@ -111,7 +134,8 @@ export function VoiceNote({
       cancelled = true;
       observer.disconnect();
     };
-  }, [note.url, note.peaks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- decoded once, from the first link; a refreshed link is the same file
+  }, [note.peaks]);
 
   /* While it plays, the bars follow the sound every frame rather than at the
      four-a-second pace of `timeupdate`, so the played colour sweeps. */
@@ -228,18 +252,28 @@ export function VoiceNote({
 
       <audio
         ref={audioRef}
-        src={note.url}
+        src={src}
         preload="metadata"
+        data-testid="voice-audio"
         onLoadedMetadata={(e) => {
           const seconds = e.currentTarget.duration;
           if (Number.isFinite(seconds)) setMeasured(Math.round(seconds * 1000));
+          if (restoreMs !== null) {
+            e.currentTarget.currentTime = restoreMs / 1000;
+            e.currentTarget.playbackRate = rate;
+            setRestoreMs(null);
+          }
         }}
         onTimeUpdate={(e) => setPosition(Math.round(e.currentTarget.currentTime * 1000))}
         onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        onPause={(e) => {
+          setPlaying(false);
+          if (!e.currentTarget.ended) adoptWaiting(Math.round(e.currentTarget.currentTime * 1000));
+        }}
         onEnded={() => {
           setPlaying(false);
           setPosition(0);
+          adoptWaiting(0);
         }}
         onError={() => setFailed(true)}
       />

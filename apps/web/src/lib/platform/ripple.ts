@@ -35,9 +35,9 @@
 
 export type Box = { left: number; top: number; width: number; height: number };
 export type RippleGeometry = {
-  /** The layer: the pressed control's box, cut to what is on screen. */
-  host: Box;
-  /** The ink circle, in the host's coordinates: its centre and diameter. */
+  /** The pressed control's box, in viewport coordinates. */
+  box: Box;
+  /** The ink circle, in the box's coordinates: its centre and diameter. */
   ink: { x: number; y: number; size: number };
   /** Icon buttons and other small round controls: a centred circle. */
   round: boolean;
@@ -47,8 +47,9 @@ export type RippleGeometry = {
 export const PRESS_DELAY_MS = 80;
 /** Movement that turns a press into a drag (Android's touch slop is 8dp). */
 export const SLOP_PX = 10;
-/** The pressed tint at its height, over the control's own text colour. */
-export const INK_OPACITY = 0.14;
+/** The pressed tint at its height, over the control's own text colour: a
+    little stronger on the night theme, where a dark screen swallows it. */
+export const INK_OPACITY = { night: 0.14, day: 0.1 } as const;
 /** A control bigger than this share of the screen is a surface, not a control. */
 const MAX_AREA_SHARE = 0.7;
 /** Small and square: an icon button, a round avatar control. */
@@ -56,6 +57,8 @@ const ROUND_MAX_PX = 56;
 const ROUND_ASPECT_SLACK_PX = 8;
 /** A tap that lifts at once still shows its ink for at least this long. */
 const MIN_VISIBLE_MS = 140;
+/** How far up the tree a rounded card that clips the control is looked for. */
+const CLIP_SEARCH_DEPTH = 4;
 
 /** What takes a ripple. The nearest one to the finger wins. */
 export const RIPPLE_TARGETS =
@@ -73,29 +76,23 @@ const RIPPLE_EXCLUDED_INSIDE = '.nf-tabbar, [data-ripple="none"]';
 export function rippleGeometry(rect: Box, point: { x: number; y: number }, viewport: { width: number; height: number }): RippleGeometry | null {
   if (rect.width <= 0 || rect.height <= 0) return null;
   if (rect.width * rect.height > viewport.width * viewport.height * MAX_AREA_SHARE) return null;
-
-  const left = Math.max(rect.left, 0);
-  const top = Math.max(rect.top, 0);
-  const right = Math.min(rect.left + rect.width, viewport.width);
-  const bottom = Math.min(rect.top + rect.height, viewport.height);
-  if (right <= left || bottom <= top) return null;
-  const host = { left, top, width: right - left, height: bottom - top };
+  const onScreen =
+    rect.left < viewport.width && rect.top < viewport.height && rect.left + rect.width > 0 && rect.top + rect.height > 0;
+  if (!onScreen) return null;
 
   const round =
     rect.width <= ROUND_MAX_PX && rect.height <= ROUND_MAX_PX && Math.abs(rect.width - rect.height) <= ROUND_ASPECT_SLACK_PX;
   if (round) {
-    return {
-      host,
-      ink: { x: rect.left + rect.width / 2 - left, y: rect.top + rect.height / 2 - top, size: Math.max(rect.width, rect.height) },
-      round,
-    };
+    return { box: rect, ink: { x: rect.width / 2, y: rect.height / 2, size: Math.max(rect.width, rect.height) }, round };
   }
 
   /* From under the finger, large enough to reach the farthest corner. */
-  const x = Math.min(Math.max(point.x, left), right) - left;
-  const y = Math.min(Math.max(point.y, top), bottom) - top;
-  const reach = Math.max(Math.hypot(x, y), Math.hypot(host.width - x, y), Math.hypot(x, host.height - y), Math.hypot(host.width - x, host.height - y));
-  return { host, ink: { x, y, size: Math.ceil(reach * 2) }, round };
+  const x = Math.min(Math.max(point.x - rect.left, 0), rect.width);
+  const y = Math.min(Math.max(point.y - rect.top, 0), rect.height);
+  const w = rect.width;
+  const h = rect.height;
+  const reach = Math.max(Math.hypot(x, y), Math.hypot(w - x, y), Math.hypot(x, h - y), Math.hypot(w - x, h - y));
+  return { box: rect, ink: { x, y, size: Math.ceil(reach * 2) }, round };
 }
 
 /** How long the ink takes to spread: a touch longer across a wide card than a chip. */
@@ -123,6 +120,26 @@ function quietMotion(reduced: MediaQueryList | null): boolean {
   return level === "calm" || level === "off" || reduced?.matches === true;
 }
 
+/** The nearest rounded ancestor that clips this control (a grouped card
+    around its rows), so the ink is cut to the card's corners too. */
+function clippingCard(el: HTMLElement): { rect: DOMRect; radius: string } | null {
+  let node = el.parentElement;
+  for (let depth = 0; node && depth < CLIP_SEARCH_DEPTH; depth += 1, node = node.parentElement) {
+    const cs = getComputedStyle(node);
+    const clips = cs.overflowX !== "visible" || cs.overflowY !== "visible";
+    if (clips && cs.borderRadius && cs.borderRadius !== "0px") return { rect: node.getBoundingClientRect(), radius: cs.borderRadius };
+    if (clips) return null;
+  }
+  return null;
+}
+
+function layer(className: string, box: Box, radius: string, position: "fixed" | "absolute"): HTMLElement {
+  const el = document.createElement(className === "nf-ripple" ? "div" : "span");
+  el.className = className;
+  el.style.cssText = `position:${position};left:${box.left}px;top:${box.top}px;width:${box.width}px;height:${box.height}px;border-radius:${radius}`;
+  return el;
+}
+
 function draw(target: HTMLElement, point: { x: number; y: number }, reduced: MediaQueryList | null): Live | null {
   const r = target.getBoundingClientRect();
   const geometry = rippleGeometry(
@@ -136,36 +153,48 @@ function draw(target: HTMLElement, point: { x: number; y: number }, reduced: Med
      the shape the reader sees, so it keeps the shared tint only. */
   if (style.display === "inline") return null;
 
-  const host = document.createElement("div");
-  host.className = "nf-ripple";
+  const radius = geometry.round ? "50%" : style.borderRadius || "0";
+  const card = geometry.round ? null : clippingCard(target);
+  const box = geometry.box;
+  let host: HTMLElement;
+  let frame: HTMLElement;
+  if (card) {
+    /* Two layers: the card's corners, then the control's own box inside it. */
+    const c = card.rect;
+    host = layer("nf-ripple", { left: c.left, top: c.top, width: c.width, height: c.height }, card.radius, "fixed");
+    frame = layer("nf-ripple__frame", { left: box.left - c.left, top: box.top - c.top, width: box.width, height: box.height }, radius, "absolute");
+    host.appendChild(frame);
+  } else {
+    host = layer("nf-ripple", box, radius, "fixed");
+    frame = host;
+  }
   host.setAttribute("aria-hidden", "true");
-  const { left, top, width, height } = geometry.host;
-  host.style.cssText = `left:${left}px;top:${top}px;width:${width}px;height:${height}px;border-radius:${geometry.round ? "50%" : style.borderRadius || "0"}`;
 
   const ink = document.createElement("span");
   ink.className = "nf-ripple__ink";
   const still = quietMotion(reduced);
-  const size = still ? Math.ceil(Math.hypot(width, height)) * 2 : geometry.ink.size;
-  const cx = still ? width / 2 : geometry.ink.x;
-  const cy = still ? height / 2 : geometry.ink.y;
+  const size = still ? Math.ceil(Math.hypot(box.width, box.height)) * 2 : geometry.ink.size;
+  const cx = still ? box.width / 2 : geometry.ink.x;
+  const cy = still ? box.height / 2 : geometry.ink.y;
   ink.style.cssText = `width:${size}px;height:${size}px;left:${cx - size / 2}px;top:${cy - size / 2}px;background-color:${style.color}`;
-  host.appendChild(ink);
+  frame.appendChild(ink);
   document.body.appendChild(host);
 
+  const peak = document.documentElement.dataset.theme === "light" ? INK_OPACITY.day : INK_OPACITY.night;
   try {
     if (still) {
-      ink.animate([{ opacity: 0 }, { opacity: INK_OPACITY }], { duration: 1, fill: "forwards" });
+      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 1, fill: "forwards" });
     } else {
       ink.animate([{ transform: "scale(0.12)" }, { transform: "scale(1)" }], {
         duration: spreadMs(size),
         easing: "cubic-bezier(0.2, 0, 0, 1)",
         fill: "forwards",
       });
-      ink.animate([{ opacity: 0 }, { opacity: INK_OPACITY }], { duration: 75, easing: "linear", fill: "forwards" });
+      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 75, easing: "linear", fill: "forwards" });
     }
   } catch {
     /* No Web Animations: the ink shows at its resting style and still goes. */
-    ink.style.opacity = String(INK_OPACITY);
+    ink.style.opacity = String(peak);
   }
   return { host, ink, shownAt: performance.now(), still };
 }

@@ -5,7 +5,8 @@ import { BackButton } from "@/components/site/BackButton";
 import { CreateBloom } from "@/components/social/bloom/CreateBloom";
 import { ComposeButton } from "@/components/social/feed/ComposeButton";
 import { Feed } from "@/components/social/feed/Feed";
-import { FeedTabs, isFeedTab, liveTab } from "@/components/social/feed/FeedMasthead";
+import { FeedLenses, FeedTabs, isFeedTab, liveTab } from "@/components/social/feed/FeedMasthead";
+import LoadingAround from "@/app/(app)/around/loading";
 import { LocationChip } from "@/components/social/feed/LocationChip";
 import { StoryRing } from "@/components/social/feed/StoryRing";
 import { PeopleRail, WhoToFollow } from "@/components/social/follow/WhoToFollow";
@@ -37,6 +38,7 @@ import {
  *   ?view=people         the people page, sections and list
  *   ?view=search         the people page with a search typed
  *   ?view=people-empty   the people page with no data (every row hidden)
+ *   ?view=loading        the feed's skeleton, in the feed's own shape
  *
  * The live routes are the Around page, its people page and the new-story page
  * under `app/(app)`. Nothing here ships and every proof taken from it is
@@ -104,6 +106,8 @@ export default async function FeedV2Harness({
             />
           </PeopleFinder>
         </div>
+      ) : view === "loading" ? (
+        <LoadingAround />
       ) : view === "story" ? (
         <div className="mx-auto w-full max-w-2xl pb-4xl pt-md">
           <PageHeader title={t.experienceSocial.newStory.title} subtitle={t.experienceSocial.newStory.lede} fallback="/around" />
@@ -115,37 +119,44 @@ export default async function FeedV2Harness({
           />
         </div>
       ) : (
-        <div className="nf-fv2-page pt-sm" style={{ paddingBottom: "var(--nf-tabbar-clearance)" }} data-testid="around-feed">
+        <div className="nf-fv2-page" style={{ paddingBottom: "var(--nf-tabbar-clearance)" }} data-testid="around-feed">
           <h1 className="sr-only">{t.nav.around}</h1>
           <div className="nf-fv2-grid">
             <div className="nf-fv2-main">
               <div className="nf-fv2-bar">
-                <BackButton fallback="/home" />
-                <LocationChip
-                  place="Lekki, Lagos"
-                  places={FEED_PLACES}
-                  currentSlug={null}
-                  signedIn
-                  copy={{
-                    label: t.social.locationLabel,
-                    allPlaces: t.social.allPlaces,
-                    changePlace: t.social.changePlace,
-                    pickPlaces: t.social.pickPlaces,
-                    signIn: t.common.signIn,
-                  }}
-                />
+                <BackButton fallback="/home" surface="round" />
+                <FeedLenses t={t} />
                 <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople}>
                   <UiIcon name="search" size={20} />
                 </Link>
-                <ComposeButton label={words.writePost} />
               </div>
+              <div className="nf-lens-track">
+              <div className="nf-lens-pane" data-lens="around">
               <StoryRing
                 stories={FEED_STORIES}
                 yourStoryLabel={words.yourStory}
                 storiesLabel={words.storiesLabel}
                 addStoryLabel={words.addStory}
               />
-              <FeedTabs active={tab} t={t} />
+              <ComposeButton label={words.writePost} prompt={words.composePrompt} you={YOU} />
+              <div className="nf-fv2-filter">
+                <FeedTabs active={tab} t={t} />
+                <div className="nf-fv2-filter__place">
+                  <LocationChip
+                    place="Lekki, Lagos"
+                    places={FEED_PLACES}
+                    currentSlug={null}
+                    signedIn
+                    copy={{
+                      label: t.social.locationLabel,
+                      allPlaces: t.social.allPlaces,
+                      changePlace: t.social.changePlace,
+                      pickPlaces: t.social.pickPlaces,
+                      signIn: t.common.signIn,
+                    }}
+                  />
+                </div>
+              </div>
               <section>
                 <Feed
                   initial={view === "friends-empty" ? [] : friends ? POSTS.slice(0, 3) : POSTS}
@@ -160,6 +171,8 @@ export default async function FeedV2Harness({
                   emptyAction={{ href: "/around/people", label: words.emptyFriendsAction }}
                 />
               </section>
+              </div>
+              </div>
             </div>
             <aside className="nf-fv2-rail" aria-label={words.railTitle}>
               <PeopleRail people={FOLLOW_SAMPLE} signedIn title={words.railTitle} seeAll={words.railSeeAll} />

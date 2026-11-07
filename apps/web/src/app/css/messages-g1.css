@@ -327,11 +327,28 @@
     border-start-start-radius: var(--nf-radius-sm);
   }
 
+  /* ------------------------------ the support conversation (job 10) */
+
+  /* The ticket thread on the Messages rhythm: rows a step apart, a run
+     tight, the team's headset in the avatar's place on the brand tint. */
+  .nf-support-thread {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nf-gap-row);
+  }
+  .nf-support-thread > .nf-msg--cont {
+    margin-block-start: calc(var(--nf-space-3xs) - var(--nf-gap-row));
+  }
+  .nf-support-avatar {
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
   /* ---------------------------------------------------- the day, a chip */
 
   /* The day rides at the top of the thread while its messages scroll under
      it, a small soft rectangle rather than a rule across the screen. */
-  .nf-thread__scroll .nf-divider-day {
+  :is(.nf-thread__scroll, .nf-support-thread) .nf-divider-day {
     position: sticky;
     inset-block-start: var(--nf-space-2xs);
     z-index: 2;
@@ -340,11 +357,11 @@
     margin-block: var(--nf-space-xs);
     pointer-events: none;
   }
-  .nf-thread__scroll .nf-divider-day::before,
-  .nf-thread__scroll .nf-divider-day::after {
+  :is(.nf-thread__scroll, .nf-support-thread) .nf-divider-day::before,
+  :is(.nf-thread__scroll, .nf-support-thread) .nf-divider-day::after {
     display: none;
   }
-  .nf-thread__scroll .nf-divider-day > span {
+  :is(.nf-thread__scroll, .nf-support-thread) .nf-divider-day > span {
     padding: var(--nf-space-3xs) var(--nf-space-sm);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     border-radius: var(--nf-radius-sm);
@@ -486,19 +503,28 @@
 
   /* ------------------------------------------------ the inbox, polished */
 
-  /* A row's swipe actions (`InboxSwipe`): the row slides left over them. */
+  /*
+   * A row's swipe actions (`InboxSwipe`): the row slides left over them. At
+   * rest the wrapper paints nothing, so a row looks exactly like its
+   * neighbours and the list card's own edges and corners clip it; the
+   * actions and the row's opaque surface exist only while it moves or is
+   * open.
+   */
   .nf-inbox-swipe {
     position: relative;
     flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
-    border-radius: var(--nf-radius-lg);
   }
   .nf-inbox-swipe__actions {
     position: absolute;
     inset-block: 0;
     inset-inline-end: 0;
     display: flex;
+    visibility: hidden;
+  }
+  .nf-inbox-swipe[data-active] .nf-inbox-swipe__actions {
+    visibility: visible;
   }
   .nf-inbox-swipe__action {
     flex: 1 1 0;
@@ -517,15 +543,27 @@
   }
   .nf-inbox-swipe__row {
     position: relative;
-    background: var(--nf-surface-canvas);
     touch-action: pan-y;
     transition: transform var(--nf-duration-base) var(--nf-ease-entrance);
+  }
+  .nf-inbox-swipe[data-active] .nf-inbox-swipe__row {
+    background: var(--nf-surface-elevated);
   }
   .nf-inbox-swipe__row[data-dragging] {
     transition: none;
   }
   .nf-inbox-swipe__row > .nf-inbox-row {
     inline-size: 100%;
+  }
+
+  /* An unread conversation: the whole row, edge to edge inside the list card
+     (which clips it to its corners), on the brand tint the selected option
+     cards use, never a grey slab. */
+  .nf-inbox-list > li:has(> .nf-inbox-swipe [data-unread], > [data-unread]) {
+    background: var(--nf-brand-tint-1);
+  }
+  .nf-inbox-list > li:has(> .nf-inbox-swipe [data-unread], > [data-unread]) .nf-inbox-swipe[data-active] .nf-inbox-swipe__row {
+    background: linear-gradient(var(--nf-brand-tint-1), var(--nf-brand-tint-1)), var(--nf-surface-elevated);
   }
 
   /* A conversation with the support team (R70): the assistant's tile, and a

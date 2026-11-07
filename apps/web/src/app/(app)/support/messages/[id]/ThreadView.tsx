@@ -23,7 +23,7 @@ import { StatusTrack } from "@/components/app/status/StatusTrack";
 import { ticketTrack, type TicketStepKey } from "@/components/app/status/tracks";
 import { ReplyBox } from "./ReplyBox";
 import { RateResolution, ReopenTicket, ResolveButton } from "./TicketActions";
-import { IconPlate } from "@/components/ui/IconPlate";
+import { linkify } from "@/components/app/messages/linkify";
 
 type ThreadWords = ReturnType<typeof getDictionary>["experienceInbox"]["support"]["thread"];
 
@@ -78,10 +78,30 @@ function Photos({ items, w }: { items: TicketAttachment[]; w: ThreadWords }) {
   );
 }
 
+/** A message's words, any web address drawn as a link that opens outside the app. */
+function Words({ text }: { text: string }) {
+  return (
+    <>
+      {linkify(text).map((part, i) =>
+        part.kind === "link" ? (
+          <a key={i} href={part.href} target="_blank" rel="noopener noreferrer nofollow ugc" className="nf-bubble__link">
+            {part.label}
+          </a>
+        ) : (
+          <Fragment key={i}>{part.text}</Fragment>
+        ),
+      )}
+    </>
+  );
+}
+
 /**
- * A support message, on the same two materials as every other thread
- * (`.nf-bubble--mine` the lit primary, `.nf-bubble--theirs` the blue glass), so
- * a conversation with the team reads as a conversation and not as a form.
+ * A support message, drawn as Messages draws one (Grade 1, job 10): the same
+ * row (`.nf-msg`), the same two materials (`.nf-bubble--mine` the lit
+ * primary, `.nf-bubble--theirs` the blue glass), the support team's headset
+ * where a person's photo would be, and who and when in the small muted line
+ * under the bubble. A run from one side sits together (`data-run`), so a
+ * conversation with the team reads as one product with the inbox.
  */
 function Bubble({
   message,
@@ -89,42 +109,64 @@ function Bubble({
   photos,
   youLabel,
   w,
+  run = "single",
 }: {
   message: Pick<TicketMessage, "senderRole" | "body" | "staffName">;
   at: string;
   photos: TicketAttachment[];
   youLabel: string;
   w: ThreadWords;
+  run?: "single" | "first" | "middle" | "last";
 }) {
-  if (message.senderRole === "user") {
-    return (
-      <li className="flex flex-col items-end gap-3xs">
-        <div className="nf-bubble nf-bubble--mine max-w-[85%]">
-          <p className="nf-bubble__body break-words">{message.body}</p>
-          <Photos items={photos} w={w} />
-        </div>
-        <span className="nf-caption text-[var(--nf-content-muted)]">
-          {youLabel} · <span className="nf-numeric">{at}</span>
-        </span>
-      </li>
-    );
-  }
+  const mine = message.senderRole === "user";
+  const continues = run === "middle" || run === "last";
+  const endsRun = run === "single" || run === "last";
   return (
-    <li className="flex flex-col items-start gap-3xs" data-testid="support-reply-admin">
-      <div className="flex max-w-[85%] items-end gap-row">
-        <IconPlate size="sm" shape="round" tone="brand" className="shrink-0">
-          <UiIcon name="headset" size={20} />
-        </IconPlate>
-        <div className="nf-bubble nf-bubble--theirs min-w-0">
-          <p className="nf-bubble__body break-words">{message.body}</p>
+    <li
+      className={`nf-msg${mine ? " nf-msg--mine" : ""}${continues ? " nf-msg--cont" : ""}`}
+      data-run={run}
+      {...(mine ? {} : { "data-testid": "support-reply-admin" })}
+    >
+      {mine ? null : (
+        <span className="nf-msg__avatar nf-support-avatar" aria-hidden="true">
+          <UiIcon name="headset" size={18} />
+        </span>
+      )}
+      <div className="nf-msg__stack">
+        <div className={`nf-bubble ${mine ? "nf-bubble--mine" : "nf-bubble--theirs"}`}>
+          <p className="nf-bubble__body break-words">
+            <Words text={message.body} />
+          </p>
           <Photos items={photos} w={w} />
         </div>
+        {endsRun ? (
+          <p className="nf-msg__status">
+            <span>{mine ? youLabel : staffByline(message.staffName, w)}</span>
+            <span aria-hidden="true">·</span>
+            <span className="nf-numeric">{at}</span>
+          </p>
+        ) : (
+          <span className="sr-only">
+            {mine ? youLabel : staffByline(message.staffName, w)}, {at}
+          </span>
+        )}
       </div>
-      <span className="nf-caption ps-[calc(2.25rem+var(--nf-gap-row))] text-[var(--nf-content-muted)]">
-        {staffByline(message.staffName, w)} · <span className="nf-numeric">{at}</span>
-      </span>
     </li>
   );
+}
+
+/** Where each message sits in its run: one side, a few minutes apart, the same day. */
+function runsOf(items: { senderRole: string; createdAt: string }[]): ("single" | "first" | "middle" | "last")[] {
+  const joins = (a: { senderRole: string; createdAt: string } | undefined, b: { senderRole: string; createdAt: string } | undefined) =>
+    Boolean(a && b) &&
+    a!.senderRole === b!.senderRole &&
+    dayKeyOf(a!.createdAt) === dayKeyOf(b!.createdAt) &&
+    Date.parse(b!.createdAt) - Date.parse(a!.createdAt) <= 3 * 60_000;
+  return items.map((item, i) => {
+    const before = joins(items[i - 1], item);
+    const after = joins(item, items[i + 1]);
+    return before && after ? "middle" : before ? "last" : after ? "first" : "single";
+  });
 }
 
 /**
@@ -220,7 +262,7 @@ export function TicketThreadView({
           )}
         </section>
 
-        <ol className="space-y-group" aria-label={w.conversation} data-testid="support-thread">
+        <ol className="nf-support-thread" aria-label={w.conversation} data-testid="support-thread">
           {(() => {
             /* A divider where the Lagos day changes, from the instants the
                rows carry: the opening message first, then each reply. The
@@ -240,6 +282,14 @@ export function TicketThreadView({
                   <DayDivider label={dayHeading(instants[i]!, locale, getDictionary(locale).experienceInbox.thread.day, now)} />
                 </li>
               ) : null;
+            /* Runs: the opening question and the conversation, in order; a
+               day divider always breaks a run (`runsOf` compares days). */
+            /* The folded AI hand-over sits between the question and the
+               replies, so it breaks the run there. */
+            const runs =
+              transcripts.length > 0
+                ? (["single", ...runsOf(conversation)] as const)
+                : runsOf([{ senderRole: "user", createdAt: ticket.createdAt }, ...conversation]);
             return (
               <>
                 {divider(0)}
@@ -249,6 +299,7 @@ export function TicketThreadView({
                   photos={photosFor(null)}
                   youLabel={w.you}
                   w={w}
+                  run={runs[0]}
                 />
                 {transcripts.map((message) => (
                   <li key={message.id}>
@@ -271,7 +322,8 @@ export function TicketThreadView({
                       at={stamp(message.createdAt, locale)}
                       photos={photosFor(message.id)}
                       youLabel={w.you}
-                  w={w}
+                      w={w}
+                      run={runs[i + 1]}
                     />
                   </Fragment>
                 ))}

@@ -69,6 +69,14 @@ export function MediaRail({
       <span className="nf-post__rail-count nf-numeric" aria-live="polite">
         {index + 1} / {count}
       </span>
+      {/* The pager: one dot per picture, the one in view lit and wider. It is
+          the eye's cue that the picture swipes, and it says nothing to a
+          screen reader, which already hears the count above. */}
+      <span className="nf-post__rail-dots" aria-hidden="true">
+        {media.map((picture, i) => (
+          <span key={picture.url} className="nf-post__rail-dot" data-on={i === index ? "" : undefined} />
+        ))}
+      </span>
     </div>
   );
 }

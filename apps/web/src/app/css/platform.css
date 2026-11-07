@@ -84,6 +84,11 @@
     pointer-events: none;
     contain: strict;
   }
+  /* Inside a rounded card that clips its rows, the layer takes the card's
+     corners and this frame the row's own box. */
+  .nf-ripple__frame {
+    overflow: hidden;
+  }
   .nf-ripple__ink {
     position: absolute;
     border-radius: 50%;

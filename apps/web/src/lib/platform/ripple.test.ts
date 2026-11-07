@@ -10,7 +10,7 @@ describe("the Android ripple's geometry", () => {
     const g = rippleGeometry({ left: 16, top: 200, width: 328, height: 56 }, { x: 40, y: 220 }, PHONE);
     expect(g).not.toBeNull();
     expect(g!.round).toBe(false);
-    expect(g!.host).toEqual({ left: 16, top: 200, width: 328, height: 56 });
+    expect(g!.box).toEqual({ left: 16, top: 200, width: 328, height: 56 });
     expect(g!.ink.x).toBe(24);
     expect(g!.ink.y).toBe(20);
     /* Farthest corner is the bottom right: (328-24, 56-20). */
@@ -23,11 +23,11 @@ describe("the Android ripple's geometry", () => {
     expect(g.ink).toEqual({ x: 22, y: 22, size: 44 });
   });
 
-  it("cuts the layer to what is on screen and keeps the finger inside it", () => {
-    const g = rippleGeometry({ left: 16, top: -30, width: 328, height: 120 }, { x: 100, y: -10 }, PHONE)!;
-    expect(g.host.top).toBe(0);
-    expect(g.host.height).toBe(90);
-    expect(g.ink.y).toBe(0);
+  it("keeps the ink's centre inside the control, even for a finger at its very edge", () => {
+    const g = rippleGeometry({ left: 16, top: -30, width: 328, height: 120 }, { x: 4, y: 95 }, PHONE)!;
+    expect(g.ink.x).toBe(0);
+    expect(g.ink.y).toBe(120);
+    expect(g.ink.size).toBe(Math.ceil(Math.hypot(328, 120) * 2));
   });
 
   it("draws nothing for an empty box, a box off screen or a whole-screen surface", () => {

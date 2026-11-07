@@ -195,7 +195,7 @@ export default async function AroundPage({
       /* `nf-fv2-page`: a column on a phone with the image's 16px gutter, and
          on a desktop the 600px feed beside a rail of people to follow
          (feed-v2.css). */
-      className="nf-fv2-page pt-sm"
+      className="nf-fv2-page"
       /* The dock floats over the bottom of the screen on a phone. Padding
          rather than a fixed value so the clearance tracks the dock's real
          height and the home indicator's inset together. */

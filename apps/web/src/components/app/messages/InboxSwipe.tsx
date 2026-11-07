@@ -37,7 +37,12 @@ export function InboxSwipe({ actions, children }: { actions: SwipeAction[]; chil
   if (actions.length === 0) return <>{children}</>;
 
   return (
-    <div className="nf-inbox-swipe" data-open={open || undefined} data-testid="inbox-swipe">
+    <div
+      className="nf-inbox-swipe"
+      data-open={open || undefined}
+      data-active={dx !== 0 || dragging || undefined}
+      data-testid="inbox-swipe"
+    >
       <div className="nf-inbox-swipe__actions" style={{ inlineSize: reveal }} aria-hidden={!open || undefined}>
         {actions.map((action) => (
           <button

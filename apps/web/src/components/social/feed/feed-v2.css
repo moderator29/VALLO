@@ -38,6 +38,9 @@
     /* 12px between cards: the list rhythm (UX_SYSTEM section 4). */
     --nf-feed-gap: var(--nf-space-sm);
     inline-size: 100%;
+    /* The shell's stage opens with 32px; the feed's masthead sits closer to
+       the app's header, at 24, so the first post rises into view. */
+    margin-block-start: calc(-1 * var(--nf-space-xs));
     max-inline-size: 48rem;
     margin-inline: auto;
   }
@@ -718,6 +721,43 @@
     inset-inline-start: auto;
     inset-inline-end: var(--nf-space-sm);
     z-index: 2;
+  }
+
+  /* The pager under the pictures: small dots on a smoked plate, the one in
+     view a wider bar in white. Drawn over the photograph's foot, so it is
+     glass on a photograph, the one place glass belongs. */
+  .nf-post__rail-dots {
+    position: absolute;
+    inset-block-end: var(--nf-space-sm);
+    inset-inline-start: 50%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-2xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-pill);
+    translate: -50% 0;
+    background: var(--nf-smoked-glass-fill);
+    pointer-events: none;
+  }
+  .nf-post__rail-dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-content-on-media);
+    opacity: 0.5;
+    transition:
+      opacity var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-post__rail-dot[data-on] {
+    opacity: 1;
+    scale: 1.35;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-post__rail-dot {
+      transition: none;
+    }
   }
 
   /* Words alone: the post is the text, at reading size, as tall as it is
