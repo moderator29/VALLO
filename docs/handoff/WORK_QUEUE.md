@@ -44,14 +44,22 @@ like Vallo and differ from theirs.
 - Closed: D-01 leaked password protection (the founder turned it on).
 
 ## Native (Lead)
-- N1 push in seconds (pending SQL), N2 status bar per screen and theme, N3
-  keyboard: composer and step foot ride the keyboard, Android adjustResize,
-  N4 Android back and predictive back, N5 edge to edge and system bars on
-  Android, N6 deep links and App Links for listings, stays, restaurants,
-  bookings, threads and notifications (cold, warm, background), N7 haptics on
-  taps, saves, tabs, sends, N8 permissions asked only in context (camera,
-  location, microphone, notifications), N9 resume refresh (done), N10 startup
-  and WebView performance on budget Android and older iPhones, measured.
+- N1 push in seconds: DONE (kick on enqueue live, 7 Nov).
+- N2 status bar per screen: DONE (screens hold their own glyphs; photo and
+  message viewers draw light glyphs over their dark ground).
+- N3 keyboard: DONE on the web (the step foot sits on the keys); Android
+  decided (Capacitor 8 SystemBars owns the keyboard inset, no adjustResize).
+- N4 Android back: DONE (step flows go back one step); predictive back in
+  the manifest for build 1.0.2.
+- N5 edge to edge: DECIDED (SystemBars), for build 1.0.2, check on device.
+- N6 deep links: DONE (threads, notifications, bookings added on both).
+- N7 haptics: DONE for tabs; saves, sends and money already had them.
+- N8 permissions in context: CHECKED, already right (camera, location and
+  microphone on tap; notifications at five good moments, never on start).
+- N9 resume refresh: DONE.
+- N10 startup and WebView performance: the live data is too thin (6 loads
+  in 14 days); measure a production build on a throttled budget phone
+  profile with round 1's build.
 - Native build queue (needs one planned 1.0.x build): see NATIVE_BUILD_QUEUE.md.
 
 ## Round 1: one feedback system, one sheet, smaller controls (IN PROGRESS)
