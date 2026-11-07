@@ -53,14 +53,13 @@ Store submission.
    rely on CI for verification: run the gates yourself (section 9). iOS builds
    (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
    tell the founder before any new iOS build is needed.
-4. **Agents: 2 maximum at any one time (changed from 4 on 7 November 2026).**
-   The founder reduced it himself: fewer, better briefed, no collisions. The
-   shape that works: YOU are the lead and you write code; ONE subagent runs
-   beside you on work that touches different files. A second subagent only
-   replaces the first when it has finished and reported. Brief each one in
-   full (it knows nothing you do not tell it), name the exact files it owns,
-   and never let it touch a file you are editing. If a job cannot be split
-   cleanly by file, do it yourself in sequence rather than racing.
+4. **Agents: 3 maximum at any one time (the founder's number, 7 November
+   2026).** Fewer, better briefed, no collisions. The shape that works: YOU
+   are the lead and you write code; up to TWO subagents run beside you on work
+   that touches DIFFERENT files. Brief each one in full (it knows nothing you
+   do not tell it), name the exact files it owns, and never let it touch a
+   file you or the other agent is editing. If a job cannot be split cleanly by
+   file, do it yourself in sequence rather than racing.
 5. **Re-audit every piece of work.** After each workstream: re-read the diff
    adversarially, run the gates, look at the screens at phone width (390 x 844
    and 360 x 800) in light and dark, then fix what you find. Only then move on.
@@ -667,7 +666,7 @@ a page map of the platform.
    `apps/web/vercel.json` has the `deploymentEnabled` block (section 1.2).
    Load the Supabase MCP and confirm access to project `uccixoonmbhrnyczyigt`.
    Do not deploy anything to Vercel.
-2. **Audit (read only, you plus ONE Explore agent).** Map every route,
+2. **Audit (read only, you plus up to TWO Explore agents).** Map every route,
    the shell, the design tokens, the toasts, the offline layer, the passcode
    gate, the phone gate, the wizard, KYC, messages, assistant, support, admin.
    Write `docs/handoff/AUDIT_2026-11.md`: what exists, what is broken, what is
@@ -684,17 +683,18 @@ a page map of the platform.
 5. **Architecture.** Decide the shared pieces first (feedback banner, motion
    tokens, sheet component, stepper component, page frame, connection state),
    so every page uses the same parts.
-6. **Implement in groups** (P0, then P1, then P2). TWO AGENTS MAXIMUM, which
-   means you plus one at a time. The founder reduced this from four on
-   7 November. Use the second agent for work that is genuinely separate by
-   file, for example:
-   - You build the shared components and the member screens; the agent audits
+6. **Implement in groups** (P0, then P1, then P2). THREE AGENTS MAXIMUM,
+   which means you plus two at a time (the founder's number, 7 November). Use
+   them for work that is genuinely separate by file, for example:
+   - You build the shared components and the member screens; agent A audits
      native behaviour (status bar, keyboard, haptics, back button, deep links)
-     and reports findings for you to apply.
-   - You build the listing wizard; the agent measures performance and writes
-     the before and after numbers.
-   - You build the admin desks; the agent sweeps pages against the design
-     language checklist and lists what is off.
+     and reports findings for you to apply; agent B measures performance and
+     writes the before and after numbers.
+   - You build the listing wizard; agent A sweeps pages against the design
+     language checklist and lists what is off; agent B drafts the help centre
+     articles from the finished screens.
+   - You build the admin desks; agent A writes the docs the AI assistant and
+     support rely on; agent B runs the regression suites and reports failures.
    Never two writers in one area. The lead (you) reviews and integrates
    everything.
 7. **Re-audit each group** (section 9) before the next.
@@ -775,8 +775,8 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    for platform-grade-1-readiness.
 
 MY RULES
-- TWO AGENTS MAXIMUM at any time (you plus one). I reduced this from four.
-  Never two writers in the same files.
+- THREE AGENTS MAXIMUM at any time (you plus two). Never two writers in the
+  same files: split the work by file or do it in sequence yourself.
 - Branch only. Never push to main unless my message literally says
   "push to main".
 - NEVER deploy to Vercel, never open a preview, never run the Vercel CLI.
