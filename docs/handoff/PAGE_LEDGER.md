@@ -219,13 +219,13 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/circle` | FEATURES |  |  |  |  |  |
-| `/circle/ask` | FEATURES |  |  |  |  |  |
-| `/circle/c/[slug]` | FEATURES |  |  |  |  |  |
-| `/circle/c/[slug]/manage` | FEATURES |  |  |  |  |  |
-| `/circle/c/[slug]/new` | FEATURES |  |  |  |  |  |
-| `/circle/new` | FEATURES |  |  |  |  |  |
-| `/circle/p/[id]` | FEATURES |  |  |  |  |  |
+| `/circle` | FEATURES | PageFrame | yes | yes | yes | 7 Nov: Circle home, LIVE counts from circle_home_stats, tabs in the URL, the first-run starter communities (real actions, nothing seeded). Seen in `/preview/features/circle` and `?first=1` at 390, 360, 768, 1280, light and dark, production build. The banner is a plain one until FE's shared banner lands. |
+| `/circle/ask` | FEATURES | StepFrame | yes | yes | yes | 7 Nov: Ask the community, 4 steps with a device draft and a preview of the real card. Seen in `/preview/features/circle-ask` (steps 1 and 4) at 390 and 360, light and dark. |
+| `/circle/c/[slug]` | FEATURES | PageFrame |  |  |  | 7 Nov: built on the same Circle parts; not yet seen in a harness (needs a deck with a sample community and thread). |
+| `/circle/c/[slug]/manage` | FEATURES | PageFrame |  |  |  | 7 Nov: built on the same Circle parts; not yet seen in a harness (needs a deck with a sample community and thread). |
+| `/circle/c/[slug]/new` | FEATURES | StepFrame |  |  |  | 7 Nov: the Ask flow in discussion mode for one community (same component as /circle/ask, which is seen); its own deck still to do. |
+| `/circle/new` | FEATURES | StepFrame | yes | yes | yes | 7 Nov: Create a community, 5 steps, prefilled from the starter suggestions. Seen in `/preview/features/circle-new` (steps 1 and 5) at 390 and 360, light and dark. |
+| `/circle/p/[id]` | FEATURES | PageFrame |  |  |  | 7 Nov: built on the same Circle parts; not yet seen in a harness (needs a deck with a sample community and thread). |
 
 ## Member: compare
 
@@ -569,7 +569,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/settings/invite/referrals` | FE |  |  |  |  |  |
 | `/settings/invite/referrals/[id]` | FE |  |  |  |  |  |
 | `/settings/notifications` | FE |  |  |  |  |  |
-| `/settings/notifications/reminders` | FEATURES |  |  |  |  |  |
+| `/settings/notifications/reminders` | FEATURES | PageFrame | yes | yes | yes | 7 Nov: A5 and A6 switches (SettingsGroup and RowSwitch). Seen in `/preview/features/reminders` at 390, 360, 768, 1280, light and dark. |
 | `/settings/passcode` | FE |  |  |  |  |  |
 | `/settings/passport` | FE |  |  |  |  |  |
 | `/settings/payments` | FE |  |  |  |  |  |

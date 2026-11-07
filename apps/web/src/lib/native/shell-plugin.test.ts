@@ -122,8 +122,8 @@ describe("iOS: the shell is wired into the project", () => {
     expect(proto).toContain("func registerPluginInstance(_ pluginInstance: CAPPlugin)");
   });
 
-  it("the launch mark and wordmark images are in the asset catalogue", () => {
-    for (const set of ["LaunchMark", "LaunchWordmark"]) {
+  it("the launch layers (the whole mark for the cover, the ring, four towers, five letters) are in the asset catalogue", () => {
+    for (const set of ["LaunchMark", "LaunchRing", "LaunchTower1", "LaunchTower2", "LaunchTower3", "LaunchTower4", "LaunchLetterV", "LaunchLetterA", "LaunchLetterL1", "LaunchLetterL2", "LaunchLetterO"]) {
       const dir = `${root}ios/App/App/Assets.xcassets/${set}.imageset`;
       const contents = JSON.parse(readFileSync(`${dir}/Contents.json`, "utf8")) as { images: Array<{ filename?: string }> };
       const files = contents.images.map((i) => i.filename).filter(Boolean) as string[];
