@@ -24,8 +24,9 @@ and PAGE_LEDGER.md (every page, ticked as passed).
 | Lead | coordination, every commit, backend (rate limits, R-03, R-04, push mute, crash log, rental ID rule, drift, welcome payload), verified 8 SQL files live | reviewing hand-offs | perf asks: PhoneField lazy on listing, Supabase client lazy in the member layout, empty-reviews image |
 | FE (fresh run 4) | round 1, light mode part 1, the feed after the reference, the Circle dock tab, Circle visuals | feed leftovers (Save on embedded listing, story morph, /post/[id], chip scroll, dark place chip); NO BLACK BUTTONS sweep | the website animated logo, light mode leftovers, E1 plates, A7 Activity cards, rating components, map and search perf, then AGENT_QUEUES jobs 5 on |
 | PAGES | job 1 in progress (PageFrame on settings, money, bookings, account, legal, help, admin heads) | job 1 to 3 | skeletons, tablet and desktop with Back in the header, docs and help |
-| NATIVE | platform layer, iOS and Android shell for 1.0.2, connection manager, perf report, animated opening, device matrix | rich notifications (lib/push) | Android full draw at open (splash to bare navy), Android renderer recovery, Capacitor audit |
-| FEATURES (fresh run 2) | Circle specs, 119 recommendations, reminders and nudges, Circle SQL, the Circle pages end to end, listing data and picker | reshoot /circle with the new visuals, harness decks for community, thread and manage | feed category filter, events screen, private posts out of OG, share and search, then lock screen words, ratings, tools per area, emails |
+| NATIVE (run 1 finished, run 2 started) | platform layer, iOS and Android shell, connection manager, perf report, animated opening on both, device matrix, rich push with photos, notification sound, Face ID fix, extension target, Android large icon, renderer recovery, Capacitor audit | run 2: PhoneField lazy, Supabase client lazy, empty-reviews image, re-measure, prop size test | its own proposals |
+| FEATURES | Circle end to end, reminders, listing data | STOPPED by the founder | its queue stays in AGENT_QUEUES; A9 moved to FE |
+| BANNER | survey of 190 banner moments | building them in batches | the inline-outcome guard test |
 | MSG | rounds 4 to 10 done | finished | messages kept by the lead |
 
 ## Waiting on the founder

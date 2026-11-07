@@ -13,6 +13,8 @@ import { EmailTakenNotice } from "./EmailTakenNotice";
 import { SocialDoors } from "./SocialDoors";
 import { AuthPillButton } from "./slate";
 import { signUpMethodForEmail, startGoogleOAuth } from "@/lib/auth/actions";
+import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 

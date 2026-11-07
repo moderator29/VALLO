@@ -10,6 +10,7 @@ import { Field } from "./fields";
 import { AuthPillButton } from "./slate";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -40,6 +41,7 @@ export function FinishSetupForm({
   initialSurname: string;
 }) {
   const [state, formAction, pending] = useActionState(action, EMPTY);
+  useAuthBanner(state);
   const [firstName, setFirstName] = useState(initialFirstName);
   const [surname, setSurname] = useState(initialSurname);
   const [accepted, setAccepted] = useState(false);
@@ -127,11 +129,7 @@ export function FinishSetupForm({
           showAdultError={adultError || Boolean(state.fieldErrors?.ageConfirmed)}
         />
 
-        {state.message && (
-          <p role="alert" className="nf-auth__alert">
-            {state.message}
-          </p>
-        )}
+        {/* Said by the one banner at the top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
         <div className="nf-auth__actions">
           <AuthPillButton type="submit" loading={pending} className="nf-auth__cta">
