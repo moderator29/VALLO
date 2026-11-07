@@ -90,6 +90,7 @@ export type ClientCopy = {
 /** The success moments carried on every screen. Keep this list short. */
 const SLICED_MOMENTS = [
   "accountCreated",
+  "signedIn",
   "emailVerified",
   "passwordChanged",
   "passcodeSet",

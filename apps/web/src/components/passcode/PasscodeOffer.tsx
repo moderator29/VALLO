@@ -21,7 +21,7 @@ export async function PasscodeOffer() {
   }
   const snoozed = (await cookies()).get(PASSCODE_OFFER_COOKIE)?.value === "1";
   if (!passcodeOfferShows({ gate, snoozed })) return null;
-  const copy = getDictionary(await getLocale()).passcode;
+  const copy = getDictionary(await getLocale()).protect;
   return (
     <PasscodeOfferCard
       title={copy.offerTitle}

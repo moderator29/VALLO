@@ -72,6 +72,7 @@ export const SUCCESS_VARIANT: Readonly<Record<SuccessMomentId, SuccessVariant>> 
   cardSaved: "success",
   payoutAccountAdded: "success",
   accountCreated: "success",
+  signedIn: "success",
   emailVerified: "success",
   passwordChanged: "success",
   passcodeSet: "success",
@@ -134,6 +135,7 @@ export const SUCCESS_OBJECT: Readonly<Record<SuccessMomentId, Icon3DName>> = {
   cardSaved: "card-secure",
   payoutAccountAdded: "earnings",
   accountCreated: "celebrate",
+  signedIn: "celebrate",
   emailVerified: "envelope",
   passwordChanged: "shield",
   passcodeSet: "passcode-lock",
@@ -258,6 +260,8 @@ export const DONE_FLAGS = {
      is open on that unit of theirs (`listing`). */
   "agents-invited": "agentsInvited",
   "account-created": "accountCreated",
+  /* Grade 1 (November 2026): a returning sign-in earns the top banner. */
+  "signed-in": "signedIn",
   "email-verified": "emailVerified",
   "password-changed": "passwordChanged",
   "passcode-set": "passcodeSet",
@@ -280,6 +284,7 @@ export type DoneFlag = keyof typeof DONE_FLAGS;
  */
 export const GLOBAL_DONE_FLAGS = [
   "account-created",
+  "signed-in",
   "email-verified",
   "password-changed",
   "passcode-set",

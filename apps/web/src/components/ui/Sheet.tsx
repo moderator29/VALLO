@@ -96,6 +96,7 @@ export function Sheet({
   detents = [0.92],
   /** Hides the visible title while keeping it as the accessible name. */
   hideTitle = false,
+  description,
   initialFocus,
   footer,
   closeLabel,
@@ -114,6 +115,11 @@ export function Sheet({
   title: string;
   detents?: number[];
   hideTitle?: boolean;
+  /**
+   * GRADE 1: one sentence of why, under the title, the way every reference
+   * sheet explains itself ("Make sure your name matches your ID"). Plain text.
+   */
+  description?: string;
   /**
    * THE FILTER SHEET'S ANATOMY, as three opt-in props. The search render
    * draws a header row (title left, a glass close square right) and a footer
@@ -646,6 +652,7 @@ export function Sheet({
             {face.title}
           </h2>
         )}
+        {description && !hideTitle ? <p className="nf-sheet__desc px-gutter">{description}</p> : null}
         <div className="nf-sheet__body px-gutter pb-lg">{face.children}</div>
         {face.reset || face.apply ? (
           <div className="nf-sheet__foot px-gutter">

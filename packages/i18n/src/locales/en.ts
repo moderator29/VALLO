@@ -32,6 +32,7 @@ import { complianceRiskEn } from "./compliance-risk.en";
 import { complianceBeneficialOwnershipEn } from "./compliance-17.en";
 /* The passcode lock (docs/PASSCODE.md), in its own module like the rest. */
 import { passcodeEn } from "./passcode.en";
+import { protectEn } from "./protect.en";
 import { experienceLandingEn } from "./experience-landing.en";
 import { experienceDiscoverEn } from "./experience-discover.en";
 import { experienceDetailEn } from "./experience-detail.en";
@@ -6032,6 +6033,7 @@ export const en = {
   complianceBeneficialOwnership: complianceBeneficialOwnershipEn,
 
   passcode: passcodeEn,
+  protect: protectEn,
 
   /* Session 3, the experience upgrade: one module per owner (docs/sessions/SESSION-3-RESPONSE.md). */
   experienceLanding: experienceLandingEn,
@@ -6255,6 +6257,7 @@ export const en = {
         body: "It is saved, and your earnings can be paid into it.",
       },
       accountCreated: { title: "Welcome to Vallo", body: "Your account is ready." },
+      signedIn: { title: "Signed in. Welcome back.", body: "You are signed in on this device." },
       emailVerified: { title: "Email confirmed", body: "Your email address is confirmed on this account." },
       passwordChanged: {
         title: "Password changed",

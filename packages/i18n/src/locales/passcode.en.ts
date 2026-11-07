@@ -109,14 +109,4 @@ export const passcodeEn = {
   deleteKey: "Delete",
   digitsEntered: "{count} of {total} digits entered",
   moneyLocked: "Unlock Vallo with your passcode first. Nothing was charged or changed.",
-
-  /**
-   * THE OFFER, NOT THE GATE (6 November 2026). A passcode is optional: a new
-   * member goes straight in, and the home screen carries this slim alert
-   * until they set one or close it. Closed, it comes back once after 60 days.
-   */
-  offerTitle: "Protect your account",
-  offerBody: "Add a passcode, and Face ID where your phone has it, so nobody else can open Vallo on this device.",
-  offerAction: "Set up",
-  offerDismiss: "Not now",
 };

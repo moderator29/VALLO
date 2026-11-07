@@ -429,6 +429,8 @@ export async function signInWithEmail(
   // The session cookies are set. Drop every cached render so the shell picks
   // up the real identity instead of the signed out view.
   (await cookies()).delete(CHOOSER_EMAIL_COOKIE);
+  /* Grade 1: "Signed in" as the top banner on arrival (reference R4). */
+  await rememberSuccess("signed-in");
   revalidatePath("/", "layout");
   redirect(landing);
 }
@@ -1135,6 +1137,8 @@ export async function signInWithAppleIdToken(input: {
   if (data.user && (await setupStillOwed(supabase, data.user))) {
     return { ok: true, next: finishSetupHref(landingFromPath(input.next)) };
   }
+  /* Grade 1: "Signed in" as the top banner on arrival (reference R4). */
+  await rememberSuccess("signed-in");
   return { ok: true, next: landingFromPath(input.next) };
 }
 

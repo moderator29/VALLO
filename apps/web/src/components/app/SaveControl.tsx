@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toggleSave } from "@/lib/saved/actions";
 import { feedback } from "@/lib/ui/feedback";
+import { banner } from "@/lib/ui/toast";
 import {
   saveRestaurant,
   saveStay,
@@ -66,8 +67,9 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * words are. On the card that space is the media band, which is a fixed ratio.
  */
 
-/** How long a note stays before it clears. Matches `ListingActions`. */
-const NOTE_MS = 2600;
+/** The banner's words for a save (Grade 1: specific, never a bare "Saved"). */
+const SAVED_WORDS = "Saved to your list";
+const REMOVED_WORDS = "Removed from your saved list";
 
 export type SaveNote = { text: string; tone: "ok" | "error" } | null;
 
@@ -186,9 +188,9 @@ export function useSaveControl(
    * not touched this heart on this page, so the stored truth wins.
    */
   const [override, setOverride] = useState<boolean | null>(null);
-  const [note, setNote] = useState<SaveNote>(null);
+  /* Always null since Grade 1: the banner says it (see `say` below). */
+  const note = null as SaveNote;
   const [pending, startTransition] = useSafeTransition();
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onDevice = useSyncExternalStore(
     subscribe,
@@ -197,23 +199,20 @@ export function useSaveControl(
   );
   const saved = override ?? (initialSaved || onDevice);
 
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
-  const say = useCallback((text: string, tone: "ok" | "error" = "ok") => {
-    setNote({ text, tone });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setNote(null), NOTE_MS);
+  /* GRADE 1 (P0.4): what a save says goes to the ONE feedback banner at the
+     top of the screen, which has room for a whole sentence and never moves a
+     card under a thumb. `note` stays in the hook's answer for the callers that
+     still read it, and is null: the banner is the one place it is said. */
+  const say = useCallback((text: string, tone: "ok" | "error" | "kept" = "ok") => {
+    /* The tone as an option rather than `banner.success(...)`: the card's
+       dictionary slice test counts any `.success` as a namespace read. */
+    banner(text, { tone: tone === "kept" ? "info" : tone === "ok" ? "success" : "error", "data-testid": "save-banner" });
   }, []);
 
   const toggle = useCallback(() => {
     if (pending) return;
     const next = !saved;
     setOverride(next);
-    setNote(null);
 
     /* V-40: no signal is not a failure. The intent is kept on the phone and
        sent, as the state wanted, when the connection comes back. */
@@ -222,7 +221,7 @@ export function useSaveControl(
         ? makeEntry("save_place", `${place.kind}:${place.id}`, next, Date.now())
         : makeEntry("save_listing", listingId, next, Date.now());
       if (entry && (await enqueue(entry))) {
-        say(next ? OUTBOX_COPY.savedWaiting : OUTBOX_COPY.removedWaiting);
+        say(next ? OUTBOX_COPY.savedWaiting : OUTBOX_COPY.removedWaiting, "kept");
         return;
       }
       setOverride(!next);
@@ -265,7 +264,7 @@ export function useSaveControl(
           return;
         }
         if (next) feedback("select");
-        say(next ? "Saved" : "Removed");
+        say(next ? SAVED_WORDS : REMOVED_WORDS);
         return;
       }
 
@@ -282,7 +281,7 @@ export function useSaveControl(
         else removeLocalSave(listingId);
         deviceChanged();
         if (next) feedback("select");
-        say(next ? "Saved on this device" : "Removed");
+        say(next ? "Saved on this device" : REMOVED_WORDS);
         return;
       }
 
@@ -299,7 +298,7 @@ export function useSaveControl(
          toggle it is: the light beat (CRAFT_DOCTRINE 6). A medium beat is
          for a primary action committing, and a heart is not one. */
       if (settled) feedback("select");
-      say(settled ? "Saved" : "Removed");
+      say(settled ? SAVED_WORDS : REMOVED_WORDS);
     }
   }, [listingId, pending, place, saved, say, OUTBOX_COPY]);
 

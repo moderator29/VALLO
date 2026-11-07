@@ -710,21 +710,27 @@ run("report submitted", () => {
 const HOST = `
   import { mount } from "@/lib/testing/browser-root";
   import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { showSuccess } from "@/lib/ui/success-moments";
   window.__show = showSuccess;
-  mount(<SuccessFlagHost />);
+  mount(<><SuccessFlagHost /><ToastHost /></>);
 `;
 
+/* GRADE 1 (P0.4, November 2026): the account moments are the top feedback
+   banner, not a sheet. The banner carries `data-testid="banner-account"`. */
+const BANNER = '[data-testid="banner-account"]';
+
 run("account created, password changed, email verified, passcode set (the root layout's host)", () => {
-  it("opens from the one-shot cookie the server set, asking the server for it", async () => {
+  it("shows the banner from the one-shot cookie the server set, asking the server for it", async () => {
     const { page, close } = await mountInBrowser({
       entry: HOST,
       init: `document.cookie = "nf_done_hint=1; path=/"`,
       actions: { consumeSuccess: `async () => "password-changed"` },
     });
     try {
-      await page.waitForSelector('[data-testid="success-sheet-account"]', { timeout: 15_000 });
-      expect(await page.getByRole("dialog", { name: "Password changed" }).count()).toBe(1);
+      await page.waitForSelector(BANNER, { timeout: 15_000 });
+      expect(await page.locator(BANNER).textContent()).toContain("Password changed");
+      expect(await page.locator('[role="dialog"]').count()).toBe(0);
     } finally {
       await close();
     }
@@ -739,7 +745,7 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await actionCalled(page, "consumeSuccess");
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
     } finally {
       await close();
     }
@@ -750,19 +756,19 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await page.waitForFunction(() => window.location.search === "?x=1", null, { timeout: 15_000 });
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
       expect(await page.evaluate(() => (window as unknown as { __calls?: unknown[] }).__calls ?? [])).toEqual([]);
     } finally {
       await close();
     }
   });
 
-  it("opens from showSuccess (the passcode screen's call)", async () => {
+  it("shows the banner from showSuccess (the passcode screen's call)", async () => {
     const { page, close } = await mountInBrowser({ entry: HOST });
     try {
       await page.evaluate(() => (window as unknown as { __show: (f: string) => void }).__show("passcode-set"));
-      await page.waitForSelector('[data-testid="success-sheet-account"]', { timeout: 15_000 });
-      expect(await page.getByRole("dialog", { name: "Passcode set" }).count()).toBe(1);
+      await page.waitForSelector(BANNER, { timeout: 15_000 });
+      expect(await page.locator(BANNER).textContent()).toContain("Passcode set");
     } finally {
       await close();
     }
@@ -773,7 +779,7 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await page.evaluate(() => (window as unknown as { __show: (f: string) => void }).__show("listing-live"));
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
     } finally {
       await close();
     }
@@ -783,32 +789,28 @@ run("account created, password changed, email verified, passcode set (the root l
 /* ---------------------------------------- the moment's own promises, per flow */
 
 /*
- * Every account moment the host shows (passcode set and changed, account
- * ready, email confirmed, password changed): the right words, the right
- * object, and ONE primary pill that is a real 44px-or-taller target and
- * closes the moment. The account moments land wherever the person was going,
- * so their button is "Continue", which closes, rather than a link.
+ * Every account moment the host shows: the right words as a success banner
+ * with a tick, announced politely, and an X that takes it down.
  */
-run("the account moments' object and button, flow by flow", () => {
+run("the account moments' banner, flow by flow", () => {
   it.each([
-    ["passcode-set", "Passcode set", "passcode-lock"],
-    ["passcode-changed", "Passcode changed", "passcode-lock"],
-    ["account-created", "Welcome to Vallo", "celebrate"],
-    ["email-verified", "Email confirmed", "envelope"],
-    ["password-changed", "Password changed", "shield"],
-  ] as const)("%s: %s, with its object and a Continue pill that closes it", async (flag, title, object) => {
+    ["passcode-set", "Passcode set"],
+    ["passcode-changed", "Passcode changed"],
+    ["account-created", "Welcome to Vallo"],
+    ["signed-in", "Signed in. Welcome back."],
+    ["email-verified", "Email confirmed"],
+    ["password-changed", "Password changed"],
+  ] as const)("%s: %s, as a success banner with an X that closes it", async (flag, title) => {
     const { page, close } = await mountInBrowser({ entry: HOST });
     try {
       await page.evaluate((f) => (window as unknown as { __show: (f: string) => void }).__show(f), flag);
-      const dialog = page.getByRole("dialog", { name: title });
-      await dialog.waitFor({ timeout: 15_000 });
-      expect(await page.locator(".nf-success__mark").getAttribute("data-object")).toBe(object);
-      const primary = page.getByTestId("success-primary");
-      expect(await primary.textContent()).toBe("Continue");
-      expect(await primary.evaluate((el) => el.tagName)).toBe("BUTTON");
-      expect(await page.getByTestId("success-secondary").count()).toBe(0);
-      await primary.click();
-      await page.waitForFunction(() => document.querySelector('[data-testid="success-sheet-account"]') === null);
+      const shown = page.locator(BANNER);
+      await shown.waitFor({ timeout: 15_000 });
+      expect(await shown.getAttribute("data-tone")).toBe("success");
+      expect(await shown.getAttribute("role")).toBe("status");
+      expect(await shown.locator(".nf-toast__text").textContent()).toBe(title);
+      await page.getByTestId("banner-close").click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="banner-account"]') === null);
     } finally {
       await close();
     }
