@@ -35,11 +35,19 @@ Store submission.
 
 ## 1. THE FOUNDER'S RULES (NON-NEGOTIABLE)
 
-1. **Branch.** All work goes on a new branch named
-   `platform-grade-1-readiness`, cut from the latest `main`. Never push to
-   `main` unless the founder's message contains the words "push to main".
-   An automated safety check has blocked pushes to main without that phrase
-   before, and it will again.
+1. **Branch.** ONE branch, `platform-grade-1-readiness`, cut from the latest
+   `main`, and EVERY piece of this work lives on it from the first audit note
+   to the last polish commit. `main` already carries this handoff, the
+   founder's verbatim brief and all the fixes up to 7 November 2026, so cut
+   from `origin/main` and push the branch up immediately
+   (`git push -u origin platform-grade-1-readiness`). Commit and push to it
+   often: Vercel builds nothing for this branch, so pushing is free and it
+   means nothing is ever lost with a session. Do not open side branches for
+   sub-pieces, and do not work directly on `main`. Never push to `main`, and
+   never merge into `main`, unless the founder's message contains the words
+   "push to main"; an automated safety check has blocked pushes without that
+   phrase before and it will again. When he does say it, push the whole branch
+   to `main` in one go and report what went live.
 2. **No Vercel previews. No Vercel spending.** The founder paid about 96 USD
    for preview builds nobody asked for. `apps/web/vercel.json` now carries
    `git.deploymentEnabled` with `platform-grade-1-readiness`, `claude/**` and
@@ -757,12 +765,17 @@ VALLO: PLATFORM GRADE 1 READINESS. You are taking over my platform upgrade.
 Repo moderator29/read-it-well. Supabase project uccixoonmbhrnyczyigt.
 
 SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
-1. git fetch origin main claude/rentme-v2-platform-audit-xuvg0a
-2. Create your branch:
-   if origin/main contains docs/handoff/PLATFORM_GRADE_1_READINESS.md:
+1. git fetch origin main
+2. Create your one working branch from main, and do EVERY piece of this work
+   on it, start to finish:
      git checkout -b platform-grade-1-readiness origin/main
-   otherwise:
-     git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
+     git push -u origin platform-grade-1-readiness
+   main already carries the handoff, the brief and all the fixes up to
+   7 November 2026, so there is nothing else to pull in. If the branch
+   already exists on origin, check it out and continue on it rather than
+   making a second one. Never open a different branch for a sub-piece of the
+   work: one branch, every commit, so I can see the whole upgrade in one
+   place and Vercel stays switched off for it.
 3. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
    message, word for word, and it is your MAIN SOURCE OF TRUTH. Where anything
    else disagrees with it, it wins. Re-read it at the start of every phase.
@@ -777,8 +790,11 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
 MY RULES
 - THREE AGENTS MAXIMUM at any time (you plus two). Never two writers in the
   same files: split the work by file or do it in sequence yourself.
-- Branch only. Never push to main unless my message literally says
-  "push to main".
+- EVERYTHING lives on the branch platform-grade-1-readiness. Commit often,
+  push to that branch often (it costs nothing: Vercel is switched off for it).
+  Never push to main, and never merge into main, unless my message literally
+  says "push to main". When I do say it, push the whole branch to main in one
+  go and tell me what went live.
 - NEVER deploy to Vercel, never open a preview, never run the Vercel CLI.
   Previews cost me real money (96 USD for nothing once already).
 - NEVER trigger GitHub Actions. My included minutes are used up. Run the
