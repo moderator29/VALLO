@@ -84,6 +84,9 @@ export function PasskeyUnlockKey({
         challenge: start.challenge,
         rpId: start.rpId,
         allow: start.credentialIds,
+        /* The sheet rises in well under a second; a ceremony that never
+           started must still answer the tap. */
+        waitMs: 20_000,
       });
       if (!proof) return onFailed(noteDeviceKeyFailed());
       const result = await finishPasskeyUnlock({
@@ -112,7 +115,8 @@ export function PasskeyUnlockKey({
         full
         className="nf-passcode__bio"
         onClick={() => void run()}
-        disabled={disabled || busy}
+        disabled={disabled}
+        loading={busy}
         data-testid="passcode-passkey"
       >
         <LockGlyph lock={lock} />

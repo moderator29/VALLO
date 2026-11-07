@@ -17,6 +17,7 @@ import { catchUpWithServer } from "@/lib/passcode/server-catch-up";
 import { Button } from "@/components/ui/Button";
 import { Keypad, PasscodeDots } from "./Keypad";
 import { PasskeyUnlockKey } from "./PasskeyUnlockKey";
+import { banner } from "@/lib/ui/toast";
 import { deviceKeyState, type DeviceKeyState } from "@/lib/platform/device-keys";
 
 /** English, like the other words added before a native speaker has read them. */
@@ -440,10 +441,12 @@ export function PasscodeLock({
   const biometricFirst = passkey && door === "biometric" && !cooling;
   const onPasskeyFailed = (device: DeviceKeyState) => {
     if (door === "biometric") toKeypad("key");
-    if (device === "none") {
-      setDeviceHasNone(true);
-      setMessage(NO_KEY_HERE);
-    } else setMessage(copy.passkeyFailed);
+    /* A tap always answers (the founder: "nothing moved and nothing
+       changed"): the words under the keypad and the one banner at the top. */
+    const words = device === "none" ? NO_KEY_HERE : copy.passkeyFailed;
+    if (device === "none") setDeviceHasNone(true);
+    setMessage(words);
+    banner.error(words);
   };
 
   /* Typing on the biometric door: the keypad's own keyboard listener is not

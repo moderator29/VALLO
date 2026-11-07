@@ -82,9 +82,19 @@ export async function createPlatformKey(input: {
 
 export type AssertResult = { credentialId: string; clientDataJSON: string; authenticatorData: string; signature: string };
 
-export async function assertPlatformKey(input: { challenge: string; rpId: string; allow: string[] }): Promise<AssertResult | null> {
+export async function assertPlatformKey(input: {
+  challenge: string;
+  rpId: string;
+  allow: string[];
+  /** The longest to wait for the phone (the Face ID bug: a ceremony WebKit
+      never started left a tap with no answer for the full minute). */
+  waitMs?: number;
+}): Promise<AssertResult | null> {
+  const controller = typeof AbortController === "undefined" ? null : new AbortController();
+  const timer = controller && input.waitMs ? setTimeout(() => controller.abort(), input.waitMs) : null;
   try {
     const credential = (await navigator.credentials.get({
+      ...(controller ? { signal: controller.signal } : {}),
       publicKey: {
         challenge: fromB64url(input.challenge),
         rpId: input.rpId,
@@ -103,5 +113,7 @@ export async function assertPlatformKey(input: { challenge: string; rpId: string
     };
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
