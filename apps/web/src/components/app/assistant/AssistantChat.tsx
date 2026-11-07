@@ -24,7 +24,8 @@ import { hrefForListing } from "@/lib/listings/href";
 import type { ListingKind } from "@/lib/listings/types";
 import type { AssistantCard } from "@/lib/assistant/types";
 import { BackControl } from "@/components/ui/BackControl";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { buildHandoff, saveHandoff } from "@/lib/assistant/handoff";
 import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import {
   AssistantSidebar,
@@ -89,6 +90,13 @@ import "@/app/css/list-views.css";
 
 const NETWORK_ERROR_MESSAGE =
   "The assistant could not reach the network. Your message is kept; tap retry.";
+
+/* GRADE 1 (P1.4, R70): the way to a person, from inside the assistant.
+   English only for now, beside the other English lines in this file. */
+const PERSON_WORDS = {
+  label: "Talk to a person",
+  hint: "Hand this conversation to the Vallo support team",
+};
 const PACE_FALLBACK_MESSAGE =
   "You are moving faster than the assistant can think. Give it a few minutes and try again.";
 
@@ -1014,6 +1022,25 @@ export function AssistantChat({
               className="nf-ai__send"
             />
           </form>
+          {/* GRADE 1 (P1.4, R70): a person, always one tap away and never
+              behind a failed answer. What the member was asking goes with
+              them (`lib/assistant/handoff.ts`), so the support team starts
+              from it; Back returns here. */}
+          <div className="nf-ai__person">
+            <ButtonLink
+              href="/assistant/person"
+              variant="quiet"
+              size="sm"
+              leadingIcon="headset"
+              title={PERSON_WORDS.hint}
+              data-testid="assistant-talk-to-person"
+              onClick={() =>
+                saveHandoff(buildHandoff(messages.map((m) => ({ role: m.role, text: m.text })), draft))
+              }
+            >
+              {PERSON_WORDS.label}
+            </ButtonLink>
+          </div>
           {privateAccess ? (
             <p className="nf-ai__note" data-testid="ai-private-banner">
               Private access is on. <Link href="/settings/ai-assistant">Settings</Link>

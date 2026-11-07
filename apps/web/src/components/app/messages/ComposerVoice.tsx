@@ -25,7 +25,8 @@ import { useVoiceRecorder, type VoiceRecording } from "./useVoiceRecorder";
  *               "Slide to cancel"
  *   slide left  past SLIDE_CANCEL_PX throws it away, with one light tap
  *   release     sends it (the thread draws it at once as "Sending")
- *   two minutes it stops and sends by itself
+ *   two minutes it stops with a gentle tap and sends what was recorded
+ *               (founder, 7 November 2026: at most two minutes, kept for ever)
  *   a tap       is not a voice note: the hint says how ("Hold the microphone
  *               to record a voice note.")
  *
@@ -44,6 +45,7 @@ const WORDS = {
     "Microphone access is off. Turn it on for Vallo in your phone's Settings (or for this site in your browser), then hold the microphone again.",
   unsupported: "This device can't record voice notes here. Write a message instead.",
   failed: "The voice note couldn't be recorded. Try again.",
+  limit: "Voice notes can be up to 2 minutes. Yours is on its way.",
 };
 
 export const COMPOSER_VOICE_WORDS = WORDS;
@@ -80,10 +82,13 @@ export function ComposerVoice({
   );
 
   const recorder = useVoiceRecorder({
-    /* Two minutes: it stops and sends, whatever the finger is doing. */
+    /* Two minutes (founder, 7 November 2026): it stops with a gentle tap and
+       keeps what was recorded, sending it whatever the finger is doing. */
     onLimit: () => {
       held.current = null;
       setDx(0);
+      feedback("select");
+      banner.info(WORDS.limit);
       void send(recorder.finish, true);
     },
   });

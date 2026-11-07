@@ -1,0 +1,524 @@
+/*
+ * MESSAGES, PLATFORM GRADE 1 (P1.3, November 2026).
+ *
+ * The thread's new pieces and its polish, in one file the messages work owns:
+ * the round button that is the microphone until there is something to send,
+ * the recording strip that takes over the chat box while the microphone is
+ * held, reactions (the row in the message menu and the counts under a
+ * bubble), runs of bubbles that sit tight with their corners tucked in, the
+ * day as a chip, the new-messages pill, the voice note's speed control and a
+ * composer that sits on the keyboard. Tokens only. Imported once, right after
+ * grade1.css, so the chat box rules there are the base these build on.
+ *
+ * Most of it is in `@layer components` with the stylesheets it refines. The
+ * message menu's rules in threads.css are outside any layer, so the menu's
+ * additions here are too (the block at the end).
+ */
+
+@layer components {
+  /* ------------------------------------------------ the chat box, hosting */
+
+  /* The recording strip lies over the box, so the box is its frame. */
+  .nf-composer__box {
+    position: relative;
+  }
+
+  /* ------------------------------------- the microphone that becomes Send */
+
+  /*
+   * One round button, two faces. As the microphone it rests on the brand tint
+   * with a brand edge (a resting control is never a grey hairline); as Send
+   * it is the solid brand. The glyphs cross over in place, so the bar never
+   * moves. 40px painted, 44px to the thumb (the ::before).
+   */
+  form.nf-composer .nf-composer__send.nf-composer__action {
+    position: relative;
+    z-index: 2;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 0;
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-primary);
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-edge);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  form.nf-composer .nf-composer__send.nf-composer__action::before {
+    content: "";
+    position: absolute;
+    inset: -0.125rem;
+    border-radius: var(--nf-radius-circle);
+  }
+  form.nf-composer .nf-composer__send.nf-composer__action[data-ready] {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: none;
+  }
+  form.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: none;
+    scale: 1.14;
+  }
+  /* The held microphone breathes a ring outward while it records. */
+  form.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--nf-radius-circle);
+    box-shadow: 0 0 0 0.375rem var(--nf-brand-tint-2);
+    /* Finite: 86 breaths of 1.4s is the two-minute cap, when recording ends. */
+    animation: nf-g1-voice-ring 1.4s var(--nf-ease-standard) 86;
+    pointer-events: none;
+  }
+  .nf-composer__glyph {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    transition:
+      opacity var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-base) var(--nf-ease-spring);
+  }
+  .nf-composer__action[data-mode="mic"] .nf-composer__glyph--send,
+  .nf-composer__action[data-mode="send"] .nf-composer__glyph--mic {
+    opacity: 0;
+    transform: scale(0.55) rotate(-20deg);
+  }
+  .nf-composer__action[data-mode="mic"] .nf-composer__glyph--mic,
+  .nf-composer__action[data-mode="send"] .nf-composer__glyph--send {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ------------------------------------------------- the recording strip */
+
+  .nf-voice-rec {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding-inline: var(--nf-space-md) 3.75rem;
+    border-radius: inherit;
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+    animation: nf-g1-voice-in var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  .nf-voice-rec__dot {
+    flex: none;
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-state-error);
+    /* Finite: one blink a second for the two minutes a note can last. */
+    animation: nf-g1-voice-dot 1s steps(2, jump-none) 120;
+  }
+  .nf-voice-rec__time {
+    flex: none;
+    min-inline-size: 2.5rem;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-voice-rec__bars {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.1875rem;
+    block-size: 1.5rem;
+    overflow: hidden;
+  }
+  .nf-voice-rec__bar {
+    flex: none;
+    inline-size: 0.1875rem;
+    block-size: 100%;
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-brand-primary);
+    transform-origin: center;
+    transition: transform var(--nf-duration-press) var(--nf-ease-standard);
+  }
+  .nf-voice-rec__slide {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+    white-space: nowrap;
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-standard),
+      opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (max-width: 23rem) {
+    .nf-voice-rec {
+      gap: var(--nf-space-xs);
+    }
+    .nf-voice-rec__bars {
+      display: none;
+    }
+  }
+
+  @keyframes nf-g1-voice-in {
+    from {
+      opacity: 0;
+      transform: translateX(0.75rem);
+    }
+  }
+  @keyframes nf-g1-voice-dot {
+    50% {
+      opacity: 0.25;
+    }
+  }
+  @keyframes nf-g1-voice-ring {
+    0% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+
+  /* --------------------------------------------- the voice note's speed */
+
+  .nf-voice__rate {
+    position: relative;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    min-inline-size: 2.5rem;
+    block-size: 1.75rem;
+    padding-inline: var(--nf-space-xs);
+    border: var(--nf-border-width) solid currentColor;
+    border-radius: var(--nf-radius-sm);
+    background: transparent;
+    color: inherit;
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+  }
+  .nf-voice__rate::before {
+    content: "";
+    position: absolute;
+    inset: -0.5rem -0.125rem;
+  }
+
+  /* --------------------------------------------- reactions under a bubble */
+
+  .nf-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-3xs);
+    margin-block-start: calc(var(--nf-space-3xs) * -1);
+    padding-inline: var(--nf-space-2xs);
+    position: relative;
+    z-index: 1;
+  }
+  .nf-reactions--mine {
+    justify-content: flex-end;
+  }
+  .nf-reactions__chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-block-size: 1.75rem;
+    padding-inline: var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    line-height: 1;
+    animation: nf-g1-react-in var(--nf-duration-base) var(--nf-ease-spring) both;
+    transition: scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  /* 28px painted, 44px to the thumb. */
+  .nf-reactions__chip::before {
+    content: "";
+    position: absolute;
+    inset: -0.5rem 0;
+  }
+  .nf-reactions__chip:active:not(:disabled) {
+    scale: var(--nf-press-scale-sm);
+  }
+  .nf-reactions__chip:disabled {
+    cursor: default;
+  }
+  .nf-reactions__chip[data-mine] {
+    border-color: var(--nf-brand-edge-strong);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-primary);
+  }
+  .nf-reactions__count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-call-msg {
+    display: grid;
+    gap: var(--nf-space-3xs);
+  }
+  @keyframes nf-g1-react-in {
+    from {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+  }
+
+  /* ----------------------------------------------------- runs of bubbles */
+
+  /*
+   * A run (one side, a few minutes apart, `thread-runs.ts`) reads as one turn:
+   * the corners where two bubbles meet tuck in, and only the last of the run
+   * keeps the tail corner. A single bubble is unchanged.
+   */
+  .nf-msg--mine[data-run="first"] .nf-bubble,
+  .nf-msg--mine[data-run="middle"] .nf-bubble {
+    border-end-end-radius: var(--nf-radius-sm);
+  }
+  .nf-msg--mine[data-run="middle"] .nf-bubble,
+  .nf-msg--mine[data-run="last"] .nf-bubble {
+    border-start-end-radius: var(--nf-radius-sm);
+  }
+  .nf-msg:not(.nf-msg--mine)[data-run="first"] .nf-bubble,
+  .nf-msg:not(.nf-msg--mine)[data-run="middle"] .nf-bubble {
+    border-end-start-radius: var(--nf-radius-sm);
+  }
+  .nf-msg:not(.nf-msg--mine)[data-run="middle"] .nf-bubble,
+  .nf-msg:not(.nf-msg--mine)[data-run="last"] .nf-bubble {
+    border-start-start-radius: var(--nf-radius-sm);
+  }
+
+  /* ---------------------------------------------------- the day, a chip */
+
+  /* The day rides at the top of the thread while its messages scroll under
+     it, a small soft rectangle rather than a rule across the screen. */
+  .nf-thread__scroll .nf-divider-day {
+    position: sticky;
+    inset-block-start: var(--nf-space-2xs);
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    margin-block: var(--nf-space-xs);
+    pointer-events: none;
+  }
+  .nf-thread__scroll .nf-divider-day::before,
+  .nf-thread__scroll .nf-divider-day::after {
+    display: none;
+  }
+  .nf-thread__scroll .nf-divider-day > span {
+    padding: var(--nf-space-3xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-elevated);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    box-shadow: var(--nf-elevation-floating);
+  }
+
+  /* ------------------------------------------------ the new-messages pill */
+
+  .nf-thread__jump-anchor {
+    position: relative;
+    block-size: 0;
+    z-index: 3;
+  }
+  .nf-thread__newpill {
+    position: absolute;
+    inset-block-end: var(--nf-space-sm);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 2.5rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-elevated);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: var(--nf-elevation-floating);
+    animation: nf-g1-pill-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-thread__newpill::before {
+    content: "";
+    position: absolute;
+    inset: -0.125rem 0;
+  }
+  .nf-thread__jump {
+    position: absolute;
+    inset-block-end: var(--nf-space-sm);
+    inset-inline-end: 0;
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-elevated);
+    color: var(--nf-content-primary);
+    box-shadow: var(--nf-elevation-floating);
+    animation: nf-g1-pill-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  .nf-thread__newpill:active,
+  .nf-thread__jump:active {
+    scale: var(--nf-press-scale-sm);
+  }
+  @keyframes nf-g1-pill-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.375rem);
+    }
+  }
+
+  /* ------------------------------------------------- on the keyboard */
+
+  /* With the keyboard up the bottom of the view is the top of the keys, where
+     no home indicator is: the safe-area padding would be dead air. */
+  :root[data-keyboard="open"] form.nf-composer {
+    padding-block-end: var(--nf-space-xs);
+  }
+
+  /* ------------------------------------ talk to a person (the assistant) */
+
+  /* Under the assistant's composer: one quiet way to a person, centred. */
+  .nf-ai__person {
+    display: flex;
+    justify-content: center;
+    margin-block-start: var(--nf-space-2xs);
+  }
+  /* The inner page (`PersonHandoff`). */
+  .nf-person {
+    padding-block-start: var(--nf-space-md);
+  }
+  .nf-person__ticket {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3.5rem;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+  }
+  .nf-person__ticket:active {
+    scale: var(--nf-press-scale-sm);
+  }
+  .nf-person__tile {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+  .nf-person__context {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    font-weight: 600;
+    color: var(--nf-content-secondary);
+  }
+  .nf-person__filed {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+  }
+  .nf-person__back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    justify-self: start;
+    min-block-size: 2.75rem;
+    color: var(--nf-content-secondary);
+    font-weight: 600;
+  }
+
+  /* -------------------------------------------------------- reduced motion */
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-composer__glyph,
+    .nf-voice-rec,
+    .nf-voice-rec__dot,
+    .nf-voice-rec__bar,
+    .nf-voice-rec__slide,
+    .nf-reactions__chip,
+    .nf-thread__newpill,
+    .nf-thread__jump {
+      animation: none;
+      transition: none;
+    }
+    form.nf-composer .nf-composer__send.nf-composer__action[data-recording] {
+      scale: 1;
+    }
+    form.nf-composer .nf-composer__send.nf-composer__action[data-recording]::after {
+      animation: none;
+      opacity: 0.6;
+    }
+  }
+}
+
+/* --------------------------------- the message menu (outside any layer) */
+
+/* The reaction row at the top: eight round choices across the menu, the
+   reader's own on the brand tint. The menu widens to carry them. */
+.nf-msg-menu:has(.nf-msg-menu__reactions) {
+  width: min(23.5rem, calc(100vw - 2 * var(--nf-space-sm)));
+}
+.nf-msg-menu__reactions {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  margin-block-end: var(--nf-space-2xs);
+  padding-block-end: var(--nf-space-2xs);
+}
+.nf-msg-menu__emoji {
+  display: grid;
+  place-items: center;
+  min-block-size: 2.75rem;
+  border: 0;
+  border-radius: var(--nf-radius-circle);
+  background: transparent;
+  font-size: 1.375rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: scale var(--nf-duration-press) var(--nf-ease-press);
+}
+.nf-msg-menu__emoji:hover,
+.nf-msg-menu__emoji:focus-visible {
+  background: var(--nf-surface-inset);
+}
+.nf-msg-menu__emoji:active {
+  scale: 1.2;
+}
+.nf-msg-menu__emoji[data-mine] {
+  background: var(--nf-brand-tint-1);
+  box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-edge-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-msg-menu__emoji {
+    transition: none;
+  }
+}
