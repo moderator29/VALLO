@@ -16,7 +16,7 @@ Ordered by member impact and business value, biased to launch readiness and to m
 | 1 | FB1 | Every action reports through the one FeedbackBanner, with a census of 40 named actions | They always know a tap worked, or exactly why it did not | M | frontend |
 | 2 | N1 | Five-tab dock with Messages promoted to the bar and the "More" grid retired | Their conversations are one tap away, with a live unread badge | M | frontend |
 | 3 | VIS1 | Page sweep on PageFrame: one surface, radius and spacing scale, busiest 30 routes first | Every screen looks like the same calm, expensive product | L | frontend |
-| 4 | VIS2 | Thin chrome icons in one family, active state as fill (decided) | The shell stops looking heavy and cartoonish | M | frontend |
+| 4 | VIS2 | One icon family and size scale, active state as fill; stroke weights unchanged (founder: do not make icons thin) | The shell stops looking heavy and cartoonish | M | frontend |
 | 5 | IOS1 | Status bar style follows each screen | No dark text on the navy header, the clearest "website" tell | S | frontend, Capacitor |
 | 6 | AND6 | Light render profile on budget Android (no blur, fewer animations) | Smooth scrolling on the 2 to 3 GB phones most Nigerians carry | S | frontend |
 | 7 | ONB6 | One "1 thing to fix" deal gate (phone, then verification) that returns to the deal | Nothing blocks sign-up, and the check appears only when it matters | M | frontend, backend |

@@ -995,5 +995,114 @@
 .nf-inbox-menu button:disabled {
   opacity: 0.5;
 }
+
+/* A CARD IN A CHAT CAN BE TAKEN OUT (founder, 7 November 2026). */
+.nf-card-removable {
+  position: relative;
+}
+.nf-card-remove {
+  position: absolute;
+  inset-block-start: var(--nf-space-xs);
+  inset-inline-end: var(--nf-space-xs);
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-surface-elevated);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  color: var(--nf-content-secondary);
+}
+.nf-card-remove::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+.nf-card-remove:active {
+  scale: var(--nf-press-scale-sm);
+}
+
+/*
+ * THE CHAT BOX (reference R58). One rounded box: the words on top, the photo
+ * button bottom left, a round send bottom right. No hairline above it and
+ * none under the thread header: the founder asked for fewer lines. Written
+ * under `form.nf-composer` so it wins over threads.css by specificity.
+ */
+form.nf-composer {
+  display: block;
+  padding: var(--nf-space-xs) 0 max(var(--nf-space-xs), env(safe-area-inset-bottom));
+  border-block-start: 0;
+  background: transparent;
+}
+.nf-composer__box {
+  display: grid;
+  gap: var(--nf-space-2xs);
+  padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
+}
+.nf-composer__box:focus-within {
+  border-color: var(--nf-brand-edge-soft);
+}
+/* Beats brand-glass.css's night well (`:root:not([data-theme]) ... :not(:focus)`). */
+:root:root form.nf-composer .nf-composer__box .nf-composer__field {
+  min-height: 1.5rem;
+  max-height: 8.25rem;
+  padding: var(--nf-space-2xs) 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  resize: none;
+  line-height: 1.45;
+  font-size: var(--nf-text-body);
+}
+.nf-composer__field:focus-visible {
+  outline: none;
+}
+.nf-composer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-inline-start: calc(var(--nf-space-xs) * -1);
+}
+.nf-composer__tool {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--nf-radius-circle);
+  color: var(--nf-content-secondary);
+}
+.nf-composer__tool:active {
+  background: var(--nf-border-subtle);
+}
+form.nf-composer .nf-composer__send {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 0;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-border-default);
+  color: var(--nf-content-muted);
+  box-shadow: none;
+  transition:
+    background-color var(--nf-duration-fast) var(--nf-ease-standard),
+    scale var(--nf-duration-press) var(--nf-ease-press);
+}
+form.nf-composer .nf-composer__send[data-ready] {
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+}
+form.nf-composer .nf-composer__send:active {
+  scale: var(--nf-press-scale-sm);
+}
+/* Beats brand-glass.css's luminous hairline under the thread header. */
+:root:root .nf-thread__head.nf-thread__head {
+  border-block-end-color: transparent;
+}
 }
 

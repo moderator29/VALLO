@@ -103,10 +103,11 @@ error, info) appear only on their state marks, never as page decoration.
 ## 7. Icons
 
 - One family (`UiIcon`, Lucide geometry), one size scale (12 to 40).
-- **Grade 1 decision: the LEAN stroke everywhere, including the chrome.** The
-  founder's brief asks for "slimmer, cleaner icons ... thin and elegant line
-  icons, consistent stroke weights", which replaces the 29 September bold
-  chrome. The dock and header move from bold to lean in the icon pass (P2.3).
+- **Founder ruling, 7 November 2026: do NOT make the icons thin.** The
+  stroke weights stay as they are: the navigation chrome keeps its bold
+  stroke (29 September ruling, `css/symbols.css`) and content keeps the lean
+  default. The icon pass is about ONE family, one size scale and removing
+  inline `<svg>`, never about thinning the line.
 - Active state is the filled twin or a tint, never a different glyph.
 - Glyphs sit in soft tiles (round for content rows, square for settings rows)
   at 40px with a 20px glyph.

@@ -20,6 +20,7 @@ import { InitialsTile } from "@/components/ui/InitialsTile";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ChatCard, type ThreadCardData } from "@/components/app/messages/ChatCard";
+import { banner } from "@/lib/ui/toast";
 import { bundlePhotos, isCaption, isPhotoOnly } from "@/components/app/messages/bundle";
 import { cardRefFor, parseShare, shareHref } from "@/components/app/messages/share";
 import {
@@ -96,6 +97,14 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
  * role tags beside the names and the context card under the header, both
  * drawn by `ThreadContextBanner`.
  */
+
+/* English only for now (Grade 1); the thread's dictionary has no words yet. */
+const CARD_REMOVE_WORDS = {
+  mine: "Remove from this chat",
+  theirs: "Hide from my chat",
+  removed: "Removed from this chat",
+  hidden: "Hidden from your chat",
+};
 
 export type ThreadBubble = {
   id: string;
@@ -529,6 +538,23 @@ export function ThreadView({
         prev.map((x) => (x.id === target.id ? { ...x, body: "", imageUrl: null, deleted: true } : x)),
       );
     } else setActionNote({ tone: "error", text: asSentence(result.error) });
+  };
+  /* GRADE 1: the X on a card (a passport, a shared listing). Mine is
+     deleted for everyone; theirs is hidden for me. Said in the banner. */
+  const removeCard = async (target: ThreadBubble) => {
+    let everyone = target.mine;
+    let result = await deleteMessage({ messageId: target.id, scope: everyone ? "everyone" : "me" });
+    /* Past the window for "everyone", it still leaves this side of the chat. */
+    if (!result.ok && everyone) {
+      everyone = false;
+      result = await deleteMessage({ messageId: target.id, scope: "me" });
+    }
+    if (!result.ok) {
+      banner.error(asSentence(result.error));
+      return;
+    }
+    setItems((prev) => prev.filter((x) => x.id !== target.id));
+    banner.success(everyone ? CARD_REMOVE_WORDS.removed : CARD_REMOVE_WORDS.hidden);
   };
   /* The messages the thread opened with. Only a message that arrives AFTER
      this (sent or received while the thread is open) plays the arrival
@@ -1463,7 +1489,25 @@ export function ThreadView({
                 ) : null}
 
                 {m.card ? (
-                  <ChatCard card={m.card} thread={threadWords} />
+                  /* GRADE 1 (founder, 7 November 2026): a card in a chat is
+                     never stuck there. The X takes it out: the sender's
+                     removes it for both people, the other person's hides it
+                     on their side only. */
+                  <div className="nf-card-removable" data-kind={m.card.kind}>
+                    <ChatCard card={m.card} thread={threadWords} />
+                    {live && !m.id.startsWith("local-") ? (
+                      <button
+                        type="button"
+                        className="nf-card-remove"
+                        aria-label={m.mine ? CARD_REMOVE_WORDS.mine : CARD_REMOVE_WORDS.theirs}
+                        title={m.mine ? CARD_REMOVE_WORDS.mine : CARD_REMOVE_WORDS.theirs}
+                        data-testid="card-remove"
+                        onClick={() => void removeCard(m)}
+                      >
+                        <UiIcon name="close" size={16} />
+                      </button>
+                    ) : null}
+                  </div>
                 ) : (
                   /* Hold for the menu, swipe to reply (`BubbleGestures`). A
                      bubble still on its way has neither: there is no message
@@ -1716,33 +1760,56 @@ export function ThreadView({
           tabIndex={-1}
           onChange={(e) => pickImage(e.target.files?.[0])}
         />
-        <Button
-          variant="icon"
-          leadingIcon="picture"
-          aria-label={view.attachPhoto}
-          onClick={() => fileRef.current?.click()}
-        />
-        <label htmlFor="thread-input" className="sr-only">
-          {view.messageTo.replace("{name}", counterpartName)}
-        </label>
-        <input
-          id="thread-input"
-          type="text"
-          value={draft}
-          onChange={(e) => onDraftChange(e.target.value)}
-          placeholder={view.placeholder}
-          autoComplete="off"
-          enterKeyHint="send"
-          className="nf-composer__field"
-        />
-        <button
-          type="submit"
-          aria-label={view.send}
-          disabled={!draft.trim() && !pendingFile}
-          className="nf-composer__send"
-        >
-          <UiIcon name="arrow-right" size={ICON.inline} className="-rotate-45" />
-        </button>
+        {/* GRADE 1 (reference R58): ONE rounded box. The words on top, growing
+            to five lines; the photo button bottom left; the round send button
+            bottom right, lit only when there is something to send. */}
+        <div className="nf-composer__box">
+          <label htmlFor="thread-input" className="sr-only">
+            {view.messageTo.replace("{name}", counterpartName)}
+          </label>
+          <textarea
+            id="thread-input"
+            rows={1}
+            value={draft}
+            onChange={(e) => {
+              onDraftChange(e.target.value);
+              const el = e.currentTarget;
+              el.style.height = "auto";
+              el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
+            }}
+            onKeyDown={(e) => {
+              /* Enter sends (the keyboard's Send key); Shift and Enter is a new line. */
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault();
+                send();
+                e.currentTarget.style.height = "auto";
+              }
+            }}
+            placeholder={view.placeholder}
+            autoComplete="off"
+            enterKeyHint="send"
+            className="nf-composer__field"
+          />
+          <div className="nf-composer__row">
+            <button
+              type="button"
+              aria-label={view.attachPhoto}
+              className="nf-composer__tool"
+              onClick={() => fileRef.current?.click()}
+            >
+              <UiIcon name="picture" size={20} />
+            </button>
+            <button
+              type="submit"
+              aria-label={view.send}
+              disabled={!draft.trim() && !pendingFile}
+              className="nf-composer__send"
+              data-ready={Boolean(draft.trim() || pendingFile) || undefined}
+            >
+              <UiIcon name="arrow-up" size={20} />
+            </button>
+          </div>
+        </div>
       </form>
       {actionMsg && (
         <MessageMenu
