@@ -15,6 +15,7 @@ import type { CSSProperties, ReactNode, TouchEvent as ReactTouchEvent } from "re
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { useOverlay } from "@/lib/ui/use-overlay";
+import { useStatusBarHold } from "@/lib/native/status-bar-hold";
 import { readSheetMarker } from "@/lib/ui/use-sheet-history";
 import type { ListingKind } from "@/lib/listings/types";
 import { PhotoFrame } from "./PhotoFrame";
@@ -346,6 +347,9 @@ function Lightbox({
     closeNow();
   }, [fold, morph, foldBack, closeNow]);
   useOverlay({ open: mounted, onClose: close, panelRef: surface, autoFocus: false });
+  /* N2: the ground is near black in both themes, so the clock and battery
+     are drawn light over it while it is open. */
+  useStatusBarHold(mounted, "light");
 
   /*
    * SWIPE DOWN TO DISMISS, the gesture every phone photo viewer teaches.
