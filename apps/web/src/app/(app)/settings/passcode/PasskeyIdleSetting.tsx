@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/Switch";
 import { readLongIdle, writeLongIdle } from "@/lib/passcode/idle-setting";
 import { platformLockAvailable } from "@/lib/security/webauthn-client";
 import { BIO_ENROL_HREF } from "@/components/passcode/biometric-offer";
+import { deviceKeyState, type DeviceKeyState } from "@/lib/platform/device-keys";
 
 type BioCopy = Pick<
   Dictionary["passcode"],
@@ -27,12 +28,17 @@ type BioCopy = Pick<
  *                          fifteen minutes idle before locking instead of five
  *                          (this device only, which the row says)
  */
-export function PasskeyIdleSetting({ hasPasskey, copy }: { hasPasskey: boolean; copy: BioCopy }) {
+export function PasskeyIdleSetting({ hasPasskey: accountHasKey, copy }: { hasPasskey: boolean; copy: BioCopy }) {
   const [on, setOn] = useState(false);
+  /* The account may hold a key made on ANOTHER phone (the Face ID bug, 7
+     November 2026): this row speaks for this phone (lib/platform/device-keys.ts).
+     Until it has been read, it trusts the account, so nothing flashes. */
+  const [here, setHere] = useState<DeviceKeyState | null>(null);
   /* Null until asked: the server cannot know what this device can do. */
   const [supported, setSupported] = useState<boolean | null>(null);
   useEffect(() => {
     setOn(readLongIdle());
+    setHere(deviceKeyState());
     let live = true;
     void platformLockAvailable().then((can) => {
       if (live) setSupported(can);
@@ -42,6 +48,7 @@ export function PasskeyIdleSetting({ hasPasskey, copy }: { hasPasskey: boolean; 
     };
   }, []);
 
+  const hasPasskey = accountHasKey && (here === null || here === "has");
   if (!hasPasskey) {
     return (
       <ListGroup label={copy.bioGroup}>

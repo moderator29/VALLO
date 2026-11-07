@@ -11,6 +11,10 @@ import { TextField } from "@/components/ui/Field";
 import { useMoneyStepUp } from "@/components/app/money/MoneyStepUp";
 import { beginEnrol, finishEnrol, removeMoneyCredential, sendFallbackCode } from "@/lib/security/money-step-up-actions";
 import { createPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
+import { rememberDeviceKey } from "@/lib/platform/device-keys";
+
+/** English, like the other words added before a native speaker has read them. */
+const ARMED_WORDS = "Your password is right. Now tap below and look at your phone, or touch the sensor.";
 import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -45,6 +49,9 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   /* The enrol sheet's own error, beside its fields. Every other outcome goes
      to the one banner (Grade 1). */
   const [error, setError] = useState<string | null>(null);
+  /* The proof was accepted; the phone's own lock waits for its own tap. */
+  const [armed, setArmed] = useState<{ challenge: string; userId: string; email: string; rpId: string } | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
   useEffect(() => {
@@ -94,34 +101,60 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           }
           return;
         }
-        const made = await createPlatformKey({
-          challenge: begun.challenge,
-          userId: begun.userId,
-          email: begun.email,
-          rpId: begun.rpId,
-          rpName: "Vallo",
-          exclude: [],
-        });
-        if (!made) {
-          fail(copy.rejected);
-          return;
-        }
-        const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
-          error: "failed" as const,
-        }));
-        if ("error" in done) {
-          fail(done.error === "rejected" ? copy.rejected : copy.failed);
-          return;
-        }
-        setEnrolling(false);
-        setPassword("");
-        setCode("");
-        banner.success(MONEY_LOCK_DONE);
-        router.refresh();
+        /*
+         * TWO TAPS, ON PURPOSE (the Face ID bug, 7 November 2026). WebKit, in
+         * Safari and in the iPhone app alike, makes a passkey only inside the
+         * tap that asked for it, and the password check above is a server
+         * round trip that can spend that permission on a phone network: the
+         * Face ID sheet never rose. So the proof is checked here, and the
+         * next tap, on its own button, goes straight to the phone.
+         */
+        setArmed(begun);
+        setEnrolling(true);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
+
+  /* The second tap: the phone makes its key at once, inside the tap. */
+  const confirmKey = async () => {
+    const begun = armed;
+    if (!begun || confirming) return;
+    setConfirming(true);
+    try {
+      const made = await createPlatformKey({
+        challenge: begun.challenge,
+        userId: begun.userId,
+        email: begun.email,
+        rpId: begun.rpId,
+        rpName: "Vallo",
+        exclude: [],
+      });
+      if (!made) {
+        setError(copy.rejected);
+        return;
+      }
+      const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
+        error: "failed" as const,
+      }));
+      if ("error" in done) {
+        setError(done.error === "rejected" ? copy.rejected : copy.failed);
+        return;
+      }
+      /* This phone now holds a key (lib/platform/device-keys.ts). */
+      rememberDeviceKey(made.credentialId);
+      setArmed(null);
+      setEnrolling(false);
+      setPassword("");
+      setCode("");
+      banner.success(MONEY_LOCK_DONE);
+      router.refresh();
+    } catch (error) {
+      if (!tapFailedOffline(error)) throw error;
+    } finally {
+      setConfirming(false);
+    }
+  };
 
   const remove = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -178,10 +211,25 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         />
       )}
       {lock.sheet}
-      <Sheet open={enrolling} onOpenChange={(open) => !pending && setEnrolling(open)} title={copy.settingsTitle} detents={[0.6]}>
+      <Sheet
+        open={enrolling}
+        onOpenChange={(open) => {
+          if (pending || confirming) return;
+          setEnrolling(open);
+          if (!open) setArmed(null);
+        }} title={copy.settingsTitle} detents={[0.6]}>
         <div className="space-y-row">
-          <p className="nf-body text-[var(--nf-content-secondary)]">{staff ? copy.staffFirstKey : copy.settingsPasswordFirst}</p>
-          {staff ? (
+          {armed ? (
+            <>
+              <p className="nf-body text-[var(--nf-content-secondary)]">{ARMED_WORDS}</p>
+              <Button type="button" variant="primary" full loading={confirming} disabled={confirming} onClick={() => void confirmKey()} data-testid="money-lock-confirm-key">
+                {copy.settingsEnrol}
+              </Button>
+            </>
+          ) : (
+            <p className="nf-body text-[var(--nf-content-secondary)]">{staff ? copy.staffFirstKey : copy.settingsPasswordFirst}</p>
+          )}
+          {armed ? null : staff ? (
             <>
               {staffNeedsPassword && (
                 <TextField
@@ -271,7 +319,16 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
               </Button>
             </>
           )}
-          <Button type="button" variant="ghost" full disabled={pending} onClick={() => setEnrolling(false)}>
+          <Button
+            type="button"
+            variant="ghost"
+            full
+            disabled={pending || confirming}
+            onClick={() => {
+              setArmed(null);
+              setEnrolling(false);
+            }}
+          >
             {copy.cancel}
           </Button>
           {error && (
