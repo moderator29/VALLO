@@ -5,7 +5,7 @@ import { readMyPayments } from "@/lib/money/history";
 import { RowDownload } from "@/components/app/account/rows";
 import { parseBefore } from "@/lib/money/history-model";
 import { HISTORY_NOT_A_BALANCE } from "@/lib/money/copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -50,7 +50,8 @@ export default async function PaymentsPage({
 
   return (
     <main className="nf-page nf-md nf-history">
-      <PageHeader title={words.title} fallback="/home" />
+      <PageFrame title={words.title} fallback="/home">
+      <div>
 
       {read.state === "signed-out" ? (
         <EmptyState
@@ -90,6 +91,8 @@ export default async function PaymentsPage({
         />
         </>
       )}
+      </div>
+    </PageFrame>
     </main>
   );
 }

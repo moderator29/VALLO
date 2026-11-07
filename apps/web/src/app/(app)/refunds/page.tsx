@@ -3,7 +3,7 @@ import { getLocale } from "@/lib/locale";
 import { readMyPayments } from "@/lib/money/history";
 import { parseBefore } from "@/lib/money/history-model";
 import { REFUNDS_LEDE, REFUNDS_TITLE } from "@/lib/money/copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -35,7 +35,8 @@ export default async function RefundsPage({
 
   return (
     <main className="nf-page nf-md nf-history">
-      <PageHeader title={REFUNDS_TITLE} fallback="/payments" />
+      <PageFrame title={REFUNDS_TITLE} fallback="/payments">
+      <div>
       {read.state === "signed-out" ? (
         <EmptyState
           icon="receipt-check"
@@ -60,6 +61,8 @@ export default async function RefundsPage({
           protectedRailOpen={protectedRailOpen}
         />
       )}
+      </div>
+    </PageFrame>
     </main>
   );
 }

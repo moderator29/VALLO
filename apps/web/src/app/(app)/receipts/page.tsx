@@ -4,7 +4,7 @@ import { readMyPayments } from "@/lib/money/history";
 import { parseBefore } from "@/lib/money/history-model";
 import { parseVaultKind, parseVaultQuery, vaultEntries } from "@/lib/money/vault";
 import { PARTNERS_SHORT, RECEIPTS_EMPTY_BODY, RECEIPTS_EMPTY_TITLE, RECEIPTS_LEDE, RECEIPTS_TITLE } from "@/lib/money/copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -39,7 +39,8 @@ export default async function ReceiptsPage({
 
   return (
     <main className="nf-page nf-md">
-      <PageHeader title={RECEIPTS_TITLE} fallback="/payments" />
+      <PageFrame title={RECEIPTS_TITLE} fallback="/payments">
+      <div>
       {read.state === "signed-out" ? (
         <EmptyState
           icon="receipt-check"
@@ -83,6 +84,8 @@ export default async function ReceiptsPage({
           <p className={TYPE.rowMeta}>{PARTNERS_SHORT}</p>
         </div>
       )}
+      </div>
+    </PageFrame>
     </main>
   );
 }
