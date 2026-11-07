@@ -6,7 +6,7 @@ export const CIRCLE_COPY = {
   title: "Vallo Circle",
   tagline: "Ask, share and learn about homes, areas and property",
   heroLine: "The community of renters, owners, agents and professionals on Vallo.",
-  stats: { members: ["member", "members"], posts: ["post", "posts"], active: ["active this week", "active this week"], communities: ["community", "communities"] },
+  stats: { members: ["member", "members"], posts: ["post", "posts"], active: ["active this week", "active this week"], activeShort: ["active this week", "active"], communities: ["community", "communities"] },
   toFeed: "Feed",
   ask: "Ask the community",
   start: "Start a community",

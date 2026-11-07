@@ -84,7 +84,7 @@ export function JoinControl({
   if (state === "active") {
     return (
       <Button
-        variant="secondary"
+        variant="quiet"
         size="md"
         loading={pending}
         data-testid="circle-leave"

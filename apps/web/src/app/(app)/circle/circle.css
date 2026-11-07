@@ -337,7 +337,7 @@
     gap: var(--nf-space-3xs);
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-act-radius-sm);
-    background: var(--nf-surface-inset);
+    background: color-mix(in oklab, var(--nf-content-primary) 7%, transparent);
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
     font-weight: 600;
@@ -520,6 +520,36 @@
     gap: var(--nf-space-xs);
     min-inline-size: 0;
   }
+  .nf-cthread__qmark {
+    display: grid;
+    place-items: center;
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    font-family: var(--nf-font-display);
+    font-weight: 800;
+  }
+  .nf-cthread__qword {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .nf-cthread__answered {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    margin-inline-start: auto;
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-act-radius-sm);
+    background: var(--nf-state-success-surface);
+    color: var(--nf-state-success);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+  }
   .nf-cthread__community {
     display: inline-flex;
     align-items: center;
@@ -527,7 +557,7 @@
     min-block-size: 2rem;
     padding-inline: var(--nf-space-xs);
     border-radius: var(--nf-act-radius-sm);
-    background: var(--nf-surface-inset);
+    background: var(--nf-brand-tint-1);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
     font-weight: 700;

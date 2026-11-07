@@ -1,5 +1,5 @@
 import "server-only";
-import { androidChannelFor } from "../family";
+import { CHIME_ANDROID, androidChannelFor } from "../family";
 
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
 
@@ -252,6 +252,9 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
                  on the manifest default; it is tinted with the brand accent
                  by `default_notification_color` (@color/vallo_notification). */
               icon: "ic_stat_vallo",
+              /* A10: the chime, for Android 7 and below (from Android 8 the
+                 channel's own sound plays, set when the shell creates it). */
+              ...(payload.quiet || payload.call ? {} : { sound: CHIME_ANDROID }),
               /* Android's own collapsing, so one conversation is one row in
                  the shade rather than eleven. */
               tag: payload.tag,

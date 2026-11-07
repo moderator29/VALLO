@@ -1,5 +1,5 @@
 import "server-only";
-import { familyCategory } from "../family";
+import { CHIME_IOS, familyCategory } from "../family";
 
 import { connect, constants, type ClientHttp2Session } from "node:http2";
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
@@ -190,7 +190,11 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
       alert: { title: payload.title, ...(payload.subtitle ? { subtitle: payload.subtitle } : {}), body: payload.body },
       /* The category the Notification Service Extension and any buttons key off. */
       ...(payload.category ? { category: familyCategory(payload.category) } : {}),
-      sound: payload.urgent ? "default" : undefined,
+      /* A10 (founder, 7 November 2026): Vallo's own chime, `vallo_chime.caf`
+         in the app bundle from build 1.0.2 (an older binary plays the
+         system's default instead). An fyi stays silent; a call's ring keeps
+         the system's ring. iOS's own silent switch and Focus still decide. */
+      sound: payload.quiet ? undefined : payload.call ? "default" : CHIME_IOS,
       /* A call's ring breaks through a Focus that allows time sensitive
          notifications; iOS has no native ringing without CallKit. */
       ...(payload.call ? { "interruption-level": "time-sensitive" } : {}),

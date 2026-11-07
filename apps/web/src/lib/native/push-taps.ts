@@ -46,11 +46,13 @@ type PushPlugin = {
     visibility?: number;
     vibration?: boolean;
     lights?: boolean;
+    /** A file in the app's `res/raw`, e.g. "vallo_chime.wav". */
+    sound?: string;
   }) => Promise<void>;
 };
 
 import { sameOriginPath } from "../push/same-origin";
-import { ANDROID_CHANNELS } from "../push/family";
+import { ANDROID_CHANNELS, CHIME_ANDROID_FILE } from "../push/family";
 
 const FALLBACK = "/notifications";
 
@@ -106,10 +108,23 @@ export async function startPushTaps(channelName: string): Promise<() => void> {
        silence Offers in the system settings and keep Messages
        (lib/push/family.ts). A push for a channel this phone does not have yet
        falls back to the manifest's default channel, so none is lost. */
-    for (const channel of ANDROID_CHANNELS) {
-      void plugin
-        .createChannel({ id: channel.id, name: channel.name, description: channel.description, importance: channel.importance })
-        .catch(() => undefined);
+    /* A10: each family channel sounds Vallo's chime (`res/raw/vallo_chime.wav`).
+       A channel's sound is fixed the moment it is created, so they are created
+       only by a binary that carries the file (1.0.2, which has Vallo's own
+       shell plugin); on an older one they are not created at all and those
+       pushes fall back to the default channel, until the update. */
+    if (Capacitor.isPluginAvailable("ValloShell")) {
+      for (const channel of ANDROID_CHANNELS) {
+        void plugin
+          .createChannel({
+            id: channel.id,
+            name: channel.name,
+            description: channel.description,
+            importance: channel.importance,
+            ...(channel.importance >= 3 ? { sound: CHIME_ANDROID_FILE } : {}),
+          })
+          .catch(() => undefined);
+      }
     }
     void plugin
       .createChannel({ id: "vallo_calls", name: "Calls", importance: 5, visibility: 1, vibration: true, lights: true })

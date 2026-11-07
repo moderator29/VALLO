@@ -18,6 +18,7 @@
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
 		C15A0B012FF0A00000C0FFEE /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C15A0B022FF0A00000C0FFEE /* PrivacyInfo.xcprivacy */; };
 		C15A0B032FF0A00000C0FFEE /* ValloShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15A0B042FF0A00000C0FFEE /* ValloShell.swift */; };
+		C15A0B052FF0A00000C0FFEE /* vallo_chime.caf in Resources */ = {isa = PBXBuildFile; fileRef = C15A0B062FF0A00000C0FFEE /* vallo_chime.caf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
 		C15A0B022FF0A00000C0FFEE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C15A0B042FF0A00000C0FFEE /* ValloShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValloShell.swift; sourceTree = "<group>"; };
+		C15A0B062FF0A00000C0FFEE /* vallo_chime.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = vallo_chime.caf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
 				504EC3131FED79650016851F /* Info.plist */,
 				C15A0B022FF0A00000C0FFEE /* PrivacyInfo.xcprivacy */,
+				C15A0B062FF0A00000C0FFEE /* vallo_chime.caf */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
 			);
@@ -156,6 +159,7 @@
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
 				C15A0B012FF0A00000C0FFEE /* PrivacyInfo.xcprivacy in Resources */,
+				C15A0B052FF0A00000C0FFEE /* vallo_chime.caf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

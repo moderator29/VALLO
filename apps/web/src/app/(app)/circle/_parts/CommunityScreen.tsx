@@ -36,9 +36,9 @@ export function CommunityScreen({
   const isRunner = isMember && (membership?.role === "owner" || membership?.role === "moderator");
   const base = `/circle/c/${community.slug}`;
   const stats = [
-    { key: "members", n: community.members, w: CIRCLE_COPY.card.members },
-    { key: "posts", n: community.posts, w: CIRCLE_COPY.card.posts },
-    { key: "active", n: page.active, w: CIRCLE_COPY.stats.active },
+    { key: "members", n: community.members, w: CIRCLE_COPY.card.members, say: CIRCLE_COPY.card.members },
+    { key: "posts", n: community.posts, w: CIRCLE_COPY.card.posts, say: CIRCLE_COPY.card.posts },
+    { key: "active", n: page.active, w: CIRCLE_COPY.stats.activeShort, say: CIRCLE_COPY.stats.active },
   ] as const;
 
   return (
@@ -79,7 +79,7 @@ export function CommunityScreen({
           {community.description ? <p className="nf-ccom__about">{community.description}</p> : null}
           <dl className="nf-ccom__stats" data-testid="community-counts">
             {stats.map((s) => (
-              <div key={s.key} className="nf-ccom__stat" aria-label={countWords(s.n, s.w[0], s.w[1])}>
+              <div key={s.key} className="nf-ccom__stat" aria-label={countWords(s.n, s.say[0], s.say[1])}>
                 <dd className="nf-ccom__stat-n nf-numeric" aria-hidden="true">
                   {compactCount(s.n)}
                 </dd>

@@ -120,3 +120,42 @@ describe("A1: the iOS Notification Service Extension source", () => {
     expect(readFileSync(`${root}src/lib/push/transport/apns.ts`, "utf8")).toContain('"mutable-content": 1');
   });
 });
+
+describe("A10: Vallo's chime", () => {
+  it("is in both native projects, as a real PCM file, and the iOS file is in the app bundle", async () => {
+    const { readFileSync, existsSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const { CHIME_IOS, CHIME_ANDROID, CHIME_ANDROID_FILE } = await import("./family");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const caf = readFileSync(`${root}ios/App/App/${CHIME_IOS}`);
+    expect(caf.subarray(0, 4).toString("latin1")).toBe("caff");
+    expect(caf.includes(Buffer.from("lpcm"))).toBe(true);
+    const wav = readFileSync(`${root}android/app/src/main/res/raw/${CHIME_ANDROID_FILE}`);
+    expect(wav.subarray(0, 4).toString("latin1")).toBe("RIFF");
+    expect(CHIME_ANDROID_FILE.startsWith(CHIME_ANDROID)).toBe(true);
+    /* Under 30 seconds (iOS refuses longer) and small. */
+    expect(caf.length).toBeLessThan(200_000);
+    const pbx = readFileSync(`${root}ios/App/App.xcodeproj/project.pbxproj`, "utf8");
+    const resources = pbx.match(/isa = PBXResourcesBuildPhase;[\s\S]*?files = \(([\s\S]*?)\);/)?.[1] ?? "";
+    expect(resources).toContain(`${CHIME_IOS} in Resources`);
+    expect(existsSync(`${root}ios/App/App/${CHIME_IOS}`)).toBe(true);
+  });
+
+  it("is named in the payloads, never for an fyi, and the ring keeps the ring", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const apns = readFileSync(`${root}src/lib/push/transport/apns.ts`, "utf8");
+    const fcm = readFileSync(`${root}src/lib/push/transport/fcm.ts`, "utf8");
+    expect(apns).toContain('sound: payload.quiet ? undefined : payload.call ? "default" : CHIME_IOS');
+    expect(fcm).toContain("...(payload.quiet || payload.call ? {} : { sound: CHIME_ANDROID })");
+  });
+
+  it("the in-app chime keeps quiet unless it is on, on screen and not just played", async () => {
+    const { chimeAllowed, MIN_GAP_MS } = await import("@/lib/platform/chime");
+    expect(chimeAllowed({ on: true, visible: true, now: 10_000, last: 0 })).toBe(true);
+    expect(chimeAllowed({ on: false, visible: true, now: 10_000, last: 0 })).toBe(false);
+    expect(chimeAllowed({ on: true, visible: false, now: 10_000, last: 0 })).toBe(false);
+    expect(chimeAllowed({ on: true, visible: true, now: 10_000, last: 10_000 - MIN_GAP_MS + 1 })).toBe(false);
+  });
+});

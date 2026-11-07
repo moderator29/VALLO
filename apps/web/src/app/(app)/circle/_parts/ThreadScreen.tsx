@@ -32,10 +32,10 @@ export function ThreadScreen({ thread, now, fallback }: { thread: Thread; now: n
           <span className="nf-cthread__eyebrow">
             {question ? (
               <>
-                <span className="nf-ccard__q-mark" aria-hidden="true">
+                <span className="nf-cthread__qmark" aria-hidden="true">
                   ?
                 </span>
-                <span className="nf-ccard__q-word">{CIRCLE_COPY.card.question}</span>
+                <span className="nf-cthread__qword">{CIRCLE_COPY.card.question}</span>
               </>
             ) : null}
             {post.community ? (
@@ -45,7 +45,7 @@ export function ThreadScreen({ thread, now, fallback }: { thread: Thread; now: n
               </Link>
             ) : null}
             {question && thread.acceptedId ? (
-              <span className="nf-ccard__answered">
+              <span className="nf-cthread__answered">
                 <UiIcon name="check" size={14} />
                 {CIRCLE_COPY.card.answered}
               </span>

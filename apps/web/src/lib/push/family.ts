@@ -82,3 +82,15 @@ export function androidChannelFor(payload: { call?: boolean; quiet?: boolean; ta
   if (!payload.category || payload.category === "calls") return "vallo_default";
   return INFO[payload.category].androidChannel;
 }
+
+/**
+ * A10 (founder, 7 November 2026): Vallo's own notification sound, a short
+ * two-note bell (A5 then E6, 0.8 s), in the iOS bundle as `vallo_chime.caf`
+ * and in Android's `res/raw/vallo_chime.wav`, both from build 1.0.2 (the
+ * same samples in two containers). The names here must match the files,
+ * which `lib/push/rich-push.test.ts` checks.
+ */
+export const CHIME_IOS = "vallo_chime.caf";
+export const CHIME_ANDROID = "vallo_chime";
+/** The Android channel sound, as the push plugin's `createChannel` takes it. */
+export const CHIME_ANDROID_FILE = "vallo_chime.wav";
