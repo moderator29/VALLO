@@ -20,12 +20,12 @@ export function bannerGlyph(n: { kind: string; title: string; href: string | nul
   switch (familyOf(n)) {
     case "money":
       return "empty-payments";
-    case "trust":
-      return "shield-check";
-    case "spaces":
+    case "bookings":
       return "house";
     case "messages":
       return "chat";
+    case "activity":
+      return /verif|badge|passport|sign-?in|device/i.test(n.title) ? "shield-check" : "empty-notifications";
     default:
       return "empty-notifications";
   }

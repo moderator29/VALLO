@@ -20,13 +20,15 @@ export const experienceInboxEn = {
     preferences: "Preferences",
     preferencesLabel: "Notification preferences",
     filterLabel: "Filter notifications by kind",
+    /* The lock screen's words (lib/push/family.ts), so a push and its tab agree. */
     families: {
       all: "All",
-      money: "Money",
-      trust: "Trust",
-      spaces: "Spaces",
       messages: "Messages",
-      account: "Account",
+      bookings: "Bookings",
+      money: "Money",
+      activity: "Activity",
+      offers: "Offers",
+      calls: "Calls",
     },
     sections: {
       needsYou: "Needs you",

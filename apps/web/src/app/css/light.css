@@ -262,14 +262,18 @@
     color: var(--nf-content-on-brand);
     box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--nf-brand-primary) 70%, transparent);
   }
-  /* The Circle tab by day: the brand plate, no bloom; chosen, the soft
-     brand drop the open menu used to wear. */
+  /* The Circle tab by day: the same solid blue disc (shell-m.css), its drop
+     a touch softer on white. */
   :root[data-theme="light"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
-    color: var(--nf-brand-primary);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 28%, transparent),
+      0 6px 14px -8px color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
   }
   :root[data-theme="light"] .nf-tab-circle[aria-current="page"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
-    background: var(--nf-brand-tint-3);
-    box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 36%, transparent),
+      0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 20%, transparent),
+      0 8px 18px -8px color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
   }
   /* The tray's glyph tiles: a whisper of brand on white, the glyph blue. */
   :root[data-theme="light"] .nf-dockmore__glyph:not(:where([data-theme="dark"] *)) {

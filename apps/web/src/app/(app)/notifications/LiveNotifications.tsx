@@ -53,7 +53,8 @@ import {
  * I deal with on Tuesday" is the question that section answers. New in this
  * pass:
  *
- *   FILTER CHIPS. All, Money, Trust, Spaces, Messages, Account. The family is
+ *   FILTER CHIPS. All, Messages, Bookings, Money, Activity, Offers (the lock
+ *   screen's words, lib/push/family.ts). The family is
  *   read from the row (`family.ts`), because the row carries no family of its
  *   own yet; each chip carries how many of ITS rows are unread.
  *
@@ -203,7 +204,7 @@ export function LiveNotifications({
 
   /* Unread per family, for the chips. */
   const unreadBy = useMemo(() => {
-    const out: Record<NotificationFamily, number> = { money: 0, trust: 0, spaces: 0, messages: 0, account: 0 };
+    const out: Record<NotificationFamily, number> = { messages: 0, bookings: 0, money: 0, activity: 0, offers: 0 };
     for (const n of items) if (!n.read) out[familyOf(n)] += 1;
     return out;
   }, [items]);
@@ -502,7 +503,7 @@ function RowBody({ n, c, locale, family }: { n: NotificationItem; c: Copy; local
         <span className="nf-list-row__title">{warmTitle(n.title)}</span>
         {n.body ? <span className="nf-list-row__sub nf-notif__body">{warmBody(n.body)}</span> : null}
         <span className="nf-notif__meta">
-          <span className="nf-notif__kind">{c.families[family]}</span>
+          <span className="nf-notif__kind">{isCallRow(n) ? c.families.calls : c.families[family]}</span>
           <FigureLine n={n} locale={locale} />
           <span className="nf-notif__time nf-numeric">{lagosTimeLabel(n.createdAt)}</span>
         </span>
