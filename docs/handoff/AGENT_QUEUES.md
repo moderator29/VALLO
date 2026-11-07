@@ -26,7 +26,11 @@ agents never commit, push, deploy, open a preview or trigger Actions.
    current weight; the bottom bar and side nav keep their structure; English
    only for new copy; Vallo's own look, never a copy of another app; reduced
    motion always honoured; nothing that names a person in logs.
-7. **Hand-off after each job** is a short message to the lead (files
+7. **The page ledger** (`docs/handoff/PAGE_LEDGER.md`, all 267 pages): the
+   founder said many pages get forgotten. Every page you pass you tick there
+   in the same change (Frame, Light, Dark, 360, a note). A job is not done
+   while a page it touched is unticked.
+8. **Hand-off after each job** is a short message to the lead (files
    changed, gates run with results, Also improved, Recommend next), then
    go straight on to the next job in your queue without waiting for a reply.
 

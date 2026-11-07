@@ -41,7 +41,9 @@ export function CountryPicker({
         </span>
         <span className="nf-g1-country__name">{countryName(code)}</span>
         {value === code ? (
-          <UiIcon name="check" size={20} className="nf-g1-country__tick" />
+          <span className="nf-g1-country__tick" aria-hidden="true">
+            <UiIcon name="check" size={14} />
+          </span>
         ) : (
           <span className="nf-g1-country__code">{code}</span>
         )}

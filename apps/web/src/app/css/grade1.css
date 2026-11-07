@@ -437,7 +437,17 @@
   min-inline-size: 0;
 }
 .nf-g1step__actions > :last-child {
-  min-inline-size: 7.5rem;
+  min-inline-size: 9.5rem;
+}
+/* The step's Continue while it is waiting for an answer (founder, 7 November
+   2026: the grey outlined box read as dead and not Vallo). Here, and only
+   here, a waiting primary stays a softened brand blue: plainly "not yet",
+   still the same button that lights up the moment the question is answered.
+   Everywhere else the calm grey disabled recipe in buttons.css stands. */
+.nf-g1step__foot .nf-btn--primary:disabled:not([data-loading="true"]) {
+  color: color-mix(in oklab, var(--nf-content-on-brand) 78%, transparent);
+  background: color-mix(in oklab, var(--nf-brand-primary) 38%, var(--nf-surface-canvas));
+  border-color: transparent;
 }
 @media (prefers-reduced-motion: reduce) {
   .nf-g1step__page,
@@ -656,19 +666,33 @@
 }
 
 /* THE COUNTRY PICKER (reference R36). */
+/* A filled field with no outline at rest, the way a native search field
+   reads; the brand edge and a soft ring arrive with the cursor. */
 .nf-g1-search {
   display: flex;
   align-items: center;
   gap: var(--nf-space-xs);
-  min-block-size: 3.25rem;
-  padding-inline: var(--nf-space-md);
-  border: var(--nf-border-width) solid var(--nf-border-default);
-  border-radius: var(--nf-radius-md);
-  background: var(--nf-surface-inset);
-  color: var(--nf-content-secondary);
+  min-block-size: 3rem;
+  padding-inline: var(--nf-space-sm) var(--nf-space-md);
+  border: var(--nf-border-width) solid transparent;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-muted);
+  transition:
+    border-color var(--nf-duration-fast) var(--nf-ease-standard),
+    box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
 }
 .nf-g1-search:focus-within {
   border-color: var(--nf-brand-primary);
+  box-shadow: 0 0 0 0.25rem var(--nf-brand-tint-1);
+  color: var(--nf-brand-primary);
+}
+.nf-g1-search input::placeholder {
+  color: var(--nf-content-muted);
+}
+.nf-g1-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 .nf-g1-search input {
   flex: 1;
@@ -682,11 +706,20 @@
   display: grid;
   gap: var(--nf-space-sm);
 }
+/* The list is the page's own surface, not a box in a box: grouped rows on
+   one quiet card, an inset hairline between rows, no outer frame. */
 .nf-g1-countries__list {
-  border: var(--nf-border-width) solid var(--nf-border-default);
   border-radius: var(--nf-radius-xl);
   background: var(--nf-surface-secondary);
-  padding-block: var(--nf-space-xs);
+  padding-block: var(--nf-space-2xs) var(--nf-space-xs);
+  overflow: hidden;
+}
+.nf-g1-countries__list li + li .nf-g1-country::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: calc(var(--nf-space-md) + 2.75rem) 0;
+  border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
 }
 .nf-g1-countries__group {
   padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-2xs);
@@ -702,6 +735,7 @@
   font-size: var(--nf-text-body-sm);
 }
 .nf-g1-country {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -710,24 +744,49 @@
   min-block-size: 3.25rem;
   padding-inline: var(--nf-space-md);
   text-align: start;
+  transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
 }
-.nf-g1-country:active,
+.nf-g1-country:active {
+  background: var(--nf-brand-tint-1);
+}
 .nf-g1-country[aria-pressed="true"] {
   background: var(--nf-brand-tint-1);
 }
+.nf-g1-country[aria-pressed="true"] .nf-g1-country__name {
+  color: var(--nf-brand-primary);
+  font-weight: 600;
+}
+/* The flag sits on a small rounded plate, so emoji flags of every shape line
+   up as one column. */
 .nf-g1-country__flag {
-  font-size: 1.375rem;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-surface-inset);
+  font-size: 1.125rem;
   line-height: 1;
 }
 .nf-g1-country__name {
   font-size: var(--nf-text-body);
+  color: var(--nf-content-primary);
 }
 .nf-g1-country__code {
   color: var(--nf-content-muted);
   font-size: var(--nf-text-caption);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
+/* The choice: a filled brand disc with a white tick, the platform's "done". */
 .nf-g1-country__tick {
-  color: var(--nf-brand-primary);
+  display: grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
 }
 
 /* ONE SIDE OF AN ID (`IdCapture`; references R37, R39). */
