@@ -26,7 +26,7 @@ function sheets(dir: string): string[] {
 
 const CONTROL = /(chip|tab(?!le)|seg|pill|btn|button|toggle|option|choice)(?![\w-]*(thumb|dot|track|tip|count|badge|icon|plate|glyph|readout))[\w-]*\s*(?:[:[.,{]|$)/i;
 const INK_FILL =
-  /^(var\(--nf-(content-primary|surface-inverse|content-inverse)\)|#0{3}\b|#000000|black|rgb\(0[ ,]+0[ ,]+0\)|#0[0-9a-f]{5}\b|#1[0-2][0-9a-f]{4}\b)/i;
+  /^(var\(--nf-(content-primary|surface-inverse|content-inverse|surface-inset)\)|#0{3}\b|#000000|black|rgb\(0[ ,]+0[ ,]+0\)|#0[0-9a-f]{5}\b|#1[0-2][0-9a-f]{4}\b)/i;
 
 /* Not controls: the connection strip is a status line (Agent NATIVE's,
    `components/app/offline`), read only, with no tap. */

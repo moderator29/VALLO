@@ -1,15 +1,19 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BrandIcon, type BrandIconName } from "@/design-system/icons/BrandIcon";
-import { Button } from "@/components/ui/Button";
-import { BackControl } from "@/components/ui/BackControl";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { Surface, TYPE } from "@/components/app/Screen";
-import { ProgressRing } from "./ProgressPath";
 
 /**
  * THE FRAME EVERY SCREEN OF THE THREE REGISTRATION FORMS STANDS IN.
+ *
+ * Since round 3 (SW5, November 2026) it is the platform's `StepFrame`: back,
+ * close, the thin progress bar, the eyebrow (the form's name), the heading,
+ * one line, the screen, and Continue in the sticky foot with "Step N of M".
+ * The private progress ring and step row are retired; the API is unchanged so
+ * the three forms did not move. The notes below are the history of why.
  *
  * `GOVERNING-03`, `04` and `05` are twelve screens and one anatomy: a back
  * square beside the form's own name, the progress row of small filled
@@ -47,28 +51,28 @@ export function RegisterShell({
   primary,
   secondary,
   error,
+  closeHref = "/profile/setup",
+  closeLabel = "Close",
 }: {
-  /** The form's own name, on the top row: "Register as an owner". */
+  /** The form's own name: the step frame's eyebrow, "Register as an owner". */
   formTitle: string;
   /**
-   * This screen's heading, the loudest thing on it. An empty string draws no
-   * heading element at all, which the confirmation screen wants: it carries
-   * its own heading under its object, and an empty `h2` is still a heading to
-   * a screen reader.
+   * This screen's heading, the loudest thing on it. An empty string means the
+   * confirmation screen, which carries its own heading under its object: the
+   * frame then titles itself with the form's name and draws no eyebrow.
    */
   heading: string;
   sub?: string;
   steps: number;
   /** Zero based. */
   current: number;
-  /** "Step 2 of 4", spoken rather than drawn. */
+  /** "Step 2 of 4", drawn in the frame's foot and spoken by its progress bar. */
   stepOfLabel: string;
   backLabel: string;
   onBack(): void;
   /**
-   * The small glass object the top right corner used to carry. That corner is
-   * the progress ring with a count now (reference 2) on every screen, so the
-   * object is no longer drawn; the prop stays so the forms that name one
+   * The small glass object the top right corner used to carry. Not drawn
+   * since the step frame (SW5); the prop stays so the forms that name one
    * still type-check and keep saying which object belongs to the screen.
    */
   mark?: BrandIconName;
@@ -76,89 +80,65 @@ export function RegisterShell({
   primary?: { label: string; onClick(): void; disabled?: boolean; icon?: UiIconName };
   secondary?: { label: string; onClick(): void };
   /**
-   * A refusal that belongs to the whole screen rather than to one field.
-   *
-   * `role="alert"` and the error colour AND the words, because colour alone
-   * fails anybody who cannot see it.
+   * A refusal that belongs to the whole screen rather than to one field,
+   * drawn as the frame's notice. `role="alert"` and the error colour AND the
+   * words, because colour alone fails anybody who cannot see it.
    */
   error?: string | null;
+  /** Where the round X leaves to: the chooser the forms are opened from. */
+  closeHref?: string;
+  closeLabel?: string;
 }) {
+  /* The slide follows the way the member moved: forward from the right, back
+     from the left (UX_SYSTEM section 10). */
+  const [seen, setSeen] = useState(current);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  if (seen !== current) {
+    setDirection(current < seen ? "back" : "forward");
+    setSeen(current);
+  }
+
+  /* The frame always has a lit control: a screen with only the quiet one
+     (none today) promotes it rather than drawing an empty foot. */
+  const lit: { label: string; onClick(): void; disabled?: boolean } | undefined = primary ?? secondary;
+  const quiet = primary ? secondary : undefined;
+
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-heading flex items-center gap-md">
-        {/* The round control every page header draws (`PageHeader`), so the
-            setup forms under `/profile` read as the same family of screens. */}
-        <BackControl onBack={onBack} label={backLabel} surface="round" />
-        <h1 className={`min-w-0 flex-1 ${TYPE.rowTitle}`}>{formTitle}</h1>
-        {/* THE PROGRESS RING WITH A COUNT (reference 2), in the corner where
-            the governing frames draw their round object: how many of the
-            form's screens are behind the member. The confirmation screen
-            passes no heading, and by then every screen is done. */}
-        <ProgressRing done={heading ? current : steps} total={steps} size={48} />
-      </div>
-
-      <div className="nf-steprow" aria-hidden="true">
-        {Array.from({ length: steps }, (_, index) => (
-          <span key={index} className="nf-steprow__bar" data-on={index <= current || undefined} />
-        ))}
-      </div>
-      {/* The position in words, for the reader the bars tell nothing. */}
-      <p className="sr-only" aria-live="polite">
-        {stepOfLabel}
-      </p>
-
-      {/* The confirmation screen carries its own heading inside its object, so
-          it passes none here and none is drawn. An empty heading element is a
-          heading to a screen reader. */}
-      {/* Keyed by the step (Track M): each step is a new arrival, so the
-          heading comes out of depth and the body pushes forward, rather than
-          the words changing in place under a still frame. */}
-      {heading ? (
-        <h2 key={`h-${current}`} className={`mt-heading nf-flow-title ${TYPE.display}`}>
-          {heading}
-        </h2>
-      ) : null}
-      {sub ? (
-        <p key={`s-${current}`} className={`mt-inline-tight max-w-[52ch] nf-flow-sub ${TYPE.bodyLg}`}>
-          {sub}
-        </p>
-      ) : null}
-
-      <div key={`b-${current}`} className="mt-heading nf-flow-step">
-        {children}
-      </div>
-
-      {error ? (
-        <p
-          role="alert"
-          className="nf-arrive mt-heading text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
-
-      {primary || secondary ? (
-        <div className="mt-section-tight flex flex-col gap-inline">
-          {primary ? (
-            <Button
-              onClick={primary.onClick}
-              variant="primary"
-              size="lg"
-              full
-              disabled={primary.disabled ?? false}
-              {...(primary.icon ? { trailingIcon: primary.icon } : {})}
-            >
-              {primary.label}
-            </Button>
-          ) : null}
-          {secondary ? (
-            <Button onClick={secondary.onClick} variant="secondary" size="md" full>
-              {secondary.label}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+    /* SW5: THE STEP FRAME, full screen over the app like verification and the
+       listing wizard. ONE back control, the frame's own (`onBack`), which
+       steps back through the form and on the first screen leaves it. */
+    <StepFrame
+      overlay
+      testId="register-steps"
+      step={heading ? current + 1 : steps}
+      total={steps}
+      stepLabel={stepOfLabel}
+      {...(heading ? { eyebrow: formTitle } : {})}
+      title={heading || formTitle}
+      {...(sub ? { subtitle: sub } : {})}
+      direction={direction}
+      onBack={onBack}
+      backLabel={backLabel}
+      closeHref={closeHref}
+      closeLabel={closeLabel}
+      {...(error
+        ? {
+            notice: (
+              <p role="alert" className="nf-arrive text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-error)]">
+                {error}
+              </p>
+            ),
+          }
+        : {})}
+      primary={
+        lit
+          ? { label: lit.label, onClick: lit.onClick, disabled: lit.disabled ?? false, testId: "register-continue" }
+          : { label: backLabel, onClick: onBack }
+      }
+      {...(quiet ? { secondary: { label: quiet.label, onClick: quiet.onClick, testId: "register-secondary" } } : {})}
+    >
+      <div className="nf-flow-step">{children}</div>
+    </StepFrame>
   );
 }
 

@@ -500,7 +500,9 @@
    */
   .nf-segmented {
     border-radius: var(--nf-radius-control);
-    background: var(--nf-surface-inset);
+    /* The chips' soft glass, never the sunken well, which reads as a black
+       slab at night (founder, 7 November 2026: no black controls). */
+    background: var(--nf-btn-glass-fill);
     border: 1px solid var(--nf-elev-1-border);
     box-shadow: var(--nf-elev-1-rim);
   }

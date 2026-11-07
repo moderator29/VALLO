@@ -47,8 +47,11 @@ describe("profile setup: one back control to the declared parent", () => {
       expect(page).not.toContain("<BackButton");
       expect(page).toContain(`<${form} `);
       const shell = readFileSync(join(SRC, "components/supply/RegisterShell.tsx"), "utf8");
-      expect(shell.match(/<BackControl /g)?.length).toBe(1);
-      expect(shell).toMatch(/<BackControl onBack=\{onBack\} label=\{backLabel\}(?: surface="round")? \/>/);
+      /* Round 3 (SW5): the shell is the platform's StepFrame, whose ONE back
+         control is the form's `onBack`; no second arrow is drawn. */
+      expect(shell).not.toContain("<BackControl");
+      expect(shell.match(/<StepFrame\b/g)?.length).toBe(1);
+      expect(shell).toMatch(/onBack=\{onBack\}\s+backLabel=\{backLabel\}/);
       const source = readFileSync(join(SRC, `components/supply/${form}.tsx`), "utf8");
       /* The first screen leaves through the shared back (history to the
          chooser when that is where the person came from, else the declared

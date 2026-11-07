@@ -226,7 +226,10 @@
     block-size: 2.5rem;
     padding-inline: var(--nf-space-md);
     border-radius: var(--nf-act-radius-md);
-    background: var(--nf-surface-inset);
+    /* The one chip material (chips.css): the soft glass door with its brand
+       edge, never the sunken well, which reads as a black slab at night. */
+    border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+    background: var(--nf-btn-glass-fill);
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
@@ -250,6 +253,7 @@
   /* The live chip is Vallo blue, the primary button's own fill and ink
      (founder, 7 November 2026: no black buttons anywhere). */
   .nf-feed-cat[aria-current="page"] {
+    border-color: transparent;
     background: var(--nf-act-fill);
     color: var(--nf-act-on);
     box-shadow: var(--nf-act-shadow);
