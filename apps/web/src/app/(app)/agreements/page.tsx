@@ -8,6 +8,7 @@ import { EmptyState, Section, TYPE } from "@/components/app/Screen";
 import { NO_CUSTODY_SENTENCE, PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
 import { RegisterRow } from "@/components/app/agreements/RegisterRow";
 import { readKeptVersions } from "@/components/app/agreements/record-read";
+import { isSocialEnabled } from "@/lib/social/flag";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,9 +42,13 @@ export default async function AgreementsPage({
   const kept = rows && rows.length > 0 ? await readKeptVersions(rows.map((row) => row.id)) : null;
   const t = getDictionary(locale);
   const copy = t.experienceMoney.agreements;
+  /* SW16: with the feed paused, Agreements holds the dock's third slot and is
+     a root tab, so it draws no Back. With the feed on it is reached from the
+     side navigation and keeps its way up to Home. */
+  const dockRoot = !(await isSocialEnabled());
   return (
     <main className="nf-page nf-md">
-      <PageFrame title={t.nav.agreements}>
+      <PageFrame title={t.nav.agreements} back={!dockRoot} fallback="/home">
       <div>
       <p className={`${TYPE.body} mt-inline`}>{PAYMENT_GATE_SENTENCE}</p>
       <p className={`${TYPE.rowMeta} mt-inline mb-block`}>{NO_CUSTODY_SENTENCE}</p>

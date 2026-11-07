@@ -47,33 +47,49 @@ describe("the iPhone's drawn opening", () => {
   });
 });
 
-describe("Android's opening", () => {
-  it("shows the exact mark, still, on the system splash and below Android 12, at the overlay's size", () => {
-    const icon = read("android/app/src/main/res/drawable/splash_icon.xml");
-    const legacy = read("android/app/src/main/res/drawable/splash_launch.xml");
-    for (const xml of [icon, legacy]) {
-      expect(xml).toContain('android:drawable="@drawable/launch_mark"');
-      expect(xml).toContain('android:width="76dp"');
-      expect(xml).toContain('android:height="65dp"');
-    }
-    expect(read("android/app/src/main/res/values/styles.xml")).toContain("@drawable/splash_icon");
-    expect(read("capacitor.config.ts")).toContain('androidSplashResourceName: "splash_launch"');
-    for (const f of ["launch_mark", "launch_letter_v", "launch_letter_a", "launch_letter_l1", "launch_letter_l2", "launch_letter_o"]) {
+describe("Android's opening, drawn the same way (founder's ruling, 7 November 2026)", () => {
+  it("keeps the system splash bare navy, so the drawing is the first mark anybody sees", () => {
+    expect(read("android/app/src/main/res/values/styles.xml")).toContain('<item name="windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>');
+    expect(read("capacitor.config.ts")).toContain('androidSplashResourceName: "splash_blank"');
+    for (const f of ["launch_ring", "launch_tower1", "launch_tower2", "launch_tower3", "launch_tower4", "launch_letter_v", "launch_letter_a", "launch_letter_l1", "launch_letter_l2", "launch_letter_o"]) {
       expect(existsSync(`${root}android/app/src/main/res/drawable-nodpi/${f}.png`), f).toBe(true);
     }
   });
 
-  it("slides the letters on the iPhone's timings and is gone about a second after the hand-over", () => {
-    expect(num(java, /LETTER_STEP_MS = (\d+)/)).toBe(60);
-    expect(num(java, /LETTER_MS = (\d+)/)).toBe(420);
-    const landed = 4 * 60 + 420 + num(java, /HOLD_MS = (\d+)/);
-    expect(landed + num(java, /FADE_MS = (\d+)/)).toBeLessThanOrEqual(1200);
+  it("draws the ring along the SAME centre line as the iPhone, with the same stroke", () => {
+    const iosBody = swift.match(/static let ringLine: \[CGFloat\] = \[([\s\S]*?)\]/)?.[1] ?? "";
+    const androidBody = java.match(/static final float\[\] RING_LINE = \{([\s\S]*?)\};/)?.[1] ?? "";
+    const ios = iosBody.split(",").map((v) => v.trim()).filter(Boolean).map(Number);
+    const android = androidBody.split(",").map((v) => v.trim().replace(/f$/, "")).filter(Boolean).map(Number);
+    expect(android).toEqual(ios);
+    expect(java).toContain("RING_STROKE = 0.132f * 1.35f");
+    expect(swift).toContain("ringStroke: CGFloat = 0.132 * 1.35");
+  });
+
+  it("plays every step on the iPhone's timings", () => {
+    const ms = (name: string) => num(java, new RegExp(`${name} = (\\d+)`));
+    expect(ms("RING_MS")).toBe(620);
+    expect(ms("TOWER_BEGIN_MS")).toBe(200);
+    expect(ms("TOWER_STEP_MS")).toBe(90);
+    expect(ms("TOWER_MS")).toBe(460);
+    expect(ms("LETTER_BEGIN_MS")).toBe(740);
+    expect(ms("LETTER_STEP_MS")).toBe(60);
+    expect(ms("LETTER_MS")).toBe(420);
+    expect(ms("VERSION_BEGIN_MS")).toBe(950);
+    expect(ms("SEQUENCE_END_MS")).toBe(num(swift, /static let sequenceEnd: CFTimeInterval = ([\d.]+)/) * 1000);
+    expect(ms("SEQUENCE_CEILING_MS")).toBe(num(swift, /static let ceiling: CFTimeInterval = ([\d.]+)/) * 1000);
+    expect(ms("SEQUENCE_CEILING_MS") + ms("FADE_MS")).toBeLessThanOrEqual(2200);
+  });
+
+  it("starts on the window's first real draw, never behind the splash", () => {
+    expect(java).toMatch(/Build\.VERSION\.SDK_INT >= 31\) \{[\s\S]*?addOnDrawListener/);
+    expect(java).toMatch(/static void handOff\(\) \{[\s\S]*?if \(!started\) start\(\);/);
   });
 
   it("never takes a touch, steps aside when animations are off, and is shown and handed over from the shell", () => {
     expect(java).toContain("g.setClickable(false)");
     expect(java).toContain("IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS");
-    expect(java).toMatch(/if \(!animatorsOn\(\)\) \{\s*remove\(g\);/);
+    expect(java).toMatch(/if \(!animatorsOn\(\)\) \{\s*remove\(ground\);/);
     expect(read("android/app/src/main/java/com/vallospaces/app/MainActivity.java")).toContain("LaunchMark.show(this)");
     expect(read("android/app/src/main/java/com/vallospaces/app/ValloShellPlugin.java")).toContain("runOnUiThread(LaunchMark::handOff)");
   });

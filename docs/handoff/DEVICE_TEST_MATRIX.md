@@ -23,7 +23,7 @@ Nothing in this file has been run on a device.
 
 | # | Check (brief section 11) | iOS | Android | What proves it now |
 |---|---|---|---|---|
-| 1 | Launch and splash screens | NEEDS A DEVICE (1.0.2: the ring draws in, the towers rise, the letters slide out, the version line, over by about 2.2 s) | NEEDS A DEVICE (1.0.2: the mark still on the system splash, then the letters slide out from behind it) | AUTOMATED: `lib/native/launch-sequence.test.ts` (layers, timings, ceilings, touch-transparent, Reduce Motion and animations off), `native-splash.test.ts`, `splash-hang.test.ts`, `shell-plugin.test.ts` (`handoff` asked for by the first script). SIMULATED: `handoff` is sent two frames after the document parses (job 2 check) |
+| 1 | Launch and splash screens | NEEDS A DEVICE (1.0.2: the ring draws in, the towers rise, the letters slide out, the version line, over by about 2.2 s) | NEEDS A DEVICE (1.0.2: the same drawing as the iPhone, from the window's first frame after the navy splash) | AUTOMATED: `lib/native/launch-sequence.test.ts` (layers, timings, ceilings, touch-transparent, Reduce Motion and animations off), `native-splash.test.ts`, `splash-hang.test.ts`, `shell-plugin.test.ts` (`handoff` asked for by the first script). SIMULATED: `handoff` is sent two frames after the document parses (job 2 check) |
 | 2 | Navigation and bottom tabs | SIMULATED (the iOS push: in from the right, back slides off) | SIMULATED (fade-through about the tapped point) | AUTOMATED: `lib/platform/detect.test.ts` (platform marked before first paint, platform.css keyed on the shell only), `lib/motion/nav-direction.test.ts` (which way a move goes). SIMULATED: job 1 check reads the running animation names per platform, and Calm and reduced motion fall back. A device must judge the feel |
 | 3 | Back-button behaviour | NEEDS A DEVICE: edge swipe back (1.0.2, `allowsBackForwardNavigationGestures`), M24 | NEEDS A DEVICE: hardware and predictive back, M23 | AUTOMATED: `lib/native/back-button.test.ts` (sheet first, step back, parent, exit only at a root), `native-back-event.test.ts`, `shell-plugin.test.ts` (swipe wired) |
 | 4 | Safe areas and system bars | NEEDS A DEVICE (notch, home indicator, status bar glyphs per screen), M26, M27 | NEEDS A DEVICE (edge to edge on Android 15, SystemBars insets, light mode glyphs), NATIVE_BUILD_QUEUE item 2 | AUTOMATED: `status-bar-hold.test.ts`. SIMULATED: 390x844 and 360x800 screenshots with `viewport-fit=cover`, which Chromium does not inset, so only the layout is checked |
@@ -92,9 +92,10 @@ steps 10 and 11.
     crash button once, reopen Vallo, then open `/admin/crashes` on the
     website: one row, platform ios, kind native.crash.
 
-The Android steps are the same, with these differences: step 1 is the
-mark, still, on the system splash, then the letters slide out from behind it
-and the page arrives about a second after it is ready; step 2 is a quick
+The Android steps are the same, with these differences: step 1 is the same
+drawing after a moment of plain navy (Android's own splash), and with
+animations turned off in Developer options the finished logo simply goes when
+the page is ready; step 2 is a quick
 fade-through instead of a slide; step 3 is the system back gesture or button
 (sheet closes first, then the page, and only the Home tab exits); step 4 is an
 ink ripple spreading from under the finger on rows, buttons and icon buttons;

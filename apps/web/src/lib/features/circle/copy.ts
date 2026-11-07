@@ -111,6 +111,7 @@ export const CIRCLE_COPY = {
   leftBanner: "You left. Nobody was told.",
   failed: "That did not go through. Try again.",
   signIn: "Sign in to take part.",
+  signInCta: "Sign in",
 } as const;
 
 export type CircleCopy = typeof CIRCLE_COPY;

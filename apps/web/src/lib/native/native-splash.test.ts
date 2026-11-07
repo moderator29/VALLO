@@ -14,8 +14,8 @@ import { describe, expect, it } from "vitest";
  * what a regeneration with the old tile composition would do.
  *
  * 7 NOVEMBER 2026: THE FOUNDER'S RULING REPLACES D68c FOR THE OPENING. The
- * mark now appears at app open, drawn by the shell (iOS `LaunchMark` in
- * ValloShell.swift; Android's splash icon and `LaunchMark.java`, held by
+ * mark now appears at app open, drawn by the shell on both phones (iOS
+ * `LaunchMark` in ValloShell.swift, Android `LaunchMark.java`, held by
  * `launch-sequence.test.ts`). These bitmaps stay flat navy all the same:
  * they are the frame before the shell draws anything, and a mark baked into
  * them would sit in a different place from the drawn one.

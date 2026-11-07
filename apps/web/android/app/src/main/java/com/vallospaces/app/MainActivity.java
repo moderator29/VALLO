@@ -36,8 +36,8 @@ public class MainActivity extends BridgeActivity {
         ValloCrashLog.install(this);
         registerPlugin(ValloShellPlugin.class);
         super.onCreate(savedInstanceState);
-        /* The opening (founder's ruling, 7 November 2026): the exact mark under
-           the system splash, then the wordmark slides out (LaunchMark). */
+        /* The opening (founder's rulings, 7 November 2026): the exact mark
+           drawn in over the launch navy, as on the iPhone (LaunchMark). */
         LaunchMark.show(this);
         try {
             if (getBridge() != null) {

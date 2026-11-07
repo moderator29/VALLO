@@ -18,6 +18,8 @@ import { reencodeToJpeg } from "@/components/social/profile/reencode";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachPostMedia, dropPost, replyToPost } from "@/lib/social/posts-actions";
+import type { ListingOption } from "@/lib/features/post-listing/actions";
+import { ListingPicker, PickedListing } from "./ListingPicker";
 import { sendOrKeep } from "@/lib/offline/send-or-keep";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { summonBot } from "@/lib/social/bot-actions";
@@ -174,6 +176,11 @@ export function Composer({
   /* The post that landed without its pictures. While this is set, the retry is
      on screen and it sends the same pictures to that same post. */
   const [strandedPost, setStrandedPost] = useState<string | null>(null);
+  /* A real Vallo listing featured on the post (the brief, part 2.2), and
+     whether its picker is open. The picker is mounted on first use only. */
+  const [listing, setListing] = useState<ListingOption | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [pickerUsed, setPickerUsed] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   /* Decided on mount: an opening plays once, not on every keystroke, and
@@ -383,6 +390,11 @@ export function Composer({
         try {
           if (parentId) {
             result = await withTimeout(replyToPost({ parentId, body }), 30_000);
+          } else if (listing) {
+            /* A featured listing needs the connection to be checked as live,
+               so it is sent now rather than kept for later. */
+            const fields = { ...(areaId ? { areaId } : {}), kind, body, listingId: listing.id };
+            result = await withTimeout(dropPost(fields), 30_000);
           } else if (pictures.length === 0) {
             const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
             const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
@@ -465,6 +477,7 @@ export function Composer({
               : "Posted. Everyone on Vallo can see it.",
         );
         setBody("");
+        setListing(null);
         onDone?.();
         router.refresh();
 
@@ -581,6 +594,8 @@ export function Composer({
         onChange={(event) => setBody(event.target.value)}
         aria-label={isReply ? "Your reply" : KIND_LABEL[kind]}
       />
+
+      {listing ? <PickedListing option={listing} onRemove={() => setListing(null)} disabled={pending} /> : null}
 
       {pictures.length > 0 ? (
         <>
@@ -708,6 +723,23 @@ export function Composer({
               <span>Ask locals</span>
             </button>
           ) : null}
+          {!isReply ? (
+            <button
+              type="button"
+              className="nf-compose-page__tool"
+              aria-pressed={listing !== null}
+              aria-haspopup="dialog"
+              onClick={() => {
+                setPickerUsed(true);
+                setPicking(true);
+              }}
+              disabled={pending}
+              data-testid="composer-feature-listing"
+            >
+              <UiIcon name="home" size={20} />
+              <span>Listing</span>
+            </button>
+          ) : null}
           <CharacterRing left={left} max={POST_MAX} />
         </div>
       ) : (
@@ -754,6 +786,17 @@ export function Composer({
         </Button>
       </div>
       )}
+
+      {pickerUsed ? (
+        <ListingPicker
+          open={picking}
+          onClose={() => setPicking(false)}
+          onPick={(option) => {
+            setListing(option);
+            setPicking(false);
+          }}
+        />
+      ) : null}
 
       <input
         ref={fileInput}

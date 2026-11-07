@@ -22,8 +22,7 @@ import org.json.JSONObject;
  *                    payment receipt to share it, which is ordinary use.
  *   takeCrashReport  the shell's own crash from the last run, once (ValloCrashLog).
  *   handoff          the page has painted: the launch overlay (LaunchMark)
- *                    slides the wordmark out from behind the mark and hands
- *                    over to the page.
+ *                    fades onto it once the drawing has landed.
  *
  * Registered in MainActivity before the bridge starts. Built, NOT tested on a
  * device: no Android SDK runs in this repository.

@@ -94,6 +94,8 @@ export async function dropPost(input: {
   areaId?: string;
   kind: "GIST" | "ASK";
   body: string;
+  /** A real listing to feature on the post (checked live by the insert). */
+  listingId?: string;
   /** V-40: the UUID minted when this was tapped; a replay answers with the first post. */
   tapKey?: string;
 }): Promise<ActionResult<{ postId: string; held: boolean }>> {
