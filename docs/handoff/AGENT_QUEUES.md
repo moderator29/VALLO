@@ -91,11 +91,11 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    the page on screen is a kept copy (with the KeptPriceNote reason);
    `DiscoveryEmpty` onto the one glyph; the inline errors left in HostWizard
    and the stays steps move with round 2's StepFrame work.
-9. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
+9. **Rounds 5, 6, 7** from WORK_QUEUE.md, in order (round 3 is Agent PAGES'). Round 7 SW11
    includes the English words the messages agent added (voice, reactions,
    Talk to a person) moving into `packages/i18n`.
 
-## Agent MSG (messages only)
+## Agent MSG (messages only): QUEUE FINISHED 7 November (jobs 1 to 10); messages are kept by the lead
 
 Owns: `app/(app)/messages/**`, `components/app/messages/**`,
 `components/app/assistant/**`, `app/(app)/assistant/**`, `lib/messages/**`,
@@ -127,6 +127,30 @@ Owns: `app/(app)/messages/**`, `components/app/messages/**`,
    source only while paused or at the end.
 10. **The support ticket thread** (`/support/messages/[id]`) in the Messages
     bubble style, so the inner page reads as one product with the inbox.
+
+## Agent PAGES (round 3: every ordinary page on one frame)
+
+Started 7 November 2026 in the slot Agent MSG left when its queue finished.
+Source: SURVEY_A_MEMBER_PUBLIC.md SW4, SW5, SW6, SW12, SW16 and the per-route
+tables; SURVEY_B_WORKSPACES_BACKEND.md X-01, AD-01.
+
+Owns the pages, not the shared parts: `app/(app)/settings/**`,
+`app/(app)/{wallet,payments,payouts,receipts,refunds,pay,rent,tenancy,agreements,bookings,inspections,trips,record,passport,profile,rewards,leaderboard,compare,price,support,help,legal,directory}/**`
+except `support/messages/**`, the public and legal pages under `app/(site)/**`
+and `app/(auth)/**` page shells, and the admin page headers
+(`app/admin/**/page.tsx` heads onto one frame). Not: the feed, search, home,
+listing, stays and restaurants discovery (Agent FE), messages and the
+assistant (lead keeps them), `components/ui/**` and design tokens (Agent FE:
+ask), anything native or offline (Agent NATIVE).
+
+1. **SW4 / X-01 / AD-01**: every ordinary page on `PageFrame` (settings first,
+   then money, bookings, account, legal and help, then admin's four header
+   styles into one), keeping every control and data path.
+2. **SW16**: root tabs never show Back; the bell on every root.
+3. **SW5**: registrations, wallet send and withdraw, support new, checkout
+   progress onto `StepFrame`; **SW6** one-choice questions onto `OptionCards`.
+4. **SW12**: every page you own has a `loading.tsx` skeleton in its own shape.
+5. Tick every page in `PAGE_LEDGER.md` as you pass it.
 
 ## Agent NATIVE (iOS and Android, performance, offline; with the lead)
 
