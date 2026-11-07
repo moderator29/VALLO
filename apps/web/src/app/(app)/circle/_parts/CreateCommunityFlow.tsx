@@ -142,7 +142,7 @@ export function CreateCommunityFlow() {
   }
   return (
     <StepFrame {...common} step={5} eyebrow="Preview" title="Ready to open?" primary={{ label: "Create community", onClick: create, loading: pending, testId: "circle-flow-publish" }}
-      notice={phoneGate ? <PhoneGateLink /> : undefined}>
+      notice={phoneGate ? <PhoneGateLink show /> : undefined}>
       <article className="nf-circle-card" data-testid="circle-flow-preview">
         <span className="nf-circle-card__eyebrow">
           <span>{draft.category ? CATEGORY_LABEL[draft.category] : CATEGORY_LABEL.general}</span>
@@ -151,7 +151,7 @@ export function CreateCommunityFlow() {
         <h3 className="nf-circle-card__title">{draft.name}</h3>
         {draft.description ? <p className="nf-circle-card__body">{draft.description}</p> : null}
         {rules.length ? (
-          <ol className="nf-circle-card__body" style={{ display: "block" }}>
+          <ol className="nf-circle-rules">
             {rules.map((r) => <li key={r}>{r}</li>)}
           </ol>
         ) : null}

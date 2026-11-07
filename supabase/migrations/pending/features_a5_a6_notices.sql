@@ -85,6 +85,7 @@ create index if not exists nudge_log_user_sent on private.nudge_log (user_id, se
 comment on table private.nudge_log is
   'FEATURES A6: one row per gentle nudge sent. Holds the caps: one a week, three per kind.';
 
+alter table private.nudge_log enable row level security;
 revoke all on table private.nudge_log from public, anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------------------

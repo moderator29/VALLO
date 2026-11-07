@@ -446,13 +446,11 @@ export function MobileTabBar({
                   prefetch={prefetchFull}
                   aria-current={circleActive ? "page" : undefined}
                   aria-label={t.nav.circle}
-                  className="nf-tab__link nf-tab__circle"
+                  className="nf-tab-circle"
                   data-testid="dock-circle"
                 >
-                  <span className="nf-tab__body">
-                    <span className="nf-tab__icon nf-tab__circle-plate" data-glyph="circle-people">
-                      <UiIcon name="circle-people" size="md" filled={circleActive} weight="bold" />
-                    </span>
+                  <span className="nf-tab-circle__plate" aria-hidden="true">
+                    <UiIcon name="circle-people" size="md" filled={circleActive} weight="bold" />
                   </span>
                 </HoldTabLink>
               </li>

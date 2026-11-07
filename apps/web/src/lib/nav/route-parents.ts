@@ -258,6 +258,13 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/listing/[id]/visit": "/listing/[id]",
   "/listing/[id]/visit/[inspectionId]": "/listing/[id]",
   "/saved": "/home",
+  "/circle": "/home",
+  "/circle/ask": "/circle",
+  "/circle/new": "/circle",
+  "/circle/c/[slug]": "/circle",
+  "/circle/c/[slug]/new": "/circle/c/[slug]",
+  "/circle/c/[slug]/manage": "/circle/c/[slug]",
+  "/circle/p/[id]": "/circle",
   /* The compare tray's table (29 October 2026): places set aside from the
      catalogue, so back is the home screen like Saved. */
   "/compare": "/home",

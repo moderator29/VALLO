@@ -536,3 +536,15 @@ export async function readMyCommunities(): Promise<{ signedIn: boolean; live: bo
   }
   return { signedIn: true, live: true, communities: out.sort((a, b) => a.name.localeCompare(b.name)) };
 }
+
+/** A live listing to attach to a question ("Ask about this place"), or null. Never a draft. */
+export async function readListingForAsk(id: unknown): Promise<{ id: string; title: string; area: string | null } | null> {
+  if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const v = await viewer();
+  if (!v) return null;
+  const { data, error } = await v.db.from("listings").select("id, title, area, city").eq("id", id).eq("status", "PUBLISHED").maybeSingle();
+  await reportReadFault("read.circle.ask-listing", ...faults(error));
+  if (error || !data) return null;
+  const row = data as { id: string; title: string; area: string | null; city: string | null };
+  return { id: row.id, title: row.title, area: row.area || row.city };
+}

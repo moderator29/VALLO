@@ -118,6 +118,7 @@ export function PostFlow({
         closeHref={closeHref}
         direction={dir}
         primary={{ label: "Continue", onClick: forward, disabled: !draft.communityId, testId: "circle-flow-next" }}
+        secondary={communities.length ? undefined : { label: "Find a community", onClick: () => router.push("/circle") }}
       >
         <div role="radiogroup" aria-label="Community" className="grid gap-sm">
           {communities.map((c) => (

@@ -125,6 +125,11 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  .nf-circle-card__title--full {
+    font-size: var(--nf-text-h3);
+    -webkit-line-clamp: unset;
+    display: block;
+  }
   .nf-circle-card__body {
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);
@@ -237,6 +242,12 @@
   }
   .nf-circle-option__sub {
     font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-circle-rules {
+    margin: 0;
+    padding-inline-start: var(--nf-space-lg);
+    font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);
   }
   @media (min-width: 64rem) {

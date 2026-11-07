@@ -58,13 +58,13 @@ export function FeedTabs({
   ] as const;
 
   return (
-    <nav className="nf-feed-chips" aria-label={words.categoriesLabel} data-testid="feed-tabs">
-      <ul className="nf-feed-chips__row">
+    <nav className="nf-feed-cats" aria-label={words.categoriesLabel} data-testid="feed-tabs">
+      <ul className="nf-feed-cats__row">
         {chips.map((chip) => (
           <li key={chip.key}>
             <Link
               href={chip.href}
-              className="nf-tap nf-feed-chip"
+              className="nf-tap nf-feed-cat"
               {...(chip.key === live ? { "aria-current": "page" as const } : {})}
               data-testid={`feed-tab-${chip.key}`}
               scroll={false}

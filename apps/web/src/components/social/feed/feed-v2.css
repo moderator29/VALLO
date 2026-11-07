@@ -78,52 +78,182 @@
     }
   }
 
-  /* ---------------------------------------------------------- the masthead */
+  /* ------------------------------------------------------------ the head */
 
-  .nf-fv2-bar {
+  /* THE HEAD (the feed reference, 7 November 2026): the large display title,
+     one quiet line with the place on it, and at the right the Circle door
+     and the people search. */
+  .nf-feed-head {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    padding-block: var(--nf-space-xs) var(--nf-space-2xs);
+  }
+  .nf-feed-head__row {
     display: flex;
     align-items: center;
-    gap: var(--nf-space-xs);
+    gap: var(--nf-space-sm);
     min-block-size: 2.75rem;
   }
-  .nf-fv2-bar .nf-feed-find {
-    margin-inline-start: auto;
-  }
-
-  /* The lenses: two words of display type. Around is ink; Circle is the quiet
-     grey with a small line under it saying it is not open. Neither is a
-     button, and Circle answers nothing (VALLO_CIRCLE.md). */
-  .nf-lens {
-    display: flex;
-    align-items: baseline;
-    gap: var(--nf-space-md);
+  .nf-feed-head__title {
+    flex: 1;
     min-inline-size: 0;
-    padding-inline-start: var(--nf-space-3xs);
-  }
-  .nf-lens__item {
     color: var(--nf-content-primary);
     font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h3);
+    font-size: var(--nf-text-h1);
     font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    white-space: nowrap;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
   }
-  .nf-lens__item--closed {
-    display: inline-flex;
-    flex-direction: column;
-    color: var(--nf-content-subtle);
-    cursor: default;
-    user-select: none;
+  .nf-feed-head__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--nf-space-xs);
   }
-  .nf-lens__tag {
-    margin-block-start: var(--nf-space-3xs);
+  .nf-feed-head__sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-2xs) var(--nf-space-xs);
+  }
+  .nf-feed-head__line {
+    flex: 1 1 14rem;
+    min-inline-size: 0;
     color: var(--nf-content-muted);
-    font-family: var(--nf-font-sans);
-    font-size: var(--nf-text-overline);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.4;
+  }
+  .nf-feed-head__place {
+    position: relative;
+    flex: none;
+  }
+  /* The place chip on the quiet line: brand words and a pin, no box, so the
+     line reads as a sentence and not a second toolbar. */
+  .nf-feed-head .nf-feed-head__place .nf-feed-chip[aria-haspopup] {
+    gap: var(--nf-space-3xs);
+    block-size: 2.75rem;
+    padding-inline: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .nf-feed-head .nf-feed-chip__pin {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    color: var(--nf-brand-primary);
+  }
+  .nf-feed-head .nf-feed-chip__label {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
     font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: 0.01em;
+  }
+  .nf-feed-head .nf-feed-chip__chev {
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--nf-content-link);
+  }
+  .nf-feed-head .nf-feed-chip__menu {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    inline-size: min(18rem, calc(100vw - 2rem));
+    top: 2.75rem;
+  }
+  /* The door into Circle: a soft brand rectangle on the 40px rung (inside a
+     44px target), the people glyph and the word. */
+  .nf-feed-circle-door {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    block-size: 2.5rem;
+    padding-inline: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-act-radius-sm);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-feed-circle-door::after {
+    content: "";
+    position: absolute;
+    inset: -0.125rem 0;
+  }
+  .nf-feed-circle-door:hover {
+    background: var(--nf-brand-tint-2);
+  }
+  .nf-feed-circle-door:active {
+    transform: scale(0.97);
+  }
+  .nf-feed-circle-door:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+
+  /* ------------------------------------------------------ the categories */
+
+  /* One row of soft rectangles that scrolls sideways on a narrow phone and
+     bleeds to the screen's edge. The live chip is the ink fill; the rest sit
+     on the quiet well with no border (fewer lines, the founder). */
+  .nf-feed-cats {
+    margin-block: var(--nf-space-xs) var(--nf-space-2xs);
+    margin-inline: calc(-1 * var(--nf-space-md));
+  }
+  .nf-feed-cats__row {
+    display: flex;
+    gap: var(--nf-space-xs);
+    overflow-x: auto;
+    padding-inline: var(--nf-space-md);
+    padding-block: var(--nf-space-3xs);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .nf-feed-cats__row::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-feed-cats__row > li {
+    flex: none;
+    scroll-snap-align: start;
+  }
+  .nf-feed-cat {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    block-size: 2.5rem;
+    padding-inline: var(--nf-space-md);
+    border-radius: var(--nf-act-radius-md);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-feed-cat::after {
+    content: "";
+    position: absolute;
+    inset: -0.125rem 0;
+  }
+  .nf-feed-cat:hover {
+    color: var(--nf-content-primary);
+  }
+  .nf-feed-cat:active {
+    transform: scale(0.97);
+  }
+  .nf-feed-cat[aria-current="page"] {
+    background: var(--nf-content-primary);
+    color: var(--nf-surface-primary);
+  }
+  .nf-feed-cat:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
   }
 
   /* The track a second lens slides into. One pane today, so it is a block;
@@ -220,31 +350,62 @@
   .nf-feed-prompt {
     display: flex;
     align-items: center;
-    gap: var(--nf-space-sm);
+    gap: var(--nf-space-2xs);
     inline-size: 100%;
-    min-block-size: 3.25rem;
-    margin-block: var(--nf-space-xs) var(--nf-space-2xs);
-    padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs);
+    min-block-size: 3.5rem;
+    margin-block: var(--nf-space-xs) var(--nf-space-xs);
+    padding: var(--nf-space-xs);
     border: var(--nf-border-width) solid var(--nf-brand-edge);
     border-radius: var(--nf-radius-md);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     color: var(--nf-content-muted);
-    font: inherit;
-    text-align: start;
-    cursor: pointer;
-    transition:
-      border-color var(--nf-duration-fast) var(--nf-ease-standard),
-      transform var(--nf-duration-press) var(--nf-ease-press);
+    transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
     -webkit-tap-highlight-color: transparent;
   }
   .nf-feed-prompt:hover {
     border-color: var(--nf-brand-edge-strong);
   }
-  .nf-feed-prompt:active {
+  .nf-feed-prompt__main {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    min-block-size: 2.75rem;
+    border-radius: var(--nf-act-radius-md);
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-feed-prompt__main:active {
     transform: scale(0.985);
   }
-  .nf-feed-prompt:focus-visible {
+  .nf-feed-prompt__doors {
+    display: flex;
+    flex: none;
+    align-items: center;
+  }
+  .nf-feed-prompt__door {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-brand-primary);
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-feed-prompt__door:hover {
+    background: var(--nf-brand-tint-1);
+  }
+  .nf-feed-prompt__door:active {
+    transform: scale(0.92);
+  }
+  .nf-feed-prompt__door:focus-visible,
+  .nf-feed-prompt__main:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
   }
@@ -293,63 +454,6 @@
     color: var(--nf-brand-secondary);
   }
 
-  /* ------------------------------------- For you, Friends, and the place */
-
-  .nf-fv2-filter {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-sm);
-    margin-block: var(--nf-space-xs) var(--nf-space-sm);
-    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
-  }
-  /* The row draws the hairline, so the tabs inside it do not draw their own. */
-  .nf-fv2-filter .nf-utabs {
-    flex: none;
-    border-block-end: 0;
-  }
-  .nf-fv2-filter__place {
-    position: relative;
-    flex: 0 1 auto;
-    min-inline-size: 0;
-    margin-inline-start: auto;
-  }
-  /* The place chip, quieter in this row than it was as the screen's head: a
-     34px soft rectangle in the card material with the brand's edge. The
-     selector carries four classes so it outranks light.css's raised fill
-     (a grey on the paper ground) without an !important. */
-  .nf-fv2-filter .nf-fv2-filter__place .nf-feed-chip[aria-haspopup] {
-    gap: var(--nf-space-2xs);
-    block-size: 2.125rem;
-    padding-inline: var(--nf-space-xs) var(--nf-space-2xs);
-    border: var(--nf-border-width) solid var(--nf-brand-edge);
-    border-radius: var(--nf-radius-sm);
-    background: var(--nf-surface-primary);
-    color: var(--nf-content-secondary);
-  }
-  .nf-fv2-filter .nf-feed-chip__pin {
-    inline-size: 1rem;
-    block-size: 1rem;
-    color: var(--nf-brand-secondary);
-  }
-  .nf-fv2-filter .nf-feed-chip__label {
-    color: var(--nf-content-primary);
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
-  }
-  .nf-fv2-filter .nf-feed-chip__chev {
-    inline-size: 1.125rem;
-    block-size: 1.125rem;
-    color: var(--nf-content-muted);
-  }
-  /* The menu opens under the chip and lines up with its right edge, at a width
-     its place names can be read in. */
-  .nf-fv2-filter .nf-feed-chip__menu {
-    inset-inline-start: auto;
-    inset-inline-end: 0;
-    inline-size: min(18rem, calc(100vw - 2rem));
-    top: 2.5rem;
-  }
-
   /* --------------------------------------------------------- the post card */
 
   /* The card: the platform's own card material (white by day, the deep navy by
@@ -361,8 +465,11 @@
     position: relative;
     display: block;
     min-inline-size: 0;
-    padding: var(--nf-space-sm) var(--nf-pc-pad) var(--nf-space-2xs);
-    border: var(--nf-border-width) solid var(--nf-card-border);
+    padding: var(--nf-space-md) var(--nf-pc-pad) var(--nf-space-3xs);
+    /* Fewer lines (the founder): the card is held up by its shadow on paper
+       and by its fill at night, and the edge goes transparent, keeping its
+       width so nothing moves by a pixel. */
+    border: var(--nf-border-width) solid transparent;
     border-radius: var(--nf-radius-xl);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
@@ -775,9 +882,8 @@
 
   .nf-pc__actions {
     display: grid;
-    gap: var(--nf-space-2xs);
     margin-block-start: var(--nf-space-2xs);
-    padding-block-end: var(--nf-space-sm);
+    padding-block-end: var(--nf-space-2xs);
   }
   /* Row one: the bare glyphs. The row is pulled out by the glyphs' own inner
      padding so the heart's edge lines up with the words above it. */
@@ -798,8 +904,9 @@
   }
   /* The glyphs carry no wrapper: no fill and no edge on the control. */
   .nf-pc .nf-act-pill {
+    gap: var(--nf-space-2xs);
     min-block-size: 2.75rem;
-    padding-inline: var(--nf-space-sm);
+    padding-inline: var(--nf-space-xs) var(--nf-space-sm);
     border-color: transparent;
     background: transparent;
     color: var(--nf-content-secondary);
@@ -821,54 +928,9 @@
     font-weight: 600;
   }
 
-  /* Row two: "Drop a comment", the sunken line you write in. A soft rectangle
-     on the 44px rung with the brand's edge; the count sits at its far end. */
-  .nf-pc__comment {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    gap: var(--nf-space-xs);
-    inline-size: 100%;
-    min-inline-size: 0;
-    min-block-size: 2.75rem;
-    padding-inline: var(--nf-space-sm);
-    border-radius: var(--nf-act-radius-md);
-    border: var(--nf-border-width) solid var(--nf-brand-edge);
-    background: var(--nf-surface-secondary);
-    color: var(--nf-content-muted);
-    font-size: var(--nf-text-body-sm);
-    text-align: start;
-    transition:
-      border-color var(--nf-duration-fast) var(--nf-ease-standard),
-      transform var(--nf-duration-press) var(--nf-ease-press);
-  }
-  .nf-pc__comment:hover {
-    border-color: var(--nf-brand-edge-strong);
-    color: var(--nf-content-secondary);
-  }
-  .nf-pc__comment:active {
-    transform: scale(0.985);
-  }
-  .nf-pc__comment:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: var(--nf-focus-ring-offset);
-  }
-  .nf-pc__comment .nf-ui-icon {
+  /* The comment is a glyph and its count in the one row now. */
+  .nf-pc .nf-pc__comment {
     flex: none;
-    color: var(--nf-content-subtle);
-  }
-  .nf-pc__comment-text {
-    flex: 1;
-    min-inline-size: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .nf-pc__comment-count {
-    flex: none;
-    color: var(--nf-content-secondary);
-    font-size: var(--nf-text-caption);
-    font-weight: 600;
   }
   .nf-pc .nf-post__attach,
   .nf-pc .nf-post__cited {
@@ -889,6 +951,339 @@
     }
   }
 
+
+  /* --------------------------------------------- the featured listing card */
+
+  /* Full bleed (the feed reference): the listing's photograph is the card,
+     4:5 on a phone, with a soft scrim at the foot that carries the words.
+     The words and controls sit on a night island (`data-theme="dark"`), so
+     they read light on the photograph in both themes. */
+  .nf-post.nf-pc.nf-pc--feature {
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--nf-surface-artwork);
+  }
+  .nf-pcf__media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    max-block-size: 34rem;
+    inline-size: 100%;
+  }
+  .nf-pcf__media img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    transition: transform var(--nf-duration-slow) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-pc--feature:hover .nf-pcf__media img {
+      transform: scale(1.02);
+    }
+  }
+  .nf-pcf__scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgb(1 1 24 / 0.32) 0%, transparent 22%),
+      linear-gradient(0deg, rgb(1 1 24 / 0.88) 0%, rgb(1 1 24 / 0.6) 34%, transparent 62%);
+    pointer-events: none;
+  }
+  .nf-pcf__top {
+    position: absolute;
+    inset: var(--nf-space-sm) var(--nf-space-sm) auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+    background: transparent;
+  }
+  .nf-pcf__tag {
+    display: inline-flex;
+    align-items: center;
+    block-size: 1.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-act-radius-sm);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+  .nf-pcf__top-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+  }
+  /* The controls on the photograph: glass, with the solid fallback. */
+  .nf-pc .nf-pcf__glass,
+  .nf-pc .nf-pcf__glass:hover {
+    inline-size: 2.5rem;
+    min-inline-size: 2.5rem;
+    block-size: 2.5rem;
+    min-block-size: 2.5rem;
+    padding: 0;
+    justify-content: center;
+    border-radius: var(--nf-radius-circle);
+    background: rgb(1 1 24 / 0.42);
+    color: var(--nf-content-primary);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+  }
+  :root[data-save-data="on"] .nf-pc .nf-pcf__glass {
+    background: rgb(1 1 24 / 0.72);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .nf-pcf__foot {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-md) var(--nf-space-md) var(--nf-space-2xs);
+    background: transparent;
+    color: var(--nf-content-primary);
+  }
+  .nf-pcf__by {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin-block-end: var(--nf-space-2xs);
+  }
+  .nf-pcf__by .nf-pc__avatar,
+  .nf-pcf__by .nf-pc__face {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+  }
+  .nf-pcf__who {
+    display: grid;
+    min-inline-size: 0;
+  }
+  .nf-pcf__who .nf-pc__meta,
+  .nf-pcf__who .nf-pc__when {
+    color: var(--nf-content-secondary);
+  }
+  .nf-pcf__title {
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .nf-pcf__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--nf-space-3xs) var(--nf-space-xs);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-pcf__price {
+    color: var(--nf-content-primary);
+    font-weight: 700;
+  }
+  .nf-pcf__period {
+    color: var(--nf-content-secondary);
+    font-weight: 500;
+  }
+  .nf-pcf__caption {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.45;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .nf-pcf__row {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+  }
+  .nf-pcf__row .nf-pc__actions {
+    flex: 1;
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .nf-pcf__row .nf-act-pill {
+    color: var(--nf-content-primary);
+  }
+  .nf-pcf__view {
+    flex: none;
+    gap: var(--nf-space-2xs);
+  }
+
+  /* --------------------------------------------------- the photo mosaic */
+
+  .nf-pc .nf-pc__media--mosaic {
+    aspect-ratio: 16 / 11;
+  }
+  .nf-mosaic {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .nf-mosaic[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+  .nf-mosaic[data-count="3"] {
+    grid-template-columns: 1.4fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .nf-mosaic[data-count="3"] .nf-mosaic__cell:first-child {
+    grid-row: 1 / span 2;
+  }
+  .nf-mosaic__cell {
+    position: relative;
+    overflow: hidden;
+    min-block-size: 0;
+    background: var(--nf-surface-inset);
+  }
+  .nf-mosaic__cell img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-mosaic__more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgb(1 1 24 / 0.48);
+    color: var(--nf-content-on-brand);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+  }
+
+  /* -------------------------------------------- the listing on a post */
+
+  /* The embedded listing (property-powered posts): the photograph at the
+     left, the title, the place, the facts it really has, the price and View
+     property. One soft card on the quiet well, no border. */
+  .nf-plc {
+    margin-block-start: var(--nf-space-sm);
+  }
+  .nf-plc__link {
+    display: flex;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-xs);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-raised);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-plc__link:active {
+    transform: scale(0.985);
+  }
+  .nf-plc__link:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-plc__photo {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 6.5rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-muted);
+  }
+  .nf-plc__photo img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-plc__body {
+    display: grid;
+    flex: 1;
+    align-content: start;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+    padding-block: var(--nf-space-3xs);
+  }
+  .nf-plc__title {
+    display: -webkit-box;
+    overflow: hidden;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+    line-height: 1.3;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .nf-plc__place {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-plc__place > span:first-of-type {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-plc__place .nf-ui-icon {
+    flex: none;
+    color: var(--nf-brand-primary);
+  }
+  .nf-plc__verified {
+    flex: none;
+    margin-inline-start: var(--nf-space-2xs);
+    color: var(--nf-state-success);
+    font-weight: 600;
+  }
+  .nf-plc__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-3xs) var(--nf-space-xs);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-plc__fact + .nf-plc__fact::before {
+    content: "\00B7";
+    margin-inline-end: var(--nf-space-xs);
+    color: var(--nf-content-muted);
+  }
+  .nf-plc__foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+    margin-block-start: var(--nf-space-2xs);
+  }
+  .nf-plc__price {
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
+  .nf-plc__period {
+    color: var(--nf-content-muted);
+    font-weight: 500;
+  }
+  .nf-plc__view {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+  }
 
   /* ------------------------------------------------------ the right rail */
 

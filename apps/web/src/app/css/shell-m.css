@@ -1462,6 +1462,47 @@
       0 0 18px -4px var(--nf-glow-4);
   }
 
+  /* THE CIRCLE TAB (founder, 7 November 2026): the dock's centre slot. The
+     people glyph in a soft round plate of the brand, always, so the centre
+     still reads as the special slot; chosen, the plate deepens, takes the
+     brand ring and a soft drop, and the glyph turns solid. The plate is
+     44px inside the slot's 52px target. */
+  .nf-tab-circle {
+    display: grid;
+    place-items: center;
+    inline-size: 3.25rem;
+    block-size: 3.25rem;
+    border-radius: var(--nf-radius-circle);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nf-tab-circle__plate {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-tint-2);
+    color: var(--nf-dock-ink-on, var(--nf-brand-quiet));
+    transition:
+      transform var(--nf-duration-press) var(--nf-ease-press),
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-tab-circle:active .nf-tab-circle__plate {
+    transform: scale(0.92);
+  }
+  .nf-tab-circle[aria-current="page"] .nf-tab-circle__plate {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-tint-4);
+    box-shadow: 0 0 16px -6px var(--nf-glow-4);
+  }
+  .nf-tab-circle:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+
   /* The tray: centred above the capsule. `--nf-tray-row` is the whole dock
      row's width in the capsule's own terms (the capsule, the gap, the "+"). */
   .nf-dockmore__tray {

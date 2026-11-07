@@ -262,6 +262,15 @@
     color: var(--nf-content-on-brand);
     box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--nf-brand-primary) 70%, transparent);
   }
+  /* The Circle tab by day: the brand plate, no bloom; chosen, the soft
+     brand drop the open menu used to wear. */
+  :root[data-theme="light"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
+    color: var(--nf-brand-primary);
+  }
+  :root[data-theme="light"] .nf-tab-circle[aria-current="page"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
+    background: var(--nf-brand-tint-3);
+    box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+  }
   /* The tray's glyph tiles: a whisper of brand on white, the glyph blue. */
   :root[data-theme="light"] .nf-dockmore__glyph:not(:where([data-theme="dark"] *)) {
     background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
