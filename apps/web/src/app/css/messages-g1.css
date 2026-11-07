@@ -23,6 +23,22 @@
     position: relative;
   }
 
+  /* The words field is 44px to the thumb: it reaches up into the box's own
+     top padding rather than making the box taller, so a one-line message
+     sits exactly where it did. Beats grade1.css's `:root:root` rule by
+     coming later at the same weight. */
+  :root:root form.nf-composer .nf-composer__box .nf-composer__field {
+    min-block-size: 2.75rem;
+    margin-block-start: calc(var(--nf-space-xs) * -1);
+    padding-block: calc(var(--nf-space-xs) + var(--nf-space-2xs)) var(--nf-space-2xs);
+  }
+
+  /* The header's round controls reach 44px, like every icon button. */
+  .nf-thread__actions .nf-btn--icon {
+    min-inline-size: 2.75rem;
+    min-block-size: 2.75rem;
+  }
+
   /* ------------------------------------- the microphone that becomes Send */
 
   /*

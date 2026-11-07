@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -63,7 +64,9 @@ export function ViewingWindows({
       try {
         const result = await saveViewingWindow({ listingIds: chosen, weekday, starts, ends, slotMinutes });
         if (!result.ok) {
-          setError(result.error);
+          /* A window that does not add up stays the form's own line; a
+             refusal is said by the one banner (Grade 1). */
+          banner.error(result.error);
           return;
         }
         setAdding(false);
@@ -106,7 +109,7 @@ export function ViewingWindows({
                   start(async () => {
                     try {
                       const result = await removeViewingWindow({ id: w.id });
-                      if (!result.ok) setError(result.error);
+                      if (!result.ok) banner.error(result.error);
                       else router.refresh();
                     } catch (error) {
                       if (!tapFailedOffline(error)) throw error;
