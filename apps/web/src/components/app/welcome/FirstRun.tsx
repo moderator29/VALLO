@@ -126,8 +126,9 @@ type Slide = {
    vertical scroll. */
 const DRAG_SLOP_PX = 8;
 
-/** The welcome intro slides are off (founder, 7 November 2026). */
-const WELCOME_SLIDES_OFF = true;
+/** The welcome slides at sign up and sign in STAY (founder, 7 November 2026:
+    only the intro slides inside features are removed). */
+const WELCOME_SLIDES_OFF = false;
 
 export function FirstRun({
   t,
@@ -231,9 +232,9 @@ export function FirstRun({
   const lastIndex = total - 1;
   /* Every arrival starts on slide one; only a returning device going
      nowhere (the app reopened signed out) opens on the choice alone. */
-  /* THE FOUNDER, 7 November 2026: the intro slides are removed from sign
-     up. A guest opens on the choice alone (sign in or create an account);
-     a new account goes straight to its question, then notifications. */
+  /* The welcome slides stay (founder, 7 November 2026, correcting his
+     first word: only the intro slides inside features go). The switch
+     remains so they can be turned off in one place if he asks. */
   const choiceOnly = guest && (atChoice || !introSlides);
   const initialIndex = choiceOnly ? lastIndex : 0;
 

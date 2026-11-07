@@ -155,7 +155,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/around` | FE | full-bleed root (no PageFrame by design) | yes | yes | yes | 7 Nov: the feed's Vallo look (lens masthead with Circle not open, story tiles, the one-line way to post, For you row with the place, calm cards, concentric media, live counts, skeleton in shape). Seen in the preview harness `/preview/feed-v2` on a production build. |
+| `/around` | FE | full-bleed root (no PageFrame by design) | yes | yes | yes | 7 Nov (second pass, the founder's feed reference): the "Feed" head with its line, the place and the Circle door; stories at the top; For you, Friends, Properties, Stays, Restaurants chips over real posts; the composer line with photo and post doors; full-bleed featured listing cards with View property; one quiet action row at 18px; photo mosaic with +N; the embedded listing card; borderless cards. Seen 390 and 360, light and dark, in `/preview/feed-v2` on a production build. |
 | `/around/[slug]` | FE |  |  |  |  |  |
 | `/around/manage` | FE |  |  |  |  |  |
 | `/around/new` | FE |  |  |  |  |  |
