@@ -1,7 +1,25 @@
 import Link from "next/link";
 
 /* The FEATURES deck index (route-files guard: every deck has one). */
-const PAGES = ["reminders", "reminders?live=0", "circle", "circle?first=1", "circle-ask", "circle-new"];
+const PAGES = [
+  "reminders",
+  "reminders?live=0",
+  "circle",
+  "circle?first=1",
+  "circle-ask",
+  "circle-new",
+  "circle-community",
+  "circle-community?as=visitor",
+  "circle-community?as=private",
+  "circle-community?as=owner&empty=1",
+  "circle-thread",
+  "circle-thread?kind=discussion",
+  "circle-thread?kind=empty",
+  "circle-thread?kind=visitor",
+  "circle-manage",
+  "circle-manage?empty=1",
+  "circle-discussion",
+];
 
 export default function PreviewFeaturesIndex() {
   return (
