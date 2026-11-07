@@ -159,3 +159,28 @@ export function decodeCursor(value: unknown): { createdAt: string; id: string } 
 }
 
 export const PAGE_SIZE = 20;
+
+/**
+ * STARTER COMMUNITIES: suggestions on the empty Circle, never seeded rows.
+ * Each opens Create a community with the name and topic filled in, so the
+ * first communities are started by real people (the lead and founder, 7
+ * November 2026: seed nothing fake).
+ */
+export const STARTER_COMMUNITIES: readonly { name: string; category: CircleCategory; line: string }[] = [
+  { name: "Lekki renters", category: "renting", line: "Rents, caution fees and landlords around Lekki." },
+  { name: "Abuja landlords", category: "landlords", line: "Tenants, agreements and upkeep, from people who let homes." },
+  { name: "First-time renters in Lagos", category: "renting", line: "What to check before you pay for your first place." },
+  { name: "Short let hosts", category: "short_lets", line: "Pricing, cleaning, guests and reviews." },
+  { name: "Buying land in Nigeria", category: "buying", line: "Titles, surveys and the questions to ask before you pay." },
+  { name: "Interiors on a budget", category: "design", line: "Making a rented place feel like home." },
+];
+
+/** A prefilled draft from `/circle/new?name=&category=`, only with values the flow accepts. */
+export function prefillFrom(params: { name?: unknown; category?: unknown }): { name: string; category: CircleCategory | "" } {
+  const name = typeof params.name === "string" ? params.name.trim().slice(0, LIMITS.nameMax) : "";
+  const category =
+    typeof params.category === "string" && (CIRCLE_CATEGORIES as readonly string[]).includes(params.category)
+      ? (params.category as CircleCategory)
+      : "";
+  return { name, category };
+}

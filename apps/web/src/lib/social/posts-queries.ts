@@ -22,6 +22,14 @@ import { EDIT_WINDOW_MINUTES } from "./posts-schema";
 import { listingPhotoUrl, readMediaFor, type SignedMedia } from "./posts-media";
 import { encodeFeedCursor, parseFeedCursor } from "./posts-cursor";
 import { DELETED_STATUS, conversationIsGone, pruneDeleted } from "./deleted-posts";
+import {
+  POST_LISTING_COLUMNS,
+  amenityLabels,
+  countOrNull,
+  firstPhotoPath,
+  statedPrice,
+  type PostListingRow,
+} from "../features/post-listing/model";
 
 const POST_COLUMNS = `
   id, area_id, root_id, parent_id, depth, author_id, author_kind, kind, body,
@@ -135,40 +143,37 @@ async function readPostListings(
   const out = new Map<string, PostListing>();
   if (listingIds.length === 0) return out;
   try {
+    /* The columns `listings` really has (Agent FEATURES, 7 November 2026):
+       the old select named `price_per_night_minor` and `price_period`, which
+       do not exist, so this read failed and no plate ever rendered. The
+       mapping is pure and tested in `lib/features/post-listing/model.ts`. */
     const { data, error } = await supabase
       .from("listings")
-      .select(
-        "id, title, area, city, price_per_night_minor, price_period, listing_photos ( storage_path, position )",
-      )
+      .select(POST_LISTING_COLUMNS)
       .in("id", listingIds)
       .eq("status", "PUBLISHED");
     if (error || !data) return out;
 
-    for (const row of data as unknown as {
-      id: string;
-      title: string;
-      area: string | null;
-      city: string | null;
-      price_per_night_minor: number | string | null;
-      price_period: string | null;
-      listing_photos: { storage_path: string; position: number }[] | null;
-    }[]) {
-      const first = [...(row.listing_photos ?? [])].sort((a, b) => a.position - b.position)[0];
-      const yearly = row.price_period === "year";
+    for (const row of data as unknown as PostListingRow[]) {
+      const price = statedPrice(row);
       out.set(row.id, {
         id: row.id,
         title: row.title,
         area: row.area ?? "",
         city: row.city ?? "",
-        priceLabel: formatMoney(Number(row.price_per_night_minor ?? 0), "en"),
-        periodLabel: yearly ? "a year" : "a night",
-        photoUrl: listingPhotoUrl(first?.storage_path),
+        priceLabel: price ? formatMoney(price.minor, "en") : "",
+        periodLabel: price?.period ?? "",
+        photoUrl: listingPhotoUrl(firstPhotoPath(row)),
         /* The verified mark is first-party inventory only, and a PUBLISHED row
            in `public.listings` is first-party by definition: it was reviewed by
            an admin before it could reach that status. `listings` carries no
            `verified` column, and the catalogue read reaches the same conclusion
            the same way. */
         verified: true,
+        kind: price?.kind ?? "property",
+        beds: countOrNull(row.bedrooms),
+        baths: countOrNull(row.bathrooms),
+        amenities: amenityLabels(row),
       });
     }
     return out;

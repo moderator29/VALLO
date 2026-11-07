@@ -20,11 +20,11 @@ type Draft = { name: string; description: string; category: CircleCategory | "";
 const KEY = "vallo.circle.draft.community";
 const EMPTY: Draft = { name: "", description: "", category: "", visibility: "public", rules: "" };
 
-export function CreateCommunityFlow() {
+export function CreateCommunityFlow({ prefill }: { prefill?: { name: string; category: CircleCategory | "" } }) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState<"forward" | "back">("forward");
-  const [draft, setDraft] = useState<Draft>(EMPTY);
+  const [draft, setDraft] = useState<Draft>({ ...EMPTY, ...(prefill?.name ? { name: prefill.name } : {}), ...(prefill?.category ? { category: prefill.category } : {}) });
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useSafeTransition();
 
@@ -32,11 +32,11 @@ export function CreateCommunityFlow() {
     try {
       const raw = window.localStorage.getItem(KEY);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- the device draft is read after hydration, so server and first client render agree
-      if (raw) setDraft({ ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) });
+      if (raw && !prefill?.name) setDraft({ ...EMPTY, ...(JSON.parse(raw) as Partial<Draft>) });
     } catch {
       /* No storage: start clean. */
     }
-  }, []);
+  }, [prefill?.name]);
 
   const update = (patch: Partial<Draft>) => {
     const next = { ...draft, ...patch };
