@@ -106,7 +106,7 @@ export function ListingPicker({
             value={link}
             onChange={(event) => setLink(event.target.value)}
           />
-          <button type="submit" className="nf-btn nf-btn--secondary nf-btn--sm" disabled={!link.trim() || looking}>
+          <button type="submit" className="nf-btn nf-btn--glass nf-btn--sm" disabled={!link.trim() || looking}>
             {WORDS.find}
           </button>
         </form>

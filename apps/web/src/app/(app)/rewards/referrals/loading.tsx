@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/ui/Skeleton";
 import { ListGroupSkeleton, LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**

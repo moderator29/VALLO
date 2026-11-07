@@ -1,4 +1,3 @@
-import { Skeleton } from "@/components/ui/Skeleton";
 import { CardRowsSkeleton, LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**

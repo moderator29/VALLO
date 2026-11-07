@@ -1,13 +1,13 @@
 "use client";
 import "@/app/css/auth.css";
 
-import { useActionState, useState } from "react";
-import Link from "next/link";
+import { useActionState, useMemo, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import type { AuthFormState } from "@/lib/auth/form-state";
 import { updatePassword } from "@/lib/auth/actions";
 import { PasswordField, StrengthMeter } from "./fields";
 import { AuthPillButton } from "./slate";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -39,11 +39,19 @@ export function ResetPasswordForm({
   askCurrent?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(updatePassword, EMPTY);
+  /* The refusal's way on is always a new code, so the banner carries it. */
+  const answer = useMemo(
+    () => (state.message ? { ...state, action: state.action ?? { href: "/forgot-password", label: t.auth.resetSend } } : state),
+    [state, t.auth.resetSend],
+  );
+  useAuthBanner(answer);
   const [current, setCurrent] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
 
-  const mismatch = confirm.length > 0 && confirm !== password;
+  /* Judged once the second password is as long as the first: the words go
+     to the banner now, and a banner on the first keystroke would scold. */
+  const mismatch = confirm.length > 0 && confirm.length >= password.length && confirm !== password;
   const confirmError = mismatch ? t.authFlow.passwordsDiffer : state.fieldErrors?.confirmPassword;
 
   return (
@@ -86,17 +94,8 @@ export function ResetPasswordForm({
           onChange={setConfirm}
         />
 
-        {state.message && (
-          <p
-            role="alert"
-            className="rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-warning)_35%,transparent)] bg-[var(--nf-state-warning-surface)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-          >
-            {state.message}{" "}
-            <Link href="/forgot-password" className="nf-tap font-semibold underline underline-offset-4">
-              {t.auth.resetSend}
-            </Link>
-          </p>
-        )}
+        {/* Said by the one banner at the top of the screen, with "Send a new
+            code" as its action (`useAuthBanner`, founder, 7 November 2026). */}
 
         <div className="nf-auth__actions">
           <AuthPillButton type="submit" loading={pending} className="nf-auth__cta">
