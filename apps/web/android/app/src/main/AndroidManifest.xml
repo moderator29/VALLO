@@ -225,6 +225,10 @@
                 <data android:pathPrefix="/messages/" />
                 <data android:pathPrefix="/notifications/" />
                 <data android:pathPrefix="/bookings/" />
+                <!-- Vallo Circle (7 November 2026, coming): the Circle and
+                     anything under it open in the app. -->
+                <data android:path="/circle" />
+                <data android:pathPrefix="/circle/" />
                 <!-- An invite link (D85): /join/<code> keeps the code in the
                      web view's cookie jar and hands over to sign-up there, so
                      a sign-up made in the app is attributed to the inviter. -->

@@ -516,3 +516,23 @@ export async function readProfessionals(): Promise<ProfessionalView[]> {
     return author ? [{ author, headline: r.headline, kinds: r.kinds ?? [], years: r.years }] : [];
   });
 }
+
+/** The communities the signed-in member can post in, for the Ask flow. */
+export async function readMyCommunities(): Promise<{ signedIn: boolean; live: boolean; communities: CommunityView[] }> {
+  const v = await viewer();
+  if (!v?.id) return { signedIn: false, live: false, communities: [] };
+  const { data, error } = await v.db
+    .from("circle_memberships")
+    .select(`community_id, circle_communities ( ${COMMUNITY_COLUMNS} )`)
+    .eq("user_id", v.id)
+    .eq("status", "active")
+    .limit(100);
+  await reportReadFault("read.circle.mine", ...faults(error));
+  if (error) return { signedIn: true, live: !isNotLive(error), communities: [] };
+  const out: CommunityView[] = [];
+  for (const row of (data ?? []) as { circle_communities: RawCommunity | RawCommunity[] | null }[]) {
+    const c = Array.isArray(row.circle_communities) ? row.circle_communities[0] : row.circle_communities;
+    if (c) out.push(toCommunity(c));
+  }
+  return { signedIn: true, live: true, communities: out.sort((a, b) => a.name.localeCompare(b.name)) };
+}
