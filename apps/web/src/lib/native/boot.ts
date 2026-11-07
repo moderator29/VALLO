@@ -51,6 +51,8 @@ export type NativeRuntimeHandlers = {
   goBack: () => void;
   /** V-53: the Android notification channel's name, in the reader's words. */
   notificationChannelName?: string;
+  /** Grade 1 (P0.5): re-read the screen after the app comes back from a real absence. */
+  refresh?: () => void;
 };
 
 const NOOP = (): void => {};
@@ -192,6 +194,16 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
       if (!stopped) void refreshNativeRegistration();
     } catch {
       /* The token stays as it was; the provider's "gone" still retires it. */
+    }
+
+    if (handlers.refresh) {
+      try {
+        const { startAppResume } = await import("./app-resume");
+        collect(await startAppResume(handlers.refresh));
+      } catch {
+        /* Coming back shows the screen as it was left; pull to refresh and
+           DeployWatch still bring it up to date. */
+      }
     }
 
     try {

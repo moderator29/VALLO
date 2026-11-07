@@ -74,6 +74,8 @@ export function NativeRuntime() {
             router,
           );
         },
+        /* Grade 1 (P0.5): coming back after a minute or more shows today. */
+        refresh: () => router.refresh(),
       }),
     /* NOT keyed on the pathname: re-running tore the whole runtime down and
        re-registered the listener on every navigation, and a press inside that
