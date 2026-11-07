@@ -247,9 +247,12 @@
   .nf-feed-cat:active {
     transform: scale(0.97);
   }
+  /* The live chip is Vallo blue, the primary button's own fill and ink
+     (founder, 7 November 2026: no black buttons anywhere). */
   .nf-feed-cat[aria-current="page"] {
-    background: var(--nf-content-primary);
-    color: var(--nf-surface-primary);
+    background: var(--nf-act-fill);
+    color: var(--nf-act-on);
+    box-shadow: var(--nf-act-shadow);
   }
   .nf-feed-cat:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);

@@ -280,6 +280,16 @@ describe("what the worker shows", () => {
     expect(harness.shown[0]?.options.data?.href).toBe("/messages/9f2");
   });
 
+  it("A3: draws the place's photograph, and only an https one", async () => {
+    const harness = loadWorker();
+    await dispatch(harness, "push", pushEvent({ title: "x", body: "y", href: "/listing/a", image: "https://cdn.example/p.jpg" }));
+    await dispatch(harness, "push", pushEvent({ title: "x", body: "y", href: "/listing/b", tag: "two", image: "http://cdn.example/p.jpg" }));
+    await dispatch(harness, "push", pushEvent({ title: "x", body: "y", href: "/listing/c", tag: "three", image: "javascript:alert(1)" }));
+    expect(harness.shown[0]?.options.image).toBe("https://cdn.example/p.jpg");
+    expect(harness.shown[1]?.options.image).toBeUndefined();
+    expect(harness.shown[2]?.options.image).toBeUndefined();
+  });
+
   it("names an icon that exists in public/, which the old worker did not", async () => {
     const harness = loadWorker();
     await dispatch(harness, "push", pushEvent({ title: "x", body: "y", href: "/notifications" }));
