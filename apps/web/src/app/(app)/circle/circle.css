@@ -219,7 +219,7 @@
     min-height: 44px;
     padding: var(--nf-space-sm) var(--nf-space-md);
     border-radius: var(--nf-radius-md);
-    border: var(--nf-border-width) solid var(--nf-border-default);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     background: var(--nf-surface-inset);
     color: var(--nf-content-primary);
     font: inherit;
@@ -238,7 +238,7 @@
     width: 100%;
     padding: var(--nf-space-md);
     border-radius: var(--nf-radius-card);
-    border: var(--nf-border-width) solid var(--nf-border-default);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     background: var(--nf-surface-primary);
     color: var(--nf-content-primary);
     text-align: start;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getDictionary } from "@vallo/i18n";
+import { getDictionary, type Dictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { FirstRun } from "@/components/app/welcome/FirstRun";
 import { WelcomeStage } from "@/components/app/welcome/WelcomeStage";
@@ -90,7 +90,7 @@ export default async function WelcomePage({
     return (
       <WelcomeStage>
         <FirstRun
-          t={t}
+          t={welcomeWords(t)}
           interests={[]}
           showCards
           asked
@@ -145,4 +145,24 @@ async function arrivalAsks() {
     askPlace,
     hearAbout: typeof heard === "string" && heard ? heard : null,
   };
+}
+
+/**
+ * ONLY THE WORDS THE WELCOME READS (performance, 7 November 2026). Passing the
+ * whole dictionary to this client screen sent about 200 KB gzipped to every
+ * signed-out visitor, the front door of the app, for the 7 KB it reads
+ * (Agent NATIVE's measurement, docs/handoff/PERFORMANCE_REPORT.md). The cast
+ * is the contract: FirstRun, InterestChoices and ArrivalAsks read these
+ * sections and no others (welcome-words.test.ts holds it).
+ */
+function welcomeWords(t: Dictionary): Dictionary {
+  return {
+    common: t.common,
+    interests: t.interests,
+    onboardingMotion: t.onboardingMotion,
+    shape: { wall: t.shape.wall },
+    welcomeCards: t.welcomeCards,
+    signUp: { hearAbout: t.signUp.hearAbout },
+    platform: { lite: t.platform.lite },
+  } as unknown as Dictionary;
 }
