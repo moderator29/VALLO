@@ -48,6 +48,16 @@ export type PushPayload = {
   call?: boolean;
   /** V-53: up to two buttons, each a destination on our origin. */
   actions?: import("./actions").PushAction[];
+  /**
+   * A1 to A3 (rich push): the family (lib/push/family.ts), which picks the
+   * Android channel and the iOS category; the header line drawn above the
+   * body; and the picture, an https address a phone can fetch with no
+   * session (lib/push/imagery.ts). All optional: a push without them is the
+   * push it always was.
+   */
+  category?: import("./family").PushFamily;
+  subtitle?: string;
+  image?: string;
 };
 
 /**

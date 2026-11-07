@@ -1,4 +1,5 @@
 import "server-only";
+import { familyCategory } from "../family";
 
 import { connect, constants, type ClientHttp2Session } from "node:http2";
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
@@ -185,7 +186,10 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
 
   const body = JSON.stringify({
     aps: {
-      alert: { title: payload.title, body: payload.body },
+      /* A1: the family's header line, drawn in bold under the title. */
+      alert: { title: payload.title, ...(payload.subtitle ? { subtitle: payload.subtitle } : {}), body: payload.body },
+      /* The category the Notification Service Extension and any buttons key off. */
+      ...(payload.category ? { category: familyCategory(payload.category) } : {}),
       sound: payload.urgent ? "default" : undefined,
       /* A call's ring breaks through a Focus that allows time sensitive
          notifications; iOS has no native ringing without CallKit. */
@@ -197,6 +201,10 @@ export async function sendApns(target: PushTarget, payload: PushPayload): Promis
       "mutable-content": 1,
     },
     href: payload.href,
+    /* A1: the picture the Notification Service Extension downloads into the
+       notification (build 1.0.2, ios/App/VALLONotificationService). Without
+       the extension iOS ignores it and shows the text, as today. */
+    ...(payload.image ? { image: payload.image } : {}),
     /* V-53: carried for the shell's tap router; iOS draws no buttons until a
        notification category is registered natively, which needs the Apple
        account (APNs is behind the native_push_apns flag until then). */

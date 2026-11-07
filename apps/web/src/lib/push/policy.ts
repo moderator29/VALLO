@@ -7,6 +7,7 @@ import type { PushPayload } from "./types";
 import { actionsFor, recipientLocale } from "./actions";
 import { DEFAULT_LOCALE, localizePush, pushSummary, type Locale } from "@vallo/i18n";
 import { severityOf } from "@/lib/notify/severity";
+import { familyOf } from "./family";
 
 /**
  * EVERY DECISION ABOUT ONE QUEUED PUSH, AS A PURE FUNCTION.
@@ -201,9 +202,20 @@ export function decide(input: {
   /* THE VOICE (3 November 2026): English lock screens say it the way the app
      does ("You have a new follower"), held to the 40-character title limit. */
   const text = locale === "en" ? { ...localised, title: warmTitle(localised.title, PUSH_TITLE_MAX), body: warmBody(localised.body) } : localised;
+  /* A1 to A3 (rich push, 7 November 2026): the family names the header line,
+     the Android channel and the iOS category (lib/push/family.ts). The
+     picture is added by the drain, which can read it (lib/push/imagery.ts). */
+  const family = familyOf({
+    kind: notification.kind,
+    call: isIncomingCallPath(safeHref(notification.href)),
+    missedCall: isMissedCallPath(safeHref(notification.href)),
+    priceDrop: isSavedPriceDrop(notification.href),
+  });
   return {
     action: "send",
     payload: {
+      category: family.family,
+      subtitle: family.label,
       /* Held to the lock-screen limits (lib/push/copy.ts): a title longer
          than a phone shows arrives cut at a word, not mid-letter. */
       /* And no account or phone number in full (`maskLongDigitRuns`). */

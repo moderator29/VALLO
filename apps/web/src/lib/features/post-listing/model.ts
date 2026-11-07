@@ -72,3 +72,9 @@ export function amenityLabels(row: PostListingRow, max = 3): string[] {
 export function countOrNull(value: number | null | undefined): number | null {
   return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 }
+
+/** A listing id from a pasted Vallo link ("https://www.vallospaces.com/listing/<id>") or a bare id; else null. */
+export function listingIdFromText(text: string): string | null {
+  const match = /(?:^|\/listing\/)([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?#]|$)/i.exec(text.trim());
+  return match ? match[1]!.toLowerCase() : null;
+}

@@ -11,6 +11,7 @@ import type { PushClient, PushPlatform, PushQueueOutcome } from "./schema";
 import { sendApns } from "./transport/apns";
 import { apnsIsOpen, gatePlatforms } from "./apns-flag";
 import { sendFcm } from "./transport/fcm";
+import { resolvePushImages } from "./imagery";
 import { sendWebPush } from "./transport/webpush";
 import { isConfigurationFailure, isRetryable, type ProviderReply, type PushPayload, type PushTarget } from "./types";
 
@@ -294,8 +295,18 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
       continue;
     }
 
+    /* A1 to A3: the picture for each push (a place's cover, the writer's
+       face), read in one batch per person; a call's ring carries none. */
+    const images = await resolvePushImages(
+      admin,
+      userId,
+      plan.send.filter((item) => !item.payload.call).map((item) => item.payload.href),
+    );
+
     for (const item of plan.send) {
-      const outcome = await deliverOne(admin, item.queueId, targets, item.payload, counts, notes);
+      const image = item.payload.call ? undefined : images.get(item.payload.href);
+      const payload = image ? { ...item.payload, image } : item.payload;
+      const outcome = await deliverOne(admin, item.queueId, targets, payload, counts, notes);
       if (outcome === "delivered") {
         await settle(admin, item.queueId, "done", "delivered");
         counts.sent += 1;

@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { motionQuiet } from "@/lib/motion/gate";
+import { startPhotoMorph } from "@/lib/motion/photo-morph";
 import Link from "next/link";
 import { initial } from "@/lib/text/initial";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -51,10 +53,24 @@ export function StoryRingItem({
   const flags = useMemo(() => ringWindow(storyIds.map((id) => seenIds.includes(id))), [storyIds, seenIds]);
   const done = allSeen(flags);
 
+  /* THE PHOTO MORPH (round 5's listing flight, lent to stories): the tap
+     names this disc, and the viewer aims the flight at its full-bleed
+     picture when it commits, so the face grows into the story instead of the
+     page cutting to it. A plain tap only; a new-tab click and reduced motion
+     open as before. */
+  const disc = useRef<HTMLSpanElement>(null);
+  const storyId = href.startsWith("/stories/") ? href.slice("/stories/".length).split(/[?#]/)[0] : null;
+  const onOpen = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!storyId || !disc.current || motionQuiet()) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    startPhotoMorph(storyMorphId(storyId), disc.current);
+  };
+
   return (
-    <Link href={href} className="nf-story-ring__item" title={title}>
+    <Link href={href} className="nf-story-ring__item" title={title} onClick={onOpen}>
       <span
-        className="nf-story-ring__disc"
+        ref={disc}
+        className="nf-story-ring__disc nf-vt-morph"
         data-seen={done ? "all" : undefined}
         style={{ "--nf-ring": ringGradient(flags) } as React.CSSProperties}
       >
@@ -76,4 +92,9 @@ export function StoryRingItem({
       {done ? <span className="sr-only">, {seenWord}</span> : null}
     </Link>
   );
+}
+
+/** The morph's name for a story, shared by the ring and the viewer. */
+export function storyMorphId(storyId: string): string {
+  return `story-${storyId}`;
 }

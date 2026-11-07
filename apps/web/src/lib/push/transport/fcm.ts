@@ -1,4 +1,5 @@
 import "server-only";
+import { androidChannelFor } from "../family";
 
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
 
@@ -233,7 +234,8 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
       body: JSON.stringify({
         message: {
           token: target.token,
-          notification: { title: payload.title, body: payload.body },
+          /* A2: the picture as the big picture and its thumbnail in the shade. */
+          notification: { title: payload.title, body: payload.body, ...(payload.image ? { image: payload.image } : {}) },
           /* Data values must be strings. A number here is a 400 that reads
              as a generic INVALID_ARGUMENT. */
           data: { href: payload.href, tag: payload.tag, actions: actionsAsData(payload.actions) },
@@ -245,7 +247,12 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
               /* The channel must already exist on the handset or Android 8
                  and above drops the notification silently. It is created by
                  the shell; the name here has to match. */
-              channel_id: payload.call ? "vallo_calls" : payload.quiet && payload.tag === "vallo-missed-call" ? "vallo_missed" : "vallo_default",
+              channel_id: androidChannelFor(payload),
+              /* A2: the monochrome Vallo mark, tinted with the brand accent
+                 (the manifest's defaults, named here so a push never depends
+                 on them). */
+              icon: "ic_stat_vallo",
+              color: "#0C39EF",
               /* Android's own collapsing, so one conversation is one row in
                  the shade rather than eleven. */
               tag: payload.tag,

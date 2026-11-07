@@ -1,7 +1,9 @@
 "use client";
 
 import { initial } from "@/lib/text/initial";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { aimPhotoMorph } from "@/lib/motion/photo-morph";
+import { storyMorphId } from "./StoryRingItem";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -132,6 +134,15 @@ export function StoryViewer({
   useEffect(() => {
     markStorySeen(story.id, viewerId);
   }, [story.id, viewerId]);
+
+  /* The far end of the ring's photo morph: the full-bleed picture is named
+     in the commit, before the browser captures the new page, and only when a
+     ring really started the flight (`aimPhotoMorph` refuses otherwise). */
+  const stage = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const picture = stage.current?.querySelector<HTMLElement>(".nf-story__image");
+    if (picture) aimPhotoMorph(picture, storyMorphId(story.id));
+  }, [story.id]);
 
   const who = story.author.label;
   /* B16: this story and the recent run, as the sequence reads them. */
@@ -265,7 +276,7 @@ export function StoryViewer({
 
   return (
     <div className="nf-story nf-story--seq">
-      <article className="nf-story__stage">
+      <article className="nf-story__stage" ref={stage}>
         {story.imageUrl ? (
           /* The picture IS the page, so it is the one image here that is
              worth a full-width fetch and a priority hint. */
@@ -277,10 +288,10 @@ export function StoryViewer({
             sizes="100vw"
             priority
             quality={90}
-            className="nf-story__image"
+            className="nf-story__image nf-vt-morph"
           />
         ) : (
-          <div className="nf-story__image nf-story__image--none" aria-hidden="true" />
+          <div className="nf-story__image nf-story__image--none nf-vt-morph" aria-hidden="true" />
         )}
         <div className="nf-story__wash" aria-hidden="true" />
         {/* B16: progress, tap zones, hold to pause, the next one ready. */}

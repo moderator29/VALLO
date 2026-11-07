@@ -45,3 +45,14 @@ describe("the featured listing card reads only what the listing states", () => {
     expect(countOrNull(3)).toBe(3);
   });
 });
+
+describe("a pasted listing link", () => {
+  it("reads the id from a Vallo link or a bare id, nothing else", async () => {
+    const { listingIdFromText } = await import("./model");
+    const id = "c7f2a0b1-1234-4abc-8def-0123456789ab";
+    expect(listingIdFromText(`https://www.vallospaces.com/listing/${id}?ref=share`)).toBe(id);
+    expect(listingIdFromText(id)).toBe(id);
+    expect(listingIdFromText("https://example.com/whatever")).toBeNull();
+    expect(listingIdFromText("")).toBeNull();
+  });
+});
