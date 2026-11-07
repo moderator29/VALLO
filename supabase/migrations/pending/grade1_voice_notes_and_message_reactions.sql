@@ -31,6 +31,9 @@ alter table public.message_attachments
 --    from a fixed set, visible only to the conversation's members.
 create table if not exists public.message_reactions (
   message_id uuid not null references public.messages(id) on delete cascade,
+  -- Copied from the message by the trigger below, never trusted from the
+  -- client, so realtime can filter one conversation's reactions.
+  conversation_id uuid not null references public.conversations(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   emoji text not null,
   created_at timestamptz not null default now(),
@@ -40,6 +43,28 @@ create table if not exists public.message_reactions (
   ))
 );
 create index if not exists message_reactions_message_idx on public.message_reactions (message_id);
+create index if not exists message_reactions_conversation_idx on public.message_reactions (conversation_id);
+
+create or replace function private.message_reaction_conversation()
+ returns trigger
+ language plpgsql
+ security definer
+ set search_path to ''
+as $function$
+begin
+  select m.conversation_id into new.conversation_id
+    from public.messages m where m.id = new.message_id;
+  if new.conversation_id is null then
+    raise exception 'No such message.' using errcode = '23503';
+  end if;
+  return new;
+end;
+$function$;
+
+drop trigger if exists message_reactions_00_conversation on public.message_reactions;
+create trigger message_reactions_00_conversation
+  before insert or update of message_id on public.message_reactions
+  for each row execute function private.message_reaction_conversation();
 
 alter table public.message_reactions enable row level security;
 alter table public.message_reactions replica identity full;
