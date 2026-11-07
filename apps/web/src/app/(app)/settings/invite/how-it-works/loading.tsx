@@ -4,8 +4,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 /** The wait, on how invites work: the header, then the four reasons in one card. */
 export default function LoadingInviteHow() {
   return (
-    <LoadingShell label="Loading how invites work" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading how invites work" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div aria-hidden="true" className="nf-panel nf-panel--card block p-md">
         {[0, 1, 2, 3].map((i) => (
           <div key={i} className="flex gap-sm py-sm">

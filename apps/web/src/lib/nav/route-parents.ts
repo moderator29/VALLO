@@ -415,6 +415,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/support/messages/[id]": "/support/messages",
   "/settings/interests": "/settings",
   "/settings/notifications": "/settings",
+  "/settings/notifications/reminders": "/settings/notifications",
   "/settings/payments": "/settings",
   "/settings/place": "/settings",
   "/settings/ai-assistant": "/settings",

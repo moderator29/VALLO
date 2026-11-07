@@ -146,7 +146,7 @@ export function AcceptTerms({
           className="mt-3xs h-5 w-5 shrink-0 accent-[var(--nf-brand-primary)]"
         />
         <span className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
-          Send me news and updates from Vallo by email. You can switch this off any time.
+          {t.safety.marketingLabel}
         </span>
       </label>
 

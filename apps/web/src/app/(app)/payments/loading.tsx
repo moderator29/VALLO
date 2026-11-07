@@ -12,7 +12,7 @@ export default function LoadingPayments() {
     <LoadingShell label="Loading your payments" className="nf-page nf-md nf-history">
       {/* A money screen: the naira sign's face arrives with the shell. */}
       <NairaFacePreload />
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton layout="large" />
       <div className="mt-inline flex flex-col items-center py-block">
         <Skeleton width="7rem" height="0.8125rem" radius="sm" />
         <Skeleton className="mt-xs" width="11rem" height="2.5rem" radius="md" />

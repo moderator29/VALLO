@@ -31,7 +31,7 @@ export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
         if (!result.ok) banner.error(result.error);
         else {
           setDone((prev) => [...prev, ...ids]);
-          banner.success(ids.length === 1 ? "Confirmed. Renters see it is still available." : "Thank you. Renters see these are current.");
+          banner.success("Confirmed as still available.");
           router.refresh();
         }
       } catch (error) {

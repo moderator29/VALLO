@@ -280,13 +280,14 @@ enum ValloCrashLog {
         if let text = try? String(contentsOf: signalURL, encoding: .utf8) {
             var lines = text.split(separator: "\n", omittingEmptySubsequences: true).map(String.init)
             let name = lines.isEmpty ? "SIGNAL" : lines.removeFirst()
-            let at = (try? signalURL.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
             return [
                 "name": name,
                 "message": "The app stopped on \(name)",
                 "stack": lines.prefix(60).joined(separator: "\n"),
                 "release": release,
-                "at": Int((at ?? Date()).timeIntervalSince1970 * 1000)
+                // Dated when read: a file timestamp would be a required
+                // reason API in the privacy manifest for one number.
+                "at": Int(Date().timeIntervalSince1970 * 1000)
             ]
         }
         return nil

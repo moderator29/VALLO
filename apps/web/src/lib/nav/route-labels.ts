@@ -95,6 +95,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/settings/help": "Help",
   "/settings/privacy": "Privacy",
   "/settings/notifications": "Notifications settings",
+  "/settings/notifications/reminders": "Reminders",
   "/settings/payments": "Payment settings",
   "/support": "Help and support",
   "/support/messages": "your tickets",

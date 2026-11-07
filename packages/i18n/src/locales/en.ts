@@ -1325,6 +1325,8 @@ export const en = {
       "I agree to the Terms, the Privacy Policy and the Community Rules, and I understand that abusive content gets an account removed.",
     acceptRead: "Read them:",
     acceptRequired: "Please tick the box to continue. It is how we record what you agreed to.",
+    /* The marketing consent line under the agreement (sign-up). */
+    marketingLabel: "Send me news and updates from Vallo by email. You can switch this off any time.",
     /* STORE-19: the Terms require 18 or over, so sign-up asks, and the
        server refuses an account without the answer. */
     ageLabel: "I am 18 or older.",

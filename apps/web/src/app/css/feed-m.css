@@ -305,6 +305,15 @@
     --nf-ring-lit-end: var(--nf-brand-primary);
     --nf-ring-seen: color-mix(in oklab, var(--nf-content-muted) 55%, transparent);
   }
+  /* On paper the info blue is the deep, AA-safe #0369A1, which beside the
+     brand reads as a dull teal at the start of the sweep. A ring is a
+     graphic, not words, so it takes a bright azure from the brand and the
+     cyan instead (light mode pass, 7 November 2026), and an opened ring is a
+     quieter grey that does not smudge on white. */
+  :root[data-theme="light"] .nf-story-ring:not(:where([data-theme="dark"] *)) {
+    --nf-ring-lit: color-mix(in oklab, var(--nf-brand-primary) 62%, var(--nf-act-cyan));
+    --nf-ring-seen: color-mix(in oklab, var(--nf-content-muted) 42%, transparent);
+  }
   .nf-story-ring__disc[style*="--nf-ring"] {
     background:
       linear-gradient(var(--nf-surface-canvas), var(--nf-surface-canvas)) padding-box,

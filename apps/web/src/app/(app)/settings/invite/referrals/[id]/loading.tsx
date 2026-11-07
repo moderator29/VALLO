@@ -4,8 +4,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 /** The wait, on one referral: the header, then the track. */
 export default function LoadingInviteReferral() {
   return (
-    <LoadingShell label="Loading this referral" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading this referral" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div aria-hidden="true" className="nf-panel nf-panel--card block p-xs">
         {[0, 1, 2].map((i) => (
           <div key={i} className="flex items-center gap-sm px-sm py-sm">

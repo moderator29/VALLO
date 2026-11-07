@@ -10,8 +10,8 @@ import { CardRowsSkeleton, LoadingShell, PageHeaderSkeleton } from "@/components
  */
 export default function LoadingApplication() {
   return (
-    <LoadingShell label="Loading your application" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading your application" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <CardRowsSkeleton rows={3} />
     </LoadingShell>
   );

@@ -4,7 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { resolveSession } from "@/lib/actions/session";
 import { reviewCallsOn } from "@/lib/calls/flags";
 import { caseHref, readStaffReview } from "@/lib/calls/review-reads";
-import { CalmNote } from "../../_components/panels";
+import { CalmNote, PageHead } from "../../_components/panels";
 import { ReviewDesk } from "@/components/calls/admin/ReviewDesk";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -51,10 +51,7 @@ export default async function ReviewCallPage({ params }: { params: Promise<{ id:
   }
   return (
     <div className="nf-console grid gap-md">
-      <header className="grid gap-3xs">
-        <h1 className="nf-h1">{c.staff.caseKinds[read.review.caseKind]}</h1>
-        <p className="text-[var(--nf-content-secondary)]">{c.staff.statuses[read.review.status]}</p>
-      </header>
+      <PageHead title={c.staff.caseKinds[read.review.caseKind]} lede={c.staff.statuses[read.review.status]} />
       <ReviewDesk
         review={read.review}
         entries={read.entries}

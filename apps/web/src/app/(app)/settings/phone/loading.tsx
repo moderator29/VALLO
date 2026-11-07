@@ -9,8 +9,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingPhoneSettings() {
   return (
-    <LoadingShell label="Loading your phone number" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading your phone number" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className="space-y-block" aria-hidden="true">
         <div>
           <Skeleton height="1rem" radius="sm" />

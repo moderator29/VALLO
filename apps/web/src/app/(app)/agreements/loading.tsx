@@ -15,7 +15,7 @@ import "@/components/app/agreements/agreements.css";
 export default function LoadingAgreements() {
   return (
     <LoadingShell label="Loading your agreements" className="nf-page nf-md">
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton layout="large" />
       <Skeleton className="mt-inline" width="92%" height="0.9375rem" radius="sm" />
       <Skeleton className="mt-2xs" width="70%" height="0.9375rem" radius="sm" />
       <Skeleton className="mb-block mt-inline" width="60%" height="0.8125rem" radius="sm" />

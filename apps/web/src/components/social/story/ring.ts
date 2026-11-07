@@ -64,7 +64,7 @@ export function ringGradient(seen: readonly boolean[]): string {
   if (n === 1) {
     return flags[0]
       ? "conic-gradient(var(--nf-ring-seen) 0deg 360deg)"
-      : "conic-gradient(var(--nf-ring-lit) 0deg, var(--nf-ring-lit-mid) 220deg, var(--nf-ring-lit-end) 316deg, var(--nf-ring-lit-end) 338deg, var(--nf-ring-lit) 360deg)";
+      : "conic-gradient(var(--nf-ring-lit) 0deg, var(--nf-ring-lit-mid) 220deg, var(--nf-ring-lit-end) 316deg, var(--nf-ring-lit-end) 342deg, var(--nf-ring-lit) 360deg)";
   }
 
   const arc = 360 / n;

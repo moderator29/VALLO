@@ -9,8 +9,8 @@ import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/compo
  */
 export default function LoadingNotificationSettings() {
   return (
-    <LoadingShell label="Loading your notifications" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading your notifications" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       {/* The explanation plate every settings page opens on (W6, D25). */}
       <Skeleton height="4.5rem" radius="lg" className="mb-md" />
       <div className="space-y-block">

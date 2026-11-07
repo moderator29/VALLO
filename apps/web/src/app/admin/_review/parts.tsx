@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { Sparkline } from "@/components/agent/charts/Sparkline";
-import { CalmNote } from "../_components/panels";
+import { CalmNote, PageHead } from "../_components/panels";
 import { donutArcs, pagerPages, share } from "./metrics";
 
 /**

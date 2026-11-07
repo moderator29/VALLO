@@ -10,8 +10,8 @@ import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/compo
  */
 export default function LoadingRegionSettings() {
   return (
-    <LoadingShell label="Loading language and region" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading language and region" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className="space-y-block">
         <SettingsGroupSkeleton rows={1} />
         <SettingsGroupSkeleton rows={3} />

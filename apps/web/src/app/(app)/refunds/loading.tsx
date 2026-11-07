@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { TYPE } from "@/components/app/Screen";
 import { HistoryListWait, MoneyWait } from "@/components/app/money-history/MoneyWait";
 import { REFUNDS_HOW_BODY, REFUNDS_HOW_TITLE, REFUNDS_LEDE, REFUNDS_SCOPE, REFUNDS_TITLE, REFUND_ROUTE } from "@/lib/money/copy";
@@ -14,7 +14,8 @@ import { REFUNDS_HOW_BODY, REFUNDS_HOW_TITLE, REFUNDS_LEDE, REFUNDS_SCOPE, REFUN
 export default function LoadingRefunds() {
   return (
     <MoneyWait label="Loading your refunds" className="nf-page nf-md nf-history">
-      <PageHeader title={REFUNDS_TITLE} fallback="/payments" />
+      <PageFrame title={REFUNDS_TITLE} fallback="/payments">
+      <div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{REFUNDS_LEDE}</p>
         <p className={TYPE.rowMeta}>{REFUNDS_SCOPE}</p>
@@ -25,6 +26,8 @@ export default function LoadingRefunds() {
           <p className="nf-body-sm mt-inline text-[var(--nf-content-secondary)]">{REFUND_ROUTE}</p>
         </section>
       </div>
+      </div>
+    </PageFrame>
     </MoneyWait>
   );
 }

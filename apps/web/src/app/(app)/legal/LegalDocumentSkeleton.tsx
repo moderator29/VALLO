@@ -27,7 +27,7 @@ export const LEGAL_SKELETON_FRAME = "mx-auto w-full max-w-3xl pb-3xl pt-md";
 export function LegalDocumentSkeleton({ sections }: { sections: number }) {
   return (
     <>
-      <PageHeaderSkeleton subtitle />
+      <PageHeaderSkeleton layout="large" subtitle />
       <DocumentSheet as="div" kind="document" className="nf-legal mt-lg">
         <Skeleton width="11rem" height="0.8125rem" radius="sm" />
         <div className="nf-legal__toc">

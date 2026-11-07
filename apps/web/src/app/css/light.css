@@ -391,6 +391,22 @@
   }
 
   /* ------------------------------------------------------------------
+   * THE AURORA ON PAPER (light mode pass, 7 November 2026). Two 90px blurred
+   * blue blobs at 20 per cent are the night's atmosphere; on paper they are a
+   * lavender haze that greys the whole top of a content page, and /about,
+   * /help and every site page stacked two of them (the page's and the head's)
+   * with the crossing beams on top. On paper the aurora is a breath of the
+   * brand at the very top and the beams go.
+   * ---------------------------------------------------------------- */
+  :root[data-theme="light"] .nf-aurora:not(:where([data-theme="dark"] *))::before,
+  :root[data-theme="light"] .nf-aurora:not(:where([data-theme="dark"] *))::after {
+    opacity: 0.06;
+  }
+  :root[data-theme="light"] .nf-grid-veil:not(:where([data-theme="dark"] *)) {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
    * THE FIELD ON PAPER (light mode pass, 7 November 2026). The base field
    * (`controls.css`) is the night's sunken well: an inset fill, an inner
    * shadow and a gradient rim, which on paper read as a grey box pressed

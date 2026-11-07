@@ -16,8 +16,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 export default async function LoadingBooking() {
   const t = getDictionary(await getLocale());
   return (
-    <LoadingShell label={t.memberFlows.loading.booking} className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label={t.memberFlows.loading.booking} className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
 
       <div className="nf-panel nf-panel--card block overflow-hidden p-0">
         <div className="flex gap-md p-md">

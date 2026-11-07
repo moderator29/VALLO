@@ -12,8 +12,8 @@ import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/compo
  */
 export default function LoadingAccessibilitySettings() {
   return (
-    <LoadingShell label="Loading accessibility" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading accessibility" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <Skeleton width="80%" height="1rem" radius="sm" className="mb-block" />
       <div className="space-y-block">
         <SettingsGroupSkeleton rows={3} />

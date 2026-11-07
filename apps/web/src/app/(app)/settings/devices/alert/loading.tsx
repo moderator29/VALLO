@@ -10,8 +10,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingSignInAlert() {
   return (
-    <LoadingShell label="Loading the sign-in" className="mx-auto w-full max-w-lg space-y-block">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading the sign-in" className="mx-auto w-full max-w-xl space-y-block">
+      <PageHeaderSkeleton layout="large" />
       <div aria-hidden="true" className="nf-panel nf-panel--card block p-card">
         <Skeleton width="35%" height="0.75rem" radius="sm" />
         <Skeleton className="mt-row" width="70%" height="1.375rem" radius="sm" />

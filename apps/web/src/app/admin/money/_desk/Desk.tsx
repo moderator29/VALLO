@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { CalmNote, type CalmNoteProps } from "../../_components/panels";
+import { CalmNote, PageHead, type CalmNoteProps } from "../../_components/panels";
 import { fill } from "../../_components/copy";
 import { pagerItems } from "@/lib/admin/reads/money-derive";
 import { NumberedSlidePager } from "../../_components/NumberedSlidePager";

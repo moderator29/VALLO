@@ -9,8 +9,8 @@ import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/compo
  */
 export default function LoadingBlockedSettings() {
   return (
-    <LoadingShell label="Loading the people you blocked" className="mx-auto w-full max-w-lg">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading the people you blocked" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <div className="space-y-block">
         <Skeleton width="85%" height="0.875rem" radius="sm" />
         <SettingsGroupSkeleton rows={3} label={false} />

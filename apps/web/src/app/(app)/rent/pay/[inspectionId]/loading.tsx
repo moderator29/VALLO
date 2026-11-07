@@ -1,5 +1,5 @@
 import { getDictionary } from "@vallo/i18n";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonWait, Line, MoneyWait } from "@/components/app/money-history/MoneyWait";
 import { ActionBar } from "@/components/ui/ActionBar";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -29,9 +29,10 @@ export default async function LoadingRentPay() {
      with a slab where the amount goes. */
   const [before = "", after = ""] = pay.largeNote.split("{amount}");
   return (
-    <MoneyWait label={dict.experienceMoney.waits.rentPay} className="mx-auto max-w-2xl">
+    <MoneyWait label={dict.experienceMoney.waits.rentPay} className="mx-auto max-w-xl">
       {/* The subtitle is the place, which the read returns: its line is held. */}
-      <PageHeader title={c.rentTitle} subtitle={" "} fallback="/bookings?kind=inspection&from=property" />
+      <PageFrame title={c.rentTitle} subtitle={" "} fallback="/bookings?kind=inspection&from=property" width="narrow">
+      <div>
 
       <section className="nf-island p-card">
         <h2 className="nf-h3">
@@ -116,6 +117,8 @@ export default async function LoadingRentPay() {
           </ActionBar>
         </section>
       </div>
+      </div>
+    </PageFrame>
     </MoneyWait>
   );
 }

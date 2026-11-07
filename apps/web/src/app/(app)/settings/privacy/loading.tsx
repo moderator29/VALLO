@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
  */
 export default function LoadingPrivacySettings() {
   return (
-    <LoadingShell label="Loading your privacy" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading your privacy" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <Skeleton height="4.5rem" radius="lg" className="mb-md" />
       <Skeleton circle width="2.75rem" className="mb-md" />
       <div className="space-y-block">
