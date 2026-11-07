@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { PaymentMethodsBlock } from "@/components/app/payments/PaymentMethodsBlock";
@@ -47,21 +47,22 @@ export default async function PaymentsPage() {
 
   if (session.state !== "signed-in") {
     return (
-      <div className="nf-money mx-auto max-w-2xl">
-        <PageHeader layout="stacked" title={copy.title} fallback="/settings" />
+      <PageFrame title={copy.title} fallback="/settings" width="narrow">
         <EmptyState
           icon="card-lock"
           title={copy.signInTitle}
           body={copy.signInBody}
           action={<EmptyActions primary={{ label: t.common.signIn, href: withNext("/sign-in", "/settings/payments") }} />}
         />
-      </div>
+      </PageFrame>
     );
   }
 
   return (
-    <div className="nf-money mx-auto max-w-2xl">
-      <PageHeader layout="stacked" title={copy.title} subtitle={copy.lede} fallback="/settings" />
+    <PageFrame title={copy.title} subtitle={copy.lede} fallback="/settings" width="narrow">
+      {/* `nf-money` stays on the body: its blocks reach into the gutter on a
+          phone, the title does not. */}
+      <div className="nf-money">
       <PaymentMethodsBlock />
       <p className={`mt-row px-2xs ${TYPE.caption}`}>{copy.cardsNote}</p>
 
@@ -93,6 +94,7 @@ export default async function PaymentsPage() {
         </ListGroup>
       </div>
       <p className={`mt-row px-2xs ${TYPE.caption}`}>{PARTNERS_SHORT}</p>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

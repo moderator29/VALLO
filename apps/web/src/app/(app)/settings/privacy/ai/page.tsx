@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forAiConsent } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { aiConsentForViewer } from "@/lib/ai/consent-server";
 import { AiConsentCard } from "../../AiConsentCard";
@@ -23,10 +23,11 @@ export default async function AiConsentPage() {
   const lede = t.experienceAccount.settings.lede;
   const consented = await aiConsentForViewer().catch(() => false);
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.settings.aiConsent.label} fallback="/settings/privacy" />
-      <SettingsLede label={lede.what} what={lede.ai.what} who={lede.ai.who} />
-      <AiConsentCard t={forAiConsent(t)} consented={consented} />
-    </div>
+    <PageFrame title={t.settings.aiConsent.label} fallback="/settings/privacy" width="narrow">
+      <div>
+        <SettingsLede label={lede.what} what={lede.ai.what} who={lede.ai.who} />
+        <AiConsentCard t={forAiConsent(t)} consented={consented} />
+      </div>
+    </PageFrame>
   );
 }

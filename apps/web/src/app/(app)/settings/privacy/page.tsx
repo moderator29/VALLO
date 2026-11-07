@@ -3,7 +3,7 @@ import { forAddressMove, forPrivacyCard, forPrivacyToggles, forSecurityCard } fr
 import { distinctDeviceCount } from "@/lib/security/device-count";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { PrivacyCard, SecurityCard } from "@/components/app/account/SettingsGroups";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
@@ -51,12 +51,9 @@ export default async function PrivacySettingsPage() {
     sessions.state === "signed-in" && sessions.readable ? distinctDeviceCount(sessions.sessions) : null;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.hub.privacy}
-        subtitle={t.settings.hub.privacySub}
-        fallback="/settings"
-      />
+    <PageFrame title={t.settings.hub.privacy} subtitle={t.settings.hub.privacySub} fallback="/settings" width="narrow">
+      {/* One child: the lede and the inner nav keep their 16px foot. */}
+      <div>
       <SettingsLede label={copy.lede.what} what={copy.lede.privacy.what} who={copy.lede.privacy.who} />
       <SettingsInnerNav
         label={copy.nav.label}
@@ -144,6 +141,7 @@ export default async function PrivacySettingsPage() {
           </SettingsGroup>
         </section>
       </div>
-    </div>
+      </div>
+    </PageFrame>
   );
 }
