@@ -10,6 +10,7 @@ import type {
 } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { counterFor } from "@/lib/ui/small-rules";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * Form fields.
@@ -147,28 +148,16 @@ export function Field({
           {hint}
         </p>
       ) : null}
-      {error ? (
-        /*
-         * `role="alert"` so a message that appears after a failed submit is
-         * announced without the user having to go looking for it. The text also
-         * carries the error colour, so the state is stated three ways: colour,
-         * copy, and the field's own ring. Colour alone would fail anyone who
-         * cannot see it.
-         *
-         * `nf-arrive` is the fourth way, and it is the one a sighted reader
-         * notices first. The message rises the six pixels from under the field
-         * it belongs to rather than simply being there on the next paint, so
-         * the eye is carried to the control that refused rather than left to
-         * find a new line of red somewhere on the form.
-         */
-        <p
-          id={errorId}
-          role="alert"
-          className="nf-arrive mt-xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
+      {/*
+       * THE WORDS GO TO THE BANNER (founder, 7 November 2026, "THE BANNER
+       * EVERYWHERE"). The field keeps its red ring (`aria-invalid`, above);
+       * the message is said once at the top of the screen and stays here,
+       * visually hidden, as the note `aria-describedby` names, so a screen
+       * reader still hears it on the control. It used to be a red caption
+       * under the field with `role="alert"`.
+       */}
+      <FieldProblem id={errorId} message={error} />
+
     </div>
   );
 }

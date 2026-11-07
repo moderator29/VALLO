@@ -1,0 +1,135 @@
+/*
+ * THE INPUT BAR (founder, 7 November 2026; refs/input-bar-reference.jpg).
+ *
+ * One floating rounded bar, shaped and sized after the reference: a round
+ * tool at the left (the plus that attaches, or the search glass), the words,
+ * and a filled Vallo blue disc at the right (the voice that becomes Send in a
+ * chat; Go in a search). 48px tall at rest, fully rounded ends, the soft
+ * glass of the chips with its brand edge and the floating shadow, in both
+ * themes. It grows with a long message and keeps its tools on the last line.
+ *
+ * Applied over the existing markup, so every behaviour and test id stays:
+ * the chat box (`form.nf-composer`, messages and the assistant) and the
+ * search shelf (`.nf-shelf-box`). Unlayered and specific on purpose: it is
+ * the last word over grade1.css, messages-g1.css, catalogue.css and
+ * search-v2.css, which drew the older two-row box and the square well.
+ */
+
+/* --------------------------------------------------------- the chat box */
+
+:root form.nf-composer .nf-composer__box {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--nf-space-3xs);
+  min-block-size: 3rem;
+  padding: var(--nf-space-3xs);
+  border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+  border-radius: var(--nf-radius-island);
+  background: var(--nf-btn-glass-fill);
+  -webkit-backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  box-shadow: var(--nf-float-shadow);
+}
+:root form.nf-composer .nf-composer__box:focus-within {
+  border-color: var(--nf-brand-edge);
+}
+:root form.nf-composer .nf-composer__row {
+  display: contents;
+}
+:root form.nf-composer .nf-composer__box .nf-composer__tool {
+  grid-column: 1;
+  grid-row: 1;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  color: var(--nf-content-primary);
+}
+:root:root form.nf-composer .nf-composer__box .nf-composer__field {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  min-block-size: 2.5rem;
+  margin: 0;
+  padding: calc(var(--nf-space-xs) + 1px) var(--nf-space-3xs);
+  line-height: 1.4;
+}
+/* The disc: Vallo blue at rest and ready alike, the glyph in the on-brand
+   ink; the microphone and Send still cross over inside it. */
+:root form.nf-composer .nf-composer__box .nf-composer__send.nf-composer__action,
+:root form.nf-composer .nf-composer__box .nf-composer__send {
+  grid-column: 3;
+  grid-row: 1;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 24%, transparent);
+}
+:root form.nf-composer .nf-composer__box .nf-composer__send:disabled {
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------- the search shelf */
+
+:root .nf-shelf-box {
+  block-size: 3rem;
+  padding-inline: var(--nf-space-3xs);
+  border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+  border-radius: var(--nf-radius-island);
+  background: var(--nf-btn-glass-fill);
+  -webkit-backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  box-shadow: var(--nf-float-shadow);
+}
+:root .nf-shelf-box > .nf-shelf-field {
+  padding-inline-start: var(--nf-space-sm);
+}
+:root .nf-shelf-box > .nf-shelf-field > svg {
+  color: var(--nf-content-primary);
+}
+:root .nf-shelf-box .nf-shelf-field__go {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+}
+:root .nf-shelf-box .nf-shelf-square,
+:root .nf-shelf-box .nf-shelf-sort--square > summary {
+  border-radius: var(--nf-radius-circle);
+}
+
+/* ------------------------------------------------ the assistant's bar */
+
+:root form.nf-ai__composer {
+  gap: var(--nf-space-3xs);
+  min-block-size: 3rem;
+  margin-block-start: var(--nf-space-xs);
+  padding: var(--nf-space-3xs);
+  border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
+  border-radius: var(--nf-radius-island);
+  background: var(--nf-btn-glass-fill);
+  -webkit-backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  backdrop-filter: blur(var(--nf-glass-blur)) saturate(var(--nf-glass-saturate));
+  box-shadow: var(--nf-float-shadow);
+}
+:root form.nf-ai__composer:focus-within {
+  border-color: var(--nf-brand-edge);
+}
+:root form.nf-ai__composer .nf-ai__well {
+  min-block-size: 2.5rem;
+  padding: 0 var(--nf-space-3xs) 0 var(--nf-space-xs);
+  border: 0;
+  background: transparent;
+}
+:root form.nf-ai__composer .nf-ai__input {
+  padding-block: var(--nf-space-xs);
+}
+:root form.nf-ai__composer .nf-ai__send.nf-ai__send {
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  min-block-size: 0;
+  min-inline-size: 0;
+  padding: 0;
+  border-radius: var(--nf-radius-circle);
+}

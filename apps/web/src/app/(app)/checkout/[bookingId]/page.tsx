@@ -4,8 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getCheckoutView } from "@/lib/bookings/checkout-view";
 import { isBookingReference } from "@/lib/payments/references";
 import { ResultScreen } from "@/components/app/ResultSheet";
-import { SegmentedProgress } from "@/components/ui/Progress";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { PageScene } from "@/components/app/PageScene";
 import { Reveal } from "@/components/site/Reveal";
 import { CancellationTimeline } from "@/lib/trust/CancellationTimeline";
@@ -210,12 +209,21 @@ export default async function CheckoutPage({
       */}
       {!settling && !view.paid && (
         <Reveal>
-          <div className="mb-md">
-            <SegmentedProgress
-              steps={3}
-              current={2}
-              label={c.step}
-            />
+          {/* SW5: the step frame's own progress mark (the 3px bar and its
+              words), so checkout reads as the same flow as every other. */}
+          <div className="mb-md grid gap-xs" data-testid="checkout-progress">
+            <div
+              className="nf-g1step__progress"
+              style={{ marginInline: 0 }}
+              role="progressbar"
+              aria-valuemin={1}
+              aria-valuemax={3}
+              aria-valuenow={2}
+              aria-label={c.step}
+            >
+              <span className="nf-g1step__progress-fill" style={{ transform: "scaleX(0.6667)" }} />
+            </div>
+            <p className="nf-caption text-[var(--nf-content-secondary)]">{c.step}</p>
           </div>
         </Reveal>
       )}
@@ -438,12 +446,14 @@ async function Shell({
 }) {
   const c = getDictionary(await getLocale()).checkout;
   return (
-    <div className="nf-cat-surface mx-auto max-w-2xl">
-      <div className="relative">
+    <div className="nf-cat-surface relative mx-auto max-w-2xl">
+      {/* The scene sits behind the title band only. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[9rem]">
         <PageScene art="calendar-check" />
-        <PageHeader title={c.title} subtitle={subtitle} fallback="/bookings?side=stays&from=stays" />
       </div>
-      {children}
+      <PageFrame title={c.title} subtitle={subtitle} fallback="/bookings?side=stays&from=stays" width="narrow">
+        <div>{children}</div>
+      </PageFrame>
     </div>
   );
 }

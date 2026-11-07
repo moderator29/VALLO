@@ -25,7 +25,7 @@ const plugin = read("src/lib/native/shell-plugin.ts");
 const javaPlugin = read("android/app/src/main/java/com/vallospaces/app/ValloShellPlugin.java");
 const activity = read("android/app/src/main/java/com/vallospaces/app/MainActivity.java");
 
-const METHODS = ["setPrivacyCover", "takeCrashReport", "handoff"];
+const METHODS = ["setPrivacyCover", "takeCrashReport", "handoff", "notePath"];
 
 describe("the app switcher cover: which screens are private", () => {
   it("covers money, the passcode and identity screens", () => {
@@ -150,5 +150,29 @@ describe("Android: the twin is registered before the bridge starts", () => {
   it("never blocks screenshots: the Recents cover only, on Android 13 and above", () => {
     expect(javaPlugin).toContain("setRecentsScreenshotEnabled(!on)");
     expect(javaPlugin.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("FLAG_SECURE");
+  });
+});
+
+describe("job 7: Android renderer recovery", () => {
+  it("reopens on the page the person was on, at most twice a minute, instead of ending the app", () => {
+    expect(activity).toMatch(/return recoverRenderer\(view\);/);
+    expect(activity).toContain("static final int MAX_RECOVERIES = 2;");
+    expect(activity).toContain("static final long RECOVERY_WINDOW_MS = 60_000;");
+    expect(activity).toMatch(/if \(!mayRecover\([^)]*\)\)\) return false;/);
+    expect(activity).toMatch(/parent\.removeView\(view\);\s*view\.destroy\(\);/);
+    expect(activity).toContain("new Intent(Intent.ACTION_VIEW, Uri.parse(origin + path), this, MainActivity.class)");
+    expect(activity).toContain("recreate();");
+    expect(javaPlugin).toMatch(/path\.startsWith\("\/"\) && !path\.startsWith\("\/\/"\)/);
+  });
+
+  it("the page reports every navigation's path to the Android shell", async () => {
+    const { notePrivacyPath, setPathSink } = await import("./privacy-cover");
+    const seen: string[] = [];
+    setPathSink((p) => seen.push(p));
+    notePrivacyPath("/listing/abc");
+    notePrivacyPath("/wallet");
+    setPathSink(null);
+    notePrivacyPath("/home");
+    expect(seen).toEqual(["/listing/abc", "/wallet"]);
   });
 });

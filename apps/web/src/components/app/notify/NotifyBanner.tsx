@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { useNotificationsRealtime, type LiveNotificationRow } from "@/lib/messages/useRealtime";
 import { feedback } from "@/lib/ui/feedback";
-import { BANNER_MS, bannerGlyph, enqueue, shouldShowBanner, type BannerItem } from "./banner-model";
+import { BANNER_MS, bannerGlyph, bannerHeader, enqueue, faceLookup, shouldShowBanner, type BannerItem } from "./banner-model";
+import { playInAppChime } from "@/lib/platform/chime";
+import { RemoteImage } from "@/components/ui/RemoteImage";
 import "./notify-banner.css";
 
 /**
@@ -33,6 +35,9 @@ export function NotifyBanner() {
   const start = useRef<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const current = queue[0] ?? null;
+  /* The sender's face, when the link names a person (FEATURE_BACKLOG A9):
+     read through the member's own session, so RLS decides what is seen. */
+  const [face, setFace] = useState<{ id: string; url: string } | null>(null);
 
   /* Who is signed in on this device; nobody, no banner. */
   useEffect(() => {
@@ -74,7 +79,37 @@ export function NotifyBanner() {
   useEffect(() => {
     if (!current) return;
     feedback("select");
+    /* The soft in-app chime: silent mode, the member's switch and the 3 s gap
+       are its own rules (`lib/platform/chime.ts`). */
+    playInAppChime();
   }, [current?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const look = current ? faceLookup(current.href) : null;
+    if (!current || !look || !userId || !isSupabaseConfigured()) return;
+    let live = true;
+    const id = current.id;
+    void (async () => {
+      try {
+        const db = createClient();
+        let person: string | null = null;
+        let handle: string | null = null;
+        if (look.by === "thread") {
+          const { data } = await db.from("conversations").select("guest_id, agent_id").eq("id", look.id).maybeSingle();
+          if (data) person = data.guest_id === userId ? data.agent_id : data.guest_id;
+        } else handle = look.handle;
+        if (!person && !handle) return;
+        const query = db.from("social_profiles").select("avatar_path");
+        const { data: profile } = await (person ? query.eq("user_id", person) : query.eq("handle", handle as string)).maybeSingle();
+        if (live && profile?.avatar_path) setFace({ id, url: profile.avatar_path });
+      } catch {
+        /* No face is fine: the family glyph stays. */
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, [current, userId]);
 
   useEffect(() => {
     if (!current || held) return;
@@ -139,9 +174,16 @@ export function NotifyBanner() {
         onMouseLeave={() => setHeld(false)}
         data-testid="notify-banner"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- a transparent glyph at 36px */}
-        <img src={glyphSrc(bannerGlyph(current))} alt="" width={36} height={36} className="nf-notify__glyph" aria-hidden="true" />
+        {face && face.id === current.id ? (
+          <span className="nf-notify__face" aria-hidden="true">
+            <RemoteImage src={face.url} alt="" width={80} height={80} sizes="40px" />
+          </span>
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element -- a transparent glyph at 36px */
+          <img src={glyphSrc(bannerGlyph(current))} alt="" width={36} height={36} className="nf-notify__glyph" aria-hidden="true" />
+        )}
         <span className="nf-notify__text">
+          <span className="nf-notify__header">{bannerHeader(current)}</span>
           <span className="nf-notify__title">{current.title}</span>
           {current.body ? <span className="nf-notify__body">{current.body}</span> : null}
         </span>

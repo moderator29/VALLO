@@ -110,7 +110,7 @@ export default async function ProfileSetupPage({
       <p className="nf-lede max-w-[52ch]">{copy.setup.involves}</p>
 
       <div className="mt-lg">
-        <ApplyWizard t={forApply(t)} role={role} />
+        <ApplyWizard t={forApply(t)} role={role} intro={copy.setup.involves} closeHref="/profile/setup" />
       </div>
       </div>
     </PageFrame>

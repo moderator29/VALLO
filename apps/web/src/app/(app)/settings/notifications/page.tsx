@@ -12,6 +12,7 @@ import { NotificationMatrix } from "./NotificationMatrix";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
 import { RowLink, SettingsGroup } from "@/components/app/account/rows";
+import { ChimeSetting } from "@/components/app/notify/ChimeSetting";
 
 
 /* English until the key lands in the dictionary, like the other words this
@@ -127,6 +128,11 @@ export default async function NotificationsSettingsPage() {
             testId="settings-reminders-row"
           />
         </SettingsGroup>
+      </section>
+
+      {/* The live banner's chime (A9), kept on this device. */}
+      <section id="settings-chime" className="mt-block scroll-mt-28">
+        <ChimeSetting />
       </section>
 
       {push.state === "signed-in" && (

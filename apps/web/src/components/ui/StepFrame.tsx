@@ -103,7 +103,13 @@ export function StepFrame({
   saveWords?: Partial<Record<Exclude<StepSaveState, "idle">, string>>;
   /** "Step 3 of 12" in the reader's language. Defaults to English. */
   stepLabel?: string;
-  primary: StepAction;
+  /**
+   * The step's Continue. Omitted when the step's own control lives in the
+   * content (a money step whose confirm is DragToConfirm: a second lit button
+   * in the foot would duplicate or bypass that deliberate gate); the foot then
+   * draws only "Step N of M" and `secondary` if given.
+   */
+  primary?: StepAction;
   /** A quiet second action beside the primary, such as "Skip for now". */
   secondary?: StepAction;
   /** Which way the content slides in: from the right going forward, from the left going back. */
@@ -230,18 +236,20 @@ export function StepFrame({
               {secondary.label}
             </Button>
           ) : null}
-          <Button
-            variant="primary"
-            size="md"
-            type={primary.type ?? "button"}
-            form={primary.form}
-            disabled={primary.disabled}
-            loading={primary.loading}
-            onClick={primary.onClick}
-            data-testid={primary.testId ?? "step-continue"}
-          >
-            {primary.label}
-          </Button>
+          {primary ? (
+            <Button
+              variant="primary"
+              size="md"
+              type={primary.type ?? "button"}
+              form={primary.form}
+              disabled={primary.disabled}
+              loading={primary.loading}
+              onClick={primary.onClick}
+              data-testid={primary.testId ?? "step-continue"}
+            >
+              {primary.label}
+            </Button>
+          ) : null}
         </div>
       </footer>
     </div>

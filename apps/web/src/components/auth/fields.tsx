@@ -4,6 +4,7 @@ import "@/app/css/auth.css";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The form furniture the auth screens share.
@@ -82,13 +83,10 @@ function LabelRow({
   );
 }
 
+/* The words go to the one banner; the field keeps its red edge and this
+   visually hidden note (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
 function FieldError({ id, error }: { id: string; error?: string }) {
-  if (!error) return null;
-  return (
-    <p id={id} role="alert" className="mt-xs text-[0.75rem] text-[var(--nf-state-error)]">
-      {error}
-    </p>
-  );
+  return <FieldProblem id={id} message={error} />;
 }
 
 export function Field({

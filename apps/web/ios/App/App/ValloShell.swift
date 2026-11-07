@@ -51,7 +51,8 @@ public class ValloShellPlugin: CAPPlugin, CAPBridgedPlugin {
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "setPrivacyCover", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "takeCrashReport", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "handoff", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "handoff", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "notePath", returnType: CAPPluginReturnPromise)
     ]
 
     @objc func setPrivacyCover(_ call: CAPPluginCall) {
@@ -66,6 +67,12 @@ public class ValloShellPlugin: CAPPlugin, CAPBridgedPlugin {
         } else {
             call.resolve(["report": NSNull()])
         }
+    }
+
+    /// Android keeps the path for renderer recovery; WKWebView's own reload
+    /// after a lost content process is Capacitor's, so iOS only answers.
+    @objc func notePath(_ call: CAPPluginCall) {
+        call.resolve()
     }
 
     @objc func handoff(_ call: CAPPluginCall) {

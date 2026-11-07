@@ -330,6 +330,16 @@
         offline card in `native-shell`.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+        THE WEB VIEW'S OWN SENSE OF THE NETWORK (Agent NATIVE job 8, the
+        Capacitor audit). Android's web view learns that the connection went
+        or came back through the system's connectivity service, which it may
+        read only with this permission. Without it `navigator.onLine` can stay
+        true and the page's `offline` and `online` events never fire, so the
+        connection line, the outbox and the offline screen (lib/offline)
+        would wait for the probe alone. A normal permission: no prompt.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
         Location. COARSE is what the product needs, and the FINE line below it

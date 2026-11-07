@@ -21,6 +21,8 @@ import org.json.JSONObject;
  *                    it would also block the screenshots people here take of a
  *                    payment receipt to share it, which is ordinary use.
  *   takeCrashReport  the shell's own crash from the last run, once (ValloCrashLog).
+ *   notePath         the page's current path, so a renderer the system
+ *                    stopped for memory reopens on the same page (MainActivity).
  *   handoff          the page has painted: the launch overlay (LaunchMark)
  *                    fades onto it once the drawing has landed.
  *
@@ -46,6 +48,16 @@ public class ValloShellPlugin extends Plugin {
         JSONObject report = ValloCrashLog.take(getContext());
         result.put("report", report != null ? report : JSONObject.NULL);
         call.resolve(result);
+    }
+
+    /** The page's current path, kept for renderer recovery (MainActivity). */
+    @PluginMethod
+    public void notePath(PluginCall call) {
+        String path = call.getString("path", "/");
+        if (path != null && path.startsWith("/") && !path.startsWith("//") && path.length() <= 2048) {
+            MainActivity.lastPath = path;
+        }
+        call.resolve();
     }
 
     @PluginMethod

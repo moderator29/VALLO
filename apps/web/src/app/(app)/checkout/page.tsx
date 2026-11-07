@@ -6,7 +6,7 @@ import { getDictionary, plural } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getStayDetail } from "@/lib/stays/queries";
 import { readStayDates } from "@/components/app/stays/model";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { Amount } from "@/components/ui/Amount";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -91,8 +91,8 @@ export default async function RoomCheckoutPage({
     : "/stays";
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.checkout.title} subtitle={detail?.accommodation.name} fallback={backHref} />
+    <PageFrame title={t.checkout.title} subtitle={detail?.accommodation.name} fallback={backHref} width="narrow">
+      <div>
 
       {detail && room && plan && (
         <Panel variant="card" aria-labelledby="nf-room-pick" data-testid="room-pick">
@@ -199,6 +199,7 @@ export default async function RoomCheckoutPage({
         <UiIcon name="info" size={ICON.inline} className="mt-3xs shrink-0" />
         <span>{t.checkout.onlyYourBooking}</span>
       </p>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

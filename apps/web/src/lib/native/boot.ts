@@ -242,12 +242,19 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
          second voice), and a crash of the shell on the last run goes to the
          crash log. On an older binary every call refuses, quietly. */
       const { ValloShell } = await mods.shellPlugin;
-      const { setPrivacySink } = await mods.privacyCover;
+      const { setPathSink, setPrivacySink } = await mods.privacyCover;
       if (!stopped) {
         setPrivacySink((on) => {
           ValloShell.setPrivacyCover({ on }).catch(() => {});
         });
         collect(() => setPrivacySink(null));
+        if (platform === "android") {
+          setPathSink((path) => {
+            ValloShell.notePath({ path }).catch(() => {});
+          });
+          ValloShell.notePath({ path: window.location.pathname }).catch(() => {});
+          collect(() => setPathSink(null));
+        }
         ValloShell.handoff().catch(() => {});
         void forwardNativeCrash(ValloShell, platform === "android" ? "android" : "ios");
       }

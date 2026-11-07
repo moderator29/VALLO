@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE SLATE SYSTEM: the pieces every door into Vallo is built from.
@@ -210,11 +211,8 @@ export function AuthFieldCard({
         />
         {trailing ? <span className="nf-slate-field__trailing">{trailing}</span> : null}
       </div>
-      {error ? (
-        <p id={errorId} role="alert" className="nf-slate-field__error">
-          {error}
-        </p>
-      ) : null}
+      {/* The words go to the one banner; the field keeps its red edge (founder, 7 November 2026). */}
+      <FieldProblem id={errorId} message={error} />
     </div>
   );
 }

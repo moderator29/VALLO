@@ -2,6 +2,7 @@
 import "@/app/css/auth.css";
 
 import { useState } from "react";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE CODE FIELD, DRAWN AS CELLS (30 September).
@@ -111,11 +112,8 @@ export function CodeInput({
           className="nf-code__input nf-numeric"
         />
       </div>
-      {error ? (
-        <p id={errorId} role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      ) : null}
+      {/* The words go to the one banner; the field keeps its red edge (founder, 7 November 2026). */}
+      <FieldProblem id={errorId} message={error} when={wrongCount} />
     </div>
   );
 }

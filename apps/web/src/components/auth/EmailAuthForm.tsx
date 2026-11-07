@@ -112,6 +112,7 @@ export function EmailAuthForm({
   emailReady?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  useAuthBanner(state);
   const isSignUp = mode === "sign-up";
   /*
    * F-12: A REFUSED SUBMIT PUTS THE CURSOR ON THE FIRST THING TO FIX. Every
@@ -213,11 +214,8 @@ export function EmailAuthForm({
       <div className="nf-slate-stagger">
         <h1 className="nf-auth__title">{isSignUp ? t.common.signUp : t.common.signIn}</h1>
 
-        {!isSignUp && notice ? (
-          <p role="status" className="nf-auth__notice">
-            {notice}
-          </p>
-        ) : null}
+        {/* The arrival sentence (`?notice=`) is said by the one banner (founder, 7 November 2026). */}
+        <BannerOnArrival message={!isSignUp && notice ? notice : null} tone="info" />
 
         {!isSignUp && accountMethod === "google" && (
           <div className="nf-auth__notice" role="status">
@@ -423,24 +421,8 @@ export function EmailAuthForm({
           </>
         )}
 
-        {state.message && (
-          <p role="alert" className="nf-auth__alert">
-            {state.message}
-            {/*
-              THE WAY OUT, when the refusal has one and it is somewhere else.
-              Inside the alert rather than under it, so a screen reader that
-              has just been handed the sentence is handed the link with it.
-            */}
-            {state.action && (
-              <>
-                {" "}
-                <Link href={state.action.href} className="nf-auth__notice-link">
-                  {state.action.label}
-                </Link>
-              </>
-            )}
-          </p>
-        )}
+        {/* The refusal and its one way out are said by the one banner at the
+            top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
         {/* On sign up the pill rides a bar pinned to the foot of the screen,
             so the one primary action is in view from the first field to the

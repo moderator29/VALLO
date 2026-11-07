@@ -34,6 +34,8 @@ export type ValloShellPlugin = {
   setPrivacyCover(options: { on: boolean }): Promise<void>;
   /** The crash written on the last run, once; null when the last run ended cleanly. */
   takeCrashReport(): Promise<{ report: NativeCrash | null }>;
+  /** Android: the page's current path, kept for renderer recovery. iOS: answered and ignored. */
+  notePath(options: { path: string }): Promise<void>;
   /** The page has painted: the launch mark may hand over to it. */
   handoff(): Promise<void>;
 };

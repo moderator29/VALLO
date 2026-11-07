@@ -53,3 +53,38 @@ export function enqueue(queue: readonly BannerItem[], item: BannerItem): BannerI
   if (queue.some((q) => q.id === item.id)) return [...queue];
   return [...queue, item].slice(-BANNER_QUEUE_MAX);
 }
+
+/**
+ * THE HEADER LINE (FEATURE_BACKLOG A9, the founder's reference "New post from
+ * Vibecode"): the kind of thing that arrived, in the lock screen's own words
+ * (`lib/push/family.ts`), so the banner, the push and the Activity Centre tab
+ * all say the same: Messages, Calls, Bookings, Money, Activity, Offers.
+ */
+const HEADER: Record<ReturnType<typeof familyOf>, string> = {
+  messages: "Messages",
+  bookings: "Bookings",
+  money: "Money",
+  activity: "Activity",
+  offers: "Offers",
+};
+
+export function bannerHeader(n: { kind: string; title: string; href: string | null }): string {
+  return isCallRow(n) ? "Calls" : HEADER[familyOf(n)];
+}
+
+/**
+ * Whose face the banner can honestly show, read from the link alone: the other
+ * person in a conversation, or the profile a follow points at. Anything else
+ * draws the family glyph; a face is never guessed.
+ */
+export type FaceLookup = { by: "thread"; id: string } | { by: "handle"; handle: string } | null;
+
+export function faceLookup(href: string | null): FaceLookup {
+  if (!href) return null;
+  const path = pathOf(href);
+  const thread = /^\/(?:agent\/|host\/)?messages\/([0-9a-f-]{36})$/i.exec(path);
+  if (thread) return { by: "thread", id: thread[1]! };
+  const person = /^\/u\/([A-Za-z0-9_.]{1,40})$/.exec(path);
+  if (person) return { by: "handle", handle: person[1]! };
+  return null;
+}

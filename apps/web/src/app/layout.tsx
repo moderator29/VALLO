@@ -18,6 +18,7 @@ import { ThresholdStage } from "@/components/motion/ThresholdStage";
 import { MOTION_COOKIE, motionAttributes, parseMotion } from "@/lib/motion/motion-pref";
 import "./globals.css";
 import "./css/launch.css";
+import "./css/input-bar.css";
 import { launchScript } from "@/components/motion/launch-script";
 import packageJson from "../../package.json";
 import "@/components/startup/startup.css";

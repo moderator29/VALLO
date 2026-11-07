@@ -34,10 +34,24 @@ function flush(): void {
   }
 }
 
+let pathSink: ((path: string) => void) | null = null;
+
 /** The screen now showing. Called by NativeRuntime on every navigation. */
 export function notePrivacyPath(pathname: string): void {
   privatePath = isPrivateScreen(pathname);
   flush();
+  /* Job 7: the Android shell keeps the path, so a renderer the system stops
+     for memory reopens on this page (MainActivity, renderer recovery). */
+  try {
+    pathSink?.(pathname);
+  } catch {
+    /* An older binary: nothing keeps the path, and nothing breaks. */
+  }
+}
+
+/** The shell's path keeper, installed by the native runtime; null takes it away. */
+export function setPathSink(next: ((path: string) => void) | null): void {
+  pathSink = next;
 }
 
 /** Cover the app switcher while this is held. Returns the release (idempotent). */

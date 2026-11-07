@@ -2377,7 +2377,8 @@ export function ThreadView({
               className="nf-composer__tool"
               onClick={() => fileRef.current?.click()}
             >
-              <UiIcon name="picture" size={20} />
+              {/* The input bar's plus (founder, 7 November 2026): attach. */}
+              <UiIcon name="plus" size={22} />
             </button>
             {/* GRADE 1 (P1.3, R58): the microphone while there is nothing to
                 send, Send the moment there is (`ComposerVoice`). */}
