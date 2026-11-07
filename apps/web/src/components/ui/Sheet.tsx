@@ -181,6 +181,9 @@ export function Sheet({
   testId?: string;
   children: ReactNode;
 }) {
+  /* GRADE 1 (survey SW3): every sheet has a close X unless it is a centred
+     card (a moment with its own Continue). A caller's own words still win. */
+  closeLabel = closeLabel ?? (card ? undefined : "Close");
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
@@ -439,7 +442,10 @@ export function Sheet({
     const target =
       wanted && node.contains(wanted) && !wanted.hasAttribute("disabled")
         ? wanted
-        : (node.querySelector<HTMLElement>(FOCUSABLE) ?? node);
+        : /* Grade 1: the sheet's own content first, not its close X. */
+          (node.querySelector<HTMLElement>(`.nf-sheet__body :is(${FOCUSABLE})`) ??
+          node.querySelector<HTMLElement>(FOCUSABLE) ??
+          node);
     target.focus({ preventScroll: true });
     /* `mounted` too: a sheet that is open during hydration renders nothing
        on that first pass (the portal latch), so the node only exists once

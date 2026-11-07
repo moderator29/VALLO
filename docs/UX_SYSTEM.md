@@ -220,7 +220,7 @@ payoff, `error` on a failure.
 
 Tokens only. Works at 390 x 844 and 360 x 800, light and dark. Loading,
 empty, error and offline states exist and look designed. Safe areas
-respected. One primary action. Thin icons. Motion respects reduced motion.
+respected. One primary action. One icon family at its current weights. Motion respects reduced motion.
 The keyboard never covers the field being typed into. Nothing shifts after
 load. Every success and failure goes through the banner. Screenshot it
 locally before saying it is done.

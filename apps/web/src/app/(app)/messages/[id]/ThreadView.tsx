@@ -99,6 +99,9 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
  */
 
 /* English only for now (Grade 1); the thread's dictionary has no words yet. */
+const SEND_FAILED_WORDS = "Message couldn't be sent. Check your connection and try again.";
+const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that message. Try again." };
+
 const CARD_REMOVE_WORDS = {
   mine: "Remove from this chat",
   theirs: "Hide from my chat",
@@ -501,12 +504,12 @@ export function ThreadView({
   const [forwarding, setForwarding] = useState<ThreadBubble | null>(null);
   /* A short line for a refused or finished action, shown above the composer.
      A refusal stays until the next action; a confirmation clears itself. */
-  const [actionNote, setActionNote] = useState<{ tone: "error" | "done"; text: string } | null>(null);
-  useEffect(() => {
-    if (actionNote?.tone !== "done") return;
-    const timer = window.setTimeout(() => setActionNote(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [actionNote]);
+  /* GRADE 1: the thread's action outcomes go to the one top banner (it was
+     a private note with its own 4-second timer under the composer). */
+  const setActionNote = (note: { tone: "error" | "done"; text: string }) => {
+    if (note.tone === "error") banner.error(note.text);
+    else banner.success(note.text);
+  };
   const menuReply = () => {
     if (actionMsg) setReplyTo(actionMsg);
     setActionMsg(null);
@@ -518,7 +521,13 @@ export function ThreadView({
   const menuCopy = async () => {
     const text = actionMsg?.body ?? "";
     setActionMsg(null);
-    if (text) await navigator.clipboard?.writeText(text).catch(() => undefined);
+    if (!text) return;
+    try {
+      await navigator.clipboard?.writeText(text);
+      banner.success(COPIED_WORDS.done);
+    } catch {
+      banner.error(COPIED_WORDS.failed);
+    }
   };
   const menuDeleteForMe = async () => {
     const target = actionMsg;
@@ -754,12 +763,18 @@ export function ThreadView({
     setItems((prev) => adoptBubble(prev, tempId, realId, timeLabel));
   }, []);
 
+  /* The retry is defined below; the failure banner reaches it through this ref. */
+  const retryRef = useRef<((tempId: string) => void) | null>(null);
   const markFailed = useCallback((tempId: string) => {
     /* B14: a message that failed and was kept is a genuine failure, felt
        as the one error pattern (CRAFT_DOCTRINE 6). */
     feedback("error");
     setItems((prev) => prev.map((m) => (m.id === tempId ? { ...m, state: "failed" } : m)));
+    /* Grade 1: said at the top as well, with the retry (the founder's brief:
+       "Message couldn't be sent. Check your connection and try again."). */
+    banner.error(SEND_FAILED_WORDS, { retry: () => retryRef.current?.(tempId) });
   }, []);
+
 
   /* V-40: which outbox entry stands for which waiting bubble. */
   const waitingKeys = useRef(new Map<string, string>());
@@ -928,6 +943,10 @@ export function ThreadView({
     },
     [items, runTextSend, runImageSend],
   );
+
+  useEffect(() => {
+    retryRef.current = retry;
+  }, [retry]);
 
   const pickImage = (file: File | undefined) => {
     if (!file || !file.type.startsWith("image/")) return;
@@ -1708,17 +1727,7 @@ export function ThreadView({
           </Button>
         </div>
       )}
-      {actionNote && (
-        <p
-          role={actionNote.tone === "error" ? "alert" : "status"}
-          className={`px-md pb-xs nf-body-sm ${
-            actionNote.tone === "error" ? "text-[var(--nf-state-error)]" : "text-[var(--nf-content-secondary)]"
-          }`}
-          data-testid="thread-action-note"
-        >
-          {actionNote.text}
-        </p>
-      )}
+
       {quickReplies.length > 0 && (
         /* V-72: the tray. A tap adds the sentence to whatever is already typed. */
         <nav aria-label={quickRepliesTitle} className="px-md pb-xs" data-testid="quick-replies">
