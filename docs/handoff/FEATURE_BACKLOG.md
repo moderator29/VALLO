@@ -68,4 +68,5 @@ end to end, in order of value. Starting ideas:
 | E1 | Remove every plate or dark container behind a logo, flag or glyph that makes it look pasted on (the flags are fixed; sweep the rest) | FE | QUEUED |
 | E2 | Tablet, iPad and desktop: layouts that use the width, Back inside the page header (never floating at the screen edge) | PAGES (pages) + FE (shared frame) | QUEUED |
 | E3 | The docs and help pages upgraded (`/docs`, `/help`, `/guides`): searchable, clean, on PageFrame, light and dark | PAGES | QUEUED |
+| E5 | Marketing email consent at sign up is pre-ticked (AcceptTerms defaultChecked): make it unticked by default, with the choice also in Privacy choices (Nigeria data protection law, NDPR) | FE (Privacy choices job) | QUEUED |
 | E4 | Every new piece audited front and back: looks solid, the data path real, RLS on, tests | Lead | ONGOING |

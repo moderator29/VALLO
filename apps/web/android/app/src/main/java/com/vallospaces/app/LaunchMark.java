@@ -92,7 +92,7 @@ final class LaunchMark {
             word.setClipChildren(true);
             word.setClipToPadding(true);
             FrameLayout.LayoutParams wordLp = new FrameLayout.LayoutParams(dp(activity, 124), dp(activity, 26), Gravity.CENTER);
-            wordLp.topMargin = dp(activity, 58) * 2;
+            wordLp.topMargin = dp(activity, 58);
             g.addView(word, wordLp);
 
             letters = new ImageView[LETTERS.length];

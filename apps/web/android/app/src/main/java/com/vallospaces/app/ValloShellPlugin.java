@@ -21,9 +21,9 @@ import org.json.JSONObject;
  *                    it would also block the screenshots people here take of a
  *                    payment receipt to share it, which is ordinary use.
  *   takeCrashReport  the shell's own crash from the last run, once (ValloCrashLog).
- *   handoff          answered and ignored. Android's system splash holds the
- *                    first frame until the page has parsed, so a launch mark
- *                    drawn under it would only flash; see NATIVE_BUILD_QUEUE item 7.
+ *   handoff          the page has painted: the launch overlay (LaunchMark)
+ *                    slides the wordmark out from behind the mark and hands
+ *                    over to the page.
  *
  * Registered in MainActivity before the bridge starts. Built, NOT tested on a
  * device: no Android SDK runs in this repository.
@@ -51,6 +51,8 @@ public class ValloShellPlugin extends Plugin {
 
     @PluginMethod
     public void handoff(PluginCall call) {
+        Activity activity = getActivity();
+        if (activity != null) activity.runOnUiThread(LaunchMark::handOff);
         call.resolve();
     }
 }
