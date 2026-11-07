@@ -312,3 +312,346 @@ could not be read; it is the content, not an action's outcome, and a banner
 would leave an empty panel behind.
 
 Listed in the tables with status `kept`; reasons are on each row.
+
+## D. Admin desk actions (audit round 2)
+
+| # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
+|---|---|---|---|---|---|---|---|
+| D1 | lib/admin/agreements-actions.ts:41 | decide agreement | silent / inline | per action | success/error | Try again | todo |
+| D2 | lib/admin/agreements-actions.ts:70 | save risk settings | silent / inline | per action | success/error | Try again | todo |
+| D3 | lib/admin/agreements-actions.ts:86 | set review kill switch | silent / inline | per action | success/error | Try again | todo |
+| D4 | lib/admin/agreements-actions.ts:111 | pause release | silent / inline | per action | success/error | Try again | todo |
+| D5 | lib/admin/agreements-actions.ts:127 | resume release | silent / inline | per action | success/error | Try again | todo |
+| D6 | lib/admin/agreements-actions.ts:163 | resolve held payment | silent / inline | per action | success/error | Try again | todo |
+| D7 | lib/admin/agreements-actions.ts:229 | decide claim | silent / inline | per action | success/error | Try again | todo |
+| D8 | lib/admin/agreements-actions.ts:273 | mark claim paid | silent / inline | per action | success/error | Try again | todo |
+| D9 | lib/admin/blocked-terms-actions.ts:55 | put blocked term | silent / inline | per action | success/error | Try again | todo |
+| D10 | lib/admin/blocked-terms-actions.ts:84 | retire blocked term | silent / inline | per action | success/error | Try again | todo |
+| D11 | lib/admin/bookings-actions.ts:359 | refund booking as admin | silent / inline | per action | success/error | Try again | todo |
+| D12 | lib/admin/bookings-actions.ts:513 | decide reservation as admin | silent / inline | per action | success/error | Try again | todo |
+| D13 | lib/admin/business-actions.ts:247 | approve business | silent / inline | per action | success/error | Try again | todo |
+| D14 | lib/admin/business-actions.ts:252 | request more info | silent / inline | per action | success/error | Try again | todo |
+| D15 | lib/admin/business-actions.ts:260 | reject business | silent / inline | per action | success/error | Try again | todo |
+| D16 | lib/admin/business-actions.ts:289 | publish accommodation | silent / inline | per action | success/error | Try again | todo |
+| D17 | lib/admin/business-actions.ts:543 | publish restaurant | silent / inline | per action | success/error | Try again | todo |
+| D18 | lib/admin/business-actions.ts:650 | record business rung | silent / inline | per action | success/error | Try again | todo |
+| D19 | lib/admin/business-actions.ts:797 | record identity check | silent / inline | per action | success/error | Try again | todo |
+| D20 | lib/admin/business-actions.ts:802 | record registration check | silent / inline | per action | success/error | Try again | todo |
+| D21 | lib/admin/business-actions.ts:807 | record payout check | silent / inline | per action | success/error | Try again | todo |
+| D22 | lib/admin/business-actions.ts:812 | record on site check | silent / inline | per action | success/error | Try again | todo |
+| D23 | lib/admin/caution-desk-actions.ts:32 | rule caution dispute | silent / inline | per action | success/error | Try again | todo |
+| D24 | lib/admin/caution-desk-actions.ts:62 | rule caution return | silent / inline | per action | success/error | Try again | todo |
+| D25 | lib/admin/chargeback-actions.ts:95 | open chargeback | silent / inline | per action | success/error | Try again | todo |
+| D26 | lib/admin/chargeback-actions.ts:156 | move chargeback | silent / inline | per action | success/error | Try again | todo |
+| D27 | lib/admin/chargeback-actions.ts:228 | add chargeback note | silent / inline | per action | success/error | Try again | todo |
+| D28 | lib/admin/chargeback-actions.ts:269 | override chargeback hold | silent / inline | per action | success/error | Try again | todo |
+| D29 | lib/admin/desk-reads/crash-log-actions.ts:20 | set crash status | silent / inline | per action | success/error | Try again | todo |
+| D30 | lib/admin/desk-reads/retention-actions.ts:34 | destroy expired money records | silent / inline | per action | success/error | Try again | todo |
+| D31 | lib/admin/desk-reads/weight-withheld-actions.ts:37 | clear weight withheld | silent / inline | per action | success/error | Try again | todo |
+| D32 | lib/admin/email-recovery-actions.ts:77 | open email recovery | silent / inline | per action | success/error | Try again | todo |
+| D33 | lib/admin/email-recovery-actions.ts:111 | complete email recovery | silent / inline | per action | success/error | Try again | todo |
+| D34 | lib/admin/email-recovery-actions.ts:202 | resend recovery notice | silent / inline | per action | success/error | Try again | todo |
+| D35 | lib/admin/email-recovery-actions.ts:230 | owner cancel email recovery | silent / inline | per action | success/error | Try again | todo |
+| D36 | lib/admin/identity-check-actions.ts:39 | decide identity check | silent / inline | per action | success/error | Try again | todo |
+| D37 | lib/admin/key-roster-actions.ts:42 | clear console keys | silent / inline | per action | success/error | Try again | todo |
+| D38 | lib/admin/key-roster-actions.ts:68 | set internal account | silent / inline | per action | success/error | Try again | todo |
+| D39 | lib/admin/key-roster-actions.ts:96 | mark internal by email | silent / inline | per action | success/error | Try again | todo |
+| D40 | lib/admin/kyc-actions.ts:40 | review kyc document | silent / inline | per action | success/error | Try again | todo |
+| D41 | lib/admin/kyc-actions.ts:149 | request selfie with id | silent / inline | per action | success/error | Try again | todo |
+| D42 | lib/admin/member-actions.ts:18 | add member note | silent / inline | per action | success/error | Try again | todo |
+| D43 | lib/admin/moderation-actions.ts:59 | decide held item | silent / inline | per action | success/error | Try again | todo |
+| D44 | lib/admin/money-actions.ts:54 | set fee rate | silent / inline | per action | success/error | Try again | todo |
+| D45 | lib/admin/notes-actions.ts:22 | add member note | silent / inline | per action | success/error | Try again | todo |
+| D46 | lib/admin/payments-actions.ts:59 | retire example listings | silent / inline | per action | success/error | Try again | todo |
+| D47 | lib/admin/payments-actions.ts:166 | remove payment method as admin | silent / inline | per action | success/error | Try again | todo |
+| D48 | lib/admin/payments-actions.ts:173 | remove bank account as admin | silent / inline | per action | success/error | Try again | todo |
+| D49 | lib/admin/person-actions.ts:16 | uphold stop as fraud | silent / inline | per action | success/error | Try again | todo |
+| D50 | lib/admin/queue-desk-actions.ts:53 | take row | silent / inline | per action | success/error | Try again | todo |
+| D51 | lib/admin/queue-desk-actions.ts:67 | release row | silent / inline | per action | success/error | Try again | todo |
+| D52 | lib/admin/queue-desk-actions.ts:79 | bulk act | silent / inline | per action | success/error | Try again | todo |
+| D53 | lib/admin/queue-desk-actions.ts:199 | save view | silent / inline | per action | success/error | Try again | todo |
+| D54 | lib/admin/queue-desk-actions.ts:213 | delete view | silent / inline | per action | success/error | Try again | todo |
+| D55 | lib/admin/recall-actions.ts:38 | send recall | silent / inline | per action | success/error | Try again | todo |
+| D56 | lib/admin/reference-actions.ts:79 | save occupation | silent / inline | per action | success/error | Try again | todo |
+| D57 | lib/admin/reference-actions.ts:129 | save local government | silent / inline | per action | success/error | Try again | todo |
+| D58 | lib/admin/referral-actions.ts:63 | set referral budget | silent / inline | per action | success/error | Try again | todo |
+| D59 | lib/admin/referral-actions.ts:109 | decide referral | silent / inline | per action | success/error | Try again | todo |
+| D60 | lib/admin/referral-actions.ts:163 | decide payout | silent / inline | per action | success/error | Try again | todo |
+| D61 | lib/admin/review-contest-actions.ts:30 | decide review contest | silent / inline | per action | success/error | Try again | todo |
+| D62 | lib/admin/staff-actions.ts:52 | acknowledge handbook | silent / inline | per action | success/error | Try again | todo |
+| D63 | lib/admin/staff-actions.ts:68 | grant staff | silent / inline | per action | success/error | Try again | todo |
+| D64 | lib/admin/staff-actions.ts:108 | revoke staff | silent / inline | per action | success/error | Try again | todo |
+| D65 | lib/admin/staff-actions.ts:148 | add to support | silent / inline | per action | success/error | Try again | todo |
+| D66 | lib/admin/staff-actions.ts:175 | remove from support | silent / inline | per action | success/error | Try again | todo |
+| D67 | lib/admin/standing-actions.ts:59 | grant standing badge | silent / inline | per action | success/error | Try again | todo |
+| D68 | lib/admin/standing-actions.ts:150 | revoke standing badge | silent / inline | per action | success/error | Try again | todo |
+| D69 | lib/admin/str-actions.ts:45 | open str case | silent / inline | per action | success/error | Try again | todo |
+| D70 | lib/admin/str-actions.ts:62 | decide str | silent / inline | per action | success/error | Try again | todo |
+| D71 | lib/admin/str-actions.ts:70 | approve str | silent / inline | per action | success/error | Try again | todo |
+| D72 | lib/admin/str-actions.ts:86 | record str filing | silent / inline | per action | success/error | Try again | todo |
+| D73 | lib/admin/str-actions.ts:98 | link str | silent / inline | per action | success/error | Try again | todo |
+| D74 | lib/admin/str-actions.ts:106 | hold str subject | silent / inline | per action | success/error | Try again | todo |
+| D75 | lib/admin/str-actions.ts:114 | release str hold | silent / inline | per action | success/error | Try again | todo |
+| D76 | lib/admin/str-actions.ts:123 | approve str release | silent / inline | per action | success/error | Try again | todo |
+| D77 | lib/admin/support-desk-actions.ts:29 | take ticket | silent / inline | per action | success/error | Try again | todo |
+| D78 | lib/admin/support-desk-actions.ts:45 | release ticket | silent / inline | per action | success/error | Try again | todo |
+| D79 | lib/admin/support-workbench-actions.ts:59 | send support reply | silent / inline | per action | success/error | Try again | todo |
+| D80 | lib/admin/support-workbench-actions.ts:116 | escalate support ticket | silent / inline | per action | success/error | Try again | todo |
+| D81 | lib/admin/support-workbench-actions.ts:147 | return support escalation | silent / inline | per action | success/error | Try again | todo |
+| D82 | lib/admin/suspension-actions.ts:122 | stop agent trading | silent / inline | per action | success/error | Try again | todo |
+| D83 | lib/admin/suspension-actions.ts:194 | lift agent stop | silent / inline | per action | success/error | Try again | todo |
+| D84 | lib/admin/verification-actions.ts:54 | record verification check | silent / inline | per action | success/error | Try again | todo |
+
+## E. Agent and host actions (audit round 2)
+
+| # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
+|---|---|---|---|---|---|---|---|
+| E1 | lib/agent/bookings-actions.ts:176 | accept booking | silent / inline | per action | success/error | Try again | todo |
+| E2 | lib/agent/bookings-actions.ts:224 | decline booking | silent / inline | per action | success/error | Try again | todo |
+| E3 | lib/agent/bookings-actions.ts:366 | record stay | silent / inline | per action | success/error | Try again | todo |
+| E4 | lib/agent/broadcast-actions.ts:42 | draft from broadcast | silent / inline | per action | success/error | Try again | todo |
+| E5 | lib/agent/calendar-actions.ts:73 | block nights | silent / inline | per action | success/error | Try again | todo |
+| E6 | lib/agent/calendar-actions.ts:138 | unblock nights | silent / inline | per action | success/error | Try again | todo |
+| E7 | lib/agent/duplicate-actions.ts:37 | duplicate listing | silent / inline | per action | success/error | Try again | todo |
+| E8 | lib/agent/freshness-actions.ts:16 | confirm listings available | silent / inline | per action | success/error | Try again | todo |
+| E9 | lib/agent/listings-actions.ts:205 | save draft | silent / inline | per action | success/error | Try again | todo |
+| E10 | lib/agent/listings-actions.ts:678 | add photo | silent / inline | per action | success/error | Try again | todo |
+| E11 | lib/agent/listings-actions.ts:941 | remove photo | silent / inline | per action | success/error | Try again | todo |
+| E12 | lib/agent/listings-actions.ts:993 | reorder photos | silent / inline | per action | success/error | Try again | todo |
+| E13 | lib/agent/listings-actions.ts:1042 | reorder media | silent / inline | per action | success/error | Try again | todo |
+| E14 | lib/agent/listings-actions.ts:1170 | add video | silent / inline | per action | success/error | Try again | todo |
+| E15 | lib/agent/listings-actions.ts:1332 | remove video | silent / inline | per action | success/error | Try again | todo |
+| E16 | lib/agent/listings-actions.ts:1377 | set amenities | silent / inline | per action | success/error | Try again | todo |
+| E17 | lib/agent/listings-actions.ts:1434 | set listing access | silent / inline | per action | success/error | Try again | todo |
+| E18 | lib/agent/listings-actions.ts:1494 | submit listing | silent / inline | per action | success/error | Try again | todo |
+| E19 | lib/agent/listings-actions.ts:1607 | unpublish listing | silent / inline | per action | success/error | Try again | todo |
+| E20 | lib/agent/listings-actions.ts:1641 | delete listing | silent / inline | per action | success/error | Try again | todo |
+| E21 | lib/agent/payout-actions.ts:67 | resolve payout account | silent / inline | per action | success/error | Try again | todo |
+| E22 | lib/agent/payout-actions.ts:99 | add payout account | silent / inline | per action | success/error | Try again | todo |
+| E23 | lib/agent/payout-actions.ts:231 | set default payout account | silent / inline | per action | success/error | Try again | todo |
+| E24 | lib/agent/payout-actions.ts:275 | remove payout account | silent / inline | per action | success/error | Try again | todo |
+| E25 | lib/agent/reviews-actions.ts:72 | reply to review | silent / inline | per action | success/error | Try again | todo |
+| E26 | lib/agent/reviews-actions.ts:125 | remove review reply | silent / inline | per action | success/error | Try again | todo |
+| E27 | lib/agent/tools-actions.ts:34 | create reply template | silent / inline | per action | success/error | Try again | todo |
+| E28 | lib/agent/tools-actions.ts:54 | delete reply template | silent / inline | per action | success/error | Try again | todo |
+| E29 | lib/agent/tools-actions.ts:67 | save agent hours | silent / inline | per action | success/error | Try again | todo |
+| E30 | lib/host/calendar-actions.ts:126 | set night price | silent / inline | per action | success/error | Try again | todo |
+| E31 | lib/host/calendar-actions.ts:167 | set nights closed | silent / inline | per action | success/error | Try again | todo |
+| E32 | lib/host/calendar-actions.ts:207 | set nights rooms | silent / inline | per action | success/error | Try again | todo |
+| E33 | lib/host/calendar-actions.ts:269 | update rate plan | silent / inline | per action | success/error | Try again | todo |
+| E34 | lib/host/calendar-sync-actions.ts:66 | make calendar feed | silent / inline | per action | success/error | Try again | todo |
+| E35 | lib/host/calendar-sync-actions.ts:98 | add calendar import | silent / inline | per action | success/error | Try again | todo |
+| E36 | lib/host/calendar-sync-actions.ts:123 | remove calendar import | silent / inline | per action | success/error | Try again | todo |
+| E37 | lib/host/calendar-sync-actions.ts:140 | set calendar import enabled | silent / inline | per action | success/error | Try again | todo |
+| E38 | lib/host/front-desk-actions.ts:24 | mark stay | silent / inline | per action | success/error | Try again | todo |
+| E39 | lib/host/review-actions.ts:51 | answer hotel review | silent / inline | per action | success/error | Try again | todo |
+| E40 | lib/host/review-actions.ts:73 | withdraw hotel review answer | silent / inline | per action | success/error | Try again | todo |
+| E41 | lib/host/review-actions.ts:102 | contest hotel review | silent / inline | per action | success/error | Try again | todo |
+| E42 | lib/host/room-booking-actions.ts:102 | accept room request | silent / inline | per action | success/error | Try again | todo |
+| E43 | lib/host/room-booking-actions.ts:107 | decline room request | silent / inline | per action | success/error | Try again | todo |
+| E44 | lib/landlord/admin-actions.ts:33 | record principal consent | silent / inline | per action | success/error | Try again | todo |
+| E45 | lib/landlord/admin-actions.ts:67 | decide property match | silent / inline | per action | success/error | Try again | todo |
+| E46 | lib/landlord/admin-actions.ts:87 | split from property | silent / inline | per action | success/error | Try again | todo |
+| E47 | lib/landlord/admin-actions.ts:99 | reopen closed listing | silent / inline | per action | success/error | Try again | todo |
+| E48 | lib/landlord/close-actions.ts:37 | close listing with reason | silent / inline | per action | success/error | Try again | todo |
+| E49 | lib/landlord/close-actions.ts:77 | answer owner heartbeat | silent / inline | per action | success/error | Try again | todo |
+| E50 | lib/landlord/portfolio-actions.ts:25 | invite agents | silent / inline | per action | success/error | Try again | todo |
+| E51 | lib/landlord/portfolio-actions.ts:40 | withdraw invitation | silent / inline | per action | success/error | Try again | todo |
+| E52 | lib/landlord/portfolio-actions.ts:51 | award mandate | silent / inline | per action | success/error | Try again | todo |
+| E53 | lib/landlord/portfolio-actions.ts:62 | pitch for mandate | silent / inline | per action | success/error | Try again | todo |
+
+## F. Member actions: money, payments, bookings, saved, social (audit round 2)
+
+| # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
+|---|---|---|---|---|---|---|---|
+| F1 | app/(app)/checkout/[bookingId]/saved-card-action.ts:19 | charge saved card for | silent / inline | per action | success/error | Try again | todo |
+| F2 | app/(app)/rent/pay/[inspectionId]/saved-card-action.ts:14 | charge rent saved card for | silent / inline | per action | success/error | Try again | todo |
+| F3 | lib/after-gate/refund-decision-actions.ts:30 | decline refund request | silent / inline | per action | success/error | Try again | todo |
+| F4 | lib/after-gate/refund-request-actions.ts:27 | request refund | silent / inline | per action | success/error | Try again | todo |
+| F5 | lib/ai/consent-actions.ts:54 | withdraw ai consent | silent / inline | per action | success/error | Try again | todo |
+| F6 | lib/assistant/action-actions.ts:62 | assistant listing photos | silent / inline | per action | success/error | Try again | todo |
+| F7 | lib/assistant/action-actions.ts:75 | assistant viewing slots | silent / inline | per action | success/error | Try again | todo |
+| F8 | lib/assistant/action-actions.ts:96 | assistant propose viewing | silent / inline | per action | success/error | Try again | todo |
+| F9 | lib/assistant/action-actions.ts:121 | assistant save | silent / inline | per action | success/error | Try again | todo |
+| F10 | lib/assistant/action-actions.ts:145 | assistant propose cancel viewing | silent / inline | per action | success/error | Try again | todo |
+| F11 | lib/assistant/action-actions.ts:160 | assistant move slots | silent / inline | per action | success/error | Try again | todo |
+| F12 | lib/assistant/action-actions.ts:180 | assistant propose move | silent / inline | per action | success/error | Try again | todo |
+| F13 | lib/assistant/action-actions.ts:218 | assistant decide | silent / inline | per action | success/error | Try again | todo |
+| F14 | lib/assistant/action-actions.ts:326 | assistant payment status | silent / inline | per action | success/error | Try again | todo |
+| F15 | lib/assistant/action-actions.ts:346 | assistant retry | silent / inline | per action | success/error | Try again | todo |
+| F16 | lib/assistant/settings-actions.ts:79 | activate assistant | silent / inline | per action | success/error | Try again | todo |
+| F17 | lib/assistant/settings-actions.ts:96 | deactivate assistant | silent / inline | per action | success/error | Try again | todo |
+| F18 | lib/assistant/settings-actions.ts:109 | set assistant permission | silent / inline | per action | success/error | Try again | todo |
+| F19 | lib/assistant/settings-actions.ts:126 | clear learned preferences | silent / inline | per action | success/error | Try again | todo |
+| F20 | lib/assistant/settings-actions.ts:138 | set learned preference | silent / inline | per action | success/error | Try again | todo |
+| F21 | lib/calls/review-actions.ts:67 | request review call | silent / inline | per action | success/error | Try again | todo |
+| F22 | lib/calls/review-actions.ts:91 | reschedule review call | silent / inline | per action | success/error | Try again | todo |
+| F23 | lib/calls/review-actions.ts:111 | start review call | silent / inline | per action | success/error | Try again | todo |
+| F24 | lib/calls/review-actions.ts:126 | add review entry | silent / inline | per action | success/error | Try again | todo |
+| F25 | lib/calls/review-actions.ts:150 | complete review call | silent / inline | per action | success/error | Try again | todo |
+| F26 | lib/calls/review-actions.ts:196 | respond to review call | silent / inline | per action | success/error | Try again | todo |
+| F27 | lib/compliance/beneficial-ownership-actions.ts:42 | file listing mandate | silent / inline | per action | success/error | Try again | todo |
+| F28 | lib/compliance/beneficial-ownership-actions.ts:80 | decide listing mandate | silent / inline | per action | success/error | Try again | todo |
+| F29 | lib/compliance/edd-actions.ts:40 | decide edd review | silent / inline | per action | success/error | Try again | todo |
+| F30 | lib/compliance/edd-actions.ts:71 | approve edd decision | silent / inline | per action | success/error | Try again | todo |
+| F31 | lib/compliance/edd-actions.ts:89 | reopen edd review | silent / inline | per action | success/error | Try again | todo |
+| F32 | lib/compliance/pep-actions.ts:31 | answer pep question | silent / inline | per action | success/error | Try again | todo |
+| F33 | lib/compliance/pep-actions.ts:65 | flag pep person | silent / inline | per action | success/error | Try again | todo |
+| F34 | lib/compliance/pep-actions.ts:114 | approve pep clear | silent / inline | per action | success/error | Try again | todo |
+| F35 | lib/compliance/risk-actions.ts:24 | override risk class | silent / inline | per action | success/error | Try again | todo |
+| F36 | lib/compliance/risk-actions.ts:65 | approve risk override | silent / inline | per action | success/error | Try again | todo |
+| F37 | lib/compliance/threshold-actions.ts:36 | decide threshold event | silent / inline | per action | success/error | Try again | todo |
+| F38 | lib/compliance/threshold-actions.ts:63 | approve threshold decision | silent / inline | per action | success/error | Try again | todo |
+| F39 | lib/doors/agent-check-actions.ts:102 | set checkable number | silent / inline | per action | success/error | Try again | todo |
+| F40 | lib/doors/safety-actions.ts:25 | create safety share | silent / inline | per action | success/error | Try again | todo |
+| F41 | lib/doors/safety-actions.ts:48 | mark safety done | silent / inline | per action | success/error | Try again | todo |
+| F42 | lib/doors/safety-actions.ts:60 | stop safety share | silent / inline | per action | success/error | Try again | todo |
+| F43 | lib/email/preferences-actions.ts:15 | save email preferences | silent / inline | per action | success/error | Try again | todo |
+| F44 | lib/enquiry/followup-actions.ts:52 | set enquiry followup | silent / inline | per action | success/error | Try again | todo |
+| F45 | lib/identity/dojah-actions.ts:37 | dojah check ready | silent / inline | per action | success/error | Try again | todo |
+| F46 | lib/identity/dojah-actions.ts:51 | start dojah check | silent / inline | per action | success/error | Try again | todo |
+| F47 | lib/identity/dojah-actions.ts:80 | dojah check status | silent / inline | per action | success/error | Try again | todo |
+| F48 | lib/inspections/handshake-actions.ts:29 | prepare handshake | silent / inline | per action | success/error | Try again | todo |
+| F49 | lib/inspections/handshake-actions.ts:60 | name delegate | silent / inline | per action | success/error | Try again | todo |
+| F50 | lib/inspections/handshake-actions.ts:91 | answer delegation | silent / inline | per action | success/error | Try again | todo |
+| F51 | lib/inspections/no-show-actions.ts:55 | report no show | silent / inline | per action | success/error | Try again | todo |
+| F52 | lib/inspections/no-show-actions.ts:70 | dispute no show | silent / inline | per action | success/error | Try again | todo |
+| F53 | lib/inspections/no-show-actions.ts:105 | resolve no show | silent / inline | per action | success/error | Try again | todo |
+| F54 | lib/inspections/truth-actions.ts:45 | answer truth questions | silent / inline | per action | success/error | Try again | todo |
+| F55 | lib/listings/commute-actions.ts:14 | report commute | silent / inline | per action | success/error | Try again | todo |
+| F56 | lib/listings/shot-list-actions.ts:23 | set photo slot | silent / inline | per action | success/error | Try again | todo |
+| F57 | lib/messages/direct-actions.ts:37 | send direct message | silent / inline | per action | success/error | Try again | todo |
+| F58 | lib/messages/message-actions.ts:24 | delete message | silent / inline | per action | success/error | Try again | todo |
+| F59 | lib/messages/message-actions.ts:44 | forward message | silent / inline | per action | success/error | Try again | todo |
+| F60 | lib/messages/notifications-actions.ts:24 | mark notifications read | silent / inline | per action | success/error | Try again | todo |
+| F61 | lib/messages/prefs-actions.ts:48 | pin conversation | silent / inline | per action | success/error | Try again | todo |
+| F62 | lib/messages/prefs-actions.ts:56 | mute conversation | silent / inline | per action | success/error | Try again | todo |
+| F63 | lib/messages/reaction-actions.ts:40 | set reaction | silent / inline | per action | success/error | Try again | todo |
+| F64 | lib/messages/reaction-actions.ts:63 | clear reaction | silent / inline | per action | success/error | Try again | todo |
+| F65 | lib/messages/show-me-actions.ts:12 | request show me | silent / inline | per action | success/error | Try again | todo |
+| F66 | lib/messages/show-me-actions.ts:33 | answer show me | silent / inline | per action | success/error | Try again | todo |
+| F67 | lib/money/arrangement-actions.ts:31 | release held payment | silent / inline | per action | success/error | Try again | todo |
+| F68 | lib/money/fund-actions.ts:39 | fund escrow payment | silent / inline | per action | success/error | Try again | todo |
+| F69 | lib/money/fund-fallback-actions.ts:43 | switch escrow to card | silent / inline | per action | success/error | Try again | todo |
+| F70 | lib/money/member-wallet-actions.ts:110 | open balance account | silent / inline | per action | success/error | Try again | todo |
+| F71 | lib/money/member-wallet-actions.ts:245 | prepare withdrawal | silent / inline | per action | success/error | Try again | todo |
+| F72 | lib/money/member-wallet-actions.ts:308 | confirm balance movement | silent / inline | per action | success/error | Try again | todo |
+| F73 | lib/money/member-wallet-actions.ts:376 | prepare deposit | silent / inline | per action | success/error | Try again | todo |
+| F74 | lib/money/member-wallet-actions.ts:412 | confirm deposit paid | silent / inline | per action | success/error | Try again | todo |
+| F75 | lib/money/member-wallet-actions.ts:495 | prepare send | silent / inline | per action | success/error | Try again | todo |
+| F76 | lib/native/widget-actions.ts:57 | widget token live | silent / inline | per action | success/error | Try again | todo |
+| F77 | lib/native/widget-actions.ts:77 | revoke widget tokens | silent / inline | per action | success/error | Try again | todo |
+| F78 | lib/passport/passport-actions.ts:33 | save passport settings | silent / inline | per action | success/error | Try again | todo |
+| F79 | lib/payments/attempt-actions.ts:40 | release card attempt | silent / inline | per action | success/error | Try again | todo |
+| F80 | lib/payments/bank-accounts-actions.ts:124 | resolve bank account | silent / inline | per action | success/error | Try again | todo |
+| F81 | lib/payments/bank-accounts-actions.ts:158 | add bank account | silent / inline | per action | success/error | Try again | todo |
+| F82 | lib/payments/bank-accounts-actions.ts:328 | set default bank account | silent / inline | per action | success/error | Try again | todo |
+| F83 | lib/payments/bank-accounts-actions.ts:401 | remove bank account | silent / inline | per action | success/error | Try again | todo |
+| F84 | lib/payments/methods-actions.ts:148 | set default payment method | silent / inline | per action | success/error | Try again | todo |
+| F85 | lib/payments/methods-actions.ts:233 | remove payment method | silent / inline | per action | success/error | Try again | todo |
+| F86 | lib/payments/methods-actions.ts:314 | start card setup | silent / inline | per action | success/error | Try again | todo |
+| F87 | lib/payments/methods-actions.ts:492 | confirm card setup | silent / inline | per action | success/error | Try again | todo |
+| F88 | lib/payments/rail-choice-actions.ts:30 | choose payment rail | silent / inline | per action | success/error | Try again | todo |
+| F89 | lib/photo-hash/backfill-action.ts:10 | run photo backfill | silent / inline | per action | success/error | Try again | todo |
+| F90 | lib/price-check/wizard-actions.ts:86 | wizard price guide | silent / inline | per action | success/error | Try again | todo |
+| F91 | lib/pricing/fee-acceptance-actions.ts:58 | quote fee terms | silent / inline | per action | success/error | Try again | todo |
+| F92 | lib/pricing/fee-acceptance-actions.ts:73 | accept fee terms | silent / inline | per action | success/error | Try again | todo |
+| F93 | lib/pricing/rate-agreement-actions.ts:46 | quote listing rate | silent / inline | per action | success/error | Try again | todo |
+| F94 | lib/pricing/rate-agreement-actions.ts:62 | accept listing rate | silent / inline | per action | success/error | Try again | todo |
+| F95 | lib/push/devices-actions.ts:51 | revoke push device | silent / inline | per action | success/error | Try again | todo |
+| F96 | lib/push/devices-actions.ts:67 | revoke all push devices | silent / inline | per action | success/error | Try again | todo |
+| F97 | lib/referral/withdraw-action.ts:16 | withdraw rewards | silent / inline | per action | success/error | Try again | todo |
+| F98 | lib/reports/withdraw-action.ts:14 | withdraw my report | silent / inline | per action | success/error | Try again | todo |
+| F99 | lib/reservations/deposit-actions.ts:94 | pay reservation deposit | silent / inline | per action | success/error | Try again | todo |
+| F100 | lib/reservations/deposit-actions.ts:193 | confirm deposit return | silent / inline | per action | success/error | Try again | todo |
+| F101 | lib/reservations/deposit-settings-actions.ts:69 | save deposit settings | silent / inline | per action | success/error | Try again | todo |
+| F102 | lib/reservations/seating-actions.ts:77 | seat by code | silent / inline | per action | success/error | Try again | todo |
+| F103 | lib/reservations/seating-actions.ts:88 | answer did you dine | silent / inline | per action | success/error | Try again | todo |
+| F104 | lib/reservations/seating-actions.ts:102 | leave table review | silent / inline | per action | success/error | Try again | todo |
+| F105 | lib/reservations/seating-actions.ts:123 | enter table bill | silent / inline | per action | success/error | Try again | todo |
+| F106 | lib/reservations/seating-actions.ts:136 | confirm table bill | silent / inline | per action | success/error | Try again | todo |
+| F107 | lib/reservations/seating-actions.ts:190 | resolve seating dispute | silent / inline | per action | success/error | Try again | todo |
+| F108 | lib/reservations/seating-actions.ts:222 | pay table bill | silent / inline | per action | success/error | Try again | todo |
+| F109 | lib/reservations/seating-actions.ts:307 | confirm table bill return | silent / inline | per action | success/error | Try again | todo |
+| F110 | lib/safety/blocks-actions.ts:46 | block user safely | silent / inline | per action | success/error | Try again | todo |
+| F111 | lib/safety/blocks-actions.ts:85 | unblock user safely | silent / inline | per action | success/error | Try again | todo |
+| F112 | lib/safety/unsafe-actions.ts:33 | feel unsafe | silent / inline | per action | success/error | Try again | todo |
+| F113 | lib/saved/collections-actions.ts:33 | create collection | silent / inline | per action | success/error | Try again | todo |
+| F114 | lib/saved/collections-actions.ts:50 | delete collection | silent / inline | per action | success/error | Try again | todo |
+| F115 | lib/saved/collections-actions.ts:61 | set in collection | silent / inline | per action | success/error | Try again | todo |
+| F116 | lib/saved/places-actions.ts:51 | save place | silent / inline | per action | success/error | Try again | todo |
+| F117 | lib/saved/places-actions.ts:107 | unsave place | silent / inline | per action | success/error | Try again | todo |
+| F118 | lib/saved/places-actions.ts:182 | save stay | silent / inline | per action | success/error | Try again | todo |
+| F119 | lib/saved/places-actions.ts:187 | unsave stay | silent / inline | per action | success/error | Try again | todo |
+| F120 | lib/saved/places-actions.ts:192 | save restaurant | silent / inline | per action | success/error | Try again | todo |
+| F121 | lib/saved/places-actions.ts:197 | unsave restaurant | silent / inline | per action | success/error | Try again | todo |
+| F122 | lib/saved/searches-actions.ts:102 | save search | silent / inline | per action | success/error | Try again | todo |
+| F123 | lib/saved/searches-actions.ts:179 | rename saved search | silent / inline | per action | success/error | Try again | todo |
+| F124 | lib/saved/searches-actions.ts:205 | delete saved search | silent / inline | per action | success/error | Try again | todo |
+| F125 | lib/saved/searches-actions.ts:238 | set saved search alert | silent / inline | per action | success/error | Try again | todo |
+| F126 | lib/security/device-alert-actions.ts:67 | report not me | silent / inline | per action | success/error | Try again | todo |
+| F127 | lib/security/device-alert-actions.ts:119 | end session group | silent / inline | per action | success/error | Try again | todo |
+| F128 | lib/security/money-step-up-actions.ts:46 | step up status | silent / inline | per action | success/error | Try again | todo |
+| F129 | lib/security/money-step-up-actions.ts:56 | begin money confirm | silent / inline | per action | success/error | Try again | todo |
+| F130 | lib/security/money-step-up-actions.ts:73 | finish money confirm | silent / inline | per action | success/error | Try again | todo |
+| F131 | lib/security/money-step-up-actions.ts:120 | send fallback code | silent / inline | per action | success/error | Try again | todo |
+| F132 | lib/security/money-step-up-actions.ts:131 | confirm with fallback | silent / inline | per action | success/error | Try again | todo |
+| F133 | lib/security/money-step-up-actions.ts:184 | begin enrol | silent / inline | per action | success/error | Try again | todo |
+| F134 | lib/security/money-step-up-actions.ts:210 | finish enrol | silent / inline | per action | success/error | Try again | todo |
+| F135 | lib/security/money-step-up-actions.ts:223 | remove money credential | silent / inline | per action | success/error | Try again | todo |
+| F136 | lib/security/sessions-actions.ts:67 | end session | silent / inline | per action | success/error | Try again | todo |
+| F137 | lib/security/sessions-actions.ts:104 | end other sessions | silent / inline | per action | success/error | Try again | todo |
+| F138 | lib/social/admin-actions.ts:90 | decide area | silent / inline | per action | success/error | Try again | todo |
+| F139 | lib/social/admin-actions.ts:198 | decide moderator application | silent / inline | per action | success/error | Try again | todo |
+| F140 | lib/social/admin-actions.ts:308 | set area paused | silent / inline | per action | success/error | Try again | todo |
+| F141 | lib/social/areas-actions.ts:71 | propose area | silent / inline | per action | success/error | Try again | todo |
+| F142 | lib/social/areas-actions.ts:147 | enter place | silent / inline | per action | success/error | Try again | todo |
+| F143 | lib/social/areas-actions.ts:197 | join area | silent / inline | per action | success/error | Try again | todo |
+| F144 | lib/social/areas-actions.ts:240 | leave area | silent / inline | per action | success/error | Try again | todo |
+| F145 | lib/social/areas-actions.ts:269 | apply to moderate | silent / inline | per action | success/error | Try again | todo |
+| F146 | lib/social/areas-actions.ts:316 | withdraw moderator application | silent / inline | per action | success/error | Try again | todo |
+| F147 | lib/social/bot-actions.ts:270 | summon bot | silent / inline | per action | success/error | Try again | todo |
+| F148 | lib/social/follows-actions.ts:73 | toggle follow | silent / inline | per action | success/error | Try again | todo |
+| F149 | lib/social/follows-actions.ts:214 | more follows | silent / inline | per action | success/error | Try again | todo |
+| F150 | lib/social/posts-actions.ts:93 | drop post | silent / inline | per action | success/error | Try again | todo |
+| F151 | lib/social/posts-actions.ts:149 | reply to post | silent / inline | per action | success/error | Try again | todo |
+| F152 | lib/social/posts-actions.ts:207 | attach post media | silent / inline | per action | success/error | Try again | todo |
+| F153 | lib/social/posts-actions.ts:259 | toggle mark | silent / inline | per action | success/error | Try again | todo |
+| F154 | lib/social/posts-actions.ts:315 | toggle repost | silent / inline | per action | success/error | Try again | todo |
+| F155 | lib/social/posts-actions.ts:402 | edit post | silent / inline | per action | success/error | Try again | todo |
+| F156 | lib/social/posts-actions.ts:464 | remove post | silent / inline | per action | success/error | Try again | todo |
+| F157 | lib/social/posts-actions.ts:548 | report post | silent / inline | per action | success/error | Try again | todo |
+| F158 | lib/social/posts-actions.ts:602 | report profile | silent / inline | per action | success/error | Try again | todo |
+| F159 | lib/social/posts-actions.ts:683 | block user | silent / inline | per action | success/error | Try again | todo |
+| F160 | lib/social/posts-actions.ts:687 | unblock user | silent / inline | per action | success/error | Try again | todo |
+| F161 | lib/social/posts-actions.ts:692 | mute target | silent / inline | per action | success/error | Try again | todo |
+| F162 | lib/social/posts-actions.ts:715 | unmute target | silent / inline | per action | success/error | Try again | todo |
+| F163 | lib/social/profiles-actions.ts:69 | save social profile | silent / inline | per action | success/error | Try again | todo |
+| F164 | lib/social/profiles-actions.ts:215 | set social cover | silent / inline | per action | success/error | Try again | todo |
+| F165 | lib/social/stories-actions.ts:57 | publish story | silent / inline | per action | success/error | Try again | todo |
+| F166 | lib/social/stories-actions.ts:118 | toggle story mark | silent / inline | per action | success/error | Try again | todo |
+| F167 | lib/social/stories-actions.ts:175 | comment on story | silent / inline | per action | success/error | Try again | todo |
+| F168 | lib/social/stories-actions.ts:225 | report story comment | silent / inline | per action | success/error | Try again | todo |
+| F169 | lib/social/stories-actions.ts:286 | delete story comment | silent / inline | per action | success/error | Try again | todo |
+| F170 | lib/social/stories-actions.ts:329 | toggle story comment like | silent / inline | per action | success/error | Try again | todo |
+| F171 | lib/social/stories-actions.ts:390 | remove story | silent / inline | per action | success/error | Try again | todo |
+| F172 | lib/stays/arrival-actions.ts:30 | declare arrival charges | silent / inline | per action | success/error | Try again | todo |
+| F173 | lib/stays/arrival-actions.ts:75 | report door charge | silent / inline | per action | success/error | Try again | todo |
+| F174 | lib/stays/arrival-check-actions.ts:37 | answer arrival check | silent / inline | per action | success/error | Try again | todo |
+| F175 | lib/stays/arrival-check-actions.ts:73 | rule arrival check | silent / inline | per action | success/error | Try again | todo |
+| F176 | lib/stays/room-booking-actions.ts:63 | request room stay | silent / inline | per action | success/error | Try again | todo |
+| F177 | lib/supply/registration-actions.ts:105 | submit supply registration | silent / inline | per action | success/error | Try again | todo |
+| F178 | lib/tenancy/review-actions.ts:20 | submit tenancy review | silent / inline | per action | success/error | Try again | todo |
+| F179 | lib/tenancy/share-actions.ts:49 | add rent contributor | silent / inline | per action | success/error | Try again | todo |
+| F180 | lib/tenancy/share-actions.ts:87 | remove rent contributor | silent / inline | per action | success/error | Try again | todo |
+| F181 | lib/tenancy/share-actions.ts:106 | answer rent share | silent / inline | per action | success/error | Try again | todo |
+
+## G. Page-level actions (audit round 2)
+
+| # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
+|---|---|---|---|---|---|---|---|
+| G1 | app/(app)/checkout/[bookingId]/saved-card-action.ts:19 | charge saved card for | silent / inline | per action | success/error | Try again | todo |
+| G2 | app/(app)/messages/[id]/card-actions.ts:43 | resolve live card | silent / inline | per action | success/error | Try again | todo |
+| G3 | app/(app)/rent/pay/[inspectionId]/saved-card-action.ts:14 | charge rent saved card for | silent / inline | per action | success/error | Try again | todo |
+| G4 | components/app/messages/media-actions.ts:57 | save media | silent / inline | per action | success/error | Try again | todo |
+| G5 | components/app/messages/media-actions.ts:83 | share media | silent / inline | per action | success/error | Try again | todo |
