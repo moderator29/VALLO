@@ -70,7 +70,9 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    (how we keep listings honest, safety at viewings, money held safely).
 6. **Round 2**: the listing wizard onto `StepFrame`, one question per screen
    (WORK_QUEUE.md round 2, Survey B LW-01 to LW-04).
-7. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order.
+7. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
+   includes the English words the messages agent added (voice, reactions,
+   Talk to a person) moving into `packages/i18n`.
 
 ## Agent MSG (messages only)
 
@@ -91,7 +93,11 @@ Owns: `app/(app)/messages/**`, `components/app/messages/**`,
    typing state, empty thread and first-message states, light mode refined.
 4. **Inbox polish pass**: swipe actions (archive, mute, pin), unread
    weight, search with highlighted matches, filters, skeletons in shape.
-5. **Support as an inner page** once the support SQL is live; until then
+5. **Voice notes offline**: an outbox so a note recorded with no signal
+   sends itself when the signal returns, instead of failing with Try again.
+6. **Signed URL refresh**: photos and voice in a thread left open past an
+   hour re-sign before their links expire (3600 seconds).
+7. **Support as an inner page** once the support SQL is live; until then
    build against it with graceful degradation.
 
 ## Lead (native, backend, coordination)
