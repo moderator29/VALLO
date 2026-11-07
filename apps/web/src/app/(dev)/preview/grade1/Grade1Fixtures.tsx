@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { StepFrame } from "@/components/ui/StepFrame";
 import { banner } from "@/lib/ui/toast";
+import { KycFlow, type KycCopy } from "@/components/verification/KycFlow";
+import type { Dictionary } from "@vallo/i18n/core";
 
 const KINDS = ["Shortlet", "Property for rent", "Property for sale"] as const;
 
@@ -64,4 +66,21 @@ export function Grade1Banner({ tone }: { tone: string }) {
     banner[kind](message, { durationMs: 600_000, ...(kind === "error" ? { retry: () => undefined } : {}) });
   }, [tone]);
   return null;
+}
+
+/* The real verification flow with a submit that sends nothing. `open` taps
+   Start on mount so the first full-screen step can be screenshotted. */
+export function Grade1Verify({ copy, flowCopy, open }: { copy: KycCopy; flowCopy: Dictionary["verifyFlow"]; open: boolean }) {
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => document.querySelector<HTMLButtonElement>('[data-testid="kyc-start"]')?.click(), 300);
+    return () => window.clearTimeout(t);
+  }, [open]);
+  return (
+    <KycFlow
+      copy={copy}
+      flowCopy={flowCopy}
+      submit={async () => ({ ok: false, message: "This harness does not send anything." })}
+    />
+  );
 }

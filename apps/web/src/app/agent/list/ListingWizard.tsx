@@ -1,6 +1,7 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
+import { VerifyGateLink } from "@/components/app/VerifyGateLink";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatDate, formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -1052,6 +1053,7 @@ export function ListingWizard({
   amenities,
   initial,
   canPersist,
+  verifyFirst = false,
   startAt = 0,
   broadcastCopy,
   guideCopy,
@@ -1145,6 +1147,12 @@ export function ListingWizard({
   initial: WizardDraft | null;
   canPersist: boolean;
   /**
+   * GRADE 1 (P0.3): the lister's identity check is not sent yet, so the last
+   * step names it as the one thing to fix, with the way to /verification,
+   * before Send is pressed (reference R27). The server refuses either way.
+   */
+  verifyFirst?: boolean;
+  /**
    * The step to open on, zero based and clamped.
    *
    * The preview harness passes it so every one of the eight steps can be
@@ -1230,6 +1238,8 @@ export function ListingWizard({
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
+  /* Grade 1 (P0.3): the identity gate on submit. */
+  const [verifyGate, setVerifyGate] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
   /** One line per file the last pick refused, naming the file. */
@@ -2439,6 +2449,7 @@ export function ListingWizard({
 
   function send() {
     setPhoneGate(false);
+    setVerifyGate(false);
     startTransition(async () => {
       try {
         /* Saved first, always: the draft and its unconfirmed set (V-09) must be
@@ -2481,6 +2492,7 @@ export function ListingWizard({
           const reasons = Object.entries(result.fieldErrors ?? {}).map(([field, message]) => gateText(field, message));
           setNotice([result.error, ...new Set(reasons)].join(" "));
           setPhoneGate(result.gate === "phone");
+          setVerifyGate(result.gate === "verification");
           setFieldErrors(result.fieldErrors ?? {});
           feedback("error");
           return;
@@ -4649,6 +4661,15 @@ export function ListingWizard({
                     />
                   </div>
                 )}
+                {verifyFirst && !verifyGate ? (
+                  <div className="mt-heading nf-g1-fix" data-testid="verify-first" role="status">
+                    <p className="nf-g1-fix__title">1 thing to fix</p>
+                    <p className="nf-g1-fix__body">
+                      Verify your identity before you send this listing for review. Your draft stays here while you do.
+                    </p>
+                    <VerifyGateLink show full className="mt-sm" />
+                  </div>
+                ) : null}
                 {notice && (
                   <div className="mt-heading" data-testid="send-refused">
                     <Note glyph="flag" role="status">
@@ -4657,6 +4678,7 @@ export function ListingWizard({
                   </div>
                 )}
                 <PhoneGateLink show={phoneGate && notice !== null} full className="mt-sm" />
+                <VerifyGateLink show={verifyGate && notice !== null} full className="mt-sm" />
                 <Button
                   variant="primary"
                   full

@@ -104,3 +104,30 @@ resolve. Video calls for doubtful cases use Vallo's own call system.
 - A staff-only "check this NIN" button for doubtful cases only (one paid lookup).
 - Dojah's full selfie + NIN/BVN check when there is budget: one flag and five
   environment variables (`docs/identity/DOJAH.md`, section 5).
+
+## Platform Grade 1 (November 2026): the flow and the gate
+
+**The flow.** `/verification` now opens on an intro card ("Verify your
+identity": what you will need, that documents are private, about five
+minutes, one working day for a decision) with one Start button. Start opens
+the same steps as before (ID, live selfie, address, business, agreements,
+review) as full-screen pages on the shared `StepFrame`
+(`components/ui/StepFrame.tsx`, `overlay`): a section eyebrow, the step's
+object, the title and hint, Back, Close (which keeps every answer and returns
+to the intro), a progress bar and "Step N of M" with Continue. The review
+step has a Change button on each row that jumps back to that step. Nothing
+about what is uploaded, filed or reviewed changed.
+
+**The gate (verified before a deal).** `submitListing`
+(`lib/agent/listings-actions.ts`) refuses a lister whose identity is not on
+file with `gate: "verification"` and a button to `/verification`
+(`components/app/VerifyGateLink.tsx`). The rule
+(`lib/identity/listing-verification-rule.ts`): verification tier 1 or more, or
+an identity document that is pending or approved, passes; nothing on file or
+only refused documents is refused; QA accounts are never asked; a failed read
+refuses with a try-again sentence. The listing still publishes only on
+approval. The wizard's last step shows "1 thing to fix" before Send when the
+gate would refuse (`verifyFirst`, read in `app/agent/list/page.tsx`).
+
+**The switch.** `feature_flags.listing_verification` set to false turns the
+gate off with no deploy (flags fail open: no row means on).

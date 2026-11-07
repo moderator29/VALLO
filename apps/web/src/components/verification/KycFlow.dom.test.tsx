@@ -22,6 +22,7 @@ const ENTRY = `
     <KycFlow
       submit={submitVerification}
       copy={getDictionary("en").experienceAccount.kyc}
+      flowCopy={getDictionary("en").verifyFlow}
       payoutHref="/agent/earnings"
     />,
   );
@@ -58,6 +59,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the verification flow, end to e
       actions: { submitVerification: `async () => ({ ok: true })` },
     });
     try {
+      /* 0. Grade 1: the intro says what will happen, and Start opens the
+         steps full screen. */
+      await page.getByTestId("kyc-intro").waitFor();
+      expect(await page.getByTestId("kyc-intro").innerText()).toContain("What you'll need");
+      await page.getByTestId("kyc-start").click();
+      await page.getByTestId("kyc-flow").waitFor();
       /* 1. The ID. */
       await page.getByText("Step 1 of 6").waitFor();
       await page.locator('input[type="file"]').first().setInputFiles({ name: "passport.jpg", mimeType: "image/jpeg", buffer: JPEG });
@@ -96,6 +103,15 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the verification flow, end to e
       const review = await page.locator("ul").first().innerText();
       expect(review).toContain("Selfie");
       expect(review).toContain("Taken");
+      /* Grade 1: Change goes straight back to that step, and Continue walks
+         forward to the review again with every answer kept. */
+      await page.getByRole("button", { name: "Change" }).nth(1).click();
+      await page.getByText("Step 2 of 6").waitFor();
+      for (const n of [3, 4, 5, 6]) {
+        if (n === 5) await page.getByRole("button", { name: /No, this is just me/ }).click();
+        else await page.getByRole("button", { name: "Continue" }).click();
+        await page.getByText(`Step ${n} of 6`).waitFor();
+      }
       await page.getByRole("button", { name: "Send for review" }).click();
 
       /* What happens next, with the bank account step. */
@@ -123,6 +139,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the verification flow, end to e
   it("will not move past the selfie step without a selfie", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, init: INIT });
     try {
+      await page.getByTestId("kyc-start").click();
       await page.route("**/storage/v1/object/**", (route) => route.fulfill({ status: 200, body: "{}" }));
       await page.locator('input[type="file"]').first().setInputFiles({ name: "passport.jpg", mimeType: "image/jpeg", buffer: JPEG });
       await page.getByLabel("Which ID is this?").selectOption("passport");

@@ -19,8 +19,11 @@ export type ActionResult<T = null> =
        * The refusal is the phone gate (`lib/phone-otp/gate.ts`): the screen
        * draws the button to Settings, Phone beside the words
        * (`components/app/PhoneGateLink.tsx`), which brings the member back.
+       * "verification" is the identity gate before a deal
+       * (`lib/identity/listing-verification-gate.ts`): the screen links to
+       * /verification.
        */
-      gate?: "phone";
+      gate?: "phone" | "verification";
     };
 
 export function ok<T>(data: T): ActionResult<T> {
@@ -39,8 +42,15 @@ export function phoneGateRefusal(error: string, link = true): PhoneGateRefusal {
   return link ? { ok: false, error, gate: "phone" } : { ok: false, error };
 }
 
+/** A refusal from the identity gate (Grade 1, P0.3). */
+export type VerificationGateRefusal = { ok: false; error: string; gate: "verification" };
+
+export function verificationGateRefusal(error: string): VerificationGateRefusal {
+  return { ok: false, error, gate: "verification" };
+}
+
 /** Did this result come back from the phone gate? For the screen's button. */
-export function isPhoneGate(result: { ok: boolean; gate?: "phone" } | null | undefined): boolean {
+export function isPhoneGate(result: { ok: boolean; gate?: "phone" | "verification" } | null | undefined): boolean {
   return Boolean(result && !result.ok && result.gate === "phone");
 }
 

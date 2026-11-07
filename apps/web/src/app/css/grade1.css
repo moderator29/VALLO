@@ -236,6 +236,30 @@
   background: var(--nf-surface-canvas);
   color: var(--nf-content-primary);
 }
+/* Full screen over the app (verification, the wizard): above the shell's
+   header and dock, scrolling on its own. */
+.nf-g1step--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--nf-z-modal);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  outline: none;
+  animation: nf-g1-step-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+@keyframes nf-g1-step-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0);
+  }
+}
+.nf-g1step__art {
+  display: grid;
+  place-items: center;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  margin-block-end: var(--nf-space-md);
+}
 .nf-g1step__top {
   position: sticky;
   top: 0;
@@ -391,7 +415,8 @@
   min-inline-size: 9rem;
 }
 @media (prefers-reduced-motion: reduce) {
-  .nf-g1step__page {
+  .nf-g1step__page,
+  .nf-g1step--overlay {
     animation: none;
   }
   .nf-g1step__progress-fill {
@@ -431,4 +456,101 @@
   font-size: var(--nf-text-body-sm);
   line-height: 1.5;
 }
+
+/* "1 THING TO FIX" (reference R27): the one blocker named before the tap. */
+.nf-g1-fix {
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-state-warning) 45%, transparent);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-state-warning-surface);
 }
+.nf-g1-fix__title {
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-fix__body {
+  margin-block-start: var(--nf-space-3xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+
+/* THE VERIFICATION INTRO (P0.3, reference R15 and the founder's brief): what
+   will happen, before the steps open full screen. */
+.nf-g1-intro {
+  padding: var(--nf-space-lg) var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-island);
+  background: var(--nf-surface-secondary);
+  animation: nf-g1-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+.nf-g1-intro__art {
+  display: grid;
+  place-items: center;
+  inline-size: 4rem;
+  block-size: 4rem;
+  margin-block-end: var(--nf-space-md);
+}
+.nf-g1-intro__title {
+  font-size: var(--nf-text-h1);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.nf-g1-intro__body {
+  margin-block-start: var(--nf-space-xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body);
+  line-height: 1.5;
+}
+.nf-g1-intro__need {
+  margin-block-start: var(--nf-space-lg);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-intro__list {
+  display: grid;
+  gap: var(--nf-space-sm);
+  margin-block-start: var(--nf-space-sm);
+}
+.nf-g1-intro__list li,
+.nf-g1-intro__note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--nf-space-sm);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-intro__list li > svg {
+  color: var(--nf-brand-primary);
+}
+.nf-g1-intro__note {
+  margin-block-start: var(--nf-space-md);
+  color: var(--nf-content-secondary);
+}
+/* THE REVIEW'S "CHANGE" (reference R27): a pale pill-free soft button. */
+.nf-g1-change {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  min-block-size: 2.75rem;
+  padding-inline: var(--nf-space-sm);
+  border-radius: var(--nf-act-radius-sm);
+  background: var(--nf-border-subtle);
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+}
+.nf-g1-change:active {
+  scale: var(--nf-press-scale);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-g1-intro {
+    animation: none;
+  }
+}
+}
+

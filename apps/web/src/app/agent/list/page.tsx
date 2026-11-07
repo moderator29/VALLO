@@ -3,6 +3,7 @@ import { flagIsOn, LISTER_FEE_GATE_BLOCKING_FLAG, NEIGHBOURS_FLAG } from "@/lib/
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { listingVerificationNeeded } from "@/lib/identity/listing-verification-gate";
 import {
   agentProfileFrom,
   getAgentContext,
@@ -106,7 +107,7 @@ export default async function Page({
     );
   }
 
-  const [states, amenities, draft] = await Promise.all([
+  const [states, amenities, draft, verifyFirst] = await Promise.all([
     readStates(context.supabase),
     readAmenities(context.supabase),
     id
@@ -114,6 +115,8 @@ export default async function Page({
       : startFresh
         ? Promise.resolve<DraftRead>(null)
         : readOpenDraft(context.supabase, context.agent.id),
+    /* Grade 1 (P0.3): drawn on the last step before the tap. */
+    listingVerificationNeeded(context.supabase, context.user.id, context.agent.id).catch(() => false),
   ]);
 
   /* A live or reviewing listing is not opened as a form that refuses every
@@ -193,6 +196,7 @@ export default async function Page({
         amenities={amenities}
         initial={shown}
         canPersist
+        verifyFirst={verifyFirst}
         broadcastCopy={t.frontDoor.broadcast}
         guideCopy={t.frontDoor.guide}
         initialUnconfirmed={unconfirmed}

@@ -3,10 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { TextField } from "@/components/ui/Field";
-import { SegmentedProgress } from "@/components/ui/Progress";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { BackControl } from "@/components/ui/BackControl";
 import { ICON_PLATE_GLYPH, IconPlate } from "@/components/ui/IconPlate";
 import { Icon3D } from "@/components/ui/Icon3D";
 import type { Icon3DName } from "@/components/ui/icon-3d";
@@ -67,12 +66,15 @@ export function KycFlow({
   submit,
   success,
   copy,
+  flowCopy,
   askBusiness = true,
   acceptCopy,
   payoutHref,
 }: {
   /** The flow's words, from the server page. */
   copy: KycCopy;
+  /** The Grade 1 intro, eyebrows and Change (`verifyFlow`). */
+  flowCopy: Dictionary["verifyFlow"];
   /** The page's `t.success`, for the "Documents sent" sheet. Absent, no sheet. */
   success?: SuccessWords;
   /**
@@ -102,6 +104,10 @@ export function KycFlow({
   payoutHref?: string;
 }) {
   const [at, setAt] = useState(0);
+  /* GRADE 1: the intro on the page first; the steps open full screen and
+     keep every answer if they are closed. */
+  const [opened, setOpened] = useState(false);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [business, setBusiness] = useState<boolean | null>(null);
   const [documents, setDocuments] = useState<Partial<Record<DocumentKind, KycDocument>>>({});
   const [selfie, setSelfie] = useState<KycSelfie | null>(null);
@@ -145,10 +151,12 @@ export function KycFlow({
 
   const back = () => {
     setFailure(null);
+    setDirection("back");
     setAt((i) => Math.max(0, i - 1));
   };
   const forward = () => {
     setFailure(null);
+    setDirection("forward");
     setAt((i) => Math.min(steps.length - 1, i + 1));
   };
 
@@ -210,45 +218,63 @@ export function KycFlow({
   const progress = copy.progress.replace("{n}", String(at + 1)).replace("{total}", String(steps.length));
   const stepWords = copy.steps[step.id];
 
+  /* GRADE 1: the review's Change jumps straight back to that step. */
+  const changeTo = (id: StepId) => {
+    const index = steps.findIndex((s) => s.id === id);
+    if (index < 0) return undefined;
+    return { label: flowCopy.change, run: () => { setDirection("back"); setAt(index); } };
+  };
+  const startedAlready = at > 0 || Boolean(documents.identity) || Boolean(selfie);
+
+  /* ------------------------------------------------- the intro, on the page */
+  if (!opened) {
+    return (
+      <section className="nf-g1-intro" data-testid="kyc-intro" aria-labelledby="kyc-intro-title">
+        <span className="nf-g1-intro__art" aria-hidden="true">
+          <Icon3D name="id-check" size={64} priority />
+        </span>
+        <p className="nf-g1step__eyebrow">{flowCopy.introEyebrow}</p>
+        <h2 id="kyc-intro-title" className="nf-g1-intro__title">{flowCopy.introTitle}</h2>
+        <p className="nf-g1-intro__body">{flowCopy.introBody}</p>
+        <p className="nf-g1-intro__need">{flowCopy.introNeedTitle}</p>
+        <ul className="nf-g1-intro__list">
+          <li><UiIcon name="id-card" size={20} /><span>{flowCopy.introNeedId}</span></li>
+          <li><UiIcon name="camera" size={20} /><span>{flowCopy.introNeedSelfie}</span></li>
+          <li><UiIcon name="home" size={20} /><span>{flowCopy.introNeedAddress}</span></li>
+        </ul>
+        <p className="nf-g1-intro__note"><UiIcon name="lock" size={16} /><span>{flowCopy.introPrivacy}</span></p>
+        <p className="nf-g1-intro__note"><UiIcon name="clock" size={16} /><span>{flowCopy.introTime}</span></p>
+        <Button variant="primary" size="lg" full className="mt-lg" onClick={() => setOpened(true)} data-testid="kyc-start">
+          {startedAlready ? flowCopy.introResume : flowCopy.introStart}
+        </Button>
+      </section>
+    );
+  }
+
+  /* ---------------------------------- one question per screen, full screen */
   return (
-    <div className="mx-auto max-w-xl">
-      {/* ------------------------------------------------------------ header */}
-      <div className="flex items-center gap-sm">
-        {/* The back control. Present from the second step onward, and it is a
-            real control rather than a reliance on the browser's back button,
-            which on a single-route wizard would leave the flow entirely. */}
-        {at > 0 ? (
-          <BackControl onBack={back} label={copy.back} surface="plate" />
-        ) : (
-          <Link href="/profile" aria-label={copy.leave} className="nf-icon-btn h-11 w-11 shrink-0">
-            <UiIcon name="close" size="md" />
-          </Link>
-        )}
-
-        <p className="nf-numeric text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-muted)]">
-          {progress}
-        </p>
-      </div>
-
-      <SegmentedProgress
-        steps={steps.length}
-        current={at + 1}
-        label={progress}
-        className="mt-sm"
-      />
-
-      {/* The founder's 3D object for the step (30 September): one per
-          screen, 64px in a fixed box, decorative beside the title. */}
-      <span className="mt-lg grid size-16 place-items-center" aria-hidden="true" data-art={STEP_ART[step.id]}>
-        <Icon3D name={STEP_ART[step.id]} size={64} priority />
-      </span>
-      <h1 className="nf-h2 mt-sm">{stepWords.title}</h1>
-      <p className="mt-2xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-        {stepWords.hint}
-      </p>
-
-      {/* -------------------------------------------------------------- body */}
-      <div className="mt-lg space-y-md">
+    <StepFrame
+      overlay
+      testId="kyc-flow"
+      step={at + 1}
+      total={steps.length}
+      stepLabel={progress}
+      eyebrow={flowCopy.eyebrows[step.id]}
+      title={stepWords.title}
+      subtitle={stepWords.hint}
+      art={<Icon3D name={STEP_ART[step.id]} size={56} priority />}
+      direction={direction}
+      onBack={at > 0 ? back : undefined}
+      backLabel={copy.back}
+      onClose={() => setOpened(false)}
+      closeLabel={flowCopy.close}
+      primary={
+        step.id === "review"
+          ? { label: copy.send, onClick: send, loading: sending, disabled: gaps.length > 0, testId: "kyc-send" }
+          : { label: copy.continue, onClick: forward, disabled: !canAdvance }
+      }
+    >
+      <div className="space-y-md">
         {step.id === "identity-document" && (
           <DocumentUploader
             kind="identity"
@@ -296,6 +322,7 @@ export function KycFlow({
                     /* Answering the question is enough to move on: a
                        confirmation tap after a two-option choice is a tap that
                        exists only to be counted. */
+                    setDirection("forward");
                     setAt((i) => i + 1);
                   }}
                   aria-pressed={business === option.value}
@@ -420,10 +447,10 @@ export function KycFlow({
         {step.id === "review" && (
           <>
             <ul className="nf-panel nf-panel--card block divide-y divide-[var(--nf-divider)] p-0">
-              <ReviewRow label={copy.identityRow} value={documents.identity?.name ?? copy.missing} />
-              <ReviewRow label={copy.selfieRow} value={selfie ? copy.selfieTaken : copy.missing} />
-              <ReviewRow label={copy.addressRow} value={documents.address?.name ?? copy.missing} />
-              {askBusiness ? <ReviewRow label={copy.businessRow} value={business ? copy.yes : copy.no} /> : null}
+              <ReviewRow label={copy.identityRow} value={documents.identity?.name ?? copy.missing} change={changeTo("identity-document")} />
+              <ReviewRow label={copy.selfieRow} value={selfie ? copy.selfieTaken : copy.missing} change={changeTo("selfie")} />
+              <ReviewRow label={copy.addressRow} value={documents.address?.name ?? copy.missing} change={changeTo("address-document")} />
+              {askBusiness ? <ReviewRow label={copy.businessRow} value={business ? copy.yes : copy.no} change={changeTo("business-question")} /> : null}
               {business &&
                 BUSINESS_SECTIONS.flatMap((s) => s.fields).map((field) => (
                   <ReviewRow
@@ -457,38 +484,31 @@ export function KycFlow({
         )}
       </div>
 
-      {/* ------------------------------------------------------------ footer */}
-      {step.id !== "business-question" && (
-        <div className="mt-lg">
-          {step.id === "review" ? (
-            <Button
-              variant="primary"
-              size="lg"
-              full
-              loading={sending}
-              disabled={gaps.length > 0}
-              onClick={send}
-            >
-              {copy.send}
-            </Button>
-          ) : (
-            <Button variant="primary" size="lg" full disabled={!canAdvance} onClick={forward}>
-              {copy.continue}
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
+    </StepFrame>
   );
 }
 
-function ReviewRow({ label, value }: { label: string; value: string }) {
+function ReviewRow({
+  label,
+  value,
+  change,
+}: {
+  label: string;
+  value: string;
+  change?: { label: string; run: () => void } | undefined;
+}) {
   return (
-    <li className="flex items-baseline justify-between gap-md px-md py-sm">
-      <span className="shrink-0 text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{label}</span>
-      <span className="truncate text-right text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]">
-        {value}
+    <li className="flex items-center justify-between gap-md px-md py-sm">
+      <span className="min-w-0">
+        <span className="block text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{label}</span>
+        <span className="block truncate text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]">{value}</span>
       </span>
+      {change ? (
+        <button type="button" className="nf-g1-change" onClick={change.run}>
+          {change.label}
+          <UiIcon name="chevron-right" size={16} />
+        </button>
+      ) : null}
     </li>
   );
 }

@@ -171,3 +171,127 @@ demo data only.
 8. Honest small grey notes under actions ("You'll choose on the next screen").
 9. Empty states: one thin glyph, one grey sentence, centred.
 10. Counts inside filter tabs, in grey, the active count in accent.
+
+---
+
+## Batch 2 (7 November 2026, 16 images): the listing flow and its help article
+
+### R16. Help article header ("How to list your property")
+- **Pattern.** Breadcrumb "Pages / Resources for hosts" (the section in
+  accent), a huge headline, a grey lead paragraph of what the guide covers,
+  byline and date, then a real screenshot of the wizard (side rail "Steps to
+  Publish" with 7 sections, the current one numbered in accent) and a plain
+  intro: "one question per screen, saves as you go, stop and pick up".
+- **Vallo.** The Help Centre article template (P1.7): breadcrumb, headline,
+  lead, byline "Vallo Team" with a real date, hero screenshot of OUR screen,
+  then the steps. On a wide screen the wizard itself gets the same side rail
+  of sections (the StepFrame's section list), on a phone the eyebrow does
+  that job.
+
+### R17. Agent "Your Listings", empty
+- **Pattern.** Big title; segmented filter with counts (All 0, Shortlets 0,
+  Rentals 0, Sales 0); three square icon buttons (filter, live, location)
+  beside a sunken search ("Search by property name, date..."); centred empty
+  state (thin house glyph, "No listings here yet.", an accent link "How to
+  list your property" into the help article); a round accent FAB "+" above
+  the agent tab bar.
+- **Vallo.** The agent Listings workspace gets the counted segmented filter,
+  the one search field, and an empty state whose action links to Vallo's own
+  help article. FAB stays (ruling 19 kind 5: one per screen, clear of the
+  dock).
+
+### R18 to R27. The wizard, step by step (as shown inside the article)
+Each step is a StepFrame: an eyebrow section name, a question title, an
+optional grey why-line, the answer, and a bottom bar "Back . Step N of 12 .
+Continue". A save state top right: "Saved in this browser" before an account
+draft exists, then a green "Saved".
+1. **THE BASICS, "What are you listing today?"** Three option cards with an
+   icon, a bold name and a one-line meaning (Shortlet: booked by the night;
+   Property for rent: longer lets, paid yearly, quarterly or monthly; Property
+   for sale: outright or in instalments). Radio circle top right; selected =
+   heavy ink border and filled radio.
+2. **"What's your connection to this property?"** Why-line: so people know
+   who they are dealing with, changeable until submit. Four cards: landlord
+   (I own it), agent (I represent the owner), developer (I built it),
+   individual (posting independently).
+3. **"What kind of property is it?"** (rent and sale only) Residential or
+   Commercial, "This decides which questions come next." From here the draft
+   is saved to the ACCOUNT, not just the device.
+4. **"Which best describes it?"** A four-column tile grid of property types
+   (Apartment, Flat, Duplex, Studio, Room, Serviced Apartment, Guesthouse,
+   Penthouse, Bungalow, Terrace, Maisonette, Mansion, Fully Detached,
+   Semi-Detached), each tile a thin glyph and a label.
+5. **LOCATION, "Where is the property?"** A search field for street, estate
+   or area, OR State (select) + Area or city + Street address + House number
+   (optional). A grey privacy card "Who sees the exact location": publicly an
+   approximate area about 800m wide, the exact address only after a booking
+   is confirmed, and confirming the pin is the publisher's check, not the
+   platform's verification.
+6. **"Is the pin on the entrance?"** A map with the pin, the address line
+   under it, and a pale "Change Pin Location" button.
+7. **DETAILS, "How many rooms does it have?"** Number chip grids for
+   Bedrooms (1 to 10+), Bathrooms, Toilets (optional, 0 up); floor area
+   optional. For a shortlet: what guests get (entire place, private room,
+   shared) and maximum guests.
+8. **PRICING, "What's your nightly rate?"** One large naira field with a
+   "/ night" suffix and a grey note: weekend rates, discounts and rules come
+   after the draft exists.
+9. **GUEST CHARGES, "Any charges on top of the nightly rate?"** Chips with
+   radio circles (None, Cleaning Fee, Caution Fee (Security Deposit),
+   Generator / Diesel Surcharge, Extra Guest Fee, Estate Access / Service
+   Charge, Pet Fee). Each chosen charge becomes a card: amount, a naira or
+   "% of night" toggle, a Per stay / Per night segmented control, a computed
+   line "= N10,000, per stay", an X; then "Add another charge". For rent: per
+   year, quarter or month, then what a tenant pays to move in; for sale: what
+   a buyer pays on top.
+10. **PHOTOS, "Add photos of the place."** "At least 3. We sort them into
+    rooms, the first one is your cover." A green readiness banner "Enough
+    photos to submit, 3 ready, most listings use 8 or more", a "Photos ready"
+    row, a grid with the cover crowned, an empty add tile.
+11. **FINISH, "Describe the property."** "We wrote a first version from your
+    answers. Edit it freely." Title with a 26/150 counter, a description
+    pre-written from the answers, "Write with AI" and "Rewrite from my
+    answers" as pale full-width buttons.
+12. **Check and submit.** A list of every answer with a grey "Change >"
+    button (Rooms and size, Space and guests, Nightly rate, Guest charges,
+    Photos "3 photos (8 recommended)", Title and description), a grey note
+    that amenities, house rules, viewing times and requirements are optional
+    and can be added after submitting, and the primary becomes "Submit for
+    review".
+
+### R28. "What happens next" (end of the article)
+- **Pattern.** Bullets: every listing is reviewed before it goes live and
+  shows Pending Review; you are notified on approval; if your ID is not
+  verified you are asked to verify first; stopped part-way, open Listings and
+  "Continue draft". "Ready? Start your listing." An author card.
+- **Vallo.** Vallo's article ends the same way, and the product matches it:
+  a listing status "In review", a push and banner on approval, the
+  verification gate on submit, and a "Continue draft" row on the Listings
+  workspace.
+
+### R29 to R31. The real wizard in the app
+- **R29, step 1 of 7.** Full screen: only a close X top left on the first
+  step, a 4px accent progress bar, the eyebrow, a large title, option cards
+  with an icon, a bold name, a grey meaning and an empty radio circle. Bottom
+  bar: "Step 1 of 7" and a large dark "Continue". (The total changes from 7
+  to 12 once the kind is picked: the flow is computed from the answers.)
+- **R30, step 2 of 12.** Back chevron left, "Saved on this phone" with a
+  phone glyph in the middle, X right. Selected card: thick ink border and a
+  filled radio dot.
+- **R31, step 3 of 12.** Residential or Commercial, two cards, "This decides
+  which questions come next."
+
+### Patterns this batch adds
+11. **The step count is honest and computed**: it grows when an answer adds
+    questions (7 before the kind is known, 12 after).
+12. **The save state names WHERE it is saved**: "Saved on this phone" before
+    an account draft exists, "Saved" once it is on the account.
+13. **Privacy is explained at the moment of asking** (who sees the exact
+    address), in a grey card under the fields.
+14. **Charges are cards with live arithmetic**, never a bare list of fields.
+15. **The AI writes a first version from the answers**, and the person edits
+    it; AI is a button, not a takeover.
+16. **The review page is the checklist**: every answer with Change, and the
+    one thing that blocks (verification) named there.
+17. **Help articles show the real screens** with the same demo data, and end
+    with "What happens next" and a link straight into the flow.
