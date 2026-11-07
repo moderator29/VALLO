@@ -180,7 +180,7 @@ export function StepFrame({
           aria-valuenow={clamped}
           aria-label={stepLabel ?? `Step ${clamped} of ${total}`}
         >
-          <span className="nf-g1step__progress-fill" style={{ inlineSize: `${percent}%` }} />
+          <span className="nf-g1step__progress-fill" style={{ transform: `scaleX(${percent / 100})` }} />
         </div>
       </header>
 
@@ -202,7 +202,7 @@ export function StepFrame({
           {secondary ? (
             <Button
               variant="quiet"
-              size="lg"
+              size="md"
               type={secondary.type ?? "button"}
               form={secondary.form}
               disabled={secondary.disabled}
@@ -214,7 +214,7 @@ export function StepFrame({
           ) : null}
           <Button
             variant="primary"
-            size="lg"
+            size="md"
             type={primary.type ?? "button"}
             form={primary.form}
             disabled={primary.disabled}

@@ -28,9 +28,13 @@ slide, and nothing that waits for no reason.
   (`CLEAN_UNIFIED_DIRECTION.md` section 18). We take Hauslet's STRUCTURE, never
   its colours.
 - **The shape law.** Every button and control that carries text is a
-  soft-cornered rectangle (10 / 12 / 14px on 44 / 48 / 56px), never a pill.
-  Icon buttons, avatars, toggles and the FAB stay round. Heights 44 / 48 / 56
-  only. One primary per screen.
+  soft-cornered rectangle, never a pill. Icon buttons, avatars, toggles and
+  the FAB stay round. One primary per screen.
+- **The button ladder (founder, 7 November 2026: "too big, too wide").**
+  Painted heights 40 / 44 / 50px (small, medium, large), labels caption /
+  body-sm / body; the touch target never under 44px. Set once in
+  `app/css/grade1.css`. Inside cards and step frames use medium; large only
+  for a screen's single main action.
 - **The type families** (Poppins for display, Inter for text) and the
   type-weight test.
 

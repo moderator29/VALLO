@@ -114,7 +114,7 @@ export function isSubtypeOf(kind: DocumentKind, subtype: string | null | undefin
  * alpha-2, migration 20261107143359).
  */
 export const NIGERIA = "NG";
-export const POPULAR_COUNTRIES = ["NG", "GH"] as const;
+export const POPULAR_COUNTRIES = ["NG"] as const;
 
 export type IdTypeOption = { value: string; label: string; detail: string; glyph: "id-card" | "globe" | "key" | "document" };
 
