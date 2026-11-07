@@ -15,6 +15,7 @@ import { ActionPill } from "./ActionPill";
 import { PostPicture } from "./PostPicture";
 import { MediaRail } from "./MediaRail";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { TierBadge } from "@/components/trust/TierBadge";
 import type { BadgeTier } from "@/lib/trust/badge-tier";
 import { countOf } from "@vallo/i18n/core";
@@ -983,7 +984,29 @@ export function EmbeddedListing({
           </span>
         </span>
       </Link>
+      <EmbeddedListingSave listingId={listing.id} title={listing.title} />
     </div>
+  );
+}
+
+/**
+ * SAVE, ON THE LISTING A POST FEATURES (the brief, part 2.2). The same heart
+ * every listing card carries, through the one `useSaveControl` loop (the
+ * optimistic flip, the device fallback when signed out, the outbox when the
+ * signal drops, the one banner). It sits beside the row's link, never inside
+ * it, so a tap on the heart saves and never opens the listing; the card's
+ * own open-the-post handler skips it because it is a button.
+ */
+function EmbeddedListingSave({ listingId, title }: { listingId: string; title: string }) {
+  const save = useSaveControl(listingId);
+  return (
+    <SaveButton
+      saved={save.saved}
+      pending={save.pending}
+      onToggle={save.toggle}
+      title={title}
+      className="nf-plc__save"
+    />
   );
 }
 

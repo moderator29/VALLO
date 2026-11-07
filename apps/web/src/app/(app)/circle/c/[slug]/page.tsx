@@ -8,7 +8,9 @@ import { CATEGORY_LABEL, CIRCLE_SORTS, countWords, readSort } from "@/lib/featur
 import { readCirclePosts, readCommunity } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 
-import { CircleEmpty, CirclePostCard } from "../../_parts/CircleCards";
+import { CirclePostCard } from "@/components/social/circle/CircleVisuals";
+
+import { CircleEmpty } from "../../_parts/CircleCards";
 import { JoinControl } from "../../_parts/CircleActions";
 
 export const dynamic = "force-dynamic";

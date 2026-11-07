@@ -62,8 +62,9 @@ export default async function CircleThreadPage({ params }: Props) {
             <ul className="nf-circle-list">
               {thread.replies.map((r) => {
                 const accepted = r.id === thread.acceptedId;
+                const nested = r.depth > 1;
                 return (
-                  <li key={r.id} id={`a-${r.id}`} className={`nf-circle-reply${accepted ? " nf-circle-reply--accepted" : ""}${r.depth > 1 ? " nf-circle-reply--nested" : ""}`} data-testid="circle-reply">
+                  <li key={r.id} id={`a-${r.id}`} className={`nf-circle-reply${accepted ? " nf-circle-reply--accepted" : ""}${nested ? " nf-circle-reply--nested" : ""}`} data-testid="circle-reply">
                     <span className="nf-circle-card__eyebrow">
                       <span>{r.author?.label ?? "Member"}</span>
                       {r.author?.verified ? <span className="nf-circle-card__answered">{CIRCLE_COPY.pro.verified}</span> : null}

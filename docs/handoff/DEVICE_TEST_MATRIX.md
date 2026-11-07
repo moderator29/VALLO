@@ -23,11 +23,11 @@ Nothing in this file has been run on a device.
 
 | # | Check (brief section 11) | iOS | Android | What proves it now |
 |---|---|---|---|---|
-| 1 | Launch and splash screens | NEEDS A DEVICE (1.0.2's LaunchMark: the mark settles, the wordmark follows, hands over to the page, at most 3 s) | NEEDS A DEVICE (system splash, navy, no mark; item 7 waits on the founder's ruling) | AUTOMATED: `lib/native/native-splash.test.ts` (launch images flat navy), `splash-hang.test.ts`, `shell-plugin.test.ts` (LaunchMark wired, Reduce Motion, touch-transparent, `handoff` asked for by the first script). SIMULATED: `handoff` is sent two frames after the document parses (job 2 check) |
+| 1 | Launch and splash screens | NEEDS A DEVICE (1.0.2: the ring draws in, the towers rise, the letters slide out, the version line, over by about 2.2 s) | NEEDS A DEVICE (1.0.2: the mark still on the system splash, then the letters slide out from behind it) | AUTOMATED: `lib/native/launch-sequence.test.ts` (layers, timings, ceilings, touch-transparent, Reduce Motion and animations off), `native-splash.test.ts`, `splash-hang.test.ts`, `shell-plugin.test.ts` (`handoff` asked for by the first script). SIMULATED: `handoff` is sent two frames after the document parses (job 2 check) |
 | 2 | Navigation and bottom tabs | SIMULATED (the iOS push: in from the right, back slides off) | SIMULATED (fade-through about the tapped point) | AUTOMATED: `lib/platform/detect.test.ts` (platform marked before first paint, platform.css keyed on the shell only), `lib/motion/nav-direction.test.ts` (which way a move goes). SIMULATED: job 1 check reads the running animation names per platform, and Calm and reduced motion fall back. A device must judge the feel |
 | 3 | Back-button behaviour | NEEDS A DEVICE: edge swipe back (1.0.2, `allowsBackForwardNavigationGestures`), M24 | NEEDS A DEVICE: hardware and predictive back, M23 | AUTOMATED: `lib/native/back-button.test.ts` (sheet first, step back, parent, exit only at a root), `native-back-event.test.ts`, `shell-plugin.test.ts` (swipe wired) |
 | 4 | Safe areas and system bars | NEEDS A DEVICE (notch, home indicator, status bar glyphs per screen), M26, M27 | NEEDS A DEVICE (edge to edge on Android 15, SystemBars insets, light mode glyphs), NATIVE_BUILD_QUEUE item 2 | AUTOMATED: `status-bar-hold.test.ts`. SIMULATED: 390x844 and 360x800 screenshots with `viewport-fit=cover`, which Chromium does not inset, so only the layout is checked |
-| 5 | Keyboard behaviour | NEEDS A DEVICE: composer on the keys, accessory bar, M22 | NEEDS A DEVICE: SystemBars pads for the IME (no adjustResize), budget phone, M22 | NOT AUTOMATED: `lib/native/keyboard.ts` writes `--nf-keyboard-inset` and has no test of its own (a gap, recommended). Keyboard sounds are the operating system's own: nothing in Vallo plays a sound per key (checked by reading `lib/native/keyboard.ts` and searching for audio) |
+| 5 | Keyboard behaviour | NEEDS A DEVICE: composer on the keys, accessory bar, M22 | NEEDS A DEVICE: SystemBars pads for the IME (no adjustResize), budget phone, M22 | AUTOMATED: `lib/native/keyboard.test.ts` (the inset is the keyboard's height, the last event wins, a teardown never leaves the dock hidden). Keyboard sounds are the operating system's own: nothing in Vallo plays a sound per key (checked by reading `lib/native/keyboard.ts` and searching for audio) |
 | 6 | Search and filters | SIMULATED | SIMULATED | SIMULATED: the performance audit loads live `/search` and `/stays/search` on both profiles and scrolls `/search` (PERFORMANCE_REPORT.md) |
 | 7 | Property and accommodation browsing | SIMULATED | SIMULATED | SIMULATED: live `/listing/<id>` loads, the search to listing to search loop of 60 navigations with memory read every 10 (PERFORMANCE_REPORT.md) |
 | 8 | Booking flows | NEEDS A DEVICE, TEST keys only (M21) | NEEDS A DEVICE, TEST keys only (M21) | AUTOMATED: the booking and money unit tests. A payment is never replayed by the outbox (`lib/offline/outbox.ts` kinds) |
@@ -46,11 +46,13 @@ screen recording is the best evidence. Use Wi-Fi first, then mobile data for
 steps 10 and 11.
 
 1. **Launch.** Delete any older Vallo, install 1.0.2, open it. Expected: navy,
-   then the Vallo mark settles in the middle and the word VALLO appears under
-   it, then the page arrives in its place with no white flash, all inside about
-   three seconds. With Settings, Accessibility, Motion, Reduce Motion on, the
-   mark only fades. Tap the screen while the mark is showing: the tap reaches
-   the page.
+   then the Vallo ring draws itself round, the four towers rise one after
+   another, the letters V A L L O slide down out from under the mark, a small
+   "Version 1.0.2" appears at the foot, and the page arrives in its place with
+   no white flash, all inside about two seconds. With Settings,
+   Accessibility, Motion, Reduce Motion on, the finished logo only fades in
+   and out. Tap the screen while the logo is showing: the tap reaches the
+   page.
 2. **Tabs and pages.** Tap each bottom tab: the page changes in a short fade.
    Tap a listing card in search: the card grows into the listing (that move
    is the same on both phones). Now tap a small link or an icon that opens a
@@ -90,7 +92,9 @@ steps 10 and 11.
     crash button once, reopen Vallo, then open `/admin/crashes` on the
     website: one row, platform ios, kind native.crash.
 
-The Android steps are the same, with these differences: step 2 is a quick
+The Android steps are the same, with these differences: step 1 is the
+mark, still, on the system splash, then the letters slide out from behind it
+and the page arrives about a second after it is ready; step 2 is a quick
 fade-through instead of a slide; step 3 is the system back gesture or button
 (sheet closes first, then the page, and only the Home tab exits); step 4 is an
 ink ripple spreading from under the finger on rows, buttons and icon buttons;

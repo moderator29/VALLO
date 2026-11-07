@@ -1170,7 +1170,18 @@
      left, the title, the place, the facts it really has, the price and View
      property. One soft card on the quiet well, no border. */
   .nf-plc {
+    position: relative;
     margin-block-start: var(--nf-space-sm);
+  }
+  /* The heart in the row's top corner, beside the link and never inside it;
+     the title leaves it room. */
+  .nf-plc__save {
+    position: absolute;
+    inset-block-start: var(--nf-space-2xs);
+    inset-inline-end: var(--nf-space-2xs);
+  }
+  .nf-plc__title {
+    padding-inline-end: 2.5rem;
   }
   .nf-plc__link {
     display: flex;

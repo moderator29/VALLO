@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import "./feed-v2.css";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { ActiveInView } from "@/components/ui/ActiveInView";
 import type { FeedCategory } from "./categories";
 
 /**
@@ -59,7 +60,7 @@ export function FeedTabs({
 
   return (
     <nav className="nf-feed-cats" aria-label={words.categoriesLabel} data-testid="feed-tabs">
-      <ul className="nf-feed-cats__row">
+      <ActiveInView as="ul" className="nf-feed-cats__row" watch={live}>
         {chips.map((chip) => (
           <li key={chip.key}>
             <Link
@@ -73,7 +74,7 @@ export function FeedTabs({
             </Link>
           </li>
         ))}
-      </ul>
+      </ActiveInView>
     </nav>
   );
 }

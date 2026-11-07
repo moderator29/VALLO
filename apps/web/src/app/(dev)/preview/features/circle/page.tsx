@@ -1,13 +1,11 @@
 import { PageFrame } from "@/components/app/PageFrame";
-import { ButtonLink } from "@/components/ui/Button";
-import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
+import { CircleBanner, CirclePostCard, CircleTabs } from "@/components/social/circle/CircleVisuals";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_TABS } from "@/lib/features/circle/model";
 import type { CirclePostView, CommunityView } from "@/lib/features/circle/queries";
 
 import "@/app/(app)/circle/circle.css";
-import { CirclePostCard, CommunityCard, StarterCommunities } from "@/app/(app)/circle/_parts/CircleCards";
-import { CircleHero } from "@/app/(app)/circle/_parts/CircleHero";
+import { CommunityCard, StarterCommunities } from "@/app/(app)/circle/_parts/CircleCards";
 
 /** /circle with sample rows (`?first=1`: the first run with no communities). Fictional people only. */
 export const dynamic = "force-dynamic";
@@ -27,11 +25,10 @@ export default async function PreviewCircle({ searchParams }: { searchParams: Pr
   return (
     /* The app shell's 16px gutter, which the harness layout does not draw. */
     <div className="px-md">
-    <PageFrame title={CIRCLE_COPY.title} subtitle={CIRCLE_COPY.tagline} fallback="/preview/features" width="wide"
-      actions={<ButtonLink href="#" variant="secondary" size="sm" leadingIcon="feed">{CIRCLE_COPY.toFeed}</ButtonLink>}>
+    <PageFrame title={CIRCLE_COPY.title} subtitle={CIRCLE_COPY.tagline} fallback="/preview/features" width="wide">
       <div className="nf-circle">
-        <CircleHero stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
-        <UnderlineTabs items={tabs} active="for-you" label={CIRCLE_COPY.tabsLabel} />
+        <CircleBanner feedHref="#" faces={first ? [] : [{ label: "Kemi A.", avatar: null }, { label: "Tunde O.", avatar: null }]} stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
+        <CircleTabs items={tabs} active="for-you" />
         {first ? (
           <section className="nf-circle-section">
             <h2 className="nf-circle-section__title">{CIRCLE_COPY.starters.title}</h2>

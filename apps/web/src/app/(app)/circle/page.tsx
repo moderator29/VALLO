@@ -3,15 +3,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageFrame } from "@/components/app/PageFrame";
+import { CircleBanner, CirclePostCard, CircleTabs, type CircleFace } from "@/components/social/circle/CircleVisuals";
 import { ButtonLink } from "@/components/ui/Button";
-import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_SORTS, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
 import { readCircleHome, readCirclePosts, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 
-import { CircleEmpty, CirclePostCard, CommunityCard, StarterCommunities } from "./_parts/CircleCards";
-import { CircleHero } from "./_parts/CircleHero";
+import { CircleEmpty, CommunityCard, StarterCommunities } from "./_parts/CircleCards";
 
 export const metadata: Metadata = { title: CIRCLE_COPY.title, description: CIRCLE_COPY.tagline };
 export const dynamic = "force-dynamic";
@@ -39,15 +38,10 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
       subtitle={C.tagline}
       fallback="/home"
       width="wide"
-      actions={
-        <ButtonLink href="/around" variant="secondary" size="sm" leadingIcon="feed" data-testid="circle-to-feed">
-          {C.toFeed}
-        </ButtonLink>
-      }
     >
       <div className="nf-circle" data-testid="circle-home">
-        <CircleHero stats={home.stats} signedIn={home.signedIn} />
-        <UnderlineTabs items={tabs} active={tab} label={C.tabsLabel} itemTestIdPrefix="circle-tab-" />
+        <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} feedHref="/around" feedLabel={C.toFeed} />
+        <CircleTabs items={tabs} active={tab} />
         {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, cursor, now, home })}
       </div>
     </PageFrame>
@@ -170,6 +164,20 @@ async function TabBody({
       ) : null}
     </div>
   );
+}
+
+/** Up to three real members' faces, from the people writing on this page. Never invented. */
+function facesOf(home: Awaited<ReturnType<typeof readCircleHome>>): CircleFace[] {
+  const seen = new Set<string>();
+  const out: CircleFace[] = [];
+  for (const p of [...home.trending, ...home.questions]) {
+    const a = p.author;
+    if (!a?.avatar || seen.has(a.id)) continue;
+    seen.add(a.id);
+    out.push({ label: a.label, avatar: a.avatar });
+    if (out.length === 3) break;
+  }
+  return out;
 }
 
 function Section({ title, more, children }: { title: string; more?: string; children: ReactNode }) {

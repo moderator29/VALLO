@@ -24,6 +24,8 @@
  * `private.notify` reads the older switches.
  */
 
+import { plural } from "@vallo/i18n/core";
+
 export const NOTICE_TOPICS = [
   "new_in_area",
   "new_neighbours",
@@ -146,10 +148,7 @@ export const NUDGE_WORDS: Record<NudgeTopic, { title: string; body: string; href
 /** The area digest's words, as the SQL builds them. */
 export function areaDigestWords(input: { areaName: string; count: number; newestNoun: string }): { title: string; body: string } {
   const title = `New in ${input.areaName}`.slice(0, 40);
-  const body =
-    input.count === 1
-      ? `A ${input.newestNoun} just listed near you.`
-      : `${input.count} new places listed near you today.`;
+  const body = plural(input.count, { one: `A ${input.newestNoun} just listed near you.`, other: "{count} new places listed near you today." }, "en");
   return { title, body };
 }
 
@@ -175,8 +174,8 @@ export function listingNoun(type: string | null, bedrooms: number | null, intent
 /** The new neighbours digest's words, as the SQL builds them. */
 export function neighboursWords(input: { firstName: string | null; count: number; areaName: string | null; areas: number }): string {
   const who = input.firstName?.trim() || "Someone you follow";
-  const more =
-    input.count === 1 ? "" : input.count === 2 ? " and 1 other you follow" : ` and ${input.count - 1} others you follow`;
-  const where = input.areas === 1 ? ` joined ${input.areaName ?? "your area"}.` : " joined your areas.";
+  const others = Math.max(0, input.count - 1);
+  const more = others > 0 ? plural(others, { one: " and {count} other you follow", other: " and {count} others you follow" }, "en") : "";
+  const where = plural(input.areas, { one: ` joined ${input.areaName ?? "your area"}.`, other: " joined your areas." }, "en");
   return `${who}${more}${where}`.slice(0, 110);
 }
