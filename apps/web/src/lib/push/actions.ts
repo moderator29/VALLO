@@ -57,6 +57,9 @@ function onOrigin(href: string | null): string | null {
   return sameOriginPath(href);
 }
 
+/** A missed call path: `/messages/<uuid>?missed=<uuid>` or the agent variant. */
+const MISSED_CALL_RE = /^\/(?:agent\/messages|messages)\/([0-9a-f-]{36})\?missed=([0-9a-f-]{36})$/;
+
 /** The recipient's language from `profiles.settings`, or the default. */
 export function recipientLocale(settings: unknown): Locale {
   const value = settings && typeof settings === "object" ? (settings as { locale?: unknown }).locale : null;
@@ -74,6 +77,17 @@ export function actionsFor(kind: NotificationKind, href: string | null, locale: 
   if (!path) return [];
   const copy = getDictionary(locale).platform.pushActions;
   const out: PushAction[] = [];
+
+  /* Missed call: "Message" opens the conversation, "Call back" opens the
+     call surface with the call parameter so the deep link resolves it. */
+  const missed = MISSED_CALL_RE.exec(path);
+  if (missed) {
+    const conversationId = missed[1]!;
+    const prefix = path.startsWith("/agent/") ? "/agent/messages" : "/messages";
+    out.push({ id: "message", title: copy.message, href: `${prefix}/${conversationId}` });
+    out.push({ id: "call-back", title: copy.callBack, href: `${prefix}/${conversationId}?call_back=1` });
+    return out.slice(0, MAX_ACTIONS);
+  }
 
   if (kind === "message" && path.startsWith("/messages/")) {
     out.push({ id: "reply", title: copy.reply, href: path });

@@ -573,10 +573,10 @@
     -webkit-backdrop-filter: blur(20px) saturate(1.8);
     backdrop-filter: blur(20px) saturate(1.8);
     background: color-mix(in oklab, var(--nf-surface-elevated) 80%, transparent);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
-    box-shadow: var(--nf-elev-3);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    box-shadow: var(--nf-glow-edge), var(--nf-elev-3);
     cursor: pointer;
-    animation: nf-call-banner-in var(--nf-duration-medium) var(--nf-ease-enter);
+    animation: nf-call-banner-in var(--nf-duration-fast) var(--nf-ease-standard);
     -webkit-tap-highlight-color: transparent;
   }
   @keyframes nf-call-banner-in {
@@ -653,11 +653,11 @@
   }
   .nf-call-incoming-banner__btn--accept {
     background: var(--nf-state-success);
-    color: #fff;
+    color: var(--nf-content-on-brand);
   }
   .nf-call-incoming-banner__btn--decline {
     background: color-mix(in oklab, var(--nf-state-error) 84%, black);
-    color: #fff;
+    color: var(--nf-content-on-brand);
   }
 
   /* ------------------------------------------------------- recovery steps */

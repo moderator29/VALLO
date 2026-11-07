@@ -505,13 +505,12 @@ export function InCallView({
       label={`${isVideo ? copy.outgoing.video : copy.outgoing.voice}: ${name}`}
       media
       testId="call-in-call"
-      onKeyDown={undefined}
     >
       {/* Tap anywhere on the stage to show/hide controls in video calls. */}
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         style={{ position: "absolute", inset: 0, zIndex: 1 }}
         onClick={onInteraction}
+        role="presentation"
       />
       {remoteVideoOn ? (
         <video
@@ -902,10 +901,12 @@ export function IncomingCallBanner({
 }) {
   const [broken, setBroken] = useState(false);
   return (
-    /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
     <div
       className="nf-call-incoming-banner"
       data-testid="call-incoming-banner"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onTap(); } }}
       onClick={(e: RMouseEvent) => {
         /* Do not open the full screen if a button was tapped. */
         if ((e.target as HTMLElement).closest("button")) return;

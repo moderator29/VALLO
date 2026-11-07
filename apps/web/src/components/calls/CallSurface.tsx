@@ -62,7 +62,7 @@ export function CallSurface({ copy }: { copy: CallsCopy }) {
  * full incoming call view. If the call ends (caller hangs up, ring times out),
  * the banner dismisses itself through the store's snapshot update.
  */
-export function IncomingBannerLayer({ copy }: { copy: CallsCopy }) {
+export function IncomingBannerLayer({ copy: _copy }: { copy: CallsCopy }) {
   const { active } = useCallStore();
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const lastCallId = useRef<string | null>(null);

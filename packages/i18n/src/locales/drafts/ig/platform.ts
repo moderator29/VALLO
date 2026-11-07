@@ -161,6 +161,8 @@ export const platformIg = {
     reply: "Zaa",
     answer: "Mepee nyocha ụlọ",
     openBooking: "Mepee ndebe ahụ",
+    message: "Ozi",
+    callBack: "Kpọghachi",
   },
 
   shelf: {
