@@ -318,6 +318,51 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the microphone that becomes Sen
     }
   });
 
+  it("keeps a note recorded with no signal on the device and sends it by itself when the signal is back", async () => {
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init,
+      actions: {
+        attachVoice: `async () => ({ ok: true, data: { messageId: "00000000-0000-4000-8000-0000000000f3", attachmentId: "x", createdAt: new Date().toISOString() } })`,
+      },
+    });
+    const stored = () =>
+      page.evaluate(
+        () =>
+          new Promise<number>((resolve) => {
+            const req = indexedDB.open("nf_voice_outbox", 1);
+            req.onupgradeneeded = () => req.result.createObjectStore("notes", { keyPath: "id" });
+            req.onsuccess = () => {
+              const all = req.result.transaction("notes", "readonly").objectStore("notes").count();
+              all.onsuccess = () => {
+                resolve(all.result);
+                req.result.close();
+              };
+            };
+            req.onerror = () => resolve(-1);
+          }),
+      );
+    try {
+      await page.context().setOffline(true);
+      await hold(page, { ms: 800 });
+      await page.getByTestId("bubble-waiting").waitFor();
+      await expect.poll(() => page.getByText("Saved on your device. It sends when you're back online").count()).toBe(1);
+      expect(await page.getByText("Not sent.").count()).toBe(0);
+      expect(await page.evaluate(() => (window as unknown as Win).__uploads.length)).toBe(0);
+      await expect.poll(stored).toBe(1);
+
+      await page.context().setOffline(false);
+      await expect.poll(() => page.locator('[data-msg-id="00000000-0000-4000-8000-0000000000f3"]').count()).toBe(1);
+      expect(await page.evaluate(() => (window as unknown as Win).__uploads.length)).toBe(1);
+      await expect.poll(stored).toBe(0);
+      /* Sent while nobody was acting: no error buzz, ever. */
+      expect(await page.evaluate(() => (window as unknown as Win).__buzz.length)).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+
   it("explains how to allow the microphone when it was refused", async () => {
     const { page, close } = await mountInBrowser({ entry, css: CSS, init: `${init}; window.__media.mode = "deny";` });
     try {

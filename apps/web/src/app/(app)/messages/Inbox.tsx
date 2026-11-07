@@ -93,7 +93,68 @@ export type InboxRow = {
 };
 
 /* GRADE 1 (inbox polish): English only for now, beside the dictionary's words. */
-const POLISH_WORDS = { read: "Mark read", readDone: "Marked as read", undo: "Undo" };
+const POLISH_WORDS = {
+  read: "Mark read",
+  readDone: "Marked as read",
+  undo: "Undo",
+  support: "Support",
+  supportName: "Vallo Support",
+  newReply: "New reply from Vallo Support",
+  supportEmptyTitle: "No support conversations",
+  supportEmptyBody: "Ask Vallo AI anything, and choose Talk to a person when you want the support team.",
+};
+
+/**
+ * GRADE 1 (R70): a conversation with the Vallo support team, read from the
+ * member's own support tickets (`loadMyTickets`, their RLS). It opens as an
+ * inner page of Messages, the ticket's own thread.
+ */
+export type SupportInboxRow = {
+  id: string;
+  /** The topic in words, or the reference when there is none. */
+  title: string;
+  reference: string;
+  /** The newest line, already one line long. */
+  preview: string;
+  whenLabel: string;
+  unread: boolean;
+};
+
+function SupportRow({ row, query = "" }: { row: SupportInboxRow; query?: string }) {
+  return (
+    <li className="flex items-center gap-3xs">
+      <Link
+        href={`/support/messages/${row.id}`}
+        className="nf-inbox-row nf-inbox-support min-w-0 flex-1"
+        data-testid="inbox-support-row"
+        data-unread={row.unread || undefined}
+      >
+        <span className="nf-inbox-pinned__tile" aria-hidden="true">
+          <UiIcon name="headset" size={24} />
+        </span>
+        <span className="min-w-0 flex-1 leading-tight">
+          <span className={`block truncate ${TYPE.rowTitle} font-semibold`}>
+            {POLISH_WORDS.supportName}
+          </span>
+          <span className={`mt-3xs block truncate ${TYPE.caption} text-[var(--nf-content-muted)]`}>
+            <Hit text={`${row.title} · ${row.reference}`} query={query} />
+          </span>
+          <span
+            className={`nf-body-sm mt-3xs block truncate ${
+              row.unread ? "font-semibold text-[var(--nf-content-primary)]" : "text-[var(--nf-content-secondary)]"
+            }`}
+          >
+            {row.unread && !query.trim() ? POLISH_WORDS.newReply : <Hit text={row.preview} query={query} />}
+          </span>
+        </span>
+        <span className="flex shrink-0 flex-col items-end gap-inline-tight self-stretch">
+          <span className="nf-inbox-row__when nf-numeric">{row.whenLabel}</span>
+          {row.unread ? <span className="nf-inbox-support__dot" aria-hidden="true" /> : <span aria-hidden="true" className="h-[1.375rem]" />}
+        </span>
+      </Link>
+    </li>
+  );
+}
 
 /** Words with the reader's search marked where it matched. */
 function Hit({ text, query }: { text: string; query: string }) {
@@ -134,11 +195,13 @@ const CONTEXT_GLYPH: Partial<Record<ThreadContextKind, UiIconName>> = {
  * list of everything mixed requests back in, which is what Requests exists to
  * stop.
  */
-type View = "recent" | "unread" | "requests" | "archived" | "reported";
-const VIEW_ORDER: View[] = ["recent", "unread", "requests", "archived", "reported"];
+type View = "recent" | "unread" | "requests" | "support" | "archived" | "reported";
+const VIEW_ORDER: View[] = ["recent", "unread", "requests", "support", "archived", "reported"];
 const SIDE_ORDER: Side[] = ["property", "stays"];
 
 function inView(row: InboxRow, view: View): boolean {
+  /* Support conversations are their own rows (`SupportRow`), never a thread here. */
+  if (view === "support") return false;
   if (view === "reported") return row.reported === true;
   if (view === "archived") return row.archived === true;
   if (row.archived) return false;
@@ -330,8 +393,11 @@ export function Inbox({
   inboxCopy,
   plusCopy,
   assistantOn = false,
+  supportRows = [],
 }: {
   rows: InboxRow[];
+  /** Grade 1 (R70): the member's support conversations, newest first. Empty draws no Support chip. */
+  supportRows?: SupportInboxRow[];
   /**
    * The inbox's words (`experienceInbox.inbox`) from the server page, so this
    * client component never reads a client dictionary (that read shipped the
@@ -507,6 +573,15 @@ export function Inbox({
      an empty one. It opens the assistant chat, where "Talk to a person"
      reaches the support team. Only on the main view with no search. */
   const plus = plusCopy;
+  /* Support conversations, searched like any row. */
+  const supportShown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return supportRows;
+    return supportRows.filter((r) => `${r.title} ${r.reference} ${r.preview}`.toLowerCase().includes(q));
+  }, [supportRows, query]);
+  /* A reply from the support team waiting to be read rides under the
+     assistant at the top of the main view, so it is never missed. */
+  const supportWaiting = supportRows.find((r) => r.unread) ?? null;
   const pinned =
     assistantOn && plus && view === "recent" && !query.trim() ? (
       <li className="flex items-center gap-3xs">
@@ -654,9 +729,17 @@ export function Inbox({
             (key) =>
               key === "recent" ||
               view === key ||
+              (key === "support" && supportRows.length > 0) ||
               ((key === "unread" || key === "requests") && onSide.some((r) => inView(r, key))),
           ).map((key) => {
-            const count = key === "unread" ? unreadThreads : key === "requests" ? requests.length : 0;
+            const count =
+              key === "unread"
+                ? unreadThreads
+                : key === "requests"
+                  ? requests.length
+                  : key === "support"
+                    ? supportRows.filter((r) => r.unread).length
+                    : 0;
             return (
               <Chip
                 key={key}
@@ -667,7 +750,13 @@ export function Inbox({
                 {...(count > 0 ? { count } : {})}
                 data-testid={`inbox-view-${key}`}
               >
-                {key === "requests" ? tabLabels.requests : key === "recent" && plus ? plus.all : inbox.filters[key]}
+                {key === "requests"
+                  ? tabLabels.requests
+                  : key === "support"
+                    ? POLISH_WORDS.support
+                    : key === "recent" && plus
+                      ? plus.all
+                      : inbox.filters[key]}
               </Chip>
             );
           })}
@@ -695,8 +784,22 @@ export function Inbox({
         aria-labelledby={`inbox-side-${side}`}
         className="mt-heading"
       >
-        {shown.length === 0 && pinned ? <ul className="nf-inbox-list">{pinned}</ul> : null}
-        {shown.length > 0 ? (
+        {view === "support" ? (
+          supportShown.length > 0 ? (
+            <ul className="nf-inbox-list">
+              {supportShown.map((row) => (
+                <SupportRow key={row.id} row={row} query={query} />
+              ))}
+            </ul>
+          ) : (
+            <Empty
+              title={query.trim() ? inbox.noMatchTitle : POLISH_WORDS.supportEmptyTitle}
+              body={query.trim() ? inbox.noMatchBody.replace("{query}", query.trim()) : POLISH_WORDS.supportEmptyBody}
+            />
+          )
+        ) : null}
+        {view !== "support" && shown.length === 0 && pinned ? <ul className="nf-inbox-list">{pinned}</ul> : null}
+        {view === "support" ? null : shown.length > 0 ? (
           /* Hairline rows on the ground, not a card wrapping a divided list.
              One line between two conversations, nothing around either. */
           <ul className="nf-inbox-list">

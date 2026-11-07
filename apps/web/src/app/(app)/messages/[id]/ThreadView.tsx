@@ -31,7 +31,7 @@ import {
   sendMessage,
 } from "@/lib/messages/actions";
 import { clearReaction, setReaction } from "@/lib/messages/reaction-actions";
-import { readLiveAttachment } from "@/lib/messages/attachment-actions";
+import { readLiveAttachment, readThreadMedia } from "@/lib/messages/attachment-actions";
 import {
   applyReactionChange,
   reactionCounts,
@@ -47,6 +47,7 @@ import type { VoiceRecording } from "@/components/app/messages/useVoiceRecorder"
 import { ReactionCounts } from "@/components/app/messages/ReactionCounts";
 import { linkify } from "@/components/app/messages/linkify";
 import { runPlace, sameRun } from "./thread-runs";
+import { withFreshMedia } from "./media-refresh";
 import { MONEY_TALK_RE, SAFETY_EDUCATION_SEEN_KEY } from "@/lib/messages/education";
 import { lagosTimeLabel } from "@/lib/messages/time";
 import { deleteMessage } from "@/lib/messages/message-actions";
@@ -1180,6 +1181,34 @@ export function ThreadView({
     },
     [conversationId, adoptResult, markFailed, uploadVoice],
   );
+
+  /*
+   * Photos and voice notes are signed for an hour. A thread left open asks
+   * for fresh links every 45 minutes (and on coming back to a tab that sat
+   * hidden past that), and swaps them in place. A link made on this device
+   * (`blob:`, a note still sending) is never touched.
+   */
+  useEffect(() => {
+    if (!live) return;
+    const EVERY_MS = 45 * 60 * 1000;
+    let last = Date.now();
+    const refresh = async () => {
+      last = Date.now();
+      const result = await readThreadMedia({ conversationId }).catch(() => null);
+      if (!result || !result.ok) return;
+      const fresh = result.data;
+      setItems((prev) => withFreshMedia(prev, fresh));
+    };
+    const timer = window.setInterval(() => void refresh(), EVERY_MS);
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - last >= EVERY_MS) void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [live, conversationId]);
 
   /* Back online: every waiting voice note sends by itself. */
   useEffect(() => {
