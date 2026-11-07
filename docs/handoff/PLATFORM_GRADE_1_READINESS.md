@@ -350,7 +350,27 @@ X to dismiss, a queue that replaces instead of stacking, retry action on
 failure, accurate states (queued is not sent). Migrate every existing toast and
 ad-hoc success line to it. Respect reduced motion. Works on iOS and Android.
 
-**P0.4b Push permission as a default onboarding step (founder, 7 Nov).**
+**P0.4b Push permission as a default onboarding step: BUILT on 7 Nov,
+POLISH AND EXTEND IT.** The previous session built it the same day the founder
+asked: first run now ends on a `notify` beat (`components/app/welcome/
+FirstRun.tsx`), where `<PushPrompt moment="joined">` shows Vallo's own offer
+screen with "Yes, tell me" and "Not now". It reaches everyone finishing the
+member welcome, with or without the interests question; `InterestChoices`
+hands completion back through `onFirstRunDone` instead of leaving for home
+(deliberately without `router.refresh()`, whose re-plan would redirect out
+from under the step). The step settles itself instantly wherever it cannot or
+should not show (granted, denied, declined recently, unsupported), so it never
+traps anyone; a No is remembered for 30 days and the existing four moments
+re-offer later. Tests: `components/app/push/joined-moment.dom.test.tsx` and
+`moments.test.ts`. YOUR JOB: polish it to the Hauslet standard and extend it.
+Ideas the founder wants explored: welcome-grade art and motion on the step
+(today it reuses the question beat's canvas with the stock PushPrompt card),
+a success beat after a Yes ("You're set"), choose-your-topics on the same
+screen, the Android 13 wording, analytics of yes/no rates, the same offer as
+a dashboard task card for people who skipped, and keeping it in step with the
+new global feedback banner.
+
+**The original ask (founder, 7 Nov).**
 Today the app only offers notifications at four "moments" (`components/app/
 push/moments.ts`, whose comment says NEVER on sign-up). The founder overrides
 that: asking must be a DEFAULT step of joining, the way Hauslet asks right

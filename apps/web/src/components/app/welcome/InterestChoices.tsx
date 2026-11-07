@@ -66,6 +66,7 @@ export function InterestChoices({
   mode = "welcome",
   t,
   extra,
+  onFirstRunDone,
 }: {
   initial: PropertyType[];
   /* The nine market names and every word around them. `INTEREST_COPY` in
@@ -74,6 +75,14 @@ export function InterestChoices({
   t: Dictionary;
   /** `welcome` is the first run. `settings` is somebody changing their mind. */
   mode?: "welcome" | "settings";
+  /**
+   * First run only: the caller takes over after the answer (the notifications
+   * step). When present, answering or skipping calls this INSTEAD of leaving
+   * for home, and deliberately without `router.refresh()`: a refresh would
+   * re-run `/welcome`'s plan, which now reads "seen and answered" and would
+   * redirect out from under the step the caller is about to show.
+   */
+  onFirstRunDone?: () => void;
   /**
    * First run only: the optional asks the sign-up form no longer carries
    * (`ArrivalAsks`, A1), drawn above Continue. They save themselves; nothing
@@ -106,6 +115,11 @@ export function InterestChoices({
       router.refresh();
       return;
     }
+    if (onFirstRunDone) {
+      /* The notifications step comes next; see the prop's note on refresh. */
+      onFirstRunDone();
+      return;
+    }
     /*
      * Home is rendered per request and reads this row, so a replace rather than
      * a push: the welcome screen is answered once and must not sit in the back
@@ -113,7 +127,7 @@ export function InterestChoices({
      */
     router.replace("/home");
     router.refresh();
-  }, [state, router, firstRun]);
+  }, [state, router, firstRun, onFirstRunDone]);
 
   const toggle = (value: PropertyType) => {
     // Any change makes a previous confirmation stale, so it goes.
@@ -133,6 +147,10 @@ export function InterestChoices({
           return;
         }
         forgetFirstInterest();
+        if (onFirstRunDone) {
+          onFirstRunDone();
+          return;
+        }
         router.replace("/home");
         router.refresh();
       } catch (error) {

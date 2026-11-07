@@ -13,6 +13,7 @@ import { markWelcomeSeen, skipInterests } from "@/lib/interests/actions";
 import { useMotionGate } from "@/components/motion/useMotionGate";
 import { releaseVelocity } from "@/components/site/landing/spring";
 import { InterestChoices } from "./InterestChoices";
+import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { ArrivalAsks } from "./ArrivalAsks";
 import { Lockup, RiseWords } from "./StepArt";
 import {
@@ -227,7 +228,9 @@ export function FirstRun({
   const choiceOnly = guest && atChoice;
   const initialIndex = choiceOnly ? lastIndex : 0;
 
-  const [beat, setBeat] = useState<"slides" | "question">(
+  /* `notify` is the last beat (the founder, 7 Nov 2026): the notifications
+     offer, after the account exists and the question is behind them. */
+  const [beat, setBeat] = useState<"slides" | "question" | "notify">(
     !guest && !showCards ? "question" : "slides",
   );
   const [index, setIndex] = useState(initialIndex);
@@ -498,7 +501,9 @@ export function FirstRun({
           setBeat("question");
           return;
         }
-        leave(next ?? "/home");
+        /* No question to ask: straight to the notifications offer, which
+           settles itself at once wherever it cannot or should not show. */
+        setBeat("notify");
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -561,6 +566,31 @@ export function FirstRun({
      7 October), anything else on Create account. */
   const signInFirst = wall ? wall.primary === "sign-in" : Boolean(next && /^\/sign-in(?:[/?#]|$)/.test(next));
 
+  /*
+   * THE NOTIFICATIONS STEP (the founder, 7 November 2026): a default part of
+   * joining, the way Hauslet asks right after sign-in. `PushPrompt` is the
+   * whole offer: Vallo's own screen first, the one system prompt only after a
+   * Yes, a No remembered for thirty days, and it settles itself immediately
+   * (so this beat never traps anyone) when the permission is already granted,
+   * already denied, declined recently, or push is unsupported here.
+   */
+  if (beat === "notify") {
+    return (
+      <div className="nf-gs-col nf-gs-col--question" data-testid="first-run-notify">
+        <div className="nf-gs-question__sky" aria-hidden="true">
+          <span className="nf-gs-orb nf-gs-orb--a" />
+          <span className="nf-gs-orb nf-gs-orb--b" />
+        </div>
+        <Lockup onCanvas />
+        <div className="nf-gs-question">
+          <div className="nf-gs-notify nf-gs-rise">
+            <PushPrompt moment="joined" onSettled={() => leave(next ?? "/home")} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (beat === "question") {
     return (
       <div className="nf-gs-col nf-gs-col--question" data-testid="first-run">
@@ -582,6 +612,7 @@ export function FirstRun({
               initial={interests}
               t={t}
               extra={asks ? <ArrivalAsks t={t} {...asks} /> : undefined}
+              onFirstRunDone={() => setBeat("notify")}
             />
           </div>
         </div>

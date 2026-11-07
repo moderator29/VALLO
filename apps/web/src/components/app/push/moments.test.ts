@@ -58,7 +58,7 @@ describe("never spend the system prompt", () => {
 
 describe("asking at a moment of success", () => {
   it("offers at each of the four moments, in the words for that moment", () => {
-    const moments = ["listing_published", "booking_requested", "conversation_active", "settings_opened"] as const;
+    const moments = ["listing_published", "booking_requested", "conversation_active", "settings_opened", "joined"] as const;
     const offers = moments.map((moment) => {
       const verdict = offerVerdict({ moment, permission: "default", memory: NO_MEMORY, now: NOW });
       expect(verdict.show).toBe(true);

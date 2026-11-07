@@ -32,9 +32,15 @@
  * when the host answers. That is a very different question from one asked on
  * a home screen, and it converts differently by a large multiple.
  *
- * NEVER on the home screen. NEVER on sign-up. NEVER on a payment screen: a
- * permission dialogue over a payment reads as a trick and costs the payment
- * as well as the permission.
+ * NEVER on the home screen. NEVER on a payment screen: a permission dialogue
+ * over a payment reads as a trick and costs the payment as well as the
+ * permission. NEVER inside the sign-up FORM either; but the founder ruled on
+ * 7 November 2026 that offering notifications is a DEFAULT STEP of joining,
+ * the way Hauslet asks right after sign-in. So `joined` exists: the last beat
+ * of first run (`FirstRun.tsx`), after the account exists and the interests
+ * question is answered, with the person already inside Vallo's own screens.
+ * The discipline stands unchanged: Vallo's screen first, the one system
+ * prompt only after a Yes, and a No honoured for thirty days.
  *
  * ===========================================================================
  * EVERYTHING HERE IS PURE. It takes a moment and a small record of what has
@@ -54,7 +60,10 @@ export type PushMoment =
   | "conversation_active"
   /** A person has opened the notification settings themselves, which is the
       one place asking is not an interruption, because they came to ask us. */
-  | "settings_opened";
+  | "settings_opened"
+  /** The last step of first run: the account exists, the interests question
+      is behind them, and joining is the moment (the founder, 7 Nov 2026). */
+  | "joined";
 
 /** What the person will actually get, in the words they are shown. */
 export const MOMENT_OFFER: Readonly<Record<PushMoment, string>> = {
@@ -62,6 +71,7 @@ export const MOMENT_OFFER: Readonly<Record<PushMoment, string>> = {
   booking_requested: "Know the moment the host answers.",
   conversation_active: "Know when they write back.",
   settings_opened: "Choose what reaches your phone.",
+  joined: "Booking answers, messages and your money, as they happen.",
 };
 
 /**

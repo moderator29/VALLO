@@ -924,6 +924,16 @@
   .nf-gs-question .nf-gs-sub {
     min-height: 0;
   }
+  /* The notifications step (the last beat): one card, centred, readable. */
+  .nf-gs-notify {
+    width: 100%;
+    max-width: 26.25rem;
+    margin-inline: auto;
+    margin-top: var(--nf-space-lg);
+    text-align: left;
+    --nf-i: 2;
+  }
+
   .nf-gs-question__choices {
     margin-top: var(--nf-space-lg);
     text-align: left;
