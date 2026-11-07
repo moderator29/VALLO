@@ -114,8 +114,15 @@ Owns: `app/(app)/messages/**`, `components/app/messages/**`,
    sends itself when the signal returns, instead of failing with Try again.
 6. **Signed URL refresh**: photos and voice in a thread left open past an
    hour re-sign before their links expire (3600 seconds).
-7. **Support as an inner page** once the support SQL is live; until then
-   build against it with graceful degradation.
+7. **Support as an inner page**: DONE (the Support chip in the inbox).
+8. **Inbox pin and mute** on the swipe and the options sheet, built against
+   `supabase/migrations/pending/grade1_conversation_pin_and_mute.sql`
+   (pinned rows first, at most 5, a muted bell on the row), degrading to
+   nothing if the table is not there yet.
+9. **A playing voice note never restarts** when its link refreshes: swap the
+   source only while paused or at the end.
+10. **The support ticket thread** (`/support/messages/[id]`) in the Messages
+    bubble style, so the inner page reads as one product with the inbox.
 
 ## Agent NATIVE (iOS and Android, performance, offline; with the lead)
 
