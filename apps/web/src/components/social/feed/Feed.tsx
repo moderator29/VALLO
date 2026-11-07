@@ -26,6 +26,7 @@ import { PostEditor } from "./PostEditor";
 import { LEAD_SETTLE_MS, leadIndexes, leadPropsFor } from "./lead";
 import { feedback } from "@/lib/ui/feedback";
 import { ViewportPost } from "./ViewportPost";
+import { inCategory, type FeedCategory } from "./categories";
 import { FreshArrival } from "./FreshArrival";
 import {
   blockUser,
@@ -90,7 +91,14 @@ export function Feed({
   pageCursor = null,
   loadMore,
   aside,
+  category = null,
+  categoryEmpty,
 }: {
+  /** A category chip (`categories.ts`): only the posts that feature that
+      kind of listing are drawn, from this page and every later one. */
+  category?: FeedCategory | null;
+  /** The empty state when a category holds nothing on the pages read. */
+  categoryEmpty?: { title: string; body: string; action: { href: string; label: string } };
   /**
    * Something the surface sets between posts, once: the feed's "worth
    * following" block, after the third post (or after the last, on a shorter
@@ -485,12 +493,13 @@ export function Feed({
    * are their own objects and arrive from their own reads on the server, which
    * is why neither of them is filtered out of `posts` here.
    */
-  const shown =
+  const shown = (
     chip === "apartments"
       ? posts.filter((post) => Boolean(post.listing))
       : chip === "updates"
         ? posts.filter((post) => !post.listing && post.authorKind === "USER")
-        : posts;
+        : posts
+  ).filter((post) => inCategory(post, category));
 
   const counts: Partial<Record<DistrictChip, number>> = district
     ? {
@@ -583,12 +592,16 @@ export function Feed({
         /* One empty-state anatomy across `/around` and `/u`. See `emptyTitle`
            above: this was a bordered paragraph with no mark, no heading and
            nothing to do, one tap from a screen that had all three. */
-        <EmptyPanel
-          icon={emptyIcon}
-          title={emptyTitle ?? DEFAULT_EMPTY_TITLE}
-          body={emptyMessage}
-          {...(emptyAction ? { action: emptyAction } : {})}
-        />
+        category && categoryEmpty && posts.length > 0 ? (
+          <EmptyPanel icon="home-search" title={categoryEmpty.title} body={categoryEmpty.body} action={categoryEmpty.action} />
+        ) : (
+          <EmptyPanel
+            icon={emptyIcon}
+            title={emptyTitle ?? DEFAULT_EMPTY_TITLE}
+            body={emptyMessage}
+            {...(emptyAction ? { action: emptyAction } : {})}
+          />
+        )
       ) : null}
 
       {(chip === "stories" || chip === "reviews" ? [] : shown).map((post, index, list) => {

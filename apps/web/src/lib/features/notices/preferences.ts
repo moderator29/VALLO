@@ -4,6 +4,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { resolveSession } from "@/lib/actions/session";
 
+import { reportReadFault } from "@/lib/observability/read-error";
+
+import { faults } from "../degrade";
+
 import { defaultPreferences, preferencesFromRows, type NoticePreferences } from "./model";
 
 /**
@@ -27,6 +31,7 @@ export async function readReminderSettings(): Promise<ReminderSettingsState> {
       .from("notice_preferences")
       .select("topic, enabled")
       .eq("user_id", session.user.id);
+    await reportReadFault("read.features.reminders", ...faults(error));
     if (error) return { state: "signed-in", live: false, preferences: defaultPreferences() };
     return {
       state: "signed-in",

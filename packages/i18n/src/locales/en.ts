@@ -661,6 +661,8 @@ export const en = {
     saved: "Saved",
     around: "Around",
     feed: "Feed",
+    /* The dock's centre tab (founder, 7 November 2026). */
+    circle: "Circle",
     map: "Map",
     primaryLabel: "Primary",
     accountLabel: "Account",
@@ -6846,6 +6848,14 @@ export const en = {
   feedV2: {
     card: {
       commentPill: "Drop a comment",
+      /* The featured listing card and the photo mosaic (7 November 2026). */
+      comment: "Comment",
+      featuredListing: "Featured listing",
+      newListing: "New listing",
+      viewProperty: "View property",
+      moreMedia: "{count} more",
+      bedsShort: "{count} bd",
+      bathsShort: "{count} ba",
       readMore: "Read more",
       readLess: "Show less",
       roleLandlord: "Landlord",
@@ -6905,6 +6915,21 @@ export const en = {
       lensCircleClosed: "Not open yet",
       composePrompt: "Share something with your area",
       composePromptIn: "Share something with {place}",
+      /* The feed's head and category chips (founder, 7 November 2026). */
+      title: "Feed",
+      subtitle: "Homes, stays and places to eat, from people near you.",
+      categoriesLabel: "What the feed shows",
+      catProperties: "Properties",
+      catStays: "Stays",
+      catRestaurants: "Restaurants",
+      emptyCatTitle: "Nothing in {category} here yet",
+      emptyCatBody: "Posts that feature a listing of this kind show up here. Try For you for everything.",
+      emptyCatAction: "Back to For you",
+      circleDoor: "Circle",
+      circleDoorLabel: "Open Vallo Circle, the community",
+      composePhoto: "Add a photo to a post",
+      composeListing: "Feature a listing in a post",
+      composeSend: "Write a post",
     },
     people: {
       navPeople: "People",

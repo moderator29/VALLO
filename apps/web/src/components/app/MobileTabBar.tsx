@@ -1,11 +1,11 @@
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import { AutoHideDock } from "./AutoHideDock";
 import { HoldTabLink } from "./HoldTabLink";
-import { DockMore, type DockMoreItem } from "./DockMore";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import type { Side } from "@/lib/side.constants";
 import { CreateDock } from "./CreateDock";
 import { isFocusedRoute } from "./focused-route";
+import { CIRCLE_ROUTE } from "./circle-route";
 
 /**
  * The bottom tab bar.
@@ -128,6 +128,7 @@ type Tab = { href: string; label: string; icon: UiIconName };
 export const TAB_BAR_ROUTES = [
   "/home",
   "/around",
+  CIRCLE_ROUTE,
   "/search",
   "/agreements",
   "/profile",
@@ -271,7 +272,6 @@ export function MobileTabBar({
   signedIn = false,
   createSlot,
   prefetchFull = false,
-  unreadConversationsPreview,
   socialOn = true,
 }: {
   t: ShellDictionary;
@@ -393,36 +393,6 @@ export function MobileTabBar({
   /* The profile slot is the way through to notifications on a phone. */
   const marked = signedIn && unreadNotifications > 0;
 
-  /*
-   * THE SUB-NAV BEHIND THE SIXTH SLOT (Track M). The destinations a member
-   * reaches often enough to deserve a thumb, which until now lived only in
-   * the drawer. The drawer keeps every one of them: this is a second, faster
-   * door, not a move. A guest gets the three that make sense signed out.
-   */
-  const stays = side === "stays";
-  const more: DockMoreItem[] = signedIn
-    ? [
-        { href: "/messages", label: t.nav.messages, icon: "chat-bubble" },
-        {
-          href: stays ? "/bookings?side=stays&from=stays" : "/bookings",
-          label: t.shape.plans.title,
-          icon: "calendar-booking",
-        },
-        { href: "/saved", label: t.nav.saved, icon: "heart" },
-        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
-        { href: "/agreements", label: t.nav.agreements, icon: "document" },
-        { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
-        { href: "/settings", label: t.nav.settings, icon: "settings-gear" },
-        { href: "/support", label: t.nav.helpSupport, icon: "headset" },
-        /* Report a problem from any screen: the support form opens as a problem report. */
-        { href: "/support/new?kind=problem", label: t.experienceInbox.support.home.reportProblem, icon: "flag" },
-      ]
-    : [
-        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
-        { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
-        { href: "/help", label: t.nav.helpSupport, icon: "headset" },
-      ];
-
   return (
     <AutoHideDock
       route={active}
@@ -461,21 +431,30 @@ export function MobileTabBar({
         <li className="nf-tabbar__pill" data-parked={activeIndex < 0 || undefined} aria-hidden="true" />
         {slots.map((tab, index) => {
           if (tab == null) {
-            /* The centre slot: the grid menu (`DockMore`), with no label
-               under it; its accessible name is "More". It sits in line with
-               the other four, same height, same baseline, in the container
-               the centre slot has always had so it still reads as special.
-               Its tray opens centred above the capsule (shell-m.css), and a
-               member's unread conversations ride its corner, live. */
+            /* THE CENTRE SLOT IS VALLO CIRCLE (founder, 7 November 2026; it
+               overrides the "no restructure" ruling for this one slot). It
+               was the grid menu (`DockMore`); every destination that tray
+               held is in the side menu, which already listed each one. The
+               Circle tab keeps the centre's special container: the people
+               glyph in a soft round plate that fills with the brand when
+               Circle is the page (`shell-m.css`, "THE CIRCLE TAB"). */
+            const circleActive = root === CIRCLE_ROUTE;
             return (
-              <li key="menu" className="nf-tab nf-tab--switch">
-                <DockMore
-                  items={more}
-                  label={t.nav.more}
-                  active={active}
-                  unreadLabel={signedIn ? t.a11y.unreadConversationsOn : undefined}
-                  unreadPreview={unreadConversationsPreview}
-                />
+              <li key="circle" className="nf-tab nf-tab--switch nf-tab--circle">
+                <HoldTabLink
+                  href={CIRCLE_ROUTE}
+                  prefetch={prefetchFull}
+                  aria-current={circleActive ? "page" : undefined}
+                  aria-label={t.nav.circle}
+                  className="nf-tab__link nf-tab__circle"
+                  data-testid="dock-circle"
+                >
+                  <span className="nf-tab__body">
+                    <span className="nf-tab__icon nf-tab__circle-plate" data-glyph="circle-people">
+                      <UiIcon name="circle-people" size="md" filled={circleActive} weight="bold" />
+                    </span>
+                  </span>
+                </HoldTabLink>
               </li>
             );
           }

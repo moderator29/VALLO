@@ -2,6 +2,7 @@ import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { Side } from "@/lib/side.constants";
+import { CIRCLE_ROUTE } from "./circle-route";
 
 /**
  * The side navigation, as data.
@@ -156,6 +157,7 @@ export function buildNav({
             { href: "/stays", label: t.nav.stays, icon: "bed" },
             { href: "/stays/search", label: t.nav.search, icon: "search" },
             { href: "/around", label: t.nav.feed, icon: "feed" },
+            { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ]
         : [
@@ -165,6 +167,7 @@ export function buildNav({
                feed, place or neighbourhood: it was the one destination in the set
                a person could not guess from its glyph. `feed` exists now. */
             { href: "/around", label: t.nav.feed, icon: "feed" },
+            { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ],
     },
@@ -439,9 +442,44 @@ export function buildNav({
     if (SUBSCRIPTIONS_OPEN) tail.push({ href: "/pro", label: "Pro", icon: "crown" });
     tail.push({ href: "/settings", label: t.nav.settings, icon: "settings-gear" });
   }
+  /*
+   * THE DOCK'S OLD GRID TRAY, KEPT WHOLE (founder, 7 November 2026). The
+   * dock's centre slot became Vallo Circle, and every destination its tray
+   * held must stay one tap from the side menu. Most already had a row; the
+   * ones that did not on this side or signed-in state join the tail here,
+   * once each, so nothing the tray offered was lost.
+   */
+  const listed = new Set(sections.flatMap((section) => section.items.map((item) => item.href)).concat(tail.map((item) => item.href)));
+  for (const item of formerTrayItems(t, signedIn, stays)) {
+    if (!listed.has(item.href)) {
+      tail.push(item);
+      listed.add(item.href);
+    }
+  }
   if (tail.length > 0) sections.push({ heading: null, items: tail });
 
   return sections;
+}
+
+/** What the dock's grid tray (`DockMore`) offered, for the side menu's check. */
+export function formerTrayItems(t: ShellDictionary, signedIn: boolean, stays: boolean): NavLeaf[] {
+  return signedIn
+    ? [
+        { href: "/messages", label: t.nav.messages, icon: "chat-bubble" },
+        { href: stays ? "/bookings?side=stays&from=stays" : "/bookings", label: t.shape.plans.title, icon: "calendar-booking" },
+        { href: "/saved", label: t.nav.saved, icon: "heart" },
+        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
+        { href: "/agreements", label: t.nav.agreements, icon: "document" },
+        { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
+        { href: "/settings", label: t.nav.settings, icon: "settings-gear" },
+        { href: "/support", label: t.nav.helpSupport, icon: "headset" },
+        { href: "/support/new?kind=problem", label: t.experienceInbox.support.home.reportProblem, icon: "flag" },
+      ]
+    : [
+        { href: "/assistant", label: t.nav.aiAssistant, icon: "bot" },
+        { href: "/price", label: t.priceCheck.title, icon: "price-tag" },
+        { href: "/help", label: t.nav.helpSupport, icon: "headset" },
+      ];
 }
 
 /**

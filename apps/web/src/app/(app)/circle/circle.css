@@ -1,0 +1,248 @@
+/*
+  VALLO CIRCLE (FEATURES, 7 November 2026; VALLO_CIRCLE.md v3). The community
+  reads as type led and organised: titles first, a topic line, quiet counts.
+  Agent FE's shared banner and cards replace `.nf-circle-hero` and
+  `.nf-circle-card` when they land; the layout here stays.
+*/
+@layer components {
+  .nf-circle {
+    display: grid;
+    gap: var(--nf-space-xl);
+    min-width: 0;
+  }
+  .nf-circle-hero {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-brand-primary-strong);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-circle-hero__title {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .nf-circle-hero__line {
+    font-size: var(--nf-text-body-sm);
+    margin: 0;
+    opacity: 0.86;
+  }
+  .nf-circle-hero__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nf-space-xs);
+    margin: 0;
+  }
+  .nf-circle-hero__stat {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    text-align: center;
+  }
+  .nf-circle-hero__stat dd {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-circle-hero__stat dt {
+    font-size: var(--nf-text-caption);
+    opacity: 0.86;
+  }
+  .nf-circle-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-sm);
+  }
+  .nf-circle-section {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-width: 0;
+  }
+  .nf-circle-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  .nf-circle-section__title {
+    font-size: var(--nf-text-h3);
+    font-weight: 600;
+    margin: 0;
+    color: var(--nf-content-primary);
+  }
+  .nf-circle-list {
+    display: grid;
+    gap: var(--nf-space-sm);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nf-circle-card {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+    min-width: 0;
+  }
+  .nf-circle-card:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: 2px;
+  }
+  .nf-circle-card__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-content-secondary);
+  }
+  .nf-circle-card__eyebrow--question {
+    color: var(--nf-brand-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .nf-circle-card__answered {
+    color: var(--nf-state-success);
+  }
+  .nf-circle-card__title {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .nf-circle-card__body {
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .nf-circle-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-sm);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-circle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--nf-space-sm);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nf-circle-empty {
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    text-align: center;
+    margin: 0;
+  }
+  .nf-circle-sort {
+    display: flex;
+    gap: var(--nf-space-xs);
+    flex-wrap: wrap;
+  }
+  .nf-circle-thread {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-circle-reply {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-secondary);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+  }
+  .nf-circle-reply--accepted {
+    border-color: var(--nf-state-success);
+    background: var(--nf-state-success-surface);
+  }
+  .nf-circle-reply--nested {
+    margin-inline-start: var(--nf-space-lg);
+  }
+  .nf-circle-reply__body {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .nf-circle-reply__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    align-items: center;
+  }
+  .nf-circle-field {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-circle-field textarea,
+  .nf-circle-field input,
+  .nf-circle-field select {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-primary);
+    font: inherit;
+  }
+  .nf-circle-field textarea {
+    min-height: 8rem;
+    resize: vertical;
+  }
+  .nf-circle-field__hint {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-circle-option {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    width: 100%;
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-primary);
+    text-align: start;
+    font: inherit;
+    cursor: pointer;
+  }
+  .nf-circle-option[aria-checked="true"] {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-primary-soft);
+  }
+  .nf-circle-option__sub {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  @media (min-width: 64rem) {
+    .nf-circle--split {
+      grid-template-columns: minmax(0, 1fr) 20rem;
+      align-items: start;
+    }
+  }
+}

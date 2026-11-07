@@ -1,6 +1,9 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import "./feed-v2.css";
-import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import type { FeedCategory } from "./categories";
 
 /**
  * The feed's modes. `for-you` and `friends` are the two the control draws.
@@ -27,57 +30,86 @@ export function liveTab(active: FeedTab): "for-you" | "friends" {
 }
 
 /**
- * For you / Friends, as the underline tab row (founder, 1 November 2026: the
- * sports app's tabs). Each is a link carrying `?tab=`, so the choice survives
- * a reload and puts a real entry in the history; `aria-current` marks the
- * live one. Every tab is 44px tall.
+ * THE CATEGORY CHIPS (founder, 7 November 2026, the feed reference): For
+ * you, Friends, Properties, Stays, Restaurants, one row that scrolls sideways
+ * on a narrow phone. Each is a link (`?tab=` for Friends, `?cat=` for a
+ * category), so the choice survives a reload and is a real history entry;
+ * `aria-current` marks the one live chip. Chips are soft rectangles, never
+ * capsules, 40px painted inside a 44px target. The live chip is the ink
+ * fill; the rest sit on the quiet well with no border.
  */
-export function FeedTabs({ active, t }: { active: FeedTab; t: Dictionary }) {
+export function FeedTabs({
+  active,
+  category = null,
+  t,
+}: {
+  active: FeedTab;
+  category?: FeedCategory | null;
+  t: Dictionary;
+}) {
   const words = t.feedV2.feed;
-  const live = liveTab(active);
-  const segments = [
-    { tab: "for-you", label: words.tabForYou, href: "/around" },
-    { tab: "friends", label: words.tabFriends, href: "/around?tab=friends" },
+  const live = category ?? liveTab(active);
+  const chips = [
+    { key: "for-you", label: words.tabForYou, href: "/around" },
+    { key: "friends", label: words.tabFriends, href: "/around?tab=friends" },
+    { key: "properties", label: words.catProperties, href: "/around?cat=properties" },
+    { key: "stays", label: words.catStays, href: "/around?cat=stays" },
+    { key: "restaurants", label: words.catRestaurants, href: "/around?cat=restaurants" },
   ] as const;
 
   return (
-    <UnderlineTabs
-      label={words.tabsLabel}
-      active={live}
-      items={segments.map((segment) => ({ key: segment.tab, label: segment.label, href: segment.href }))}
-      data-testid="feed-tabs"
-      itemTestIdPrefix="feed-tab-"
-      className="nf-feed-utabs"
-    />
+    <nav className="nf-feed-chips" aria-label={words.categoriesLabel} data-testid="feed-tabs">
+      <ul className="nf-feed-chips__row">
+        {chips.map((chip) => (
+          <li key={chip.key}>
+            <Link
+              href={chip.href}
+              className="nf-tap nf-feed-chip"
+              {...(chip.key === live ? { "aria-current": "page" as const } : {})}
+              data-testid={`feed-tab-${chip.key}`}
+              scroll={false}
+            >
+              {chip.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
 /**
- * THE TWO LENSES (VALLO_CIRCLE.md, "What Agent FE does now").
- *
- * Around is everyone near you, and it is the feed this page draws. Circle is
- * the people you trust, and it is not open: the founder has the brief to
- * approve first. So the switch is drawn with Around chosen and Circle shown
- * beside it, quiet, with a plain word that says it is not open. Nothing about
- * Circle can be tapped, so nothing on this screen promises a door that leads
- * nowhere. The tag says what is true today rather than a date, because the
- * product never promises a schedule it cannot keep (`lib/copy/banned-phrases`).
- *
- * The words are type, not a second tab row: the For you and Friends tabs under
- * the stories choose WHICH Around, and this chooses which lens, so the two
- * never read as the same control.
+ * THE FEED'S HEAD (the reference): the large title, one quiet line under it,
+ * and at the right the way into Circle and the people search. The bell is the
+ * shell header's, directly above, so it is not drawn twice. The place chip
+ * rides on the quiet line, because where is a filter on this feed, not its
+ * name.
  */
-export function FeedLenses({ t }: { t: Dictionary }) {
+export function FeedHead({ t, place }: { t: Dictionary; place?: ReactNode }) {
   const words = t.feedV2.feed;
   return (
-    <div className="nf-lens" role="group" aria-label={words.lensLabel} data-testid="feed-lenses">
-      <span className="nf-lens__item" aria-current="page" data-testid="feed-lens-around">
-        {words.lensAround}
-      </span>
-      <span className="nf-lens__item nf-lens__item--closed" aria-disabled="true" data-testid="feed-lens-circle">
-        <span className="nf-lens__word">{words.lensCircle}</span>
-        <span className="nf-lens__tag">{words.lensCircleClosed}</span>
-      </span>
-    </div>
+    <header className="nf-feed-head" data-testid="feed-head">
+      <div className="nf-feed-head__row">
+        <h1 className="nf-feed-head__title">{words.title}</h1>
+        <div className="nf-feed-head__actions">
+          <Link
+            href="/circle"
+            className="nf-tap nf-feed-circle-door"
+            aria-label={words.circleDoorLabel}
+            data-testid="feed-circle-door"
+          >
+            <UiIcon name="circle-people" size={18} />
+            <span>{words.circleDoor}</span>
+          </Link>
+          <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople} data-testid="feed-find-people">
+            <UiIcon name="search" size={20} />
+          </Link>
+        </div>
+      </div>
+      <div className="nf-feed-head__sub">
+        <p className="nf-feed-head__line">{words.subtitle}</p>
+        {place ? <div className="nf-feed-head__place">{place}</div> : null}
+      </div>
+    </header>
   );
 }

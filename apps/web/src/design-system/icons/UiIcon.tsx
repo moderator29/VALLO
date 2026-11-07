@@ -166,6 +166,8 @@ export type UiIconName =
   | "camera"
   | "pencil"
   | "users"
+  | "circle-people"
+  | "pin"
   | "lock"
   | "calendar-check"
   | "calendar-clock"
@@ -1128,6 +1130,26 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
     </>
   ),
+  // [circle-people] Vallo Circle: three people, the one in front a step
+  // taller, the two behind leaning in (the dock's Circle tab).
+  "circle-people": (
+    <>
+      <circle cx="12" cy="8" r="3.25" />
+      <path d="M6.5 20a5.5 5.5 0 0 1 11 0" />
+      <circle cx="5.25" cy="10" r="2.25" />
+      <path d="M1.75 18.5a3.75 3.75 0 0 1 4.1-3.7" />
+      <circle cx="18.75" cy="10" r="2.25" />
+      <path d="M22.25 18.5a3.75 3.75 0 0 0-4.1-3.7" />
+    </>
+  ),
+  // [pin] A push pin, for pinned rows (round 1 follow-up; the inbox pin
+  // borrowed the bookmark).
+  pin: (
+    <>
+      <path d="M12 17v5" />
+      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+    </>
+  ),
   // [lock]
   lock: (
     <>
@@ -1417,6 +1439,25 @@ const HOUSE_BODY =
   "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
 
 const FILLED: Partial<Record<UiIconName, FilledTwin>> = {
+  /* The Circle tab's active state: the three people solid. */
+  "circle-people": {
+    body: (
+      <>
+        <circle cx="12" cy="8" r="3.25" />
+        <path d="M6.5 20a5.5 5.5 0 0 1 11 0z" />
+        <circle cx="5.25" cy="10" r="2.25" />
+        <path d="M1.75 18.5a3.75 3.75 0 0 1 4.1-3.7A6.9 6.9 0 0 0 5.1 18.5z" />
+        <circle cx="18.75" cy="10" r="2.25" />
+        <path d="M22.25 18.5a3.75 3.75 0 0 0-4.1-3.7 6.9 6.9 0 0 1 .75 3.7z" />
+      </>
+    ),
+  },
+  pin: {
+    body: (
+      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+    ),
+    keep: <path d="M12 17v5" />,
+  },
   /* VC1: the call controls' solid twins. A slash is cut a little below
      and right of the line it keeps, so the solid body shows a clean gap. */
   video: {

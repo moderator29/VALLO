@@ -70,6 +70,15 @@ export type PostListing = {
   periodLabel: string;
   photoUrl: string | null;
   verified: boolean;
+  /** What the listing is, when the read says (Agent FEATURES' post model).
+      Absent, the feed's categories fall back to the price period. */
+  kind?: "property" | "stay" | "restaurant";
+  /** Facts for the embedded card, drawn only when the read supplies them:
+      never filled in or guessed. */
+  beds?: number | null;
+  baths?: number | null;
+  /** Up to three short amenity words, from the listing itself. */
+  amenities?: readonly string[];
 };
 
 export type PostMedia = {
@@ -294,6 +303,15 @@ function ActionRows({
 }) {
   const likes = compact(post.likeCount, locale);
   const reposts = compact(post.repostCount, locale);
+  const replies = compact(post.replyCount, locale);
+  /*
+   * ONE QUIET ROW (founder, 7 November 2026: "comment, repost and bookmark
+   * icons smaller and refined", "cleaner, less stuff"). Like, comment and
+   * repost with their counts, share, and the bookmark alone at the far end.
+   * The comment used to be a wide "Drop a comment" pill on a second row; it
+   * is the same reply door now, a glyph and its count in the row, still 44px
+   * to the touch.
+   */
   return (
     <div className="nf-pc__actions">
       <div className="nf-pc__more-row">
@@ -307,6 +325,18 @@ function ActionRows({
             count={post.likeCount > 0 ? likes : undefined}
             label={(post.liked ? words.likedUndo : words.like).replace("{count}", likes)}
             onClick={onLike}
+          />
+        </AuthGate>
+
+        <AuthGate action="post">
+          <ActionPill
+            icon="chat-bubble"
+            tone="reply"
+            className="nf-pc__comment nf-post__act--reply"
+            count={post.replyCount > 0 ? replies : undefined}
+            label={`${words.comment}, ${countOf(post.replyCount, "replies", locale)}`}
+            onClick={onReply}
+            data-testid="post-comment-pill"
           />
         </AuthGate>
 
@@ -345,29 +375,6 @@ function ActionRows({
             />
           </AuthGate>
         ) : null}
-      </div>
-
-      <div className="nf-pc__reply-row">
-        <AuthGate action="post">
-          <button
-            type="button"
-            className="nf-pc__comment nf-post__act--reply"
-            aria-label={`${words.commentPill}, ${countOf(post.replyCount, "replies", locale)}`}
-            onClick={onReply}
-            data-testid="post-comment-pill"
-          >
-            <UiIcon name="chat-bubble" size={18} />
-            <span className="nf-pc__comment-text">{words.commentPill}</span>
-            {/* A word break the flex row does not draw, so the visible words
-                read "Drop a comment 56" and sit inside the name. */}
-            {" "}
-            {post.replyCount > 0 ? (
-              <span className="nf-pc__comment-count nf-numeric" aria-hidden="true">
-                {compact(post.replyCount, locale)}
-              </span>
-            ) : null}
-          </button>
-        </AuthGate>
       </div>
     </div>
   );
@@ -534,6 +541,129 @@ export function PostCard({
         : words.roleAgent
       : null;
 
+  /*
+   * THE FEATURED LISTING, FULL BLEED (founder, 7 November 2026, the feed
+   * reference). A post that features a real listing and carries no pictures
+   * of its own is drawn as an editorial card: the listing's own photograph to
+   * the card's edges, a soft scrim at its foot, and on it the author, the
+   * listing's title and its line, the counts and View property. The tag says
+   * what is true: Vallo's own note of a newly published listing is "New
+   * listing"; a member who chose to feature one is "Featured listing". The
+   * listing is the one `posts-queries` read through `listings_select_published`,
+   * so a taken-down flat never reaches this card.
+   */
+  const featured = post.listing && post.listing.photoUrl && !hasMedia && !isBot && !editor ? post.listing : null;
+  if (featured) {
+    const tag = isSystem || post.kind === "SHOWCASE" ? words.newListing : words.featuredListing;
+    return (
+      <article
+        className="nf-post nf-post--pressable nf-pc nf-pc--feature"
+        aria-label={describe(post, words)}
+        onClick={openPost}
+        onAuxClick={openPost}
+        data-testid="post-card"
+        data-variant="feature"
+      >
+        <div
+          ref={mediaRef}
+          className="nf-pcf__media"
+          style={arriving ? { viewTransitionName: `post-photo-${post.id}` } : undefined}
+        >
+          <PostPicture src={featured.photoUrl as string} alt={featured.title} width={1200} height={1500} sizes="(max-width: 640px) 100vw, 600px" />
+          <span className="nf-pcf__scrim" aria-hidden="true" />
+        </div>
+
+        <div className="nf-pcf__top" data-theme="dark">
+          <span className="nf-pcf__tag">{tag}</span>
+          <span className="nf-pcf__top-actions">
+            {onSave ? (
+              <AuthGate action="react">
+                <ActionPill
+                  icon="bookmark"
+                  tone="save"
+                  round
+                  className="nf-post__act--save nf-pcf__glass"
+                  pressed={post.saved}
+                  label={post.saved ? words.savedRemove : words.save}
+                  onClick={onSave}
+                />
+              </AuthGate>
+            ) : null}
+            <button
+              type="button"
+              className="nf-post__act nf-post__kebab nf-pc__kebab nf-pcf__glass"
+              aria-label={words.moreActions}
+              aria-haspopup="dialog"
+              onClick={onMenu}
+            >
+              <UiIcon name="more" size={20} />
+            </button>
+          </span>
+        </div>
+
+        <div className="nf-pcf__foot" data-theme="dark">
+          <div className="nf-pcf__by">
+            {isSystem ? (
+              <span className="nf-pc__avatar" aria-hidden="true">
+                <span className="nf-pc__monogram">V</span>
+              </span>
+            ) : (
+              <Avatar author={post.author} />
+            )}
+            <span className="nf-pcf__who">
+              <span className="nf-pc__nameline">
+                {isSystem ? (
+                  <span className="nf-pc__name">Vallo</span>
+                ) : (
+                  <Link
+                    href={post.author?.handle ? `/u/${post.author.handle}` : "#"}
+                    className="nf-pc__name"
+                    data-testid="post-author"
+                  >
+                    <span className="nf-pc__name-text">
+                      {post.author?.displayLabel ?? `@${post.author?.handle ?? words.someone}`}
+                    </span>
+                  </Link>
+                )}
+                {!isSystem && post.author?.tier && post.author.tier !== "none" ? (
+                  <span className="nf-pc__tick">
+                    <TierBadge tier={post.author.tier} size={14} />
+                  </span>
+                ) : null}
+              </span>
+              <span className="nf-pc__meta">{when}</span>
+            </span>
+          </div>
+
+          <h3 className="nf-pcf__title">{featured.title}</h3>
+          <p className="nf-pcf__line">
+            <span>{[featured.area, featured.city].filter(Boolean).join(", ")}</span>
+            <span className="nf-pcf__price nf-numeric">
+              {featured.priceLabel} <span className="nf-pcf__period">{featured.periodLabel}</span>
+            </span>
+          </p>
+          {hasWords ? <p className="nf-pcf__caption">{post.body}</p> : null}
+
+          <div className="nf-pcf__row">
+            <ActionRows
+              post={post}
+              locale={locale}
+              words={words}
+              onLike={onLike}
+              onReply={onReply}
+              onRepost={onRepost}
+              onShare={onShare}
+            />
+            <Link href={`/listing/${featured.id}`} className="nf-btn nf-btn--primary nf-btn--sm nf-pcf__view" data-testid="post-view-property">
+              <span>{words.viewProperty}</span>
+              <UiIcon name="arrow-right" size={16} />
+            </Link>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   const body = (
     <>
       {post.repostedBy ? (
@@ -673,13 +803,15 @@ export function PostCard({
 
           <div
             ref={mediaRef}
-            className={`nf-pc__frame nf-pc__media ${post.media.length > 1 ? "nf-pc__media--rail" : "nf-pc__media--one"}`}
+            className={`nf-pc__frame nf-pc__media ${post.media.length > 1 ? (detail ? "nf-pc__media--rail" : "nf-pc__media--mosaic") : "nf-pc__media--one"}`}
             style={{
               ...(post.media.length === 1 ? { aspectRatio: frameRatio(post.media[0]!) } : {}),
               ...(arriving ? { viewTransitionName: `post-photo-${post.id}` } : {}),
             }}
           >
-            {post.media.length > 1 ? (
+            {post.media.length > 1 && !detail ? (
+              <MediaMosaic media={post.media} alt={words.pictureAlt} moreLabel={words.moreMedia} />
+            ) : post.media.length > 1 ? (
               <MediaRail media={post.media.slice(0, 4)} />
             ) : (
               <PostPicture
@@ -720,7 +852,17 @@ export function PostCard({
 
       {post.sourceNote ? <p className="nf-pc__note">{post.sourceNote}</p> : null}
 
-      {post.listing ? <ListingAttachment listing={post.listing} verifiedLabel={copy.common.verified} /> : null}
+      {post.listing ? (
+        <EmbeddedListing
+          listing={post.listing}
+          words={{
+            verified: copy.common.verified,
+            view: words.viewProperty,
+            beds: words.bedsShort,
+            baths: words.bathsShort,
+          }}
+        />
+      ) : null}
 
       {detail ? (
         /* On the post's own page: when it was written and how many have
@@ -789,29 +931,84 @@ export function PostCard({
  * tabular on the right, and a chevron. The whole row is the link, so the way
  * in is the attachment itself, as on every product people already know.
  */
-function ListingAttachment({ listing, verifiedLabel }: { listing: PostListing; verifiedLabel: string }) {
+export function EmbeddedListing({
+  listing,
+  words,
+}: {
+  listing: PostListing;
+  words: { verified: string; view: string; beds: string; baths: string };
+}) {
+  /* Only what the listing itself says: beds, baths and amenities are drawn
+     when the read carried them and never filled in; "verified" only where
+     the listing truly is (a published, reviewed row). */
+  const facts = [
+    typeof listing.beds === "number" && listing.beds > 0 ? words.beds.replace("{count}", String(listing.beds)) : null,
+    typeof listing.baths === "number" && listing.baths > 0 ? words.baths.replace("{count}", String(listing.baths)) : null,
+    ...(listing.amenities ?? []).slice(0, 3),
+  ].filter((fact): fact is string => Boolean(fact));
   return (
-    <Link href={`/listing/${listing.id}`} className="nf-post__attach">
-      <span className="nf-post__attach-thumb" aria-hidden="true">
-        {listing.photoUrl ? (
-          <PostPicture src={listing.photoUrl} alt="" width={160} height={160} sizes="64px" />
-        ) : (
-          <UiIcon name="home" size={20} />
-        )}
-      </span>
-      <span className="nf-post__attach-text">
-        <span className="nf-post__attach-title">{listing.title}</span>
-        <span className="nf-post__attach-place">
-          {listing.area}, {listing.city}
-          {listing.verified ? <span className="nf-post__attach-verified"> &middot; {verifiedLabel}</span> : null}
+    <div className="nf-plc" data-testid="post-listing">
+      <Link href={`/listing/${listing.id}`} className="nf-plc__link" aria-label={`${listing.title}, ${words.view}`}>
+        <span className="nf-plc__photo" aria-hidden="true">
+          {listing.photoUrl ? (
+            <PostPicture src={listing.photoUrl} alt="" width={640} height={480} sizes="(max-width: 640px) 40vw, 240px" />
+          ) : (
+            <UiIcon name="home" size={24} />
+          )}
         </span>
-      </span>
-      <span className="nf-post__attach-price nf-numeric">
-        {listing.priceLabel}
-        <span className="nf-post__attach-period">{listing.periodLabel}</span>
-      </span>
-      <UiIcon name="chevron-right" size={16} className="nf-post__attach-chevron" />
-    </Link>
+        <span className="nf-plc__body">
+          <span className="nf-plc__title">{listing.title}</span>
+          <span className="nf-plc__place">
+            <UiIcon name="location" size={12} filled />
+            <span>{[listing.area, listing.city].filter(Boolean).join(", ")}</span>
+            {listing.verified ? <span className="nf-plc__verified">{words.verified}</span> : null}
+          </span>
+          {facts.length > 0 ? (
+            <span className="nf-plc__facts">
+              {facts.map((fact) => (
+                <span key={fact} className="nf-plc__fact">
+                  {fact}
+                </span>
+              ))}
+            </span>
+          ) : null}
+          <span className="nf-plc__foot">
+            <span className="nf-plc__price nf-numeric">
+              {listing.priceLabel} <span className="nf-plc__period">{listing.periodLabel}</span>
+            </span>
+            <span className="nf-plc__view">
+              {words.view}
+              <UiIcon name="arrow-right" size={14} />
+            </span>
+          </span>
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/**
+ * THE PHOTO MOSAIC (the feed reference): two pictures side by side, three or
+ * more as one tall picture and two stacked beside it, with "+N" on the last
+ * when there are more. Every frame holds its shape before a byte arrives. A
+ * tap opens the post, where the full rail and the viewer are.
+ */
+function MediaMosaic({ media, alt, moreLabel }: { media: PostMedia[]; alt: string; moreLabel: string }) {
+  const shown = media.slice(0, 3);
+  const more = media.length - shown.length;
+  return (
+    <div className="nf-mosaic" data-count={shown.length}>
+      {shown.map((item, index) => (
+        <span key={item.url} className="nf-mosaic__cell">
+          <PostPicture src={item.url} alt={index === 0 ? alt : ""} width={item.width || 900} height={item.height || 900} sizes="(max-width: 640px) 60vw, 360px" />
+          {index === shown.length - 1 && more > 0 ? (
+            <span className="nf-mosaic__more" aria-label={moreLabel.replace("{count}", String(more))}>
+              +{more}
+            </span>
+          ) : null}
+        </span>
+      ))}
+    </div>
   );
 }
 

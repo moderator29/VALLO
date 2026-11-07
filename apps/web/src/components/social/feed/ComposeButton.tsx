@@ -27,6 +27,7 @@ export function ComposeButton({
   label,
   prompt,
   you = null,
+  actions,
 }: {
   label: string;
   /** The words on the feed's compose entry. Given, the control is the quiet
@@ -35,27 +36,45 @@ export function ComposeButton({
       composer, so nothing about posting changes but where the eye finds it. */
   prompt?: string;
   you?: { label: string; avatarUrl: string } | null;
+  /** The doors at the line's right (the feed reference): a photo and a post.
+      Each opens the same composer, whose photo control is one tap inside.
+      Video and a featured listing join here only once the composer can carry
+      them, so no door on this line leads nowhere. */
+  actions?: { photo: string; send: string };
 }) {
   const open = () => window.dispatchEvent(new CustomEvent(COMPOSE_POST_EVENT));
   if (prompt) {
     return (
-      <button type="button" className="nf-feed-prompt" aria-label={label} data-testid="feed-compose" onClick={open}>
-        <span className="nf-feed-prompt__face" aria-hidden="true">
-          {you?.avatarUrl ? (
-            <RemoteImage src={you.avatarUrl} alt="" width={72} height={72} sizes="36px" loading="lazy" />
-          ) : you?.label ? (
-            <span className="nf-feed-prompt__monogram">{initial(you.label)}</span>
-          ) : (
-            <UiIcon name="pencil" size={18} />
-          )}
-        </span>
-        <span className="nf-feed-prompt__words" aria-hidden="true">
-          {prompt}
-        </span>
-        <span className="nf-feed-prompt__pic" aria-hidden="true">
-          <UiIcon name="picture" size={20} />
-        </span>
-      </button>
+      <div className="nf-feed-prompt" data-testid="feed-compose-row">
+        <button type="button" className="nf-feed-prompt__main" aria-label={label} data-testid="feed-compose" onClick={open}>
+          <span className="nf-feed-prompt__face" aria-hidden="true">
+            {you?.avatarUrl ? (
+              <RemoteImage src={you.avatarUrl} alt="" width={72} height={72} sizes="36px" loading="lazy" />
+            ) : you?.label ? (
+              <span className="nf-feed-prompt__monogram">{initial(you.label)}</span>
+            ) : (
+              <UiIcon name="pencil" size={18} />
+            )}
+          </span>
+          <span className="nf-feed-prompt__words" aria-hidden="true">
+            {prompt}
+          </span>
+        </button>
+        {actions ? (
+          <span className="nf-feed-prompt__doors">
+            <button type="button" className="nf-tap nf-feed-prompt__door" aria-label={actions.photo} onClick={open} data-testid="feed-compose-photo">
+              <UiIcon name="picture" size={20} />
+            </button>
+            <button type="button" className="nf-tap nf-feed-prompt__door" aria-label={actions.send} onClick={open} data-testid="feed-compose-send">
+              <UiIcon name="send" size={20} />
+            </button>
+          </span>
+        ) : (
+          <span className="nf-feed-prompt__pic" aria-hidden="true">
+            <UiIcon name="picture" size={20} />
+          </span>
+        )}
+      </div>
     );
   }
   return (

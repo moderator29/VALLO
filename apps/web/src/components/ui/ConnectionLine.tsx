@@ -1,5 +1,7 @@
 "use client";
 
+import { CONNECTION_BACK_EVENT } from "@/lib/offline/connection";
+import { useConnection } from "@/lib/offline/use-connection";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -58,10 +60,14 @@ function signalIsPoor(): boolean {
 /* "slow" is an instant copy whose refresh is taking long: drawn as "kept". */
 type Phase = "online" | "offline" | "kept" | "slow" | "back" | "leaving";
 
+/** The unstable strip. English only for now (SW11 moves it to the dictionary). */
+const UNSTABLE_WORDS = "Connection is unstable. Vallo keeps trying.";
+
 export function ConnectionLine() {
   const copy = useClientCopy().details.connection;
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("online");
+  const conn = useConnection();
   const timers = useRef<number[]>([]);
   /* Whether the page on screen is a kept copy that still wants refreshing. */
   const stale = useRef(false);
@@ -166,15 +172,30 @@ export function ConnectionLine() {
     });
     window.addEventListener("offline", offline);
     window.addEventListener("online", online);
+    /* A phone that lied about being offline: recover when Vallo answers. */
+    window.addEventListener(CONNECTION_BACK_EVENT, online);
     return () => {
       clear();
       stopFresh();
       window.removeEventListener("offline", offline);
       window.removeEventListener("online", online);
+      window.removeEventListener(CONNECTION_BACK_EVENT, online);
     };
   }, [router]);
 
   /* A slow refresh that has since landed is simply online again. */
+  /* Connection manager (Agent NATIVE): an unstable link gets the one calm
+     strip, briefly, while the page itself is online. */
+  if (phase === "online" && conn === "unstable") {
+    return (
+      <div className="nf-connection" data-state="kept" data-brief data-testid="connection-line" role="status">
+        <span className="nf-connection__pill">
+          <span className="nf-connection__dot" aria-hidden="true" />
+          {UNSTABLE_WORDS}
+        </span>
+      </div>
+    );
+  }
   if (phase === "online" || (phase === "slow" && !refreshing)) return null;
   const back = phase === "back" || phase === "leaving";
   const keptLine = phase === "kept" || phase === "slow";

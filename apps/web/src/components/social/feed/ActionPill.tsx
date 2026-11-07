@@ -74,7 +74,9 @@ export function ActionPill({
         onClick();
       }}
     >
-      <UiIcon name={icon} size={20} filled={filled} className="nf-act-pill__glyph" />
+      {/* 18, a step under the 20 it was (founder, 7 November 2026: the
+          card's icons smaller and refined); the stroke is unchanged. */}
+      <UiIcon name={icon} size={18} filled={filled} className="nf-act-pill__glyph" />
       {count !== undefined && !round ? (
         /* Keyed on the figure, so a new figure is a new element and the roll
            plays once for it; `data-roll` only after this person tapped. */
