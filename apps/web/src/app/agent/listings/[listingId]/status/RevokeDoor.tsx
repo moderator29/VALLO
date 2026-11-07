@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -19,7 +20,6 @@ type Copy = Dictionary["frontDoor"]["status"];
 export function RevokeDoor({ token, copy }: { token: string; copy: Copy }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   return (
@@ -32,12 +32,11 @@ export function RevokeDoor({ token, copy }: { token: string; copy: Copy }) {
               variant="secondary"
               loading={pending}
               onClick={() => {
-                setError(null);
                 start(async () => {
                   try {
                     const result = await revokeShareLink({ token });
                     if (!result.ok) {
-                      setError(copy.revokeFailed);
+                      banner.error(copy.revokeFailed);
                       return;
                     }
                     setConfirming(false);
@@ -59,11 +58,6 @@ export function RevokeDoor({ token, copy }: { token: string; copy: Copy }) {
         <Button variant="ghost" onClick={() => setConfirming(true)}>
           {copy.revoke}
         </Button>
-      )}
-      {error && (
-        <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
       )}
     </div>
   );

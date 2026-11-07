@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
@@ -24,7 +25,6 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
   const router = useRouter();
   const [choice, setChoice] = useState(homes[0]?.id ?? "");
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const full = brief.answered >= 3;
   return (
@@ -48,15 +48,15 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
             loading={pending}
             disabled={choice === ""}
             onClick={() => {
-              setError(null);
               start(async () => {
                 try {
                   const result = await answerBrief({ briefId: brief.id, listingId: choice });
                   if (!result.ok) {
-                    setError(result.error);
+                    banner.error(result.error);
                     return;
                   }
                   setSent(true);
+                  banner.success(copy.sent);
                   router.refresh();
                 } catch (error) {
                   if (!tapFailedOffline(error)) throw error;
@@ -67,12 +67,6 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
             {pending ? copy.sending : copy.send}
           </Button>
         </div>
-      )}
-      {sent && <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]" role="status">{copy.sent}</p>}
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
       )}
     </li>
   );

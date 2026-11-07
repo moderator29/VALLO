@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -52,7 +53,10 @@ export function CloseListingSheet({
       try {
         const result = await closeListingWithReason({ listingId, reason });
         if (!result.ok) {
-          setError(result.fieldErrors?.reason === "no-rent" ? copy.noRent : copy.failed);
+          /* A reason that does not fit stays on the choice; a refusal is said
+             by the one banner (Grade 1), above this sheet. */
+          if (result.fieldErrors?.reason === "no-rent") setError(copy.noRent);
+          else banner.error(copy.failed, { retry: run });
           return;
         }
         onClose();

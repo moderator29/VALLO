@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useRouter } from "next/navigation";
@@ -17,7 +18,6 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
   const maxId = useId();
   const [min, setMin] = useState("");
   const [max, setMax] = useState("");
-  const [note, setNote] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
@@ -26,15 +26,13 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
       className="mt-sm grid gap-xs"
       onSubmit={(event) => {
         event.preventDefault();
-        setNote(null);
         start(async () => {
           try {
             const result = await inviteAgents({ listingId, min, max });
+            /* Said by the one banner at the top of the screen (Grade 1). When
+               somebody was told, the portfolio's own moment says it instead. */
             if (result.ok) {
-              setNote({
-                tone: "ok",
-                text: result.data.told > 0 ? copy.inviteSent.replace("{n}", String(result.data.told)) : copy.inviteSentNone,
-              });
+              if (result.data.told === 0) banner.info(copy.inviteSentNone);
               /* "Invitation sent" only when the database told somebody; the
                  portfolio checks the invitation is open on this unit before
                  it shows (arrival-moments.ts), and the form itself gives way
@@ -44,7 +42,7 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
               }
               return;
             }
-            setNote({ tone: "error", text: result.error === "band" ? copy.inviteBand : copy.inviteFailed });
+            banner.error(result.error === "band" ? copy.inviteBand : copy.inviteFailed);
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
           }
@@ -72,15 +70,6 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
       <Button type="submit" variant="secondary" size="md" loading={pending} disabled={!min.trim() || !max.trim()} data-testid="portfolio-invite">
         {copy.inviteSend}
       </Button>
-      {note && (
-        <p
-          role={note.tone === "error" ? "alert" : "status"}
-          className="text-[length:var(--nf-text-caption)]"
-          style={{ color: note.tone === "error" ? "var(--nf-state-error)" : "var(--nf-content-secondary)" }}
-        >
-          {note.text}
-        </p>
-      )}
     </form>
   );
 }
@@ -88,34 +77,26 @@ export function InviteForm({ listingId, place, copy }: { listingId: string; plac
 /** The owner gives the mandate to one pitch (and may give it to more). */
 export function AwardButton({ pitchId, copy }: { pitchId: string; copy: Copy }) {
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState(false);
   return (
-    <>
-      <Button
-        type="button"
-        variant="primary"
-        size="sm"
-        loading={pending}
-        onClick={() => {
-          setError(false);
-          start(async () => {
-            try {
-              const result = await awardMandate({ pitchId });
-              if (!result.ok) setError(true);
-            } catch (error) {
-              if (!tapFailedOffline(error)) throw error;
-            }
-          });
-        }}
-      >
-        {copy.award}
-      </Button>
-      {error && (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {copy.awardFailed}
-        </p>
-      )}
-    </>
+    <Button
+      type="button"
+      variant="primary"
+      size="sm"
+      loading={pending}
+      onClick={() => {
+        start(async () => {
+          try {
+            /* A refusal is said by the one banner (Grade 1). */
+            const result = await awardMandate({ pitchId });
+            if (!result.ok) banner.error(copy.awardFailed);
+          } catch (error) {
+            if (!tapFailedOffline(error)) throw error;
+          }
+        });
+      }}
+    >
+      {copy.award}
+    </Button>
   );
 }
 
@@ -132,7 +113,7 @@ export function WithdrawButton({ invitationId, copy }: { invitationId: string; c
 export function PitchForm({ invitationId, copy }: { invitationId: string; copy: Copy }) {
   const fieldId = useId();
   const [text, setText] = useState("");
-  const [state, setState] = useState<"idle" | "sent" | "short" | "failed">("idle");
+  const [state, setState] = useState<"idle" | "sent" | "short">("idle");
   const [pending, start] = useSafeTransition();
 
   if (state === "sent") {
@@ -151,7 +132,9 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
         start(async () => {
           try {
             const result = await pitchForMandate({ invitationId, note: text });
-            setState(result.ok ? "sent" : result.error === "short" ? "short" : "failed");
+            /* Too short is the field's own line; any other refusal is the banner's. */
+            if (!result.ok && result.error !== "short") banner.error(copy.pitchFailed);
+            setState(result.ok ? "sent" : result.error === "short" ? "short" : "idle");
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
           }
@@ -169,9 +152,9 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
         onChange={(e) => setText(e.target.value)}
         placeholder={copy.pitchPlaceholder}
       />
-      {(state === "short" || state === "failed") && (
+      {state === "short" && (
         <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {state === "short" ? copy.pitchShort : copy.pitchFailed}
+          {copy.pitchShort}
         </p>
       )}
       <Button type="submit" variant="primary" size="md" loading={pending} disabled={text.trim().length < 10} data-testid="portfolio-pitch">

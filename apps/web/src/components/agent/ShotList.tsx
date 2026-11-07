@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -29,7 +30,6 @@ export function ShotList({
   copy: Copy;
 }) {
   const [labels, setLabels] = useState<Record<string, string>>({});
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const ids = photos.map((photo) => photo.id).join(",");
 
@@ -67,7 +67,6 @@ export function ShotList({
               onChange={(event) => {
                 const slot = event.target.value === "" ? null : (event.target.value as ShotSlot);
                 const before = labels[photo.id];
-                setError(null);
                 setLabels((now) => {
                   const next = { ...now };
                   if (slot) next[photo.id] = slot;
@@ -78,7 +77,7 @@ export function ShotList({
                   try {
                     const result = await setPhotoSlot({ photoId: photo.id, slot });
                     if (!result.ok) {
-                      setError(result.error);
+                      banner.error(result.error);
                       setLabels((now) => {
                         const next = { ...now };
                         if (before) next[photo.id] = before;
@@ -107,11 +106,6 @@ export function ShotList({
           ? copy.complete
           : copy.missing.replace("{slots}", missing.map((slot) => copy.slots[slot].toLowerCase()).join(", "))}
       </p>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

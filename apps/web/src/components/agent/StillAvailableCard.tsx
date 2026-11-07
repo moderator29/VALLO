@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { countOf } from "@vallo/i18n/core";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,6 @@ export type StillAvailableItem = { id: string; title: string; days: number | nul
  */
 export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
   const [done, setDone] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
   const left = items.filter((i) => !done.includes(i.id));
@@ -27,9 +27,8 @@ export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
   const confirm = (ids: string[]) =>
     start(async () => {
       try {
-        setError(null);
         const result = await confirmListingsAvailable({ listingIds: ids });
-        if (!result.ok) setError(result.error);
+        if (!result.ok) banner.error(result.error);
         else {
           setDone((prev) => [...prev, ...ids]);
           router.refresh();
@@ -80,11 +79,6 @@ export function StillAvailableCard({ items }: { items: StillAvailableItem[] }) {
           </div>
         </>
       )}
-      {error ? (
-        <p className="nf-caption mt-2xs" role="alert">
-          {error}
-        </p>
-      ) : null}
     </section>
   );
 }

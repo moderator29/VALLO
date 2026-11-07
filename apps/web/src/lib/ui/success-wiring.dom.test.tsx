@@ -407,9 +407,10 @@ run("inspection (viewing) booked", () => {
 });
 
 const DRAW = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { DrawUpAgreement } from "@/components/app/agreements/DrawUpAgreement";
-  mount(<DrawUpAgreement inspectionId="ix-1" minDate="2030-01-01" />);
+  mount(<><DrawUpAgreement inspectionId="ix-1" minDate="2030-01-01" /><ToastHost /></>);
 `;
 
 run("agreement drawn up", () => {
@@ -436,9 +437,10 @@ run("agreement drawn up", () => {
 });
 
 const CONFIRM = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { ConfirmTerms } from "@/components/app/agreements/AgreementControls";
-  mount(<ConfirmTerms agreementId="ag-1" version={2} />);
+  mount(<><ConfirmTerms agreementId="ag-1" version={2} /><ToastHost /></>);
 `;
 
 run("agreement confirmed", () => {
@@ -523,10 +525,11 @@ run("on arrival (agreement, listing and approval pages)", () => {
 });
 
 const REFUND = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { RefundRequestForm } from "@/components/app/after-gate/RefundRequestForm";
-  mount(<RefundRequestForm success={getDictionary("en").success} bookingId="bk-1" copy={getDictionary("en").afterTheGate.refund} reasons={[{ code: "guest_choice", label: "My plans changed" }]} />);
+  mount(<><RefundRequestForm success={getDictionary("en").success} bookingId="bk-1" copy={getDictionary("en").afterTheGate.refund} reasons={[{ code: "guest_choice", label: "My plans changed" }]} /><ToastHost /></>);
 `;
 
 run("refund requested", () => {
@@ -562,10 +565,11 @@ run("refund requested", () => {
 });
 
 const TABLE = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { ReserveTable } from "@/app/(app)/listing/[id]/ReserveTable";
-  mount(<ReserveTable listingId="l-1" success={getDictionary("en").success} copy={getDictionary("en").memberFlows} locale="en" />);
+  mount(<><ReserveTable listingId="l-1" success={getDictionary("en").success} copy={getDictionary("en").memberFlows} locale="en" /><ToastHost /></>);
 `;
 
 /* Today's seatings can all have passed (the form never offers a past time,
@@ -820,10 +824,11 @@ run("the account moments' banner, flow by flow", () => {
 /* ---------------------------------------------------------- invitations */
 
 const ADD_FLATMATE = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { AddFlatmate } from "@/components/app/tenancy/FlatmateControls";
-  mount(<AddFlatmate tenancyId="11111111-1111-4111-8111-111111111111" copy={getDictionary("en").afterTheGate.flatmates} success={getDictionary("en").success} />);
+  mount(<><AddFlatmate tenancyId="11111111-1111-4111-8111-111111111111" copy={getDictionary("en").afterTheGate.flatmates} success={getDictionary("en").success} /><ToastHost /></>);
 `;
 
 async function inviteFlatmate(page: Page): Promise<void> {
@@ -872,7 +877,8 @@ const INVITE_AGENTS = `
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { InviteForm } from "@/app/agent/portfolio/PortfolioControls";
-  mount(<InviteForm listingId="l-1" place="Flat 2, Yaba" copy={getDictionary("en").landlord.portfolio} />);
+  import { ToastHost } from "@/components/ui/ToastHost";
+  mount(<><InviteForm listingId="l-1" place="Flat 2, Yaba" copy={getDictionary("en").landlord.portfolio} /><ToastHost /></>);
 `;
 
 async function inviteAgents(page: Page): Promise<void> {
@@ -908,7 +914,8 @@ run("agents invited to pitch (owner's portfolio)", () => {
       try {
         await inviteAgents(page);
         await actionCalled(page, "inviteAgents");
-        await page.locator("form p[role]").waitFor();
+        /* The outcome is said by the one banner (Grade 1). */
+        await page.locator(".nf-toast").waitFor();
         expect((await routerCalls(page)).filter((c) => c[0] === "replace")).toHaveLength(0);
       } finally {
         await close();

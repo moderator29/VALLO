@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -20,7 +21,6 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
   const router = useRouter();
   const [pending, start] = useSafeTransition();
   const [armed, setArmed] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
 
   const loop = (ids: string[], act: (id: string) => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
@@ -32,7 +32,9 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
           if (result.ok) done += 1;
           else failures.push(result.error ?? "That did not go through.");
         }
-        setMessage(bulkSummary(done, failures));
+        /* Said by the one banner (Grade 1): the bar goes as the selection clears. */
+        if (failures.length > 0) banner.warning(bulkSummary(done, failures));
+        else banner.success(bulkSummary(done, failures));
         setArmed(false);
         onClear();
         router.refresh();
@@ -61,7 +63,8 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
             start(async () => {
               try {
                 const result = await confirmListingsAvailable({ listingIds: plan.confirm });
-                setMessage(result.ok ? bulkSummary(result.data.confirmed, []) : result.error);
+                if (result.ok) banner.success(bulkSummary(result.data.confirmed, []));
+                else banner.error(result.error);
                 if (result.ok) {
                   onClear();
                   router.refresh();
@@ -104,11 +107,6 @@ export function BulkBar({ plan, count, onClear }: { plan: BulkPlan; count: numbe
       </div>
       {plan.takeDown.length === 0 && plan.confirm.length > 0 ? (
         <p className="nf-caption mt-2xs">A live rental is closed with a reason, one at a time, from its own row.</p>
-      ) : null}
-      {message ? (
-        <p className="nf-caption mt-2xs" role="status">
-          {message}
-        </p>
       ) : null}
     </div>
   );

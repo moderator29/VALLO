@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -10,7 +10,17 @@ import { banner } from "@/lib/ui/toast";
 import { feedback } from "@/lib/ui/feedback";
 import { fileSupportTicket } from "@/lib/support/actions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
-import { clearHandoff, readHandoff, type Handoff } from "@/lib/assistant/handoff";
+import { HANDOFF_KEY, clearHandoff, readHandoff } from "@/lib/assistant/handoff";
+
+/* The hand-over is read from this tab's storage as the page draws (nothing on the server). */
+const noSubscribe = () => () => undefined;
+function storedHandoff(): string | null {
+  try {
+    return window.sessionStorage.getItem(HANDOFF_KEY);
+  } catch {
+    return null;
+  }
+}
 
 /**
  * TALK TO A PERSON: THE INNER PAGE (Platform Grade 1, P1.4; reference R70).
@@ -51,20 +61,16 @@ export type OpenTicket = { id: string; reference: string; topic: string | null; 
 
 export function PersonHandoff({ signedIn, openTickets }: { signedIn: boolean; openTickets: OpenTicket[] }) {
   const router = useRouter();
-  const [handoff, setHandoff] = useState<Handoff | null>(null);
-  const [question, setQuestion] = useState("");
+  /* What the member was asking, from the assistant. */
+  const raw = useSyncExternalStore(noSubscribe, storedHandoff, () => null);
+  const handoff = useMemo(() => (raw ? readHandoff() : null), [raw]);
+  const [edited, setQuestion] = useState<string | null>(null);
+  const question = edited ?? handoff?.question ?? "";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<{ question?: string; name?: string; email?: string }>({});
   const [busy, setBusy] = useState(false);
   const [filed, setFiled] = useState<string | null>(null);
-
-  /* What the member was asking, from the assistant, once, on arrival. */
-  useEffect(() => {
-    const found = readHandoff();
-    setHandoff(found);
-    if (found?.question) setQuestion(found.question);
-  }, []);
 
   const submit = async () => {
     const body = question.trim();

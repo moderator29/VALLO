@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -14,14 +15,15 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function add() {
-    setError(null);
     start(async () => {
       const result = await createReplyTemplate({ title, body });
-      if (!result.ok) return setError(result.error);
+      if (!result.ok) {
+        banner.error(result.error);
+        return;
+      }
       setTitle("");
       setBody("");
       router.refresh();
@@ -29,10 +31,12 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
   }
 
   function remove(id: string) {
-    setError(null);
     start(async () => {
       const result = await deleteReplyTemplate({ id });
-      if (!result.ok) return setError(result.error);
+      if (!result.ok) {
+        banner.error(result.error);
+        return;
+      }
       router.refresh();
     });
   }
@@ -61,11 +65,6 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
       <div className="mt-group space-y-sm">
         <TextField label="Title" value={title} maxLength={TEMPLATE_TITLE_MAX} placeholder="Viewing times" onChange={(e) => setTitle(e.target.value)} />
         <TextArea label="The reply" rows={3} value={body} maxLength={TEMPLATE_BODY_MAX} onChange={(e) => setBody(e.target.value)} />
-        {error ? (
-          <p role="alert" className="nf-caption text-[var(--nf-state-error)]">
-            {error}
-          </p>
-        ) : null}
         <Button variant="primary" size="md" loading={pending} onClick={add}>
           Save reply
         </Button>
@@ -78,11 +77,9 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
 export function AgentHoursCard({ initial }: { initial: Schedule }) {
   const router = useRouter();
   const [week, setWeek] = useState<Schedule>(initial);
-  const [note, setNote] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function setDay(day: Weekday, patch: "off" | "on" | { open?: string; close?: string }) {
-    setNote(null);
     setWeek((w) => {
       if (patch === "off") return { ...w, [day]: null };
       const current = w[day] ?? { open: "09:00", close: "18:00" };
@@ -92,11 +89,14 @@ export function AgentHoursCard({ initial }: { initial: Schedule }) {
   }
 
   function save() {
-    setNote(null);
     start(async () => {
       const result = await saveAgentHours(week as Record<string, unknown>);
-      if (!result.ok) return setNote(result.error);
-      setNote("Saved.");
+      /* Said by the one banner at the top of the screen (Grade 1). */
+      if (!result.ok) {
+        banner.error(result.error, { retry: save });
+        return;
+      }
+      banner.success("Your hours are saved. Your listings show them now.");
       router.refresh();
     });
   }
@@ -145,11 +145,6 @@ export function AgentHoursCard({ initial }: { initial: Schedule }) {
         <Button variant="primary" size="md" loading={pending} onClick={save}>
           Save hours
         </Button>
-        {note ? (
-          <span role="status" className="nf-caption text-[var(--nf-content-secondary)]">
-            {note}
-          </span>
-        ) : null}
       </div>
     </section>
   );
