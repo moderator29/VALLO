@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { getShellIdentity } from "@/lib/app/shell-queries";
 import { readPasscodeSession, readPasscodeStatus, sessionSignedInWithin } from "@/lib/passcode/state";
 import { FRESH_RESET_SECONDS } from "@/lib/passcode/rules";
@@ -48,8 +48,7 @@ export default async function PasscodeSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg">
-      <PageHeader title={copy.screenTitle} fallback="/settings" />
+    <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow">
       <PasscodeSettings
         copy={copy}
         locale={locale}
@@ -60,10 +59,8 @@ export default async function PasscodeSettingsPage() {
         avatarUrl={identity.avatarUrl}
       />
       {state === "set" ? (
-        <div className="mt-block">
-          <PasskeyIdleSetting hasPasskey={await passkeyUnlockOffered().catch(() => false)} copy={copy} />
-        </div>
+        <PasskeyIdleSetting hasPasskey={await passkeyUnlockOffered().catch(() => false)} copy={copy} />
       ) : null}
-    </div>
+    </PageFrame>
   );
 }
