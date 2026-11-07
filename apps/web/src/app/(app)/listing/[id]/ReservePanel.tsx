@@ -21,6 +21,7 @@ import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { Switch } from "@/components/ui/Switch";
 import { addDaysIso, useStayDates } from "@/components/app/listing/StayDates";
 import dynamic from "next/dynamic";
+import type { PhoneFieldProps } from "@/components/app/PhoneField";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { DoorTotal, type DoorTotalCopy } from "@/components/stays/DoorTotal";
@@ -34,10 +35,48 @@ import type { DoorCharge } from "@/lib/stays/door-total";
  * the first load of every listing and stay page on a budget phone. Now they
  * arrive with the switch; the space the field will take is held meanwhile so
  * nothing jumps.
+ *
+ * A chunk that cannot be fetched (the signal dropped as the switch was
+ * pressed, a deploy that moved it) draws a plain number box that posts the
+ * same `guestPhone`, which the server normalises as it always has, instead of
+ * throwing the whole panel into the route's error screen.
  */
-const PhoneField = dynamic(() => import("@/components/app/PhoneField").then((m) => m.PhoneField), {
-  loading: () => <div aria-hidden="true" className="min-h-[5.5rem]" />,
-});
+const PhoneField = dynamic(
+  () =>
+    import("@/components/app/PhoneField")
+      .then((m) => m.PhoneField)
+      .catch(() => PlainGuestPhone),
+  { loading: () => <div aria-hidden="true" className="min-h-[5.5rem]" /> },
+);
+
+function PlainGuestPhone({ id, name, label, value, onChange, error, hint, autoComplete }: PhoneFieldProps) {
+  const fieldId = id ?? `${name}-plain`;
+  return (
+    <div>
+      <label htmlFor={fieldId} className="nf-label">
+        {label}
+      </label>
+      <input
+        id={fieldId}
+        name={name}
+        type="tel"
+        inputMode="tel"
+        autoComplete={autoComplete ?? "tel"}
+        maxLength={20}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={hint ? `${fieldId}-hint` : undefined}
+        className="nf-field"
+      />
+      {hint ? (
+        <p id={`${fieldId}-hint`} className="mt-row nf-caption leading-relaxed text-[var(--nf-content-muted)]">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * The next fourteen days, as ISO dates.
