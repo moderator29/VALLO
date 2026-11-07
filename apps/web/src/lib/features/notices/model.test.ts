@@ -24,7 +24,7 @@ import {
 } from "./model";
 
 const SQL = readFileSync(
-  join(__dirname, "..", "..", "..", "..", "..", "..", "supabase", "migrations", "pending", "features_a5_a6_notices.sql"),
+  join(__dirname, "..", "..", "..", "..", "..", "..", "supabase", "migrations", "20261107210100_features_a5_a6_notices.sql"),
   "utf8",
 );
 

@@ -83,7 +83,7 @@
     overflow: hidden;
     border: 2px solid color-mix(in oklab, var(--nf-content-primary) 22%, transparent);
     border-radius: var(--nf-radius-xl);
-    box-shadow: 0 24px 48px -20px rgb(1 1 24 / 0.9);
+    box-shadow: var(--nf-elevation-dialog);
     transform: rotate(-4deg);
   }
   .nf-cbn__photo img {
@@ -99,7 +99,7 @@
     border: 2px solid var(--nf-content-primary);
     border-radius: var(--nf-radius-circle);
     background: var(--nf-gradient-brand-ink);
-    box-shadow: 0 10px 22px -10px rgb(1 1 24 / 0.9);
+    box-shadow: var(--nf-elevation-floating);
   }
   .nf-cbn__face img {
     inline-size: 100%;

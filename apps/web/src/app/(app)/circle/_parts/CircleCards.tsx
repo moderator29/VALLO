@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
-import { CATEGORY_LABEL, countWords } from "@/lib/features/circle/model";
+import { CATEGORY_LABEL, STARTER_COMMUNITIES, countWords } from "@/lib/features/circle/model";
 import type { CirclePostView, CommunityView } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 
@@ -55,5 +55,34 @@ export function CircleEmpty({ children }: { children: string }) {
     <p className="nf-circle-empty" data-testid="circle-empty">
       {children}
     </p>
+  );
+}
+
+/**
+ * The empty Circle's first run: suggested communities as real actions. Each
+ * opens Create a community prefilled; nothing exists until someone creates it.
+ */
+export function StarterCommunities({ signedIn }: { signedIn: boolean }) {
+  return (
+    <div className="nf-circle-section" data-testid="circle-starters">
+      <p className="nf-circle-card__body">{CIRCLE_COPY.starters.lede}</p>
+      <ul className="nf-circle-grid">
+        {STARTER_COMMUNITIES.map((s) => {
+          const target = `/circle/new?name=${encodeURIComponent(s.name)}&category=${s.category}`;
+          return (
+            <li key={s.name}>
+              <Link href={signedIn ? target : `/sign-in?next=${encodeURIComponent(target)}`} className="nf-circle-card nf-circle-card--starter">
+                <span className="nf-circle-card__eyebrow">
+                  <span>{CATEGORY_LABEL[s.category]}</span>
+                </span>
+                <h3 className="nf-circle-card__title">{s.name}</h3>
+                <p className="nf-circle-card__body">{s.line}</p>
+                <span className="nf-circle-card__cta">{CIRCLE_COPY.starters.cta}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

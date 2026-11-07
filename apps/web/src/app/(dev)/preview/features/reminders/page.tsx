@@ -13,8 +13,11 @@ export default async function PreviewRemindersPage({
 }) {
   const live = (await searchParams).live !== "0";
   return (
+    /* The app shell's 16px gutter, which the harness layout does not draw. */
+    <div className="px-md">
     <PageFrame title={REMINDERS_COPY.title} subtitle={REMINDERS_COPY.subtitle} fallback="/preview/features" width="narrow">
       <PreviewReminders live={live} />
     </PageFrame>
+    </div>
   );
 }

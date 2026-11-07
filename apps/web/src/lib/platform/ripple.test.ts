@@ -46,7 +46,8 @@ describe("the Android ripple's geometry", () => {
 describe("the ripple stays an Android-shell feature", () => {
   it("is started only from the native runtime, for Android, behind a dynamic import", () => {
     const boot = readFileSync(join(process.cwd(), "src/lib/native/boot.ts"), "utf8");
-    expect(boot).toMatch(/if \(platform === "android"\) \{[\s\S]*?await import\("@\/lib\/platform\/ripple"\)/);
+    expect(boot).toMatch(/ripple: platform === "android" \? soon\(\(\) => import\("@\/lib\/platform\/ripple"\)\) : null/);
+    expect(boot).toMatch(/if \(platform === "android"\) \{[\s\S]*?await mods\.ripple!/);
     const importers = ["src/components/app/NativeRuntime.tsx", "src/app/layout.tsx"].map((f) => readFileSync(join(process.cwd(), f), "utf8"));
     for (const source of importers) expect(source).not.toContain("platform/ripple");
   });

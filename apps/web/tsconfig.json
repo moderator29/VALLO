@@ -86,7 +86,9 @@
     ".next-native/types/**/*.ts",
     ".next-native/dev/types/**/*.ts",
     ".next-pages/types/**/*.ts",
-    ".next-pages/dev/types/**/*.ts"
+    ".next-pages/dev/types/**/*.ts",
+    ".next-features/types/**/*.ts",
+    ".next-features/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

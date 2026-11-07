@@ -130,6 +130,15 @@
     -webkit-line-clamp: unset;
     display: block;
   }
+  .nf-circle-card--starter {
+    border-style: dashed;
+    border-color: var(--nf-brand-edge);
+  }
+  .nf-circle-card__cta {
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-brand-primary);
+  }
   .nf-circle-card__body {
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-secondary);

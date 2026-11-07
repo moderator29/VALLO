@@ -63,20 +63,14 @@ describe("the dock", () => {
     expect(dock).toContain('className="nf-dock-create"');
   });
 
-  it("keeps the menu in the capsule's centre slot and opens its tray centred above the capsule", () => {
-    /* The swap (13 October 2026): the menu is a slot of the capsule... */
-    expect(bar).toMatch(/<li key="menu" className="nf-tab nf-tab--switch">\s*<DockMore/);
-    /* ...and the "+" is the control after the capsule, in the round slot. */
+  it("puts Vallo Circle in the capsule's centre slot, with the + after the capsule", () => {
+    /* The centre slot was the grid menu (13 October 2026); since 7 November
+       2026 it is the Circle tab, a link in the soft round plate. */
+    expect(bar).toMatch(/<li key="circle" className="nf-tab nf-tab--switch nf-tab--circle">\s*<HoldTabLink/);
+    expect(bar).toContain("href={CIRCLE_ROUTE}");
+    expect(bar).not.toContain("<DockMore");
     expect(bar.indexOf("</ul>")).toBeLessThan(bar.indexOf('className="nf-dockcreate"'));
-    /* Nothing in the slot is a positioned box, so the tray anchors to the capsule. */
-    expect(shell).toMatch(/\.nf-tabbar \.nf-tab--switch \{\s*position: static;/);
-    expect(shell).toMatch(/\.nf-dockmore \{\s*position: static;/);
-    /* Centred on the capsule, never leaving the dock row, never wider than 24rem. */
-    expect(shell).toContain("--nf-tray-w: min(24rem, var(--nf-tray-row));");
-    expect(shell).toMatch(/left: clamp\(\s*calc\(var\(--nf-tray-w\) \/ 2\),\s*50%,/);
-    expect(shell).toContain("translate: -50% 0;");
-    /* A blur nested in the capsule's blur sees nothing, so the tray draws none. */
-    expect(css).toMatch(/\.nf-dockmore__tray \{\s*-webkit-backdrop-filter: none;\s*backdrop-filter: none;/);
+    expect(shell).toMatch(/\.nf-tab-circle__plate \{[^}]*border-radius: var\(--nf-radius-circle\);/);
   });
 
   it("counts in cyan, never red or orange", () => {

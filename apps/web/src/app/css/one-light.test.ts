@@ -40,6 +40,7 @@ const ALLOWED: Record<string, [number, string]> = {
   "app/css/money-wallet.css": [2, "glows (the founder's Wallet ruling, 8 October 2026): the wallet card's tight contact shadow in its own navy (no spreading glow), and the Withdraw capsule's bloom in its own blue; everything else reads the elevation rungs"],
   "app/css/shell-m.css": [3, "glows: the side rail's sideways edge light, the dock plus's brand bloom and its rim"],
   "app/css/site.css": [2, "glow: the site's lit primary and its chip in brand ink"],
+  "components/social/circle/circle-visuals.css": [1, "the Circle mark's brand bloom on the banner (a glow, the banner's one coloured light)"],
   /* PENDING: files that carry another agent's uncommitted work right now. */
   "app/social-feed.css": [3, "PENDING: two photo-overlay lifts (onto `--nf-elevation-floating`) and a brand bloom"],
   "app/social.css": [2, "PENDING: a photo-overlay lift and a glow"],

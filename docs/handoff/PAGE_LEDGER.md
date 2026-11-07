@@ -1,6 +1,6 @@
 # PAGE LEDGER: every page, nothing forgotten (founder, 7 November 2026)
 
-Generated from `apps/web/src/app/**/page.tsx` (dev previews left out): 267 pages.
+Generated from `apps/web/src/app/**/page.tsx` (dev previews left out): 275 pages.
 Every page is passed by its owner and ticked here in the same change. A
 tick means seen in a production build at 390 AND 360 wide, light AND dark,
 on the one design system (PageFrame or StepFrame, the banner, the sheet,
@@ -214,6 +214,18 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 |---|---|---|---|---|---|---|
 | `/checkout` | FE |  |  |  |  |  |
 | `/checkout/[bookingId]` | FE |  |  |  |  |  |
+
+## Member: circle
+
+| Page | Owner | Frame | Light | Dark | 360 | Notes |
+|---|---|---|---|---|---|---|
+| `/circle` | FEATURES |  |  |  |  |  |
+| `/circle/ask` | FEATURES |  |  |  |  |  |
+| `/circle/c/[slug]` | FEATURES |  |  |  |  |  |
+| `/circle/c/[slug]/manage` | FEATURES |  |  |  |  |  |
+| `/circle/c/[slug]/new` | FEATURES |  |  |  |  |  |
+| `/circle/new` | FEATURES |  |  |  |  |  |
+| `/circle/p/[id]` | FEATURES |  |  |  |  |  |
 
 ## Member: compare
 
@@ -557,6 +569,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/settings/invite/referrals` | FE |  |  |  |  |  |
 | `/settings/invite/referrals/[id]` | FE |  |  |  |  |  |
 | `/settings/notifications` | FE |  |  |  |  |  |
+| `/settings/notifications/reminders` | FEATURES |  |  |  |  |  |
 | `/settings/passcode` | FE |  |  |  |  |  |
 | `/settings/passport` | FE |  |  |  |  |  |
 | `/settings/payments` | FE |  |  |  |  |  |

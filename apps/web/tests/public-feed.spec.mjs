@@ -151,7 +151,8 @@ try {
   }
 
   const tabs = await page.locator('[data-testid^="feed-tab-"]').all();
-  check("both are there, For you and Friends", tabs.length === 2, [`${tabs.length}`]);
+  /* For you, Friends and the three categories (founder, 7 November 2026). */
+  check("all five are there, For you, Friends, Properties, Stays, Restaurants", tabs.length === 5, [`${tabs.length}`]);
 
   const shapes = [];
   for (const tab of tabs) {
@@ -182,8 +183,8 @@ try {
     shapes.map((s) => `${s.text}: radius ${s.radius} on height ${s.height}`),
   );
   check(
-    "and they are smaller than the 44px chip they used to be",
-    shapes.every((s) => s.height > 0 && s.height <= 36),
+    "and they paint on the 40px rung, under the 44px chip they used to be",
+    shapes.every((s) => s.height > 0 && s.height <= 40),
     shapes.map((s) => `${s.text}: ${s.height}px`),
   );
   /* Smaller paint must not mean a smaller target. The centred overlay is what

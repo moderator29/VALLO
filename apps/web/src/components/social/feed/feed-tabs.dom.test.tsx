@@ -4,20 +4,29 @@ import { getDictionary } from "@vallo/i18n";
 import { FEED_TABS, FeedTabs, isFeedTab, liveTab } from "./FeedMasthead";
 
 /**
- * For you / Friends: two compact pills in one rounded track, the chosen one
- * marked. Each is a link carrying `?tab=`, so the choice survives a reload.
+ * The feed's chips (founder, 7 November 2026): For you, Friends and the three
+ * categories, each a link (`?tab=` or `?cat=`), so the choice survives a
+ * reload, one marked as the page.
  */
 const t = getDictionary("en");
 
 describe("the feed's tabs", () => {
-  it("draws exactly two links, For you and Friends, in a named landmark", () => {
+  it("draws five links, For you, Friends and the three categories, in a named landmark", () => {
     const html = renderToStaticMarkup(<FeedTabs active="for-you" t={t} />);
-    expect(html).toContain('data-testid="feed-tab-for-you"');
-    expect(html).toContain('data-testid="feed-tab-friends"');
-    expect(html.match(/nf-utabs__tab/g)).toHaveLength(2);
-    expect(html).toContain(`aria-label="${t.feedV2.feed.tabsLabel}"`);
+    for (const key of ["for-you", "friends", "properties", "stays", "restaurants"]) {
+      expect(html).toContain(`data-testid="feed-tab-${key}"`);
+    }
+    expect(html.match(/class="nf-tap nf-feed-cat"/g)).toHaveLength(5);
+    expect(html).toContain(`aria-label="${t.feedV2.feed.categoriesLabel}"`);
     expect(html).toContain(">For you<");
     expect(html).toContain(">Friends<");
+    expect(html).toContain(">Properties<");
+  });
+
+  it("a category is the page when chosen, and For you is not", () => {
+    const html = renderToStaticMarkup(<FeedTabs active="for-you" category="stays" t={t} />);
+    expect(html.match(/aria-current="page"/g)).toHaveLength(1);
+    expect(html).toMatch(/<a(?=[^>]*aria-current="page")(?=[^>]*href="\/around\?cat=stays")[^>]*>/);
   });
 
   it("links For you to the feed and Friends to ?tab=friends", () => {

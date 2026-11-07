@@ -78,6 +78,11 @@ export const CIRCLE_COPY = {
   },
   guides: { vallo: "Vallo guides", members: "From members", open: "Open the guides" },
   pro: { verified: "Checked by Vallo", helpfulAnswers: ["helpful answer", "helpful answers"] },
+  starters: {
+    title: "Start the first communities",
+    lede: "Circle is new, so every community here is started by a member. Pick one to open, or start your own.",
+    cta: "Start this community",
+  },
   saved: "Posted",
   joinedBanner: "You joined",
   requestedBanner: "Request sent. You will be told when it is answered.",

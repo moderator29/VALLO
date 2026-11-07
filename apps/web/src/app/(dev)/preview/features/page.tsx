@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /* The FEATURES deck index (route-files guard: every deck has one). */
-const PAGES = ["reminders", "reminders?live=0"];
+const PAGES = ["reminders", "reminders?live=0", "circle", "circle?first=1", "circle-ask", "circle-new"];
 
 export default function PreviewFeaturesIndex() {
   return (

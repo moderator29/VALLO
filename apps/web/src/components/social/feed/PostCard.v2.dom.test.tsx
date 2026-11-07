@@ -132,11 +132,11 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a post card on a phone", () => 
     }
   });
 
-  it("the comment pill opens the reply flow: it asks to reply and does not open the post", async () => {
+  it("the comment glyph opens the reply flow: it asks to reply and does not open the post", async () => {
     const { page, close } = await mountInBrowser({ entry: entryFor(`{ media: [] }`), css: CSS });
     try {
       const pill = page.getByTestId("post-comment-pill");
-      expect(await pill.innerText()).toContain("Drop a comment");
+      expect(await pill.getAttribute("aria-label")).toMatch(/^Comment, /);
       expect((await pill.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       await pill.click({ timeout: 4000 });
       const after = await state(page);

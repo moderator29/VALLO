@@ -58,7 +58,7 @@ function guest(next: string | null = null): string {
       create: t.welcomeCards.firstRun.choice.create,
       signIn: t.welcomeCards.firstRun.choice.signIn,
     };
-    mount(<FirstRun t={t} interests={[]} showCards asked viewer="guest" next={next} arrival={arrivalOf(next)} />);
+    mount(<FirstRun introSlides t={t} interests={[]} showCards asked viewer="guest" next={next} arrival={arrivalOf(next)} />);
   `;
 }
 
@@ -69,7 +69,7 @@ function member(): string {
     import { mount } from "@/lib/testing/browser-root";
     const t = getDictionary("en");
     window.__facts = { cont: t.welcomeCards.firstRun.member.continue, question: t.interests.question };
-    mount(<FirstRun t={t} interests={[]} showCards asked={false} viewer="member" next={null} />);
+    mount(<FirstRun introSlides t={t} interests={[]} showCards asked={false} viewer="member" next={null} />);
   `;
 }
 

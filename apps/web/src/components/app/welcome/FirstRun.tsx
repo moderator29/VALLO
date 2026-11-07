@@ -126,6 +126,9 @@ type Slide = {
    vertical scroll. */
 const DRAG_SLOP_PX = 8;
 
+/** The welcome intro slides are off (founder, 7 November 2026). */
+const WELCOME_SLIDES_OFF = true;
+
 export function FirstRun({
   t,
   interests,
@@ -138,8 +141,11 @@ export function FirstRun({
   fromSignUpForm = false,
   catalogueOpen = false,
   asks = null,
+  introSlides = !WELCOME_SLIDES_OFF,
 }: {
   t: Dictionary;
+  /** Tests switch the dormant intro slides back on (founder: off, 7 Nov 2026). */
+  introSlides?: boolean;
   interests: ComponentProps<typeof InterestChoices>["initial"];
   /* False for a member who has already been shown the steps, on this
      device or another: they go straight to the question. */
@@ -225,13 +231,16 @@ export function FirstRun({
   const lastIndex = total - 1;
   /* Every arrival starts on slide one; only a returning device going
      nowhere (the app reopened signed out) opens on the choice alone. */
-  const choiceOnly = guest && atChoice;
+  /* THE FOUNDER, 7 November 2026: the intro slides are removed from sign
+     up. A guest opens on the choice alone (sign in or create an account);
+     a new account goes straight to its question, then notifications. */
+  const choiceOnly = guest && (atChoice || !introSlides);
   const initialIndex = choiceOnly ? lastIndex : 0;
 
   /* `notify` is the last beat (the founder, 7 Nov 2026): the notifications
      offer, after the account exists and the question is behind them. */
   const [beat, setBeat] = useState<"slides" | "question" | "notify">(
-    !guest && !showCards ? "question" : "slides",
+    !guest && (!showCards || !introSlides) ? "question" : "slides",
   );
   const [index, setIndex] = useState(initialIndex);
   /* Bumped on every arrival, so the move-in figure counts again each time. */

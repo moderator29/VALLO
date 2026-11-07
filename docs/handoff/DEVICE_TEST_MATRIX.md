@@ -24,10 +24,10 @@ Nothing in this file has been run on a device.
 | # | Check (brief section 11) | iOS | Android | What proves it now |
 |---|---|---|---|---|
 | 1 | Launch and splash screens | NEEDS A DEVICE (1.0.2's LaunchMark: the mark settles, the wordmark follows, hands over to the page, at most 3 s) | NEEDS A DEVICE (system splash, navy, no mark; item 7 waits on the founder's ruling) | AUTOMATED: `lib/native/native-splash.test.ts` (launch images flat navy), `splash-hang.test.ts`, `shell-plugin.test.ts` (LaunchMark wired, Reduce Motion, touch-transparent, `handoff` asked for by the first script). SIMULATED: `handoff` is sent two frames after the document parses (job 2 check) |
-| 2 | Navigation and bottom tabs | SIMULATED (the iOS push: in from the right, back slides off) | SIMULATED (fade-through about the tapped point) | AUTOMATED: `lib/platform/detect.test.ts` (platform marked before first paint), the route motion tests. SIMULATED: job 1 check reads the running animation names per platform, and Calm and reduced motion fall back. A device must judge the feel |
+| 2 | Navigation and bottom tabs | SIMULATED (the iOS push: in from the right, back slides off) | SIMULATED (fade-through about the tapped point) | AUTOMATED: `lib/platform/detect.test.ts` (platform marked before first paint, platform.css keyed on the shell only), `lib/motion/nav-direction.test.ts` (which way a move goes). SIMULATED: job 1 check reads the running animation names per platform, and Calm and reduced motion fall back. A device must judge the feel |
 | 3 | Back-button behaviour | NEEDS A DEVICE: edge swipe back (1.0.2, `allowsBackForwardNavigationGestures`), M24 | NEEDS A DEVICE: hardware and predictive back, M23 | AUTOMATED: `lib/native/back-button.test.ts` (sheet first, step back, parent, exit only at a root), `native-back-event.test.ts`, `shell-plugin.test.ts` (swipe wired) |
 | 4 | Safe areas and system bars | NEEDS A DEVICE (notch, home indicator, status bar glyphs per screen), M26, M27 | NEEDS A DEVICE (edge to edge on Android 15, SystemBars insets, light mode glyphs), NATIVE_BUILD_QUEUE item 2 | AUTOMATED: `status-bar-hold.test.ts`. SIMULATED: 390x844 and 360x800 screenshots with `viewport-fit=cover`, which Chromium does not inset, so only the layout is checked |
-| 5 | Keyboard behaviour | NEEDS A DEVICE: composer on the keys, accessory bar, M22 | NEEDS A DEVICE: SystemBars pads for the IME (no adjustResize), budget phone, M22 | AUTOMATED: the keyboard foot tests. Keyboard sounds are the operating system's own: nothing in Vallo plays a sound per key (checked by reading `lib/native/keyboard.ts`) |
+| 5 | Keyboard behaviour | NEEDS A DEVICE: composer on the keys, accessory bar, M22 | NEEDS A DEVICE: SystemBars pads for the IME (no adjustResize), budget phone, M22 | NOT AUTOMATED: `lib/native/keyboard.ts` writes `--nf-keyboard-inset` and has no test of its own (a gap, recommended). Keyboard sounds are the operating system's own: nothing in Vallo plays a sound per key (checked by reading `lib/native/keyboard.ts` and searching for audio) |
 | 6 | Search and filters | SIMULATED | SIMULATED | SIMULATED: the performance audit loads live `/search` and `/stays/search` on both profiles and scrolls `/search` (PERFORMANCE_REPORT.md) |
 | 7 | Property and accommodation browsing | SIMULATED | SIMULATED | SIMULATED: live `/listing/<id>` loads, the search to listing to search loop of 60 navigations with memory read every 10 (PERFORMANCE_REPORT.md) |
 | 8 | Booking flows | NEEDS A DEVICE, TEST keys only (M21) | NEEDS A DEVICE, TEST keys only (M21) | AUTOMATED: the booking and money unit tests. A payment is never replayed by the outbox (`lib/offline/outbox.ts` kinds) |
@@ -52,9 +52,11 @@ steps 10 and 11.
    mark only fades. Tap the screen while the mark is showing: the tap reaches
    the page.
 2. **Tabs and pages.** Tap each bottom tab: the page changes in a short fade.
-   Open a listing from search by tapping its small heart-free area or a text
-   link: the new page slides in from the right over the old one, which moves
-   a little to the left and dims. Tap Back: it slides off to the right.
+   Tap a listing card in search: the card grows into the listing (that move
+   is the same on both phones). Now tap a small link or an icon that opens a
+   new page (a place name, the bell): the new page slides in from the right
+   over the old one, which moves a little to the left and dims. Tap the
+   round Back arrow: it slides off to the right.
 3. **Edge swipe back.** On a listing, put a thumb on the left edge and drag
    right slowly: the page under it shows as you drag; let go past a third and
    you are back; let go early and you stay. It must not animate a second time.

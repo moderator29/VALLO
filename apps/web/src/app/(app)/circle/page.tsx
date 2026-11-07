@@ -10,7 +10,7 @@ import { CIRCLE_SORTS, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, re
 import { readCircleHome, readCirclePosts, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 
-import { CircleEmpty, CirclePostCard, CommunityCard } from "./_parts/CircleCards";
+import { CircleEmpty, CirclePostCard, CommunityCard, StarterCommunities } from "./_parts/CircleCards";
 import { CircleHero } from "./_parts/CircleHero";
 
 export const metadata: Metadata = { title: CIRCLE_COPY.title, description: CIRCLE_COPY.tagline };
@@ -68,6 +68,15 @@ async function TabBody({
   home: Awaited<ReturnType<typeof readCircleHome>>;
 }) {
   if (tab === "for-you") {
+    /* The first run: no community exists yet, so the home is one clear
+       invitation rather than three empty lists. */
+    if (home.communities.length === 0 && home.mine.length === 0) {
+      return (
+        <Section title={C.starters.title}>
+          <StarterCommunities signedIn={home.signedIn} />
+        </Section>
+      );
+    }
     return (
       <div className="nf-circle nf-circle--split">
         <div className="nf-circle">
@@ -84,13 +93,11 @@ async function TabBody({
               <ul className="nf-circle-list">{home.mine.map((c) => <li key={c.id}><CommunityCard community={c} /></li>)}</ul>
             </Section>
           ) : null}
-          <Section title={C.sections.communities}>
-            {home.communities.length ? (
+          {home.communities.length ? (
+            <Section title={C.sections.communities}>
               <ul className="nf-circle-list">{home.communities.map((c) => <li key={c.id}><CommunityCard community={c} /></li>)}</ul>
-            ) : (
-              <CircleEmpty>{C.empty.communities}</CircleEmpty>
-            )}
-          </Section>
+            </Section>
+          ) : null}
         </div>
       </div>
     );

@@ -30,8 +30,17 @@ describe("the first-run gate", () => {
         throw BROKEN;
       },
     };
-    await gateFirstRun("host", "/host", {}, store as never);
+    await gateFirstRun("host", "/host", {}, store as never, false);
     expect(redirect).not.toHaveBeenCalled();
     expect(reported).toEqual(["read.first_run"]);
+  });
+
+  it("is off for every feature (founder, 7 November 2026): no read, no redirect", async () => {
+    const { gateFirstRun } = await import("./first-run-store");
+    let reads = 0;
+    const store = { read: async () => { reads += 1; return "unseen"; } };
+    await gateFirstRun("invite", "/settings/invite", {}, store as never);
+    expect(reads).toBe(0);
+    expect(redirect).not.toHaveBeenCalled();
   });
 });

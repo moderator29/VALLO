@@ -165,8 +165,42 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
        the user agent before the first frame; the bridge's own answer is the
        authority, so it is written again here (a no-op when they agree). */
     const platform = Capacitor.getPlatform();
+
+    /*
+     * EVERY MODULE IS ASKED FOR AT ONCE (job 4, the performance audit). Each
+     * feature used to `await import()` its module only after the one before
+     * had started, so on a cold start the shell fetched about fifteen small
+     * chunks one after another: on a budget profile (6x CPU, Fast 3G,
+     * SIMULATED) the last feature, deep links, was wired about 1.4 s after
+     * the page had loaded, and the hardware back button somewhere in the
+     * middle of that. Now every chunk is requested here, together, and the
+     * features still START in the same order as before (the splash first and
+     * alone), each awaiting only its own module. A module that fails to load
+     * fails only its own feature, exactly as before.
+     */
+    const soon = <T,>(load: () => Promise<T>): Promise<T> => {
+      const pending = load();
+      pending.catch(() => {});
+      return pending;
+    };
+    const mods = {
+      detect: soon(() => import("@/lib/platform/detect")),
+      splash: soon(() => import("./splash")),
+      statusBar: soon(() => import("./status-bar")),
+      ripple: platform === "android" ? soon(() => import("@/lib/platform/ripple")) : null,
+      shellPlugin: soon(() => import("./shell-plugin")),
+      privacyCover: soon(() => import("./privacy-cover")),
+      keyboard: soon(() => import("./keyboard")),
+      backButton: soon(() => import("./back-button")),
+      externalLinks: soon(() => import("./external-links")),
+      shareBridge: soon(() => import("./share-bridge")),
+      pushTaps: soon(() => import("./push-taps")),
+      enrol: soon(() => import("@/components/app/push/enrol")),
+      appResume: handlers.refresh ? soon(() => import("./app-resume")) : null,
+      deepLinks: soon(() => import("./deep-links")),
+    };
     try {
-      const { applyPlatform, readPlatform } = await import("@/lib/platform/detect");
+      const { applyPlatform, readPlatform } = await mods.detect;
       applyPlatform(document.documentElement, readPlatform({ bridgePlatform: platform, userAgent: navigator.userAgent }));
     } catch {
       /* The early mark stands. */
@@ -174,7 +208,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
 
     /* First, and alone. See the note above about the splash. */
     try {
-      const { startSplash } = await import("./splash");
+      const { startSplash } = await mods.splash;
       bootMark("runtime:splash-module-loaded");
       collect(startSplash());
     } catch {
@@ -184,7 +218,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
-      const { startStatusBar } = await import("./status-bar");
+      const { startStatusBar } = await mods.statusBar;
       collect(startStatusBar());
     } catch {
       /* The bar keeps the colour the config gave it at launch. */
@@ -194,7 +228,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
       try {
         /* Material touch feedback: the ink spreads from under the finger.
            Android only; iOS keeps its highlight and dim (platform.css). */
-        const { startRipple } = await import("@/lib/platform/ripple");
+        const { startRipple } = await mods.ripple!;
         if (!stopped) collect(startRipple());
       } catch {
         /* The shared press (scale and tint) still answers every tap. */
@@ -207,8 +241,8 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
          the page is here (the inline script already said so; this is the
          second voice), and a crash of the shell on the last run goes to the
          crash log. On an older binary every call refuses, quietly. */
-      const { ValloShell } = await import("./shell-plugin");
-      const { setPrivacySink } = await import("./privacy-cover");
+      const { ValloShell } = await mods.shellPlugin;
+      const { setPrivacySink } = await mods.privacyCover;
       if (!stopped) {
         setPrivacySink((on) => {
           ValloShell.setPrivacyCover({ on }).catch(() => {});
@@ -222,14 +256,14 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
-      const { startKeyboard } = await import("./keyboard");
+      const { startKeyboard } = await mods.keyboard;
       collect(await startKeyboard());
     } catch {
       /* `resize: "native"` in the config still does the heavy lifting. */
     }
 
     try {
-      const { startBackButton } = await import("./back-button");
+      const { startBackButton } = await mods.backButton;
       collect(await startBackButton(handlers.goBack));
     } catch {
       /* Android's back button falls back to doing nothing, which is the
@@ -237,7 +271,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
-      const { startExternalLinks } = await import("./external-links");
+      const { startExternalLinks } = await mods.externalLinks;
       collect(startExternalLinks());
     } catch {
       /* Capacitor's own navigation delegate still refuses to load a foreign
@@ -248,7 +282,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     try {
       /* Android's web view has no navigator.share; supply it from the plugin
          so every share control opens the system sheet, not the clipboard. */
-      const { startShareBridge } = await import("./share-bridge");
+      const { startShareBridge } = await mods.shareBridge;
       collect(await startShareBridge());
     } catch {
       /* The share controls fall back to copying the link, as on the web. */
@@ -256,7 +290,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
 
     try {
       /* V-53: a tap on a native notification opens the screen it names. */
-      const { startPushTaps } = await import("./push-taps");
+      const { startPushTaps } = await mods.pushTaps;
       collect(await startPushTaps(handlers.notificationChannelName ?? "Vallo"));
     } catch {
       /* A tap opens the app where it was, which is what it did before. */
@@ -266,7 +300,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
       /* F-14 and F-15: read the real notification permission without asking,
          and re-register a device enrolled before, so a rotated token is not
          left stale. Never prompts; nothing runs for a device never enrolled. */
-      const { refreshNativeRegistration } = await import("@/components/app/push/enrol");
+      const { refreshNativeRegistration } = await mods.enrol;
       if (!stopped) void refreshNativeRegistration();
     } catch {
       /* The token stays as it was; the provider's "gone" still retires it. */
@@ -274,7 +308,7 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
 
     if (handlers.refresh) {
       try {
-        const { startAppResume } = await import("./app-resume");
+        const { startAppResume } = await mods.appResume!;
         collect(await startAppResume(handlers.refresh));
       } catch {
         /* Coming back shows the screen as it was left; pull to refresh and
@@ -283,12 +317,13 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
-      const { startDeepLinks } = await import("./deep-links");
+      const { startDeepLinks } = await mods.deepLinks;
       collect(await startDeepLinks());
     } catch {
       /* A returning universal link opens as an ordinary page instead of being
          handed to the running application. */
     }
+    bootMark("runtime:ready");
   })();
 
   return () => {
