@@ -133,6 +133,14 @@ export const STARTUP_NATIVE_SCRIPT = [
   /* Belt and braces: iOS drops a hide that beats its launch view's own fade
      in. A hide after the splash is gone does nothing. */
   "function again(){setTimeout(function(){hide('t400')},400);setTimeout(function(){hide('t1200')},1200)}",
+  /* Build 1.0.2 (NATIVE_BUILD_QUEUE item 7): the shell's launch mark hands
+     over once this document has parsed and painted two frames, so the mark
+     leaves onto a drawn page, never onto navy. An older binary has no
+     ValloShell plugin; the refusal is traced and changes nothing. */
+  "function handoff(){try{var C=W.Capacitor;if(!C||!C.nativePromise||!(C.isNativePlatform&&C.isNativePlatform()))return;",
+  "var r=C.nativePromise('ValloShell','handoff',{});m('handoff:sent');if(r&&r.then)r.then(null,function(){m('handoff:refused')})}catch(e){}}",
+  "if(W.__nfLoud){var go=function(){requestAnimationFrame(function(){requestAnimationFrame(handoff)})};",
+  "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go,{once:true});else go()}",
   "})();",
 ].join("");
 

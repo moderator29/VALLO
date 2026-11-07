@@ -168,6 +168,26 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
     }
 
     try {
+      /* Build 1.0.2: Vallo's own shell plugin (lib/native/shell-plugin.ts).
+         The app switcher cover follows the screen, the launch mark is told
+         the page is here (the inline script already said so; this is the
+         second voice), and a crash of the shell on the last run goes to the
+         crash log. On an older binary every call refuses, quietly. */
+      const { ValloShell } = await import("./shell-plugin");
+      const { setPrivacySink } = await import("./privacy-cover");
+      if (!stopped) {
+        setPrivacySink((on) => {
+          ValloShell.setPrivacyCover({ on }).catch(() => {});
+        });
+        collect(() => setPrivacySink(null));
+        ValloShell.handoff().catch(() => {});
+        void forwardNativeCrash(ValloShell, platform === "android" ? "android" : "ios");
+      }
+    } catch {
+      /* No cover, no crash hand-over: the shell behaves as build 1.0.1 did. */
+    }
+
+    try {
       const { startKeyboard } = await import("./keyboard");
       collect(await startKeyboard());
     } catch {
