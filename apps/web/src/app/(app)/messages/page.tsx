@@ -13,6 +13,7 @@ import { getLocale } from "@/lib/locale";
 import { withNext } from "@/lib/auth/next-link";
 import { Inbox, InboxEmpty, type InboxRow, type SupportInboxRow } from "./Inbox";
 import { loadMyTickets } from "@/lib/support/my-tickets";
+import { loadConversationPrefs } from "@/lib/messages/conversation-prefs-read";
 import { lagosWhenLabel } from "@/lib/messages/time";
 import { previewLine } from "@/components/app/messages/preview";
 import { markerIds } from "@/lib/calls/thread-calls";
@@ -56,7 +57,7 @@ export default async function InboxPage() {
   if (session.state === "signed-in") {
     /* The switch, the threads and the side are asked for together; the
        threads are only drawn when the switch is on (Track M performance). */
-    const [messagingOn, conversations, side, assistantOn, tickets] = await Promise.all([
+    const [messagingOn, conversations, side, assistantOn, tickets, prefs] = await Promise.all([
       isFeatureEnabled("messaging"),
       loadConversationSummaries(session.supabase, session.user),
       getSide(),
@@ -65,6 +66,9 @@ export default async function InboxPage() {
       /* Grade 1 (R70): the member's support conversations, as an inner page
          of Messages. A failed read is simply no Support chip. */
       loadMyTickets(20),
+      /* Grade 1 (job 8): this reader's pins and mutes; none offered when the
+         table is not there yet. */
+      loadConversationPrefs(session.supabase, session.user.id),
     ]);
     if (!messagingOn) {
       return (
@@ -118,6 +122,8 @@ export default async function InboxPage() {
       side: c.side ?? "property",
       archived: views.archived.has(c.id),
       reported: views.reported.has(c.id),
+      pinnedAt: prefs.byId[c.id]?.pinnedAt ?? null,
+      mutedUntil: prefs.byId[c.id]?.mutedUntil ?? null,
       };
     });
 
@@ -148,6 +154,7 @@ export default async function InboxPage() {
           plusCopy={dictionary.inboxPlus}
           assistantOn={assistantOn}
           supportRows={supportRows}
+          prefsOpen={prefs.open}
         />
       </PullToRefresh>
     );

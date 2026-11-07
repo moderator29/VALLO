@@ -20,7 +20,7 @@ import { AROUND_UNCONFIGURED } from "./copy";
 import { loadMoreAround } from "./feed-actions";
 import type { FeedMode } from "@/lib/social/posts-actions";
 import { Feed } from "@/components/social/feed/Feed";
-import { FeedTabs, isFeedTab, liveTab, type FeedTab } from "@/components/social/feed/FeedMasthead";
+import { FeedLenses, FeedTabs, isFeedTab, liveTab, type FeedTab } from "@/components/social/feed/FeedMasthead";
 import { LocationChip } from "@/components/social/feed/LocationChip";
 import { StoryRing } from "@/components/social/feed/StoryRing";
 import { AroundFab } from "@/components/social/AroundFab";
@@ -38,9 +38,10 @@ export const dynamic = "force-dynamic";
 /**
  * Around: the feed, to `GOVERNING-feed-plus-bloom.png`.
  *
- * Top to bottom: the location chip (the person's own place, the chevron
- * opening the real choices), the story rings, the For you / Following capsule,
- * the cards, and the plus that blooms. The app's own header sits above all of
+ * Top to bottom: the masthead (back, the Around and Circle lenses, the
+ * people search), the story tiles, the one-line way to post, the row that
+ * chooses what Around shows (For you or Friends, and the place chip whose
+ * chevron opens the real choices), the cards, and the plus that blooms. The app's own header sits above all of
  * it and the dock below; both are the shell's.
  *
  * Three timelines, and each one is honest about what it is:
@@ -207,45 +208,37 @@ export default async function AroundPage({
       <div className="nf-fv2-grid">
         <div className="nf-fv2-main">
           {/*
-            THE WAY BACK, BESIDE THE PLACE.
+            THE MASTHEAD: the way back, the two lenses, the people search.
 
-            `/around` declares `/home` above it and drew nothing. The paused
-            branch above renders `SocialPaused`, which DOES carry a
-            `PageHeader`, and that is exactly the trap: a static read of this
-            file found a back control in the import graph and the running feed
-            had none, because the only screen that drew one was the kill-switch
-            notice nobody sees.
+            The way back stays on the head row. `/around` declares `/home`
+            above it, and the paused branch above renders `SocialPaused`, whose
+            `PageHeader` once made a static read believe this screen had a back
+            control when the running feed drew none.
 
-            It sits on the chip's row rather than above it because the chip IS
-            this screen's head. A `PageHeader` here would put the word "Around"
-            over a screen whose first object already says where you are.
+            The lenses are the screen's visible name (Around, with Circle
+            beside it and not open yet, VALLO_CIRCLE.md). The place moved down
+            to the row that chooses what Around shows, beside For you and
+            Friends, because the place is a filter on this lens and not its
+            title.
           */}
           <div className="nf-fv2-bar">
             <BackButton fallback="/" surface="round" />
-            <LocationChip
-              place={placeLabel || t.social.locationEverywhere}
-              places={activePlaces}
-              currentSlug={selected?.slug ?? null}
-              signedIn={signedIn}
-              copy={{
-                label: t.social.locationLabel,
-                allPlaces: t.social.allPlaces,
-                changePlace: t.social.changePlace,
-                pickPlaces: t.social.pickPlaces,
-                signIn: t.common.signIn,
-              }}
-            />
+            <FeedLenses t={t} />
             {/* The search: the people page (`/around/people`), a round glyph at
                 the head's right as the feed reference draws it. */}
             <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople} data-testid="feed-find-people">
               <UiIcon name="search" size={20} />
             </Link>
-            {/* THE FEED'S OWN PLUS: opens the post composer, one tap. The dock's
-                plus is the platform's create sheet, a different thing. Without
-                keys there is no composer to open, so no plus. */}
-            {unconfigured ? null : <ComposeButton label={words.writePost} />}
           </div>
 
+          {/*
+            THE LENS TRACK. One pane today, Around. Circle arrives as a second
+            pane beside it (one swipe apart, VALLO_CIRCLE.md) and the track is
+            already the shape that takes it: a row of full-width panes. Until
+            then it is a plain block and changes nothing about the feed.
+          */}
+          <div className="nf-lens-track">
+          <div className="nf-lens-pane" data-lens="around">
           {/* No tiles without keys: an empty row would claim nobody has a
               story, and nothing was read. */}
           {unconfigured ? null : (
@@ -259,7 +252,36 @@ export default async function AroundPage({
             />
           )}
 
-          <FeedTabs active={tab} t={t} />
+          {/* THE FEED'S OWN WAY TO POST: one quiet line, your face and an
+              invitation, one tap into the composer (`CreateBloom`). Without
+              keys there is no composer to open, so no line. */}
+          {unconfigured ? null : (
+            <ComposeButton
+              label={words.writePost}
+              prompt={selected ? words.composePromptIn.replace("{place}", selected.name) : words.composePrompt}
+              you={you}
+            />
+          )}
+
+          {/* What Around shows: For you or Friends, and where. */}
+          <div className="nf-fv2-filter">
+            <FeedTabs active={tab} t={t} />
+            <div className="nf-fv2-filter__place">
+              <LocationChip
+                place={placeLabel || t.social.locationEverywhere}
+                places={activePlaces}
+                currentSlug={selected?.slug ?? null}
+                signedIn={signedIn}
+                copy={{
+                  label: t.social.locationLabel,
+                  allPlaces: t.social.allPlaces,
+                  changePlace: t.social.changePlace,
+                  pickPlaces: t.social.pickPlaces,
+                  signIn: t.common.signIn,
+                }}
+              />
+            </div>
+          </div>
 
           <section>
             <Feed
@@ -299,6 +321,8 @@ export default async function AroundPage({
                     })}
             />
           </section>
+          </div>
+          </div>
         </div>
 
         {/* The desktop's right rail: the people worth following, drawn only

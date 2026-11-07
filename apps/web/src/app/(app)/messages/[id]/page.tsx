@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { resolveSession } from "@/lib/actions/session";
 import { isFeatureEnabled } from "@/lib/flags";
 import { getThreadContext, loadThread, loadThreadReactions, type ThreadContext } from "@/lib/messages/live";
+import { loadConversationPrefs } from "@/lib/messages/conversation-prefs-read";
 import { readOpenInspectionForConversation } from "@/lib/inspections/queries";
 import { ThreadView, type ThreadBubble } from "./ThreadView";
 import { resolveCards } from "./cards";
@@ -173,7 +174,7 @@ export default async function ConversationPage({
     if (!UUID_RE.test(id)) notFound();
     const locale = await getLocale();
     const t = getDictionary(locale);
-    const [thread, contextRead, role, read, unread, callsOn, threadCalls, reactions] = await Promise.all([
+    const [thread, contextRead, role, read, unread, callsOn, threadCalls, reactions, prefs] = await Promise.all([
       loadThread(session.supabase, session.user, id),
       getThreadContext(id),
       viewerRole(session.supabase, session.user.id, id),
@@ -185,6 +186,8 @@ export default async function ConversationPage({
       /* GRADE 1 (P1.3): the thread's reactions. Null when the table is not
          there yet (the pending migration), and the thread then offers none. */
       loadThreadReactions(session.supabase, id),
+      /* Job 8: this reader's pin and mute; none offered without the table. */
+      loadConversationPrefs(session.supabase, session.user.id),
     ]);
     if (!thread) notFound();
     /*
@@ -452,6 +455,7 @@ export default async function ConversationPage({
         calls={{ copy: t.calls, enabled: callsOn, words: t.chatPolish.calls }}
         viewerCopy={t.chatPolish.viewer}
         reactions={reactions}
+        chatPrefs={prefs.open ? (prefs.byId[id] ?? { pinnedAt: null, mutedUntil: null }) : null}
         messages={thread.messages.map((m): ThreadBubble => {
           const card = cards.get(m.id);
           const callId = threadCalls.markers.get(m.id);

@@ -6897,6 +6897,12 @@ export const en = {
       emptyFriendsAction: "Find people",
       railTitle: "People to follow",
       railSeeAll: "See all",
+      lensLabel: "Ways to see the feed",
+      lensAround: "Around",
+      lensCircle: "Circle",
+      lensCircleClosed: "Not open yet",
+      composePrompt: "Share something with your area",
+      composePromptIn: "Share something with {place}",
     },
     people: {
       navPeople: "People",

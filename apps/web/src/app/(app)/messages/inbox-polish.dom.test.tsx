@@ -57,6 +57,7 @@ const entry = `
         inboxCopy={t.experienceInbox.inbox}
         plusCopy={t.inboxPlus}
         supportRows={window.__support || []}
+        prefsOpen={Boolean(window.__prefsOpen)}
       />
       <ToastHost />
     </div>,
@@ -159,6 +160,66 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the inbox's polish", () => {
     try {
       expect(await page.getByTestId("inbox-view-support").count()).toBe(0);
       expect(await page.getByTestId("inbox-support-row").count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+
+  it("pins a chat to the top and mutes it from the swipe, each said in the banner", async () => {
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init: "window.__prefsOpen = true;",
+      actions: {
+        pinConversation: `async (input) => ({ ok: true, data: { pinnedAt: input.pinned ? new Date().toISOString() : null, mutedUntil: null } })`,
+        muteConversation: `async (input) => ({ ok: true, data: { pinnedAt: null, mutedUntil: input.until ? "2100-01-01T00:00:00.000Z" : null } })`,
+      },
+    });
+    try {
+      const names = () => page.getByTestId("inbox-row").evaluateAll((rows) => rows.map((r) => r.querySelector(".truncate")?.textContent ?? ""));
+      const before = await names();
+      const last = before.length - 1;
+      /* The last row, pinned, rides to the top. */
+      await slide(page, last, -300);
+      await page.locator(".nf-inbox-swipe").nth(last).getByTestId("inbox-swipe-pin").click();
+      await expect.poll(async () => (await names())[0]).toBe(before[last]);
+      await expect.poll(() => page.getByText("Pinned to the top").count()).toBe(1);
+      expect(await page.getByTestId("inbox-row").first().getByRole("img", { name: "Pinned" }).count()).toBe(1);
+
+      /* Mute asks for how long, then marks the row. */
+      await slide(page, 1, -300);
+      await page.locator(".nf-inbox-swipe").nth(1).getByTestId("inbox-swipe-mute").click();
+      await page.getByTestId("inbox-mute-week").click();
+      await expect.poll(() => page.getByText("Muted. You will not be notified about this chat").count()).toBe(1);
+      expect(await page.getByTestId("inbox-row").nth(1).getByRole("img", { name: "Muted" }).count()).toBe(1);
+      expect(await page.evaluate(() => ((window as unknown as { __calls: unknown[][] }).__calls ?? []).find((c) => c[0] === "muteConversation")?.[1])).toMatchObject({ until: "week" });
+    } finally {
+      await close();
+    }
+  });
+
+  it("puts a refused pin back and says why", async () => {
+    const { page, close } = await mountInBrowser({
+      entry,
+      css: CSS,
+      init: "window.__prefsOpen = true;",
+      actions: { pinConversation: `async () => ({ ok: false, error: "You can pin up to 5 conversations." })` },
+    });
+    try {
+      await slide(page, 1, -300);
+      await page.locator(".nf-inbox-swipe").nth(1).getByTestId("inbox-swipe-pin").click();
+      await expect.poll(() => page.getByText("You can pin up to 5 conversations.").count()).toBe(1);
+      expect(await page.getByRole("img", { name: "Pinned" }).count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+
+  it("offers no Pin and no Mute where the database has none yet", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: CSS });
+    try {
+      expect(await page.getByTestId("inbox-swipe-pin").count()).toBe(0);
+      expect(await page.getByTestId("inbox-swipe-mute").count()).toBe(0);
     } finally {
       await close();
     }

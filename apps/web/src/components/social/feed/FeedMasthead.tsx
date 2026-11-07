@@ -51,3 +51,33 @@ export function FeedTabs({ active, t }: { active: FeedTab; t: Dictionary }) {
     />
   );
 }
+
+/**
+ * THE TWO LENSES (VALLO_CIRCLE.md, "What Agent FE does now").
+ *
+ * Around is everyone near you, and it is the feed this page draws. Circle is
+ * the people you trust, and it is not open: the founder has the brief to
+ * approve first. So the switch is drawn with Around chosen and Circle shown
+ * beside it, quiet, with a plain word that says it is not open. Nothing about
+ * Circle can be tapped, so nothing on this screen promises a door that leads
+ * nowhere. The tag says what is true today rather than a date, because the
+ * product never promises a schedule it cannot keep (`lib/copy/banned-phrases`).
+ *
+ * The words are type, not a second tab row: the For you and Friends tabs under
+ * the stories choose WHICH Around, and this chooses which lens, so the two
+ * never read as the same control.
+ */
+export function FeedLenses({ t }: { t: Dictionary }) {
+  const words = t.feedV2.feed;
+  return (
+    <div className="nf-lens" role="group" aria-label={words.lensLabel} data-testid="feed-lenses">
+      <span className="nf-lens__item" aria-current="page" data-testid="feed-lens-around">
+        {words.lensAround}
+      </span>
+      <span className="nf-lens__item nf-lens__item--closed" aria-disabled="true" data-testid="feed-lens-circle">
+        <span className="nf-lens__word">{words.lensCircle}</span>
+        <span className="nf-lens__tag">{words.lensCircleClosed}</span>
+      </span>
+    </div>
+  );
+}

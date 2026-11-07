@@ -45,6 +45,16 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * `BLOCK_CONFIRM_COPY` and it lives beside the action so the two cannot drift.
  */
 
+/* Grade 1 (job 8): English only for now. */
+const PREF_WORDS = {
+  pin: "Pin this chat",
+  unpin: "Unpin this chat",
+  pinBody: "Keeps it at the top of your messages. Only you see this.",
+  mute: "Mute notifications",
+  unmute: "Unmute notifications",
+  muteBody: "New messages still arrive here; you are not notified.",
+};
+
 export type SheetListing = {
   id: string;
   title: string;
@@ -77,7 +87,13 @@ export function ThreadOptionsSheet({
   unsafeAsLister = false,
   sheetCopy,
   words,
+  chatPrefs = null,
 }: {
+  /**
+   * Grade 1 (job 8): pin this chat to the top of the inbox, mute its
+   * notifications. Absent where the database has no pins and mutes yet.
+   */
+  chatPrefs?: { pinned: boolean; muted: boolean; onPin: () => void; onMute: () => void } | null;
   /** The sheet's own words (`experienceInbox.thread.view`), from the thread. */
   words: Dictionary["experienceInbox"]["thread"]["view"];
   open: boolean;
@@ -236,6 +252,34 @@ export function ThreadOptionsSheet({
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
         </Link>
       )}
+
+      {/* ------------------------------------------- pin and mute (job 8) */}
+      {chatPrefs ? (
+        <>
+          <button type="button" onClick={chatPrefs.onPin} className="nf-share-row mt-md w-full text-left" data-testid="thread-pin">
+            <IconPlate size="sm" className="shrink-0">
+              <UiIcon name="bookmark" size={20} filled={chatPrefs.pinned} />
+            </IconPlate>
+            <span className="min-w-0 flex-1">
+              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
+                {chatPrefs.pinned ? PREF_WORDS.unpin : PREF_WORDS.pin}
+              </span>
+              <span className="block nf-caption text-[var(--nf-content-muted)]">{PREF_WORDS.pinBody}</span>
+            </span>
+          </button>
+          <button type="button" onClick={chatPrefs.onMute} className="nf-share-row mt-md w-full text-left" data-testid="thread-mute">
+            <IconPlate size="sm" className="shrink-0">
+              <UiIcon name={chatPrefs.muted ? "bell" : "mute"} size={20} />
+            </IconPlate>
+            <span className="min-w-0 flex-1">
+              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
+                {chatPrefs.muted ? PREF_WORDS.unmute : PREF_WORDS.mute}
+              </span>
+              <span className="block nf-caption text-[var(--nf-content-muted)]">{PREF_WORDS.muteBody}</span>
+            </span>
+          </button>
+        </>
+      ) : null}
 
       {/* ------------------------------------------------- the Vallo passport */}
       {canShare && passport && (

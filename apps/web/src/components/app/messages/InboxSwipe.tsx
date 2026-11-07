@@ -23,7 +23,7 @@ import { lockAxis } from "./swipe";
 
 export type SwipeAction = { key: string; label: string; icon: UiIconName; tone?: "brand" | "neutral"; run: () => void };
 
-const ACTION_W = 76;
+const ACTION_W = 68;
 const OPEN_AT = 56;
 
 export function InboxSwipe({ actions, children }: { actions: SwipeAction[]; children: ReactNode }) {

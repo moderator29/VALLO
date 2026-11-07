@@ -102,11 +102,13 @@
       animation: none;
     }
   }
+  /* A calm rise (7 November 2026): 28px and a hair of scale, where it was
+     64px, so a card settles into the column rather than flying up it. */
   @keyframes nf-feed-arrive {
     from {
       opacity: 0;
-      translate: 0 64px;
-      scale: 0.985;
+      translate: 0 28px;
+      scale: 0.99;
     }
     to {
       opacity: 1;
@@ -201,6 +203,71 @@
   }
 
   /* ------------------------------------------------------------ repost */
+
+  /*
+   * THE HEART, WHEN IT IS TURNED ON (7 November 2026). Three things at once,
+   * each on transform and opacity only, each played once by the tap and never
+   * by a page load (`data-pop` and `data-roll` are set only by the tap):
+   *
+   *   the glyph   springs from 0.7 past 1.2 and settles at its size;
+   *   the burst   a dotted ring in the spark (CLEAN_UNIFIED_DIRECTION 18 lists
+   *               "the feed like button's brief dotted burst") opens from the
+   *               glyph's centre and fades;
+   *   the count   rolls up into place, the new figure arriving from below.
+   */
+  .nf-act-pill--like[data-pop] svg {
+    animation: nf-feed-heart-glyph var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-feed-heart-glyph {
+    0% {
+      scale: 0.7;
+    }
+    55% {
+      scale: 1.2;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+  .nf-act-pill--like::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: calc(var(--nf-space-sm) - 4px);
+    inline-size: 28px;
+    block-size: 28px;
+    margin-block-start: -14px;
+    border: 2px dotted var(--nf-spark);
+    border-radius: var(--nf-radius-circle);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .nf-act-pill--like[data-pop]::after {
+    animation: nf-feed-burst var(--nf-duration-slow) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-feed-burst {
+    0% {
+      opacity: 0.95;
+      scale: 0.45;
+    }
+    100% {
+      opacity: 0;
+      scale: 1.55;
+    }
+  }
+  .nf-act-pill__count[data-roll] {
+    animation: nf-feed-count var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-feed-count {
+    from {
+      opacity: 0;
+      translate: 0 0.6em;
+    }
+    to {
+      opacity: 1;
+      translate: none;
+    }
+  }
 
   .nf-act-pill--repost[data-pop] svg {
     animation: nf-feed-turn var(--nf-duration-slow) var(--nf-ease-entrance) both;
@@ -328,6 +395,9 @@
     .nf-post > *,
     .nf-post__media img,
     .nf-act-pill--like[data-pop],
+    .nf-act-pill--like[data-pop] svg,
+    .nf-act-pill--like[data-pop]::after,
+    .nf-act-pill__count[data-roll],
     .nf-act-pill--repost[data-pop] svg,
     .nf-story--seq .nf-story__image,
     .nf-story--seq .nf-story__top,
@@ -355,8 +425,14 @@
       transition: none;
     }
     .nf-act-pill:active,
-    .nf-post__attach:active {
+    .nf-post__attach:active,
+    .nf-feed-prompt:active,
+    .nf-pc__comment:active {
       transform: none;
+    }
+    .nf-feed-prompt,
+    .nf-pc__comment {
+      transition: none;
     }
     .nf-story-ring__item:active {
       scale: none;
@@ -367,7 +443,7 @@
       transition: none;
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-act-pill--like[data-pop], .nf-act-pill--repost[data-pop] svg) {
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-act-pill--like[data-pop], .nf-act-pill--like[data-pop] svg, .nf-act-pill--like[data-pop]::after, .nf-act-pill__count[data-roll], .nf-act-pill--repost[data-pop] svg) {
     animation: none;
   }
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-pic {

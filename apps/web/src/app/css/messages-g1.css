@@ -538,6 +538,17 @@
     background: var(--nf-brand-primary);
   }
 
+  /* Pinned and muted, beside the time: small, muted, never loud (job 8). */
+  .nf-inbox-row__when:has(.nf-inbox-row__mark) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+  }
+  .nf-inbox-row__mark {
+    flex: none;
+    color: var(--nf-content-muted);
+  }
+
   /* The search, marked where each row matched. */
   .nf-inbox-hit {
     border-radius: var(--nf-radius-xs);

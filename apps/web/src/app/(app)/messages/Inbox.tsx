@@ -9,6 +9,8 @@ import { markInboxRead, markThreadRead } from "@/lib/messages/actions";
 import { banner } from "@/lib/ui/toast";
 import { highlightParts, snippetAround } from "@/components/app/messages/highlight";
 import { InboxSwipe, type SwipeAction } from "@/components/app/messages/InboxSwipe";
+import { muteConversation, pinConversation } from "@/lib/messages/prefs-actions";
+import { isMuted, muteUntil, pinnedFirst, type ConversationPref, type MuteFor } from "@/lib/messages/conversation-prefs";
 import { archiveConversation, unarchiveConversation } from "@/lib/messages/archive";
 import type { Side } from "@/lib/side.constants";
 import { useInboxTyping } from "@/lib/messages/useRealtime";
@@ -84,6 +86,10 @@ export type InboxRow = {
    * earned. Absent never means "offline", it means "not known".
    */
   presence?: "online";
+  /** Grade 1 (job 8): pinned to the top of this reader's inbox, and when. */
+  pinnedAt?: string | null;
+  /** Grade 1 (job 8): notifications muted until this instant. */
+  mutedUntil?: string | null;
   /**
    * VC1: the newest message is a call this reader missed (read from the
    * call marker's `call_id`, never from typed words). Drawn as a red
@@ -102,6 +108,22 @@ const POLISH_WORDS = {
   newReply: "New reply from Vallo Support",
   supportEmptyTitle: "No support conversations",
   supportEmptyBody: "Ask Vallo AI anything, and choose Talk to a person when you want the support team.",
+  pin: "Pin",
+  unpin: "Unpin",
+  pinned: "Pinned to the top",
+  unpinned: "Unpinned",
+  pinnedLabel: "Pinned",
+  mute: "Mute",
+  unmute: "Unmute",
+  mutedLabel: "Muted",
+  muteTitle: "Mute {name}",
+  muteBody: "You will not be notified about new messages. They still arrive here.",
+  mute8h: "For 8 hours",
+  muteWeek: "For a week",
+  muteAlways: "Until I turn it back on",
+  mutedDone: "Muted. You will not be notified about this chat",
+  unmutedDone: "Unmuted",
+  close: "Close",
 };
 
 /**
@@ -309,7 +331,15 @@ function Row({
         </span>
 
         <span className="flex shrink-0 flex-col items-end gap-inline-tight self-stretch">
-          <span className="nf-inbox-row__when nf-numeric">{row.whenLabel}</span>
+          <span className="nf-inbox-row__when nf-numeric">
+            {isMuted(row.mutedUntil) ? (
+              <UiIcon name="mute" size={14} className="nf-inbox-row__mark" label={POLISH_WORDS.mutedLabel} />
+            ) : null}
+            {row.pinnedAt ? (
+              <UiIcon name="bookmark" size={14} filled className="nf-inbox-row__mark" label={POLISH_WORDS.pinnedLabel} />
+            ) : null}
+            {row.whenLabel}
+          </span>
           {row.unread > 0 ? (
             <span className="nf-inbox-row__count" aria-label={unreadWord}>
               {row.unread}
@@ -394,7 +424,10 @@ export function Inbox({
   plusCopy,
   assistantOn = false,
   supportRows = [],
+  prefsOpen = false,
 }: {
+  /** Grade 1 (job 8): pin and mute are live (signed in, and the table exists). */
+  prefsOpen?: boolean;
   rows: InboxRow[];
   /** Grade 1 (R70): the member's support conversations, newest first. Empty draws no Support chip. */
   supportRows?: SupportInboxRow[];
@@ -427,6 +460,10 @@ export function Inbox({
   const [archivedLocal, setArchivedLocal] = useState<Record<string, boolean>>({});
   /* Optimistic too: a row marked read by a swipe loses its count at once. */
   const [readLocal, setReadLocal] = useState<Record<string, true>>({});
+  /* Optimistic pins and mutes, put back if the server refuses. */
+  const [prefsLocal, setPrefsLocal] = useState<Record<string, ConversationPref>>({});
+  /* The conversation whose mute choices are open. */
+  const [muteTarget, setMuteTarget] = useState<InboxRow | null>(null);
   const [query, setQuery] = useState("");
   /* GRADE 1: search is a button in the header until it is wanted (R59). */
   const [searchOpen, setSearchOpen] = useState(false);
@@ -456,9 +493,10 @@ export function Inbox({
       rows.map((r) => {
         const archived = r.id in archivedLocal ? { archived: archivedLocal[r.id] } : null;
         const read = readLocal[r.id] ? { unread: 0 } : null;
-        return archived || read ? { ...r, ...archived, ...read } : r;
+        const prefs = prefsLocal[r.id] ?? null;
+        return archived || read || prefs ? { ...r, ...archived, ...read, ...prefs } : r;
       }),
-    [rows, archivedLocal, readLocal],
+    [rows, archivedLocal, readLocal, prefsLocal],
   );
   /* A chat with a person (9 October 2026) belongs to neither side: it shows
      on both, so a message from somebody never hides behind the other tab. */
@@ -492,7 +530,8 @@ export function Inbox({
   }, [live]);
 
   const shown = useMemo(() => {
-    const byView = onSide.filter((r) => inView(r, view));
+    /* Pinned conversations ride at the top of every view (job 8). */
+    const byView = pinnedFirst(onSide.filter((r) => inView(r, view)));
     const q = query.trim().toLowerCase();
     if (q.length === 0) return byView;
     return byView.filter((r) =>
@@ -528,6 +567,49 @@ export function Inbox({
         if (!tapFailedOffline(error)) throw error;
       }
     });
+  };
+
+  /* Pin and mute (job 8): optimistic, said in the banner, put back on a refusal. */
+  const setPref = (
+    row: InboxRow,
+    next: ConversationPref,
+    work: () => Promise<{ ok: true; data: ConversationPref } | { ok: false; error: string }>,
+    said: string,
+  ) => {
+    const before: ConversationPref = { pinnedAt: row.pinnedAt ?? null, mutedUntil: row.mutedUntil ?? null };
+    setPrefsLocal((current) => ({ ...current, [row.id]: next }));
+    void work()
+      .then((result) => {
+        if (result.ok) {
+          setPrefsLocal((current) => ({ ...current, [row.id]: result.data }));
+          banner.success(said);
+          return;
+        }
+        setPrefsLocal((current) => ({ ...current, [row.id]: before }));
+        banner.error(result.error);
+      })
+      .catch((error: unknown) => {
+        setPrefsLocal((current) => ({ ...current, [row.id]: before }));
+        if (!tapFailedOffline(error)) throw error;
+      });
+  };
+  const togglePin = (row: InboxRow) => {
+    const pin = !row.pinnedAt;
+    setPref(
+      row,
+      { pinnedAt: pin ? new Date().toISOString() : null, mutedUntil: row.mutedUntil ?? null },
+      () => pinConversation({ conversationId: row.id, pinned: pin }),
+      pin ? POLISH_WORDS.pinned : POLISH_WORDS.unpinned,
+    );
+  };
+  const setMute = (row: InboxRow, until: MuteFor | null) => {
+    setMuteTarget(null);
+    setPref(
+      row,
+      { pinnedAt: row.pinnedAt ?? null, mutedUntil: until ? muteUntil(until) : null },
+      () => muteConversation({ conversationId: row.id, until }),
+      until ? POLISH_WORDS.mutedDone : POLISH_WORDS.unmutedDone,
+    );
   };
 
   /* Swipe, Mark read: one conversation, said in the banner. */
@@ -826,6 +908,22 @@ export function Inbox({
                   ...(canMarkRead && row.unread > 0
                     ? [{ key: "read", label: POLISH_WORDS.read, icon: "check" as const, run: () => markOneRead(row) }]
                     : []),
+                  ...(prefsOpen
+                    ? [
+                        {
+                          key: "pin",
+                          label: row.pinnedAt ? POLISH_WORDS.unpin : POLISH_WORDS.pin,
+                          icon: "bookmark" as const,
+                          run: () => togglePin(row),
+                        },
+                        {
+                          key: "mute",
+                          label: isMuted(row.mutedUntil) ? POLISH_WORDS.unmute : POLISH_WORDS.mute,
+                          icon: isMuted(row.mutedUntil) ? ("bell" as const) : ("mute" as const),
+                          run: () => (isMuted(row.mutedUntil) ? setMute(row, null) : setMuteTarget(row)),
+                        },
+                      ]
+                    : []),
                   ...(archiveOpen && view !== "reported"
                     ? [
                         {
@@ -887,6 +985,40 @@ export function Inbox({
           />
         )}
       </div>
+
+      {/* Job 8: how long to mute a conversation for. */}
+      <Sheet
+        open={muteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setMuteTarget(null);
+        }}
+        title={POLISH_WORDS.muteTitle.replace("{name}", muteTarget?.counterpartName ?? "")}
+        description={POLISH_WORDS.muteBody}
+        closeLabel={POLISH_WORDS.close}
+        detents={[0.5]}
+        testId="inbox-mute"
+      >
+        <ul className="nf-inbox-menu">
+          {(
+            [
+              ["8h", POLISH_WORDS.mute8h],
+              ["week", POLISH_WORDS.muteWeek],
+              ["always", POLISH_WORDS.muteAlways],
+            ] as const
+          ).map(([choice, label]) => (
+            <li key={choice}>
+              <button
+                type="button"
+                onClick={() => muteTarget && setMute(muteTarget, choice)}
+                data-testid={`inbox-mute-${choice}`}
+              >
+                <UiIcon name="mute" size={20} />
+                {label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Sheet>
 
       {/* GRADE 1 (R61): the inbox's options, as one sheet. */}
       <Sheet

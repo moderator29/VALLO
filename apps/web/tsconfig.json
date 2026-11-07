@@ -82,7 +82,9 @@
     ".next-lead/types/**/*.ts",
     ".next-lead/dev/types/**/*.ts",
     ".next-fe/types/**/*.ts",
-    ".next-fe/dev/types/**/*.ts"
+    ".next-fe/dev/types/**/*.ts",
+    ".next-native/types/**/*.ts",
+    ".next-native/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

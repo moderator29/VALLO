@@ -253,12 +253,18 @@ function PostText({
 
 /**
  * THE ACTION ROWS (founder, 13 October reference: "a rounded Drop a comment
- * pill with a comment icon and a heart on the right").
+ * pill with a comment icon and a heart on the right"; re-set 7 November 2026
+ * for the new feed).
  *
- *   row one   the comment pill, which opens the post's own page with the reply
- *             box focused (the existing reply flow), and the heart.
- *   row two   the quieter things you do with a post: repost, send it to
- *             somebody, and save it to your own shelf at the far edge.
+ *   row one   what you do TO a post, as bare glyphs with their counts: the
+ *             heart, the repost and send-to-somebody at the left, and save to
+ *             your own shelf at the far edge. The counts roll when a tap
+ *             changes them (`ActionPill`), so the number feels touched.
+ *   row two   "Drop a comment": one calm sunken line, the reply count at its
+ *             far end, that opens the post's own page with the reply box
+ *             focused (the existing reply flow). It reads as the place you
+ *             write, which is what it is, and it is a soft rectangle like
+ *             every control that carries words.
  *
  * Reply, repost, like and save all write a row against an account, so a guest
  * tapping one is sent to sign up carrying this screen and the verb. Share
@@ -290,28 +296,7 @@ function ActionRows({
   const reposts = compact(post.repostCount, locale);
   return (
     <div className="nf-pc__actions">
-      <div className="nf-pc__reply-row">
-        <AuthGate action="post">
-          <button
-            type="button"
-            className="nf-pc__comment nf-post__act--reply"
-            aria-label={`${words.commentPill}, ${countOf(post.replyCount, "replies", locale)}`}
-            onClick={onReply}
-            data-testid="post-comment-pill"
-          >
-            <UiIcon name="chat-bubble" size={18} />
-            <span className="nf-pc__comment-text">{words.commentPill}</span>
-            {/* A word break the flex row does not draw, so the visible words
-                read "Drop a comment 56" and sit inside the name. */}
-            {" "}
-            {post.replyCount > 0 ? (
-              <span className="nf-pc__comment-count nf-numeric" aria-hidden="true">
-                {compact(post.replyCount, locale)}
-              </span>
-            ) : null}
-          </button>
-        </AuthGate>
-
+      <div className="nf-pc__more-row">
         <AuthGate action="react">
           <ActionPill
             icon="heart"
@@ -324,9 +309,7 @@ function ActionRows({
             onClick={onLike}
           />
         </AuthGate>
-      </div>
 
-      <div className="nf-pc__more-row">
         <AuthGate action="react">
           <ActionPill
             icon="repost-loop"
@@ -362,6 +345,29 @@ function ActionRows({
             />
           </AuthGate>
         ) : null}
+      </div>
+
+      <div className="nf-pc__reply-row">
+        <AuthGate action="post">
+          <button
+            type="button"
+            className="nf-pc__comment nf-post__act--reply"
+            aria-label={`${words.commentPill}, ${countOf(post.replyCount, "replies", locale)}`}
+            onClick={onReply}
+            data-testid="post-comment-pill"
+          >
+            <UiIcon name="chat-bubble" size={18} />
+            <span className="nf-pc__comment-text">{words.commentPill}</span>
+            {/* A word break the flex row does not draw, so the visible words
+                read "Drop a comment 56" and sit inside the name. */}
+            {" "}
+            {post.replyCount > 0 ? (
+              <span className="nf-pc__comment-count nf-numeric" aria-hidden="true">
+                {compact(post.replyCount, locale)}
+              </span>
+            ) : null}
+          </button>
+        </AuthGate>
       </div>
     </div>
   );
@@ -500,19 +506,24 @@ export function PostCard({
   );
 
   /*
-   * THE PLACE, AS A LABEL ON THE FRAME. This is a network about homes, stays
-   * and neighbourhoods, so where a post was written is part of what it says.
-   * It sits in the frame's lower right on a dark scrim, as the reference sets
-   * its label, and takes you to the place. The link is the 44px target; the
-   * chip is drawn inside it.
+   * THE PLACE, ON THE AUTHOR'S QUIET LINE. This is a network about homes,
+   * stays and neighbourhoods, so where a post was written is part of what it
+   * says: it sits between the handle and the time, a pin and the place's
+   * name, and takes you to the place. It used to be a chip laid over the
+   * photograph, which put a label on somebody's picture and made a text post
+   * grow a second line for it. The link's name is the whole sentence
+   * ("Around Lekki Phase 1"), which starts with nothing the eye does not read
+   * and contains everything it does (WCAG 2.5.3).
    */
   const place =
     post.areaName && post.areaSlug && !isSystem ? (
-      <Link href={`/around/${post.areaSlug}`} className="nf-post__place nf-pc__place">
-        <span className="nf-post__place-chip">
-          <UiIcon name="location" size={12} filled />
-          <span className="truncate">{aroundLine.replace("{area}", post.areaName)}</span>
-        </span>
+      <Link
+        href={`/around/${post.areaSlug}`}
+        className="nf-pc__place"
+        aria-label={aroundLine.replace("{area}", post.areaName)}
+      >
+        <UiIcon name="location" size={12} filled />
+        <span className="nf-pc__place-name">{post.areaName}</span>
       </Link>
     ) : null;
 
@@ -551,23 +562,20 @@ export function PostCard({
         )}
 
         <div className="nf-pc__who">
-          {isSystem ? (
-            /* Vallo's own notes carry the platinum mark, the administrator's
-               tier, a size up from a member's tick so it reads as the house. */
-            <span className="nf-pc__nameline">
-              <span className="nf-pc__name">Vallo</span>
-              <span className="nf-pc__tick nf-pc__tick--house">
-                <TierBadge tier="platinum" size={20} />
-              </span>
-            </span>
-          ) : isBot ? (
-            <>
+          <span className="nf-pc__nameline">
+            {isSystem ? (
+              /* Vallo's own notes carry the platinum mark, the administrator's
+                 tier, a size up from a member's tick so it reads as the house. */
+              <>
+                <span className="nf-pc__name">Vallo</span>
+                <span className="nf-pc__tick nf-pc__tick--house">
+                  <TierBadge tier="platinum" size={18} />
+                </span>
+              </>
+            ) : isBot ? (
               <span className="nf-pc__name">Vallo AI</span>
-              <span className="nf-pc__handle">{words.assistant}</span>
-            </>
-          ) : (
-            <>
-              <span className="nf-pc__nameline">
+            ) : (
+              <>
                 <Link
                   href={post.author?.handle ? `/u/${post.author.handle}` : "#"}
                   className="nf-pc__name"
@@ -582,27 +590,42 @@ export function PostCard({
                     <TierBadge tier={post.author.tier} size={14} />
                   </span>
                 ) : null}
+              </>
+            )}
+            {roleWord || post.author?.moderatorOf ? (
+              <span className="nf-pc__marks">
+                {roleWord ? <span className="nf-pc__mark">{roleWord}</span> : null}
+                {post.author?.moderatorOf ? (
+                  <span
+                    className="nf-pc__mark nf-pc__mark--mod"
+                    aria-label={words.looksAfter.replace("{place}", post.author.moderatorOf)}
+                  >
+                    <span aria-hidden="true">{words.mod}</span>
+                  </span>
+                ) : null}
               </span>
-              {post.author?.handle ? <span className="nf-pc__handle">@{post.author.handle}</span> : null}
-            </>
-          )}
-        </div>
+            ) : null}
+          </span>
 
-        <div className="nf-pc__side">
-          {roleWord || post.author?.moderatorOf ? (
-            <span className="nf-pc__marks">
-              {roleWord ? <span className="nf-pc__mark">{roleWord}</span> : null}
-              {post.author?.moderatorOf ? (
-                <span
-                  className="nf-pc__mark nf-pc__mark--mod"
-                  aria-label={words.looksAfter.replace("{place}", post.author.moderatorOf)}
-                >
-                  <span aria-hidden="true">{words.mod}</span>
-                </span>
-              ) : null}
-            </span>
-          ) : null}
-          {when}
+          {/* THE QUIET LINE: who (the handle), where (the place) and when (the
+              time), in that order, one line in the muted ink. The handle gives
+              way first on a narrow phone, then the place; the time never does,
+              because it is the post's own link. */}
+          <span className="nf-pc__meta">
+            {isBot ? (
+              <span className="nf-pc__handle">{words.assistant}</span>
+            ) : !isSystem && post.author?.handle ? (
+              <span className="nf-pc__handle">@{post.author.handle}</span>
+            ) : null}
+            {place ? (
+              <>
+                {isBot || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
+                {place}
+              </>
+            ) : null}
+            {isBot || place || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
+            {when}
+          </span>
         </div>
 
         {/* The header carries the name, the time and this. Nothing else: the
@@ -669,7 +692,6 @@ export function PostCard({
                 sizes="(max-width: 640px) 100vw, 600px"
               />
             )}
-            {place ? <div className="nf-pc__chips">{place}</div> : null}
           </div>
         </>
       ) : textFrame ? (
@@ -682,10 +704,7 @@ export function PostCard({
           ) : (
             <PostText text={post.body as string} mode="frame" detail={detail} words={words} system={isSystem} />
           )}
-          {place ? <div className="nf-pc__plainplace">{place}</div> : null}
         </div>
-      ) : place ? (
-        <div className="nf-pc__plainplace">{place}</div>
       ) : null}
 
       {post.cited.length > 0 ? (

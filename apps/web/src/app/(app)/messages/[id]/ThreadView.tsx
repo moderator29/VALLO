@@ -42,6 +42,8 @@ import {
 } from "@/lib/messages/reactions";
 import { VOICE_BODY } from "@/lib/messages/voice-note";
 import { forgetVoice, keepVoice, waitingVoices } from "@/lib/messages/voice-outbox";
+import { muteConversation, pinConversation } from "@/lib/messages/prefs-actions";
+import { isMuted, type ConversationPref } from "@/lib/messages/conversation-prefs";
 import { ComposerVoice } from "@/components/app/messages/ComposerVoice";
 import type { VoiceRecording } from "@/components/app/messages/useVoiceRecorder";
 import { ReactionCounts } from "@/components/app/messages/ReactionCounts";
@@ -358,6 +360,12 @@ export type ThreadViewProps = {
    * a stand-in, because its Supabase client has no session to upload with.
    */
   uploadVoice?: (input: UploadInput) => Promise<UploadResult>;
+  /**
+   * Grade 1 (job 8): this reader's pin and mute on this chat. Null or absent
+   * where the database has no pins and mutes yet: the options sheet offers
+   * neither.
+   */
+  chatPrefs?: ConversationPref | null;
 };
 
 const INSPECTIONS_KEY = "nf_inspections";
@@ -592,7 +600,28 @@ export function ThreadView({
   viewerCopy = null,
   reactions: reactionsInitial = null,
   uploadVoice = uploadToStorage,
+  chatPrefs: chatPrefsInitial = null,
 }: ThreadViewProps) {
+  /* Job 8: pin and mute from the options sheet, optimistic, said in the banner. */
+  const [chatPrefs, setChatPrefs] = useState<ConversationPref | null>(live ? chatPrefsInitial : null);
+  const changePref = (next: ConversationPref, work: () => Promise<{ ok: true; data: ConversationPref } | { ok: false; error: string }>, said: string) => {
+    const before = chatPrefs;
+    setChatPrefs(next);
+    void work()
+      .then((result) => {
+        if (result.ok) {
+          setChatPrefs(result.data);
+          banner.success(said);
+        } else {
+          setChatPrefs(before);
+          banner.error(result.error);
+        }
+      })
+      .catch(() => {
+        setChatPrefs(before);
+        banner.error(SEND_FAILED_WORDS);
+      });
+  };
   const [items, setItems] = useState<ThreadBubble[]>(messages);
   /* GRADE 1 (P1.3): reactions by message, or null when the thread cannot react. */
   const [reactions, setReactions] = useState<ReactionMap | null>(live ? reactionsInitial : null);
@@ -1748,6 +1777,30 @@ export function ThreadView({
         sheetCopy={sheetCopy}
         words={view}
         unsafeAsLister={context?.kind === "listing" && role === "host"}
+        chatPrefs={
+          chatPrefs
+            ? {
+                pinned: Boolean(chatPrefs.pinnedAt),
+                muted: isMuted(chatPrefs.mutedUntil),
+                onPin: () => {
+                  const pin = !chatPrefs.pinnedAt;
+                  changePref(
+                    { ...chatPrefs, pinnedAt: pin ? new Date().toISOString() : null },
+                    () => pinConversation({ conversationId, pinned: pin }),
+                    pin ? "Pinned to the top of your messages" : "Unpinned",
+                  );
+                },
+                onMute: () => {
+                  const mute = !isMuted(chatPrefs.mutedUntil);
+                  changePref(
+                    { ...chatPrefs, mutedUntil: mute ? "2100-01-01T00:00:00.000Z" : null },
+                    () => muteConversation({ conversationId, until: mute ? "always" : null }),
+                    mute ? "Muted. You will not be notified about this chat" : "Unmuted",
+                  );
+                },
+              }
+            : null
+        }
       />
 
       {/* ------------------------------------------------- context banner */}

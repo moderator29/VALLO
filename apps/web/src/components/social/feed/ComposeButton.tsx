@@ -1,6 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
+import { RemoteImage } from "@/components/ui/RemoteImage";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import { initial } from "@/lib/text/initial";
 
 /** The window event the feed's create control (`CreateBloom`) answers. */
 export const COMPOSE_POST_EVENT = "nf:compose-post";
@@ -20,7 +23,41 @@ export const COMPOSE_POST_EVENT = "nf:compose-post";
  * the same page (`AroundFab`) and listens for this event. One composer per
  * screen, two doors into it.
  */
-export function ComposeButton({ label }: { label: string }) {
+export function ComposeButton({
+  label,
+  prompt,
+  you = null,
+}: {
+  label: string;
+  /** The words on the feed's compose entry. Given, the control is the quiet
+      one-line entry under the stories (your face, the invitation, the pencil)
+      rather than the bare pencil disc; it is still one tap into the same
+      composer, so nothing about posting changes but where the eye finds it. */
+  prompt?: string;
+  you?: { label: string; avatarUrl: string } | null;
+}) {
+  const open = () => window.dispatchEvent(new CustomEvent(COMPOSE_POST_EVENT));
+  if (prompt) {
+    return (
+      <button type="button" className="nf-feed-prompt" aria-label={label} data-testid="feed-compose" onClick={open}>
+        <span className="nf-feed-prompt__face" aria-hidden="true">
+          {you?.avatarUrl ? (
+            <RemoteImage src={you.avatarUrl} alt="" width={72} height={72} sizes="36px" loading="lazy" />
+          ) : you?.label ? (
+            <span className="nf-feed-prompt__monogram">{initial(you.label)}</span>
+          ) : (
+            <UiIcon name="pencil" size={18} />
+          )}
+        </span>
+        <span className="nf-feed-prompt__words" aria-hidden="true">
+          {prompt}
+        </span>
+        <span className="nf-feed-prompt__pic" aria-hidden="true">
+          <UiIcon name="picture" size={20} />
+        </span>
+      </button>
+    );
+  }
   return (
     <Button
       variant="primary"
@@ -31,7 +68,7 @@ export function ComposeButton({ label }: { label: string }) {
       className="nf-feed-compose"
       aria-label={label}
       data-testid="feed-compose"
-      onClick={() => window.dispatchEvent(new CustomEvent(COMPOSE_POST_EVENT))}
+      onClick={open}
     />
   );
 }

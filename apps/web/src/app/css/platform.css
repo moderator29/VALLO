@@ -1,0 +1,280 @@
+/*
+ * ONE APP, AT HOME ON BOTH PHONES (Agent NATIVE, job 1, 7 November 2026).
+ *
+ * Brief section 11: "Do not simply copy iOS interface behaviour onto Android
+ * or vice versa ... avoid creating two completely separate applications."
+ * This file is the whole of that adaptation, and it ADAPTS, it never forks:
+ * the same components, tokens, colours and type on both phones, with the
+ * handful of behaviours each operating system teaches its people done its way.
+ *
+ *   touch      iOS: the press dims and the row lights, on top of Vallo's own
+ *              press. Android: an ink ripple from under the finger
+ *              (`lib/platform/ripple.ts` draws it; its look is here), with
+ *              the press scale softened so the two do not fight.
+ *   page       iOS: the push. The new page slides in from the right edge over
+ *              the old one, which slides a third of the way under it and dims;
+ *              back slides it off again. Android: fade-through. The old page
+ *              fades out quickly, the new one fades in and settles from 92%
+ *              about the point that was tapped. Both run through the same four
+ *              rules below, which read the platform's four animation tokens
+ *              (`--nf-pt-*`): one helper, two dialects.
+ *   edges      iOS keeps its rubber band at the top and foot of a page, and
+ *              Android keeps its own overscroll stretch: neither is faked.
+ *
+ * WHAT IS LEFT SHARED ON PURPOSE. A card or row that opens its page (the
+ * container transform, `data-nav-origin="expand"`), the listing photograph's
+ * flight (`data-nav-morph`), back into the card it came from (`return`), tab
+ * changes and the side flip are Vallo's own signature moves and read as native
+ * on both platforms (Material's container transform; the App Store's card
+ * zoom). They stay exactly as `route-motion.css` draws them.
+ *
+ * THE KEYS. `data-platform` ("ios", "android", "web") and `data-native` on
+ * <html>, written before first paint by the first script in <head>
+ * (`lib/platform/detect.ts`) and confirmed by `lib/native/boot.ts`. The website
+ * has no `data-native`, so nothing here changes it.
+ *
+ * THE GATES. Every travelling move is inside `prefers-reduced-motion:
+ * no-preference` and stands aside for Calm and Off (`route-motion.css` keeps
+ * their short fade and their cut). Transform and opacity only, on snapshots the
+ * compositor already holds, so a budget Android phone pays nothing extra.
+ *
+ * Imported once by globals.css, after grade1.css and messages-g1.css and
+ * before motion-pref.css, so the motion setting's "off" still wins.
+ */
+
+/* ------------------------------------------------------------------ edges */
+
+/*
+ * The root's `overscroll-behavior-y: none` (base.css) keeps the website from
+ * bouncing. In the shell, `contain` hands the edge back to the operating
+ * system: the iPhone's rubber band and Android's stretch, with no scroll
+ * chaining and no browser pull to reload. `PullToRefresh` sets the same value
+ * while it is mounted, so the two never disagree.
+ */
+:root[data-native] {
+  overscroll-behavior-y: contain;
+}
+
+/* ----------------------------------------------------------------- touch */
+
+/*
+ * ANDROID: THE PRESS SCALE STANDS BACK FOR THE RIPPLE. Material answers a
+ * press with ink, not a squeeze, and a control that shrank under its own ink
+ * would slide out from under it. Rows and big cards stop scaling; buttons and
+ * icon buttons keep a little of Vallo's press so the brand is still felt.
+ * Unlayered, because the tokens are (a layered override loses to them), and
+ * inside `no-preference`, because reduced motion already sets all three to 1.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-native][data-platform="android"] {
+    --nf-press-scale-lg: 1;
+    --nf-press-scale: 0.99;
+    --nf-press-scale-sm: 0.96;
+  }
+}
+
+@layer components {
+  /* The ripple's layer and its ink (lib/platform/ripple.ts sets the box, the
+     radius, the size and the colour, which is the control's own text colour,
+     so the ink is white on the blue button and ink on a quiet row). */
+  .nf-ripple {
+    position: fixed;
+    z-index: var(--nf-z-top);
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
+  }
+  .nf-ripple__ink {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0.12);
+    will-change: transform, opacity;
+  }
+
+  /*
+   * iOS: HIGHLIGHT AND DIM. On an iPhone a pressed glyph or text control dims
+   * and a pressed row lights with a neutral wash, instantly, under the finger.
+   * Vallo's own press (the scale and the brand tint) stays; this is the
+   * platform's accent on it. Glyph controls dim; filled buttons do not (their
+   * fill already answers), and nothing here moves.
+   */
+  :root[data-native][data-platform="ios"] {
+    --nf-pt-ios-highlight: color-mix(in oklab, var(--nf-content-primary) 9%, transparent);
+  }
+  :root[data-native][data-platform="ios"]
+    :is(.nf-icon-btn, .nf-app-header__btn, .nf-btn--ghost, .nf-btn--quiet, .nf-btn--icon):not(:disabled, [aria-disabled="true"]):active {
+    opacity: 0.6;
+  }
+  :root[data-native][data-platform="ios"] :is(a.nf-srow, button.nf-srow:not(:disabled), label.nf-srow):active,
+  :root[data-native][data-platform="ios"] :is(.nf-inbox-row, .nf-notif__row, a.nf-nav__row):active {
+    background-color: var(--nf-pt-ios-highlight);
+  }
+}
+
+/* ----------------------------------------------------------------- pages */
+
+:root {
+  --nf-pt-sign: 1;
+}
+:root[dir="rtl"] {
+  --nf-pt-sign: -1;
+}
+
+/*
+ * THE TWO DIALECTS, AS TOKENS. Each platform names the four moves a plain page
+ * change makes (forward: the page leaving and the page arriving; back: the
+ * same), and the four shared rules below play whichever the platform named.
+ *
+ * iOS: the push, on the curve iOS's own navigation settles on, at the slow
+ * rung (380ms), with the old page a third of the way under and dimmed.
+ * Android: fade-through, 90ms out, then 160ms in with a 240ms settle from 92%
+ * (back settles from 104%, the page coming forward again), about the tapped
+ * point `route-motion.css` already writes as the root images' origin.
+ */
+:root[data-native][data-platform="ios"] {
+  --nf-pt-ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --nf-pt-forward-old: nf-pt-ios-under var(--nf-duration-slow) var(--nf-pt-ios-ease) both;
+  --nf-pt-forward-new: nf-pt-ios-in var(--nf-duration-slow) var(--nf-pt-ios-ease) both;
+  --nf-pt-back-old: nf-pt-ios-out var(--nf-duration-slow) var(--nf-pt-ios-ease) both;
+  --nf-pt-back-new: nf-pt-ios-surface var(--nf-duration-slow) var(--nf-pt-ios-ease) both;
+}
+:root[data-native][data-platform="android"] {
+  --nf-pt-forward-old: nf-pt-fade-out var(--nf-duration-instant) var(--nf-ease-exit) both;
+  --nf-pt-forward-new:
+    nf-pt-fade-in var(--nf-duration-fast) var(--nf-ease-standard) var(--nf-duration-instant) both,
+    nf-pt-settle-in var(--nf-duration-base) var(--nf-ease-entrance) var(--nf-duration-instant) both;
+  --nf-pt-back-old: nf-pt-fade-out var(--nf-duration-instant) var(--nf-ease-exit) both;
+  --nf-pt-back-new:
+    nf-pt-fade-in var(--nf-duration-fast) var(--nf-ease-standard) var(--nf-duration-instant) both,
+    nf-pt-settle-back var(--nf-duration-base) var(--nf-ease-entrance) var(--nf-duration-instant) both;
+}
+
+/*
+ * THE SHARED RULES. Only a plain page change: forward with no container
+ * opening it, or back with nothing to return into. Each condition sits in
+ * `:where()`, so these rules weigh exactly what `route-motion.css`'s own do,
+ * and win by coming later; the side flip's guard further down outweighs them.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  :root[data-native]:where([data-platform="ios"], [data-platform="android"]):where(
+      [data-nav-dir="forward"]:not(
+          [data-nav-origin="expand"],
+          [data-nav-origin^="quiet"],
+          [data-nav-morph],
+          [data-motion="calm"],
+          [data-motion="off"]
+        )
+    )::view-transition-old(root) {
+    z-index: 0;
+    animation: var(--nf-pt-forward-old);
+  }
+  :root[data-native]:where([data-platform="ios"], [data-platform="android"]):where(
+      [data-nav-dir="forward"]:not(
+          [data-nav-origin="expand"],
+          [data-nav-origin^="quiet"],
+          [data-nav-morph],
+          [data-motion="calm"],
+          [data-motion="off"]
+        )
+    )::view-transition-new(root) {
+    z-index: 1;
+    animation: var(--nf-pt-forward-new);
+  }
+  :root[data-native]:where([data-platform="ios"], [data-platform="android"]):where(
+      [data-nav-dir="back"]:not(
+          [data-nav-origin^="return"],
+          [data-nav-origin^="quiet"],
+          [data-nav-morph],
+          [data-motion="calm"],
+          [data-motion="off"]
+        )
+    )::view-transition-old(root) {
+    z-index: 1;
+    animation: var(--nf-pt-back-old);
+  }
+  :root[data-native]:where([data-platform="ios"], [data-platform="android"]):where(
+      [data-nav-dir="back"]:not(
+          [data-nav-origin^="return"],
+          [data-nav-origin^="quiet"],
+          [data-nav-morph],
+          [data-motion="calm"],
+          [data-motion="off"]
+        )
+    )::view-transition-new(root) {
+    z-index: 0;
+    animation: var(--nf-pt-back-new);
+  }
+
+  /* iOS: the page on top casts its edge over the one beneath, and the one
+     beneath dims a little into the dark, the way the iPhone's stack reads. */
+  :root[data-native][data-platform="ios"]:where([data-nav-dir="forward"]:not([data-nav-origin="expand"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]))::view-transition-new(root),
+  :root[data-native][data-platform="ios"]:where([data-nav-dir="back"]:not([data-nav-origin^="return"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]))::view-transition-old(root) {
+    box-shadow: calc(-1rem * var(--nf-pt-sign)) 0 2rem -1rem var(--nf-scrim-drawer);
+  }
+  :root[data-native][data-platform="ios"]:where(
+      [data-nav-dir="forward"]:not([data-nav-origin="expand"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]),
+      [data-nav-dir="back"]:not([data-nav-origin^="return"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"])
+    )::view-transition {
+    background-color: var(--nf-scrim-drawer);
+  }
+}
+
+/* The side flip turns the whole screen itself; the swap under it stays
+   instant whatever the platform (outweighs the shared rules above). */
+:root[data-native]:active-view-transition-type(nf-flip)::view-transition-old(root) {
+  display: none;
+}
+:root[data-native]:active-view-transition-type(nf-flip)::view-transition-new(root) {
+  animation: none;
+}
+
+/* -------------------------------------------------------------- keyframes */
+
+/* iOS: in from the trailing edge, over the old page. */
+@keyframes nf-pt-ios-in {
+  from {
+    translate: calc(100% * var(--nf-pt-sign)) 0;
+  }
+}
+/* iOS: the old page, a third of the way under and a little dimmer. */
+@keyframes nf-pt-ios-under {
+  to {
+    translate: calc(-30% * var(--nf-pt-sign)) 0;
+    opacity: 0.82;
+  }
+}
+/* iOS back: the page on top slides off the trailing edge. */
+@keyframes nf-pt-ios-out {
+  to {
+    translate: calc(100% * var(--nf-pt-sign)) 0;
+  }
+}
+/* iOS back: the page beneath comes out from under it. */
+@keyframes nf-pt-ios-surface {
+  from {
+    translate: calc(-30% * var(--nf-pt-sign)) 0;
+    opacity: 0.82;
+  }
+}
+/* Android fade-through. */
+@keyframes nf-pt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes nf-pt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes nf-pt-settle-in {
+  from {
+    scale: 0.92;
+  }
+}
+@keyframes nf-pt-settle-back {
+  from {
+    scale: 1.04;
+  }
+}

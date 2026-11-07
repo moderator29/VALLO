@@ -127,6 +127,17 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
        check, so a website can never be marked. */
     document.documentElement.dataset.shell = "native";
 
+    /* Job 1 (platform layer): the inline script marked the platform from
+       the user agent before the first frame; the bridge's own answer is the
+       authority, so it is written again here (a no-op when they agree). */
+    const platform = Capacitor.getPlatform();
+    try {
+      const { applyPlatform, readPlatform } = await import("@/lib/platform/detect");
+      applyPlatform(document.documentElement, readPlatform({ bridgePlatform: platform, userAgent: navigator.userAgent }));
+    } catch {
+      /* The early mark stands. */
+    }
+
     /* First, and alone. See the note above about the splash. */
     try {
       const { startSplash } = await import("./splash");
@@ -143,6 +154,17 @@ export function startNativeRuntime(handlers: NativeRuntimeHandlers): () => void 
       collect(startStatusBar());
     } catch {
       /* The bar keeps the colour the config gave it at launch. */
+    }
+
+    if (platform === "android") {
+      try {
+        /* Material touch feedback: the ink spreads from under the finger.
+           Android only; iOS keeps its highlight and dim (platform.css). */
+        const { startRipple } = await import("@/lib/platform/ripple");
+        if (!stopped) collect(startRipple());
+      } catch {
+        /* The shared press (scale and tint) still answers every tap. */
+      }
     }
 
     try {

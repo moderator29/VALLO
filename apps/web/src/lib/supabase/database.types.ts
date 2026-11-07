@@ -3792,6 +3792,38 @@ export type Database = {
           },
         ]
       }
+      conversation_prefs: {
+        Row: {
+          conversation_id: string
+          muted_until: string | null
+          pinned_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          muted_until?: string | null
+          pinned_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          muted_until?: string | null
+          pinned_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_prefs_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           agent_id: string

@@ -1,28 +1,42 @@
 /*
- * THE FEED, THE STORIES ROW, THE POST CARD AND THE COMPOSER (13 October 2026).
+ * THE AROUND FEED: masthead, story tiles, the way to post, the post card and
+ * the composer (13 October 2026; the Vallo look of 7 November 2026).
  *
- * The founder's reference, taken in shape and not in colour: a row of
- * rounded-square story tiles with the name under each and a "Your story" tile
- * with a plus first; a small capsule segmented control (For you, Friends); a
- * post as a round face with the name in bold over the @handle, the time at the
- * right, the caption, the picture in one large rounded container with its
- * labels laid over it, and under it a rounded "Drop a comment" pill with a
- * heart at the right. A post with words and no picture puts the words inside
- * the same rounded container, so a text post is as tidy as a photo post.
+ * The 7 November look, in one line: calm cards with one hierarchy, the media
+ * set inside the card on a concentric corner, and every control a quiet
+ * object until it is touched.
+ *
+ *   - The masthead names the lens (Around, with Circle beside it and not
+ *     open yet), and the place moved down to the row that chooses what Around
+ *     shows, beside For you and Friends.
+ *   - A card is the platform's card material, 22px corners, one hairline and
+ *     (by day) the soft blue-tinted lift. Its head is the face, the name with
+ *     its marks, and ONE quiet line under it: the handle, the place, the time.
+ *   - The picture sits 4px inside the card's edge on an 18px corner, the
+ *     card's own corner less the inset, so the two curves are concentric and
+ *     the photograph reads as the card's own surface rather than a box in a
+ *     box. Its proportion is fixed before a byte arrives.
+ *   - The actions are bare glyphs with live counts, then "Drop a comment" as
+ *     one sunken line, a soft rectangle like every control with words.
+ *   - The story tiles are Vallo's rounded squares, not circles: a tile ringed
+ *     blue running into the orange spark while unseen, a quiet edge once
+ *     seen.
  *
  * Tokens only, and every colour comes from a token that is re-pointed for the
- * night and day themes, so one rule serves both. Corners are the radius scale
- * (`--nf-radius-island` for the big container, `--nf-radius-lg` for a story
- * tile, the pill for the comment pill). Nothing here uses font-weight 500.
+ * night and day themes, so one rule serves both. Nothing here uses font-weight
+ * 500. Motion lives in `app/css/feed-m.css`.
  *
  * It sits beside `social-feed.css` and wins by naming its own classes
- * (`nf-pc`, `nf-fv2`), not by fighting the old ones.
+ * (`nf-pc`, `nf-fv2`, `nf-lens`, `nf-feed-prompt`), not by fighting the old
+ * ones. Where it must restyle an old class it says so and carries the weight
+ * to win.
  */
 @layer components {
   /* ------------------------------------------------------------ the page */
 
   .nf-fv2-page {
-    --nf-feed-gap: var(--nf-space-md);
+    /* 12px between cards: the list rhythm (UX_SYSTEM section 4). */
+    --nf-feed-gap: var(--nf-space-sm);
     inline-size: 100%;
     max-inline-size: 48rem;
     margin-inline: auto;
@@ -60,52 +74,118 @@
     }
   }
 
+  /* ---------------------------------------------------------- the masthead */
+
+  .nf-fv2-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 2.75rem;
+  }
+  .nf-fv2-bar .nf-feed-find {
+    margin-inline-start: auto;
+  }
+
+  /* The lenses: two words of display type. Around is ink; Circle is the quiet
+     grey with a small line under it saying it is not open. Neither is a
+     button, and Circle answers nothing (VALLO_CIRCLE.md). */
+  .nf-lens {
+    display: flex;
+    align-items: baseline;
+    gap: var(--nf-space-md);
+    min-inline-size: 0;
+    padding-inline-start: var(--nf-space-3xs);
+  }
+  .nf-lens__item {
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+  .nf-lens__item--closed {
+    display: inline-flex;
+    flex-direction: column;
+    color: var(--nf-content-subtle);
+    cursor: default;
+    user-select: none;
+  }
+  .nf-lens__tag {
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-muted);
+    font-family: var(--nf-font-sans);
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  /* The track a second lens slides into. One pane today, so it is a block;
+     the day Circle opens, the track becomes a row of full-width panes that
+     snap, one swipe apart, and nothing above or below it moves. */
+  .nf-lens-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+    min-inline-size: 0;
+  }
+  .nf-lens-pane {
+    min-inline-size: 0;
+  }
+
   /* ------------------------------------------------------------ stories */
 
+  /* The row bleeds to the screen's edge (social-feed.css), the tiles are 64px
+     rounded squares, 12px apart. */
+  div.nf-story-ring.nf-fv2-stories {
+    margin-block: var(--nf-space-xs) var(--nf-space-2xs);
+  }
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__row {
     gap: var(--nf-space-sm);
     padding-block: var(--nf-space-2xs);
   }
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__item {
-    inline-size: 4.5rem;
+    inline-size: 4rem;
     gap: var(--nf-space-xs);
     border-radius: var(--nf-radius-lg);
   }
-  /* The tile: a rounded square holding the story's own picture, ringed by one
-     segment per live story (the ring's gradient is written by the item). */
+  /* The tile: the story's own picture inside a 2px ring, with 2px of the
+     page's ground between them, so the picture never touches the ring. The
+     ring's colours are written by the item (one segment per live story). */
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__disc {
-    inline-size: 4.5rem;
-    block-size: 4.5rem;
-    padding: 3px;
-    border-radius: var(--nf-radius-lg);
+    inline-size: 4rem;
+    block-size: 4rem;
+    padding: 2px;
+    border-width: 2px;
+    border-radius: var(--nf-radius-xl);
     box-shadow: none;
   }
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__disc img,
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__monogram {
-    border-radius: var(--nf-radius-md);
+    border-radius: var(--nf-radius-lg);
   }
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__name {
     max-inline-size: 100%;
     font-size: var(--nf-text-overline);
     color: var(--nf-content-secondary);
   }
-  /* "Your story": the same rounded square, a soft dashed outline, a plus in
-     the middle. No picture is claimed for somebody who has not made one. */
+  /* "Your story": the same rounded square in the card material with the
+     brand's soft edge and a filled blue disc with a plus. No picture is
+     claimed for somebody who has not made one. */
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__disc.nf-story-ring__disc--you:not([style*="--nf-ring"]) {
     display: grid;
     place-items: center;
     padding: 0;
-    border: var(--nf-border-width-strong) dashed var(--nf-border-strong);
-    background: var(--nf-surface-secondary);
-    color: var(--nf-brand-secondary);
-    transition:
-      background-color var(--nf-duration-fast) var(--nf-ease-standard),
-      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-on-brand);
+    transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__item:hover .nf-story-ring__disc--you:not([style*="--nf-ring"]),
   div.nf-story-ring.nf-fv2-stories .nf-story-ring__item:focus-visible .nf-story-ring__disc--you:not([style*="--nf-ring"]) {
-    background: var(--nf-brand-tint-1);
-    border-color: var(--nf-brand-secondary);
+    border-color: var(--nf-brand-edge-strong);
   }
   /* On a desktop the row starts where the column does. */
   @media (min-width: 1024px) {
@@ -120,10 +200,150 @@
   .nf-story-ring__add {
     display: grid;
     place-items: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: var(--nf-elevation-raised);
+  }
+
+  /* ------------------------------------------------- the way to post */
+
+  /* One quiet line: your face, the invitation, a picture glyph. The whole line
+     is one button into the composer. A soft rectangle in the card material
+     with the brand's edge, 52px tall, so it reads as the place you write. */
+  .nf-feed-prompt {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    margin-block: var(--nf-space-xs) var(--nf-space-2xs);
+    padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+    color: var(--nf-content-muted);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition:
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nf-feed-prompt:hover {
+    border-color: var(--nf-brand-edge-strong);
+  }
+  .nf-feed-prompt:active {
+    transform: scale(0.985);
+  }
+  .nf-feed-prompt:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-feed-prompt__face {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    overflow: hidden;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-secondary);
+  }
+  .nf-feed-prompt__face img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-feed-prompt__monogram {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
+  .nf-feed-prompt__words {
+    flex: 1;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-feed-prompt__pic {
+    display: grid;
+    flex: none;
+    place-items: center;
     inline-size: 2.25rem;
     block-size: 2.25rem;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-secondary);
+  }
+
+  /* ------------------------------------- For you, Friends, and the place */
+
+  .nf-fv2-filter {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    margin-block: var(--nf-space-xs) var(--nf-space-sm);
+    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  /* The row draws the hairline, so the tabs inside it do not draw their own. */
+  .nf-fv2-filter .nf-utabs {
+    flex: none;
+    border-block-end: 0;
+  }
+  .nf-fv2-filter__place {
+    position: relative;
+    flex: 0 1 auto;
+    min-inline-size: 0;
+    margin-inline-start: auto;
+  }
+  /* The place chip, quieter in this row than it was as the screen's head: a
+     34px soft rectangle in the card material with the brand's edge. The
+     selector carries four classes so it outranks light.css's raised fill
+     (a grey on the paper ground) without an !important. */
+  .nf-fv2-filter .nf-fv2-filter__place .nf-feed-chip[aria-haspopup] {
+    gap: var(--nf-space-2xs);
+    block-size: 2.125rem;
+    padding-inline: var(--nf-space-xs) var(--nf-space-2xs);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-secondary);
+  }
+  .nf-fv2-filter .nf-feed-chip__pin {
+    inline-size: 1rem;
+    block-size: 1rem;
+    color: var(--nf-brand-secondary);
+  }
+  .nf-fv2-filter .nf-feed-chip__label {
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-fv2-filter .nf-feed-chip__chev {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+    color: var(--nf-content-muted);
+  }
+  /* The menu opens under the chip and lines up with its right edge, at a width
+     its place names can be read in. */
+  .nf-fv2-filter .nf-feed-chip__menu {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    inline-size: min(18rem, calc(100vw - 2rem));
+    top: 2.5rem;
   }
 
   /* --------------------------------------------------------- the post card */
@@ -133,13 +353,13 @@
      hook the feed's arrival motion and the end-to-end checks use, so the card's
      own look is stated here with enough weight to be the one that applies. */
   .nf-post.nf-pc {
+    --nf-pc-pad: var(--nf-space-md);
     position: relative;
     display: block;
     min-inline-size: 0;
-    /* Compact, the way X reads: the words start right under the name. */
-    padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-xs);
+    padding: var(--nf-space-sm) var(--nf-pc-pad) var(--nf-space-2xs);
     border: var(--nf-border-width) solid var(--nf-card-border);
-    border-radius: var(--nf-radius-island);
+    border-radius: var(--nf-radius-xl);
     background: var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
   }
@@ -148,6 +368,7 @@
     align-items: center;
     gap: var(--nf-space-xs);
     margin: 0 0 var(--nf-space-xs);
+    padding-inline-start: var(--nf-space-lg);
     color: var(--nf-content-muted);
     font-size: var(--nf-text-overline);
     font-weight: 600;
@@ -164,7 +385,7 @@
     flex: none;
     border-radius: var(--nf-radius-circle);
   }
-  /* The face is 40px to read like X; its tap target still reaches 44. */
+  /* The face is 40px; its tap target still reaches 44. */
   .nf-pc__face::after {
     content: "";
     position: absolute;
@@ -192,7 +413,7 @@
     block-size: 100%;
     background: var(--nf-gradient-brand-ink);
     color: var(--nf-content-on-brand);
-    font-size: var(--nf-text-body-lg);
+    font-size: var(--nf-text-body);
     font-weight: 700;
   }
   .nf-pc__who {
@@ -215,7 +436,7 @@
     font-size: var(--nf-text-body);
     font-weight: 700;
     line-height: 1.25;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     text-decoration: none;
   }
   /* The name is a link and a small one: its target reaches 44 tall. The
@@ -243,37 +464,97 @@
   .nf-pc__tick--house svg {
     filter: drop-shadow(0 0 0.5px currentColor);
   }
-  .nf-pc__handle {
-    overflow: hidden;
-    color: var(--nf-content-muted);
-    font-size: var(--nf-text-caption);
-    line-height: 1.25;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .nf-pc__side {
-    display: flex;
-    flex: none;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--nf-space-3xs);
-  }
+  /* The role word and the moderator mark: small soft tags after the name, in
+     the brand's tint. Tags, not buttons, so the corner is the small one. */
   .nf-pc__marks {
     display: inline-flex;
+    flex: none;
     gap: var(--nf-space-2xs);
+    margin-inline-start: var(--nf-space-3xs);
   }
   .nf-pc__mark {
-    padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-pill);
+    padding: 0.0625rem var(--nf-space-2xs);
+    border-radius: var(--nf-radius-xs);
     background: var(--nf-brand-tint-1);
     color: var(--nf-brand-secondary);
     font-size: var(--nf-text-overline);
     font-weight: 600;
+    line-height: 1.35;
+  }
+
+  /* THE QUIET LINE: handle, place, time. One line, the muted ink; the handle
+     gives way first, then the place, and the time never does. */
+  .nf-pc__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-inline-size: 0;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
     line-height: 1.3;
+    white-space: nowrap;
+  }
+  .nf-pc__handle {
+    flex: 0 3 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    line-height: 1.3;
+    text-overflow: ellipsis;
+  }
+  /* A 3px dot between the parts, drawn rather than typed so a screen reader
+     reads the line as three facts and not as punctuation. */
+  .nf-pc__sep {
+    flex: none;
+    inline-size: 3px;
+    block-size: 3px;
+    border-radius: var(--nf-radius-circle);
+    background: currentColor;
+    opacity: 0.7;
+  }
+  .nf-pc__place {
+    position: relative;
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+    color: var(--nf-content-secondary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-pc__place .nf-ui-icon {
+    flex: none;
+    color: var(--nf-brand-secondary);
+  }
+  .nf-pc__place-name {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* The place is a small link: its target reaches 44 tall. */
+  .nf-pc__place::after {
+    content: "";
+    position: absolute;
+    inset-inline: calc(-1 * var(--nf-space-2xs));
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    block-size: 44px;
+  }
+  .nf-pc__place:hover .nf-pc__place-name,
+  .nf-pc__place:focus-visible .nf-pc__place-name {
+    color: var(--nf-content-primary);
+  }
+  .nf-pc__place:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+    border-radius: var(--nf-radius-xs);
   }
   .nf-pc__when {
     position: relative;
     display: inline-flex;
+    flex: none;
     align-items: center;
     color: var(--nf-content-muted);
     font-size: var(--nf-text-caption);
@@ -297,9 +578,10 @@
     flex: none;
     display: grid;
     place-items: center;
+    align-self: flex-start;
     inline-size: 2.75rem;
     block-size: 2.75rem;
-    margin-block: 0;
+    margin-block: calc(-1 * var(--nf-space-2xs)) 0;
     margin-inline: calc(-1 * var(--nf-space-xs)) calc(-1 * var(--nf-space-sm));
     padding: 0;
     color: var(--nf-content-muted);
@@ -369,16 +651,31 @@
     margin-block-start: var(--nf-space-sm);
   }
 
-  /* The one rounded container: the picture's frame and the words' frame. */
+  /* THE PICTURE, CONCENTRIC WITH THE CARD. It sits 4px inside the card's edge
+     (the card's padding less 4px, taken back with a negative margin) on the
+     card's corner less those 4px, so the two curves share a centre. */
   .nf-pc__frame {
+    --nf-pc-inset: var(--nf-space-2xs);
     position: relative;
     margin-block-start: var(--nf-space-sm);
+    margin-inline: calc(var(--nf-pc-inset) - var(--nf-pc-pad));
     overflow: hidden;
-    border-radius: var(--nf-radius-xl);
+    border-radius: calc(var(--nf-radius-xl) - var(--nf-pc-inset));
+    isolation: isolate;
+  }
+  /* A hairline drawn over the picture's edge, inside it, so a white sky on a
+     white card still has an edge and a dark one on the night card does too. */
+  .nf-pc__frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-border-subtle);
+    pointer-events: none;
   }
   .nf-pc__media {
     background: var(--nf-surface-inset);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
   }
   .nf-pc__media--one {
     /* A fixed proportion before a byte arrives (set inline from the picture's
@@ -420,60 +717,11 @@
     inset-block-start: var(--nf-space-sm);
     inset-inline-start: auto;
     inset-inline-end: var(--nf-space-sm);
-  }
-
-  /* Labels laid over the picture: likes at the left, the place at the right. */
-  .nf-pc__chips {
-    position: absolute;
-    inset-inline: var(--nf-space-sm);
-    inset-block-end: var(--nf-space-sm);
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--nf-space-xs);
-    pointer-events: none;
-  }
-  .nf-pc__chips > * {
-    pointer-events: auto;
-  }
-  .nf-pc .nf-pc__place {
-    min-block-size: 2.8rem;
-    margin: 0;
-    min-inline-size: 0;
-    max-inline-size: 70%;
-    margin-inline-start: auto;
-    color: var(--nf-content-on-media);
-  }
-  .nf-pc .nf-pc__place .nf-post__place-chip {
-    border-radius: var(--nf-radius-pill);
-    background: var(--nf-surface-control-on-media-strong);
-    color: var(--nf-content-on-media);
-  }
-  .nf-pc .nf-pc__place .nf-post__place-chip .nf-ui-icon {
-    color: var(--nf-content-on-media);
-  }
-  .nf-pc__plainplace {
-    margin-block-start: var(--nf-space-2xs);
-  }
-  .nf-pc__plainplace .nf-post__place {
-    min-block-size: 2.8rem;
-  }
-  .nf-pc__plainplace .nf-pc__place {
-    max-inline-size: 100%;
-    margin-inline-start: 0;
-    color: var(--nf-content-secondary);
-  }
-  .nf-pc__plainplace .nf-pc__place .nf-post__place-chip {
-    background: var(--nf-brand-tint-1);
-    color: var(--nf-content-secondary);
-  }
-  .nf-pc__plainplace .nf-pc__place .nf-post__place-chip .nf-ui-icon {
-    color: var(--nf-brand-secondary);
+    z-index: 2;
   }
 
   /* Words alone: the post is the text, at reading size, as tall as it is
-     (29 October 2026, the founder; X's text post is the reference). */
+     (29 October 2026, the founder; a text post has no frame). */
   .nf-pc__plaintext {
     margin-block-start: var(--nf-space-xs);
   }
@@ -485,37 +733,79 @@
 
   .nf-pc__actions {
     display: grid;
-    gap: 0;
-    margin-block-start: var(--nf-space-xs);
+    gap: var(--nf-space-2xs);
+    margin-block-start: var(--nf-space-2xs);
+    padding-block-end: var(--nf-space-sm);
   }
-  .nf-pc__reply-row {
+  /* Row one: the bare glyphs. The row is pulled out by the glyphs' own inner
+     padding so the heart's edge lines up with the words above it. */
+  .nf-pc__more-row {
     display: flex;
     align-items: center;
-    gap: var(--nf-space-xs);
+    gap: 0;
+    margin-inline: calc(-1 * var(--nf-space-sm));
   }
-  /* The rounded "Drop a comment" pill: a comment icon and the words, the count
-     at its far end. The pill is the 44px target, whole. */
+  .nf-pc__more-row .nf-post__act--share {
+    margin-inline-start: 0;
+  }
+  /* Save to your own shelf sits at the far edge. A guest's control is wrapped
+     in a `display: contents` span (AuthGate), so the button is the flex item
+     either way and the margin goes on it. */
+  .nf-pc__more-row .nf-post__act--save {
+    margin-inline-start: auto;
+  }
+  /* The glyphs carry no wrapper: no fill and no edge on the control. */
+  .nf-pc .nf-act-pill {
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-color: transparent;
+    background: transparent;
+    color: var(--nf-content-secondary);
+  }
+  .nf-pc .nf-act-pill--round {
+    min-inline-size: 2.75rem;
+  }
+  .nf-pc .nf-act-pill:hover {
+    background: transparent;
+    color: var(--nf-content-primary);
+  }
+  .nf-pc .nf-act-pill[aria-pressed="true"] {
+    border-color: transparent;
+    background: transparent;
+  }
+  .nf-pc .nf-act-pill__count {
+    display: inline-block;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+
+  /* Row two: "Drop a comment", the sunken line you write in. A soft rectangle
+     on the 44px rung with the brand's edge; the count sits at its far end. */
   .nf-pc__comment {
     display: flex;
     flex: 1;
     align-items: center;
-    gap: var(--nf-space-sm);
+    gap: var(--nf-space-xs);
+    inline-size: 100%;
     min-inline-size: 0;
-    min-block-size: 2.8rem;
-    padding-inline: var(--nf-space-md);
-    border-radius: var(--nf-radius-pill);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-sm);
+    border-radius: var(--nf-act-radius-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
     background: var(--nf-surface-secondary);
     color: var(--nf-content-muted);
     font-size: var(--nf-text-body-sm);
     text-align: start;
     transition:
-      background-color var(--nf-duration-fast) var(--nf-ease-standard),
-      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-press) var(--nf-ease-press);
   }
   .nf-pc__comment:hover {
-    background: var(--nf-surface-raised);
+    border-color: var(--nf-brand-edge-strong);
     color: var(--nf-content-secondary);
+  }
+  .nf-pc__comment:active {
+    transform: scale(0.985);
   }
   .nf-pc__comment:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
@@ -538,38 +828,6 @@
     font-size: var(--nf-text-caption);
     font-weight: 600;
   }
-  /* The glyphs in both rows are bare: no fill and no edge on the control. */
-  .nf-pc .nf-act-pill {
-    min-block-size: 2.75rem;
-    border-color: transparent;
-    background: transparent;
-  }
-  .nf-pc .nf-act-pill--round {
-    min-inline-size: 2.75rem;
-  }
-  .nf-pc .nf-act-pill:hover {
-    background: var(--nf-surface-secondary);
-  }
-  .nf-pc .nf-act-pill[aria-pressed="true"] {
-    border-color: transparent;
-    background: transparent;
-  }
-  .nf-pc__more-row {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-2xs);
-    margin-inline-start: calc(-1 * var(--nf-space-xs));
-  }
-  .nf-pc__more-row .nf-post__act--share {
-    margin-inline-start: 0;
-  }
-  .nf-pc__more-row > :last-child {
-    margin-inline-start: auto;
-    margin-inline-end: calc(-1 * var(--nf-space-xs));
-  }
-  .nf-pc__more-row .nf-post__act--save {
-    margin-inline-start: auto;
-  }
   .nf-pc .nf-post__attach,
   .nf-pc .nf-post__cited {
     margin-block-start: var(--nf-space-sm);
@@ -580,23 +838,15 @@
     font-size: var(--nf-text-caption);
   }
 
-  /* ----------------------------------------------------- the feed's header */
-
-  .nf-fv2-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--nf-space-xs);
-  }
-  .nf-fv2-bar .nf-feed-find {
-    margin-inline-start: auto;
-  }
-
-  /* On a wide screen the feed is a calm centred column of 600px. */
+  /* On a wide screen the feed is a calm centred column of 600px, and the card
+     breathes a step more. */
   @media (min-width: 1024px) {
     .nf-fv2-main .nf-post.nf-pc {
-      padding: var(--nf-space-lg);
+      --nf-pc-pad: var(--nf-space-lg);
+      padding: var(--nf-space-md) var(--nf-pc-pad) var(--nf-space-2xs);
     }
   }
+
 
   /* ------------------------------------------------------ the right rail */
 
