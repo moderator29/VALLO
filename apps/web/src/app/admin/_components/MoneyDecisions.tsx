@@ -9,6 +9,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The two decisions the money side of the console takes here (the escrow
@@ -63,7 +64,11 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
             : { documentId, approve: false, reason },
         );
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"] ?? result.error);
+          /* A word about a field stays under the decision; anything else is
+             the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: () => decide(approve) });
           return;
         }
         setReason("");
@@ -193,13 +198,11 @@ export function FeeRateForm({
   const [startsAt, setStartsAt] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
   function submit() {
     setError(null);
-    setDone(false);
     const percentValue = Number(percent);
     const flatValue = Number(flatNaira);
     if (!Number.isFinite(percentValue) || percentValue < 0 || percentValue > 100) {
@@ -232,15 +235,19 @@ export function FeeRateForm({
           note,
         });
         if (!result.ok) {
+          /* A word about the note or the start date goes back to the form;
+             anything else is the outcome, and the banner says it. No retry:
+             a rate is recorded from the confirm step, so trying again means
+             confirming again. */
           setConfirming(false);
-          setError(
-            result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"] ?? result.error,
-          );
+          const about = result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"];
+          if (about) setError(about);
+          else banner.error(result.error);
           return;
         }
         setNote("");
         setConfirming(false);
-        setDone(true);
+        banner.success("Recorded, with your name on it.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -349,11 +356,6 @@ export function FeeRateForm({
           }
         />
       </Sheet>
-      {done && (
-        <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">
-          Recorded, with your name on it.
-        </p>
-      )}
     </div>
   );
 }

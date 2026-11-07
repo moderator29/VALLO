@@ -9,6 +9,7 @@ import { adjustInterest } from "@/lib/interests/actions";
 import type { IntentDirection, PropertyType } from "@/lib/interests/model";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * "More like this" / "Not for me", on the card itself.
@@ -75,11 +76,14 @@ export function IntentTune({
   /* The optimistic answer to "is this market ranked ahead". Seeded from the
      server's read and moved by a tap before the round trip returns. */
   const [ranked, setRanked] = useState(() => interests.includes(type));
-  const [note, setNote] = useState("");
-  const [error, setError] = useState("");
   const [pending, startTransition] = useSafeTransition();
 
   const say = (line: string) => line.replace("{market}", market);
+  /* One line, naming the market and what actually happened to it, said by the
+     one banner at the top of the screen (Grade 1), which sits above this
+     sheet. The tone as an option: the card's dictionary slice test counts any
+     `.success` read. */
+  const tell = (line: string) => banner(line, { tone: "success", "data-testid": "intent-tune-note" });
 
   const choose = (direction: IntentDirection) => {
     const wants = direction === "more";
@@ -90,9 +94,8 @@ export function IntentTune({
      * another device, can both make this belief wrong - so the line is written
      * again from the real result below.
      */
-    setError("");
     setRanked(wants);
-    setNote(
+    tell(
       before === wants
         ? say(wants ? copy.alreadyUp : copy.alreadyBack)
         : say(wants ? copy.movedUp : copy.steppedBack),
@@ -104,12 +107,11 @@ export function IntentTune({
         if (!result.ok) {
           // Nothing was written, so the screen goes back to what is true.
           setRanked(before);
-          setNote("");
-          setError(result.error);
+          banner.error(result.error, { retry: () => choose(direction), "data-testid": "intent-tune-error" });
           return;
         }
         setRanked(result.data.interests.includes(type));
-        setNote(
+        tell(
           result.data.changed
             ? say(wants ? copy.movedUp : copy.steppedBack)
             : say(wants ? copy.alreadyUp : copy.alreadyBack),
@@ -127,11 +129,7 @@ export function IntentTune({
         data-testid={`intent-tune-${type}`}
         aria-label={copy.open}
         aria-haspopup="dialog"
-        onClick={() => {
-          setNote("");
-          setError("");
-          setOpen(true);
-        }}
+        onClick={() => setOpen(true)}
         /*
          * `nf-tap` is the 44pt floor, and it is the platform's own rule rather
          * than a local one: an `::after` centred on the control at
@@ -194,27 +192,6 @@ export function IntentTune({
             {copy.less}
           </Button>
         </div>
-
-        {/* One line, naming the market and what actually happened to it. */}
-        {note && (
-          <p
-            role="status"
-            data-testid="intent-tune-note"
-            className="mt-md rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-success)_45%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-success)]"
-          >
-            {note}
-          </p>
-        )}
-
-        {error && (
-          <p
-            role="alert"
-            data-testid="intent-tune-error"
-            className="mt-md rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-          >
-            {error}
-          </p>
-        )}
 
         {/* Says what the control does, and what it does NOT do. Somebody who
             reads "Not for me" as "hide this" has to be corrected here, before

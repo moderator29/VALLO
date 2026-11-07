@@ -1,7 +1,8 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Reveal } from "@/components/site/Reveal";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toggleSave } from "@/lib/saved/actions";
@@ -135,7 +136,6 @@ export function SavedBoard({
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
   const [phase, setPhase] = useState<Record<string, Phase>>({});
-  const [messages, setMessages] = useState<Record<string, string>>({});
   const [hydrating, setHydrating] = useState(false);
   /* Plan item 28: a removed card fades (160ms) and then folds its height away
      (240ms) before the Undo chip takes the slot; under reduced motion, Calm
@@ -159,7 +159,7 @@ export function SavedBoard({
     setLastSaved(before);
   }, []);
 
-  /* Slots, phases and messages are keyed by shelf and id (`savedBoardKey`),
+  /* Slots and phases are keyed by shelf and id (`savedBoardKey`),
      never by id alone: a listing and a place are two tables, and a repeated
      row must be one slot rather than two cards under one React key. */
   const ids = useMemo(() => uniqueBoardKeys(items), [items]);
@@ -210,18 +210,6 @@ export function SavedBoard({
     startTransition(() => router.refresh());
   }, [items, router]);
 
-  const setMessage = useCallback((id: string, message: string | null) => {
-    setMessages((prev) => {
-      if (message === null) {
-        if (!(id in prev)) return prev;
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      }
-      return { ...prev, [id]: message };
-    });
-  }, []);
-
   const byKey = new Map<string, SavedBoardItem>();
   for (const item of items) {
     const key = savedBoardKey(item);
@@ -263,7 +251,6 @@ export function SavedBoard({
   function commitUnsave(item: SavedBoardItem) {
     const key = savedBoardKey(item);
     removedItems.current.set(key, item);
-    setMessage(key, null);
     setPhase((prev) => ({ ...prev, [key]: "removed" }));
     if (item.mode === "local") removeLocalSave(item.id);
 
@@ -278,7 +265,8 @@ export function SavedBoard({
           delete next[key];
           return next;
         });
-        setMessage(key, result.error);
+        /* Said by the one banner at the top of the screen (Grade 1). */
+        banner.error(result.error, { retry: () => commitUnsave(item) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -289,7 +277,6 @@ export function SavedBoard({
     const item = byKey.get(key) ?? removedItems.current.get(key);
     if (!item) return;
     const id = item.id;
-    setMessage(key, null);
     setPhase((prev) => ({ ...prev, [key]: "restoring" }));
     if (item.mode === "local") addLocalSave(id, item.savedAt);
 
@@ -299,7 +286,7 @@ export function SavedBoard({
         if (!result.ok) {
           if (item.mode === "local") removeLocalSave(id);
           setPhase((prev) => ({ ...prev, [key]: "removed" }));
-          setMessage(key, result.error);
+          banner.error(result.error, { retry: () => undo(key) });
           return;
         }
         router.refresh();
@@ -431,11 +418,6 @@ export function SavedBoard({
                     {slotCopy.undo}
                   </button>
                 </div>
-              )}
-              {messages[key] && (
-                <p role="alert" className="nf-caption mt-inline-tight text-[var(--nf-state-error)]">
-                  {messages[key]}
-                </p>
               )}
             </li>
           ))}

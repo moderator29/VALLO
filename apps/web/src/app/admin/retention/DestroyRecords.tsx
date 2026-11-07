@@ -8,6 +8,7 @@ import { confirmationMatches } from "@/lib/admin/desk-reads/retention";
 import { fill } from "../_components/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type DestroyCopy = {
   destroyBody: string;
@@ -43,22 +44,25 @@ export function DestroyRecords({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function run() {
-    setError(null);
+    setConfirmError(null);
     start(async () => {
       try {
         const result = await destroyExpiredMoneyRecords({ confirm: typed, expected });
         if (!result.ok) {
-          setError(result.fieldErrors?.["confirm"] ?? result.error);
+          /* A word about the typed phrase stays under the field; anything
+             else is the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["confirm"];
+          if (about) setConfirmError(about);
+          else banner.error(result.error, { retry: run });
           return;
         }
         setOpen(false);
         setTyped("");
-        setMessage("redacted" in result.data ? fill(copy.done, { count: result.data.redacted }) : copy.nothingToDo);
+        banner.success("redacted" in result.data ? fill(copy.done, { count: result.data.redacted }) : copy.nothingToDo);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -89,10 +93,7 @@ export function DestroyRecords({
           <Button
             type="button"
             variant="danger"
-            onClick={() => {
-              setMessage(null);
-              setOpen(true);
-            }}
+            onClick={() => setOpen(true)}
           >
             {fill(copy.confirmButton, { count: expected })}
           </Button>
@@ -121,6 +122,11 @@ export function DestroyRecords({
           <p id={`${id}-hint`} className="nf-caption mt-xs">
             {copy.confirmHint}
           </p>
+          {confirmError && (
+            <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
+              {confirmError}
+            </p>
+          )}
           <div className="mt-row flex flex-wrap gap-inline">
             <Button type="submit" variant="danger" loading={pending} disabled={!confirmationMatches(typed)}>
               {fill(copy.confirmButton, { count: expected })}
@@ -132,16 +138,6 @@ export function DestroyRecords({
         </form>
       )}
 
-      {error && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
-      {message && (
-        <p role="status" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">
-          {message}
-        </p>
-      )}
     </div>
   );
 }

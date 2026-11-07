@@ -12,6 +12,7 @@ import { NotMePanel, type NotMeCopy } from "./NotMePanel";
 import { signOutEverywhere } from "@/lib/profile/actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The list, and the buttons that end things.
@@ -118,19 +119,22 @@ export function DeviceList({
   locale: Locale;
 }) {
   const [armed, setArmed] = useState<string | null>(null);
-  const [outcome, setOutcome] = useState<Outcome>(null);
   const [pending, startTransition] = useSafeTransition();
 
+  /* The first tap arms the row; the second runs it. What it did is said by
+     the one banner at the top of the screen (Grade 1). */
   const run = (key: string, work: () => Promise<Outcome>) => {
     if (armed !== key) {
       setArmed(key);
-      setOutcome(null);
       return;
     }
     setArmed(null);
     startTransition(async () => {
       try {
-        setOutcome(await work());
+        const outcome = await work();
+        if (!outcome) return;
+        if (outcome.tone === "problem") banner.error(outcome.message, { "data-testid": "devices-outcome" });
+        else banner.success(outcome.message, { "data-testid": "devices-outcome" });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -199,18 +203,6 @@ export function DeviceList({
       {!readable && (
         <p role="alert" className="nf-panel nf-panel--card block p-card nf-body-sm text-content">
           {copy.unreadable}
-        </p>
-      )}
-
-      {outcome && (
-        <p
-          role="status"
-          data-testid="devices-outcome"
-          className={`nf-panel nf-panel--card block p-card nf-body-sm ${
-            outcome.tone === "problem" ? "text-danger" : "text-content"
-          }`}
-        >
-          {outcome.message}
         </p>
       )}
 

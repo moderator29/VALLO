@@ -7,6 +7,7 @@ import { addMemberNote } from "@/lib/admin/member-actions";
 import { NOTE_MAX, NOTE_MIN } from "@/lib/admin/member-file-rules";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Write a note on this person's file. Notes cannot be edited or deleted, by
@@ -18,28 +19,31 @@ export function NoteForm({ userId }: { userId: string }) {
   const hintId = useId();
   const router = useRouter();
   const [body, setBody] = useState("");
-  const [result, setResult] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function save() {
+    start(async () => {
+      try {
+        const r = await addMemberNote({ userId, body });
+        if (r.ok) {
+          setBody("");
+          banner.success("Note saved. It is on the file and in the audit log.");
+          router.refresh();
+        } else {
+          banner.error(r.error, { retry: save });
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
 
   return (
     <form
       className="mt-row grid gap-xs"
       onSubmit={(event) => {
         event.preventDefault();
-        start(async () => {
-          try {
-            const r = await addMemberNote({ userId, body });
-            if (r.ok) {
-              setBody("");
-              setResult({ tone: "ok", text: "Note saved. It is on the file and in the audit log." });
-              router.refresh();
-            } else {
-              setResult({ tone: "error", text: r.error });
-            }
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        save();
       }}
     >
       <label htmlFor={fieldId} className="nf-label">
@@ -62,15 +66,6 @@ export function NoteForm({ userId }: { userId: string }) {
           Save note
         </Button>
       </div>
-      {result && (
-        <p
-          role={result.tone === "error" ? "alert" : "status"}
-          className="text-[length:var(--nf-text-caption)]"
-          style={{ color: result.tone === "error" ? "var(--nf-state-error)" : "var(--nf-content-secondary)" }}
-        >
-          {result.text}
-        </p>
-      )}
     </form>
   );
 }

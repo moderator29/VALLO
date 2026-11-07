@@ -3,7 +3,6 @@
 import type { HubCopy } from "@/components/app/account/settings-copy";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
 import { initial } from "@/lib/text/initial";
-import { useState } from "react";
 import Link from "next/link";
 import { withNext } from "@/lib/auth/next-link";
 import { useRouter } from "next/navigation";
@@ -32,6 +31,7 @@ import type { ResolvedProfileSettings } from "@/lib/profile/model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE SETTINGS HOME, per `7F96BE6C`.
@@ -378,30 +378,20 @@ export function SettingsHub({
   );
 }
 
-/** Log Out, the last row on the screen. Real `signOut`, with its own error line. */
+/** Log Out, the last row on the screen. Real `signOut`; a refusal is said by the one banner. */
 export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
   const router = useRouter();
   const hub = t.settings.hub;
   const [signingOut, startSignOut] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   if (!signedIn) return null;
   return (
     <div className="nf-hub">
-      <SettingsGroup
-        note={
-          error ? (
-            <span role="alert" className="text-[var(--nf-state-error)]">
-              {error}
-            </span>
-          ) : undefined
-        }
-      >
+      <SettingsGroup>
         <RowButton
           glyph={<HubGlyph name="log-out" />}
           label={signingOut ? hub.loggingOut : hub.logOut}
           disabled={signingOut}
           onClick={() => {
-            setError(null);
             startSignOut(async () => {
               try {
                 /* V-98: the widget stops reading this account before the session ends. */
@@ -409,7 +399,7 @@ export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
                 /* The push row for THIS device is retired with the session. */
                 const result = await signOut(readLocalDevice()?.deviceRef);
                 if (!result.ok) {
-                  setError(result.error);
+                  banner.error(result.error);
                   return;
                 }
                 /* V-35, V-77: a shared phone keeps neither somebody else's gate code

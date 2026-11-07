@@ -2,7 +2,6 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { CANCELLATION_REASONS, type CancellationReason } from "@/lib/trust/cancellation";
 import { cancelBookingAsAdmin, previewCancellation } from "@/lib/admin/bookings-actions";
@@ -24,6 +23,7 @@ import {
 } from "@/lib/admin/actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Every hand the console offers, in one client module.
@@ -85,15 +85,19 @@ function ActionSheet({
 }: SheetProps) {
   const router = useRouter();
   const [notes, setNotes] = useState("");
-  const [result, setResult] = useState<ActionResult<null> | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
-  const submit = () => {
+  /* The outcome goes to the banner: done closes the sheet and says what
+     happened; a refusal keeps the sheet open, with the same tap one away. */
+  const submit = (): void => {
     startTransition(async () => {
       try {
         const outcome = await run(notes.trim());
-        setResult(outcome);
-        if (outcome.ok) router.refresh();
+        if (outcome.ok) {
+          banner.success(`${successTitle}. ${successBody}`);
+          onClose();
+          router.refresh();
+        } else banner.error(outcome.error, { retry: submit });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -102,8 +106,6 @@ function ActionSheet({
 
   const blocked = notesRequired && notes.trim().length === 0;
 
-  const succeeded = Boolean(result?.ok);
-
   return (
     <Sheet
       open
@@ -111,76 +113,44 @@ function ActionSheet({
         if (!next) onClose();
       }}
       title={title}
-      /* The success state replaces the heading with its own line, exactly as
-         before; the title stays as the sheet's accessible name. */
-      hideTitle={succeeded}
       footer={
-        succeeded ? (
-          <Button variant="primary" full onClick={onClose}>
-            {common.done}
+        <div className="grid gap-sm">
+          <Button
+            variant={destructive ? "dangerQuiet" : "primary"}
+            full
+            onClick={submit}
+            disabled={blocked}
+            loading={pending}
+          >
+            {confirmLabel}
           </Button>
-        ) : (
-          <div className="grid gap-sm">
-            <Button
-              variant={destructive ? "dangerQuiet" : "primary"}
-              full
-              onClick={submit}
-              disabled={blocked}
-              loading={pending}
-            >
-              {confirmLabel}
-            </Button>
-            <Button variant="secondary" full onClick={onClose}>
-              {common.notNow}
-            </Button>
-          </div>
-        )
+          <Button variant="secondary" full onClick={onClose}>
+            {common.notNow}
+          </Button>
+        </div>
       }
     >
-      {succeeded ? (
-        <div className="text-center">
-          <p className="flex items-center justify-center gap-xs text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
-            <UiIcon name="verified" size={20} className="text-[var(--nf-state-success)]" />
-            {successTitle}
-          </p>
-          <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {successBody}
-          </p>
-        </div>
-      ) : (
-        <>
-          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {description}
-          </p>
+      <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+        {description}
+      </p>
 
-          {extra}
+      {extra}
 
-          {withNotes && (
-            <label className="mt-md block">
-              <span className="nf-label">
-                {notesLabel}
-                {notesRequired ? "" : ` ${common.optional}`}
-              </span>
-              <textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                rows={3}
-                maxLength={2000}
-                className="nf-field mt-2xs w-full resize-y"
-                placeholder={common.notePlaceholder}
-              />
-            </label>
-          )}
-
-          {result && !result.ok && (
-            <p
-              role="alert"
-              className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-            >
-              {result.error}
-            </p>
-          )}
-        </>
+      {withNotes && (
+        <label className="mt-md block">
+          <span className="nf-label">
+            {notesLabel}
+            {notesRequired ? "" : ` ${common.optional}`}
+          </span>
+          <textarea
+            value={notes}
+            onChange={(event) => setNotes(event.target.value)}
+            rows={3}
+            maxLength={2000}
+            className="nf-field mt-2xs w-full resize-y"
+            placeholder={common.notePlaceholder}
+          />
+        </label>
       )}
     </Sheet>
   );
@@ -586,18 +556,17 @@ export function TicketReply({
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
-  const [result, setResult] = useState<ActionResult<null> | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
-  const send = () => {
+  const send = (): void => {
     startTransition(async () => {
       try {
         const outcome = await replySupportTicket({ ticketId, body });
-        setResult(outcome);
         if (outcome.ok) {
+          banner.success(copy.reply.sent);
           setBody("");
           router.refresh();
-        }
+        } else banner.error(outcome.error, { retry: send });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -617,18 +586,6 @@ export function TicketReply({
           placeholder={copy.reply.placeholder}
         />
       </label>
-
-      {result && !result.ok && (
-        <p
-          role="alert"
-          className="mt-xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-        >
-          {result.error}
-        </p>
-      )}
-      {result?.ok && (
-        <p className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-success)]">{copy.reply.sent}</p>
-      )}
 
       <div className="mt-xs flex flex-wrap items-center gap-md">
         <Button
@@ -657,13 +614,12 @@ export function TicketStatusControl({
   copy: AdminCopy["support"];
 }) {
   const router = useRouter();
-  const [result, setResult] = useState<ActionResult<null> | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const [closing, setClosing] = useState(false);
   const [closingNote, setClosingNote] = useState("");
 
-  const move = (next: (typeof TICKET_STATES)[number], note?: string) => {
+  const move = (next: (typeof TICKET_STATES)[number], note?: string): void => {
     /* Closing always says what was done, so the ticket's end is on record. */
     if (next === "closed" && note === undefined) {
       setClosing(true);
@@ -672,12 +628,11 @@ export function TicketStatusControl({
     startTransition(async () => {
       try {
         const outcome = await setTicketStatus({ ticketId, status: next, ...(note ? { note } : {}) });
-        setResult(outcome);
         if (outcome.ok) {
           setClosing(false);
           setClosingNote("");
           router.refresh();
-        }
+        } else banner.error(outcome.error, { retry: () => move(next, note) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -732,11 +687,6 @@ export function TicketStatusControl({
           </div>
         </div>
       ) : null}
-      {result && !result.ok && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-warning)]">
-          {result.error}
-        </p>
-      )}
     </div>
   );
 }
@@ -758,15 +708,14 @@ export function SwitchControl({
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [result, setResult] = useState<ActionResult<null> | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
-  const turnOn = () => {
+  const turnOn = (): void => {
     startTransition(async () => {
       try {
         const outcome = await toggleFeatureFlag({ key: flagKey, enabled: true });
-        setResult(outcome);
         if (outcome.ok) router.refresh();
+        else banner.error(outcome.error, { retry: turnOn });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -783,12 +732,6 @@ export function SwitchControl({
         <Button variant="primary" onClick={turnOn} loading={pending} className="shrink-0">
           {copy.switchOn}
         </Button>
-      )}
-
-      {result && !result.ok && (
-        <p role="alert" className="mt-xs w-full text-[length:var(--nf-text-caption)] text-[var(--nf-state-warning)]">
-          {result.error}
-        </p>
       )}
 
       {confirming && (

@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Let it through, or take it down.
@@ -34,16 +35,14 @@ export function HoldDecision({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
 
-  const run = (decision: "RELEASE" | "REMOVE") => {
-    setError(null);
+  const run = (decision: "RELEASE" | "REMOVE"): void => {
     startTransition(async () => {
       try {
         const result = await decideHeldItem({ target, id, decision, reason });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => run(decision) });
           return;
         }
         router.refresh();
@@ -104,11 +103,6 @@ export function HoldDecision({
         </p>
       )}
 
-      {error && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

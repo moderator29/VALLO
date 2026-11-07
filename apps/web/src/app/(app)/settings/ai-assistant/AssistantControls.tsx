@@ -14,22 +14,22 @@ import {
 import { PERMISSIONS, type AiPermission } from "@/lib/assistant/permissions";
 import { AI_GLYPH, PERMISSION_GLYPH } from "@/lib/assistant/glyphs";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The assistant's controls once it is on: the master switch, one switch per
  * permission, the learned list. Every control calls a server action that the
  * database then enforces, and the screen re-reads the result, so what a
- * switch shows is what is saved.
+ * switch shows is what is saved. Each outcome is said by the one banner at
+ * the top of the screen (Grade 1, UX_SYSTEM 8.1).
  */
 
 export function MasterSwitch({ enabled }: { enabled: boolean }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const onChange = (next: boolean) => {
-    setError(null);
     if (next) {
       /* Never on in place: the first time goes through the agreement screen. */
       router.push("/settings/ai-assistant/consent");
@@ -43,10 +43,11 @@ export function MasterSwitch({ enabled }: { enabled: boolean }) {
       try {
         const result = await deactivateAssistant();
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: turnOff });
           return;
         }
         setConfirming(false);
+        banner.success("The assistant is off. Every permission you gave was taken back.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -89,11 +90,6 @@ export function MasterSwitch({ enabled }: { enabled: boolean }) {
           </div>
         </div>
       ) : null}
-      {error ? (
-        <p className="nf-rv-msg nf-rv-msg--error" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -101,17 +97,17 @@ export function MasterSwitch({ enabled }: { enabled: boolean }) {
 export function PermissionRows({ granted }: { granted: readonly AiPermission[] }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [error, setError] = useState<string | null>(null);
 
   const toggle = (permission: AiPermission, next: boolean) => {
-    setError(null);
     start(async () => {
       try {
         const result = await setAssistantPermission({ permission, granted: next });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => toggle(permission, next) });
           return;
         }
+        const title = PERMISSIONS.find((p) => p.key === permission)?.title;
+        if (title) banner.success(next ? `Allowed: ${title}` : `Taken back: ${title}`);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -150,11 +146,6 @@ export function PermissionRows({ granted }: { granted: readonly AiPermission[] }
       <p className="nf-ai-set__hint nf-ai-note">
         Letting it read your transactions does not let it pay for anything. Payment help is its own permission, and every payment still needs your Confirm and a security check at that moment.
       </p>
-      {error ? (
-        <p className="nf-rv-msg nf-rv-msg--error" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }
@@ -162,17 +153,16 @@ export function PermissionRows({ granted }: { granted: readonly AiPermission[] }
 export function LearnedList({ items }: { items: readonly { key: string; weight: number }[] }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [error, setError] = useState<string | null>(null);
 
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) =>
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>, done: string) =>
     start(async () => {
       try {
-        setError(null);
         const result = await fn();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through.");
+          banner.error(result.error ?? "That did not go through.", { retry: () => run(fn, done) });
           return;
         }
+        banner.success(done);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -191,13 +181,13 @@ export function LearnedList({ items }: { items: readonly { key: string; weight: 
               {item.key.startsWith("seen:") ? `From places you opened: ${item.key.slice(5).replace(/[_:]/g, " ")}` : item.key.replace(/_/g, " ")}
             </span>
             <span className="nf-ai-learned__acts">
-              <Button size="sm" variant={item.weight > 0 ? "primary" : "quiet"} disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "like" }))}>
+              <Button size="sm" variant={item.weight > 0 ? "primary" : "quiet"} disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "like" }), "Noted. It will show you more like this.")}>
                 Like
               </Button>
-              <Button size="sm" variant={item.weight < 0 ? "primary" : "quiet"} disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "dislike" }))}>
+              <Button size="sm" variant={item.weight < 0 ? "primary" : "quiet"} disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "dislike" }), "Noted. It will show you less like this.")}>
                 Dislike
               </Button>
-              <Button size="sm" variant="quiet" disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "remove" }))}>
+              <Button size="sm" variant="quiet" disabled={pending} onClick={() => run(() => setLearnedPreference({ key: item.key, stance: "remove" }), "Removed from what it learned.")}>
                 Remove
               </Button>
             </span>
@@ -205,15 +195,10 @@ export function LearnedList({ items }: { items: readonly { key: string; weight: 
         ))}
       </ul>
       <div className="nf-ai-set__foot">
-        <Button size="sm" variant="dangerQuiet" disabled={pending} onClick={() => run(() => clearLearnedPreferences())} data-testid="ai-clear-prefs">
+        <Button size="sm" variant="dangerQuiet" disabled={pending} onClick={() => run(() => clearLearnedPreferences(), "Everything it learned about you is cleared.")} data-testid="ai-clear-prefs">
           Clear everything it learned
         </Button>
       </div>
-      {error ? (
-        <p className="nf-rv-msg nf-rv-msg--error" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

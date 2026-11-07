@@ -8,6 +8,7 @@ import { PhoneField } from "@/components/app/PhoneField";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { saveProfilePhone } from "@/lib/settings/profile-phone";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE NUMBER ON FILE, while codes are not sent. One field, one save; the
@@ -37,6 +38,7 @@ export function ProfilePhoneForm({
       if (!result.ok) return setError(result.fieldErrors?.phone ?? result.error);
       setSavedLast(result.data.last);
       setPhone("");
+      banner.success(copy.profileSaved, { "data-testid": "profile-phone-saved" });
       if (next) router.push(next);
       else router.refresh();
     });
@@ -46,8 +48,8 @@ export function ProfilePhoneForm({
       <h2 className="nf-h3 text-[var(--nf-content-primary)]">{copy.profileTitle}</h2>
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.profileBody}</p>
       {last ? (
-        <p className="nf-body text-[var(--nf-content-primary)]" role="status" data-testid="profile-phone-current">
-          {savedLast ? copy.profileSaved : copy.profileCurrent.replace("{last}", last)}
+        <p className="nf-body text-[var(--nf-content-primary)]" data-testid="profile-phone-current">
+          {copy.profileCurrent.replace("{last}", last)}
         </p>
       ) : null}
       <PhoneField

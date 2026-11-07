@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
@@ -52,18 +53,18 @@ export function ReportSheet({
 }) {
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [detail, setDetail] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useSafeTransition();
 
   const send = () => {
     if (!reason) return;
-    setError(null);
     startTransition(async () => {
       try {
         const result = await submit({ reason, detail: detail.trim() });
         if (!result.ok) {
-          setError(result.error);
+          /* Said by the one banner (Grade 1), which sits above this sheet. The
+             thank-you below stays: it is the record, with what to do next. */
+          banner.error(result.error, { retry: send });
           return;
         }
         setSent(true);
@@ -133,15 +134,6 @@ export function ReportSheet({
                 placeholder={words.detailPlaceholder}
               />
             </label>
-
-            {error ? (
-              <p
-                role="alert"
-                className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-primary)]"
-              >
-                {error}
-              </p>
-            ) : null}
 
             <div className="mt-lg flex flex-col gap-xs sm:flex-row-reverse">
               <Button

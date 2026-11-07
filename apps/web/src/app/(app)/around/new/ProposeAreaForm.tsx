@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import "@/app/css/orphans.css";
@@ -49,7 +50,6 @@ export function ProposeAreaForm({
   const [stateCode, setStateCode] = useState("");
   const [blurb, setBlurb] = useState("");
 
-  const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
 
@@ -98,7 +98,6 @@ export function ProposeAreaForm({
   }
 
   const submit = () => {
-    setError(null);
     setFieldErrors({});
     startTransition(async () => {
       try {
@@ -108,7 +107,9 @@ export function ProposeAreaForm({
           router.refresh();
           return;
         }
-        setError(result.error);
+        /* The outcome goes to the one banner (Grade 1); each field's own
+           error stays under that field. */
+        banner.error(result.error);
         setFieldErrors(result.fieldErrors ?? {});
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -218,15 +219,6 @@ export function ProposeAreaForm({
       <p className="text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
         {AREA_COPY.proposeWhy}
       </p>
-
-      {error ? (
-        <p
-          role="alert"
-          className="nf-panel nf-panel--card block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
 
       <Button type="submit" variant="primary" full disabled={pending || !signedIn}>
         {pending ? "Sending" : "Suggest this place"}

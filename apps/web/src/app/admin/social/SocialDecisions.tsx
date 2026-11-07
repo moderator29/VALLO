@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The decision controls for Around.
@@ -32,15 +33,13 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 function useDecision() {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
 
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => {
-    setError(null);
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>): void => {
     startTransition(async () => {
       try {
         const result = await fn();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through. Try again.");
+          banner.error(result.error ?? "That did not go through. Try again.", { retry: () => run(fn) });
           return;
         }
         router.refresh();
@@ -50,7 +49,7 @@ function useDecision() {
     });
   };
 
-  return { pending, error, run };
+  return { pending, run };
 }
 
 function NoteField({
@@ -76,17 +75,8 @@ function NoteField({
   );
 }
 
-function ErrorLine({ error }: { error: string | null }) {
-  if (!error) return null;
-  return (
-    <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-      {error}
-    </p>
-  );
-}
-
 export function AreaDecision({ areaId, name }: { areaId: string; name: string }) {
-  const { pending, error, run } = useDecision();
+  const { pending, run } = useDecision();
   const [note, setNote] = useState("");
 
   return (
@@ -121,7 +111,6 @@ export function AreaDecision({ areaId, name }: { areaId: string; name: string })
           Declining needs a reason. They receive it word for word.
         </p>
       ) : null}
-      <ErrorLine error={error} />
     </div>
   );
 }
@@ -133,7 +122,7 @@ export function ModeratorDecision({
   applicationId: string;
   areaName: string;
 }) {
-  const { pending, error, run } = useDecision();
+  const { pending, run } = useDecision();
   const [note, setNote] = useState("");
 
   return (
@@ -174,7 +163,6 @@ export function ModeratorDecision({
         Approving lets them hide a post while somebody reviews it. It does not let
         them delete one, and it grants nothing outside this place.
       </p>
-      <ErrorLine error={error} />
     </div>
   );
 }
@@ -188,7 +176,7 @@ export function PauseToggle({
   paused: boolean;
   name: string;
 }) {
-  const { pending, error, run } = useDecision();
+  const { pending, run } = useDecision();
   const [note, setNote] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -225,7 +213,6 @@ export function PauseToggle({
           Cancel
         </Button>
       </div>
-      <ErrorLine error={error} />
     </div>
   );
 }

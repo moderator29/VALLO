@@ -6,6 +6,8 @@ import { pauseRelease, resolveHeldPayment, resumeRelease } from "@/lib/admin/agr
 import { signalWords, type WatchRow } from "@/lib/admin/watch-list";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
+import type { ActionResult } from "@/lib/actions/envelope";
 
 /**
  * D68d: the watch list over live deals, riskiest first. A deal waiting for a
@@ -27,14 +29,25 @@ export function WatchList({ rows, locale }: { rows: WatchRow[]; locale: Locale }
 
 function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
   const [pending, start] = useSafeTransition();
-  const [message, setMessage] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const held = row.arrangementId !== null && ["protected", "release_requested", "payment_processing"].includes(row.heldStatus ?? "");
   /* A person decides a held payment (refund or dispute): only once the
      partner has said it holds the money. */
   const decidable = row.arrangementId !== null && ["protected", "release_requested", "disputed"].includes(row.heldStatus ?? "");
   const [note, setNote] = useState("");
-  const [resolveMessage, setResolveMessage] = useState<string | null>(null);
+
+  /* Every outcome goes to the banner, with the same tap one away on a refusal. */
+  const act = (send: () => Promise<ActionResult<unknown>>, done: string): void =>
+    start(async () => {
+      try {
+        const r = await send();
+        if (r.ok) banner.success(done);
+        else banner.error(r.error, { retry: () => act(send, done) });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+
   return (
     <li className="nf-admin-queue-row" data-risk={row.riskScore}>
       <p className="font-semibold">
@@ -64,16 +77,7 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
               type="button"
               className="nf-btn nf-btn--glass nf-btn--sm"
               disabled={pending}
-              onClick={() =>
-                start(async () => {
-                  try {
-                    const r = await resumeRelease({ arrangementId: row.arrangementId! });
-                    setMessage(r.ok ? "Release resumed." : r.error);
-                  } catch (error) {
-                    if (!tapFailedOffline(error)) throw error;
-                  }
-                })
-              }
+              onClick={() => act(() => resumeRelease({ arrangementId: row.arrangementId! }), "Release resumed.")}
             >
               Resume release
             </button>
@@ -90,25 +94,11 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
                 type="button"
                 className="nf-btn nf-btn--glass nf-btn--sm"
                 disabled={pending || reason.trim().length < 10}
-                onClick={() =>
-                  start(async () => {
-                    try {
-                      const r = await pauseRelease({ arrangementId: row.arrangementId!, reason });
-                      setMessage(r.ok ? "Release paused. The money stays held." : r.error);
-                    } catch (error) {
-                      if (!tapFailedOffline(error)) throw error;
-                    }
-                  })
-                }
+                onClick={() => act(() => pauseRelease({ arrangementId: row.arrangementId!, reason }), "Release paused. The money stays held.")}
               >
                 Pause release
               </button>
             </>
-          )}
-          {message && (
-            <span role="status" className="nf-caption">
-              {message}
-            </span>
           )}
         </div>
       )}
@@ -125,16 +115,7 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
             type="button"
             className="nf-btn nf-btn--glass nf-btn--sm"
             disabled={pending || note.trim().length < 10}
-            onClick={() =>
-              start(async () => {
-                try {
-                  const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "refund", note });
-                  setResolveMessage(r.ok ? "Refund asked of the partner. It shows as refunded when the partner confirms." : r.error);
-                } catch (error) {
-                  if (!tapFailedOffline(error)) throw error;
-                }
-              })
-            }
+            onClick={() => act(() => resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "refund", note }), "Refund asked of the partner. It shows as refunded when the partner confirms.")}
           >
             Refund to payer
           </button>
@@ -142,24 +123,10 @@ function WatchItem({ row, locale }: { row: WatchRow; locale: Locale }) {
             type="button"
             className="nf-btn nf-btn--glass nf-btn--sm"
             disabled={pending || note.trim().length < 10}
-            onClick={() =>
-              start(async () => {
-                try {
-                  const r = await resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "release", note });
-                  setResolveMessage(r.ok ? "Release asked of the partner. It shows as released when the partner confirms." : r.error);
-                } catch (error) {
-                  if (!tapFailedOffline(error)) throw error;
-                }
-              })
-            }
+            onClick={() => act(() => resolveHeldPayment({ arrangementId: row.arrangementId!, outcome: "release", note }), "Release asked of the partner. It shows as released when the partner confirms.")}
           >
             Release to lister
           </button>
-          {resolveMessage && (
-            <span role="status" className="nf-caption">
-              {resolveMessage}
-            </span>
-          )}
         </div>
       )}
     </li>

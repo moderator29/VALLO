@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { requestSelfieWithId } from "@/lib/admin/kyc-actions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * "ASK FOR A SELFIE HOLDING THEIR ID" (2 November 2026).
@@ -49,7 +50,9 @@ export function RequestSelfieWithId({
       try {
         const result = await requestSelfieWithId({ subjectId, message });
         if (!result.ok) {
-          setError(result.fieldErrors?.["message"] ?? result.error);
+          const about = result.fieldErrors?.["message"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: send });
           return;
         }
         setWriting(false);

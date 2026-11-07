@@ -11,6 +11,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { decidePayout, decideReferral, setReferralBudget } from "@/lib/admin/referral-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE REFERRAL DESK'S HANDS: set the budget, decide a referral, decide a
@@ -55,20 +56,16 @@ function ReasonSheet(p: ReasonSheetProps) {
   const fieldId = useId();
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
 
   const reset = () => {
     setReason("");
     setError(null);
-    setDone(false);
   };
   const close = () => {
     if (pending) return;
-    const finished = done;
     p.onClose();
     reset();
-    if (finished) router.refresh();
   };
 
   function submit() {
@@ -82,10 +79,19 @@ function ReasonSheet(p: ReasonSheetProps) {
       try {
         const result = await p.run(trimmed);
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.error);
+          /* A word about the reason stays under the reason; anything else is
+             the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: submit });
           return;
         }
-        setDone(true);
+        /* Done: the sheet closes, the banner says what happened, and the
+           desk re-reads so the row shows its new state. */
+        p.onClose();
+        reset();
+        banner.success(p.doneMessage);
+        router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -94,62 +100,49 @@ function ReasonSheet(p: ReasonSheetProps) {
 
   return (
     <Sheet open={p.open} onOpenChange={(next) => !next && close()} title={p.title} hideTitle card detents={[0.9]}>
-      {done ? (
-        <div data-testid="referral-decision-done">
-          <p className="nf-rdesk-done" role="status">
-            {p.doneMessage}
-          </p>
-          <div className="mt-md">
-            <Button type="button" size="md" onClick={close}>
-              {p.close}
-            </Button>
-          </div>
+      <ConfirmPanel
+        icon={p.icon}
+        tone={p.tone ?? "brand"}
+        title={p.title}
+        context={p.context}
+        summary={p.summary}
+        next={p.next.map((text) => ({ icon: "circle-check" as UiIconName, text }))}
+        error={error}
+        cancel={
+          <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={close}>
+            {p.cancel}
+          </Button>
+        }
+        primary={
+          <Button
+            type="button"
+            size="sm"
+            variant={p.destructive ? "danger" : "primary"}
+            disabled={pending}
+            onClick={submit}
+          >
+            {pending ? p.working : p.cta}
+          </Button>
+        }
+      >
+        <div className="nf-rdesk-field">
+          <label htmlFor={fieldId} className="nf-label">
+            {p.reasonLabel}
+          </label>
+          <textarea
+            id={fieldId}
+            className="nf-field min-h-[84px] resize-y"
+            value={reason}
+            maxLength={500}
+            required
+            aria-required="true"
+            aria-invalid={error ? true : undefined}
+            placeholder={p.reasonPlaceholder}
+            onChange={(e) => setReason(e.target.value)}
+          />
+          <span className="nf-caption">{p.reasonHelp}</span>
         </div>
-      ) : (
-        <ConfirmPanel
-          icon={p.icon}
-          tone={p.tone ?? "brand"}
-          title={p.title}
-          context={p.context}
-          summary={p.summary}
-          next={p.next.map((text) => ({ icon: "circle-check" as UiIconName, text }))}
-          error={error}
-          cancel={
-            <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={close}>
-              {p.cancel}
-            </Button>
-          }
-          primary={
-            <Button
-              type="button"
-              size="sm"
-              variant={p.destructive ? "danger" : "primary"}
-              disabled={pending}
-              onClick={submit}
-            >
-              {pending ? p.working : p.cta}
-            </Button>
-          }
-        >
-          <div className="nf-rdesk-field">
-            <label htmlFor={fieldId} className="nf-label">
-              {p.reasonLabel}
-            </label>
-            <textarea
-              id={fieldId}
-              className="nf-field min-h-[84px] resize-y"
-              value={reason}
-              maxLength={500}
-              required
-              aria-required="true"
-              aria-invalid={error ? true : undefined}
-              placeholder={p.reasonPlaceholder}
-              onChange={(e) => setReason(e.target.value)}
-            />
-            <span className="nf-caption">{p.reasonHelp}</span>
-          </div>
-        </ConfirmPanel>
-      )}
+      </ConfirmPanel>
     </Sheet>
   );
 }
@@ -365,7 +358,7 @@ export function BudgetControl({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [stage, setStage] = useState<"form" | "confirm" | "done">("form");
+  const [stage, setStage] = useState<"form" | "confirm">("form");
   const [month, setMonth] = useState(months[0]?.value ?? "");
   const picked = months.find((m) => m.value === month) ?? months[0]!;
   const [naira, setNaira] = useState(picked.capMinor !== null ? String(picked.capMinor / 100) : "");
@@ -379,12 +372,10 @@ export function BudgetControl({
 
   function close() {
     if (pending) return;
-    const finished = stage === "done";
     setOpen(false);
     setStage("form");
     setError(null);
     setReason("");
-    if (finished) router.refresh();
   }
 
   function review() {
@@ -410,11 +401,21 @@ export function BudgetControl({
       try {
         const result = await setReferralBudget({ month, capMinor, reason: reason.trim() });
         if (!result.ok) {
-          setStage("form");
-          setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["capMinor"] ?? result.fieldErrors?.["month"] ?? result.error);
+          /* A word about a field sends the form back with it under the
+             fields; anything else is the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"] ?? result.fieldErrors?.["capMinor"] ?? result.fieldErrors?.["month"];
+          if (about) {
+            setStage("form");
+            setError(about);
+          } else banner.error(result.error, { retry: save });
           return;
         }
-        setStage("done");
+        setOpen(false);
+        setStage("form");
+        setError(null);
+        setReason("");
+        banner.success(copy.done.replace("{month}", picked.name));
+        router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -431,18 +432,7 @@ export function BudgetControl({
         {hasBudget ? copy.openEdit : copy.openSet}
       </Button>
       <Sheet open={open} onOpenChange={(next) => !next && close()} title={copy.sheetTitle} hideTitle={stage !== "form"} card detents={[0.9]}>
-        {stage === "done" ? (
-          <div data-testid="budget-done">
-            <p className="nf-rdesk-done" role="status">
-              {copy.done.replace("{month}", picked.name)}
-            </p>
-            <div className="mt-md">
-              <Button type="button" size="md" onClick={close}>
-                {copy.close}
-              </Button>
-            </div>
-          </div>
-        ) : stage === "confirm" && capMinor !== null ? (
+        {stage === "confirm" && capMinor !== null ? (
           <ConfirmPanel
             icon="price-tag"
             tone={below || big ? "warning" : "brand"}

@@ -17,9 +17,11 @@ const entry = `
   import { getDictionary } from "@vallo/i18n";
   import { ClearStamp } from "@/app/admin/weight-withheld/ClearStamp";
   import { mount } from "@/lib/testing/browser-root";
+  import { ToastHost } from "@/components/ui/ToastHost";
   const c = getDictionary("en").adminCoverage.weightWithheld;
   mount(
     <div style={{ width: 360, padding: 16 }}>
+      <ToastHost />
       <ul className="nf-rows nf-group">
         <li className="nf-row flex-wrap items-start">
           <span className="min-w-[12rem] flex-1 basis-0">A stamped review</span>

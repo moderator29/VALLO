@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
@@ -173,7 +174,6 @@ export function Feed({
   const signInHref = useSignInHref();
   const router = useRouter();
   const [posts, setPosts] = useState(initial);
-  const [notice, setNotice] = useState<string | null>(null);
   /* The post a report sheet is open for. A report used to fire on the first tap
      with reason OTHER and no way back, which is both an untriageable queue and
      a control people learn not to touch. */
@@ -297,12 +297,6 @@ export function Feed({
     return () => observer.disconnect();
   }, [loadMore, cursor, readMore]);
 
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
-
   const patch = (id: string, next: Partial<PostView>) =>
     setPosts((all) => all.map((p) => (p.id === id ? { ...p, ...next } : p)));
 
@@ -329,7 +323,7 @@ export function Feed({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -357,7 +351,7 @@ export function Feed({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -379,12 +373,12 @@ export function Feed({
         return;
       }
       void navigator.clipboard?.writeText(url);
-      setNotice(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     if (action === "copy") {
       void navigator.clipboard?.writeText(`${window.location.origin}/post/${post.id}`);
-      setNotice(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     /*
@@ -398,7 +392,7 @@ export function Feed({
      */
     if (action === "contact") {
       if (!post.listing) {
-        setNotice("There is no flat on this post to ask about.");
+        banner.error("There is no flat on this post to ask about.");
         return;
       }
       router.push(`/messages/new?listing=${post.listing.id}`);
@@ -442,7 +436,7 @@ export function Feed({
           const result = sent.state === "sent" ? sent.result : null;
           if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
-            setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+            banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           }
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
@@ -461,18 +455,16 @@ export function Feed({
         // labelled "Not interested". One key now, named for what it does.
         if (action === "mute" || action === "block") {
           const target = post.author?.id;
-          if (!target) return setNotice("There is nobody to do that to on this post.");
+          if (!target) {
+            banner.error("There is nobody to do that to on this post.");
+            return;
+          }
           const result =
             action === "block"
               ? await blockUser({ userId: target })
               : await muteTarget({ targetKind: "USER", targetId: target });
-          setNotice(
-            result.ok
-              ? action === "block"
-                ? POST_COPY.blockedDone
-                : POST_COPY.mutedDone
-              : result.error,
-          );
+          if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
+          else banner.error(result.error);
           /* Their posts leave the list now. The refresh re-reads only the first
              page, so anything of theirs on a page read further down stayed on
              screen after the block said it was done. */
@@ -587,15 +579,6 @@ export function Feed({
         already do rather than being the one thing with a permanent form.
       */}
 
-      {notice ? (
-        <p
-          role="status"
-          className="nf-panel nf-panel--card px-md py-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]"
-        >
-          {notice}
-        </p>
-      ) : null}
-
       {chip !== "stories" && chip !== "reviews" && shown.length === 0 ? (
         /* One empty-state anatomy across `/around` and `/u`. See `emptyTitle`
            above: this was a bordered paragraph with no mark, no heading and
@@ -635,7 +618,8 @@ export function Feed({
                     onDone={() => setEditing(null)}
                     onSaved={(body, held) => {
                       patch(post.id, { body, rawBody: body, edited: true });
-                      setNotice(held ? POST_COPY.editHeld : POST_COPY.editedDone);
+                      if (held) banner.info(POST_COPY.editHeld);
+                      else banner.success(POST_COPY.editedDone);
                       router.refresh();
                     }}
                   />
@@ -730,7 +714,7 @@ export function Feed({
           if (!target) return false;
           const result = await removePost({ postId: target.id });
           if (!result.ok) {
-            setNotice(result.error);
+            banner.error(result.error);
             return false;
           }
           setPosts((all) => all.filter((p) => p.id !== target.id));

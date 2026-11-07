@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -68,7 +69,6 @@ export function StoryComposer({
   const [standfirst, setStandfirst] = useState("");
   const [place, setPlace] = useState("");
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState(false);
   const [pending, startTransition] = useSafeTransition();
   /* 0 to 1 while the picture is on its way, so "Publishing" is never a
@@ -142,19 +142,18 @@ export function StoryComposer({
   }
 
   async function choose(file: File) {
-    setError(null);
     if (!ACCEPTED.includes(file.type)) {
-      setError(STORY_FAILURE.wrongType);
+      banner.error(STORY_FAILURE.wrongType);
       return;
     }
     if (file.size > STORY_IMAGE_MAX_BYTES) {
-      setError(STORY_FAILURE.tooBig);
+      banner.error(STORY_FAILURE.tooBig);
       return;
     }
     const prepared = await reencodeToJpeg(file, { maxEdge: STORY_IMAGE_MAX_EDGE });
     if (!prepared) {
       /* Deliberately not falling back to the original file. */
-      setError(STORY_FAILURE.reencode);
+      banner.error(STORY_FAILURE.reencode);
       return;
     }
     /* Measured after the re-encode, so the row records the pixels that were
@@ -183,23 +182,22 @@ export function StoryComposer({
 
   const publish = () => {
     if (!blob || !userId) {
-      setError(STORY_COPY.needsImage);
+      banner.error(STORY_COPY.needsImage);
       return;
     }
-    setError(null);
 
     startTransition(async () => {
       try {
         /* A throw (a dropped connection, a server action that did not answer)
-           is said here in the composer, never handed to the error boundary with
-           the person's writing still in it. */
+           is said by the one banner (Grade 1), never handed to the error
+           boundary with the person's writing still in it. */
         let stage: "upload" | "publish" = "upload";
         try {
           let path = uploaded.current?.blob === blob ? uploaded.current.path : null;
           if (!path) {
             const supabase = await loadBrowserClient();
             if (!supabase) {
-              setError(STORY_FAILURE.upload);
+              banner.error(STORY_FAILURE.upload);
               return;
             }
             /* The post id is not known yet, so the object goes under a fresh uuid in
@@ -217,7 +215,7 @@ export function StoryComposer({
             });
             if (!upload.ok) {
               setSent(null);
-              setError(uploadFailureText(upload.reason));
+              banner.error(uploadFailureText(upload.reason), { retry: publish });
               return;
             }
             uploaded.current = { blob, path: fresh };
@@ -239,7 +237,7 @@ export function StoryComposer({
           );
 
           if (!result.ok) {
-            setError(result.error);
+            banner.error(result.error, { retry: publish });
             return;
           }
           if (result.data.held) {
@@ -249,7 +247,7 @@ export function StoryComposer({
           router.replace(`/stories/${result.data.storyId}`);
         } catch {
           setSent(null);
-          setError(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down);
+          banner.error(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down, { retry: publish });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -356,15 +354,6 @@ export function StoryComposer({
             ))}
           </select>
         </label>
-      ) : null}
-
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-primary)]"
-        >
-          {error}
-        </p>
       ) : null}
 
       <Button type="submit" variant="primary" className="nf-story-form__share" loading={pending} disabled={!canPublish}>

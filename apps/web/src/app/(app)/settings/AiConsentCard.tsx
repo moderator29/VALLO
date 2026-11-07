@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { withdrawAiConsent } from "@/lib/ai/consent-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * STORE-07: the AI disclosure a person agreed to in the assistant, stated on
@@ -26,22 +27,21 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
   const router = useRouter();
   const [withdrawn, setWithdrawn] = useState(false);
   const [asking, setAsking] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [pending, startTransition] = useSafeTransition();
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const agreed = consented && !withdrawn;
 
   const withdraw = () => {
-    setFailed(false);
     startTransition(async () => {
       try {
         const result = await withdrawAiConsent().catch(() => ({ ok: false }));
         if (!result.ok) {
-          setFailed(true);
+          banner.error(copy.failed, { retry: withdraw });
           return;
         }
         setWithdrawn(true);
         setAsking(false);
+        banner.success(copy.withdrawn, { "data-testid": "settings-ai-consent-withdrawn" });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -52,15 +52,7 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
   return (
     <SettingsGroup
       label={copy.label}
-      note={
-        withdrawn ? (
-          <span role="status" data-testid="settings-ai-consent-withdrawn">
-            {copy.withdrawn}
-          </span>
-        ) : agreed ? (
-          copy.note
-        ) : undefined
-      }
+      note={agreed ? copy.note : undefined}
     >
       {agreed ? (
         <RowButton
@@ -68,10 +60,7 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
           label={copy.row}
           sub={copy.subOn}
           value={copy.on}
-          onClick={() => {
-            setFailed(false);
-            setAsking(true);
-          }}
+          onClick={() => setAsking(true)}
           testId="settings-ai-consent-row"
         />
       ) : (
@@ -117,11 +106,6 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
         >
           {copy.confirmBody}
         </p>
-        {failed ? (
-          <p role="alert" className="mt-sm text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-            {copy.failed}
-          </p>
-        ) : null}
       </Sheet>
     </SettingsGroup>
   );

@@ -23,6 +23,7 @@ import {
 import type { ActionResult } from "@/lib/actions/envelope";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The deletion control, and everything behind it.
@@ -225,7 +226,7 @@ function ScheduledPanel({
   const copy = t.settings.delete;
   const router = useRouter();
   const [busy, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
+  /* Restored: the button goes while the page refreshes; the banner says it. */
   const [done, setDone] = useState(false);
 
   const when = formatDate(new Date(purgeAfter), locale, {
@@ -236,18 +237,18 @@ function ScheduledPanel({
   });
 
   const restore = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await cancelDeletion();
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: restore });
           return;
         }
         setDone(true);
+        banner.success(copy.restored, { "data-testid": "delete-restored" });
         router.refresh();
       } catch {
-        setError("We could not reach Vallo. Check your connection and try again.");
+        banner.error("We could not reach Vallo. Check your connection and try again.", { retry: restore });
       }
     });
   };
@@ -264,14 +265,7 @@ function ScheduledPanel({
       <p className="mt-2xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
         {phrase(copy.scheduledBody, { date: when, days: String(daysLeft) })}
       </p>
-      {done ? (
-        <p
-          className="mt-sm text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-success)]"
-          data-testid="delete-restored"
-        >
-          {copy.restored}
-        </p>
-      ) : (
+      {done ? null : (
         <div className="mt-md">
           <Button
             variant="primary"
@@ -283,11 +277,6 @@ function ScheduledPanel({
             {busy ? copy.restoring : copy.restore}
           </Button>
         </div>
-      )}
-      {error && (
-        <p role="alert" className="mt-sm text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
       )}
     </div>
   );

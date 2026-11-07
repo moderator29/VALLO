@@ -16,9 +16,11 @@ const entry = `
   import { getDictionary } from "@vallo/i18n";
   import { DestroyRecords } from "@/app/admin/retention/DestroyRecords";
   import { mount } from "@/lib/testing/browser-root";
+  import { ToastHost } from "@/components/ui/ToastHost";
   const c = getDictionary("en").adminCoverage.retention;
   mount(
     <div style={{ width: 360, padding: 16 }}>
+      <ToastHost />
       <DestroyRecords expected={3} totals={{ bank: 4, payout: 1, wallet: 2 }} copy={c} cancel="Cancel" />
     </div>,
   );

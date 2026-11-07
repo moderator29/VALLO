@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useRef, useState } from "react";
@@ -29,13 +30,11 @@ export function MessageVenue({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, startTransition] = useSafeTransition();
   const field = useRef<HTMLTextAreaElement | null>(null);
 
   function send() {
-    setError(null);
     setPhoneGate(false);
     startTransition(async () => {
       try {
@@ -44,7 +43,9 @@ export function MessageVenue({
           setOpen(false);
           router.push(`/messages/${result.data.conversationId}`);
         } else {
-          setError(result.error);
+          /* Said by the one banner (Grade 1), above this sheet; the phone
+             step, when that is what stands in the way, stays here as its link. */
+          banner.error(result.error, { "data-testid": "venue-message-error" });
           setPhoneGate(isPhoneGate(result));
         }
       } catch (error) {
@@ -100,11 +101,6 @@ export function MessageVenue({
               className="nf-field"
             />
           </label>
-          {error && (
-            <p role="alert" className="nf-caption" data-testid="venue-message-error">
-              {error}
-            </p>
-          )}
           <PhoneGateLink show={phoneGate} full />
           <p className="nf-caption">Keep every chat and payment inside Vallo so it stays on the record.</p>
         </form>

@@ -1,24 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { resolveSeatingDispute } from "@/lib/reservations/seating-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /** Vallo decides: the table was seated, or nobody came. Recorded with who decided. */
 export function DisputeDecision({ reservationId }: { reservationId: string }) {
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const decide = (outcome: "SEATED" | "NO_SHOW") =>
     start(async () => {
       try {
-        setError(null);
         const result = await resolveSeatingDispute(reservationId, outcome);
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => decide(outcome) });
           return;
         }
         router.refresh();
@@ -36,11 +34,6 @@ export function DisputeDecision({ reservationId }: { reservationId: string }) {
           Count as no-show
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="nf-caption mt-inline text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

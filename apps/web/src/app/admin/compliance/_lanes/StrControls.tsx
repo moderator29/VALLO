@@ -24,6 +24,7 @@ import {
 } from "@/lib/admin/str";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * SCUML item 6: the STR lane's controls. Every button calls a server action
@@ -46,22 +47,17 @@ export type StrSlideWords = {
   /** The slide that ends a hold: a second person's release is as final as an approval. */
   slideApproveRelease: string;
 };
-type Said = { ok: boolean; text: string } | null;
+type Said = { ok: boolean; text: string };
 
-function Message({ said }: { said: Said }) {
-  if (!said || !said.text) return null;
-  return (
-    <p
-      role={said.ok ? "status" : "alert"}
-      className={`nf-body-sm mt-inline ${
-        said.ok
-          ? "text-[var(--nf-content-primary)]"
-          : "text-[var(--nf-state-error)]"
-      }`}
-    >
-      {said.text}
-    </p>
-  );
+/**
+ * Every outcome on this desk goes to the banner. A refusal on a button
+ * carries a retry; a refusal on a slide does not, because a ruling that
+ * cannot be taken back is confirmed by sliding again, never by one tap.
+ */
+function say(said: Said, retry?: () => void) {
+  if (!said.text) return;
+  if (said.ok) banner.success(said.text);
+  else banner.error(said.text, retry ? { retry } : undefined);
 }
 
 const field = "nf-field w-full";
@@ -78,11 +74,9 @@ export function StrOpenForm({
   const [sourceId, setSourceId] = useState(prefill.id);
   const [subject, setSubject] = useState(prefill.subject);
   const [grounds, setGrounds] = useState("");
-  const [said, setSaid] = useState<Said>(null);
   const [pending, start] = useSafeTransition();
 
   function submit() {
-    setSaid(null);
     start(async () => {
       try {
         const result = await openStrCase({
@@ -91,10 +85,10 @@ export function StrOpenForm({
           subjectId: subject,
           grounds,
         });
-        if (!result.ok) return setSaid({ ok: false, text: result.error });
+        if (!result.ok) return say({ ok: false, text: result.error }, submit);
         const due =
           (result.data.data as { due_at?: string } | null)?.due_at ?? "";
-        setSaid({ ok: true, text: copy.opened.replace("{due}", lagosTime(due)) });
+        say({ ok: true, text: copy.opened.replace("{due}", lagosTime(due)) });
         setGrounds("");
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -161,13 +155,11 @@ export function StrOpenForm({
       <Button type="submit" variant="primary" full loading={pending}>
         {pending ? copy.opening : copy.open}
       </Button>
-      <Message said={said} />
     </form>
   );
 }
 
 export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; words: StrSlideWords }) {
-  const [said, setSaid] = useState<Said>(null);
   const [pending, start] = useSafeTransition();
   const [reasons, setReasons] = useState("");
   const [note, setNote] = useState("");
@@ -187,15 +179,10 @@ export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; wo
       { ok: true; data: { text: string } } | { ok: false; error: string }
     >
   ) {
-    setSaid(null);
     start(async () => {
       try {
         const result = await action();
-        setSaid(
-          result.ok
-            ? { ok: true, text: result.data.text }
-            : { ok: false, text: result.error }
-        );
+        say(result.ok ? { ok: true, text: result.data.text } : { ok: false, text: result.error }, () => run(action));
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -206,17 +193,16 @@ export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; wo
    * THE ONE RULING THAT CANNOT BE TAKEN BACK. A second person's approval is
    * recorded once and never revised, so it is a slide, and the track says
    * "confirmed" only after the server has said so: this resolves false on a
-   * refusal, and the refusal's own sentence is printed under it. Sending a
+   * refusal, and the refusal's own sentence goes to the banner. Sending a
    * decision back reopens the case, so that stays a button.
    */
   async function rule(
     action: () => Promise<{ ok: true; data: { text: string } } | { ok: false; error: string }>,
   ): Promise<boolean> {
-    setSaid(null);
     setRuling(true);
     try {
       const result = await action();
-      setSaid(result.ok ? { ok: true, text: result.data.text } : { ok: false, text: result.error });
+      say(result.ok ? { ok: true, text: result.data.text } : { ok: false, text: result.error });
       return result.ok;
     } finally {
       setRuling(false);
@@ -418,7 +404,6 @@ export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; wo
           {copy.working}
         </p>
       )}
-      <Message said={said} />
     </div>
   );
 }
@@ -428,10 +413,9 @@ export function StrCaseControls({ copy, c, words }: { copy: Copy; c: StrCase; wo
  * as final as approving a decision (it is recorded once, by a second person),
  * so it is the same slide: not the money one, because ending a hold moves no
  * money, and resolving false on a refusal, with the refusal's own sentence
- * printed beneath.
+ * in the banner.
  */
 export function StrApproveRelease({ copy, releaseId, words }: { copy: Copy; releaseId: string; words: StrSlideWords }) {
-  const [said, setSaid] = useState<Said>(null);
   return (
     <div className="mt-row">
       <DragToConfirm
@@ -441,14 +425,12 @@ export function StrApproveRelease({ copy, releaseId, words }: { copy: Copy; rele
         confirmedLabel={words.confirmed}
         errorLabel={words.error}
         onConfirm={async () => {
-          setSaid(null);
           const result = await approveStrRelease({ releaseId });
-          setSaid(result.ok ? { ok: true, text: result.data.text } : { ok: false, text: result.error });
+          say(result.ok ? { ok: true, text: result.data.text } : { ok: false, text: result.error });
           return result.ok;
         }}
         data-testid="str-release-slide"
       />
-      <Message said={said} />
     </div>
   );
 }

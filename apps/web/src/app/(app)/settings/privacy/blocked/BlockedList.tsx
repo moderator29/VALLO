@@ -6,6 +6,7 @@ import { unblockUserSafely } from "@/lib/safety/blocks-actions";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /** Nobody blocked yet: what the list is for, and where Block lives. */
 export function BlockedEmpty({ title, body }: { title: string; body: string }) {
@@ -44,11 +45,9 @@ type Copy = {
 export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) {
   const [armed, setArmed] = useState<string | null>(null);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
-  const [failed, setFailed] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function press(row: BlockedRow) {
-    setFailed(null);
     if (armed !== row.userId) {
       setArmed(row.userId);
       return;
@@ -61,7 +60,8 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
           /* Only clear the arm if it is still this row's. */
           setArmed((a) => (a === row.userId ? null : a));
         } else {
-          setFailed(row.userId);
+          /* The row stays armed, so Try again is the second tap again. */
+          banner.error(copy.unblockFailed, { retry: () => press(row) });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -97,11 +97,6 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
             {isArmed && !pending && (
               <p className="nf-body-sm mt-row text-content-2" role="status">
                 {copy.unblockConfirm.replace("{name}", row.name)}
-              </p>
-            )}
-            {failed === row.userId && (
-              <p className="nf-body-sm mt-row text-danger" role="alert">
-                {copy.unblockFailed}
               </p>
             )}
           </li>

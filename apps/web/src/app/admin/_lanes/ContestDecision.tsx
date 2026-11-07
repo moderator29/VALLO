@@ -11,6 +11,7 @@ import { CONTEST_PUBLIC_NOTE_MAX, suggestedPublicNote, type ContestOutcome } fro
 import type { ContestView } from "@/lib/admin/reads/review-contests";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * A LISTER ASKED VALLO TO LOOK AT A REVIEW: the decision, on the report that
@@ -24,31 +25,34 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  *
  * Both close the report with the operator's name on it and tell the lister
  * and the reviewer (the database function does all three). A refusal is
- * shown in the panel in the server's sentence; success refreshes the lane.
+ * said in the banner in the server's sentence; success refreshes the lane.
  */
 export function ContestDecision({ contest }: { contest: ContestView }) {
   const router = useRouter();
   const [open, setOpen] = useState<ContestOutcome | null>(null);
   const [note, setNote] = useState(() => suggestedPublicNote(contest.criterion));
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
 
   const reason = criterionLabel(contest.criterion);
   const place = contest.place ?? "The place";
   const rating = contest.rating !== null ? `${contest.rating} of 5` : "No rating";
 
-  const decide = (outcome: ContestOutcome) => {
-    setError(null);
+  const decide = (outcome: ContestOutcome): void => {
     start(async () => {
       try {
         const result = await decideReviewContest({ contestId: contest.id, outcome, publicNote: outcome === "hide" ? note : null });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => decide(outcome) });
           return;
         }
         setOpen(null);
-        setDone(outcome === "hide" ? "Hidden, with your note in its place. The lister and the reviewer are told." : "Kept up. The lister and the reviewer are told.");
+        const said =
+          outcome === "hide" ? "Hidden, with your note in its place. The lister and the reviewer are told." : "Kept up. The lister and the reviewer are told.";
+        /* Decided: the banner says so and the refresh moves the report off
+           the lane; until it lands the two outcomes are not offered again. */
+        setDone(true);
+        banner.success(said);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -59,7 +63,6 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
   const close = () => {
     if (pending) return;
     setOpen(null);
-    setError(null);
   };
 
   const trimmed = note.trim();
@@ -77,11 +80,7 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
         </p>
       </div>
 
-      {done ? (
-        <p role="status" className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-success)]">
-          {done}
-        </p>
-      ) : (
+      {done ? null : (
         <div className="flex flex-wrap gap-xs">
           <Button variant="secondary" disabled={pending} onClick={() => setOpen("keep")}>
             Keep the review
@@ -118,7 +117,6 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
               { icon: "bell", text: "The lister is told it stays up and can still answer it publicly. The reviewer is told too." },
             ]}
             told="The lister and the reviewer are told at once."
-            error={error ? <p role="alert">{error}</p> : null}
             cancel={
               <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={close}>
                 Cancel
@@ -147,7 +145,6 @@ export function ContestDecision({ contest }: { contest: ContestView }) {
               { icon: "bell", text: "The lister and the reviewer are told, with the note." },
             ]}
             told="The lister and the reviewer are told at once."
-            error={error ? <p role="alert">{error}</p> : null}
             cancel={
               <Button type="button" size="sm" variant="secondary" disabled={pending} onClick={close}>
                 Cancel

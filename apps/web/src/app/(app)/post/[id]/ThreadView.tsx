@@ -1,7 +1,8 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import type { SheetWords } from "@/components/social/sheet-words";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Sheet } from "@/components/ui/Sheet";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -78,7 +79,6 @@ export function ThreadView({
   const [replyingTo, setReplyingTo] = useState<string | null>(
     openReply ? thread.root.id : null,
   );
-  const [notice, setNotice] = useState<string | null>(null);
   /* The post a report sheet is open for. Reporting is a decision, not a tap. */
   const [reporting, setReporting] = useState<PostView | null>(null);
   /* The post currently being changed. One at a time: two open editors on one
@@ -115,12 +115,6 @@ export function ThreadView({
     setReplies(thread.replies);
   }
 
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
-
   const patch = (id: string, next: Partial<PostView>) => {
     setRoot((r) => (r.id === id ? { ...r, ...next } : r));
     setReplies((all) => all.map((p) => (p.id === id ? { ...p, ...next } : p)));
@@ -148,7 +142,7 @@ export function ThreadView({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -168,7 +162,7 @@ export function ThreadView({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -194,7 +188,7 @@ export function ThreadView({
         return;
       }
       void navigator.clipboard?.writeText(url);
-      setNotice(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     /* Contact agent, the one row in the sheet that had no branch in either
@@ -202,7 +196,7 @@ export function ThreadView({
        the same bridge the listing page uses. */
     if (action === "contact") {
       if (!post.listing) {
-        setNotice("There is no flat on this post to ask about.");
+        banner.error("There is no flat on this post to ask about.");
         return;
       }
       router.push(`/messages/new?listing=${post.listing.id}`);
@@ -243,7 +237,7 @@ export function ThreadView({
           const result = sent.state === "sent" ? sent.result : null;
           if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
-            setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+            banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           }
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
@@ -258,18 +252,16 @@ export function ThreadView({
         // labelled "Not interested". One key now, named for what it does.
         if (action === "mute" || action === "block") {
           const target = post.author?.id;
-          if (!target) return setNotice("There is nobody to do that to on this post.");
+          if (!target) {
+            banner.error("There is nobody to do that to on this post.");
+            return;
+          }
           const result =
             action === "block"
               ? await blockUser({ userId: target })
               : await muteTarget({ targetKind: "USER", targetId: target });
-          setNotice(
-            result.ok
-              ? action === "block"
-                ? POST_COPY.blockedDone
-                : POST_COPY.mutedDone
-              : result.error,
-          );
+          if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
+          else banner.error(result.error);
           router.refresh();
           return;
         }
@@ -287,10 +279,9 @@ export function ThreadView({
     if (!post) return false;
     const result = await removePost({ postId: post.id });
     if (!result.ok) {
-      setNotice(result.error);
+      banner.error(result.error);
       return false;
     }
-    setNotice(null);
     /* A deleted root with nothing still under it is not a conversation any
        more, and `getThread` answers not found for it. Leave for the feed
        rather than refresh into that. */
@@ -378,7 +369,8 @@ export function ThreadView({
               onDone={() => setEditing(null)}
               onSaved={(body, held) => {
                 patch(post.id, { body, rawBody: body, edited: true });
-                setNotice(held ? POST_COPY.editHeld : POST_COPY.editedDone);
+                if (held) banner.info(POST_COPY.editHeld);
+                else banner.success(POST_COPY.editedDone);
                 router.refresh();
               }}
             />
@@ -390,15 +382,6 @@ export function ThreadView({
 
   return (
     <div className="flex flex-col gap-[var(--nf-feed-gap)]">
-      {notice ? (
-        <p
-          role="status"
-          className="nf-panel nf-panel--card block px-md py-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]"
-        >
-          {notice}
-        </p>
-      ) : null}
-
       {card(root)}
 
 

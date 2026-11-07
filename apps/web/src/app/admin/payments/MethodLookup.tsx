@@ -11,6 +11,7 @@ import {
 } from "@/lib/admin/payments-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Removing a saved card or a bank account for somebody who asked.
@@ -51,10 +52,13 @@ export function RemoveSavedMethod({
             ? await removePaymentMethodAsAdmin({ id, reason: reason.trim() })
             : await removeBankAccountAsAdmin({ id, reason: reason.trim() });
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.error);
+          const about = result.fieldErrors?.["reason"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: run });
           return;
         }
         setDone(true);
+        banner.success(c.done);
         setOpen(false);
         router.refresh();
       } catch (error) {
@@ -63,11 +67,8 @@ export function RemoveSavedMethod({
     });
   }
 
-  if (done) {
-    return (
-      <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">{c.done}</p>
-    );
-  }
+  /* Removed: the banner says so and the refresh redraws the list. */
+  if (done) return null;
 
   if (!open) {
     return (

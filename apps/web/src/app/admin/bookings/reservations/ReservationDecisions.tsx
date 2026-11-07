@@ -7,6 +7,7 @@ import { decideReservationAsAdmin } from "@/lib/admin/bookings-actions";
 import type { ReservationDecision } from "@/lib/admin/schema";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The three things an operator can do to a table, and the sentence first.
@@ -53,7 +54,7 @@ export function ReservationDecisions({
   const [chosen, setChosen] = useState<ReservationDecision | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
 
   if (offers.length === 0) return null;
@@ -72,10 +73,13 @@ export function ReservationDecisions({
           reason: reason.trim(),
         });
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.error);
+          const about = result.fieldErrors?.["reason"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: run });
           return;
         }
-        setDone(
+        setDone(true);
+        banner.success(
           chosen === "confirm"
             ? "Confirmed. The guest has been told."
             : "Cancelled. The guest has been told, with your reason, and the decision is in the audit log.",
@@ -89,11 +93,8 @@ export function ReservationDecisions({
     });
   }
 
-  if (done) {
-    return (
-      <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">{done}</p>
-    );
-  }
+  /* Decided: the banner says so and the refresh redraws the booking. */
+  if (done) return null;
 
   return (
     <div className="mt-sm">

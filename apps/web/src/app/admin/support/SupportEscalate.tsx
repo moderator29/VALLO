@@ -11,6 +11,7 @@ import {
 import { escalateSupportTicket, returnSupportEscalation } from "@/lib/admin/support-workbench-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * HAND A TICKET TO ANOTHER DESK. Support routes money, safety and identity;
@@ -37,8 +38,24 @@ export function SupportEscalate({
     suggested && free.includes(suggested) ? suggested : (free[0] ?? null),
   );
   const [reason, setReason] = useState("");
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function escalate() {
+    if (!scope) return;
+    start(async () => {
+      try {
+        const r = await escalateSupportTicket({ ticketId, scope, reason });
+        if (!r.ok) banner.error(r.error, { retry: escalate });
+        else {
+          banner.success(`Handed to the ${ESCALATION_TARGET_LABEL[scope].name.toLowerCase()} desk. They have been told.`);
+          setReason("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
 
   return (
     <details id="support-escalate" className="nf-panel nf-panel--card mt-md p-md" data-testid="support-escalate">
@@ -58,20 +75,7 @@ export function SupportEscalate({
           className="mt-xs grid gap-xs"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!scope) return;
-            start(async () => {
-              try {
-                const r = await escalateSupportTicket({ ticketId, scope, reason });
-                if (!r.ok) setMessage({ ok: false, text: r.error });
-                else {
-                  setMessage({ ok: true, text: `Handed to the ${ESCALATION_TARGET_LABEL[scope].name.toLowerCase()} desk. They have been told.` });
-                  setReason("");
-                  router.refresh();
-                }
-              } catch (error) {
-                if (!tapFailedOffline(error)) throw error;
-              }
-            });
+            escalate();
           }}
         >
           <fieldset className="grid gap-2xs">
@@ -115,11 +119,6 @@ export function SupportEscalate({
           </div>
         </form>
       )}
-      {message ? (
-        <p role={message.ok ? "status" : "alert"} className={`mt-xs nf-caption ${message.ok ? "text-[var(--nf-state-success)]" : "text-[var(--nf-state-warning)]"}`}>
-          {message.text}
-        </p>
-      ) : null}
     </details>
   );
 }
@@ -129,8 +128,24 @@ export function ReturnEscalation({ ticketId, escalationId, label }: { ticketId: 
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function handBack() {
+    start(async () => {
+      try {
+        const r = await returnSupportEscalation({ ticketId, escalationId, note });
+        if (!r.ok) banner.error(r.error, { retry: handBack });
+        else {
+          setOpen(false);
+          setNote("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   if (!open) {
     return (
       <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
@@ -143,19 +158,7 @@ export function ReturnEscalation({ ticketId, escalationId, label }: { ticketId: 
       className="mt-xs grid gap-2xs"
       onSubmit={(e) => {
         e.preventDefault();
-        start(async () => {
-          try {
-            const r = await returnSupportEscalation({ ticketId, escalationId, note });
-            if (!r.ok) setError(r.error);
-            else {
-              setOpen(false);
-              setNote("");
-              router.refresh();
-            }
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        handBack();
       }}
     >
       <label className="grid gap-2xs">
@@ -170,11 +173,6 @@ export function ReturnEscalation({ ticketId, escalationId, label }: { ticketId: 
           Not yet
         </Button>
       </div>
-      {error ? (
-        <p role="alert" className="nf-caption text-[var(--nf-state-warning)]">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

@@ -8,6 +8,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { createCollection, deleteCollection, setInCollection } from "@/lib/saved/collections-actions";
 import { COLLECTION_NAME_MAX, type SavedCollection } from "@/lib/saved/collections";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 const WORDS = {
   all: "All",
@@ -21,6 +22,11 @@ const WORDS = {
   deleteList: "Delete this list",
   deleteNote: "Deleting a list never removes anything you saved.",
   done: "Done",
+  /* What each action did, said by the one banner (Grade 1). */
+  created: "List created. Add places to it from any saved card.",
+  deleted: "List deleted. Everything you saved is still here.",
+  addedTo: "Added to {name}",
+  takenOff: "Taken off {name}",
 };
 
 /** The lists strip above the shortlist: All, each list, and a way to make one. */
@@ -36,6 +42,7 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
     router.push(id ? `${pathname}?list=${id}` : pathname);
   }
 
+  /* A refused name is the field's own error, under the field. */
   function create() {
     setError(null);
     start(async () => {
@@ -43,6 +50,7 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
       if (result.ok) {
         setName("");
         setCreating(false);
+        banner.success(WORDS.created);
         go(result.data.id);
       } else setError(result.error);
     });
@@ -51,8 +59,10 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
   function remove(id: string) {
     start(async () => {
       const result = await deleteCollection({ id });
-      if (result.ok) go(null);
-      else setError(result.error);
+      if (result.ok) {
+        banner.success(WORDS.deleted);
+        go(null);
+      } else banner.error(result.error, { retry: () => remove(id) });
     });
   }
 
@@ -122,16 +132,17 @@ export function AddToList({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const member = collections.filter((c) => c.keys.includes(itemKey));
 
   function toggle(collectionId: string, on: boolean) {
-    setError(null);
     start(async () => {
       const result = await setInCollection({ collectionId, kind, id, on });
-      if (result.ok) router.refresh();
-      else setError(result.error);
+      if (result.ok) {
+        const name = collections.find((c) => c.id === collectionId)?.name ?? "";
+        banner.success((on ? WORDS.addedTo : WORDS.takenOff).replace("{name}", name));
+        router.refresh();
+      } else banner.error(result.error, { retry: () => toggle(collectionId, on) });
     });
   }
 
@@ -162,11 +173,6 @@ export function AddToList({
             );
           })}
         </ul>
-        {error ? (
-          <p role="alert" className="nf-caption mt-inline-tight text-[var(--nf-state-error)]">
-            {error}
-          </p>
-        ) : null}
       </Sheet>
     </>
   );

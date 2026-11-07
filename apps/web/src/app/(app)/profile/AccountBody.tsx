@@ -26,6 +26,7 @@ import {
   MAX_PHONE_LENGTH,
 } from "@/lib/profile/model";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { banner } from "@/lib/ui/toast";
 import { NO_FACTS, rowValue, type BelongingsFacts } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { SwitchRoleRow } from "./SwitchRoleRow";
@@ -383,13 +384,20 @@ function DetailsSheet({
 
   // A successful save closes the sheet and refreshes the tree, so every other
   // surface showing this name agrees before the sheet has finished leaving.
+  // The outcome is said by the one banner at the top of the screen (Grade 1);
+  // a field's own error stays under that field.
   useEffect(() => {
-    if (!state?.ok) return;
+    if (!state) return;
+    if (!state.ok) {
+      if (!state.fieldErrors) banner.error(state.error);
+      return;
+    }
     setFirstName(state.data.firstName);
     setSurname(state.data.surname);
     setNickname(state.data.nickname);
     setPhone(state.data.phone);
     onClose();
+    banner.success("Your profile has been updated");
     router.refresh();
   }, [state, onClose, router]);
 
@@ -444,15 +452,6 @@ function DetailsSheet({
           placeholder="0803 123 4567"
           optional
         />
-
-        {state && !state.ok && !state.fieldErrors && (
-          <p
-            role="alert"
-            className="rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-          >
-            {state.error}
-          </p>
-        )}
 
         <p className="text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
           Your name is what hosts see when you message or book. Your phone number stays

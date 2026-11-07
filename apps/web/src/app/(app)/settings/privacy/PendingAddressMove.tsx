@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { banner } from "@/lib/ui/toast";
 import type { AddressMoveCopy } from "@/components/app/account/settings-copy";
 import { ownerCancelEmailRecovery } from "@/lib/admin/email-recovery-actions";
 import type { PendingMove } from "@/lib/auth/pending-address-move";
@@ -23,16 +24,14 @@ export function PendingAddressMove({
     null
   );
   const copy = t.settings.addressMove;
-  if (state?.ok) {
-    return (
-      <p
-        role="status"
-        className="nf-panel nf-panel--card p-card text-[length:var(--nf-text-body-sm)]"
-      >
-        {copy.cancelled}
-      </p>
-    );
-  }
+  /* The outcome goes to the one banner (Grade 1). Cancelled, the warning
+     itself leaves: there is no longer a move to warn about. */
+  useEffect(() => {
+    if (!state) return;
+    if (state.ok) banner.success(copy.cancelled);
+    else banner.error(state.error);
+  }, [state, copy.cancelled]);
+  if (state?.ok) return null;
   return (
     <form
       action={action}
@@ -52,11 +51,6 @@ export function PendingAddressMove({
       <Button type="submit" variant="primary" disabled={pending}>
         {copy.cancel}
       </Button>
-      {state && !state.ok && (
-        <p role="status" className="text-[length:var(--nf-text-caption)]">
-          {state.error}
-        </p>
-      )}
     </form>
   );
 }

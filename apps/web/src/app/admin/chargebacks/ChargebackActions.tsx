@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
-import { Button, ButtonLink, type ButtonVariant } from "@/components/ui/Button";
+import { Button, type ButtonVariant } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { addChargebackNote, moveChargeback, openChargeback, overrideChargebackHold } from "@/lib/admin/chargeback-actions";
@@ -19,6 +19,7 @@ import {
 import type { ActionResult } from "@/lib/actions/envelope";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE CHARGEBACKS DESK'S CONTROLS: the next moves on a case, recording a new
@@ -39,29 +40,14 @@ const TONE_VARIANT: Record<MoveOffer["tone"], ButtonVariant> = {
   danger: "dangerQuiet",
 };
 
-function Refusal({ result }: { result: ActionResult<unknown> | null }) {
-  if (!result || result.ok) return null;
-  return (
-    <p
-      role="alert"
-      className="mt-sm rounded-[var(--nf-radius-md)] bg-[var(--nf-state-warning-surface)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-primary)]"
-    >
-      {result.error}
-    </p>
-  );
-}
-
-function Done({ title, body, children }: { title: string; body: string; children?: ReactNode }) {
-  return (
-    <div className="text-center" data-testid="chargeback-sheet-done">
-      <p className="flex items-center justify-center gap-xs text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
-        <UiIcon name="circle-check" size={20} className="text-[var(--nf-state-success)]" />
-        {title}
-      </p>
-      <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{body}</p>
-      {children}
-    </div>
-  );
+/**
+ * Every outcome on this desk goes to the banner: done closes the sheet and
+ * says what happened; a refusal keeps the sheet open with the server's own
+ * sentence and the same tap one away.
+ */
+function sayRefusal(result: ActionResult<unknown>, retry?: () => void) {
+  if (result.ok) return;
+  banner.error(result.error, retry ? { retry } : undefined);
 }
 
 function ReasonField({ copy, value, onChange, label }: { copy: DeskCopy; value: string; onChange: (v: string) => void; label?: string }) {
@@ -169,16 +155,17 @@ function OverrideSheet({
 }) {
   const router = useRouter();
   const [reason, setReason] = useState("");
-  const [result, setResult] = useState<ActionResult<unknown> | null>(null);
   const [pending, startTransition] = useSafeTransition();
-  const succeeded = Boolean(result?.ok);
   const blocked = reason.trim().length < REASON_MIN;
-  const submit = () =>
+  const submit = (): void =>
     startTransition(async () => {
       try {
         const outcome = await overrideChargebackHold({ kind: item.kind, subjectId: item.id, reason: reason.trim() });
-        setResult(outcome);
-        if (outcome.ok) router.refresh();
+        if (outcome.ok) {
+          banner.success(`${copy.doneTitle}. ${copy.doneBody}`);
+          onClose();
+          router.refresh();
+        } else sayRefusal(outcome, submit);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -190,39 +177,25 @@ function OverrideSheet({
         if (!next) onClose();
       }}
       title={copy.sheetTitle}
-      hideTitle={succeeded}
       testId="chargeback-override-sheet"
       footer={
-        succeeded ? (
-          <Button variant="primary" full onClick={onClose}>
-            {deskCopy.done}
+        <div className="grid gap-sm">
+          <Button variant="primary" full onClick={submit} disabled={blocked} loading={pending}>
+            {copy.confirm}
           </Button>
-        ) : (
-          <div className="grid gap-sm">
-            <Button variant="primary" full onClick={submit} disabled={blocked} loading={pending}>
-              {copy.confirm}
-            </Button>
-            <Button variant="secondary" full onClick={onClose}>
-              {deskCopy.notNow}
-            </Button>
-          </div>
-        )
+          <Button variant="secondary" full onClick={onClose}>
+            {deskCopy.notNow}
+          </Button>
+        </div>
       }
     >
-      {succeeded ? (
-        <Done title={copy.doneTitle} body={copy.doneBody} />
-      ) : (
-        <>
-          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {copy.sheetBody
-              .replace("{kind}", copy.kinds[item.kind].toLowerCase())
-              .replace("{reference}", item.reference.slice(0, 18))
-              .replace("{amount}", formatMoney(item.amountMinor, locale, currency))}
-          </p>
-          <ReasonField copy={{ ...deskCopy, reasonHint: copy.reasonHint }} value={reason} onChange={setReason} label={copy.reasonLabel} />
-          <Refusal result={result} />
-        </>
-      )}
+      <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+        {copy.sheetBody
+          .replace("{kind}", copy.kinds[item.kind].toLowerCase())
+          .replace("{reference}", item.reference.slice(0, 18))
+          .replace("{amount}", formatMoney(item.amountMinor, locale, currency))}
+      </p>
+      <ReasonField copy={{ ...deskCopy, reasonHint: copy.reasonHint }} value={reason} onChange={setReason} label={copy.reasonLabel} />
     </Sheet>
   );
 }
@@ -264,14 +237,12 @@ function MoveSheet({ row, offer, copy, locale, onClose }: { row: MoveCase; offer
   const [due, setDue] = useState("");
   const [recoveredNow, setRecoveredNow] = useState("");
   const [alreadyRecovered, setAlreadyRecovered] = useState(false);
-  const [result, setResult] = useState<ActionResult<unknown> | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const nowKobo = /^\d{1,12}(\.\d{1,2})?$/.test(recoveredNow.replace(/[,\s]/g, "")) ? Math.round(Number(recoveredNow.replace(/[,\s]/g, "")) * 100) : 0;
   const blocked = note.trim().length < REASON_MIN || (offer.asksRecovered === true && nowKobo <= 0);
-  const succeeded = Boolean(result?.ok);
 
-  const submit = () =>
+  const submit = (): void =>
     startTransition(async () => {
       try {
         const outcome = await moveChargeback({
@@ -284,8 +255,11 @@ function MoveSheet({ row, offer, copy, locale, onClose }: { row: MoveCase; offer
           ...(offer.offersAlreadyRecovered && alreadyRecovered ? { alreadyRecovered: true } : {}),
           ...(offer.asksDeadline && due ? { evidenceDueAt: due } : {}),
         });
-        setResult(outcome);
-        if (outcome.ok) router.refresh();
+        if (outcome.ok) {
+          banner.success(`${copy.savedTitle}. ${copy.savedBody}`);
+          onClose();
+          router.refresh();
+        } else sayRefusal(outcome, submit);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -298,65 +272,51 @@ function MoveSheet({ row, offer, copy, locale, onClose }: { row: MoveCase; offer
         if (!next) onClose();
       }}
       title={words.title}
-      hideTitle={succeeded}
       testId="chargeback-move-sheet"
       footer={
-        succeeded ? (
-          <Button variant="primary" full onClick={onClose}>
-            {copy.done}
+        <div className="grid gap-sm">
+          <Button variant={offer.tone === "danger" ? "dangerQuiet" : "primary"} full onClick={submit} disabled={blocked} loading={pending}>
+            {words.label}
           </Button>
-        ) : (
-          <div className="grid gap-sm">
-            <Button variant={offer.tone === "danger" ? "dangerQuiet" : "primary"} full onClick={submit} disabled={blocked} loading={pending}>
-              {words.label}
-            </Button>
-            <Button variant="secondary" full onClick={onClose}>
-              {copy.notNow}
-            </Button>
-          </div>
-        )
+          <Button variant="secondary" full onClick={onClose}>
+            {copy.notNow}
+          </Button>
+        </div>
       }
     >
-      {succeeded ? (
-        <Done title={copy.savedTitle} body={copy.savedBody} />
-      ) : (
-        <>
-          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{words.body}</p>
-          {offer.asksDeadline ? (
-            <label className="mt-md block">
-              <span className="nf-label">
-                {copy.dueLabel} {copy.open.optional}
-              </span>
-              <input type="datetime-local" value={due} onChange={(event) => setDue(event.target.value)} className="nf-field mt-2xs w-full" />
-            </label>
-          ) : null}
-          {offer.asksRecovered && "amount" in words ? (
-            <label className="mt-md block">
-              <span className="nf-label">{words.amount}</span>
-              <input
-                inputMode="decimal"
-                value={recoveredNow}
-                onChange={(event) => setRecoveredNow(event.target.value)}
-                className="nf-field mt-2xs w-full"
-                aria-describedby="nf-cb-new-total"
-              />
-              <span id="nf-cb-new-total" className="mt-2xs block text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
-                {words.newTotal
-                  .replace("{amount}", formatMoney(Math.min(row.amountMinor, row.recoveredMinor + nowKobo), locale, row.currency))
-                  .replace("{of}", formatMoney(row.amountMinor, locale, row.currency))}
-              </span>
-            </label>
-          ) : null}
-          {offer.offersAlreadyRecovered && "alreadyRecovered" in words ? (
-            <label className="mt-md flex min-h-11 items-start gap-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]">
-              <input type="checkbox" checked={alreadyRecovered} onChange={(event) => setAlreadyRecovered(event.target.checked)} className="mt-[3px]" />
-              <span>{words.alreadyRecovered}</span>
-            </label>
-          ) : null}
-          <ReasonField copy={copy} value={note} onChange={setNote} />
-          <Refusal result={result} />
-        </>
-      )}
+      <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{words.body}</p>
+      {offer.asksDeadline ? (
+        <label className="mt-md block">
+          <span className="nf-label">
+            {copy.dueLabel} {copy.open.optional}
+          </span>
+          <input type="datetime-local" value={due} onChange={(event) => setDue(event.target.value)} className="nf-field mt-2xs w-full" />
+        </label>
+      ) : null}
+      {offer.asksRecovered && "amount" in words ? (
+        <label className="mt-md block">
+          <span className="nf-label">{words.amount}</span>
+          <input
+            inputMode="decimal"
+            value={recoveredNow}
+            onChange={(event) => setRecoveredNow(event.target.value)}
+            className="nf-field mt-2xs w-full"
+            aria-describedby="nf-cb-new-total"
+          />
+          <span id="nf-cb-new-total" className="mt-2xs block text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+            {words.newTotal
+              .replace("{amount}", formatMoney(Math.min(row.amountMinor, row.recoveredMinor + nowKobo), locale, row.currency))
+              .replace("{of}", formatMoney(row.amountMinor, locale, row.currency))}
+          </span>
+        </label>
+      ) : null}
+      {offer.offersAlreadyRecovered && "alreadyRecovered" in words ? (
+        <label className="mt-md flex min-h-11 items-start gap-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]">
+          <input type="checkbox" checked={alreadyRecovered} onChange={(event) => setAlreadyRecovered(event.target.checked)} className="mt-[3px]" />
+          <span>{words.alreadyRecovered}</span>
+        </label>
+      ) : null}
+      <ReasonField copy={copy} value={note} onChange={setNote} />
     </Sheet>
   );
 }
@@ -399,14 +359,13 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
   const [due, setDue] = useState("");
   const [status, setStatus] = useState("");
   const [note, setNote] = useState("");
-  const [result, setResult] = useState<Awaited<ReturnType<typeof openChargeback>> | null>(null);
+  /* Each field's word stays under its field; the outcome goes to the banner. */
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useSafeTransition();
 
   const blocked = reference.trim().length < 3 || disputeId.trim().length === 0 || amount.trim().length === 0 || note.trim().length < REASON_MIN;
-  const succeeded = result?.ok === true ? result.data : null;
-  const errors = result && !result.ok ? (result.fieldErrors ?? {}) : {};
 
-  const submit = () =>
+  const submit = (): void =>
     startTransition(async () => {
       try {
         const outcome = await openChargeback({
@@ -418,8 +377,18 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
           providerStatus: status.trim(),
           note: note.trim(),
         });
-        setResult(outcome);
-        if (outcome.ok) router.refresh();
+        if (outcome.ok) {
+          const made = outcome.data;
+          const open = { action: { label: o.openIt, run: () => router.push(`/admin/chargebacks/${made.chargebackId}`) } };
+          if (made.duplicate) banner.info(o.already, open);
+          else banner.success(`${o.doneTitle}. ${o.doneBody}`, open);
+          onClose();
+          router.refresh();
+        } else {
+          const fields = outcome.fieldErrors ?? {};
+          setErrors(fields);
+          sayRefusal(outcome, Object.keys(fields).length === 0 ? submit : undefined);
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -435,81 +404,62 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
         if (!next) onClose();
       }}
       title={o.title}
-      hideTitle={Boolean(succeeded)}
       testId="chargeback-open-sheet"
       footer={
-        succeeded ? (
-          <div className="grid gap-sm">
-            <ButtonLink href={`/admin/chargebacks/${succeeded.chargebackId}`} variant="primary" full>
-              {o.openIt}
-            </ButtonLink>
-            <Button variant="secondary" full onClick={onClose}>
-              {copy.done}
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-sm">
-            <Button variant="primary" full onClick={submit} disabled={blocked} loading={pending}>
-              {o.submit}
-            </Button>
-            <Button variant="secondary" full onClick={onClose}>
-              {copy.notNow}
-            </Button>
-          </div>
-        )
+        <div className="grid gap-sm">
+          <Button variant="primary" full onClick={submit} disabled={blocked} loading={pending}>
+            {o.submit}
+          </Button>
+          <Button variant="secondary" full onClick={onClose}>
+            {copy.notNow}
+          </Button>
+        </div>
       }
     >
-      {succeeded ? (
-        <Done title={o.doneTitle} body={succeeded.duplicate ? o.already : o.doneBody} />
-      ) : (
-        <>
-          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{o.lede}</p>
-          <p className="mt-xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">{o.sheetBody}</p>
-          <label className="mt-md block">
-            <span className="nf-label">{o.reference}</span>
-            <input value={reference} onChange={(e) => setReference(e.target.value)} className="nf-field mt-2xs w-full font-mono" autoComplete="off" />
-            {fieldError("reference")}
-          </label>
-          <div className="mt-md grid grid-cols-2 gap-sm">
-            <label className="block">
-              <span className="nf-label">{o.provider}</span>
-              <select value={provider} onChange={(e) => setProvider(e.target.value)} className="nf-field mt-2xs w-full">
-                {CHARGEBACK_PROVIDERS.map((p) => (
-                  <option key={p} value={p}>
-                    {o.providers[p]}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="nf-label">{o.amount}</span>
-              <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" className="nf-field mt-2xs w-full" />
-              {fieldError("amount")}
-            </label>
-          </div>
-          <label className="mt-md block">
-            <span className="nf-label">{o.disputeId}</span>
-            <input value={disputeId} onChange={(e) => setDisputeId(e.target.value)} className="nf-field mt-2xs w-full font-mono" autoComplete="off" />
-            {fieldError("disputeId")}
-          </label>
-          <div className="mt-md grid grid-cols-1 gap-sm sm:grid-cols-2">
-            <label className="block">
-              <span className="nf-label">
-                {o.due} {o.optional}
-              </span>
-              <input type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} className="nf-field mt-2xs w-full" />
-            </label>
-            <label className="block">
-              <span className="nf-label">
-                {o.providerStatus} {o.optional}
-              </span>
-              <input value={status} onChange={(e) => setStatus(e.target.value)} className="nf-field mt-2xs w-full" maxLength={120} />
-            </label>
-          </div>
-          <ReasonField copy={copy} value={note} onChange={setNote} label={o.note} />
-          <Refusal result={result} />
-        </>
-      )}
+      <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">{o.lede}</p>
+      <p className="mt-xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">{o.sheetBody}</p>
+      <label className="mt-md block">
+        <span className="nf-label">{o.reference}</span>
+        <input value={reference} onChange={(e) => setReference(e.target.value)} className="nf-field mt-2xs w-full font-mono" autoComplete="off" />
+        {fieldError("reference")}
+      </label>
+      <div className="mt-md grid grid-cols-2 gap-sm">
+        <label className="block">
+          <span className="nf-label">{o.provider}</span>
+          <select value={provider} onChange={(e) => setProvider(e.target.value)} className="nf-field mt-2xs w-full">
+            {CHARGEBACK_PROVIDERS.map((p) => (
+              <option key={p} value={p}>
+                {o.providers[p]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="nf-label">{o.amount}</span>
+          <input value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" className="nf-field mt-2xs w-full" />
+          {fieldError("amount")}
+        </label>
+      </div>
+      <label className="mt-md block">
+        <span className="nf-label">{o.disputeId}</span>
+        <input value={disputeId} onChange={(e) => setDisputeId(e.target.value)} className="nf-field mt-2xs w-full font-mono" autoComplete="off" />
+        {fieldError("disputeId")}
+      </label>
+      <div className="mt-md grid grid-cols-1 gap-sm sm:grid-cols-2">
+        <label className="block">
+          <span className="nf-label">
+            {o.due} {o.optional}
+          </span>
+          <input type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} className="nf-field mt-2xs w-full" />
+        </label>
+        <label className="block">
+          <span className="nf-label">
+            {o.providerStatus} {o.optional}
+          </span>
+          <input value={status} onChange={(e) => setStatus(e.target.value)} className="nf-field mt-2xs w-full" maxLength={120} />
+        </label>
+      </div>
+      <ReasonField copy={copy} value={note} onChange={setNote} label={o.note} />
     </Sheet>
   );
 }
@@ -520,17 +470,16 @@ export function ChargebackNoteForm({ chargebackId, copy }: { chargebackId: strin
   const router = useRouter();
   const d = copy.detail;
   const [note, setNote] = useState("");
-  const [result, setResult] = useState<ActionResult<null> | null>(null);
   const [pending, startTransition] = useSafeTransition();
-  const submit = () =>
+  const submit = (): void =>
     startTransition(async () => {
       try {
         const outcome = await addChargebackNote({ chargebackId, note: note.trim() });
-        setResult(outcome);
         if (outcome.ok) {
+          banner.success(d.noteDone);
           setNote("");
           router.refresh();
-        }
+        } else sayRefusal(outcome, submit);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -549,13 +498,7 @@ export function ChargebackNoteForm({ chargebackId, copy }: { chargebackId: strin
         <Button type="submit" variant="secondary" disabled={note.trim().length < REASON_MIN} loading={pending}>
           {d.noteSubmit}
         </Button>
-        {result?.ok ? (
-          <span role="status" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-success)]">
-            {d.noteDone}
-          </span>
-        ) : null}
       </div>
-      <Refusal result={result} />
     </form>
   );
 }

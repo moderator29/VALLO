@@ -16,6 +16,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { markNotificationsRead } from "@/lib/messages/notifications-actions";
 import { warmBody, warmTitle } from "@/lib/notify/voice";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
+import { banner } from "@/lib/ui/toast";
 import { loadOlderNotifications } from "@/lib/notify/inbox-actions";
 import { toNotificationItem, type NotificationItem } from "@/lib/notify/links";
 import { lagosTimeLabel } from "@/lib/messages/time";
@@ -117,7 +118,6 @@ export function LiveNotifications({
   const [items, setItems] = useState<NotificationItem[]>(initial);
   const [more, setMore] = useState(initialMore);
   const [loadingOlder, setLoadingOlder] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
   const [family, setFamily] = useState<NotificationFamily | "all">("all");
 
   useNotificationsRealtime(userId, (row: LiveNotificationRow) => {
@@ -154,10 +154,12 @@ export function LiveNotifications({
   const markAll = useCallback(() => {
     const before = items;
     setItems((prev) => prev.map((n) => ({ ...n, read: true })));
-    setProblem(null);
+    /* What the press did is said by the one banner at the top of the screen
+       (Grade 1); the list itself is the record. */
     void setOrKeep("read_notification", "all", true, () => markNotificationsRead({})).then((out) => {
       if (out.state === "kept") return;
       if (out.state === "sent" && out.result.ok) {
+        banner.success(c.empty.title);
         router.refresh();
         return;
       }
@@ -165,23 +167,24 @@ export function LiveNotifications({
          over realtime in the meantime keeps its own state. */
       const unread = new Set(before.filter((n) => !n.read).map((n) => n.id));
       setItems((prev) => prev.map((n) => (unread.has(n.id) ? { ...n, read: false } : n)));
-      setProblem(out.state === "sent" && !out.result.ok ? out.result.error : "Could not mark them read. Try again.");
+      banner.error(out.state === "sent" && !out.result.ok ? out.result.error : "Could not mark them read. Try again.", {
+        "data-testid": "notifications-problem",
+      });
     });
-  }, [items, router]);
+  }, [items, router, c.empty.title]);
 
   /* Older rows, a page at a time, after the last row on screen. */
   const showOlder = useCallback(() => {
     const last = items.at(-1);
     if (!last || loadingOlder) return;
     setLoadingOlder(true);
-    setProblem(null);
     /* A request that never reached the server (a dropped connection) ends the
        wait and says so, like a refused read does. */
     void loadOlderNotifications({ createdAt: last.createdAt, id: last.id })
       .then((result) => {
         setLoadingOlder(false);
         if (!result.ok) {
-          setProblem(result.error);
+          banner.error(result.error, { "data-testid": "notifications-problem" });
           return;
         }
         setItems((prev) => {
@@ -192,7 +195,7 @@ export function LiveNotifications({
       })
       .catch(() => {
         setLoadingOlder(false);
-        setProblem(c.olderFailed);
+        banner.error(c.olderFailed, { "data-testid": "notifications-problem" });
       });
   }, [items, loadingOlder, c.olderFailed]);
 
@@ -337,12 +340,6 @@ export function LiveNotifications({
             />
           ))}
         </div>
-      )}
-
-      {problem && (
-        <p role="alert" className="nf-notif__problem" data-testid="notifications-problem">
-          {problem}
-        </p>
       )}
 
       {more && (

@@ -13,6 +13,7 @@ import { NUBAN_LENGTH, digitsOnly, groupNuban } from "@/lib/agent/payout-model";
 import { addBankAccount, listBanks, resolveBankAccount } from "@/lib/payments/bank-accounts-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type PaymentsCopy = Dictionary["paymentsPage"];
 type Bank = { name: string; code: string };
@@ -114,12 +115,14 @@ export function AddBankAccountSheet({
         const result = await lock.guard({ kind: "bank_add", target: `${bank.code}:${digits}` }, (stepUp) =>
           addBankAccount({ bankCode: bank.code, accountNumber: digits, idempotencyKey, stepUp }),
         );
+        /* The save's outcome goes to the one banner (Grade 1); the number's
+           own error stays under its field. */
         if (result === null) {
-          setError(lockWords.notConfirmed);
+          banner.error(lockWords.notConfirmed, { retry: save });
           return;
         }
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: save });
           return;
         }
         onSaved();
@@ -238,11 +241,6 @@ export function AddBankAccountSheet({
               <p className={`nf-numeric mt-3xs ${TYPE.caption}`}>{groupNuban(number)}</p>
             </div>
           </div>
-          {error && (
-            <p role="alert" className={`mt-row ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-              {error}
-            </p>
-          )}
           <div className="mt-block flex flex-col gap-inline">
             <Button variant="primary" full loading={pending} onClick={save}>
               {pending ? copy.saving : copy.yesSave}

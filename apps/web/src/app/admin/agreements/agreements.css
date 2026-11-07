@@ -119,20 +119,6 @@
   gap: var(--nf-space-sm);
 }
 
-.nf-risk-settings__message {
-  margin: 0;
-  font-size: var(--nf-text-caption);
-  color: var(--nf-content-secondary);
-}
-
-.nf-risk-settings__message--ok {
-  color: var(--nf-state-success);
-}
-
-.nf-risk-settings__message--error {
-  color: var(--nf-state-error);
-}
-
 .nf-risk-kill--on {
   border-color: var(--nf-state-error);
   background: var(--nf-state-error-surface);

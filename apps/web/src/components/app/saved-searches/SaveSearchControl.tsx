@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useCallback, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -56,22 +57,22 @@ export function SaveSearchControl({
   searchesHref?: string;
 }) {
   const [row, setRow] = useState<SavedSearchView | null>(saved);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const save = useCallback(() => {
     if (pending) return;
-    setError(null);
     startTransition(async () => {
       try {
         const result = await saveSearch({ params });
+        /* Said by the one banner at the top of the screen (Grade 1). */
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         /* The row the database returned, so the name and the alert state on
            screen are the stored ones rather than this component's guess. */
         setRow(result.data);
+        banner.success(`Search saved as ${result.data.label}`);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -130,11 +131,6 @@ export function SaveSearchControl({
       >
         Save this search
       </Button>
-      {error && (
-        <p role="status" className="nf-body-sm mt-2xs text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

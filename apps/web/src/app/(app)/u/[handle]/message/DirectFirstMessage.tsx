@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState } from "react";
@@ -32,21 +33,21 @@ export function DirectFirstMessage({
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useSafeTransition();
 
   const send = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (body.trim().length === 0 || pending) return;
-    setError(null);
     setPhoneGate(false);
     start(async () => {
       try {
         const result = await sendDirectMessage({ handle, body });
         if (result.ok) router.replace(`/messages/${result.data.conversationId}`);
         else {
-          setError(result.error);
+          /* Said by the one banner (Grade 1); the phone step, when that is
+             what stands in the way, stays here as its link. */
+          banner.error(result.error);
           setPhoneGate(isPhoneGate(result));
         }
       } catch (error) {
@@ -74,14 +75,7 @@ export function DirectFirstMessage({
 
       <div className="nf-direct__body">
         <p className="nf-direct__hint">{copy.hint}</p>
-        {error ? (
-          <>
-            <p role="alert" className="nf-caption text-[var(--nf-state-error)]">
-              {error}
-            </p>
-            <PhoneGateLink show={phoneGate} full />
-          </>
-        ) : null}
+        <PhoneGateLink show={phoneGate} full />
       </div>
 
       <form onSubmit={send} className="nf-composer nf-direct__composer">

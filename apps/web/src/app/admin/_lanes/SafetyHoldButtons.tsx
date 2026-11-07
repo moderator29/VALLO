@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { decideSafetyHold } from "@/lib/admin/safety-holds";
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-63: Clear or Extend one safety hold. The three words come from the server
@@ -17,15 +17,13 @@ export function SafetyHoldButtons({
   holdId: string;
   copy: { working: string; clear: string; extend: string };
 }) {
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function act(action: "clear" | "extend") {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await decideSafetyHold({ holdId, action });
-        if (!result.ok) setError(result.error);
+        if (!result.ok) banner.error(result.error, { retry: () => act(action) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -40,11 +38,6 @@ export function SafetyHoldButtons({
       <Button variant="quiet" size="sm" type="button" disabled={pending} onClick={() => act("extend")}>
         {copy.extend}
       </Button>
-      {error && (
-        <span role="alert" className="nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </span>
-      )}
     </span>
   );
 }

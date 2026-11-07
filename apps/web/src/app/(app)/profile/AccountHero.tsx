@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { initial } from "@/lib/text/initial";
 import "./profile.css";
 import { useRef, useState } from "react";
@@ -123,19 +124,17 @@ export function AccountHero({
   const [cover, setCover] = useState(identity?.coverUrl ?? "");
   const [avatar, setAvatarState] = useState(avatarUrl);
   const [busy, setBusy] = useState<"cover" | "avatar" | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const shownName = displayName.trim() || email || "Your account";
   const monogram = initial(displayName.trim() || identity?.handle || email);
 
   async function prepare(file: File, square: boolean): Promise<Blob | null> {
-    setError(null);
     if (!ACCEPTED.includes(file.type)) {
-      setError("Choose a JPG, PNG or WebP photo.");
+      banner.error("Choose a JPG, PNG or WebP photo.");
       return null;
     }
     if (file.size > COVER_MAX_BYTES) {
-      setError("That photo is over 10MB. Please choose a smaller one.");
+      banner.error("That photo is over 10MB. Please choose a smaller one.");
       return null;
     }
     const blob = await reencodeToJpeg(file, {
@@ -143,7 +142,7 @@ export function AccountHero({
       square,
     });
     if (!blob) {
-      setError(
+      banner.error(
         "We could not prepare that photo safely, so it was not uploaded. Try a different one.",
       );
       return null;
@@ -159,25 +158,26 @@ export function AccountHero({
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError("We could not upload that photo. Check your connection and try again.");
+        banner.error("We could not upload that photo. Check your connection and try again.");
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: blob, contentType: "image/jpeg" });
       if (!upload.ok) {
-        setError("We could not upload that photo. Check your connection and try again.");
+        banner.error("We could not upload that photo. Check your connection and try again.");
         return;
       }
 
       const result = await setSocialCover({ storagePath: path });
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
       router.refresh();
       setCover(URL.createObjectURL(blob));
+      banner.success("Your cover is saved.");
     } catch {
-      setError("We could not read that photo. Try a different one.");
+      banner.error("We could not read that photo. Try a different one.");
     } finally {
       setBusy(null);
       if (coverInput.current) coverInput.current.value = "";
@@ -192,25 +192,26 @@ export function AccountHero({
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError("We could not upload that photo. Check your connection and try again.");
+        banner.error("We could not upload that photo. Check your connection and try again.");
         return;
       }
       const path = `${userId}/${crypto.randomUUID()}.jpg`;
       const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: blob, contentType: "image/jpeg" });
       if (!upload.ok) {
-        setError("We could not upload that photo. Check your connection and try again.");
+        banner.error("We could not upload that photo. Check your connection and try again.");
         return;
       }
 
       const result = await setAvatar({ storagePath: path });
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
       setAvatarState(result.data.avatarUrl);
+      banner.success("Your photo is saved, here and everywhere else on Vallo.");
       router.refresh();
     } catch {
-      setError("We could not read that photo. Try a different one.");
+      banner.error("We could not read that photo. Try a different one.");
     } finally {
       setBusy(null);
       if (avatarInput.current) avatarInput.current.value = "";
@@ -293,11 +294,6 @@ export function AccountHero({
       }
     >
       {!identity ? <p className="nf-pf-claim__note">{COPY.claimHandleNote}</p> : null}
-      {error && (
-        <p role="alert" className="nf-pf-error">
-          {error}
-        </p>
-      )}
       {credentials}
       {/* The cover's picker opens from the "Cover photo" row under the
           belongings (`COVER_INPUT_ID`), not from a third control here. */}

@@ -15,6 +15,7 @@ import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * LOCK MONEY WITH THIS PHONE. V-81.
@@ -41,7 +42,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const [codeSent, setCodeSent] = useState(false);
   /* A password changed in the last day is refused; the emailed code takes over. */
   const [forceCode, setForceCode] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+  /* The enrol sheet's own error, beside its fields. Every other outcome goes
+     to the one banner (Grade 1). */
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
@@ -63,6 +65,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const staffHasKey = staff && list.state === "ok" && list.rows.length > 0;
   const staffNeedsPassword = staff && list.state === "ok" && list.fallback === "password";
 
+  /* Inside the sheet a refusal sits under its fields; with no sheet open (a
+     staff key proving the next one) it goes to the banner. */
+  const fail = (text: string) => (enrolling ? setError(text) : banner.error(text));
+
   const enrol = () =>
     start(async () => {
       try {
@@ -80,7 +86,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         const begun = await beginEnrol(proof).catch(() => ({ error: "failed" as const }));
         if ("error" in begun) {
           const refused = staffHasKey ? copy.staffAnotherKey : copy.rejected;
-          setError(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
+          fail(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
           if (begun.error === "password_recent") {
             setForceCode(true);
             setCodeSent(false);
@@ -97,20 +103,20 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           exclude: [],
         });
         if (!made) {
-          setError(copy.rejected);
+          fail(copy.rejected);
           return;
         }
         const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
           error: "failed" as const,
         }));
         if ("error" in done) {
-          setError(done.error === "rejected" ? copy.rejected : copy.failed);
+          fail(done.error === "rejected" ? copy.rejected : copy.failed);
           return;
         }
         setEnrolling(false);
         setPassword("");
         setCode("");
-        setNote(MONEY_LOCK_DONE);
+        banner.success(MONEY_LOCK_DONE);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -127,10 +133,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         if (stepUp === null) return;
         const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ error: "failed" as const }));
         if ("error" in done) {
-          setError(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
+          banner.error(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
           return;
         }
-        setNote(MONEY_LOCK_REMOVED);
+        banner.success(MONEY_LOCK_REMOVED);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -139,10 +145,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   };
 
   const rows = list.state === "ok" ? list.rows : [];
-  const groupNote = note ?? error ?? (list.state === "unreadable" ? copy.settingsUnknown : MONEY_LOCK_BODY);
+  const groupNote = list.state === "unreadable" ? copy.settingsUnknown : MONEY_LOCK_BODY;
 
   return (
-    <SettingsGroup label={copy.settingsTitle} note={<span role={error ? "alert" : undefined}>{groupNote}</span>}>
+    <SettingsGroup label={copy.settingsTitle} note={<span>{groupNote}</span>}>
       {rows.length > 0 && (
         <RowValue icon="key" label={copy.settingsTitle} value={copy.settingsEnrolled.replace("{count}", plural(rows.length, copy.phones, locale))} testId="money-lock-count" />
       )}
@@ -165,7 +171,6 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           disabled={supported !== true || pending}
           onClick={() => {
             setError(null);
-            setNote(null);
             if (staffHasKey) enrol();
             else setEnrolling(true);
           }}

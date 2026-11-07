@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -70,7 +71,6 @@ export function FollowButton({
   const router = useRouter();
   const { gateHref } = useRequireAuth();
   const [following, setFollowing] = useState(initialFollowing);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   /*
@@ -108,7 +108,6 @@ export function FollowButton({
   const onClick = () => {
     const next = !following;
     setFollowing(next);
-    setError(null);
 
     startTransition(async () => {
       try {
@@ -118,7 +117,10 @@ export function FollowButton({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           setFollowing(!next);
-          setError(result && !result.ok ? result.error : "You are offline, and this phone could not keep that for later.");
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result && !result.ok ? result.error : "You are offline, and this phone could not keep that for later.", {
+            retry: onClick,
+          });
           return;
         }
         /* The database is the authority even when it agrees with us: a second tab
@@ -147,14 +149,6 @@ export function FollowButton({
       >
         {following ? labels.following : labels.follow}
       </Button>
-      {error && (
-        <p
-          role="alert"
-          className="max-w-[14rem] text-right text-[length:var(--nf-text-overline)] leading-snug text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      )}
     </div>
   );
 }

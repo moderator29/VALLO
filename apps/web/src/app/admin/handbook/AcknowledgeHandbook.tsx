@@ -6,12 +6,29 @@ import { Button } from "@/components/ui/Button";
 import { acknowledgeHandbook } from "@/lib/admin/staff-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 export function AcknowledgeHandbook({ version }: { version: string }) {
   const [read, setRead] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
+  function acknowledge() {
+    start(async () => {
+      try {
+        const result = await acknowledgeHandbook({ version });
+        if (!result.ok) banner.error(result.error, { retry: acknowledge });
+        else {
+          /* Straight into the console, where their desks and their
+             position are now open, rather than staying on this page. */
+          router.replace("/admin");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <div className="grid gap-xs">
       <label className="flex items-start gap-xs nf-body">
@@ -24,31 +41,11 @@ export function AcknowledgeHandbook({ version }: { version: string }) {
           size="md"
           disabled={!read || pending}
           data-testid="handbook-acknowledge"
-          onClick={() =>
-            start(async () => {
-              try {
-                const result = await acknowledgeHandbook({ version });
-                if (!result.ok) setError(result.error);
-                else {
-                  /* Straight into the console, where their desks and their
-                     position are now open, rather than staying on this page. */
-                  router.replace("/admin");
-                  router.refresh();
-                }
-              } catch (error) {
-                if (!tapFailedOffline(error)) throw error;
-              }
-            })
-          }
+          onClick={acknowledge}
         >
           Acknowledge and unlock my desks
         </Button>
       </div>
-      {error ? (
-        <p className="nf-body text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

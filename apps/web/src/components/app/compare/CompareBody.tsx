@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -56,7 +57,6 @@ export function useCompareChoice(table: CompareTable, initial?: readonly string[
   const [chosen, setChosen] = useState<string[]>(() =>
     (initial && initial.length > 0 ? [...initial] : table.columns.map((c) => c.id)).slice(0, COMPARE_MIN),
   );
-  const [note, setNote] = useState<string | null>(null);
 
   /* A place removed from the list leaves the compare too. */
   const valid = chosen.filter((id) => table.columns.some((c) => c.id === id));
@@ -65,15 +65,15 @@ export function useCompareChoice(table: CompareTable, initial?: readonly string[
   const toggle = (id: string, limitNote: string) => {
     if (valid.includes(id)) {
       setChosen(valid.filter((x) => x !== id));
-      setNote(null);
       return;
     }
-    /* A third pick replaces the first chosen: two at a time, never refused. */
+    /* A third pick replaces the first chosen: two at a time, never refused.
+       That swap is said by the one banner at the top of the screen (Grade 1). */
     setChosen(valid.length >= TWO ? [...valid.slice(1), id] : [...valid, id]);
-    setNote(valid.length >= TWO ? limitNote : null);
+    if (valid.length >= TWO) banner.info(limitNote);
   };
 
-  return { valid, shown, note, toggle };
+  return { valid, shown, toggle };
 }
 
 export type CompareChoice = ReturnType<typeof useCompareChoice>;
@@ -87,7 +87,7 @@ export function CompareBody({
   copy: SavedCompareCopy;
   choice: CompareChoice;
 }) {
-  const { valid, shown, note, toggle } = choice;
+  const { valid, shown, toggle } = choice;
   return (
     <>
         <p className="nf-caption text-[var(--nf-content-secondary)]">{copy.pick}</p>
@@ -118,7 +118,7 @@ export function CompareBody({
           })}
         </ul>
         <p className="nf-caption mt-inline-tight min-h-5 text-[var(--nf-content-muted)]" role="status">
-          {note ?? (valid.length < COMPARE_MIN ? copy.tooFew : "")}
+          {valid.length < COMPARE_MIN ? copy.tooFew : ""}
         </p>
 
         {shown.columns.length >= COMPARE_MIN ? (

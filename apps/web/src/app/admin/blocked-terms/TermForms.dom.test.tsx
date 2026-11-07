@@ -17,10 +17,12 @@ const entry = `
   import { TermForm, RetireTerm } from "@/app/admin/blocked-terms/TermForms";
   import { BLOCKED_TERM_ACTIONS, BLOCKED_TERM_CATEGORIES, BLOCKED_TERM_SEVERITIES } from "@/lib/admin/blocked-terms-rules";
   import { mount } from "@/lib/testing/browser-root";
+  import { ToastHost } from "@/components/ui/ToastHost";
   const c = getDictionary("en").adminCoverage.blockedTerms;
   const opt = (values, names) => values.map((value) => ({ value, label: names[value] ?? value }));
   mount(
     <div style={{ width: 360, padding: 16 }}>
+      <ToastHost />
       <TermForm copy={c} categories={opt(BLOCKED_TERM_CATEGORIES, c.category)} actions={opt(BLOCKED_TERM_ACTIONS, c.action)} severities={opt(BLOCKED_TERM_SEVERITIES, c.severity)} />
       <ul className="nf-rows nf-group"><li className="nf-row flex-wrap"><span className="flex-1">send money first</span><RetireTerm term="send money first" copy={{ ...c, cancel: "Cancel" }} /></li></ul>
     </div>,

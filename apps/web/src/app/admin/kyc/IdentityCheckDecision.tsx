@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideIdentityCheck } from "@/lib/admin/identity-check-actions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Approve or refuse one Dojah check, the same shape as `DocumentDecision`:
@@ -23,7 +24,11 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
       try {
         const result = await decideIdentityCheck(approve ? { checkId, approve: true } : { checkId, approve: false, reason });
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.error);
+          /* A word about the reason stays under the reason; anything else
+             is the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: () => decide(approve) });
           return;
         }
         setReason("");

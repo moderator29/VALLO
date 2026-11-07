@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { activateAssistant } from "@/lib/assistant/settings-actions";
 import { AI_PRIVACY_VERSION, AI_TERMS_VERSION } from "@/lib/assistant/permissions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The agreement screen. Activation stays disabled until the Terms, the
@@ -20,12 +21,10 @@ export function ConsentForm() {
   const [privacy, setPrivacy] = useState(false);
   const [agree, setAgree] = useState(false);
   const [pending, start] = useTransition();
-  const [error, setError] = useState<string | null>(null);
   const ready = terms && privacy && agree;
 
   const activate = () => {
     if (!ready) return;
-    setError(null);
     start(async () => {
       try {
         const result = await activateAssistant({
@@ -37,9 +36,10 @@ export function ConsentForm() {
           permissions: ["discovery"],
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: activate });
           return;
         }
+        banner.success("The assistant is on. It starts with public listings only.");
         router.push("/settings/ai-assistant");
         router.refresh();
       } catch (error) {
@@ -96,11 +96,6 @@ export function ConsentForm() {
         </label>
       </section>
 
-      {error ? (
-        <p className="nf-rv-msg nf-rv-msg--error" role="alert">
-          {error}
-        </p>
-      ) : null}
       <Button type="submit" variant="primary" full disabled={!ready || pending} data-testid="ai-activate">
         {pending ? "Turning on" : "Activate assistant"}
       </Button>

@@ -3,7 +3,7 @@
 import { POST_COPY } from "@/lib/social/posts-model";
 import { displayHost } from "@/lib/brand-domain";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { Toast, useToast } from "@/components/ui/Toast";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Share, floating on the cover beside the `…`.
@@ -35,7 +35,6 @@ export function ProfileShare({
   handle: string;
   displayLabel: string;
 }) {
-  const { toast, show } = useToast();
   const who = displayLabel || `@${handle}`;
 
   const share = () => {
@@ -48,27 +47,23 @@ export function ProfileShare({
     }
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
-      show(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     /* No share sheet and no clipboard, which is an old browser on a hotel wifi
        rather than a hypothetical. The address is the thing being shared, so
        say it rather than failing silently. */
-    show(`The address is ${displayHost()}/u/${handle}`);
+    banner.info(`The address is ${displayHost()}/u/${handle}`);
   };
 
   return (
-    <>
-      <button
-        type="button"
-        className="nf-social-round nf-btn--glass"
-        aria-label={`Share ${who}`}
-        onClick={share}
-      >
-        <UiIcon name="share" size={19} />
-      </button>
-
-      {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
-    </>
+    <button
+      type="button"
+      className="nf-social-round nf-btn--glass"
+      aria-label={`Share ${who}`}
+      onClick={share}
+    >
+      <UiIcon name="share" size={19} />
+    </button>
   );
 }

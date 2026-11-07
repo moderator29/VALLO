@@ -13,7 +13,10 @@ afterAll(closeBrowser);
 const ENTRY = `
   import { mount } from "@/lib/testing/browser-root";
   import { FollowButton } from "@/components/social/profile/FollowButton";
-  mount(<FollowButton handle="ada_o" initialFollowing={false} signedIn />);
+  import { ToastHost } from "@/components/ui/ToastHost";
+  /* The refusal is said by the one banner (Grade 1), drawn by the host the
+     root layout mounts. */
+  mount(<><FollowButton handle="ada_o" initialFollowing={false} signedIn /><ToastHost /></>);
 `;
 
 describe.skipIf(!hasBrowser && !process.env.CI)("the follow button on a weak signal", () => {

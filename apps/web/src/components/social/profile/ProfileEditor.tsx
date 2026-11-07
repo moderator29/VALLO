@@ -1,7 +1,7 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useActionState, useEffect, useId, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -89,6 +89,20 @@ export function ProfileEditor({
     router.replace(`/u/${saved.handle}/edit`);
     router.refresh();
   }, [saved, router]);
+
+  /* The outcome is said by the one banner at the top of the screen (Grade 1);
+     each field's own error stays under that field. */
+  useEffect(() => {
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error);
+      return;
+    }
+    const handle = state.data.handle;
+    banner.success(state.data.claimed ? `@${handle} is yours.` : "Your profile is saved.", {
+      action: { label: "View your profile", run: () => router.push(`/u/${handle}`) },
+    });
+  }, [state, router]);
 
   const fieldError = (key: string): string | undefined =>
     state && !state.ok ? state.fieldErrors?.[key] : undefined;
@@ -339,29 +353,6 @@ export function ProfileEditor({
           </span>
         </label>
       </section>
-
-      {/* ------------------------------------------------------------ result */}
-      {state && !state.ok && (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]">
-          {state.error}
-        </p>
-      )}
-
-      {saved && (
-        <div role="status" className="nf-panel nf-panel--card p-md">
-          <p className="flex items-center gap-xs text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-success)]">
-            <UiIcon name="verified" size={15} className="shrink-0" />
-            {saved.claimed ? `@${saved.handle} is yours.` : "Your profile is saved."}
-          </p>
-          <Link
-            href={`/u/${saved.handle}`}
-            className="mt-xs inline-flex items-center gap-2xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-brand-secondary)]"
-          >
-            View your profile
-            <UiIcon name="arrow-right" size={14} />
-          </Link>
-        </div>
-      )}
 
       <div className="flex flex-col gap-xs pb-xs sm:flex-row-reverse">
         <Button type="submit" variant="primary" loading={pending} disabled={pending} className="w-full sm:w-auto">
