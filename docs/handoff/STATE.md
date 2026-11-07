@@ -27,6 +27,7 @@ and PAGE_LEDGER.md (every page, ticked as passed).
 | NATIVE (run 1 finished, run 2 started) | platform layer, iOS and Android shell, connection manager, perf report, animated opening on both, device matrix, rich push with photos, notification sound, Face ID fix, extension target, Android large icon, renderer recovery, Capacitor audit | run 2: PhoneField lazy, Supabase client lazy, empty-reviews image, re-measure, prop size test | its own proposals |
 | FEATURES | Circle end to end, reminders, listing data | STOPPED by the founder | its queue stays in AGENT_QUEUES; A9 moved to FE |
 | BANNER | survey of 190 banner moments | building them in batches | the inline-outcome guard test |
+| CALLS | (new) | upgrading the call screens and adding in-app incoming call banner, missed call push, control sheet | F1 to F6 from FEATURE_BACKLOG; outside-app calls (F2) queued for build 1.0.2 |
 | MSG | rounds 4 to 10 done | finished | messages kept by the lead |
 
 ## Waiting on the founder

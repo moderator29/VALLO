@@ -254,6 +254,34 @@ lead's).
    (versions, permissions strings, Info.plist and manifest entries, privacy
    manifest) and fix what is wrong for build 1.0.2.
 
+## Agent CALLS (call screens, in-app incoming, missed call push; started 7 November 2026)
+
+Owns: `components/calls/**`, `lib/calls/**`, `app/css/calls.css`, and the calls
+family in `lib/push/family.ts` (coordinate with the lead for push edits).
+
+1. **F4 and F5: redesign the call screens** (ringing, outgoing, in-call for
+   voice and video). A glass control sheet at the bottom with: Mute, Video,
+   Speaker, More (a menu with screen share, flip camera, add to group), End.
+   Cool, clean, lovely, with Vallo's identity. The controls as round glass
+   discs. The avatar area calmer. The self-view for video stays draggable.
+   Light and dark. 390 and 360 wide.
+2. **F1: in-app incoming call banner.** When a call arrives while the user is
+   inside the app, show a top banner (like the NotifyBanner but for calls):
+   the caller's photo, name, call kind (voice or video), Accept and Decline.
+   Tap Accept opens the call surface. Uses the existing realtime subscription
+   (`useCallRealtime`) and `call-store.ts`.
+3. **F3: missed call notification.** A push notification with the caller's
+   photo (from imagery.ts), their name, and action buttons: Message (opens
+   the thread) and Call back (opens the call surface). Wire the actions into
+   push action handling (`lib/push/family.ts` V-53 actions).
+4. **F6: recommendations.** Think up 5 or more improvements: call quality
+   indicator visible during a call, a call history page, scheduled calls,
+   call recording consent, group calls for Circle, hold music, call transfer
+   for agents, call notes after a call. Propose each in the hand-off.
+5. **F2: outside-app incoming call** (CallKit on iOS, full-screen intent on
+   Android) is QUEUED for build 1.0.2 and coordinated with Agent NATIVE.
+   Write the native spec and the JS bridge but do not wire the native side.
+
 ## Lead (native with Agent NATIVE, backend, coordination)
 
 Native review and the requests Agent NATIVE sends for component files,

@@ -72,3 +72,14 @@ end to end, in order of value. Starting ideas:
 | E3 | The docs and help pages upgraded (`/docs`, `/help`, `/guides`): searchable, clean, on PageFrame, light and dark | PAGES | QUEUED |
 | E5 | Marketing email consent at sign up is pre-ticked (AcceptTerms defaultChecked): make it unticked by default, with the choice also in Privacy choices (Nigeria data protection law, NDPR) | FE (Privacy choices job) | QUEUED |
 | E4 | Every new piece audited front and back: looks solid, the data path real, RLS on, tests | Lead | ONGOING |
+
+## F. Calling (founder, 7 November 2026)
+
+| # | What | Owner | State |
+|---|---|---|---|
+| F1 | In-app incoming call banner: a top banner with Accept and Decline when a call arrives while the user is inside the app, like the in-app notification banner but for calls, with the caller's photo, name and call kind | CALLS (Agent CALLS) | QUEUED |
+| F2 | Outside-app incoming call: CallKit on iOS (the native incoming call screen), full-screen intent and call notification on Android (native, build 1.0.2) | CALLS + NATIVE | QUEUED, needs build 1.0.2 |
+| F3 | Missed call notification: a push with Message and Call back action buttons, the caller's photo and name, opening the thread | CALLS | QUEUED |
+| F4 | Upgraded audio call screens: ringing, calling and in-call redesigned with a glass control sheet (Video, Speaker, Mute, More, Share, End), cooler and more Vallo, clean and lovely, light and dark | CALLS | QUEUED |
+| F5 | Upgraded video call screens: the same control sheet, a clear camera preview, the self-view draggable, the remote view edge to edge | CALLS | QUEUED |
+| F6 | Calling recommendations: think of more improvements (call quality indicator, call history page, scheduled calls, call recording consent, group calls in Circle) | CALLS | QUEUED |
