@@ -2859,11 +2859,15 @@
    * feed's own calm material, a small title and one note, rows of face,
    * name, kind and place, and a compact Follow capsule. Vallo's, not X's.
    * ------------------------------------------------------------------ */
+  /* The block is a card among cards (7 November 2026): the feed's own card
+     material, corner and lift, so it reads as part of the column rather than
+     a tinted panel dropped into it. */
   .nf-follow {
-    padding: 14px var(--nf-feed-pad) 6px;
-    border-radius: var(--nf-container-radius);
-    border: 1px solid color-mix(in oklab, var(--nf-lit) 30%, var(--nf-surface-canvas));
-    background: color-mix(in oklab, var(--nf-lit) 6%, var(--nf-surface-canvas));
+    padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-2xs);
+    border-radius: var(--nf-radius-xl);
+    border: var(--nf-border-width) solid var(--nf-card-border);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
   }
   .nf-follow__title {
     color: var(--nf-content-primary);
@@ -2939,15 +2943,15 @@
     position: relative;
     z-index: 2;
   }
-  /* Follow is a quiet capsule here, not a lit primary: three lit buttons in
+  /* Follow is a quiet soft rectangle on the 40px rung here, not a lit primary: three lit buttons in
      one block would be three primaries on a screen whose primary is reading
      (D74 restraint). The shared button keeps its states; only the dress and
      the height change, and the row's 64px gives the thumb its room. */
   .nf-follow-row__act .nf-btn {
-    min-block-size: 36px;
-    block-size: 36px;
-    padding-inline: 16px;
-    border-radius: var(--nf-radius-segment);
+    min-block-size: 40px;
+    block-size: 40px;
+    padding-inline: var(--nf-space-md);
+    border-radius: var(--nf-act-radius-sm);
     border: 1px solid color-mix(in oklab, var(--nf-brand-secondary) 45%, transparent);
     background: color-mix(in oklab, var(--nf-brand-secondary) 12%, transparent);
     box-shadow: none;

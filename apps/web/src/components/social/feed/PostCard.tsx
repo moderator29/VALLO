@@ -607,23 +607,21 @@ export function PostCard({
             ) : null}
           </span>
 
-          {/* THE QUIET LINE: who (the handle), where (the place) and when (the
-              time), in that order, one line in the muted ink. The handle gives
-              way first on a narrow phone, then the place; the time never does,
-              because it is the post's own link. */}
+          {/* THE QUIET LINE: where (the place) and when (the time), one line
+              in the muted ink. A post written in no place shows the author's
+              @handle where the place would be, so the line is never just a
+              time; with a place, the name above already says who, and a third
+              part only truncated all three on a phone. The time never gives
+              way, because it is the post's own link. */}
           <span className="nf-pc__meta">
-            {isBot ? (
+            {place ? (
+              place
+            ) : isBot ? (
               <span className="nf-pc__handle">{words.assistant}</span>
             ) : !isSystem && post.author?.handle ? (
               <span className="nf-pc__handle">@{post.author.handle}</span>
             ) : null}
-            {place ? (
-              <>
-                {isBot || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
-                {place}
-              </>
-            ) : null}
-            {isBot || place || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
+            {place || isBot || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
             {when}
           </span>
         </div>

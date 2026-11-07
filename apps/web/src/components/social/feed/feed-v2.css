@@ -11,7 +11,8 @@
  *     shows, beside For you and Friends.
  *   - A card is the platform's card material, 22px corners, one hairline and
  *     (by day) the soft blue-tinted lift. Its head is the face, the name with
- *     its marks, and ONE quiet line under it: the handle, the place, the time.
+ *     its marks, and ONE quiet line under it: the place and the time (the
+ *     @handle stands in for a post written in no place).
  *   - The picture sits 4px inside the card's edge on an 18px corner, the
  *     card's own corner less the inset, so the two curves are concentric and
  *     the photograph reads as the card's own surface rather than a box in a
@@ -485,8 +486,9 @@
     line-height: 1.35;
   }
 
-  /* THE QUIET LINE: handle, place, time. One line, the muted ink; the handle
-     gives way first, then the place, and the time never does. */
+  /* THE QUIET LINE: the place (or the @handle) and the time. One line, the
+     muted ink; the place or handle gives way on a narrow phone and the time
+     never does. */
   .nf-pc__meta {
     display: flex;
     align-items: center;
