@@ -89,7 +89,8 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    unblock, payment method remove and default, and hours saved; `ToastHost`
    inside `lib/testing/browser-root` `mount()`; Book and Pay disabled while
    the page on screen is a kept copy (with the KeptPriceNote reason);
-   `DiscoveryEmpty` onto the one glyph; the inline errors left in HostWizard
+   `DiscoveryEmpty` onto the one glyph; a real `pin` glyph in UiIcon at
+   the current stroke weight (the inbox pin mark borrows `bookmark` today); the inline errors left in HostWizard
    and the stays steps move with round 2's StepFrame work.
 9. **Rounds 5, 6, 7** from WORK_QUEUE.md, in order (round 3 is Agent PAGES'). Round 7 SW11
    includes the English words the messages agent added (voice, reactions,
