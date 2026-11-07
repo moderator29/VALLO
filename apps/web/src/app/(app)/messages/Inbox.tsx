@@ -20,6 +20,7 @@ import { useInboxPart } from "@/components/app/threads/use-inbox-copy";
 import { formatNumber, plural } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { TextField } from "@/components/ui/Field";
+import { Sheet } from "@/components/ui/Sheet";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { previewLine } from "@/components/app/messages/preview";
 import { type BadgeTier } from "@/lib/trust/badge-tier";
@@ -294,6 +295,8 @@ export function Inbox({
   initialSide = "property",
   archiveOpen = false,
   inboxCopy,
+  plusCopy,
+  assistantOn = false,
 }: {
   rows: InboxRow[];
   /**
@@ -312,6 +315,10 @@ export function Inbox({
   meId?: string | null;
   /** Only a signed-in reader has read state the server can clear. */
   canMarkRead?: boolean;
+  /** Grade 1: the pinned assistant row, search and options words (`inboxPlus`). */
+  plusCopy?: Dictionary["inboxPlus"];
+  /** Grade 1: the assistant is switched on, so its row is pinned first. */
+  assistantOn?: boolean;
 }) {
   const router = useRouter();
   const [side, setSide] = useState<Side>(initialSide);
@@ -321,6 +328,9 @@ export function Inbox({
   /* Optimistic: an archived row leaves Recent the moment it is tapped. */
   const [archivedLocal, setArchivedLocal] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState("");
+  /* GRADE 1: search is a button in the header until it is wanted (R59). */
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [markError, setMarkError] = useState<string | null>(null);
   const [marking, startMarking] = useSafeTransition();
 
@@ -347,9 +357,18 @@ export function Inbox({
   );
   /* A chat with a person (9 October 2026) belongs to neither side: it shows
      on both, so a message from somebody never hides behind the other tab. */
+  /* GRADE 1: the Property and Stays tabs only appear when there are
+     conversations on BOTH sides; with one side, every thread is shown and
+     the tab row is not drawn (one control layer fewer, R59). */
+  const bothSides = useMemo(
+    () =>
+      live.some((r) => r.contextKind !== "direct" && r.side === "stays") &&
+      live.some((r) => r.contextKind !== "direct" && (r.side ?? "property") === "property"),
+    [live],
+  );
   const onSide = useMemo(
-    () => live.filter((r) => r.contextKind === "direct" || (r.side ?? "property") === side),
-    [live, side],
+    () => (bothSides ? live.filter((r) => r.contextKind === "direct" || (r.side ?? "property") === side) : live),
+    [live, side, bothSides],
   );
   const requests = useMemo(() => onSide.filter((r) => inView(r, "requests")), [onSide]);
   const unreadTotal = rows.reduce((sum, r) => sum + r.unread, 0);
@@ -416,6 +435,30 @@ export function Inbox({
     });
   };
 
+  /* GRADE 1 (P1.4, R59): Vallo Assistant, pinned first in every inbox, even
+     an empty one. It opens the assistant chat, where "Talk to a person"
+     reaches the support team. Only on the main view with no search. */
+  const plus = plusCopy;
+  const pinned =
+    assistantOn && plus && view === "recent" && !query.trim() ? (
+      <li className="flex items-center gap-3xs">
+        <Link href="/assistant" className="nf-inbox-row nf-inbox-pinned min-w-0 flex-1" data-testid="inbox-assistant">
+          <span className="nf-inbox-pinned__tile" aria-hidden="true">
+            <UiIcon name="bot" size={24} />
+          </span>
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className={`block truncate ${TYPE.rowTitle} font-semibold`}>{plus.assistantName}</span>
+            <span className="nf-body-sm mt-3xs block truncate text-[var(--nf-content-secondary)]">{plus.assistantLine}</span>
+          </span>
+        </Link>
+      </li>
+    ) : null;
+
+  const pick = (next: View) => {
+    setView(next);
+    setMenuOpen(false);
+  };
+
   return (
     <div>
       {/* ------------------------------------------------------- heading */}
@@ -456,26 +499,30 @@ export function Inbox({
         {...(unreadTotal > 0 ? { subtitle: inbox.unreadCount.replace("{count}", formatNumber(unreadTotal, locale)) } : {})}
         actions={
           <div className="flex shrink-0 items-center gap-inline">
-            {canMarkRead && unreadTotal > 0 && (
-              <Button
-                variant="quiet"
-                size="sm"
-                onClick={markAllRead}
-                disabled={marking}
-                data-testid="inbox-mark-read"
-              >
-                {marking ? inbox.marking : inbox.markAllRead}
-              </Button>
-            )}
-            <Link
-              href="/search"
-              aria-label={inbox.compose}
-              data-testid="inbox-compose"
+            {/* GRADE 1 (R59): search and the options sheet as two round
+                buttons beside the title; Mark all read lives in the sheet. */}
+            <button
+              type="button"
+              aria-label={searchOpen ? (plus?.closeSearch ?? inbox.clearSearch) : (plus?.openSearch ?? inbox.search)}
+              aria-expanded={searchOpen}
+              data-testid="inbox-search-toggle"
               className="nf-icon-btn h-11 w-11"
+              onClick={() => {
+                if (searchOpen) setQuery("");
+                setSearchOpen((open) => !open);
+              }}
             >
-              {/* A pencil, not a second magnifier: the field under the header is the search. */}
-              <UiIcon name="pencil" size={ICON.row} />
-            </Link>
+              <UiIcon name={searchOpen ? "close" : "search"} size={ICON.row} />
+            </button>
+            <button
+              type="button"
+              aria-label={plus?.more ?? inbox.title}
+              data-testid="inbox-more"
+              className="nf-icon-btn h-11 w-11"
+              onClick={() => setMenuOpen(true)}
+            >
+              <UiIcon name="more" size={ICON.row} />
+            </button>
           </div>
         }
       />
@@ -485,9 +532,11 @@ export function Inbox({
           search that filters as you type needs a way back to everything that
           is not "select all and delete", and the platform's other four search
           bars each hand-rolled the icon slot at a different size. */}
+      {searchOpen || query ? (
       <TextField
         label={inbox.search}
         hideLabel
+        autoFocus
         type="search"
         leadingIcon="search"
         clearable={inbox.clearSearch}
@@ -497,6 +546,7 @@ export function Inbox({
         placeholder={inbox.searchPlaceholder}
         data-testid="inbox-search"
       />
+      ) : null}
 
       {/* ------------------------------------------------ side, then view */}
       {/*
@@ -505,6 +555,7 @@ export function Inbox({
         unread. The VIEW is a radiogroup of chips beneath it: a filter over
         that side's list, four equal cells so every word is whole at 390px.
       */}
+      {bothSides ? (
       <div className="mt-heading">
         <Segmented<Side>
           label={inbox.sides}
@@ -519,6 +570,7 @@ export function Inbox({
           itemIdPrefix="inbox-side"
         />
       </div>
+      ) : null}
       <div className="mt-sm" data-testid="inbox-views">
         {/* The views as filter chips (north star 15.4): one rail, radio
             semantics because it filters the list below, the waiting counts
@@ -527,8 +579,14 @@ export function Inbox({
         <ChipRow label={tabLabels.filterLabel} radiogroup bleed={false}>
           {/* A filter appears only when it has something in it. Recent and
               Requests always show; the view you are on never vanishes under you. */}
+          {/* GRADE 1 (R59): All, Unread and Requests as the one chip row;
+              Archived and Reported open from the options sheet and show a
+              chip only while they are the view. */}
           {VIEW_ORDER.filter(
-            (key) => key === "recent" || key === "requests" || view === key || onSide.some((r) => inView(r, key)),
+            (key) =>
+              key === "recent" ||
+              view === key ||
+              ((key === "unread" || key === "requests") && onSide.some((r) => inView(r, key))),
           ).map((key) => {
             const count = key === "unread" ? unreadThreads : key === "requests" ? requests.length : 0;
             return (
@@ -541,7 +599,7 @@ export function Inbox({
                 {...(count > 0 ? { count } : {})}
                 data-testid={`inbox-view-${key}`}
               >
-                {key === "requests" ? tabLabels.requests : inbox.filters[key]}
+                {key === "requests" ? tabLabels.requests : key === "recent" && plus ? plus.all : inbox.filters[key]}
               </Chip>
             );
           })}
@@ -573,10 +631,12 @@ export function Inbox({
         aria-labelledby={`inbox-side-${side}`}
         className="mt-heading"
       >
+        {shown.length === 0 && pinned ? <ul className="nf-inbox-list">{pinned}</ul> : null}
         {shown.length > 0 ? (
           /* Hairline rows on the ground, not a card wrapping a divided list.
              One line between two conversations, nothing around either. */
           <ul className="nf-inbox-list">
+            {pinned}
             {shown.map((row) => (
               <Row
                 key={row.id}
@@ -636,6 +696,73 @@ export function Inbox({
           />
         )}
       </div>
+
+      {/* GRADE 1 (R61): the inbox's options, as one sheet. */}
+      <Sheet
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        title={plus?.menuTitle ?? inbox.title}
+        closeLabel={inbox.clearSearch}
+        detents={[0.5]}
+        testId="inbox-menu"
+      >
+        <ul className="nf-inbox-menu">
+          {canMarkRead && unreadTotal > 0 ? (
+            <li>
+              <button type="button" onClick={() => { markAllRead(); setMenuOpen(false); }} disabled={marking} data-testid="inbox-mark-read">
+                <UiIcon name="check" size={20} />
+                {marking ? inbox.marking : inbox.markAllRead}
+              </button>
+            </li>
+          ) : null}
+          <li>
+            <button type="button" onClick={() => pick(view === "unread" ? "recent" : "unread")}>
+              <UiIcon name="mail" size={20} />
+              {view === "unread" ? (plus?.showAll ?? inbox.filters.recent) : (plus?.showUnread ?? inbox.filters.unread)}
+            </button>
+          </li>
+          <li>
+            <button type="button" onClick={() => pick("requests")}>
+              <UiIcon name="users" size={20} />
+              {plus?.requests ?? tabLabels.requests}
+            </button>
+          </li>
+          {archiveOpen ? (
+            <li>
+              <button type="button" onClick={() => pick("archived")} data-testid="inbox-menu-archived">
+                <UiIcon name="archive" size={20} />
+                {plus?.archived ?? inbox.filters.archived}
+              </button>
+            </li>
+          ) : null}
+          <li>
+            <button type="button" onClick={() => pick("reported")}>
+              <UiIcon name="flag" size={20} />
+              {plus?.reported ?? inbox.filters.reported}
+            </button>
+          </li>
+          <li>
+            {/* Starting a conversation begins from a place (Grade 1: moved
+                here from the header, which keeps two round buttons). */}
+            <Link href="/search" onClick={() => setMenuOpen(false)} data-testid="inbox-compose">
+              <UiIcon name="pencil" size={20} />
+              {plus?.compose ?? inbox.compose}
+            </Link>
+          </li>
+          <li>
+            <Link href="/support/messages" onClick={() => setMenuOpen(false)}>
+              <UiIcon name="headset" size={20} />
+              {plus?.support ?? inbox.title}
+            </Link>
+          </li>
+          <li>
+            <button type="button" onClick={() => { router.refresh(); setMenuOpen(false); }}>
+              <UiIcon name="history" size={20} />
+              {plus?.refresh ?? inbox.title}
+            </button>
+          </li>
+        </ul>
+      </Sheet>
     </div>
   );
 }

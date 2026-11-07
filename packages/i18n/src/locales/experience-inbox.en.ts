@@ -322,7 +322,7 @@ export const experienceInboxEn = {
     /** The wide screen's list beside an open conversation (`InboxPane`). */
     pane: "Conversations",
     /* `/messages`, the page's own words (Round 3 sweep, C3). */
-    title: "Inbox",
+    title: "Messages",
     paused: "Messaging is paused for maintenance. Your conversations are stored on your account, not on this device. Try again in a few minutes.",
     signedOutTitle: "Sign in to see your messages",
     signedOutBody: "Conversations live with your account, so they follow you between devices and nobody else can read them. Message an agent from any listing to start one.",

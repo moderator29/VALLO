@@ -921,5 +921,67 @@
 .nf-g1-final__body {
   display: block;
 }
+
+/*
+ * THE INBOX, GRADE 1 (references R56 to R61). Written with the list's class
+ * in front so it wins over threads.css (a member route sheet that loads
+ * after this file) without leaning on order.
+ */
+/* Calmer rows: more air, a quieter archive control. */
+.nf-inbox-list .nf-inbox-row {
+  min-block-size: 4.75rem;
+  padding-block: var(--nf-space-sm);
+}
+.nf-inbox-list [data-testid="inbox-archive"] {
+  color: var(--nf-content-muted);
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nf-inbox-list [data-testid="inbox-archive"] {
+    opacity: 0;
+  }
+  .nf-inbox-list li:hover [data-testid="inbox-archive"],
+  .nf-inbox-list [data-testid="inbox-archive"]:focus-visible {
+    opacity: 1;
+  }
+}
+/* Vallo Assistant, pinned first. */
+.nf-inbox-list .nf-inbox-pinned {
+  background: color-mix(in oklab, var(--nf-brand-primary) 6%, transparent);
+}
+.nf-inbox-pinned__tile {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-tint-2);
+  color: var(--nf-brand-primary);
+}
+/* The options sheet: one row per action, thin glyphs, 52px targets. */
+.nf-inbox-menu {
+  display: grid;
+}
+.nf-inbox-menu li + li {
+  border-block-start: var(--nf-border-width) solid var(--nf-divider);
+}
+.nf-inbox-menu button,
+.nf-inbox-menu a {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-md);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body);
+  text-align: start;
+}
+.nf-inbox-menu svg {
+  color: var(--nf-content-secondary);
+}
+.nf-inbox-menu button:disabled {
+  opacity: 0.5;
+}
 }
 

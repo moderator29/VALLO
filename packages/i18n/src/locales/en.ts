@@ -34,6 +34,7 @@ import { complianceBeneficialOwnershipEn } from "./compliance-17.en";
 import { passcodeEn } from "./passcode.en";
 import { protectEn } from "./protect.en";
 import { verifyFlowEn } from "./verify-flow.en";
+import { inboxPlusEn } from "./inbox-plus.en";
 import { experienceLandingEn } from "./experience-landing.en";
 import { experienceDiscoverEn } from "./experience-discover.en";
 import { experienceDetailEn } from "./experience-detail.en";
@@ -6036,6 +6037,7 @@ export const en = {
   passcode: passcodeEn,
   protect: protectEn,
   verifyFlow: verifyFlowEn,
+  inboxPlus: inboxPlusEn,
 
   /* Session 3, the experience upgrade: one module per owner (docs/sessions/SESSION-3-RESPONSE.md). */
   experienceLanding: experienceLandingEn,

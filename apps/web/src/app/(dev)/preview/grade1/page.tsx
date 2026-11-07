@@ -10,11 +10,25 @@ import { getLocale } from "@/lib/locale";
 import { PasscodeOfferCard } from "@/components/passcode/PasscodeOfferCard";
 import { PageFrame } from "@/components/app/PageFrame";
 import { Grade1Step, Grade1Banner, Grade1Verify } from "./Grade1Fixtures";
+import { Inbox, type InboxRow } from "@/app/(app)/messages/Inbox";
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ s?: string }> }) {
   const { s = "step" } = await searchParams;
   const t = getDictionary(await getLocale());
   const copy = t.protect;
+  if (s === "inbox") {
+    /* Invented people and places for the screenshot only. */
+    const rows: InboxRow[] = [
+      { id: "t1", counterpartName: "Adaeze Okafor", listingTitle: "2 bedroom serviced apartment, Lekki Phase 1", lastMessage: "Yes, it is still available from Friday.", whenLabel: "15:58", unread: 2, isRequest: false, counterpartKind: "agent", counterpartVerified: true, counterpartTier: "gold", side: "property" },
+      { id: "t2", counterpartName: "Tunde Bakare", listingTitle: "Studio flat, Yaba", lastMessage: "Can I come for a viewing on Saturday morning?", whenLabel: "Tue", unread: 0, isRequest: false, counterpartKind: "member", counterpartVerified: false, counterpartTier: "none", side: "property" },
+      { id: "t3", counterpartName: "Ngozi Eze", listingTitle: null, lastMessage: "Thank you, see you then.", whenLabel: "2 Nov", unread: 0, isRequest: false, counterpartKind: "member", counterpartVerified: false, counterpartTier: "none", contextKind: "direct", side: "property" },
+    ];
+    return (
+      <div className="mx-auto max-w-2xl px-gutter">
+        <Inbox rows={rows} canMarkRead inboxCopy={t.experienceInbox.inbox} plusCopy={t.inboxPlus} assistantOn />
+      </div>
+    );
+  }
   if (s === "verify" || s === "verify-open") {
     return (
       <div className="mx-auto max-w-lg px-gutter py-section">

@@ -53,10 +53,12 @@ export default async function InboxPage() {
   if (session.state === "signed-in") {
     /* The switch, the threads and the side are asked for together; the
        threads are only drawn when the switch is on (Track M performance). */
-    const [messagingOn, conversations, side] = await Promise.all([
+    const [messagingOn, conversations, side, assistantOn] = await Promise.all([
       isFeatureEnabled("messaging"),
       loadConversationSummaries(session.supabase, session.user),
       getSide(),
+      /* Grade 1 (P1.4): the assistant's row is pinned first when it is on. */
+      isFeatureEnabled("assistant"),
     ]);
     if (!messagingOn) {
       return (
@@ -122,6 +124,8 @@ export default async function InboxPage() {
           initialSide={side}
           archiveOpen={views.archiveOpen}
           inboxCopy={words}
+          plusCopy={dictionary.inboxPlus}
+          assistantOn={assistantOn}
         />
       </PullToRefresh>
     );

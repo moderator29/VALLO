@@ -393,3 +393,95 @@ bank chooser sheet on the payout screen.
 20. A "Final step: nothing is sent yet" notice before the one button that sends.
 21. Task cards with inline actions (Do it / Dismiss / Snooze), counted in a
     "Needs attention (N)" heading.
+
+---
+
+## Batch 4 (7 November 2026, 16 images): explore, profile, listing detail, messages
+
+### R48. Explore
+A big pill search "Find your next place", underline tabs (Shortlets, Rentals,
+Sales), "Explore Shortlets." with the accent stop, rails "Near Lagos >" and
+"Trending in Lagos >" of large rounded photo cards: a glass type chip, a
+heart, a glass pill of beds, baths and guests over the photo; title, area,
+"N220,000 . 1 Night".
+
+### R49. Member profile
+A rounded profile card (avatar, name, "Member since", a sunken stat strip:
+Reviews, Rating, New Member); a tinted "Complete your profile" card (Add a
+profile photo with an X, Verify your identity with a chevron); "List on
+Hauslet" promo; rows View profile, Wishlists, Bookings, Applications...; the
+floating "Switch to Agent Tools" pill.
+
+### R50. Public profile, "Reasons to trust"
+The same card with an Edit pill; "Reasons to trust" cards (Email Verified,
+Community Commitment) each with a thin glyph, a verified tick and one line.
+Vallo: the profile shows real trust facts (identity verified, phone
+confirmed, email, community promise), never an unearned one.
+
+### R51 to R53. Edit profile
+X / "Edit profile" / Save; a big avatar with "Change photo"; "About me" with
+Add; "Basic info highlights" rows with tinted glyphs (My work, Pets, Where I
+live, Favourite type of home, School, Languages...); a "What are you into?"
+sheet of interest chips with glyphs and a full-width Save.
+Vallo already asks interests (`/settings/interests`); the profile edit
+becomes this calm list in group 4.
+
+### R54 and R55. Listing detail
+The hero with glass back, share and heart buttons and a glass chip
+"Shortlet . Lekki phase 1, Lagos"; a thumbnail strip with the active one
+lifted and tilted; a centred title and "Entire home in ..."; three facts
+(Service type, Property type, Occupancy type); a bordered pill of guests,
+bedrooms, bathrooms; a host card with a round message button; "What this
+home offers" with line icons and "Show all 28 amenities"; "1 nights in
+Lekki phase 1" with a month calendar, crossed-out past days, the chosen
+range as black circles; "Clear dates"; a sticky bar with the total and Book Now.
+
+### R56. Meet your host and "Contact" sheet
+"Meet your host" card (big initial avatar, verified mark, "Identity
+verified", rating, reviews, years); a contact sheet: "Most travellers ask
+about" (Getting there, House details and rules, Price and availability
+expanded with bullets), a field "Still have questions? Message the host" and
+a Send Message button that lights only when there is text.
+
+### R57. Photo tour
+An X, "Photo tour", a rail of room thumbnails with names (Living Room,
+Kitchen, Bedroom 1), then each room as a heading with a horizontal carousel.
+
+### R58. Thread with the composer and a hint banner
+The top banner "Hold the microphone to record a voice note." (info, with an
+X), a date separator, a dark sent bubble with time and a tick, and the
+composer: a rounded two-row box, the text on top, a photo button bottom left,
+a round dark mic button bottom right (it becomes Send when there is text).
+
+### R59 to R61. Map search, inbox, inbox menu
+Map: back, a pill (Lagos | Anytime | Guests), a filter button, filter chips
+(Lagos active, Add dates, Guests, Price, Beds), a clean vector map, a
+locate button, a bottom sheet "No shortlets in Lagos" with "Save search".
+Inbox: a big "Messages" title, search and more buttons top right, chips All /
+Starred / Unread / Support, a row with the listing photo and the person's
+avatar overlaid, name, preview, a "Shortlet" tag and "Inquiry". Its more
+menu is a sheet: Show unread only, Archived chats, Refresh.
+**Vallo: inbox BUILT (group 4)**, see below.
+
+### R62. The error banner
+"Couldn't add your reaction. Try again." at the top: a white rounded banner,
+a red warning glyph, one sentence, an X. **Vallo: BUILT in group 1** (the
+feedback banner, `banner.error`).
+
+### R63. Agent "Account" with "Exit Agent Tools"
+Sections ORGANIZATIONS, MANAGEMENT TOOLS (Messaging, Leads, Finances),
+SUPPORT (Help Center, Guides and articles, Report a Problem, Legal),
+PREFERENCES (Account Settings); the floating "Exit Agent Tools" pill.
+Vallo: the switch lives in the side nav (founder's ruling) and as this pill.
+
+### What Vallo's inbox does now (group 4)
+- Title "Messages", with two round buttons: search (opens the field only when
+  wanted) and the options sheet.
+- One chip row: All, Unread, Requests (each only when it has something).
+- Property and Stays tabs only when there are conversations on both sides.
+- Vallo Assistant pinned first in every inbox, even an empty one.
+- The options sheet: Mark all read, Show unread only, Message requests,
+  Archived chats, Reported chats, Message about a place, Your support
+  tickets, Refresh.
+- Calmer rows (more air), the archive control quiet on touch and shown on
+  hover on a desktop.
