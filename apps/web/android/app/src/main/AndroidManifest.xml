@@ -8,7 +8,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="true">
         <!--
             `allowBackup` was `true`, which is the template default and the wrong
             answer for this application. Android Auto Backup copies an
@@ -37,12 +38,23 @@
             All three have to agree or the weakest one wins.
         -->
 
+        <!--
+            Platform Grade 1 (N3, N4; NATIVE_BUILD_QUEUE.md items 1 and 2), for
+            build 1.0.2. `adjustResize` shrinks the window above the keyboard,
+            the Android half of the Keyboard plugin's `resize: "native"`, so
+            the composer and a step's Continue ride on the keys.
+            `enableOnBackInvokedCallback` opts in to predictive back: the
+            system's back-to-home preview on the root screen, while the App
+            plugin's back handler (`lib/native/back-button.ts`) still decides
+            every in-app back. Built, not tested on a device.
+        -->
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
