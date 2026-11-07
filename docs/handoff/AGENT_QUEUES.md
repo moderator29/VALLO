@@ -244,7 +244,10 @@ lead's).
    large icon and big picture, `image`, `category` and `subtitle` in the
    payload across APNs, FCM and web push. You own `lib/push/**` for this job;
    the lead reviews.
-7. Then audit the Capacitor config and every plugin on both platforms
+7. **Android renderer recovery**: in `onRenderProcessGone`, recreate the web
+   view and reload the current path (return true) instead of letting the app
+   end; the likeliest crash on a 2 GB phone. For build 1.0.2.
+8. Then audit the Capacitor config and every plugin on both platforms
    (versions, permissions strings, Info.plist and manifest entries, privacy
    manifest) and fix what is wrong for build 1.0.2.
 
