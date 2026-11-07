@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { readTenancyReviewTarget } from "@/lib/tenancy/review-queries";
@@ -23,14 +23,16 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
   const copy = getDictionary(locale).trustVisible.tenancy;
   const target = await readTenancyReviewTarget(paymentId);
 
-  const header = (subtitle?: string) => (
-    <PageHeader title={copy.title} {...(subtitle ? { subtitle } : {})} fallback="/bookings?kind=inspection&from=property" />
+  /* One frame for every state the screen draws, so the title never moves. */
+  const Frame = ({ subtitle, children }: { subtitle?: string; children: React.ReactNode }) => (
+    <PageFrame title={copy.title} {...(subtitle ? { subtitle } : {})} fallback="/bookings?kind=inspection&from=property" width="narrow">
+      {children}
+    </PageFrame>
   );
 
   if (target.state === "signed-out") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header()}
+      <Frame>
         <EmptyState
           icon="keys-home"
           title={copy.signedOut}
@@ -41,13 +43,12 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
             </ButtonLink>
           }
         />
-      </div>
+      </Frame>
     );
   }
   if (target.state === "missing") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header()}
+      <Frame>
         <EmptyState
           icon="keys-home"
           title={copy.missingTitle}
@@ -58,34 +59,31 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
             </ButtonLink>
           }
         />
-      </div>
+      </Frame>
     );
   }
   if (target.state === "already") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header(target.title)}
+      <Frame subtitle={target.title}>
         <p role="status" className={TYPE.body}>
           {copy.already}
         </p>
-      </div>
+      </Frame>
     );
   }
   if (target.state === "not-open") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header(target.title)}
+      <Frame subtitle={target.title}>
         <p role="status" className={TYPE.body}>
           {copy.notOpen} {copy.movedIn.replace("{date}", formatDate(new Date(`${target.moveIn}T12:00:00Z`), locale))}
         </p>
-      </div>
+      </Frame>
     );
   }
   return (
-    <div className="mx-auto max-w-2xl">
-      {header(target.title)}
-      <p className={`${TYPE.body} mb-block`}>{copy.lede}</p>
+    <Frame subtitle={target.title}>
+      <p className={TYPE.body}>{copy.lede}</p>
       <TenancyReviewForm paymentId={target.paymentId} copy={copy} success={getDictionary(locale).success} />
-    </div>
+    </Frame>
   );
 }

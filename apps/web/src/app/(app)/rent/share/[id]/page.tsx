@@ -4,7 +4,7 @@ import { formatMoney, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { resolveSession } from "@/lib/actions/session";
 import { formatMoneyDate } from "@/lib/money/dates";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, Section, TYPE } from "@/components/app/Screen";
 import { DocFigure, DocHead, DocNote, DocRow, DocRows, DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { PayShare, SettleShareOnReturn, ShareAnswer } from "@/components/app/tenancy/FlatmateControls";
@@ -35,10 +35,9 @@ export default async function RentSharePage({
   const locale = await getLocale();
   const copy = getDictionary(locale).afterTheGate.flatmates;
   const shell = (children: React.ReactNode) => (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.shareTitle} fallback="/agreements" />
+    <PageFrame title={copy.shareTitle} fallback="/agreements" width="narrow">
       {children}
-    </div>
+    </PageFrame>
   );
   const missing = shell(<EmptyState icon="calendar-home" title={copy.shareMissingTitle} body={copy.shareMissingBody} data-testid="share-missing" />);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return missing;

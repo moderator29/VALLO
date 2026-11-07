@@ -9,7 +9,7 @@ import { RESPOND_WITHIN_DAYS, type LetterFacts } from "@/lib/tenancy/letter";
 import { formatMoneyDate } from "@/lib/money/dates";
 import { RECEIPT_CODE_AFTER_FULL_PAYMENT, RECEIPT_CODE_VOID, TENANCY_VOID_STATEMENT } from "@/lib/money/copy";
 import { ROOM_COPY, ROOM_ITEMS } from "@/lib/inspections/report";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, FactGrid, Section, Stack, TYPE } from "@/components/app/Screen";
 import { DemandLetter, PinnedChoice, PrintPack } from "./PackControls";
 import { publicPlace } from "@/lib/after-gate/public-place";
@@ -41,10 +41,9 @@ export default async function ComplaintPage({ params }: { params: Promise<{ id: 
   const copy = t.afterTheGate.complaint;
   const read = await getTenancyFile(id, locale);
   const shell = (children: React.ReactNode) => (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.title} fallback={`/tenancy/${id}`} />
+    <PageFrame title={copy.title} fallback={`/tenancy/${id}`} width="narrow">
       {children}
-    </div>
+    </PageFrame>
   );
   if (read.state === "unavailable") {
     return shell(<EmptyState icon="calendar-home" title={t.afterTheGate.tenancy.unavailableTitle} body={t.afterTheGate.tenancy.unavailableBody} />);

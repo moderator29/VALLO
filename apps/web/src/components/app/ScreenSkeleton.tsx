@@ -51,12 +51,40 @@ export function LoadingShell({
 export function PageHeaderSkeleton({
   subtitle = false,
   layout = "inline",
+  back = true,
 }: {
   subtitle?: boolean;
   /** Mirrors `PageHeader`'s `layout`: the stacked twin puts the square on its
-   *  own row and the title block, at `nf-h1` height, beneath it. */
-  layout?: "inline" | "stacked";
+   *  own row and the title block, at `nf-h1` height, beneath it. `large` is
+   *  `PageFrame`'s header (`PageHeader variant="large"`, chrome.css
+   *  `.nf-ph-large`): the 44px round back, a 30/36 title, a 15/22 subtitle,
+   *  and below it the header's own 1.25rem plus the frame's body gap, so the
+   *  first body skeleton lands where the first real control will. */
+  layout?: "inline" | "stacked" | "large";
+  /** `large` only: root tabs draw no Back (SW16). */
+  back?: boolean;
 }) {
+  if (layout === "large") {
+    return (
+      <div
+        className="flex items-start gap-[0.75rem]"
+        style={{ marginBlock: "0.5rem calc(1.25rem + var(--nf-space-lg))" }}
+        data-testid="page-header-skeleton-large"
+      >
+        {back ? <Skeleton circle width="2.75rem" className="-mt-[0.25rem] shrink-0" /> : null}
+        <div className="min-w-0 flex-1">
+          <div className="flex h-[2.25rem] items-center">
+            <Skeleton width="55%" height="1.875rem" radius="sm" />
+          </div>
+          {subtitle ? (
+            <div className="mt-[0.25rem] flex h-[1.375rem] items-center">
+              <Skeleton width="75%" height="0.9375rem" radius="sm" />
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
   if (layout === "stacked") {
     return (
       <div className="mb-heading">

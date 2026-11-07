@@ -8,7 +8,7 @@ import { listPaymentMethods } from "@/lib/payments/methods-actions";
 import type { PaymentMethod } from "@/lib/payments/methods";
 import { cryptoOfferForViewer } from "@/lib/crypto/offer";
 import { ResultScreen } from "@/components/app/ResultSheet";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { PaidMoment } from "@/components/ui/SuccessMoment";
 import { Reveal } from "@/components/site/Reveal";
@@ -246,9 +246,8 @@ export default async function RentPayPage({
 async function Shell({ subtitle, children }: { subtitle?: string; children: React.ReactNode }) {
   const c = getDictionary(await getLocale()).checkout;
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={c.rentTitle} subtitle={subtitle ?? c.rentSubtitle} fallback="/bookings?kind=inspection&from=property" />
+    <PageFrame title={c.rentTitle} subtitle={subtitle ?? c.rentSubtitle} fallback="/bookings?kind=inspection&from=property" width="narrow">
       {children}
-    </div>
+    </PageFrame>
   );
 }

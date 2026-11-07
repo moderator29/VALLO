@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { DepositPageBody } from "@/components/app/reservations/DepositPageBody";
 import { readGuestDeposit } from "@/lib/reservations/guest-deposit";
@@ -35,8 +35,7 @@ export default async function DepositPage({
   const ref = typeof query.ref === "string" && isDepositReference(query.ref) ? query.ref : null;
 
   return (
-    <div className="mx-auto max-w-2xl px-md">
-      <PageHeader title={w.title} fallback="/bookings" />
+    <PageFrame title={w.title} fallback="/bookings" width="narrow">
       {read.state === "signed-out" ? (
         <ResultScreen
           state="sign-in"
@@ -59,6 +58,6 @@ export default async function DepositPage({
           returnReference={ref}
         />
       )}
-    </div>
+    </PageFrame>
   );
 }
