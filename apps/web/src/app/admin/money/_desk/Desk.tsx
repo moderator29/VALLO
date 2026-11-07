@@ -19,16 +19,9 @@ function deskWords(locale: Locale | undefined) {
  * money renders draw that the shared set does not.
  */
 
+/** The console's one header (`PageHead`, AD-01), kept under this name for the money desks. */
 export function DeskHead({ title, lede, aside }: { title: string; lede: string; aside?: ReactNode }) {
-  return (
-    <header className="nf-md-head">
-      <div className="min-w-0">
-        <h1 className="nf-md-head__title">{title}</h1>
-        <p className="nf-md-head__lede">{lede}</p>
-      </div>
-      {aside ? <div className="nf-md-head__aside">{aside}</div> : null}
-    </header>
-  );
+  return <PageHead title={title} lede={lede} action={aside ? <div className="nf-md-head__aside">{aside}</div> : undefined} />;
 }
 
 export function Panel({

@@ -34,14 +34,8 @@ export function DeskHead({
   lead?: ReactNode;
   trail?: ReactNode;
 }) {
-  return (
-    <header className="nf-rv-head">
-      {lead}
-      <h1 className="nf-rv-head__title">{title}</h1>
-      {trail}
-      {sub ? <p className="nf-rv-head__sub">{sub}</p> : null}
-    </header>
-  );
+  /* The console's one header (`PageHead`, AD-01), kept under this name for the review desks. */
+  return <PageHead title={title} lede={sub} lead={lead} trail={trail} />;
 }
 
 /* ---------------------------------------------------------- section list */

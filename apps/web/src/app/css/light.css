@@ -397,7 +397,7 @@
    * into the page. Here it is a white sheet with the brand edge and a hair
    * of contact shadow, and focus deepens the edge to the brand and lays the
    * soft halo outside it (the text-field ring in `base.css` still draws on
-   * top for keyboard focus). The auth fields take the same edge. Search
+   * top for keyboard focus). The auth fields take the same edge (`auth.css`, the light slate). Search
    * fields keep their resting look on focus, as everywhere else.
    * ---------------------------------------------------------------- */
   :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:where([data-theme="dark"] *)) {
@@ -423,9 +423,6 @@
     background:
       linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
       linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
-  }
-  :root[data-theme="light"] .nf-slate:not(:where([data-theme="dark"] *)) {
-    --nf-slate-card-edge: var(--nf-paper-field-edge);
   }
 }
 

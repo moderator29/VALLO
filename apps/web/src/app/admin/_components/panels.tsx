@@ -23,12 +23,35 @@ import { IconPlate as UiIconPlate, ICON_PLATE_GLYPH } from "@/components/ui/Icon
  * as one object. Server-safe: nothing here holds state.
  */
 
-export function PageHead({ title, lede, action }: { title: string; lede: string; action?: ReactNode }) {
+/**
+ * THE ONE CONSOLE HEADER (AD-01, Grade 1). Every admin page draws its title
+ * here: the money desks' and the review desks' `DeskHead`s are thin wrappers
+ * over it, and the pages that drew a raw `<h1>` moved onto it. One title size,
+ * one sub-line, the actions at the end. `lead` goes before the title (a back
+ * link on a detail page), `trail` after it on the same line (a status chip).
+ */
+export function PageHead({
+  title,
+  lede,
+  action,
+  lead,
+  trail,
+}: {
+  title: string;
+  lede?: string | undefined;
+  action?: ReactNode;
+  lead?: ReactNode;
+  trail?: ReactNode;
+}) {
   return (
     <header className="nf-admin-page-head">
       <div className="min-w-0">
-        <h1 className="nf-admin-page-head__title">{title}</h1>
-        <p className="nf-admin-page-head__lede">{lede}</p>
+        {lead}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-sm gap-y-2xs">
+          <h1 className="nf-admin-page-head__title [overflow-wrap:anywhere]">{title}</h1>
+          {trail}
+        </div>
+        {lede ? <p className="nf-admin-page-head__lede">{lede}</p> : null}
       </div>
       {action}
     </header>

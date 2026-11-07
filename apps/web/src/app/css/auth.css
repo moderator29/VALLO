@@ -78,7 +78,8 @@
   :root[data-theme="light"] .nf-slate {
     --nf-slate-page: var(--nf-surface-secondary);
     --nf-slate-card: var(--nf-surface-elevated);
-    --nf-slate-card-edge: transparent;
+    /* The brand edge, as every control on paper (light mode pass). */
+    --nf-slate-card-edge: var(--nf-paper-field-edge);
     --nf-slate-card-shadow: var(--nf-elev-1);
     --nf-slate-ink: color-mix(in oklab, var(--nf-surface-artwork) 45%, var(--nf-brand-primary));
     --nf-slate-link: var(--nf-slate-ink);
