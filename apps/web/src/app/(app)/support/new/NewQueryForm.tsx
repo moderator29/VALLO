@@ -113,7 +113,6 @@ export function NewQueryForm({
     }
   }, [draft, hydrated, filed]);
 
-  const topic = topicChoice(draft.topic);
   const offered = useMemo(() => recordsForTopic(draft.topic, records), [draft.topic, records]);
 
   const update = (next: Partial<QueryDraft>) => {
@@ -453,7 +452,7 @@ export function FiledView({ filed, topic, copy }: { filed: Filed; topic: string 
       </p>
       <div className="mt-group flex justify-center">
         <span
-          className="nf-numeric shrink-0 whitespace-nowrap rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-sm py-xs text-[1.0625rem] font-bold tracking-wide text-[var(--nf-content-primary)]"
+          className="nf-numeric shrink-0 whitespace-nowrap rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-sm py-xs text-[length:var(--nf-text-body-lg)] font-bold tracking-wide text-[var(--nf-content-primary)]"
           data-testid="support-filed-reference"
         >
           {filed.reference}
