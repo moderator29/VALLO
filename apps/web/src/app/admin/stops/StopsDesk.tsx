@@ -3,6 +3,7 @@
 import { dateTimeLabel } from "@/lib/format/when";
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 import {
   liftAgentStop,
   stopAgentTrading,
@@ -363,6 +364,11 @@ export function StopsDesk({
     ActionResult<LiftReceipt> | null,
     FormData
   >(liftAgentStop, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1);
+     a missing reason stays under its field, and what was done stays on the
+     agent's card as its record. */
+  useActionBanner(liftState);
+  useActionBanner(stopState && !stopState.ok && stopState.fieldErrors?.reason ? null : stopState);
 
   return (
     <div className="space-y-section-tight">
@@ -416,11 +422,6 @@ export function StopsDesk({
           </ul>
         )}
 
-        {liftState && !liftState.ok && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-warning)]">
-            {liftState.error}
-          </p>
-        )}
       </section>
 
       <section aria-label="Trading">
@@ -466,11 +467,6 @@ export function StopsDesk({
           </ul>
         )}
 
-        {stopState && !stopState.ok && !stopState.fieldErrors?.reason && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-warning)]">
-            {stopState.error}
-          </p>
-        )}
       </section>
     </div>
   );

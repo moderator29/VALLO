@@ -439,14 +439,30 @@ export function Sheet({
      * still focusable before using it rather than focusing nothing.
      */
     const wanted = initialFocus?.current;
-    const target =
-      wanted && node.contains(wanted) && !wanted.hasAttribute("disabled")
-        ? wanted
-        : /* Grade 1: the sheet's own content first, not its close X. */
-          (node.querySelector<HTMLElement>(`.nf-sheet__body :is(${FOCUSABLE})`) ??
-          node.querySelector<HTMLElement>(FOCUSABLE) ??
-          node);
-    target.focus({ preventScroll: true });
+    /*
+     * Grade 1: the sheet's own content first, not its close X. A candidate
+     * is only taken if focus really lands on it: the first focusable node in
+     * a body is often a visually hidden control (a custom radio's input, a
+     * file input), and `focus()` on a node that is not rendered does nothing
+     * and says nothing, which left focus on the page behind the sheet. So
+     * each candidate is tried in order (the named node, the body's own
+     * controls, then anything in the sheet) and the sheet itself is the floor.
+     */
+    const candidates: HTMLElement[] = [
+      ...(wanted && node.contains(wanted) && !wanted.hasAttribute("disabled") ? [wanted] : []),
+      ...node.querySelectorAll<HTMLElement>(`.nf-sheet__body :is(${FOCUSABLE})`),
+      ...node.querySelectorAll<HTMLElement>(FOCUSABLE),
+    ];
+    let landed = false;
+    for (const candidate of candidates) {
+      if (candidate.getClientRects().length === 0) continue;
+      candidate.focus({ preventScroll: true });
+      if (document.activeElement === candidate) {
+        landed = true;
+        break;
+      }
+    }
+    if (!landed) node.focus({ preventScroll: true });
     /* `mounted` too: a sheet that is open during hydration renders nothing
        on that first pass (the portal latch), so the node only exists once
        `mounted` flips, and without it here first focus never happened. */

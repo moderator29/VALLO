@@ -1,4 +1,5 @@
 "use client";
+import { banner } from "@/lib/ui/toast";
 import "@/app/host/host-desk.css";
 
 import Link from "next/link";
@@ -146,7 +147,6 @@ export function RateCalendar(props: RateCalendarProps) {
   const [anchor, setAnchor] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [planSheet, setPlanSheet] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
   const drag = useRef<Drag>({ mode: "idle" });
   const gridRef = useRef<HTMLDivElement | null>(null);
   const [focusDate, setFocusDate] = useState<string>(() => (today.slice(0, 7) === month ? today : `${month}-01`));
@@ -306,7 +306,8 @@ export function RateCalendar(props: RateCalendarProps) {
   );
 
   const done = (message: string) => {
-    setNotice(message);
+    /* Said by the one banner at the top of the screen (Grade 1). */
+    banner.success(message);
     setSelected(new Set());
     setAnchor(null);
     setSheetOpen(false);
@@ -354,7 +355,6 @@ export function RateCalendar(props: RateCalendarProps) {
                 onClick={() => {
                   setRoomId(r.id);
                   setPlanId(null);
-                  setNotice(null);
                   setSelected(new Set());
                   setAnchor(null);
                 }}
@@ -525,13 +525,6 @@ export function RateCalendar(props: RateCalendarProps) {
           <li><span className="nf-rcal__key" data-tone="none" aria-hidden="true" />{w.legendNone}</li>
         </ul>
 
-        {notice ? (
-          <p className="nf-rcal__notice" role="status">
-            <UiIcon name="circle-check" size={16} />
-            {notice}
-          </p>
-        ) : null}
-
         <p className="nf-caption nf-rcal__fine">
           {w.fine}
         </p>
@@ -570,7 +563,7 @@ export function RateCalendar(props: RateCalendarProps) {
       </Sheet>
 
       {plan ? (
-        <RatePlanSheet key={plan.id} open={planSheet} onOpenChange={setPlanSheet} plan={plan} locale={locale} onDone={(m: string) => setNotice(m)} />
+        <RatePlanSheet key={plan.id} open={planSheet} onOpenChange={setPlanSheet} plan={plan} locale={locale} onDone={(m: string) => banner.success(m)} />
       ) : null}
     </div>
   );

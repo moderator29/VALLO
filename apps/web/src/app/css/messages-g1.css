@@ -292,6 +292,17 @@
     }
   }
 
+  /* A web address in a message: underlined in the bubble's own ink, so it
+     reads on the sent blue and the received glass alike. */
+  .nf-bubble__link {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+    overflow-wrap: anywhere;
+  }
+
   /* ----------------------------------------------------- runs of bubbles */
 
   /*
@@ -473,6 +484,58 @@
     font-weight: 600;
   }
 
+  /* ------------------------------------------------ the inbox, polished */
+
+  /* A row's swipe actions (`InboxSwipe`): the row slides left over them. */
+  .nf-inbox-swipe {
+    position: relative;
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    overflow: hidden;
+    border-radius: var(--nf-radius-lg);
+  }
+  .nf-inbox-swipe__actions {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    display: flex;
+  }
+  .nf-inbox-swipe__action {
+    flex: 1 1 0;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: var(--nf-space-3xs);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-inbox-swipe__action[data-tone="brand"] {
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-inbox-swipe__row {
+    position: relative;
+    background: var(--nf-surface-canvas);
+    touch-action: pan-y;
+    transition: transform var(--nf-duration-base) var(--nf-ease-entrance);
+  }
+  .nf-inbox-swipe__row[data-dragging] {
+    transition: none;
+  }
+  .nf-inbox-swipe__row > .nf-inbox-row {
+    inline-size: 100%;
+  }
+
+  /* The search, marked where each row matched. */
+  .nf-inbox-hit {
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-brand-tint-2);
+    color: inherit;
+    font-weight: 600;
+  }
+
   /* -------------------------------------------------------- reduced motion */
 
   @media (prefers-reduced-motion: reduce) {
@@ -483,7 +546,8 @@
     .nf-voice-rec__slide,
     .nf-reactions__chip,
     .nf-thread__newpill,
-    .nf-thread__jump {
+    .nf-thread__jump,
+    .nf-inbox-swipe__row {
       animation: none;
       transition: none;
     }
@@ -537,4 +601,24 @@
   .nf-msg-menu__emoji {
     transition: none;
   }
+}
+
+/* The reply bar (threads.css draws it outside any layer, so this is too). */
+/* Over the composer: who is being answered, then what they
+   said (or what it was: a photo, a voice note) on one line. */
+.nf-composer__reply p {
+  display: grid;
+  gap: 0.0625rem;
+  white-space: normal;
+}
+.nf-composer__reply-who {
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+  color: var(--nf-brand-primary);
+}
+.nf-composer__reply-said {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  min-inline-size: 0;
 }

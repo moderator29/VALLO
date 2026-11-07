@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 import { useRouter } from "next/navigation";
 import { saveLocalGovernment, saveOccupation } from "@/lib/admin/reference-actions";
 import { matchesSearch, type StateOption } from "@/lib/places/reference";
@@ -62,22 +63,6 @@ function Field({
   );
 }
 
-function Result({ state, done }: { state: ActionResult<{ code: string }> | null; done: string }) {
-  if (!state) return null;
-  if (state.ok) {
-    return (
-      <p role="status" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-success)]">
-        {done}
-      </p>
-    );
-  }
-  return (
-    <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-      {state.error}
-    </p>
-  );
-}
-
 /* ------------------------------------------------------------ occupations */
 
 function OccupationForm({
@@ -94,6 +79,9 @@ function OccupationForm({
     FormData
   >(saveOccupation, null);
 
+  /* Said by the one banner at the top of the screen (Grade 1), which stays
+     when the form closes; a field's own error stays under that field. */
+  useActionBanner(state, { ok: "Saved. It is on the picker now." });
   useEffect(() => {
     if (state?.ok) onSaved();
   }, [state, onSaved]);
@@ -136,7 +124,6 @@ function OccupationForm({
         <Button variant="primary" size="sm" type="submit" loading={pending}>
           {pending ? "Saving" : mode === "edit" ? "Save this occupation" : "Add occupation"}
         </Button>
-        <Result state={state} done="Saved. It is on the picker now." />
       </div>
     </form>
   );
@@ -253,6 +240,9 @@ function LocalGovernmentForm({
     FormData
   >(saveLocalGovernment, null);
 
+  /* Said by the one banner at the top of the screen (Grade 1), which stays
+     when the form closes; a field's own error stays under that field. */
+  useActionBanner(state, { ok: "Saved. It is on the picker now." });
   useEffect(() => {
     if (state?.ok) onSaved();
   }, [state, onSaved]);
@@ -300,7 +290,6 @@ function LocalGovernmentForm({
         <Button variant="primary" size="sm" type="submit" loading={pending}>
           {pending ? "Saving" : mode === "edit" ? "Save this local government" : "Add local government"}
         </Button>
-        <Result state={state} done="Saved. It is on the picker now." />
       </div>
     </form>
   );

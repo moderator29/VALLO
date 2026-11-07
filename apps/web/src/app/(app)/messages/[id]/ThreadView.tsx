@@ -41,9 +41,11 @@ import {
   type ReactionMap,
 } from "@/lib/messages/reactions";
 import { VOICE_BODY } from "@/lib/messages/voice-note";
+import { forgetVoice, keepVoice, waitingVoices } from "@/lib/messages/voice-outbox";
 import { ComposerVoice } from "@/components/app/messages/ComposerVoice";
 import type { VoiceRecording } from "@/components/app/messages/useVoiceRecorder";
 import { ReactionCounts } from "@/components/app/messages/ReactionCounts";
+import { linkify } from "@/components/app/messages/linkify";
 import { runPlace, sameRun } from "./thread-runs";
 import { MONEY_TALK_RE, SAFETY_EDUCATION_SEEN_KEY } from "@/lib/messages/education";
 import { lagosTimeLabel } from "@/lib/messages/time";
@@ -125,6 +127,7 @@ const VOICE_WORDS = {
   failed: "Voice note couldn't be sent. Check your connection and try again.",
   notReady: "Voice notes aren't switched on yet. Write a message instead.",
   retry: "Retry sending your voice note",
+  kept: "Saved on your device. It sends when you're back online",
 };
 const REACTION_WORDS = { failed: "Couldn't add your reaction. Try again." };
 const NEW_WORDS = { one: "1 new message", other: "{count} new messages" };
@@ -430,6 +433,14 @@ function retryLabel(
   return message.imageUrl ? view.retryPhoto : view.retryMessage;
 }
 
+/** What a message is, for a quote and the reply bar: its placeholder words never count as words. */
+function kindOf(m: { body: string; audio?: unknown; file?: unknown; imageUrl: string | null }): "text" | "photo" | "voice" | "file" {
+  if (m.audio || m.body === VOICE_BODY) return "voice";
+  if (m.file) return "file";
+  if (m.imageUrl || m.body === PHOTO_BODY) return "photo";
+  return "text";
+}
+
 /** The conversation screen's own words (`experienceInbox.thread.view`). */
 type ViewWords = Dictionary["experienceInbox"]["thread"]["view"];
 
@@ -455,6 +466,26 @@ function Ticks({ state, view }: { state: Delivery; view: ViewWords }) {
         )}
       </svg>
     </span>
+  );
+}
+
+/**
+ * A message's words, with any web address in them drawn as a link that opens
+ * outside the app (`linkify.ts`). Grade 1 thread polish.
+ */
+function BubbleText({ text }: { text: string }) {
+  return (
+    <>
+      {linkify(text).map((part, i) =>
+        part.kind === "link" ? (
+          <a key={i} href={part.href} target="_blank" rel="noopener noreferrer nofollow ugc" className="nf-bubble__link">
+            {part.label}
+          </a>
+        ) : (
+          <Fragment key={i}>{part.text}</Fragment>
+        ),
+      )}
+    </>
   );
 }
 
@@ -784,6 +815,13 @@ export function ThreadView({
     return () => viewport.removeEventListener("resize", keep);
   }, []);
 
+  /* Choosing Reply (the menu or the swipe) puts the cursor in the field, ready
+     for the answer, the way a chat app does. */
+  const replyKey = replyTo?.id ?? null;
+  useEffect(() => {
+    if (replyKey) document.getElementById("thread-input")?.focus({ preventScroll: true });
+  }, [replyKey]);
+
   /* A quoted reply, tapped: bring the message it quotes into view and hold a
      ring on it for a moment so the eye finds it. Smooth only when motion is
      allowed. */
@@ -966,10 +1004,11 @@ export function ThreadView({
 
   /* The retry is defined below; the failure banner reaches it through this ref. */
   const retryRef = useRef<((tempId: string) => void) | null>(null);
-  const markFailed = useCallback((tempId: string, words: string = SEND_FAILED_WORDS) => {
+  const markFailed = useCallback((tempId: string, words: string = SEND_FAILED_WORDS, quiet = false) => {
     /* B14: a message that failed and was kept is a genuine failure, felt
-       as the one error pattern (CRAFT_DOCTRINE 6). */
-    feedback("error");
+       as the one error pattern (CRAFT_DOCTRINE 6). Never felt when nobody
+       just acted (a waiting note retried as the network came back). */
+    if (!quiet) feedback("error");
     setItems((prev) => prev.map((m) => (m.id === tempId ? { ...m, state: "failed" } : m)));
     /* Grade 1: said at the top as well, with the retry (the founder's brief:
        "Message couldn't be sent. Check your connection and try again."). */
@@ -1067,10 +1106,34 @@ export function ThreadView({
    * Try again: the retry records the file already there.
    */
   const runVoiceSend = useCallback(
-    async (tempId: string) => {
+    async (tempId: string, passive = false) => {
       const payload = retryPayloads.current.get(tempId);
       if (!payload || payload.kind !== "voice") return;
       const { recording, replyToId } = payload;
+      /* No signal: the note waits on this device and sends by itself
+         (`voice-outbox.ts`), said once, calmly, never as a failure. */
+      const keep = (path?: string) => {
+        setItems((prev) => prev.map((m) => (m.id === tempId ? { ...m, state: "waiting" } : m)));
+        const bubble = itemsRef.current.find((m) => m.id === tempId);
+        void keepVoice({
+          id: tempId,
+          conversationId,
+          blob: recording.blob,
+          contentType: recording.contentType,
+          ext: recording.ext,
+          durationMs: recording.durationMs,
+          peaks: recording.peaks,
+          replyToId,
+          createdAt: bubble?.createdAt ?? new Date().toISOString(),
+          ...(path ? { path } : {}),
+        });
+        if (!passive) banner.info(VOICE_WORDS.kept);
+      };
+      const offline = () => typeof navigator !== "undefined" && navigator.onLine === false;
+      if (offline()) {
+        keep(payload.path);
+        return;
+      }
       try {
         let path = payload.path;
         if (!path) {
@@ -1083,8 +1146,12 @@ export function ThreadView({
             contentType: recording.contentType,
           });
           if (!uploaded.ok) {
+            if (uploaded.reason === "offline" || offline()) {
+              keep();
+              return;
+            }
             const refusedType = uploaded.status === 400 || uploaded.status === 415 || uploaded.status === 422;
-            markFailed(tempId, refusedType ? VOICE_WORDS.notReady : VOICE_WORDS.failed);
+            markFailed(tempId, refusedType ? VOICE_WORDS.notReady : VOICE_WORDS.failed, passive);
             return;
           }
           path = fresh;
@@ -1101,15 +1168,71 @@ export function ThreadView({
           30_000,
         );
         if (result.ok) {
+          void forgetVoice(tempId);
           adoptResult(tempId, result.data.messageId, lagosTimeLabel(result.data.createdAt));
           if (itemsRef.current.some((m) => !m.mine)) setConversationActive(true);
-        } else markFailed(tempId, result.error || VOICE_WORDS.failed);
+        } else markFailed(tempId, result.error || VOICE_WORDS.failed, passive);
       } catch {
-        markFailed(tempId, VOICE_WORDS.failed);
+        const landed = retryPayloads.current.get(tempId);
+        if (offline()) keep(landed?.kind === "voice" ? landed.path : undefined);
+        else markFailed(tempId, VOICE_WORDS.failed, passive);
       }
     },
     [conversationId, adoptResult, markFailed, uploadVoice],
   );
+
+  /* Back online: every waiting voice note sends by itself. */
+  useEffect(() => {
+    if (!live) return;
+    const resend = () => {
+      for (const [id, payload] of retryPayloads.current) {
+        if (payload.kind !== "voice") continue;
+        if (itemsRef.current.find((m) => m.id === id)?.state !== "waiting") continue;
+        setItems((prev) => prev.map((m) => (m.id === id ? { ...m, state: "sending" } : m)));
+        void runVoiceSend(id, true);
+      }
+    };
+    window.addEventListener("online", resend);
+    return () => window.removeEventListener("online", resend);
+  }, [live, runVoiceSend]);
+
+  /* Opening the thread: notes recorded here with no signal, even before a
+     reload, are drawn waiting and sent once the connection allows. */
+  useEffect(() => {
+    if (!live) return;
+    let cancelled = false;
+    void waitingVoices(conversationId).then((notes) => {
+      if (cancelled || notes.length === 0) return;
+      const fresh = notes.filter((n) => !retryPayloads.current.has(n.id));
+      if (fresh.length === 0) return;
+      const bubbles: ThreadBubble[] = fresh.map((n) => {
+        const url = URL.createObjectURL(n.blob);
+        objectUrls.current.push(url);
+        retryPayloads.current.set(n.id, {
+          kind: "voice",
+          recording: { blob: n.blob, durationMs: n.durationMs, peaks: n.peaks, contentType: n.contentType, ext: n.ext },
+          replyToId: n.replyToId,
+          ...(n.path ? { path: n.path } : {}),
+        });
+        return {
+          id: n.id,
+          mine: true,
+          body: VOICE_BODY,
+          timeLabel: lagosTimeLabel(n.createdAt),
+          imageUrl: null,
+          audio: { url, durationMs: n.durationMs, peaks: n.peaks },
+          createdAt: n.createdAt,
+          replyToId: n.replyToId,
+          state: navigator.onLine === false ? "waiting" : "sending",
+        };
+      });
+      setItems((prev) => [...prev, ...bubbles]);
+      if (navigator.onLine !== false) for (const b of bubbles) void runVoiceSend(b.id, true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [live, conversationId, runVoiceSend]);
 
   const sendVoice = useCallback(
     (recording: VoiceRecording) => {
@@ -1377,11 +1500,13 @@ export function ThreadView({
   const quotedOf = (id: string): QuotedMessage | null => {
     const found = items.find((x) => x.id === id);
     if (!found) return null;
+    const kind = kindOf(found);
     return {
       id: found.id,
       name: found.mine ? null : counterpartName,
-      text: found.body,
-      kind: found.audio ? "voice" : found.file ? "file" : found.imageUrl ? "photo" : "text",
+      /* A photo or a voice note is named by its kind, never by its placeholder words. */
+      text: found.deleted ? view.deleted : kind === "text" ? found.body : "",
+      kind,
     };
   };
 
@@ -1898,7 +2023,11 @@ export function ThreadView({
                         </Link>
                       </p>
                     ) : (
-                      words && <p className="nf-bubble__body">{words}</p>
+                      words && (
+                        <p className="nf-bubble__body">
+                          <BubbleText text={words} />
+                        </p>
+                      )
                     )}
                   </BubbleGestures>
                 )}
@@ -2060,11 +2189,28 @@ export function ThreadView({
       )}
       {replyTo && (
         <div className="nf-composer__reply" data-testid="composer-reply">
-          <p className="nf-body-sm text-[var(--nf-content-secondary)]">
-            <span className="font-semibold">{replyTo.mine ? threadWords.quoted.you : counterpartName}</span>
-            {": "}
-            {replyTo.deleted ? view.deleted : replyTo.body || threadWords.quoted.photo}
-          </p>
+          {(() => {
+            const kind = kindOf(replyTo);
+            const glyph = kind === "voice" ? "mic" : kind === "photo" ? "picture" : kind === "file" ? "file-text" : null;
+            const said = replyTo.deleted
+              ? view.deleted
+              : kind === "text"
+                ? replyTo.body
+                : threadWords.quoted[kind === "voice" ? "voice" : kind === "photo" ? "photo" : "file"];
+            return (
+              <p className="nf-body-sm text-[var(--nf-content-secondary)]">
+                <span className="nf-composer__reply-who">
+                  {replyTo.mine
+                    ? threadWords.quoted.you
+                    : threadWords.quoted.replyingTo.replace("{name}", counterpartName)}
+                </span>
+                <span className="nf-composer__reply-said">
+                  {glyph ? <UiIcon name={glyph} size={14} className="shrink-0" /> : null}
+                  <span className="truncate">{said}</span>
+                </span>
+              </p>
+            );
+          })()}
           <Button variant="ghost" size="sm" aria-label={view.cancelReply} onClick={() => setReplyTo(null)}>
             {view.cancel}
           </Button>

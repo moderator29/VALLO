@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -65,7 +66,6 @@ export function CalendarSync({
   const router = useRouter();
   const w = useHostPageCopy().calendarUi;
   const [pending, start] = useSafeTransition();
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [source, setSource] = useState<FeedSource>("airbnb");
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
@@ -78,13 +78,13 @@ export function CalendarSync({
   const act = (fn: () => Promise<{ ok: boolean; error?: string }>, success: string, after?: () => void) =>
     start(async () => {
       try {
-        setMessage(null);
         const result = await fn();
         if (!result.ok) {
-          setMessage({ tone: "error", text: result.error ?? w.failed });
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error ?? w.failed);
           return;
         }
-        setMessage({ tone: "ok", text: success });
+        banner.success(success);
         after?.();
         router.refresh();
       } catch (error) {
@@ -205,12 +205,6 @@ export function CalendarSync({
             ) : null}
           </div>
         </>
-      ) : null}
-
-      {message ? (
-        <p className={message.tone === "error" ? "nf-rcal-panel__error" : "nf-rcal__notice"} role={message.tone === "error" ? "alert" : "status"}>
-          {message.text}
-        </p>
       ) : null}
     </section>
   );

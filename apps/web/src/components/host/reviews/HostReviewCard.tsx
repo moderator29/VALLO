@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -27,7 +28,6 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const [pending, start] = useSafeTransition();
   const [writing, setWriting] = useState(false);
   const [reply, setReply] = useState(review.reply?.body ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [contesting, setContesting] = useState(false);
   const [criterion, setCriterion] = useState<ContestCriterion | null>(null);
   const [note, setNote] = useState("");
@@ -36,10 +36,9 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const saveReply = () =>
     start(async () => {
       try {
-        setError(null);
         const result = await answerHotelReview({ reviewId: review.id, body: reply });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setWriting(false);
@@ -52,9 +51,8 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const withdraw = () =>
     start(async () => {
       try {
-        setError(null);
         const result = await withdrawHotelReviewAnswer({ reviewId: review.id });
-        if (!result.ok) setError(result.error);
+        if (!result.ok) banner.error(result.error);
         else {
           setReply("");
           router.refresh();
@@ -172,11 +170,6 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
           ) : null}
         </>
       )}
-      {error ? (
-        <p className="nf-rcal-panel__error" role="alert">
-          {error}
-        </p>
-      ) : null}
 
       <Sheet
         open={contesting}

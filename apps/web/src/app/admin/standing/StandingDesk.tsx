@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, type ReactNode } from "react";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 import {
   grantStandingBadge,
   revokeStandingBadge,
@@ -8,7 +9,6 @@ import {
 } from "@/lib/admin/standing-actions";
 import type { ManualGrant } from "@/lib/admin/standing-queries";
 import type { ActionResult } from "@/lib/actions/envelope";
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { Button } from "@/components/ui/Button";
 import { TextField, SelectField, TextArea } from "@/components/ui/Field";
@@ -50,6 +50,10 @@ export function StandingDesk({
     ActionResult<{ userId: string }> | null,
     FormData
   >(revokeStandingBadge, null);
+  /* Each outcome is said by the one banner at the top of the screen (Grade 1);
+     a field's own error stays under that field. */
+  useActionBanner(state, { ok: state?.ok ? `Granted to @${state.data.handle}. Your name is on it.` : undefined });
+  useActionBanner(revokeState, { ok: "Standing taken back. The record keeps who granted it and who took it back." });
 
   const fieldError = (key: string): string | undefined =>
     state && !state.ok ? state.fieldErrors?.[key] : undefined;
@@ -107,22 +111,6 @@ export function StandingDesk({
           error={fieldError("reason")}
         />
 
-        {/* A refusal is said in the error ink, the way every other console
-            form says it, not in a fifth container drawn for one sentence. */}
-        {state && !state.ok && (
-          <p role="alert" className="nf-body-sm mt-sm font-semibold text-[var(--nf-state-error)]">
-            {state.error}
-          </p>
-        )}
-        {state?.ok && (
-          <p
-            role="status"
-            className="mt-sm flex items-center gap-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-success)]"
-          >
-            <UiIcon name="verified" size={16} className="shrink-0" />
-            Granted to @{state.data.handle}. Your name is on it.
-          </p>
-        )}
 
         <Button
           type="submit"
@@ -193,13 +181,6 @@ export function StandingDesk({
               </li>
             ))}
           </ul>
-        )}
-        {revokeState && !revokeState.ok && (
-          /* The error ink, not `--nf-state-warning`: that resolves to the
-             pending cyan, which says "still going through" about a refusal. */
-          <p role="alert" className="nf-body-sm mt-xs font-semibold text-[var(--nf-state-error)]">
-            {revokeState.error}
-          </p>
         )}
       </section>
     </div>

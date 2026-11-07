@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -102,7 +103,6 @@ export function DepositSettingsCard({
   );
   const [draft, setDraft] = useState<DepositSettings>(venue?.settings ?? deposits.venues[0]!.settings);
   const [amount, setAmount] = useState(String(Math.round((venue?.settings.amountMinor ?? 0) / 100)));
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
@@ -114,7 +114,6 @@ export function DepositSettingsCard({
   const problem = depositSettingsProblem(current, windows.map((w) => w.id));
   if (!venue) return null;
   const set = (patch: Partial<DepositSettings>) => {
-    setMessage(null);
     setDraft((d) => ({ ...d, ...patch }));
   };
   const pickVenue = (id: string) => {
@@ -124,20 +123,19 @@ export function DepositSettingsCard({
     setVenueId(id);
     setDraft(s);
     setAmount(String(Math.round(s.amountMinor / 100)));
-    setMessage(null);
   };
   const save = () =>
     start(async () => {
       try {
-        setMessage(null);
         const result = await saveDepositSettings({ businessId: venue.businessId, settings: current });
         if (!result.ok) {
-          setMessage({ ok: false, text: result.error });
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error, { retry: save });
           return;
         }
         setSaved((all) => ({ ...all, [venue.businessId]: result.data.settings }));
         setDraft(result.data.settings);
-        setMessage({ ok: true, text: words.saved });
+        banner.success(words.saved);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -206,7 +204,6 @@ export function DepositSettingsCard({
                 hint={words.amountHint}
                 value={amount}
                 onValueChange={(v) => {
-                  setMessage(null);
                   setAmount(v);
                 }}
                 data-testid="deposit-amount"
@@ -341,14 +338,6 @@ export function DepositSettingsCard({
           </Button>
           {problem && draft.on ? <p className={TYPE.rowMeta}>{words.problems[problem]}</p> : null}
         </div>
-        {message && (
-          <p
-            role={message.ok ? "status" : "alert"}
-            className={`${TYPE.rowMeta} ${message.ok ? "" : "text-[var(--nf-state-error)]"}`}
-          >
-            {message.text}
-          </p>
-        )}
       </div>
     </section>
   );

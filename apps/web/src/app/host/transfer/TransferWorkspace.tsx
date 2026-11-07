@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useHostCopy, useHostPageCopy } from "@/components/host/host-copy";
 import { useState } from "react";
 import Link from "next/link";
@@ -159,7 +160,6 @@ function BusinessRow({
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<string | null>(null);
   const [busy, start] = useSafeTransition();
   const w = useHostPageCopy();
@@ -167,7 +167,6 @@ function BusinessRow({
   const locale = useClientLocale();
 
   const send = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await offerBusinessTransfer({
@@ -176,7 +175,7 @@ function BusinessRow({
           note: note.length > 0 ? note : undefined,
         });
         if (!result.ok) {
-          setError(result.fieldErrors?.email ?? result.error);
+          banner.error(result.fieldErrors?.email ?? result.error);
           return;
         }
         setSent(result.data.expiresAt);
@@ -190,7 +189,6 @@ function BusinessRow({
 
   const takeBack = () => {
     if (!offer) return;
-    setError(null);
     start(async () => {
       try {
         const result = await respondToBusinessTransfer({
@@ -198,7 +196,7 @@ function BusinessRow({
           decision: "withdraw",
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         router.refresh();
@@ -209,12 +207,11 @@ function BusinessRow({
   };
 
   const close = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await closeBusiness({ businessId: business.id });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         router.refresh();
@@ -355,11 +352,6 @@ function BusinessRow({
         </div>
       )}
 
-      {error && (
-        <p role="alert" className={`${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
     </Row>
   );
 }
@@ -368,13 +360,11 @@ function BusinessRow({
 
 function IncomingRow({ offer }: { offer: TransferOffer }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [busy, start] = useSafeTransition();
   const tw = useHostPageCopy().transfer;
   const locale = useClientLocale();
 
   const answer = (decision: "accept" | "decline") => {
-    setError(null);
     start(async () => {
       try {
         const result = await respondToBusinessTransfer({
@@ -382,7 +372,7 @@ function IncomingRow({ offer }: { offer: TransferOffer }) {
           decision,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         router.refresh();
@@ -425,11 +415,6 @@ function IncomingRow({ offer }: { offer: TransferOffer }) {
           {tw.acceptIt}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className={`${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
     </Row>
   );
 }

@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/Button";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { markInboxRead } from "@/lib/messages/actions";
+import { markInboxRead, markThreadRead } from "@/lib/messages/actions";
+import { banner } from "@/lib/ui/toast";
+import { highlightParts, snippetAround } from "@/components/app/messages/highlight";
+import { InboxSwipe, type SwipeAction } from "@/components/app/messages/InboxSwipe";
 import { archiveConversation, unarchiveConversation } from "@/lib/messages/archive";
 import type { Side } from "@/lib/side.constants";
 import { useInboxTyping } from "@/lib/messages/useRealtime";
@@ -89,6 +92,27 @@ export type InboxRow = {
   missedCall?: { kind: "AUDIO" | "VIDEO"; words: string };
 };
 
+/* GRADE 1 (inbox polish): English only for now, beside the dictionary's words. */
+const POLISH_WORDS = { read: "Mark read", readDone: "Marked as read", undo: "Undo" };
+
+/** Words with the reader's search marked where it matched. */
+function Hit({ text, query }: { text: string; query: string }) {
+  if (!query.trim()) return <>{text}</>;
+  return (
+    <>
+      {highlightParts(text, query).map((part, i) =>
+        part.hit ? (
+          <mark key={i} className="nf-inbox-hit">
+            {part.text}
+          </mark>
+        ) : (
+          <span key={i}>{part.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 const CONTEXT_GLYPH: Partial<Record<ThreadContextKind, UiIconName>> = {
   reservation: "utensils",
   booking: "building-hotel",
@@ -132,9 +156,15 @@ function Row({
   presenceWord,
   unreadWord,
   words,
+  query = "",
+  swipe = [],
 }: {
   row: InboxRow;
   typing: boolean;
+  /** The search, so the row marks where it matched. */
+  query?: string;
+  /** The row's swipe actions on touch (`InboxSwipe`). */
+  swipe?: SwipeAction[];
   /** The row's own words, from the inbox copy. */
   words: { typing: string; archive: string; moveBack: string };
   /** "Online now" and "3 unread messages", already worded and counted. */
@@ -147,9 +177,11 @@ function Row({
   const glyph = row.contextKind ? CONTEXT_GLYPH[row.contextKind] : undefined;
   /* One short line (founder, 11 October 2026): line breaks folded, cut at a
      word. A shared card previews as its words, never as the path it carries. */
-  const preview = previewLine(row.lastMessage);
+  /* Searching: a match past the first line is brought into view. */
+  const preview = query.trim() ? previewLine(snippetAround(row.lastMessage, query)) : previewLine(row.lastMessage);
   return (
     <li className="flex items-center gap-3xs">
+      <InboxSwipe actions={swipe}>
       <Link
         href={`/messages/${row.id}`}
         data-testid="inbox-row"
@@ -176,7 +208,7 @@ function Row({
 
         <span className="min-w-0 flex-1 leading-tight">
           <span className={`block truncate ${TYPE.rowTitle} ${row.unread > 0 ? "font-semibold" : ""}`}>
-            {row.counterpartName}
+            <Hit text={row.counterpartName} query={query} />
           </span>
           {row.listingTitle && (
             <span className={`nf-inbox-row__context mt-3xs flex items-center gap-inline-tight ${TYPE.caption}`}>
@@ -187,7 +219,7 @@ function Row({
                   listing title cut at one line lost the words that tell two
                   flats apart ("Luxury 2 bedroom apartm..."). */}
               <span className="min-w-0 line-clamp-2 [overflow-wrap:anywhere]" title={row.listingTitle}>
-                {row.listingTitle}
+                <Hit text={row.listingTitle} query={query} />
               </span>
             </span>
           )}
@@ -208,7 +240,7 @@ function Row({
                 {row.missedCall.words}
               </span>
             ) : (
-              preview
+              <Hit text={preview} query={query} />
             )}
           </span>
         </span>
@@ -224,6 +256,7 @@ function Row({
           )}
         </span>
       </Link>
+      </InboxSwipe>
       {onArchive && (
         <Button
           variant="icon"
@@ -323,10 +356,11 @@ export function Inbox({
   const router = useRouter();
   const [side, setSide] = useState<Side>(initialSide);
   const [view, setView] = useState<View>("recent");
-  const [archiveNote, setArchiveNote] = useState<string | null>(null);
   const [archiving, startArchiving] = useSafeTransition();
   /* Optimistic: an archived row leaves Recent the moment it is tapped. */
   const [archivedLocal, setArchivedLocal] = useState<Record<string, boolean>>({});
+  /* Optimistic too: a row marked read by a swipe loses its count at once. */
+  const [readLocal, setReadLocal] = useState<Record<string, true>>({});
   const [query, setQuery] = useState("");
   /* GRADE 1: search is a button in the header until it is wanted (R59). */
   const [searchOpen, setSearchOpen] = useState(false);
@@ -352,8 +386,13 @@ export function Inbox({
   );
 
   const live = useMemo(
-    () => rows.map((r) => (r.id in archivedLocal ? { ...r, archived: archivedLocal[r.id] } : r)),
-    [rows, archivedLocal],
+    () =>
+      rows.map((r) => {
+        const archived = r.id in archivedLocal ? { archived: archivedLocal[r.id] } : null;
+        const read = readLocal[r.id] ? { unread: 0 } : null;
+        return archived || read ? { ...r, ...archived, ...read } : r;
+      }),
+    [rows, archivedLocal, readLocal],
   );
   /* A chat with a person (9 October 2026) belongs to neither side: it shows
      on both, so a message from somebody never hides behind the other tab. */
@@ -399,7 +438,6 @@ export function Inbox({
 
   const toggleArchive = (row: InboxRow) => {
     const next = !row.archived;
-    setArchiveNote(null);
     setArchivedLocal((current) => ({ ...current, [row.id]: next }));
     startArchiving(async () => {
       try {
@@ -408,15 +446,44 @@ export function Inbox({
           : await unarchiveConversation({ conversationId: row.id });
         if (!result.ok) {
           setArchivedLocal((current) => ({ ...current, [row.id]: !next }));
-          setArchiveNote(result.error);
+          /* GRADE 1: every outcome in the top banner, with Try again. */
+          banner.error(result.error, { retry: () => toggleArchive(row) });
           return;
         }
-        setArchiveNote(next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote);
+        /* The banner says it, with Undo for an archive (Survey A, Messages). */
+        const said = next ? inbox.archivedNote.replace("{name}", row.counterpartName) : inbox.movedBackNote;
+        if (next) {
+          banner.success(said, {
+            action: { label: POLISH_WORDS.undo, run: () => toggleArchive({ ...row, archived: true }) },
+          });
+        } else banner.success(said);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
+  };
+
+  /* Swipe, Mark read: one conversation, said in the banner. */
+  const markOneRead = (row: InboxRow) => {
+    setReadLocal((current) => ({ ...current, [row.id]: true }));
+    void markThreadRead({ conversationId: row.id })
+      .then((result) => {
+        if (result.ok) {
+          banner.success(POLISH_WORDS.readDone);
+          router.refresh();
+          return;
+        }
+        setReadLocal((current) => {
+          const rest = { ...current };
+          delete rest[row.id];
+          return rest;
+        });
+        banner.error(result.error, { retry: () => markOneRead(row) });
+      })
+      .catch((error: unknown) => {
+        if (!tapFailedOffline(error)) throw error;
+      });
   };
 
   const markAllRead = () => {
@@ -429,6 +496,7 @@ export function Inbox({
           return;
         }
         setMarkError(result.error);
+        banner.error(result.error, { retry: markAllRead });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -606,11 +674,7 @@ export function Inbox({
         </ChipRow>
       </div>
 
-      {archiveNote && (
-        <p role="status" className="nf-body-sm mt-inline text-[var(--nf-content-secondary)]" data-testid="inbox-archive-note">
-          {archiveNote}
-        </p>
-      )}
+      {/* Archive and move back are said in the top banner (Grade 1). */}
 
       {markError && (
         /* Rose, not cyan: `--nf-state-warning` is the pending token under
@@ -647,6 +711,23 @@ export function Inbox({
                 presenceWord={inbox.presence.online}
                 unreadWord={plural(row.unread, inbox.unreadBadge, locale)}
                 words={{ typing: inbox.typing, archive: inbox.archive, moveBack: inbox.moveBack }}
+                query={query}
+                swipe={[
+                  ...(canMarkRead && row.unread > 0
+                    ? [{ key: "read", label: POLISH_WORDS.read, icon: "check" as const, run: () => markOneRead(row) }]
+                    : []),
+                  ...(archiveOpen && view !== "reported"
+                    ? [
+                        {
+                          key: "archive",
+                          label: row.archived ? inbox.moveBack : inbox.archive,
+                          icon: row.archived ? ("arrow-up" as const) : ("archive" as const),
+                          tone: "brand" as const,
+                          run: () => toggleArchive(row),
+                        },
+                      ]
+                    : []),
+                ]}
               />
             ))}
           </ul>

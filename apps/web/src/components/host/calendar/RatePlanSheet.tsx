@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatMoney, type Locale } from "@vallo/i18n/core";
@@ -38,7 +39,6 @@ export function RatePlanSheet({
   const [rate, setRate] = useState(String(plan.rateMinor / 100));
   const [minStay, setMinStay] = useState(String(plan.minStayNights ?? 1));
   const [maxStay, setMaxStay] = useState(plan.maxStayNights ? String(plan.maxStayNights) : "");
-  const [error, setError] = useState<string | null>(null);
   const [fields, setFields] = useState<Record<string, string>>({});
 
   const rateMinor = nairaToMinor(rate);
@@ -48,7 +48,6 @@ export function RatePlanSheet({
   const save = () =>
     start(async () => {
       try {
-        setError(null);
         setFields({});
         const result = await updateRatePlan({
           ratePlanId: plan.id,
@@ -57,7 +56,7 @@ export function RatePlanSheet({
           maxStayNights: max !== null && Number.isFinite(max) ? max : null,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           setFields(result.fieldErrors ?? {});
           return;
         }
@@ -116,11 +115,6 @@ export function RatePlanSheet({
         <p className="nf-caption">
           {w.newRateNote}
         </p>
-        {error ? (
-          <p className="nf-rcal-panel__error" role="alert">
-            {error}
-          </p>
-        ) : null}
       </div>
     </Sheet>
   );

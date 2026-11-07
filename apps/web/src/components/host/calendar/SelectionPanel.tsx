@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { Quantity } from "@/components/ui/Quantity";
 import { useRouter } from "next/navigation";
@@ -55,7 +56,6 @@ export function SelectionPanel({
   const floor = bookedFloor(cells);
   const openNow = cells.map((c) => c.unitsOpen ?? 0);
   const [units, setUnits] = useState(() => (openNow.length ? Math.max(...openNow, floor) : room.unitsTotal));
-  const [error, setError] = useState<string | null>(null);
 
   if (dates.length === 0) {
     return (
@@ -84,10 +84,9 @@ export function SelectionPanel({
   ) =>
     start(async () => {
       try {
-        setError(null);
         const result = await act();
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         onDone(word(result.data.nights, result.data));
@@ -263,11 +262,6 @@ export function SelectionPanel({
         ) : null}
       </section>
 
-      {error ? (
-        <p className="nf-rcal-panel__error" role="alert">
-          {error}
-        </p>
-      ) : null}
     </div>
   );
 }

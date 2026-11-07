@@ -31,7 +31,7 @@ function BriefRow({ brief, homes, copy, locale }: { brief: DeskBrief; homes: { i
     <li className="nf-panel nf-panel--card p-card-sm">
       <p className="nf-body-sm font-semibold text-[var(--nf-content-primary)]">{briefLine(brief, copy, locale)}</p>
       <p className="mt-3xs nf-caption text-[var(--nf-content-muted)]">{copy.answered.replace("{count}", String(brief.answered))}</p>
-      {!full && homes.length > 0 && (
+      {!full && !sent && homes.length > 0 && (
         <div className="mt-row flex flex-col gap-row">
           <label className="block">
             <span className="nf-label">{copy.answerWith}</span>
