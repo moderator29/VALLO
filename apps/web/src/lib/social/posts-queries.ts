@@ -533,6 +533,10 @@ async function readFeedPage(
      read, rather than drawing a tombstone in somebody's timeline. */
   let query = supabase.from("posts").select(POST_COLUMNS).neq("status", DELETED_STATUS);
 
+  /* Circle posts stay in Circle: a post written inside a community is read
+     by `lib/features/circle`, never by the Around feed. */
+  query = query.is("community_id", null);
+
   if (areaIds === null) {
     /* Everywhere. No area predicate at all; the policy is the filter. */
   } else if (areaIds.length === 0) {

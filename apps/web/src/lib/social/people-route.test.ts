@@ -49,10 +49,12 @@ describe("the side navigation's People row", () => {
   const base = { t, unreadNotifications: 0, isAgent: false, isAdmin: false };
 
   for (const side of ["property", "stays"] as const) {
-    it(`sits right after Feed on the ${side} side`, () => {
+    it(`sits after Feed and Circle on the ${side} side`, () => {
       const first = buildNav({ ...base, side, signedIn: true })[0]!;
       const hrefs = first.items.map((i) => i.href);
-      expect(hrefs.indexOf(PATH)).toBe(hrefs.indexOf("/around") + 1);
+      /* Feed, then Circle (the feed's twin, founder 7 November 2026), then People. */
+      expect(hrefs.indexOf("/circle")).toBe(hrefs.indexOf("/around") + 1);
+      expect(hrefs.indexOf(PATH)).toBe(hrefs.indexOf("/circle") + 1);
       expect(first.items.find((i) => i.href === PATH)!.label).toBe(t.feedV2.people.navPeople);
     });
   }

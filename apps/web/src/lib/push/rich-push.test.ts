@@ -103,3 +103,20 @@ describe("A1 to A3: the picture", () => {
     expect((await resolvePushImages(admin, "me", [`/listing/${LISTING}`])).size).toBe(0);
   });
 });
+
+describe("A1: the iOS Notification Service Extension source", () => {
+  it("downloads only an https image into an attachment and always shows the push", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const swift = readFileSync(`${root}ios/App/VALLONotificationService/NotificationService.swift`, "utf8");
+    const plist = readFileSync(`${root}ios/App/VALLONotificationService/Info.plist`, "utf8");
+    expect(swift).toContain('request.content.userInfo["image"]');
+    expect(swift).toContain('url.scheme == "https"');
+    expect(swift).toContain("UNNotificationAttachment(identifier:");
+    expect(swift).toContain("override func serviceExtensionTimeWillExpire()");
+    expect(plist).toContain("com.apple.usernotifications.service");
+    /* The server marks every push mutable, which is what wakes the extension. */
+    expect(readFileSync(`${root}src/lib/push/transport/apns.ts`, "utf8")).toContain('"mutable-content": 1');
+  });
+});
