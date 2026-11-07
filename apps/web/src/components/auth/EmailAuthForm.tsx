@@ -1,5 +1,4 @@
 "use client";
-import { PhoneField } from "@/components/app/PhoneField";
 import "@/app/css/auth.css";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
@@ -29,7 +28,7 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 const SIGNUP_DRAFT_KEY = "vallo_signup_draft";
 
-type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password" | "phone", string>>;
+type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password", string>>;
 
 /**
  * The email form, on its own screen, in the Slate dress.
@@ -181,7 +180,6 @@ export function EmailAuthForm({
   }, [isSignUp]);
 
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
   /*
    * THE ACCEPTANCE, AND WHY IT IS STATE RATHER THAN A `required` ATTRIBUTE.
    *
@@ -205,7 +203,6 @@ export function EmailAuthForm({
     if (!email) errors.email = t.signUp.emailRequired;
     else if (!EMAIL_SHAPE.test(email)) errors.email = t.signUp.emailInvalid;
     if (password.length < 8) errors.password = t.signUp.passwordShort;
-    if (!phone.trim()) errors.phone = t.signUp.phoneRequired;
     return errors;
   }
 
@@ -345,21 +342,9 @@ export function EmailAuthForm({
               check={signUpMethodForEmail}
               initialEmail={initialEmail}
             />
-            {/* Required, any country, Nigeria first (2 November 2026). */}
-            <PhoneField
-              id="phone"
-              name="phone"
-              label={t.signUp.phoneLabel}
-              hint={t.signUp.phoneHint}
-              value={phone}
-              onChange={(next) => {
-                setPhone(next);
-                if (localErrors.phone) setLocalErrors((e) => ({ ...e, phone: undefined }));
-              }}
-              autoComplete="tel"
-              required
-              error={fieldError("phone")}
-            />
+            {/* No phone number here (founder, 6 November 2026: "phone number
+                should be removed from sign up"). It is asked at the first deal
+                instead, by the moments gate (`lib/phone-otp/gate.ts`). */}
             <div>
               <PasswordField
                 t={t}

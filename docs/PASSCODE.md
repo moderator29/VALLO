@@ -1,12 +1,14 @@
 # The passcode: "Welcome back"
 
-Every signed-in member has an account passcode: 4 digits by default, or 6. It is an app lock on top of the normal session, in the style of a banking app. It does **not** replace the password, Google or Apple. It decides whether a browser that is already signed in may show the app and move money right now.
+> **OPTIONAL SINCE 6 NOVEMBER 2026 (Platform Grade 1, P0.1).** The founder: "the app don't need by default to turn on passcode ... you can create your account and sign in and enter the app without setting up the passcode". A member with no passcode now goes straight in (`decideGate` returns `{ kind: "unset" }`, drawn as the page). The home screen and the agent dashboard carry a slim, dismissible alert, `components/passcode/PasscodeOffer.tsx`, linking to Settings, Passcode. Its X writes the `vallo_pc_offer` cookie for 60 days, then it is offered once more. Money with no passcode set is allowed, as it always was before a first code (`moneyAllowed`). A member who HAS a passcode keeps the lock exactly as below. Section 1's "It cannot be skipped" is history.
+
+Every signed-in member may set an account passcode: 4 digits by default, or 6. It is an app lock on top of the normal session, in the style of a banking app. It does **not** replace the password, Google or Apple. It decides whether a browser that is already signed in may show the app and move money right now.
 
 This document is the design. The code is in `apps/web/src/lib/passcode/`, `apps/web/src/components/passcode/` and the migration `supabase/migrations/20260929034124_passcode_member_app_lock_code_bcrypt_only.sql`.
 
 ## 1. Setup
 
-- **Who.** Every signed-in member. A new member meets it straight after account creation: sign-up lands on `/home`, and the `(app)` layout draws the setup screen instead of the page until a code is set. An existing member meets the same screen on their next visit to any page under `(app)`. It cannot be skipped. The only other way out is **Sign out**.
+- **Who.** (History, until 6 November 2026; see the note at the top.) Every signed-in member. A new member met it straight after account creation: sign-up lands on `/home`, and the `(app)` layout draws the setup screen instead of the page until a code is set. An existing member meets the same screen on their next visit to any page under `(app)`. It cannot be skipped. The only other way out is **Sign out**.
 - **Length.** 4 digits by default (D18). "Use a 6-digit passcode" on the first screen switches to 6, and back.
 - **Twice.** The code is typed, then typed again on "Enter it again". A mismatch shakes the dots and starts again.
 - **Trivial codes are refused.** These are refused on the screen before the code is sent (`lib/passcode/rules.ts`), and again by the database, which has the final say (`private.passcode_is_trivial`):

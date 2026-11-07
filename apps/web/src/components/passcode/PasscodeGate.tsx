@@ -62,6 +62,9 @@ export async function PasscodeGate({
 
   switch (view.kind) {
     case "open":
+    case "unset":
+      /* No passcode set: the page, untouched. The offer to set one is a
+         dismissible alert on the dashboard, never a gate. */
       return <>{children}</>;
     case "unlocked":
       return (

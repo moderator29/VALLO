@@ -205,6 +205,8 @@
 /* The small things: toast, connection line, back to top, pull to refresh,
    the late spinner, the done check, the card menu, the field counter. */
 @import "./css/details.css";
+/* Platform Grade 1 (November 2026): the shared Grade 1 surfaces. */
+@import "./css/grade1.css";
 /* D81: the warm spark used more (the orange button, the light sweep, the
    states that point, the waits). After every partial whose states it warms,
    before the motion setting so "off" still wins. */

@@ -84,7 +84,14 @@ describe("PasscodeGate", () => {
     expect(html).toContain(t.passcode.usePassword);
   });
 
-  it("draws setup instead of the page for a member with no passcode, four digits by default", async () => {
+  it("draws the page, untouched, for a member with no passcode (optional since 6 November 2026)", async () => {
+    const html = await draw({ kind: "unset" });
+    expect(html).toContain("Secret page content");
+    expect(html).not.toContain('data-testid="passcode-setup-enter"');
+    expect(html).not.toContain('data-testid="passcode-lock"');
+  });
+
+  it("still draws the first-code setup when asked for it, four digits by default", async () => {
     const html = await draw({ kind: "setup", mode: "first" });
     expect(html).not.toContain("Secret page content");
     expect(html).toContain('data-testid="passcode-setup-enter"');

@@ -39,6 +39,12 @@ export type LockMode =
 
 export type GateView =
   | { kind: "open" }
+  /**
+   * Signed in, no passcode set. THE PASSCODE IS OPTIONAL (founder, 6 November
+   * 2026): the page shows, and the dashboard offers one with a dismissible
+   * alert (`PasscodeOffer`). Nothing is drawn in front of the page.
+   */
+  | { kind: "unset" }
   /** `mint`: the page may show, and the browser should ask for an unlock cookie now. */
   | { kind: "unlocked"; mint: boolean; length: PasscodeLength }
   | { kind: "setup"; mode: "first" | "reset" }
@@ -54,7 +60,7 @@ export function decideGate(facts: GateFacts): GateView {
     return { kind: "locked", mode: "unavailable", length: 6, failedCount: 0, lockedUntil: null };
   }
 
-  if (status.state === "unset") return { kind: "setup", mode: "first" };
+  if (status.state === "unset") return { kind: "unset" };
 
   if (status.state === "reset_required") {
     if (facts.freshReset) return { kind: "setup", mode: "reset" };
@@ -75,12 +81,12 @@ export function decideGate(facts: GateFacts): GateView {
 
 /**
  * May money move on this session? Only when unlocked, or when no passcode has
- * been set yet (the setup screen stands in front of every money screen, and
- * a stolen session could set the first code anyway, so refusing proves
- * nothing). A reset in progress, a lock and an unreadable table all refuse.
+ * been set (a stolen session could set the first code anyway, so refusing
+ * proves nothing; money screens keep their own lock, `MoneyLockGroup`). A
+ * reset in progress, a lock and an unreadable table all refuse.
  */
 export function moneyAllowed(view: GateView): boolean {
-  if (view.kind === "unlocked") return true;
+  if (view.kind === "unlocked" || view.kind === "unset") return true;
   return view.kind === "setup" && view.mode === "first";
 }
 

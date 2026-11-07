@@ -1,0 +1,84 @@
+/*
+ * PLATFORM GRADE 1 (November 2026). The shared surfaces of the Grade 1
+ * language (docs/UX_SYSTEM.md): one file, tokens only, so the pieces every
+ * page now shares are read in one place. Imported after details.css and
+ * before motion-pref.css, so the motion setting ("off") still wins.
+ */
+
+/* THE PASSCODE OFFER (P0.1). A slim alert on the home screen, never a gate. */
+.nf-pc-offer {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: var(--nf-space-sm);
+  margin-block: var(--nf-space-md) 0;
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-primary);
+  animation: nf-g1-rise var(--nf-g1-dur-base, 220ms) var(--nf-g1-ease-out, cubic-bezier(0.2, 0.8, 0.2, 1)) both;
+}
+.nf-pc-offer__tile {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--nf-radius-md);
+  background: var(--nf-brand-tint-1);
+  color: var(--nf-brand-primary);
+}
+.nf-pc-offer__text {
+  display: grid;
+  gap: var(--nf-space-3xs);
+  min-inline-size: 0;
+}
+.nf-pc-offer__title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+.nf-pc-offer__body {
+  color: var(--nf-content-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.nf-pc-offer__action {
+  justify-self: start;
+  margin-block-start: var(--nf-space-xs);
+  color: var(--nf-content-link);
+  font-weight: 600;
+  font-size: 0.875rem;
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+.nf-pc-offer__close {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin: calc(var(--nf-space-xs) * -1);
+  border-radius: var(--nf-radius-circle);
+  color: var(--nf-content-secondary);
+}
+.nf-pc-offer__close:hover {
+  background: var(--nf-border-subtle);
+}
+
+@keyframes nf-g1-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-pc-offer {
+    animation: none;
+  }
+}
