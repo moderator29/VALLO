@@ -155,6 +155,8 @@ export function decide(input: {
   /** `profiles.settings`, as jsonb, in whatever shape it is in. */
   settings: unknown;
   now: Date;
+  /** Conversations this person has muted right now (`conversation_prefs`). */
+  mutedConversations?: ReadonlySet<string>;
 }): Decision {
   const { notification, settings, now } = input;
 
@@ -163,6 +165,13 @@ export function decide(input: {
   }
 
   if (!wantsPush(settings, notification.kind)) {
+    return { action: "suppress", outcome: "suppressed_preference" };
+  }
+
+  /* A muted conversation (inbox mute, 7 November 2026) stays silent on the
+     lock screen; the notification still reaches the Activity Centre. */
+  const thread = conversationOf(notification.href);
+  if (thread && input.mutedConversations?.has(thread)) {
     return { action: "suppress", outcome: "suppressed_preference" };
   }
 
@@ -314,4 +323,10 @@ export function wantsSavedPriceDrops(settings: unknown): boolean {
   if (!notifications || typeof notifications !== "object") return true;
   const value = (notifications as Record<string, unknown>).savedPriceDrops;
   return value !== false;
+}
+
+/** The conversation id a notification's link opens, or null. */
+export function conversationOf(href: string | null | undefined): string | null {
+  const match = /^\/messages\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?#]|$)/i.exec(href ?? "");
+  return match ? match[1]!.toLowerCase() : null;
 }

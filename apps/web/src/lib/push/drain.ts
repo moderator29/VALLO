@@ -200,7 +200,9 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
   /* Everything the decision needs, read in two queries rather than in two
      hundred. */
   const notifications = await readNotifications(admin, claimed.map((row) => row.notification_id));
-  const settingsByUser = await readSettings(admin, [...new Set(claimed.map((row) => row.user_id))]);
+  const userIds = [...new Set(claimed.map((row) => row.user_id))];
+  const settingsByUser = await readSettings(admin, userIds);
+  const mutedByUser = await readMutes(admin, userIds);
   const now = new Date();
 
   /* Per person, because collapsing is a decision about a person's whole
@@ -228,7 +230,12 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
       expiresAt: new Date(row.expires_at),
     };
 
-    const decision = decide({ notification: queued, settings: settingsByUser.get(row.user_id), now });
+    const decision = decide({
+      notification: queued,
+      settings: settingsByUser.get(row.user_id),
+      now,
+      mutedConversations: mutedByUser.get(row.user_id),
+    });
 
     if (decision.action === "suppress") {
       await settle(admin, row.id, "done", decision.outcome);
@@ -577,6 +584,37 @@ async function readSettings(admin: PushClient, userIds: string[]): Promise<Map<s
   if (userIds.length === 0) return out;
   const { data } = await admin.from("profiles").select("id, settings").in("id", userIds);
   for (const row of data ?? []) out.set(row.id, row.settings);
+  return out;
+}
+
+/**
+ * Muted conversations per person (`conversation_prefs.muted_until` in the
+ * future). Best effort: until the table exists, or on a failed read, nobody
+ * is muted and pushes go as before.
+ */
+async function readMutes(admin: PushClient, userIds: string[]): Promise<Map<string, Set<string>>> {
+  const out = new Map<string, Set<string>>();
+  if (userIds.length === 0) return out;
+  try {
+    const { data, error } = await (admin.from("conversation_prefs" as never) as unknown as {
+      select: (columns: string) => {
+        in: (column: string, values: string[]) => {
+          gt: (column: string, value: string) => PromiseLike<{ data: { user_id: string; conversation_id: string }[] | null; error: unknown }>;
+        };
+      };
+    })
+      .select("user_id, conversation_id")
+      .in("user_id", userIds)
+      .gt("muted_until", new Date().toISOString());
+    if (error) return out;
+    for (const row of data ?? []) {
+      const set = out.get(row.user_id) ?? new Set<string>();
+      set.add(String(row.conversation_id).toLowerCase());
+      out.set(row.user_id, set);
+    }
+  } catch {
+    /* Nobody muted. */
+  }
   return out;
 }
 
