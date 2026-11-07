@@ -92,7 +92,10 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    `DiscoveryEmpty` onto the one glyph; a real `pin` glyph in UiIcon at
    the current stroke weight (the inbox pin mark borrows `bookmark` today); the inline errors left in HostWizard
    and the stays steps move with round 2's StepFrame work.
-9. **Rounds 5, 6, 7** from WORK_QUEUE.md, in order (round 3 is Agent PAGES'). Round 7 SW11
+9. **FEATURE_BACKLOG E1** (no plate or dark box behind any logo, flag or
+   glyph, platform wide), **A7** (rich Activity Centre cards) and the shared
+   rating components for **C2**.
+10. **Rounds 5, 6, 7** from WORK_QUEUE.md, in order (round 3 is Agent PAGES'). Round 7 SW11
    includes the English words the messages agent added (voice, reactions,
    Talk to a person) moving into `packages/i18n`.
 
@@ -151,7 +154,22 @@ ask), anything native or offline (Agent NATIVE).
 3. **SW5**: registrations, wallet send and withdraw, support new, checkout
    progress onto `StepFrame`; **SW6** one-choice questions onto `OptionCards`.
 4. **SW12**: every page you own has a `loading.tsx` skeleton in its own shape.
-5. Tick every page in `PAGE_LEDGER.md` as you pass it.
+5. **FEATURE_BACKLOG E2** (tablet, iPad and desktop layouts, Back inside
+   the page header) and **E3** (docs, help and guides upgraded).
+6. Tick every page in `PAGE_LEDGER.md` as you pass it.
+
+## Agent FEATURES (new features end to end; started 7 November 2026)
+
+Works `docs/handoff/FEATURE_BACKLOG.md` sections A4 to A6, A8, B, C and D.
+Owns new feature files it creates (`lib/features/**`, new routes it adds,
+`supabase/migrations/pending/features_*.sql`) plus `lib/notify/**` and the
+notification inserts; for edits in another agent's files it sends the lead a
+one-line request. Every feature ships end to end (SQL for the founder,
+server, screen in light and dark, phone, tablet and desktop, tests).
+
+1. B1 Circle spec v2, then A5 and A6 (new notification kinds and the gentle
+   nudges), A4 lock screen words, C1 and C2 ratings, then B2 Circle, then
+   area tools from D in order of value, then A8 emails.
 
 ## Agent NATIVE (iOS and Android, performance, offline; with the lead)
 
@@ -221,7 +239,12 @@ lead's).
    in brief section 11 ("Cross-Platform Testing") per platform, marked
    automated here, simulated here, or needs a real device, with the exact
    steps for the founder's iPhone.
-6. Then audit the Capacitor config and every plugin on both platforms
+6. **Rich notifications** (FEATURE_BACKLOG A1 to A3): the iOS Notification
+   Service Extension with the photo, Android channels, monochrome small icon,
+   large icon and big picture, `image`, `category` and `subtitle` in the
+   payload across APNs, FCM and web push. You own `lib/push/**` for this job;
+   the lead reviews.
+7. Then audit the Capacitor config and every plugin on both platforms
    (versions, permissions strings, Info.plist and manifest entries, privacy
    manifest) and fix what is wrong for build 1.0.2.
 
