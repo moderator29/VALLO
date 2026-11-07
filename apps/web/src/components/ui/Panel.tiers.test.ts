@@ -34,10 +34,20 @@ describe("elevation", () => {
     }
   });
 
-  it("gives Paper the blue-tinted card shadow, exactly as the north star writes it", () => {
-    expect(light).toMatch(
-      /--nf-elevation-raised: 0 1px 2px rgb\(1 1 24 \/ 0\.04\), 0 8px 24px -10px rgb\(0 95 232 \/ 0\.16\);/,
-    );
+  /* The north star's rung was "0 1px 2px rgb(1 1 24 / 0.04), 0 8px 24px -10px
+     rgb(0 95 232 / 0.16)". The light mode pass of 7 November 2026 (Agent FE,
+     the founder's "shadows that read on white") kept its two inks and its
+     long blue ambient and gave the contact real weight, so a white card on
+     paper is held up by a shadow the eye can see. What the north star asks
+     for is what is pinned: blue tinted, the contact ink and the blue ink
+     only, the long blue ambient last. */
+  it("gives Paper the blue-tinted card shadow the north star describes", () => {
+    const raised = light.match(/--nf-elevation-raised:([^;]+);/)?.[1] ?? "";
+    const layers = raised.split(/,(?![^(]*\))/).map((layer) => layer.trim());
+    expect(layers.length).toBeGreaterThanOrEqual(2);
+    for (const layer of layers) expect(layer).toMatch(/rgb\((1 1 24|0 95 232) \/ 0\.\d+\)$/);
+    expect(layers.at(-1)).toMatch(/^0 \d+px \d+px -\d+px rgb\(0 95 232 \/ 0\.\d+\)$/);
+    expect(layers.filter((layer) => layer.includes("0 95 232"))).toHaveLength(1);
   });
 
   it("casts the Paper overlay shadow upwards, because a sheet sits on the bottom edge", () => {

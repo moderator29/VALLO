@@ -11,6 +11,7 @@ import { deviceName, loadPushDevices, whenPhrase } from "@/lib/push/devices";
 import { NotificationMatrix } from "./NotificationMatrix";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
+import { RowLink, SettingsGroup } from "@/components/app/account/rows";
 
 
 /* English until the key lands in the dictionary, like the other words this
@@ -99,6 +100,7 @@ export default async function NotificationsSettingsPage() {
           currentLabel={t.settings.notifications.label}
           sections={[
             { id: "settings-notifications", label: copy.notificationsNav.navChannels, icon: "bell" },
+            { id: "settings-reminders", label: REMINDERS_ROW.label, icon: "clock" },
             { id: "settings-push", label: copy.notificationsNav.navPhone, icon: "phone" },
           ]}
         />
