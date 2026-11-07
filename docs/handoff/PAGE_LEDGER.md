@@ -23,13 +23,13 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/analytics` | FE |  |  |  |  |  |
 | `/admin/audit` | FE |  |  |  |  |  |
 | `/admin/blocked-terms` | FE |  |  |  |  |  |
-| `/admin/bookings` | FE |  |  |  |  |  |
-| `/admin/bookings/[bookingId]` | FE |  |  |  |  |  |
+| `/admin/bookings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/bookings/[bookingId]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/bookings/reservations` | FE |  |  |  |  |  |
 | `/admin/bookings/visits` | FE |  |  |  |  |  |
 | `/admin/businesses` | FE |  |  |  |  |  |
 | `/admin/call-usage` | FE |  |  |  |  |  |
-| `/admin/chargebacks` | FE |  |  |  |  |  |
+| `/admin/chargebacks` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/chargebacks/[chargebackId]` | FE |  |  |  |  |  |
 | `/admin/compliance` | FE |  |  |  |  |  |
 | `/admin/crashes` | Lead |  |  |  |  |  |
@@ -39,16 +39,16 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/front-door` | FE |  |  |  |  |  |
 | `/admin/handbook` | FE |  |  |  |  |  |
 | `/admin/handbook/position` | FE |  |  |  |  |  |
-| `/admin/kyc` | FE |  |  |  |  |  |
-| `/admin/kyc/guide` | FE |  |  |  |  |  |
-| `/admin/listings` | FE |  |  |  |  |  |
-| `/admin/listings/[id]` | FE |  |  |  |  |  |
+| `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/listings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/listings/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/lookup` | FE |  |  |  |  |  |
-| `/admin/money` | FE |  |  |  |  |  |
+| `/admin/money` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/operations` | FE |  |  |  |  |  |
 | `/admin/operations/providers` | FE |  |  |  |  |  |
 | `/admin/oversight` | FE |  |  |  |  |  |
-| `/admin/payments` | FE |  |  |  |  |  |
+| `/admin/payments` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/people` | FE |  |  |  |  |  |
 | `/admin/people/[id]` | FE |  |  |  |  |  |
 | `/admin/queue` | FE |  |  |  |  |  |
@@ -56,14 +56,14 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/referrals` | FE |  |  |  |  |  |
 | `/admin/restaurant-fees` | FE |  |  |  |  |  |
 | `/admin/retention` | FE |  |  |  |  |  |
-| `/admin/review-calls` | FE |  |  |  |  |  |
-| `/admin/review-calls/[id]` | FE |  |  |  |  |  |
+| `/admin/review-calls` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
+| `/admin/review-calls/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/settings` | FE |  |  |  |  |  |
 | `/admin/social` | FE |  |  |  |  |  |
 | `/admin/staff` | FE |  |  |  |  |  |
 | `/admin/standing` | FE |  |  |  |  |  |
 | `/admin/stops` | FE |  |  |  |  |  |
-| `/admin/supply` | FE |  |  |  |  |  |
+| `/admin/supply` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/support` | FE |  |  |  |  |  |
 | `/admin/switches` | FE |  |  |  |  |  |
 | `/admin/weight-withheld` | FE |  |  |  |  |  |
@@ -131,10 +131,10 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/agreements` | FE |  |  |  |  |  |
-| `/agreements/[id]` | FE |  |  |  |  |  |
-| `/agreements/[id]/fund` | FE |  |  |  |  |  |
-| `/agreements/[id]/held` | FE |  |  |  |  |  |
+| `/agreements` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); no Back while it holds the dock slot (social off) |
+| `/agreements/[id]` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/agreements/[id]/fund` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/agreements/[id]/held` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
 
 ## Member: ai
 
@@ -179,9 +179,9 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/bookings` | FE |  |  |  |  |  |
-| `/bookings/[bookingId]` | FE |  |  |  |  |  |
-| `/bookings/[bookingId]/review` | FE |  |  |  |  |  |
+| `/bookings` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/bookings/[bookingId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/bookings/[bookingId]/review` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: calls
 
@@ -231,7 +231,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/compare` | FE |  |  |  |  |  |
+| `/compare` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: contact
 
@@ -249,7 +249,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/directory` | FE |  |  |  |  |  |
+| `/directory` | PAGES | own | yes | yes | yes | DirectoryScreen draws PageHeader inside components/app/directory |
 
 ## Member: disclaimer
 
@@ -336,7 +336,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/inspections/gate/[id]` | FE |  |  |  |  |  |
+| `/inspections/gate/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: landlord
 
@@ -348,15 +348,15 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/leaderboard` | FE |  |  |  |  |  |
+| `/leaderboard` | PAGES | own | yes | yes | yes | kept: LeaderboardScreen own header (components/app/leaderboard) |
 
 ## Member: legal
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/legal/disclaimer` | FE |  |  |  |  |  |
-| `/legal/privacy` | FE |  |  |  |  |  |
-| `/legal/terms` | FE |  |  |  |  |  |
+| `/legal/disclaimer` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/legal/privacy` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/legal/terms` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: listing
 
@@ -399,26 +399,26 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/passport/[who]` | FE |  |  |  |  |  |
+| `/passport/[who]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: pay
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/pay/crypto/[reference]` | FE |  |  |  |  |  |
-| `/pay/deposit/[reservationId]` | FE |  |  |  |  |  |
+| `/pay/crypto/[reference]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/pay/deposit/[reservationId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: payments
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/payments` | FE |  |  |  |  |  |
+| `/payments` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: payouts
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/payouts` | FE |  |  |  |  |  |
+| `/payouts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: post
 
@@ -430,8 +430,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/price` | FE |  |  |  |  |  |
-| `/price/area/[id]` | FE |  |  |  |  |  |
+| `/price` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/price/area/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: privacy
 
@@ -451,9 +451,9 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
 | `/profile` | FE |  |  |  |  |  |
-| `/profile/application` | FE |  |  |  |  |  |
-| `/profile/setup` | FE |  |  |  |  |  |
-| `/profile/setup/[role]` | FE |  |  |  |  |  |
+| `/profile/application` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/profile/setup` | PAGES |  |  |  |  | job 3: AddWorkspaceChooser onto OptionCards |
+| `/profile/setup/[role]` | PAGES | PageFrame |  |  |  | PageFrame now; job 3 ApplyWizard onto StepFrame |
 | `/profile/setup/agent` | FE |  |  |  |  |  |
 | `/profile/setup/firm` | FE |  |  |  |  |  |
 | `/profile/setup/owner` | FE |  |  |  |  |  |
@@ -469,28 +469,28 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/receipts` | FE |  |  |  |  |  |
+| `/receipts` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: record
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/record/[code]` | FE |  |  |  |  |  |
+| `/record/[code]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: refunds
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/refunds` | FE |  |  |  |  |  |
+| `/refunds` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: rent
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
 | `/rent/move-in/[listingId]` | FE |  |  |  |  |  |
-| `/rent/pay/[inspectionId]` | FE |  |  |  |  |  |
-| `/rent/review/[paymentId]` | FE |  |  |  |  |  |
-| `/rent/share/[id]` | FE |  |  |  |  |  |
+| `/rent/pay/[inspectionId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rent/review/[paymentId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rent/share/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: reset-password
 
@@ -514,10 +514,10 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/rewards` | FE |  |  |  |  |  |
-| `/rewards/history` | FE |  |  |  |  |  |
-| `/rewards/referrals` | FE |  |  |  |  |  |
-| `/rewards/withdraw` | FE |  |  |  |  |  |
+| `/rewards` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rewards/history` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rewards/referrals` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rewards/withdraw` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: s
 
@@ -554,33 +554,33 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/settings` | FE |  |  |  |  |  |
-| `/settings/accessibility` | FE |  |  |  |  |  |
-| `/settings/account` | FE |  |  |  |  |  |
-| `/settings/ai-assistant` | FE |  |  |  |  |  |
-| `/settings/ai-assistant/consent` | FE |  |  |  |  |  |
-| `/settings/appearance` | FE |  |  |  |  |  |
-| `/settings/devices` | FE |  |  |  |  |  |
-| `/settings/devices/alert` | FE |  |  |  |  |  |
-| `/settings/help` | FE |  |  |  |  |  |
-| `/settings/interests` | FE |  |  |  |  |  |
-| `/settings/invite` | FE |  |  |  |  |  |
-| `/settings/invite/how-it-works` | FE |  |  |  |  |  |
-| `/settings/invite/referrals` | FE |  |  |  |  |  |
-| `/settings/invite/referrals/[id]` | FE |  |  |  |  |  |
-| `/settings/notifications` | FE |  |  |  |  |  |
+| `/settings` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/accessibility` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/account` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/ai-assistant` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/settings/ai-assistant/consent` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/settings/appearance` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/devices` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/devices/alert` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/help` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/interests` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/invite` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/invite/how-it-works` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/invite/referrals` | PAGES | redirect |  |  |  | redirects to /rewards/referrals (D85) |
+| `/settings/invite/referrals/[id]` | PAGES | redirect |  |  |  | redirects to /rewards/referrals (D85) |
+| `/settings/notifications` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); Reminders row added (/settings/notifications/reminders) |
 | `/settings/notifications/reminders` | FEATURES | PageFrame | yes | yes | yes | 7 Nov: A5 and A6 switches (SettingsGroup and RowSwitch). Seen in `/preview/features/reminders` at 390, 360, 768, 1280, light and dark. |
-| `/settings/passcode` | FE |  |  |  |  |  |
-| `/settings/passport` | FE |  |  |  |  |  |
-| `/settings/payments` | FE |  |  |  |  |  |
-| `/settings/phone` | FE |  |  |  |  |  |
-| `/settings/place` | FE |  |  |  |  |  |
-| `/settings/privacy` | FE |  |  |  |  |  |
-| `/settings/privacy/ai` | FE |  |  |  |  |  |
-| `/settings/privacy/blocked` | FE |  |  |  |  |  |
-| `/settings/privacy/data` | FE |  |  |  |  |  |
-| `/settings/privacy/money-lock` | FE |  |  |  |  |  |
-| `/settings/region` | FE |  |  |  |  |  |
+| `/settings/passcode` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/passport` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/payments` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/phone` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/place` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/privacy` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/privacy/ai` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/privacy/blocked` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/privacy/data` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/privacy/money-lock` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/settings/region` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: sign-in
 
@@ -637,17 +637,17 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/support` | FE |  |  |  |  |  |
+| `/support` | PAGES | own | yes | yes | yes | kept: SupportHero greeting top; floating Back to move into a header (job 6) |
 | `/support/messages` | MSG |  |  |  |  |  |
 | `/support/messages/[id]` | MSG |  |  |  |  |  |
-| `/support/new` | FE |  |  |  |  |  |
+| `/support/new` | PAGES | StepFrame |  |  |  | R3 job 3: four steps on StepFrame (kind as OptionCards); screenshots with job 3 |
 
 ## Member: tenancy
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/tenancy/[id]` | FE |  |  |  |  |  |
-| `/tenancy/[id]/complaint` | FE |  |  |  |  |  |
+| `/tenancy/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/tenancy/[id]/complaint` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: terms
 
@@ -676,7 +676,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/wallet` | FE |  |  |  |  |  |
+| `/wallet` | PAGES | own | yes | yes | yes | kept: WalletHeader (the wallet own top, 9 callers in components/money); recommend a PageFrame decision |
 | `/wallet/add` | FE |  |  |  |  |  |
 | `/wallet/send` | FE |  |  |  |  |  |
 | `/wallet/settings` | FE |  |  |  |  |  |

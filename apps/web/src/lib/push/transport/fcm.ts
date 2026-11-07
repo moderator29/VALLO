@@ -1,5 +1,5 @@
 import "server-only";
-import { CHIME_ANDROID, androidChannelFor } from "../family";
+import { CHIME_ANDROID, androidChannelFor, richAndroidData, wantsRichAndroid } from "../family";
 
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
 
@@ -232,7 +232,20 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: {
+        message: wantsRichAndroid(target.appVersion, payload)
+          ? {
+              /* A2: a 1.0.2 shell draws this itself (ValloMessagingService):
+                 the photo as the large icon beside the text and as the big
+                 picture. A data message, so only a shell that said it can
+                 draw one is ever sent one (lib/push/family.ts). */
+              token: target.token,
+              data: richAndroidData(payload),
+              android: {
+                priority: payload.urgent ? "HIGH" : "NORMAL",
+                ...(payload.ttlSeconds ? { ttl: `${payload.ttlSeconds}s` } : {}),
+              },
+            }
+          : {
           token: target.token,
           /* A2: the picture as the big picture and its thumbnail in the shade. */
           notification: { title: payload.title, body: payload.body, ...(payload.image ? { image: payload.image } : {}) },

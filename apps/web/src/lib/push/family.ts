@@ -1,4 +1,5 @@
 import type { NotificationKind } from "./preferences";
+import { versionAtLeast } from "@/lib/native/app-version";
 
 /**
  * WHICH FAMILY A PUSH BELONGS TO (FEATURE_BACKLOG A1 to A3, Agent NATIVE job
@@ -94,3 +95,45 @@ export const CHIME_IOS = "vallo_chime.caf";
 export const CHIME_ANDROID = "vallo_chime";
 /** The Android channel sound, as the push plugin's `createChannel` takes it. */
 export const CHIME_ANDROID_FILE = "vallo_chime.wav";
+
+/**
+ * A2: the richer Android notification (the photo as a round or rounded large
+ * icon beside the text, and as the big picture), which only Vallo's own
+ * messaging service in build 1.0.2 can draw (`ValloMessagingService.java`).
+ * It is sent as a data message, which an older binary would never show, so it
+ * goes only to a token whose shell said it is 1.0.2 or later, only with a
+ * picture, never for a call's ring, and never with buttons (the plain
+ * notification keeps those).
+ */
+export const RICH_ANDROID_FROM = "1.0.2";
+
+export function wantsRichAndroid(appVersion: string | null | undefined, payload: { image?: string; call?: boolean; actions?: unknown[] }): boolean {
+  return Boolean(payload.image) && !payload.call && !(payload.actions && payload.actions.length > 0) && versionAtLeast(appVersion, RICH_ANDROID_FROM);
+}
+
+/** The data a rich Android push carries: every value a string, as FCM requires. */
+export function richAndroidData(payload: {
+  title: string;
+  body: string;
+  href: string;
+  tag: string;
+  quiet?: boolean;
+  urgent: boolean;
+  call?: boolean;
+  category?: PushFamily;
+  subtitle?: string;
+  image?: string;
+}): Record<string, string> {
+  return {
+    vallo_rich: "1",
+    title: payload.title,
+    body: payload.body,
+    href: payload.href,
+    tag: payload.tag,
+    channel: androidChannelFor(payload),
+    quiet: payload.quiet ? "1" : "0",
+    round: payload.category === "messages" ? "1" : "0",
+    ...(payload.subtitle ? { subtitle: payload.subtitle } : {}),
+    ...(payload.image ? { image: payload.image } : {}),
+  };
+}

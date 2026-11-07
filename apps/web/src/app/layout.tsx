@@ -17,6 +17,9 @@ import { STARTUP_GATE_SCRIPT, STARTUP_NATIVE_SCRIPT } from "@/components/startup
 import { ThresholdStage } from "@/components/motion/ThresholdStage";
 import { MOTION_COOKIE, motionAttributes, parseMotion } from "@/lib/motion/motion-pref";
 import "./globals.css";
+import "./css/launch.css";
+import { launchScript } from "@/components/motion/launch-script";
+import packageJson from "../../package.json";
 import "@/components/startup/startup.css";
 import { siteUrl } from "@/lib/site";
 import { CHROME_COLOUR } from "@/lib/theme/chrome";
@@ -486,6 +489,10 @@ export default async function RootLayout({
             __html: STARTUP_GATE_SCRIPT,
           }}
         />
+        {/* The app open logo on the website (founder ruling (a)): decided before
+            the first frame, never on the native shell, once per session on the
+            front doors; components/motion/launch-script.ts. */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: launchScript(packageJson.version) }} />
         {/*
           WITHOUT JAVASCRIPT, EVERYTHING BELOW THE FOLD WAS INVISIBLE.
 

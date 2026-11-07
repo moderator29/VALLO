@@ -637,7 +637,7 @@ async function readTargets(
 ): Promise<PushTarget[]> {
   const { data } = await admin
     .from("push_tokens")
-    .select("id, platform, token, p256dh, auth, device_ref")
+    .select("id, platform, token, p256dh, auth, device_ref, app_version")
     .eq("user_id", userId)
     .is("revoked_at", null)
     .in("platform", platforms);
@@ -648,6 +648,7 @@ async function readTargets(
     p256dh: row.p256dh,
     auth: row.auth,
     deviceRef: row.device_ref,
+    appVersion: row.app_version,
   }));
 }
 

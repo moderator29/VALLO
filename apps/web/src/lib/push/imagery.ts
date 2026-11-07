@@ -8,7 +8,8 @@ import type { PushClient } from "./schema";
 
 /**
  * THE PICTURE ON THE LOCK SCREEN (FEATURE_BACKLOG A1 to A3, Agent NATIVE job
- * 6). A push about a place carries that place's cover photograph; a message
+ * 6). A push about a place, or a booking of one, carries that place's cover
+ * photograph; a message
  * carries the face of the person who wrote it, or, when they have none, the
  * place the conversation is about. iOS draws it through the Notification
  * Service Extension, Android as the big picture and its thumbnail, and web
@@ -24,16 +25,19 @@ import type { PushClient } from "./schema";
  * push, and best effort: any failure is a push without a picture.
  */
 
-export type ImageTarget = { kind: "listing" | "stay" | "thread"; id: string };
+export type ImageTarget = { kind: "listing" | "stay" | "thread" | "booking"; id: string };
 
 const ID = "[A-Za-z0-9-]{8,64}";
 const PLACE = new RegExp(`^/(listing|stay)/(${ID})(?:[/?#]|$)`);
+const BOOKING = /^\/bookings\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?#]|$)/i;
 
 /** What a push's destination is a picture of, or null. Pure. */
 export function imageTargetOf(href: string | null | undefined): ImageTarget | null {
   if (!href) return null;
   const place = href.match(PLACE);
   if (place) return { kind: place[1] === "stay" ? "stay" : "listing", id: place[2]! };
+  const booking = href.match(BOOKING);
+  if (booking) return { kind: "booking", id: booking[1]!.toLowerCase() };
   const thread = conversationOf(href);
   return thread ? { kind: "thread", id: thread } : null;
 }
@@ -92,11 +96,41 @@ export async function resolvePushImages(admin: PushClient, recipientId: string, 
       }
     }
 
+    /* A booking shows its place, read only as the recipient's own: the guest,
+       or the host of that listing or stay. Anything else draws no picture. */
+    const bookingPlace = new Map<string, { kind: "listing" | "stay"; id: string }>();
+    const bookingIds = [...new Set([...targets.values()].filter((t) => t.kind === "booking").map((t) => t.id))];
+    if (bookingIds.length > 0) {
+      const { data: rows } = await admin.from("bookings").select("id, guest_id, listing_id, accommodation_id").in("id", bookingIds);
+      const hostListings = (rows ?? []).filter((r) => r.guest_id !== recipientId && r.listing_id).map((r) => r.listing_id!);
+      const hostStays = (rows ?? []).filter((r) => r.guest_id !== recipientId && r.accommodation_id).map((r) => r.accommodation_id!);
+      const [listingHosts, stayHosts] = await Promise.all([
+        hostListings.length > 0
+          ? admin.from("listings").select("id, agents(user_id)").in("id", hostListings)
+          : Promise.resolve({ data: [] as Array<{ id: string; agents: { user_id: string | null } | null }> }),
+        hostStays.length > 0
+          ? admin.from("accommodations").select("id, businesses(owner_id)").in("id", hostStays)
+          : Promise.resolve({ data: [] as Array<{ id: string; businesses: { owner_id: string | null } | null }> }),
+      ]);
+      const listingHost = new Map(((listingHosts.data ?? []) as Array<{ id: string; agents: { user_id: string | null } | null }>).map((r) => [r.id, r.agents?.user_id ?? null]));
+      const stayHost = new Map(((stayHosts.data ?? []) as Array<{ id: string; businesses: { owner_id: string | null } | null }>).map((r) => [r.id, r.businesses?.owner_id ?? null]));
+      for (const r of rows ?? []) {
+        const guest = r.guest_id === recipientId;
+        if (r.listing_id && (guest || listingHost.get(r.listing_id) === recipientId)) bookingPlace.set(r.id, { kind: "listing", id: r.listing_id });
+        else if (r.accommodation_id && (guest || stayHost.get(r.accommodation_id) === recipientId)) bookingPlace.set(r.id, { kind: "stay", id: r.accommodation_id });
+      }
+    }
+
     const listingIds = new Set<string>();
     const stayIds = new Set<string>();
     for (const t of targets.values()) {
       if (t.kind === "listing") listingIds.add(t.id);
       if (t.kind === "stay") stayIds.add(t.id);
+      if (t.kind === "booking") {
+        const place = bookingPlace.get(t.id);
+        if (place?.kind === "listing") listingIds.add(place.id);
+        if (place?.kind === "stay") stayIds.add(place.id);
+      }
       if (t.kind === "thread") {
         const listing = threads.get(t.id)?.listing;
         if (listing) listingIds.add(listing);
@@ -124,6 +158,15 @@ export async function resolvePushImages(admin: PushClient, recipientId: string, 
       let url: string | null = null;
       if (t.kind === "listing") url = listingCover.has(t.id) ? photoUrl(listingCover.get(t.id)!) : null;
       else if (t.kind === "stay") url = stayCover.has(t.id) ? accommodationPhotoUrl(stayCover.get(t.id)!) : null;
+      else if (t.kind === "booking") {
+        const place = bookingPlace.get(t.id);
+        url =
+          place?.kind === "listing" && listingCover.has(place.id)
+            ? photoUrl(listingCover.get(place.id)!)
+            : place?.kind === "stay" && stayCover.has(place.id)
+              ? accommodationPhotoUrl(stayCover.get(place.id)!)
+              : null;
+      }
       else {
         const thread = threads.get(t.id);
         const avatar = thread?.counterpart ? face.get(thread.counterpart) : null;

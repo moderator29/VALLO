@@ -17,7 +17,7 @@ import { homeCardCopyOf } from "@/components/app/home/home-card-copy";
 import { DiscoveryEmpty } from "@/components/app/search/DiscoveryEmpty";
 import type { PropertyType } from "@/lib/interests/property-types";
 import { HeroBand } from "@/components/ui/HeroBand";
-import { LogoMark } from "@/design-system/brand/Logo";
+import { MarkDraw } from "@/components/motion/MarkDraw";
 import { VerifyPrompt } from "@/components/roles/VerifyPrompt";
 import type { RoleState } from "@/components/roles/roles";
 import "@/app/css/home.css";
@@ -246,7 +246,7 @@ export function HomeScreen({
           <h1 className="nf-rise nf-rise-2 mt-inline-tight flex items-center gap-inline">
             <span className="nf-h1">{name}</span>
             <span className="inline-block shrink-0 translate-y-[2px]">
-              <LogoMark size={26} title="Vallo" />
+              <MarkDraw size={26} />
             </span>
           </h1>
         ) : (

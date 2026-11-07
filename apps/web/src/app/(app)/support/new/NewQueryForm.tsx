@@ -6,7 +6,8 @@ import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
-import { Segmented } from "@/components/ui/Segmented";
+import { OptionCards } from "@/components/ui/OptionCards";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { Sheet } from "@/components/ui/Sheet";
 import { OfflineNote, useOnline } from "@/components/support/OfflineNote";
 import { PhotoField } from "@/components/support/PhotoField";
@@ -43,9 +44,10 @@ export type Filed = { reference: string; id?: string; photoNote?: string };
 /**
  * Ask a question or report a problem, filed as a ticket with a reference.
  *
- * One screen, one primary action. The topic and the linked record are
- * chosen in the shared bottom sheet, as a list with a tick on the chosen
- * row. Everything typed is kept on this device until the ticket is filed, so
+ * One question per screen on the shared step frame (SW5): the kind of
+ * message as option cards, the topic as a list with a tick on the chosen
+ * row (the linked record in the shared bottom sheet), what happened, then a
+ * photo and Send. Everything typed is kept on this device until the ticket is filed, so
  * a reload, a dropped connection or a failed send never costs the member the
  * description; the draft is cleared only once the server has returned a
  * reference.
@@ -75,7 +77,7 @@ export function NewQueryForm({
   const [hydrated, setHydrated] = useState(false);
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [errors, setErrors] = useState<DraftErrors>({});
-  const [sheet, setSheet] = useState<"topic" | "record" | null>(null);
+  const [sheet, setSheet] = useState<"record" | null>(null);
   const [filed, setFiled] = useState<Filed | null>(null);
   const [pending, start] = useSafeTransition();
   const online = useOnline();
@@ -120,16 +122,42 @@ export function NewQueryForm({
     if (next.body !== undefined && errors.body) setErrors((e) => ({ ...e, body: undefined }));
   };
 
+  /* THE STEPS (SW5, Grade 1): one question per screen. What kind of
+     message, what it is about (and the record it concerns), what happened,
+     then a photo and Send. Nothing is lost between steps: the draft is the
+     same one, kept on this device as before. */
+  const [at, setAt] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const go = (next: number) => {
+    setDirection(next > at ? "forward" : "back");
+    setAt(next);
+  };
+
+  /* Continue checks only the question on screen; Send checks them all. */
+  const forward = () => {
+    const found = draftErrors(draft);
+    if (at === 1 && found.topic) {
+      setErrors((e) => ({ ...e, topic: found.topic }));
+      return;
+    }
+    if (at === 2 && found.body) {
+      setErrors((e) => ({ ...e, body: found.body }));
+      bodyRef.current?.querySelector("textarea")?.focus();
+      return;
+    }
+    go(at + 1);
+  };
+
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const found = draftErrors(draft);
     setErrors(found);
     if (found.topic) {
-      setSheet("topic");
+      go(1);
       return;
     }
     if (found.body) {
-      bodyRef.current?.querySelector("textarea")?.focus();
+      go(2);
       return;
     }
     if (!online) {
@@ -176,120 +204,128 @@ export function NewQueryForm({
       </>
     );
 
-  const kindCopy = QUERY_KINDS[draft.kind];
+  const problem = draft.kind === "problem";
+  const total = 4;
+  const last = at === total - 1;
+  const titles = [copy.kindLabel, copy.about, problem ? copy.whatHappened : copy.yourQuestion, STEP_WORDS.photoTitle];
+  const subtitles = [
+    undefined,
+    copy.chooseTopicHint,
+    problem ? copy.whatHappenedHint : copy.yourQuestionHint,
+    STEP_WORDS.photoSub,
+  ];
 
   return (
-    <form onSubmit={submit} className="space-y-block" noValidate data-testid="support-new-form">
-      <Segmented
-        options={[
-          { value: "question", label: copy.question },
-          { value: "problem", label: copy.problem },
-        ]}
-        value={draft.kind}
-        onChange={(kind) => update({ kind })}
-        semantics="radio"
-        label={copy.kindLabel}
-        full
-      />
-      <p className="nf-body-sm -mt-group text-[var(--nf-content-secondary)]">{kindCopy.lede}</p>
-
-      <section className="nf-sgroup" aria-label={copy.topic}>
-        <p className="nf-sgroup__label">{copy.about}</p>
-        <div className="nf-sgroup__body nf-panel nf-panel--card">
-          <button
-            type="button"
-            className="nf-srow w-full cursor-pointer text-left"
-            onClick={() => setSheet("topic")}
-            aria-haspopup="dialog"
-            aria-describedby={errors.topic ? "support-topic-error" : undefined}
-            data-testid="support-topic"
-          >
-            <span className="nf-srow__body min-w-0">
-              <span className="nf-srow__label">{topic ? copy.topicChoices[topic.code].title : copy.chooseTopic}</span>
-              <span className="nf-srow__sub">{topic ? copy.topicChoices[topic.code].hint : copy.chooseTopicHint}</span>
-            </span>
-            <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
-          </button>
-          {offered.length > 0 && (
-            <div className="border-t border-[var(--nf-border-subtle)]">
-              {draft.related ? (
-                <div className="nf-srow" data-testid="support-related-chosen">
-                  <span className="nf-srow__body min-w-0">
-                    <span className="nf-srow__label break-words">{draft.related.label}</span>
-                    <span className="nf-srow__sub">{copy.linkedHint}</span>
-                  </span>
-                  <Button variant="quiet" size="sm" onClick={() => update({ related: null })} className="shrink-0">
-                    {copy.remove}
-                  </Button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  className="nf-srow w-full cursor-pointer text-left"
-                  onClick={() => setSheet("record")}
-                  aria-haspopup="dialog"
-                  data-testid="support-related"
-                >
-                  <span className="nf-srow__body min-w-0">
-                    <span className="nf-srow__label">{copy.linkRecord}</span>
-                    <span className="nf-srow__sub">{copy.linkRecordHint}</span>
-                  </span>
-                  <UiIcon name="plus" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-        {errors.topic && (
-          <p id="support-topic-error" role="alert" className="nf-caption mt-row text-[var(--nf-state-error)]">
+    <StepFrame
+      overlay
+      testId="support-new-steps"
+      step={at + 1}
+      total={total}
+      stepLabel={STEP_WORDS.step.replace("{n}", String(at + 1)).replace("{total}", String(total))}
+      eyebrow={STEP_WORDS.eyebrows[at]}
+      title={titles[at] ?? copy.about}
+      subtitle={subtitles[at]}
+      direction={direction}
+      onBack={at > 0 ? () => go(at - 1) : undefined}
+      backLabel={STEP_WORDS.back}
+      closeHref="/support"
+      closeLabel={copy.close}
+      notice={
+        errors.topic && at === 1 ? (
+          <p id="support-topic-error" role="alert" className="nf-caption text-[var(--nf-state-error)]">
             {errors.topic}
           </p>
-        )}
-      </section>
+        ) : undefined
+      }
+      primary={
+        last
+          ? { label: copy.send, type: "submit", form: FORM_ID, loading: pending, disabled: pending, testId: "support-send" }
+          : { label: STEP_WORDS.next, onClick: forward, testId: "support-next" }
+      }
+    >
+      <form id={FORM_ID} onSubmit={submit} className="space-y-block" noValidate data-testid="support-new-form">
+        {at === 0 ? (
+          <OptionCards
+            label={copy.kindLabel}
+            options={[
+              { value: "question", label: copy.question, detail: QUERY_KINDS.question.lede, icon: "chat-bubble" },
+              { value: "problem", label: copy.problem, detail: QUERY_KINDS.problem.lede, icon: "alert-triangle" },
+            ]}
+            value={draft.kind}
+            onChange={(kind) => update({ kind: kind as QueryKind })}
+            testId="support-kind"
+          />
+        ) : null}
 
-      <div ref={bodyRef}>
-      <TextArea
-        label={draft.kind === "problem" ? copy.whatHappened : copy.yourQuestion}
-        hint={
-          draft.kind === "problem"
-            ? copy.whatHappenedHint
-            : copy.yourQuestionHint
-        }
-        value={draft.body}
-        onChange={(e) => update({ body: e.target.value })}
-        rows={6}
-        maxLength={DESCRIPTION_MAX}
-        error={errors.body}
-        data-testid="support-body"
-      />
-      </div>
+        {at === 1 ? (
+          <div className="space-y-block" data-testid="support-topic">
+            <ChoiceList
+              label={copy.topics}
+              items={TOPIC_CHOICES.map((choice) => ({ key: choice.code, title: copy.topicChoices[choice.code].title, sub: copy.topicChoices[choice.code].hint }))}
+              selected={draft.topic}
+              onPick={(key) => {
+                const next = topicChoice(key);
+                const keep = draft.related && next?.records.includes(draft.related.kind) ? draft.related : null;
+                update({ topic: next?.code ?? null, related: keep });
+              }}
+            />
+            {offered.length > 0 && (
+              <div className="nf-panel nf-panel--card">
+                {draft.related ? (
+                  <div className="nf-srow" data-testid="support-related-chosen">
+                    <span className="nf-srow__body min-w-0">
+                      <span className="nf-srow__label break-words">{draft.related.label}</span>
+                      <span className="nf-srow__sub">{copy.linkedHint}</span>
+                    </span>
+                    <Button variant="quiet" size="sm" onClick={() => update({ related: null })} className="shrink-0">
+                      {copy.remove}
+                    </Button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="nf-srow w-full cursor-pointer text-left"
+                    onClick={() => setSheet("record")}
+                    aria-haspopup="dialog"
+                    data-testid="support-related"
+                  >
+                    <span className="nf-srow__body min-w-0">
+                      <span className="nf-srow__label">{copy.linkRecord}</span>
+                      <span className="nf-srow__sub">{copy.linkRecordHint}</span>
+                    </span>
+                    <UiIcon name="plus" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ) : null}
 
-      <PhotoField value={photo} onChange={setPhoto} disabled={pending} />
+        {at === 2 ? (
+          <div ref={bodyRef}>
+            <TextArea
+              label={problem ? copy.whatHappened : copy.yourQuestion}
+              hint={problem ? copy.whatHappenedHint : copy.yourQuestionHint}
+              value={draft.body}
+              onChange={(e) => update({ body: e.target.value })}
+              rows={6}
+              maxLength={DESCRIPTION_MAX}
+              error={errors.body}
+              data-testid="support-body"
+            />
+          </div>
+        ) : null}
 
-      <OfflineNote />
-
-      <div className="space-y-row">
-        <Button type="submit" variant="primary" size="lg" full loading={pending} disabled={pending} data-testid="support-send">
-          {copy.send}
-        </Button>
-        <p className="nf-caption text-center text-[var(--nf-content-muted)]">
-          {copy.afterSend.replace("{expected}", expectedResponse(draft.topic, copy.expected))}
-        </p>
-      </div>
-
-      <Sheet open={sheet === "topic"} onOpenChange={(o) => setSheet(o ? "topic" : null)} title={copy.about} closeLabel={copy.close} detents={[0.85]}>
-        <ChoiceList
-          label={copy.topics}
-          items={TOPIC_CHOICES.map((choice) => ({ key: choice.code, title: copy.topicChoices[choice.code].title, sub: copy.topicChoices[choice.code].hint }))}
-          selected={draft.topic}
-          onPick={(key) => {
-            const next = topicChoice(key);
-            const keep = draft.related && next?.records.includes(draft.related.kind) ? draft.related : null;
-            update({ topic: next?.code ?? null, related: keep });
-            setSheet(null);
-          }}
-        />
-      </Sheet>
+        {at === 3 ? (
+          <>
+            <PhotoField value={photo} onChange={setPhoto} disabled={pending} />
+            <OfflineNote />
+            <p className="nf-caption text-[var(--nf-content-muted)]">
+              {copy.afterSend.replace("{expected}", expectedResponse(draft.topic, copy.expected))}
+            </p>
+          </>
+        ) : null}
+      </form>
 
       <Sheet open={sheet === "record"} onOpenChange={(o) => setSheet(o ? "record" : null)} title={copy.linkRecord} closeLabel={copy.close} detents={[0.85]}>
         <RecordList
@@ -301,9 +337,22 @@ export function NewQueryForm({
           }}
         />
       </Sheet>
-    </form>
+    </StepFrame>
   );
 }
+
+const FORM_ID = "support-new";
+
+/* The step frame's own words. English until the keys land in the dictionary
+   beside `experienceInbox.support.form`. */
+const STEP_WORDS = {
+  eyebrows: ["Your message", "Topic", "Details", "Photo"],
+  photoTitle: "Add a photo",
+  photoSub: "Optional. A screenshot or a photo helps the team see it.",
+  next: "Continue",
+  back: "Back",
+  step: "Step {n} of {total}",
+} as const;
 
 /** Quiet rows, the chosen one ticked: the sheet list in the founder's first reference. */
 function ChoiceList({

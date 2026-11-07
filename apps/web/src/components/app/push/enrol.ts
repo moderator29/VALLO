@@ -1,6 +1,7 @@
 "use client";
 
 import { looksNative } from "@/lib/native/platform";
+import { nativeAppVersion } from "@/lib/native/app-version";
 
 import {
   clearLocalDevice,
@@ -399,7 +400,15 @@ async function enrolNative(): Promise<EnrolOutcome> {
   const answer = await nativeToken(plugin);
   if (answer.token === null) return { ok: false, reason: "failed", step: "token", detail: answer.detail };
 
-  return postRegistration({ platform, token: answer.token, deviceLabel: platform === "ios" ? "iPhone" : "Android" });
+  /* A2: the binary's version, so the server sends the richer Android
+     notification only to a shell that can draw it (lib/native/app-version.ts). */
+  const appVersion = await nativeAppVersion();
+  return postRegistration({
+    platform,
+    token: answer.token,
+    deviceLabel: platform === "ios" ? "iPhone" : "Android",
+    ...(appVersion ? { appVersion } : {}),
+  });
 }
 
 /** Capacitor's refusal for a plugin the native binary does not carry. */
@@ -536,8 +545,9 @@ export async function refreshNativeRegistration(): Promise<"refreshed" | "skippe
        the record: forgetting it here meant the next sign-in had nothing to
        re-register, the OS permission was already granted so the Vallo screen
        never asked again, and the phone went quiet with no word anywhere. */
+    const appVersion = await nativeAppVersion();
     const outcome = await postRegistration(
-      { platform, token: answer.token, deviceLabel: platform === "ios" ? "iPhone" : "Android" },
+      { platform, token: answer.token, deviceLabel: platform === "ios" ? "iPhone" : "Android", ...(appVersion ? { appVersion } : {}) },
       { keepWhenSignedOut: true },
     );
     return outcome.ok ? "refreshed" : "failed";
@@ -586,6 +596,7 @@ async function postRegistration(
     p256dh?: string;
     auth?: string;
     deviceLabel?: string;
+    appVersion?: string;
   },
   options: { keepWhenSignedOut?: boolean } = {},
 ): Promise<EnrolOutcome> {

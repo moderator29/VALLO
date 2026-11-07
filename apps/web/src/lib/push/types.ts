@@ -23,6 +23,8 @@ export type PushTarget = {
   auth: string | null;
   /** The safe handle. This is what goes in a log line or an alert. */
   deviceRef: string;
+  /** The native binary's version (`push_tokens.app_version`), when the shell sent it. */
+  appVersion?: string | null;
 };
 
 /** What a person sees on their lock screen. */
