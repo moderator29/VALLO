@@ -93,7 +93,7 @@
  * details.css, so it wins over the old pill above the dock by position.
  */
 .nf-toast-host {
-  top: calc(env(safe-area-inset-top, 0px) + var(--nf-space-xs));
+  top: calc(env(safe-area-inset-top, 0px) + var(--nf-space-sm));
   bottom: auto;
   padding-inline: var(--nf-space-md);
 }
@@ -107,13 +107,19 @@
     bottom: auto;
   }
 }
+/* COMPACT, NOT A SLAB (founder, 7 November 2026: "make it smaller ... it's
+   too wide", references R4, R58, R62). Sized to its words up to 24rem, one
+   line where it fits, a plain glyph rather than a tile, a small close
+   square, and the retry as a word beside the sentence. */
 .nf-toast-host .nf-toast {
-  inline-size: 100%;
-  max-inline-size: 34rem;
-  min-block-size: 3.5rem;
-  gap: var(--nf-space-sm);
-  padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-md);
-  border-radius: var(--nf-radius-xl);
+  inline-size: fit-content;
+  min-inline-size: min(15rem, 100%);
+  max-inline-size: min(24rem, 100%);
+  min-block-size: 0;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  padding: var(--nf-space-xs) var(--nf-space-2xs) var(--nf-space-xs) var(--nf-space-sm);
+  border-radius: var(--nf-radius-lg);
   border: var(--nf-border-width) solid var(--nf-border-default);
   background: var(--nf-surface-elevated);
   color: var(--nf-content-primary);
@@ -123,96 +129,102 @@
 /* Glass where the device can afford it; the solid surface above is the fallback. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   :root:not([data-save-data="on"]) .nf-toast-host .nf-toast {
-    background: color-mix(in oklab, var(--nf-surface-elevated) 86%, transparent);
+    background: color-mix(in oklab, var(--nf-surface-elevated) 88%, transparent);
     -webkit-backdrop-filter: blur(var(--nf-glass-blur));
     backdrop-filter: blur(var(--nf-glass-blur));
   }
 }
-.nf-toast-host .nf-toast:not(:has(.nf-toast__action)) {
-  padding-inline-end: var(--nf-space-xs);
-}
+.nf-toast-host .nf-toast:not(:has(.nf-toast__action)),
 .nf-toast-host .nf-toast:has(.nf-toast__action) {
-  padding-inline-end: var(--nf-space-xs);
+  padding-inline-end: var(--nf-space-2xs);
 }
 .nf-toast-host .nf-toast[data-leaving] {
   opacity: 0;
-  transform: translate3d(0, -0.75rem, 0);
+  transform: translate3d(0, -0.5rem, 0);
 }
 @keyframes nf-banner-drop {
   from {
     opacity: 0;
-    transform: translate3d(0, -1rem, 0) scale(0.98);
+    transform: translate3d(0, -0.75rem, 0) scale(0.98);
   }
-}
-.nf-toast-host .nf-toast {
-  align-items: flex-start;
-}
-.nf-toast-host .nf-toast__mark,
-.nf-toast-host .nf-toast__close {
-  align-self: center;
 }
 .nf-toast__body {
   flex: 1;
   min-inline-size: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  padding-block: var(--nf-space-xs);
-}
-.nf-toast-host .nf-toast__body:has(.nf-toast__action) {
-  padding-block-end: 0;
-}
-.nf-toast-host .nf-toast__body .nf-toast__action {
-  min-block-size: 2.75rem;
-  margin-inline-start: calc(var(--nf-space-sm) * -1);
-  padding-inline: var(--nf-space-sm);
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--nf-space-xs);
+  row-gap: 0;
 }
 .nf-toast-host .nf-toast__text {
-  font-size: var(--nf-text-row);
+  font-size: var(--nf-text-body-sm);
   font-weight: 500;
   line-height: 1.35;
 }
-.nf-toast-host .nf-toast__mark {
-  inline-size: 2rem;
-  block-size: 2rem;
-  border-radius: var(--nf-radius-circle);
-}
-.nf-toast-host .nf-toast[data-tone="success"] .nf-toast__mark {
-  background: var(--nf-state-success-surface);
-  color: var(--nf-state-success);
-}
-.nf-toast-host .nf-toast[data-tone="error"] .nf-toast__mark {
-  background: var(--nf-state-error-surface);
-  color: var(--nf-state-error);
-}
-.nf-toast-host .nf-toast[data-tone="warning"] .nf-toast__mark {
-  background: var(--nf-state-warning-surface);
-  color: var(--nf-state-warning);
-}
-.nf-toast-host .nf-toast[data-tone="info"] .nf-toast__mark,
-.nf-toast-host .nf-toast[data-tone="neutral"] .nf-toast__mark {
-  background: var(--nf-brand-tint-1);
-  color: var(--nf-brand-primary);
-}
-.nf-toast-host .nf-toast__action {
+/* The retry: a word, not a button row; its 44px target comes from padding. */
+.nf-toast-host .nf-toast__body .nf-toast__action {
+  min-block-size: 0;
+  margin-block: calc(var(--nf-space-xs) * -1);
+  margin-inline: calc(var(--nf-space-2xs) * -1);
+  padding: var(--nf-space-xs) var(--nf-space-2xs);
   color: var(--nf-content-link);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
   text-decoration: none;
-  border-radius: var(--nf-radius-button);
+  border-radius: var(--nf-radius-sm);
 }
 .nf-toast-host .nf-toast__action:active {
   background: var(--nf-brand-tint-1);
 }
+/* A plain glyph in the tone's colour (R62), no tile behind it. */
+.nf-toast-host .nf-toast__mark {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 0;
+  background: none;
+}
+.nf-toast-host .nf-toast[data-tone="success"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-success);
+}
+.nf-toast-host .nf-toast[data-tone="error"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-error);
+}
+.nf-toast-host .nf-toast[data-tone="warning"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-warning);
+}
+.nf-toast-host .nf-toast[data-tone="info"] .nf-toast__mark,
+.nf-toast-host .nf-toast[data-tone="neutral"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-brand-primary);
+}
+/* The close: a small grey square (R4), with a full 44px touch area. */
 .nf-toast__close {
+  position: relative;
   flex-shrink: 0;
   display: inline-grid;
   place-items: center;
-  inline-size: 2.75rem;
-  block-size: 2.75rem;
-  border-radius: var(--nf-radius-md);
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  margin-inline: var(--nf-space-2xs);
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-border-subtle);
   color: var(--nf-content-secondary);
 }
+.nf-toast__close::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+.nf-toast__close svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
 .nf-toast__close:active {
-  background: var(--nf-border-subtle);
+  background: var(--nf-border-default);
 }
 .nf-toast__close:focus-visible {
   outline: 2px solid var(--nf-focus-ring);

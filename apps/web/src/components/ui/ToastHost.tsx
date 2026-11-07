@@ -195,7 +195,7 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       }}
     >
       <span className="nf-toast__mark" aria-hidden="true">
-        <UiIcon name={MARK[item.tone]} size={16} />
+        <UiIcon name={MARK[item.tone]} size={20} />
       </span>
       {/* The sentence and its action stack, so a long failure keeps the
           whole width to read in and "Try again" sits under it. */}
