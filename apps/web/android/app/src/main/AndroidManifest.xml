@@ -215,6 +215,13 @@
                 <data android:pathPrefix="/u/" />
                 <data android:pathPrefix="/post/" />
                 <data android:pathPrefix="/stories/" />
+                <!-- N6 (7 November 2026): a member's own thread, notification
+                     and booking links, from their emails, open in the app
+                     where they are signed in. /bookings/ needs the id after
+                     the slash, so the bare list stays in the browser. -->
+                <data android:pathPrefix="/messages/" />
+                <data android:pathPrefix="/notifications/" />
+                <data android:pathPrefix="/bookings/" />
                 <!-- An invite link (D85): /join/<code> keeps the code in the
                      web view's cookie jar and hands over to sign-up there, so
                      a sign-up made in the app is attributed to the inviter. -->
