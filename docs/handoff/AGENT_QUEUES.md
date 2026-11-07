@@ -71,7 +71,17 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    (how we keep listings honest, safety at viewings, money held safely).
 6. **Round 2**: the listing wizard onto `StepFrame`, one question per screen
    (WORK_QUEUE.md round 2, Survey B LW-01 to LW-04).
-7. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
+7. **Universal systems from the follow-up directive**, each tested in
+   several modules: bottom sheets audited onto the one `Sheet` (drag,
+   dismissal, keyboard, safe areas) for filters, sort, share, collections,
+   account and booking actions; **saved collections** (custom collections,
+   covers, move between, sort, share, compare up to 4 side by side on a
+   phone); the **Activity Centre** (`/notifications`: categories, grouping,
+   unread, mark all read, archive, every row opens its exact destination,
+   distinct from Messages); **keyboard actions** on every form (`enterKeyHint`
+   Next and Done, `inputMode`, `autoComplete`, Enter moves to the next
+   field), done in the shared input components first.
+8. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
    includes the English words the messages agent added (voice, reactions,
    Talk to a person) moving into `packages/i18n`.
 
@@ -101,8 +111,80 @@ Owns: `app/(app)/messages/**`, `components/app/messages/**`,
 7. **Support as an inner page** once the support SQL is live; until then
    build against it with graceful degradation.
 
-## Lead (native, backend, coordination)
+## Agent NATIVE (iOS and Android, performance, offline; with the lead)
 
-N3 to N10, B-03 rate limits, the R-03 audit dedupe, the native build
-queue, the crash log follow-ups, Vallo Circle's design brief, and every
-review, gate and commit.
+The founder, 7 November 2026: the native work deserves its own high end
+engineer working beside the lead. Brief section 11 (cross-platform), the
+premium iOS brief, the deep WebView performance audit and the offline
+sections are its source (docs/handoff/FOUNDER_BRIEF_VERBATIM.md).
+
+Owns: `lib/native/**`, `lib/offline/**`, `components/app/offline/**`,
+`components/app/NativeRuntime.tsx`, `components/startup/**`,
+`lib/ui/feedback.ts` (haptics), `capacitor.config.ts`, `android/**`, `ios/**`,
+`native-shell/**`, `public/.well-known/**`, `public/sw*.js` and the service
+worker sources, `perf-budget.json`, new `lib/platform/**`, new
+`app/css/platform.css` (imported once, after grade1.css), and
+`docs/handoff/NATIVE_BUILD_QUEUE.md`, `docs/handoff/PERFORMANCE_REPORT.md`,
+`docs/handoff/DEVICE_TEST_MATRIX.md`. Anything in a component outside these
+goes to the lead as a one-line request; never edit another agent's files.
+
+Already done by the lead (keep, build on it): status bar holds (N2),
+keyboard foot on the keys and the SystemBars decision (N3, N5), step-flow
+Android Back and predictive back in the manifest (N4), deep links for
+threads, notifications and bookings (N6), the tab haptic (N7), push kick on
+enqueue (N1), resume refresh (N9), the crash log (`lib/observability/**`,
+lead's).
+
+1. **Platform-aware layer, one codebase.** At boot put `data-platform`
+   (`ios`, `android`, `web`) and `data-native` on `<html>` (before first
+   paint where possible, through the existing startup script). Then
+   `app/css/platform.css` adapts, never forks: iOS press highlight and dim,
+   Android Material-style touch ripple (transform and opacity only, cheap on
+   budget phones); iOS push transition (slide from the right, back slides
+   out) vs Android fade-through for page changes, both through one shared
+   transition helper, reduced motion honoured; scroll edge behaviour
+   (iOS bounce kept, Android overscroll glow left native). Same brand,
+   same tokens.
+2. **iOS shell polish for build 1.0.2**: edge swipe back in the web view
+   (`allowsBackForwardNavigationGestures` in the iOS project), link preview
+   off, the app switcher privacy cover for money screens (queue item 5),
+   native crash capture on next launch (item 6, into `/api/client-error`
+   with platform ios), the animated launch hand-off with the exact logo and
+   wordmark (item 7). Android twins where they exist. Every native change is
+   listed in NATIVE_BUILD_QUEUE.md; none ships until the planned build.
+3. **Connection manager (offline brief).** One shared state: connected,
+   slow, unstable, offline, reconnected (from `navigator.onLine`, the
+   Network Information API where present, and real request timing). One
+   calm Vallo strip and the existing banner for changes; the offline screen
+   upgraded (status, Try again, saved and recently viewed from the existing
+   shelf and pack stores, a way home, automatic recovery). Cached prices and
+   availability always labelled "Saved on your device. Price and
+   availability may have changed." (KeptPriceNote exists: reuse). On
+   reconnect: refresh, replay only safe queued actions through the existing
+   outbox and replay guard, never a payment or booking without confirmation.
+4. **The performance audit, measured, both platforms separately.** Build
+   production (`next build` then `next start -p 3100`), then with the
+   preinstalled Playwright Chromium measure on emulated budget Android
+   (CPU 6x and 4x throttle, Slow 4G and Fast 3G, 360x800, deviceScaleFactor
+   2) and an emulated iPhone profile: cold and warm load, time to first
+   usable screen, long tasks, JS bundle per route, image bytes, memory over a
+   60-navigation loop (`performance.memory`, detached nodes), scroll frame
+   timing on search and the feed. Real WKWebView and real Android devices are
+   NOT available here: say "simulated" on every number. Write
+   `docs/handoff/PERFORMANCE_REPORT.md` (separate iOS and Android sections:
+   baseline, bottlenecks, fixes, after, remaining) and fix the top
+   bottlenecks inside your files; anything in a component goes to the lead as
+   a request with the measurement.
+5. **Device test matrix** `docs/handoff/DEVICE_TEST_MATRIX.md`: every check
+   in brief section 11 ("Cross-Platform Testing") per platform, marked
+   automated here, simulated here, or needs a real device, with the exact
+   steps for the founder's iPhone.
+6. Then audit the Capacitor config and every plugin on both platforms
+   (versions, permissions strings, Info.plist and manifest entries, privacy
+   manifest) and fix what is wrong for build 1.0.2.
+
+## Lead (native with Agent NATIVE, backend, coordination)
+
+Native review and the requests Agent NATIVE sends for component files,
+backend (D-02 policies, R-04 idempotent alerts, B-05 read waves), the crash
+log follow-ups, Vallo Circle, and every review, gate and commit.
