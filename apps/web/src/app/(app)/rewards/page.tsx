@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/site";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { RewardsDashboard } from "@/components/app/referral/RewardsDashboard";
 import { RewardsState } from "@/components/app/referral/RewardsState";
 import { REWARDS_PAUSED_EARNED_LINE } from "@/components/app/referral/money-words";
@@ -40,14 +40,12 @@ export default async function RewardsPage() {
   const t = getDictionary(locale);
   const copy = t.experienceRewards;
   const screen = await rewardsScreen();
-  const header = <PageHeader title={copy.title} subtitle={copy.lede} fallback="/settings" />;
 
   if (screen.kind === "state") {
     return (
-      <div className="mx-auto max-w-2xl" data-testid="rewards-page">
-        {header}
+      <PageFrame title={copy.title} subtitle={copy.lede} fallback="/settings" width="narrow" testId="rewards-page">
         <RewardsState read={screen.read} copy={copy.states} signInHref={signInHref("/rewards")} inviteHref={INVITE_HREF} />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -55,8 +53,7 @@ export default async function RewardsPage() {
   const invite = code ? { code, url: `${siteUrl().replace(/\/+$/, "")}${invitePath(code)}` } : null;
 
   return (
-    <div className="mx-auto max-w-2xl" data-testid="rewards-page">
-      {header}
+    <PageFrame title={copy.title} subtitle={copy.lede} fallback="/settings" width="narrow" testId="rewards-page">
       <RewardsDashboard
         snapshot={screen.snapshot}
         invite={invite}
@@ -69,6 +66,6 @@ export default async function RewardsPage() {
         now={new Date().getTime()}
         phoneLine={t.fixesV2.referral.countsOnPhone}
       />
-    </div>
+    </PageFrame>
   );
 }

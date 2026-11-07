@@ -17,22 +17,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * not theirs or does not exist, too early (with the date it opens), already
  * reviewed, and the form. Loading is `loading.tsx` beside this file.
  */
+/* One frame for every state the screen draws, so the title never moves. */
+function Frame({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <PageFrame title={title} {...(subtitle ? { subtitle } : {})} fallback="/bookings?kind=inspection&from=property" width="narrow">
+      {children}
+    </PageFrame>
+  );
+}
+
 export default async function TenancyReviewPage({ params }: { params: Promise<{ paymentId: string }> }) {
   const { paymentId } = await params;
   const locale = await getLocale();
   const copy = getDictionary(locale).trustVisible.tenancy;
   const target = await readTenancyReviewTarget(paymentId);
 
-  /* One frame for every state the screen draws, so the title never moves. */
-  const Frame = ({ subtitle, children }: { subtitle?: string; children: React.ReactNode }) => (
-    <PageFrame title={copy.title} {...(subtitle ? { subtitle } : {})} fallback="/bookings?kind=inspection&from=property" width="narrow">
-      {children}
-    </PageFrame>
-  );
 
   if (target.state === "signed-out") {
     return (
-      <Frame>
+      <Frame title={copy.title}>
         <EmptyState
           icon="keys-home"
           title={copy.signedOut}
@@ -48,7 +51,7 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
   }
   if (target.state === "missing") {
     return (
-      <Frame>
+      <Frame title={copy.title}>
         <EmptyState
           icon="keys-home"
           title={copy.missingTitle}
@@ -64,7 +67,7 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
   }
   if (target.state === "already") {
     return (
-      <Frame subtitle={target.title}>
+      <Frame title={copy.title} subtitle={target.title}>
         <p role="status" className={TYPE.body}>
           {copy.already}
         </p>
@@ -73,7 +76,7 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
   }
   if (target.state === "not-open") {
     return (
-      <Frame subtitle={target.title}>
+      <Frame title={copy.title} subtitle={target.title}>
         <p role="status" className={TYPE.body}>
           {copy.notOpen} {copy.movedIn.replace("{date}", formatDate(new Date(`${target.moveIn}T12:00:00Z`), locale))}
         </p>
@@ -81,7 +84,7 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
     );
   }
   return (
-    <Frame subtitle={target.title}>
+    <Frame title={copy.title} subtitle={target.title}>
       <p className={TYPE.body}>{copy.lede}</p>
       <TenancyReviewForm paymentId={target.paymentId} copy={copy} success={getDictionary(locale).success} />
     </Frame>

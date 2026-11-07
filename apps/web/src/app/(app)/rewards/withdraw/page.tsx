@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { formatMoney, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { RewardsState } from "@/components/app/referral/RewardsState";
@@ -54,14 +54,12 @@ export default async function RewardsWithdrawPage() {
   const copy = t.experienceRewards;
   const w = copy.withdraw;
   const screen = await rewardsScreen();
-  const header = <PageHeader title={w.title} subtitle={w.lede} fallback="/rewards" />;
 
   if (screen.kind === "state") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame title={w.title} subtitle={w.lede} fallback="/rewards" width="narrow">
         <RewardsState read={screen.read} copy={copy.states} signInHref={signInHref("/rewards/withdraw")} inviteHref={INVITE_HREF} />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -76,8 +74,7 @@ export default async function RewardsWithdrawPage() {
   const paused = pausedProgramme({ state: "ready", snapshot });
 
   return (
-    <div className="mx-auto max-w-2xl space-y-block">
-      {header}
+    <PageFrame title={w.title} subtitle={w.lede} fallback="/rewards" width="narrow">
       {paused ? <RewardsPauseNotice programme={paused} copy={copy.pause} earned={REWARDS_PAUSED_EARNED_LINE} locale={locale} /> : null}
       {gate === "open" ? (
         <div className="grid gap-sm" data-testid="rewards-withdraw-open">
@@ -111,6 +108,6 @@ export default async function RewardsWithdrawPage() {
           data-testid="rewards-withdraw-not-open"
         />
       )}
-    </div>
+    </PageFrame>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { State } from "@/components/ui/State";
 import { loadListingsByIds } from "@/lib/listings/supabase-repository";
 import { createClient } from "@/lib/supabase/server";
@@ -51,7 +51,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="nf-cat-surface mx-auto max-w-5xl">
-      <PageHeader variant="large" title={copy.page.title} />
+      <PageFrame  title={copy.page.title}>
+      <div>
       <p className="nf-body-sm px-gutter text-[var(--nf-content-secondary)]">{copy.page.lede}</p>
 
       {left > 0 && ids.length > 0 ? (
@@ -89,6 +90,8 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
           />
         )}
       </div>
+      </div>
+    </PageFrame>
     </div>
   );
 }

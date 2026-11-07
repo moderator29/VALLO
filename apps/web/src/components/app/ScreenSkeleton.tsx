@@ -67,17 +67,17 @@ export function PageHeaderSkeleton({
   if (layout === "large") {
     return (
       <div
-        className="flex items-start gap-[0.75rem]"
+        className="flex items-start gap-sm"
         style={{ marginBlock: "0.5rem calc(1.25rem + var(--nf-space-lg))" }}
         data-testid="page-header-skeleton-large"
       >
-        {back ? <Skeleton circle width="2.75rem" className="-mt-[0.25rem] shrink-0" /> : null}
+        {back ? <Skeleton circle width="2.75rem" className="-mt-2xs shrink-0" /> : null}
         <div className="min-w-0 flex-1">
           <div className="flex h-[2.25rem] items-center">
             <Skeleton width="55%" height="1.875rem" radius="sm" />
           </div>
           {subtitle ? (
-            <div className="mt-[0.25rem] flex h-[1.375rem] items-center">
+            <div className="mt-2xs flex h-[1.375rem] items-center">
               <Skeleton width="75%" height="0.9375rem" radius="sm" />
             </div>
           ) : null}
