@@ -528,6 +528,16 @@
     inline-size: 100%;
   }
 
+  /* A conversation with the support team (R70): the assistant's tile, and a
+     brand dot while a reply waits. */
+  .nf-inbox-support__dot {
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    margin-block-start: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+  }
+
   /* The search, marked where each row matched. */
   .nf-inbox-hit {
     border-radius: var(--nf-radius-xs);

@@ -11,7 +11,10 @@ import { PageScene } from "@/components/app/PageScene";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { withNext } from "@/lib/auth/next-link";
-import { Inbox, InboxEmpty, type InboxRow } from "./Inbox";
+import { Inbox, InboxEmpty, type InboxRow, type SupportInboxRow } from "./Inbox";
+import { loadMyTickets } from "@/lib/support/my-tickets";
+import { lagosWhenLabel } from "@/lib/messages/time";
+import { previewLine } from "@/components/app/messages/preview";
 import { markerIds } from "@/lib/calls/thread-calls";
 import { inboxMissedCall, parseCallMarker } from "@/lib/calls/screen";
 
@@ -53,12 +56,15 @@ export default async function InboxPage() {
   if (session.state === "signed-in") {
     /* The switch, the threads and the side are asked for together; the
        threads are only drawn when the switch is on (Track M performance). */
-    const [messagingOn, conversations, side, assistantOn] = await Promise.all([
+    const [messagingOn, conversations, side, assistantOn, tickets] = await Promise.all([
       isFeatureEnabled("messaging"),
       loadConversationSummaries(session.supabase, session.user),
       getSide(),
       /* Grade 1 (P1.4): the assistant's row is pinned first when it is on. */
       isFeatureEnabled("assistant"),
+      /* Grade 1 (R70): the member's support conversations, as an inner page
+         of Messages. A failed read is simply no Support chip. */
+      loadMyTickets(20),
     ]);
     if (!messagingOn) {
       return (
@@ -115,6 +121,21 @@ export default async function InboxPage() {
       };
     });
 
+    const supportRows: SupportInboxRow[] =
+      tickets.state === "ok"
+        ? tickets.tickets.map((ticket) => {
+            const last = ticket.thread.last;
+            return {
+              id: ticket.id,
+              title: ticket.topic ?? ticket.reference,
+              reference: ticket.reference,
+              preview: last ? previewLine(last.body) : ticket.reference,
+              whenLabel: lagosWhenLabel(last?.createdAt ?? ticket.createdAt),
+              unread: ticket.unread,
+            };
+          })
+        : [];
+
     return (
       <PullToRefresh className="mx-auto max-w-(--container-2xl) lg:max-w-(--container-4xl)">
         <Inbox
@@ -126,6 +147,7 @@ export default async function InboxPage() {
           inboxCopy={words}
           plusCopy={dictionary.inboxPlus}
           assistantOn={assistantOn}
+          supportRows={supportRows}
         />
       </PullToRefresh>
     );

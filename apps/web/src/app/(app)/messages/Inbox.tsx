@@ -582,7 +582,7 @@ export function Inbox({
   /* A reply from the support team waiting to be read rides under the
      assistant at the top of the main view, so it is never missed. */
   const supportWaiting = supportRows.find((r) => r.unread) ?? null;
-  const pinned =
+  const pinnedAssistant =
     assistantOn && plus && view === "recent" && !query.trim() ? (
       <li className="flex items-center gap-3xs">
         <Link href="/assistant" className="nf-inbox-row nf-inbox-pinned min-w-0 flex-1" data-testid="inbox-assistant">
@@ -595,6 +595,13 @@ export function Inbox({
           </span>
         </Link>
       </li>
+    ) : null;
+  const pinned =
+    pinnedAssistant || (supportWaiting && view === "recent" && !query.trim()) ? (
+      <>
+        {pinnedAssistant}
+        {supportWaiting && view === "recent" && !query.trim() ? <SupportRow row={supportWaiting} /> : null}
+      </>
     ) : null;
 
   const pick = (next: View) => {

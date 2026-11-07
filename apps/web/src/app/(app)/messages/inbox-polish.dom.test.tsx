@@ -48,7 +48,16 @@ const entry = `
   ];
   mount(
     <div className="nf-shell" style={{ width: 390 }}>
-      <Inbox rows={rows} meId="00000000-0000-4000-8000-000000000001" canMarkRead archiveOpen inboxCopy={t.experienceInbox.inbox} plusCopy={t.inboxPlus} />
+      <Inbox
+        rows={rows}
+        meId="00000000-0000-4000-8000-000000000001"
+        canMarkRead
+        archiveOpen
+        assistantOn
+        inboxCopy={t.experienceInbox.inbox}
+        plusCopy={t.inboxPlus}
+        supportRows={window.__support || []}
+      />
       <ToastHost />
     </div>,
   );
@@ -117,6 +126,39 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the inbox's polish", () => {
       await expect.poll(() => page.getByTestId("inbox-row").count()).toBe(before);
       const calls = await page.evaluate(() => ((window as unknown as { __calls: unknown[][] }).__calls ?? []).map((c) => c[0]));
       expect(calls).toEqual(expect.arrayContaining(["markThreadRead", "archiveConversation", "unarchiveConversation"]));
+    } finally {
+      await close();
+    }
+  });
+
+  it("holds support conversations as an inner page of Messages, a waiting reply pinned under the assistant", async () => {
+    const support = `window.__support = [
+      { id: "t1", title: "Payments", reference: "VAL-SUP-00042", preview: "We have refunded your deposit.", whenLabel: "09:10", unread: true },
+      { id: "t2", title: "Bookings", reference: "VAL-SUP-00007", preview: "Thanks, all sorted.", whenLabel: "Mon", unread: false },
+    ];`;
+    const { page, close } = await mountInBrowser({ entry, css: CSS, init: support });
+    try {
+      /* All: the assistant first, then the reply waiting from support. */
+      const top = page.locator(".nf-inbox-list > li").nth(1).getByTestId("inbox-support-row");
+      expect(await page.locator(".nf-inbox-list > li").first().getByTestId("inbox-assistant").count()).toBe(1);
+      expect(await top.getAttribute("href")).toBe("/support/messages/t1");
+      expect(await top.textContent()).toContain("New reply from Vallo Support");
+
+      await page.getByTestId("inbox-view-support").click();
+      const rows = page.getByTestId("inbox-support-row");
+      expect(await rows.count()).toBe(2);
+      expect(await rows.nth(1).getAttribute("href")).toBe("/support/messages/t2");
+      expect(await page.getByTestId("inbox-row").count()).toBe(0);
+    } finally {
+      await close();
+    }
+  });
+
+  it("draws no Support chip for a member with no support conversations", async () => {
+    const { page, close } = await mountInBrowser({ entry, css: CSS });
+    try {
+      expect(await page.getByTestId("inbox-view-support").count()).toBe(0);
+      expect(await page.getByTestId("inbox-support-row").count()).toBe(0);
     } finally {
       await close();
     }
