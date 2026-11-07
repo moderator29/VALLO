@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { acceptCall, declineCall } from "@/lib/calls/actions";
 import { callPhase, durationWords, endReasonWords } from "@/lib/calls/lifecycle";
@@ -10,7 +10,7 @@ import { dismissCall, markLocallyOver, mergeSnapshot, setAnsweredWith, setCallNo
 import { placeCall } from "./place-call";
 import { startRing } from "./ring";
 import { useCallPulse, useServerClock } from "./use-call-pulse";
-import { EndedView, IncomingCallView, OutgoingView, RecoveryView, type CallsCopy } from "./views";
+import { EndedView, IncomingCallBanner, IncomingCallView, OutgoingView, RecoveryView, type CallsCopy } from "./views";
 
 /**
  * THE CALL SURFACE: the one full-screen layer that draws whatever call the
@@ -54,6 +54,48 @@ export function CallSurface({ copy }: { copy: CallsCopy }) {
     >
       <CallStage active={active} copy={copy} />
     </Suspense>
+  );
+}
+
+/**
+ * The in-app incoming call banner: shown at the top of the screen before the
+ * full incoming call view. If the call ends (caller hangs up, ring times out),
+ * the banner dismisses itself through the store's snapshot update.
+ */
+export function IncomingBannerLayer({ copy }: { copy: CallsCopy }) {
+  const { active } = useCallStore();
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const lastCallId = useRef<string | null>(null);
+
+  /* Reset dismissed state when a new call arrives. */
+  const callId = active?.snapshot.id ?? null;
+  if (callId !== lastCallId.current) {
+    lastCallId.current = callId;
+    if (callId) setBannerDismissed(false);
+  }
+
+  if (!active) return null;
+  if (bannerDismissed) return null;
+  const phase = callPhase(active.snapshot.state, active.snapshot.role);
+  if (phase !== "incoming" || active.answeredWith) return null;
+  /* The full incoming screen is already showing: no banner needed. */
+  if (active.recovery) return null;
+
+  const s = active.snapshot;
+  return (
+    <IncomingCallBanner
+      name={s.otherName ?? ""}
+      photo={s.otherAvatarUrl ?? null}
+      kind={s.kind}
+      onAccept={() => setBannerDismissed(true)}
+      onDecline={() => {
+        setBannerDismissed(true);
+        markLocallyOver(s.id);
+        dismissCall();
+        void declineCall({ callId: s.id }).catch(() => null);
+      }}
+      onTap={() => setBannerDismissed(true)}
+    />
   );
 }
 

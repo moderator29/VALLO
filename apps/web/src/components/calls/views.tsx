@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type RefCallback } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode, type RefCallback, type MouseEvent as RMouseEvent } from "react";
 import "@/app/css/calls.css";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { initial } from "@/lib/text/initial";
@@ -388,6 +388,60 @@ export type InCallProps = {
   confirm?: ReactNode;
 };
 
+/** Auto-hide controls for video calls. Tap to show, hide after 5 seconds
+ *  of inactivity. Under reduced motion, controls stay visible always. */
+function useAutoHide(enabled: boolean): {
+  hidden: boolean;
+  onInteraction: () => void;
+} {
+  const [hidden, setHidden] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prefersReduced = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    prefersReduced.current = mq.matches;
+    const onChange = (e: MediaQueryListEvent) => {
+      prefersReduced.current = e.matches;
+      if (e.matches) setHidden(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  useEffect(() => {
+    /* Also respect data-motion on the root. */
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const motion = root.dataset.motion;
+    if (motion === "calm" || motion === "off") {
+      prefersReduced.current = true;
+    }
+  }, []);
+
+  const resetTimer = useCallback(() => {
+    if (!enabled || prefersReduced.current) {
+      setHidden(false);
+      return;
+    }
+    setHidden(false);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setHidden(true), 5000);
+  }, [enabled]);
+
+  useEffect(() => {
+    if (enabled && !prefersReduced.current) {
+      timer.current = setTimeout(() => setHidden(true), 5000);
+    }
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [enabled]);
+
+  return { hidden, onInteraction: resetTimer };
+}
+
 export function InCallView({
   copy,
   name,
@@ -417,6 +471,21 @@ export function InCallView({
   confirm,
 }: InCallProps) {
   const statusId = useId();
+  const isVideo = kind === "VIDEO";
+  const { hidden, onInteraction } = useAutoHide(isVideo && remoteVideoOn);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  /* Close the "More" menu on outside click. */
+  useEffect(() => {
+    if (!moreOpen) return;
+    const close = (e: Event) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    };
+    document.addEventListener("pointerdown", close, true);
+    return () => document.removeEventListener("pointerdown", close, true);
+  }, [moreOpen]);
+
   const bannerWords =
     banner === "reconnecting"
       ? { title: copy.inCall.reconnecting, body: copy.inCall.reconnectingBody }
@@ -427,8 +496,23 @@ export function InCallView({
           : banner === "camera_paused"
             ? { title: copy.inCall.cameraPaused, body: "" }
             : null;
+
+  /* Whether we need a "More" button: only when there are overflow items. */
+  const hasMore = isVideo && (canSwitchCamera || true /* placeholder items */);
+
   return (
-    <CallFrame label={`${kind === "VIDEO" ? copy.outgoing.video : copy.outgoing.voice}: ${name}`} media testId="call-in-call">
+    <CallFrame
+      label={`${isVideo ? copy.outgoing.video : copy.outgoing.voice}: ${name}`}
+      media
+      testId="call-in-call"
+      onKeyDown={undefined}
+    >
+      {/* Tap anywhere on the stage to show/hide controls in video calls. */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div
+        style={{ position: "absolute", inset: 0, zIndex: 1 }}
+        onClick={onInteraction}
+      />
       {remoteVideoOn ? (
         <video
           ref={remoteVideoRef}
@@ -442,16 +526,14 @@ export function InCallView({
         <div className="nf-call__placeholder">
           <CallAvatar name={name} photo={photo} />
           <h2 className="nf-call__name">{name}</h2>
-          <p className="nf-call__status">{kind === "VIDEO" ? copy.inCall.cameraIsOff : copy.inCall.voiceCall}</p>
+          <p className="nf-call__status">{isVideo ? copy.inCall.cameraIsOff : copy.inCall.voiceCall}</p>
         </div>
       )}
-      {/* The remote video element stays mounted while their camera is off, so
-          re-enabling it does not need a new attach. */}
       {!remoteVideoOn && remoteVideoRef ? (
         <video ref={remoteVideoRef} hidden autoPlay playsInline muted aria-hidden="true" />
       ) : null}
 
-      <div className="nf-call__bar">
+      <div className="nf-call__bar" {...(hidden ? { "data-hidden": "" } : {})}>
         <p className="nf-call__bar-name">{name}</p>
         <span className="nf-call__clock" aria-label={`${copy.inCall.duration} ${clock}`} id={statusId}>
           <span className="nf-call__live" aria-hidden="true" />
@@ -486,7 +568,7 @@ export function InCallView({
         ) : null}
       </div>
 
-      {kind === "VIDEO" ? (
+      {isVideo ? (
         <SelfView
           copy={copy}
           videoRef={localVideoRef}
@@ -495,14 +577,19 @@ export function InCallView({
         />
       ) : null}
 
-      <div className="nf-call__controls" role="toolbar" aria-label={name}>
+      <div
+        className="nf-call__controls"
+        role="toolbar"
+        aria-label={name}
+        {...(hidden ? { "data-hidden": "" } : {})}
+      >
         <CallControl
           icon={micOn ? "mic" : "mic-off"}
           label={micOn ? copy.inCall.mute : copy.inCall.unmute}
           caption={micOn ? copy.inCall.mute.split(" ")[0]! : copy.inCall.unmute.split(" ")[0]!}
           variant="media"
           pressed={!micOn}
-          onClick={onToggleMic}
+          onClick={() => { onInteraction(); onToggleMic(); }}
           testId="call-mic"
         />
         {canCamera ? (
@@ -512,19 +599,8 @@ export function InCallView({
             caption={copy.inCall.cameraIsOff.split(" ")[0]!}
             variant="media"
             pressed={!cameraOn}
-            onClick={onToggleCamera}
+            onClick={() => { onInteraction(); onToggleCamera(); }}
             testId="call-camera"
-          />
-        ) : null}
-        {canCamera && canSwitchCamera && cameraOn ? (
-          <CallControl
-            icon="switch-camera"
-            label={copy.inCall.switchCamera}
-            caption={copy.inCall.switchCamera.split(" ")[0]!}
-            variant="media"
-            filled={false}
-            onClick={onSwitchCamera}
-            testId="call-switch"
           />
         ) : null}
         {canChooseOutput ? (
@@ -534,17 +610,59 @@ export function InCallView({
             caption={speakerOn ? copy.inCall.speakerOn : copy.inCall.speakerOff}
             variant="media"
             pressed={speakerOn}
-            onClick={onNextOutput}
+            onClick={() => { onInteraction(); onNextOutput(); }}
             testId="call-output"
           />
+        ) : null}
+        {hasMore ? (
+          <span className="nf-call-ctl" style={{ position: "relative" }} ref={moreRef}>
+            <button
+              type="button"
+              className="nf-call-btn nf-call-btn--media"
+              aria-label="More"
+              aria-expanded={moreOpen}
+              onClick={() => { onInteraction(); setMoreOpen((v) => !v); }}
+              data-testid="call-more"
+            >
+              <UiIcon name="more" size={24} />
+            </button>
+            <span aria-hidden="true">More</span>
+            {moreOpen ? (
+              <div className="nf-call__more-menu" role="menu">
+                {canSwitchCamera && cameraOn ? (
+                  <button
+                    type="button"
+                    className="nf-call__more-item"
+                    role="menuitem"
+                    onClick={() => { onSwitchCamera(); setMoreOpen(false); }}
+                    data-testid="call-switch"
+                  >
+                    <UiIcon name="switch-camera" size={20} />
+                    {copy.inCall.switchCamera}
+                  </button>
+                ) : null}
+                <button type="button" className="nf-call__more-item" role="menuitem" disabled>
+                  <UiIcon name="share" size={20} />
+                  Share screen
+                  <span>Coming soon</span>
+                </button>
+                <button type="button" className="nf-call__more-item" role="menuitem" disabled>
+                  <UiIcon name="users" size={20} />
+                  Add to group
+                  <span>Coming soon</span>
+                </button>
+              </div>
+            ) : null}
+          </span>
         ) : null}
         <CallControl
           icon="phone"
           label={copy.inCall.end}
           caption={copy.inCall.end.split(" ")[0]!}
           variant="end"
+          large
           disabled={ending}
-          onClick={onEnd}
+          onClick={() => { onInteraction(); onEnd(); }}
           testId="call-end"
         />
       </div>
@@ -761,6 +879,73 @@ export function RecoveryView({
         </Button>
       </div>
     </CallFrame>
+  );
+}
+
+/* ------------------------------------------- in-app incoming call banner */
+
+export function IncomingCallBanner({
+  name,
+  photo,
+  kind,
+  onAccept,
+  onDecline,
+  onTap,
+}: {
+  name: string;
+  photo?: string | null;
+  kind: CallKind;
+  onAccept: () => void;
+  onDecline: () => void;
+  /** Tapping the banner body (not a button) opens the full incoming screen. */
+  onTap: () => void;
+}) {
+  const [broken, setBroken] = useState(false);
+  return (
+    /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+    <div
+      className="nf-call-incoming-banner"
+      data-testid="call-incoming-banner"
+      onClick={(e: RMouseEvent) => {
+        /* Do not open the full screen if a button was tapped. */
+        if ((e.target as HTMLElement).closest("button")) return;
+        onTap();
+      }}
+    >
+      {photo && !broken ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="nf-call-incoming-banner__photo" src={photo} alt="" onError={() => setBroken(true)} />
+      ) : (
+        <span className="nf-call-incoming-banner__initial" aria-hidden="true">{initial(name)}</span>
+      )}
+      <div className="nf-call-incoming-banner__text">
+        <span className="nf-call-incoming-banner__name">{name}</span>
+        <span className="nf-call-incoming-banner__type">
+          <UiIcon name={kind === "VIDEO" ? "video" : "phone"} size={14} filled />
+          {kind === "VIDEO" ? "Incoming video call" : "Incoming voice call"}
+        </span>
+      </div>
+      <div className="nf-call-incoming-banner__actions">
+        <button
+          type="button"
+          className="nf-call-incoming-banner__btn nf-call-incoming-banner__btn--decline"
+          aria-label="Decline"
+          onClick={onDecline}
+          data-testid="banner-decline"
+        >
+          <UiIcon name="phone" size={18} filled />
+        </button>
+        <button
+          type="button"
+          className="nf-call-incoming-banner__btn nf-call-incoming-banner__btn--accept"
+          aria-label="Accept"
+          onClick={onAccept}
+          data-testid="banner-accept"
+        >
+          <UiIcon name="phone" size={18} filled />
+        </button>
+      </div>
+    </div>
   );
 }
 

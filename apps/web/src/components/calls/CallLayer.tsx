@@ -7,7 +7,7 @@ import { callPhase, isTerminal } from "@/lib/calls/lifecycle";
 import { callIdFromParam } from "@/lib/calls/screen";
 import { incomingChannelHealthy, useIncomingCalls, type CallNudge } from "@/lib/calls/useCallRealtime";
 import { callState, mergeSnapshot, showCall, showGone } from "./call-store";
-import { CallSurface } from "./CallSurface";
+import { CallSurface, IncomingBannerLayer } from "./CallSurface";
 import type { CallsCopy } from "./views";
 
 /**
@@ -38,6 +38,7 @@ export function CallLayer({ userId, copy }: { userId: string; copy: CallsCopy })
       <Suspense fallback={null}>
         <DeepLinkWatcher />
       </Suspense>
+      <IncomingBannerLayer copy={copy} />
       <CallSurface copy={copy} />
     </>
   );

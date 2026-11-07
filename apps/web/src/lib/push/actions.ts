@@ -43,7 +43,7 @@ import type { NotificationKind } from "./preferences";
 
 export type PushAction = {
   /** A stable id the service worker and the shell route on. */
-  id: "reply" | "answer" | "open-booking";
+  id: "reply" | "answer" | "open-booking" | "message" | "call-back";
   title: string;
   /** A path on our own origin. */
   href: string;
