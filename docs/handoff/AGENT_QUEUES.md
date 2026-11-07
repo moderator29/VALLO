@@ -81,7 +81,13 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    distinct from Messages); **keyboard actions** on every form (`enterKeyHint`
    Next and Done, `inputMode`, `autoComplete`, Enter moves to the next
    field), done in the shared input components first.
-8. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
+8. **Round 1 follow-ups** (from the round 1 hand-off): success words for
+   unblock, payment method remove and default, and hours saved; `ToastHost`
+   inside `lib/testing/browser-root` `mount()`; Book and Pay disabled while
+   the page on screen is a kept copy (with the KeptPriceNote reason);
+   `DiscoveryEmpty` onto the one glyph; the inline errors left in HostWizard
+   and the stays steps move with round 2's StepFrame work.
+9. **Round 3, then 5, 6, 7** from WORK_QUEUE.md, in order. Round 7 SW11
    includes the English words the messages agent added (voice, reactions,
    Talk to a person) moving into `packages/i18n`.
 
