@@ -1108,6 +1108,11 @@
   .nf-pcf__row .nf-act-pill {
     color: var(--nf-content-primary);
   }
+  /* Share rides in the card's menu here (the sheet offers it), so the counts
+     and View property share one line at 360 without touching. */
+  .nf-pcf__row .nf-post__act--share {
+    display: none;
+  }
   .nf-pcf__view {
     flex: none;
     gap: var(--nf-space-2xs);
