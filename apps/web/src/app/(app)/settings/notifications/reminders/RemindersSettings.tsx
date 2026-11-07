@@ -81,8 +81,8 @@ export function RemindersSettings({
   return (
     <div className="flex flex-col gap-xl" data-testid="reminders-settings">
       {!live && (
-        <p className="nf-sgroup__note" data-testid="reminders-not-live">
-          {copy.notLive}
+        <p className="nf-sgroup__note" data-testid="reminders-off-account">
+          {copy.idle}
         </p>
       )}
       <SettingsGroup label={copy.groups.near}>{NEAR.map((t) => row(t))}</SettingsGroup>

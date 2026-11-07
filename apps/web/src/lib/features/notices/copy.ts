@@ -7,7 +7,7 @@ import type { NoticeTopic } from "./model";
 export const REMINDERS_COPY = {
   title: "Reminders",
   subtitle: "Places near you, people you follow, and gentle nudges",
-  notLive:
+  idle:
     "None of these reminders are running on your account, so there is nothing to switch off here.",
   saved: "Saved",
   groups: {
