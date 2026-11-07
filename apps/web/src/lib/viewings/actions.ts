@@ -1,5 +1,6 @@
 "use server";
 
+import { memberWriteLimit } from "../security/member-write-limit";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { formatDate, getDictionary } from "@vallo/i18n";
@@ -65,6 +66,9 @@ async function bookViewingSlotWork(
      phone_confirmation flag is on. Booking a slot used to skip this gate. */
   const phoneGate = await phoneGateFor(session.supabase, session.user.id, "inspection");
   if (phoneGate) return phoneGate;
+  /* B-03: a ceiling on viewing bookings. */
+  const tooMany = await memberWriteLimit("viewing_booking", session.user.id);
+  if (tooMany) return tooMany;
   const mode = parsed.data.mode ?? "in_person";
   if (mode === "video" && !(await videoCallsOn())) return fail(getDictionary(locale).visit.problems.videoOff);
 

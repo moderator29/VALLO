@@ -23,6 +23,7 @@
  * therefore never turn a saved booking into an error the guest sees.
  */
 
+import { memberWriteLimit } from "../security/member-write-limit";
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { stayTitle } from "./stay-title";
@@ -142,6 +143,9 @@ export async function reserve(
      flag on. Asked before anything is read or held. */
   const phoneGate = await phoneGateFor(session.supabase, session.user.id, "booking");
   if (phoneGate) return phoneGate;
+  /* B-03: a ceiling on holds, so one account cannot hold every night. */
+  const tooMany = await memberWriteLimit("booking_hold", session.user.id);
+  if (tooMany) return tooMany;
 
   // ------------------------------------------------- resolve the listing
   // A bookable listing lives in public.listings and carries its own price

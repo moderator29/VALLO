@@ -1,5 +1,6 @@
 "use server";
 
+import { memberWriteLimit } from "../security/member-write-limit";
 import { farEnoughAhead, lagosWallClockToIso } from "./when";
 import { oncePerTap, tapKey } from "../offline/replay-guard";
 import { revalidatePath } from "next/cache";
@@ -139,6 +140,10 @@ async function requestInspectionWork(
      phone_confirmation flag is on. Null, and nothing read, when it is off. */
   const phoneGate = await phoneGateFor(session.supabase, session.user.id, "inspection");
   if (phoneGate) return phoneGate;
+
+  /* B-03: a ceiling on requests, so one account cannot flood listers. */
+  const tooMany = await memberWriteLimit("inspection_request", session.user.id);
+  if (tooMany) return tooMany;
 
   const modeRefusal = await visitModeRefusal(parsed.data.mode);
   if (modeRefusal) return fail(modeRefusal, { mode: modeRefusal });
