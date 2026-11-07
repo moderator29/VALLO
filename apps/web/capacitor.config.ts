@@ -227,7 +227,12 @@ const config: CapacitorConfig = {
        * screen is the same: the app's first frame, not a poster. The glass
        * tile stays what it is, the app icon.
        */
-      androidSplashResourceName: "splash_blank",
+      /* 7 NOVEMBER 2026, THE FOUNDER'S RULING (replacing D68c and the note
+         above): Android shows the exact mark, still, on the launch navy, and
+         the launch overlay (`LaunchMark.java`) takes over from it. Below
+         Android 12 this is the plugin's image: `splash_launch`, the mark at
+         the centre. iOS draws the mark itself (`ValloShell.swift`). */
+      androidSplashResourceName: "splash_launch",
       showSpinner: false,
     },
     StatusBar: {
