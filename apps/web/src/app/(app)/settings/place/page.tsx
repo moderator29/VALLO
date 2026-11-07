@@ -45,7 +45,7 @@ export default async function PlacePage() {
     return (
       <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow">
         <EmptyState
-          icon="location"
+          icon="globe-pin"
           title={copy.accountTitle}
           body={session.state === "unconfigured" ? copy.accountBodyUnconfigured : copy.accountBodySignedOut}
           {...(session.state === "signed-out"

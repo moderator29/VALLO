@@ -4,7 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { ButtonLink } from "@/components/ui/Button";
 import { Section, Stack } from "@/components/app/Screen";
 import { DiscoveryEmpty } from "@/components/app/search/DiscoveryEmpty";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { listStates } from "@/lib/places/queries";
 import { shareById } from "@/lib/price-check/queries";
 import { AreaShareCard } from "@/components/share/AreaShareCard";
@@ -119,8 +119,7 @@ export default async function AreaSharePage({ params }: Params) {
      * thing that always works: run a check of your own.
      */
     return (
-      <>
-        <PageHeader title={t.priceCheck.title} fallback="/price" />
+      <PageFrame title={t.priceCheck.title} fallback="/price" width="narrow">
         {/* Stage 5: the object settles, the reason is the true one, and the
             one way onward is a check of their own. */}
         <DiscoveryEmpty
@@ -130,7 +129,7 @@ export default async function AreaSharePage({ params }: Params) {
           primary={{ href: "/price", label: copy.checkYours }}
           data-testid="nf-pc-share-missing"
         />
-      </>
+      </PageFrame>
     );
   }
 
@@ -140,8 +139,7 @@ export default async function AreaSharePage({ params }: Params) {
   const madeOn = shareMonth(share.createdAt, locale);
 
   return (
-    <>
-      <PageHeader title={t.priceCheck.title} subtitle={copy.pageLead} fallback="/price" />
+    <PageFrame title={t.priceCheck.title} subtitle={copy.pageLead} fallback="/price" width="narrow">
       <Stack>
         <Section>
           {/* THE SHARE CARD FRAME (spec section 10), the same card the unfurl
@@ -184,6 +182,6 @@ export default async function AreaSharePage({ params }: Params) {
           </div>
         </Section>
       </Stack>
-    </>
+    </PageFrame>
   );
 }

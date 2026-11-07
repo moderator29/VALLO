@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { TYPE } from "@/components/app/Screen";
 import { State } from "@/components/ui/State";
 import { ButtonLink } from "@/components/ui/Button";
@@ -42,16 +42,17 @@ export default async function RecordLookupPage({ params }: { params: Promise<{ c
      kit's search glyph, never the shield with a tick, which reads as a Record
      that checked out (Round 3 sweep, C3). */
   const missing = (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.lookupTitle} fallback="/search" />
+    <PageFrame title={copy.lookupTitle} fallback="/search" width="narrow">
+      <div>
       <State kind="empty" art={false} title={copy.lookupMissingTitle} body={copy.lookupMissingBody} action={back} />
-    </div>
+      </div>
+    </PageFrame>
   );
   if (lookup.state === "missing") return missing;
   if (lookup.state === "limited" || lookup.state === "failed") {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={copy.lookupTitle} fallback="/search" />
+      <PageFrame title={copy.lookupTitle} fallback="/search" width="narrow">
+        <div>
         {/* The same designed empty state as a code that matches nobody, so a
             refusal is a screen with a way on rather than a bare line of text
             under the header (restyle only: the words are unchanged). */}
@@ -65,7 +66,8 @@ export default async function RecordLookupPage({ params }: { params: Promise<{ c
             <State kind="offline" title={copy.lookupTitle} body={copy.lookupLimited} action={back} />
           </div>
         )}
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
@@ -78,10 +80,11 @@ export default async function RecordLookupPage({ params }: { params: Promise<{ c
      that looks empty. */
   const onlySince = recordLines(record, copy, locale).every((line) => line.key === "since");
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={title} subtitle={copy.code.replace("{code}", record.recordCode ?? "")} fallback="/search" />
+    <PageFrame title={title} subtitle={copy.code.replace("{code}", record.recordCode ?? "")} fallback="/search" width="narrow">
+      <div>
       <ValloRecord record={record} t={t} locale={locale} />
       {onlySince && <p className={`${TYPE.body} mt-block`}>{copy.lookupEmpty}</p>}
-    </div>
+      </div>
+    </PageFrame>
   );
 }

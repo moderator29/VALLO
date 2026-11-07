@@ -51,7 +51,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="nf-cat-surface mx-auto max-w-5xl">
-      <PageFrame  title={copy.page.title}>
+      <PageFrame title={copy.page.title}>
       <div>
       <p className="nf-body-sm px-gutter text-[var(--nf-content-secondary)]">{copy.page.lede}</p>
 

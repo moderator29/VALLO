@@ -181,6 +181,17 @@ const config: CapacitorConfig = {
      * NEEDS A NATIVE REBUILD to take effect; `cap sync` copies it.
      */
     limitsNavigationsToAppBoundDomains: true,
+    /*
+     * LINK PREVIEW OFF (build 1.0.2, Agent NATIVE job 2). A long press on any
+     * link in WKWebView opened Safari's preview card of the URL, the clearest
+     * "this is a website" tell there is. A long press in Vallo belongs to the
+     * page (a card's menu, a message's reactions). Capacitor reads this key
+     * into `WKWebView.allowsLinkPreview` (CAPInstanceDescriptor.swift).
+     * `platform.css` also turns the long-press callout off on links and
+     * images, which reaches the app at once, before this build.
+     * NEEDS A NATIVE REBUILD; `cap sync` copies it.
+     */
+    allowsLinkPreview: false,
   },
 
   plugins: {

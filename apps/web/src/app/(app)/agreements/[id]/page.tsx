@@ -17,7 +17,7 @@ import { AgreementHistory, eventLabel } from "@/components/app/agreements/Agreem
 import { readAgreementRecord } from "@/components/app/agreements/record-read";
 import { previousVersionDiff, versionRegister, type RecordEvent } from "@/components/app/agreements/version-register";
 import { termDay, termValue } from "@/components/app/agreements/term-words";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { Tracker } from "@/components/ui/Tracker";
 import { DecisionCard } from "@/components/app/confirm/DecisionCard";
 import { ButtonLink } from "@/components/ui/Button";
@@ -250,7 +250,8 @@ export default async function AgreementPage({
         }
         haptic={moment ? undefined : false}
       />
-      <PageHeader title={pw.title} />
+      <PageFrame title={pw.title}>
+      <div>
       {/* WHERE IT STANDS, as the one tracker (ONE-PRODUCT-DECISIONS,
           recommendation 1; status-tracking-timeline.jpg): the status in
           words, when it got there, what happens next and the reader's part,
@@ -545,6 +546,8 @@ export default async function AgreementPage({
       </Section>
 
       <p className={`${TYPE.rowMeta} mt-block`}>{OFF_PLATFORM_SENTENCE}</p>
+      </div>
+    </PageFrame>
     </main>
   );
 }

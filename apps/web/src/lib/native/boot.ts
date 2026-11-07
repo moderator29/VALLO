@@ -2,6 +2,7 @@
 
 import { looksNative } from "./platform";
 import { bootMark } from "./boot-trace";
+import type { NativeCrash } from "./shell-plugin";
 
 /**
  * The one entry point into everything native.
@@ -92,6 +93,39 @@ function hideSplashViaBridge(): void {
     }
   } catch {
     /* Nothing left to try. */
+  }
+}
+
+/** A shell crash read but not yet delivered (no signal at launch) waits here for the next launch. */
+const PENDING_CRASH_KEY = "nf_native_crash";
+
+async function forwardNativeCrash(
+  shell: { takeCrashReport(): Promise<{ report: NativeCrash | null }> },
+  platform: "ios" | "android",
+): Promise<void> {
+  try {
+    const { sendNativeCrash } = await import("./native-crash");
+    let pending: NativeCrash | null = null;
+    try {
+      const kept = localStorage.getItem(PENDING_CRASH_KEY);
+      pending = kept ? (JSON.parse(kept) as NativeCrash) : null;
+    } catch {
+      pending = null;
+    }
+    if (!pending) {
+      const { report } = await shell.takeCrashReport();
+      pending = report;
+    }
+    if (!pending) return;
+    const delivered = await sendNativeCrash(pending, platform);
+    try {
+      if (delivered) localStorage.removeItem(PENDING_CRASH_KEY);
+      else localStorage.setItem(PENDING_CRASH_KEY, JSON.stringify(pending));
+    } catch {
+      /* Storage refused: this report is lost, which is all that can happen. */
+    }
+  } catch {
+    /* An older binary, or nothing to report. */
   }
 }
 

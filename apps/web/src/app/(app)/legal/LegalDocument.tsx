@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
@@ -13,7 +13,7 @@ import "@/app/css/system.css";
  * whole point. Tapping Privacy in the side navigation used to hand a
  * signed-in person to `(site)/privacy`: a different shell, a different
  * header, and no way back into the product except the browser's own back
- * button. So the document comes to them. `PageHeader` carries the platform
+ * button. So the document comes to them. `PageFrame` (over `PageHeader`) carries the platform
  * back flow already, so a person reading the refund rules from a checkout
  * screen lands back on that checkout screen.
  *
@@ -57,10 +57,9 @@ export function LegalDocument({
   also?: { href: string; label: string };
 }) {
   return (
-    <div className="mx-auto w-full max-w-3xl pb-3xl pt-md">
-      <PageHeader title={title} subtitle={intro} fallback="/settings" />
-
-      <DocumentSheet kind="document" printable aria-label={title} className="nf-legal mt-lg">
+    <PageFrame title={title} subtitle={intro} fallback="/settings">
+      <div className="pb-3xl">
+      <DocumentSheet kind="document" printable aria-label={title} className="nf-legal">
         <p className="nf-legal__meta">
           <span>Last updated</span>
           <time>{updated}</time>
@@ -115,7 +114,8 @@ export function LegalDocument({
         <Link href={SUPPORT_HREF}>{SUPPORT_LABEL}</Link>{" "}
         with any question.
       </p>
-    </div>
+      </div>
+    </PageFrame>
   );
 }
 

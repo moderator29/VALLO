@@ -301,6 +301,7 @@
    */
   .nf-story-ring {
     --nf-ring-lit: var(--nf-state-info);
+    --nf-ring-lit-mid: var(--nf-brand-primary);
     --nf-ring-lit-end: var(--nf-brand-primary);
     --nf-ring-seen: color-mix(in oklab, var(--nf-content-muted) 55%, transparent);
   }

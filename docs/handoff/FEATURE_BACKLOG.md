@@ -26,7 +26,7 @@ States: QUEUED, BUILDING, BUILT (not on a device), LIVE (after "push to main").
 
 | # | What | Owner | State |
 |---|---|---|---|
-| B1 | Circle spec v2 in `VALLO_CIRCLE.md`: the problems it solves (finding a flatmate, trusting a landlord, planning a stay with friends, choosing where to eat), the tools, the flows with the feed, a side nav entry, notifications, privacy | FEATURES | QUEUED |
+| B1 | Circle spec v2 in `VALLO_CIRCLE.md`: the problems it solves (finding a flatmate, trusting a landlord, planning a stay with friends, choosing where to eat), the tools, the flows with the feed, a side nav entry, notifications, privacy | FEATURES | WRITTEN (v2, 7 Nov), waiting for the founder (Q1 to Q6 in section 13) |
 | B2 | Build it end to end after the founder reads v2: tables and RLS (SQL for the founder), the Circle lens in the feed, the Circle page in the side nav, invites, shared shortlists, plans, vouches | FEATURES | QUEUED |
 
 ## C. Ratings, like the App Store (founder)

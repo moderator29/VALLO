@@ -47,10 +47,10 @@ export const CHROME_COLOUR = "#010118";
 /**
  * The browser chrome over the LIGHT theme (reintroduced 25 September 2026).
  * Since the clean, unified sweep (29 September 2026, plan item 1) the light
- * canvas is warm paper, `--nf-surface-canvas` #F4F4F1, not white, so the bar
+ * canvas is cool paper (7 November 2026, was warm #F4F4F1), `--nf-surface-canvas` #F5F6F8, not white, so the bar
  * is that same paper and the page runs up into it without a seam. Written by
  * the before-paint script and the theme control, never by the server, which
  * cannot know a "system" choice. It is a literal for the reason above: none
  * of its consumers can read a token.
  */
-export const CHROME_COLOUR_LIGHT = "#F4F4F1";
+export const CHROME_COLOUR_LIGHT = "#F5F6F8";

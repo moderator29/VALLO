@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { readMyAgreements } from "@/lib/agreements/queries";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, Section, TYPE } from "@/components/app/Screen";
 import { NO_CUSTODY_SENTENCE, PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
 import { RegisterRow } from "@/components/app/agreements/RegisterRow";
@@ -43,7 +43,8 @@ export default async function AgreementsPage({
   const copy = t.experienceMoney.agreements;
   return (
     <main className="nf-page nf-md">
-      <PageHeader variant="large" title={t.nav.agreements} />
+      <PageFrame title={t.nav.agreements}>
+      <div>
       <p className={`${TYPE.body} mt-inline`}>{PAYMENT_GATE_SENTENCE}</p>
       <p className={`${TYPE.rowMeta} mt-inline mb-block`}>{NO_CUSTODY_SENTENCE}</p>
       <Section title={copy.listTitle}>
@@ -65,6 +66,8 @@ export default async function AgreementsPage({
           </ul>
         )}
       </Section>
+      </div>
+    </PageFrame>
     </main>
   );
 }

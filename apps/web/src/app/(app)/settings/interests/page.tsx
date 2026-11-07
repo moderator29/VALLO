@@ -35,7 +35,7 @@ export default async function InterestsSettingsPage() {
     return (
       <PageFrame title={t.interests.screenTitle} fallback="/settings" width="narrow">
         <EmptyState
-          icon="user"
+          icon="user-verified"
           title={t.interests.accountTitle}
           body={state.state === "unconfigured" ? t.interests.accountBodyUnconfigured : t.interests.accountBodySignedOut}
           {...(state.state === "signed-out"

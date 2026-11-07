@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { formatMoney } from "@vallo/i18n/core";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { FundScreen } from "@/components/money/fund/FundScreen";
 import { readFundPayment } from "@/lib/money/fund-view";
@@ -39,20 +39,22 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
 
   if (read.state === "signed-out") {
     return (
-      <div className="mx-auto max-w-xl px-md">
-        <PageHeader title="Pay into escrow" fallback="/agreements" />
+      <PageFrame title="Pay into escrow" fallback="/agreements" width="narrow">
+        <div className="px-md">
         <ButtonLink href={withNext("/sign-in", `/agreements/${id}/fund`)} variant="primary" full>
           Sign in to pay
         </ButtonLink>
-      </div>
+        </div>
+      </PageFrame>
     );
   }
   if (read.state === "unavailable") {
     return (
-      <div className="mx-auto max-w-xl px-md">
-        <PageHeader title="Pay into escrow" fallback={`/agreements/${id}`} />
+      <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
+        <div className="px-md">
         <p className="nf-body">This could not be read just now. Nothing has been taken; refresh to try again.</p>
-      </div>
+        </div>
+      </PageFrame>
     );
   }
   if (read.state !== "ready") return notFound();
@@ -61,8 +63,8 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
   if (model.kind === "go_held") redirect(`/agreements/${id}/held`);
 
   return (
-    <div className="mx-auto max-w-xl px-md pb-2xl">
-      <PageHeader title="Pay into escrow" fallback={`/agreements/${id}`} />
+    <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
+      <div className="px-md pb-2xl">
       <FundScreen
         facts={read.facts}
         model={model}
@@ -71,6 +73,7 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
         control={<FundControl agreementId={id} amountLabel={formatMoney(read.facts.amountMinor, locale, "NGN")} />}
         fallback={cardAllowed ? <SwitchToCard agreementId={id} /> : undefined}
       />
-    </div>
+      </div>
+    </PageFrame>
   );
 }

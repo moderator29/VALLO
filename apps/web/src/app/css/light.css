@@ -389,6 +389,44 @@
     background: none;
     box-shadow: none;
   }
+
+  /* ------------------------------------------------------------------
+   * THE FIELD ON PAPER (light mode pass, 7 November 2026). The base field
+   * (`controls.css`) is the night's sunken well: an inset fill, an inner
+   * shadow and a gradient rim, which on paper read as a grey box pressed
+   * into the page. Here it is a white sheet with the brand edge and a hair
+   * of contact shadow, and focus deepens the edge to the brand and lays the
+   * soft halo outside it (the text-field ring in `base.css` still draws on
+   * top for keyboard focus). The auth fields take the same edge. Search
+   * fields keep their resting look on focus, as everywhere else.
+   * ---------------------------------------------------------------- */
+  :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-paper-field-edge), var(--nf-paper-field-edge)) border-box;
+    box-shadow: var(--nf-elevation-raised);
+  }
+  @media (hover: hover) {
+    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:focus):not(:disabled):hover:not(:where([data-theme="dark"] *)) {
+      background:
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(var(--nf-paper-field-edge-hover), var(--nf-paper-field-edge-hover)) border-box;
+    }
+  }
+  :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+    box-shadow: 0 0 0 3px var(--nf-paper-field-halo);
+  }
+  :root[data-theme="light"] .nf-field[aria-invalid="true"]:not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
+  }
+  :root[data-theme="light"] .nf-slate:not(:where([data-theme="dark"] *)) {
+    --nf-slate-card-edge: var(--nf-paper-field-edge);
+  }
 }
 
 /* ------------------------------------------------------------------

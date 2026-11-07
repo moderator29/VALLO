@@ -58,6 +58,19 @@
 /* ----------------------------------------------------------------- touch */
 
 /*
+ * NO WEBSITE CALLOUT ON A LONG PRESS. In the shell a long press on a link or
+ * a picture opened the browser's own sheet (Open in Safari, Copy link, Save
+ * image), which is a website's answer. A long press belongs to the page: a
+ * card's menu, a message's reactions. Text stays selectable and copyable.
+ * A surface that wants the system sheet back (a photo someone may save)
+ * opts in with `data-callout="allow"`. The iOS link preview itself goes off
+ * natively in build 1.0.2 (`ios.allowsLinkPreview` in capacitor.config.ts).
+ */
+:root[data-native] :is(a, img):not([data-callout="allow"], [data-callout="allow"] *) {
+  -webkit-touch-callout: none;
+}
+
+/*
  * ANDROID: THE PRESS SCALE STANDS BACK FOR THE RIPPLE. Material answers a
  * press with ink, not a squeeze, and a control that shrank under its own ink
  * would slide out from under it. Rows and big cards stop scaling; buttons and

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { readHeldPayment } from "@/lib/money/held-view";
 import { withNext } from "@/lib/auth/next-link";
@@ -33,8 +33,8 @@ export default async function HeldPaymentPage({
 
   if (read.state === "signed-out") {
     return (
-      <div className="mx-auto max-w-xl px-md">
-        <PageHeader title="Escrow payment" fallback="/agreements" />
+      <PageFrame title="Escrow payment" fallback="/agreements" width="narrow">
+        <div className="px-md">
         <ButtonLink
           href={withNext("/sign-in", `/agreements/${id}/held`)}
           variant="primary"
@@ -42,18 +42,20 @@ export default async function HeldPaymentPage({
         >
           Sign in to see it
         </ButtonLink>
-      </div>
+        </div>
+      </PageFrame>
     );
   }
   if (read.state === "unavailable") {
     return (
-      <div className="mx-auto max-w-xl px-md">
-        <PageHeader title="Escrow payment" fallback={`/agreements/${id}`} />
+      <PageFrame title="Escrow payment" fallback={`/agreements/${id}`} width="narrow">
+        <div className="px-md">
         <p className="nf-body">
           This could not be read just now. Nothing has moved; refresh to try
           again.
         </p>
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
@@ -64,14 +66,15 @@ export default async function HeldPaymentPage({
     redirect(`/agreements/${id}/fund`);
 
   return (
-    <div className="mx-auto max-w-xl px-md pb-2xl">
-      <PageHeader title="Escrow payment" fallback={`/agreements/${id}`} />
+    <PageFrame title="Escrow payment" fallback={`/agreements/${id}`} width="narrow">
+      <div className="px-md pb-2xl">
       <HeldPaymentBody
         facts={f}
         locale={locale}
         agreementId={read.agreementId}
         arrangementId={read.arrangementId}
       />
-    </div>
+      </div>
+    </PageFrame>
   );
 }

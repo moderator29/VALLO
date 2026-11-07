@@ -12,6 +12,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // delegate when it starts (`CapacitorBridge.swift`), which replaces
         // anything set here, and the router hands foreground presentation and
         // taps to the push plugin. See the note at the bottom of this file.
+
+        // Build 1.0.2: a crash of the shell itself is written on the way
+        // down and handed to the page on the next launch (ValloShell.swift).
+        ValloCrashLog.install()
         return true
     }
 
