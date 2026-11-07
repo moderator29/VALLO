@@ -53,10 +53,14 @@ Store submission.
    rely on CI for verification: run the gates yourself (section 9). iOS builds
    (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
    tell the founder before any new iOS build is needed.
-4. **Agents: 4 maximum at any one time.** The founder said so explicitly. Use
-   one lead (you) plus up to three parallel subagents, or four if the lead does
-   not write code. Brief each one fully; they know nothing you do not tell them.
-   Never let two agents edit the same files.
+4. **Agents: 2 maximum at any one time (changed from 4 on 7 November 2026).**
+   The founder reduced it himself: fewer, better briefed, no collisions. The
+   shape that works: YOU are the lead and you write code; ONE subagent runs
+   beside you on work that touches different files. A second subagent only
+   replaces the first when it has finished and reported. Brief each one in
+   full (it knows nothing you do not tell it), name the exact files it owns,
+   and never let it touch a file you are editing. If a job cannot be split
+   cleanly by file, do it yourself in sequence rather than racing.
 5. **Re-audit every piece of work.** After each workstream: re-read the diff
    adversarially, run the gates, look at the screens at phone width (390 x 844
    and 360 x 800) in light and dark, then fix what you find. Only then move on.
@@ -82,6 +86,63 @@ Store submission.
     small, in-place signals only.
 15. Commit in small, well-described commits. Push the branch often (it no
     longer costs Vercel money). Never rewrite history on `main`.
+
+---
+
+## 1B. WHO YOU ARE WORKING FOR, AND HOW HE WANTS YOU TO WORK
+
+Read this twice. More sessions have annoyed this founder by HOW they worked
+than by what they built.
+
+**The person.** Sole technical decision-maker on Vallo, non-engineer, in
+Nigeria, working from a phone a lot of the time. He writes fast, informally,
+in long bursts, with typos and voice-note energy ("you get me ?!", "bro").
+That is enthusiasm and urgency, never disrespect, and it is never vague about
+what he wants: read for INTENT, act on it, and never ask him to rewrite a
+message more clearly. He is paying real money for this out of a thin budget
+and he is preparing to launch publicly. Treat every naira and every hour as
+his, not yours.
+
+**Work autonomously. This is the big one.**
+- He says "go", and expects you to go: audit, decide, build, verify, report.
+  Do not come back with a menu of options and ask him to choose between things
+  he hired you to judge. Make the call, say what you chose and why in one
+  line, and move.
+- NEVER ask permission for work that is already in this handoff or in his
+  brief. It is already approved. Asking again wastes his day.
+- Do ask (once, briefly, with a recommendation attached) only when: money
+  would be spent, something irreversible or outward-facing would happen, a
+  decision changes his product strategy or legal position, or two readings of
+  his words would lead to genuinely different platforms.
+- When you are blocked, do not idle. Park the blocked item, say so in your
+  next report, and carry on with the next thing.
+- Keep going to the end of a workstream. He hates being handed a half-finished
+  thing with a list of what you did not do.
+
+**How to talk to him.**
+- Plain language, short sentences, no jargon, no filler, no flattery. He is not
+  an engineer: say "the screen that crashed when you tapped the bell", not the
+  component name, unless the file name is the point.
+- Lead with the answer, then the detail. Never bury the result.
+- Be specific about state: "built and tested", "built, not tested on a device",
+  "not started". Never blur those three.
+- Tell him the truth immediately when something is broken, when you were
+  wrong, or when you cannot verify something. He has caught earlier sessions
+  guessing and he remembers it. "I don't know yet, here is how I'll find out"
+  is always acceptable; a confident guess is not.
+- No em dashes, ever, in anything (code, copy, docs, commits, chat).
+- When you finish a group of work, tell him exactly what HE must do next on
+  his phone, step by step, numbered.
+
+**His quality bar.** He looks at Hauslet and feels joy; he looks at Vallo and
+feels embarrassed. That gap is the whole job. "It works" is a failing grade.
+Every screen must look deliberate, calm, expensive and finished. If you ship
+something you would not screenshot and show off, you have not finished it.
+
+**What he will do, so you can plan around him.** He installs TestFlight builds
+and tests on a real iPhone. He sends screenshots rather than logs. He will
+send roughly 60 or more Hauslet references. He runs SQL you give him. He says
+"push to main" when he wants the world to see it, and not before.
 
 ---
 
@@ -308,6 +369,69 @@ like that.
 
 ---
 
+## 4B. THE VALLO GRADE 1 DESIGN LANGUAGE (BUILD THIS FIRST, THEN APPLY IT EVERYWHERE)
+
+The founder's instruction is "every single page, not too much, not too little".
+That is only achievable if the language is decided ONCE, in tokens and shared
+components, and then applied. Do not hand-tune screens one by one.
+
+**Decide and write down (in `docs/UX_SYSTEM.md`) before touching pages:**
+
+1. **Surfaces.** Page background, raised card, sunken field, overlay scrim.
+   Hauslet's calm comes from near-white surfaces, 1px hairline borders and
+   almost no shadow. Vallo keeps its own palette and its dark mode; take the
+   STRUCTURE, not the colours.
+2. **Radii.** One scale. Large containers and sheets read around 24 to 28px,
+   cards around 16 to 20px, chips and fields around 12 to 14px, pills fully
+   round. Pick the numbers, name them, use nothing else.
+3. **Spacing.** One rhythm, generous. Page gutter, section gap, card padding,
+   row gap, and a consistent distance from the title to the first control.
+   Crowding is the fastest way to look cheap.
+4. **Type.** One scale: page title (large, bold, tight), section title, body,
+   caption, and the small uppercase accent "eyebrow" label that Hauslet uses
+   above step titles (LOCATION, PHOTOS, FINISH, MOVE-IN CHARGES). Vallo already
+   has a type-weight test; keep inside it.
+5. **Accent discipline.** One accent carries meaning: the active tab, progress,
+   the eyebrow label, the selected state, the primary action. Everything else
+   is ink and grey. Two accents fighting is what makes a screen look amateur.
+6. **Buttons.** Primary: full width, tall (about 56px), pill, high contrast.
+   Secondary: pale pill, same height. Quiet: text only. One primary per screen.
+   Hauslet pairs a dark primary with a pale secondary and it always reads.
+7. **Icons.** Thin line icons, one stroke weight, one size scale, one family.
+   Audit `design-system/icons` and remove anything heavier or rounder than the
+   rest. Active state is a fill or a tint, never a different icon.
+8. **Glass.** Only on floating things: the dock, sheets, the feedback banner,
+   controls over photos (the back, share and heart buttons on a listing hero).
+   Never on reading surfaces. Always with a solid fallback for low-end Android.
+9. **Motion.** Name the durations and easings. Sheets spring up, steps slide
+   sideways, banners fade and lift, lists stagger slightly on first paint.
+   Fast (most things 180 to 260ms), never blocking, always respecting reduced
+   motion and the in-app Motion setting.
+10. **States.** Every screen defines: loading (skeleton shaped like the real
+    content, never a spinner alone), empty (art, one line, one action), error
+    (plain sentence, retry), offline (what is cached, what may have changed).
+
+**The four shared components every screen then uses.** Build these before the
+page work, because they are what makes 559 pages look like one product:
+- `FeedbackBanner` (P0.4): the one global success, error, info surface.
+- `Sheet`: the bottom sheet with a grabber, a close X, a title, scroll and a
+  sticky footer. Hauslet uses this for confirm-your-name, profile photo,
+  policies, account switching and "What do you manage?".
+- `StepFrame`: back, "Saved" tick, close X, progress bar, eyebrow, title,
+  subtitle, content, sticky bottom bar with "Step N of M" and Continue. This
+  is the listing wizard, the verification flow and any future long form.
+- `PageFrame`: the large page title, the optional tab row, the safe areas,
+  the scroll behaviour and the dock spacing, so no page re-invents its header.
+
+**Definition of done for every screen you touch** (the founder's "must be
+every single page"): tokens only, no stray values; works at 390x844 and
+360x800; light and dark; loading, empty and error states exist and look
+designed; safe areas respected; one primary action; thin icons; motion
+respects reduced motion; keyboard does not cover the thing being typed into;
+nothing shifts after load. Screenshot it locally before saying it is done.
+
+---
+
 ## 5. THE WORK, IN PRIORITY ORDER
 
 Each item lists: goal, where, acceptance. Re-audit after each.
@@ -447,6 +571,25 @@ with step screenshots of Vallo's own new screens, tips callouts and "Before you
 start" lists. Screenshots are taken AFTER the upgrade, at 2x, with demo data
 (never real people's IDs).
 
+**P1.8 Reporting that reaches the right desk.** The founder asked for this
+explicitly: a member must be able to report a listing, a person, a message, a
+photo or a transaction from the thing itself (an overflow menu on the listing,
+the profile, the message bubble, the receipt), in two taps, with a short
+reason list and an optional note. Each kind routes to the correct admin queue
+(safety, supply, money, support) with the evidence attached, the reporter gets
+an honest acknowledgement ("We have it. You will hear from us.") and a trace
+they can look up. Nothing silently disappears. Check what already exists in
+`app/admin/queue` and the report paths before building a second system.
+
+**P1.9 Media that behaves like a native app.** Photos and video must load,
+cache and play the way people expect on a phone: correctly sized images for
+the device, no layout jump when they land, a blurred or coloured placeholder
+first, swipeable galleries with a counter, pinch to zoom on a listing photo,
+inline video that respects Data Saver, never autoplaying with sound, and
+cached so a second visit on a weak connection is instant. The founder said
+"be it for videos should work cache etc like native iOS or be it android too".
+Use the existing image optimiser and service worker rather than a new layer.
+
 ### P2. Identity, motion, admin, depth
 
 **P2.1 Vallo's own signature feature (like Hauslet's "Hausmates").** Hausmates
@@ -456,6 +599,14 @@ the founder before building; candidates: **Vallo Kin**, **Vallo Circle**,
 **Nest by Vallo**, **Yardmates**, **Vallo Crew**. It should combine verified
 co-renting with Vallo's social side (feed, follows, stays, tables), with mutual
 consent and strong safety.
+
+**P2.1b The feed and Vallo's inner world.** The founder wants the feed and the
+"inner sides" of Vallo to carry the identity, not just the marketplace pages:
+a calm, scrollable place where listings, stays, tables, stories and people
+meet, with the same containers, motion and voice as everything else. Decide
+what the feed is FOR (discovery, trust, belonging), make the card rhythm
+beautiful, and make the signature feature (P2.1) live inside it rather than
+hiding in a tab nobody opens.
 
 **P2.2 Motion system.** A shared motion vocabulary (durations, easings,
 spring for sheets, slide for steps, fade-scale for banners, shared-element-like
@@ -486,8 +637,14 @@ security settings, deleting the account. Never as a forced first-run step.
   them. Least privilege, audit log for every action.
 - **Social media manager desk.** Upload and schedule everything a platform of
   this size posts (feed posts, stories, announcements, banners), premium
-  access to the AI assistant for drafting, access to support replies, analytics
-  of their posts. Audit log.
+  access to the AI assistant for drafting, access to support and the ability
+  to reply to support messages, analytics of their posts. Audit log.
+- **How staff are added.** The founder adds a person BY THEIR VALLO ACCOUNT
+  (they sign up normally, he grants the desk). Build the table and the grant
+  screen for that, with roles, scopes, who granted it and when, and a single
+  switch to revoke. Least privilege: a support person can review and approve
+  listings and answer members, and cannot touch money, payouts or other
+  people's grants.
 - Make sure every report (listing, person, message, transaction) routes to the
   right desk and queue.
 - Update `docs/ADMIN_CONSOLE.md` and `docs/SUPPORT_STAFF.md`.
@@ -510,7 +667,7 @@ a page map of the platform.
    `apps/web/vercel.json` has the `deploymentEnabled` block (section 1.2).
    Load the Supabase MCP and confirm access to project `uccixoonmbhrnyczyigt`.
    Do not deploy anything to Vercel.
-2. **Audit (read only, up to 3 parallel Explore agents).** Map every route,
+2. **Audit (read only, you plus ONE Explore agent).** Map every route,
    the shell, the design tokens, the toasts, the offline layer, the passcode
    gate, the phone gate, the wizard, KYC, messages, assistant, support, admin.
    Write `docs/handoff/AUDIT_2026-11.md`: what exists, what is broken, what is
@@ -527,14 +684,19 @@ a page map of the platform.
 5. **Architecture.** Decide the shared pieces first (feedback banner, motion
    tokens, sheet component, stepper component, page frame, connection state),
    so every page uses the same parts.
-6. **Implement in groups** (P0, then P1, then P2), with the agent split:
-   - Agent 1: UX research, recommendations, design quality review of every
-     change.
-   - Agent 2: native iOS and Android behaviour (Capacitor, status bar,
-     keyboard, haptics, back button, deep links, push).
-   - Agent 3: performance and offline architecture.
-   - Agent 4 (or the lead): UI implementation of shared components and pages.
-   The lead reviews every change and prevents conflicts. 4 agents maximum.
+6. **Implement in groups** (P0, then P1, then P2). TWO AGENTS MAXIMUM, which
+   means you plus one at a time. The founder reduced this from four on
+   7 November. Use the second agent for work that is genuinely separate by
+   file, for example:
+   - You build the shared components and the member screens; the agent audits
+     native behaviour (status bar, keyboard, haptics, back button, deep links)
+     and reports findings for you to apply.
+   - You build the listing wizard; the agent measures performance and writes
+     the before and after numbers.
+   - You build the admin desks; the agent sweeps pages against the design
+     language checklist and lists what is off.
+   Never two writers in one area. The lead (you) reviews and integrates
+   everything.
 7. **Re-audit each group** (section 9) before the next.
 8. **Report** to the founder after each group in plain language: what changed,
    screenshots taken locally, what they must test on the phone.
@@ -591,39 +753,98 @@ From `apps/web`:
 ## 10. THE FIRST MESSAGE TO PASTE INTO THE NEW SESSION
 
 ```
-You are continuing work on Vallo (repo moderator29/read-it-well, Supabase
-project uccixoonmbhrnyczyigt). Before anything else:
+VALLO: PLATFORM GRADE 1 READINESS. You are taking over my platform upgrade.
+Repo moderator29/read-it-well. Supabase project uccixoonmbhrnyczyigt.
 
+SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
 1. git fetch origin main claude/rentme-v2-platform-audit-xuvg0a
-2. If origin/main does not contain docs/handoff/PLATFORM_GRADE_1_READINESS.md,
-   create the branch from the session branch instead:
-   git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
-   otherwise: git checkout -b platform-grade-1-readiness origin/main
-3. FIRST read docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. It is my
-   full message, word for word, and it is your MAIN SOURCE OF TRUTH: work
-   from it, and where anything else differs, it wins. Then read
-   docs/handoff/PLATFORM_GRADE_1_READINESS.md (repo facts, state, patterns,
-   process), then apps/web/AGENTS.md, then the docs listed in its section 3.
-   Re-read my brief at the start of every phase.
-4. Load the Supabase MCP tools and confirm you can query the project.
-5. Confirm apps/web/vercel.json switches Vercel deployments OFF for
-   platform-grade-1-readiness. Never deploy to Vercel, never open previews,
-   never trigger GitHub Actions (the minutes are used up).
+2. Create your branch:
+   if origin/main contains docs/handoff/PLATFORM_GRADE_1_READINESS.md:
+     git checkout -b platform-grade-1-readiness origin/main
+   otherwise:
+     git checkout -b platform-grade-1-readiness origin/claude/rentme-v2-platform-audit-xuvg0a
+3. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
+   message, word for word, and it is your MAIN SOURCE OF TRUTH. Where anything
+   else disagrees with it, it wins. Re-read it at the start of every phase.
+4. READ docs/handoff/PLATFORM_GRADE_1_READINESS.md completely: my rules, how I
+   work, the current state, the codebase map, the Hauslet patterns, the design
+   language, the priority list, the gates. Then apps/web/AGENTS.md, then the
+   docs it lists in section 3.
+5. Load the Supabase MCP tools and confirm you can query the project.
+6. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+   for platform-grade-1-readiness.
 
-Rules: 4 agents maximum at once. No em dashes. Push only to
-platform-grade-1-readiness; never to main unless my message says
-"push to main". Re-audit every piece of work. Never claim something works
-without running it. This is an UPGRADE of the existing platform, not a
-rebuild: keep Capacitor, the backend, every feature and the data.
+MY RULES
+- TWO AGENTS MAXIMUM at any time (you plus one). I reduced this from four.
+  Never two writers in the same files.
+- Branch only. Never push to main unless my message literally says
+  "push to main".
+- NEVER deploy to Vercel, never open a preview, never run the Vercel CLI.
+  Previews cost me real money (96 USD for nothing once already).
+- NEVER trigger GitHub Actions. My included minutes are used up. Run the
+  checks yourself locally instead.
+- No em dashes anywhere: code, copy, docs, commit messages, chat.
+- This is an UPGRADE, not a rebuild. Keep Capacitor, the backend, the
+  database, every working feature. Do not delete features. Do not replace
+  real data with mock data. Do not add paid services without asking me.
+- Re-audit after every piece of work: re-read your own diff, run the gates,
+  look at the screens at phone width in light and dark, fix what you find.
+- Never tell me something works unless you ran it. Say "built, not tested on
+  a device" when that is the truth. If you were wrong, say so immediately.
+- Do not copy Hauslet's branding, logos, screens or assets. Learn the
+  patterns, then build a better Vallo version with our own identity.
 
-Start with the read-only audit (section 6, step 2) and the P0 items
-(passcode optional with a dismissible dashboard banner, phone number out of
-sign-up and asked before the first deal, verification before deals, the
-global feedback banner, native polish basics). I will send about 60
-screenshots of the Hauslet app and other references: number them as they
-arrive and record each in docs/handoff/REFERENCE_PATTERNS.md. Show me the top
-30 recommendations before any large build. Tell me what you plan before each
-group, and report in plain language after it.
+HOW I WANT YOU TO WORK
+- Work autonomously. Everything in the handoff and my brief is already
+  approved: do not come back asking permission for it. Decide, build, verify,
+  report. Only ask me when money would be spent, something is irreversible or
+  public, or two honest readings of my words would build different products,
+  and then ask once with your recommendation attached.
+- If you get blocked, park it, say so in the next report, and keep moving.
+- Finish what you start. Do not hand me a half-built thing.
+- Talk to me in plain language, short, no jargon, no flattery, the answer
+  first. I am not an engineer. I test on a real iPhone and I send
+  screenshots.
+- After each group of work, tell me in numbered steps exactly what I need to
+  do on my phone.
+
+WHAT I AM AIMING AT
+Hauslet is my reference and I will send you about 60 or more screenshots of
+it. It feels like a real native app: calm, white, generous spacing, thin
+icons, big rounded containers, one question per screen, autosave, bottom
+sheets, a 7-step ID check in the in-app browser, proper help articles with
+screenshots. Vallo must reach that level and then go past it: more features,
+better flows, stronger identity, so that next to us they look like the small
+platform. I want to open Vallo and feel joy. Every single page gets the
+uniform enhancement, not too much and not too little. Clean architecture,
+like a project that had a proper plan before it was built.
+
+START HERE
+1. The read-only audit (handoff section 6 step 2), written to
+   docs/handoff/AUDIT_2026-11.md.
+2. The design language decided and written to docs/UX_SYSTEM.md, then the
+   four shared components (feedback banner, sheet, step frame, page frame),
+   because they are what makes 559 pages look like one product.
+3. The P0 work: passcode optional with a dismissible dashboard alert; phone
+   number out of sign-up and asked before the first deal; verification
+   required before deals and rebuilt as a premium stepper; the global
+   feedback banner; native polish basics (status bar, safe areas, keyboard,
+   haptics, Android back).
+   Note: the notifications step at the end of sign-up is already BUILT; your
+   job is to polish and extend it.
+4. Then P1 (listing wizard one question per screen, agent switch in the side
+   nav working on low or no data, voice notes and reactions in messages, the
+   pinned AI assistant chat with a button through to human support, offline,
+   the map, the help centre, reporting, media and video caching).
+5. Then P2 (our own signature feature with a name you propose, the feed and
+   our inner world, the motion system and a possible mascot, the whole-platform
+   container and icon pass, Face ID where it belongs, the support and social
+   media admin desks, performance measurements, docs).
+
+As my screenshots arrive, number them and record every pattern in
+docs/handoff/REFERENCE_PATTERNS.md. Show me your top 30 recommendations
+before any large build. Tell me what you plan before each group, and report
+in plain language after it. Go.
 ```
 
 ---
