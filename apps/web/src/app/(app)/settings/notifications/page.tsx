@@ -12,6 +12,14 @@ import { NotificationMatrix } from "./NotificationMatrix";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
 
+
+/* English until the key lands in the dictionary, like the other words this
+   screen states once. */
+const REMINDERS_ROW = {
+  label: "Reminders",
+  sub: "Places near you, people you follow, gentle nudges",
+} as const;
+
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).settings.notifications.label };
 }
@@ -103,6 +111,20 @@ export default async function NotificationsSettingsPage() {
         ) : (
           <NotificationsCard t={forNotificationsCard(t)} />
         )}
+      </section>
+
+      {/* The reminders Vallo may send on its own (Agent FEATURES' screen),
+          one tap down from the channels. */}
+      <section id="settings-reminders" className="mt-block scroll-mt-28">
+        <SettingsGroup label={REMINDERS_ROW.label}>
+          <RowLink
+            href="/settings/notifications/reminders"
+            icon="bell"
+            label={REMINDERS_ROW.label}
+            sub={REMINDERS_ROW.sub}
+            testId="settings-reminders-row"
+          />
+        </SettingsGroup>
       </section>
 
       {push.state === "signed-in" && (
