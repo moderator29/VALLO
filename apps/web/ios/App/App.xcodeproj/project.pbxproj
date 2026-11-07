@@ -158,8 +158,8 @@
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,
-				C15A0B012FF0A00000C0FFEE /* PrivacyInfo.xcprivacy in Resources */,
 				C15A0B052FF0A00000C0FFEE /* vallo_chime.caf in Resources */,
+				C15A0B012FF0A00000C0FFEE /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
