@@ -320,6 +320,12 @@ jobs:
             exit 1
           fi
           grep -A1 "aps-environment" "$RUNNER_TEMP/ents.xml" | grep -o "<string>[a-z]*</string>"
+          # Face ID unlock (a passkey in the web view) needs webcredentials
+          # (7 November 2026: builds without it could never offer Face ID).
+          if ! grep -q "webcredentials:www.vallospaces.com" "$RUNNER_TEMP/ents.xml"; then
+            echo "::error::The signed IPA has no webcredentials:www.vallospaces.com, so Face ID unlock cannot work. Nothing was uploaded."
+            exit 1
+          fi
 
       - name: Upload to App Store Connect
         if: ${{ success() && inputs.upload }}
