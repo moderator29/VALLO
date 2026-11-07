@@ -985,7 +985,7 @@ Ordered by member impact and business value, biased to launch readiness and to m
 - How: Each page passes the 4B definition of done at 390x844 and 360x800, light and dark.
 - Layer: frontend. Priority: P0. Effort: L.
 
-**VIS2. Thin chrome icons (decided)**
+**VIS2. One icon family (stroke weights unchanged: founder ruling, 7 November 2026, do not make icons thin)**
 - What: Lean strokes in the header, drawer and dock with the active state as a fill; fold `SettingsGlyph`, `LineGlyph`, `AdminGlyph` and the 48 inline SVG files into `UiIcon`.
 - Why: The bold chrome is the biggest reason the shell looks heavier than the references.
 - Where: `design-system/icons/UiIcon.tsx`, `app/css/symbols.css`, `docs/ICON_SYSTEM.md`.
