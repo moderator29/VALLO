@@ -42,7 +42,7 @@ export function SampleEmails({ initial }: { initial: string }) {
           if (failed > 0) banner.warning(`Finished with ${failed} that did not send. ${sent} did.`);
           else
             banner.success(
-              `Done. All ${result.data.total} samples are on their way to ${addresses.length === 1 ? "that address" : "both addresses"}.`,
+              `Done. All ${result.data.total} samples are on their way.`,
             );
           return;
         }

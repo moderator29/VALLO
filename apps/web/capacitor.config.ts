@@ -227,12 +227,10 @@ const config: CapacitorConfig = {
        * screen is the same: the app's first frame, not a poster. The glass
        * tile stays what it is, the app icon.
        */
-      /* 7 NOVEMBER 2026, THE FOUNDER'S RULING (replacing D68c and the note
-         above): Android shows the exact mark, still, on the launch navy, and
-         the launch overlay (`LaunchMark.java`) takes over from it. Below
-         Android 12 this is the plugin's image: `splash_launch`, the mark at
-         the centre. iOS draws the mark itself (`ValloShell.swift`). */
-      androidSplashResourceName: "splash_launch",
+      /* 7 November 2026, the founder's ruling: the opening is drawn by the
+         shell on both phones (`ValloShell.swift`, `LaunchMark.java`), over
+         this same bare navy, so the splash itself stays empty. */
+      androidSplashResourceName: "splash_blank",
       showSpinner: false,
     },
     StatusBar: {

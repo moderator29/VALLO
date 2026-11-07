@@ -197,7 +197,7 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
   const label = question ? CIRCLE_COPY.thread.reply : CIRCLE_COPY.thread.replyDiscussion;
   return (
     <form
-      className="nf-circle-field"
+      className="nf-circle-field nf-creplybox"
       data-testid="circle-reply-box"
       onSubmit={(event) => {
         event.preventDefault();
@@ -212,9 +212,16 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
       <label htmlFor={`reply-${parentId}`} className="nf-circle-section__title">
         {label}
       </label>
-      <textarea id={`reply-${parentId}`} value={body} maxLength={4000} onChange={(e) => setBody(e.target.value)} />
-      <div>
-        <Button type="submit" variant="primary" size="md" loading={pending} disabled={!body.trim()}>
+      <textarea
+        id={`reply-${parentId}`}
+        value={body}
+        maxLength={4000}
+        placeholder={question ? CIRCLE_COPY.thread.answerHint : CIRCLE_COPY.thread.replyHint}
+        onChange={(e) => setBody(e.target.value)}
+      />
+      <div className="nf-creplybox__foot">
+        <span className="nf-circle-field__hint nf-numeric">{body.length > 3600 ? `${4000 - body.length} left` : ""}</span>
+        <Button type="submit" variant="primary" size="md" loading={pending} disabled={!body.trim()} trailingIcon="send">
           {CIRCLE_COPY.thread.send}
         </Button>
       </div>
@@ -230,10 +237,10 @@ export function RequestDecision({ communityId, userId, slug }: { communityId: st
   return (
     <span className="nf-circle-reply__actions">
       <Button variant="primary" size="sm" disabled={pending} onClick={() => decide(true)} data-testid="circle-approve">
-        Accept
+        {CIRCLE_COPY.manage.accept}
       </Button>
       <Button variant="quiet" size="sm" disabled={pending} onClick={() => decide(false)} data-testid="circle-decline">
-        Decline
+        {CIRCLE_COPY.manage.decline}
       </Button>
     </span>
   );
