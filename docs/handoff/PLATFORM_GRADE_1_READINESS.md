@@ -91,7 +91,7 @@ Store submission.
 |---|---|
 | App Store | 1.0.0 approved and live. Availability set to 146 countries. 29 cannot sell: Afghanistan (Apple) and the EU (Trader Status not declared, App Store Connect, Business, Compliance). |
 | Build 1.0.1 | Uploaded to App Store Connect by Native iOS run #156, build number 10001156. Push entitlement verified inside the IPA. Founder is installing it through TestFlight internal testing to test push. Version page 1.0.1 must be created in App Store Connect (the plus next to iOS App) before submitting. Screenshots for 1.0.1 wait until this upgrade is done. |
-| Push | Server side ready (APNS_KEY_ID, APNS_TEAM_ID, APNS_PRIVATE_KEY, APNS_PRODUCTION=true in Vercel). Old builds lacked `aps-environment`; fixed in the workflow (entitlements are now put on the archived app, then checked). `push_enrol_log` records each attempt and its failing step. |
+| Push | WORKING END TO END as of 7 Nov 2026: APNs env set in Vercel, build 1.0.1 carries the entitlement, the founder's iPhone enrolled (push_enrol_log id 9, a live row in push_tokens), and the iOS gate flag `native_push_apns` in `feature_flags` is OPEN (the drain refused iOS while it was missing; every queue row ended suppressed_no_device). The drain runs every 5 minutes via pg_net. A device on the App Store 1.0.0 build still fails enrol with os-no-valid-aps-environment-entitle until 1.0.1 is released. `push_enrol_log`, `push_queue.outcome` and `push_deliveries` tell you exactly where any future failure sits. |
 | Notification bell | Crash fixed (`lib/supabase/channel-name.ts`, unique names for database-listening channels). Confirmed on the founder's phone after a reinstall. |
 | Stale code on phones | The service worker kept page copies for up to 7 days with old script names, so fixes reached phones late. Commit `2ca5b9013` adds `components/app/DeployWatch.tsx`, `lib/deploy/watch.ts`, `app/api/build/route.ts`, `NEXT_PUBLIC_BUILD_ID` and cache version v8. On the branch `claude/rentme-v2-platform-audit-xuvg0a`, NOT yet on main unless the founder said "push to main". Check `git log origin/main`. |
 | Crash recorder | Browser crashes are stored as scrubbed alerts in `public.risk_alerts` (description starts `client.error`, `entity_id` is the `C-XXXXXX` reference shown on the error screen). Use it. |
@@ -349,6 +349,19 @@ for review", "Welcome to Vallo"), smooth slide and fade, auto-dismiss, swipe or
 X to dismiss, a queue that replaces instead of stacking, retry action on
 failure, accurate states (queued is not sent). Migrate every existing toast and
 ad-hoc success line to it. Respect reduced motion. Works on iOS and Android.
+
+**P0.4b Push permission as a default onboarding step (founder, 7 Nov).**
+Today the app only offers notifications at four "moments" (`components/app/
+push/moments.ts`, whose comment says NEVER on sign-up). The founder overrides
+that: asking must be a DEFAULT step of joining, the way Hauslet asks right
+after sign-in. Build it as a Vallo screen inside onboarding (after the account
+exists and the member is inside the app, during the welcome/first-run steps):
+what they will get, Turn on / Not now. Yes triggers the one system prompt.
+"Not now" costs nothing and the existing moments re-offer later. Keep the
+one-prompt-per-install discipline (a declined SYSTEM prompt is permanent on
+iOS), so the Vallo screen always comes first. Every notification kind must
+deliver to the lock screen subject to the person's switches; test with the
+app closed and Do Not Disturb off.
 
 **P0.5 Native polish basics.** Status bar style per screen (light/dark),
 safe areas everywhere (top, bottom, notch, home indicator), haptics on taps and
