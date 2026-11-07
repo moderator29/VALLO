@@ -51,9 +51,10 @@ Owns: everything under `apps/web/src/app/**` and `components/**` except
    counts that feel alive, a story rail that reads as Vallo, motion on
    arrival and on react (transform and opacity only, reduced motion
    respected), skeletons in the feed's own shape, light mode first-class.
-   Leave room beside the feed for **Vallo Circle** (a people and places
-   layer that works side by side with the feed; the lead briefs it later):
-   a slot in the masthead and a section anchor, nothing built yet.
+   Leave room beside the feed for **Vallo Circle** as
+   `docs/handoff/VALLO_CIRCLE.md` "What Agent FE does now" says: the
+   masthead's two-lens switch (Around selected, Circle "Coming soon", not
+   tappable) and a layout a second lens can slide in beside. Nothing else.
 3. **Light mode refinement, platform wide.** Cleaner, calmer, more refined:
    surfaces and edges (no muddy greys, the brand edge rule), shadows that
    read on white, text contrast, cards, sheets, inputs, the bottom bar and
