@@ -102,21 +102,21 @@ export function StepFrame({
   const saveText = save === "idle" ? null : words[save];
 
   return (
-    <div className="nf-step" data-testid={testId}>
-      <header className="nf-step__top">
-        <div className="nf-step__bar">
+    <div className="nf-g1step" data-testid={testId}>
+      <header className="nf-g1step__top">
+        <div className="nf-g1step__bar">
           {onBack ? (
-            <button type="button" className="nf-step__round" aria-label={backLabel} onClick={onBack}>
+            <button type="button" className="nf-g1step__round" aria-label={backLabel} onClick={onBack}>
               <UiIcon name="arrow-left" size={20} />
             </button>
           ) : (
-            <span className="nf-step__round nf-step__round--empty" aria-hidden="true" />
+            <span className="nf-g1step__round nf-g1step__round--empty" aria-hidden="true" />
           )}
-          <p className="nf-step__save" data-save={save} aria-live="polite">
+          <p className="nf-g1step__save" data-save={save} aria-live="polite">
             {saveText ? (
               <>
                 {save === "saved" || save === "device" ? (
-                  <span className="nf-step__save-mark" aria-hidden="true">
+                  <span className="nf-g1step__save-mark" aria-hidden="true">
                     <UiIcon name="check" size={12} />
                   </span>
                 ) : null}
@@ -125,43 +125,43 @@ export function StepFrame({
             ) : null}
           </p>
           {closeHref ? (
-            <Link href={closeHref} className="nf-step__round" aria-label={closeLabel}>
+            <Link href={closeHref} className="nf-g1step__round" aria-label={closeLabel}>
               <UiIcon name="close" size={20} />
             </Link>
           ) : onClose ? (
-            <button type="button" className="nf-step__round" aria-label={closeLabel} onClick={onClose}>
+            <button type="button" className="nf-g1step__round" aria-label={closeLabel} onClick={onClose}>
               <UiIcon name="close" size={20} />
             </button>
           ) : (
-            <span className="nf-step__round nf-step__round--empty" aria-hidden="true" />
+            <span className="nf-g1step__round nf-g1step__round--empty" aria-hidden="true" />
           )}
         </div>
         <div
-          className="nf-step__progress"
+          className="nf-g1step__progress"
           role="progressbar"
           aria-valuemin={1}
           aria-valuemax={total}
           aria-valuenow={clamped}
           aria-label={stepLabel ?? `Step ${clamped} of ${total}`}
         >
-          <span className="nf-step__progress-fill" style={{ inlineSize: `${percent}%` }} />
+          <span className="nf-g1step__progress-fill" style={{ inlineSize: `${percent}%` }} />
         </div>
       </header>
 
-      <div className="nf-step__main">
+      <div className="nf-g1step__main">
         {/* Keyed by step, so each question arrives with the slide. */}
-        <div key={clamped} className="nf-step__page" data-direction={direction}>
-          {eyebrow ? <p className="nf-step__eyebrow">{eyebrow}</p> : null}
-          <h1 className="nf-step__title">{title}</h1>
-          {subtitle ? <div className="nf-step__subtitle">{subtitle}</div> : null}
-          {notice ? <div className="nf-step__notice">{notice}</div> : null}
-          <div className="nf-step__content">{children}</div>
+        <div key={clamped} className="nf-g1step__page" data-direction={direction}>
+          {eyebrow ? <p className="nf-g1step__eyebrow">{eyebrow}</p> : null}
+          <h1 className="nf-g1step__title">{title}</h1>
+          {subtitle ? <div className="nf-g1step__subtitle">{subtitle}</div> : null}
+          {notice ? <div className="nf-g1step__notice">{notice}</div> : null}
+          <div className="nf-g1step__content">{children}</div>
         </div>
       </div>
 
-      <footer className="nf-step__foot">
-        <p className="nf-step__count">{stepLabel ?? `Step ${clamped} of ${total}`}</p>
-        <div className="nf-step__actions">
+      <footer className="nf-g1step__foot">
+        <p className="nf-g1step__count">{stepLabel ?? `Step ${clamped} of ${total}`}</p>
+        <div className="nf-g1step__actions">
           {secondary ? (
             <Button
               variant="quiet"

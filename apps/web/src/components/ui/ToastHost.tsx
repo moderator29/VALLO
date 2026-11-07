@@ -197,19 +197,23 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       <span className="nf-toast__mark" aria-hidden="true">
         <UiIcon name={MARK[item.tone]} size={16} />
       </span>
-      <p className="nf-toast__text">{item.message}</p>
-      {item.action ? (
-        <button
-          type="button"
-          className="nf-toast__action"
-          onClick={() => {
-            item.action?.run();
-            dismissToast(item.id);
-          }}
-        >
-          {item.action.label}
-        </button>
-      ) : null}
+      {/* The sentence and its action stack, so a long failure keeps the
+          whole width to read in and "Try again" sits under it. */}
+      <div className="nf-toast__body">
+        <p className="nf-toast__text">{item.message}</p>
+        {item.action ? (
+          <button
+            type="button"
+            className="nf-toast__action"
+            onClick={() => {
+              item.action?.run();
+              dismissToast(item.id);
+            }}
+          >
+            {item.action.label}
+          </button>
+        ) : null}
+      </div>
       <button
         type="button"
         className="nf-toast__close"

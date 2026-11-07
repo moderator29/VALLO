@@ -7,7 +7,7 @@ import { PageHeader } from "./PageHeader";
  * the large bold title that folds into the shell header on scroll
  * (`PageHeader variant="large"`), an optional one-line subtitle, actions at the
  * right, an optional tab or segmented row directly under it, then the content
- * on the Grade 1 rhythm (`.nf-page`: the gutter, the title-to-first-control
+ * on the Grade 1 rhythm (`.nf-g1page`: the gutter, the title-to-first-control
  * gap, the section gap, the dock clearance at the foot).
  *
  * It wraps `PageHeader` rather than replacing it: the 103 pages already on
@@ -40,7 +40,7 @@ export function PageFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="nf-page" data-width={width} data-testid={testId}>
+    <div className="nf-g1page" data-width={width} data-testid={testId}>
       <PageHeader
         title={title}
         variant="large"
@@ -49,8 +49,8 @@ export function PageFrame({
         {...(actions ? { actions } : {})}
         {...(fallback ? { fallback } : {})}
       />
-      {tabs ? <div className="nf-page__tabs">{tabs}</div> : null}
-      <div className="nf-page__body">{children}</div>
+      {tabs ? <div className="nf-g1page__tabs">{tabs}</div> : null}
+      <div className="nf-g1page__body">{children}</div>
     </div>
   );
 }
