@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import "@/app/css/visit.css";
 import { useMemo, useRef, useState, type ReactNode } from "react";
@@ -106,7 +107,6 @@ export function VisitPlanner({
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [kept, setKept] = useState(false);
 
@@ -140,14 +140,12 @@ export function VisitPlanner({
     if (!day) return setProblem(copy.problems.pickDay);
     if (!time) return setProblem(copy.problems.pickTime);
     setProblem(null);
-    setSendError(null);
     setReviewOpen(true);
   }
 
   async function send() {
     if (!time || sending) return;
     setSending(true);
-    setSendError(null);
     setPhoneGate(false);
     const choice: VisitChoice = { listingId, mode, kind: open ? "slot" : "ask", at: time, note };
     const outcome = await submitter.current(choice);
@@ -159,12 +157,19 @@ export function VisitPlanner({
       setSending(true);
       return;
     }
+    /* What the send did is said by the one banner at the top of the screen
+       (Grade 1). Kept on the phone, the page keeps its own line too: the
+       request is still waiting to go. */
     if (outcome.state === "kept") {
       setReviewOpen(false);
       setKept(true);
+      banner.info(copy.problems.kept);
       return;
     }
-    setSendError(outcome.state === "notKept" ? copy.problems.notKept : outcome.error || copy.problems.failed);
+    banner.error(outcome.state === "notKept" ? copy.problems.notKept : outcome.error || copy.problems.failed, {
+      retry: () => void send(),
+      "data-testid": "visit-send-error",
+    });
     setPhoneGate(outcome.state === "failed" && outcome.phoneGate === true);
   }
 
@@ -422,11 +427,6 @@ export function VisitPlanner({
             </dl>
             <p className="nf-visit__lead">{open ? copy.review.bookLine : copy.review.askLine}</p>
             <p className="nf-visit__muted">{copy.review.free}</p>
-            {sendError ? (
-              <p className="nf-visit__error" role="alert" data-testid="visit-send-error">
-                {sendError}
-              </p>
-            ) : null}
             <PhoneGateLink show={phoneGate} full />
             <Button variant="primary" size="lg" full loading={sending} onClick={() => void send()} data-testid="visit-send">
               {sending ? copy.footer.sending : open ? copy.footer.book : copy.footer.send}

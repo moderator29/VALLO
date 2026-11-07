@@ -38,6 +38,7 @@ const entry = `
   import { ListingStickyBar } from "@/components/app/listing/ListingStickyBar";
   import { specChips } from "@/components/app/listing/spec-chips";
   import { RENTAL } from "@/app/(dev)/preview/f3/fixtures";
+  import { ToastHost } from "@/components/ui/ToastHost";
 
   const t = getDictionary("en");
   const d = t.catalogue.detail;
@@ -84,6 +85,7 @@ const entry = `
       <section style={{ marginTop: 24, width: 326 }} data-testid="plates-host">
         <ListingAmenityTiles variant="plates" amenities={listing.amenities} limit={5} moreHref="#amenities" moreLabel={d.more} />
       </section>
+      <ToastHost />
       <ListingStickyBar
         variant="rental"
         priceMinor={listing.priceMinor}
@@ -152,12 +154,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the listing page's new pieces a
       expect(await live.getByTestId("lister-profile").count()).toBe(0);
 
       /* A live call rings through the calls feature; the database's refusal
-         is said under the card in the calls feature's own words. */
+         is said by the one banner (Grade 1) in the calls feature's own words. */
       const liveCall = live.getByTestId("lister-call");
       expect(await liveCall.getAttribute("data-call")).toBe("live");
       expect(await liveCall.getAttribute("aria-label")).toBe("Voice call Daniel Okafor");
       await liveCall.click();
-      const note = live.getByTestId("lister-call-note");
+      const note = page.getByTestId("lister-call-note");
       await note.waitFor();
       expect(await note.textContent()).toContain("Calls open once they have replied");
     } finally {

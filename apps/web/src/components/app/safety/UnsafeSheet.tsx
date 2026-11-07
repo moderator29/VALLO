@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Sheet } from "@/components/ui/Sheet";
@@ -68,7 +69,7 @@ export function UnsafeSheet({
   filerIsLister?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
+  const [note, setNote] = useState<{ ok: true; text: string } | null>(null);
   const [pending, startTransition] = useSafeTransition();
   /* Which of the two was pressed, so only that one says it is working: a
      frightened person must see the thing they chose answer, not both. */
@@ -86,7 +87,9 @@ export function UnsafeSheet({
           block,
         });
         if (!result.ok) {
-          setNote({ ok: false, text: result.error });
+          /* Said by the one banner (Grade 1), above this sheet, with Try
+             again. What was done stays in the sheet as its record. */
+          banner.error(result.error, { retry: () => file(block) });
           return;
         }
         const said = (block ? copy.left : copy.told).replace("{clock}", clock);
@@ -147,7 +150,7 @@ export function UnsafeSheet({
           </a>
           <p className="nf-caption text-[var(--nf-content-muted)]">{copy.callHint}</p>
 
-          {note?.ok ? (
+          {note ? (
             <p role="status" className="nf-panel nf-panel--card p-card nf-body text-[var(--nf-content-primary)]" data-testid="unsafe-done">
               {note.text}
             </p>
@@ -175,12 +178,6 @@ export function UnsafeSheet({
               </Button>
               <p className="nf-caption text-[var(--nf-content-muted)]">{filerIsLister ? `${tellHint} ${copy.pauseHint}` : tellHint}</p>
             </>
-          )}
-
-          {note && !note.ok && (
-            <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-              {note.text}
-            </p>
           )}
         </div>
       </Sheet>

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import "@/app/css/visit.css";
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
@@ -170,8 +171,6 @@ export function VisitStatus({
   const join = videoJoinState(row, clock);
   const [sheet, setSheet] = useState<null | "cancel" | "change">(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [callNote, setCallNote] = useState<string | null>(null);
 
   const t = copy.status;
   const title = t[PHASE_TITLE[view.phase]];
@@ -180,10 +179,10 @@ export function VisitStatus({
   async function accept() {
     if (busy) return;
     setBusy(true);
-    setError(null);
     try {
+      /* Said by the one banner at the top of the screen (Grade 1). */
       const result = await acceptProposedTime({ id: row.id });
-      if (!result.ok) setError(result.error);
+      if (!result.ok) banner.error(result.error, { retry: () => void accept() });
       else router.refresh();
     } finally {
       setBusy(false);
@@ -220,12 +219,11 @@ export function VisitStatus({
 
   async function joinCall() {
     if (!row.conversationId) {
-      setCallNote(copy.actions.joinNoThread);
+      banner.info(copy.actions.joinNoThread);
       return;
     }
-    setCallNote(null);
     const placed = await placeCall({ conversationId: row.conversationId, kind: "VIDEO", context: { line: null } });
-    if (!placed.ok) setCallNote(placed.error);
+    if (!placed.ok) banner.error(placed.error);
   }
 
   const calendarReason =
@@ -258,11 +256,6 @@ export function VisitStatus({
               {t.accept}
             </Button>
           </div>
-        ) : null}
-        {error ? (
-          <p className="nf-visit__error" role="alert">
-            {error}
-          </p>
         ) : null}
 
         {/* ------------------------------------------------------- tiles */}
@@ -314,11 +307,6 @@ export function VisitStatus({
           </p>
         ) : join === "over" ? (
           <p className="nf-visit__muted">{copy.actions.joinEnded}</p>
-        ) : null}
-        {callNote ? (
-          <p className="nf-visit__muted" role="status">
-            {callNote}
-          </p>
         ) : null}
 
         {/* ------------------------------------------- the notes, as sent */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -41,10 +42,16 @@ export function AgentLookupCard({
         if (result.ok) {
           setHint(result.data.hint);
           setValue("");
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.success(result.data.hint ? copy.registered.replace("{hint}", result.data.hint) : copy.none);
           return;
         }
+        /* A number that is taken or not a number is the field's own error;
+           anything else is the banner's. */
         const reason = result.fieldErrors?.phone ?? result.error;
-        setError(reason === "taken" ? copy.taken : reason === "invalid" ? copy.invalid : copy.failed);
+        if (reason === "taken") setError(copy.taken);
+        else if (reason === "invalid") setError(copy.invalid);
+        else banner.error(copy.failed, { retry: () => save(phone) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

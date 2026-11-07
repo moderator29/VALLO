@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
@@ -60,7 +61,11 @@ function Refusal({ error }: { error: string | null }) {
   );
 }
 
-/** One call at a time; the answer and the busy state for the sheet to draw. */
+/**
+ * One call at a time; the busy state, and a field's own refusal for the sheet
+ * to draw under that field. Any other refusal is said by the one banner at the
+ * top of the screen (Grade 1), which sits above the sheet, with Try again.
+ */
 function useOneCall() {
   const inFlight = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -73,12 +78,14 @@ function useOneCall() {
     try {
       const result = await work();
       if (!result.ok) {
-        setError((field ? result.fieldErrors?.[field] : undefined) ?? result.error ?? FALLBACK);
+        const onField = field ? result.fieldErrors?.[field] : undefined;
+        if (onField) setError(onField);
+        else banner.error(result.error ?? FALLBACK, { retry: () => void call(work, onDone, field) });
         return;
       }
       onDone();
     } catch {
-      setError(FALLBACK);
+      banner.error(FALLBACK, { retry: () => void call(work, onDone, field) });
     } finally {
       inFlight.current = false;
       setBusy(false);

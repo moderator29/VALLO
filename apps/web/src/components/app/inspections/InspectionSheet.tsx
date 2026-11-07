@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import "@/app/css/inspection.css";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
 import { useRef, useState } from "react";
@@ -227,7 +228,6 @@ export function InspectionSheet({
   const w = flowCopy;
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the card, if any: a time to offer, or a final
      move asked before it is made. */
   const [sheet, setSheet] = useState<
@@ -278,13 +278,13 @@ export function InspectionSheet({
   function run(work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
     if (inFlight.current) return;
     inFlight.current = true;
-    setError(null);
     startTransition(async () => {
       try {
         try {
           const result = await work();
           if (!result.ok) {
-            setError(result.error ?? w.failed);
+            /* Said by the one banner at the top of the screen (Grade 1). */
+            banner.error(result.error ?? w.failed);
             return;
           }
           after?.();
@@ -320,7 +320,6 @@ export function InspectionSheet({
    * what was typed.
    */
   function saveReport(body: { items?: { item: RoomItem; checked: boolean }[]; submit?: boolean }) {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await saveInspectionReport({
@@ -330,7 +329,7 @@ export function InspectionSheet({
           submit: body.submit ?? false,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setSaved((now) => fromSaved(result.data, now.photoCount));
@@ -349,7 +348,6 @@ export function InspectionSheet({
    * The count moves only when that row came back.
    */
   async function addPhoto(picked: File) {
-    setError(null);
     setUploading(true);
     try {
       /*
@@ -367,7 +365,7 @@ export function InspectionSheet({
       if (!isPdf) {
         const clean = await reencodeToJpeg(picked, { maxEdge: 2560, quality: 0.9 });
         if (!clean) {
-          setError("That photo could not be read on this device. Try a JPEG or a screenshot.");
+          banner.error("That photo could not be read on this device. Try a JPEG or a screenshot.");
           return;
         }
         file = clean;
@@ -376,12 +374,12 @@ export function InspectionSheet({
       }
       const target = await createInspectionPhotoUpload({ inspectionId: inspection.id, extension });
       if (!target.ok) {
-        setError(target.error);
+        banner.error(target.error);
         return;
       }
       const client = await loadBrowserClient();
       if (!client) {
-        setError(w.photoFailed);
+        banner.error(w.photoFailed);
         return;
       }
       const upload = await uploadToStorage({
@@ -393,12 +391,12 @@ export function InspectionSheet({
         signedToken: target.data.token,
       });
       if (!upload.ok) {
-        setError(w.photoFailed);
+        banner.error(w.photoFailed);
         return;
       }
       const added = await addReportPhoto({ inspectionId: inspection.id, storagePath: target.data.path });
       if (!added.ok) {
-        setError(added.error);
+        banner.error(added.error);
         return;
       }
       setSaved((now) => ({ ...now, photoCount: now.photoCount + 1 }));
@@ -763,12 +761,6 @@ export function InspectionSheet({
               })}
             </div>
           </section>
-        )}
-
-        {error && (
-          <p role="alert" className="nf-ix-error">
-            {error}
-          </p>
         )}
 
         {/* ---------------------------------------------------------- actions */}

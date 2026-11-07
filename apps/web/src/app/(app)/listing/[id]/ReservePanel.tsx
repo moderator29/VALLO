@@ -2,8 +2,9 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
-import { useActionState, useId, useState, useMemo } from "react";
-import Link from "next/link";
+import { useActionState, useEffect, useId, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { banner } from "@/lib/ui/toast";
 import { withNext } from "@/lib/auth/next-link";
 import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -199,6 +200,18 @@ export function ReservePanel({
     ActionResult<ReserveReceipt> | null,
     FormData
   >(reserve, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1),
+     with Sign in as its action when that is the reason; a field's own error
+     stays under the field, and the phone step stays as its link. */
+  const router = useRouter();
+  useEffect(() => {
+    if (!state || state.ok) return;
+    const signIn = withNext("/sign-in", `/listing/${encodeURIComponent(listingId)}`);
+    banner.error(
+      state.error,
+      isSignedOutRefusal(state.error) ? { action: { label: w.signIn, run: () => router.push(signIn) } } : undefined,
+    );
+  }, [state, listingId, router, w.signIn]);
   /* The success sheet over the "Booking requested" panel, once per reserve. */
   const [successClosed, setSuccessClosed] = useState(false);
 
@@ -757,23 +770,7 @@ export function ReservePanel({
         )}
 
         {/* ---------------------------------------------------- failures */}
-        {state && !state.ok && (
-          <div
-            role="alert"
-            className="mt-block rounded-[var(--nf-container-radius)] border border-[var(--nf-panel-hair)] bg-[color-mix(in_oklab,var(--nf-state-warning)_12%,transparent)] p-card-sm nf-body-sm leading-relaxed text-[var(--nf-content-secondary)]"
-          >
-            {state.error}
-            {isSignedOutRefusal(state.error) && (
-              <Link
-                href={withNext("/sign-in", `/listing/${encodeURIComponent(listingId)}`)}
-                className="mt-row inline-flex min-h-11 items-center font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"
-              >
-                {w.signIn}
-              </Link>
-            )}
-            <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
-          </div>
-        )}
+        <PhoneGateLink show={isPhoneGate(state)} full className="mt-block" />
 
         <div className="mt-block grid gap-row">
           <Button type="submit" variant="primary" full disabled={!ready} loading={pending}>

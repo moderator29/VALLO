@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -40,7 +41,6 @@ export function RefundRequestForm({
   const router = useRouter();
   const [reason, setReason] = useState(reasons[0]?.code ?? "guest_choice");
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   /*
    * The request is filed. The page refreshes when the sheet CLOSES rather
@@ -55,13 +55,13 @@ export function RefundRequestForm({
   const words = success ? successCopy(success, "refundRequested") : null;
 
   function submit() {
-    setError(null);
     start(async () => {
       try {
         const result = await requestRefund({ bookingId, reason, note });
         setConfirming(false);
         if (!result.ok) {
-          setError(result.error || copy.askFailed);
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error || copy.askFailed, { retry: submit });
           return;
         }
         /* With no sheet to hold it open, the page refreshes straight away. */
@@ -79,7 +79,6 @@ export function RefundRequestForm({
       data-testid="refund-request"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
         setConfirming(true);
       }}
     >
@@ -97,7 +96,7 @@ export function RefundRequestForm({
             </select>
           )}
         </Field>
-        <Field label={copy.askNote} error={error ?? undefined}>
+        <Field label={copy.askNote}>
           {(control) => (
             <textarea
               {...control}

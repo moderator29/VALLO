@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { iconPlateClass } from "@/components/ui/IconPlate";
 import { placeCall } from "@/components/calls/place-call";
@@ -48,56 +49,37 @@ export function ListerCallButton({
   copy: ListerCallCopy;
 }) {
   const [pending, setPending] = useState(false);
-  const [note, setNote] = useState<{ title?: string; body: string } | null>(null);
 
-  useEffect(() => {
-    if (!note) return;
-    const timer = window.setTimeout(() => setNote(null), 9000);
-    return () => window.clearTimeout(timer);
-  }, [note]);
-
+  /* Why a call did not ring is said by the one banner at the top of the
+     screen (Grade 1), in the calls feature's own words. */
   const tap = async () => {
     if (pending) return;
     setPending(true);
-    setNote(null);
     const result = await placeCall({ conversationId, kind: "AUDIO", context: { line: contextLine } });
     setPending(false);
     if (!result.ok) {
-      setNote(
-        result.refusal === "not_engaged"
-          ? { title: copy.notEngagedTitle, body: copy.notEngagedBody }
-          : { body: result.error },
-      );
+      if (result.refusal === "not_engaged") {
+        banner.info(`${copy.notEngagedTitle}. ${copy.notEngagedBody}`, { "data-testid": "lister-call-note" });
+      } else {
+        banner.error(result.error, { "data-testid": "lister-call-note" });
+      }
       return;
     }
-    if (result.outcome === "busy") setNote({ body: fill(copy.busy, { name }) });
+    if (result.outcome === "busy") banner.info(fill(copy.busy, { name }), { "data-testid": "lister-call-note" });
   };
 
   return (
-    <>
-      <button
-        type="button"
-        className={iconPlateClass({ size: "md", tone: "solid", shape: "round", className: "nf-lister-act" })}
-        aria-label={fill(copy.label, { name })}
-        aria-busy={pending || undefined}
-        disabled={pending}
-        onClick={() => void tap()}
-        data-testid="lister-call"
-        data-call="live"
-      >
-        <UiIcon name="phone" size={20} />
-      </button>
-      {note ? (
-        <span className="nf-lister-note" role="status" data-testid="lister-call-note">
-          <span className="min-w-0 flex-1">
-            {note.title ? <strong className="block">{note.title}</strong> : null}
-            {note.body}
-          </span>
-          <button type="button" className="nf-tap nf-caption font-semibold" onClick={() => setNote(null)}>
-            {copy.dismiss}
-          </button>
-        </span>
-      ) : null}
-    </>
+    <button
+      type="button"
+      className={iconPlateClass({ size: "md", tone: "solid", shape: "round", className: "nf-lister-act" })}
+      aria-label={fill(copy.label, { name })}
+      aria-busy={pending || undefined}
+      disabled={pending}
+      onClick={() => void tap()}
+      data-testid="lister-call"
+      data-call="live"
+    >
+      <UiIcon name="phone" size={20} />
+    </button>
   );
 }

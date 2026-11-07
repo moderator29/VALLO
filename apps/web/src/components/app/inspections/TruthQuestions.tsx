@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { panelClass } from "@/components/ui/Panel";
@@ -82,7 +83,9 @@ export function TruthQuestions({
       try {
         const result = await answerTruthQuestions({ inspectionId, answers: complete });
         if (!result.ok) {
-          setError(result.error);
+          /* Said by the one banner at the top of the screen (Grade 1); the
+             unanswered question stays the form's own line. */
+          banner.error(result.error, { retry: send });
           return;
         }
         setDone({ at: new Date().toISOString(), reportOpened: result.data.reportOpened });

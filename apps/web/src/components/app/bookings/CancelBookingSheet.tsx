@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useRouter } from "next/navigation";
 import { cancel } from "@/lib/bookings/actions";
@@ -28,8 +28,8 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
  *
  * `<Sheet>` owns the portal, the drag handle, the detents, the focus trap,
  * focus restoration, Escape, the backdrop and the body scroll lock. What is
- * left here is the decision: the server action, the refusal, and the success
- * state. On success the router refreshes and the server-rendered list becomes
+ * left here is the decision: the server action and its outcome, said by the
+ * banner. On success the router refreshes and the server-rendered list becomes
  * the single source of truth, never optimistic guesswork.
  */
 /** The sheet's words (`memberFlows.cancelBooking`). */
@@ -53,6 +53,11 @@ export function CancelBookingSheet({
   /* The outcome is said by the one banner at the top of the screen (Grade 1),
      and the booking page behind it, refreshed, is the record. */
   const cancelledLine = w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange);
+  /* Held in a ref so a parent re-render (a new `onClose`) never says it twice. */
+  const close = useRef(onClose);
+  useEffect(() => {
+    close.current = onClose;
+  }, [onClose]);
   useEffect(() => {
     if (!state) return;
     if (!state.ok) {
@@ -61,8 +66,8 @@ export function CancelBookingSheet({
     }
     banner.success(cancelledLine, { "data-testid": "cancel-booking-done" });
     router.refresh();
-    onClose();
-  }, [state, router, onClose, cancelledLine]);
+    close.current();
+  }, [state, router, cancelledLine]);
 
   return (
     <Sheet
@@ -71,39 +76,37 @@ export function CancelBookingSheet({
         if (!next) onClose();
       }}
       title={w.title}
-      /* The success state speaks for itself and the confirm panel carries its
-         own title; the title stays on as the sheet's accessible name. */
+      /* The confirm panel carries its own title; the title stays on as the
+         sheet's accessible name. The panel (plan item 22) carries its own
+         foot, with the same form, the same hidden field and the same `cancel`
+         action as before. */
       hideTitle
-      /* Cancelled: one Done under the result. Still asking: the confirm panel
-         (plan item 22) carries its own foot, with the same form, the same
-         hidden field and the same `cancel` action as before. */
     >
-        <ConfirmPanel
-          icon="calendar-booking"
-          tone="error"
-          title={w.title}
-          context={w.context}
-          summary={[
-            { label: w.stay, value: booking.title },
-            { label: w.dates, value: booking.dateRange },
-            { label: w.total, value: booking.totalDisplay },
-          ]}
-          next={[{ icon: "calendar-check", text: w.released }]}
-          error={null}
-          cancel={
-            <Button variant="secondary" onClick={onClose}>
-              {w.keep}
+      <ConfirmPanel
+        icon="calendar-booking"
+        tone="error"
+        title={w.title}
+        context={w.context}
+        summary={[
+          { label: w.stay, value: booking.title },
+          { label: w.dates, value: booking.dateRange },
+          { label: w.total, value: booking.totalDisplay },
+        ]}
+        next={[{ icon: "calendar-check", text: w.released }]}
+        cancel={
+          <Button variant="secondary" onClick={onClose}>
+            {w.keep}
+          </Button>
+        }
+        primary={
+          <form action={formAction}>
+            <input type="hidden" name="bookingId" value={booking.id} />
+            <Button type="submit" variant="primary" loading={pending}>
+              {w.confirm}
             </Button>
-          }
-          primary={
-            <form action={formAction}>
-              <input type="hidden" name="bookingId" value={booking.id} />
-              <Button type="submit" variant="primary" loading={pending}>
-                {w.confirm}
-              </Button>
-            </form>
-          }
-        />
+          </form>
+        }
+      />
     </Sheet>
   );
 }

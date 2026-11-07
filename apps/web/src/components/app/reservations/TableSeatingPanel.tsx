@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -38,8 +39,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 export function TableSeatingPanel({ table }: { table: ReservationView }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
   const [billOpenForm, setBillOpenForm] = useState(false);
   const [amount, setAmount] = useState("");
   const [rating, setRating] = useState(0);
@@ -56,14 +55,13 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
   const run = (job: () => Promise<{ ok: boolean; error?: string } | { ok: true; data: unknown }>, done?: string) =>
     start(async () => {
       try {
-        setError(null);
-        setNote(null);
+        /* Said by the one banner at the top of the screen (Grade 1). */
         const result = (await job()) as { ok: boolean; error?: string };
         if (!result.ok) {
-          setError(result.error ?? "That did not go through. Please try again.");
+          banner.error(result.error ?? "That did not go through. Please try again.", { retry: () => run(job, done) });
           return;
         }
-        if (done) setNote(done);
+        if (done) banner.success(done);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -134,10 +132,9 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
             onClick={() =>
               start(async () => {
                 try {
-                  setError(null);
                   const result = await payTableBill(bill.id);
                   if (!result.ok) {
-                    setError(result.error);
+                    banner.error(result.error);
                     return;
                   }
                   window.location.assign(result.data.authorizationUrl);
@@ -227,16 +224,6 @@ export function TableSeatingPanel({ table }: { table: ReservationView }) {
       )}
       {table.reviewed && <span className={`block ${TYPE.rowMeta}`}>You reviewed this table. Thank you.</span>}
 
-      {note && (
-        <span role="status" className={`block ${TYPE.rowMeta}`}>
-          {note}
-        </span>
-      )}
-      {error && (
-        <span role="alert" className={`block ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </span>
-      )}
     </div>
   );
 }

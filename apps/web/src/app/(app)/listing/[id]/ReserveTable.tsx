@@ -3,7 +3,8 @@
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useActionState, useId, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { reserveTable } from "@/lib/reservations/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
@@ -176,6 +177,11 @@ export function ReserveTable({
     ActionResult<{ reservationId: string; status: "PENDING"; deposit?: ReservedDeposit | null }> | null,
     FormData
   >(reserveTable, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1);
+     the phone step, when that is the reason, stays as its link. */
+  useEffect(() => {
+    if (state && !state.ok) banner.error(state.error);
+  }, [state]);
   /* What the restaurant's rule asks of this party at this time, on the
      screen, before anything is sent. The database quotes again once the
      request exists, and that is the figure the guest pays. */
@@ -428,11 +434,6 @@ export function ReserveTable({
         </div>
       ) : null}
 
-      {state && !state.ok && (
-        <p role="alert" className="mt-sm text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {state.error}
-        </p>
-      )}
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
       <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0}>
