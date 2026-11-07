@@ -36,14 +36,15 @@ export function blackControlFills(css: string): string[] {
   const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const found: string[] = [];
   for (const rule of clean.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selector = rule[1].replace(/\s+/g, " ").trim();
+    const selector = (rule[1] ?? "").replace(/\s+/g, " ").trim();
     if (selector.startsWith("@")) continue;
     const last = selector.split(",").map((part) => part.trim().split(/\s|>/).pop() ?? "");
     const stateful = /\[aria-(current|selected|pressed|checked)/.test(selector);
     if (!stateful && !last.some((part) => CONTROL.test(part + " "))) continue;
     if (ALLOWED.some((name) => selector.includes(name))) continue;
-    for (const decl of rule[2].matchAll(/background(?:-color)?\s*:\s*([^;]+);?/g)) {
-      if (INK_FILL.test(decl[1].trim())) found.push(`${selector} -> ${decl[1].trim()}`);
+    for (const decl of (rule[2] ?? "").matchAll(/background(?:-color)?\s*:\s*([^;]+);?/g)) {
+      const fill = (decl[1] ?? "").trim();
+      if (INK_FILL.test(fill)) found.push(`${selector} -> ${fill}`);
     }
   }
   return found;

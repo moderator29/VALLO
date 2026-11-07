@@ -253,7 +253,7 @@
     background: none;
     box-shadow: none;
   }
-  .nf-notif__group--stack .nf-list-item {
+  .nf-notif__group--stack .nf-list-group > .nf-list-item {
     border-radius: var(--nf-radius-card);
     border: var(--nf-border-width) solid var(--nf-glass-rim-thin);
     background: var(--nf-glass-fill-strong);
@@ -265,14 +265,22 @@
        muted measured 4.27:1 on the day card (axe), the tint rung clears 4.5. */
     --nf-content-muted: var(--nf-content-muted-on-tint);
   }
-  .nf-notif__group--stack .nf-list-item + .nf-list-item::before {
+  .nf-notif__group--stack .nf-list-group > .nf-list-item + .nf-list-item::before {
     display: none;
   }
+  /* A bundle opened inside a card is rows in that card, never cards of its
+     own: only the list's direct items are cards (the founder's bug of 7
+     November 2026: a nested row drew as a second frosted card inside the
+     first, with a double edge and a stray shadow). */
+  .nf-notif__group--stack .nf-notif__bundle {
+    margin-inline-end: var(--nf-space-sm);
+  }
+
   /* The one warm glow, behind the front card's plate. */
-  .nf-notif__group--stack .nf-list-item:first-child .nf-list-row__lead {
+  .nf-notif__group--stack .nf-list-group > .nf-list-item:first-child .nf-list-row__lead:not(.nf-notif__bundle *) {
     position: relative;
   }
-  .nf-notif__group--stack .nf-list-item:first-child .nf-list-row__lead::before {
+  .nf-notif__group--stack .nf-list-group > .nf-list-item:first-child .nf-list-row__lead:not(.nf-notif__bundle *)::before {
     content: "";
     position: absolute;
     inset: -1.25rem;
@@ -290,11 +298,11 @@
     position: relative;
     padding-bottom: 1.25rem;
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:first-child {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:first-child {
     position: relative;
     z-index: 3;
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:nth-child(n + 2) {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(n + 2) {
     position: absolute;
     inset: 0 0 1.25rem;
     overflow: hidden;
@@ -304,31 +312,31 @@
     background: var(--nf-surface-elevated);
     border-color: var(--nf-glass-rim);
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:nth-child(n + 2) > * {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(n + 2) > * {
     visibility: hidden;
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:nth-child(2) {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(2) {
     z-index: 2;
     transform: translateY(0.625rem) scale(0.94);
     opacity: 0.72;
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:nth-child(3) {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(3) {
     z-index: 1;
     transform: translateY(1.25rem) scale(0.88);
     opacity: 0.4;
   }
-  .nf-notif__group--stack[data-stacked="true"] .nf-list-item:nth-child(n + 4) {
+  .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(n + 4) {
     display: none;
   }
 
   /* Fanned: the cards behind slide down out of the stack, 50ms apart. */
-  .nf-notif__group--stack[data-stacked="false"] .nf-list-item:nth-child(n + 2) {
+  .nf-notif__group--stack[data-stacked="false"] .nf-list-group > .nf-list-item:nth-child(n + 2) {
     animation: nf-notif-fan var(--nf-duration-slow) var(--nf-ease-entrance) both;
   }
-  .nf-notif__group--stack[data-stacked="false"] .nf-list-item:nth-child(3) {
+  .nf-notif__group--stack[data-stacked="false"] .nf-list-group > .nf-list-item:nth-child(3) {
     animation-delay: 50ms;
   }
-  .nf-notif__group--stack[data-stacked="false"] .nf-list-item:nth-child(n + 4) {
+  .nf-notif__group--stack[data-stacked="false"] .nf-list-group > .nf-list-item:nth-child(n + 4) {
     animation-delay: 100ms;
   }
   @keyframes nf-notif-fan {
@@ -338,15 +346,15 @@
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .nf-notif__group--stack .nf-list-item {
+    .nf-notif__group--stack .nf-list-group > .nf-list-item {
       animation: none !important;
     }
     .nf-notif__fan svg {
       transition: none;
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-notif__group--stack .nf-list-item,
-  [data-save-data="on"] .nf-notif__group--stack .nf-list-item {
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-notif__group--stack .nf-list-group > .nf-list-item,
+  [data-save-data="on"] .nf-notif__group--stack .nf-list-group > .nf-list-item {
     animation: none !important;
   }
 
