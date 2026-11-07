@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { fundEscrowPayment } from "@/lib/money/fund-actions";
@@ -13,7 +13,6 @@ import { FUND_ARMED_LABEL, FUND_CONFIRMED_LABEL, FUND_CONFIRMING_LABEL, FUND_SWI
  */
 export function FundControl({ agreementId, amountLabel }: { agreementId: string; amountLabel: string }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   return (
     <div className="grid gap-sm" data-testid="fund-swipe">
       <DragToConfirm
@@ -22,23 +21,17 @@ export function FundControl({ agreementId, amountLabel }: { agreementId: string;
         armedLabel={FUND_ARMED_LABEL}
         confirmingLabel={FUND_CONFIRMING_LABEL}
         confirmedLabel={FUND_CONFIRMED_LABEL}
-        errorLabel={error ?? "The payment did not go through. Nothing has been taken."}
+        errorLabel="The payment did not go through. Nothing has been taken."
         onConfirm={async () => {
-          setError(null);
           const result = await fundEscrowPayment({ agreementId });
           if (!result.ok) {
-            setError(result.error);
+            banner.error(result.error);
             return false;
           }
           router.push(result.data.next);
           return true;
         }}
       />
-      {error && (
-        <p role="alert" className="nf-caption text-[var(--nf-platinum-hi)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -26,7 +27,6 @@ export function PinMessages({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   if (candidates.length === 0) return null;
   if (!open) {
     return (
@@ -50,12 +50,11 @@ export function PinMessages({
               variant="ghost"
               disabled={pending}
               onClick={() => {
-                setError(null);
                 start(async () => {
                   try {
                     const result = await pinTenancyMessage({ tenancyId, messageId: message.id });
                     if (!result.ok) {
-                      setError(result.error);
+                      banner.error(result.error);
                       return;
                     }
                     router.refresh();
@@ -70,11 +69,6 @@ export function PinMessages({
           </li>
         ))}
       </ul>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

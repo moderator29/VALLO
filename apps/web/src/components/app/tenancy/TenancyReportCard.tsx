@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
@@ -46,7 +47,6 @@ export function TenancyReportCard({
 }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [items, setItems] = useState<Partial<Record<RoomItem, boolean>>>(report.items);
   const [notes, setNotes] = useState(report.notes ?? "");
   const [uploadFor, setUploadFor] = useState<RoomItem | null>(null);
@@ -75,7 +75,6 @@ export function TenancyReportCard({
               : null;
 
   function save(submit: boolean) {
-    setError(null);
     start(async () => {
       try {
         const result = await saveTenancyReport({
@@ -86,7 +85,7 @@ export function TenancyReportCard({
           submit,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         router.refresh();
@@ -97,9 +96,8 @@ export function TenancyReportCard({
   }
 
   async function upload(file: File) {
-    setError(null);
     if (!report.id) {
-      setError(copy.failed);
+      banner.error(copy.failed);
       return;
     }
     const extension = (file.name.split(".").pop() ?? "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
@@ -109,17 +107,17 @@ export function TenancyReportCard({
        the upload failure this card already says. */
     const supabase = await loadBrowserClient();
     if (!supabase) {
-      setError(copy.failed);
+      banner.error(copy.failed);
       return;
     }
     const uploaded = await uploadToStorage({ supabase, bucket: "tenancy-evidence", path, body: file, contentType: file.type });
     if (!uploaded.ok) {
-      setError(copy.failed);
+      banner.error(copy.failed);
       return;
     }
     const added = await addTenancyReportPhoto({ tenancyId, reportId: report.id, item: uploadFor, path });
     if (!added.ok) {
-      setError(added.error);
+      banner.error(added.error);
       return;
     }
     router.refresh();
@@ -231,11 +229,10 @@ export function TenancyReportCard({
           full
           disabled={pending}
           onClick={() => {
-            setError(null);
             start(async () => {
               try {
                 const result = await countersignTenancyReport({ tenancyId, reportId: report.id as string });
-                if (!result.ok) setError(result.error);
+                if (!result.ok) banner.error(result.error);
                 else router.refresh();
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
@@ -247,11 +244,6 @@ export function TenancyReportCard({
         </Button>
       )}
 
-      {error && (
-        <p className="nf-caption mt-sm text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </article>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState } from "react";
@@ -107,7 +108,9 @@ export function TenancyReviewForm({
           ...(body.trim() ? { body: body.trim() } : {}),
         });
         if (!result.ok) {
-          setError(result.error);
+          /* Said by the one banner (Grade 1); an unanswered question stays the
+             form's own line, and the phone step stays as its link. */
+          banner.error(result.error);
           setPhoneGate(isPhoneGate(result));
           return;
         }

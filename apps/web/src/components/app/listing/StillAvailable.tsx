@@ -2,7 +2,6 @@
 
 import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { askStillAvailable } from "@/lib/availability/actions";

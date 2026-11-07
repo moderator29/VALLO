@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -42,8 +43,6 @@ export function ArrivalChargesForm({
   const router = useRouter();
   const [rows, setRows] = useState(() => initialRows(existing));
   const [pending, start] = useSafeTransition();
-  const [note, setNote] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const open = openKeys(rows);
 
   return (
@@ -52,8 +51,6 @@ export function ArrivalChargesForm({
       data-testid="arrival-charges"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
-        setNote(null);
         const answers = answersFrom(rows);
         start(async () => {
           try {
@@ -63,10 +60,11 @@ export function ArrivalChargesForm({
               answers,
             });
             if (!result.ok) {
-              setError(result.error);
+              banner.error(result.error);
               return;
             }
-            setNote(copy.saved);
+            /* Said by the one banner at the top of the screen (Grade 1). */
+            banner.success(copy.saved);
             router.refresh();
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
@@ -75,16 +73,6 @@ export function ArrivalChargesForm({
       }}
     >
       <ArrivalChargesFields rows={rows} onRows={setRows} copy={copy} />
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
-      {note && (
-        <p className="nf-caption text-[var(--nf-state-success)]" role="status">
-          {note}
-        </p>
-      )}
       <Button type="submit" variant="primary" full loading={pending} disabled={pending || open.length > 0}>
         {copy.save}
       </Button>

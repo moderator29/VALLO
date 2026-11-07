@@ -12,6 +12,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy: Dictionary["afterTheGate"]["arrival"] }) {
   const [asked, setAsked] = useState("");
   const [pending, start] = useSafeTransition();
+  /* The amount's refusal is the field's own error, under the field. */
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
   if (done) {

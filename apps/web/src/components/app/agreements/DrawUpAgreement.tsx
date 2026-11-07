@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { openRentAgreement } from "@/lib/agreements/actions";
@@ -24,7 +25,6 @@ export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: strin
   const [moveIn, setMoveIn] = useState(minDate);
   const [handover, setHandover] = useState(minDate);
   const [notes, setNotes] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   return (
     <form
@@ -32,12 +32,11 @@ export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: strin
       data-testid="draw-up-agreement"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
         start(async () => {
           try {
             const result = await openRentAgreement({ inspectionId, moveIn, handoverOn: handover, notes });
             if (!result.ok) {
-              setError(result.error);
+              banner.error(result.error);
               return;
             }
             /* The agreement page checks the record before it shows the moment. */
@@ -61,11 +60,6 @@ export function DrawUpAgreement({ inspectionId, minDate }: { inspectionId: strin
         <span className="nf-label">Anything both of you should agree in writing (optional)</span>
         <textarea className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </label>
-      {error ? (
-        <p role="alert" className="nf-ix-hint text-[var(--nf-status-error)]">
-          {error}
-        </p>
-      ) : null}
       <Button type="submit" variant="primary" full disabled={pending}>
         {pending ? "Drawing up the agreement" : "Draw up the agreement"}
       </Button>

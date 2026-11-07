@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n";
@@ -29,17 +30,16 @@ type Copy = Dictionary["afterTheGate"]["tenancy"];
  * these forms only collect the facts and say what came back.
  */
 
+/* What a step did is said by the one banner at the top of the screen (Grade 1). */
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   function run(work: () => Promise<{ ok: boolean; error?: string }>) {
-    setError(null);
     start(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? null);
+          banner.error(result.error ?? "That did not go through. Try again.");
           return;
         }
         router.refresh();
@@ -48,7 +48,7 @@ function useRun() {
       }
     });
   }
-  return { pending, error, run };
+  return { pending, run };
 }
 
 export function DeductionAnswer({
@@ -60,7 +60,7 @@ export function DeductionAnswer({
   deductionId: string;
   copy: Copy;
 }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   return (
     <div className="mt-xs">
       <div className="flex flex-wrap gap-sm">
@@ -97,14 +97,6 @@ export function DeductionAnswer({
           {copy.dispute}
         </Button>
       </div>
-      {error && (
-        <p
-          className="nf-caption mt-xs text-[var(--nf-state-error)]"
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -120,7 +112,7 @@ export function ProposeDeduction({
   photos: { id: string; item: RoomItem | null; label: string }[];
   copy: Copy;
 }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [item, setItem] = useState<RoomItem>(photos[0]?.item ?? "overall");
   const [amount, setAmount] = useState("");
   const [photoId, setPhotoId] = useState(photos[0]?.id ?? "");
@@ -198,7 +190,7 @@ export function ProposeDeduction({
           </select>
         )}
       </Field>
-      <Field label={copy.proposeNote} error={error ?? undefined}>
+      <Field label={copy.proposeNote}>
         {(control) => (
           <input
             {...control}
@@ -249,20 +241,17 @@ export function RecordReturn({
 }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [amount, setAmount] = useState(outstandingNaira);
   const [returnedOn, setReturnedOn] = useState(today);
   const [method, setMethod] = useState<"bank_transfer" | "cash" | "other">("bank_transfer");
   const [reference, setReference] = useState("");
   const [key, setKey] = useState(() => crypto.randomUUID());
-  const [sent, setSent] = useState<string | null>(null);
   return (
     <form
       className="grid gap-md"
       data-testid="caution-return"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
         start(async () => {
           try {
             const result = await recordCautionReturn({
@@ -275,10 +264,10 @@ export function RecordReturn({
               idempotencyKey: key,
             });
             if (!result.ok) {
-              setError(result.error ?? null);
+              banner.error(result.error ?? "That did not go through. Try again.");
               return;
             }
-            setSent(copy.returnSent);
+            banner.success(copy.returnSent, { "data-testid": "caution-return-sent" });
             setAmount("");
             setKey(crypto.randomUUID());
             router.refresh();
@@ -291,11 +280,6 @@ export function RecordReturn({
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">
         {(viewer === "lister" ? copy.returnHelp : copy.returnHelpTenant).replace("{outstanding}", outstanding)}
       </p>
-      {sent && (
-        <p className="nf-body-sm text-[var(--nf-state-success)]" role="status" data-testid="caution-return-sent">
-          {sent}
-        </p>
-      )}
       <Field label={copy.returnAmount}>
         {(control) => (
           <input
@@ -304,10 +288,7 @@ export function RecordReturn({
             inputMode="decimal"
             autoComplete="off"
             value={amount}
-            onChange={(e) => {
-              setAmount(e.target.value);
-              setSent(null);
-            }}
+            onChange={(e) => setAmount(e.target.value)}
           />
         )}
       </Field>
@@ -332,7 +313,7 @@ export function RecordReturn({
           </select>
         )}
       </Field>
-      <Field label={copy.returnReference} error={error ?? undefined}>
+      <Field label={copy.returnReference}>
         {(control) => (
           <input {...control} className="nf-field" maxLength={100} value={reference} onChange={(e) => setReference(e.target.value)} />
         )}
@@ -346,7 +327,7 @@ export function RecordReturn({
 
 /** The tenant says a return the lister recorded never arrived. Vallo staff rule on it. */
 export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string; returnId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
   if (!open) {
@@ -364,7 +345,7 @@ export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string
         run(() => contestCautionReturn({ tenancyId, returnId, note }));
       }}
     >
-      <Field label={copy.contestNote} error={error ?? undefined}>
+      <Field label={copy.contestNote}>
         {(control) => <input {...control} className="nf-field" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />}
       </Field>
       <Button type="submit" size="sm" variant="secondary" loading={pending} disabled={pending || note.trim().length < 5}>
@@ -376,7 +357,7 @@ export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string
 
 /** Past its due date, the tenant takes the unreturned part to the Vallo Guarantee. */
 export function EscalateCaution({ tenancyId, obligationId, copy }: { tenancyId: string; obligationId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   return (
     <div className="grid gap-xs">
       <Button
@@ -388,11 +369,6 @@ export function EscalateCaution({ tenancyId, obligationId, copy }: { tenancyId: 
       >
         {copy.escalateSubmit}
       </Button>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
