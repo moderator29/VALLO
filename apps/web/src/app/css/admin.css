@@ -2679,3 +2679,70 @@
     font-weight: 600;
   }
 }
+
+/* THE CRASH LOG (/admin/crashes, 7 November 2026): one card per distinct
+   crash, the platform and the count on top, the message, one quiet line of
+   when and where, the stack folded away. */
+@layer components {
+  .nf-crash-list {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-crash {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-panel-edge);
+    border-radius: var(--nf-radius-sm);
+    background: var(--nf-surface-canvas);
+  }
+  .nf-crash__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-xs);
+  }
+  .nf-crash__count {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-crash__title {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+    overflow-wrap: anywhere;
+  }
+  .nf-crash__type {
+    font-weight: 600;
+  }
+  .nf-crash__meta {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+    overflow-wrap: anywhere;
+  }
+  .nf-crash__stack summary {
+    cursor: pointer;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-brand-primary);
+  }
+  .nf-crash__stack pre {
+    margin: var(--nf-space-xs) 0 0;
+    padding: var(--nf-space-sm);
+    max-height: 14rem;
+    overflow: auto;
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-panel-hair);
+    font-size: var(--nf-text-caption);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .nf-crash__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+}

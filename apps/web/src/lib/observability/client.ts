@@ -92,6 +92,10 @@ export function reportClientError(error: unknown, context: ClientErrorContext): 
       digest: context.digest,
       componentStack: context.componentStack?.slice(0, MAX_STACK),
       area,
+      /* The crash log (7 November 2026) sorts by platform: inside the iOS
+         or Android app, or a plain browser. No device model, no version. */
+      platform: platformNow(),
+      release: (process.env.NEXT_PUBLIC_BUILD_ID ?? "").slice(0, 40) || undefined,
     });
 
     void fetch(CLIENT_ERROR_PATH, {
@@ -106,4 +110,40 @@ export function reportClientError(error: unknown, context: ClientErrorContext): 
   } catch {
     // Reporting must never be the second failure. See the header.
   }
+}
+
+/** "ios", "android" or "web": where this page is running. Never throws. */
+function platformNow(): "ios" | "android" | "web" {
+  try {
+    const shell = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor;
+    const name = shell?.getPlatform?.();
+    return name === "ios" || name === "android" ? name : "web";
+  } catch {
+    return "web";
+  }
+}
+
+let installed = false;
+
+/**
+ * Crashes that never reach a React error boundary: a throw in an event
+ * handler, a timer or a promise nobody awaited. Before this the crash log
+ * only ever heard about render crashes. Installed once, from `CrashListener`
+ * in the root layout. Errors from other origins (extensions, a third party
+ * script) arrive as a bare "Script error." with nothing to read and are
+ * skipped.
+ */
+export function installGlobalCrashHandlers(): void {
+  if (installed || typeof window === "undefined") return;
+  installed = true;
+  window.addEventListener("error", (event) => {
+    if (!event.error && (!event.message || event.message === "Script error.")) return;
+    reportClientError(event.error ?? new Error(event.message), { kind: "client.window" });
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    const reason = event.reason;
+    /* An aborted fetch is a person leaving a page, not a crash. */
+    if (reason && typeof reason === "object" && (reason as { name?: unknown }).name === "AbortError") return;
+    reportClientError(reason instanceof Error ? reason : new Error(String(reason ?? "Unhandled rejection")), { kind: "client.promise" });
+  });
 }

@@ -13,6 +13,9 @@ vi.mock("@/lib/observability/report", () => ({
     state.reported += 1;
   },
 }));
+vi.mock("@/lib/observability/crash-log", () => ({
+  recordCrash: async () => false,
+}));
 vi.mock("@/lib/security/rate-limit", () => ({
   ipFromHeaders: () => "203.0.113.7",
   subjectForIp: (ip: string) => `ip:${ip}`,

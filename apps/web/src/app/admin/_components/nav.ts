@@ -191,6 +191,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     countLabel: "alerts open, waiting on a person",
     children: [
       { key: "alerts", href: "/admin/alerts", icon: ui("bell"), label: "Alerts", countKeys: ["alerts"], countLabel: "alerts open, waiting on a person" },
+      /* Vallo's own crash log: iPhone, Android, website and server (7 November 2026). */
+      { key: "crashes", href: "/admin/crashes", icon: ui("alert-triangle"), label: "Crash log" },
       { key: "audit", href: "/admin/audit", icon: ui("history"), label: "Audit log" },
       { key: "oversight", href: "/admin/oversight", icon: ui("user"), label: "Team oversight" },
       /* Read-only checks of each provider key (Payluk, LiveKit, Apple push, Termii, MapTiler). */

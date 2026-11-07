@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { recordAlert } from "@/lib/alerts";
 import { reportError } from "@/lib/observability/report";
 import { scrubError } from "@/lib/observability/scrub";
+import { recordCrash } from "@/lib/observability/crash-log";
+import { crashSource } from "@/lib/observability/crash-fingerprint";
 import { consume, ipFromHeaders, subjectForIp } from "@/lib/security/rate-limit";
 
 /**
@@ -134,6 +136,20 @@ export async function POST(request: Request): Promise<NextResponse> {
       componentStack: field(record.componentStack) || undefined,
     },
   });
+
+  /* THE CRASH LOG (7 November 2026): one counted row per distinct crash,
+     by platform, read at /admin/crashes. The alert below stays only as the
+     fallback for a report the crash log could not take (its table not
+     there yet), so nothing is lost while the SQL waits to be applied. */
+  const logged = await recordCrash({
+    error,
+    source: crashSource(field(record.platform, 16)),
+    kind,
+    area,
+    release: field(record.release, 40) || null,
+    ref: field(record.digest, 80) || null,
+  });
+  if (logged) return acknowledged;
 
   /* A READABLE COPY ON THE ADMIN DESK (5 November 2026). With no SENTRY_DSN a
      browser crash left only a reference on the person's screen and nothing the

@@ -12,6 +12,8 @@ Web-side changes reach the app instantly and are not listed.
 | 3 | New App Link and Universal Link paths for bookings, messages, notifications | Both | Deep links land on the right screen | Not started |
 | 4 | Notification Service Extension for rich push images | iOS | Push with listing photos | Optional, founder to decide |
 | 5 | App switcher privacy cover | iOS | Hide money screens in the app switcher | Not started |
+| 6 | Native crash capture: a crash of the Swift or Kotlin shell itself (not the web pages, which the crash log already hears) written on next launch to /api/client-error with platform ios or android | Both | Founder, 7 November 2026: Vallo's own crash log in admin | Not started |
+| 7 | Animated launch: the exact Vallo logo and wordmark drawn in on the splash, handing off to the web startup screen without a flash | Both | Founder, 7 November 2026: animated logo | Not started |
 
 Nothing in this file has been built. Built items move to a "Shipped in" column
 with the build number.

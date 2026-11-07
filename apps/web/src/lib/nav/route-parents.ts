@@ -381,6 +381,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
 
   /* ------------------------------------------------------------- account */
   "/assistant": "/home",
+  /* Grade 1 (P1.4): Talk to a person, an inner page of the assistant. */
+  "/assistant/person": "/assistant",
   "/notifications": "/home",
   /* D22: every notification's designed full view, reached by a route so back
      behaves and a push lands. Its way up is the list it belongs to. */
@@ -501,6 +503,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/blocked-terms": "/admin/queue",
   "/admin/weight-withheld": "/admin/social",
   "/admin/call-usage": "/admin/operations",
+  "/admin/crashes": "/admin/operations",
   "/admin/retention": "/admin/operations",
 
   /* ---------------------------------------------------- the agent console */
