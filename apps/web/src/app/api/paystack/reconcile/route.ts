@@ -191,11 +191,21 @@ async function run(request: Request): Promise<NextResponse> {
   const alert = reconcileAlert(summary);
   if (alert) await recordAlert(alert);
 
+  /* R-03 (Survey B): two schedulers run this, and a row per run was 97% of
+     audit_log, burying the staff actions an auditor reads. A run that found
+     anything always writes. A CLEAN run writes only when the newest row is
+     older than CLEAN_HEARTBEAT_MS, which keeps the freshness watch
+     (`lib/cron/freshness.ts`, 3 hours) fed even with one scheduler down. */
+  const outcome = reconcileAuditOutcome(summary);
+  if (outcome === "clean" && (await cleanRunRecordedRecently(admin))) {
+    return NextResponse.json({ ok: true, apply, needsAttention: report.needsAttention, recorded: false });
+  }
+
   await recordMoneyAudit(admin, {
     actor: { kind: "sweep" },
     action: "payment.reconciliation.run",
     reference: null,
-    outcome: reconcileAuditOutcome(summary),
+    outcome,
     detail: { hours, apply, ...summary.counts },
   });
 
@@ -226,4 +236,22 @@ export async function GET(request: Request): Promise<NextResponse> {
 /** POST, for anything that would rather not put a run behind a GET. */
 export async function POST(request: Request): Promise<NextResponse> {
   return run(request);
+}
+
+/** A clean run's row at most this often: under the 3 hour freshness window. */
+const CLEAN_HEARTBEAT_MS = 100 * 60 * 1000;
+
+/** True when a reconciliation row was written inside the heartbeat. A failed read answers false, so the row is written. */
+async function cleanRunRecordedRecently(admin: NonNullable<ReturnType<typeof getAdminClient>>): Promise<boolean> {
+  try {
+    const since = new Date(Date.now() - CLEAN_HEARTBEAT_MS).toISOString();
+    const { count, error } = await admin
+      .from("audit_log")
+      .select("id", { count: "exact", head: true })
+      .eq("action", "payment.reconciliation.run")
+      .gte("created_at", since);
+    return !error && (count ?? 0) > 0;
+  } catch {
+    return false;
+  }
 }
