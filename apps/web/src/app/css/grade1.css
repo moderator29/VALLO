@@ -718,7 +718,7 @@
   content: "";
   position: absolute;
   inset-block-start: 0;
-  inset-inline: calc(var(--nf-space-md) + 2.75rem) 0;
+  inset-inline: calc(var(--nf-space-md) + 2.5rem) 0;
   border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
 }
 .nf-g1-countries__group {
@@ -756,16 +756,13 @@
   color: var(--nf-brand-primary);
   font-weight: 600;
 }
-/* The flag sits on a small rounded plate, so emoji flags of every shape line
-   up as one column. */
+/* The flag stands on its own (founder, 7 November 2026: no plate behind it),
+   in a fixed-width column so names line up whatever the flag's shape. */
 .nf-g1-country__flag {
   display: grid;
   place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
-  border-radius: var(--nf-radius-sm);
-  background: var(--nf-surface-inset);
-  font-size: 1.125rem;
+  inline-size: 1.75rem;
+  font-size: 1.375rem;
   line-height: 1;
 }
 .nf-g1-country__name {
