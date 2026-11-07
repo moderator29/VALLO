@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { LISTING_PRIVATE_COLUMNS, withListingPrivate, withoutColumns } from "../supabase/private-fields";
 import type { Database } from "../supabase/database.types";
@@ -103,7 +105,11 @@ function publishedTier(embed: unknown): unknown {
  * listings.agent_id points at public.agents, never at the auth user, so every
  * path through this feature starts by walking agents.user_id = auth.uid().
  */
-export async function getAgentContext(): Promise<AgentContext> {
+/* Grade 1 (survey B-04): memoised per request with React's cache, so a page,
+   its layout and its parts read the agents table once, not two or three times. */
+export const getAgentContext = cache(getAgentContextOnce);
+
+async function getAgentContextOnce(): Promise<AgentContext> {
   const session = await resolveSession();
   if (session.state === "unconfigured") return { state: "unconfigured" };
   if (session.state === "signed-out") return { state: "signed-out" };

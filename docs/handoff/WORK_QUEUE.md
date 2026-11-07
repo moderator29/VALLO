@@ -50,6 +50,22 @@ like Vallo and differ from theirs.
   minutes), staff sign-in alerts only on a new device, voice notes and
   reactions.
 
+### Carried over from Builder B (stopped 7 November to free its slot)
+- DONE by the lead: R-01 the call channels take their own names (the shape
+  behind 7 of 9 recorded crashes); B-04 `getAgentContext` cached per request.
+- R-03 DECIDED: keep BOTH reconciliation schedulers. The pg_cron path was
+  silently dead for three weeks in September (`lib/cron/freshness.ts`), and the
+  Vercel copy is the backup for the one job that recovers unconfirmed
+  payments. Fix the audit noise instead: write a run row only when the last
+  one is older than 15 minutes (Lead, backend).
+- For Agent FE: banner sweep on the rest of `app/agent/**` (PortfolioControls,
+  BroadcastPaste, DraftMatches, BookingsWorkspace, MandateForm, RevokeDoor,
+  CloseListingSheet, BulkBar, DuplicateListing), all of `app/host/**`,
+  `components/agent/**`, `components/host/**`, `components/workspace/**`, and
+  the four useActionState desks (RecoveryDesk, StandingDesk,
+  ReferenceEditors, StopsDesk) plus the queue page's claim and bulk outcome.
+- For the Lead: B-03 rate limits, D-08 migration drift files.
+
 ## Round 2: the listing wizard, one question per screen
 - LW-01, LW-02: split the 4,733-line `ListingWizard.tsx` into steps as data
   on `StepFrame` (the 17-screen flow in Survey B), keeping every gate: supply
