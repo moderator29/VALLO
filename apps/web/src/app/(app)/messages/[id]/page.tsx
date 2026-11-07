@@ -9,7 +9,7 @@ import { getLocale } from "@/lib/locale";
 import { PageHeader } from "@/components/app/PageHeader";
 import { resolveSession } from "@/lib/actions/session";
 import { isFeatureEnabled } from "@/lib/flags";
-import { getThreadContext, loadThread, type ThreadContext } from "@/lib/messages/live";
+import { getThreadContext, loadThread, loadThreadReactions, type ThreadContext } from "@/lib/messages/live";
 import { readOpenInspectionForConversation } from "@/lib/inspections/queries";
 import { ThreadView, type ThreadBubble } from "./ThreadView";
 import { resolveCards } from "./cards";
@@ -173,7 +173,7 @@ export default async function ConversationPage({
     if (!UUID_RE.test(id)) notFound();
     const locale = await getLocale();
     const t = getDictionary(locale);
-    const [thread, contextRead, role, read, unread, callsOn, threadCalls] = await Promise.all([
+    const [thread, contextRead, role, read, unread, callsOn, threadCalls, reactions] = await Promise.all([
       loadThread(session.supabase, session.user, id),
       getThreadContext(id),
       viewerRole(session.supabase, session.user.id, id),
@@ -182,6 +182,9 @@ export default async function ConversationPage({
       /* VC1: whether to draw the call buttons, and which rows are calls. */
       videoCallsOn(),
       readThreadCalls(session.supabase, id),
+      /* GRADE 1 (P1.3): the thread's reactions. Null when the table is not
+         there yet (the pending migration), and the thread then offers none. */
+      loadThreadReactions(session.supabase, id),
     ]);
     if (!thread) notFound();
     /*
@@ -448,6 +451,7 @@ export default async function ConversationPage({
         dayKitCopy={t.memberKit.dayKit}
         calls={{ copy: t.calls, enabled: callsOn, words: t.chatPolish.calls }}
         viewerCopy={t.chatPolish.viewer}
+        reactions={reactions}
         messages={thread.messages.map((m): ThreadBubble => {
           const card = cards.get(m.id);
           const callId = threadCalls.markers.get(m.id);
@@ -463,6 +467,12 @@ export default async function ConversationPage({
             imageUrl: m.imageUrl,
             imageSize: m.imageSize ?? null,
             read: read.has(m.id),
+            /* The row's own reply, forward and delete state, and (GRADE 1)
+               its voice note, so the player draws after a reload too. */
+            ...(m.replyToId ? { replyToId: m.replyToId } : {}),
+            ...(m.forwarded ? { forwarded: true } : {}),
+            ...(m.deleted ? { deleted: true } : {}),
+            ...(m.audio ? { audio: m.audio } : {}),
             ...(m.createdAt ? { createdAt: m.createdAt } : {}),
             ...(card ? { card } : {}),
           };

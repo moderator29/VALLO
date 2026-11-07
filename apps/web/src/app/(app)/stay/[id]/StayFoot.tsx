@@ -1,5 +1,6 @@
 "use client";
 
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { useEffect, useRef } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import { Money } from "@/components/ui/Money";
@@ -79,6 +80,8 @@ export function StayFoot({
                   <Money minor={figureMinor} locale={locale} mode="full" />
                 </span>
                 <span className="nf-detail-foot__caption whitespace-nowrap leading-snug">{caption}</span>
+                {/* Read off the phone's kept copy, the figure says so (SW15). */}
+                <KeptPriceNote inline />
               </>
             ) : (
               <span className="nf-detail-foot__caption leading-snug">{caption}</span>

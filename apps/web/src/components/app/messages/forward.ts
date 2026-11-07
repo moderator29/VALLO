@@ -1,3 +1,4 @@
+import { VOICE_BODY } from "@/lib/messages/voice-note";
 import type { BadgeTier } from "@/lib/trust/badge-tier";
 
 /**
@@ -76,9 +77,14 @@ export type ForwardableMessage = {
 };
 
 /** Words, sent, and nothing else riding on it. */
+const PHOTO_PLACEHOLDER = "\u{1F4F7} Photo";
+
 export function canForward(m: ForwardableMessage): boolean {
   if (m.id.startsWith("local-") || m.state !== undefined) return false;
   if (m.deleted || m.imageUrl !== null || m.audio || m.file || m.card || m.call) return false;
+  /* A photo or a voice note that arrived live, before its attachment was read,
+     is still its placeholder words: never forwarded as if they were the note. */
+  if (m.body === PHOTO_PLACEHOLDER || m.body === VOICE_BODY) return false;
   return m.body.trim().length > 0;
 }
 

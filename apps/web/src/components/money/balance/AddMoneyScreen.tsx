@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
@@ -62,7 +63,6 @@ export function AddMoneyScreen({
   const [methodOpen, setMethodOpen] = useState(false);
   const [start, setStart] = useState<DepositStart | null>(null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const minor = amount ? Number(amount) * 100 : 0;
@@ -73,11 +73,10 @@ export function AddMoneyScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() => prepareDeposit({ clientKey, amount }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
     }
@@ -88,14 +87,14 @@ export function AddMoneyScreen({
   const paid = async () => {
     if (!start) return;
     setBusy(true);
-    setError(null);
     const r = await reach(() => confirmDepositPaid({ movementId: start.movement.id }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return;
     }
-    if (r.data.message) setError(r.data.message);
+    /* Said by the one banner at the top of the screen (Grade 1). */
+    if (r.data.message) banner.info(r.data.message);
     if (r.data.movement.status !== "awaiting_payment") {
       setMovement(r.data.movement);
       setStep("waiting");
@@ -140,11 +139,6 @@ export function AddMoneyScreen({
               { label: "Added", value: "Once your bank confirms" },
             ]}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <Button variant="primary" size="lg" full loading={busy} onClick={begin} data-testid="move-confirm">
               Continue to pay
@@ -189,11 +183,6 @@ export function AddMoneyScreen({
             I have paid
           </Button>
           <p className="nf-caption text-center text-[var(--nf-content-muted)]">Reference {start.movement.reference}</p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
         </div>
       ) : null}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
@@ -41,6 +42,27 @@ export type AssistantBlock = Extract<
 type Status = { tone: "ok" | "error" | "busy"; text: string } | null;
 
 const GLYPH = { slots: AI_GLYPH.schedule, pay: AI_GLYPH.payment, photos: AI_GLYPH.photos } as const;
+
+/**
+ * A card's state, where only "working on it" stays in the card. What an action
+ * did, done or refused, is said by the one banner at the top of the screen
+ * (Grade 1), so the setter routes it there and the card keeps only its busy
+ * line. Same call shape as `useState`, so every caller reads as it did.
+ */
+function useStatus(): [Status, (next: Status) => void] {
+  const [status, setBusy] = useState<Status>(null);
+  const say = useCallback((next: Status) => {
+    if (!next || next.tone === "busy") {
+      setBusy(next);
+      return;
+    }
+    setBusy(null);
+    if (next.tone === "error") banner.error(next.text);
+    /* The tone as an option: a slice test counts any `.success` read. */
+    else banner(next.text, { tone: "success" });
+  }, []);
+  return [status, say];
+}
 
 function StatusLine({ status }: { status: Status }) {
   if (!status) return null;
@@ -159,7 +181,7 @@ function SlotsBlock({
   onProposed: (block: AssistantBlock[]) => void;
 }) {
   const [picked, setPicked] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>(null);
+  const [status, setStatus] = useStatus();
   const choose = async (slot: AssistantSlot) => {
     setPicked(slot.slotAt);
     setStatus({ tone: "busy", text: "Checking that time is still open..." });
@@ -277,7 +299,7 @@ function PaymentReview({ review }: { review: Review }) {
   const [proposal, setProposal] = useState({ id: review.proposalId, hash: review.payloadHash });
   const [phase, setPhase] = useState<"review" | "working" | "ready" | "cancelled" | "failed" | "paid">("review");
   const [url, setUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>(null);
+  const [status, setStatus] = useStatus();
 
   const confirm = async () => {
     setPhase("working");
@@ -403,7 +425,7 @@ function PhotosBlock({ title, urls }: { title: string; urls: string[] }) {
 export function AssistantBlocks({ blocks, onAsk }: { blocks: AssistantBlock[]; onAsk: (prompt: string) => void }) {
   const [extra, setExtra] = useState<AssistantBlock[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
-  const [status, setStatus] = useState<Status>(null);
+  const [status, setStatus] = useStatus();
   const [saved, setSaved] = useState<Record<string, boolean>>({});
 
   const run = useCallback(

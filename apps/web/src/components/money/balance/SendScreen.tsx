@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
@@ -60,7 +61,9 @@ export function SendScreen({
   const [otp, setOtp] = useState("");
   const [quote, setQuote] = useState<Quote | null>(initial?.quote ?? null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
-  const [error, setError] = useState<string | null>(null);
+  /* The code step's own instruction (where the code went). Every outcome is
+     said by the one banner at the top of the screen (Grade 1). */
+  const [otpNote, setOtpNote] = useState<string | null>(null);
   const [whoError, setWhoError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -87,11 +90,10 @@ export function SendScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() => prepareSend({ clientKey, phone: recipient.phone, amount, ...(note ? { note: note.slice(0, 100) } : {}) }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
     }
@@ -101,15 +103,14 @@ export function SendScreen({
 
   const submit = async (code?: string): Promise<boolean> => {
     if (!quote) return false;
-    setError(null);
     const r = await reach(() => confirmBalanceMovement({ movementId: quote.movementId, ...(code ? { otp: code } : {}) }));
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return false;
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setError(r.data.message);
+      setOtpNote(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -159,11 +160,6 @@ export function SendScreen({
             </div>
             {reason === "Other" ? <TextField label={MOVE_COPY.otherReason} value={other} maxLength={100} showCount onChange={(e) => setOther(e.target.value)} /> : null}
           </div>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <Button variant="primary" size="lg" full loading={busy} disabled={!ready} onClick={prepare} data-testid="move-continue">
               {MOVE_COPY.continue}
@@ -183,11 +179,6 @@ export function SendScreen({
             </p>
           ) : null}
           <p className="nf-caption text-[var(--nf-content-muted)]">A send cannot be taken back once it is confirmed. Reference {quote.reference}.</p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <DragToConfirm
               money
@@ -217,9 +208,9 @@ export function SendScreen({
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
+          {otpNote ? (
+            <p role="status" className="nf-mw-error">
+              {otpNote}
             </p>
           ) : null}
           <Button

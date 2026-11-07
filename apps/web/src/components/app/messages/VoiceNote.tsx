@@ -33,6 +33,14 @@ type Copy = Dictionary["experienceInbox"]["thread"]["voice"];
 /** Decode only what is small enough to decode on a metered phone: about 2 MB. */
 const MAX_DECODE_BYTES = 2_000_000;
 
+/**
+ * GRADE 1: the speeds a note plays at, as a chat app offers them (1x, 1.5x,
+ * 2x), one tap to the next. English only for now; the thread's dictionary
+ * has no word for it yet.
+ */
+export const VOICE_RATES = [1, 1.5, 2] as const;
+const RATE_WORDS = { label: "Playback speed {rate}x. Tap to change", short: "{rate}x" };
+
 export type VoiceNoteData = {
   /** A URL the signed-in reader may fetch (a signed storage URL). */
   url: string;
@@ -58,6 +66,7 @@ export function VoiceNote({
   const [measured, setMeasured] = useState<number | null>(null);
   const [decoded, setDecoded] = useState<number[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [rate, setRate] = useState<(typeof VOICE_RATES)[number]>(1);
 
   const durationMs = note.durationMs ?? measured;
   const peaks = note.peaks && note.peaks.length > 0 ? note.peaks : decoded;
@@ -104,15 +113,36 @@ export function VoiceNote({
     };
   }, [note.url, note.peaks]);
 
+  /* While it plays, the bars follow the sound every frame rather than at the
+     four-a-second pace of `timeupdate`, so the played colour sweeps. */
+  useEffect(() => {
+    if (!playing) return;
+    let frame = 0;
+    const follow = () => {
+      const audio = audioRef.current;
+      if (audio) setPosition(Math.round(audio.currentTime * 1000));
+      frame = window.requestAnimationFrame(follow);
+    };
+    frame = window.requestAnimationFrame(follow);
+    return () => window.cancelAnimationFrame(frame);
+  }, [playing]);
+
+  const cycleRate = () => {
+    const next = VOICE_RATES[(VOICE_RATES.indexOf(rate) + 1) % VOICE_RATES.length]!;
+    setRate(next);
+    if (audioRef.current) audioRef.current.playbackRate = next;
+  };
+
   const toggle = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
+      audio.playbackRate = rate;
       void audio.play().catch(() => setFailed(true));
     } else {
       audio.pause();
     }
-  }, []);
+  }, [rate]);
 
   const seek = (value: number) => {
     const audio = audioRef.current;
@@ -176,6 +206,18 @@ export function VoiceNote({
         <span className="nf-voice__time nf-numeric">
           {playing || position > 0 ? formatDuration(position) : length}
         </span>
+      ) : null}
+
+      {playing || position > 0 ? (
+        <button
+          type="button"
+          className="nf-voice__rate nf-numeric"
+          onClick={cycleRate}
+          aria-label={RATE_WORDS.label.replace("{rate}", String(rate))}
+          data-testid="voice-rate"
+        >
+          {RATE_WORDS.short.replace("{rate}", String(rate))}
+        </button>
       ) : null}
 
       {failed ? (

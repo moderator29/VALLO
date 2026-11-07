@@ -1,5 +1,6 @@
 "use client";
 
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { Money } from "@/components/ui/Money";
 import { useEffect, useRef } from "react";
 import { plural, type Locale } from "@vallo/i18n/core";
@@ -247,6 +248,8 @@ export function ListingStickyBar({
                   is a promise trimmed into a different promise, and this column
                   has the room to wrap. */}
               <span className="nf-detail-foot__caption whitespace-nowrap leading-snug">{caption}</span>
+              {/* Read off the phone's kept copy, the figure says so (SW15). */}
+              <KeptPriceNote inline />
             </>
           ) : (
             /* The property's name, on the bar a person acts from, and it was

@@ -21,7 +21,8 @@ import { STATE_TONE, stateRole, type StateKind } from "@/lib/design/voice";
  *
  * THE ANATOMY, fixed:
  *   1. a glyph: a lean line glyph on the kind's flat plate; a state that
- *      names an object (`icon`, a BrandIcon name) draws its line twin
+ *      names an object (`icon`, a BrandIcon name) draws its line twin. The
+ *      founder's art (`art`) only where a caller names it.
  *   2. one title, under 40 characters
  *   3. one sentence of body, under 180 characters
  *   4. at most one primary and one secondary action, stacked and full width,
@@ -63,9 +64,10 @@ export type StateProps = {
   /** An object name; its line twin is drawn on the plate. Without one, the kind's glyph. */
   icon?: BrandIconName;
   /**
-   * The founder's 3D object in place of the plate. Derived from `icon` when
-   * one matches (`state-art.ts`); pass a name to choose, or `false` to keep
-   * the glyph.
+   * The founder's art in place of the plate (its glyph from the set where
+   * `state-art.ts` has one, else the 3D object), on an empty or a done.
+   * Never derived from `icon` since Grade 1: pass a name to ask for it, for a
+   * record moment. Omitted or `false`, the thin line glyph on its plate.
    */
   art?: Icon3DName | false;
   /** The single next thing to do, naming where it goes. */
@@ -111,16 +113,15 @@ export function State({
   "data-testid": testId,
 }: StateProps) {
   const role = stateRole(kind);
-  /* Objects are for empty and done; an error or offline keeps its glyph. */
-  const object = kind === "empty" || kind === "done" ? stateArtFor(icon, art) : undefined;
-  /* The founder's glyph set wins where it has one: bare, no plate. An error
-     names the shield with the exclamation. */
-  const glyph =
-    kind === "empty" || kind === "done"
-      ? stateGlyphFor(icon, art)
-      : kind === "error"
-        ? ("booking-disputed" as const)
-        : undefined;
+  /* GRADE 1 (SW7, UX_SYSTEM section 11): ONE THIN GLYPH. By default every
+     state draws the lean line glyph on the kind's plate: the object a call
+     site names (`icon`) draws its line twin, and nothing is derived from it
+     any more. The founder's art (a glyph from the set, else the 3D object)
+     draws only where a caller asks for it by name with `art`, which is kept
+     for record moments, and only on an empty or a done. */
+  const asked = (kind === "empty" || kind === "done") && art ? art : undefined;
+  const object = asked ? stateArtFor(undefined, asked) : undefined;
+  const glyph = asked ? stateGlyphFor(undefined, asked) : undefined;
 
   if (kind === "loading") {
     /* The title is read out, not shown: a live region announces its text, and

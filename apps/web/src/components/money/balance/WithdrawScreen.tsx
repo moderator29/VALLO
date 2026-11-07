@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
@@ -16,7 +17,7 @@ import {
   type Quote,
 } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
-import { ACTION_LABEL, MOVE_COPY, REFUSAL } from "@/lib/money/balance-copy";
+import { ACTION_LABEL, MOVE_COPY } from "@/lib/money/balance-copy";
 import { lastFour } from "@/lib/money/funds";
 import { shareChips } from "../AmountPad";
 import { Breakdown, Watching } from "./balance-ui";
@@ -64,7 +65,9 @@ export function WithdrawScreen({
   const [quote, setQuote] = useState<Quote | null>(initial?.quote ?? null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  /* The code step's own instruction (where the code went). Every outcome is
+     said by the one banner at the top of the screen (Grade 1). */
+  const [otpNote, setOtpNote] = useState<string | null>(null);
   const [toError, setToError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -100,7 +103,6 @@ export function WithdrawScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() =>
       prepareWithdrawal({
         clientKey,
@@ -113,7 +115,7 @@ export function WithdrawScreen({
     );
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       /* A fresh key for a fresh attempt; the refused one moved nothing. */
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
@@ -124,15 +126,14 @@ export function WithdrawScreen({
 
   const submit = async (code?: string): Promise<boolean> => {
     if (!quote) return false;
-    setError(null);
     const r = await reach(() => confirmBalanceMovement({ movementId: quote.movementId, ...(code ? { otp: code } : {}) }));
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return false;
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setError(r.data.message);
+      setOtpNote(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -168,11 +169,6 @@ export function WithdrawScreen({
             }}
             testId="withdraw-account"
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <Button variant="primary" size="lg" full loading={busy} disabled={!ready} onClick={prepare} data-testid="move-continue">
               {MOVE_COPY.continue}
@@ -189,11 +185,6 @@ export function WithdrawScreen({
           <p className="nf-caption text-[var(--nf-content-muted)]">
             The processing fee is set by our licensed provider for this withdrawal and is what you will be charged. Reference {quote.reference}.
           </p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error === REFUSAL.otpNeeded ? REFUSAL.otpNeeded : error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <DragToConfirm
               money
@@ -223,9 +214,9 @@ export function WithdrawScreen({
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
+          {otpNote ? (
+            <p role="status" className="nf-mw-error">
+              {otpNote}
             </p>
           ) : null}
           <Button

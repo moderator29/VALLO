@@ -1,3 +1,4 @@
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { DetailGlyph } from "@/components/app/listing/DetailGlyph";
 import { ButtonLink } from "@/components/ui/Button";
@@ -103,6 +104,8 @@ export async function RentalPanel({
       <p className={`mt-2xs ${TYPE.rowMeta}`}>
         {forSale ? w.saleTerms : period === "year" ? w.annualTerms : w.tenancyTerms}
       </p>
+      {/* Read off the phone's kept copy, the price says so (SW15). */}
+      <KeptPriceNote className="mt-2xs" />
 
       {/* A sale has no term to lengthen. Nothing is bought by the year. */}
       {!forSale && (

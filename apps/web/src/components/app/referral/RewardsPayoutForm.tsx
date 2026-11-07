@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -37,7 +38,6 @@ export function RewardsPayoutForm({
 }) {
   const [bankCode, setBankCode] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState<RewardsPayoutResult | null>(null);
   const [pending, start] = useSafeTransition();
@@ -69,20 +69,23 @@ export function RewardsPayoutForm({
       data-testid="rewards-payout-form"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
         setFieldErrors({});
         start(async () => {
-          /* A dropped connection is said here, never handed to the error
-             boundary with the form's state still in it. */
+          /* A refusal or a dropped connection is said by the one banner at the
+             top of the screen (Grade 1), never handed to the error boundary
+             with the form's state still in it; a field's own error stays
+             under that field. */
           try {
             const result = await action({ bankCode, accountNumber });
             if (result.ok) setDone(result.data);
             else {
-              setError(result.error);
+              banner.error(result.error, { "data-testid": "rewards-payout-error" });
               setFieldErrors(result.fieldErrors ?? {});
             }
           } catch {
-            setError("We could not reach Vallo. Check your connection and try again. Nothing was withdrawn.");
+            banner.error("We could not reach Vallo. Check your connection and try again. Nothing was withdrawn.", {
+              "data-testid": "rewards-payout-error",
+            });
           }
         });
       }}
@@ -114,11 +117,6 @@ export function RewardsPayoutForm({
         error={fieldErrors.accountNumber}
         required
       />
-      {error ? (
-        <p className="nf-rewards-error" role="alert" data-testid="rewards-payout-error">
-          {error}
-        </p>
-      ) : null}
       <Button type="submit" variant="primary" size="lg" full loading={pending} data-testid="rewards-payout-submit">
         {pending ? copy.form.sending : fill(copy.form.submit, { amount: money(availableMinor, locale) })}
       </Button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
@@ -840,7 +841,6 @@ function EscalationCard({
   const [name, setName] = useState(defaultName);
   const [email, setEmail] = useState(defaultEmail);
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string }>({});
-  const [note, setNote] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const submit = () => {
@@ -853,7 +853,6 @@ function EscalationCard({
       if (Object.keys(errors).length > 0) return;
     }
 
-    setNote(null);
     startTransition(async () => {
       try {
         const result = await fileSupportTicket({
@@ -870,7 +869,8 @@ function EscalationCard({
             ...(result.fieldErrors?.name ? { name: result.fieldErrors.name } : {}),
             ...(result.fieldErrors?.email ? { email: result.fieldErrors.email } : {}),
           });
-          setNote(result.error);
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error);
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -929,9 +929,6 @@ function EscalationCard({
         </div>
       )}
 
-      {note && (
-        <p className="mt-row nf-caption leading-relaxed text-[var(--nf-content-muted)]">{note}</p>
-      )}
 
       <Button
         variant="primary"

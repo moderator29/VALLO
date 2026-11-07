@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { REACTION_EMOJI } from "./reactions";
+import { VOICE_SERVER_MAX_MS } from "./voice-note";
 
 /**
  * Messaging input schemas.
@@ -64,6 +66,35 @@ export const attachImageSchema = z.object({
 });
 
 export type AttachImageInput = z.infer<typeof attachImageSchema>;
+
+// A voice note: the same folder rule, an audio ending only, its length and its
+// bars (GRADE 1, P1.3; `lib/messages/voice-note.ts`).
+const VOICE_PATH_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(webm|m4a|mp4|aac|mp3|ogg)$/i;
+
+export const attachVoiceSchema = z.object({
+  conversationId: z.uuid("This conversation could not be identified."),
+  storagePath: z.string().regex(VOICE_PATH_RE, "This voice note could not be identified."),
+  durationMs: z
+    .number("This voice note has no length.")
+    .int("This voice note has no length.")
+    .min(1, "This voice note is empty.")
+    .max(VOICE_SERVER_MAX_MS, "Voice notes can be up to 2 minutes long."),
+  peaks: z.array(z.number().min(0).max(1)).max(64).nullable().optional(),
+  replyToId: z.uuid().nullable().optional(),
+});
+
+export type AttachVoiceInput = z.infer<typeof attachVoiceSchema>;
+
+/** A reaction: one of the eight, on one message (`lib/messages/reactions.ts`). */
+export const setReactionSchema = z.object({
+  messageId: z.uuid("This message could not be identified."),
+  emoji: z.enum(REACTION_EMOJI, "Choose one of the reactions."),
+});
+
+export const clearReactionSchema = z.object({
+  messageId: z.uuid("This message could not be identified."),
+});
 
 export const confirmInspectionSchema = z.object({
   conversationId: z.uuid("This conversation could not be identified."),

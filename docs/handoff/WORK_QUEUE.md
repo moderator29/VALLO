@@ -25,6 +25,24 @@ brief; new native ideas go to the Lead. Hauslet screenshots are references
 for the JOB a screen does, never a design to copy: Vallo's version must look
 like Vallo and differ from theirs.
 
+## Founder answers, 7 November 2026 (new work, by owner)
+- Lead: the crash log. Scrubbed client and server errors written to Vallo's
+  own table (pending SQL for the founder to paste), native crashes from the
+  shell too, and an admin page that reads it. No Sentry.
+- Lead: the animated splash on native (the exact logo and wordmark).
+- Lead: the long rental rule at 5 months or more wherever the ID check for
+  rentals is decided.
+- Agent MSG: voice notes capped at 2 minutes and kept for ever.
+- Agent FE, in this order after the round 1 sweep:
+  1. THE FEED: a new, polished, unique Vallo look (looks only, every feature
+     kept), built so Vallo Circle can sit beside it.
+  2. Light mode refinement platform wide: cleaner, calmer, more refined.
+  3. The animated logo and wordmark in the web app, plus a motion pass in
+     more places (reduced motion always honoured).
+  4. Privacy choices screen (wide: sharing, visibility, contact, data, AI,
+     notifications) and the Community Promise page with its trust siblings.
+- Closed: D-01 leaked password protection (the founder turned it on).
+
 ## Native (Lead)
 - N1 push in seconds (pending SQL), N2 status bar per screen and theme, N3
   keyboard: composer and step foot ride the keyboard, Android adjustResize,

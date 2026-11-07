@@ -237,3 +237,55 @@ export function useInboxTyping(
 
   return typing;
 }
+
+/** A change on `message_reactions` as the feed delivers it (`applyReactionChange` reads it). */
+export type LiveReactionChange = {
+  eventType: "INSERT" | "UPDATE" | "DELETE";
+  new?: { message_id?: unknown; user_id?: unknown; emoji?: unknown } | null;
+  old?: { message_id?: unknown; user_id?: unknown } | null;
+};
+
+/**
+ * GRADE 1 (P1.3): every reaction added, changed or taken back in one
+ * conversation, live. `conversation_id` is written onto each reaction by the
+ * table's own trigger, so the feed can be filtered to this thread, and RLS
+ * hands a member only the reactions they could read anyway. A database
+ * listener, so its channel has a name of its own (`ownChannelName`). Pass
+ * null to stay inert (seed mode, or a database without the table yet).
+ */
+export function useThreadReactions(
+  conversationId: string | null,
+  onChange: (change: LiveReactionChange) => void,
+): void {
+  const handler = useRef(onChange);
+  useEffect(() => {
+    handler.current = onChange;
+  });
+
+  useEffect(() => {
+    if (!conversationId || !isSupabaseConfigured()) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(ownChannelName(`reactions-${conversationId}`))
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "message_reactions",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          handler.current({
+            eventType: payload.eventType as LiveReactionChange["eventType"],
+            new: (payload.new ?? null) as LiveReactionChange["new"],
+            old: (payload.old ?? null) as LiveReactionChange["old"],
+          });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
 import { useActionState, useEffect, useId, useState, useMemo } from "react";
@@ -684,6 +685,8 @@ export function ReservePanel({
             all. */}
         {ready && (
           <div className="nf-hairline mt-block pt-block">
+            {/* Read off the phone's kept copy, the figures say so (SW15). */}
+            <KeptPriceNote className="mb-row" />
             <div className="flex items-baseline justify-between gap-row">
               {/* The `Amount` primitive, not a hand-assembled figure: the
                   tabular digits, the locale-built currency symbol and the

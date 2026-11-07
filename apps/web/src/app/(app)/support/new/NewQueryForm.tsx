@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -74,7 +75,6 @@ export function NewQueryForm({
   const [hydrated, setHydrated] = useState(false);
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [errors, setErrors] = useState<DraftErrors>({});
-  const [serverError, setServerError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<"topic" | "record" | null>(null);
   const [filed, setFiled] = useState<Filed | null>(null);
   const [pending, start] = useSafeTransition();
@@ -124,7 +124,6 @@ export function NewQueryForm({
     event.preventDefault();
     const found = draftErrors(draft);
     setErrors(found);
-    setServerError(null);
     if (found.topic) {
       setSheet("topic");
       return;
@@ -134,7 +133,7 @@ export function NewQueryForm({
       return;
     }
     if (!online) {
-      setServerError(copy.offline);
+      banner.error(copy.offline, { "data-testid": "support-new-error" });
       return;
     }
     start(async () => {
@@ -146,7 +145,8 @@ export function NewQueryForm({
           ...(draft.related ? { related: { kind: draft.related.kind, id: draft.related.id } } : {}),
         });
         if (!result.ok) {
-          setServerError(result.error);
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error, { "data-testid": "support-new-error" });
           return;
         }
         let photoNote: string | undefined;
@@ -267,12 +267,6 @@ export function NewQueryForm({
       <PhotoField value={photo} onChange={setPhoto} disabled={pending} />
 
       <OfflineNote />
-
-      {serverError && (
-        <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]" data-testid="support-new-error">
-          {serverError}
-        </p>
-      )}
 
       <div className="space-y-row">
         <Button type="submit" variant="primary" size="lg" full loading={pending} disabled={pending} data-testid="support-send">

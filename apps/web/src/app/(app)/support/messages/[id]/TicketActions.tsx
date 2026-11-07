@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -31,7 +32,6 @@ export function MarkRead({ ticketId, unread }: { ticketId: string; unread: boole
 export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   return (
     <div className="text-center">
       <p className="nf-caption text-[var(--nf-content-muted)]">{copy.sorted}</p>
@@ -43,8 +43,9 @@ export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy
         onClick={() =>
           start(async () => {
             try {
+              /* Said by the one banner at the top of the screen (Grade 1). */
               const result = await resolveMyTicket(ticketId);
-              if (!result.ok) setError(result.error);
+              if (!result.ok) banner.error(result.error);
               else router.refresh();
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
@@ -54,11 +55,6 @@ export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy
       >
         {copy.resolve}
       </Button>
-      {error && (
-        <p role="alert" className="nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -116,7 +112,7 @@ export function RateResolution({
         start(async () => {
           try {
             const result = await rateMyTicket(ticketId, { rating: stars, comment: text });
-            if (!result.ok) setError(result.error);
+            if (!result.ok) banner.error(result.error);
             else {
               setEditing(false);
               router.refresh();
@@ -178,7 +174,6 @@ export function RateResolution({
 export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; until: string; copy: Copy }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   return (
     <div className="nf-panel nf-panel--card block p-card-sm" data-testid="support-reopen">
       <p className="nf-body-sm font-semibold text-[var(--nf-content-primary)]">{copy.notSorted}</p>
@@ -194,8 +189,9 @@ export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; unti
         onClick={() =>
           start(async () => {
             try {
+              /* Said by the one banner at the top of the screen (Grade 1). */
               const result = await reopenMyTicket(ticketId);
-              if (!result.ok) setError(result.error);
+              if (!result.ok) banner.error(result.error);
               else router.refresh();
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
@@ -205,11 +201,6 @@ export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; unti
       >
         {copy.reopen}
       </Button>
-      {error && (
-        <p role="alert" className="nf-caption mt-row text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -343,6 +344,9 @@ export function SavedBoard({
 
   return (
     <>
+      {/* Read off the phone's kept copy, the prices on these cards say so
+          once, above them (SW15). */}
+      <KeptPriceNote className="mb-row" />
       <Reveal>
         {/* The count as a meta strip (plan item 17): the figure, then what
             the list is for, divided by a hairline. */}

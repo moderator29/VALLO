@@ -1,5 +1,6 @@
 "use client";
 
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
@@ -416,6 +417,8 @@ export function ReserveTable({
           venue that sets deposits at all. */}
       {deposit && slots.length > 0 ? (
         <div className="mt-md" aria-live="polite">
+          {/* Read off the phone's kept copy, the deposit says so (SW15). */}
+          <KeptPriceNote className="mb-row" />
           {preview ? (
             <DepositSummary
               amountMinor={preview.amountMinor}

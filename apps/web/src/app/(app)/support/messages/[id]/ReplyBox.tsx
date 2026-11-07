@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -27,8 +28,9 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
   const online = useOnline();
   const [body, setBody] = useState("");
   const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
+  /* The box's own error (empty, offline) sits under the box; what a send did
+     is said by the one banner at the top of the screen (Grade 1). */
   const [error, setError] = useState<string | undefined>();
-  const [note, setNote] = useState("");
   const [pending, start] = useSafeTransition();
 
   useEffect(() => {
@@ -61,22 +63,25 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
       return;
     }
     setError(undefined);
-    setNote("");
     start(async () => {
       try {
         const result = await replyToMyTicket({ ticketId, body, withPhoto: Boolean(photo) });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
+        let photoFailed = false;
         if (photo) {
           const uploaded = await uploadTicketPhoto(ticketId, photo, result.data.messageId);
-          if (!uploaded.ok) setNote(uploaded.error);
+          if (!uploaded.ok) {
+            photoFailed = true;
+            banner.error(uploaded.error);
+          }
           URL.revokeObjectURL(photo.previewUrl);
           setPhoto(null);
         }
         keep("");
-        if (!photo) setNote(copy.sent);
+        if (!photoFailed) banner.success(copy.sent);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -89,10 +94,7 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
       <TextArea
         label={copy.label}
         value={body}
-        onChange={(e) => {
-          keep(e.target.value);
-          if (note) setNote("");
-        }}
+        onChange={(e) => keep(e.target.value)}
         rows={3}
         maxLength={4000}
         error={error}
@@ -103,9 +105,6 @@ export function ReplyBox({ ticketId, copy }: { ticketId: string; copy: Dictionar
       <div className="flex flex-wrap items-center justify-between gap-row">
         <div className="flex min-w-0 flex-1 items-center gap-row">
           {!photo && <PhotoField value={null} onChange={setPhoto} disabled={pending} compact />}
-          <p className="nf-caption min-w-0 text-[var(--nf-content-muted)]" role="status">
-            {note}
-          </p>
         </div>
         <Button type="submit" variant="primary" loading={pending} disabled={pending} data-testid="support-reply-send">
           {copy.send}

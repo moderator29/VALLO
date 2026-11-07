@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@vallo/i18n/core";
@@ -133,17 +134,15 @@ function CryptoSheet({
   const pair = offer.pairs.find((p) => p.asset === asset && p.network === network) ?? networks[0] ?? null;
   const [picker, setPicker] = useState<null | "asset" | "network">(null);
   const [step, setStep] = useState<Step>({ kind: "pick" });
-  const [error, setError] = useState<string | null>(null);
   const [refund, setRefund] = useState("");
   const [refundError, setRefundError] = useState<string | null>(null);
 
   const quote = async () => {
     if (!pair) return;
-    setError(null);
     setStep({ kind: "quoting" });
     const result = await getCryptoQuote({ bookingId, asset: pair.asset, network: pair.network });
     if (!result.ok) {
-      setError(result.error);
+      banner.error(result.error);
       setStep({ kind: "pick" });
       return;
     }
@@ -151,7 +150,6 @@ function CryptoSheet({
   };
 
   const start = async (view: CryptoPaymentView) => {
-    setError(null);
     if (!refundAddressLooksValid(view.network, refund)) {
       setRefundError(fill(t.refundInvalid, { network: view.networkName }));
       return;
@@ -160,7 +158,7 @@ function CryptoSheet({
     setStep({ kind: "starting", view });
     const result = await startCryptoPayment({ paymentId: view.id, refundAddress: refund.trim() });
     if (!result.ok) {
-      setError(result.error);
+      banner.error(result.error);
       setStep({ kind: "quote", view });
       return;
     }
@@ -197,11 +195,6 @@ function CryptoSheet({
             )}
           </div>
 
-          {error && (
-            <p role="alert" className="nf-body-sm rounded-[var(--nf-radius-md)] bg-[var(--nf-state-error-surface)] px-md py-sm text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
 
           {(step.kind === "pick" || step.kind === "quoting") && (
             <>

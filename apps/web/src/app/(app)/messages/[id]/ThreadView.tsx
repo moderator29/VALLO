@@ -1,6 +1,6 @@
 "use client";
 
-import { uploadToStorage, withTimeout } from "@/lib/media/upload";
+import { uploadToStorage, withTimeout, type UploadInput, type UploadResult } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -25,10 +25,26 @@ import { bundlePhotos, isCaption, isPhotoOnly } from "@/components/app/messages/
 import { cardRefFor, parseShare, shareHref } from "@/components/app/messages/share";
 import {
   attachImage,
+  attachVoice,
   confirmInspection,
   markThreadRead,
   sendMessage,
 } from "@/lib/messages/actions";
+import { clearReaction, setReaction } from "@/lib/messages/reaction-actions";
+import { readLiveAttachment } from "@/lib/messages/attachment-actions";
+import {
+  applyReactionChange,
+  reactionCounts,
+  toggleTarget,
+  withReaction,
+  type ReactionEmoji,
+  type ReactionMap,
+} from "@/lib/messages/reactions";
+import { VOICE_BODY } from "@/lib/messages/voice-note";
+import { ComposerVoice } from "@/components/app/messages/ComposerVoice";
+import type { VoiceRecording } from "@/components/app/messages/useVoiceRecorder";
+import { ReactionCounts } from "@/components/app/messages/ReactionCounts";
+import { runPlace, sameRun } from "./thread-runs";
 import { MONEY_TALK_RE, SAFETY_EDUCATION_SEEN_KEY } from "@/lib/messages/education";
 import { lagosTimeLabel } from "@/lib/messages/time";
 import { deleteMessage } from "@/lib/messages/message-actions";
@@ -38,6 +54,7 @@ import { BubbleGestures } from "@/components/app/messages/BubbleGestures";
 import { PhotoGroup } from "@/components/app/messages/PhotoGroup";
 import { asSentence, canForward } from "@/components/app/messages/forward";
 import {
+  useThreadReactions,
   useThreadRealtime,
   useThreadTyping,
   type LiveMessageRow,
@@ -101,6 +118,19 @@ import { deliveryStates, type Delivery } from "@/lib/messages/delivery";
 /* English only for now (Grade 1); the thread's dictionary has no words yet. */
 const SEND_FAILED_WORDS = "Message couldn't be sent. Check your connection and try again.";
 const COPIED_WORDS = { done: "Message copied", failed: "Couldn't copy that message. Try again." };
+
+/* GRADE 1 (P1.3): voice notes, reactions and the new-messages pill. English
+   only for now, beside the other Grade 1 words above. */
+const VOICE_WORDS = {
+  failed: "Voice note couldn't be sent. Check your connection and try again.",
+  notReady: "Voice notes aren't switched on yet. Write a message instead.",
+  retry: "Retry sending your voice note",
+};
+const REACTION_WORDS = { failed: "Couldn't add your reaction. Try again." };
+const NEW_WORDS = { one: "1 new message", other: "{count} new messages" };
+
+/** The placeholder bodies the server writes for a photo and a voice note. */
+const PHOTO_BODY = "\u{1F4F7} Photo";
 
 const CARD_REMOVE_WORDS = {
   mine: "Remove from this chat",
@@ -311,6 +341,19 @@ export type ThreadViewProps = {
    * order. Absent: the photos are pictures only, as they were.
    */
   viewerCopy?: ViewerCopy | null;
+  /**
+   * GRADE 1 (P1.3): every reaction in the thread, read by the page under the
+   * reader's RLS. NULL or absent means the thread cannot react (seed mode, or
+   * a database without `message_reactions` yet): no reaction row in the menu
+   * and no counts, rather than a control that cannot work.
+   */
+  reactions?: ReactionMap | null;
+  /**
+   * How a voice note reaches the bucket. The page never passes it: it is
+   * `uploadToStorage`, the photo's own uploader. The browser harness passes
+   * a stand-in, because its Supabase client has no session to upload with.
+   */
+  uploadVoice?: (input: UploadInput) => Promise<UploadResult>;
 };
 
 const INSPECTIONS_KEY = "nf_inspections";
@@ -349,14 +392,22 @@ function dimensionsOf(url: string): Promise<{ width?: number; height?: number }>
   });
 }
 
-type RetryPayload = { kind: "text"; body: string; replyToId?: string | null } | { kind: "image"; file: File };
+type RetryPayload =
+  | { kind: "text"; body: string; replyToId?: string | null }
+  | { kind: "image"; file: File }
+  /* `path` is set once the file has landed, so a retry does not upload it twice. */
+  | { kind: "voice"; recording: VoiceRecording; replyToId: string | null; path?: string };
 
 /**
  * What the retry button is called, for somebody who cannot see which bubble it
  * sits under. Words where there are words, and an honest noun where there are
  * not.
  */
-function retryLabel(message: { body?: string | null; imageUrl?: string | null }, view: ViewWords): string {
+function retryLabel(
+  message: { body?: string | null; imageUrl?: string | null; audio?: unknown },
+  view: ViewWords,
+): string {
+  if (message.audio) return VOICE_WORDS.retry;
   const words = (message.body ?? "").trim();
   if (words.length > 0) {
     const short = words.length > 40 ? `${words.slice(0, 40).trimEnd()}...` : words;
@@ -493,8 +544,16 @@ export function ThreadView({
   inboxThreadCopy,
   calls = null,
   viewerCopy = null,
+  reactions: reactionsInitial = null,
+  uploadVoice = uploadToStorage,
 }: ThreadViewProps) {
   const [items, setItems] = useState<ThreadBubble[]>(messages);
+  /* GRADE 1 (P1.3): reactions by message, or null when the thread cannot react. */
+  const [reactions, setReactions] = useState<ReactionMap | null>(live ? reactionsInitial : null);
+  const reactionsRef = useRef(reactions);
+  useEffect(() => {
+    reactionsRef.current = reactions;
+  }, [reactions]);
   /* The message being answered, set by Reply in the message menu or by a
      swipe on the bubble. Cleared on send. */
   const [replyTo, setReplyTo] = useState<ThreadBubble | null>(null);
@@ -610,6 +669,14 @@ export function ThreadView({
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
+  /* GRADE 1 (P1.3): where the reader is in the thread. Their own send sets
+     `followNext`, so the thread glides down to it; a message from the other
+     side while they are reading further up counts into the pill instead of
+     pulling the page out from under them. */
+  const followNext = useRef(false);
+  const atBottom = useRef(true);
+  const [unseen, setUnseen] = useState(0);
+  const [away, setAway] = useState(false);
 
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -639,9 +706,14 @@ export function ThreadView({
      nothing unread, or after that first arrival, it keeps the newest bubble
      in view as the thread grows. */
   const arrived = useRef(false);
+  const lastKey = useRef<string | null>(null);
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
+    const newest = items[items.length - 1];
+    const key = newest ? bubbleKey(newest) : null;
+    const grew = key !== lastKey.current;
+    lastKey.current = key;
     if (!arrived.current) {
       arrived.current = true;
       const divider = unreadAnchor ? el.querySelector<HTMLElement>(`#${UNREAD_DIVIDER_ID}`) : null;
@@ -650,9 +722,53 @@ export function ThreadView({
         el.scrollTo({ top: Math.max(0, top - 16) });
         return;
       }
+      el.scrollTo({ top: el.scrollHeight });
+      return;
     }
-    el.scrollTo({ top: el.scrollHeight });
+    const quiet = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    if (followNext.current) {
+      followNext.current = false;
+      atBottom.current = true;
+      el.scrollTo({ top: el.scrollHeight, behavior: quiet ? "auto" : "smooth" });
+      return;
+    }
+    /* At the newest message, the thread follows; further up, it stays put
+       and the realtime arrival counts into the pill instead (below). */
+    if (atBottom.current) el.scrollTo({ top: el.scrollHeight, behavior: grew && !quiet ? "smooth" : "auto" });
   }, [items, unreadAnchor]);
+
+  const onThreadScroll = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    atBottom.current = distance < 120;
+    const far = distance > 480;
+    setAway((was) => (was === far ? was : far));
+    if (atBottom.current) setUnseen((n) => (n === 0 ? n : 0));
+  };
+
+  const toNewest = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const quiet = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    atBottom.current = true;
+    setUnseen(0);
+    el.scrollTo({ top: el.scrollHeight, behavior: quiet ? "auto" : "smooth" });
+  };
+
+  /* The keyboard rising (or the window shrinking) keeps a reader who was at
+     the newest message at the newest message, so the last bubble is never
+     left under the composer. */
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const keep = () => {
+      const el = scrollerRef.current;
+      if (el && atBottom.current) el.scrollTo({ top: el.scrollHeight });
+    };
+    viewport.addEventListener("resize", keep);
+    return () => viewport.removeEventListener("resize", keep);
+  }, []);
 
   /* A quoted reply, tapped: bring the message it quotes into view and hold a
      ring on it for a moment so the eye finds it. Smooth only when motion is
@@ -676,6 +792,35 @@ export function ThreadView({
     const urls = objectUrls.current;
     return () => urls.forEach((u) => URL.revokeObjectURL(u));
   }, []);
+
+  /* The attachment row is written a moment after the message, so it is asked
+     for a few times, briefly, and then left for the next load. */
+  const fillAttachment = useCallback(
+    async (messageId: string) => {
+      for (const wait of [350, 1200, 3000]) {
+        await new Promise((resolve) => window.setTimeout(resolve, wait));
+        const result = await readLiveAttachment({ conversationId, messageId }).catch(() => null);
+        if (!result || !result.ok) return;
+        const found = result.data;
+        if (!found) continue;
+        setItems((prev) =>
+          prev.map((m) => {
+            if (m.id !== messageId) return m;
+            if (found.kind === "audio") {
+              return { ...m, audio: { url: found.url, durationMs: found.durationMs, peaks: found.peaks } };
+            }
+            return {
+              ...m,
+              imageUrl: found.url,
+              imageSize: found.width && found.height ? { width: found.width, height: found.height } : null,
+            };
+          }),
+        );
+        return;
+      }
+    },
+    [conversationId],
+  );
 
   // "Someone is typing", the real signal: a broadcast on the thread's own
   // channel (see useThreadTyping), not a timer with nobody behind it. Seed
@@ -719,6 +864,12 @@ export function ThreadView({
       }),
     );
     if (row.sender_id !== meId) void markThreadRead({ conversationId });
+    /* Reading further up: the new message is counted into the pill. */
+    if (row.sender_id !== meId && !atBottom.current) setUnseen((n) => n + 1);
+    /* GRADE 1 (P1.3): a photo or a voice note from the other side lands as
+       its placeholder words; its picture or its player follows as soon as
+       the attachment row exists. */
+    if (row.sender_id !== meId && (row.body === PHOTO_BODY || row.body === VOICE_BODY)) void fillAttachment(row.id);
     /* A share arriving live (a listing, a stay, a booking or a member's own
        passport) is expanded the way the page expands the ones it loads:
        the same rule decides whether it is a card (`cardRefFor`), and the
@@ -739,6 +890,12 @@ export function ThreadView({
     setItems((prev) => prev.map((m) => (m.id === row.id && !m.read ? { ...m, read: true } : m)));
   });
 
+  /* GRADE 1 (P1.3): reactions from either side, live. Mine echo back too and
+     change nothing; the other person's appear under the bubble at once. */
+  useThreadReactions(live && reactionsInitial !== null ? conversationId : null, (change) => {
+    setReactions((prev) => (prev ? applyReactionChange(prev, change) : prev));
+  });
+
   /* The safety education moment: the first money-shaped draft in a session
      surfaces the canonical copy once, inline and dismissible. */
   const onDraftChange = (value: string) => {
@@ -755,6 +912,36 @@ export function ThreadView({
     }
   };
 
+  /*
+   * GRADE 1 (P1.3): A REACTION, optimistic and honest. The choice shows at
+   * once; the server's answer decides whether it stays. A refusal puts back
+   * exactly what was there before and says so in the banner, with Try again.
+   */
+  const reactRef = useRef<(target: ThreadBubble, emoji: ReactionEmoji) => void>(() => undefined);
+  const react = (target: ThreadBubble, emoji: ReactionEmoji) => {
+    if (!meId || !reactionsRef.current) return;
+    const before = reactionsRef.current[target.id]?.[meId];
+    const next = toggleTarget(before, emoji);
+    setReactions((prev) => (prev ? withReaction(prev, target.id, meId, next) : prev));
+    feedback("select");
+    void (next ? setReaction({ messageId: target.id, emoji: next }) : clearReaction({ messageId: target.id }))
+      .catch(() => ({ ok: false as const, error: REACTION_WORDS.failed }))
+      .then((result) => {
+        if (result.ok) return;
+        setReactions((prev) => (prev ? withReaction(prev, target.id, meId, before ?? null) : prev));
+        banner.error(result.error || REACTION_WORDS.failed, { retry: () => reactRef.current(target, emoji) });
+      });
+  };
+  useEffect(() => {
+    reactRef.current = react;
+  });
+  const menuReact = (emoji: ReactionEmoji) => {
+    const target = actionMsg;
+    setActionMsg(null);
+    if (target) react(target, emoji);
+  };
+  const canReact = live && reactions !== null && Boolean(meId);
+
   const adoptResult = useCallback((tempId: string, realId: string, timeLabel?: string) => {
     retryPayloads.current.delete(tempId);
     /* Realtime may have delivered the real row already; the temp is dropped
@@ -765,14 +952,14 @@ export function ThreadView({
 
   /* The retry is defined below; the failure banner reaches it through this ref. */
   const retryRef = useRef<((tempId: string) => void) | null>(null);
-  const markFailed = useCallback((tempId: string) => {
+  const markFailed = useCallback((tempId: string, words: string = SEND_FAILED_WORDS) => {
     /* B14: a message that failed and was kept is a genuine failure, felt
        as the one error pattern (CRAFT_DOCTRINE 6). */
     feedback("error");
     setItems((prev) => prev.map((m) => (m.id === tempId ? { ...m, state: "failed" } : m)));
     /* Grade 1: said at the top as well, with the retry (the founder's brief:
        "Message couldn't be sent. Check your connection and try again."). */
-    banner.error(SEND_FAILED_WORDS, { retry: () => retryRef.current?.(tempId) });
+    banner.error(words, { retry: () => retryRef.current?.(tempId) });
   }, []);
 
 
@@ -855,6 +1042,91 @@ export function ThreadView({
     [conversationId, adoptResult, markFailed],
   );
 
+  /*
+   * GRADE 1 (P1.3): A VOICE NOTE, sent the way a photo is. The file goes to
+   * the private bucket at `<conversation>/<uuid>.<ext>` first; then
+   * `attachVoice` writes the message and its attachment, under the same
+   * guards as a photo. The bubble says "Sending" until the server has
+   * answered, and only then takes its real id: it is never "sent" before.
+   * A bucket that refuses the type (a database the voice-note migration has
+   * not reached) says so in words. An upload that landed is not repeated by
+   * Try again: the retry records the file already there.
+   */
+  const runVoiceSend = useCallback(
+    async (tempId: string) => {
+      const payload = retryPayloads.current.get(tempId);
+      if (!payload || payload.kind !== "voice") return;
+      const { recording, replyToId } = payload;
+      try {
+        let path = payload.path;
+        if (!path) {
+          const fresh = `${conversationId}/${crypto.randomUUID()}.${recording.ext}`;
+          const uploaded = await uploadVoice({
+            supabase: createClient(),
+            bucket: "message-attachments",
+            path: fresh,
+            body: recording.blob,
+            contentType: recording.contentType,
+          });
+          if (!uploaded.ok) {
+            const refusedType = uploaded.status === 400 || uploaded.status === 415 || uploaded.status === 422;
+            markFailed(tempId, refusedType ? VOICE_WORDS.notReady : VOICE_WORDS.failed);
+            return;
+          }
+          path = fresh;
+          retryPayloads.current.set(tempId, { ...payload, path });
+        }
+        const result = await withTimeout(
+          attachVoice({
+            conversationId,
+            storagePath: path,
+            durationMs: recording.durationMs,
+            peaks: recording.peaks,
+            replyToId,
+          }),
+          30_000,
+        );
+        if (result.ok) {
+          adoptResult(tempId, result.data.messageId, lagosTimeLabel(result.data.createdAt));
+          if (itemsRef.current.some((m) => !m.mine)) setConversationActive(true);
+        } else markFailed(tempId, result.error || VOICE_WORDS.failed);
+      } catch {
+        markFailed(tempId, VOICE_WORDS.failed);
+      }
+    },
+    [conversationId, adoptResult, markFailed, uploadVoice],
+  );
+
+  const sendVoice = useCallback(
+    (recording: VoiceRecording) => {
+      const url = URL.createObjectURL(recording.blob);
+      objectUrls.current.push(url);
+      const tempId = `local-${crypto.randomUUID()}`;
+      const replyToId = replyTo && !replyTo.id.startsWith("local-") ? replyTo.id : null;
+      const bubble: ThreadBubble = {
+        id: tempId,
+        mine: true,
+        body: VOICE_BODY,
+        timeLabel: nowLabel(),
+        imageUrl: null,
+        audio: { url, durationMs: recording.durationMs, peaks: recording.peaks },
+        createdAt: new Date().toISOString(),
+        replyToId,
+      };
+      setReplyTo(null);
+      followNext.current = true;
+      if (!live) {
+        /* Seed mode: the note stays on this device, like every seeded send. */
+        setItems((prev) => [...prev, bubble]);
+        return;
+      }
+      retryPayloads.current.set(tempId, { kind: "voice", recording, replyToId });
+      setItems((prev) => [...prev, { ...bubble, state: "sending" }]);
+      void runVoiceSend(tempId);
+    },
+    [live, replyTo, runVoiceSend],
+  );
+
   const send = useCallback(() => {
     const body = draft.trim();
     const picked = pendingFile;
@@ -863,6 +1135,8 @@ export function ThreadView({
     setDraft("");
     setPendingFile(null);
     if (fileRef.current) fileRef.current.value = "";
+    /* Whatever the reader was looking at, their own send brings them down to it. */
+    followNext.current = true;
 
     if (!live) {
       // Seed mode: the thread lives on this device, exactly as before.
@@ -936,12 +1210,13 @@ export function ThreadView({
       if (!payload) return;
       setItems((prev) => prev.map((m) => (m.id === tempId ? { ...m, state: "sending" } : m)));
       if (payload.kind === "text") void runTextSend(tempId, payload.body, payload.replyToId ?? null);
+      else if (payload.kind === "voice") void runVoiceSend(tempId);
       else {
         const bubble = items.find((m) => m.id === tempId);
         void runImageSend(tempId, payload.file, bubble?.imageUrl ?? "");
       }
     },
-    [items, runTextSend, runImageSend],
+    [items, runTextSend, runImageSend, runVoiceSend],
   );
 
   useEffect(() => {
@@ -1333,6 +1608,7 @@ export function ThreadView({
         className="nf-thread__scroll"
         aria-live="polite"
         aria-label={view.conversation}
+        onScroll={onThreadScroll}
       >
         <p className="nf-thread__safety">
           <UiIcon name="verified" size={16} />
@@ -1385,27 +1661,37 @@ export function ThreadView({
              row and one avatar, the way the render stacks the hotel's
              greeting over its card. */
           const prev = index > 0 ? bundles[index - 1]!.lead : null;
-          const continues =
-            prev !== null && prev.mine === m.mine && prev.timeLabel === m.timeLabel && !prev.state && !m.state;
+          /* GRADE 1: a run is one side, a few minutes apart (`thread-runs.ts`). */
+          const continues = !dayBreaks.has(index) && sameRun(prev, m);
           const photos = run.filter((p) => p.imageUrl !== null);
           const caption = run.length > 1 ? run.find((p) => isCaption(p)) : null;
           /* A photo sent alone carries the placeholder body the server writes; it is
              not words, so no caption and no camera glyph under the picture. */
-          const words = run.length === 1 ? (isPhotoOnly(m) ? "" : m.body) : (caption?.body ?? "");
+          const words =
+            m.audio && m.body === VOICE_BODY
+              ? ""
+              : run.length === 1
+                ? isPhotoOnly(m)
+                  ? ""
+                  : m.body
+                : (caption?.body ?? "");
           const last = run[run.length - 1]!;
           /* The time and the ticks are drawn once, under the LAST bubble of a
              run from one side in one minute, not inside every bubble. */
           const following = index < bundles.length - 1 ? bundles[index + 1]!.lead : null;
-          const endsRun = !(
-            following !== null &&
-            !following.call &&
-            !following.card &&
-            following.mine === m.mine &&
-            following.timeLabel === m.timeLabel &&
-            !following.state &&
-            !m.state &&
-            !dayBreaks.has(index + 1)
-          );
+          const continued = following !== null && !dayBreaks.has(index + 1) && sameRun(m, following);
+          const endsRun = !continued;
+          const place = runPlace(continues, continued);
+          /* GRADE 1 (P1.3): the reactions on this message, counted. */
+          const counts = reactions ? reactionCounts(reactions[m.id], meId) : [];
+          const reactionLine =
+            counts.length > 0 ? (
+              <ReactionCounts
+                counts={counts}
+                mine={m.mine}
+                onToggle={canReact ? (emoji) => react(m, emoji) : undefined}
+              />
+            ) : null;
           /* V-04: the first message in this run from the other side that
              carries an account number gets the receiver's card above it. */
           /* Only where a check can run: a listing thread, read by the renter,
@@ -1438,18 +1724,27 @@ export function ThreadView({
                 {dayBreaks.has(index) && m.createdAt && (
                   <DayDivider label={dayHeading(m.createdAt, locale, threadWords.day, nowMs)} />
                 )}
-                <div data-msg-id={m.id}>
-                  <CallHistoryRow
-                    view={m.call.view}
-                    name={counterpartName}
-                    timeLabel={m.timeLabel}
-                    words={calls.words}
-                    onCallBack={
-                      calls.enabled && live
-                        ? () => void placeCall({ conversationId, kind, context: { line: callContextLine } })
-                        : undefined
-                    }
-                  />
+                <div data-msg-id={m.id} className="nf-call-msg">
+                  {/* Held, a call row opens the same menu, so it can be
+                      reacted to like any message (GRADE 1, P1.3). */}
+                  <BubbleGestures
+                    side={m.mine ? "mine" : "theirs"}
+                    className="nf-call-hold"
+                    onLongPress={canReact && !m.id.startsWith("local-") ? () => setActionMsg(m) : undefined}
+                  >
+                    <CallHistoryRow
+                      view={m.call.view}
+                      name={counterpartName}
+                      timeLabel={m.timeLabel}
+                      words={calls.words}
+                      onCallBack={
+                        calls.enabled && live
+                          ? () => void placeCall({ conversationId, kind, context: { line: callContextLine } })
+                          : undefined
+                      }
+                    />
+                  </BubbleGestures>
+                  {reactionLine}
                 </div>
               </Fragment>
             );
@@ -1465,6 +1760,7 @@ export function ThreadView({
             <div
               data-msg-id={m.id}
               {...(jumpedId === m.id ? { "data-jumped": "" } : {})}
+              data-run={place}
               className={`nf-msg ${m.mine ? "nf-msg--mine" : ""}${arrivalClass(openedWith, m)}${
                 wide ? " nf-msg--card" : ""
               }${continues ? " nf-msg--cont" : ""}`}
@@ -1593,6 +1889,8 @@ export function ThreadView({
                   </BubbleGestures>
                 )}
 
+                {reactionLine}
+
                 {!m.card && endsRun && (
                   /* Under the last bubble of the run, small and muted: the
                      time (or "Sending"), then my ticks. It follows the bubble
@@ -1636,6 +1934,7 @@ export function ThreadView({
                       size="sm"
                       onClick={() => retry(m.id)}
                       aria-label={retryLabel(m, view)}
+                      data-testid="bubble-retry"
                     >
                       {view.retry}
                     </Button>
@@ -1668,6 +1967,36 @@ export function ThreadView({
             </div>
           </div>
         )}
+      </div>
+
+      {/* GRADE 1 (P1.3): reading further up while the other side writes: a
+          calm pill counts what arrived and takes the reader down to it. Far
+          up with nothing new, a round arrow does the same. */}
+      <div className="nf-thread__jump-anchor">
+        {unseen > 0 ? (
+          <button
+            type="button"
+            className="nf-thread__newpill"
+            onClick={toNewest}
+            aria-label={threadWords.newMessages}
+            data-testid="new-messages-pill"
+          >
+            <UiIcon name="arrow-down" size={16} />
+            <span className="nf-numeric">
+              {unseen === 1 ? NEW_WORDS.one : NEW_WORDS.other.replace("{count}", String(unseen))}
+            </span>
+          </button>
+        ) : away ? (
+          <button
+            type="button"
+            className="nf-thread__jump"
+            onClick={toNewest}
+            aria-label={threadWords.newMessages}
+            data-testid="jump-newest"
+          >
+            <UiIcon name="arrow-down" size={20} />
+          </button>
+        ) : null}
       </div>
 
       {/* ----------------------------------------------- safety education */}
@@ -1808,22 +2137,23 @@ export function ThreadView({
             >
               <UiIcon name="picture" size={20} />
             </button>
-            <button
-              type="submit"
-              aria-label={view.send}
-              disabled={!draft.trim() && !pendingFile}
-              className="nf-composer__send"
-              data-ready={Boolean(draft.trim() || pendingFile) || undefined}
-            >
-              <UiIcon name="arrow-up" size={20} />
-            </button>
+            {/* GRADE 1 (P1.3, R58): the microphone while there is nothing to
+                send, Send the moment there is (`ComposerVoice`). */}
+            <ComposerVoice ready={Boolean(draft.trim() || pendingFile)} sendLabel={view.send} onVoice={sendVoice} />
           </div>
         </div>
       </form>
       {actionMsg && (
         <MessageMenu
           words={threadWords.menu}
-          canCopy={actionMsg.body.length > 0 && !actionMsg.deleted}
+          canCopy={
+            actionMsg.body.length > 0 &&
+            !actionMsg.deleted &&
+            !actionMsg.audio &&
+            !actionMsg.call &&
+            actionMsg.body !== VOICE_BODY &&
+            actionMsg.body !== PHOTO_BODY
+          }
           canDeleteEveryone={actionMsg.mine && !actionMsg.deleted}
           canForward={live && canForward(actionMsg)}
           onReply={menuReply}
@@ -1832,6 +2162,11 @@ export function ThreadView({
           onDeleteForMe={() => void menuDeleteForMe()}
           onDeleteForEveryone={() => void menuDeleteForEveryone()}
           onClose={() => setActionMsg(null)}
+          react={
+            canReact && meId && !actionMsg.deleted
+              ? { mine: reactions?.[actionMsg.id]?.[meId], onPick: menuReact }
+              : null
+          }
         />
       )}
       {live ? (
