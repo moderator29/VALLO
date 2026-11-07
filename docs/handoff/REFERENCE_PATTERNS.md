@@ -485,3 +485,46 @@ Vallo: the switch lives in the side nav (founder's ruling) and as this pill.
   tickets, Refresh.
 - Calmer rows (more air), the archive control quiet on touch and shown on
   hover on a desktop.
+
+---
+
+## Batch 5 (7 November 2026, 7 images)
+
+### R64. "Essential Info Summary" sheet on a listing
+A sheet: "Avg. price per night", a large figure with a tag glyph, the amount
+in words ("eighty-five thousand NGN"), then guests, bedrooms and bathrooms
+with thin glyphs, then a key-value list (Property type, Occupancy type,
+Location). Vallo: a "Key facts" sheet from the listing's facts row, with the
+price in words (helps on a small screen and for screen readers).
+
+### R65. Agent Account with "Refer & earn"
+The R63 page plus a "Refer & earn" row under Management tools. Vallo has
+Rewards and Invite; they belong in the same calm grouped list.
+
+### R66 and R67. Legal pages
+A docs site with a "Legal" header and search; numbered sections in heavy
+capitals, hairlines, a tinted "In Short:" callout with an accent left rule
+before each long section. R67 explains their roommate feature's data use
+(an optional profile, a live selfie check, ID and phone verified to post).
+Vallo: every legal page gets an "In short" callout per section; Vallo
+Circle (the signature feature, if approved) gets its own section.
+
+### R68. Search opening state
+A big pill field "Area, estate or address", a segmented Shortlets / Rentals
+/ Sales with the active one raised and carrying the brand glyph, "Near me"
+(use your current location), then "Suggested searches" from real popular
+listings ("2 bedroom apartment in Lekki Phase 1, Popular . 2 beds .
+Apartment"), each with a soft square pin tile.
+
+### R69. Profile with Refer & earn
+A tinted "Verify your identity" card, "List on Hauslet." and "Refer & earn:
+No referral campaign is running right now" promo cards (honest when there
+is nothing), then the rows and the Switch pill.
+
+### R70. App Store screenshot: "In-App Messaging & Notifications."
+The inbox with a workspace switcher pill beside the title ("Personal, Your
+Own Messages"), chips All / Starred / Unread / Support, and the SUPPORT
+conversation pinned first with a black brand tile ("Hauslet Support",
+tags "Support . Support"). Vallo: the pinned Vallo Assistant row, with the
+human support reached from inside it, and the store screenshots for 1.0.1
+taken from the upgraded inbox.
