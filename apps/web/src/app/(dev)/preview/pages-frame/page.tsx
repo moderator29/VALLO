@@ -82,17 +82,56 @@ const PAGES: Record<string, Entry> = {
   "/support": { load: () => import("@/app/(app)/support/page") },
   "/leaderboard": { load: () => import("@/app/(app)/leaderboard/page") },
   "/directory": { load: () => import("@/app/(app)/directory/page") },
+  "/profile/setup": { load: () => import("@/app/(app)/profile/setup/page") },
+  "/profile/setup/owner": { load: () => import("@/app/(app)/profile/setup/owner/page") },
+  "/profile/setup/agent": { load: () => import("@/app/(app)/profile/setup/agent/page") },
+  "/profile/setup/[role]": { load: () => import("@/app/(app)/profile/setup/[role]/page"), params: { role: "professional" } },
+  "/wallet/send": { load: () => import("@/app/(app)/wallet/send/page") },
+  "/wallet/add": { load: () => import("@/app/(app)/wallet/add/page") },
+  "/wallet/withdraw": { load: () => import("@/app/(app)/wallet/withdraw/page") },
+  "/checkout/[bookingId]": { load: () => import("@/app/(app)/checkout/[bookingId]/page"), params: { bookingId: ID } },
+  "/checkout": { load: () => import("@/app/(app)/checkout/page") },
+  "/settings/ai-assistant": { load: () => import("@/app/(app)/settings/ai-assistant/page") },
+  "/settings/ai-assistant/consent": { load: () => import("@/app/(app)/settings/ai-assistant/consent/page") },
+  "/agreements/[id]/fund": { load: () => import("@/app/(app)/agreements/[id]/fund/page"), params: { id: ID } },
+};
+
+/* `&loading=1`: the route's own `loading.tsx` instead (SW12), so the wait can
+   be seen in its shape beside the page it stands in for. */
+const LOADING: Record<string, () => Promise<{ default: unknown }>> = {
+  "/settings/ai-assistant": () => import("@/app/(app)/settings/ai-assistant/loading"),
+  "/settings/ai-assistant/consent": () => import("@/app/(app)/settings/ai-assistant/consent/loading"),
+  "/pay/deposit/[reservationId]": () => import("@/app/(app)/pay/deposit/[reservationId]/loading"),
+  "/agreements/[id]/fund": () => import("@/app/(app)/agreements/[id]/fund/loading"),
+  "/inspections/gate/[id]": () => import("@/app/(app)/inspections/gate/[id]/loading"),
+  "/rewards": () => import("@/app/(app)/rewards/loading"),
+  "/rewards/history": () => import("@/app/(app)/rewards/history/loading"),
+  "/rewards/withdraw": () => import("@/app/(app)/rewards/withdraw/loading"),
+  "/compare": () => import("@/app/(app)/compare/loading"),
+  "/price": () => import("@/app/(app)/price/loading"),
+  "/price/area/[id]": () => import("@/app/(app)/price/area/[id]/loading"),
+  "/checkout": () => import("@/app/(app)/checkout/loading"),
+  "/checkout/[bookingId]": () => import("@/app/(app)/checkout/[bookingId]/loading"),
+  "/support/new": () => import("@/app/(app)/support/new/loading"),
+  "/profile/setup": () => import("@/app/(app)/profile/setup/loading"),
+  "/profile/setup/[role]": () => import("@/app/(app)/profile/setup/[role]/loading"),
+  "/wallet/send": () => import("@/app/(app)/wallet/send/loading"),
+  "/settings": () => import("@/app/(app)/settings/loading"),
+  "/settings/notifications": () => import("@/app/(app)/settings/notifications/loading"),
+  "/payments": () => import("@/app/(app)/payments/loading"),
+  "/legal/terms": () => import("@/app/(app)/legal/terms/loading"),
 };
 
 export default async function PagesFramePreview({
   searchParams,
 }: {
-  searchParams: Promise<{ p?: string }>;
+  searchParams: Promise<{ p?: string; loading?: string }>;
 }) {
-  const { p = "/settings" } = await searchParams;
+  const { p = "/settings", loading } = await searchParams;
   const entry = PAGES[p];
-  if (!entry) notFound();
-  const Real = (await entry.load()).default as Page;
+  const wait = loading === "1" ? LOADING[p] : undefined;
+  if (!entry || (loading === "1" && !wait)) notFound();
+  const Real = (await (wait ?? entry.load)()).default as Page;
   const route = p.replace(/\[[^\]]+\]/g, (m) => entry.params?.[m.slice(1, -1)] ?? "x");
   let body: ReactNode = <Real params={Promise.resolve(entry.params ?? {})} searchParams={Promise.resolve({})} />;
   if (p.startsWith("/settings")) body = <SettingsLayout>{body}</SettingsLayout>;

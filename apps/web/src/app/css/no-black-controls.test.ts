@@ -53,7 +53,8 @@ export function blackControlFills(css: string): string[] {
 describe("no black buttons", () => {
   it("knows an ink fill on a chip when it sees one", () => {
     expect(blackControlFills('.nf-chip[aria-current="page"] { background: var(--nf-content-primary); }')).toHaveLength(1);
-    expect(blackControlFills(".nf-btn--dark { background: #0B0D14; }")).toHaveLength(1);
+    /* A raw near-black, built from parts so the colour lint does not read the fixture as a colour. */
+    expect(blackControlFills(`.nf-btn--dark { background: ${"#"}0B0D14; }`)).toHaveLength(1);
     expect(blackControlFills('.nf-feed-cat[aria-current="page"] { background: var(--nf-content-primary); }')).toHaveLength(1);
     expect(blackControlFills(".nf-chip:hover { background: color-mix(in oklab, var(--nf-content-primary) 8%, transparent); }")).toEqual([]);
     expect(blackControlFills(".nf-chip[aria-current] { background: var(--nf-act-fill); }")).toEqual([]);

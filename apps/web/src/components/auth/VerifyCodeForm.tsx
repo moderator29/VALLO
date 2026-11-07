@@ -15,8 +15,8 @@ import { ArrivalMoment } from "./ArrivalMoment";
 import { CodeInput } from "./CodeInput";
 import { withNext } from "@/lib/auth/next-link";
 import { mailAppFor, resendLabel, RESEND_WAIT_SECONDS } from "@/lib/auth/mail-app";
-import {
 import { useAuthBanner } from "./use-auth-banner";
+import {
   CONFIRMATION_CODE_LENGTH,
   CONFIRMATION_CODE_PLACEHOLDER,
   codeLengthWord,

@@ -19,11 +19,24 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { Switch } from "@/components/ui/Switch";
 import { addDaysIso, useStayDates } from "@/components/app/listing/StayDates";
-import { PhoneField } from "@/components/app/PhoneField";
+import dynamic from "next/dynamic";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { DoorTotal, type DoorTotalCopy } from "@/components/stays/DoorTotal";
 import type { DoorCharge } from "@/lib/stays/door-total";
+
+/*
+ * THE PHONE FIELD LOADS ONLY WHEN IT IS NEEDED (performance audit, 7
+ * November 2026). It carries Google's number rules (libphonenumber, 39 KB
+ * gzipped), and it is drawn only when the booking is for someone else, a
+ * switch most guests never touch. Statically imported, those rules were in
+ * the first load of every listing and stay page on a budget phone. Now they
+ * arrive with the switch; the space the field will take is held meanwhile so
+ * nothing jumps.
+ */
+const PhoneField = dynamic(() => import("@/components/app/PhoneField").then((m) => m.PhoneField), {
+  loading: () => <div aria-hidden="true" className="min-h-[5.5rem]" />,
+});
 
 /**
  * The next fourteen days, as ISO dates.

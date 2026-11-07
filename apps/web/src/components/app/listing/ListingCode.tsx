@@ -57,7 +57,7 @@ export function ListingCodeText({ code, className = "" }: { code: string; classN
 export function ListingCodeRow({ code, copy }: { code: string; copy: Copy }) {
   /* Details pass: the one copy path (fallback, tick, a check on the button). */
   const [copied, copyCode] = useCopyFlash();
-  const onCopy = () => copyCode(code);
+  const onCopy = () => copyCode(code, "code");
 
   return (
     <div className="flex flex-wrap items-center gap-sm" data-testid="listing-code-row">

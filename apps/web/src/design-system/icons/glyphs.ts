@@ -30,8 +30,23 @@ export const GLYPHS = [
 
 export type GlyphName = (typeof GLYPHS)[number];
 
-export function glyphSrc(name: GlyphName): string {
+/*
+ * A SMALL WEBP FOR THE PLAIN IMAGE SPOTS (performance audit, 7 November
+ * 2026). A plain `<img>` gets no resizing from the image optimiser, so the
+ * listing page's empty reviews state fetched the whole 249px PNG (57.6 KB)
+ * to draw it at 88px. A glyph named here also ships as a 176px WebP (88px at
+ * twice the density, 7.8 KB), which `glyphSrc` hands out. `glyphMasterSrc`
+ * stays the full PNG for `Icon3D`, whose optimiser cuts its own sizes and
+ * may draw a glyph at 144px or more.
+ */
+const SMALL_WEBP: ReadonlySet<GlyphName> = new Set<GlyphName>(["empty-reviews"]);
+
+export function glyphMasterSrc(name: GlyphName): string {
   return `/brand/glyphs/${name}.png`;
+}
+
+export function glyphSrc(name: GlyphName): string {
+  return SMALL_WEBP.has(name) ? `/brand/glyphs/${name}.webp` : glyphMasterSrc(name);
 }
 
 /** A listing's status as its glyph. Unknown statuses draw nothing. */

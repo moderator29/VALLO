@@ -133,3 +133,11 @@
   padding: 0;
   border-radius: var(--nf-radius-circle);
 }
+/* At rest (nothing typed) the disc stays Vallo blue, quieter, never grey. */
+:root form.nf-ai__composer .nf-ai__send.nf-ai__send:disabled {
+  border-color: transparent;
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+  box-shadow: none;
+  opacity: 0.55;
+}

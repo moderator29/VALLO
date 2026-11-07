@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { TERMS_VERSION } from "@/lib/legal/versions";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The tick that turns a notice into an acceptance.
@@ -87,15 +88,8 @@ export function AcceptTerms({
           {t.safety.ageLabel}
         </span>
       </label>
-      {showAdultError && (
-        <p
-          id="age-confirmed-error"
-          role="alert"
-          className="-mt-2xs mb-sm pl-xl text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {t.safety.ageRequired}
-        </p>
-      )}
+      {/* The box keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id="age-confirmed-error" message={showAdultError ? t.safety.ageRequired : null} />
       <label className="nf-tap flex cursor-pointer items-start gap-sm">
         <input
           type="checkbox"
@@ -154,15 +148,7 @@ export function AcceptTerms({
           accepted rather than only that something was. */}
       {accepted && <input type="hidden" name="termsVersion" value={TERMS_VERSION} />}
 
-      {showError && (
-        <p
-          id="accept-terms-error"
-          role="alert"
-          className="mt-2xs pl-xl text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {t.safety.acceptRequired}
-        </p>
-      )}
+      <FieldProblem id="accept-terms-error" message={showError ? t.safety.acceptRequired : null} />
     </div>
   );
 }

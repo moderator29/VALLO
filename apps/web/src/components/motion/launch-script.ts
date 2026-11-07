@@ -42,7 +42,7 @@ export function launchScript(version: string): string {
     "el.appendChild(img);el.appendChild(p);(d.body||r).appendChild(el);" +
     "var gone=0,t=0;function done(){if(gone)return;gone=1;clearTimeout(t);el.setAttribute('data-launch','leave');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},320)}" +
     /* The clock starts when the artwork is drawn, not when it was asked for, with a ceiling for a load that never answers. */
-    "function arm(){el.setAttribute('data-ready','');clearTimeout(t);t=setTimeout(done,still?900:1900)}" +
+    "function arm(){el.setAttribute('data-ready','');clearTimeout(t);t=setTimeout(done,still?900:1700)}" +
     "if(img.complete)arm();else{img.onload=arm;img.onerror=done}t=setTimeout(done,3200);" +
     "W.addEventListener('pointerdown',done,{once:true,capture:true,passive:true});W.addEventListener('keydown',done,{once:true,capture:true});" +
     "}catch(e){}})();"

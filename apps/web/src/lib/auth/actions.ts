@@ -946,10 +946,25 @@ export async function completeEmailVerification(input: {
      by the one-shot cookie; a magic-link sign-in and a recovery earn none. */
   const moment = doneFlagForLinkType(input.type);
   if (isGlobalDoneFlag(moment)) await rememberSuccess(moment);
+  /* A RETURNING SIGN-IN BY LINK OR PROVIDER is greeted like a password
+     sign-in: "Signed in. Welcome back." (founder, 7 November 2026, "THE
+     BANNER EVERYWHERE"; it was silent). The link type cannot tell a new
+     account from a returning one (`link-moment.ts`), so the account's own
+     age decides: only one made more than ten minutes ago is "back". A
+     recovery link goes on to choose a password, which has its own moment. */
+  else if (input.type !== "recovery" && input.type !== "invite" && confirmed.user && isReturningAccount(confirmed.user.created_at)) {
+    await rememberSuccess("signed-in");
+  }
   // The session cookies are set. Drop every cached render so the shell picks
   // the signed-in tree rather than the anonymous one behind this screen.
   revalidatePath("/", "layout");
   return { ok: true, next };
+}
+
+/** An account made more than ten minutes ago: a sign-in, not a sign-up. */
+function isReturningAccount(createdAt: string | undefined): boolean {
+  const made = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(made) && Date.now() - made > 10 * 60 * 1000;
 }
 
 async function refuseSwitchedOffProvider(

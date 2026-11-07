@@ -28,7 +28,7 @@ export function InviteShare({ copy, url, code }: { copy: Dictionary["publicDoors
         full
         leadingIcon="link"
         done={copied}
-        onClick={() => void copyUrl(url)}
+        onClick={() => void copyUrl(url, "link")}
       >
         {copied ? copy.copied : copy.copy}
       </Button>

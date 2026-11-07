@@ -106,7 +106,7 @@ export async function resolvePushImages(admin: PushClient, recipientId: string, 
       const hostStays = (rows ?? []).filter((r) => r.guest_id !== recipientId && r.accommodation_id).map((r) => r.accommodation_id!);
       const [listingHosts, stayHosts] = await Promise.all([
         hostListings.length > 0
-          ? admin.from("listings").select("id, agents(user_id)").in("id", hostListings)
+          ? admin.from("listings").select("id, agents!listings_agent_id_fkey(user_id)").in("id", hostListings)
           : Promise.resolve({ data: [] as Array<{ id: string; agents: { user_id: string | null } | null }> }),
         hostStays.length > 0
           ? admin.from("accommodations").select("id, businesses(owner_id)").in("id", hostStays)

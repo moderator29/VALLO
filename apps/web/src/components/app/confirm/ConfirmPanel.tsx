@@ -3,6 +3,7 @@ import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { IconPlate, type IconPlateTone } from "@/components/ui/IconPlate";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { RecipientPreview } from "@/lib/email/everyone-gets";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE ONE CONFIRM PANEL (plan item 22, spec section 15, references 35 and 37).
@@ -186,7 +187,12 @@ export function ConfirmPanel({
 
       {children}
 
-      {error ? (
+      {/* A refusal in words is said by the one banner at the top of the
+          screen and kept here for a screen reader (founder, 7 November 2026,
+          "THE BANNER EVERYWHERE"); anything richer keeps its line. */}
+      {typeof error === "string" ? (
+        <FieldProblem id="nf-confirm-problem" message={error} />
+      ) : error ? (
         <p className="nf-confirm__error" role="alert">
           {error}
         </p>

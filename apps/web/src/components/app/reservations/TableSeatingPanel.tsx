@@ -267,7 +267,7 @@ function CopyCode({ code }: { code: string }) {
       size="sm"
       leadingIcon="document"
       done={copied}
-      onClick={() => void copy(code)}
+      onClick={() => void copy(code, "code")}
       data-testid="check-in-code-copy"
     >
       {copied ? words.copied : words.copy}

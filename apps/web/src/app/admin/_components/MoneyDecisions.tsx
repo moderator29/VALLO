@@ -27,17 +27,9 @@ import { banner } from "@/lib/ui/toast";
  * than from an optimistic guess about what happened.
  */
 
-function Refusal({ message }: { message: string | null }) {
-  if (!message) return null;
-  return (
-    <p
-      role="alert"
-      className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]"
-    >
-      {message}
-    </p>
-  );
-}
+/* A refusal is said by the one banner at the top of the screen (founder,
+   7 November 2026, "THE BANNER EVERYWHERE"); it used to be a red line
+   under the form. */
 
 /* ------------------------------------------------------------ KYC decision */
 
@@ -46,7 +38,6 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   const [reason, setReason] = useState("");
   const [nameOnId, setNameOnId] = useState("");
   const [showReason, setShowReason] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   /* An ID is approved with the name printed on it; the bank account name is
      matched against that name, so the reviewer types it, exactly. */
@@ -55,7 +46,6 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   const nameReady = !isId || nameOnId.trim().length >= 2;
 
   function decide(approve: boolean) {
-    setError(null);
     start(async () => {
       try {
         const result = await reviewKycDocument(
@@ -67,7 +57,7 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
           /* A word about a field stays under the decision; anything else is
              the outcome, and the banner says it. */
           const about = result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"];
-          if (about) setError(about);
+          if (about) banner.error(about);
           else banner.error(result.error, { retry: () => decide(approve) });
           return;
         }
@@ -156,14 +146,12 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
             disabled={pending}
             onClick={() => {
               setShowReason(false);
-              setError(null);
             }}
           >
             Cancel
           </Button>
         )}
       </div>
-      <Refusal message={error} />
     </div>
   );
 }
@@ -197,20 +185,18 @@ export function FeeRateForm({
   const [flatNaira, setFlatNaira] = useState(String(currentFlatMinor / 100));
   const [startsAt, setStartsAt] = useState("");
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
   function submit() {
-    setError(null);
     const percentValue = Number(percent);
     const flatValue = Number(flatNaira);
     if (!Number.isFinite(percentValue) || percentValue < 0 || percentValue > 100) {
-      setError("Enter the rate as a percentage between 0 and 100.");
+      banner.error("Enter the rate as a percentage between 0 and 100.");
       return;
     }
     if (!Number.isFinite(flatValue) || flatValue < 0) {
-      setError("Enter the flat amount in naira, or zero.");
+      banner.error("Enter the flat amount in naira, or zero.");
       return;
     }
 
@@ -241,7 +227,7 @@ export function FeeRateForm({
              confirming again. */
           setConfirming(false);
           const about = result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"];
-          if (about) setError(about);
+          if (about) banner.error(about);
           else banner.error(result.error);
           return;
         }
@@ -319,7 +305,6 @@ export function FeeRateForm({
           {pending ? "Recording" : "Record this rate"}
         </Button>
       </div>
-      <Refusal message={error} />
       <Sheet
         open={confirming}
         onOpenChange={(next) => {

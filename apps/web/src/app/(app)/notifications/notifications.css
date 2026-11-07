@@ -301,6 +301,11 @@
   .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:first-child {
     position: relative;
     z-index: 3;
+    /* Opaque while it stands in front: frosted glass let the cards behind
+       show through it as a second, offset card (the founder's bug). */
+    background: var(--nf-surface-elevated);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
   .nf-notif__group--stack[data-stacked="true"] .nf-list-group > .nf-list-item:nth-child(n + 2) {
     position: absolute;

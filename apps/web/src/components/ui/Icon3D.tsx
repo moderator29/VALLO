@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { icon3dSrc, type Icon3DName } from "./icon-3d";
-import { ICON3D_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
+import { ICON3D_GLYPH, glyphMasterSrc } from "@/design-system/icons/glyphs";
 
 /**
  * THE FOUNDER'S 3D ICONS (30 September): soft clay objects in royal blue with
@@ -143,7 +143,7 @@ export function Icon3D({
       <Image
         ref={ref}
         onError={() => setFailed(true)}
-        src={glyph ? glyphSrc(glyph) : icon3dSrc(name)}
+        src={glyph ? glyphMasterSrc(glyph) : icon3dSrc(name)}
         alt={label ?? ""}
         aria-hidden={label ? undefined : true}
         width={256}

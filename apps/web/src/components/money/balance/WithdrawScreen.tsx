@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { SelectField, TextField } from "@/components/ui/Field";
 import { Sheet } from "@/components/ui/Sheet";
+import { StepFrame } from "@/components/ui/StepFrame";
 import {
   cancelBalanceMovement,
   checkBalanceBankAccount,
@@ -148,9 +149,14 @@ export function WithdrawScreen({
     setStep("amount");
   };
 
-  return (
+  /* SW5 (round 3): the amount, the quote and the code stand in the
+     platform's STEP FRAME; the keypad and the slide stay in the content, the
+     slide the review's only confirm. The outcomes keep the wallet's own top.
+     Every gate, key and reach is unchanged (see SendScreen). */
+  const framed = step === "amount" || step === "review" || step === "otp";
+  const body = (
     <div className="nf-balance nf-mw" data-screen="withdraw" data-testid="wallet-withdraw" data-step={step}>
-      <WalletHeader title={ACTION_LABEL.withdraw} back={links.overview} />
+      {framed ? null : <WalletHeader title={ACTION_LABEL.withdraw} back={links.overview} />}
 
       {step === "amount" ? (
         <div className="nf-mw-move">
@@ -170,9 +176,6 @@ export function WithdrawScreen({
             testId="withdraw-account"
           />
           <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full loading={busy} disabled={!ready} onClick={prepare} data-testid="move-continue">
-              {MOVE_COPY.continue}
-            </Button>
             <Keypad value={amount} onChange={setAmount} />
           </div>
         </div>
@@ -180,7 +183,6 @@ export function WithdrawScreen({
 
       {step === "review" && quote ? (
         <div className="nf-mw-move" data-testid="withdraw-review">
-          <p className="nf-mw-label text-center">{MOVE_COPY.review}</p>
           <Breakdown breakdown={quote.breakdown} locale={locale} destination={{ label: "To", title: quote.destination.title, detail: quote.destination.detail }} receivedLabel="You'll receive" />
           <p className="nf-caption text-[var(--nf-content-muted)]">
             The processing fee is set by our licensed provider for this withdrawal and is what you will be charged. Reference {quote.reference}.
@@ -219,20 +221,6 @@ export function WithdrawScreen({
               {otpNote}
             </p>
           ) : null}
-          <Button
-            variant="primary"
-            size="lg"
-            full
-            loading={busy}
-            disabled={otp.length < 4}
-            onClick={async () => {
-              setBusy(true);
-              await submit(otp);
-              setBusy(false);
-            }}
-          >
-            Confirm withdrawal
-          </Button>
         </div>
       ) : null}
 
@@ -310,4 +298,40 @@ export function WithdrawScreen({
       </Sheet>
     </div>
   );
+
+  if (!framed) return body;
+  const at = step === "amount" ? 1 : step === "review" ? 2 : 3;
+  return (
+    <StepFrame
+      testId="withdraw-steps"
+      step={at}
+      total={3}
+      eyebrow={ACTION_LABEL.withdraw}
+      title={step === "amount" ? WITHDRAW_STEP.amount : step === "review" ? MOVE_COPY.review : WITHDRAW_STEP.code}
+      direction={at === 1 ? "back" : "forward"}
+      {...(step === "review" ? { onBack: backFromReview } : {})}
+      closeHref={links.overview}
+      {...(step === "amount"
+        ? { primary: { label: MOVE_COPY.continue, onClick: prepare, loading: busy, disabled: !ready, testId: "move-continue" } }
+        : step === "otp"
+          ? {
+              primary: {
+                label: "Confirm withdrawal",
+                loading: busy,
+                disabled: otp.length < 4,
+                onClick: async () => {
+                  setBusy(true);
+                  await submit(otp);
+                  setBusy(false);
+                },
+              },
+            }
+          : {})}
+    >
+      {body}
+    </StepFrame>
+  );
 }
+
+/* The step titles a withdrawal did not have words for. */
+const WITHDRAW_STEP = { amount: "How much, and to which account", code: "Enter the code" } as const;

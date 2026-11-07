@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { confirmDepositPaid, prepareDeposit, type DepositStart } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
@@ -101,9 +102,13 @@ export function AddMoneyScreen({
     }
   };
 
-  return (
+  /* SW5 (round 3): the amount, the check and the payment stand in the
+     platform's STEP FRAME; the keypad stays in the content. The outcomes keep
+     the wallet's own top. Every gate, key and reach is unchanged. */
+  const framed = step === "amount" || step === "confirm" || step === "pay";
+  const body = (
     <div className="nf-balance nf-mw" data-screen="add" data-testid="wallet-add" data-step={step}>
-      <WalletHeader title={ACTION_LABEL.add} back={links.overview} />
+      {framed ? null : <WalletHeader title={ACTION_LABEL.add} back={links.overview} />}
 
       {step === "amount" ? (
         <div className="nf-mw-move">
@@ -118,9 +123,6 @@ export function AddMoneyScreen({
             testId="add-method"
           />
           <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full disabled={!amount} onClick={() => setStep("confirm")} data-testid="move-continue">
-              {MOVE_COPY.continue}
-            </Button>
             <Keypad value={amount} onChange={setAmount} />
           </div>
         </div>
@@ -129,7 +131,6 @@ export function AddMoneyScreen({
       {step === "confirm" ? (
         <div className="nf-mw-move">
           <div className="nf-mw-amount">
-            <span className="nf-mw-amount__label">{MOVE_COPY.review}</span>
             <MoneyFigure minor={minor} locale={locale} size="hero" kobo="auto" />
           </div>
           <Summary
@@ -139,14 +140,6 @@ export function AddMoneyScreen({
               { label: "Added", value: "Once your bank confirms" },
             ]}
           />
-          <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full loading={busy} onClick={begin} data-testid="move-confirm">
-              Continue to pay
-            </Button>
-            <Button variant="secondary" size="lg" full onClick={() => setStep("amount")}>
-              Change amount
-            </Button>
-          </div>
         </div>
       ) : null}
 
@@ -210,4 +203,32 @@ export function AddMoneyScreen({
       </Sheet>
     </div>
   );
+
+  if (!framed) return body;
+  const at = step === "amount" ? 1 : step === "confirm" ? 2 : 3;
+  return (
+    <StepFrame
+      testId="add-steps"
+      step={at}
+      total={3}
+      eyebrow={ACTION_LABEL.add}
+      title={step === "amount" ? ADD_STEP.amount : step === "confirm" ? MOVE_COPY.review : ADD_STEP.pay}
+      direction={at === 1 ? "back" : "forward"}
+      {...(step === "confirm" ? { onBack: () => setStep("amount") } : {})}
+      closeHref={links.overview}
+      {...(step === "amount"
+        ? { primary: { label: MOVE_COPY.continue, onClick: () => setStep("confirm"), disabled: !amount, testId: "move-continue" } }
+        : step === "confirm"
+          ? {
+              primary: { label: "Continue to pay", onClick: begin, loading: busy, testId: "move-confirm" },
+              secondary: { label: "Change amount", onClick: () => setStep("amount") },
+            }
+          : {})}
+    >
+      {body}
+    </StepFrame>
+  );
 }
+
+/* The step titles adding money did not have words for. */
+const ADD_STEP = { amount: "How much to add", pay: "Pay from your bank" } as const;

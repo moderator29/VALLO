@@ -10,16 +10,42 @@
  * change feed exactly as it does to queries, so a client only ever receives
  * rows it could have selected. Delivery is best effort by design: if the
  * socket drops, the next full load renders the truth from the database.
+ *
+ * THE CLIENT ARRIVES AFTER THE FIRST PAINT (performance audit, 7 November
+ * 2026). supabase-js is about 65 KB gzipped, and through the notification
+ * banner these hooks put it in the first load of every member page (188
+ * routes). Each effect now loads it at the moment it opens its channel
+ * (`load-client.ts`), so the page paints first and the socket follows a
+ * moment later. A channel opened after the effect was torn down is never
+ * opened; one opened before is removed exactly as before.
  */
+
+/** Open a channel once the client has loaded; the returned stop is safe to call at any time. */
+function whenLoaded(open: (supabase: BrowserClient) => () => void): () => void {
+  let cancelled = false;
+  let stop: (() => void) | null = null;
+  void loadBrowserClient()
+    .then((supabase) => {
+      if (cancelled || !supabase) return;
+      stop = open(supabase);
+    })
+    .catch(() => undefined);
+  return () => {
+    cancelled = true;
+    stop?.();
+  };
+}
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Database } from "../supabase/database.types";
 import { isSupabaseConfigured } from "../supabase/env";
-import { createClient } from "../supabase/client";
+import type { createClient } from "../supabase/client";
+import { loadBrowserClient, type BrowserClient } from "../supabase/load-client";
 import { ownChannelName } from "@/lib/supabase/channel-name";
 
 export type LiveMessageRow = Database["public"]["Tables"]["messages"]["Row"];
-export type LiveNotificationRow = Database["public"]["Tables"]["notifications"]["Row"];
+export type LiveNotificationRow =
+  Database["public"]["Tables"]["notifications"]["Row"];
 
 /**
  * Subscribe to message inserts in one conversation, and to updates of its
@@ -30,7 +56,7 @@ export type LiveNotificationRow = Database["public"]["Tables"]["notifications"][
 export function useThreadRealtime(
   conversationId: string | null,
   onInsert: (row: LiveMessageRow) => void,
-  onUpdate?: (row: LiveMessageRow) => void,
+  onUpdate?: (row: LiveMessageRow) => void
 ): void {
   const handler = useRef(onInsert);
   const updateHandler = useRef(onUpdate);
@@ -41,37 +67,38 @@ export function useThreadRealtime(
 
   useEffect(() => {
     if (!conversationId || !isSupabaseConfigured()) return;
-    const supabase = createClient();
-    const channel = supabase
-      .channel(ownChannelName(`thread-${conversationId}`))
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          handler.current(payload.new as LiveMessageRow);
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          updateHandler.current?.(payload.new as LiveMessageRow);
-        },
-      )
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    return whenLoaded((supabase) => {
+      const channel = supabase
+        .channel(ownChannelName(`thread-${conversationId}`))
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => {
+            handler.current(payload.new as LiveMessageRow);
+          }
+        )
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => {
+            updateHandler.current?.(payload.new as LiveMessageRow);
+          }
+        )
+        .subscribe();
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    });
   }, [conversationId]);
 }
 
@@ -92,7 +119,7 @@ const TYPING_PING_MS = 1_500;
  */
 export function useThreadTyping(
   conversationId: string | null,
-  meId: string | null,
+  meId: string | null
 ): { typing: boolean; ping: () => void } {
   const [typing, setTyping] = useState(false);
   const channelRef = useRef<ReturnType<
@@ -104,22 +131,28 @@ export function useThreadTyping(
   useEffect(() => {
     setTyping(false);
     if (!conversationId || !isSupabaseConfigured()) return;
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`typing-${conversationId}`, { config: { broadcast: { self: false } } })
-      .on("broadcast", { event: "typing" }, ({ payload }) => {
-        if ((payload as { from?: string } | null)?.from === meId) return;
-        setTyping(true);
+    return whenLoaded((supabase) => {
+      const channel = supabase
+        .channel(`typing-${conversationId}`, {
+          config: { broadcast: { self: false } },
+        })
+        .on("broadcast", { event: "typing" }, ({ payload }) => {
+          if ((payload as { from?: string } | null)?.from === meId) return;
+          setTyping(true);
+          if (decayTimer.current) clearTimeout(decayTimer.current);
+          decayTimer.current = setTimeout(
+            () => setTyping(false),
+            TYPING_TIMEOUT_MS
+          );
+        })
+        .subscribe();
+      channelRef.current = channel;
+      return () => {
         if (decayTimer.current) clearTimeout(decayTimer.current);
-        decayTimer.current = setTimeout(() => setTyping(false), TYPING_TIMEOUT_MS);
-      })
-      .subscribe();
-    channelRef.current = channel;
-    return () => {
-      if (decayTimer.current) clearTimeout(decayTimer.current);
-      channelRef.current = null;
-      void supabase.removeChannel(channel);
-    };
+        channelRef.current = null;
+        void supabase.removeChannel(channel);
+      };
+    });
   }, [conversationId, meId]);
 
   const ping = useCallback(() => {
@@ -142,7 +175,7 @@ export function useThreadTyping(
  */
 export function useNotificationsRealtime(
   userId: string | null,
-  onInsert: (row: LiveNotificationRow) => void,
+  onInsert: (row: LiveNotificationRow) => void
 ): void {
   const handler = useRef(onInsert);
   useEffect(() => {
@@ -151,25 +184,26 @@ export function useNotificationsRealtime(
 
   useEffect(() => {
     if (!userId || !isSupabaseConfigured()) return;
-    const supabase = createClient();
-    const channel = supabase
-      .channel(ownChannelName(`notifications-${userId}`))
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "notifications",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          handler.current(payload.new as LiveNotificationRow);
-        },
-      )
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    return whenLoaded((supabase) => {
+      const channel = supabase
+        .channel(ownChannelName(`notifications-${userId}`))
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            handler.current(payload.new as LiveNotificationRow);
+          }
+        )
+        .subscribe();
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    });
   }, [userId]);
 }
 
@@ -187,7 +221,7 @@ export function useNotificationsRealtime(
  */
 export function useInboxTyping(
   conversationIds: string[],
-  meId: string | null,
+  meId: string | null
 ): Set<string> {
   const [typing, setTyping] = useState<Set<string>>(() => new Set());
   // The array identity changes on every render; the ids rarely do.
@@ -198,41 +232,42 @@ export function useInboxTyping(
     const ids = key.length > 0 ? key.split(",") : [];
     if (ids.length === 0 || !isSupabaseConfigured()) return;
 
-    const supabase = createClient();
-    const timers = new Map<string, ReturnType<typeof setTimeout>>();
+    return whenLoaded((supabase) => {
+      const timers = new Map<string, ReturnType<typeof setTimeout>>();
 
-    const channels = ids.map((id) =>
-      supabase
-        .channel(`typing-${id}`, { config: { broadcast: { self: false } } })
-        .on("broadcast", { event: "typing" }, ({ payload }) => {
-          if ((payload as { from?: string } | null)?.from === meId) return;
-          setTyping((current) => {
-            if (current.has(id)) return current;
-            const next = new Set(current);
-            next.add(id);
-            return next;
-          });
-          const existing = timers.get(id);
-          if (existing) clearTimeout(existing);
-          timers.set(
-            id,
-            setTimeout(() => {
-              setTyping((current) => {
-                if (!current.has(id)) return current;
-                const next = new Set(current);
-                next.delete(id);
-                return next;
-              });
-            }, TYPING_TIMEOUT_MS),
-          );
-        })
-        .subscribe(),
-    );
+      const channels = ids.map((id) =>
+        supabase
+          .channel(`typing-${id}`, { config: { broadcast: { self: false } } })
+          .on("broadcast", { event: "typing" }, ({ payload }) => {
+            if ((payload as { from?: string } | null)?.from === meId) return;
+            setTyping((current) => {
+              if (current.has(id)) return current;
+              const next = new Set(current);
+              next.add(id);
+              return next;
+            });
+            const existing = timers.get(id);
+            if (existing) clearTimeout(existing);
+            timers.set(
+              id,
+              setTimeout(() => {
+                setTyping((current) => {
+                  if (!current.has(id)) return current;
+                  const next = new Set(current);
+                  next.delete(id);
+                  return next;
+                });
+              }, TYPING_TIMEOUT_MS)
+            );
+          })
+          .subscribe()
+      );
 
-    return () => {
-      for (const timer of timers.values()) clearTimeout(timer);
-      for (const channel of channels) void supabase.removeChannel(channel);
-    };
+      return () => {
+        for (const timer of timers.values()) clearTimeout(timer);
+        for (const channel of channels) void supabase.removeChannel(channel);
+      };
+    });
   }, [key, meId]);
 
   return typing;
@@ -255,7 +290,7 @@ export type LiveReactionChange = {
  */
 export function useThreadReactions(
   conversationId: string | null,
-  onChange: (change: LiveReactionChange) => void,
+  onChange: (change: LiveReactionChange) => void
 ): void {
   const handler = useRef(onChange);
   useEffect(() => {
@@ -264,28 +299,29 @@ export function useThreadReactions(
 
   useEffect(() => {
     if (!conversationId || !isSupabaseConfigured()) return;
-    const supabase = createClient();
-    const channel = supabase
-      .channel(ownChannelName(`reactions-${conversationId}`))
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "message_reactions",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          handler.current({
-            eventType: payload.eventType as LiveReactionChange["eventType"],
-            new: (payload.new ?? null) as LiveReactionChange["new"],
-            old: (payload.old ?? null) as LiveReactionChange["old"],
-          });
-        },
-      )
-      .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    return whenLoaded((supabase) => {
+      const channel = supabase
+        .channel(ownChannelName(`reactions-${conversationId}`))
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "message_reactions",
+            filter: `conversation_id=eq.${conversationId}`,
+          },
+          (payload) => {
+            handler.current({
+              eventType: payload.eventType as LiveReactionChange["eventType"],
+              new: (payload.new ?? null) as LiveReactionChange["new"],
+              old: (payload.old ?? null) as LiveReactionChange["old"],
+            });
+          }
+        )
+        .subscribe();
+      return () => {
+        void supabase.removeChannel(channel);
+      };
+    });
   }, [conversationId]);
 }

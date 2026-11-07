@@ -6,6 +6,7 @@ import type { ProviderId, ProviderState, SignInSurface } from "@/lib/auth/provid
 import { continueWithEmail } from "@/lib/auth/actions";
 import { SocialDoors } from "./SocialDoors";
 import { AuthPillButton } from "./slate";
+import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
 
 /**
  * The door, to the Slate references of 29 September
@@ -76,11 +77,8 @@ export function AuthChoices({
     <div className="nf-auth__screen nf-slate-stagger">
       <h1 className="nf-auth__title">{isSignUp ? t.common.signUp : t.common.signIn}</h1>
 
-      {notice ? (
-        <p role="status" className="nf-auth__notice">
-          {notice}
-        </p>
-      ) : null}
+      {/* The arrival sentence is said by the one banner (founder, 7 November 2026). */}
+      <BannerOnArrival message={notice ?? null} tone="info" />
 
       {/*
         The address is posted to a server action that keeps it in a cookie
