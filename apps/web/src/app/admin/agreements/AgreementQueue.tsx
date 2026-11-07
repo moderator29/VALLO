@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Chip } from "@/components/ui/Chip";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE QUEUE, BUILT TO BE WORKED AT SPEED.
@@ -43,9 +44,11 @@ function Row({ row, locale, now }: { row: QueueRow; locale: Locale; now: number 
   const [pending, start] = useSafeTransition();
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
-  const [outcome, setOutcome] = useState<{ kind: "done"; text: string } | { kind: "error"; text: string } | null>(null);
+  /* The decided row folds to one line, the list's record of it; the banner
+     says the outcome as it happens, and a refusal with a retry. */
+  const [outcome, setOutcome] = useState<{ kind: "done"; text: string } | null>(null);
 
-  const act = (decision: "approve" | "reject") =>
+  const act = (decision: "approve" | "reject"): void =>
     start(async () => {
       try {
         const result = await decideAgreement({
@@ -53,11 +56,11 @@ function Row({ row, locale, now }: { row: QueueRow; locale: Locale; now: number 
           decision,
           ...(decision === "reject" ? { reason } : {}),
         });
-        setOutcome(
-          result.ok
-            ? { kind: "done", text: decision === "approve" ? "Approved. Both parties told; payment is open." : "Sent back. Both parties told with your reason." }
-            : { kind: "error", text: result.error },
-        );
+        if (result.ok) {
+          const text = decision === "approve" ? "Approved. Both parties told; payment is open." : "Sent back. Both parties told with your reason.";
+          setOutcome({ kind: "done", text });
+          banner.success(text);
+        } else banner.error(result.error, { retry: () => act(decision) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -94,11 +97,6 @@ function Row({ row, locale, now }: { row: QueueRow; locale: Locale; now: number 
         </p>
         {row.notes ? (
           <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">“{row.notes}”</p>
-        ) : null}
-        {outcome?.kind === "error" ? (
-          <p role="alert" className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-status-error)]">
-            {outcome.text}
-          </p>
         ) : null}
       </div>
       <div className="nf-admin-queue-row__actions">

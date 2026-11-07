@@ -9,6 +9,7 @@ import { REVIEW_REASONS, composeReviewNote } from "@/lib/admin/review-reasons";
 import "../../_components/admin-material.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type Decision = "approve" | "publish" | "request_changes" | "reject";
 
@@ -56,7 +57,6 @@ export function ReviewActionBar({
   const [codes, setCodes] = useState<string[]>([]);
   const [pending, startTransition] = useSafeTransition();
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
   const [armed, setArmed] = useState(false);
   const disarm = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -79,7 +79,7 @@ export function ReviewActionBar({
      send it back, so the button does not offer to. */
   const withLister = status === "MORE_INFO_REQUIRED";
 
-  const run = (decision: Decision) => {
+  const run = (decision: Decision): void => {
     setError(null);
     startTransition(async () => {
       try {
@@ -91,12 +91,17 @@ export function ReviewActionBar({
           ...(sendsReasons && codes.length > 0 ? { reasons: codes } : {}),
         });
         if (!result.ok) {
-          setError(result.fieldErrors?.["notes"] ?? result.error);
+          /* A word about the note stays under the note; anything else is the
+             outcome, and the banner says it (a retry except for a rejection,
+             which is confirmed by pressing Reject twice). */
+          const about = result.fieldErrors?.["notes"];
+          if (about) setError(about);
+          else banner.error(result.error, decision === "reject" ? undefined : { retry: () => run(decision) });
           /* An approval that could not go live has still moved the status. */
           router.refresh();
           return;
         }
-        setDone(
+        banner.success(
           decision === "approve"
             ? "Approved and live. The lister has been told."
             : decision === "publish"
@@ -218,7 +223,6 @@ export function ReviewActionBar({
           </p>
         ) : null}
         {pending ? <p className="nf-rv-msg">Recording the decision.</p> : null}
-        {done ? <p className="nf-rv-msg nf-rv-msg--ok">{done} Loading the next listing.</p> : null}
         {error ? (
           <p className="nf-rv-msg nf-rv-msg--error" role="alert">
             {error}

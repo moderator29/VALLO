@@ -7,6 +7,7 @@ import { decideListingMandate } from "@/lib/compliance/beneficial-ownership-acti
 import { ID_DOCUMENT_KINDS, RELATIONSHIPS, VERIFIED_HOW, looksLikeNin } from "@/lib/compliance/beneficial-ownership";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type Copy = Dictionary["complianceBeneficialOwnership"];
 
@@ -29,7 +30,6 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
   const [reason, setReason] = useState("");
   const [refusing, setRefusing] = useState(false);
   const [done, setDone] = useState<"approved" | "rejected" | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   if (done) {
@@ -43,7 +43,6 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
   const nin = idRef.trim().length > 0 && looksLikeNin(idRef);
 
   function run(decision: "approve" | "reject") {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await decideListingMandate({
@@ -56,10 +55,13 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
           reason: decision === "reject" ? reason : null,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => run(decision) });
           return;
         }
+        /* The decided line stays as the card's record (nothing re-reads it
+           here); the banner says it as it happens. */
         setDone(decision === "approve" ? "approved" : "rejected");
+        banner.success(decision === "approve" ? d.approved : d.rejected);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -175,11 +177,6 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
           </>
         )}
       </div>
-      {error && (
-        <p role="alert" className="nf-rv-msg" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }

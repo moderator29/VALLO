@@ -7,6 +7,7 @@ import { decidePropertyMatch, reopenClosedListing, splitFromProperty } from "@/l
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-37. The reviewer's one-tap decision on a proposed match: "Same property"
@@ -25,14 +26,12 @@ export function PropertyMatchButtons({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
 
   function decide(decision: "join" | "apart") {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await decidePropertyMatch({ listingId, otherId, decision });
-        if (!result.ok) setError(result.error);
+        if (!result.ok) banner.error(result.error, { retry: () => decide(decision) });
         else router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -50,11 +49,6 @@ export function PropertyMatchButtons({
           {labels.apart}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="nf-rv-msg" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -62,7 +56,19 @@ export function PropertyMatchButtons({
 export function PropertySplitButton({ listingId, label }: { listingId: string; label: string }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
+
+  function split() {
+    startTransition(async () => {
+      try {
+        const result = await splitFromProperty({ listingId });
+        if (!result.ok) banner.error(result.error, { retry: split });
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <div className="grid gap-2xs">
       <Button
@@ -70,25 +76,10 @@ export function PropertySplitButton({ listingId, label }: { listingId: string; l
         size="sm"
         variant="dangerQuiet"
         loading={pending}
-        onClick={() =>
-          startTransition(async () => {
-            try {
-              const result = await splitFromProperty({ listingId });
-              if (!result.ok) setError(result.error);
-              else router.refresh();
-            } catch (error) {
-              if (!tapFailedOffline(error)) throw error;
-            }
-          })
-        }
+        onClick={split}
       >
         {label}
       </Button>
-      {error && (
-        <p role="alert" className="nf-rv-msg" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -102,7 +93,19 @@ export function ReopenControl({ listingId, copy }: { listingId: string; copy: Di
   const router = useRouter();
   const [note, setNote] = useState("");
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
+
+  function reopen() {
+    startTransition(async () => {
+      try {
+        const result = await reopenClosedListing({ listingId, note });
+        if (!result.ok) banner.error(result.error, { retry: reopen });
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <div className="mt-sm grid gap-xs">
       <label className="nf-label" htmlFor={`reopen-${listingId}`}>
@@ -123,26 +126,11 @@ export function ReopenControl({ listingId, copy }: { listingId: string; copy: Di
           variant="secondary"
           loading={pending}
           disabled={note.trim().length < 8}
-          onClick={() =>
-            startTransition(async () => {
-              try {
-                const result = await reopenClosedListing({ listingId, note });
-                if (!result.ok) setError(result.error);
-                else router.refresh();
-              } catch (error) {
-                if (!tapFailedOffline(error)) throw error;
-              }
-            })
-          }
+          onClick={reopen}
         >
           {copy.reopen}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="nf-rv-msg" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }

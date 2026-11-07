@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { cancel } from "@/lib/bookings/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
 import type { BookingView } from "@/lib/bookings/queries";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { banner } from "@/lib/ui/toast";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
@@ -50,11 +50,19 @@ export function CancelBookingSheet({
     null,
   );
 
+  /* The outcome is said by the one banner at the top of the screen (Grade 1),
+     and the booking page behind it, refreshed, is the record. */
+  const cancelledLine = w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange);
   useEffect(() => {
-    if (state?.ok) router.refresh();
-  }, [state, router]);
-
-  const cancelled = Boolean(state?.ok);
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error, { "data-testid": "cancel-booking-error" });
+      return;
+    }
+    banner.success(cancelledLine, { "data-testid": "cancel-booking-done" });
+    router.refresh();
+    onClose();
+  }, [state, router, onClose, cancelledLine]);
 
   return (
     <Sheet
@@ -69,25 +77,7 @@ export function CancelBookingSheet({
       /* Cancelled: one Done under the result. Still asking: the confirm panel
          (plan item 22) carries its own foot, with the same form, the same
          hidden field and the same `cancel` action as before. */
-      footer={
-        cancelled ? (
-          <Button variant="primary" full onClick={onClose}>
-            {w.done}
-          </Button>
-        ) : undefined
-      }
     >
-      {cancelled ? (
-        <div className="text-center">
-          <p className="flex items-center justify-center gap-xs text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
-            <UiIcon name="verified" size={20} className="text-[var(--nf-state-success)]" />
-            {w.cancelledTitle}
-          </p>
-          <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange)}
-          </p>
-        </div>
-      ) : (
         <ConfirmPanel
           icon="calendar-booking"
           tone="error"
@@ -99,7 +89,7 @@ export function CancelBookingSheet({
             { label: w.total, value: booking.totalDisplay },
           ]}
           next={[{ icon: "calendar-check", text: w.released }]}
-          error={state && !state.ok ? state.error : null}
+          error={null}
           cancel={
             <Button variant="secondary" onClick={onClose}>
               {w.keep}
@@ -114,7 +104,6 @@ export function CancelBookingSheet({
             </form>
           }
         />
-      )}
     </Sheet>
   );
 }
