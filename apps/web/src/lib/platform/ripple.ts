@@ -115,6 +115,24 @@ type Live = {
   still: boolean;
 };
 
+/** The motion tokens' curves, read once from the stylesheet so script and CSS
+    share one ladder; the fallbacks are the same tokens' values. */
+function curves(): { spread: string; fadeIn: string; fadeOut: string } {
+  const read = (name: string, fallback: string) => {
+    try {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  return {
+    spread: read("--nf-ease-entrance", "cubic-bezier(0.16, 1, 0.3, 1)"),
+    fadeIn: read("--nf-ease-standard", "cubic-bezier(0.22, 0.61, 0.36, 1)"),
+    fadeOut: read("--nf-ease-exit", "cubic-bezier(0.4, 0, 1, 1)"),
+  };
+}
+let ladder: ReturnType<typeof curves> | null = null;
+
 function quietMotion(reduced: MediaQueryList | null): boolean {
   const level = document.documentElement.dataset.motion;
   return level === "calm" || level === "off" || reduced?.matches === true;
@@ -153,7 +171,7 @@ function draw(target: HTMLElement, point: { x: number; y: number }, reduced: Med
      the shape the reader sees, so it keeps the shared tint only. */
   if (style.display === "inline") return null;
 
-  const radius = geometry.round ? "50%" : style.borderRadius || "0";
+  const radius = geometry.round ? "var(--nf-radius-circle)" : style.borderRadius || "0";
   const card = geometry.round ? null : clippingCard(target);
   const box = geometry.box;
   let host: HTMLElement;
@@ -185,12 +203,13 @@ function draw(target: HTMLElement, point: { x: number; y: number }, reduced: Med
     if (still) {
       ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 1, fill: "forwards" });
     } else {
+      const ease = (ladder ??= curves());
       ink.animate([{ transform: "scale(0.12)" }, { transform: "scale(1)" }], {
         duration: spreadMs(size),
-        easing: "cubic-bezier(0.2, 0, 0, 1)",
+        easing: ease.spread,
         fill: "forwards",
       });
-      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 75, easing: "linear", fill: "forwards" });
+      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 75, easing: ease.fadeIn, fill: "forwards" });
     }
   } catch {
     /* No Web Animations: the ink shows at its resting style and still goes. */
@@ -207,7 +226,7 @@ function release(live: Live, fast = false): void {
     try {
       const fade = live.ink.animate([{ opacity: getComputedStyle(live.ink).opacity }, { opacity: 0 }], {
         duration: fast ? 90 : live.still ? 150 : 220,
-        easing: "cubic-bezier(0.4, 0, 1, 1)",
+        easing: (ladder ??= curves()).fadeOut,
         fill: "forwards",
       });
       fade.onfinish = remove;

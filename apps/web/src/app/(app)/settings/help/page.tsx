@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { RowLink, RowValue, SettingsGroup } from "@/components/app/account/rows";
 import { SupportChat } from "@/components/app/account/SupportChat";
 import { aiConsentForViewer } from "@/lib/ai/consent-server";
@@ -24,12 +24,9 @@ export default async function HelpSettingsPage() {
   const reports = await loadMyReports();
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.hub.help}
-        subtitle={t.settings.hub.helpSub}
-        fallback="/settings"
-      />
+    <PageFrame title={t.settings.hub.help} subtitle={t.settings.hub.helpSub} fallback="/settings" width="narrow">
+      {/* One child: the lede keeps its 16px foot above the sections. */}
+      <div>
       <SettingsLede
         label={t.experienceAccount.settings.lede.what}
         what={t.experienceAccount.settings.lede.help.what}
@@ -73,6 +70,7 @@ export default async function HelpSettingsPage() {
           </div>
         </section>
       </div>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

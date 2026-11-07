@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import { distinctDeviceCount } from "@/lib/security/device-count";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { loadProfileState } from "@/lib/profile/queries";
 import { loadSessions } from "@/lib/security/sessions";
 import { getAgentContext } from "@/lib/agent/listings-queries";
@@ -64,16 +64,14 @@ export default async function SettingsPage() {
   const hub = t.settings.hub;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      {/*
-        THE WAY BACK. `/settings` declares `/home` above it in
-        `lib/nav/route-parents.ts`, every screen UNDER it draws a `PageHeader`
-        with a back control, and so does the hub: the clean spec's large title
-        (section 8.1) carries the same back control, so the settings tree has
-        a way up at its top and the head matches Saved, Inbox and Bookings.
-      */}
-      <PageHeader variant="large" title={t.nav.settings} subtitle={hub.ledeShort} fallback="/home" />
-
+    /*
+      THE WAY BACK. `/settings` declares `/home` above it in
+      `lib/nav/route-parents.ts`, every screen UNDER it is on the same
+      `PageFrame` with a back control, and so is the hub: the large title
+      (section 8.1) carries the same back control, so the settings tree has a
+      way up at its top and the head matches Saved, Inbox and Bookings.
+    */
+    <PageFrame title={t.nav.settings} subtitle={hub.ledeShort} fallback="/home" width="narrow">
       <div className="space-y-block">
         <SettingsHub
           t={forHub(t)}
@@ -119,6 +117,6 @@ export default async function SettingsPage() {
 
         <LogOutRow t={forHub(t)} signedIn={signedIn} />
       </div>
-    </div>
+    </PageFrame>
   );
 }

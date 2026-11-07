@@ -91,7 +91,7 @@
   }
   .nf-ripple__ink {
     position: absolute;
-    border-radius: 50%;
+    border-radius: var(--nf-radius-circle);
     opacity: 0;
     transform: scale(0.12);
     will-change: transform, opacity;
@@ -215,7 +215,7 @@
      beneath dims a little into the dark, the way the iPhone's stack reads. */
   :root[data-native][data-platform="ios"]:where([data-nav-dir="forward"]:not([data-nav-origin="expand"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]))::view-transition-new(root),
   :root[data-native][data-platform="ios"]:where([data-nav-dir="back"]:not([data-nav-origin^="return"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]))::view-transition-old(root) {
-    box-shadow: calc(-1rem * var(--nf-pt-sign)) 0 2rem -1rem var(--nf-scrim-drawer);
+    box-shadow: var(--nf-elevation-overlay);
   }
   :root[data-native][data-platform="ios"]:where(
       [data-nav-dir="forward"]:not([data-nav-origin="expand"], [data-nav-origin^="quiet"], [data-nav-morph], [data-motion="calm"], [data-motion="off"]),

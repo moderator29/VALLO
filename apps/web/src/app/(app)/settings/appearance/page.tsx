@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forAppearance, forLanguage, forMotion } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { AppearanceCard, LanguageRow } from "@/components/app/account/SettingsGroups";
 import { SettingsGroup } from "@/components/app/account/rows";
 import { ThemeControl } from "@/components/site/ThemeControl";
@@ -22,12 +22,14 @@ export default async function AppearanceSettingsPage() {
   const t = getDictionary(locale);
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.appearance.label}
-        subtitle={t.settings.hub.appearanceSub}
-        fallback="/settings"
-      />
+    <PageFrame
+      title={t.settings.appearance.label}
+      subtitle={t.settings.hub.appearanceSub}
+      fallback="/settings"
+      width="narrow"
+    >
+      {/* One child: the lede keeps its 16px foot above the theme. */}
+      <div>
       <SettingsLede
         label={t.experienceAccount.settings.lede.what}
         what={t.experienceAccount.settings.lede.appearance.what}
@@ -60,6 +62,7 @@ export default async function AppearanceSettingsPage() {
           <LanguageRow t={forLanguage(t)} current={locale} />
         </AppearanceCard>
       </section>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

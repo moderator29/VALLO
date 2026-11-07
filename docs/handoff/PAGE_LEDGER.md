@@ -155,7 +155,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/around` | FE |  |  |  |  |  |
+| `/around` | FE | full-bleed root (no PageFrame by design) | yes | yes | yes | 7 Nov: the feed's Vallo look (lens masthead with Circle not open, story tiles, the one-line way to post, For you row with the place, calm cards, concentric media, live counts, skeleton in shape). Seen in the preview harness `/preview/feed-v2` on a production build. |
 | `/around/[slug]` | FE |  |  |  |  |  |
 | `/around/manage` | FE |  |  |  |  |  |
 | `/around/new` | FE |  |  |  |  |  |
@@ -412,7 +412,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/post/[id]` | FE |  |  |  |  |  |
+| `/post/[id]` | FE |  |  |  |  |  7 Nov: its post card took the feed's new card (seen 390 light, 360 dark in `/preview/f4/post-thread`); the page pass itself is still to do. |
 
 ## Member: price
 

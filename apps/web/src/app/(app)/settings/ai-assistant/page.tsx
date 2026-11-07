@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { resolveSession } from "@/lib/actions/session";
 import { AUDIT_WORDS } from "@/lib/assistant/permissions";
 import { readAssistantState, readAuditRows, readLearnedPreferences } from "@/lib/assistant/access";
@@ -31,9 +31,7 @@ export default async function AiAssistantSettingsPage() {
     : [[], []];
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title="VALLO AI Assistant" subtitle="Your personal property assistant" fallback="/settings" />
-
+    <PageFrame title="VALLO AI Assistant" subtitle="Your personal property assistant" fallback="/settings" width="narrow">
       <div className="space-y-block">
         <section className="nf-panel nf-panel--card p-card">
           <MasterSwitch enabled={state.enabled} />
@@ -88,6 +86,6 @@ export default async function AiAssistantSettingsPage() {
           <LegalLinks />
         </section>
       </div>
-    </div>
+    </PageFrame>
   );
 }

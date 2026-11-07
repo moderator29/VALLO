@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forNotificationsCard } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { NotificationsCard } from "@/components/app/account/SettingsGroups";
 import { loadSettingsState } from "@/lib/profile/queries";
 import { PushDevices, type PushDeviceView } from "@/components/app/push/PushDevices";
@@ -75,12 +75,14 @@ export default async function NotificationsSettingsPage() {
       : [];
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.notifications.label}
-        subtitle={t.settings.hub.notificationsSub}
-        fallback="/settings"
-      />
+    <PageFrame
+      title={t.settings.notifications.label}
+      subtitle={t.settings.hub.notificationsSub}
+      fallback="/settings"
+      width="narrow"
+    >
+      {/* One child: the lede and the inner nav keep their 16px foot. */}
+      <div>
       <SettingsLede label={copy.lede.what} what={copy.lede.notifications.what} who={copy.lede.notifications.who} />
       {push.state === "signed-in" && (
         <SettingsInnerNav
@@ -113,6 +115,7 @@ export default async function NotificationsSettingsPage() {
           <PushDevices rows={rows} readable={push.readable} />
         </section>
       )}
-    </div>
+      </div>
+    </PageFrame>
   );
 }

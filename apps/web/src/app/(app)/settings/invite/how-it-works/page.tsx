@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { TYPE } from "@/components/app/Screen";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
@@ -61,8 +61,7 @@ export default async function InviteHowItWorksPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-2xl" data-testid="invite-how">
-      <PageHeader title={copy.howTitle} subtitle={how.lede} fallback="/settings/invite" />
+    <PageFrame title={copy.howTitle} subtitle={how.lede} fallback="/settings/invite" width="narrow" testId="invite-how">
       <ol className="nf-panel nf-panel--card nf-how">
         {items.map((item) => (
           <li key={item.title} className="nf-how__item">
@@ -77,15 +76,13 @@ export default async function InviteHowItWorksPage() {
         ))}
       </ol>
       {rewards.state === "paused" ? (
-        <div className="mt-block">
-          <RewardsPauseNotice programme={rewards.programme} copy={t.experienceRewards.pause} earned={REWARDS_PAUSED_EARNED_LINE} locale={locale} />
-        </div>
+        <RewardsPauseNotice programme={rewards.programme} copy={t.experienceRewards.pause} earned={REWARDS_PAUSED_EARNED_LINE} locale={locale} />
       ) : null}
       {rewards.state === "running" ? (
-        <p className={`${TYPE.caption} mt-block text-center`} data-testid="invite-rewards-not-held">
+        <p className={`${TYPE.caption} text-center`} data-testid="invite-rewards-not-held">
           {REWARDS_NOT_HELD}
         </p>
       ) : null}
-    </div>
+    </PageFrame>
   );
 }

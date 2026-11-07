@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { forMotion } from "@/components/app/account/settings-copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { MotionSettings } from "@/components/app/account/MotionSettings";
 import { AccessibilitySettings } from "./AccessibilitySettings";
 
@@ -20,15 +20,14 @@ export default async function AccessibilitySettingsPage() {
   const t = getDictionary(await getLocale());
   const copy = t.experienceSettings.accessibility;
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.title} subtitle={copy.sub} fallback="/settings" />
-      <p className="nf-body-sm mb-block text-[var(--nf-content-secondary)]">{copy.lede}</p>
-      <section id="settings-seeing" className="mb-block scroll-mt-28">
+    <PageFrame title={copy.title} subtitle={copy.sub} fallback="/settings" width="narrow">
+      <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.lede}</p>
+      <section id="settings-seeing" className="scroll-mt-28">
         <AccessibilitySettings copy={copy} />
       </section>
       <section id="settings-motion" className="scroll-mt-28">
         <MotionSettings t={forMotion(t)} />
       </section>
-    </div>
+    </PageFrame>
   );
 }
