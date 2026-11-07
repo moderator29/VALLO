@@ -7,6 +7,7 @@ import { useOverlay } from "@/lib/ui/use-overlay";
 import { useClientMount } from "@/lib/ui/client-mount";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
+import { NATIVE_BACK_EVENT } from "@/lib/native/native-back-event";
 
 /**
  * THE STEP FRAME (Platform Grade 1, November 2026; docs/UX_SYSTEM.md, "Step
@@ -132,6 +133,22 @@ export function StepFrame({
   useEffect(() => {
     if (overlay && mounted) panelRef.current?.focus({ preventScroll: true });
   }, [overlay, mounted]);
+  /* Android Back (N4): one step back, not out of the whole flow. On the
+     first step there is no Back, so the press falls through to Close. */
+  const backRef = useRef(onBack);
+  useEffect(() => {
+    backRef.current = onBack;
+  }, [onBack]);
+  useEffect(() => {
+    if (!overlay) return;
+    const claim = (event: Event) => {
+      if (!backRef.current) return;
+      event.preventDefault();
+      backRef.current();
+    };
+    document.addEventListener(NATIVE_BACK_EVENT, claim);
+    return () => document.removeEventListener(NATIVE_BACK_EVENT, claim);
+  }, [overlay]);
 
   const frame = (
     <div
