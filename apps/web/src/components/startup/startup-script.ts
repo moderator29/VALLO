@@ -80,6 +80,8 @@
  * or surface `nf_boot_trace` on a diagnostics row.
  */
 
+import { PLATFORM_SCRIPT } from "@/lib/platform/detect";
+
 /** The full opening: the first open of the day. */
 export const OPENING_FULL_MS = 600;
 
@@ -107,6 +109,10 @@ const MARK =
   "try{localStorage.setItem('" + BOOT_TRACE_KEY + "',b.join(' '))}catch(e){}}catch(e){}}";
 
 export const STARTUP_NATIVE_SCRIPT = [
+  /* Job 1 (platform layer): `data-platform` and `data-native` on <html>
+     before the first frame, so platform.css paints the right platform from
+     the start. Its own try, so nothing here can stop the splash's hide. */
+  PLATFORM_SCRIPT,
   "(function(){var W=window;" + MARK + "W.__nfMark=m;",
   /* Loud (console, marks, storage) only on the shell: the shell's user agent
      carries VALLO-NATIVE (capacitor.config.ts). The website stays silent. */

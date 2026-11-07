@@ -96,12 +96,6 @@
       animation-range: cover 0% cover 100%;
     }
   }
-  /* The rail's pictures move under the finger, sideways; a vertical
-     parallax inside each card would fight the swipe and overflow its own
-     corner, so the rail keeps them still. */
-  .nf-post__media--rail img {
-    animation: none;
-  }
   @media print {
     .nf-post,
     .nf-post__media img {
@@ -220,49 +214,6 @@
     }
   }
 
-  /* ----------------------------------------------- the For you / Following pill */
-
-  /*
-   * THE SEGMENTED PILL SLIDES (motion 6, `drift` 240ms). The track is two
-   * equal halves now (it was 297 to 315 in the founder's render, a 3 per cent
-   * difference nobody can see, and a sliding thumb needs equal halves to
-   * travel by exactly its own width), the lit fill is the `__thumb`, and the
-   * current link only lifts its label above it. Transform only.
-   */
-  .nf-feed-seg {
-    grid-template-columns: 1fr 1fr;
-    position: relative;
-  }
-  .nf-feed-seg .nf-feed-seg__thumb {
-    position: absolute;
-    inset-block: -1px;
-    inset-inline-start: -1px;
-    inline-size: calc(50% + 1px);
-    border: 1px solid transparent;
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-selected-fill);
-    border-color: var(--nf-selected-edges);
-    box-shadow: var(--nf-selected-shadow-inline);
-    pointer-events: none;
-    transition: translate var(--nf-duration-base) var(--nf-ease-spring);
-  }
-  .nf-feed-seg[data-live="following"] .nf-feed-seg__thumb {
-    translate: 100% 0;
-  }
-  .nf-feed-seg[data-live="following"] .nf-feed-seg__thumb:dir(rtl) {
-    translate: -100% 0;
-  }
-  /* The fill moved to the thumb; the current link keeps only its label. */
-  .nf-feed-seg .nf-feed-seg__link[aria-current="page"] {
-    background: none;
-    border-color: transparent;
-    box-shadow: none;
-    z-index: 1;
-  }
-  .nf-feed-seg .nf-feed-seg__link {
-    z-index: 1;
-  }
-
   /* ----------------------------------------------------------- stories */
 
   /*
@@ -335,8 +286,7 @@
   .nf-story--seq .nf-story__top,
   .nf-story--seq .nf-story__card,
   .nf-story--seq .nf-story__actions,
-  .nf-story--seq .nf-story__pile,
-  .nf-story--seq .nf-story__commentbar {
+  .nf-story--seq .nf-story__pile {
     animation: nf-story-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
   }
   .nf-story--seq .nf-story__top {
@@ -351,9 +301,6 @@
   }
   .nf-story--seq .nf-story__pile {
     animation-delay: 240ms;
-  }
-  .nf-story--seq .nf-story__commentbar {
-    animation-delay: 300ms;
   }
   @keyframes nf-story-rise {
     from {
@@ -386,8 +333,7 @@
     .nf-story--seq .nf-story__top,
     .nf-story--seq .nf-story__card,
     .nf-story--seq .nf-story__actions,
-    .nf-story--seq .nf-story__pile,
-    .nf-story--seq .nf-story__commentbar {
+    .nf-story--seq .nf-story__pile {
       animation: none;
     }
     /* The lead six keep a 160ms fade and lose the lift: the order is still
@@ -405,7 +351,6 @@
       }
     }
     .nf-act-pill,
-    .nf-feed-seg .nf-feed-seg__thumb,
     .nf-story-ring__item {
       transition: none;
     }

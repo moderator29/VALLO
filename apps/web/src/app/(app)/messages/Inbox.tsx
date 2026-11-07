@@ -941,10 +941,18 @@ export function Inbox({
             </Link>
           </li>
           <li>
-            <Link href="/support/messages" onClick={() => setMenuOpen(false)}>
-              <UiIcon name="headset" size={20} />
-              {plus?.support ?? inbox.title}
-            </Link>
+            {/* With support conversations, they open here, in Messages (R70). */}
+            {supportRows.length > 0 ? (
+              <button type="button" onClick={() => pick("support")} data-testid="inbox-menu-support">
+                <UiIcon name="headset" size={20} />
+                {plus?.support ?? inbox.title}
+              </button>
+            ) : (
+              <Link href="/support/messages" onClick={() => setMenuOpen(false)}>
+                <UiIcon name="headset" size={20} />
+                {plus?.support ?? inbox.title}
+              </Link>
+            )}
           </li>
           <li>
             <button type="button" onClick={() => { router.refresh(); setMenuOpen(false); }}>

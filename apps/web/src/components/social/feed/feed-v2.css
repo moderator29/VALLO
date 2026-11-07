@@ -126,62 +126,6 @@
     background: var(--nf-brand-tint-1);
   }
 
-  /* ------------------------------------------------------- the capsule tabs */
-
-  .nf-fv2-seg {
-    display: flex;
-    justify-content: flex-start;
-    margin-block: var(--nf-space-xs) var(--nf-space-md);
-  }
-  .nf-fv2-seg__track {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-space-3xs);
-    padding: var(--nf-space-2xs);
-    border-radius: var(--nf-radius-pill);
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
-    background: var(--nf-surface-secondary);
-  }
-  .nf-fv2-seg__link {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-block-size: 2rem;
-    padding-inline: var(--nf-space-md);
-    border-radius: var(--nf-radius-pill);
-    color: var(--nf-content-secondary);
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    line-height: 1;
-    text-decoration: none;
-    white-space: nowrap;
-    transition:
-      color var(--nf-duration-fast) var(--nf-ease-standard),
-      background-color var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  /* The pill looks small and the target is not: 44px tall by the link's own
-     width, centred on the pill. */
-  .nf-fv2-seg__link::after {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    inset-block-start: 50%;
-    translate: 0 -50%;
-    block-size: max(100%, 44px);
-  }
-  .nf-fv2-seg__link:hover {
-    color: var(--nf-content-primary);
-  }
-  .nf-fv2-seg__link:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: var(--nf-focus-ring-offset);
-  }
-  .nf-fv2-seg__link[aria-current="page"] {
-    background: var(--nf-brand-primary);
-    color: var(--nf-content-on-brand);
-  }
-
   /* --------------------------------------------------------- the post card */
 
   /* The card: the platform's own card material (white by day, the deep navy by
