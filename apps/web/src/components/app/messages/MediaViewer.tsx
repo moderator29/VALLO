@@ -14,6 +14,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { fill } from "@/components/app/threads/when";
 import { useClientMount } from "@/lib/ui/client-mount";
 import { useOverlay } from "@/lib/ui/use-overlay";
+import { useStatusBarHold } from "@/lib/native/status-bar-hold";
 import { useSheetHistory } from "@/lib/ui/use-sheet-history";
 import { canShareMedia, saveMedia, shareMedia } from "./media-actions";
 import {
@@ -162,6 +163,10 @@ export function MediaViewer({
   }, [onClose]);
   const close = useCallback(() => onCloseRef.current(), []);
   useOverlay({ open: mounted, onClose: close, panelRef: surface });
+  /* GRADE 1 (N2): the viewer's ground is dark in both themes, so the clock
+     and battery are held light while it is open, and handed back to the
+     theme the moment it closes. */
+  useStatusBarHold(mounted, "light");
   useSheetHistory(mounted, "media-viewer", close);
 
   /* ---------------------------------------------------------- navigation */

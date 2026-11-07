@@ -373,3 +373,28 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the chat's full-screen media vi
     }
   });
 });
+
+/* GRADE 1 (N2): the viewer is dark in both themes, so it holds light status
+   bar glyphs while it is open and hands the bar back when it closes. */
+describe.skipIf(!hasBrowser && !process.env.CI)("the viewer's status bar", () => {
+  it("holds light glyphs while open and releases them on close", async () => {
+    const watched = entry(MESSAGES).replace(
+      'const t = getDictionary("en");',
+      `const t = getDictionary("en");
+  import { STATUS_BAR_HOLD_EVENT, heldGlyphs } from "@/lib/native/status-bar-hold";
+  window.__held = [];
+  window.addEventListener(STATUS_BAR_HOLD_EVENT, () => window.__held.push(heldGlyphs()));`,
+    );
+    const { page, close } = await mountInBrowser({ entry: watched, css: CSS });
+    try {
+      const held = () => page.evaluate(() => (window as unknown as { __held: unknown[] }).__held);
+      expect(await held()).toEqual([]);
+      await open(page);
+      await expect.poll(held).toEqual(["light"]);
+      await page.getByTestId("media-viewer-close").click();
+      await expect.poll(held).toEqual(["light", null]);
+    } finally {
+      await close();
+    }
+  });
+});
