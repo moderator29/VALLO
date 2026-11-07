@@ -248,11 +248,10 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
                  and above drops the notification silently. It is created by
                  the shell; the name here has to match. */
               channel_id: androidChannelFor(payload),
-              /* A2: the monochrome Vallo mark, tinted with the brand accent
-                 (the manifest's defaults, named here so a push never depends
-                 on them). */
+              /* A2: the monochrome Vallo mark, named so a push never depends
+                 on the manifest default; it is tinted with the brand accent
+                 by `default_notification_color` (@color/vallo_notification). */
               icon: "ic_stat_vallo",
-              color: "#0C39EF",
               /* Android's own collapsing, so one conversation is one row in
                  the shade rather than eleven. */
               tag: payload.tag,

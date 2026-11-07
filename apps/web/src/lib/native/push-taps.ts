@@ -50,6 +50,7 @@ type PushPlugin = {
 };
 
 import { sameOriginPath } from "../push/same-origin";
+import { ANDROID_CHANNELS } from "../push/family";
 
 const FALLBACK = "/notifications";
 
@@ -101,6 +102,15 @@ export async function startPushTaps(channelName: string): Promise<() => void> {
        no sound and no peek. Android decides sound by channel, so this is the
        only way to make it quiet (`lib/push/transport/fcm.ts`). */
     void plugin.createChannel({ id: "vallo_missed", name: "Missed calls", importance: 2 }).catch(() => undefined);
+    /* A2 (rich push, 7 November 2026): one channel per family, so a member can
+       silence Offers in the system settings and keep Messages
+       (lib/push/family.ts). A push for a channel this phone does not have yet
+       falls back to the manifest's default channel, so none is lost. */
+    for (const channel of ANDROID_CHANNELS) {
+      void plugin
+        .createChannel({ id: channel.id, name: channel.name, description: channel.description, importance: channel.importance })
+        .catch(() => undefined);
+    }
     void plugin
       .createChannel({ id: "vallo_calls", name: "Calls", importance: 5, visibility: 1, vibration: true, lights: true })
       .catch(() => undefined);
