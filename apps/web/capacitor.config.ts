@@ -256,7 +256,10 @@ const config: CapacitorConfig = {
        * in its own sheets.
        */
       resize: KeyboardResize.Native,
-      resizeOnFullScreen: true,
+      /* `resizeOnFullScreen` is left out on purpose (N3, N5, 7 November
+         2026). It was true, and Capacitor 8's SystemBars, which now owns the
+         Android edge to edge insets and the keyboard's inset, warns at launch
+         that any value here "can lead to unexpected behavior". */
     },
   },
 

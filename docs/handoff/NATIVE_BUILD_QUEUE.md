@@ -8,7 +8,7 @@ Web-side changes reach the app instantly and are not listed.
 | # | Change | Platform | Why | Status |
 |---|---|---|---|---|
 | 1 | Android predictive back (`android:enableOnBackInvokedCallback`) | Android | Brief section 11 | Written in the manifest, waits for the build |
-| 2 | `adjustResize` window mode for the keyboard | Android | Composer above the keyboard | Written in the manifest, waits for the build |
+| 2 | Keyboard and edge to edge on Android | Android | Composer above the keyboard, page under the system bars | Decided: NO `adjustResize`; Capacitor 8 SystemBars pads by the keyboard inset itself, and `Keyboard.resizeOnFullScreen` is removed (SystemBars warns against it). Waits for the build; then check on Android 14 and 15 that the composer sits on the keys and light mode glyphs read |
 | 3 | New App Link and Universal Link paths for bookings, messages, notifications | Both | Deep links land on the right screen | Written: iOS reads the association file from the website (live on the next push to main); Android needs the build |
 | 4 | Notification Service Extension for rich push images | iOS | Push with listing photos | Optional, founder to decide |
 | 5 | App switcher privacy cover | iOS | Hide money screens in the app switcher | Not started |
