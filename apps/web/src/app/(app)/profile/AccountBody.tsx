@@ -31,6 +31,7 @@ import { NO_FACTS, rowValue, type BelongingsFacts } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { SwitchRoleRow } from "./SwitchRoleRow";
 import { COVER_INPUT_ID } from "./AccountHero";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * EVERYTHING UNDER YOUR OWN IDENTITY, BUILT TO `50E032EA`.
@@ -516,9 +517,11 @@ function Field({
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${name}-problem` : undefined}
         className="nf-field"
       />
-      {error && <span className="mt-2xs block text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">{error}</span>}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${name}-problem`} message={error} />
     </label>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +12,7 @@ import {
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * Removing a saved card or a bank account for somebody who asked.
@@ -40,6 +41,7 @@ export function RemoveSavedMethod({
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const problemId = useId();
   const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
 
@@ -88,6 +90,8 @@ export function RemoveSavedMethod({
         <span className="nf-label">{c.who}</span>
         <textarea
           className="nf-field min-h-[72px] resize-y"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? problemId : undefined}
           value={reason}
           maxLength={500}
           onChange={(event) => setReason(event.target.value)}
@@ -118,11 +122,8 @@ export function RemoveSavedMethod({
           {copy.notNow}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={problemId} message={error} />
     </div>
   );
 }

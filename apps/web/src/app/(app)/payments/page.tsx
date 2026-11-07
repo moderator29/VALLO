@@ -6,6 +6,7 @@ import { RowDownload } from "@/components/app/account/rows";
 import { parseBefore } from "@/lib/money/history-model";
 import { HISTORY_NOT_A_BALANCE } from "@/lib/money/copy";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -58,11 +59,7 @@ export default async function PaymentsPage({
           icon="receipt-check"
           title={words.signInTitle}
           body={HISTORY_NOT_A_BALANCE}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/payments")} variant="primary" size="lg">
-              {words.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: words.signIn, href: withNext("/sign-in", "/payments") }} />}
         />
       ) : read.state === "error" ? (
         <div className="mt-block">

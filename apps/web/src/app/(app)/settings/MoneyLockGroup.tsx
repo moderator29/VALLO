@@ -46,9 +46,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const [codeSent, setCodeSent] = useState(false);
   /* A password changed in the last day is refused; the emailed code takes over. */
   const [forceCode, setForceCode] = useState(false);
-  /* The enrol sheet's own error, beside its fields. Every other outcome goes
-     to the one banner (Grade 1). */
-  const [error, setError] = useState<string | null>(null);
+  /* Every outcome, the enrol sheet's refusals included, goes to the one
+     banner (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
   /* The proof was accepted; the phone's own lock waits for its own tap. */
   const [armed, setArmed] = useState<{ challenge: string; userId: string; email: string; rpId: string } | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -72,14 +71,12 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const staffHasKey = staff && list.state === "ok" && list.rows.length > 0;
   const staffNeedsPassword = staff && list.state === "ok" && list.fallback === "password";
 
-  /* Inside the sheet a refusal sits under its fields; with no sheet open (a
-     staff key proving the next one) it goes to the banner. */
-  const fail = (text: string) => (enrolling ? setError(text) : banner.error(text));
+  /* Inside the sheet or not, a refusal is said by the one banner. */
+  const fail = (text: string) => banner.error(text);
 
   const enrol = () =>
     start(async () => {
       try {
-        setError(null);
         let proof: { code?: string; password?: string; stepUp?: string };
         if (staffHasKey) {
           const stepUp = await lock.prove({ kind: "add_lock" });
@@ -131,14 +128,14 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         exclude: [],
       });
       if (!made) {
-        setError(copy.rejected);
+        banner.error(copy.rejected);
         return;
       }
       const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
         error: "failed" as const,
       }));
       if ("error" in done) {
-        setError(done.error === "rejected" ? copy.rejected : copy.failed);
+        banner.error(done.error === "rejected" ? copy.rejected : copy.failed);
         return;
       }
       /* This phone now holds a key (lib/platform/device-keys.ts). */
@@ -203,7 +200,6 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           sub={supported === false ? copy.settingsUnsupported : copy.settingsPasswordFirst}
           disabled={supported !== true || pending}
           onClick={() => {
-            setError(null);
             if (staffHasKey) enrol();
             else setEnrolling(true);
           }}
@@ -271,7 +267,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                     start(async () => {
                       try {
                         const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                        if ("error" in sent) setError(copy.failed);
+                        if ("error" in sent) banner.error(copy.failed);
                         else setCodeSent(true);
                       } catch (error) {
                         if (!tapFailedOffline(error)) throw error;
@@ -294,7 +290,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                 start(async () => {
                   try {
                     const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                    if ("error" in sent) setError(copy.failed);
+                    if ("error" in sent) banner.error(copy.failed);
                     else setCodeSent(true);
                   } catch (error) {
                     if (!tapFailedOffline(error)) throw error;
@@ -331,11 +327,6 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           >
             {copy.cancel}
           </Button>
-          {error && (
-            <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
         </div>
       </Sheet>
     </SettingsGroup>

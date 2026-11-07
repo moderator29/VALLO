@@ -42,6 +42,9 @@ type Copy = {
  * leaves because the server says it is gone, not because this component
  * guessed. Until then it is hidden optimistically and comes back on failure.
  */
+/* What the unblock did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { unblocked: "{name} is unblocked" };
+
 export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) {
   const [armed, setArmed] = useState<string | null>(null);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
@@ -57,6 +60,7 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
         const result = await unblockUserSafely({ userId: row.userId });
         if (result.ok) {
           setGone((prev) => new Set(prev).add(row.userId));
+          banner.success(WORDS.unblocked.replace("{name}", row.name));
           /* Only clear the arm if it is still this row's. */
           setArmed((a) => (a === row.userId ? null : a));
         } else {

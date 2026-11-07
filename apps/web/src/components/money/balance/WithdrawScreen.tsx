@@ -68,8 +68,6 @@ export function WithdrawScreen({
   const [otp, setOtp] = useState("");
   /* The code step's own instruction (where the code went). Every outcome is
      said by the one banner at the top of the screen (Grade 1). */
-  const [otpNote, setOtpNote] = useState<string | null>(null);
-  const [toError, setToError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const bankName = banks?.find((b) => b.code === bankCode)?.name ?? "";
@@ -82,7 +80,7 @@ export function WithdrawScreen({
     void reach(() => listBalanceBanks()).then((r) => {
       if (!live) return;
       if (r.ok) setBanks(r.data.banks);
-      else setToError(r.error);
+      else banner.error(r.error);
     });
     return () => {
       live = false;
@@ -91,11 +89,10 @@ export function WithdrawScreen({
 
   const check = async () => {
     setBusy(true);
-    setToError(null);
     const r = await reach(() => checkBalanceBankAccount({ bankCode, bankName, accountNumber }));
     setBusy(false);
     if (r.ok) setNamed(r.data.accountName);
-    else setToError(r.error);
+    else banner.error(r.error, { retry: () => void check() });
   };
 
   const prepare = async () => {
@@ -134,7 +131,8 @@ export function WithdrawScreen({
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setOtpNote(r.data.message);
+      /* "We sent you a code": said by the one banner (founder, 7 November 2026). */
+      if (r.data.message) banner.info(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -171,7 +169,7 @@ export function WithdrawScreen({
             onOpen={() => {
               setToOpen(true);
               setNamed(null);
-              setToError(connected ? null : MOVE_COPY.notAvailableWithdraw);
+              if (!connected) banner.warning(MOVE_COPY.notAvailableWithdraw);
             }}
             testId="withdraw-account"
           />
@@ -216,11 +214,6 @@ export function WithdrawScreen({
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {otpNote ? (
-            <p role="status" className="nf-mw-error">
-              {otpNote}
-            </p>
-          ) : null}
         </div>
       ) : null}
 
@@ -289,11 +282,6 @@ export function WithdrawScreen({
               Check account
             </Button>
           )}
-          {toError ? (
-            <p role="alert" className="nf-mw-error">
-              {toError}
-            </p>
-          ) : null}
         </div>
       </Sheet>
     </div>

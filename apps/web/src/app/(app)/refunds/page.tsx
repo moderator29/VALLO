@@ -4,6 +4,7 @@ import { readMyPayments } from "@/lib/money/history";
 import { parseBefore } from "@/lib/money/history-model";
 import { REFUNDS_LEDE, REFUNDS_TITLE } from "@/lib/money/copy";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -42,11 +43,7 @@ export default async function RefundsPage({
           icon="receipt-check"
           title="Sign in to see your refunds"
           body={REFUNDS_LEDE}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/refunds")} variant="primary" size="lg">
-              Sign in
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", "/refunds") }} />}
         />
       ) : read.state === "error" ? (
         <div className="mt-block">

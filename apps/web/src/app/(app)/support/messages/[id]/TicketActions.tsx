@@ -28,6 +28,14 @@ export function MarkRead({ ticketId, unread }: { ticketId: string; unread: boole
   return null;
 }
 
+/* What each action did, said by the one banner at the top of the screen
+   (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+const WORDS = {
+  resolved: "Marked as resolved. Thank you for letting us know.",
+  reopened: "Your query is open again. We will reply here.",
+  rated: "Thank you. Your rating is saved.",
+};
+
 /** "Sorted? Mark it resolved", the quiet exit under the reply box. */
 export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy }) {
   const router = useRouter();
@@ -46,7 +54,10 @@ export function ResolveButton({ ticketId, copy }: { ticketId: string; copy: Copy
               /* Said by the one banner at the top of the screen (Grade 1). */
               const result = await resolveMyTicket(ticketId);
               if (!result.ok) banner.error(result.error);
-              else router.refresh();
+              else {
+                banner.success(WORDS.resolved);
+                router.refresh();
+              }
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
             }
@@ -81,7 +92,6 @@ export function RateResolution({
   const [editing, setEditing] = useState(rating === null);
   const [stars, setStars] = useState(rating ?? 0);
   const [text, setText] = useState(comment ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   if (!editing && rating) {
@@ -105,16 +115,16 @@ export function RateResolution({
       onSubmit={(event) => {
         event.preventDefault();
         if (stars < 1) {
-          setError(copy.chooseStars);
+          banner.error(copy.chooseStars);
           return;
         }
-        setError(null);
         start(async () => {
           try {
             const result = await rateMyTicket(ticketId, { rating: stars, comment: text });
             if (!result.ok) banner.error(result.error);
             else {
               setEditing(false);
+              banner.success(WORDS.rated);
               router.refresh();
             }
           } catch (error) {
@@ -158,11 +168,6 @@ export function RateResolution({
         maxLength={1000}
         placeholder={copy.addPlaceholder}
       />
-      {error && (
-        <p role="alert" className="nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
       <Button type="submit" variant="primary" full loading={pending} disabled={pending} data-testid="support-rate-send">
         {copy.sendRating}
       </Button>
@@ -192,7 +197,10 @@ export function ReopenTicket({ ticketId, until, copy }: { ticketId: string; unti
               /* Said by the one banner at the top of the screen (Grade 1). */
               const result = await reopenMyTicket(ticketId);
               if (!result.ok) banner.error(result.error);
-              else router.refresh();
+              else {
+                banner.success(WORDS.reopened);
+                router.refresh();
+              }
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
             }

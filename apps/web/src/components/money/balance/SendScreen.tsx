@@ -64,8 +64,6 @@ export function SendScreen({
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
   /* The code step's own instruction (where the code went). Every outcome is
      said by the one banner at the top of the screen (Grade 1). */
-  const [otpNote, setOtpNote] = useState<string | null>(null);
-  const [whoError, setWhoError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const chips: QuickAmount[] = availableMinor !== null ? shareChips(availableMinor) : [];
@@ -74,15 +72,14 @@ export function SendScreen({
 
   const find = async () => {
     if (!connected) {
-      setWhoError(MOVE_COPY.notAvailableSend);
+      banner.warning(MOVE_COPY.notAvailableSend);
       return;
     }
     setBusy(true);
-    setWhoError(null);
     const r = await reach(() => findBalanceRecipient({ phone }));
     setBusy(false);
     if (r.ok) setFound(r.data.name);
-    else setWhoError(r.error);
+    else banner.error(r.error);
   };
 
   const prepare = async () => {
@@ -111,7 +108,8 @@ export function SendScreen({
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setOtpNote(r.data.message);
+      /* "We sent you a code": said by the one banner (founder, 7 November 2026). */
+      if (r.data.message) banner.info(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -152,7 +150,6 @@ export function SendScreen({
             onOpen={() => {
               setWhoOpen(true);
               setFound(null);
-              setWhoError(null);
             }}
             testId="send-recipient"
           />
@@ -213,11 +210,6 @@ export function SendScreen({
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {otpNote ? (
-            <p role="status" className="nf-mw-error">
-              {otpNote}
-            </p>
-          ) : null}
         </div>
       ) : null}
 
@@ -267,11 +259,6 @@ export function SendScreen({
               Find member
             </Button>
           )}
-          {whoError ? (
-            <p role="alert" className="nf-mw-error">
-              {whoError}
-            </p>
-          ) : null}
         </div>
       </Sheet>
     </div>

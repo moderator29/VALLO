@@ -12,6 +12,7 @@ import { decidePayout, decideReferral, setReferralBudget } from "@/lib/admin/ref
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE REFERRAL DESK'S HANDS: set the budget, decide a referral, decide a
@@ -137,6 +138,7 @@ function ReasonSheet(p: ReasonSheetProps) {
             required
             aria-required="true"
             aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "nf-confirm-problem" : undefined}
             placeholder={p.reasonPlaceholder}
             onChange={(e) => setReason(e.target.value)}
           />
@@ -520,16 +522,14 @@ export function BudgetControl({
                 required
                 aria-required="true"
                 aria-invalid={error ? true : undefined}
+                aria-describedby={error ? `${ids.reason}-problem` : undefined}
                 placeholder={copy.reasonPlaceholder}
                 onChange={(e) => setReason(e.target.value)}
               />
               <span className="nf-caption">{copy.reasonHelp}</span>
             </div>
-            {error ? (
-              <p className="nf-rdesk-error" role="alert">
-                {error}
-              </p>
-            ) : null}
+            {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+            <FieldProblem id={`${ids.reason}-problem`} message={error} />
             <div className="flex flex-wrap gap-xs">
               <Button type="submit" size="md" data-testid="budget-review">
                 {copy.save}

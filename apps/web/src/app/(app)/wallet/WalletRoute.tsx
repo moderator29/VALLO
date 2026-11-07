@@ -1,3 +1,4 @@
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { getLocale } from "@/lib/locale";
 import { readMyBalance } from "@/lib/money/member-wallet";
 import { BALANCE_LEDE } from "@/lib/money/balance-copy";
@@ -30,11 +31,7 @@ export async function WalletRoute({ screen, path, title, filter }: { screen: Wal
             icon="bank-column"
             title="Sign in to continue"
             body={BALANCE_LEDE}
-            action={
-              <ButtonLink href={withNext("/sign-in", path)} variant="primary" size="lg">
-                Sign in
-              </ButtonLink>
-            }
+            action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", path) }} />}
           />
         </div>
       ) : (

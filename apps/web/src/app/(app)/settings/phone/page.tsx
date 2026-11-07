@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { panelClass } from "@/components/ui/Panel";
@@ -47,11 +48,7 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
           icon="user-verified"
           title={copy.signedOutTitle}
           body={copy.signedOutBody}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/settings/phone")} variant="primary" size="lg">
-              {copy.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: copy.signIn, href: withNext("/sign-in", "/settings/phone") }} />}
         />
       </PageFrame>
     );

@@ -39,44 +39,44 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| A1 | components/ui/Field.tsx:150 | Any field refused (every form on `Field`, `TextInput`, `TextArea`, `Select`) | red caption under the field, `role="alert"` | the field's own message | error | none (fix the field) | todo |
-| A2 | components/auth/fields.tsx:88 | Auth field refused (email, password, name) | red caption, `role="alert"` | the field's own message | error | none | todo |
-| A3 | components/auth/slate.tsx:213 | Slate field refused (welcome slates) | red caption, `role="alert"` | the field's own message | error | none | todo |
-| A4 | components/auth/CodeInput.tsx:114 | Code boxes refused (wrong or short code) | red caption, `role="alert"` | the code's own message | error | none | todo |
-| A5 | app/css/controls.css:266 | The red edge itself in dark mode | `border-color` only, hidden by the gradient border (Field.tsx explains) | n/a: the edge must show now that the words leave | n/a | n/a | todo |
-| A6 | lib/ui/use-copy.ts:52 (`useCopyFlash`) | Link, code, invite copied from an in-place copy button (InviteShare, ListingCode, SuccessSheet, TableSeatingPanel, CryptoPaymentStatus, InviteTicket) | button label turns "Copied", nothing at the top | "Link copied" / "Code copied" / "Copied" | success | none | todo |
-| A7 | app/admin/_components/MoneyDecisions.tsx:30 (`Refusal`) | Fee rate refused, KYC document decision refused | red line under the form | the server's sentence | error | Try again | todo |
-| A8 | components/app/confirm/ConfirmPanel.tsx:190 | Any confirm sheet's action refused (cancel, remove, close) | red line inside the sheet | the error passed in | error | per caller | todo |
-| A9 | components/ui/StepFrame.tsx:212 | Step frame notice | notice slot under the step | the step's notice (callers decide) | per caller | none | todo (audit callers) |
+| A1 | components/ui/Field.tsx:150 | Any field refused (every form on `Field`, `TextInput`, `TextArea`, `Select`) | red caption under the field, `role="alert"` | the field's own message | error | none (fix the field) | done (batch 1) |
+| A2 | components/auth/fields.tsx:88 | Auth field refused (email, password, name) | red caption, `role="alert"` | the field's own message | error | none | done (batch 1) |
+| A3 | components/auth/slate.tsx:213 | Slate field refused (welcome slates) | red caption, `role="alert"` | the field's own message | error | none | done (batch 1) |
+| A4 | components/auth/CodeInput.tsx:114 | Code boxes refused (wrong or short code) | red caption, `role="alert"` | the code's own message | error | none | done (batch 1) |
+| A5 | app/css/controls.css:266 | The red edge itself in dark mode | `border-color` only, hidden by the gradient border (Field.tsx explains) | n/a: the edge must show now that the words leave | n/a | n/a | done (batch 1) |
+| A6 | lib/ui/use-copy.ts:52 (`useCopyFlash`) | Link, code, invite copied from an in-place copy button (InviteShare, ListingCode, SuccessSheet, TableSeatingPanel, CryptoPaymentStatus, InviteTicket) | button label turns "Copied", nothing at the top | "Link copied" / "Code copied" / "Copied" | success | none | done (batch 1) |
+| A7 | app/admin/_components/MoneyDecisions.tsx:30 (`Refusal`) | Fee rate refused, KYC document decision refused | red line under the form | the server's sentence | error | Try again | done (batch 1) |
+| A8 | components/app/confirm/ConfirmPanel.tsx:190 | Any confirm sheet's action refused (cancel, remove, close) | red line inside the sheet | the error passed in | error | per caller | done (batch 1) |
+| A9 | components/ui/StepFrame.tsx:212 | Step frame notice | notice slot under the step | the step's notice (callers decide) | per caller | none | done (audited: two callers, support topic handled in C14, phone gate link kept as an action) |
 | A10 | components/ui/AIResponse.tsx:139 | Assistant answer failed | red line in the answer block | "That answer did not come through. Try again." | error | Try again | kept (the answer block is the content; assistant is another owner) |
 
 ## B. Account and arrival moments
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| B1 | lib/auth/email-code.ts:84 | Returning sign-in with an email code | no word (only a first sign-in earns "Welcome to Vallo") | "Signed in. Welcome back." (`signed-in`) | success | none | todo |
-| B2 | lib/auth/phone-sign-in.ts:71 | Returning sign-in with a phone code | no word | "Signed in. Welcome back." | success | none | todo |
-| B3 | components/auth/PasskeySignIn.tsx:65 | Signed in with a passkey or Face ID | no word | "Signed in. Welcome back." (`showSuccess("signed-in")`) | success | none | todo |
-| B4 | lib/auth/actions.ts:947 (`completeEmailVerification`) | Returning Google or Apple sign-in, magic link sign-in | no word (link types `email`, OAuth carry none) | "Signed in. Welcome back." when the account is not new | success | none | todo |
-| B5 | components/auth/AuthChoices.tsx:80 | Arrival notice on sign in (`?notice=link-expired`, signed out, etc.) | status line on the page | the notice's own sentence | info or warning | none | todo |
-| B6 | components/auth/EmailAuthForm.tsx:217 | Arrival notice on the email form | status line | the notice's own sentence | info | none | todo |
-| B7 | components/auth/ForgotPasswordForm.tsx:41 | Reset code sent | status paragraph replacing the form | "Check your email for a reset code" (the form's own words) | success | none | todo (the "check your inbox" panel stays as the page's next step) |
-| B8 | components/auth/VerifyCodeForm.tsx:270 | New code sent (resend) | status line under the button | the resend message | success | none | todo |
-| B9 | components/auth/EmailAuthForm.tsx:427 | Sign in or sign up refused (wrong password, limit) | red alert above the button | the server's sentence | error | none | todo |
-| B10 | components/auth/VerifyCodeForm.tsx:242 | Sign-up code refused | red alert | the server's sentence | error | none | todo |
-| B11 | components/auth/ResetCodeForm.tsx:103 | Reset code refused | red alert | the server's sentence | error | none | todo |
-| B12 | components/auth/ResetPasswordForm.tsx:91 | New password refused | red alert | the server's sentence | error | none | todo |
-| B13 | components/auth/ForgotPasswordForm.tsx:69 | Reset request refused | red alert | the server's sentence | error | none | todo |
-| B14 | components/auth/FinishSetupForm.tsx:131 | Finish setup refused | red alert | the server's sentence | error | none | todo |
-| B15 | components/auth/CodeSignInForm.tsx:133 | Code sign-in: sending refused | red notice | the refusal | error | none | todo |
-| B16 | components/auth/CodeSignInForm.tsx:160 | Code sign-in: verify refused (limit, failed) | red notice | the refusal | error | none | todo |
-| B17 | components/auth/PasskeySignIn.tsx:75 | Passkey sign-in failed | notice under the button | "That did not sign you in. Try again or use your password." (its own words) | error | Try again | todo |
-| B18 | components/auth/NativeAppleSignIn.tsx:151 | Sign in with Apple failed | notice under the button | its own message | error | Try again | todo |
-| B19 | components/auth/AcceptTerms.tsx:93 | Age not confirmed | red line under the box | its own words | error | none | todo (field: red edge + sr note) |
-| B20 | components/auth/AcceptTerms.tsx:160 | Terms not accepted | red line under the box | its own words | error | none | todo (field) |
+| B1 | lib/auth/email-code.ts:84 | Returning sign-in with an email code | no word (only a first sign-in earns "Welcome to Vallo") | "Signed in. Welcome back." (`signed-in`) | success | none | done (batch 1) |
+| B2 | lib/auth/phone-sign-in.ts:71 | Returning sign-in with a phone code | no word | "Signed in. Welcome back." | success | none | done (batch 1) |
+| B3 | components/auth/PasskeySignIn.tsx:65 | Signed in with a passkey or Face ID | no word | "Signed in. Welcome back." (`showSuccess("signed-in")`) | success | none | done (batch 1) |
+| B4 | lib/auth/actions.ts:947 (`completeEmailVerification`) | Returning Google or Apple sign-in, magic link sign-in | no word (link types `email`, OAuth carry none) | "Signed in. Welcome back." when the account is not new | success | none | done (batch 1) |
+| B5 | components/auth/AuthChoices.tsx:80 | Arrival notice on sign in (`?notice=link-expired`, signed out, etc.) | status line on the page | the notice's own sentence | info or warning | none | done (batch 1) |
+| B6 | components/auth/EmailAuthForm.tsx:217 | Arrival notice on the email form | status line | the notice's own sentence | info | none | done (batch 1) |
+| B7 | components/auth/ForgotPasswordForm.tsx:41 | Reset code sent | status paragraph replacing the form | "Check your email for a reset code" (the form's own words) | success | none | done (batch 1) |
+| B8 | components/auth/VerifyCodeForm.tsx:270 | New code sent (resend) | status line under the button | the resend message | success | none | done (batch 1) |
+| B9 | components/auth/EmailAuthForm.tsx:427 | Sign in or sign up refused (wrong password, limit) | red alert above the button | the server's sentence | error | none | done (batch 1) |
+| B10 | components/auth/VerifyCodeForm.tsx:242 | Sign-up code refused | red alert | the server's sentence | error | none | done (batch 1) |
+| B11 | components/auth/ResetCodeForm.tsx:103 | Reset code refused | red alert | the server's sentence | error | none | done (batch 1) |
+| B12 | components/auth/ResetPasswordForm.tsx:91 | New password refused | red alert | the server's sentence | error | none | done (batch 1) |
+| B13 | components/auth/ForgotPasswordForm.tsx:69 | Reset request refused | red alert | the server's sentence | error | none | done (batch 1) |
+| B14 | components/auth/FinishSetupForm.tsx:131 | Finish setup refused | red alert | the server's sentence | error | none | done (batch 1) |
+| B15 | components/auth/CodeSignInForm.tsx:133 | Code sign-in: sending refused | red notice | the refusal | error | none | done (batch 1) |
+| B16 | components/auth/CodeSignInForm.tsx:160 | Code sign-in: verify refused (limit, failed) | red notice | the refusal | error | none | done (batch 1) |
+| B17 | components/auth/PasskeySignIn.tsx:75 | Passkey sign-in failed | notice under the button | "That did not sign you in. Try again or use your password." (its own words) | error | Try again | done (batch 1) |
+| B18 | components/auth/NativeAppleSignIn.tsx:151 | Sign in with Apple failed | notice under the button | its own message | error | Try again | done (batch 1) |
+| B19 | components/auth/AcceptTerms.tsx:93 | Age not confirmed | red line under the box | its own words | error | none | done (batch 1) |
+| B20 | components/auth/AcceptTerms.tsx:160 | Terms not accepted | red line under the box | its own words | error | none | done (batch 1) |
 | B21 | components/auth/EmailTakenNotice.tsx:81 | Email already has an account | status panel with a sign-in link | kept: it carries the next step's link | info | n/a | kept (guidance with a link, not an outcome line) |
-| B22 | app/(site)/delete-account/RestoreForm.tsx:57 | Account restore code refused | red alert under the form | the refusal | error | none | todo |
-| B23 | app/(site)/delete-account/RestoreForm.tsx:24 | Account restored | record panel replaces the form | "Your account is restored" | success | none | todo (panel kept as the page's record, banner added) |
+| B22 | app/(site)/delete-account/RestoreForm.tsx:57 | Account restore code refused | red alert under the form | the refusal | error | none | done (batch 1) |
+| B23 | app/(site)/delete-account/RestoreForm.tsx:24 | Account restored | record panel replaces the form | "Your account is restored" | success | none | done (panel kept as the record, banner beside it) |
 
 ## C. Member side (app/(app), components/app, social, money, verification)
 
@@ -104,8 +104,8 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 | C20 | app/(app)/profile/AccountBody.tsx:521 | Profile field refused | red caption | its words | error | none | todo (field) |
 | C21 | app/(app)/checkout/[bookingId]/PayPanel.tsx:168 | Payment could not start | note under Pay | the note | error | Try again | todo |
 | C22 | app/(app)/rent/pay/[inspectionId]/PayPanel.tsx:108 | Rent payment could not start | note under Pay | the note | error | Try again | todo |
-| C23 | app/email/preferences/PreferencesForm.tsx:54 | Email preferences refused | red line | the refusal | error | Try again | todo |
-| C24 | app/email/preferences/PreferencesForm.tsx | Email preferences saved | no word | "Your email choices are saved" | success | none | todo |
+| C23 | app/email/preferences/PreferencesForm.tsx:54 | Email preferences refused | red line | the refusal | error | Try again | done (batch 1) |
+| C24 | app/email/preferences/PreferencesForm.tsx | Email preferences saved | no word | "Your email choices are saved" | success | none | done (batch 1) |
 | C25 | components/money/balance/WithdrawScreen.tsx:305 | Withdraw destination refused | red line under the picker | the refusal | error | none | todo (field) |
 | C26 | components/money/balance/WithdrawScreen.tsx:218 | Withdraw one-time code note | note under the code | the note | info/error | none | todo |
 | C27 | components/money/balance/SendScreen.tsx:280 | Recipient not found | red line under the field | the refusal | error | none | todo (field) |
@@ -164,9 +164,9 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 | C80 | components/site/NewsletterForm.tsx:33 | Newsletter subscribed | status line replaces the form | kept panel + "You're on the list" | success | none | todo |
 | C81 | components/app/safety/UnsafeSheet.tsx:154 | Unsafe report filed | record panel in the sheet | kept + "Your report is sent" | success | none | todo |
 | C82 | components/app/assistant/PersonHandoff.tsx:145 | Handed to a person | record | kept (assistant owner) | n/a | n/a | kept |
-| C83 | app/(app)/settings/invite/InviteShare.tsx:30 | Invite link copied | label "Copied" | "Invite link copied" (via A6) | success | none | todo |
-| C84 | components/app/account/InviteTicket.tsx | Invite code or link copied | label "Copied" | "Invite link copied" (via A6) | success | none | todo |
-| C85 | components/app/listing/ListingCode.tsx:71 | Listing code copied | label "Copied" | "Code copied" (via A6) | success | none | todo |
+| C83 | app/(app)/settings/invite/InviteShare.tsx:30 | Invite link copied | label "Copied" | "Invite link copied" (via A6) | success | none | done (batch 1) |
+| C84 | components/app/account/InviteTicket.tsx | Invite code or link copied | label "Copied" | "Invite link copied" (via A6) | success | none | done (already through useCopy) |
+| C85 | components/app/listing/ListingCode.tsx:71 | Listing code copied | label "Copied" | "Code copied" (via A6) | success | none | done (batch 1) |
 | C86 | components/app/payments/crypto/CryptoPaymentStatus.tsx:124 | Wallet address copied | label "Copied" | "Address copied" (via A6) | success | none | todo |
 | C87 | components/app/payments/PaymentMethodsPanel.tsx:250 | Adding a card | status line while it works | kept: progress, not an outcome | n/a | n/a | kept |
 | C88 | components/compliance/PepQuestion.tsx:45 | PEP answer saved | "Saved." in the card head | "Your answer is saved" | success | none | todo |
@@ -253,17 +253,17 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| F1 | app/admin/weight-withheld/ClearStamp.tsx:108 | Clear note refused | red line under the form | the refusal | error | none | todo (field) |
-| F2 | app/admin/retention/DestroyRecords.tsx:126 | Destroy confirmation wrong | red line | its words | error | none | todo (field) |
-| F3 | app/admin/kyc/IdentityCheckDecision.tsx:91 | Identity decision reason refused | red line | its words | error | none | todo (field) |
-| F4 | app/admin/kyc/IdentityCheckDecision.tsx:36 | Identity check approved or declined | refresh only | "Identity check approved" / "Identity check declined" | success | none | todo |
-| F5 | app/admin/kyc/RequestSelfieWithId.tsx:95 | Selfie request message refused | red caption | its words | error | none | todo (field) |
-| F6 | app/admin/kyc/RequestSelfieWithId.tsx:59 | Selfie with ID requested | refresh only | "Selfie with ID requested" | success | none | todo |
-| F7 | app/admin/payments/MethodLookup.tsx:122 | Removal reason refused | red line | its words | error | none | todo (field) |
-| F8 | app/admin/bookings/reservations/ReservationDecisions.tsx:181 | Decision reason refused | red line | its words | error | none | todo (field) |
-| F9 | app/admin/blocked-terms/TermForms.tsx:157 | Term field refused | red caption | its words | error | none | todo (field) |
-| F10 | app/admin/blocked-terms/TermForms.tsx:235 | Term form refused | red line | the refusal | error | none | todo |
-| F11 | app/admin/referrals/ReferralControls.tsx:529 | Referral decision reason refused | red line | its words | error | none | todo (field) |
+| F1 | app/admin/weight-withheld/ClearStamp.tsx:108 | Clear note refused | red line under the form | the refusal | error | none | done (batch 1) |
+| F2 | app/admin/retention/DestroyRecords.tsx:126 | Destroy confirmation wrong | red line | its words | error | none | done (batch 1) |
+| F3 | app/admin/kyc/IdentityCheckDecision.tsx:91 | Identity decision reason refused | red line | its words | error | none | done (batch 1) |
+| F4 | app/admin/kyc/IdentityCheckDecision.tsx:36 | Identity check approved or declined | refresh only | "Identity check approved" / "Identity check declined" | success | none | done (batch 1) |
+| F5 | app/admin/kyc/RequestSelfieWithId.tsx:95 | Selfie request message refused | red caption | its words | error | none | done (batch 1) |
+| F6 | app/admin/kyc/RequestSelfieWithId.tsx:59 | Selfie with ID requested | refresh only | "Selfie with ID requested" | success | none | done (batch 1) |
+| F7 | app/admin/payments/MethodLookup.tsx:122 | Removal reason refused | red line | its words | error | none | done (batch 1) |
+| F8 | app/admin/bookings/reservations/ReservationDecisions.tsx:181 | Decision reason refused | red line | its words | error | none | done (batch 1) |
+| F9 | app/admin/blocked-terms/TermForms.tsx:157 | Term field refused | red caption | its words | error | none | done (batch 1) |
+| F10 | app/admin/blocked-terms/TermForms.tsx:235 | Term form refused | red line | the refusal | error | none | done (field select now sr-only + banner) |
+| F11 | app/admin/referrals/ReferralControls.tsx:529 | Referral decision reason refused | red line | its words | error | none | done (batch 1) |
 | F12 | app/admin/listings/[id]/ReviewActionBar.tsx:227 | Listing review decision refused | red line | the refusal | error | Try again | todo |
 | F13 | app/admin/listings/[id]/ReviewActionBar.tsx:226 | "Recording the decision." progress line | line | kept: progress state | n/a | n/a | kept |
 | F14 | app/admin/listings/MandateDecision.tsx:37 | Mandate approved or rejected | status line replaces the buttons | "Mandate approved" / "Mandate rejected" | success | none | todo |
@@ -298,10 +298,10 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 | F43 | components/calls/views.tsx:326 | Call view action refused | red line | the refusal | error | Try again | todo |
 | F44 | app/admin/_lanes/SafetyHolds.tsx:28, app/admin/listings/[id]/FeeAcceptancePanel.tsx:23, app/admin/_components/ActingFor.tsx:40, app/admin/compliance/_lanes/{StrLane,PepLane,RiskLane,BeneficialOwnershipLane}.tsx, app/admin/compliance/error.tsx, app/admin/account-recovery/page.tsx:60, app/admin/people/[id]/MemberSections.tsx:42 | Desk could not be read | alert or line in the panel | kept: a page state, the panel has nothing else to show | n/a | n/a | kept |
 | F45 | app/admin/compliance/_lanes/SanctionsLane.tsx:77,95,153 | Sanctions list facts (none loaded, list shrank) | alert lines | kept: facts about the list a reviewer must see while working | n/a | n/a | kept |
-| F46 | app/(site)/landlord/[token]/ReplyActions.tsx:82 | Landlord reply refused | alert | the refusal | error | Try again | todo |
-| F47 | app/(site)/landlord/[token]/ReplyActions.tsx:48 | Landlord answered or stopped messages | settled panel | kept panel + "Your answer is sent" / "Messages stopped" | success | none | todo |
-| F48 | app/(site)/contact/ContactForm.tsx:176 | Contact form refused | alert | the refusal | error | none | todo |
-| F49 | app/(site)/check/CheckForm.tsx:77 | Agent check refused | caption | the refusal | error | none | todo |
+| F46 | app/(site)/landlord/[token]/ReplyActions.tsx:82 | Landlord reply refused | alert | the refusal | error | Try again | done (batch 1) |
+| F47 | app/(site)/landlord/[token]/ReplyActions.tsx:48 | Landlord answered or stopped messages | settled panel | kept panel + "Your answer is sent" / "Messages stopped" | success | none | kept (a ResultScreen replaces the form: the result is its own record) |
+| F48 | app/(site)/contact/ContactForm.tsx:176 | Contact form refused | alert | the refusal | error | none | done (batch 1) |
+| F49 | app/(site)/check/CheckForm.tsx:77 | Agent check refused | caption | the refusal | error | none | done (batch 1) |
 
 ## Kept on purpose (records and page states)
 

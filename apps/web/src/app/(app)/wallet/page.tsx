@@ -1,3 +1,4 @@
+import { EmptyActions } from "@/components/app/EmptyActions";
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/locale";
 import { readMyBalance } from "@/lib/money/member-wallet";
@@ -37,11 +38,7 @@ export default async function WalletPage() {
             icon="bank-column"
             title="Sign in to open Wallet"
             body={BALANCE_LEDE}
-            action={
-              <ButtonLink href={withNext("/sign-in", "/wallet")} variant="primary" size="lg">
-                Sign in
-              </ButtonLink>
-            }
+            action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", "/wallet") }} />}
           />
         </div>
       ) : (

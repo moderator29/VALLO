@@ -9,6 +9,7 @@ import { fill } from "../_components/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type DestroyCopy = {
   destroyBody: string;
@@ -116,17 +117,15 @@ export function DestroyRecords({
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}
-            aria-describedby={`${id}-hint`}
+            aria-describedby={confirmError ? `${id}-hint ${id}-problem` : `${id}-hint`}
+            aria-invalid={confirmError ? true : undefined}
             onChange={(event) => setTyped(event.target.value)}
           />
           <p id={`${id}-hint`} className="nf-caption mt-xs">
             {copy.confirmHint}
           </p>
-          {confirmError && (
-            <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-              {confirmError}
-            </p>
-          )}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id={`${id}-problem`} message={confirmError} />
           <div className="mt-row flex flex-wrap gap-inline">
             <Button type="submit" variant="danger" loading={pending} disabled={!confirmationMatches(typed)}>
               {fill(copy.confirmButton, { count: expected })}

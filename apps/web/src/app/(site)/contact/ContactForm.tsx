@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { submitContactForm } from "@/lib/support/actions";
 import { TicketFiledSheet } from "@/components/app/account/TicketFiledSheet";
@@ -39,6 +40,16 @@ export function ContactForm({
     ActionResult<{ reference: string; id?: string }> | null,
     FormData
   >(submitContactForm, null);
+
+  useEffect(() => {
+    if (!state || state.ok) return;
+    banner.error(
+      SUPPORT_MAILBOX ? `${state.error} Nothing you typed has been cleared.` : `${state.error} Nothing you typed has been cleared, so try again in a moment.`,
+      SUPPORT_MAILBOX
+        ? { action: { label: "Email us", run: () => window.location.assign(`mailto:${SUPPORT_EMAIL}`) } }
+        : undefined,
+    );
+  }, [state]);
 
   const fieldError = (key: string): string | undefined =>
     state && !state.ok ? state.fieldErrors?.[key] : undefined;
@@ -170,48 +181,28 @@ export function ContactForm({
         {pending ? "Sending your message..." : "Send message"}
       </Button>
 
-      {state && !state.ok ? (
-        <p
-          id="contact-form-note"
-          role="alert"
-          className="nf-panel nf-panel--card block p-row text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]"
-        >
-          {state.error}
-          {SUPPORT_MAILBOX ? (
-            <>
-              {" "}You can also email{" "}
-              <a
-                href={`mailto:${SUPPORT_EMAIL}`}
-                className="font-semibold text-[var(--nf-content-link)] hover:underline"
-              >
-                {SUPPORT_EMAIL}
-              </a>{" "}
-              directly, and nothing you typed here has been cleared.
-            </>
-          ) : (
-            <> Nothing you typed here has been cleared, so try again in a moment.</>
-          )}
-        </p>
-      ) : (
-        <p id="contact-form-note" className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
-          {/* No "or write to us at" line without a mailbox to write to. This
-              form opens a real support_tickets row that an admin works in the
-              console, so it is the channel, not the fallback. */}
-          This opens a support ticket and emails you the reference.
-          {SUPPORT_MAILBOX ? (
-            <>
-              {" "}If you would rather write to us yourself, the address is{" "}
-              <a
-                href={`mailto:${SUPPORT_EMAIL}`}
-                className="font-semibold text-[var(--nf-content-link)] hover:underline"
-              >
-                {SUPPORT_EMAIL}
-              </a>
-              .
-            </>
-          ) : null}
-        </p>
-      )}
+      {/* A refusal is said by the one banner at the top of the screen, with
+          "Email us" when there is a mailbox, and nothing typed is cleared
+          (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */}
+      <p id="contact-form-note" className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
+        {/* No "or write to us at" line without a mailbox to write to. This
+            form opens a real support_tickets row that an admin works in the
+            console, so it is the channel, not the fallback. */}
+        This opens a support ticket and emails you the reference.
+        {SUPPORT_MAILBOX ? (
+          <>
+            {" "}If you would rather write to us yourself, the address is{" "}
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              className="font-semibold text-[var(--nf-content-link)] hover:underline"
+            >
+              {SUPPORT_EMAIL}
+            </a>
+            .
+          </>
+        ) : null}
+      </p>
+
     </form>
   );
 }

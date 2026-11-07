@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { AppShell } from "@/components/app/AppShell";
 import SettingsLayout from "@/app/(app)/settings/layout";
+import { ApplyWizard } from "@/components/agent/ApplyWizard";
+import { forApply } from "@/components/agent/agent-copy";
+import { ROLE_COPY } from "@/components/roles/roles";
 import "@/app/css/home.css";
 
 /**
@@ -128,6 +131,12 @@ export default async function PagesFramePreview({
   searchParams: Promise<{ p?: string; loading?: string }>;
 }) {
   const { p = "/settings", loading } = await searchParams;
+  /* The professional application with no session: the wizard itself, on its
+     real copy, since the route asks for a sign-in first. */
+  if (p === "apply-wizard") {
+    const t = getDictionary("en");
+    return <ApplyWizard t={forApply(t)} role="professional" intro={ROLE_COPY.professional.setup.involves} closeHref="/profile/setup" />;
+  }
   const entry = PAGES[p];
   const wait = loading === "1" ? LOADING[p] : undefined;
   if (!entry || (loading === "1" && !wait)) notFound();

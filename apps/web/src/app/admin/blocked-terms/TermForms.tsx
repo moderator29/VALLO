@@ -7,6 +7,7 @@ import { putBlockedTerm, retireBlockedTerm } from "@/lib/admin/blocked-terms-act
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type Option = { value: string; label: string };
 
@@ -147,14 +148,22 @@ function Select({
       <label className="nf-label" htmlFor={id}>
         {label}
       </label>
-      <select id={id} className="nf-field" value={value} onChange={(e) => onChange(e.target.value)}>
+      <select
+        id={id}
+        className="nf-field"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-problem` : undefined}
+      >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
       </select>
-      {error && <p className="nf-caption mt-xs text-[var(--nf-state-error)]">{error}</p>}
+      {/* The select keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${id}-problem`} message={error} />
     </div>
   );
 }
@@ -221,7 +230,16 @@ export function RetireTerm({ term, copy }: { term: string; copy: RetireCopy }) {
       <label className="nf-label mt-row block" htmlFor={`${id}-why`}>
         {copy.retireReasonLabel}
       </label>
-      <textarea id={`${id}-why`} className="nf-field" rows={2} maxLength={400} value={reason} onChange={(e) => setReason(e.target.value)} />
+      <textarea
+        id={`${id}-why`}
+        className="nf-field"
+        rows={2}
+        maxLength={400}
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-why-problem` : undefined}
+      />
       <p className="nf-caption mt-xs">{copy.reasonHint}</p>
       <div className="mt-row flex flex-wrap gap-inline">
         <Button type="submit" variant="danger" size="sm" loading={pending} disabled={reason.trim().length < 12}>
@@ -231,11 +249,8 @@ export function RetireTerm({ term, copy }: { term: string; copy: RetireCopy }) {
           {copy.cancel}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${id}-why-problem`} message={error} />
     </form>
   );
 }

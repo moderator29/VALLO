@@ -4,6 +4,7 @@ import { readMyEarnings } from "@/lib/money/history";
 import { parseBefore } from "@/lib/money/history-model";
 import { PAYOUTS_LEDE, PAYOUTS_TITLE } from "@/lib/money/copy";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
@@ -47,11 +48,7 @@ export default async function PayoutsPage({
           icon="bank-column"
           title="Sign in to see your payouts"
           body={PAYOUTS_LEDE}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/payouts")} variant="primary" size="lg">
-              Sign in
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", "/payouts") }} />}
         />
       ) : read.state === "error" ? (
         <div className="mt-block">

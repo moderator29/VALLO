@@ -6,6 +6,7 @@ import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
 import { useActionState, useEffect, useId, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { withNext } from "@/lib/auth/next-link";
 import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -528,6 +529,7 @@ export function ReservePanel({
               value={checkIn}
               onChange={(e) => setCheckIn(e.target.value)}
               aria-invalid={hint || fieldError("checkIn") ? true : undefined}
+              aria-describedby={hint || fieldError("checkIn") ? `${uid}-dates-problem` : undefined}
               className="nf-field"
             />
           </div>
@@ -543,15 +545,13 @@ export function ReservePanel({
               value={checkOut}
               onChange={(e) => setCheckOut(e.target.value)}
               aria-invalid={hint || fieldError("checkOut") ? true : undefined}
+              aria-describedby={hint || fieldError("checkOut") ? `${uid}-dates-problem` : undefined}
               className="nf-field"
             />
           </div>
         </div>
-        {(hint || fieldError("checkIn") || fieldError("checkOut")) && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-            {hint ?? fieldError("checkIn") ?? fieldError("checkOut")}
-          </p>
-        )}
+        {/* The dates keep their red edge; the words go to the one banner (founder, 7 November 2026). */}
+        <FieldProblem id={`${uid}-dates-problem`} message={hint ?? fieldError("checkIn") ?? fieldError("checkOut")} when={state} />
 
         {/* ------------------------------------------------------ guests */}
         {/* The host's declared capacity is the ceiling, split live between the
@@ -625,18 +625,10 @@ export function ReservePanel({
                 onChange={(e) => setGuestName(e.target.value)}
                 placeholder={w.theirNamePlaceholder}
                 aria-invalid={fieldError("guestName") ? true : undefined}
+                aria-describedby={fieldError("guestName") ? `${uid}-guest-name-problem` : undefined}
                 className="nf-field"
               />
-              {fieldError("guestName") && (
-                /* A FIELD ERROR IS AN ERROR. `--nf-state-warning` resolves to
-                  `--nf-cyan-400`, the same token `--nf-status-pending` is
-                  defined as, so a refused input was drawn in the colour that
-                  means "still going through". `Field.tsx` already gets this
-                  right; these hand-rolled messages did not. */
-                <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-                  {fieldError("guestName")}
-                </p>
-              )}
+              <FieldProblem id={`${uid}-guest-name-problem`} message={fieldError("guestName")} when={state} />
             </div>
             {/* The one field on this form where a wrong character is not
                 caught until somebody is standing at a gate. It states its
@@ -665,7 +657,7 @@ export function ReservePanel({
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
                 placeholder={w.optional}
-                aria-describedby={`${uid}-guest-email-hint`}
+                aria-describedby={fieldError("guestEmail") ? `${uid}-guest-email-hint ${uid}-guest-email-problem` : `${uid}-guest-email-hint`}
                 aria-invalid={fieldError("guestEmail") ? true : undefined}
                 className="nf-field"
               />
@@ -675,11 +667,7 @@ export function ReservePanel({
               >
                 {w.theirEmailHint}
               </p>
-              {fieldError("guestEmail") && (
-                <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-                  {fieldError("guestEmail")}
-                </p>
-              )}
+              <FieldProblem id={`${uid}-guest-email-problem`} message={fieldError("guestEmail")} when={state} />
             </div>
           </div>
         )}

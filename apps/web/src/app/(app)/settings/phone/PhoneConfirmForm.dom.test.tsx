@@ -27,9 +27,10 @@ const ENTRY = `
   import { getDictionary } from "@vallo/i18n";
   import { mount } from "@/lib/testing/browser-root";
   import { PhoneConfirmForm } from "@/app/(app)/settings/phone/PhoneConfirmForm";
+  import { ToastHost } from "@/components/ui/ToastHost";
   window.__buzz = [];
   Object.defineProperty(navigator, "vibrate", { configurable: true, value: (p) => { window.__buzz.push(p); return true; } });
-  mount(<PhoneConfirmForm copy={getDictionary("en").trustVisible.phone} />);
+  mount(<><ToastHost /><PhoneConfirmForm copy={getDictionary("en").trustVisible.phone} /></>);
 `;
 const SENT = `async () => ({ ok: true, data: { sentTo: "8031234567" } })`;
 const buzz = (page: Page) => page.evaluate(() => (window as unknown as { __buzz: unknown[] }).__buzz);
@@ -75,7 +76,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("confirming a phone number", () 
     }
   });
 
-  it("a wrong code is a cut: the words at once, no motion, one error pattern, and focus back in the code to retype", async () => {
+  it("a wrong code is a cut: the words at once in the top banner, a red edge with no motion, one error pattern, and focus back in the code to retype", async () => {
     const { page, close } = await mountInBrowser({
       entry: ENTRY,
       css: CSS,
@@ -84,9 +85,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("confirming a phone number", () 
     try {
       await toCode(page);
       await page.getByRole("button", { name: "Confirm" }).click();
+      /* The words are said by the one top banner (founder, 7 November 2026);
+         the code field keeps only its red edge and a screen-reader note. */
       const alert = page.getByRole("alert");
       await alert.waitFor();
-      expect(await alert.evaluate((el) => el.getAnimations().length)).toBe(0);
+      expect(await alert.innerText()).toContain("That code does not match");
+      expect(await page.getByLabel("Code").getAttribute("aria-invalid")).toBe("true");
+      expect(await page.locator("[data-field-problem]").evaluate((el) => el.getAnimations().length)).toBe(0);
       expect(await page.locator('[data-morph="done"]').count()).toBe(0);
       await page.waitForFunction(() => document.activeElement?.getAttribute("autocomplete") === "one-time-code");
       expect(await buzz(page)).toEqual([[40, 60, 40, 60, 40]]);
@@ -105,6 +110,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("confirming a phone number", () 
       await toCode(page);
       await page.getByRole("button", { name: "Confirm" }).click();
       await page.getByRole("alert").waitFor();
+      expect(await page.getByRole("alert").innerText()).toContain("That code has expired");
       await page.waitForFunction(() => document.activeElement?.textContent === "Send a new code");
     } finally {
       await close();

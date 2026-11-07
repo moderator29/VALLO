@@ -140,6 +140,11 @@ export function AddMoneyScreen({
               { label: "Added", value: "Once your bank confirms" },
             ]}
           />
+          {/* The quiet way back to the amount, in the content: the frame's foot
+              holds only the one lit control at a phone's width. */}
+          <Button variant="quiet" size="md" full onClick={() => setStep("amount")}>
+            Change amount
+          </Button>
         </div>
       ) : null}
 
@@ -221,7 +226,6 @@ export function AddMoneyScreen({
         : step === "confirm"
           ? {
               primary: { label: "Continue to pay", onClick: begin, loading: busy, testId: "move-confirm" },
-              secondary: { label: "Change amount", onClick: () => setStep("amount") },
             }
           : {})}
     >

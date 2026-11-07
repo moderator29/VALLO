@@ -8,6 +8,7 @@ import { fill } from "../_components/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type ClearCopy = {
   clearAction: string;
@@ -90,7 +91,8 @@ export function ClearStamp({ kind, subject, copy }: { kind: "review" | "report";
         rows={2}
         maxLength={400}
         value={note}
-        aria-describedby={`${noteId}-hint`}
+        aria-describedby={noteError ? `${noteId}-hint ${noteId}-problem` : `${noteId}-hint`}
+        aria-invalid={noteError ? true : undefined}
         onChange={(event) => setNote(event.target.value)}
       />
       <p id={`${noteId}-hint`} className="nf-caption mt-xs">
@@ -104,11 +106,8 @@ export function ClearStamp({ kind, subject, copy }: { kind: "review" | "report";
           {copy.cancel}
         </Button>
       </div>
-      {noteError && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {noteError}
-        </p>
-      )}
+      {/* The note keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${noteId}-problem`} message={noteError} />
     </form>
   );
 }

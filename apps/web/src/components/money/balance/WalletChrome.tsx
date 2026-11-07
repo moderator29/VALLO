@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { BackControl } from "@/components/ui/BackControl";
+import { PageHeader } from "@/components/app/PageHeader";
 import { ACTION_LABEL, WALLET_SETTINGS_TITLE, WALLET_TABS } from "@/lib/money/balance-copy";
 
 /**
@@ -44,17 +44,35 @@ export const WALLET_LINKS: WalletLinks = {
  * so the browser's own back walked straight into it again.
  */
 export function WalletHeader({ title, back, settings, end }: { title: string; back: string; settings?: string | null; end?: ReactNode }) {
+  /* ROUND 3 (the lead's ruling on Agent PAGES' job 1): the wallet's top is
+     the platform's one page top, `PageHeader variant="large"` (what
+     `PageFrame` draws): the round back, the large title, the gear as an
+     action. The back decides as it always did (`BackControl` inside). */
   return (
-    <header className="nf-mw-head" data-testid="wallet-header">
-      <BackControl fallback={back} className="nf-mw-head__btn nf-mw-head__btn--back" data-testid="wallet-back" />
-      <h1 className="nf-mw-head__title">{title}</h1>
-      {end}
-      {settings ? (
-        <Link href={settings} className="nf-mw-head__btn nf-mw-head__btn--gear" aria-label={WALLET_SETTINGS_TITLE} data-testid="wallet-settings">
-          <UiIcon name="settings-gear" size={20} />
-        </Link>
-      ) : null}
-    </header>
+    <div data-testid="wallet-header">
+      <PageHeader
+        variant="large"
+        title={title}
+        fallback={back}
+        actions={
+          end || settings ? (
+            <>
+              {end}
+              {settings ? (
+                <Link
+                  href={settings}
+                  className="nf-tap nf-icon-btn nf-icon-btn--round"
+                  aria-label={WALLET_SETTINGS_TITLE}
+                  data-testid="wallet-settings"
+                >
+                  <UiIcon name="settings-gear" size={20} />
+                </Link>
+              ) : null}
+            </>
+          ) : undefined
+        }
+      />
+    </div>
   );
 }
 

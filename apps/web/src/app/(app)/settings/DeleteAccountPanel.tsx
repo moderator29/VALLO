@@ -24,6 +24,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The deletion control, and everything behind it.
@@ -299,8 +300,6 @@ function DeleteDrawer({
   const copy = t.settings.delete;
   const [step, setStep] = useState<"explain" | "confirm">("explain");
   const [phraseValue, setPhraseValue] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
-  const [codeError, setCodeError] = useState<string | null>(null);
   const [sending, startSending] = useSafeTransition();
   const phraseId = useId();
   const proofId = useId();
@@ -334,17 +333,19 @@ function DeleteDrawer({
   }, [state, router]);
 
   const ready = phraseValue.trim() === DELETE_CONFIRM_PHRASE;
+  const refusal = state && !state.ok ? (state.fieldErrors?.confirmPhrase ?? state.fieldErrors?.password ?? state.error) : null;
 
+  /* Sent or refused, said by the one banner at the top of the screen
+     (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
   const askForCode = () => {
-    setCodeError(null);
     startSending(async () => {
       try {
         const result = await sendDeletionCode();
         if (!result.ok) {
-          setCodeError(result.error);
+          banner.error(result.error, { retry: askForCode });
           return;
         }
-        setCodeSent(true);
+        banner.success(copy.codeSent);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -478,16 +479,6 @@ function DeleteDrawer({
                       {sending ? copy.sendingCode : copy.sendCode}
                     </Button>
                   </div>
-                  {codeSent && (
-                    <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-success)]">
-                      {copy.codeSent}
-                    </p>
-                  )}
-                  {codeError && (
-                    <p role="alert" className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-                      {codeError}
-                    </p>
-                  )}
                   <label htmlFor={proofId} className="nf-label mb-2xs mt-sm block">
                     {copy.codeLabel}
                   </label>
@@ -517,19 +508,16 @@ function DeleteDrawer({
                 spellCheck={false}
                 onChange={(event) => setPhraseValue(event.target.value)}
                 className="nf-field"
+                aria-invalid={state && !state.ok && state.fieldErrors?.confirmPhrase ? true : undefined}
+                aria-describedby={refusal ? `${phraseId}-problem` : undefined}
               />
               <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
                 {copy.capitals}
               </p>
 
-              {state && !state.ok && (
-                <p
-                  role="alert"
-                  className="mt-sm nf-panel nf-panel--card block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-                >
-                  {state.fieldErrors?.confirmPhrase ?? state.fieldErrors?.password ?? state.error}
-                </p>
-              )}
+              {/* A refusal is said by the one banner; the phrase keeps its red
+                  edge when it is the phrase that was refused. */}
+              <FieldProblem id={`${phraseId}-problem`} message={refusal} when={state} />
 
               <div className="mt-md grid gap-sm sm:grid-cols-2">
                 <Button variant="primary" full onClick={onClose}>

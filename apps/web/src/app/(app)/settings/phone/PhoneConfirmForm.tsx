@@ -16,6 +16,7 @@ import { retryLost } from "@/lib/offline/retry-lost";
 import { hapticOnPop } from "@/components/verification/payoff-haptic";
 import "@/components/verification/verified-face.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 /** The button morph's payoff pop (`buttons.css`, "THE ACTION MORPH"). */
 const POP = "nf-btn-pop";
@@ -131,7 +132,8 @@ export function PhoneConfirmForm({
     startTransition(async () => {
       const result = await sendPhoneCode({ phone, country });
       if (!result.ok) {
-        setError(result.error);
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        banner.error(result.error, { retry: send });
         return;
       }
       setSentTo(result.data.sentTo);
@@ -155,6 +157,7 @@ export function PhoneConfirmForm({
         return;
       }
       setDone(true);
+      banner.success("Your phone number is confirmed", { "data-testid": "banner-phone-confirmed" });
     });
   }
 
@@ -228,11 +231,6 @@ export function PhoneConfirmForm({
             {wait > 0 ? resendLabel(copy.resendIn, wait) : copy.resend}
           </Button>
         </>
-      )}
-      {error && !settled && sentTo === null && (
-        <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-          {error}
-        </p>
       )}
     </div>
   );

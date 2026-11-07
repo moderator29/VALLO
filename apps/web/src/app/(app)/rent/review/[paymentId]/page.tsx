@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { readTenancyReviewTarget } from "@/lib/tenancy/review-queries";
@@ -56,11 +57,7 @@ export default async function TenancyReviewPage({ params }: { params: Promise<{ 
           icon="keys-home"
           title={copy.missingTitle}
           body={copy.missingBody}
-          action={
-            <ButtonLink href="/bookings?kind=inspection&from=property" variant="primary" size="lg">
-              {copy.openInspections}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: copy.openInspections, href: "/bookings?kind=inspection&from=property" }} />}
         />
       </Frame>
     );

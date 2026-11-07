@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { PassportSettings } from "@/components/passport/PassportSettings";
@@ -48,11 +49,7 @@ export default async function PassportSettingsPage({
           art="id-check"
           title={copy.signedOut}
           body={copy.lede}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/settings/passport")} variant="primary" size="lg">
-              {copy.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: copy.signIn, href: withNext("/sign-in", "/settings/passport") }} />}
         />
       </PageFrame>
     );

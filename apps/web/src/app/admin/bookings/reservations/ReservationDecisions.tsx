@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideReservationAsAdmin } from "@/lib/admin/bookings-actions";
@@ -8,6 +8,7 @@ import type { ReservationDecision } from "@/lib/admin/schema";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The three things an operator can do to a table, and the sentence first.
@@ -54,6 +55,7 @@ export function ReservationDecisions({
   const [chosen, setChosen] = useState<ReservationDecision | null>(null);
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const problemId = useId();
   const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
 
@@ -145,6 +147,8 @@ export function ReservationDecisions({
               <span className="nf-label">Why</span>
               <textarea
                 className="nf-field min-h-[72px] resize-y"
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? problemId : undefined}
                 value={reason}
                 maxLength={500}
                 onChange={(event) => setReason(event.target.value)}
@@ -177,11 +181,8 @@ export function ReservationDecisions({
               Not now
             </Button>
           </div>
-          {error && (
-            <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id={problemId} message={error} />
         </div>
       )}
     </div>

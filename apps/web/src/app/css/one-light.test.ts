@@ -38,7 +38,7 @@ const ALLOWED: Record<string, [number, string]> = {
   "app/css/light.css": [9, "glows on Paper in brand ink (the lit chip, tiles, the profile ring and its contact, the hero chips) and the two night islands on Paper (home top, hero band), which wait for a Paper rung a dark scope can read"],
   "app/css/money-surface.css": [1, "glow: the processor's brand mark lit in its own blue"],
   "app/css/money-wallet.css": [2, "glows (the founder's Wallet ruling, 8 October 2026): the wallet card's tight contact shadow in its own navy (no spreading glow), and the Withdraw capsule's bloom in its own blue; everything else reads the elevation rungs"],
-  "app/css/shell-m.css": [3, "glows: the side rail's sideways edge light, the dock plus's brand bloom and its rim"],
+  "app/css/shell-m.css": [5, "glows: the side rail's sideways edge light, the dock plus's brand bloom and its rim, and the Circle tab's brand drop at rest and chosen (founder, 7 November 2026: the solid blue centre disc)"],
   "app/css/site.css": [2, "glow: the site's lit primary and its chip in brand ink"],
   "components/social/circle/circle-visuals.css": [1, "the Circle mark's brand bloom on the banner (a glow, the banner's one coloured light)"],
   /* PENDING: files that carry another agent's uncommitted work right now. */

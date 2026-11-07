@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { resolveSession } from "@/lib/actions/session";
@@ -44,11 +45,7 @@ export default async function NewSupportQueryPage({
           icon="support-chat"
           title={w.newSignedOutTitle}
           body={w.newSignedOutBody}
-          action={
-            <ButtonLink href="/sign-in?next=%2Fsupport%2Fnew" variant="primary" size="lg">
-              {w.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: w.signIn, href: "/sign-in?next=%2Fsupport%2Fnew" }} />}
           secondary={
             <ButtonLink href="/contact" variant="ghost" size="lg">
               {w.contactForm}

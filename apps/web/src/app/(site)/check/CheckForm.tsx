@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -47,6 +48,11 @@ export function CheckForm({
      its uncontrolled fields, which emptied the field under "that is not a
      number" and made the visitor type it again. */
   const [query, setQuery] = useState(initial);
+  useEffect(() => {
+    if (state && !state.ok) banner.error(copy.failed, { "data-testid": "check-failed" });
+    // Once per answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <div className="mt-md">
@@ -74,11 +80,7 @@ export function CheckForm({
       </form>
 
       <div aria-live="polite" className="mt-md">
-        {state && !state.ok && (
-          <Note tone="error" icon="alert-triangle" alert testId="check-failed">
-            {copy.failed}
-          </Note>
-        )}
+        {/* A failed check is said by the one banner at the top of the screen (founder, 7 November 2026). */}
         {state?.ok && <CheckAnswer outcome={state.data} copy={copy} locale={locale} warning={warning} />}
       </div>
     </div>

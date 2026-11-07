@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { BrandIcon, type BrandIconName } from "@/design-system/icons/BrandIcon";
+import { Button } from "@/components/ui/Button";
 import { StepFrame } from "@/components/ui/StepFrame";
 import { Surface, TYPE } from "@/components/app/Screen";
 
@@ -135,9 +136,16 @@ export function RegisterShell({
           ? { label: lit.label, onClick: lit.onClick, disabled: lit.disabled ?? false, testId: "register-continue" }
           : { label: backLabel, onClick: onBack }
       }
-      {...(quiet ? { secondary: { label: quiet.label, onClick: quiet.onClick, testId: "register-secondary" } } : {})}
     >
       <div className="nf-flow-step">{children}</div>
+      {/* The quiet second way ("Back to home" on the confirmation) sits under
+          the content, full width: beside the lit control in the foot the two
+          labels did not fit a 360px phone. */}
+      {quiet ? (
+        <Button variant="quiet" size="md" full onClick={quiet.onClick} data-testid="register-secondary">
+          {quiet.label}
+        </Button>
+      ) : null}
     </StepFrame>
   );
 }

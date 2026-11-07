@@ -34,6 +34,7 @@ import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type FormCopy = Dictionary["experienceInbox"]["support"]["form"];
 
@@ -187,6 +188,8 @@ export function NewQueryForm({
           // Nothing to clear.
         }
         setFiled({ reference: result.data.reference, id: result.data.id, photoNote });
+        /* Filed, but the photo did not go: said by the one banner (founder, 7 November 2026). */
+        if (photoNote) banner.warning(photoNote, { "data-testid": "support-photo-note" });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -230,11 +233,9 @@ export function NewQueryForm({
       closeHref="/support"
       closeLabel={copy.close}
       notice={
-        errors.topic && at === 1 ? (
-          <p id="support-topic-error" role="alert" className="nf-caption text-[var(--nf-state-error)]">
-            {errors.topic}
-          </p>
-        ) : undefined
+        /* The topic's problem is said by the one banner; the note stays for a
+           screen reader (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+        errors.topic && at === 1 ? <FieldProblem id="support-topic-error" message={errors.topic} /> : undefined
       }
       primary={
         last
@@ -458,7 +459,6 @@ export function FiledView({ filed, topic, copy }: { filed: Filed; topic: string 
           {filed.reference}
         </span>
       </div>
-      {filed.photoNote && <p className="nf-caption mt-group text-[var(--nf-state-warning)]">{filed.photoNote}</p>}
       <div className="mt-block space-y-row">
         {filed.id ? (
           <ButtonLink href={`/support/messages/${filed.id}`} variant="primary" size="lg" full>
