@@ -731,6 +731,7 @@ export function Feed({
             return false;
           }
           setPosts((all) => all.filter((p) => p.id !== target.id));
+          banner.success("Post deleted");
           router.refresh();
           return true;
         }}

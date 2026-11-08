@@ -234,7 +234,10 @@ export function TenancyReportCard({
               try {
                 const result = await countersignTenancyReport({ tenancyId, reportId: report.id as string });
                 if (!result.ok) banner.error(result.error);
-                else router.refresh();
+                else {
+                  banner.success("Report countersigned");
+                  router.refresh();
+                }
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
               }

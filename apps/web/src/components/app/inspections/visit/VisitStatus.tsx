@@ -424,7 +424,10 @@ export function VisitStatus({
           }}
           onConfirm={async () => {
             const result = await withdraw();
-            if (result.ok) router.refresh();
+            if (result.ok) {
+              banner.success("Viewing cancelled");
+              router.refresh();
+            }
             return result;
           }}
         />
@@ -441,7 +444,10 @@ export function VisitStatus({
           }}
           onConfirm={async () => {
             const result = await withdraw();
-            if (result.ok) router.replace(`/listing/${listingId}/visit`);
+            if (result.ok) {
+              banner.success("Viewing cancelled");
+              router.replace(`/listing/${listingId}/visit`);
+            }
             return result;
           }}
         />

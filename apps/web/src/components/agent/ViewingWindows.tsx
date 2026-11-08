@@ -111,7 +111,10 @@ export function ViewingWindows({
                     try {
                       const result = await removeViewingWindow({ id: w.id });
                       if (!result.ok) banner.error(result.error);
-                      else router.refresh();
+                      else {
+                        banner.success("Viewing window removed");
+                        router.refresh();
+                      }
                     } catch (error) {
                       if (!tapFailedOffline(error)) throw error;
                     }

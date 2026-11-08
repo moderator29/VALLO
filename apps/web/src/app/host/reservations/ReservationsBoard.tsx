@@ -354,6 +354,7 @@ function HostBill({ table }: { table: HostReservationView }) {
           return;
         }
         setAmount("");
+        banner.success("Done");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

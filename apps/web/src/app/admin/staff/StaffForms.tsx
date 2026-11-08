@@ -122,7 +122,10 @@ export function RevokeStaffForm({ userId }: { userId: string }) {
       try {
         const result = await revokeStaff({ userId, reason });
         if (!result.ok) banner.error(result.error, { retry: revoke });
-        else router.refresh();
+        else {
+          banner.success("Access revoked");
+          router.refresh();
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
