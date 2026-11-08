@@ -350,6 +350,7 @@ export const roommatesEn = {
     eyebrow: "Shared living on Vallo",
     findRoommate: "Find a roommate",
     signInCta: "Sign in",
+    signInContinue: "Sign in to continue",
     seeAll: "See all",
     back: "Back to Roommates",
     statsLabel: "Live on Vallo Roommates",

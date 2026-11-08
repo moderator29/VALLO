@@ -73,6 +73,8 @@ export type ListingActionsProps = {
   groups: { id: string; name: string }[];
   viewCount: number;
   interestCount: number;
+  /** Open the viewing request on arrival (the hub links with `?viewing=1`). */
+  openViewing?: boolean;
 };
 
 /**
@@ -88,7 +90,9 @@ export function ListingActions(props: ListingActionsProps) {
   const { pending, busy, run } = useRun();
   const [status, setStatus] = useState<ListingStatus>(props.status);
   const [connection, setConnection] = useState<ConnectionState>(props.connection);
-  const [sheet, setSheet] = useState<null | "delete" | "interest" | "viewing" | "shortlist">(null);
+  const [sheet, setSheet] = useState<null | "delete" | "interest" | "viewing" | "shortlist">(
+    props.openViewing && props.signedIn && !props.isOwner && !props.myViewing ? "viewing" : null,
+  );
   const close = () => setSheet(null);
   const first = props.owner.name.split(" ")[0] ?? props.owner.name;
 
@@ -176,8 +180,8 @@ export function ListingActions(props: ListingActionsProps) {
     return (
       <div className="nf-rmv-act" data-testid="listing-actions">
         <p className="nf-rmv-act__line">{L.signInToAct}</p>
-        <ButtonLink href={`/sign-in?next=${encodeURIComponent(ROOMMATES_ROUTES.listing(props.id))}`} variant="primary" size="lg" full>
-          {copy.ui.signInCta}
+        <ButtonLink href={`/sign-in?next=${encodeURIComponent(ROOMMATES_ROUTES.listing(props.id))}`} variant="primary" size="lg" full data-testid="listing-sign-in">
+          {copy.ui.signInContinue}
         </ButtonLink>
       </div>
     );

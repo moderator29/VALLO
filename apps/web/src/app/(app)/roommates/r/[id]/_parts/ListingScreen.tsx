@@ -40,7 +40,20 @@ import { ListingActions, ListingShareMenu, RecordView } from "./ListingActions";
  * property. The actions and the costs sit in the side column on a wide
  * screen, under the facts on a phone.
  */
-export function RoomListingScreen({ read, groups, t: copy, now }: { read: ListingRead; groups: { id: string; name: string }[]; t: RoommatesCopy; now: number }) {
+export function RoomListingScreen({
+  read,
+  groups,
+  t: copy,
+  now,
+  openViewing = false,
+}: {
+  read: ListingRead;
+  groups: { id: string; name: string }[];
+  t: RoommatesCopy;
+  now: number;
+  /** Open the viewing request on arrival (`?viewing=1`). */
+  openViewing?: boolean;
+}) {
   if (read.state !== "ok") {
     return (
       <PageFrame title={copy.title} fallback={ROOMMATES_ROUTES.rooms} width="narrow">
@@ -63,7 +76,7 @@ export function RoomListingScreen({ read, groups, t: copy, now }: { read: Listin
       width="wide"
       actions={
         <span className="nf-rmv-headacts">
-          {l.isOwner ? null : <SaveButton kind="room" id={l.id} signedIn={read.signedIn} />}
+          {l.isOwner || !read.signedIn ? null : <SaveButton kind="room" id={l.id} />}
           <ListingShareMenu id={l.id} title={l.title} signedIn={read.signedIn} />
         </span>
       }
@@ -119,7 +132,7 @@ export function RoomListingScreen({ read, groups, t: copy, now }: { read: Listin
           ) : null}
           <Trust l={l} t={copy} />
           {l.linkedListing ? <Linked l={l} t={copy} /> : null}
-          {l.isOwner ? null : <SafetyRows targetType="roommate_listing" targetId={l.id} label={l.title} userId={l.owner.userId} name={l.owner.name.split(" ")[0] ?? l.owner.name} signedIn={read.signedIn} />}
+          {l.isOwner || !read.signedIn ? null : <SafetyRows targetType="roommate_listing" targetId={l.id} label={l.title} userId={l.owner.userId} name={l.owner.name.split(" ")[0] ?? l.owner.name} signedIn={read.signedIn} />}
         </div>
         <aside className="nf-rmv__side">
           <div className="nf-rm-panel nf-rmv__actcard">
@@ -136,6 +149,7 @@ export function RoomListingScreen({ read, groups, t: copy, now }: { read: Listin
               groups={groups}
               viewCount={l.viewCount}
               interestCount={l.interestCount}
+              openViewing={openViewing}
             />
           </div>
           <CostBreakdown cost={l} t={copy} />
