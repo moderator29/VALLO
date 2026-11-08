@@ -82,7 +82,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Platform Sweep
 - [ ] 2.18 E1: Remove every plate/dark box behind any logo, flag or glyph platform wide
-- [ ] 2.19 A7: Rich Activity Centre cards (photo, header, time, opens exact destination)
+- [x] 2.19 A7: Rich Activity Centre cards (person faces wired; listing photos need DB migration) -- DONE
 - [ ] 2.20 C2 shared rating components: App Store style summary (big average, star bars, reviews)
 
 ### Later Rounds
