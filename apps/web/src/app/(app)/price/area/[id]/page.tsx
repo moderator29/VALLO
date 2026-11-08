@@ -123,7 +123,7 @@ export default async function AreaSharePage({ params }: Params) {
         {/* Stage 5: the object settles, the reason is the true one, and the
             one way onward is a check of their own. */}
         <DiscoveryEmpty
-          object="doc-search"
+          object="listing-in-review"
           title={copy.missingTitle}
           body={copy.missingBody}
           primary={{ href: "/price", label: copy.checkYours }}

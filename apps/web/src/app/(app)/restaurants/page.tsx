@@ -96,7 +96,7 @@ export default async function RestaurantsPage() {
            brief is for homes, not tables (request W2-R4). */
         <DiscoveryEmpty
           data-testid="restaurants-empty"
-          object="cup-saucer"
+          object="empty-tables"
           title={t.stays.restaurantsEmptyTitle}
           body={t.stays.restaurantsEmptyBody}
           primary={{ href: "/stays", label: t.nav.stays }}

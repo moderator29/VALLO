@@ -381,7 +381,7 @@ export function HomeScreen({
            */
           <DiscoveryEmpty
             data-testid="home-empty"
-            object="apartment-block"
+            object="apartment"
             title={t.home.empty.title}
             body={t.home.empty.body}
             primary={{ label: t.home.empty.action, href: "/profile?switch=owner" }}

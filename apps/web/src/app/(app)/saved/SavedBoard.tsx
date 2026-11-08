@@ -319,7 +319,7 @@ export function SavedBoard({
       <DiscoveryEmpty
         className="pb-4xl"
         data-testid="saved-empty"
-        object="house-heart"
+        object="empty-saved"
         title={hydrating ? (emptyCopy?.hydratingTitle ?? "Bringing your saves together") : (emptyCopy?.title ?? "Nothing saved yet")}
         body={
           hydrating

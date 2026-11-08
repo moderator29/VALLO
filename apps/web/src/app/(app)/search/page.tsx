@@ -715,7 +715,7 @@ export default async function SearchPage({
               /* Clear of the floating dock: this is the whole page. */
               className="pb-4xl"
               data-testid="search-empty"
-              object={narrowed || areaNarrowed || query.q ? "search-pin" : "apartment-block"}
+              object={narrowed || areaNarrowed || query.q ? "empty-search" : "apartment"}
               title={narrowed || areaNarrowed ? sx.noMatchTitle : query.q ? sx.noWordsTitle : sx.emptyTitle}
               body={narrowed || areaNarrowed ? sx.noMatchBody : query.q ? sx.noWordsBody : sx.emptyBody}
               primary={
