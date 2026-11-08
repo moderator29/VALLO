@@ -929,3 +929,20 @@ export async function shareRoommateListingToFeed(input: { listingId: string; bod
   refresh("/around");
   return ok({ postId: res.data });
 }
+
+/* ------------------------------------------------------------------ listers */
+
+/** The lister marks a property as good for sharing, and for how many people. */
+export async function setListingSharing(input: { listingId: string; ok: boolean; maxOccupants: number | null }): Promise<ActionResult<{ ok: boolean; maxOccupants: number | null }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  if (!uuid.safeParse(input.listingId).success) return fail(FAILED);
+  const max = input.ok ? Math.round(Number(input.maxOccupants)) : null;
+  if (input.ok && (!Number.isFinite(max) || (max as number) < 2 || (max as number) > 20)) {
+    return fail("Say how many people can share it, from 2 to 20.", { maxOccupants: "From 2 to 20." });
+  }
+  const res = await call<null>(who.db, "roommate_set_listing_sharing", { p_listing: input.listingId, p_ok: Boolean(input.ok), p_max: max });
+  if (res.error) return fail(res.error);
+  refresh(`/agent/listings/${input.listingId}/sharing`, `/listing/${input.listingId}`);
+  return ok({ ok: Boolean(input.ok), maxOccupants: max });
+}

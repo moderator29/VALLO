@@ -578,6 +578,12 @@ function ListingRow({
             {statusLabel}
           </ButtonLink>
         )}
+        {/* Vallo Roommates: the lister says the home suits people renting it together. */}
+        {!closedReason && (
+          <ButtonLink href={`/agent/listings/${listing.id}/sharing`} variant="quiet" size="sm" leadingIcon="users" data-testid="listing-sharing-link">
+            Good for sharing
+          </ButtonLink>
+        )}
         {/* J4: every listing the lister owns has a health page: what its
             record holds and what it is missing. An example listing's page
             says it is never measured, rather than this row guessing. */}

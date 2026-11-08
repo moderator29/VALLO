@@ -22,8 +22,10 @@ create table public.profiles (id uuid primary key, display_name text, avatar_url
 create table public.user_roles (user_id uuid, role public.app_role);
 create table public.areas (id uuid primary key default gen_random_uuid(), slug text, name text, state_code text, city text);
 create table public.agents (id uuid primary key default gen_random_uuid(), user_id uuid);
+create function private.my_agent_ids() returns setof uuid language sql stable security definer set search_path to '' as $$ select a.id from public.agents a where a.user_id = auth.uid() $$;
+create function private.my_firm_ids() returns setof uuid language sql stable as $$ select null::uuid where false $$;
 create table public.listings (id uuid primary key default gen_random_uuid(), agent_id uuid, title text, status public.listing_status default 'DRAFT', state_code text, city text, area text,
-  bedrooms integer default 0, bathrooms integer default 1, rent_amount_minor bigint, rent_period public.rent_period, rate_minor bigint, sale_price_minor bigint, listing_intent text, property_type text, created_at timestamptz default now());
+  bedrooms integer default 0, bathrooms integer default 1, rent_amount_minor bigint, rent_period public.rent_period, rate_minor bigint, sale_price_minor bigint, listing_intent text, property_type text, firm_id uuid, created_at timestamptz default now());
 create table public.listing_photos (id uuid primary key default gen_random_uuid(), listing_id uuid, storage_path text, position integer default 0);
 create table public.social_profiles (user_id uuid primary key references public.profiles(id), handle text, display_label text, avatar_path text, contact_policy text default 'REQUEST', created_at timestamptz default now());
 create table public.follows (follower_id uuid, followee_id uuid);

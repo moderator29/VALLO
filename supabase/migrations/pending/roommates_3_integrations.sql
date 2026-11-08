@@ -80,3 +80,32 @@ values
    'roommates', 'public',
    array['No listings with payment details in the post.', 'Report anything that looks like a scam.'], true)
 on conflict (slug) do nothing;
+
+-- The lister says a property is good for sharing, and for how many people.
+-- Only these two columns change, so a published listing is not sent back
+-- for review (the owner-write guard only restricts member-role writes, and
+-- this function checks ownership itself: the lister's own agent profile or
+-- their firm).
+create or replace function public.roommate_set_listing_sharing(p_listing uuid, p_ok boolean, p_max smallint)
+returns void language plpgsql security definer set search_path to '' as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Sign in to continue.' using errcode = 'RM300';
+  end if;
+  if not exists (select 1 from public.listings l
+                  where l.id = p_listing
+                    and (l.agent_id in (select private.my_agent_ids())
+                         or (l.firm_id is not null and l.firm_id in (select private.my_firm_ids())))) then
+    raise exception 'Only the lister can change this.' using errcode = 'RM340';
+  end if;
+  if p_ok and (p_max is null or p_max < 2 or p_max > 20) then
+    raise exception 'Say how many people can share it, from 2 to 20.' using errcode = 'RM341';
+  end if;
+  update public.listings
+     set shared_living_ok = coalesce(p_ok, false),
+         max_occupants = case when p_ok then p_max else null end
+   where id = p_listing;
+end;
+$$;
+revoke all on function public.roommate_set_listing_sharing(uuid, boolean, smallint) from public, anon;
+grant execute on function public.roommate_set_listing_sharing(uuid, boolean, smallint) to authenticated;
