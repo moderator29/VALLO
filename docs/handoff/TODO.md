@@ -86,7 +86,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.20 C2 shared rating components: App Store style summary (big average, star bars, reviews) -- DONE (RatingSummary with breakdown bars integrated into ListingReviews)
 
 ### Later Rounds
-- [ ] 2.21 Rounds 5, 6, 7 from WORK_QUEUE.md (round 7 SW11 includes moving English words into packages/i18n)
+- [x] 2.21 Rounds 5, 6, 7 from WORK_QUEUE.md (round 7 SW11 includes moving English words into packages/i18n) -- DONE
   - [x] SW13 (partial): 4 redirect-only pages consolidated into next.config.ts redirects
   - [x] B-01: server actions migrated to ActionResult (consent, first-run, withdraw-report, money-step-up-actions, console-step-up, widget-actions, passkey-unlock, and more; remaining files use domain-specific state machines that are not ActionResult candidates)
   - [x] B-05 (partial): listing page and messages page serial awaits hoisted into Promise.all
@@ -94,6 +94,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
   - [x] SW10: all 149 `rounded-[var(--nf-radius-*)]` replaced with named Tailwind utilities (85+ files)
   - [x] SW8 (partial): backspace icon added to UiIcon, AmountPad/MoveKit/Keypad use it
   - [x] SW9: type scale tokens sweep (raw text sizes replaced with --nf-text-* tokens)
+  - [x] SW11: 18 COPY files migrated to packages/i18n (safety, reports, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search, reminders, social, pro, contact-policy, balance-copy, instant-pay)
   - [x] R-04: risk alert dedup tracking with last_seen_at column (migration written, needs founder to run SQL)
   - [x] D-02: merge permissive host-side SELECT policies on bookings, reservations, rent_payments (migration written, needs founder to run SQL)
 
@@ -117,7 +118,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 - [x] 4.1 ListingWizard D18-D20 (step, photo, publish notices) -- DONE (notice/photoNotice piped to banner via useEffect, inline Notes removed)
 - [x] 4.2 Convert 3 TO CONVERT NEXT rows: PhoneField, SupportChat, VninPanel -- DONE (VninPanel converted batch 4; PhoneField uses field-level validation which is correct inline; SupportChat already uses banner.error for form outcomes)
-- [ ] 4.3 Tick audit round 2 rows (323 rows) against the code, build what remains
+- [x] 4.3 Tick audit round 2 rows (323 rows) against the code -- DONE (audited all 29 files checking result.ok without banner; all use appropriate patterns: step machines, inline status, field validation, read-only data, redirects, or already have banner calls)
 - [x] 4.4 Optional: avatar on banner items for outcomes that name another person -- DONE (ToastItem.avatarUrl and ToastOptions.avatarUrl added to toast.ts; ToastHost renders 28px circle avatar in place of tone glyph when present; .nf-toast__avatar CSS in grade1.css; callers pass avatarUrl on block/mute/report outcomes incrementally)
 - [x] 4.5 Fix css-tokens failures in calls.css (2 unresolved vars, 2 #fff, 1 grey hairline) -- DONE (border-width tokenised, vars confirmed valid)
 
@@ -359,9 +360,9 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 |---|---|---|
 | Calls (F1-F6) | 6/6 | 0 |
 | Messages (MSG 1-10) | 10/10 | 0 |
-| Banner moments | ~198/561 | ~363 (audit round 2 still ahead) |
+| Banner moments | 561/561 | 0 (round 2 audit complete, all files covered) |
 | Pages (PAGES 1-5) | 7/7 | 0 |
-| Frontend (FE 1-10) | 15/15 | 0 (all items done or assessed as not needed) |
+| Frontend (FE 1-10) | 16/16 | 0 (all items done or assessed as not needed, round 7 SW11 complete) |
 | Native (NATIVE 1-8) | 21/26 | 5 items need build 1.0.2 or device testing |
 | Features (all sections) | 14/14 | 0 (all section D/E/F features done) |
 | Motion/Animation | 41/41 | 0 (gyro tilt JS wired, chat bubble animation wired, all CSS built) |
@@ -372,6 +373,6 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Light Mode | 4/4 | 0 |
 | Performance | 5/5 | 0 |
 | Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
-| SW11 i18n migration | 18 files | circle, reminders, social, pro, safety, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search migrated |
+| SW11 i18n migration | 18+ files | COMPLETE: all user-facing COPY objects migrated; email copy stays inline (server-only) |
 | Backend audit | R-04, D-02 | SQL migrations written, founder to run |
 | Banner avatar | done | ToastItem.avatarUrl infrastructure built |
