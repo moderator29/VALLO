@@ -1,0 +1,93 @@
+/*
+ * THE "NEW FEATURE" BANNER (`PromoBanner.tsx`). A royal blue island: the
+ * brand ink gradient, one soft light at the end edge behind the 3D object,
+ * the words on the start side. The object floats a few times on arrival;
+ * reduced motion, Calm and Off hold it still.
+ */
+@layer components {
+  .nf-promo {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    overflow: hidden;
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    text-decoration: none;
+    box-shadow: var(--nf-elevation-floating);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-promo:active {
+    transform: scale(0.985);
+  }
+  .nf-promo:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-promo__glow {
+    position: absolute;
+    inset: -40% -10% -40% 45%;
+    z-index: -1;
+    border-radius: var(--nf-radius-circle);
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--nf-content-on-brand) 26%, transparent), transparent);
+  }
+  .nf-promo__words {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+  }
+  .nf-promo__eyebrow {
+    justify-self: start;
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-badge);
+    background: var(--nf-spark-fill);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nf-promo__title {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .nf-promo__body {
+    color: color-mix(in oklab, var(--nf-content-on-brand) 82%, transparent);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+  }
+  .nf-promo__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    margin-block-start: var(--nf-space-xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
+  .nf-promo__art {
+    display: grid;
+    place-items: center;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-promo__art {
+      animation: nf-promo-float 3s var(--nf-ease-standard) 6 alternate both;
+    }
+  }
+  @keyframes nf-promo-float {
+    from {
+      transform: translateY(0) rotate(-3deg);
+    }
+    to {
+      transform: translateY(-8px) rotate(3deg);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-promo__art {
+    animation: none;
+  }
+}

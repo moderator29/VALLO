@@ -348,6 +348,19 @@ export const roommatesEn = {
      profile and listing pages, the two flows, schools, NYSC and safety. */
   ui: {
     eyebrow: "Shared living on Vallo",
+    firstRun: {
+      title: "Find your ideal roommate",
+      body: "Tell us where, your budget and how you like to live. We show you the people who fit.",
+      steps: ["Where and your budget", "How you live", "See who matches you"],
+      cta: "Continue",
+      later: "Not now",
+    },
+    promo: {
+      eyebrow: "New on Vallo",
+      title: "Find a place together",
+      body: "Start a group with people you connect with, shortlist homes and split the costs.",
+      cta: "Start a group",
+    },
     peopleLooking: { one: "{count} person looking for a place to share", other: "{count} people looking for a place to share" },
     findRoommate: "Find a roommate",
     signInCta: "Sign in",

@@ -150,7 +150,7 @@ export function StatTiles({ stats, t: copy }: { stats: { people: number; rooms: 
   );
 }
 
-const TRUST_ICON: UiIconName[] = ["user-check", "shield-check", "lock"];
+const TRUST_ART: Icon3DName[] = ["envelope", "id-check", "passcode-lock"];
 
 export function TrustTiles({ t: copy }: { t: RoommatesCopy }) {
   return (
@@ -159,8 +159,8 @@ export function TrustTiles({ t: copy }: { t: RoommatesCopy }) {
       <ul className="nf-rm-trust">
         {copy.home.trust.map((item, i) => (
           <li key={item.title} className="nf-rm-trust__tile">
-            <span className="nf-rm-plate" aria-hidden="true">
-              <UiIcon name={TRUST_ICON[i] ?? "shield-check"} size={20} />
+            <span className="nf-rm-trust__art" aria-hidden="true">
+              <Icon3D name={TRUST_ART[i] ?? "shield"} size={44} classic />
             </span>
             <span className="nf-rm-trust__title">{item.title}</span>
             <span className="nf-rm-trust__body">{item.body}</span>
@@ -209,13 +209,32 @@ export function SectionHead({ id, title, more, moreLabel, count }: { id?: string
   );
 }
 
-/** An honest empty list: a quiet glyph, one true sentence, and the one next step. */
+/* Each empty state's 3D object, by the glyph it was asked for. */
+const EMPTY_ART: Partial<Record<UiIconName, Icon3DName>> = {
+  users: "team",
+  bed: "home-small",
+  info: "toolbox",
+  "circle-people": "handover",
+  "id-card": "id-check",
+  lock: "passcode-lock",
+  "user-pen": "checklist",
+  door: "home-small",
+};
+
+/** An honest empty list: one of the founder's 3D objects, one true sentence, and the one next step. */
 export function RoommatesEmpty({ children, icon = "users", action, testId }: { children: ReactNode; icon?: UiIconName; action?: ReactNode; testId?: string }) {
+  const art = EMPTY_ART[icon];
   return (
     <div className="nf-rm-empty" data-testid={testId ?? "roommates-empty"}>
-      <span className="nf-rm-plate nf-rm-plate--lg" aria-hidden="true">
-        <UiIcon name={icon} size={24} />
-      </span>
+      {art ? (
+        <span className="nf-rm-empty__art" aria-hidden="true">
+          <Icon3D name={art} size={72} classic />
+        </span>
+      ) : (
+        <span className="nf-rm-plate nf-rm-plate--lg" aria-hidden="true">
+          <UiIcon name={icon} size={24} />
+        </span>
+      )}
       <p className="nf-rm-empty__words">{children}</p>
       {action ? <div className="nf-rm-empty__action">{action}</div> : null}
     </div>

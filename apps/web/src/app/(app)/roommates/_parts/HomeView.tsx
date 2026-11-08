@@ -18,6 +18,8 @@ import {
   institutionKind,
   lagosDay,
 } from "@/components/roommates";
+import { PromoBanner } from "@/components/app/PromoBanner";
+import { FirstRunCard } from "@/components/roommates/FirstRunCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
@@ -151,14 +153,30 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
   const how = <HowItWorks t={copy} key="how" />;
   const stats = <StatTiles stats={home.stats} t={copy} key="stats" />;
 
-  const order = active ? [stats, recommended, rooms, together, journeys, schools, nysc, how] : [journeys, stats, how, rooms, recommended, together, schools, nysc];
+  const promo = (
+    <PromoBanner
+      key="promo"
+      eyebrow={copy.ui.promo.eyebrow}
+      title={copy.ui.promo.title}
+      body={copy.ui.promo.body}
+      cta={copy.ui.promo.cta}
+      href={home.signedIn ? ROOMMATES_ROUTES.newGroup : signInTo(ROOMMATES_ROUTES.newGroup)}
+      art="handover"
+      testId="roommates-promo"
+    />
+  );
+  const order = active ? [stats, recommended, rooms, promo, together, journeys, schools, nysc, how] : [journeys, stats, how, rooms, promo, recommended, together, schools, nysc];
 
   return (
     <PageFrame title={copy.title} fallback="/home" width="wide">
       <div className="nf-rmp" data-testid="roommates-home">
         {hero}
         <Pending home={home} t={copy} />
-        {needsProfile ? <CompleteCard home={home} t={copy} /> : null}
+        {home.myStatus === "none" ? (
+          <FirstRunCard href={home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile)} />
+        ) : needsProfile ? (
+          <CompleteCard home={home} t={copy} />
+        ) : null}
         {order}
         <TrustTiles t={copy} />
         <SafetyStrip t={copy} />

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 
+import { Celebration } from "@/components/roommates/Celebrate";
 import { ChoiceChips } from "@/components/roommates/ChoiceChips";
 import { budgetText, fill, lifestyleFacts, moveInText, naira, placeText, type RoommatesCopy } from "@/components/roommates/format";
 import { SchoolPicker } from "@/components/roommates/SchoolPicker";
@@ -170,21 +171,22 @@ export function ProfileFlow({
 
   if (live) {
     return (
-      <div className="nf-rmf-done" data-testid="profile-live">
-        <span className="nf-rmf-done__mark" aria-hidden="true">
-          <UiIcon name="check" size={36} />
-        </span>
-        <h1 className="nf-rmf-done__title">{copy.onboarding.live}</h1>
-        <p className="nf-rmf-done__body">{copy.onboarding.liveBody}</p>
-        <div className="nf-rmf-done__actions">
-          <ButtonLink href={ROOMMATES_ROUTES.discover} variant="primary" size="lg" full arrow data-testid="profile-live-discover">
-            {O.liveCta}
-          </ButtonLink>
-          <ButtonLink href={ROOMMATES_ROUTES.home} variant="secondary" size="lg" full>
-            {O.liveSecondary}
-          </ButtonLink>
-        </div>
-      </div>
+      <Celebration
+        testId="profile-live"
+        art="team"
+        title={copy.onboarding.live}
+        body={copy.onboarding.liveBody}
+        actions={
+          <>
+            <ButtonLink href={ROOMMATES_ROUTES.discover} variant="primary" size="lg" full arrow glow data-testid="profile-live-discover">
+              {O.liveCta}
+            </ButtonLink>
+            <ButtonLink href={ROOMMATES_ROUTES.home} variant="secondary" size="lg" full>
+              {O.liveSecondary}
+            </ButtonLink>
+          </>
+        }
+      />
     );
   }
 

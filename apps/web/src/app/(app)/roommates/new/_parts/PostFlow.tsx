@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { RoomCardView } from "@/components/roommates/Cards";
+import { Celebration } from "@/components/roommates/Celebrate";
 import { ChoiceChips, ToggleChips } from "@/components/roommates/ChoiceChips";
 import { AMENITY_ICON, counted, fill, naira } from "@/components/roommates/format";
 import { CostBreakdown } from "@/components/roommates/Panels";
@@ -242,21 +243,21 @@ export function PostFlow({
 
   if (done) {
     return (
-      <div className="nf-rmf-done" data-testid="post-live">
-        <span className="nf-rmf-done__mark" aria-hidden="true">
-          <UiIcon name="check" size={36} />
-        </span>
-        <h1 className="nf-rmf-done__title">{copy.create.published}</h1>
-        <p className="nf-rmf-done__body">{fill(copy.create.publishedBody, { city: done.city })}</p>
-        <div className="nf-rmf-done__actions">
-          <ButtonLink href={ROOMMATES_ROUTES.listing(done.id)} variant="primary" size="lg" full arrow data-testid="post-live-view">
-            {C.publishedCta}
-          </ButtonLink>
-          <ButtonLink href={ROOMMATES_ROUTES.home} variant="secondary" size="lg" full>
-            {C.backHome}
-          </ButtonLink>
-        </div>
-      </div>
+      <Celebration
+        testId="post-live"
+        title={copy.create.published}
+        body={fill(copy.create.publishedBody, { city: done.city })}
+        actions={
+          <>
+            <ButtonLink href={ROOMMATES_ROUTES.listing(done.id)} variant="primary" size="lg" full arrow glow data-testid="post-live-view">
+              {C.publishedCta}
+            </ButtonLink>
+            <ButtonLink href={ROOMMATES_ROUTES.home} variant="secondary" size="lg" full>
+              {C.backHome}
+            </ButtonLink>
+          </>
+        }
+      />
     );
   }
 
