@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest";
 import { BANNED_EVERYWHERE, SCHEDULE_PROMISES, firstBannedPhrase } from "@/lib/copy/banned-phrases";
 import { PUSH_BODY_MAX, PUSH_TITLE_MAX } from "@/lib/push/copy";
 
-import { REMINDERS_COPY } from "./copy";
+import { getDictionary } from "@vallo/i18n";
+const REMINDERS_COPY = getDictionary("en").reminders;
 import {
   NOTICE_TOPICS,
   NUDGE_GAP_DAYS,

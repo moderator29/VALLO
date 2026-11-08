@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+
 /**
  * Stories.
  *
@@ -60,45 +62,10 @@ export const STORY_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 
 export const STORY_BUCKET = "social-media";
 
-export const STORY_COPY = {
-  chip: "STORY",
-  publishing: "Publishing",
-  publish: "Publish story",
-  headlinePlaceholder: "What happened?",
-  standfirstPlaceholder: "The paragraph under the headline. Two sentences is plenty.",
-  placePlaceholder: "Lekki Phase 1, Lagos",
-  imagePrompt: "Choose the picture",
-  imageNote:
-    "Pictures are re-encoded on your phone before they are uploaded, so the location tag a camera writes never leaves it.",
-  needsImage: "Choose a picture and it will publish. A caption is optional.",
-  held:
-    "Your story mentions something we check by hand. Somebody is reading it before it goes up, and only you can see it until then.",
-  emptyMine:
-    "A story is a picture, a headline and a line or two. It stays up, so it is worth writing the ones people will still want next month.",
-  addComment: "Add a comment...",
-  updates: "Updates",
-  stories: "Stories",
-  removed: "This story was removed.",
-} as const;
-
-export const STORY_FAILURE = {
-  down: "We could not publish that just now. Please try again in a moment.",
-  upload: "That upload did not go through. Check your connection and try again.",
-  reencode:
-    "We could not prepare that picture safely, so it was not uploaded. Try a different one.",
-  tooBig: "That picture is over 10MB. Please choose a smaller one.",
-  wrongType: "Choose a JPG, PNG or WebP picture.",
-  notInArea: "Join this place before you write a story about it.",
-  gone: "That story is no longer there. It may have been taken down. Refresh to see the ones still up.",
-  /*
-   * 42P01 is "no such table", which is the honest answer while the migration is
-   * on its way. It is a platform state, not something the person did, and it
-   * says so rather than blaming them or claiming a network problem.
-   */
-  notYet:
-    "We cannot reach stories right now. Everything else you can do here works as normal.",
-  signedOutLike: "Sign in to like this story.",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+const _s = getDictionary("en").social;
+export const STORY_COPY = _s.story;
+export const STORY_FAILURE = _s.storyFailure;
 
 /** The SQLSTATEs the story paths turn into sentences. */
 export function messageForStoryError(code: string | undefined): string {

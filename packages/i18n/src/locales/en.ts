@@ -76,6 +76,23 @@ import { adminCoverageEn } from "./admin-coverage.en";
 import { referralDeskEn } from "./referral-desk.en";
 /* The chargebacks desk and the lister's hold notice (13 October 2026). */
 import { chargebacksEn } from "./chargebacks.en";
+/* Circle (SW11): the community feature's words. */
+import { circleEn } from "./circle.en";
+/* The social layer (SW11): posts, stories, areas, the bot, profiles. */
+import {
+  socialPostEn,
+  socialPostFailureEn,
+  socialStoryEn,
+  socialStoryFailureEn,
+  socialAreaEn,
+  socialAreaFailureEn,
+  socialBotEn,
+  socialPidginEn,
+  socialFollowFirstEn,
+  socialContactPolicyEn,
+} from "./social.en";
+/* The reminders screen's words, moved from lib/features/notices/copy.ts (SW11). */
+import { remindersEn } from "./reminders.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -144,6 +161,9 @@ export const en = {
     requestRoom: "Request this room",
     requestRoomBody:
       "The hotel confirms your request first. Nothing is charged now: once they accept and the stay agreement is approved, you pay here by card, and the payment goes straight to the hotel.",
+    /* D73 Part A: instant pay, when the hotel's own price is booked and paid in one flow (SW11). */
+    instantRoomAction: "Book and pay",
+    instantRoomBody: "This is the hotel's own price. Book now and pay by card on the next screen; the payment goes straight to the hotel. Your room is held for 30 minutes while you pay.",
     signInToRequestRoom: "Sign in to request this room",
     dates: "Dates",
     guests: "Guests",
@@ -754,6 +774,16 @@ export const en = {
       "Nothing has been said in your places yet. What you write will be the first thing anybody arriving reads.",
     emptyAnywhere:
       "Nothing has been said in any open place yet. Nothing is hidden and nothing is missing: Around is this new.",
+    /* SW11: model words moved from lib/social/ into the dictionary. */
+    post: socialPostEn,
+    postFailure: socialPostFailureEn,
+    story: socialStoryEn,
+    storyFailure: socialStoryFailureEn,
+    area: socialAreaEn,
+    areaFailure: socialAreaFailureEn,
+    bot: socialBotEn,
+    pidgin: socialPidginEn,
+    followFirst: socialFollowFirstEn,
   },
 
   /**
@@ -7330,6 +7360,11 @@ export const en = {
    * `chargebacks.en.ts` carries the words and the reasons.
    */
   chargebacks: chargebacksEn,
+  /* The reminders screen (SW11), moved from lib/features/notices/copy.ts. */
+  reminders: remindersEn,
+
+  /* Circle (SW11): the community feature. */
+  circle: circleEn,
 
 };
 

@@ -90,29 +90,9 @@ export const BOT_REFUSALS: Record<"off" | "month" | "day" | "person", string> = 
     "You have asked me a fair few times today already. Give it until tomorrow and I will pick it up again.",
 };
 
-export const BOT_COPY = {
-  /* STORE-07: the summoner's post would be sent to Anthropic, so it is not
-     until they have agreed to how the assistant works. Nothing is posted. */
-  consent:
-    "Vallo AI only answers people who have agreed to how it works. Open the assistant once to see what is sent, and to whom, before asking it here.",
-  /** When the model is reachable but says nothing useful. */
-  empty:
-    "I could not find anything solid on that. Somebody who actually lives around here will know better than me.",
-  /** When the key is absent, which is a configuration state and not a failure. */
-  unconfigured:
-    "I am not switched on in places yet. Everything else around here works as normal.",
-  /** When the upstream call fails outright. */
-  upstream:
-    "I could not finish that thought. Ask me again in a moment and your post is still here.",
-  /** Already answered. One reply per summon, and this is that rule spoken. */
-  already: "I have already answered on this one. Reply to me and I will read it.",
-  paced:
-    "You have summoned me a few times in quick succession. Give it a moment and ask again.",
-  notLive:
-    "I do not answer on a post that a person is still reading. Summon me again once it is live.",
-  slowMode:
-    "This place is still finding its feet, so I stay out of it until it has. The people here will answer you.",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+export const BOT_COPY = getDictionary("en").social.bot;
 
 /**
  * The one line under a bot reply that says where the answer came from.

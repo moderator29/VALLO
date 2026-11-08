@@ -64,6 +64,7 @@ export const callsEn = {
     reconnecting: "Reconnecting",
     reconnectingBody: "The connection dropped. Hold on, the call is still open.",
     weak: "Weak connection",
+    switchToVoice: "Switch to voice only",
     theyLeft: "{name} lost connection",
     theyLeftBody: "Waiting for them to come back.",
     youMuted: "Your microphone is off",

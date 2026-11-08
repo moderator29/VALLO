@@ -38,10 +38,9 @@ export const CONTACT_POLICY_COPY: Record<ContactPolicy, { title: string; detail:
   },
 };
 
-export const PIDGIN_COPY = {
-  title: "Pidgin is welcome",
-  detail: "Tells people, and the assistant, that they can reply to you in Pidgin.",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+export const PIDGIN_COPY = getDictionary("en").social.pidgin;
 
 /* ------------------------------------------------------------------ fields */
 

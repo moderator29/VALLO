@@ -31,10 +31,9 @@ export type MessageDoor = "message" | "follow-first" | "none";
 /** Said instead of Message, beside Follow. */
 export const FOLLOW_TO_MESSAGE = "Follow to message";
 /** The message screen, reached by address with the button hidden. `{name}` is theirs. */
-export const FOLLOW_FIRST_COPY = {
-  title: "Follow {name} to message them",
-  body: "They take new messages only from people who follow them. Follow them from their profile and the Message button appears.",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+export const FOLLOW_FIRST_COPY = getDictionary("en").social.followFirst;
 
 export function messageDoor(input: {
   isOwner: boolean;
