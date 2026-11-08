@@ -158,6 +158,16 @@
     opacity: 0.6;
   }
 
+  /* ---------------------------------------- CSS-native virtual scroll
+     Items beyond the initial viewport get content-visibility: auto so the
+     browser skips their layout and paint until they scroll near. The
+     intrinsic size keeps the scrollbar stable. */
+  .nf-results--one > :nth-child(n + 5),
+  .nf-results--rows > :nth-child(n + 5) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 400px;
+  }
+
   /* ------------------------------------------------------ the card */
 
   .nf-pcard {
