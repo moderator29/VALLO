@@ -41,7 +41,7 @@ async function plugin(): Promise<{ readonly plugin: WidgetPlugin } | null> {
 /* The marker is "<user id>:<token id>": whose token, and which one. */
 export async function handWidgetToken(
   userId: string,
-  mint: () => Promise<{ token: string; id: string } | { error: string }>,
+  mint: () => Promise<{ ok: true; data: { token: string; id: string } } | { ok: false; error: string }>,
   live: (tokenId: string) => Promise<boolean | null>,
 ): Promise<"handed" | "skipped"> {
   if (typeof window === "undefined" || !looksNative() || !userId) return "skipped";
@@ -53,11 +53,11 @@ export async function handWidgetToken(
   const heldWidget = await plugin().catch(() => null);
   if (!heldWidget) return "skipped";
   const widget = heldWidget.plugin;
-  const minted = await mint().catch(() => ({ error: "failed" }));
-  if (!("token" in minted)) return "skipped";
+  const minted = await mint().catch(() => ({ ok: false as const, error: "failed" }));
+  if (!minted.ok) return "skipped";
   try {
-    await widget.setToken({ token: minted.token, origin: window.location.origin });
-    window.localStorage.setItem(HANDED, `${userId}:${minted.id}`);
+    await widget.setToken({ token: minted.data.token, origin: window.location.origin });
+    window.localStorage.setItem(HANDED, `${userId}:${minted.data.id}`);
     return "handed";
   } catch {
     return "skipped";

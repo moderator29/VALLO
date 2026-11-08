@@ -1,6 +1,7 @@
 "use server";
 
 import { createHash, randomBytes } from "node:crypto";
+import { fail, ok, type ActionResult } from "../actions/envelope";
 import { resolveSession } from "../actions/session";
 import { getAdminClient } from "@/lib/supabase/service";
 
@@ -18,10 +19,10 @@ import { getAdminClient } from "@/lib/supabase/service";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Loose = any;
 
-export async function mintWidgetToken(label: unknown): Promise<{ token: string; id: string } | { error: "failed" }> {
+export async function mintWidgetToken(label: unknown): Promise<ActionResult<{ token: string; id: string }>> {
   const session = await resolveSession();
   const admin = getAdminClient() as Loose;
-  if (session.state !== "signed-in" || !admin) return { error: "failed" };
+  if (session.state !== "signed-in" || !admin) return fail("Could not mint the widget token");
   const token = randomBytes(32).toString("base64url");
   const hash = createHash("sha256").update(token).digest("hex");
   const name = typeof label === "string" ? label.trim().slice(0, 40) || null : null;
@@ -31,7 +32,7 @@ export async function mintWidgetToken(label: unknown): Promise<{ token: string; 
       .insert({ user_id: session.user.id, token_hash: hash, label: name })
       .select("id")
       .single();
-    if (error || !made) return { error: "failed" };
+    if (error || !made) return fail("Could not mint the widget token");
     /* Three live at most: a fourth phone retires the oldest. */
     const { data } = await admin
       .from("widget_tokens")
@@ -41,9 +42,9 @@ export async function mintWidgetToken(label: unknown): Promise<{ token: string; 
       .order("created_at", { ascending: false });
     const extra = Array.isArray(data) ? (data as { id: string }[]).slice(3).map((r) => r.id) : [];
     if (extra.length > 0) await admin.from("widget_tokens").update({ revoked_at: new Date().toISOString() }).in("id", extra);
-    return { token, id: (made as { id: string }).id };
+    return ok({ token, id: (made as { id: string }).id });
   } catch {
-    return { error: "failed" };
+    return fail("Could not mint the widget token");
   }
 }
 
