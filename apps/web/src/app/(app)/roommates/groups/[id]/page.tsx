@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
+import { Money } from "@/components/ui/Money";
 import { State } from "@/components/ui/State";
 import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -150,9 +151,17 @@ function Tiles({ g, R, locale, now }: { g: GroupView; R: Words; locale: Locale; 
   const D = R.groupsX.dash;
   const active = g.members.filter((m) => m.state === "active").length;
   const budget =
-    g.budgetMaxMinor !== null
-      ? `${g.budgetMinMinor !== null && g.budgetMinMinor !== g.budgetMaxMinor ? `${formatMoney(g.budgetMinMinor, locale, "NGN", { compact: true })} to ` : ""}${formatMoney(g.budgetMaxMinor, locale, "NGN", { compact: true })}`
-      : null;
+    g.budgetMaxMinor !== null ? (
+      <>
+        {g.budgetMinMinor !== null && g.budgetMinMinor !== g.budgetMaxMinor ? (
+          <>
+            <Money minor={g.budgetMinMinor} locale={locale} mode="compact" />
+            {" - "}
+          </>
+        ) : null}
+        <Money minor={g.budgetMaxMinor} locale={locale} mode="compact" period={g.budgetPeriod} />
+      </>
+    ) : null;
   let moveIn: string = D.noDate;
   if (g.moveInOn) {
     const days = Math.ceil((Date.parse(`${g.moveInOn}T00:00:00`) - now) / (24 * 3600 * 1000));

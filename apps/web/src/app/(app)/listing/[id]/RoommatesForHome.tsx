@@ -58,7 +58,7 @@ async function readSharing(listingId: string): Promise<{ ok: boolean; max: numbe
     const db = await createClient();
     const { data, error } = await (db as unknown as import("@supabase/supabase-js").SupabaseClient)
       .from("listings")
-      .select(["shared_living_ok", "max_occupants"].join(","))
+      .select("shared_living_ok,max_occupants")
       .eq("id", listingId)
       .maybeSingle();
     /* An absent column (the SQL not pasted yet) is the expected state: no line. */

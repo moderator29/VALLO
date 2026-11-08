@@ -159,9 +159,9 @@ export function buildNav({
             { href: "/stays/search", label: t.nav.search, icon: "search" },
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
-            /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
+            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
+            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ]
         : [
             { href: "/home", label: t.nav.home, icon: "home" },
@@ -171,9 +171,9 @@ export function buildNav({
                a person could not guess from its glyph. `feed` exists now. */
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
-            /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
+            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
+            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ],
     },
   ];
