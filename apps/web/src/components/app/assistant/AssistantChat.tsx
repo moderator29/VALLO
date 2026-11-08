@@ -1,5 +1,6 @@
 "use client";
 
+import { ChatWatermark } from "@/components/app/messages/ChatWatermark";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import Image from "next/image";
@@ -781,6 +782,7 @@ export function AssistantChat({
               setAwayFromEnd(el.scrollHeight - el.scrollTop - el.clientHeight > 160);
             }}
           >
+            <ChatWatermark hidden={!empty} />
             {empty && (
               <div className="flex flex-1 flex-col items-center justify-center gap-md py-section-tight text-center">
                 {/* Track M: the assistant settles in with a small spring, its

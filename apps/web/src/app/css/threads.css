@@ -1996,3 +1996,48 @@
     overflow-wrap: anywhere;
   }
 }
+
+@layer components {
+  /*
+   * THE VALLO WATERMARK behind a quiet chat (ChatWatermark), one rule for
+   * every surface it sits on: messages, support and the assistant. The mark
+   * rests in the middle at a whisper of opacity and clears when the thread
+   * has anything in it. Opacity only, so it costs no layout and the
+   * reduced-motion branch below simply removes the fade.
+   */
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread) {
+    position: relative;
+  }
+  .nf-chat-watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.1;
+    transition: opacity var(--nf-duration-slow) var(--nf-ease-exit);
+  }
+  .nf-chat-watermark[data-hidden] {
+    opacity: 0;
+  }
+  .nf-chat-watermark img {
+    width: min(44%, 200px);
+    height: auto;
+    transform: translateY(-6%);
+  }
+  /* The conversation and its empty state sit above the mark. */
+  :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread) > :not(.nf-chat-watermark) {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @layer components {
+    .nf-chat-watermark {
+      transition: none;
+    }
+  }
+}

@@ -44,6 +44,7 @@ import { VOICE_BODY } from "@/lib/messages/voice-note";
 import { forgetVoice, keepVoice, waitingVoices } from "@/lib/messages/voice-outbox";
 import { muteConversation, pinConversation } from "@/lib/messages/prefs-actions";
 import { isMuted, type ConversationPref } from "@/lib/messages/conversation-prefs";
+import { ChatWatermark } from "@/components/app/messages/ChatWatermark";
 import { ComposerVoice } from "@/components/app/messages/ComposerVoice";
 import type { VoiceRecording } from "@/components/app/messages/useVoiceRecorder";
 import { ReactionCounts } from "@/components/app/messages/ReactionCounts";
@@ -1831,6 +1832,7 @@ export function ThreadView({
         aria-label={view.conversation}
         onScroll={onThreadScroll}
       >
+        <ChatWatermark hidden={bundles.length > 0} />
         <p className="nf-thread__safety">
           <UiIcon name="verified" size={16} />
           {view.keepInside}
