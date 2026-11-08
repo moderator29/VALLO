@@ -117,7 +117,7 @@ export const roommatesEn = {
       phone: "Phone confirmed",
     },
     status: { pending: "Waiting for your code", review: "With our team", verified: "Verified", rejected: "Not accepted", expired: "Expired" },
-    honest: "A badge says what was checked and when. It does not vouch for anyone's character. Meet safely and view before you pay.",
+    honest: "A badge says what was checked and when. It does not vouch for anyone's character. Meet somewhere public first, and view before you pay.",
     emailIntro: "Confirm your school email and we will mark you as a student at that school.",
     codeSent: "We sent a 6 digit code to {email}.",
     idIntro: "Upload your student ID or NYSC call-up letter. Only our team sees it, and we delete it after the check.",
@@ -375,7 +375,7 @@ export const roommatesEn = {
     openHub: "Open My roommates",
     nyscCta: "Find corps members",
     campusCta: "Browse schools",
-    safetyTitle: "Meet safely",
+    safetyTitle: "Meet somewhere public",
     safetyLine: "View before you pay, check who is offering the room, and keep chats on Vallo until you trust someone.",
     safetyLink: "Read the safety guide",
     emptyRecommended: "Nobody matches you yet. As more people join, your best matches show here first.",
@@ -698,7 +698,7 @@ export const roommatesEn = {
       people: "Corps members in {state}",
     },
     safety: {
-      subtitle: "How to share a home with someone new, safely",
+      subtitle: "How to share a home with someone new, with care",
       verifyTitle: "What a badge means",
       reportTitle: "Report or block",
       reportBody: "Every profile and post has Report and Block in its menu. A person reads every report, and nobody is told who sent it. Blocking hides you from each other everywhere on Vallo.",
@@ -839,7 +839,7 @@ export const roommatesEn = {
     },
     verification: {
       empty: "You have no checks yet. A check adds a badge to your profile.",
-      start: "Get verified",
+      start: "Add a check",
       submitted: "Sent {when}",
     },
     signIn: "Sign in to see your requests, posts and groups.",
@@ -1051,7 +1051,7 @@ export const roommatesEn = {
   },
   /* ---------------------------------------------------------------- FE-B: verification */
   verifyX: {
-    title: "Get verified",
+    title: "Add a check",
     subtitle: "Badges say what was checked. They help people trust who they are talking to.",
     current: "Your checks",
     none: "No checks yet.",

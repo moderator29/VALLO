@@ -30,18 +30,18 @@ const SECTIONS: {
   },
   {
     id: "safe-viewings",
-    title: "Safe viewings",
+    title: "Careful viewings",
     body: "Meet in daylight, bring someone with you, and keep the conversation on Vallo. If anything feels wrong before or during a viewing, report it. Vallo reviews all parties involved and responds to safety reports within hours.",
   },
   {
     id: "money-held-safely",
-    title: "Money held safely",
+    title: "Money through licensed providers",
     body: "Payments are processed by licensed providers, never held in personal accounts. The price you agree is the price you pay, with no hidden charges. If something goes wrong, the refund policy on your booking applies automatically.",
   },
   {
     id: "respectful-community",
     title: "Respectful community",
-    body: "Discrimination, harassment and threats have no place here. Every account is verified, every message is monitored for unsafe language, and anyone who makes the platform worse for others is removed.",
+    body: "Discrimination, harassment and threats have no place here. Listers confirm their identity before a listing is published, messages are scanned for unsafe language, and anyone who makes the platform worse for others is removed.",
   },
   {
     id: "your-part",

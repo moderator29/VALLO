@@ -15,7 +15,7 @@ import { Empty, Plate, Section, Tag, fill } from "../groups/_parts/kit";
 import "../groups/_parts/fe-b.css";
 import { DocumentCheck, EmailCheck } from "./VerifyFlows";
 
-export const metadata: Metadata = { title: "Get verified" };
+export const metadata: Metadata = { title: "Add a check" };
 export const dynamic = "force-dynamic";
 
 /**

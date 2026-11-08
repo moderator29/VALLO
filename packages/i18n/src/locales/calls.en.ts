@@ -76,7 +76,7 @@ export const callsEn = {
     moveSelfView: "Your camera preview. Use the arrow keys to move it to another corner.",
     cameraPaused: "Your camera paused while the app was in the background.",
     resumeCamera: "Turn camera back on",
-    encrypted: "End-to-end encrypted",
+    encrypted: "A Vallo call",
   },
   confirmEnd: {
     title: "End the review call?",

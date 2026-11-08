@@ -94,7 +94,7 @@ export const publicMetaEn = {
     community: {
       title: "Community promise",
       description:
-        "What Vallo promises to every person on the platform: honest listings, safe viewings, money held safely, a respectful community, and what we ask of you in return.",
+        "What Vallo promises to every person on the platform: honest listings, careful viewings, money through licensed providers, a respectful community, and what we ask of you in return.",
     },
   },
 };

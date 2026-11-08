@@ -99,7 +99,7 @@ export function PostFlow({
           return;
         }
         writeDraft(key, null);
-        banner.success(result.data.held ? "Posted. It shows once it has been checked." : question ? "Your question is live" : "Your discussion is live", {
+        banner.success(result.data.held ? "Posted. It shows once a moderator has looked at it." : question ? "Your question is live" : "Your discussion is live", {
           action: { label: "View", run: () => router.push(`/circle/p/${result.data.id}`) },
         });
         router.push(`/circle/p/${result.data.id}`);
