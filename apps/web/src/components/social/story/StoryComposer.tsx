@@ -243,6 +243,7 @@ export function StoryComposer({
             setHeld(true);
             return;
           }
+          banner.success("Story published");
           router.replace(`/stories/${result.data.storyId}`);
         } catch {
           setSent(null);

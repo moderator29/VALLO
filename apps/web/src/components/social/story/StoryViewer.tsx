@@ -249,6 +249,7 @@ export function StoryViewer({
       banner.error(result.error);
       return false;
     }
+    banner.success("Story deleted");
     router.replace("/around");
     return true;
   };
