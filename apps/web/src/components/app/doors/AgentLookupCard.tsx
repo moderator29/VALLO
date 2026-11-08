@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { setCheckableNumber } from "@/lib/doors/agent-check-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type CardCopy = Dictionary["trustDoors"]["agentCard"];
 
@@ -106,12 +107,10 @@ export function AgentLookupCard({
             maxLength={20}
             className="nf-field"
             aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${fieldId}-problem` : undefined}
           />
-          {error && (
-            <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id={`${fieldId}-problem`} message={error} />
           <div className="flex flex-wrap gap-xs">
             <Button type="submit" variant="primary" size="md" loading={pending} disabled={!value.trim()}>
               {copy.save}

@@ -38,6 +38,7 @@ import {
 } from "./onboarding-flow";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Get started IN MOTION (30 September), to the founder's onboarding video
@@ -248,7 +249,6 @@ export function FirstRun({
   const [visit, setVisit] = useState(0);
   const [announce, setAnnounce] = useState("");
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState("");
   /* Whether the device memory really stuck, so an exit can carry the flag
      instead when a browser refuses the cookie. */
   const stuck = useRef<boolean | null>(null);
@@ -502,7 +502,6 @@ export function FirstRun({
 
   /* A member finishing the steps. */
   const onDone = () => {
-    setError("");
     start(async () => {
       try {
         remember();
@@ -521,7 +520,6 @@ export function FirstRun({
   };
 
   const skip = () => {
-    setError("");
     const plan = skipPlan({ guest, next });
     if (plan.kind === "go") {
       router.push(onward(plan.to));
@@ -537,7 +535,8 @@ export function FirstRun({
         remember();
         const [, skipped] = await Promise.all([markWelcomeSeen(), skipInterests()]);
         if (!skipped.ok) {
-          setError(skipped.error);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(skipped.error, { retry: skip });
           return;
         }
         forgetFirstInterest();
@@ -874,11 +873,6 @@ export function FirstRun({
           </Button>
         )}
 
-        {error && (
-          <p role="alert" className="nf-gs-error">
-            {error}
-          </p>
-        )}
       </div>
     </section>
   );

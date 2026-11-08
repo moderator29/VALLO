@@ -20,6 +20,10 @@ import {
 } from "./kyc";
 import type { KycCopy } from "./KycFlow";
 import { uploadToStorage } from "@/lib/media/upload";
+import { banner } from "@/lib/ui/toast";
+
+/* What an upload did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { uploaded: "{name} uploaded" };
 
 /**
  * The private bucket identity documents live in, under `<auth uid>/…`, which
@@ -83,33 +87,31 @@ export function DocumentUploader({
   const titleId = `${inputId}-title`;
   const hintId = `${inputId}-hint`;
   const input = useRef<HTMLInputElement | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
   async function pick(chosen: File | undefined) {
     if (!chosen || uploading) return;
     const refusal = rejectFileIssue(chosen);
     if (refusal) {
-      setError(
+      banner.error(
         (refusal === "type" ? copy.fileType : copy.fileSize)
           .replace("{formats}", ACCEPTED_LABEL)
           .replace("{size}", MAX_FILE_LABEL),
       );
       return;
     }
-    setError(null);
     setUploading(true);
     try {
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError(copy.uploadFailed);
+        banner.error(copy.uploadFailed);
         return;
       }
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError(copy.signInFirst);
+        banner.error(copy.signInFirst);
         return;
       }
       /* A new object for every file chosen, never an overwrite: a filed
@@ -117,7 +119,7 @@ export function DocumentUploader({
       const path = `${user.id}/kyc-${batchId}/${kind}-${randomId()}.${documentExtension(chosen.type)}`;
       const upload = await uploadToStorage({ supabase, bucket: DOCUMENT_BUCKET, path, body: chosen, contentType: chosen.type });
       if (!upload.ok) {
-        setError(copy.uploadFailed);
+        banner.error(copy.uploadFailed);
         return;
       }
       if (file?.path && file.path !== path) {
@@ -133,8 +135,10 @@ export function DocumentUploader({
         subtype: file?.subtype ?? null,
         issuedOn: file?.issuedOn ?? null,
       });
+      /* Uploaded: said by the one banner (founder, 7 November 2026). */
+      banner.success(WORDS.uploaded.replace("{name}", chosen.name));
     } catch {
-      setError(copy.uploadFailed);
+      banner.error(copy.uploadFailed);
     } finally {
       setUploading(false);
       if (input.current) input.current.value = "";
@@ -251,11 +255,6 @@ export function DocumentUploader({
         {copy.limit.replace("{formats}", ACCEPTED_LABEL).replace("{size}", MAX_FILE_LABEL)}
       </p>
 
-      {error && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

@@ -386,7 +386,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/notifications` | FE |  |  |  |  |  |
+| `/notifications` | FE |  | yes | yes | yes | 8 Nov: the Needs you stack fixed (one card per row, no card inside a card, opaque front), families the lock screen's words (Messages, Bookings, Money, Activity, Offers, Calls), right glyph per row; seen in `/preview/fe-notifications`; the opaque front card awaits a re-shoot on a green build. |
 | `/notifications/[id]` | FE |  |  |  |  |  |
 
 ## Member: offline

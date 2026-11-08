@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { AI_DISCLOSURE } from "@/lib/ai/consent";
 import { recordAiConsent } from "@/lib/ai/consent-actions";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * STORE-07: the disclosure shown before the first message to an AI surface.
@@ -22,7 +23,17 @@ export function AiConsentSheet({
   onDeclined: () => void;
 }) {
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  /* Not saved: said by the one banner at the top of the screen, with Try
+     again (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  const agree = () => {
+    setBusy(true);
+    const failed = () =>
+      banner.error("That was not saved, so nothing has been sent. Try again.", { retry: agree, "data-testid": "ai-consent-failed" });
+    void recordAiConsent()
+      .then((result) => (result.ok ? onAgreed() : failed()))
+      .catch(failed)
+      .finally(() => setBusy(false));
+  };
   return (
     /* A labelled region, not a dialog: this card sits inline in the chat
        (inside the support sheet), traps nothing and covers nothing, so the
@@ -49,14 +60,7 @@ export function AiConsentSheet({
         <Button
           variant="primary"
           disabled={busy}
-          onClick={() => {
-            setBusy(true);
-            setFailed(false);
-            void recordAiConsent()
-              .then((result) => (result.ok ? onAgreed() : setFailed(true)))
-              .catch(() => setFailed(true))
-              .finally(() => setBusy(false));
-          }}
+          onClick={agree}
         >
           {AI_DISCLOSURE.agree}
         </Button>
@@ -64,11 +68,6 @@ export function AiConsentSheet({
           {AI_DISCLOSURE.decline}
         </Button>
       </div>
-      {failed ? (
-        <p role="alert" className="nf-body-sm mt-sm" data-testid="ai-consent-failed">
-          That was not saved, so nothing has been sent. Try again.
-        </p>
-      ) : null}
       <p className="nf-body-sm mt-sm">
         <Link href="/contact" className="underline" data-testid="ai-consent-human">
           {AI_DISCLOSURE.human}

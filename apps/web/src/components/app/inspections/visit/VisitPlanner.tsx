@@ -103,7 +103,6 @@ export function VisitPlanner({
   const [day, setDay] = useState<string | null>(firstDay);
   const [time, setTime] = useState<string | null>(startSlot?.slotAt ?? null);
   const [note, setNote] = useState("");
-  const [problem, setProblem] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [sending, setSending] = useState(false);
@@ -121,7 +120,6 @@ export function VisitPlanner({
   function chooseDay(next: string) {
     setDay(next);
     setTime(null);
-    setProblem(null);
     const nextTimes = open ? slotsOn(slots ?? [], next) : askTimesOn(next, now);
     setPart(firstDayPart(groupByDayPart(nextTimes)));
   }
@@ -137,9 +135,10 @@ export function VisitPlanner({
   );
 
   function review() {
-    if (!day) return setProblem(copy.problems.pickDay);
-    if (!time) return setProblem(copy.problems.pickTime);
-    setProblem(null);
+    /* What is missing is said by the one banner at the top of the screen
+       (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+    if (!day) return void banner.error(copy.problems.pickDay, { "data-testid": "visit-problem" });
+    if (!time) return void banner.error(copy.problems.pickTime, { "data-testid": "visit-problem" });
     setReviewOpen(true);
   }
 
@@ -320,7 +319,6 @@ export function VisitPlanner({
                         className="nf-visit-time nf-tap"
                         onClick={() => {
                           setTime(option.slotAt);
-                          setProblem(null);
                         }}
                         data-testid="visit-time"
                       >
@@ -361,11 +359,6 @@ export function VisitPlanner({
         {kept ? (
           <p className="nf-visit__lead" role="status" data-testid="visit-kept">
             {copy.problems.kept}
-          </p>
-        ) : null}
-        {problem ? (
-          <p className="nf-visit__error" role="alert" data-testid="visit-problem">
-            {problem}
           </p>
         ) : null}
       </div>

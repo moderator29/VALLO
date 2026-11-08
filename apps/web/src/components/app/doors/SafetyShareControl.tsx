@@ -104,6 +104,7 @@ export function SafetyShareControl({
           return;
         }
         setPhase({ kind: "done" });
+        banner.success(copy.doneThanks);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -119,6 +120,7 @@ export function SafetyShareControl({
           return;
         }
         setPhase({ kind: "stopped" });
+        banner.success(copy.stopped);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -155,9 +157,6 @@ export function SafetyShareControl({
           <p className="mt-2xs select-all break-all text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
             {phase.url}
           </p>
-          <p className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]" aria-live="polite">
-            {phase.copied ? copy.copied : ""}
-          </p>
           <div className="mt-sm grid gap-xs">
             <Button
               type="button"
@@ -167,7 +166,11 @@ export function SafetyShareControl({
               onClick={() => {
                 void navigator.clipboard
                   ?.writeText(`${phase.text} ${phase.url}`)
-                  .then(() => setPhase({ ...phase, copied: true }))
+                  .then(() => {
+                    setPhase({ ...phase, copied: true });
+                    /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+                    banner.success(copy.copied);
+                  })
                   .catch(() => undefined);
               }}
             >

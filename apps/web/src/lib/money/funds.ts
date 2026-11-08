@@ -165,10 +165,8 @@ export function movementStatusForProvider(word: string): MovementStatus {
   }
 }
 
-/** Still moving: the screen keeps watching these and never calls them done. */
-export function isOpenMovement(status: MovementStatus): boolean {
-  return status === "processing" || status === "unknown" || status === "awaiting_payment" || status === "under_review";
-}
+/** Still moving, and the last four digits: in `funds-light.ts`, so a client screen can use them without this file's phone rules. */
+export { isOpenMovement, lastFour } from "./funds-light";
 
 /** The kind of a movement the provider reported for this member. */
 export function movementKindFor(type: string, direction: "credit" | "debit" | null): MovementKind {
@@ -317,12 +315,6 @@ const PREFIX: Record<"deposit" | "withdrawal" | "transfer_out", string> = {
  */
 export function movementReference(kind: "deposit" | "withdrawal" | "transfer_out", movementId: string): string {
   return `${PREFIX[kind]}${movementId}`;
-}
-
-/** The last four digits of an account number, which is all Vallo keeps. */
-export function lastFour(accountNumber: string): string {
-  const d = accountNumber.replace(/\D/g, "");
-  return d.slice(-4);
 }
 
 /**

@@ -7,6 +7,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { uploadToStorage } from "@/lib/media/upload";
 import { ACCEPTED_LABEL, ACCEPTED_MIME, MAX_FILE_LABEL, documentExtension, rejectFileIssue } from "./kyc";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * ONE SIDE OF AN ID, PHOTOGRAPHED PROPERLY (Platform Grade 1, P0.3; references
@@ -88,7 +89,6 @@ export function IdCapture({
   const [vertical, setVertical] = useState(false);
   const [shot, setShot] = useState<{ blob: Blob; url: string | null; name: string } | null>(null);
   const [zoom, setZoom] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const label = side === "front" ? words.front : words.back;
 
   function stop() {
@@ -104,9 +104,8 @@ export function IdCapture({
   }, [phase]);
 
   async function start() {
-    setError(null);
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      setError(words.unavailable);
+      banner.error(words.unavailable);
       return;
     }
     setPhase("starting");
@@ -127,7 +126,7 @@ export function IdCapture({
       stop();
       setPhase(value ? "saved" : "idle");
       const name = cause && typeof cause === "object" && "name" in cause ? String((cause as { name: unknown }).name) : "";
-      setError(name === "NotAllowedError" || name === "SecurityError" ? words.denied : words.unavailable);
+      banner.error(name === "NotAllowedError" || name === "SecurityError" ? words.denied : words.unavailable);
     }
   }
 
@@ -144,7 +143,7 @@ export function IdCapture({
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          setError(words.failed);
+          banner.error(words.failed);
           return;
         }
         stop();
@@ -160,10 +159,9 @@ export function IdCapture({
     if (!file) return;
     const issue = rejectFileIssue(file);
     if (issue) {
-      setError((issue === "type" ? words.fileType : words.fileSize).replace("{formats}", ACCEPTED_LABEL).replace("{size}", MAX_FILE_LABEL));
+      banner.error((issue === "type" ? words.fileType : words.fileSize).replace("{formats}", ACCEPTED_LABEL).replace("{size}", MAX_FILE_LABEL));
       return;
     }
-    setError(null);
     stop();
     setShot({ blob: file, url: file.type.startsWith("image/") ? URL.createObjectURL(file) : null, name: file.name });
     setPhase("check");
@@ -171,7 +169,6 @@ export function IdCapture({
 
   async function use() {
     if (!shot) return;
-    setError(null);
     setPhase("saving");
     try {
       const supabase = await loadBrowserClient();
@@ -180,7 +177,7 @@ export function IdCapture({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError(words.signInFirst);
+        banner.error(words.signInFirst);
         setPhase("check");
         return;
       }
@@ -193,7 +190,7 @@ export function IdCapture({
       setShot(null);
       setPhase("saved");
     } catch {
-      setError(words.failed);
+      banner.error(words.failed);
       setPhase("check");
     }
   }
@@ -316,11 +313,6 @@ export function IdCapture({
         }}
       />
 
-      {error ? (
-        <p role="alert" className="nf-g1-capture__error">
-          {error}
-        </p>
-      ) : null}
 
       <Sheet open={zoom} onOpenChange={setZoom} title={label} closeLabel={words.zoomClose} fullPage>
         {seen ? (

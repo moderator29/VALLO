@@ -42,6 +42,7 @@ import {
   type KycSubmitResult,
   type StepId,
 } from "./kyc";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The verification flow.
@@ -138,7 +139,6 @@ export function KycFlow({
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);
   const [sending, setSending] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
 
   const steps = stepsFor(business, askBusiness);
@@ -178,12 +178,10 @@ export function KycFlow({
     );
 
   const back = () => {
-    setFailure(null);
     setDirection("back");
     setAt((i) => Math.max(0, i - 1));
   };
   const forward = () => {
-    setFailure(null);
     setDirection("forward");
     setAt((i) => Math.min(steps.length - 1, i + 1));
   };
@@ -227,7 +225,6 @@ export function KycFlow({
   async function send() {
     if (sending) return;
     setSending(true);
-    setFailure(null);
     let result: KycSubmitResult;
     try {
       result = await submit(submission);
@@ -243,7 +240,9 @@ export function KycFlow({
       setSent(true);
       return;
     }
-    setFailure(result.message);
+    /* Said by the one banner at the top of the screen, with Try again
+       (founder, 7 November 2026); every answer is still on this screen. */
+    banner.error(result.message, { retry: () => void send() });
   }
 
   const gaps = missingItems(submission).map((item) => gapWords(item, copy, flowCopy));
@@ -561,11 +560,6 @@ export function KycFlow({
               </div>
             )}
 
-            {failure && (
-              <p role="alert" className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-state-error)]">
-                {failure}
-              </p>
-            )}
           </>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { banner } from "@/lib/ui/toast";
 import { flushSync } from "react-dom";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
 import { Button } from "@/components/ui/Button";
@@ -67,6 +68,13 @@ export function useMoneyStepUp(
   const [forceCode, setForceCode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<"rejected" | "failed" | "password_recent" | null>(null);
+  /* A refusal is said by the one banner at the top of the screen, over the
+     sheet (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  useEffect(() => {
+    if (error) banner.error(error === "rejected" ? copy.rejected : error === "password_recent" ? copy.passwordRecent : copy.failed);
+    // The words follow the refusal, not the copy object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
   const bypass = useRef(false);
   const form = useRef<HTMLFormElement | null>(null);
   const intent = useRef<MoneyIntent | null>(null);
@@ -317,11 +325,6 @@ export function useMoneyStepUp(
         <Button type="button" variant="ghost" full disabled={busy} onClick={close}>
           {copy.cancel}
         </Button>
-        {error && (
-          <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-            {error === "rejected" ? copy.rejected : error === "password_recent" ? copy.passwordRecent : copy.failed}
-          </p>
-        )}
       </div>
     </Sheet>
   );

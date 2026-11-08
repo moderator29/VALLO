@@ -77,7 +77,14 @@ export function RewardsPayoutForm({
              under that field. */
           try {
             const result = await action({ bankCode, accountNumber });
-            if (result.ok) setDone(result.data);
+            if (result.ok) {
+              setDone(result.data);
+              /* The panel keeps the record; the banner says it (founder, 7 November 2026). */
+              banner.success(
+                result.data.status === "under_review" ? copy.form.review : fill(copy.form.sent, { amount: money(result.data.amountMinor, locale) }),
+                { "data-testid": "banner-rewards-payout" },
+              );
+            }
             else {
               banner.error(result.error, { "data-testid": "rewards-payout-error" });
               setFieldErrors(result.fieldErrors ?? {});

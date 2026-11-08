@@ -19,7 +19,7 @@ import {
 } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
 import { ACTION_LABEL, MOVE_COPY } from "@/lib/money/balance-copy";
-import { lastFour } from "@/lib/money/funds";
+import { lastFour } from "@/lib/money/funds-light";
 import { shareChips } from "../AmountPad";
 import { Breakdown, Watching } from "./balance-ui";
 import { reach } from "./reach";

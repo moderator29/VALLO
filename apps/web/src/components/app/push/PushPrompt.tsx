@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/Button";
 import { LogoMark } from "@/design-system/brand/Logo";
@@ -18,6 +17,10 @@ import {
   writeMemory,
   type PushMoment,
 } from "./moments";
+import { banner } from "@/lib/ui/toast";
+
+/* What the prompt did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { on: "Notifications are on", signIn: "Open sign in", retry: "Try again" };
 
 /**
  * THE SCREEN THAT COMES BEFORE THE SYSTEM PROMPT.
@@ -72,7 +75,6 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
      yet", which is distinct from "decided not to show". */
   const [shown, setShown] = useState<{ offer: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState<{ text: string; signIn: boolean } | null>(null);
 
   useEffect(() => {
     /* DECIDED AFTER MOUNT, ON THE CLIENT, AND THERE IS NO OTHER OPTION.
@@ -102,7 +104,6 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
 
   const accept = useCallback(() => {
     setBusy(true);
-    setFailed(null);
     /* NOT AWAITED BEFORE THE CALL. `enrol` requests the permission on its
        first line precisely so the user activation from this click is still
        live when it does. */
@@ -111,6 +112,7 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
       setBusy(false);
       if (outcome.ok) {
         setShown(null);
+        banner.success(WORDS.on, { "data-testid": "banner-push-on" });
         onSettled?.("enrolled", outcome.deviceRef);
         return;
       }
@@ -126,16 +128,25 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
       /* Every failure says one plain sentence and the prompt stays, so the
          person is never left with a closed prompt and a silent screen. */
       const reference = failureReference(outcome);
-      setFailed({
-        text:
-          failureMessage(outcome.reason, {
-            iosHomeScreenApp: onIosHomeScreenApp(),
-            where: "prompt",
-            reference,
-          }) + (reference ? ` (Reference: ${reference}.)` : ""),
-        signIn: outcome.reason === "signed_out",
+      /* Said by the one banner at the top of the screen (founder, 7 November
+         2026), with Open sign in when that is the way on, or Try again (a
+         tap on the banner is a fresh user activation for the permission). */
+      const text =
+        failureMessage(outcome.reason, {
+          iosHomeScreenApp: onIosHomeScreenApp(),
+          where: "prompt",
+          reference,
+        }) + (reference ? ` (Reference: ${reference}.)` : "");
+      banner.error(text, {
+        "data-testid": "push-problem",
+        action:
+          outcome.reason === "signed_out"
+            ? { label: WORDS.signIn, run: () => window.location.assign("/sign-in?next=%2Fsettings%2Fnotifications") }
+            : { label: WORDS.retry, run: () => accept() },
       });
     });
+  // `accept` names itself for Try again; it is stable with `onSettled`.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSettled]);
 
   const decline = useCallback(() => {
@@ -181,19 +192,6 @@ export function PushPrompt({ moment, onSettled }: PushPromptProps) {
           </li>
         ))}
       </ul>
-      {failed ? (
-        <p role="alert" data-push-note="problem" className="nf-body-sm mt-sm text-[var(--nf-state-error)]">
-          {failed.text}
-          {failed.signIn ? (
-            <>
-              {" "}
-              <Link href="/sign-in?next=%2Fsettings%2Fnotifications" className="underline">
-                Open sign in
-              </Link>
-            </>
-          ) : null}
-        </p>
-      ) : null}
       <div className="nf-push-ask__actions">
         <Button variant="primary" full onClick={accept} disabled={busy}>
           {busy ? "Just a moment" : "Yes, tell me"}

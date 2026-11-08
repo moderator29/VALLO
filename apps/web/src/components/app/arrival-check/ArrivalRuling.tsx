@@ -6,6 +6,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { ruleArrivalCheck } from "@/lib/stays/arrival-check-actions";
+import { banner } from "@/lib/ui/toast";
 
 type Ruling = "upheld" | "declined";
 
@@ -24,6 +25,9 @@ type Ruling = "upheld" | "declined";
  * after `ruleArrivalCheck` has resolved. The keyboard path is the handle
  * itself (Enter or Space), so nothing here needs a pointer.
  */
+/* What the ruling did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { upheld: "Report upheld", declined: "Report declined" };
+
 export function ArrivalRuling({
   bookingId,
   copy,
@@ -36,7 +40,6 @@ export function ArrivalRuling({
 }) {
   const router = useRouter();
   const [asking, setAsking] = useState<Ruling | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
   /*
    * The ruling is on its way to the server. `pending` alone covered only the
@@ -52,18 +55,19 @@ export function ArrivalRuling({
   /* Resolves true only when the ruling landed, so the slide claims nothing
      the server did not accept. */
   const rule = async (ruling: Ruling): Promise<boolean> => {
-    setMessage(null);
     setInFlight(true);
     try {
       const result = await ruleArrivalCheck({ bookingId, ruling });
       if (!result.ok) {
-        setMessage(result.error || copy.ruleFailed);
+        banner.error(result.error || copy.ruleFailed);
         return false;
       }
       if (result.data.state === "none") {
-        setMessage(copy.ruleNone);
+        banner.info(copy.ruleNone);
         return false;
       }
+      /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+      banner.success(ruling === "upheld" ? WORDS.upheld : WORDS.declined);
       start(() => router.refresh());
       return true;
     } finally {
@@ -108,11 +112,6 @@ export function ArrivalRuling({
             {copy.decline}
           </Button>
         </div>
-      )}
-      {message && (
-        <p role="status" className="nf-body-sm mt-xs text-[var(--nf-content-secondary)]">
-          {message}
-        </p>
       )}
     </div>
   );

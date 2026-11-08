@@ -8,6 +8,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { TextField } from "@/components/ui/Field";
 import { matchesSearch } from "@/lib/places/reference";
 import type { PickersCopy } from "@/components/app/welcome/welcome-copy";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * One choice out of a very long list, without a very long list.
@@ -217,15 +218,8 @@ export function ChoicePicker({
           {hint}
         </p>
       )}
-      {error && (
-        <p
-          id={errorId}
-          role="alert"
-          className="mt-2xs text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      )}
+      {/* The picker keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={errorId} message={error} />
 
       <Sheet
         open={open}

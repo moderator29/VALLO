@@ -36,6 +36,9 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * The answers are never shown back as a verdict on the listing. The renter
  * is told they are counted, privately, and nothing more.
  */
+/* What sending did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { sent: "Thank you. Your answers are sent." };
+
 export function TruthQuestions({
   inspectionId,
   answeredAt,
@@ -52,7 +55,6 @@ export function TruthQuestions({
   const [done, setDone] = useState<{ at: string; reportOpened: boolean } | null>(
     answeredAt ? { at: answeredAt, reportOpened: false } : null,
   );
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const options = [
@@ -73,9 +75,8 @@ export function TruthQuestions({
   }
 
   function send() {
-    setError(null);
     if (!truthComplete(answers)) {
-      setError(copy.incomplete);
+      banner.error(copy.incomplete);
       return;
     }
     const complete = answers;
@@ -83,12 +84,13 @@ export function TruthQuestions({
       try {
         const result = await answerTruthQuestions({ inspectionId, answers: complete });
         if (!result.ok) {
-          /* Said by the one banner at the top of the screen (Grade 1); the
-             unanswered question stays the form's own line. */
+          /* Said by the one banner at the top of the screen (Grade 1). */
           banner.error(result.error, { retry: send });
           return;
         }
         setDone({ at: new Date().toISOString(), reportOpened: result.data.reportOpened });
+        /* The panel keeps the record; the banner says it (founder, 7 November 2026). */
+        banner.success(WORDS.sent);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -117,11 +119,6 @@ export function TruthQuestions({
           </li>
         ))}
       </ol>
-      {error && (
-        <p role="alert" className="nf-body-sm mt-md text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
       <Button type="button" variant="primary" full className="mt-md" loading={pending} onClick={send}>
         {pending ? copy.sending : copy.submit}
       </Button>

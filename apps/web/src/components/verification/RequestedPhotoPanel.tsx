@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { SelfieCapture } from "./SelfieCapture";
 import type { KycSelfie } from "./kyc";
 import type { KycCopy } from "./KycFlow";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * A REVIEWER ASKED FOR ONE MORE PHOTO (2 November 2026).
@@ -30,7 +31,6 @@ export function RequestedPhotoPanel({
   const r = copy.request;
   const router = useRouter();
   const [photo, setPhoto] = useState<KycSelfie | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, start] = useTransition();
   const [batchId] = useState(() => {
@@ -51,18 +51,19 @@ export function RequestedPhotoPanel({
 
   function send() {
     if (!photo) return;
-    setError(null);
     start(async () => {
       try {
         const result = await submit({ requestId, path: photo.path });
         if (!result.ok) {
-          setError(result.message);
+          banner.error(result.message);
           return;
         }
         setSent(true);
+        /* The panel keeps the record; the banner says it (founder, 7 November 2026). */
+        banner.success(r.sent, { "data-testid": "banner-request-sent" });
         router.refresh();
       } catch {
-        setError(r.failed);
+        banner.error(r.failed);
       }
     });
   }
@@ -87,11 +88,6 @@ export function RequestedPhotoPanel({
       <Button variant="primary" size="lg" full loading={pending} disabled={!photo} onClick={send} data-testid="request-send">
         {pending ? r.sending : r.send}
       </Button>
-      {error && (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { TYPE } from "@/components/app/Screen";
 import { earliestLagosInput, lagosWallClockToIso } from "@/lib/inspections/when";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE TWO SHEETS EVERY VIEWING SURFACE OPENS.
@@ -52,13 +53,10 @@ export type StepSheetWords = {
 
 const FALLBACK = "That did not go through. Try again in a moment.";
 
+/* A refusal in the sheet is said by the one banner above it; the words stay
+   here for a screen reader (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
 function Refusal({ error }: { error: string | null }) {
-  if (!error) return null;
-  return (
-    <p role="alert" className={`mt-sm ${TYPE.rowMeta} text-[var(--nf-state-error)]`} data-testid="viewing-sheet-error">
-      {error}
-    </p>
-  );
+  return <FieldProblem id="viewing-sheet-error" message={error} />;
 }
 
 /**
@@ -125,6 +123,8 @@ export function ViewingTimeSheet({
             step={900}
             onChange={(event) => setWhen(event.target.value)}
             className="nf-field mt-2xs w-full"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "viewing-sheet-error" : undefined}
             data-testid="viewing-time-when"
           />
         </label>
