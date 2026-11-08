@@ -14,7 +14,7 @@ const CIRCLES = [
   { href: "/circle/c/nysc-accommodation", icon: "certificate" as const },
 ];
 
-export function SafetyView({ copy }: { t: RoommatesCopy }) {
+export function SafetyView({ t: copy }: { t: RoommatesCopy }) {
   return (
     <PageFrame title={copy.safety.title} subtitle={copy.ui.safety.subtitle} fallback={ROOMMATES_ROUTES.home} width="default">
       <div className="nf-rmp" data-testid="roommates-safety">

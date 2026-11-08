@@ -184,7 +184,7 @@ function Header({ p, t: copy, now }: { p: RoommateProfileView; t: RoommatesCopy;
   );
 }
 
-function Facts({ p, copy }: { p: RoommateProfileView; t: RoommatesCopy }) {
+function Facts({ p, t: copy }: { p: RoommateProfileView; t: RoommatesCopy }) {
   const where = placeText(p.areas.join(", "), p.city, stateName(p.stateCode));
   const budget = budgetText(p.budget, copy);
   const hint = monthlyHint(p.budget.maxMinor, p.budget.period, copy);

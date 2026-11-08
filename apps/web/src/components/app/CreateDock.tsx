@@ -119,7 +119,7 @@ export function CreateDock({
       : { id: "viewing", href: "/search", title: copy.viewing, sub: copy.viewingSub, icon: "calendar-booking" },
     /* Vallo Roommates (8 November 2026): one more quiet row on the property
        side, after booking; a guest goes through the sign-up door. */
-    ...(stays
+    ...(stays || !t.roommatesEntry
       ? []
       : [{ id: "roommate", href: door(ROOMMATES_ROUTES.create), title: t.roommatesEntry.createDock, sub: t.roommatesEntry.createDockSub, icon: "house-duplex" as const }]),
   ];

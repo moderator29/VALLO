@@ -121,7 +121,7 @@ export function JourneyTiles({ t: copy, hrefs = JOURNEY_HREF }: { t: RoommatesCo
   );
 }
 
-export function StatTiles({ stats, copy }: { stats: { people: number; rooms: number; groups: number } | null; t: RoommatesCopy }) {
+export function StatTiles({ stats, t: copy }: { stats: { people: number; rooms: number; groups: number } | null; t: RoommatesCopy }) {
   if (!stats) return null;
   const nf = new Intl.NumberFormat("en-NG", { notation: stats.people >= 10000 ? "compact" : "standard" });
   const tiles = [
@@ -146,7 +146,7 @@ export function StatTiles({ stats, copy }: { stats: { people: number; rooms: num
 
 const TRUST_ICON: UiIconName[] = ["user-check", "shield-check", "lock"];
 
-export function TrustTiles({ copy }: { t: RoommatesCopy }) {
+export function TrustTiles({ t: copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-trust">
       <SectionHead id="rm-trust" title={copy.home.trustTitle} />
@@ -165,7 +165,7 @@ export function TrustTiles({ copy }: { t: RoommatesCopy }) {
   );
 }
 
-export function HowItWorks({ copy }: { t: RoommatesCopy }) {
+export function HowItWorks({ t: copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-how">
       <SectionHead id="rm-how" title={copy.home.howTitle} />

@@ -8,7 +8,7 @@ import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 
 const CIRCLE_NYSC = "/circle/c/nysc-accommodation";
 
-export function NyscView({ copy }: { t: RoommatesCopy }) {
+export function NyscView({ t: copy }: { t: RoommatesCopy }) {
   return (
     <PageFrame title={copy.nysc.title} subtitle={copy.nysc.intro} fallback={ROOMMATES_ROUTES.home} width="wide">
       <div className="nf-rmp" data-testid="roommates-nysc-page">

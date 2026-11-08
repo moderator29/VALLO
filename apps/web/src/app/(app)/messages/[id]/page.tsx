@@ -13,6 +13,7 @@ import { getThreadContext, loadThread, loadThreadReactions, type ThreadContext }
 import { loadConversationPrefs } from "@/lib/messages/conversation-prefs-read";
 import { readOpenInspectionForConversation } from "@/lib/inspections/queries";
 import { ThreadView, type ThreadBubble } from "./ThreadView";
+import { RoommateMatch } from "./RoommateMatch";
 import { resolveCards } from "./cards";
 import { readAvailabilityForConversation } from "@/lib/availability/queries";
 import { AvailabilityCard } from "@/components/app/messages/AvailabilityCard";
@@ -370,14 +371,17 @@ export default async function ConversationPage({
         }
         inspected={thread.inspected}
         availabilitySlot={
-          availability ? (
-            <AvailabilityCard
-              check={availability}
-              copy={t.frontDoor.available}
-              locale={locale}
-              today={lagosToday}
-            />
-          ) : null
+          <>
+            <RoommateMatch conversationId={thread.conversationId} meId={thread.meId} otherId={thread.counterpartId ?? null} copy={t.roommates.entryX} />
+            {availability ? (
+              <AvailabilityCard
+                check={availability}
+                copy={t.frontDoor.available}
+                locale={locale}
+                today={lagosToday}
+              />
+            ) : null}
+          </>
         }
         stageSlot={
           stage ? (

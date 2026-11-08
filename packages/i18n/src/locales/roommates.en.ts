@@ -1117,6 +1117,11 @@ export const roommatesEn = {
     feedVerified: "Checked by Vallo",
     shortlistAdd: "Add",
     shortlistAdded: "Added to the shortlist of {group}",
+    chatMatched: "You matched on Vallo Roommates",
+    chatViewProfile: "View profile",
+    chatViewListing: "View listing",
+    chatScheduleViewing: "Schedule viewing",
+    chatLabel: "From Vallo Roommates",
   },
   lister: {
     title: "Good for sharing",

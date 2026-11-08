@@ -11,7 +11,7 @@ export type PostFlowState =
   | { state: "ok"; initial: ListingDraft; status: ListingStatus | null; me: { userId: string; name: string; avatarUrl: string | null } };
 
 /** THE POST FLOW'S DOOR (server safe): not open, signed out, or the flow (new or editing). */
-export function PostFlowScreen({ read, schools, copy }: { read: PostFlowState; schools: InstitutionRef[]; t: RoommatesCopy }) {
+export function PostFlowScreen({ read, schools, t: copy }: { read: PostFlowState; schools: InstitutionRef[]; t: RoommatesCopy }) {
   if (read.state !== "ok") {
     return (
       <PageFrame title={copy.create.title} fallback={ROOMMATES_ROUTES.home} width="narrow">

@@ -473,7 +473,7 @@ function Card({ icon, title, children }: { icon: UiIconName; title: string; chil
   );
 }
 
-function ReviewRow({ title, value, extra, onEdit, copy }: { title: string; value: string; extra?: ReactNode; onEdit: () => void; t: RoommatesCopy }) {
+function ReviewRow({ title, value, extra, onEdit, t: copy }: { title: string; value: string; extra?: ReactNode; onEdit: () => void; t: RoommatesCopy }) {
   return (
     <section className="nf-rmf-review">
       <div className="nf-rmf-review__head">

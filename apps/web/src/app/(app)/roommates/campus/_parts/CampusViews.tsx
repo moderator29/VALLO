@@ -26,7 +26,7 @@ import type { InstitutionPage } from "@/lib/features/roommates/queries";
  * is, the live counts, rooms near it, students there, and the school email
  * check.
  */
-export function CampusDirectoryView({ live, items, q, copy }: { live: boolean; items: InstitutionRef[]; q: string; t: RoommatesCopy }) {
+export function CampusDirectoryView({ live, items, q, t: copy }: { live: boolean; items: InstitutionRef[]; q: string; t: RoommatesCopy }) {
   const groups = new Map<string, InstitutionRef[]>();
   for (const s of items) {
     const key = stateName(s.stateCode) ?? "";

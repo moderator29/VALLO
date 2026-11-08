@@ -160,7 +160,7 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
-            { href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" },
+            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ]
         : [
@@ -172,7 +172,7 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
-            { href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" },
+            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ],
     },

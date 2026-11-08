@@ -144,7 +144,7 @@ export function RoomListingScreen({ read, groups, t: copy, now }: { read: Listin
   );
 }
 
-function Summary({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
+function Summary({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   const where = placeText(l.area, l.city, stateName(l.stateCode));
   return (
     <section className="nf-rml-summary">
@@ -185,7 +185,7 @@ function PriceBlock({ l, t: copy, inline = false }: { l: RoomDetail; t: Roommate
   );
 }
 
-function FactsRow({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
+function FactsRow({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   const c = copy.ui.card;
   const facts: { icon: UiIconName; text: string }[] = [];
   if (l.roomType) facts.push({ icon: "door", text: copy.roomTypes[l.roomType] });
@@ -208,7 +208,7 @@ function FactsRow({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
   );
 }
 
-function Poster({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
+function Poster({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   return (
     <Link href={ROOMMATES_ROUTES.person(l.owner.userId)} className="nf-rml-poster" data-testid="listing-poster">
       <PersonFace person={l.owner} size="lg" />
@@ -254,7 +254,7 @@ function Household({ l, t: copy, today }: { l: RoomDetail; t: RoommatesCopy; tod
   );
 }
 
-function Trust({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
+function Trust({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   return (
     <section className="nf-rm-panel nf-rml-trust" aria-label={copy.verification.title}>
       <p className="nf-rml-trust__line" data-ok={l.verified || undefined}>
@@ -275,7 +275,7 @@ function Trust({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
   );
 }
 
-function Linked({ l, copy }: { l: RoomDetail; t: RoommatesCopy }) {
+function Linked({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   const p = l.linkedListing!;
   return (
     <section className="nf-rm-section" aria-labelledby="rml-linked">

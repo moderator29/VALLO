@@ -167,7 +167,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
   );
 }
 
-function Pending({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
+function Pending({ home, t: copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   const p = home.pending;
   const lines = [
     p.requests ? counted(p.requests, copy.ui.pending.requests) : null,
@@ -189,7 +189,7 @@ function Pending({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   );
 }
 
-function CompleteCard({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
+function CompleteCard({ home, t: copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   const pct = home.myStatus === "none" ? 0 : Math.max(0, Math.min(100, Math.round(home.completeness)));
   const href = home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile);
   return (
@@ -218,7 +218,7 @@ function CompleteCard({ home, copy }: { home: RoommatesHome; t: RoommatesCopy })
   );
 }
 
-function Schools({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
+function Schools({ home, t: copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-schools">
       <SectionHead id="rm-schools" title={copy.home.campuses} more={ROOMMATES_ROUTES.campuses} moreLabel={copy.home.seeAll} />
@@ -250,7 +250,7 @@ function Schools({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   );
 }
 
-function NyscStrip({ copy }: { t: RoommatesCopy }) {
+function NyscStrip({ t: copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-panel nf-rmp-strip" aria-labelledby="rm-nysc" data-testid="roommates-nysc">
       <span className="nf-rm-plate nf-rm-plate--lg" aria-hidden="true">
@@ -269,7 +269,7 @@ function NyscStrip({ copy }: { t: RoommatesCopy }) {
   );
 }
 
-function SafetyStrip({ copy }: { t: RoommatesCopy }) {
+function SafetyStrip({ t: copy }: { t: RoommatesCopy }) {
   return (
     <Link href={ROOMMATES_ROUTES.safety} className="nf-rmp-safety" data-testid="roommates-safety-link">
       <span className="nf-rm-plate" aria-hidden="true">

@@ -71,7 +71,7 @@ export function MatchRing({ score, size = "md", label }: { score: number | null;
   );
 }
 
-export function MatchBadge({ match, copy }: { match: MatchView | null; t: RoommatesCopy }) {
+export function MatchBadge({ match, t: copy }: { match: MatchView | null; t: RoommatesCopy }) {
   if (!match) return null;
   if (match.score === null) {
     return (

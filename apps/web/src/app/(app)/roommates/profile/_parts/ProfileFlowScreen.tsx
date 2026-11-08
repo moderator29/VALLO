@@ -11,7 +11,7 @@ import { ProfileFlow } from "./ProfileFlow";
  * itself, which opens on the first question for a new profile and on the
  * review for one that exists.
  */
-export function ProfileFlowScreen({ read, schools, copy }: { read: MyProfileRead; schools: InstitutionRef[]; t: RoommatesCopy }) {
+export function ProfileFlowScreen({ read, schools, t: copy }: { read: MyProfileRead; schools: InstitutionRef[]; t: RoommatesCopy }) {
   if (read.state !== "ok") {
     return (
       <PageFrame title={copy.profile.create} fallback={ROOMMATES_ROUTES.home} width="narrow">

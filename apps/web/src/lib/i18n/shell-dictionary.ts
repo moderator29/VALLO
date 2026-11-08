@@ -38,7 +38,9 @@ export type ShellDictionary = Pick<Dictionary, "a11y" | "common" | "nav" | "side
   /** The People row's label, beside Feed: the page's own word, so the two cannot drift. */
   feedV2: { people: Pick<Dictionary["feedV2"]["people"], "navPeople"> };
   /** Vallo Roommates' side-nav row and its Create sheet option (8 November 2026). */
-  roommatesEntry: Pick<Dictionary["roommates"]["entryX"], "nav" | "createDock" | "createDockSub">;
+  /* Optional: a fixture that hands the shell a whole Dictionary has no such
+     key, and the shell then simply draws no Roommates row. */
+  roommatesEntry?: Pick<Dictionary["roommates"]["entryX"], "nav" | "createDock" | "createDockSub">;
   /** "Report a problem", the support home's own words, for the More menu on every screen. */
   experienceInbox: { support: { home: Pick<Dictionary["experienceInbox"]["support"]["home"], "reportProblem"> } };
 };
