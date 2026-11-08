@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto, type ReencodeResult } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { publishStory } from "@/lib/social/stories-actions";
 import { uploadFailureText, uploadToStorage, withTimeout } from "@/lib/media/upload";
@@ -64,6 +64,7 @@ export function StoryComposer({
 
   const [preview, setPreview] = useState<string | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
+  const [blobMeta, setBlobMeta] = useState<{ contentType: string; extension: string }>({ contentType: "image/webp", extension: "webp" });
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [headline, setHeadline] = useState("");
   const [standfirst, setStandfirst] = useState("");
@@ -150,23 +151,21 @@ export function StoryComposer({
       banner.error(STORY_FAILURE.tooBig);
       return;
     }
-    const prepared = await reencodeToJpeg(file, { maxEdge: STORY_IMAGE_MAX_EDGE });
-    if (!prepared) {
-      /* Deliberately not falling back to the original file. */
+    const encoded = await reencodePhoto(file, { maxEdge: STORY_IMAGE_MAX_EDGE });
+    if (!encoded) {
       banner.error(STORY_FAILURE.reencode);
       return;
     }
-    /* Measured after the re-encode, so the row records the pixels that were
-       actually stored rather than the ones the camera produced. */
     try {
-      const bitmap = await createImageBitmap(prepared);
+      const bitmap = await createImageBitmap(encoded.blob);
       setSize({ width: bitmap.width, height: bitmap.height });
       bitmap.close();
     } catch {
       setSize(null);
     }
-    setBlob(prepared);
-    setPreview(URL.createObjectURL(prepared));
+    setBlob(encoded.blob);
+    setBlobMeta({ contentType: encoded.contentType, extension: encoded.extension });
+    setPreview(URL.createObjectURL(encoded.blob));
   }
 
   /* The picture and the headline are the story. A standfirst is optional,
@@ -204,13 +203,13 @@ export function StoryComposer({
                the person's own folder. The bucket's insert policy only checks the
                first path segment; the read policy resolves the post id out of the
                second, which the server action fills in when it writes the media row. */
-            const fresh = `${userId}/${crypto.randomUUID()}.jpg`;
+            const fresh = `${userId}/${crypto.randomUUID()}.${blobMeta.extension}`;
             const upload = await uploadToStorage({
               supabase,
               bucket: "social-media",
               path: fresh,
               body: blob,
-              contentType: "image/jpeg",
+              contentType: blobMeta.contentType,
               onProgress: setSent,
             });
             if (!upload.ok) {

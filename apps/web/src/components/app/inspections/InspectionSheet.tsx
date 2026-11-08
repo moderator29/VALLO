@@ -28,7 +28,7 @@ import {
   saveInspectionReport,
 } from "@/lib/inspections/actions";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import {
   EMPTY_REPORT,
   ROOM_COPY,
@@ -366,14 +366,14 @@ export function InspectionSheet({
       let extension = "pdf";
       let contentType = "application/pdf";
       if (!isPdf) {
-        const clean = await reencodeToJpeg(picked, { maxEdge: 2560, quality: 0.9 });
-        if (!clean) {
+        const encoded = await reencodePhoto(picked, { maxEdge: 2560, quality: 0.9 });
+        if (!encoded) {
           banner.error("That photo could not be read on this device. Try a JPEG or a screenshot.");
           return;
         }
-        file = clean;
-        extension = "jpg";
-        contentType = "image/jpeg";
+        file = encoded.blob;
+        extension = encoded.extension;
+        contentType = encoded.contentType;
       }
       const target = await createInspectionPhotoUpload({ inspectionId: inspection.id, extension });
       if (!target.ok) {

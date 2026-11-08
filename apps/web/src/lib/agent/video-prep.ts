@@ -132,18 +132,23 @@ export function videoDuration(file: Blob): Promise<number | null> {
   });
 }
 
-/** A JPEG still from about a second in, at most 1280px on its long edge. */
-export function posterFrame(file: Blob): Promise<Blob | null> {
+/** A WebP (or JPEG fallback) still from about a second in, at most 1280px on its long edge. */
+export function posterFrame(file: Blob): Promise<{ blob: Blob; contentType: string; extension: string } | null> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const element = document.createElement("video");
     let settled = false;
-    const finish = (value: Blob | null) => {
+    const finish = (value: { blob: Blob; contentType: string; extension: string } | null) => {
       if (settled) return;
       settled = true;
       URL.revokeObjectURL(url);
       resolve(value);
     };
+    const useWebp = (() => {
+      try { const c = document.createElement("canvas"); c.width = 1; c.height = 1; return c.toDataURL("image/webp").startsWith("data:image/webp"); } catch { return false; }
+    })();
+    const mime = useWebp ? "image/webp" : "image/jpeg";
+    const ext = useWebp ? "webp" : "jpg";
     element.preload = "auto";
     element.muted = true;
     element.playsInline = true;
@@ -163,7 +168,7 @@ export function posterFrame(file: Blob): Promise<Blob | null> {
         const context = canvas.getContext("2d");
         if (!context) return finish(null);
         context.drawImage(element, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob((blob) => finish(blob), "image/jpeg", 0.85);
+        canvas.toBlob((blob) => blob ? finish({ blob, contentType: mime, extension: ext }) : finish(null), mime, 0.85);
       } catch {
         finish(null);
       }

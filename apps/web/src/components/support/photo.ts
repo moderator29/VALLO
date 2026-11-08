@@ -1,6 +1,6 @@
 "use client";
 
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachToMyTicket } from "@/lib/support/ticket-reply";
 import { uploadToStorage } from "@/lib/media/upload";
@@ -14,23 +14,23 @@ import { uploadToStorage } from "@/lib/media/upload";
  * message thread applies to its photos. A file the browser cannot decode
  * (HEIC outside Safari) is refused in words rather than sent as the original.
  */
-export type PreparedPhoto = { blob: Blob; width: number; height: number; previewUrl: string };
+export type PreparedPhoto = { blob: Blob; width: number; height: number; previewUrl: string; contentType: "image/webp" | "image/jpeg" | "image/png"; extension: string };
 
 export const PHOTO_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif";
 
 export async function preparePhoto(file: File): Promise<PreparedPhoto | { error: string }> {
   if (!file.type.startsWith("image/")) return { error: "Choose a photo or a screenshot." };
-  const blob = await reencodeToJpeg(file, { maxEdge: 2560, quality: 0.85 });
-  if (!blob) return { error: "That photo could not be read on this device. Try a screenshot or a JPEG." };
-  if (blob.size > 10 * 1024 * 1024) return { error: "That photo is too large. Try a smaller one." };
-  const previewUrl = URL.createObjectURL(blob);
+  const result = await reencodePhoto(file, { maxEdge: 2560, quality: 0.85 });
+  if (!result) return { error: "That photo could not be read on this device. Try a screenshot or a JPEG." };
+  if (result.blob.size > 10 * 1024 * 1024) return { error: "That photo is too large. Try a smaller one." };
+  const previewUrl = URL.createObjectURL(result.blob);
   const { width, height } = await new Promise<{ width: number; height: number }>((resolve) => {
     const img = new Image();
     img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
     img.onerror = () => resolve({ width: 0, height: 0 });
     img.src = previewUrl;
   });
-  return { blob, width, height, previewUrl };
+  return { blob: result.blob, width, height, previewUrl, contentType: result.contentType, extension: result.extension };
 }
 
 /**
@@ -52,14 +52,14 @@ export async function uploadTicketPhoto(
     const { data } = await supabase.auth.getSession();
     const userId = data.session?.user.id;
     if (!userId) return { ok: false, error: "Sign in again to attach a photo." };
-    const path = `${userId}/${ticketId}/${crypto.randomUUID()}.jpg`;
-    const uploaded = await uploadToStorage({ supabase, bucket: "support-attachments", path, body: photo.blob, contentType: "image/jpeg" });
+    const path = `${userId}/${ticketId}/${crypto.randomUUID()}.${photo.extension}`;
+    const uploaded = await uploadToStorage({ supabase, bucket: "support-attachments", path, body: photo.blob, contentType: photo.contentType });
     if (!uploaded.ok) return { ok: false, error: failed };
     const result = await attachToMyTicket({
       ticketId,
       messageId,
       storagePath: path,
-      mimeType: "image/jpeg",
+      mimeType: photo.contentType,
       sizeBytes: photo.blob.size,
       width: photo.width > 0 ? photo.width : undefined,
       height: photo.height > 0 ? photo.height : undefined,

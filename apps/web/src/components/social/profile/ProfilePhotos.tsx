@@ -12,7 +12,7 @@ import { COVER_MAX_BYTES, COVER_MAX_EDGE } from "@/lib/social/profiles-model";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
-import { reencodeToJpeg } from "./reencode";
+import { reencodePhoto } from "./reencode";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 
 /**
@@ -58,7 +58,7 @@ export function ProfilePhotos({
 
   const monogram = initial(displayName || handle);
 
-  async function prepare(file: File, square: boolean): Promise<Blob | null> {
+  async function prepare(file: File, square: boolean) {
     if (!ACCEPTED.includes(file.type)) {
       banner.error("Choose a JPG, PNG or WebP photo.");
       return null;
@@ -67,33 +67,32 @@ export function ProfilePhotos({
       banner.error("That photo is over 10MB. Please choose a smaller one.");
       return null;
     }
-    const blob = await reencodeToJpeg(file, {
+    const result = await reencodePhoto(file, {
       maxEdge: square ? AVATAR_MAX_EDGE : COVER_MAX_EDGE,
       square,
     });
-    if (!blob) {
-      /* Deliberately not falling back to the original file. */
+    if (!result) {
       banner.error(
         "We could not prepare that photo safely, so it was not uploaded. Try a different one.",
       );
       return null;
     }
-    return blob;
+    return result;
   }
 
   async function onCover(file: File) {
     setBusy("cover");
     try {
-      const blob = await prepare(file, false);
-      if (!blob) return;
+      const encoded = await prepare(file, false);
+      if (!encoded) return;
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
         banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: blob, contentType: "image/jpeg" });
+      const path = `${userId}/${crypto.randomUUID()}.${encoded.extension}`;
+      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: encoded.blob, contentType: encoded.contentType });
       if (!upload.ok) {
         banner.error("That upload did not go through. Check your connection and try again.");
         return;
@@ -104,7 +103,7 @@ export function ProfilePhotos({
         banner.error(result.error);
         return;
       }
-      setCover(URL.createObjectURL(blob));
+      setCover(URL.createObjectURL(encoded.blob));
       banner.success("Your cover is saved.");
       router.refresh();
     } catch {
@@ -118,16 +117,16 @@ export function ProfilePhotos({
   async function onAvatar(file: File) {
     setBusy("avatar");
     try {
-      const blob = await prepare(file, true);
-      if (!blob) return;
+      const encoded = await prepare(file, true);
+      if (!encoded) return;
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
         banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: blob, contentType: "image/jpeg" });
+      const path = `${userId}/${crypto.randomUUID()}.${encoded.extension}`;
+      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: encoded.blob, contentType: encoded.contentType });
       if (!upload.ok) {
         banner.error("That upload did not go through. Check your connection and try again.");
         return;

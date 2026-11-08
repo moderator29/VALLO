@@ -1984,7 +1984,7 @@ export function ListingWizard({
    * is refused rather than uploaded, because publishing a geotagged photo is
    * worse than asking for another one.
    */
-  async function stripMetadata(file: File): Promise<Blob | null> {
+  async function stripMetadata(file: File): Promise<{ blob: Blob; contentType: string; extension: string } | null> {
     const MAX_EDGE = 2560;
     /*
      * The decoded image, by either door. `createImageBitmap` is missing or
@@ -2030,9 +2030,15 @@ export function ListingWizard({
       context.imageSmoothingQuality = "high";
       context.drawImage(decoded.source, 0, 0, width, height);
 
-      return await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92);
+      const useWebp = (() => {
+        try { const c = document.createElement("canvas"); c.width = 1; c.height = 1; return c.toDataURL("image/webp").startsWith("data:image/webp"); } catch { return false; }
+      })();
+      const mime = useWebp ? "image/webp" : "image/jpeg";
+      const ext = useWebp ? "webp" : "jpg";
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), mime, 0.88);
       });
+      return blob ? { blob, contentType: mime, extension: ext } : null;
     } catch {
       return null;
     } finally {
@@ -2135,8 +2141,7 @@ export function ListingWizard({
           continue;
         }
 
-        // Strip location metadata before the photo leaves the device. The
-        // re-encode always produces a JPEG, so the stored extension follows.
+        // Strip location metadata before the photo leaves the device.
         const clean = await stripMetadata(file);
         if (!clean) {
           refuse(file, isHeic(file) ? copy.photos.heicUndecodable : copy.photos.notPrepared);
@@ -2155,7 +2160,7 @@ export function ListingWizard({
          * size says nothing about it.
          */
         const tooBig = rejectUpload(
-          { type: "image/jpeg", size: clean.size },
+          { type: clean.contentType, size: clean.blob.size },
           PHOTO_MIME_TYPES,
           MAX_PHOTO_BYTES,
         );
@@ -2164,7 +2169,7 @@ export function ListingWizard({
           continue;
         }
 
-        const path = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
+        const path = `${userId}/${id}/${crypto.randomUUID()}.${clean.extension}`;
 
         let uploadError: { message?: string; statusCode?: string | number } | null = null;
         try {
@@ -2172,8 +2177,8 @@ export function ListingWizard({
             supabase,
             bucket: "listing-photos",
             path,
-            body: clean,
-            contentType: "image/jpeg",
+            body: clean.blob,
+            contentType: clean.contentType,
           });
           if (!upload.ok) {
             uploadError = {
@@ -2314,9 +2319,9 @@ export function ListingWizard({
     /* The still is a nicety: without it the video still plays. */
     let posterPath: string | undefined;
     if (poster) {
-      const stillPath = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
+      const stillPath = `${userId}/${id}/${crypto.randomUUID()}.${poster.extension}`;
       try {
-        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster, contentType: "image/jpeg" });
+        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster.blob, contentType: poster.contentType });
         if (upload.ok) posterPath = stillPath;
       } catch {
         /* no still */

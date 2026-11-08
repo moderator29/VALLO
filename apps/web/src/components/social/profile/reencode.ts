@@ -12,10 +12,10 @@
  * the original file: publishing a geotagged photo is worse than asking somebody
  * for another one.
  *
- * The same technique is already used by `stripMetadata` in the listing wizard
- * and by `downscaleToSquare` on the account profile. This is a third caller
- * rather than a third rule, and the three should be hoisted into one shared
- * module the next time anybody is in all of them.
+ * Output is WebP when the browser supports it (every modern browser does),
+ * falling back to JPEG for the rare engine that does not. Callers receive
+ * the content type alongside the blob so they can set the storage path and
+ * content-type header correctly.
  */
 
 export type ReencodeOptions = {
@@ -23,14 +23,35 @@ export type ReencodeOptions = {
   maxEdge: number;
   /** Centre crop to a square first, for an avatar. */
   square?: boolean;
-  /** JPEG quality, 0 to 1. */
+  /** Quality, 0 to 1. Applied to both WebP and JPEG. */
   quality?: number;
 };
 
-export async function reencodeToJpeg(
+export type ReencodeResult = {
+  blob: Blob;
+  contentType: "image/webp" | "image/jpeg";
+  extension: "webp" | "jpg";
+};
+
+let _webpSupported: boolean | null = null;
+
+function supportsWebp(): boolean {
+  if (_webpSupported !== null) return _webpSupported;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    _webpSupported = canvas.toDataURL("image/webp").startsWith("data:image/webp");
+  } catch {
+    _webpSupported = false;
+  }
+  return _webpSupported;
+}
+
+export async function reencodePhoto(
   file: File,
-  { maxEdge, square = false, quality = 0.92 }: ReencodeOptions,
-): Promise<Blob | null> {
+  { maxEdge, square = false, quality = 0.88 }: ReencodeOptions,
+): Promise<ReencodeResult | null> {
   try {
     const bitmap = await createImageBitmap(file);
     try {
@@ -38,8 +59,6 @@ export async function reencodeToJpeg(
       const sourceH = bitmap.height;
       if (sourceW === 0 || sourceH === 0) return null;
 
-      /* A square avatar takes the middle of the frame, which is where a face
-         almost always is. A cover keeps its own shape. */
       const cropSize = square ? Math.min(sourceW, sourceH) : 0;
       const sx = square ? (sourceW - cropSize) / 2 : 0;
       const sy = square ? (sourceH - cropSize) / 2 : 0;
@@ -58,13 +77,28 @@ export async function reencodeToJpeg(
       context.imageSmoothingQuality = "high";
       context.drawImage(bitmap, sx, sy, sw, sh, 0, 0, width, height);
 
-      return await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", quality);
+      const useWebp = supportsWebp();
+      const mime = useWebp ? "image/webp" : "image/jpeg";
+      const ext = useWebp ? "webp" : "jpg";
+
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), mime, quality);
       });
+      if (!blob) return null;
+      return { blob, contentType: mime, extension: ext };
     } finally {
       bitmap.close();
     }
   } catch {
     return null;
   }
+}
+
+/** @deprecated Use `reencodePhoto` instead. Kept for any remaining callers. */
+export async function reencodeToJpeg(
+  file: File,
+  opts: ReencodeOptions,
+): Promise<Blob | null> {
+  const result = await reencodePhoto(file, opts);
+  return result?.blob ?? null;
 }

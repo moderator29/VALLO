@@ -14,7 +14,7 @@ import { initial as initialOf } from "@/lib/text/initial";
 /* The composer's own look (`nf-compose-who` and the page bar) lives here. It used to arrive only with a PostCard, so a composer opened before any post had loaded drew unstyled: the face collapsed into a bare "?" beside "You" (29 October 2026). */
 import "./feed-v2.css";
 import { Segmented } from "@/components/ui/Segmented";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachPostMedia, dropPost, replyToPost } from "@/lib/social/posts-actions";
@@ -82,6 +82,8 @@ type Picture = {
   key: string;
   blob: Blob;
   preview: string;
+  contentType: string;
+  extension: string;
   /** Measured AFTER the re-encode, so the row records what was stored. */
   width: number | null;
   height: number | null;
@@ -285,16 +287,15 @@ export function Composer({
         refusal = POST_FAILURE.pictureTooBig;
         continue;
       }
-      const blob = await reencodeToJpeg(file, { maxEdge: POST_IMAGE_MAX_EDGE });
-      if (!blob) {
-        /* Deliberately not falling back to the original file. */
+      const encoded = await reencodePhoto(file, { maxEdge: POST_IMAGE_MAX_EDGE });
+      if (!encoded) {
         refusal = POST_FAILURE.pictureReencode;
         continue;
       }
       let width: number | null = null;
       let height: number | null = null;
       try {
-        const bitmap = await createImageBitmap(blob);
+        const bitmap = await createImageBitmap(encoded.blob);
         width = bitmap.width;
         height = bitmap.height;
         bitmap.close();
@@ -302,7 +303,7 @@ export function Composer({
         /* A row with no dimensions still renders; the tile just cannot reserve
            its space before the picture arrives. */
       }
-      prepared.push({ key: crypto.randomUUID(), blob, preview: URL.createObjectURL(blob), width, height });
+      prepared.push({ key: crypto.randomUUID(), blob: encoded.blob, preview: URL.createObjectURL(encoded.blob), contentType: encoded.contentType, extension: encoded.extension, width, height });
     }
 
     if (chosen.length > room) refusal = POST_FAILURE.pictureTooMany;
@@ -348,13 +349,13 @@ export function Composer({
 
       const uploaded: { path: string; width: number | null; height: number | null }[] = [];
       for (const picture of items) {
-        const path = `${user.id}/${postId}/${crypto.randomUUID()}.jpg`;
+        const path = `${user.id}/${postId}/${crypto.randomUUID()}.${picture.extension}`;
         const upload = await uploadToStorage({
           supabase,
           bucket: POST_MEDIA_BUCKET,
           path,
           body: picture.blob,
-          contentType: "image/jpeg",
+          contentType: picture.contentType,
         });
         if (!upload.ok) return false;
         uploaded.push({ path, width: picture.width, height: picture.height });

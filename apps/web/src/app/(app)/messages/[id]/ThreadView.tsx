@@ -65,7 +65,7 @@ import {
   type LiveMessageRow,
 } from "@/lib/messages/useRealtime";
 import { createClient } from "@/lib/supabase/client";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { OUTBOX_SENT_EVENT, type OutboxSentDetail } from "@/lib/offline/outbox";
 import { sendOrKeep } from "@/lib/offline/send-or-keep";
@@ -1096,19 +1096,19 @@ export function ThreadView({
            fits the 10MB bucket and a metered connection. If the phone cannot
            decode it (HEIC outside Safari), the send fails visibly rather
            than falling back to the tagged original. */
-        const clean = await reencodeToJpeg(file, { maxEdge: 2560, quality: 0.85 });
-        if (!clean) {
+        const encoded = await reencodePhoto(file, { maxEdge: 2560, quality: 0.85 });
+        if (!encoded) {
           markFailed(tempId);
           return;
         }
-        const path = `${conversationId}/${crypto.randomUUID()}.jpg`;
+        const path = `${conversationId}/${crypto.randomUUID()}.${encoded.extension}`;
         const supabase = createClient();
         const uploaded = await uploadToStorage({
           supabase,
           bucket: "message-attachments",
           path,
-          body: clean,
-          contentType: "image/jpeg",
+          body: encoded.blob,
+          contentType: encoded.contentType,
         });
         if (!uploaded.ok) {
           markFailed(tempId);
