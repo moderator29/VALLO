@@ -399,7 +399,9 @@
     flex-shrink: 0;
     padding: 4px 10px;
     border: none;
-    border-radius: var(--nf-radius-pill);
+    /* The shape law (DESIGN_DIRECTION 1, rule 4): a text control is a rounded
+       rectangle on the control radius, never a capsule. */
+    border-radius: var(--nf-radius-control);
     background: var(--nf-surface-control-on-media);
     color: var(--nf-content-on-media);
     font-size: var(--nf-text-caption);

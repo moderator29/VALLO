@@ -23,6 +23,10 @@ export const STAFF_DESK: Record<StaffScope, string> = {
   finance: "/admin/money",
   compliance: "/admin/compliance",
   operations: "/admin/operations",
+  trust_safety: "/admin/cases",
+  roommates: "/admin/roommates",
+  circle: "/admin/circle",
+  analyst: "/admin/trust",
 };
 
 /** The other desks a scope opens, beyond its front door. */
@@ -31,7 +35,19 @@ export const STAFF_EXTRA_DESKS: Partial<Record<StaffScope, { href: string; label
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/chargebacks", label: "Chargebacks" },
   ],
-  moderation: [{ href: "/admin/blocked-terms", label: "Blocked terms" }],
+  moderation: [
+    { href: "/admin/blocked-terms", label: "Blocked terms" },
+    { href: "/admin/cases", label: "Cases" },
+  ],
+  trust_safety: [
+    { href: "/admin/trust", label: "Trust overview" },
+    { href: "/admin/appeals", label: "Appeals" },
+    { href: "/admin/roommates", label: "Roommates" },
+    { href: "/admin/circle", label: "Circle" },
+  ],
+  roommates: [{ href: "/admin/cases?module=roommates", label: "Roommates cases" }],
+  circle: [{ href: "/admin/cases?module=circle", label: "Circle cases" }],
+  support: [{ href: "/admin/cases", label: "Cases" }],
   operations: [
     { href: "/admin/call-usage", label: "Call usage" },
     { href: "/admin/alerts", label: "Alerts" },
