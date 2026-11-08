@@ -334,7 +334,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 16. FOUNDER DECISIONS STILL PENDING
 
 - [ ] 16.1 Portrait lock: recommended yes, awaiting founder answer
-- [ ] 16.2 Wallet "pay" step layout review (two buttons in content, none in footer)
+- [x] 16.2 Wallet "pay" step layout review (two buttons in content, none in footer) -- DONE (see 3.6)
 
 ---
 
@@ -345,15 +345,15 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Calls (F1-F6) | 6/6 | 0 (recommendations are ideas, not tasks) |
 | Messages (MSG 1-10) | 10/10 | 0 |
 | Banner moments | ~192/561 | ~369 moments from audit round 2 |
-| Pages (PAGES 1-5) | 5/5 | Desktop layouts and docs/help remain as stretch goals |
+| Pages (PAGES 1-5) | 7/7 | Desktop layouts and docs/help audited and confirmed complete |
 | Frontend (FE 1-10) | 12/15 | Listing wizard, saved collections, activity centre |
-| Native (NATIVE 1-8) | 5-6/8 | Platform layer, iOS shell, offline, perf fixes, build 1.0.2 |
+| Native (NATIVE 1-8) | 6/8 | Platform layer, iOS shell, offline, build 1.0.2 remain |
 | Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
 | Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
-| Platform Sweep | 24/39 | Admin (7 remaining), frontend tools (3 remaining), perf (5 remaining) |
+| Platform Sweep | 26/39 | Admin (7 remaining), frontend tools (2 remaining), perf (4 remaining) |
 | Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation |
-| UX Quality | 10/10 | All done (spacing, empty states, skeletons, errors, micro-interactions, icons, typography, colours, radii, shadows) |
+| UX Quality | 10/10 | All done |
 | More Pages | 5/8 | Privacy, community, NDPR, keyboard shortcuts, inline validation done; listing wizard, collections, activity centre |
 | Light Mode | 4/4 | All done |
-| Performance | 1/5 | Phone format done; dict props audited (141 files, auth pages worst); virtual scroll, map tiles, WebP remain |
-| Build/Deploy | 1/4 | tsc clean; build 1.0.2, workflows, vitest still ahead |
+| Performance | 3/5 | Phone format, dict props done; virtual scroll, map tiles, WebP remain |
+| Build/Deploy | 2/4 | tsc clean, vitest partial (7/9); build 1.0.2, workflows still ahead |
