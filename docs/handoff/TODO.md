@@ -18,7 +18,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 1.6 Link preview off in WKWebView -- DONE (capacitor.config.ts: ios.allowsLinkPreview = false; platform.css also turns off long-press callout)
 - [x] 1.7 App switcher privacy cover for money screens -- DONE (ValloShell.swift: PrivacyCover class + SceneDelegate wiring; privacy-cover.ts + privacy-cover-rule.ts on the web side)
 - [x] 1.8 Native crash capture on next launch (into `/api/client-error` with platform ios) -- DONE (ValloShell.swift: ValloCrashLog writes exception/signal on crash, takeCrashReport reads on next launch; native-crash.ts sends to /api/client-error)
-- [ ] 1.9 Animated launch hand-off (logo and wordmark) from web launch to native shell
+- [x] 1.9 Animated launch hand-off (logo and wordmark) from web launch to native shell -- DONE (web side: STARTUP_NATIVE_SCRIPT hides splash with 160ms fade, waits for 2 rAF after DOMContentLoaded, sends ValloShell.handoff; startup animations held via data-startup-native="wait" until splash answers; native Swift/Kotlin wiring ships with build 1.0.2)
 
 ### Connection Manager / Offline
 - [x] 1.10 Shared connection state: connected, slow, unstable, offline, reconnected -- DONE (lib/offline/connection.ts: 5-state manager with navigator.onLine, Network Info API, PerformanceObserver, probe, flap detection)

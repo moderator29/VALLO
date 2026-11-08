@@ -54,6 +54,8 @@ export type ToastItem = {
   durationMs: number;
   /** When it went up, for the error hold. */
   shownAt: number;
+  /** A person's avatar URL, shown as a small circle beside the message. */
+  avatarUrl?: string;
   "data-testid"?: string;
 };
 
@@ -64,6 +66,8 @@ export type ToastOptions = {
   retry?: () => void;
   retryLabel?: string;
   durationMs?: number;
+  /** A person's avatar URL, shown as a small circle beside the message. */
+  avatarUrl?: string;
   "data-testid"?: string;
 };
 
@@ -136,6 +140,7 @@ function show(message: string, options: ToastOptions = {}): number {
     durationMs: options.durationMs ?? dwellFor(tone, Boolean(action)),
     shownAt: now(),
     ...(action ? { action } : {}),
+    ...(options.avatarUrl ? { avatarUrl: options.avatarUrl } : {}),
     ...(options["data-testid"] ? { "data-testid": options["data-testid"] } : {}),
   };
 

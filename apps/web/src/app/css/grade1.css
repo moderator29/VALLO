@@ -201,6 +201,14 @@
   background: none;
   color: var(--nf-brand-primary);
 }
+/* 4.4: a person's face beside the message, for banners that name someone. */
+.nf-toast__avatar {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: var(--nf-radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
 /* The close: a small grey square (R4), with a full 44px touch area. */
 .nf-toast__close {
   position: relative;

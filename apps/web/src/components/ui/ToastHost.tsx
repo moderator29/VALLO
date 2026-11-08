@@ -194,9 +194,19 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
         if (!drag.current) start();
       }}
     >
-      <span className="nf-toast__mark" aria-hidden="true">
-        <UiIcon name={MARK[item.tone]} size={20} />
-      </span>
+      {item.avatarUrl ? (
+        <img
+          src={item.avatarUrl}
+          alt=""
+          className="nf-toast__avatar"
+          width={28}
+          height={28}
+        />
+      ) : (
+        <span className="nf-toast__mark" aria-hidden="true">
+          <UiIcon name={MARK[item.tone]} size={20} />
+        </span>
+      )}
       {/* The sentence and its action stack, so a long failure keeps the
           whole width to read in and "Try again" sits under it. */}
       <div className="nf-toast__body">
