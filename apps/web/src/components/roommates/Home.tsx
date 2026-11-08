@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
+import { Odometer } from "@/components/ui/Odometer";
 import { FEATURE_ART, type ArtSlot } from "@/lib/features/art";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type Intent, type PersonRef } from "@/lib/features/roommates/model";
@@ -143,7 +144,9 @@ export function StatTiles({ stats, t: copy }: { stats: { people: number; rooms: 
             <UiIcon name={tile.icon} size={14} />
             {copy.ui.statTiles[tile.key]}
           </span>
-          <span className="nf-rm-stat__n">{nf.format(tile.n)}</span>
+          <span className="nf-rm-stat__n">
+            <Odometer value={nf.format(tile.n)} from={nf.format(tile.n).replace(/\d/g, "0")} />
+          </span>
         </div>
       ))}
     </section>

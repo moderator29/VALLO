@@ -1231,6 +1231,32 @@
     backdrop-filter: none;
   }
 
+  /* ------------------------------------------------------------ small live touches */
+  /* The match ring draws its arc once, from empty to the figure. */
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-rm-ring__arc {
+      animation: nf-rm-ring-draw 900ms var(--nf-ease-entrance) both 150ms;
+    }
+    .nf-rm-card,
+    .nf-rm-journey {
+      transition:
+        transform var(--nf-duration-press) var(--nf-ease-press),
+        box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+    }
+  }
+  @keyframes nf-rm-ring-draw {
+    from {
+      stroke-dashoffset: var(--nf-rm-ring-c);
+    }
+  }
+  .nf-rm-card:has(.nf-rm-card__link):active,
+  .nf-rm-journey:active {
+    transform: scale(0.98);
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-rm-ring__arc {
+    animation: none;
+  }
+
   /* ------------------------------------------------------------ the client controls */
   .nf-rm-togglechips {
     display: flex;

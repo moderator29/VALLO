@@ -19,6 +19,7 @@ import {
   lagosDay,
 } from "@/components/roommates";
 import { PromoBanner } from "@/components/app/PromoBanner";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { FirstRunCard } from "@/components/roommates/FirstRunCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -45,6 +46,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
   if (!home.live) {
     return (
       <PageFrame title={copy.title} fallback="/home" width="wide">
+        <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-home">
           {hero}
           <RoommatesEmpty icon="info" testId="roommates-not-open">
@@ -58,6 +60,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
           <TrustTiles t={copy} />
           <SafetyStrip t={copy} />
         </div>
+        </PullToRefresh>
       </PageFrame>
     );
   }
@@ -169,7 +172,8 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
 
   return (
     <PageFrame title={copy.title} fallback="/home" width="wide">
-      <div className="nf-rmp" data-testid="roommates-home">
+      <PullToRefresh>
+        <div className="nf-rmp" data-testid="roommates-home">
         {hero}
         <Pending home={home} t={copy} />
         {home.myStatus === "none" ? (
@@ -180,7 +184,8 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
         {order}
         <TrustTiles t={copy} />
         <SafetyStrip t={copy} />
-      </div>
+        </div>
+      </PullToRefresh>
     </PageFrame>
   );
 }

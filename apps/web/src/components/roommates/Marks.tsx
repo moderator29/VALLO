@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { BadgeKind, Lifestyle, ListingKind, MatchView, PersonRef } from "@/lib/features/roommates/model";
@@ -61,7 +63,7 @@ export function MatchRing({ score, size = "md", label }: { score: number | null;
       <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
         <circle className="nf-rm-ring__track" cx="22" cy="22" r={r} />
         {score !== null ? (
-          <circle className="nf-rm-ring__arc" cx="22" cy="22" r={r} strokeDasharray={c} strokeDashoffset={c - (c * value) / 100} />
+          <circle className="nf-rm-ring__arc" cx="22" cy="22" r={r} strokeDasharray={c} strokeDashoffset={c - (c * value) / 100} style={{ "--nf-rm-ring-c": c } as CSSProperties} />
         ) : null}
       </svg>
       <span className="nf-rm-ring__n" aria-hidden="true">

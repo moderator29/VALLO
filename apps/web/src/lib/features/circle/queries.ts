@@ -324,6 +324,33 @@ export async function readCirclePosts(input: {
   };
 }
 
+/**
+ * FOLLOWING (8 November 2026): top-level posts from the communities the
+ * reader is an active member of, through `circle_following_posts` (pending
+ * SQL, `roommates_3_integrations.sql`), which re-checks membership, live
+ * status and blocks. Signed out, or before the SQL is pasted, it is empty.
+ */
+export async function readFollowingPosts(input: { sort: "newest" | "popular"; cursor?: string | null }): Promise<PostPage & { signedIn: boolean }> {
+  const v = await viewer();
+  if (!v) return { live: false, posts: [], next: null, signedIn: false };
+  if (!v.id) return { live: true, posts: [], next: null, signedIn: false };
+  const cursor = input.sort === "popular" ? null : decodeCursor(input.cursor);
+  const { data, error } = await v.db
+    .rpc("circle_following_posts", { p_sort: input.sort, p_before: cursor?.createdAt ?? null, p_before_id: cursor?.id ?? null, p_limit: PAGE_SIZE + 1 })
+    .select(POST_COLUMNS);
+  await reportReadFault("read.circle.following", ...faults(error));
+  if (error) return { live: !isNotLive(error), posts: [], next: null, signedIn: true };
+  const rows = (data ?? []) as unknown as RawPost[];
+  const page = rows.slice(0, PAGE_SIZE);
+  const last = page[page.length - 1];
+  return {
+    live: true,
+    signedIn: true,
+    posts: await enrich(v.db, page),
+    next: rows.length > PAGE_SIZE && last && input.sort !== "popular" ? encodeCursor({ createdAt: last.created_at, id: last.id }) : null,
+  };
+}
+
 export async function readCommunities(category?: CircleCategory | null): Promise<{ live: boolean; communities: CommunityView[] }> {
   const v = await viewer();
   if (!v) return { live: false, communities: [] };

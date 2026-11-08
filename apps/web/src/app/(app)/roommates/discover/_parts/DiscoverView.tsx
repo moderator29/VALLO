@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { PageFrame } from "@/components/app/PageFrame";
 import { CardGrid, RoomCardView, RoommateCardView, RoommatesEmpty, lagosDay, type RoommatesCopy } from "@/components/roommates";
 import { ButtonLink } from "@/components/ui/Button";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ROOMMATES_ROUTES, type InstitutionRef, type PeopleFilters, type RoomCard, type RoomFilters, type RoommateCard } from "@/lib/features/roommates/model";
 
 import { DiscoverControls, ModeSwitch, SaveSearchButton } from "./DiscoverControls";
@@ -117,10 +118,12 @@ export function DiscoverView({
 
   return (
     <PageFrame title={copy.ui.discover.title} subtitle={copy.ui.discover.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<ModeSwitch mode={mode} />}>
-      <div className="nf-rmp" data-testid="roommates-discover">
-        <DiscoverControls mode={mode} people={people} rooms={rooms} schools={schools} canSave={result.state === "ok"} />
-        {body}
-      </div>
+      <PullToRefresh>
+        <div className="nf-rmp" data-testid="roommates-discover">
+          <DiscoverControls mode={mode} people={people} rooms={rooms} schools={schools} canSave={result.state === "ok"} />
+          {body}
+        </div>
+      </PullToRefresh>
     </PageFrame>
   );
 }
