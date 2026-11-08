@@ -25,6 +25,8 @@ import {
   rejectFileIssue,
 } from "@/components/verification/kyc";
 import { uploadToStorage } from "@/lib/media/upload";
+import { FieldProblem } from "@/components/ui/FieldProblem";
+import { banner } from "@/lib/ui/toast";
 
 const EMPTY: ApplicationResult = { ok: false };
 const DRAFT_KEY = "nf_agent_application_draft";
@@ -208,6 +210,12 @@ export function ApplyWizard({
   const [values, setValues] = useState<Values>({});
   const [docs, setDocs] = useState<Record<string, DocumentSlot>>({});
   const [state, formAction, pending] = useActionState(submitAgentApplication, EMPTY);
+  /* Filed or refused, said by the one banner at the top of the screen
+     (founder, 7 November 2026, "THE BANNER EVERYWHERE"); a filed application
+     also keeps its reference on the page. */
+  useEffect(() => {
+    if (state.message) banner(state.message, { tone: state.ok ? "success" : "error" });
+  }, [state]);
   const [successClosed, setSuccessClosed] = useState(false);
   const restored = useRef(false);
 
@@ -570,11 +578,8 @@ export function ApplyWizard({
               <UploadZone id="registration" label={a.documents.registration} hint={a.documents.chooseFile} slot={docs.registration} onFile={onFile} />
             )}
           </div>
-          {err?.documents && (
-            <p role="alert" className="text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-              {err.documents}
-            </p>
-          )}
+          {/* The words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="apply-documents-problem" message={err?.documents} when={state} />
           <p className="text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
             These files are stored privately and are only ever seen by the Vallo team reviewing
             your application. They are never shown on your public profile.
@@ -624,9 +629,7 @@ export function ApplyWizard({
             label={a.fields.agreeTerms}
             className="nf-panel nf-panel--card block p-sm"
           />
-          {err?.agreeTerms && (
-            <p role="alert" className="text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">{err.agreeTerms}</p>
-          )}
+          <FieldProblem id="apply-terms-problem" message={err?.agreeTerms} when={state} />
 
           {acceptTerms && <input type="hidden" name="acceptTerms" value="on" />}
           {acceptPay && <input type="hidden" name="acceptPayOnVallo" value="on" />}
@@ -648,9 +651,9 @@ export function ApplyWizard({
             the four state tokens carry the meaning, so this picks the state
             rather than a colour.
           */}
-          {state.message && (
+          {state.message && state.ok && (
             <p
-              role="alert"
+              role="status"
               className="rounded-[var(--nf-radius-md)] border px-md py-sm text-[length:var(--nf-text-caption)]"
               style={
                 state.ok
@@ -814,11 +817,8 @@ function UploadZone({
           </span>
         )}
       </label>
-      {slot?.error && (
-        <p role="alert" className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {slot.error}
-        </p>
-      )}
+      {/* An upload that failed is said by the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${id}-problem`} message={slot?.error} />
       <input
         id={id}
         type="file"

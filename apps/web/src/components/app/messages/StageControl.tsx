@@ -11,6 +11,7 @@ import { addDays, FOLLOWUP_MAX_DAYS, FOLLOWUP_NOTE_MAX } from "@/lib/enquiry/fol
 import { LOST_REASONS, STAGES, type DeskStage, type LostReason, type Stage } from "@/lib/enquiry/stage";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-72: THE STAGE, AT THE TOP OF A LISTING THREAD, FOR THE LISTER ONLY.
@@ -60,16 +61,14 @@ function FollowupRow({
   const [open, setOpen] = useState(false);
   const [dueOn, setDueOn] = useState(followup.dueOn ?? "");
   const [note, setNote] = useState(followup.note ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function send(nextDue: string | null, nextNote: string | null) {
-    setError(null);
     start(async () => {
       try {
         const result = await setEnquiryFollowup({ conversationId, dueOn: nextDue, note: nextNote });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setOpen(false);
@@ -77,6 +76,8 @@ function FollowupRow({
           setDueOn("");
           setNote("");
         }
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        banner.success(nextDue === null ? "Follow-up cleared" : "Follow-up saved");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -146,11 +147,6 @@ function FollowupRow({
           </div>
         </div>
       )}
-      {error && (
-        <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -178,11 +174,9 @@ export function StageControl({
   const [open, setOpen] = useState(false);
   const [next, setNext] = useState<Stage>(stage.stage);
   const [reason, setReason] = useState<LostReason | null>(stage.lostReason);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function save() {
-    setError(null);
     start(async () => {
       try {
         const result = await setEnquiryStage({
@@ -191,10 +185,11 @@ export function StageControl({
           ...(next === "lost" && reason ? { reason } : {}),
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setOpen(false);
+        banner.success("Stage updated");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -266,11 +261,6 @@ export function StageControl({
         </div>
       )}
 
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
 
       {followup && today && followupCopy ? (
         <FollowupRow

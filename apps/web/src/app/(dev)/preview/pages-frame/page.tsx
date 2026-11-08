@@ -4,7 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { AppShell } from "@/components/app/AppShell";
 import SettingsLayout from "@/app/(app)/settings/layout";
 import { ApplyWizard } from "@/components/agent/ApplyWizard";
-import { AssistantSettingsBody } from "@/app/(app)/settings/ai-assistant/page";
+import { AssistantSettingsBody } from "@/app/(app)/settings/ai-assistant/AssistantSettingsBody";
 import { forApply } from "@/components/agent/agent-copy";
 import { ROLE_COPY } from "@/components/roles/roles";
 import "@/app/css/home.css";

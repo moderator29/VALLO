@@ -61,6 +61,8 @@ export function MandateForm({
           return;
         }
         setSent(true);
+        /* The line keeps the record; the banner says it (founder, 7 November 2026). */
+        banner.success(copy.sent);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

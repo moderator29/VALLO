@@ -12,6 +12,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { cancelReservation } from "@/lib/reservations/actions";
 import type { ThreadContext } from "@/lib/messages/live";
 import { fill, lagosWhen } from "./when";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * THE RESERVATION FACE: the chat lives inside the table.
@@ -58,6 +59,9 @@ export function ReservationFace({
     cancelReservation,
     null,
   );
+  /* Cancelled or refused, said by the one banner at the top of the screen
+     (founder, 7 November 2026); the face keeps "Cancelled" as its record. */
+  useActionBanner(state, { ok: copy.cancelled });
   const cancelled = Boolean(state?.ok);
   /* The moment this face mounted, read once. A table in the past cannot be
      cancelled from here, and the clock is not something a render should keep
@@ -108,11 +112,6 @@ export function ReservationFace({
         </div>
       )}
 
-      {state && !state.ok && (
-        <p role="alert" className={`mt-inline-tight ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {state.error}
-        </p>
-      )}
 
       {confirming && !cancelled && (
         <Sheet open={confirming} onOpenChange={setConfirming} title={copy.cancelTitle} detents={[0.42]}>

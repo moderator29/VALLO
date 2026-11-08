@@ -11,6 +11,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { EmptyState } from "@/components/app/Screen";
 import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * The host's calendar.
@@ -49,6 +50,11 @@ export function CalendarEditor({
     unblockNights,
     null,
   );
+
+  /* Blocked, opened or refused, said by the one banner at the top of the
+     screen (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  useActionBanner(blockState, { ok: "Dates blocked" });
+  useActionBanner(openState, { ok: "Dates open again" });
 
   const statusByDate = useMemo(() => {
     const map = new Map<string, "booked" | "unavailable">();
@@ -100,11 +106,6 @@ export function CalendarEditor({
   }
 
   const selectedCount = from && to ? countNights(from, to) : 0;
-  const error =
-    (blockState && !blockState.ok && blockState.error) ||
-    (openState && !openState.ok && openState.error) ||
-    null;
-
   /*
    * THE FIRST RUN, WHICH IS EVERY LISTING ON THE DAY IT IS MADE.
    *
@@ -270,14 +271,6 @@ export function CalendarEditor({
             Clear selection
           </Button>
 
-          {error && (
-            <p
-              role="alert"
-              className="mt-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-            >
-              {error}
-            </p>
-          )}
         </div>
       )}
 

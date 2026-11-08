@@ -468,7 +468,6 @@ export function Inbox({
   /* GRADE 1: search is a button in the header until it is wanted (R59). */
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [markError, setMarkError] = useState<string | null>(null);
   const [marking, startMarking] = useSafeTransition();
 
   /*
@@ -635,15 +634,14 @@ export function Inbox({
   };
 
   const markAllRead = () => {
-    setMarkError(null);
     startMarking(async () => {
       try {
         const result = await markInboxRead();
         if (result.ok) {
+          banner.success("Everything is marked as read");
           router.refresh();
           return;
         }
-        setMarkError(result.error);
         banner.error(result.error, { retry: markAllRead });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -854,13 +852,6 @@ export function Inbox({
 
       {/* Archive and move back are said in the top banner (Grade 1). */}
 
-      {markError && (
-        /* Rose, not cyan: `--nf-state-warning` is the pending token under
-           another name, and a write that did not happen is not in flight. */
-        <p role="alert" className="nf-body-sm mt-inline text-[var(--nf-state-error)]">
-          {markError}
-        </p>
-      )}
 
       {/* ---------------------------------------------------------- list */}
       {/* The panel the tabs above actually control. It is keyed on the tab so

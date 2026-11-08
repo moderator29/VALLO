@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { listingOptions, type ListingOption } from "@/lib/features/post-listing/actions";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * FEATURE A LISTING (the brief, part 2.2: property-powered posts). The
@@ -43,26 +44,24 @@ export function ListingPicker({
   onPick(option: ListingOption): void;
 }) {
   const [options, setOptions] = useState<ListingOption[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [link, setLink] = useState("");
   const [looking, setLooking] = useState(false);
   const loaded = useRef(false);
 
   const load = async (fromLink: string | null) => {
-    setError(null);
     setLooking(true);
     try {
       const result = await listingOptions({ link: fromLink });
       if (!result.ok) {
-        setError(result.error || WORDS.failed);
+        banner.error(result.error || WORDS.failed);
         return;
       }
       setOptions(result.data.options);
-      if (fromLink && !result.data.options.some((option) => option.source === "link")) setError(WORDS.linkMissed);
+      if (fromLink && !result.data.options.some((option) => option.source === "link")) banner.error(WORDS.linkMissed);
     } catch {
       /* Offline or a dropped request: the same calm sentence, and the field
          stays so a second tap can try again. */
-      setError(WORDS.failed);
+      banner.error(WORDS.failed);
     } finally {
       setLooking(false);
     }
@@ -111,11 +110,6 @@ export function ListingPicker({
           </button>
         </form>
 
-        {error ? (
-          <p role="alert" className="nf-lpick__note">
-            {error}
-          </p>
-        ) : null}
 
         {options === null ? (
           <div className="nf-lpick__list" aria-hidden="true">

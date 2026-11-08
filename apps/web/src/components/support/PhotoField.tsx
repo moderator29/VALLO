@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { PHOTO_ACCEPT, preparePhoto, type PreparedPhoto } from "./photo";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * One optional photo or screenshot, picked, previewed and removable.
@@ -25,18 +26,17 @@ export function PhotoField({
 }) {
   const id = useId();
   const input = useRef<HTMLInputElement | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
 
   const pick = async (file: File | undefined) => {
     if (!file) return;
-    setError(null);
     setReading(true);
     const prepared = await preparePhoto(file);
     setReading(false);
     if (input.current) input.current.value = "";
     if ("error" in prepared) {
-      setError(prepared.error);
+      /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+      banner.error(prepared.error);
       return;
     }
     if (value) URL.revokeObjectURL(value.previewUrl);
@@ -89,11 +89,6 @@ export function PhotoField({
         >
           <UiIcon name="picture" size={20} />
         </label>
-        {error && (
-          <p role="alert" className="nf-caption basis-full text-[var(--nf-state-error)]">
-            {error}
-          </p>
-        )}
       </>
     );
   }
@@ -115,11 +110,6 @@ export function PhotoField({
           </span>
         </span>
       </label>
-      {error && (
-        <p role="alert" className="nf-caption mt-row text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

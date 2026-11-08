@@ -7,6 +7,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * The host's reply, written or corrected in place.
@@ -41,6 +42,12 @@ export function ReplyForm({
     FormData
   >(removeReviewReply, null);
 
+  /* Posted, removed or refused, said by the one banner at the top of the
+     screen (founder, 7 November 2026, "THE BANNER EVERYWHERE"). A refused
+     reply is also said by its field. */
+  useActionBanner(state && !state.ok ? null : state, { ok: "Your reply is posted" });
+  useActionBanner(removeState, { ok: "Your reply is removed" });
+
   // What is actually on the record right now: the server's answer wins over the
   // props the page was rendered with, so the card is right before any reload.
   const saved = removeState?.ok ? null : state?.ok ? state.data.body : existing;
@@ -71,11 +78,6 @@ export function ReplyForm({
             </Button>
           </form>
         </div>
-        {removeState && !removeState.ok && (
-          <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-warning)]">
-            {removeState.error}
-          </p>
-        )}
       </div>
     );
   }

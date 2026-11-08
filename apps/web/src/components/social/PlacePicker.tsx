@@ -16,6 +16,7 @@ import { countOf } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The way in.
@@ -65,7 +66,6 @@ export function PlacePicker({
   const router = useRouter();
   const [pendingCode, setPendingCode] = useState<string | null>(null);
   const [isPending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -97,7 +97,6 @@ export function PlacePicker({
   const chooseState = (code: string | null) => {
     setStateCode(code);
     setQuery("");
-    setError(null);
     rememberInUrl(code);
     if (code) window.setTimeout(() => searchRef.current?.focus(), 60);
   };
@@ -168,7 +167,6 @@ export function PlacePicker({
 
   const enter = (lga: LgaNode, lgaStateCode: string) => {
     if (isPending) return;
-    setError(null);
 
     const already = openByCode.get(lga.code);
     if (already) {
@@ -191,7 +189,7 @@ export function PlacePicker({
         const result = await enterPlace({ lgaCode: lga.code });
         if (!result.ok) {
           setPendingCode(null);
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         router.replace(`/around/${result.data.slug}`);
@@ -260,11 +258,6 @@ export function PlacePicker({
         />
       </div>
 
-      {error ? (
-        <p role="alert" className="nf-enter__error">
-          {error}
-        </p>
-      ) : null}
 
       {results.total === 0 ? (
         <div className="nf-enter__empty">

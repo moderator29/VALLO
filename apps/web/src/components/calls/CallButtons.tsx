@@ -8,6 +8,7 @@ import type { CallKind } from "@/lib/calls/types";
 import { registerContext } from "./call-store";
 import { placeCall } from "./place-call";
 import type { CallsCopy } from "./views";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE THREAD HEADER'S TWO CALL BUTTONS: voice and video, bare solid glyphs in
@@ -42,31 +43,26 @@ export function CallButtons({
   copy: CallsCopy;
 }) {
   const [pending, setPending] = useState<CallKind | null>(null);
-  const [note, setNote] = useState<{ title?: string; body: string } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => registerContext(conversationId, { line: contextLine ?? null }), [conversationId, contextLine]);
-  useEffect(() => {
-    if (!note) return;
-    const timer = window.setTimeout(() => setNote(null), 9000);
-    return () => window.clearTimeout(timer);
-  }, [note]);
 
   const tap = async (kind: CallKind) => {
     if (pending) return;
     setPending(kind);
-    setNote(null);
     const result = await placeCall({ conversationId, kind, context: { line: contextLine ?? null } });
     setPending(null);
+    /* A call that could not start is said by the one banner at the top of
+       the screen (founder, 7 November 2026); it was a note beside the buttons. */
     if (!result.ok) {
-      setNote(
-        result.refusal === "not_engaged"
-          ? { title: copy.refusal.notEngagedTitle, body: copy.refusal.notEngagedBody }
-          : { body: result.error },
-      );
+      if (result.refusal === "not_engaged") {
+        banner.info(`${copy.refusal.notEngagedTitle}. ${copy.refusal.notEngagedBody}`, { "data-testid": "thread-call-note" });
+      } else {
+        banner.error(result.error, { retry: () => void tap(kind), "data-testid": "thread-call-note" });
+      }
       return;
     }
-    if (result.outcome === "busy") setNote({ body: fill(copy.outgoing.busy, { name }) });
+    if (result.outcome === "busy") banner.info(fill(copy.outgoing.busy, { name }), { "data-testid": "thread-call-note" });
   };
 
   return (
@@ -117,17 +113,6 @@ export function CallButtons({
             </button>
           </span>
         </>
-      ) : null}
-      {note ? (
-        <span className="nf-call-note nf-call-note--pop" role="status" data-testid="thread-call-note">
-          <span style={{ minWidth: 0, flex: 1 }}>
-            {note.title ? <strong>{note.title}</strong> : null}
-            {note.body}
-          </span>
-          <button type="button" className="nf-call-row__back" onClick={() => setNote(null)} aria-label={copy.refusal.dismiss}>
-            <UiIcon name="close" size={16} />
-          </button>
-        </span>
       ) : null}
     </span>
   );

@@ -12,6 +12,7 @@ import { fill, lagosInputToIso, lagosWords } from "@/lib/calls/screen";
 import type { SubjectReview } from "@/lib/calls/types";
 import { resolveDeepLink } from "./CallLayer";
 import type { CallsCopy } from "./views";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE REVIEW CALL INVITATION, as the person it is about sees it: from "the
@@ -30,16 +31,13 @@ export function SubjectReviewCard({ review, copy, preview = false }: { review: S
   const [proposing, setProposing] = useState(false);
   const [at, setAt] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   const answer = async (response: "ACCEPT" | "DECLINE" | "PROPOSE") => {
-    setError(null);
     let proposedFor: string | undefined;
     if (response === "PROPOSE") {
       const iso = lagosInputToIso(at);
       if (!iso) {
-        setError(copy.staff.errors.time);
+        banner.error(copy.staff.errors.time);
         return;
       }
       proposedFor = iso;
@@ -48,10 +46,11 @@ export function SubjectReviewCard({ review, copy, preview = false }: { review: S
     const result = await respondToReviewCall({ reviewId: review.id, response, ...(proposedFor ? { proposedFor } : {}) }).catch(() => null);
     setBusy(null);
     if (!result || !result.ok) {
-      setError(result ? result.error : copy.connecting.body);
+      banner.error(result ? result.error : copy.connecting.body);
       return;
     }
-    setSaved(true);
+    /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+    banner.success(r.yourAnswerSaved);
     setProposing(false);
     if (!preview) router.refresh();
   };
@@ -102,11 +101,6 @@ export function SubjectReviewCard({ review, copy, preview = false }: { review: S
         </section>
       ) : ANSWERABLE.has(review.status) ? (
         <section className="nf-review-call__card">
-          {saved ? (
-            <p role="status" className="nf-call__note">
-              {r.yourAnswerSaved}
-            </p>
-          ) : null}
           <div className="grid gap-xs">
             <Button variant="primary" size="lg" full loading={busy === "ACCEPT"} disabled={busy !== null} onClick={() => void answer("ACCEPT")} data-testid="subject-review-accept">
               {r.accept}
@@ -126,11 +120,6 @@ export function SubjectReviewCard({ review, copy, preview = false }: { review: S
               {r.decline}
             </Button>
           </div>
-          {error ? (
-            <p className="nf-call__error" role="alert">
-              {error}
-            </p>
-          ) : null}
         </section>
       ) : null}
     </div>

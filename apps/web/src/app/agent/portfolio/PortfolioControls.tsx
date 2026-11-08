@@ -9,6 +9,7 @@ import { withDone } from "@/lib/ui/success-moments";
 import { awardMandate, inviteAgents, pitchForMandate, withdrawInvitation } from "@/lib/landlord/portfolio-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type Copy = Dictionary["landlord"]["portfolio"];
 
@@ -100,10 +101,24 @@ export function AwardButton({ pitchId, copy }: { pitchId: string; copy: Copy }) 
   );
 }
 
+/* What withdrawing did, said by the one banner (founder, 7 November 2026). */
+const WITHDRAWN = "Invitation withdrawn";
+
 export function WithdrawButton({ invitationId, copy }: { invitationId: string; copy: Copy }) {
   const [pending, start] = useSafeTransition();
+  /* Withdrawn or refused, said by the one banner (founder, 7 November 2026). */
+  const withdraw = () =>
+    start(async () => {
+      try {
+        const result = await withdrawInvitation({ invitationId });
+        if (!result.ok) banner.error(result.error, { retry: withdraw });
+        else banner.success(WITHDRAWN);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
   return (
-    <Button type="button" variant="ghost" size="sm" loading={pending} onClick={() => start(async () => void (await withdrawInvitation({ invitationId })))}>
+    <Button type="button" variant="ghost" size="sm" loading={pending} onClick={withdraw}>
       {copy.withdraw}
     </Button>
   );
@@ -134,6 +149,8 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
             const result = await pitchForMandate({ invitationId, note: text });
             /* Too short is the field's own line; any other refusal is the banner's. */
             if (!result.ok && result.error !== "short") banner.error(copy.pitchFailed);
+            /* Sent: the line keeps the record and the banner says it (founder, 7 November 2026). */
+            if (result.ok) banner.success(copy.pitched);
             setState(result.ok ? "sent" : result.error === "short" ? "short" : "idle");
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
@@ -151,12 +168,10 @@ export function PitchForm({ invitationId, copy }: { invitationId: string; copy: 
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={copy.pitchPlaceholder}
+        aria-invalid={state === "short" ? true : undefined}
+        aria-describedby={state === "short" ? `${fieldId}-problem` : undefined}
       />
-      {state === "short" && (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {copy.pitchShort}
-        </p>
-      )}
+      <FieldProblem id={`${fieldId}-problem`} message={state === "short" ? copy.pitchShort : null} />
       <Button type="submit" variant="primary" size="md" loading={pending} disabled={text.trim().length < 10} data-testid="portfolio-pitch">
         {copy.pitchSend}
       </Button>

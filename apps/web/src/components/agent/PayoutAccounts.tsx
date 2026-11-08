@@ -18,6 +18,7 @@ import type { PayoutAccount } from "@/lib/agent/payout-queries";
 import { NUBAN_LENGTH, digitsOnly, groupNuban } from "@/lib/agent/payout-model";
 import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * Where earnings are paid.
@@ -65,6 +66,9 @@ export function PayoutAccounts({
     null,
   );
   useLockRecovery(addLock, addState);
+  /* A refusal is said by the one banner; an added account opens its success sheet. */
+  useActionBanner(resolveState);
+  useActionBanner(addState, { ok: success ? undefined : "Payout account added" });
 
   const bankName = banks.find((b) => b.code === bankCode)?.name ?? "";
   const complete = digitsOnly(accountNumber).length === NUBAN_LENGTH && bankCode.length > 0;
@@ -248,22 +252,6 @@ export function PayoutAccounts({
             </form>
           )}
 
-          {resolveState && !resolveState.ok && (
-            <p
-              role="alert"
-              className="mt-sm nf-panel nf-panel--card block p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-            >
-              {resolveState.error}
-            </p>
-          )}
-          {addState && !addState.ok && (
-            <p
-              role="alert"
-              className="mt-sm nf-panel nf-panel--card block p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-            >
-              {addState.error}
-            </p>
-          )}
         </div>
       )}
     </section>
@@ -291,9 +279,10 @@ function AccountRow({ account }: { account: PayoutAccount }) {
     if (defaultState?.ok || removeState?.ok) router.refresh();
   }, [defaultState, removeState, router]);
 
-  const error = (defaultState && !defaultState.ok && defaultState.error) ||
-    (removeState && !removeState.ok && removeState.error) ||
-    null;
+  /* Changed, removed or refused, said by the one banner at the top of the
+     screen (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  useActionBanner(defaultState, { ok: "Default payout account changed" });
+  useActionBanner(removeState, { ok: "Payout account removed" });
 
   return (
     <li className="nf-panel nf-panel--card block p-md">
@@ -338,14 +327,6 @@ function AccountRow({ account }: { account: PayoutAccount }) {
         </form>
       </div>
 
-      {error && (
-        <p
-          role="alert"
-          className="mt-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-        >
-          {error}
-        </p>
-      )}
     </li>
   );
 }

@@ -82,75 +82,75 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| C1 | app/(app)/settings/MoneyLockGroup.tsx:335 | Money lock enrolment refused | red line in the enrol card | the refusal | error | none | todo |
-| C2 | app/(app)/settings/DeleteAccountPanel.tsx:487 | Delete confirmation word wrong | red caption under the field | its words | error | none | todo (field) |
-| C3 | app/(app)/settings/DeleteAccountPanel.tsx:527 | Delete request refused | red alert in the sheet | the refusal | error | Try again | todo |
+| C1 | app/(app)/settings/MoneyLockGroup.tsx:335 | Money lock enrolment refused | red line in the enrol card | the refusal | error | none | done (batch 2) |
+| C2 | app/(app)/settings/DeleteAccountPanel.tsx:487 | Delete confirmation word wrong | red caption under the field | its words | error | none | done (batch 2) |
+| C3 | app/(app)/settings/DeleteAccountPanel.tsx:527 | Delete request refused | red alert in the sheet | the refusal | error | Try again | done (batch 2) |
 | C4 | app/(app)/settings/privacy/PendingAddressMove.tsx:39 | Address move pending (warning card) | warning card with Cancel | kept: the page's own record of a pending change | warning | n/a | kept |
-| C5 | app/(app)/settings/phone/PhoneConfirmForm.tsx:233 | Phone code send or verify refused | red line under the form | the refusal | error | Try again (send) | todo |
-| C6 | app/(app)/settings/phone/PhoneConfirmForm.tsx:164 | Phone number confirmed | record face replaces the form | "Your phone number is confirmed" | success | none | todo (face kept, banner added) |
+| C5 | app/(app)/settings/phone/PhoneConfirmForm.tsx:233 | Phone code send or verify refused | red line under the form | the refusal | error | Try again (send) | done (batch 2) |
+| C6 | app/(app)/settings/phone/PhoneConfirmForm.tsx:164 | Phone number confirmed | record face replaces the form | "Your phone number is confirmed" | success | none | done (batch 2) |
 | C7 | app/(app)/settings/devices/DeviceList.tsx:204 | Device list read failed | panel | kept: a page state, not an action outcome | error | n/a | kept |
-| C8 | app/(app)/settings/devices/NotMePanel.tsx:111 | "This was not me": account held, or failed | outcome sheet | the sheet stays (it explains next steps); a banner says "Your account is secured" or the failure | success / error | Try again on failure | todo |
-| C9 | app/(app)/settings/privacy/blocked/BlockedList.tsx:98 | Member unblocked | status line under the row | "{name} is unblocked" | success | none | todo |
-| C10 | app/(app)/rent/review/[paymentId]/TenancyReviewForm.tsx:193 | Review incomplete | red line under the form | "Answer every question to send your review" | error | none | todo |
-| C11 | app/(app)/rent/review/[paymentId]/TenancyReviewForm.tsx:61 | Tenancy review sent | thank-you panel replaces the form | "Your review is sent" | success | none | todo (panel kept as record, banner added) |
-| C12 | app/(app)/support/messages/[id]/TicketActions.tsx:162 | Rating needs stars | red caption | "Choose how many stars first" | error | none | todo |
-| C13 | app/(app)/support/messages/[id]/TicketActions.tsx:48 | Ticket closed or reopened, rating sent | refresh only | "Your query is closed" / "Thanks for rating this answer" / "Your query is open again" | success | none | todo |
-| C14 | app/(app)/support/new/NewQueryForm.tsx:234 | Topic not chosen | red caption under topics | its words | error | none | todo (field) |
-| C15 | app/(app)/support/new/NewQueryForm.tsx:445 | Support query filed | receipt panel with reference | "Your query is sent" | success | none | kept panel + banner (receipt is the record) |
-| C16 | app/(app)/listing/[id]/ReservePanel.tsx:538 | Table reservation refused | red line under the panel | the refusal | error | Try again | todo |
-| C17 | app/(app)/listing/[id]/ReservePanel.tsx:623 | Stay hold refused | red line | the refusal | error | Try again | todo |
-| C18 | app/(app)/listing/[id]/ReservePanel.tsx:666 | Rental request refused | red line | the refusal | error | Try again | todo |
-| C19 | app/(app)/stay/[id]/StayDatesForm.tsx:74 | Dates note (nights, unavailable) | caption under the form | the note when it is a refusal | warning | none | todo (audit: a live summary stays) |
-| C20 | app/(app)/profile/AccountBody.tsx:521 | Profile field refused | red caption | its words | error | none | todo (field) |
-| C21 | app/(app)/checkout/[bookingId]/PayPanel.tsx:168 | Payment could not start | note under Pay | the note | error | Try again | todo |
-| C22 | app/(app)/rent/pay/[inspectionId]/PayPanel.tsx:108 | Rent payment could not start | note under Pay | the note | error | Try again | todo |
+| C8 | app/(app)/settings/devices/NotMePanel.tsx:111 | "This was not me": account held, or failed | outcome sheet | the sheet stays (it explains next steps); a banner says "Your account is secured" or the failure | success / error | Try again on failure | kept (an outcome SHEET with next steps, not inline text) |
+| C9 | app/(app)/settings/privacy/blocked/BlockedList.tsx:98 | Member unblocked | status line under the row | "{name} is unblocked" | success | none | done (batch 2) |
+| C10 | app/(app)/rent/review/[paymentId]/TenancyReviewForm.tsx:193 | Review incomplete | red line under the form | "Answer every question to send your review" | error | none | done (batch 2) |
+| C11 | app/(app)/rent/review/[paymentId]/TenancyReviewForm.tsx:61 | Tenancy review sent | thank-you panel replaces the form | "Your review is sent" | success | none | done (batch 2) |
+| C12 | app/(app)/support/messages/[id]/TicketActions.tsx:162 | Rating needs stars | red caption | "Choose how many stars first" | error | none | done (batch 2) |
+| C13 | app/(app)/support/messages/[id]/TicketActions.tsx:48 | Ticket closed or reopened, rating sent | refresh only | "Your query is closed" / "Thanks for rating this answer" / "Your query is open again" | success | none | done (batch 2) |
+| C14 | app/(app)/support/new/NewQueryForm.tsx:234 | Topic not chosen | red caption under topics | its words | error | none | done (batch 2) |
+| C15 | app/(app)/support/new/NewQueryForm.tsx:445 | Support query filed | receipt panel with reference | "Your query is sent" | success | none | done (batch 2) |
+| C16 | app/(app)/listing/[id]/ReservePanel.tsx:538 | Table reservation refused | red line under the panel | the refusal | error | Try again | done (batch 2) |
+| C17 | app/(app)/listing/[id]/ReservePanel.tsx:623 | Stay hold refused | red line | the refusal | error | Try again | done (batch 2) |
+| C18 | app/(app)/listing/[id]/ReservePanel.tsx:666 | Rental request refused | red line | the refusal | error | Try again | done (batch 2) |
+| C19 | app/(app)/stay/[id]/StayDatesForm.tsx:74 | Dates note (nights, unavailable) | caption under the form | the note when it is a refusal | warning | none | kept (a caller's guidance note, not an outcome) |
+| C20 | app/(app)/profile/AccountBody.tsx:521 | Profile field refused | red caption | its words | error | none | done (batch 2) |
+| C21 | app/(app)/checkout/[bookingId]/PayPanel.tsx:168 | Payment could not start | note under Pay | the note | error | Try again | kept (a caller's guidance note about card payment, not an outcome) |
+| C22 | app/(app)/rent/pay/[inspectionId]/PayPanel.tsx:108 | Rent payment could not start | note under Pay | the note | error | Try again | kept (a caller's guidance note, not an outcome) |
 | C23 | app/email/preferences/PreferencesForm.tsx:54 | Email preferences refused | red line | the refusal | error | Try again | done (batch 1) |
 | C24 | app/email/preferences/PreferencesForm.tsx | Email preferences saved | no word | "Your email choices are saved" | success | none | done (batch 1) |
-| C25 | components/money/balance/WithdrawScreen.tsx:305 | Withdraw destination refused | red line under the picker | the refusal | error | none | todo (field) |
-| C26 | components/money/balance/WithdrawScreen.tsx:218 | Withdraw one-time code note | note under the code | the note | info/error | none | todo |
-| C27 | components/money/balance/SendScreen.tsx:280 | Recipient not found | red line under the field | the refusal | error | none | todo (field) |
-| C28 | components/money/balance/SendScreen.tsx:212 | Send one-time code note | note | the note | info/error | none | todo |
+| C25 | components/money/balance/WithdrawScreen.tsx:305 | Withdraw destination refused | red line under the picker | the refusal | error | none | done (batch 2) |
+| C26 | components/money/balance/WithdrawScreen.tsx:218 | Withdraw one-time code note | note under the code | the note | info/error | none | done (batch 2) |
+| C27 | components/money/balance/SendScreen.tsx:280 | Recipient not found | red line under the field | the refusal | error | none | done (batch 2) |
+| C28 | components/money/balance/SendScreen.tsx:212 | Send one-time code note | note | the note | info/error | none | done (batch 2) |
 | C29 | components/money/WithdrawalMaths.tsx:65 | Withdrawal quote failed | line in the maths card | kept: the card's own state (quote unavailable) | n/a | n/a | kept |
-| C30 | components/verification/KycFlow.tsx:552 | Verification gaps named | red panel listing the missing items | "Add {first gap} to continue" and the panel's list stays as the checklist | error | none | todo |
-| C31 | components/verification/KycFlow.tsx:565 | Verification submission failed | red line | the failure | error | Try again | todo |
-| C32 | components/verification/SelfieCapture.tsx:295 | Selfie upload or camera failed | red caption | the failure | error | Try again | todo |
-| C33 | components/verification/RequestedPhotoPanel.tsx:91 | Requested photo send failed | red caption | the failure | error | Try again | todo |
-| C34 | components/verification/RequestedPhotoPanel.tsx | Requested photo sent | no word | "Photo sent to the review team" | success | none | todo |
-| C35 | components/verification/IdCapture.tsx:320 | ID photo refused | error line | the failure | error | Try again | todo |
-| C36 | components/verification/DocumentUploader.tsx:255 | Document upload failed | red caption | the failure | error | Try again | todo |
-| C37 | components/verification/DocumentUploader.tsx | Document uploaded | no word | "Document uploaded" | success | none | todo |
-| C38 | components/verification/DojahPanel.tsx:137 | Identity check failed | red line | the failure | error | Try again | todo |
-| C39 | components/verification/DojahPanel.tsx:102 | Identity check done | record panel | kept panel + "Identity check sent" | success | none | todo |
-| C40 | components/app/money/MoneyStepUp.tsx:321 | Money step-up refused | red line | the refusal | error | none | todo |
-| C41 | components/app/ai/AiConsentSheet.tsx:68 | AI consent not saved | line in the sheet | "Your choice was not saved. Try again." | error | Try again | todo |
-| C42 | components/app/price/NextActions.tsx:97 | Price alert not saved | red caption | the refusal | error | Try again | todo |
-| C43 | components/app/price/NextActions.tsx:72 | Price alert saved | inline status block | "Price alert saved" | success | none | todo |
-| C44 | components/app/push/PushPrompt.tsx:185 | Notifications could not be turned on | red line | the failure | error | Try again | todo |
-| C45 | components/app/welcome/FirstRun.tsx:878 | First run step not saved | red line | the failure | error | Try again | todo |
-| C46 | components/app/referral/WithdrawFlow.tsx:196 | Rewards withdrawal refused | red line | the refusal | error | Try again | todo |
-| C47 | components/app/referral/WithdrawFlow.tsx:142 | Rewards withdrawal requested | record panel | kept panel + "Withdrawal requested" | success | none | todo |
-| C48 | components/app/referral/RewardsPayoutForm.tsx:47 | Rewards payout account saved | record panel | kept panel + "Payout account saved" | success | none | todo |
-| C49 | components/app/briefs/BriefComposer.tsx:198 | Brief not posted | red line | the refusal | error | Try again | todo |
-| C50 | components/app/briefs/BriefComposer.tsx:94 | Brief posted | status line | "Your brief is posted" | success | none | todo |
-| C51 | components/app/briefs/MyBriefs.tsx:106 | Brief close or change failed | red list item | the refusal | error | Try again | todo |
-| C52 | components/app/place/ChoicePicker.tsx:223 | Choice required | red caption | its words | error | none | todo (field) |
-| C53 | components/app/doors/AgentLookupCard.tsx:111 | Agent lookup refused | red caption under the field | its words | error | none | todo (field) |
-| C54 | components/app/doors/SafetyShareControl.tsx:208 | Safety check answered | green line | "Thanks. Your contact can see you are safe" | success | none | todo |
-| C55 | components/app/arrival-check/ArrivalRuling.tsx:113 | Arrival ruling outcome | status line | the outcome | success / error | none | todo |
-| C56 | components/app/inspections/TruthQuestions.tsx:121 | Truth answers not sent | red line | the refusal | error | Try again | todo |
-| C57 | components/app/inspections/visit/VisitPlanner.tsx:367 | Visit plan refused | problem line | the problem | error | none | todo |
-| C58 | components/app/inspections/ViewingSheets.tsx:58 | Viewing sheet action refused | red caption | the refusal | error | Try again | todo |
+| C30 | components/verification/KycFlow.tsx:552 | Verification gaps named | red panel listing the missing items | "Add {first gap} to continue" and the panel's list stays as the checklist | error | none | kept (the review step's own checklist of what is missing; a submit refusal goes to the banner, C31) |
+| C31 | components/verification/KycFlow.tsx:565 | Verification submission failed | red line | the failure | error | Try again | done (batch 2) |
+| C32 | components/verification/SelfieCapture.tsx:295 | Selfie upload or camera failed | red caption | the failure | error | Try again | done (batch 2) |
+| C33 | components/verification/RequestedPhotoPanel.tsx:91 | Requested photo send failed | red caption | the failure | error | Try again | done (batch 2) |
+| C34 | components/verification/RequestedPhotoPanel.tsx | Requested photo sent | no word | "Photo sent to the review team" | success | none | done (batch 2) |
+| C35 | components/verification/IdCapture.tsx:320 | ID photo refused | error line | the failure | error | Try again | done (batch 2) |
+| C36 | components/verification/DocumentUploader.tsx:255 | Document upload failed | red caption | the failure | error | Try again | done (batch 2) |
+| C37 | components/verification/DocumentUploader.tsx | Document uploaded | no word | "Document uploaded" | success | none | done (batch 2) |
+| C38 | components/verification/DojahPanel.tsx:137 | Identity check failed | red line | the failure | error | Try again | done (batch 2) |
+| C39 | components/verification/DojahPanel.tsx:102 | Identity check done | record panel | kept panel + "Identity check sent" | success | none | done (batch 2) |
+| C40 | components/app/money/MoneyStepUp.tsx:321 | Money step-up refused | red line | the refusal | error | none | done (batch 2) |
+| C41 | components/app/ai/AiConsentSheet.tsx:68 | AI consent not saved | line in the sheet | "Your choice was not saved. Try again." | error | Try again | done (batch 2) |
+| C42 | components/app/price/NextActions.tsx:97 | Price alert not saved | red caption | the refusal | error | Try again | done (batch 2) |
+| C43 | components/app/price/NextActions.tsx:72 | Price alert saved | inline status block | "Price alert saved" | success | none | done (batch 2) |
+| C44 | components/app/push/PushPrompt.tsx:185 | Notifications could not be turned on | red line | the failure | error | Try again | done (batch 2) |
+| C45 | components/app/welcome/FirstRun.tsx:878 | First run step not saved | red line | the failure | error | Try again | done (batch 2) |
+| C46 | components/app/referral/WithdrawFlow.tsx:196 | Rewards withdrawal refused | red line | the refusal | error | Try again | done (batch 2) |
+| C47 | components/app/referral/WithdrawFlow.tsx:142 | Rewards withdrawal requested | record panel | kept panel + "Withdrawal requested" | success | none | done (batch 2) |
+| C48 | components/app/referral/RewardsPayoutForm.tsx:47 | Rewards payout account saved | record panel | kept panel + "Payout account saved" | success | none | done (batch 2) |
+| C49 | components/app/briefs/BriefComposer.tsx:198 | Brief not posted | red line | the refusal | error | Try again | done (batch 2) |
+| C50 | components/app/briefs/BriefComposer.tsx:94 | Brief posted | status line | "Your brief is posted" | success | none | done (batch 2) |
+| C51 | components/app/briefs/MyBriefs.tsx:106 | Brief close or change failed | red list item | the refusal | error | Try again | done (batch 2) |
+| C52 | components/app/place/ChoicePicker.tsx:223 | Choice required | red caption | its words | error | none | done (batch 2) |
+| C53 | components/app/doors/AgentLookupCard.tsx:111 | Agent lookup refused | red caption under the field | its words | error | none | done (batch 2) |
+| C54 | components/app/doors/SafetyShareControl.tsx:208 | Safety check answered | green line | "Thanks. Your contact can see you are safe" | success | none | done (batch 2) |
+| C55 | components/app/arrival-check/ArrivalRuling.tsx:113 | Arrival ruling outcome | status line | the outcome | success / error | none | done (batch 2) |
+| C56 | components/app/inspections/TruthQuestions.tsx:121 | Truth answers not sent | red line | the refusal | error | Try again | done (batch 2) |
+| C57 | components/app/inspections/visit/VisitPlanner.tsx:367 | Visit plan refused | problem line | the problem | error | none | done (batch 2) |
+| C58 | components/app/inspections/ViewingSheets.tsx:58 | Viewing sheet action refused | red caption | the refusal | error | Try again | done (batch 2) |
 | C59 | components/app/inspections/GateHandshake.tsx:386 | Gate warning | warning block | kept: the handshake's own state | warning | n/a | kept |
-| C60 | components/app/threads/ReservationFace.tsx:112 | Reservation step refused in a thread | red caption | the refusal | error | Try again | todo |
-| C61 | components/app/threads/RentalFace.tsx:294 | Rental step refused | red caption | the refusal | error | Try again | todo |
-| C62 | components/app/threads/RentalFace.tsx:499 | Rental action refused | red caption | the refusal | error | Try again | todo |
-| C63 | components/app/payments/AddBankAccountSheet.tsx:157 | Bank account name check failed | red line | the refusal | error | Try again | todo |
-| C64 | components/app/listing/ListingActions.tsx:385 | Save, share outcome on the listing hero | chip beside the actions | "Saved to your list" / "Removed from your list" / the failure | success / error | Undo on save | todo |
-| C65 | components/app/ListingCard.tsx:607 | Save on a card | note on the card | "Saved to your list" / the failure | success / error | Undo | todo |
-| C66 | components/app/search/MapDock.tsx:241 | Save from the map | red note | the failure | error | Try again | todo |
-| C67 | components/app/price/ShareAreaButton.tsx:177 | Area link copied | label turns "Copied" | "Link copied" | success | none | todo |
-| C68 | components/site/MoveInCalculator.tsx:115 | Calculator link copied | label turns "Copied" | "Link copied" | success | none | todo |
-| C69 | components/ui/ExternalLinkSheet.tsx:127 | External link copied | label turns "Copied" | "Link copied" | success | none | todo |
+| C60 | components/app/threads/ReservationFace.tsx:112 | Reservation step refused in a thread | red caption | the refusal | error | Try again | done (batch 2) |
+| C61 | components/app/threads/RentalFace.tsx:294 | Rental step refused | red caption | the refusal | error | Try again | done (batch 2) |
+| C62 | components/app/threads/RentalFace.tsx:499 | Rental action refused | red caption | the refusal | error | Try again | done (batch 2) |
+| C63 | components/app/payments/AddBankAccountSheet.tsx:157 | Bank account name check failed | red line | the refusal | error | Try again | kept (the bank list load failure with its own Try again button inside the sheet; the number field now speaks through Field, A1) |
+| C64 | components/app/listing/ListingActions.tsx:385 | Save, share outcome on the listing hero | chip beside the actions | "Saved to your list" / "Removed from your list" / the failure | success / error | Undo on save | done (batch 2) |
+| C65 | components/app/ListingCard.tsx:607 | Save on a card | note on the card | "Saved to your list" / the failure | success / error | Undo | done (round 1 already: SaveControl says it in the banner) |
+| C66 | components/app/search/MapDock.tsx:241 | Save from the map | red note | the failure | error | Try again | done (batch 2) |
+| C67 | components/app/price/ShareAreaButton.tsx:177 | Area link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
+| C68 | components/site/MoveInCalculator.tsx:115 | Calculator link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
+| C69 | components/ui/ExternalLinkSheet.tsx:127 | External link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
 | C70 | components/social/PlacePicker.tsx:264 | Place search failed | red line | the failure | error | Try again | todo |
 | C71 | components/social/feed/ListingPicker.tsx:115 | Listing picker failed | note | the failure | error | Try again | todo |
 | C72 | components/social/feed/Composer.tsx:661 | Post not published | red line | the refusal | error | Try again | todo |

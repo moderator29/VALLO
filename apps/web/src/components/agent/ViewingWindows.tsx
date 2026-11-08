@@ -28,6 +28,9 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 type Copy = Dictionary["frontDoor"]["viewings"];
 const LENGTHS = [15, 20, 30, 45, 60] as const;
 
+/* What saving did, said by the one banner (founder, 7 November 2026). */
+const WINDOW_SAVED = "Viewing times saved";
+
 export function ViewingWindows({
   windows,
   homes,
@@ -50,27 +53,25 @@ export function ViewingWindows({
   const [ends, setEnds] = useState("14:00");
   const [slotMinutes, setSlotMinutes] = useState<(typeof LENGTHS)[number]>(20);
   const [chosen, setChosen] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function save() {
     const problem = windowProblem({ starts, ends, listingIds: chosen });
     if (problem) {
-      setError(copy.problems[problem]);
+      banner.error(copy.problems[problem]);
       return;
     }
-    setError(null);
     start(async () => {
       try {
         const result = await saveViewingWindow({ listingIds: chosen, weekday, starts, ends, slotMinutes });
         if (!result.ok) {
-          /* A window that does not add up stays the form's own line; a
-             refusal is said by the one banner (Grade 1). */
+          /* Said by the one banner at the top of the screen (Grade 1). */
           banner.error(result.error);
           return;
         }
         setAdding(false);
         setChosen([]);
+        banner.success(WINDOW_SAVED);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -199,11 +200,6 @@ export function ViewingWindows({
           </Button>
         ))}
 
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

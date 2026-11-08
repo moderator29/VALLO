@@ -32,6 +32,11 @@ import "./discovery.css";
 import "./search-v2.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
+
+/* What a save on the map did, said by the one banner (founder, 7 November 2026);
+   the same words the cards use (components/app/SaveControl.tsx). */
+const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on this device", removed: "Removed from your saved list" };
 
 /**
  * The discovery map.
@@ -149,7 +154,6 @@ export function MapCanvas({
   const [locate, setLocate] = useState<Locate>({ phase: "idle" });
 
   const [savedIds, setSavedIds] = useState<ReadonlySet<string>>(() => new Set<string>());
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [savePending, startSave] = useSafeTransition();
 
   /*
@@ -430,7 +434,6 @@ export function MapCanvas({
    */
   const choose = useCallback(
     (listing: MapListing) => {
-      setSaveMessage(null);
       setSelectedId(listing.id);
       mapRef.current?.panTo([listing.lat, listing.lng], { animate: true });
     },
@@ -534,7 +537,6 @@ export function MapCanvas({
     (listing: MapListing) => {
       const wasSaved = savedIds.has(listing.id);
       const onDevice = !UUID_RE.test(listing.id);
-      setSaveMessage(null);
       setSavedIds((previous) => {
         const next = new Set(previous);
         if (wasSaved) next.delete(listing.id);
@@ -559,6 +561,9 @@ export function MapCanvas({
                 else next.delete(listing.id);
                 return next;
               });
+              banner(truth ? MAP_SAVE_WORDS.saved : MAP_SAVE_WORDS.removed, { tone: "success", "data-testid": "save-banner" });
+            } else {
+              banner(wasSaved ? MAP_SAVE_WORDS.removed : MAP_SAVE_WORDS.savedOnDevice, { tone: "success", "data-testid": "save-banner" });
             }
             return;
           }
@@ -572,7 +577,8 @@ export function MapCanvas({
             else next.delete(listing.id);
             return next;
           });
-          setSaveMessage(result.error);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(result.error, { retry: () => save(listing) });
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
         }
@@ -1031,7 +1037,6 @@ export function MapCanvas({
             copy={copy}
             saved={savedIds.has(selected.id)}
             saveBusy={savePending}
-            saveMessage={saveMessage}
             onSave={() => save(selected)}
             onDismiss={() => setSelectedId(null)}
           />

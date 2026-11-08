@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
@@ -41,6 +41,7 @@ import {
 } from "@/lib/social/posts-model";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Writing something.
@@ -168,6 +169,12 @@ export function Composer({
   const body = draft ?? ownBody;
   const setBody = (next: string) => (onDraftChange ? onDraftChange(next) : setOwnBody(next));
   const [error, setError] = useState<string | null>(null);
+  /* A refusal is said by the one banner at the top of the screen (founder,
+     7 November 2026, "THE BANNER EVERYWHERE"); only a post whose picture was
+     lost keeps its recovery panel here, with its two ways on. */
+  useEffect(() => {
+    if (error) banner.error(error, { "data-testid": "composer-problem" });
+  }, [error]);
   /* V-40: the post was kept for when the signal returns. */
   const [keptNote, setKeptNote] = useState<string | null>(null);
   const OUTBOX = useClientCopy().platform.outbox;
@@ -402,6 +409,7 @@ export function Composer({
               setBody("");
               setError(null);
               setKeptNote(OUTBOX.waiting);
+              banner.info(OUTBOX.waiting);
               return;
             }
             if (done.state === "not_kept") {
@@ -656,9 +664,9 @@ export function Composer({
         </p>
       ) : null}
 
-      {error ? (
+      {error && strandedPost ? (
         <div
-          role="alert"
+          role="group"
           className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
         >
           <p className="leading-relaxed">{error}</p>

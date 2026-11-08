@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Radio } from "@/components/ui/Check";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { answerPepQuestion } from "@/lib/compliance/pep-actions";
+import { FieldProblem } from "@/components/ui/FieldProblem";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * SCUML item 20: the PEP question, asked of LISTERS at verification and at
@@ -34,6 +36,9 @@ export function PepQuestion({
   const [answer, setAnswer] = useState<"" | "yes" | "no">("");
   const saved = state?.ok === true;
   const id = `pep-${askedAt}`;
+  /* Saved, or refused as a whole, said by the one banner at the top of the
+     screen (founder, 7 November 2026); a field's own problem is said by it. */
+  useActionBanner(state && !state.ok && state.fieldErrors ? null : state, { ok: copy.saved });
 
   if (!open || saved) {
     const when = saved ? new Date() : answeredAt ? new Date(answeredAt) : null;
@@ -42,9 +47,7 @@ export function PepQuestion({
         <h2 id={`${id}-title`} className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">
           {copy.title}
         </h2>
-        <p className="nf-body-sm mt-inline-tight text-[var(--nf-content-secondary)]" role={saved ? "status" : undefined}>
-          {saved ? copy.saved : null}
-          {saved ? " " : null}
+        <p className="nf-body-sm mt-inline-tight text-[var(--nf-content-secondary)]">
           {when ? copy.answered.replace("{date}", formatDate(when, locale)) : null}
         </p>
         <div className="mt-group">
@@ -81,7 +84,7 @@ export function PepQuestion({
             </Radio>
           ))}
         </div>
-        {err?.fieldErrors?.isPep ? <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.isPep}</p> : null}
+        <FieldProblem id={`${id}-isPep-problem`} message={err?.fieldErrors?.isPep} when={state} />
       </fieldset>
 
       {answer === "yes" ? (
@@ -95,9 +98,7 @@ export function PepQuestion({
                 </Radio>
               ))}
             </div>
-            {err?.fieldErrors?.relation ? (
-              <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.relation}</p>
-            ) : null}
+            <FieldProblem id={`${id}-relation-problem`} message={err?.fieldErrors?.relation} when={state} />
           </fieldset>
           <div>
             <label htmlFor={`${id}-role`} className="nf-label block">
@@ -110,8 +111,9 @@ export function PepQuestion({
               placeholder={copy.rolePlaceholder}
               className="nf-field mt-xs min-h-[44px] w-full"
               aria-invalid={err?.fieldErrors?.role ? true : undefined}
+              aria-describedby={err?.fieldErrors?.role ? `${id}-role-problem` : undefined}
             />
-            {err?.fieldErrors?.role ? <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.role}</p> : null}
+            <FieldProblem id={`${id}-role-problem`} message={err?.fieldErrors?.role} when={state} />
           </div>
         </div>
       ) : null}
@@ -121,11 +123,6 @@ export function PepQuestion({
           {pending ? copy.saving : copy.save}
         </Button>
       </div>
-      {err && !err.fieldErrors ? (
-        <p role="alert" className="nf-caption mt-sm text-[var(--nf-state-warning)]">
-          {err.error}
-        </p>
-      ) : null}
     </form>
   );
 }

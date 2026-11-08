@@ -36,12 +36,14 @@ const sheetEntry = `
   import { useState } from "react";
   import { mount } from "@/lib/testing/browser-root";
   import { ForwardSheet } from "@/components/app/messages/ForwardSheet";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { getDictionary } from "@vallo/i18n";
   function Harness() {
     const [open, setOpen] = useState(true);
     const [done, setDone] = useState(null);
     return (
       <div>
+        <ToastHost />
         <p data-testid="done">{done ?? ""}</p>
         <ForwardSheet
           words={getDictionary("en").experienceInbox.thread.forward}
@@ -103,7 +105,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the forward chooser", () => {
       await page.getByTestId("forward-row").first().click();
       const refusal = page.getByTestId("forward-refusal");
       await refusal.waitFor();
-      expect(await refusal.textContent()).toBe("You can forward only to people you follow.");
+      /* Said by the one top banner (founder, 7 November 2026); the sheet stays open. */
+      expect(await refusal.textContent()).toContain("You can forward only to people you follow.");
       expect(await page.getByTestId("forward-sheet").count()).toBe(1);
       expect(await page.getByTestId("done").textContent()).toBe("");
     } finally {

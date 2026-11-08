@@ -4,6 +4,7 @@ import type { Dictionary } from "@vallo/i18n/core";
 import { Segmented } from "@/components/ui/Segmented";
 import { UNIT_SHAPES, inferShape, type UnitForm, type UnitShape } from "@/lib/listings/unit-shape";
 import "@/app/css/catalogue.css";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * WHAT SHAPE IS IT, in the listing wizard's first step (V-66).
@@ -58,11 +59,8 @@ export function UnitQuestions({
           </button>
         ))}
       </div>
-      {error && (
-        <p role="alert" className="nf-body-sm mt-inline block font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
+      {/* The step's problem is said by the one banner (founder, 7 November 2026). */}
+      <FieldProblem id="wizard-unit-problem" message={error} />
 
       <div className="mt-group space-y-group">
         {bedrooms > 0 && (

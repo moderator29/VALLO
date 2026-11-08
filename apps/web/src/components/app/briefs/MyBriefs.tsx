@@ -3,7 +3,6 @@
 import { State } from "@/components/ui/State";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { closeBrief } from "@/lib/briefs/actions";

@@ -185,7 +185,7 @@ export function LeaderboardScreen({
       {/* Round 3: the page's one top (`PageHeader variant="large"`, what
           PageFrame draws): the round back, the large title, the board's line
           under it, "How to climb" as the round action. */}
-      <div data-testid="lb-subtitle">
+      <div className="nf-lb__head" data-testid="lb-subtitle">
         <PageHeader
           variant="large"
           title={LEADERBOARD_TITLE}

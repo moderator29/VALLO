@@ -15,6 +15,7 @@ import { showCall } from "../call-store";
 import { resolveDeepLink } from "../CallLayer";
 import type { CallsCopy } from "../views";
 import { ReviewOutcomeForm } from "./ReviewOutcomeForm";
+import { banner } from "@/lib/ui/toast";
 
 export type DeskEntry = {
   id: string;
@@ -47,6 +48,10 @@ export type DeskAudit = { id: string; action: string; at: string; reason: string
  *
  * A review call verifies nothing by itself; the banner says so.
  */
+/* What each desk action did, said by the one banner at the top of the
+   screen (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+const WORDS = { moved: "Review call moved", cancelled: "Review call cancelled", added: "Added to the record" };
+
 export function ReviewDesk({
   review,
   entries,
@@ -70,20 +75,18 @@ export function ReviewDesk({
   const s = copy.staff;
   const allowed = reviewActions(review.status, review.scheduledFor, new Date(nowIso));
   const closed = review.status === "COMPLETED" || review.status === "CANCELLED";
-  const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const start = async () => {
     setBusy("start");
-    setNote(null);
     const answer = await startReviewCall({ reviewId: review.id }).catch(() => null);
     setBusy(null);
     if (!answer || !answer.ok) {
-      setNote(answer ? answer.error : copy.connecting.body);
+      banner.error(answer ? answer.error : copy.connecting.body, { retry: () => void start() });
       return;
     }
     if (answer.data.state === "BUSY") {
-      setNote(fill(copy.outgoing.busy, { name: subjectName ?? s.subject }));
+      banner.info(fill(copy.outgoing.busy, { name: subjectName ?? s.subject }));
       router.refresh();
       return;
     }
@@ -144,11 +147,6 @@ export function ReviewDesk({
           ) : (
             <p className="nf-call__note">{s.startHint}</p>
           )}
-          {note ? (
-            <p className="nf-call__error" role="alert">
-              {note}
-            </p>
-          ) : null}
           {allowed.canReschedule ? <Reschedule review={review} copy={copy} onDone={() => router.refresh()} /> : null}
           {allowed.canCancel ? <CancelReview reviewId={review.id} copy={copy} onDone={() => router.refresh()} /> : null}
         </section>
@@ -230,7 +228,6 @@ function Reschedule({ review, copy, onDone }: { review: StaffReview; copy: Calls
   const [open, setOpen] = useState(false);
   const [at, setAt] = useState(isoToLagosInput(review.proposedFor ?? review.scheduledFor));
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (!open) {
     return (
@@ -242,24 +239,20 @@ function Reschedule({ review, copy, onDone }: { review: StaffReview; copy: Calls
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     const iso = lagosInputToIso(at);
-    if (!iso) return setError(s.errors.time);
-    if (reason.trim().length < 3) return setError(s.errors.reason);
+    if (!iso) return void banner.error(s.errors.time);
+    if (reason.trim().length < 3) return void banner.error(s.errors.reason);
     setBusy(true);
     const answer = await rescheduleReviewCall({ reviewId: review.id, scheduledFor: iso, reason: reason.trim() }).catch(() => null);
     setBusy(false);
-    if (!answer || !answer.ok) return setError(answer ? answer.error : copy.connecting.body);
+    if (!answer || !answer.ok) return void banner.error(answer ? answer.error : copy.connecting.body);
     setOpen(false);
+    banner.success(WORDS.moved);
     onDone();
   };
   return (
     <form className="grid gap-xs" onSubmit={(e) => void submit(e)} noValidate>
       <TextField type="datetime-local" label={s.scheduleLabel} value={at} onChange={(e) => setAt(e.target.value)} />
       <TextField label={s.rescheduleReason} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} />
-      {error ? (
-        <p className="nf-call__error" role="alert">
-          {error}
-        </p>
-      ) : null}
       <div className="flex flex-wrap gap-xs">
         <Button type="submit" variant="primary" size="md" loading={busy}>
           {s.saveTime}
@@ -276,7 +269,6 @@ function CancelReview({ reviewId, copy, onDone }: { reviewId: string; copy: Call
   const s = copy.staff;
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (!open) {
     return (
@@ -287,21 +279,17 @@ function CancelReview({ reviewId, copy, onDone }: { reviewId: string; copy: Call
   }
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (reason.trim().length < 3) return setError(s.errors.reason);
+    if (reason.trim().length < 3) return void banner.error(s.errors.reason);
     setBusy(true);
     const answer = await cancelReviewCall({ reviewId, reason: reason.trim() }).catch(() => null);
     setBusy(false);
-    if (!answer || !answer.ok) return setError(answer ? answer.error : copy.connecting.body);
+    if (!answer || !answer.ok) return void banner.error(answer ? answer.error : copy.connecting.body);
+    banner.success(WORDS.cancelled);
     onDone();
   };
   return (
     <form className="grid gap-xs" onSubmit={(e) => void submit(e)} noValidate>
       <TextField label={s.cancelReason} value={reason} onChange={(e) => setReason(e.target.value)} maxLength={500} />
-      {error ? (
-        <p className="nf-call__error" role="alert">
-          {error}
-        </p>
-      ) : null}
       <div className="flex flex-wrap gap-xs">
         <Button type="submit" variant="danger" size="md" loading={busy}>
           {s.confirmCancel}
@@ -330,17 +318,15 @@ function AddEntry({
   const [body, setBody] = useState("");
   const [ref, setRef] = useState("");
   const [corrects, setCorrects] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const correctable = entries.filter((e) => e.kind === "NOTE" || e.kind === "EVIDENCE" || e.kind === "CORRECTION");
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!body.trim()) return setError(s.errors.body);
-    if (kind === "EVIDENCE" && !/^[a-z_]{2,40}:[0-9a-f-]{36}$/.test(ref.trim())) return setError(s.errors.evidence);
-    if (kind === "CORRECTION" && !corrects) return setError(s.errors.corrects);
+    if (!body.trim()) return void banner.error(s.errors.body);
+    if (kind === "EVIDENCE" && !/^[a-z_]{2,40}:[0-9a-f-]{36}$/.test(ref.trim())) return void banner.error(s.errors.evidence);
+    if (kind === "CORRECTION" && !corrects) return void banner.error(s.errors.corrects);
     setBusy(true);
-    setError(null);
     const answer = await addReviewEntry({
       reviewId,
       kind,
@@ -349,10 +335,11 @@ function AddEntry({
       ...(kind === "CORRECTION" ? { correctsId: corrects } : {}),
     }).catch(() => null);
     setBusy(false);
-    if (!answer || !answer.ok) return setError(answer ? answer.error : copy.connecting.body);
+    if (!answer || !answer.ok) return void banner.error(answer ? answer.error : copy.connecting.body);
     setBody("");
     setRef("");
     setCorrects("");
+    banner.success(WORDS.added);
     onDone();
   };
 
@@ -377,11 +364,6 @@ function AddEntry({
         <TextField label={s.evidenceRef} value={ref} onChange={(e) => setRef(e.target.value)} spellCheck={false} autoComplete="off" />
       ) : null}
       <TextArea label={s.noteBody} value={body} onChange={(e) => setBody(e.target.value)} maxLength={4000} rows={3} />
-      {error ? (
-        <p className="nf-call__error" role="alert">
-          {error}
-        </p>
-      ) : null}
       <div>
         <Button type="submit" variant="secondary" size="md" loading={busy}>
           {s.addEntry}

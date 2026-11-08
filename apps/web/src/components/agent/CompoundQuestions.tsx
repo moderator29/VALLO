@@ -4,6 +4,7 @@ import { useId } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Segmented } from "@/components/ui/Segmented";
 import type { CompoundForm, ParkingType, WasteDisposal } from "@/lib/listings/compound";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE COMPOUND: five questions in the listing wizard (V-28).
@@ -87,12 +88,11 @@ export function CompoundQuestions({
             value={value.flatsInCompound}
             data-testid="compound-flats"
             onChange={(e) => patch({ flatsInCompound: e.target.value.replace(/[^0-9]/g, "").slice(0, 3) })}
+            aria-invalid={flatsError ? true : undefined}
+            aria-describedby={flatsError ? "compound-flats-problem" : undefined}
           />
-          {flatsError && (
-            <span role="alert" className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-              {flatsError}
-            </span>
-          )}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="compound-flats-problem" message={flatsError} />
         </div>
 
         <div>

@@ -17,6 +17,7 @@ import {
   type FeeLine,
   type MoveInInput,
 } from "@/lib/site/move-in-calculator";
+import { banner } from "@/lib/ui/toast";
 
 type Copy = Dictionary["publicDoors"]["moveIn"];
 
@@ -113,6 +114,8 @@ export function MoveInCalculator({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
+      /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
+      banner(copy.copied, { tone: "success" });
       window.setTimeout(() => setCopied(false), 2400);
     } catch {
       setCopied(false);

@@ -94,6 +94,8 @@ export function UnsafeSheet({
         }
         const said = (block ? copy.left : copy.told).replace("{clock}", clock);
         setNote({ ok: true, text: result.data.held && filerIsLister ? `${said} ${copy.heldNote}` : said });
+        /* The panel keeps the record in the sheet; the banner says it (founder, 7 November 2026). */
+        banner.success(said, { "data-testid": "banner-unsafe-filed" });
         if (block && afterLeave) window.setTimeout(() => window.location.assign(afterLeave), 2500);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

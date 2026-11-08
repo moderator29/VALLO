@@ -64,6 +64,7 @@ const CSS = productCss(GLASS_CSS, "app/css/base.css", "app/css/chips.css", "app/
 const RULING_ENTRY = `
   import { getDictionary } from "@vallo/i18n";
   import { ArrivalRuling } from "@/components/app/arrival-check/ArrivalRuling";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   const t = getDictionary("en");
   window.__facts = { admin: t.arrivalCheck.admin, slide: t.experienceUi };
@@ -72,6 +73,7 @@ const RULING_ENTRY = `
   window.__release = (value) => window.__answer(value);
   mount(
     <div style={{ width: 360, padding: 16 }}>
+      <ToastHost />
       <ArrivalRuling bookingId="booking-slot" copy={t.arrivalCheck.admin} slide={t.experienceUi} />
     </div>,
   );
@@ -245,7 +247,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the console's arrival ruling", 
       await own.page.waitForFunction(() => document.querySelector("[data-testid=arrival-ruling-slide]")?.getAttribute("data-state") === "confirming");
       await release(own.page, { ok: false, error: "The server's own sentence, slot." });
       await own.page.waitForFunction(() => document.querySelector("[data-testid=arrival-ruling-slide]")?.getAttribute("data-state") === "idle");
-      expect(await own.page.locator("p[role=status]").textContent()).toBe("The server's own sentence, slot.");
+      /* Said by the one top banner (founder, 7 November 2026). */
+      expect(await own.page.getByTestId("arrival-ruling-message").textContent()).toContain("The server's own sentence, slot.");
     } finally {
       await own.close();
     }
@@ -263,7 +266,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the console's arrival ruling", 
       await release(none.page, { ok: true, data: { state: "none" } });
       await none.page.waitForFunction(() => document.querySelector("[data-testid=arrival-ruling-slide]")?.getAttribute("data-state") === "idle");
       /* Not a success: the slide is back at rest, with the sentence for "nothing to rule". */
-      expect(await none.page.locator("p[role=status]").textContent()).toBe(f.admin.ruleNone);
+      expect(await none.page.getByTestId("arrival-ruling-message").textContent()).toContain(f.admin.ruleNone);
       expect(await routerCalls(none.page)).toEqual([]);
     } finally {
       await none.close();

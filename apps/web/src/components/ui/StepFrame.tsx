@@ -255,5 +255,9 @@ export function StepFrame({
     </div>
   );
   if (!overlay) return frame;
-  return mounted ? createPortal(frame, document.body) : null;
+  /* Inline until mounted, then portalled (round 3): the overlay is fixed and
+     covers the screen where it stands, so a route whose whole page is the
+     flow (support/new, the registrations, the chooser) serves its question
+     in the server HTML instead of a blank first paint. */
+  return mounted ? createPortal(frame, document.body) : frame;
 }

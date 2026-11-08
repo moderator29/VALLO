@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/Button";
 import { Radio } from "@/components/ui/Check";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { flagPepPerson } from "@/lib/compliance/pep-actions";
+import { useActionBanner } from "@/components/ui/use-action-banner";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /** SCUML item 20: staff put a person on the PEP record, or take them off. Staff only. */
 export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePep"]["lane"]; question: Dictionary["compliancePep"]["question"] }) {
   const [state, action, pending] = useActionState<ActionResult<"flagged" | "proposed"> | null, FormData>(flagPepPerson, null);
+  /* Saved or refused, said by the one banner at the top of the screen (founder, 7 November 2026). */
+  useActionBanner(state, { ok: state?.ok ? (state.data === "proposed" ? copy.clearProposed : copy.flagged) : undefined });
   const err = state && !state.ok ? state : null;
   return (
     <form action={action} className="grid gap-sm" data-testid="pep-flag-form">
@@ -18,8 +22,16 @@ export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePe
         <label htmlFor="pep-flag-person" className="nf-label block">
           {copy.person}
         </label>
-        <input id="pep-flag-person" name="person" required autoComplete="off" className="nf-field mt-xs min-h-[44px] w-full" />
-        {err?.fieldErrors?.person ? <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.person}</p> : null}
+        <input
+          id="pep-flag-person"
+          name="person"
+          required
+          autoComplete="off"
+          className="nf-field mt-xs min-h-[44px] w-full"
+          aria-invalid={err?.fieldErrors?.person ? true : undefined}
+          aria-describedby={err?.fieldErrors?.person ? "pep-flag-person-problem" : undefined}
+        />
+        <FieldProblem id="pep-flag-person-problem" message={err?.fieldErrors?.person} when={state} />
       </div>
       <fieldset>
         <legend className="nf-label mb-inline">{question.who}</legend>
@@ -35,8 +47,15 @@ export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePe
         <label htmlFor="pep-flag-role" className="nf-label block">
           {question.role}
         </label>
-        <input id="pep-flag-role" name="role" maxLength={200} className="nf-field mt-xs min-h-[44px] w-full" />
-        {err?.fieldErrors?.role ? <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.role}</p> : null}
+        <input
+          id="pep-flag-role"
+          name="role"
+          maxLength={200}
+          className="nf-field mt-xs min-h-[44px] w-full"
+          aria-invalid={err?.fieldErrors?.role ? true : undefined}
+          aria-describedby={err?.fieldErrors?.role ? "pep-flag-role-problem" : undefined}
+        />
+        <FieldProblem id="pep-flag-role-problem" message={err?.fieldErrors?.role} when={state} />
       </div>
       <div>
         <label htmlFor="pep-flag-note" className="nf-label block">
@@ -52,16 +71,6 @@ export function PepFlagForm({ copy, question }: { copy: Dictionary["compliancePe
           {copy.clear}
         </Button>
       </div>
-      {state?.ok ? (
-        <p role="status" className="nf-caption text-[var(--nf-content-secondary)]">
-          {state.data === "proposed" ? copy.clearProposed : copy.flagged}
-        </p>
-      ) : null}
-      {err ? (
-        <p role="alert" className="nf-caption text-[var(--nf-state-warning)]">
-          {err.error}
-        </p>
-      ) : null}
     </form>
   );
 }

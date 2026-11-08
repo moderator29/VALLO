@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The consented departure.
@@ -92,6 +93,8 @@ export function ExternalLinkSheet({
       done = copyByExecCommand(href);
     }
     setCopied(done);
+    /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
+    if (done) banner("Link copied", { tone: "success" });
   }
 
   return (

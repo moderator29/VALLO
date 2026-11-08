@@ -14,6 +14,7 @@ import { PassportThreadRows, type PassportSheet } from "@/components/passport/Pa
 import { IconPlate } from "@/components/ui/IconPlate";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The conversation's options sheet, behind the kebab in the header.
@@ -67,6 +68,9 @@ export type SheetListing = {
 
 /** The words the options sheet draws, handed down from the thread page. */
 export type ThreadSheetCopy = Pick<Dictionary["trustVisible"], "unsafe">;
+
+/* What blocking did, said by the one banner (founder, 7 November 2026). */
+const BLOCKED_WORDS = "{name} is blocked";
 
 export function ThreadOptionsSheet({
   open,
@@ -130,7 +134,6 @@ export function ThreadOptionsSheet({
   sheetCopy: ThreadSheetCopy;
 }) {
   const [confirmingBlock, setConfirmingBlock] = useState(false);
-  const [blockNote, setBlockNote] = useState<string | null>(null);
   const [blocking, startBlocking] = useSafeTransition();
 
   /* Every close resets the block confirmation, so reopening the sheet never
@@ -138,7 +141,6 @@ export function ThreadOptionsSheet({
      of a moment ago. */
   function closeEverything() {
     setConfirmingBlock(false);
-    setBlockNote(null);
     onClose();
   }
 
@@ -148,9 +150,11 @@ export function ThreadOptionsSheet({
       try {
         const result = await blockUserSafely({ userId: counterpartId });
         if (!result.ok) {
-          setBlockNote(result.error);
+          banner.error(result.error, { retry: doBlock });
           return;
         }
+        /* Said by the one banner, which stays up across the move (founder, 7 November 2026). */
+        banner.success(BLOCKED_WORDS.replace("{name}", counterpartName));
         /* The thread is gone for both of them now, so the sheet does not stay
            open over a conversation that no longer exists. */
         setConfirmingBlock(false);
@@ -332,14 +336,6 @@ export function ThreadOptionsSheet({
               <p className="mt-2xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
                 {words.blockConfirm}
               </p>
-              {blockNote && (
-                <p
-                  role="alert"
-                  className="mt-xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]"
-                >
-                  {blockNote}
-                </p>
-              )}
               <div className="mt-sm grid gap-xs">
                 <Button variant="danger" full onClick={doBlock} loading={blocking}>
                   {words.block.replace("{name}", counterpartName)}
@@ -349,7 +345,6 @@ export function ThreadOptionsSheet({
                   full
                   onClick={() => {
                     setConfirmingBlock(false);
-                    setBlockNote(null);
                   }}
                 >
                   {words.keepOpen}

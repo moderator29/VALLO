@@ -133,8 +133,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 |---|---|---|---|---|---|---|
 | `/agreements` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); no Back while it holds the dock slot (social off) |
 | `/agreements/[id]` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
-| `/agreements/[id]/fund` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
-| `/agreements/[id]/held` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/agreements/[id]/fund` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; loading.tsx in its own shape (SW12) |
+| `/agreements/[id]/held` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; loading.tsx in its own shape (SW12) |
 
 ## Member: ai
 
@@ -212,8 +212,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/checkout` | FE |  |  |  |  |  |
-| `/checkout/[bookingId]` | FE |  |  |  |  |  |
+| `/checkout` | PAGES | PageFrame | yes | yes | yes | R3: PageFrame; loading in shape |
+| `/checkout/[bookingId]` | PAGES | PageFrame | yes | yes | yes | R3 job 3: one progress mark, the step frame bar and its words; PageFrame with the scene behind the title band |
 
 ## Member: circle
 
@@ -231,7 +231,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/compare` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/compare` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
 
 ## Member: contact
 
@@ -249,7 +249,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/directory` | PAGES | own | yes | yes | yes | DirectoryScreen draws PageHeader inside components/app/directory |
+| `/directory` | PAGES | PageFrame top | yes | yes | yes | DirectoryScreen top is PageHeader large; loading in shape (was generic) |
 
 ## Member: disclaimer
 
@@ -336,7 +336,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/inspections/gate/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/inspections/gate/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
 
 ## Member: landlord
 
@@ -348,7 +348,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/leaderboard` | PAGES | own | yes | yes | yes | kept: LeaderboardScreen own header (components/app/leaderboard) |
+| `/leaderboard` | PAGES | PageFrame top | yes | yes | yes | LeaderboardScreen top is PageHeader large; loading in shape (was generic) |
 
 ## Member: legal
 
@@ -406,7 +406,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
 | `/pay/crypto/[reference]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/pay/deposit/[reservationId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/pay/deposit/[reservationId]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
 
 ## Member: payments
 
@@ -430,8 +430,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/price` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/price/area/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/price` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
+| `/price/area/[id]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
 
 ## Member: privacy
 
@@ -452,11 +452,11 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 |---|---|---|---|---|---|---|
 | `/profile` | FE |  |  |  |  |  |
 | `/profile/application` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/profile/setup` | PAGES |  |  |  |  | job 3: AddWorkspaceChooser onto OptionCards |
-| `/profile/setup/[role]` | PAGES | PageFrame |  |  |  | PageFrame now; job 3 ApplyWizard onto StepFrame |
-| `/profile/setup/agent` | FE |  |  |  |  |  |
-| `/profile/setup/firm` | FE |  |  |  |  |  |
-| `/profile/setup/owner` | FE |  |  |  |  |  |
+| `/profile/setup` | PAGES | StepFrame | yes | yes | yes | R3 job 3: chooser on StepFrame, each door group as OptionCards, the door 3D object as step art; loading in shape. Seen via /preview/b1b/chooser |
+| `/profile/setup/[role]` | PAGES | StepFrame | yes | yes | yes | R3 job 3: ApplyWizard on StepFrame (draft line as the save state). Seen via /preview/pages-frame?p=apply-wizard |
+| `/profile/setup/agent` | PAGES | StepFrame | yes | yes | yes | R3 job 3: same RegisterShell on StepFrame. Seen via /preview/b1b/agent |
+| `/profile/setup/firm` | PAGES | redirect |  |  |  | redirects to /profile/setup/agent (SUP-10) |
+| `/profile/setup/owner` | PAGES | StepFrame | yes | yes | yes | R3 job 3: RegisterShell is StepFrame (eyebrow, Step N of M, Continue in the foot); done screen secondary under content. Seen via /preview/b1b/owner, owner-done |
 
 ## Member: r
 
@@ -514,10 +514,10 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/rewards` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/rewards/history` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/rewards/referrals` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/rewards/withdraw` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
+| `/rewards` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
+| `/rewards/history` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
+| `/rewards/referrals` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
+| `/rewards/withdraw` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here); loading.tsx in its own shape (SW12) |
 
 ## Member: s
 
@@ -557,8 +557,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/settings` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 | `/settings/accessibility` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 | `/settings/account` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
-| `/settings/ai-assistant` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
-| `/settings/ai-assistant/consent` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see |
+| `/settings/ai-assistant` | PAGES | PageFrame | yes | yes | yes | R3: filled state seen via /preview/pages-frame?p=ai-assistant-on (sample rows); loading in shape |
+| `/settings/ai-assistant/consent` | PAGES | PageFrame |  |  |  | R3 job 1: on PageFrame in code; signed-in only (redirect or not-found without a session), needs a fixture harness to see; loading.tsx in its own shape (SW12) |
 | `/settings/appearance` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 | `/settings/devices` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 | `/settings/devices/alert` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
@@ -640,7 +640,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/support` | PAGES | own | yes | yes | yes | kept: SupportHero greeting top; floating Back to move into a header (job 6) |
 | `/support/messages` | MSG |  |  |  |  |  |
 | `/support/messages/[id]` | MSG |  |  |  |  |  |
-| `/support/new` | PAGES | StepFrame |  |  |  | R3 job 3: four steps on StepFrame (kind as OptionCards); screenshots with job 3 |
+| `/support/new` | PAGES | StepFrame | yes | yes | yes | R3 job 3: four steps (kind as OptionCards, topic, details, photo and Send); loading in the frame shape. Seen via /preview/support?screen=new |
 
 ## Member: tenancy
 
@@ -676,12 +676,12 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/wallet` | PAGES | own | yes | yes | yes | kept: WalletHeader (the wallet own top, 9 callers in components/money); recommend a PageFrame decision |
-| `/wallet/add` | FE |  |  |  |  |  |
-| `/wallet/send` | FE |  |  |  |  |  |
-| `/wallet/settings` | FE |  |  |  |  |  |
-| `/wallet/transactions` | FE |  |  |  |  |  |
-| `/wallet/withdraw` | FE |  |  |  |  |  |
+| `/wallet` | PAGES | PageFrame top | yes | yes | yes | WalletHeader is now PageHeader large (round back, large title, gear action). Seen via /preview/money/wallet |
+| `/wallet/add` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, check, pay on StepFrame. Seen via /preview/money/wallet?state=add* |
+| `/wallet/send` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, review (slide stays the only confirm), code on StepFrame; outcomes keep the wallet top. Seen via /preview/money/wallet?state=send* |
+| `/wallet/settings` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card) |
+| `/wallet/transactions` | PAGES | PageFrame top | yes | yes | yes | WalletHeader large; loading in its own shape (was the overview card) |
+| `/wallet/withdraw` | PAGES | StepFrame | yes | yes | yes | R3 job 3: amount, review (slide), code on StepFrame. Seen via /preview/money/wallet?state=withdraw* |
 
 ## Member: welcome
 

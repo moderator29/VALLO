@@ -59,11 +59,11 @@ export function ArrivalRuling({
     try {
       const result = await ruleArrivalCheck({ bookingId, ruling });
       if (!result.ok) {
-        banner.error(result.error || copy.ruleFailed);
+        banner.error(result.error || copy.ruleFailed, { "data-testid": "arrival-ruling-message" });
         return false;
       }
       if (result.data.state === "none") {
-        banner.info(copy.ruleNone);
+        banner.info(copy.ruleNone, { "data-testid": "arrival-ruling-message" });
         return false;
       }
       /* Said by the one banner at the top of the screen (founder, 7 November 2026). */

@@ -15,6 +15,7 @@ import { IconPlate } from "@/components/ui/IconPlate";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /** The picker's words, `experienceInbox.share.picker`, from the server page. */
 export type ShareCopy = Dictionary["experienceInbox"]["share"]["picker"];
@@ -226,17 +227,16 @@ function ConfirmSend({
 }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
 
   const send = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await sendMessage({ conversationId, body: shareBody(target) });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
+        banner.success("Shared in the conversation");
         router.replace(`/messages/${conversationId}`);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -247,11 +247,6 @@ function ConfirmSend({
   return (
     <div className="nf-panel nf-panel--card nf-context-card mt-block flex-col items-stretch" role="group" aria-label={label}>
       <p className={TYPE.body}>{copy.lands}</p>
-      {error && (
-        <p role="alert" className={`mt-inline-tight ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
       <div className="nf-context-card__actions">
         <Button variant="primary" onClick={send} loading={pending} data-testid="share-confirm">
           {label}

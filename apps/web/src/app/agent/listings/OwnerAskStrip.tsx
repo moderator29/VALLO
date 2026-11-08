@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { answerOwnerHeartbeat } from "@/lib/landlord/close-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-31 FOR A LISTING ITS OWNER PUT UP: "Is this still available?"
@@ -54,11 +55,14 @@ export function OwnerAskStrip({
             startTransition(async () => {
               try {
                 const result = await answerOwnerHeartbeat({ listingId });
+                /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
                 if (!result.ok) {
                   setState("failed");
+                  banner.error(copy.failed);
                   return;
                 }
                 setState("done");
+                banner.success(copy.thanks);
                 router.refresh();
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
@@ -72,11 +76,6 @@ export function OwnerAskStrip({
           {copy.let}
         </Button>
       </div>
-      {state === "failed" && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {copy.failed}
-        </p>
-      )}
     </div>
   );
 }

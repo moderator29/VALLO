@@ -8,6 +8,8 @@ import { completeReviewCall } from "@/lib/calls/review-actions";
 import { lagosInputToIso, outcomeFormErrors, type FormErrors } from "@/lib/calls/screen";
 import type { ReviewCompletionOutcome } from "@/lib/calls/types";
 import type { CallsCopy } from "../views";
+import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 const OUTCOMES: ReviewCompletionOutcome[] = [
   "REVIEW_COMPLETED",
@@ -25,6 +27,9 @@ const OUTCOMES: ReviewCompletionOutcome[] = [
  * Recording an outcome ends a live review call and closes the review; it
  * changes no verification, badge or listing status by itself.
  */
+/* What recording the outcome did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { recorded: "Outcome recorded" };
+
 export function ReviewOutcomeForm({
   reviewId,
   copy,
@@ -39,7 +44,6 @@ export function ReviewOutcomeForm({
   const [summary, setSummary] = useState("");
   const [followUpDue, setFollowUpDue] = useState("");
   const [errors, setErrors] = useState<FormErrors<"outcome" | "summary" | "followUpDue">>({});
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
@@ -48,7 +52,6 @@ export function ReviewOutcomeForm({
     setErrors(found);
     if (Object.keys(found).length > 0 || !outcome) return;
     setBusy(true);
-    setError(null);
     const due = outcome === "FOLLOW_UP_REQUIRED" ? lagosInputToIso(followUpDue) : null;
     const answer = await completeReviewCall({
       reviewId,
@@ -58,9 +61,10 @@ export function ReviewOutcomeForm({
     }).catch(() => null);
     setBusy(false);
     if (!answer || !answer.ok) {
-      setError(answer ? answer.error : copy.connecting.body);
+      banner.error(answer ? answer.error : copy.connecting.body);
       return;
     }
+    banner.success(WORDS.recorded);
     onDone?.();
   };
 
@@ -82,11 +86,8 @@ export function ReviewOutcomeForm({
           </label>
         ))}
       </fieldset>
-      {errors.outcome ? (
-        <p id="review-outcome-error" className="nf-call__error" role="alert">
-          {errors.outcome}
-        </p>
-      ) : null}
+      {/* The choice keeps its words for a screen reader; the banner says them (founder, 7 November 2026). */}
+      <FieldProblem id="review-outcome-error" message={errors.outcome} />
       <TextArea
         label={s.outcomeSummary}
         value={summary}
@@ -105,11 +106,6 @@ export function ReviewOutcomeForm({
           error={errors.followUpDue}
           data-testid="review-outcome-due"
         />
-      ) : null}
-      {error ? (
-        <p className="nf-call__error" role="alert">
-          {error}
-        </p>
       ) : null}
       <div>
         <Button type="submit" variant="primary" size="md" loading={busy} data-testid="review-outcome-submit">

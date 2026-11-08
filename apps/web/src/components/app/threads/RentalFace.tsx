@@ -27,6 +27,7 @@ import { viewingWords } from "@/components/app/inspections/viewing-words";
 import { reportNoShow } from "@/lib/inspections/no-show-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE RENTAL FACE: the inspection request, inside the chat it was made in.
@@ -110,7 +111,6 @@ export function RentalFace({
   const [state, setState] = useState<InspectionState>(inspection.state);
   const [slotAt, setSlotAt] = useState<string | null>(inspection.slotAt);
   const [settled, setSettled] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [sheet, setSheet] = useState<OpenSheet>(null);
   /* A second tap while the first is in flight is dropped, not sent twice. */
   const inFlight = useRef(false);
@@ -120,13 +120,13 @@ export function RentalFace({
   function run(work: () => Promise<{ ok: boolean; error?: string }>, then: () => void) {
     if (inFlight.current) return;
     inFlight.current = true;
-    setError(null);
     startTransition(async () => {
       try {
         try {
           const result = await work();
           if (!result.ok) {
-            setError(result.error ?? copy.failed);
+            /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+            banner.error(result.error ?? copy.failed, { retry: () => run(work, then) });
             return;
           }
           then();
@@ -290,11 +290,6 @@ export function RentalFace({
             <p className={`mt-inline-tight ${TYPE.rowMeta}`}>{fill(copy.confirmedFor, { when: agreed })}</p>
           )}
 
-          {error && (
-            <p role="alert" className={`mt-inline-tight ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-              {error}
-            </p>
-          )}
 
           {yourMove && role === "lister" && (
             <div className="mt-row flex flex-wrap gap-xs">
@@ -449,7 +444,6 @@ function OutcomeSheet({
 }) {
   const [outcome, setOutcome] = useState<InspectionOutcome | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const inFlight = useRef(false);
   const options: { value: InspectionOutcome; label: string }[] = [
     { value: "inspected", label: copy.outcomeInspected },
@@ -460,16 +454,16 @@ function OutcomeSheet({
     if (inFlight.current) return;
     inFlight.current = true;
     setBusy(true);
-    setError(null);
     try {
       const result = await onSubmit(chosen);
       if (!result.ok) {
-        setError(result.error ?? copy.failed);
+        /* Said by the one banner above the sheet (founder, 7 November 2026). */
+        banner.error(result.error ?? copy.failed, { retry: () => void save(chosen) });
         return;
       }
       onOpenChange(false);
     } catch {
-      setError(copy.failed);
+      banner.error(copy.failed, { retry: () => void save(chosen) });
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -495,11 +489,6 @@ function OutcomeSheet({
           );
         })}
       </div>
-      {error && (
-        <p role="alert" className={`mt-sm ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
       <Button
         full
         size="lg"
