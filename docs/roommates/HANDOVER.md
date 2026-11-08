@@ -98,10 +98,13 @@ Dev only: `/preview/features/roommates?screen=...` (fictional data).
 | Check | State |
 |---|---|
 | SQL end to end on local Postgres | PASS |
-| Type-check | in progress (agents finishing) |
-| Lint, unit and guard tests | in progress |
-| CI (draft PR #110) | running |
-| Screenshots of the real screens | after the agents land |
+| CI Build (includes the claims guard) | PASS |
+| CI Advisories (production dependencies) | PASS |
+| CI iOS compile (unsigned, simulator) | PASS |
+| CI Android debug build | PASS |
+| CI Database probes | 124 of 129; db-06 passes after the paste, the other four are live-data states (section 1) |
+| Type-check, lint, unit and guard tests | being finished by the agents; see the PR's latest run |
+| Screenshots of the real screens | rounds 1 and 2 sent (preview harness, fictional data) |
 | iOS and Android devices | NOT TESTED on a device (Capacitor build not run in this session) |
 
 ## 6. Known limitations
