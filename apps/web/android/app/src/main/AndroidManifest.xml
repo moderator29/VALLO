@@ -230,6 +230,10 @@
                      anything under it open in the app. -->
                 <data android:path="/circle" />
                 <data android:pathPrefix="/circle/" />
+                <!-- Vallo Roommates (8 November 2026): a shared room, a
+                     profile, a group invite or a school page open in the app. -->
+                <data android:path="/roommates" />
+                <data android:pathPrefix="/roommates/" />
                 <!-- An invite link (D85): /join/<code> keeps the code in the
                      web view's cookie jar and hands over to sign-up there, so
                      a sign-up made in the app is attributed to the inviter. -->

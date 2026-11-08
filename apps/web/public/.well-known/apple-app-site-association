@@ -94,6 +94,14 @@
           {
             "/": "/circle/*",
             "comment": "Vallo Circle: an invite or a shared Circle page opens in the app."
+          },
+          {
+            "/": "/roommates",
+            "comment": "Vallo Roommates (8 November 2026): the Roommates home opens in the app."
+          },
+          {
+            "/": "/roommates/*",
+            "comment": "Vallo Roommates: a shared room, a roommate profile, a group invite or a school page opens in the app."
           }
         ]
       }
