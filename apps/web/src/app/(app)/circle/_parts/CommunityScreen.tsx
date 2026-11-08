@@ -1,4 +1,7 @@
+import Image from "next/image";
+
 import { PageFrame } from "@/components/app/PageFrame";
+import { FEATURE_ART } from "@/lib/features/art";
 import { CirclePostCard } from "@/components/social/circle/CircleVisuals";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -47,18 +50,34 @@ export function CommunityScreen({
       subtitle={CATEGORY_LABEL[community.category]}
       fallback={fallback}
       width="default"
-      actions={
-        <JoinControl
-          communityId={community.id}
-          slug={community.slug}
-          name={community.name}
-          visibility={community.visibility}
-          initial={joinState}
-          signedIn={page.signedIn}
-        />
-      }
     >
       <div className="nf-circle" data-testid="circle-community">
+        {/* THE COVER (8 November 2026): the community's art under a scrim,
+            its object, its name, the live member count and Join or Joined,
+            in the new Circle hero's register. */}
+        <section className="nf-ccover" data-theme="dark" aria-label={community.name} data-testid="community-cover">
+          <span className="nf-ccover__art" aria-hidden="true">
+            <Image src={FEATURE_ART.circlePromo.src} alt="" fill sizes="(max-width: 768px) 100vw, 720px" style={{ objectFit: "cover", objectPosition: FEATURE_ART.circlePromo.focus }} />
+          </span>
+          <span className="nf-ccover__scrim" aria-hidden="true" />
+          <div className="nf-ccover__body">
+            <CommunityGlyph category={community.category} size="lg" />
+            <h2 className="nf-ccover__name">{community.name}</h2>
+            <p className="nf-ccover__meta nf-numeric">
+              {[CATEGORY_LABEL[community.category], countWords(community.members, CIRCLE_COPY.card.members[0], CIRCLE_COPY.card.members[1])].join(" · ")}
+            </p>
+            <div className="nf-ccover__join">
+              <JoinControl
+                communityId={community.id}
+                slug={community.slug}
+                name={community.name}
+                visibility={community.visibility}
+                initial={joinState}
+                signedIn={page.signedIn}
+              />
+            </div>
+          </div>
+        </section>
         <section className="nf-ccom" aria-label={community.name}>
           <div className="nf-ccom__top">
             <CommunityGlyph category={community.category} size="lg" />

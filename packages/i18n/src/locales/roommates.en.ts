@@ -1142,6 +1142,11 @@ export const roommatesEn = {
     chatViewListing: "View listing",
     chatScheduleViewing: "Schedule viewing",
     chatLabel: "From Vallo Roommates",
+    feedPromoEyebrow: "New in Vallo",
+    feedPromoTitle: "Vallo Roommates",
+    feedPromoBody: "Find compatible people to share a home with, and split the costs.",
+    feedPromoCta: "Open Roommates",
+    feedPromoClose: "Hide this",
   },
   lister: {
     title: "Good for sharing",

@@ -156,6 +156,7 @@ function Person({ author, at, now, lead }: { author: CircleAuthor | null; at: st
         <span className="nf-cperson__name">
           {lead ? <span className="nf-cperson__lead">{lead}</span> : null}
           <span className="nf-cperson__label">{name}</span>
+          {author?.isAgent ? <span className="nf-cperson__role">{CIRCLE_COPY.home.roleAgent}</span> : null}
           {author?.verified ? (
             <span className="nf-cperson__tick" title={CIRCLE_COPY.pro.verified}>
               <UiIcon name="verified" size={14} filled />

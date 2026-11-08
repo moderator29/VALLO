@@ -710,14 +710,15 @@
     border-color: transparent;
     background: var(--nf-surface-secondary);
   }
+  /* The rail: one clean line from the reply it answers, full height. */
   .nf-creply--nested::before {
     content: "";
     position: absolute;
-    inset-block: var(--nf-space-sm);
+    inset-block: 0;
     inset-inline-start: calc(-1 * var(--nf-space-sm));
     inline-size: 2px;
     border-radius: var(--nf-radius-pill);
-    background: var(--nf-divider);
+    background: var(--nf-brand-tint-2);
   }
   .nf-creply__body {
     margin: 0;
@@ -727,7 +728,12 @@
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
+  /* The reply bar stays docked above the dock and the keyboard while the
+     thread scrolls (sticky, so it still sits in the flow at the foot). */
   .nf-creplybox {
+    position: sticky;
+    inset-block-end: calc(var(--nf-tabbar-clearance) + var(--nf-space-xs));
+    z-index: var(--nf-z-sticky);
     padding: var(--nf-space-md);
     border-radius: var(--nf-radius-xl);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
@@ -801,5 +807,93 @@
   /* Room at the foot for the compose button, so it never rests over content. */
   [data-testid="circle-home"] {
     padding-block-end: calc(var(--nf-space-3xl) + var(--nf-space-md));
+  }
+
+  /* ------------------------------------------------ the community cover */
+  .nf-ccover {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    align-items: end;
+    min-inline-size: 0;
+    min-block-size: clamp(14rem, 48vw, 18rem);
+    overflow: hidden;
+    border-radius: var(--nf-radius-island);
+    background: var(--nf-surface-artwork);
+    color: var(--nf-content-primary);
+    box-shadow: var(--nf-elevation-floating);
+  }
+  .nf-ccover__art {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+  }
+  .nf-ccover__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, color-mix(in oklab, var(--nf-surface-artwork) 15%, transparent) 0%, var(--nf-surface-artwork) 100%);
+  }
+  .nf-ccover__body {
+    display: grid;
+    justify-items: start;
+    gap: var(--nf-space-xs);
+    min-inline-size: 0;
+    padding: var(--nf-space-lg) var(--nf-space-md);
+  }
+  .nf-ccover__name {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .nf-ccover__meta {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-ccover__join {
+    margin-block-start: var(--nf-space-2xs);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-ccover__art {
+      animation: nf-cbn-drift 18s var(--nf-ease-standard) both;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-ccover__art {
+    animation: none;
+  }
+
+  .nf-cperson__role {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: var(--nf-space-2xs);
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-control-sm);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  @media (max-width: 30rem) {
+    .nf-creplybox textarea {
+      min-height: 4.5rem;
+    }
+  }
+  /* Helpful: the tick lands with a spring when it turns on. */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-testid="circle-helpful"][aria-pressed="true"] svg {
+      animation: nf-chelp-pop var(--nf-duration-pop) var(--nf-ease-spring) both;
+    }
+  }
+  @keyframes nf-chelp-pop {
+    from {
+      transform: scale(0.4);
+      opacity: 0.4;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) [data-testid="circle-helpful"] svg {
+    animation: none;
   }
 }

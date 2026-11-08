@@ -27,6 +27,7 @@ export default async function AskPage({ searchParams }: { searchParams: Promise<
       closeHref="/circle"
       listingId={listing?.id ?? null}
       prefillTitle={listing ? `What is it like to live around ${listing.area ?? listing.title}?` : null}
+      pickType={query.pick === "1"}
     />
   );
 }

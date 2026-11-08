@@ -241,7 +241,7 @@ export function CircleFeaturedCard({ post, now }: { post: CirclePostView; now: n
 
 /** The floating compose button (client: it hides while the hero action shows). */
 export function CircleComposeFab({ signedIn }: { signedIn: boolean }) {
-  return <ComposeFab href={signedIn ? "/circle/new" : "/sign-in?next=%2Fcircle%2Fnew"} label={CIRCLE_COPY.home.compose} />;
+  return <ComposeFab href={signedIn ? "/circle/ask?pick=1" : "/sign-in?next=%2Fcircle%2Fask%3Fpick%3D1"} label={CIRCLE_COPY.home.compose} />;
 }
 
 export type CircleTab = { key: string; label: string; href: string };

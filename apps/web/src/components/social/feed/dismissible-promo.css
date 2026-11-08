@@ -1,0 +1,26 @@
+@layer components {
+  .nf-promo-dismiss {
+    position: relative;
+    min-inline-size: 0;
+  }
+  .nf-promo-dismiss__close {
+    position: absolute;
+    inset-block-start: var(--nf-space-xs);
+    inset-inline-end: var(--nf-space-xs);
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-artwork);
+    color: var(--nf-content-on-brand);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-promo-dismiss__close:active {
+    transform: scale(0.92);
+  }
+  .nf-promo-dismiss__close:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+}

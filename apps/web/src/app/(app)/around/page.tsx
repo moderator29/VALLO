@@ -1,3 +1,5 @@
+import { PromoBanner } from "@/components/app/PromoBanner";
+import { DismissiblePromo } from "@/components/social/feed/DismissiblePromo";
 import type { Metadata } from "next";
 import { sheetWordsOf } from "@/components/social/sheet-words";
 import { getDictionary } from "@vallo/i18n";
@@ -255,6 +257,22 @@ export default async function AroundPage({
 
           {/* What the feed shows: For you, Friends and the categories. */}
           <FeedTabs active={tab} category={category} t={t} />
+
+          {/* Vallo Roommates, once, on For you: the feed's door to it (Circle
+              and Roommates already have theirs). The reader can put it away. */}
+          {tab === "for-you" && !category ? (
+            <DismissiblePromo storageKey="vallo.promo.roommates.feed" closeLabel={t.roommates.entryX.feedPromoClose}>
+              <PromoBanner
+                eyebrow={t.roommates.entryX.feedPromoEyebrow}
+                title={t.roommates.entryX.feedPromoTitle}
+                body={t.roommates.entryX.feedPromoBody}
+                cta={t.roommates.entryX.feedPromoCta}
+                href="/roommates"
+                art="home-small"
+                testId="feed-roommates-promo"
+              />
+            </DismissiblePromo>
+          ) : null}
 
           {/* THE FEED'S OWN WAY TO POST: your face, the invitation, and the
               photo, listing and post doors, every one a tap into the same

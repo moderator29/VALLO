@@ -7,6 +7,8 @@ const PAGES = [
   "circle",
   "circle?first=1",
   "circle-ask",
+  "circle-ask?pick=1",
+  "circle-ask?posted=1",
   "circle-new",
   "circle-community",
   "circle-community?as=visitor",

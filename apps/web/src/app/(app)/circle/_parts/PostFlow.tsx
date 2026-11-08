@@ -5,10 +5,17 @@ import { useEffect, useState } from "react";
 
 import { StepFrame } from "@/components/ui/StepFrame";
 import { createCirclePost } from "@/lib/features/circle/actions";
+import { CIRCLE_COPY } from "@/lib/features/circle/copy";
+import { Icon3D } from "@/components/ui/Icon3D";
+import { SuccessBadge } from "@/components/ui/SuccessMoment";
+import { feedback } from "@/lib/ui/feedback";
+import "./post-flow.css";
 import { LIMITS } from "@/lib/features/circle/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+
+const P = CIRCLE_COPY.home.post;
 
 /**
  * ASK THE COMMUNITY, AND START A DISCUSSION (FEED_AND_CIRCLE_BRIEF part 8),
@@ -48,8 +55,14 @@ export function PostFlow({
   closeHref,
   listingId,
   prefillTitle,
+  pickType = false,
+  initialPosted = null,
 }: {
   mode: "question" | "discussion";
+  /** Open on the type picker (the compose button): Discussion, Question, Roommate, Property. */
+  pickType?: boolean;
+  /** The harness only: open on the "Posted!" moment. */
+  initialPosted?: { id: string; held: boolean } | null;
   communities: Option[];
   presetCommunityId?: string | null;
   closeHref: string;
@@ -58,8 +71,10 @@ export function PostFlow({
 }) {
   const router = useRouter();
   const key = `vallo.circle.draft.${mode}.${presetCommunityId ?? "any"}`;
-  const firstStep = presetCommunityId ? 2 : 1;
+  const firstStep = pickType ? 0 : presetCommunityId ? 2 : 1;
   const [step, setStep] = useState(firstStep);
+  const [kind, setKind] = useState<"question" | "discussion">(mode);
+  const [posted, setPosted] = useState<{ id: string; held: boolean } | null>(initialPosted);
   const [dir, setDir] = useState<"forward" | "back">("forward");
   const [draft, setDraft] = useState<Draft>({ communityId: presetCommunityId ?? "", title: prefillTitle ?? "", body: "" });
   const [pending, start] = useSafeTransition();
@@ -82,14 +97,14 @@ export function PostFlow({
   const back = step > firstStep ? () => { setDir("back"); setStep(step - 1); } : undefined;
   const forward = () => { setDir("forward"); setStep(step + 1); };
   const community = communities.find((c) => c.id === draft.communityId);
-  const question = mode === "question";
+  const question = kind === "question";
 
   const publish = () =>
     start(async () => {
       try {
         const result = await createCirclePost({
           communityId: draft.communityId,
-          type: mode,
+          type: kind,
           title: draft.title,
           body: draft.body,
           listingId: listingId ?? null,
@@ -99,14 +114,68 @@ export function PostFlow({
           return;
         }
         writeDraft(key, null);
-        banner.success(result.data.held ? "Posted. It shows once a moderator has looked at it." : question ? "Your question is live" : "Your discussion is live", {
-          action: { label: "View", run: () => router.push(`/circle/p/${result.data.id}`) },
-        });
-        router.push(`/circle/p/${result.data.id}`);
+        feedback("confirm");
+        banner.success(result.data.held ? P.postedHeld : P.posted);
+        setPosted({ id: result.data.id, held: result.data.held });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
+
+  /* THE PAYOFF: "Posted!", with the two ways on. */
+  if (posted) {
+    return (
+      <StepFrame
+        step={total}
+        total={total}
+        eyebrow={P.typeEyebrow}
+        title={P.posted}
+        subtitle={posted.held ? P.postedHeld : P.postedLine.replace("{community}", community?.name ?? CIRCLE_COPY.title)}
+        closeHref="/circle"
+        direction="forward"
+        primary={{ label: P.view, onClick: () => router.push(`/circle/p/${posted.id}`), testId: "circle-posted-view" }}
+        secondary={{ label: P.back, onClick: () => router.push("/circle") }}
+      >
+        <div className="nf-cposted" data-testid="circle-posted">
+          <SuccessBadge />
+        </div>
+      </StepFrame>
+    );
+  }
+
+  /* THE TYPE PICKER: four tiles with the founder's 3D objects. Roommate
+     opens the Roommates post flow; Property is a discussion about a home. */
+  if (step === 0) {
+    const tiles = [
+      { key: "discussion", icon: "local-talks", title: P.discussion, sub: P.discussionSub, go: () => { setKind("discussion"); forward(); } },
+      { key: "question", icon: "assistant", title: P.question, sub: P.questionSub, go: () => { setKind("question"); forward(); } },
+      { key: "roommate", icon: "home-small", title: P.roommate, sub: P.roommateSub, go: () => router.push("/roommates/new") },
+      { key: "property", icon: "apartment", title: P.property, sub: P.propertySub, go: () => { setKind("discussion"); forward(); } },
+    ] as const;
+    return (
+      <StepFrame step={1} total={total + 1} eyebrow={P.typeEyebrow} title={P.typeTitle} closeHref={closeHref} direction={dir}>
+        <ul className="nf-ctype" data-testid="circle-type-picker">
+          {tiles.map((t) => (
+            <li key={t.key}>
+              <button
+                type="button"
+                className="nf-ctype__tile"
+                data-testid={`circle-type-${t.key}`}
+                onClick={() => {
+                  feedback("select");
+                  t.go();
+                }}
+              >
+                <Icon3D name={t.icon} size={56} />
+                <span className="nf-ctype__title">{t.title}</span>
+                <span className="nf-ctype__sub">{t.sub}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </StepFrame>
+    );
+  }
 
   if (step === 1) {
     return (
