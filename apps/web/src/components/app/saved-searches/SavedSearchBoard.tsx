@@ -191,7 +191,7 @@ function SavedSearchRow({
           say(result.error, "error");
           return;
         }
-        say(copy.deleted ?? "Search removed");
+        say("Search removed");
         onDrop(row.id);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
 import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { createCollection, deleteCollection, setInCollection } from "@/lib/saved/collections-actions";
+import { createCollection, deleteCollection, renameCollection, setInCollection } from "@/lib/saved/collections-actions";
 import { COLLECTION_NAME_MAX, type SavedCollection } from "@/lib/saved/collections";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { banner } from "@/lib/ui/toast";
@@ -22,9 +22,12 @@ const WORDS = {
   deleteList: "Delete this list",
   deleteNote: "Deleting a list never removes anything you saved.",
   done: "Done",
+  renameList: "Rename this list",
+  rename: "Rename",
   /* What each action did, said by the one banner (Grade 1). */
   created: "List created. Add places to it from any saved card.",
   deleted: "List deleted. Everything you saved is still here.",
+  renamed: "List renamed",
   addedTo: "Added to {name}",
   takenOff: "Taken off {name}",
 };
@@ -34,8 +37,11 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
   const router = useRouter();
   const pathname = usePathname();
   const [creating, setCreating] = useState(false);
+  const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState("");
+  const [renameValue, setRenameValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [renameError, setRenameError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   function go(id: string | null) {
@@ -63,6 +69,27 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
         banner.success(WORDS.deleted);
         go(null);
       } else banner.error(result.error, { retry: () => remove(id) });
+    });
+  }
+
+  function openRename() {
+    if (current) {
+      setRenameValue(current.name);
+      setRenameError(null);
+      setRenaming(true);
+    }
+  }
+
+  function submitRename() {
+    if (!current) return;
+    setRenameError(null);
+    start(async () => {
+      const result = await renameCollection({ id: current.id, name: renameValue });
+      if (result.ok) {
+        setRenaming(false);
+        banner.success(WORDS.renamed);
+        router.refresh();
+      } else setRenameError(result.error);
     });
   }
 
@@ -96,6 +123,10 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
           <button type="button" className="underline" disabled={pending} onClick={() => remove(current.id)}>
             {WORDS.deleteList}
           </button>
+          {" / "}
+          <button type="button" className="underline" disabled={pending} onClick={openRename}>
+            {WORDS.renameList}
+          </button>
         </p>
       ) : null}
       <Sheet
@@ -113,6 +144,23 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
           enterKeyHint="done"
           onChange={(e) => setName(e.target.value)}
           {...(error ? { error } : {})}
+        />
+      </Sheet>
+      <Sheet
+        open={renaming}
+        onOpenChange={setRenaming}
+        title={WORDS.renameList}
+        detents={[0.4]}
+        apply={{ label: WORDS.rename, onClick: submitRename, loading: pending }}
+      >
+        <TextField
+          label={WORDS.name}
+          value={renameValue}
+          maxLength={COLLECTION_NAME_MAX}
+          placeholder={WORDS.namePlaceholder}
+          enterKeyHint="done"
+          onChange={(e) => setRenameValue(e.target.value)}
+          {...(renameError ? { error: renameError } : {})}
         />
       </Sheet>
     </div>
