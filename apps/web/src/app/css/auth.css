@@ -507,9 +507,16 @@
   .nf-auth .nf-field:focus,
   .nf-slate-input:focus {
     outline: none;
-    border-color: var(--nf-slate-ink);
+    border-color: var(--nf-brand-primary);
     background: var(--nf-slate-card);
     box-shadow: var(--nf-slate-card-shadow);
+  }
+  @media (pointer: coarse) {
+    .nf-auth .nf-field:focus,
+    .nf-slate-input:focus {
+      border-color: color-mix(in oklab, var(--nf-brand-primary) 55%, transparent);
+      box-shadow: none;
+    }
   }
   .nf-auth .nf-field[aria-invalid="true"],
   .nf-slate-input[aria-invalid="true"] {

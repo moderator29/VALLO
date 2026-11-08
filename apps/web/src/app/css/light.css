@@ -448,6 +448,14 @@
       linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
     box-shadow: 0 0 0 3px var(--nf-paper-field-halo);
   }
+  @media (pointer: coarse) {
+    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+      background:
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(color-mix(in oklab, var(--nf-brand-primary) 55%, transparent), color-mix(in oklab, var(--nf-brand-primary) 55%, transparent)) border-box;
+      box-shadow: none;
+    }
+  }
   :root[data-theme="light"] .nf-field[aria-invalid="true"]:not(:where([data-theme="dark"] *)) {
     background:
       linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
