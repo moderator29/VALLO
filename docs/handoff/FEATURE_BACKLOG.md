@@ -77,9 +77,9 @@ end to end, in order of value. Starting ideas:
 
 | # | What | Owner | State |
 |---|---|---|---|
-| F1 | In-app incoming call banner: a top banner with Accept and Decline when a call arrives while the user is inside the app, like the in-app notification banner but for calls, with the caller's photo, name and call kind | CALLS (Agent CALLS) | QUEUED |
-| F2 | Outside-app incoming call: CallKit on iOS (the native incoming call screen), full-screen intent and call notification on Android (native, build 1.0.2) | CALLS + NATIVE | QUEUED, needs build 1.0.2 |
-| F3 | Missed call notification: a push with Message and Call back action buttons, the caller's photo and name, opening the thread | CALLS | QUEUED |
-| F4 | Upgraded audio call screens: ringing, calling and in-call redesigned with a glass control sheet (Video, Speaker, Mute, More, Share, End), cooler and more Vallo, clean and lovely, light and dark | CALLS | QUEUED |
-| F5 | Upgraded video call screens: the same control sheet, a clear camera preview, the self-view draggable, the remote view edge to edge | CALLS | QUEUED |
-| F6 | Calling recommendations: think of more improvements (call quality indicator, call history page, scheduled calls, call recording consent, group calls in Circle) | CALLS | QUEUED |
+| F1 | In-app incoming call banner: a top banner with Accept and Decline when a call arrives while the user is inside the app, like the in-app notification banner but for calls, with the caller's photo, name and call kind | CALLS (Agent CALLS) | BUILT |
+| F2 | Outside-app incoming call: CallKit on iOS (the native incoming call screen), full-screen intent and call notification on Android (native, build 1.0.2) | CALLS + NATIVE | BUILT (JS bridge spec done; native Swift/Kotlin needs build 1.0.2) |
+| F3 | Missed call notification: a push with Message and Call back action buttons, the caller's photo and name, opening the thread | CALLS | BUILT |
+| F4 | Upgraded audio call screens: ringing, calling and in-call redesigned with a glass control sheet (Video, Speaker, Mute, More, Share, End), cooler and more Vallo, clean and lovely, light and dark | CALLS | BUILT |
+| F5 | Upgraded video call screens: the same control sheet, a clear camera preview, the self-view draggable, the remote view edge to edge | CALLS | BUILT |
+| F6 | Calling recommendations: think of more improvements (call quality indicator, call history page, scheduled calls, call recording consent, group calls in Circle) | CALLS | BUILT (7 recommendations delivered) |
