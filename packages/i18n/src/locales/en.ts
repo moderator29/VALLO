@@ -95,6 +95,16 @@ import {
 import { remindersEn } from "./reminders.en";
 /* The /pro page's words (SW11), moved from app/(app)/pro/pro-copy.ts. */
 import { proEn } from "./pro.en";
+/* Safety, reporting and blocking copy (SW11). */
+import { safetyBlocksEn, safetyReportsEn, safetyReportTargetNounEn, safetyEducationEn } from "./safety.en";
+/* Referral requirement copy (SW11). */
+import { referralRequirementsEn, referralStepsEn } from "./referral.en";
+/* Directory copy (SW11): find an agent / find a host. */
+import { directoryCopyEn, directoryKindPluralEn, directoryKindOneEn } from "./directory.en";
+/* Workspace standing copy (SW11): draft, pending, refused, suspended. */
+import { workspaceStandingEn } from "./workspace.en";
+/* Wallet/money copy (SW11): move, onboarding, phone taken, waiting. */
+import { walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletWaitingEn } from "./wallet.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -1361,10 +1371,7 @@ export const en = {
       "I agree to the Terms, the Privacy Policy and the Community Rules, and I understand that abusive content gets an account removed.",
     acceptRead: "Read them:",
     acceptRequired: "Please tick the box to continue. It is how we record what you agreed to.",
-    /* The marketing consent line under the agreement (sign-up). */
     marketingLabel: "Send me news and updates from Vallo by email. You can switch this off any time.",
-    /* STORE-19: the Terms require 18 or over, so sign-up asks, and the
-       server refuses an account without the answer. */
     ageLabel: "I am 18 or older.",
     ageRequired: "Vallo is for adults. Tick the box to confirm you are 18 or older.",
     termsLink: "Terms",
@@ -1373,6 +1380,10 @@ export const en = {
     communityLink: "Community promise",
     helpLink: "Help",
     docsLink: "Docs",
+    blocks: safetyBlocksEn,
+    reports: safetyReportsEn,
+    reportTargetNoun: safetyReportTargetNounEn,
+    education: safetyEducationEn,
   },
 
   auth: {
@@ -7370,6 +7381,27 @@ export const en = {
   circle: circleEn,
   /* The /pro page (SW11). */
   pro: proEn,
+
+  /* Referral requirement and step copy (SW11). */
+  referral: {
+    requirements: referralRequirementsEn,
+    steps: referralStepsEn,
+  },
+  /* Directory copy (SW11). */
+  directory: {
+    copy: directoryCopyEn,
+    kindPlural: directoryKindPluralEn,
+    kindOne: directoryKindOneEn,
+  },
+  /* Workspace standing copy (SW11). */
+  workspaceStanding: workspaceStandingEn,
+  /* Wallet/money copy (SW11). */
+  wallet: {
+    move: walletMoveEn,
+    onboarding: walletOnboardingEn,
+    phoneTaken: walletPhoneTakenEn,
+    waiting: walletWaitingEn,
+  },
 
 };
 
