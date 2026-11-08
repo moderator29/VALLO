@@ -78,6 +78,8 @@ import { referralDeskEn } from "./referral-desk.en";
 import { chargebacksEn } from "./chargebacks.en";
 /* Circle (SW11): the community feature's words. */
 import { circleEn } from "./circle.en";
+/* Vallo Roommates: roommate discovery and shared homes. */
+import { roommatesEn } from "./roommates.en";
 /* The social layer (SW11): posts, stories, areas, the bot, profiles. */
 import {
   socialPostEn,
@@ -7407,6 +7409,8 @@ export const en = {
 
   /* Circle (SW11): the community feature. */
   circle: circleEn,
+  /* Vallo Roommates. */
+  roommates: roommatesEn,
   /* The /pro page (SW11). */
   pro: proEn,
 
