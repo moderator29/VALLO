@@ -48,7 +48,7 @@ import { isSocialEnabled } from "@/lib/social/flag";
 import { readPublicRoleWords } from "@/lib/profile/role-facts";
 import { roleLine } from "@/lib/profile/role-line";
 import { passportIsOpen } from "@/lib/passport/passport-read";
-import { FOLLOW_TO_MESSAGE, messageDoor } from "@/lib/social/message-door";
+import { messageDoor } from "@/lib/social/message-door";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ownershipSeenFor } from "@/lib/trust/ownership-seen";
 import { OwnershipSeenMark } from "@/components/trust/OwnershipSeenMark";
@@ -290,7 +290,7 @@ export default async function SocialProfilePage({
                 data-testid="profile-follow-to-message"
               >
                 <UiIcon name="messages" size={16} />
-                {FOLLOW_TO_MESSAGE}
+                {t.experienceSocial.followToMessage}
               </span>
             ) : undefined
           }

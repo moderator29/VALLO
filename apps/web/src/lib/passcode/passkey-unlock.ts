@@ -2,6 +2,7 @@
 
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { fail, ok, type ActionResult } from "../actions/envelope";
 import { resolveSession } from "../actions/session";
 import { consume, subjectForUser } from "../security/rate-limit";
 import { admin, ceremonyOrigin, listCredentialIds, mintChallenge, takeChallenge } from "../security/money-step-up";
@@ -82,19 +83,19 @@ const assertionSchema = z.object({
   signature: z.string().min(10).max(2000),
 });
 
-export async function finishPasskeyUnlock(input: unknown): Promise<{ ok: true } | { error: "rejected" | "failed" | "not_set" }> {
+export async function finishPasskeyUnlock(input: unknown): Promise<ActionResult<null>> {
   const parsed = assertionSchema.safeParse(input);
-  if (!parsed.success) return { error: "rejected" };
+  if (!parsed.success) return fail("rejected");
   const now = await current();
   const a = admin();
-  if (!now || !a) return { error: "failed" };
+  if (!now || !a) return fail("failed");
   const userId = now.session.user.id;
   const paced = await consume({ bucket: "passcode_passkey", subject: subjectForUser(userId), limit: 10, windowSeconds: 900 });
-  if (!paced.allowed) return { error: "rejected" };
+  if (!paced.allowed) return fail("rejected");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const status = await readPasscodeStatus(now.session.supabase as any);
-  if (status.state !== "set") return { error: "not_set" };
+  if (status.state !== "set") return fail("not_set");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const loose = a as any;
@@ -104,7 +105,7 @@ export async function finishPasskeyUnlock(input: unknown): Promise<{ ok: true } 
     .eq("user_id", userId)
     .eq("credential_id", parsed.data.credentialId)
     .maybeSingle();
-  if (!key) return { error: "rejected" };
+  if (!key) return fail("rejected");
   const row = key as { id: string; public_key_spki: string; alg: Alg; sign_count: number };
   const { origin, rpId } = await ceremonyOrigin();
   const verdict = verifyAssertion({
@@ -118,14 +119,14 @@ export async function finishPasskeyUnlock(input: unknown): Promise<{ ok: true } 
     origins: [origin],
     rpId,
   });
-  if (!verdict.ok) return { error: "rejected" };
+  if (!verdict.ok) return fail("rejected");
   const digest = await takeChallenge(a, userId, parsed.data.challenge, "money");
-  if (digest !== digestFor(now.sessionId)) return { error: "rejected" };
+  if (digest !== digestFor(now.sessionId)) return fail("rejected");
 
   await loose
     .from("money_credentials")
     .update({ sign_count: verdict.signCount, last_used_at: new Date().toISOString() })
     .eq("id", row.id);
   const written = await writeUnlock(userId);
-  return written ? { ok: true } : { error: "failed" };
+  return written ? ok(null) : fail("failed");
 }

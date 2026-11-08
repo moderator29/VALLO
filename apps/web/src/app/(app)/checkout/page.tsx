@@ -15,7 +15,6 @@ import { ICON, TYPE } from "@/components/app/Screen";
 import { formatMoneyDate } from "@/lib/money/dates";
 import { cancelStanding, termsFromPolicyRules } from "@/lib/trust/cancellation";
 import { ROOM_BOOKINGS_FLAG, STAYS_INSTANT_PAY_FLAG, flagIsOn } from "@/lib/flags/read";
-import { INSTANT_ROOM_COPY } from "@/lib/bookings/instant-pay";
 import { resolveSession } from "@/lib/actions/session";
 import { returnHref } from "@/components/auth/auth-intent";
 import { withNext } from "@/lib/auth/next-link";
@@ -160,8 +159,8 @@ export default async function RoomCheckoutPage({
             maxRooms={room.units_total}
             copy={{
               roomsLabel: t.checkout.roomsLabel,
-              requestRoom: instantOn ? INSTANT_ROOM_COPY.action : t.checkout.requestRoom,
-              requestRoomBody: instantOn ? INSTANT_ROOM_COPY.body : t.checkout.requestRoomBody,
+              requestRoom: instantOn ? t.checkout.instantRoomAction : t.checkout.requestRoom,
+              requestRoomBody: instantOn ? t.checkout.instantRoomBody : t.checkout.requestRoomBody,
               roomChoices: Array.from({ length: Math.min(10, room.units_total) }, (_, i) => plural(i + 1, t.counts.rooms, locale)),
             }}
           />

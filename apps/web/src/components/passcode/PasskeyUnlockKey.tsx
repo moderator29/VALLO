@@ -93,7 +93,7 @@ export function PasskeyUnlockKey({
         challenge: start.challenge,
         ...proof,
       });
-      if ("ok" in result) {
+      if (result.ok) {
         rememberDeviceKey(proof.credentialId);
         onUnlocked();
       } else onFailed("unknown");

@@ -7,7 +7,6 @@ import { EmptyState } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { withNext } from "@/lib/auth/next-link";
 import { readDirectTarget } from "@/lib/messages/direct";
-import { FOLLOW_FIRST_COPY } from "@/lib/social/message-door";
 import { DirectFirstMessage } from "./DirectFirstMessage";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function MessagePersonPage({ params }: { params: Promise<{ handle: string }> }) {
   const { handle: rawHandle } = await params;
-  const w = getDictionary(await getLocale()).experienceInbox.direct;
+  const t = getDictionary(await getLocale());
+  const w = t.experienceInbox.direct;
   const read = await readDirectTarget(rawHandle);
 
   if (read.state === "ready") {
@@ -62,8 +62,8 @@ export default async function MessagePersonPage({ params }: { params: Promise<{ 
         <PageHeader title={w.metaTitle} fallback={back} />
         <EmptyState
           icon="chat-duo"
-          title={FOLLOW_FIRST_COPY.title.replace("{name}", name)}
-          body={FOLLOW_FIRST_COPY.body}
+          title={t.social.followFirst.title.replace("{name}", name)}
+          body={t.social.followFirst.body}
           action={<EmptyActions primary={{ label: w.back, href: back }} />}
           data-testid="direct-follow-first"
         />
