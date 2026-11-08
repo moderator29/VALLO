@@ -348,6 +348,7 @@ export const roommatesEn = {
      profile and listing pages, the two flows, schools, NYSC and safety. */
   ui: {
     eyebrow: "Shared living on Vallo",
+    peopleLooking: { one: "{count} person looking for a place to share", other: "{count} people looking for a place to share" },
     findRoommate: "Find a roommate",
     signInCta: "Sign in",
     signInContinue: "Sign in to continue",

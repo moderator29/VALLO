@@ -38,7 +38,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
   const faces = home.recommended.filter((p) => p.avatarUrl).slice(0, 3);
   const greeting = home.signedIn && home.viewerName ? fill(copy.home.welcome, { name: home.viewerName.split(" ")[0] ?? home.viewerName }) : null;
 
-  const hero = <RoommatesHero t={copy} findHref={ROOMMATES_ROUTES.discover} postHref={postHref} faces={faces} greeting={greeting} />;
+  const hero = <RoommatesHero t={copy} findHref={ROOMMATES_ROUTES.discover} postHref={postHref} faces={faces} greeting={greeting} peopleCount={home.stats?.people ?? null} />;
 
   if (!home.live) {
     return (

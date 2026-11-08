@@ -3,10 +3,12 @@ import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { ButtonLink } from "@/components/ui/Button";
+import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
+import { FEATURE_ART, type ArtSlot } from "@/lib/features/art";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type Intent, type PersonRef } from "@/lib/features/roommates/model";
 
-import { type RoommatesCopy } from "./format";
+import { counted, type RoommatesCopy } from "./format";
 import { FaceStack } from "./Marks";
 import "./roommates-kit.css";
 
@@ -30,6 +32,7 @@ export function RoommatesHero({
   postHref,
   faces = [],
   greeting,
+  peopleCount = null,
 }: {
   t: RoommatesCopy;
   findHref: string;
@@ -38,58 +41,61 @@ export function RoommatesHero({
   faces?: readonly Pick<PersonRef, "userId" | "name" | "avatarUrl">[];
   /** "Welcome back, Ada", when the page knows the name. */
   greeting?: string | null;
+  /** The LIVE count of people looking (`home.stats.people`); null draws no figure. */
+  peopleCount?: number | null;
 }) {
   const lines = copy.tagline.split(". ").map((s, i, all) => (i < all.length - 1 ? `${s}.` : s));
   const last = lines.pop() ?? "";
+  const art: ArtSlot = FEATURE_ART.roommatesHero;
+  const showPeople = faces.length > 0 || (peopleCount !== null && peopleCount > 0);
   return (
-    <section className="nf-rm-hero" data-theme="dark" aria-labelledby="rm-hero-title" data-testid="roommates-hero">
-      <span className="nf-rm-hero__bloom" aria-hidden="true" />
-      <div className="nf-rm-hero__words">
-        <p className="nf-rm-hero__eyebrow">
-          <UiIcon name="circle-people" size={16} />
+    <section className="nf-rmh" data-theme="dark" data-fit={art.fit} aria-labelledby="rm-hero-title" data-testid="roommates-hero">
+      <div className="nf-rmh__art" aria-hidden="true">
+        <Image src={art.src} alt="" fill priority sizes="(max-width: 768px) 100vw, 1152px" style={art.focus ? { objectPosition: art.focus } : undefined} />
+      </div>
+      <span className="nf-rmh__scrim" aria-hidden="true" />
+      <span className="nf-rmh__accent" aria-hidden="true">
+        <span className="nf-rmh__accent-tile">
+          <Icon3D name="team" size={64} classic />
+        </span>
+      </span>
+      <div className="nf-rmh__words">
+        <p className="nf-rmh__eyebrow" style={{ "--nf-rm-i": 0 } as CSSProperties}>
           {greeting ?? copy.ui.eyebrow}
         </p>
-        <h2 id="rm-hero-title" className="nf-rm-hero__title">
+        <h2 id="rm-hero-title" className="nf-rmh__title" style={{ "--nf-rm-i": 1 } as CSSProperties}>
           {lines.map((l) => (
             <span key={l}>{l} </span>
           ))}
-          <span className="nf-rm-hero__accent">{last}</span>
+          <span className="nf-rmh__accentword">{last}</span>
         </h2>
-        <p className="nf-rm-hero__line">{copy.heroLine}</p>
-        <div className="nf-rm-hero__actions">
-          <ButtonLink href={findHref} variant="primary" size="lg" leadingIcon="search" data-testid="roommates-find">
+        <p className="nf-rmh__line" style={{ "--nf-rm-i": 2 } as CSSProperties}>
+          {copy.heroLine}
+        </p>
+        <div className="nf-rmh__actions" style={{ "--nf-rm-i": 3 } as CSSProperties}>
+          <ButtonLink href={findHref} variant="primary" size="lg" leadingIcon="search" glow className="nf-rm-sheen" data-testid="roommates-find">
             {copy.ui.findRoommate}
           </ButtonLink>
           <ButtonLink href={postHref} variant="secondary" size="lg" leadingIcon="plus" data-testid="roommates-post">
             {copy.actions.create}
           </ButtonLink>
         </div>
-      </div>
-      <div className="nf-rm-hero__art" aria-hidden="true">
-        <span className="nf-rm-hero__photo nf-rm-hero__photo--back">
-          <Image src="/brand/photos/living-room-day.webp" alt="" fill sizes="(max-width: 640px) 50vw, 260px" />
-        </span>
-        <span className="nf-rm-hero__photo nf-rm-hero__photo--front">
-          <Image src="/brand/photos/bedroom-01.webp" alt="" fill sizes="(max-width: 640px) 60vw, 300px" />
-        </span>
-        {faces.length ? (
-          <span className="nf-rm-hero__faces">
-            <FaceStack people={faces} max={3} size="md" />
-          </span>
+        {showPeople ? (
+          <p className="nf-rmh__people" style={{ "--nf-rm-i": 4 } as CSSProperties} data-testid="roommates-hero-people">
+            {faces.length ? <FaceStack people={faces} max={4} size="sm" /> : null}
+            {peopleCount !== null && peopleCount > 0 ? <span>{counted(peopleCount, copy.ui.peopleLooking)}</span> : null}
+          </p>
         ) : null}
-        <span className="nf-rm-hero__mark">
-          <UiIcon name="key" size={24} />
-        </span>
       </div>
     </section>
   );
 }
 
-const JOURNEY_ICON: Record<Intent, UiIconName> = {
-  find_roommate: "users",
-  find_room: "bed",
-  offer_room: "key",
-  find_together: "circle-people",
+const JOURNEY_ART: Record<Intent, Icon3DName> = {
+  find_roommate: "team",
+  find_room: "search",
+  offer_room: "home-small",
+  find_together: "map",
 };
 
 export const JOURNEY_HREF: Record<Intent, string> = {
@@ -106,8 +112,8 @@ export function JourneyTiles({ t: copy, hrefs = JOURNEY_HREF }: { t: RoommatesCo
       {keys.map((k, i) => (
         <li key={k} style={{ "--nf-rm-i": i } as CSSProperties}>
           <Link href={hrefs[k]} className="nf-rm-journey" data-testid={`journey-${k}`}>
-            <span className="nf-rm-journey__glyph" aria-hidden="true">
-              <UiIcon name={JOURNEY_ICON[k]} size={22} />
+            <span className="nf-rm-journey__art" aria-hidden="true">
+              <Icon3D name={JOURNEY_ART[k]} size={56} classic />
             </span>
             <span className="nf-rm-journey__title">{copy.journeys[k].title}</span>
             <span className="nf-rm-journey__body">{copy.journeys[k].body}</span>
