@@ -137,12 +137,17 @@ export const TYPE = {
  * with its label beside or beneath it.
  */
 export const ICON = {
-  /** Inline with a line of text. Was 16. */
-  inline: 20,
-  /** Leading a row in a list. Was 16 to 20. */
-  row: 24,
-  /** Beside a section heading, or the mark on a fact. Was 16 to 20. */
-  section: 28,
+  /**
+   * Inline with a line of text. One step down from 20 on the founder's call
+   * of 8 November 2026 ("make the black and white icons smaller platform-wide,
+   * apart from the side nav and the bottom nav"). The nav rails set their own
+   * sizes and do not read this map, so they keep their weight.
+   */
+  inline: 16,
+  /** Leading a row in a list. One step down from 24. */
+  row: 20,
+  /** Beside a section heading, or the mark on a fact. One step down from 28. */
+  section: 24,
 } as const;
 
 /**
