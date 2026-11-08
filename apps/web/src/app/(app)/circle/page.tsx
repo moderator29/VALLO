@@ -9,6 +9,9 @@ import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_SORTS, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
 import { readCircleHome, readCirclePosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
+import { getDictionary } from "@vallo/i18n";
+import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
+import { getLocale } from "@/lib/locale";
 
 import { CircleEmpty, CommunityCard, StarterCommunities } from "./_parts/CircleCards";
 import { InviteList } from "./_parts/InviteList";
@@ -85,6 +88,7 @@ async function TabBody({
           </Section>
         </div>
         <div className="nf-circle">
+          <RoommatesDoor />
           {home.mine.length ? (
             <Section title={C.sections.mine}>
               <ul className="nf-circle-list">{home.mine.map((c) => <li key={c.id}><CommunityCard community={c} /></li>)}</ul>
@@ -181,6 +185,41 @@ function facesOf(home: Awaited<ReturnType<typeof readCircleHome>>): CircleFace[]
     if (out.length === 3) break;
   }
   return out;
+}
+
+/**
+ * THE DOOR TO VALLO ROOMMATES (8 November 2026). Circle is the community;
+ * Roommates is where people match and share a home. One card, a link out,
+ * and the three roommate communities Vallo started, by their real slugs.
+ */
+async function RoommatesDoor() {
+  const E = getDictionary(await getLocale()).roommates.entryX;
+  const rooms = [
+    { slug: "student-accommodation", label: E.circleStudent },
+    { slug: "nysc-accommodation", label: E.circleNysc },
+    { slug: "finding-roommates", label: E.circleFinding },
+  ];
+  return (
+    <section className="nf-circle-card" data-testid="circle-roommates-door" aria-labelledby="circle-roommates-title">
+      <h2 id="circle-roommates-title" className="nf-circle-card__title">
+        {E.circleTitle}
+      </h2>
+      <p className="nf-circle-card__body">{E.circleLine}</p>
+      <ButtonLink href={ROOMMATES_ROUTES.home} variant="primary" size="sm" arrow>
+        {E.circleOpen}
+      </ButtonLink>
+      <span className="nf-circle-card__eyebrow">{E.circleCommunities}</span>
+      <ul className="nf-circle-list">
+        {rooms.map((r) => (
+          <li key={r.slug}>
+            <Link href={`/circle/c/${r.slug}`} className="nf-link">
+              {r.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 function Section({ title, more, children }: { title: string; more?: string; children: ReactNode }) {

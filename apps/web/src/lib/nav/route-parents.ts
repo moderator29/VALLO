@@ -298,6 +298,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/rent/review/[paymentId]": "/bookings",
   "/record/[code]": "/search",
   "/settings/passport": "/settings",
+  /* Trust and Safety (8 November 2026): the member's own restrictions, appeals and report outcomes. */
+  "/settings/standing": "/settings",
   /* The Vallo passport of another member, opened from a profile or a chat. */
   "/passport/[who]": "/around",
   "/settings/invite": "/settings",
@@ -520,6 +522,12 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/settings": "/admin",
   "/admin/social": "/admin",
   "/admin/roommates": "/admin",
+  /* Trust and Safety (8 November 2026): the case queue, one case, restrictions, appeals, the Circle desk. */
+  "/admin/cases": "/admin",
+  "/admin/cases/[id]": "/admin/cases",
+  "/admin/trust": "/admin",
+  "/admin/appeals": "/admin",
+  "/admin/circle": "/admin",
   "/admin/standing": "/admin",
   "/admin/stops": "/admin",
   "/admin/people/[id]": "/admin/people",

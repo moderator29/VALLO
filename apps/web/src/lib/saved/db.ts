@@ -5,12 +5,15 @@ import type { Database } from "../supabase/database.types";
  * (M13 explains why it does not reference M9's enum), so the union lives here
  * and mirrors the CHECK: the catalogue's three shelves.
  */
-export type SavedPlaceKind = "listing" | "accommodation" | "restaurant";
+/** `roommate_listing` and `roommate_profile` (Vallo Roommates, 8 November 2026) need the roommate SQL's widened CHECK. */
+export type SavedPlaceKind = "listing" | "accommodation" | "restaurant" | "roommate_listing" | "roommate_profile";
 
 export const SAVED_PLACE_KINDS: readonly SavedPlaceKind[] = [
   "listing",
   "accommodation",
   "restaurant",
+  "roommate_listing",
+  "roommate_profile",
 ] as const;
 
 export type SavedPlaceRow = Database["public"]["Tables"]["saved_places"]["Row"];

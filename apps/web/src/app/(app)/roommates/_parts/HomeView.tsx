@@ -32,29 +32,29 @@ const signInTo = (next: string) => `/sign-in?next=${encodeURIComponent(next)}`;
  * real read; an empty one says so with its next step, and a server without
  * the SQL says that once, plainly.
  */
-export function RoommatesHomeView({ home, t, now }: { home: RoommatesHome; t: RoommatesCopy; now: number }) {
+export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome; t: RoommatesCopy; now: number }) {
   const today = lagosDay(now);
   const postHref = home.signedIn ? ROOMMATES_ROUTES.create : signInTo(ROOMMATES_ROUTES.create);
   const faces = home.recommended.filter((p) => p.avatarUrl).slice(0, 3);
-  const greeting = home.signedIn && home.viewerName ? fill(t.home.welcome, { name: home.viewerName.split(" ")[0] ?? home.viewerName }) : null;
+  const greeting = home.signedIn && home.viewerName ? fill(copy.home.welcome, { name: home.viewerName.split(" ")[0] ?? home.viewerName }) : null;
 
-  const hero = <RoommatesHero t={t} findHref={ROOMMATES_ROUTES.discover} postHref={postHref} faces={faces} greeting={greeting} />;
+  const hero = <RoommatesHero t={copy} findHref={ROOMMATES_ROUTES.discover} postHref={postHref} faces={faces} greeting={greeting} />;
 
   if (!home.live) {
     return (
-      <PageFrame title={t.title} subtitle={t.tagline} fallback="/home" width="wide">
+      <PageFrame title={copy.title} subtitle={copy.tagline} fallback="/home" width="wide">
         <div className="nf-rmp" data-testid="roommates-home">
           {hero}
           <RoommatesEmpty icon="info" testId="roommates-not-open">
-            {t.notOpen}
+            {copy.notOpen}
           </RoommatesEmpty>
           <section className="nf-rm-section" aria-labelledby="rm-journeys">
-            <SectionHead id="rm-journeys" title={t.ui.journeysTitle} />
-            <JourneyTiles t={t} />
+            <SectionHead id="rm-journeys" title={copy.ui.journeysTitle} />
+            <JourneyTiles t={copy} />
           </section>
-          <HowItWorks t={t} />
-          <TrustTiles t={t} />
-          <SafetyStrip t={t} />
+          <HowItWorks t={copy} />
+          <TrustTiles t={copy} />
+          <SafetyStrip t={copy} />
         </div>
       </PageFrame>
     );
@@ -65,18 +65,18 @@ export function RoommatesHomeView({ home, t, now }: { home: RoommatesHome; t: Ro
 
   const journeys = (
     <section className="nf-rm-section" aria-labelledby="rm-journeys" key="journeys">
-      <SectionHead id="rm-journeys" title={t.ui.journeysTitle} />
-      <JourneyTiles t={t} />
+      <SectionHead id="rm-journeys" title={copy.ui.journeysTitle} />
+      <JourneyTiles t={copy} />
     </section>
   );
   const recommended = (
     <section className="nf-rm-section" aria-labelledby="rm-recommended" key="recommended">
-      <SectionHead id="rm-recommended" title={t.home.recommended} more={home.recommended.length ? ROOMMATES_ROUTES.discover : undefined} moreLabel={t.home.seeAll} />
+      <SectionHead id="rm-recommended" title={copy.home.recommended} more={home.recommended.length ? ROOMMATES_ROUTES.discover : undefined} moreLabel={copy.home.seeAll} />
       {home.recommended.length ? (
         <CardRail testId="roommates-recommended">
           {home.recommended.map((p) => (
             <li key={p.userId}>
-              <RoommateCardView card={p} t={t} />
+              <RoommateCardView card={p} t={copy} />
             </li>
           ))}
         </CardRail>
@@ -86,24 +86,24 @@ export function RoommatesHomeView({ home, t, now }: { home: RoommatesHome; t: Ro
           action={
             needsProfile ? (
               <ButtonLink href={home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile)} variant="primary" size="md">
-                {t.profile.create}
+                {copy.profile.create}
               </ButtonLink>
             ) : null
           }
         >
-          {needsProfile ? t.discover.needProfile : t.ui.emptyRecommended}
+          {needsProfile ? copy.discover.needProfile : copy.ui.emptyRecommended}
         </RoommatesEmpty>
       )}
     </section>
   );
   const rooms = (
     <section className="nf-rm-section" aria-labelledby="rm-rooms" key="rooms">
-      <SectionHead id="rm-rooms" title={t.home.roomsNear} more={home.rooms.length ? ROOMMATES_ROUTES.rooms : undefined} moreLabel={t.home.seeAll} />
+      <SectionHead id="rm-rooms" title={copy.home.roomsNear} more={home.rooms.length ? ROOMMATES_ROUTES.rooms : undefined} moreLabel={copy.home.seeAll} />
       {home.rooms.length ? (
         <CardRail testId="roommates-rooms">
           {home.rooms.map((r) => (
             <li key={r.id}>
-              <RoomCardView room={r} t={t} today={today} />
+              <RoomCardView room={r} t={copy} today={today} />
             </li>
           ))}
         </CardRail>
@@ -112,23 +112,23 @@ export function RoommatesHomeView({ home, t, now }: { home: RoommatesHome; t: Ro
           icon="bed"
           action={
             <ButtonLink href={home.signedIn ? `${ROOMMATES_ROUTES.create}?kind=room_offer` : signInTo(`${ROOMMATES_ROUTES.create}?kind=room_offer`)} variant="primary" size="md" leadingIcon="key">
-              {t.ui.offerRoom}
+              {copy.ui.offerRoom}
             </ButtonLink>
           }
         >
-          {t.ui.emptyRooms}
+          {copy.ui.emptyRooms}
         </RoommatesEmpty>
       )}
     </section>
   );
   const together = (
     <section className="nf-rm-section" aria-labelledby="rm-together" key="together">
-      <SectionHead id="rm-together" title={t.home.together} more={home.together.length ? `${ROOMMATES_ROUTES.discover}?mode=rooms&kind=together` : undefined} moreLabel={t.home.seeAll} />
+      <SectionHead id="rm-together" title={copy.home.together} more={home.together.length ? `${ROOMMATES_ROUTES.discover}?mode=rooms&kind=together` : undefined} moreLabel={copy.home.seeAll} />
       {home.together.length ? (
         <CardRail testId="roommates-together">
           {home.together.map((r) => (
             <li key={r.id}>
-              <RoomCardView room={r} t={t} today={today} />
+              <RoomCardView room={r} t={copy} today={today} />
             </li>
           ))}
         </CardRail>
@@ -137,42 +137,42 @@ export function RoommatesHomeView({ home, t, now }: { home: RoommatesHome; t: Ro
           icon="circle-people"
           action={
             <ButtonLink href={home.signedIn ? ROOMMATES_ROUTES.newGroup : signInTo(ROOMMATES_ROUTES.newGroup)} variant="secondary" size="md" leadingIcon="plus">
-              {t.ui.startGroup}
+              {copy.ui.startGroup}
             </ButtonLink>
           }
         >
-          {t.ui.emptyTogether}
+          {copy.ui.emptyTogether}
         </RoommatesEmpty>
       )}
     </section>
   );
-  const schools = <Schools home={home} t={t} key="schools" />;
-  const nysc = <NyscStrip t={t} key="nysc" />;
-  const how = <HowItWorks t={t} key="how" />;
-  const stats = <StatTiles stats={home.stats} t={t} key="stats" />;
+  const schools = <Schools home={home} t={copy} key="schools" />;
+  const nysc = <NyscStrip t={copy} key="nysc" />;
+  const how = <HowItWorks t={copy} key="how" />;
+  const stats = <StatTiles stats={home.stats} t={copy} key="stats" />;
 
   const order = active ? [stats, recommended, rooms, together, journeys, schools, nysc, how] : [journeys, stats, how, rooms, recommended, together, schools, nysc];
 
   return (
-    <PageFrame title={t.title} subtitle={t.tagline} fallback="/home" width="wide">
+    <PageFrame title={copy.title} subtitle={copy.tagline} fallback="/home" width="wide">
       <div className="nf-rmp" data-testid="roommates-home">
         {hero}
-        <Pending home={home} t={t} />
-        {needsProfile ? <CompleteCard home={home} t={t} /> : null}
+        <Pending home={home} t={copy} />
+        {needsProfile ? <CompleteCard home={home} t={copy} /> : null}
         {order}
-        <TrustTiles t={t} />
-        <SafetyStrip t={t} />
+        <TrustTiles t={copy} />
+        <SafetyStrip t={copy} />
       </div>
     </PageFrame>
   );
 }
 
-function Pending({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
+function Pending({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   const p = home.pending;
   const lines = [
-    p.requests ? counted(p.requests, t.ui.pending.requests) : null,
-    p.invites ? counted(p.invites, t.ui.pending.invites) : null,
-    p.viewings ? counted(p.viewings, t.ui.pending.viewings) : null,
+    p.requests ? counted(p.requests, copy.ui.pending.requests) : null,
+    p.invites ? counted(p.invites, copy.ui.pending.invites) : null,
+    p.viewings ? counted(p.viewings, copy.ui.pending.viewings) : null,
   ].filter((x): x is string => Boolean(x));
   if (!home.signedIn || !lines.length) return null;
   return (
@@ -181,7 +181,7 @@ function Pending({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
         <UiIcon name="bell" size={20} />
       </span>
       <span className="nf-rmp-pending__words">
-        <span className="nf-rmp-pending__title">{t.ui.openHub}</span>
+        <span className="nf-rmp-pending__title">{copy.ui.openHub}</span>
         <span className="nf-rmp-pending__line">{lines.join(" · ")}</span>
       </span>
       <UiIcon name="chevron-right" size={20} />
@@ -189,7 +189,7 @@ function Pending({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
   );
 }
 
-function CompleteCard({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
+function CompleteCard({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   const pct = home.myStatus === "none" ? 0 : Math.max(0, Math.min(100, Math.round(home.completeness)));
   const href = home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile);
   return (
@@ -200,28 +200,28 @@ function CompleteCard({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
         </span>
         <div className="nf-rmp-complete__words">
           <h2 id="rm-complete" className="nf-rm-panel__title">
-            {t.home.completeTitle}
+            {copy.home.completeTitle}
           </h2>
-          <p className="nf-rm-panel__sub">{t.home.completeBody}</p>
+          <p className="nf-rm-panel__sub">{copy.home.completeBody}</p>
         </div>
       </div>
-      <div className="nf-rmp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={fill(t.ui.completeness, { n: pct })}>
+      <div className="nf-rmp-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={fill(copy.ui.completeness, { n: pct })}>
         <span className="nf-rmp-progress__fill" style={{ transform: `scaleX(${pct / 100})` }} />
       </div>
       <div className="nf-rmp-complete__foot">
-        <span className="nf-rmp-complete__pct">{fill(t.ui.completeness, { n: pct })}</span>
+        <span className="nf-rmp-complete__pct">{fill(copy.ui.completeness, { n: pct })}</span>
         <ButtonLink href={href} variant="primary" size="md" arrow data-testid="roommates-complete-cta">
-          {home.myStatus === "none" ? t.profile.create : t.ui.continueProfile}
+          {home.myStatus === "none" ? copy.profile.create : copy.ui.continueProfile}
         </ButtonLink>
       </div>
     </section>
   );
 }
 
-function Schools({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
+function Schools({ home, copy }: { home: RoommatesHome; t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-schools">
-      <SectionHead id="rm-schools" title={t.home.campuses} more={ROOMMATES_ROUTES.campuses} moreLabel={t.home.seeAll} />
+      <SectionHead id="rm-schools" title={copy.home.campuses} more={ROOMMATES_ROUTES.campuses} moreLabel={copy.home.seeAll} />
       {home.institutions.length ? (
         <ul className="nf-rmp-schools" data-testid="roommates-schools">
           {home.institutions.slice(0, 8).map((s) => (
@@ -233,7 +233,7 @@ function Schools({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
                 <span className="nf-rmp-school__words">
                   <span className="nf-rmp-school__name">{s.shortName ?? s.name}</span>
                   <span className="nf-rmp-school__meta">
-                    {[institutionKind(s.kind, t), s.city, s.people ? counted(s.people, t.ui.campus.people) : null, s.rooms ? counted(s.rooms, t.ui.campus.rooms) : null].filter(Boolean).join(" · ")}
+                    {[institutionKind(s.kind, copy), s.city, s.people ? counted(s.people, copy.ui.campus.people) : null, s.rooms ? counted(s.rooms, copy.ui.campus.rooms) : null].filter(Boolean).join(" · ")}
                   </span>
                 </span>
                 <UiIcon name="chevron-right" size={16} />
@@ -242,15 +242,15 @@ function Schools({ home, t }: { home: RoommatesHome; t: RoommatesCopy }) {
           ))}
         </ul>
       ) : (
-        <RoommatesEmpty icon="id-card" action={<ButtonLink href={ROOMMATES_ROUTES.campuses} variant="secondary" size="md">{t.ui.campusCta}</ButtonLink>}>
-          {t.ui.emptyCampuses}
+        <RoommatesEmpty icon="id-card" action={<ButtonLink href={ROOMMATES_ROUTES.campuses} variant="secondary" size="md">{copy.ui.campusCta}</ButtonLink>}>
+          {copy.ui.emptyCampuses}
         </RoommatesEmpty>
       )}
     </section>
   );
 }
 
-function NyscStrip({ t }: { t: RoommatesCopy }) {
+function NyscStrip({ copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-panel nf-rmp-strip" aria-labelledby="rm-nysc" data-testid="roommates-nysc">
       <span className="nf-rm-plate nf-rm-plate--lg" aria-hidden="true">
@@ -258,29 +258,29 @@ function NyscStrip({ t }: { t: RoommatesCopy }) {
       </span>
       <div className="nf-rmp-strip__words">
         <h2 id="rm-nysc" className="nf-rm-panel__title">
-          {t.home.nysc}
+          {copy.home.nysc}
         </h2>
-        <p className="nf-rm-panel__sub">{t.home.nyscBody}</p>
+        <p className="nf-rm-panel__sub">{copy.home.nyscBody}</p>
       </div>
       <ButtonLink href={ROOMMATES_ROUTES.nysc} variant="secondary" size="md" arrow>
-        {t.ui.nyscCta}
+        {copy.ui.nyscCta}
       </ButtonLink>
     </section>
   );
 }
 
-function SafetyStrip({ t }: { t: RoommatesCopy }) {
+function SafetyStrip({ copy }: { t: RoommatesCopy }) {
   return (
     <Link href={ROOMMATES_ROUTES.safety} className="nf-rmp-safety" data-testid="roommates-safety-link">
       <span className="nf-rm-plate" aria-hidden="true">
         <UiIcon name="shield-check" size={20} />
       </span>
       <span className="nf-rmp-pending__words">
-        <span className="nf-rmp-pending__title">{t.ui.safetyTitle}</span>
-        <span className="nf-rmp-pending__line">{t.ui.safetyLine}</span>
+        <span className="nf-rmp-pending__title">{copy.ui.safetyTitle}</span>
+        <span className="nf-rmp-pending__line">{copy.ui.safetyLine}</span>
       </span>
       <span className="nf-rmp-safety__go">
-        {t.ui.safetyLink}
+        {copy.ui.safetyLink}
         <UiIcon name="chevron-right" size={16} />
       </span>
     </Link>

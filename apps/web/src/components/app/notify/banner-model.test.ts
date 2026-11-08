@@ -46,4 +46,15 @@ describe("the banner's header line and face", () => {
     expect(faceLookup("/bookings/b1")).toBeNull();
     expect(faceLookup(null)).toBeNull();
   });
+  it("reads the sender a link names with ?from= on any path, ahead of the path", () => {
+    const ada = "6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b";
+    expect(faceLookup(`/roommates/me?tab=requests&from=${ada}`)).toEqual({ by: "user", id: ada });
+    expect(faceLookup(`/roommates/groups/00000000-0000-4000-8000-000000000002?from=${ada.toUpperCase()}`)).toEqual({ by: "user", id: ada });
+    expect(faceLookup(`/roommates/p/${ada}?from=${ada}#top`)).toEqual({ by: "user", id: ada });
+    expect(faceLookup(`/messages/00000000-0000-4000-8000-000000000001?from=${ada}`)).toEqual({ by: "user", id: ada });
+    /* Not a user id: the path decides, and a page with no person draws no face. */
+    expect(faceLookup("/roommates/me?from=not-a-uuid")).toBeNull();
+    expect(faceLookup("/u/chioma?from=")).toEqual({ by: "handle", handle: "chioma" });
+    expect(faceLookup("/roommates/me?tab=requests")).toBeNull();
+  });
 });

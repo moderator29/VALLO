@@ -55,6 +55,8 @@ export const safetyReportTargetNounEn = {
   review: "review",
   business: "place",
   event: "event",
+  roommate_listing: "roommate post",
+  roommate_profile: "roommate profile",
 };
 
 export const safetyEducationEn =

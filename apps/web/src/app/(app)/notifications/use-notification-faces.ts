@@ -44,6 +44,7 @@ export function useNotificationFaces(
         const handles: string[] = [];
         for (const { look } of lookups) {
           if (look!.by === "thread") threadIds.push(look!.id);
+          else if (look!.by === "user") continue;
           else handles.push(look!.handle);
         }
 
@@ -62,8 +63,10 @@ export function useNotificationFaces(
           }
         }
 
-        /* Collect all user_ids and handles, then batch-load avatars. */
-        const userIds = [...personMap.values()];
+        /* Collect all user_ids and handles, then batch-load avatars. A link
+           that names its sender (`?from=`) is already a user id. */
+        const named = lookups.flatMap(({ look }) => (look!.by === "user" ? [look!.id] : []));
+        const userIds = [...new Set([...personMap.values(), ...named])];
         const result = new Map<string, string>();
 
         if (userIds.length > 0) {
@@ -77,6 +80,8 @@ export function useNotificationFaces(
               if (look!.by === "thread") {
                 const uid = personMap.get(look!.id);
                 if (uid && byUserId.has(uid)) result.set(id, byUserId.get(uid)!);
+              } else if (look!.by === "user" && byUserId.has(look!.id)) {
+                result.set(id, byUserId.get(look!.id)!);
               }
             }
           }

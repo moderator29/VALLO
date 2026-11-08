@@ -71,48 +71,48 @@ export function MatchRing({ score, size = "md", label }: { score: number | null;
   );
 }
 
-export function MatchBadge({ match, t }: { match: MatchView | null; t: RoommatesCopy }) {
+export function MatchBadge({ match, copy }: { match: MatchView | null; t: RoommatesCopy }) {
   if (!match) return null;
   if (match.score === null) {
     return (
       <span className="nf-rm-matchbadge" data-thin="">
         <UiIcon name="sliders" size={14} />
-        {t.ui.card.thinShort}
+        {copy.ui.card.thinShort}
       </span>
     );
   }
   return (
     <span className="nf-rm-matchbadge">
       <UiIcon name="circle-check" size={14} filled />
-      {fill(t.ui.card.matchFor, { n: Math.round(match.score) })}
+      {fill(copy.ui.card.matchFor, { n: Math.round(match.score) })}
     </span>
   );
 }
 
-export function MatchReasons({ match, t, max = 3 }: { match: MatchView | null; t: RoommatesCopy; max?: number }) {
+export function MatchReasons({ match, t: copy, max = 3 }: { match: MatchView | null; t: RoommatesCopy; max?: number }) {
   if (!match || !match.reasons.length) return null;
   return (
-    <ul className="nf-rm-reasons" aria-label={t.match.label}>
+    <ul className="nf-rm-reasons" aria-label={copy.match.label}>
       {match.reasons.slice(0, max).map((r) => (
         <li key={r}>
           <UiIcon name="check" size={14} />
-          {t.reasons[r]}
+          {copy.reasons[r]}
         </li>
       ))}
     </ul>
   );
 }
 
-export function BadgesRow({ badges, t, max, size = "md" }: { badges: readonly BadgeKind[]; t: RoommatesCopy; max?: number; size?: "sm" | "md" }) {
+export function BadgesRow({ badges, t: copy, max, size = "md" }: { badges: readonly BadgeKind[]; t: RoommatesCopy; max?: number; size?: "sm" | "md" }) {
   if (!badges.length) return null;
   const shown = typeof max === "number" ? badges.slice(0, max) : badges;
   const more = badges.length - shown.length;
   return (
-    <ul className="nf-rm-badges" data-size={size} aria-label={t.verification.title}>
+    <ul className="nf-rm-badges" data-size={size} aria-label={copy.verification.title}>
       {shown.map((b) => (
         <li key={b} className="nf-rm-badge">
           <UiIcon name={BADGE_ICON[b]} size={14} />
-          {t.verification.kinds[b]}
+          {copy.verification.kinds[b]}
         </li>
       ))}
       {more > 0 ? <li className="nf-rm-badge nf-rm-badge--more">{`+${more}`}</li> : null}
@@ -120,8 +120,8 @@ export function BadgesRow({ badges, t, max, size = "md" }: { badges: readonly Ba
   );
 }
 
-export function LifestyleChips({ lifestyle, t, max, labelled = false }: { lifestyle: Lifestyle; t: RoommatesCopy; max?: number; labelled?: boolean }) {
-  const facts = lifestyleFacts(lifestyle, t);
+export function LifestyleChips({ lifestyle, t: copy, max, labelled = false }: { lifestyle: Lifestyle; t: RoommatesCopy; max?: number; labelled?: boolean }) {
+  const facts = lifestyleFacts(lifestyle, copy);
   if (!facts.length) return null;
   const shown = typeof max === "number" ? facts.slice(0, max) : facts;
   return (
@@ -143,20 +143,20 @@ export function LifestyleChips({ lifestyle, t, max, labelled = false }: { lifest
 
 const KIND_ICON = { room_offer: "key", roommate_wanted: "users", together: "circle-people" } as const;
 
-export function KindTag({ kind, t, onMedia = false }: { kind: ListingKind; t: RoommatesCopy; onMedia?: boolean }) {
+export function KindTag({ kind, t: copy, onMedia = false }: { kind: ListingKind; t: RoommatesCopy; onMedia?: boolean }) {
   return (
     <span className="nf-rm-kind" data-kind={kind} data-on-media={onMedia || undefined}>
       <UiIcon name={KIND_ICON[kind]} size={14} />
-      {t.listingKinds[kind]}
+      {copy.listingKinds[kind]}
     </span>
   );
 }
 
-export function VerifiedChip({ t, onMedia = false }: { t: RoommatesCopy; onMedia?: boolean }) {
+export function VerifiedChip({ t: copy, onMedia = false }: { t: RoommatesCopy; onMedia?: boolean }) {
   return (
     <span className="nf-rm-verified" data-on-media={onMedia || undefined}>
       <UiIcon name="verified" size={14} filled />
-      {t.ui.card.verified}
+      {copy.ui.card.verified}
     </span>
   );
 }

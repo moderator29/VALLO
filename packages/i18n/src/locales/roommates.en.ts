@@ -586,6 +586,7 @@ export const roommatesEn = {
       liveCta: "See people who match",
       liveSecondary: "Back to Roommates",
       savedLive: "Profile saved",
+      saveChanges: "Save changes",
       notSet: "Not set",
       signedOut: "Sign in to create your roommate profile.",
     },
@@ -654,6 +655,9 @@ export const roommatesEn = {
       signedOut: "Sign in to post on Roommates.",
       draftKept: "We kept your unfinished post on this device.",
       discard: "Start again",
+      draftDevice: "Saved on this device. Add a title and a city to save it to your account.",
+      less: "one less",
+      more: "one more",
       problems: {
         title: "Give it a title of 8 letters or more.",
         city: "Which city is it in?",
@@ -689,6 +693,7 @@ export const roommatesEn = {
       ],
       circle: "Ask corps members in Vallo Circle",
       circleBody: "Questions about lodges, areas and PPAs, answered by people who have been there.",
+      circleCta: "Open the community",
       people: "Corps members in {state}",
     },
     safety: {
@@ -698,6 +703,8 @@ export const roommatesEn = {
       reportBody: "Every profile and post has Report and Block in its menu. A person reads every report, and nobody is told who sent it. Blocking hides you from each other everywhere on Vallo.",
       emergency: "If you are in danger, call 112 first.",
       verifyCta: "Verify my roommate profile",
+      circleTitle: "Ask people who have done it",
+      circles: ["Finding roommates", "Student accommodation", "NYSC accommodation"],
     },
   },
   /* ---------------------------------------------------------------- FE-B: the hub */
@@ -709,7 +716,7 @@ export const roommatesEn = {
       status: { none: "Not started", draft: "Draft", active: "Live", paused: "Paused", held: "With our team" },
       line: {
         none: "Create your profile so people who match you can find you.",
-        draft: "Your profile is saved but not live. Finish it to be found.",
+        draft: "Your profile is saved as a draft. Finish it so people can find you.",
         active: "People who match you can find you.",
         paused: "Nobody can find you until you turn it back on.",
         held: "Our team is reviewing your profile. We will let you know.",
@@ -1108,6 +1115,8 @@ export const roommatesEn = {
     feedKicker: "On Vallo Roommates",
     feedView: "View details",
     feedVerified: "Checked by Vallo",
+    shortlistAdd: "Add",
+    shortlistAdded: "Added to the shortlist of {group}",
   },
   lister: {
     title: "Good for sharing",

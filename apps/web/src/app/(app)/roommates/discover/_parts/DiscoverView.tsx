@@ -22,7 +22,7 @@ export type DiscoverResult =
  * profile yet (make one, or look at rooms), nothing matches (save the search).
  */
 export function DiscoverView({
-  t,
+  t: copy,
   result,
   people,
   rooms,
@@ -45,19 +45,19 @@ export function DiscoverView({
   const here = discoverHref(mode, filters);
   const signIn = `/sign-in?next=${encodeURIComponent(here)}`;
   const moreHref = `${here}${here.includes("?") ? "&" : "?"}more=${pages + 1}`;
-  const more = result.state === "ok" && result.next !== null && pages < MAX_PAGES ? <More href={moreHref} label={t.ui.discover.loadMore} /> : null;
+  const more = result.state === "ok" && result.next !== null && pages < MAX_PAGES ? <More href={moreHref} label={copy.ui.discover.loadMore} /> : null;
 
   let body: ReactNode;
   if (result.state === "not-open") {
     body = (
       <RoommatesEmpty icon="info" testId="discover-not-open">
-        {t.notOpen}
+        {copy.notOpen}
       </RoommatesEmpty>
     );
   } else if (result.state === "signed-out") {
     body = (
-      <RoommatesEmpty icon="lock" testId="discover-signed-out" action={<ButtonLink href={signIn} variant="primary" size="md">{t.ui.signInCta}</ButtonLink>}>
-        {t.ui.discover.signedOut}
+      <RoommatesEmpty icon="lock" testId="discover-signed-out" action={<ButtonLink href={signIn} variant="primary" size="md">{copy.ui.signInCta}</ButtonLink>}>
+        {copy.ui.discover.signedOut}
       </RoommatesEmpty>
     );
   } else if (result.state === "need-profile") {
@@ -68,15 +68,15 @@ export function DiscoverView({
         action={
           <>
             <ButtonLink href={ROOMMATES_ROUTES.profile} variant="primary" size="md">
-              {t.ui.discover.needProfileCta}
+              {copy.ui.discover.needProfileCta}
             </ButtonLink>
             <ButtonLink href={ROOMMATES_ROUTES.rooms} variant="secondary" size="md">
-              {t.ui.discover.tryRooms}
+              {copy.ui.discover.tryRooms}
             </ButtonLink>
           </>
         }
       >
-        {t.discover.needProfile}
+        {copy.discover.needProfile}
       </RoommatesEmpty>
     );
   } else if (result.mode === "people") {
@@ -85,7 +85,7 @@ export function DiscoverView({
         <CardGrid testId="discover-people">
           {result.items.map((p) => (
             <li key={p.userId}>
-              <RoommateCardView card={p} t={t} />
+              <RoommateCardView card={p} t={copy} />
             </li>
           ))}
         </CardGrid>
@@ -93,7 +93,7 @@ export function DiscoverView({
       </>
     ) : (
       <RoommatesEmpty icon="users" testId="discover-empty" action={<SaveSearchButton mode="people" filters={people} variant="primary" />}>
-        {t.discover.empty}
+        {copy.discover.empty}
       </RoommatesEmpty>
     );
   } else {
@@ -102,7 +102,7 @@ export function DiscoverView({
         <CardGrid kind="rooms" testId="discover-rooms">
           {result.items.map((r) => (
             <li key={r.id}>
-              <RoomCardView room={r} t={t} today={today} />
+              <RoomCardView room={r} t={copy} today={today} />
             </li>
           ))}
         </CardGrid>
@@ -110,13 +110,13 @@ export function DiscoverView({
       </>
     ) : (
       <RoommatesEmpty icon="bed" testId="discover-empty" action={<SaveSearchButton mode="rooms" filters={rooms} variant="primary" />}>
-        {t.discover.emptyRooms}
+        {copy.discover.emptyRooms}
       </RoommatesEmpty>
     );
   }
 
   return (
-    <PageFrame title={t.ui.discover.title} subtitle={t.ui.discover.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<ModeSwitch mode={mode} />}>
+    <PageFrame title={copy.ui.discover.title} subtitle={copy.ui.discover.subtitle} fallback={ROOMMATES_ROUTES.home} width="wide" tabs={<ModeSwitch mode={mode} />}>
       <div className="nf-rmp" data-testid="roommates-discover">
         <DiscoverControls mode={mode} people={people} rooms={rooms} schools={schools} canSave={result.state === "ok"} />
         {body}

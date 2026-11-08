@@ -25,7 +25,7 @@ import "./roommates-kit.css";
  */
 
 export function RoommatesHero({
-  t,
+  t: copy,
   findHref,
   postHref,
   faces = [],
@@ -39,7 +39,7 @@ export function RoommatesHero({
   /** "Welcome back, Ada", when the page knows the name. */
   greeting?: string | null;
 }) {
-  const lines = t.tagline.split(". ").map((s, i, all) => (i < all.length - 1 ? `${s}.` : s));
+  const lines = copy.tagline.split(". ").map((s, i, all) => (i < all.length - 1 ? `${s}.` : s));
   const last = lines.pop() ?? "";
   return (
     <section className="nf-rm-hero" data-theme="dark" aria-labelledby="rm-hero-title" data-testid="roommates-hero">
@@ -47,7 +47,7 @@ export function RoommatesHero({
       <div className="nf-rm-hero__words">
         <p className="nf-rm-hero__eyebrow">
           <UiIcon name="circle-people" size={16} />
-          {greeting ?? t.ui.eyebrow}
+          {greeting ?? copy.ui.eyebrow}
         </p>
         <h2 id="rm-hero-title" className="nf-rm-hero__title">
           {lines.map((l) => (
@@ -55,13 +55,13 @@ export function RoommatesHero({
           ))}
           <span className="nf-rm-hero__accent">{last}</span>
         </h2>
-        <p className="nf-rm-hero__line">{t.heroLine}</p>
+        <p className="nf-rm-hero__line">{copy.heroLine}</p>
         <div className="nf-rm-hero__actions">
           <ButtonLink href={findHref} variant="primary" size="lg" leadingIcon="search" data-testid="roommates-find">
-            {t.ui.findRoommate}
+            {copy.ui.findRoommate}
           </ButtonLink>
           <ButtonLink href={postHref} variant="secondary" size="lg" leadingIcon="plus" data-testid="roommates-post">
-            {t.actions.create}
+            {copy.actions.create}
           </ButtonLink>
         </div>
       </div>
@@ -99,7 +99,7 @@ export const JOURNEY_HREF: Record<Intent, string> = {
   find_together: ROOMMATES_ROUTES.groups,
 };
 
-export function JourneyTiles({ t, hrefs = JOURNEY_HREF }: { t: RoommatesCopy; hrefs?: Record<Intent, string> }) {
+export function JourneyTiles({ t: copy, hrefs = JOURNEY_HREF }: { t: RoommatesCopy; hrefs?: Record<Intent, string> }) {
   const keys: Intent[] = ["find_roommate", "find_room", "offer_room", "find_together"];
   return (
     <ul className="nf-rm-journeys" data-testid="roommates-journeys">
@@ -109,8 +109,8 @@ export function JourneyTiles({ t, hrefs = JOURNEY_HREF }: { t: RoommatesCopy; hr
             <span className="nf-rm-journey__glyph" aria-hidden="true">
               <UiIcon name={JOURNEY_ICON[k]} size={22} />
             </span>
-            <span className="nf-rm-journey__title">{t.journeys[k].title}</span>
-            <span className="nf-rm-journey__body">{t.journeys[k].body}</span>
+            <span className="nf-rm-journey__title">{copy.journeys[k].title}</span>
+            <span className="nf-rm-journey__body">{copy.journeys[k].body}</span>
             <span className="nf-rm-journey__go" aria-hidden="true">
               <UiIcon name="arrow-up-right" size={16} />
             </span>
@@ -121,7 +121,7 @@ export function JourneyTiles({ t, hrefs = JOURNEY_HREF }: { t: RoommatesCopy; hr
   );
 }
 
-export function StatTiles({ stats, t }: { stats: { people: number; rooms: number; groups: number } | null; t: RoommatesCopy }) {
+export function StatTiles({ stats, copy }: { stats: { people: number; rooms: number; groups: number } | null; t: RoommatesCopy }) {
   if (!stats) return null;
   const nf = new Intl.NumberFormat("en-NG", { notation: stats.people >= 10000 ? "compact" : "standard" });
   const tiles = [
@@ -130,12 +130,12 @@ export function StatTiles({ stats, t }: { stats: { people: number; rooms: number
     { key: "groups", icon: "circle-people", n: stats.groups },
   ] as const;
   return (
-    <section className="nf-rm-stats" aria-label={t.ui.statsLabel} data-testid="roommates-stats">
+    <section className="nf-rm-stats" aria-label={copy.ui.statsLabel} data-testid="roommates-stats">
       {tiles.map((tile, i) => (
         <div key={tile.key} className="nf-rm-stat" style={{ "--nf-rm-i": i } as CSSProperties}>
           <span className="nf-rm-stat__label">
             <UiIcon name={tile.icon} size={14} />
-            {t.ui.statTiles[tile.key]}
+            {copy.ui.statTiles[tile.key]}
           </span>
           <span className="nf-rm-stat__n">{nf.format(tile.n)}</span>
         </div>
@@ -146,12 +146,12 @@ export function StatTiles({ stats, t }: { stats: { people: number; rooms: number
 
 const TRUST_ICON: UiIconName[] = ["user-check", "shield-check", "lock"];
 
-export function TrustTiles({ t }: { t: RoommatesCopy }) {
+export function TrustTiles({ copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-trust">
-      <SectionHead id="rm-trust" title={t.home.trustTitle} />
+      <SectionHead id="rm-trust" title={copy.home.trustTitle} />
       <ul className="nf-rm-trust">
-        {t.home.trust.map((item, i) => (
+        {copy.home.trust.map((item, i) => (
           <li key={item.title} className="nf-rm-trust__tile">
             <span className="nf-rm-plate" aria-hidden="true">
               <UiIcon name={TRUST_ICON[i] ?? "shield-check"} size={20} />
@@ -165,12 +165,12 @@ export function TrustTiles({ t }: { t: RoommatesCopy }) {
   );
 }
 
-export function HowItWorks({ t }: { t: RoommatesCopy }) {
+export function HowItWorks({ copy }: { t: RoommatesCopy }) {
   return (
     <section className="nf-rm-section" aria-labelledby="rm-how">
-      <SectionHead id="rm-how" title={t.home.howTitle} />
+      <SectionHead id="rm-how" title={copy.home.howTitle} />
       <ol className="nf-rm-how">
-        {t.home.how.map((step, i) => (
+        {copy.home.how.map((step, i) => (
           <li key={step.title} className="nf-rm-how__step">
             <span className="nf-rm-how__n" aria-hidden="true">
               {i + 1}

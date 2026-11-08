@@ -313,6 +313,17 @@ export function SettingsHub({
           }
           testId="hub-privacy"
         />
+        {/* Trust and Safety (8 November 2026): the member's own restrictions,
+            appeals and what happened to their reports. */}
+        {signedIn && (
+          <RowLink
+            href="/settings/standing"
+            glyph={<HubGlyph name="user-check" />}
+            label="Account standing"
+            sub="Restrictions, appeals and your reports"
+            testId="hub-standing"
+          />
+        )}
         {/* The passcode lock (docs/PASSCODE.md): change it, or its length. */}
         {signedIn && (
           <RowLink

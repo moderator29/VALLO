@@ -62,6 +62,20 @@ export type PostAuthor = {
   tier?: BadgeTier;
 };
 
+/** A roommate post a feed post shares (Vallo Roommates, 8 November 2026). Words come with it from the read. */
+export type PostRoommateListing = {
+  id: string;
+  href: string;
+  title: string;
+  kindLabel: string;
+  place: string;
+  priceLabel: string | null;
+  periodLabel: string;
+  photoUrl: string | null;
+  verified: boolean;
+  words: { kicker: string; view: string; verified: string };
+};
+
 export type PostListing = {
   id: string;
   title: string;
@@ -100,6 +114,8 @@ export type PostView = {
   areaName: string | null;
   areaSlug: string | null;
   listing: PostListing | null;
+  /** A Vallo Roommates post shared to the feed, when there is one (optional: older reads leave it out). */
+  roommateListing?: PostRoommateListing | null;
   /** The bot's own note about where its answer came from. */
   sourceNote: string | null;
   /** The listings the assistant cited, resolved through the same policy as any
@@ -853,6 +869,8 @@ export function PostCard({
 
       {post.sourceNote ? <p className="nf-pc__note">{post.sourceNote}</p> : null}
 
+      {post.roommateListing ? <EmbeddedRoommateListing room={post.roommateListing} /> : null}
+
       {post.listing ? (
         <EmbeddedListing
           listing={post.listing}
@@ -985,6 +1003,56 @@ export function EmbeddedListing({
         </span>
       </Link>
       <EmbeddedListingSave listingId={listing.id} title={listing.title} />
+    </div>
+  );
+}
+
+/**
+ * A ROOMMATE POST ON THE FEED (Vallo Roommates, 8 November 2026). The same
+ * plate as a featured flat, so the feed keeps one card grammar: the room's
+ * photograph, what kind of post it is, the title, the place, the person's
+ * share or the rent with its period, and "View details" into the room. Only
+ * what the post itself says; "Checked by Vallo" only where staff checked it.
+ */
+export function EmbeddedRoommateListing({ room }: { room: PostRoommateListing }) {
+  return (
+    <div className="nf-plc" data-testid="post-roommate-listing">
+      <Link href={room.href} className="nf-plc__link" aria-label={`${room.title}, ${room.words.view}`}>
+        <span className="nf-plc__photo" aria-hidden="true">
+          {room.photoUrl ? (
+            <PostPicture src={room.photoUrl} alt="" width={640} height={480} sizes="(max-width: 640px) 40vw, 240px" />
+          ) : (
+            <UiIcon name="house-duplex" size={24} />
+          )}
+        </span>
+        <span className="nf-plc__body">
+          <span className="nf-plc__facts">
+            <span className="nf-plc__fact">{room.words.kicker}</span>
+            <span className="nf-plc__fact">{room.kindLabel}</span>
+          </span>
+          <span className="nf-plc__title">{room.title}</span>
+          {room.place || room.verified ? (
+            <span className="nf-plc__place">
+              {room.place ? <UiIcon name="location" size={12} filled /> : null}
+              {room.place ? <span>{room.place}</span> : null}
+              {room.verified ? <span className="nf-plc__verified">{room.words.verified}</span> : null}
+            </span>
+          ) : null}
+          <span className="nf-plc__foot">
+            {room.priceLabel ? (
+              <span className="nf-plc__price nf-numeric">
+                {room.priceLabel} <span className="nf-plc__period">{room.periodLabel}</span>
+              </span>
+            ) : (
+              <span />
+            )}
+            <span className="nf-plc__view">
+              {room.words.view}
+              <UiIcon name="arrow-right" size={14} />
+            </span>
+          </span>
+        </span>
+      </Link>
     </div>
   );
 }

@@ -122,7 +122,8 @@ export function NotifyBanner() {
             .maybeSingle();
           if (data)
             person = data.guest_id === userId ? data.agent_id : data.guest_id;
-        } else handle = look.handle;
+        } else if (look.by === "user") person = look.id;
+        else handle = look.handle;
         if (!person && !handle) return;
         const query = db.from("social_profiles").select("avatar_path");
         const { data: profile } = await (person

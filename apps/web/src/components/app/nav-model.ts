@@ -3,6 +3,7 @@ import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { Side } from "@/lib/side.constants";
 import { CIRCLE_ROUTE } from "./circle-route";
+import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 
 /**
  * The side navigation, as data.
@@ -158,6 +159,8 @@ export function buildNav({
             { href: "/stays/search", label: t.nav.search, icon: "search" },
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
+            /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
+            { href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ]
         : [
@@ -168,6 +171,8 @@ export function buildNav({
                a person could not guess from its glyph. `feed` exists now. */
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
+            /* Vallo Roommates (8 November 2026): one row after Circle, nothing moved. */
+            { href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
           ],
     },

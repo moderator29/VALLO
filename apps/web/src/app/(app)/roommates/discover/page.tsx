@@ -7,9 +7,9 @@ import { requestNow } from "@/lib/format/when";
 
 import { DiscoverView, MAX_PAGES, type DiscoverResult } from "./_parts/DiscoverView";
 
-const t = getDictionary("en").roommates;
+const copy = getDictionary("en").roommates;
 
-export const metadata: Metadata = { title: `${t.ui.discover.title}, ${t.title}`, description: t.ui.discover.subtitle };
+export const metadata: Metadata = { title: `${copy.ui.discover.title}, ${copy.title}`, description: copy.ui.discover.subtitle };
 export const dynamic = "force-dynamic";
 
 type Params = Record<string, string | string[] | undefined>;
@@ -60,5 +60,5 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
     }
   }
 
-  return <DiscoverView t={t} result={result} people={people} rooms={rooms} schools={schools.items} pages={pages} now={requestNow()} />;
+  return <DiscoverView t={copy} result={result} people={people} rooms={rooms} schools={schools.items} pages={pages} now={requestNow()} />;
 }

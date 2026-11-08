@@ -6,13 +6,13 @@ import { requestNow } from "@/lib/format/when";
 
 import { RoommatesHomeView } from "./_parts/HomeView";
 
-const t = getDictionary("en").roommates;
+const copy = getDictionary("en").roommates;
 
-export const metadata: Metadata = { title: t.title, description: t.tagline };
+export const metadata: Metadata = { title: copy.title, description: copy.tagline };
 export const dynamic = "force-dynamic";
 
 /** The roommates home: the read, then the screen (`_parts/HomeView.tsx`). */
 export default async function RoommatesHomePage() {
   const home = await readRoommatesHome();
-  return <RoommatesHomeView home={home} t={t} now={requestNow()} />;
+  return <RoommatesHomeView home={home} t={copy} now={requestNow()} />;
 }

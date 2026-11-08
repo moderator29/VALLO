@@ -1,18 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { ReportSheet } from "@/components/app/ReportSheet";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/Field";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
 import { expressInterest } from "@/lib/features/roommates/actions";
+import { listSavedPlaces, savePlace, unsavePlace } from "@/lib/saved/places-actions";
 import { LIMITS } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
-import type { ReportTarget } from "@/lib/reports/categories";
 import { blockUserSafely } from "@/lib/safety/blocks-actions";
 import { shareOrCopy } from "@/lib/ui/clipboard";
 import { feedback } from "@/lib/ui/feedback";
@@ -21,85 +21,88 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 import { fill } from "./format";
 
+/* The report sheet carries the report words (the dictionary), so it arrives
+   on demand rather than in this route's first load. */
+const ReportSheet = dynamic(() => import("@/components/app/ReportSheet").then((m) => m.ReportSheet), { ssr: false });
+
 /**
  * VALLO ROOMMATES, THE SHARED CLIENT CONTROLS: save, share, the safety rows
  * (report and block) and the "I'm interested" sheet. Words come from the
  * route's scope (`useScopedCopy("roommates")`).
  */
 
-/* ------------------------------------------------------------------ save on this device */
-
-const SAVE_KEY = "vallo.roommates.saved.v1";
-type SavedKind = "person" | "room";
-
-function readSaved(): string[] {
-  try {
-    const raw = window.localStorage.getItem(SAVE_KEY);
-    const v = raw ? (JSON.parse(raw) as unknown) : [];
-    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
-function writeSaved(list: string[]) {
-  try {
-    window.localStorage.setItem(SAVE_KEY, JSON.stringify(list.slice(-200)));
-  } catch {
-    /* No storage: the save is simply not kept. */
-  }
-}
+/* ------------------------------------------------------------------ save */
 
 /**
- * Save, kept on this device. The contract has no saved-items kind for a
- * roommate or a room yet (reported to the lead), so the banner says exactly
- * where it is kept rather than claiming an account save.
+ * Save to the account's shortlist (`saved_places`, kinds `roommate_profile`
+ * and `roommate_listing`). Optimistic: the mark turns at once and turns back,
+ * with the banner and Try again, if the server refuses.
  */
-export function SaveButton({ kind, id }: { kind: SavedKind; id: string }) {
-  const t = useScopedCopy("roommates");
-  const key = `${kind}:${id}`;
+export function SaveButton({ kind, id, signedIn = true }: { kind: "person" | "room"; id: string; signedIn?: boolean }) {
+  const copy = useScopedCopy("roommates");
+  const router = useRouter();
+  const entityKind = kind === "person" ? "roommate_profile" : "roommate_listing";
   const [saved, setSaved] = useState(false);
+  const [pending, start] = useSafeTransition();
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the device list is read after hydration, so server and first client render agree
-    setSaved(readSaved().includes(key));
-  }, [key]);
+    if (!signedIn) return;
+    let live = true;
+    void listSavedPlaces({ entityKind })
+      .then((result) => {
+        if (live && result.ok) setSaved(result.data.some((p) => p.entityId === id));
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [entityKind, id, signedIn]);
+
+  const toggle = () =>
+    start(async () => {
+      if (!signedIn) {
+        router.push(`/sign-in?next=${encodeURIComponent(window.location.pathname)}`);
+        return;
+      }
+      const want = !saved;
+      feedback("select");
+      setSaved(want);
+      try {
+        const result = want ? await savePlace({ entityKind, entityId: id }) : await unsavePlace({ entityKind, entityId: id });
+        if (!result.ok) {
+          setSaved(!want);
+          banner.error(result.error, { retry: toggle });
+          return;
+        }
+        if (want) banner.success(copy.actions.saved);
+        else banner.info(copy.ui.profile.removedSave);
+      } catch (error) {
+        setSaved(!want);
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+
   return (
-    <Button
-      variant="icon"
-      round
-      iconOnly
-      aria-label={saved ? t.actions.saved : t.actions.save}
-      aria-pressed={saved}
-      data-testid="roommates-save"
-      onClick={() => {
-        feedback("select");
-        const list = readSaved().filter((k) => k !== key);
-        if (!saved) list.push(key);
-        writeSaved(list);
-        setSaved(!saved);
-        if (saved) banner.info(t.ui.profile.removedSave);
-        else banner.success(t.ui.profile.savedDevice);
-      }}
-    >
+    <Button variant="icon" round iconOnly aria-label={saved ? copy.actions.saved : copy.actions.save} aria-pressed={saved} disabled={pending} data-testid="roommates-save" onClick={toggle}>
       <UiIcon name="bookmark" size={20} filled={saved} />
     </Button>
   );
 }
 
 export function ShareButton({ path, title }: { path: string; title: string }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   return (
     <Button
       variant="icon"
       round
       iconOnly
-      aria-label={t.actions.share}
+      aria-label={copy.actions.share}
       data-testid="roommates-share"
       onClick={async () => {
         feedback("select");
         const outcome = await shareOrCopy({ url: `${window.location.origin}${path}`, title });
-        if (outcome === "copied") banner.success(t.ui.profile.shared);
-        else if (outcome === "shared") banner.success(t.ui.profile.sharedNative);
-        else if (outcome === "failed") banner.error(t.ui.profile.shareFailed);
+        if (outcome === "copied") banner.success(copy.ui.profile.shared);
+        else if (outcome === "shared") banner.success(copy.ui.profile.sharedNative);
+        else if (outcome === "failed") banner.error(copy.ui.profile.shareFailed);
       }}
     >
       <UiIcon name="share" size={20} />
@@ -125,7 +128,7 @@ export function SafetyRows({
   name: string;
   signedIn: boolean;
 }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useSafeTransition();
@@ -142,7 +145,7 @@ export function SafetyRows({
         }
         feedback("confirm");
         setOpen(false);
-        banner.success(t.ui.profile.blocked);
+        banner.success(copy.ui.profile.blocked);
         router.push("/roommates");
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -152,7 +155,7 @@ export function SafetyRows({
   return (
     <div className="nf-rm-safety" data-testid="roommates-safety-rows">
       {/* The kinds `roommate_profile` and `roommate_listing` join REPORT_TARGETS with FE-B's report-target work. */}
-      <ReportSheet targetType={targetType as ReportTarget} targetId={targetId} targetLabel={label} signedIn={signedIn} trigger="row" />
+      <ReportSheet targetType={targetType} targetId={targetId} targetLabel={label} signedIn={signedIn} trigger="row" />
       {userId && signedIn ? (
         <>
           <button type="button" className="nf-share-row mt-md w-full text-left" onClick={() => setOpen(true)} data-testid="roommates-block">
@@ -160,29 +163,29 @@ export function SafetyRows({
               <UiIcon name="block" size={20} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">{fill(t.ui.profile.blockTitle, { name })}</span>
-              <span className="block nf-caption text-[var(--nf-content-muted)]">{t.ui.profile.blockLine}</span>
+              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">{fill(copy.ui.profile.blockTitle, { name })}</span>
+              <span className="block nf-caption text-[var(--nf-content-muted)]">{copy.ui.profile.blockLine}</span>
             </span>
             <UiIcon name="chevron-right" size={16} />
           </button>
           <Sheet
             open={open}
             onOpenChange={setOpen}
-            title={fill(t.ui.profile.blockTitle, { name })}
-            description={t.ui.profile.blockLine}
+            title={fill(copy.ui.profile.blockTitle, { name })}
+            description={copy.ui.profile.blockLine}
             detents={[0.5]}
             footer={
               <div className="nf-rm-sheetfoot">
                 <Button variant="secondary" size="lg" full onClick={() => setOpen(false)}>
-                  {t.ui.listing.keep}
+                  {copy.ui.listing.keep}
                 </Button>
                 <Button variant="danger" size="lg" full loading={pending} onClick={block} data-testid="roommates-block-confirm">
-                  {t.actions.block}
+                  {copy.actions.block}
                 </Button>
               </div>
             }
           >
-            <p className="nf-rm-sheetline">{t.ui.safety.reportBody}</p>
+            <p className="nf-rm-sheetline">{copy.ui.safety.reportBody}</p>
           </Sheet>
         </>
       ) : null}
@@ -212,7 +215,7 @@ export function InterestSheet({
   body?: string;
   onSent: (interestId: string) => void;
 }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   const [note, setNote] = useState("");
   const [pending, start] = useSafeTransition();
   const send = () =>
@@ -225,7 +228,7 @@ export function InterestSheet({
           return;
         }
         feedback("confirm");
-        banner.success(t.ui.profile.sentBanner);
+        banner.success(copy.ui.profile.sentBanner);
         setNote("");
         onOpenChange(false);
         onSent(result.data.id);
@@ -237,25 +240,25 @@ export function InterestSheet({
     <Sheet
       open={open}
       onOpenChange={onOpenChange}
-      title={title ?? t.ui.profile.interestTitle}
-      description={body ?? fill(t.ui.profile.interestBody, { name })}
-      closeLabel={t.ui.flow.close}
+      title={title ?? copy.ui.profile.interestTitle}
+      description={body ?? fill(copy.ui.profile.interestBody, { name })}
+      closeLabel={copy.ui.flow.close}
       footer={
         <div className="nf-rm-sheetfoot">
           <Button variant="secondary" size="lg" full onClick={() => onOpenChange(false)}>
-            {t.ui.profile.cancel}
+            {copy.ui.profile.cancel}
           </Button>
           <Button variant="primary" size="lg" full loading={pending} onClick={send} data-testid="roommates-interest-send">
-            {t.ui.profile.send}
+            {copy.ui.profile.send}
           </Button>
         </div>
       }
       testId="roommates-interest-sheet"
     >
       <TextArea
-        label={t.ui.profile.noteLabel}
-        optionalText={t.ui.flow.optional}
-        placeholder={t.ui.profile.notePlaceholder}
+        label={copy.ui.profile.noteLabel}
+        optionalText={copy.ui.flow.optional}
+        placeholder={copy.ui.profile.notePlaceholder}
         value={note}
         maxLength={LIMITS.noteMax}
         rows={4}

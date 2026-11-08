@@ -82,8 +82,8 @@ export type ListingActionsProps = {
  * Try again.
  */
 export function ListingActions(props: ListingActionsProps) {
-  const t = useScopedCopy("roommates");
-  const L = t.ui.listing;
+  const copy = useScopedCopy("roommates");
+  const L = copy.ui.listing;
   const router = useRouter();
   const { pending, busy, run } = useRun();
   const [status, setStatus] = useState<ListingStatus>(props.status);
@@ -107,7 +107,7 @@ export function ListingActions(props: ListingActionsProps) {
       <div className="nf-rmv-act" data-testid="listing-owner-actions">
         <p className="nf-rmv-act__line nf-rmv-act__line--strong">
           <UiIcon name="file-check" size={16} />
-          {fill(L.ownerStatus, { status: t.listingStatus[status] })}
+          {fill(L.ownerStatus, { status: copy.listingStatus[status] })}
         </p>
         <p className="nf-rmv-act__line">{fill(L.stats, { views: props.viewCount, interests: props.interestCount })}</p>
         <ButtonLink href={ROOMMATES_ROUTES.editListing(props.id)} variant="primary" size="lg" full leadingIcon="pencil">
@@ -116,21 +116,21 @@ export function ListingActions(props: ListingActionsProps) {
         <div className="nf-rmv-act__pair">
           {status === "live" ? (
             <Button variant="secondary" size="md" full loading={pending && busy === "paused"} disabled={pending} onClick={() => setTo("paused", L.paused)}>
-              {t.actions.pause}
+              {copy.actions.pause}
             </Button>
           ) : status === "paused" || status === "filled" ? (
             <Button variant="secondary" size="md" full loading={pending && busy === "live"} disabled={pending} onClick={() => setTo("live", L.resumed)}>
-              {t.actions.resume}
+              {copy.actions.resume}
             </Button>
           ) : null}
           {status === "live" || status === "paused" ? (
             <Button variant="secondary" size="md" full loading={pending && busy === "filled"} disabled={pending} onClick={() => setTo("filled", L.filled)}>
-              {t.actions.markFilled}
+              {copy.actions.markFilled}
             </Button>
           ) : null}
         </div>
         <Button variant="dangerQuiet" size="md" full leadingIcon="trash" onClick={() => setSheet("delete")} data-testid="listing-delete">
-          {t.actions.delete}
+          {copy.actions.delete}
         </Button>
         <Sheet
           open={sheet === "delete"}
@@ -161,7 +161,7 @@ export function ListingActions(props: ListingActionsProps) {
                   })
                 }
               >
-                {t.actions.delete}
+                {copy.actions.delete}
               </Button>
             </div>
           }
@@ -177,7 +177,7 @@ export function ListingActions(props: ListingActionsProps) {
       <div className="nf-rmv-act" data-testid="listing-actions">
         <p className="nf-rmv-act__line">{L.signInToAct}</p>
         <ButtonLink href={`/sign-in?next=${encodeURIComponent(ROOMMATES_ROUTES.listing(props.id))}`} variant="primary" size="lg" full>
-          {t.ui.signInCta}
+          {copy.ui.signInCta}
         </ButtonLink>
       </div>
     );
@@ -187,16 +187,16 @@ export function ListingActions(props: ListingActionsProps) {
     <div className="nf-rmv-act" data-testid="listing-actions">
       {connection.state === "none" || connection.state === "declined" ? (
         <Button variant="primary" size="lg" full leadingIcon="heart" onClick={() => setSheet("interest")} disabled={connection.state === "declined"} data-testid="listing-interested">
-          {connection.state === "declined" ? t.connection.declined : t.actions.interested}
+          {connection.state === "declined" ? copy.connection.declined : copy.actions.interested}
         </Button>
       ) : connection.state === "sent" ? (
         <p className="nf-rmv-act__line nf-rmv-act__line--strong">
           <UiIcon name="hourglass" size={16} />
-          {t.connection.sent}
+          {copy.connection.sent}
         </p>
       ) : connection.state === "received" ? (
         <ButtonLink href={ROOMMATES_ROUTES.person(props.owner.userId)} variant="primary" size="lg" full>
-          {fill(t.connection.received, { name: first })}
+          {fill(copy.connection.received, { name: first })}
         </ButtonLink>
       ) : (
         <Button
@@ -219,24 +219,24 @@ export function ListingActions(props: ListingActionsProps) {
             })
           }
         >
-          {t.actions.message}
+          {copy.actions.message}
         </Button>
       )}
 
       {props.myViewing ? (
         <p className="nf-rmv-act__line">
           <UiIcon name="calendar-clock" size={16} />
-          {fill(L.yourViewing, { status: t.viewings.status[props.myViewing.status].toLowerCase(), date: dayText(props.myViewing.proposedAt) })}
+          {fill(L.yourViewing, { status: copy.viewings.status[props.myViewing.status].toLowerCase(), date: dayText(props.myViewing.proposedAt) })}
         </p>
       ) : (
         <Button variant="secondary" size="lg" full leadingIcon="calendar-booking" onClick={() => setSheet("viewing")} data-testid="listing-viewing">
-          {t.actions.requestViewing}
+          {copy.actions.requestViewing}
         </Button>
       )}
 
       {props.groups.length ? (
         <Button variant="quiet" size="md" full leadingIcon="circle-people" onClick={() => setSheet("shortlist")} data-testid="listing-shortlist">
-          {t.actions.addToShortlist}
+          {copy.actions.addToShortlist}
         </Button>
       ) : null}
 
@@ -254,7 +254,7 @@ export function ListingActions(props: ListingActionsProps) {
         }}
       />
       <ViewingSheet open={sheet === "viewing"} onOpenChange={(o) => setSheet(o ? "viewing" : null)} listingId={props.id} />
-      <Sheet open={sheet === "shortlist"} onOpenChange={(o) => setSheet(o ? "shortlist" : null)} title={L.shortlistTitle} description={L.shortlistBody} closeLabel={t.ui.flow.close} detents={[0.6]}>
+      <Sheet open={sheet === "shortlist"} onOpenChange={(o) => setSheet(o ? "shortlist" : null)} title={L.shortlistTitle} description={L.shortlistBody} closeLabel={copy.ui.flow.close} detents={[0.6]}>
         <ul className="nf-rmv-picklist">
           {props.groups.map((g) => (
             <li key={g.id}>
@@ -295,8 +295,8 @@ function instant(local: string): string | null {
 }
 
 function ViewingSheet({ open, onOpenChange, listingId }: { open: boolean; onOpenChange: (o: boolean) => void; listingId: string }) {
-  const t = useScopedCopy("roommates");
-  const L = t.ui.listing;
+  const copy = useScopedCopy("roommates");
+  const L = copy.ui.listing;
   const router = useRouter();
   const [mode, setMode] = useState<ViewingMode>("in_person");
   const [at, setAt] = useState("");
@@ -337,7 +337,7 @@ function ViewingSheet({ open, onOpenChange, listingId }: { open: boolean; onOpen
       onOpenChange={onOpenChange}
       title={L.viewing}
       description={L.viewingBody}
-      closeLabel={t.ui.flow.close}
+      closeLabel={copy.ui.flow.close}
       footer={
         <Button variant="primary" size="lg" full loading={pending} onClick={send} data-testid="viewing-send">
           {L.sendRequest}
@@ -347,22 +347,23 @@ function ViewingSheet({ open, onOpenChange, listingId }: { open: boolean; onOpen
     >
       <div className="nf-rmd-sheet">
         <Segmented<ViewingMode>
+          variant="solid"
           label={L.mode}
           semantics="radio"
           full
           value={mode}
           options={[
-            { value: "in_person", label: t.viewings.inPerson, icon: "house" },
-            { value: "virtual", label: t.viewings.virtual, icon: "video" },
+            { value: "in_person", label: copy.viewings.inPerson, icon: "house" },
+            { value: "virtual", label: copy.viewings.virtual, icon: "video" },
           ]}
           onChange={setMode}
         />
         <TextField label={L.when} type="datetime-local" value={at} onChange={(e) => setAt(e.target.value)} error={problem ?? undefined} required data-testid="viewing-at" />
-        <TextField label={L.alt} optionalText={t.ui.flow.optional} type="datetime-local" value={alt} onChange={(e) => setAlt(e.target.value)} />
-        <TextArea label={L.note} optionalText={t.ui.flow.optional} value={note} maxLength={LIMITS.noteMax} rows={3} onChange={(e) => setNote(e.target.value)} />
+        <TextField label={L.alt} optionalText={copy.ui.flow.optional} type="datetime-local" value={alt} onChange={(e) => setAlt(e.target.value)} />
+        <TextArea label={L.note} optionalText={copy.ui.flow.optional} value={note} maxLength={LIMITS.noteMax} rows={3} onChange={(e) => setNote(e.target.value)} />
         <p className="nf-rm-note">
           <UiIcon name="info" size={16} />
-          {t.viewings.notReserved}
+          {copy.viewings.notReserved}
         </p>
       </div>
     </Sheet>
@@ -371,8 +372,8 @@ function ViewingSheet({ open, onOpenChange, listingId }: { open: boolean; onOpen
 
 /** Share: the link (the system sheet, or the clipboard), and for a member, to their feed with a line of their own. */
 export function ListingShareMenu({ id, title, signedIn }: { id: string; title: string; signedIn: boolean }) {
-  const t = useScopedCopy("roommates");
-  const L = t.ui.listing;
+  const copy = useScopedCopy("roommates");
+  const L = copy.ui.listing;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState(false);
@@ -382,9 +383,9 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
   const link = async () => {
     feedback("select");
     const outcome = await shareOrCopy({ url: `${window.location.origin}${ROOMMATES_ROUTES.listing(id)}`, title });
-    if (outcome === "copied") banner.success(t.ui.profile.shared);
-    else if (outcome === "shared") banner.success(t.ui.profile.sharedNative);
-    else if (outcome === "failed") banner.error(t.ui.profile.shareFailed);
+    if (outcome === "copied") banner.success(copy.ui.profile.shared);
+    else if (outcome === "shared") banner.success(copy.ui.profile.sharedNative);
+    else if (outcome === "failed") banner.error(copy.ui.profile.shareFailed);
     if (outcome !== "cancelled") setOpen(false);
   };
 
@@ -409,7 +410,7 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
 
   return (
     <>
-      <Button variant="icon" round iconOnly aria-label={t.actions.share} onClick={() => setOpen(true)} data-testid="listing-share">
+      <Button variant="icon" round iconOnly aria-label={copy.actions.share} onClick={() => setOpen(true)} data-testid="listing-share">
         <UiIcon name="share" size={20} />
       </Button>
       <Sheet
@@ -418,9 +419,9 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
           setOpen(o);
           if (!o) setFeed(false);
         }}
-        title={feed ? L.feedTitle : t.actions.share}
+        title={feed ? L.feedTitle : copy.actions.share}
         {...(feed ? { description: L.feedBody } : {})}
-        closeLabel={t.ui.flow.close}
+        closeLabel={copy.ui.flow.close}
         detents={[0.55]}
         {...(feed
           ? {
@@ -433,7 +434,7 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
           : {})}
       >
         {feed ? (
-          <TextArea label={L.feedLine} optionalText={t.ui.flow.optional} value={line} maxLength={2000} rows={4} onChange={(e) => setLine(e.target.value)} />
+          <TextArea label={L.feedLine} optionalText={copy.ui.flow.optional} value={line} maxLength={2000} rows={4} onChange={(e) => setLine(e.target.value)} />
         ) : (
           <ul className="nf-rmv-picklist">
             <li>

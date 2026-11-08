@@ -77,10 +77,27 @@ export function bannerHeader(n: { kind: string; title: string; href: string | nu
  * person in a conversation, or the profile a follow points at. Anything else
  * draws the family glyph; a face is never guessed.
  */
-export type FaceLookup = { by: "thread"; id: string } | { by: "handle"; handle: string } | null;
+export type FaceLookup = { by: "thread"; id: string } | { by: "handle"; handle: string } | { by: "user"; id: string } | null;
+
+const USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * The sender a link names outright: `?from=<user uuid>` (or `&from=`), which
+ * the database puts on every notification it writes about another member
+ * (Vallo Roommates first, 8 November 2026). It wins over the path, because it
+ * is the actor, not the page the link opens.
+ */
+function fromParam(href: string): string | null {
+  const query = href.split("#")[0]?.split("?")[1];
+  if (!query) return null;
+  const from = new URLSearchParams(query).get("from");
+  return from && USER_ID.test(from) ? from.toLowerCase() : null;
+}
 
 export function faceLookup(href: string | null): FaceLookup {
   if (!href) return null;
+  const from = fromParam(href);
+  if (from) return { by: "user", id: from };
   const path = pathOf(href);
   const thread = /^\/(?:agent\/|host\/)?messages\/([0-9a-f-]{36})$/i.exec(path);
   if (thread) return { by: "thread", id: thread[1]! };

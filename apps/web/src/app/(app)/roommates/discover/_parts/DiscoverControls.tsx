@@ -43,17 +43,17 @@ function shared(f: Draft): Draft {
 }
 
 export function ModeSwitch({ mode }: { mode: Mode }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   const router = useRouter();
   return (
     <Segmented<Mode>
-      label={t.ui.discover.mode}
+      label={copy.ui.discover.mode}
       value={mode}
       full
       variant="solid"
       options={[
-        { value: "people", label: t.discover.people, icon: "users" },
-        { value: "rooms", label: t.discover.rooms, icon: "bed" },
+        { value: "people", label: copy.discover.people, icon: "users" },
+        { value: "rooms", label: copy.discover.rooms, icon: "bed" },
       ]}
       onChange={(next) => {
         const url = new URL(window.location.href);
@@ -84,8 +84,8 @@ export function DiscoverControls({
   schools: InstitutionRef[];
   canSave: boolean;
 }) {
-  const t = useScopedCopy("roommates");
-  const d = t.ui.discover;
+  const copy = useScopedCopy("roommates");
+  const d = copy.ui.discover;
   const router = useRouter();
   const current: Draft = mode === "people" ? people : rooms;
   const [q, setQ] = useState(current.q ?? "");
@@ -102,8 +102,8 @@ export function DiscoverControls({
 
   const quick =
     mode === "people"
-      ? (["student", "corps_member", "professional"] as const).map((v) => ({ key: v, label: t.lifeStages[v], on: current.lifeStage === v, set: () => go({ ...current, lifeStage: current.lifeStage === v ? null : v }) }))
-      : LISTING_KINDS.map((v) => ({ key: v, label: t.listingKinds[v], on: current.kind === v, set: () => go({ ...current, kind: current.kind === v ? null : v }) }));
+      ? (["student", "corps_member", "professional"] as const).map((v) => ({ key: v, label: copy.lifeStages[v], on: current.lifeStage === v, set: () => go({ ...current, lifeStage: current.lifeStage === v ? null : v }) }))
+      : LISTING_KINDS.map((v) => ({ key: v, label: copy.listingKinds[v], on: current.kind === v, set: () => go({ ...current, kind: current.kind === v ? null : v }) }));
 
   const patch = (p: Draft) => setDraft((x) => ({ ...x, ...p }));
   const schoolOptions = [...schools].sort((a, b) => a.name.localeCompare(b.name));
@@ -115,7 +115,7 @@ export function DiscoverControls({
           <UiIcon name="search" size={20} />
         </span>
         <label htmlFor="rm-discover-q" className="sr-only">
-          {t.discover.search}
+          {copy.discover.search}
         </label>
         <input
           id="rm-discover-q"
@@ -124,7 +124,7 @@ export function DiscoverControls({
           enterKeyHint="search"
           value={q}
           maxLength={80}
-          placeholder={t.discover.search}
+          placeholder={copy.discover.search}
           onChange={(e) => setQ(e.target.value)}
           data-testid="discover-search"
         />
@@ -133,7 +133,7 @@ export function DiscoverControls({
         </button>
       </form>
 
-      <ChipRow label={t.discover.filters}>
+      <ChipRow label={copy.discover.filters}>
         <Chip
           behaviour="filter"
           selected={count > 0}
@@ -147,7 +147,7 @@ export function DiscoverControls({
           }}
           data-testid="discover-filters"
         >
-          {t.discover.filters}
+          {copy.discover.filters}
         </Chip>
         <Chip
           behaviour="filter"
@@ -158,7 +158,7 @@ export function DiscoverControls({
             go({ ...current, verifiedOnly: !current.verifiedOnly });
           }}
         >
-          {t.discover.filterLabels.verified}
+          {copy.discover.filterLabels.verified}
         </Chip>
         {quick.map((c) => (
           <Chip
@@ -183,16 +183,16 @@ export function DiscoverControls({
         description={d.filtersBody}
         fullPage
         sideOnWide
-        closeLabel={t.ui.flow.close}
+        closeLabel={copy.ui.flow.close}
         reset={{
-          label: t.discover.reset,
+          label: copy.discover.reset,
           onClick: () => {
             feedback("select");
             setDraft({ ...(mode === "people" ? EMPTY_PEOPLE_FILTERS : EMPTY_ROOM_FILTERS), q: current.q ?? "" });
           },
         }}
         apply={{
-          label: t.discover.apply,
+          label: copy.discover.apply,
           onClick: () => {
             feedback("confirm");
             setOpen(false);
@@ -202,7 +202,7 @@ export function DiscoverControls({
         testId="discover-filter-sheet"
       >
         <div className="nf-rmd-sheet">
-          <FilterGroup title={t.discover.filterLabels.city} icon="pin">
+          <FilterGroup title={copy.discover.filterLabels.city} icon="pin">
             <SelectField label={d.state} value={draft.stateCode ?? ""} onChange={(e) => patch({ stateCode: e.target.value || null })}>
               <option value="">{d.anyState}</option>
               {STATE_OPTIONS.map((s) => (
@@ -211,12 +211,12 @@ export function DiscoverControls({
                 </option>
               ))}
             </SelectField>
-            <TextField label={t.discover.filterLabels.city} value={draft.city ?? ""} maxLength={60} placeholder={d.cityPlaceholder} onChange={(e) => patch({ city: e.target.value || null })} />
+            <TextField label={copy.discover.filterLabels.city} value={draft.city ?? ""} maxLength={60} placeholder={d.cityPlaceholder} onChange={(e) => patch({ city: e.target.value || null })} />
           </FilterGroup>
 
           {schoolOptions.length ? (
-            <FilterGroup title={t.discover.filterLabels.institution} icon="id-card">
-              <SelectField label={t.discover.filterLabels.institution} hideLabel value={draft.institutionId ?? ""} onChange={(e) => patch({ institutionId: e.target.value || null })}>
+            <FilterGroup title={copy.discover.filterLabels.institution} icon="id-card">
+              <SelectField label={copy.discover.filterLabels.institution} hideLabel value={draft.institutionId ?? ""} onChange={(e) => patch({ institutionId: e.target.value || null })}>
                 <option value="">{d.anySchool}</option>
                 {schoolOptions.map((s) => (
                   <option key={s.id} value={s.id}>
@@ -227,48 +227,49 @@ export function DiscoverControls({
             </FilterGroup>
           ) : null}
 
-          <FilterGroup title={t.discover.filterLabels.budget} icon="wallet">
+          <FilterGroup title={copy.discover.filterLabels.budget} icon="wallet">
             <NairaField
               label={d.maxBudget}
               value={draft.maxMinor ? String(Math.round(draft.maxMinor / 100)) : ""}
               onValueChange={(v) => patch({ maxMinor: v ? Math.round(Number(v) * 100) : null })}
             />
             <Segmented
+              variant="solid"
               label={d.per}
               semantics="radio"
               size="sm"
               value={draft.period ?? "year"}
-              options={PERIODS.map((p) => ({ value: p, label: t.periods[p] }))}
+              options={PERIODS.map((p) => ({ value: p, label: copy.periods[p] }))}
               onChange={(p) => patch({ period: p })}
             />
           </FilterGroup>
 
-          <FilterGroup title={t.discover.filterLabels.moveBy} icon="calendar-check">
-            <TextField label={t.discover.filterLabels.moveBy} hideLabel type="date" value={draft.moveBy ?? ""} onChange={(e) => patch({ moveBy: e.target.value || null })} />
+          <FilterGroup title={copy.discover.filterLabels.moveBy} icon="calendar-check">
+            <TextField label={copy.discover.filterLabels.moveBy} hideLabel type="date" value={draft.moveBy ?? ""} onChange={(e) => patch({ moveBy: e.target.value || null })} />
           </FilterGroup>
 
           {mode === "people" ? (
             <>
-              <FilterGroup title={t.discover.filterLabels.lifeStage} icon="users">
-                <ChoiceChips label={t.discover.filterLabels.lifeStage} anyLabel={d.any} value={draft.lifeStage ?? null} options={LIFE_STAGES.map((v) => ({ value: v, label: t.lifeStages[v] }))} onChange={(v) => patch({ lifeStage: v })} />
+              <FilterGroup title={copy.discover.filterLabels.lifeStage} icon="users">
+                <ChoiceChips label={copy.discover.filterLabels.lifeStage} anyLabel={d.any} value={draft.lifeStage ?? null} options={LIFE_STAGES.map((v) => ({ value: v, label: copy.lifeStages[v] }))} onChange={(v) => patch({ lifeStage: v })} />
               </FilterGroup>
-              <FilterGroup title={t.ui.onboarding.intentsTitle} icon="circle-people">
-                <ChoiceChips label={t.ui.onboarding.intentsTitle} anyLabel={d.any} value={draft.intent ?? null} options={INTENTS.map((v) => ({ value: v, label: t.intents[v] }))} onChange={(v) => patch({ intent: v })} />
+              <FilterGroup title={copy.ui.onboarding.intentsTitle} icon="circle-people">
+                <ChoiceChips label={copy.ui.onboarding.intentsTitle} anyLabel={d.any} value={draft.intent ?? null} options={INTENTS.map((v) => ({ value: v, label: copy.intents[v] }))} onChange={(v) => patch({ intent: v })} />
               </FilterGroup>
             </>
           ) : (
             <>
-              <FilterGroup title={t.discover.filterLabels.kind} icon="key">
-                <ChoiceChips label={t.discover.filterLabels.kind} anyLabel={d.any} value={draft.kind ?? null} options={LISTING_KINDS.map((v) => ({ value: v, label: t.listingKinds[v] }))} onChange={(v) => patch({ kind: v })} />
+              <FilterGroup title={copy.discover.filterLabels.kind} icon="key">
+                <ChoiceChips label={copy.discover.filterLabels.kind} anyLabel={d.any} value={draft.kind ?? null} options={LISTING_KINDS.map((v) => ({ value: v, label: copy.listingKinds[v] }))} onChange={(v) => patch({ kind: v })} />
               </FilterGroup>
-              <FilterGroup title={t.discover.filterLabels.roomType} icon="door">
-                <ChoiceChips label={t.discover.filterLabels.roomType} anyLabel={d.any} value={draft.roomType ?? null} options={ROOM_TYPES.map((v) => ({ value: v, label: t.roomTypes[v] }))} onChange={(v) => patch({ roomType: v })} />
+              <FilterGroup title={copy.discover.filterLabels.roomType} icon="door">
+                <ChoiceChips label={copy.discover.filterLabels.roomType} anyLabel={d.any} value={draft.roomType ?? null} options={ROOM_TYPES.map((v) => ({ value: v, label: copy.roomTypes[v] }))} onChange={(v) => patch({ roomType: v })} />
               </FilterGroup>
-              <FilterGroup title={t.discover.filterLabels.furnished} icon="bed">
-                <ChoiceChips label={t.discover.filterLabels.furnished} anyLabel={d.any} value={draft.furnished ?? null} options={FURNISHED.map((v) => ({ value: v, label: t.furnished[v] }))} onChange={(v) => patch({ furnished: v })} />
+              <FilterGroup title={copy.discover.filterLabels.furnished} icon="bed">
+                <ChoiceChips label={copy.discover.filterLabels.furnished} anyLabel={d.any} value={draft.furnished ?? null} options={FURNISHED.map((v) => ({ value: v, label: copy.furnished[v] }))} onChange={(v) => patch({ furnished: v })} />
               </FilterGroup>
-              <FilterGroup title={t.discover.filterLabels.gender} icon="users">
-                <ChoiceChips label={t.discover.filterLabels.gender} anyLabel={d.any} value={draft.genderPref ?? null} options={GENDER_PREFS.map((v) => ({ value: v, label: t.genderPref[v] }))} onChange={(v) => patch({ genderPref: v })} />
+              <FilterGroup title={copy.discover.filterLabels.gender} icon="users">
+                <ChoiceChips label={copy.discover.filterLabels.gender} anyLabel={d.any} value={draft.genderPref ?? null} options={GENDER_PREFS.map((v) => ({ value: v, label: copy.genderPref[v] }))} onChange={(v) => patch({ genderPref: v })} />
               </FilterGroup>
             </>
           )}
@@ -277,13 +278,13 @@ export function DiscoverControls({
             <ChoiceChips
               label={d.sort}
               value={draft.sort ?? (mode === "people" ? "match" : "newest")}
-              options={(["match", "newest", "budget"] as const).map((v) => ({ value: v, label: t.discover.sort[v] }))}
+              options={(["match", "newest", "budget"] as const).map((v) => ({ value: v, label: copy.discover.sort[v] }))}
               onChange={(v) => patch({ sort: v ?? (mode === "people" ? "match" : "newest") })}
             />
           </FilterGroup>
 
           <div className="nf-rmd-group">
-            <Switch label={t.discover.filterLabels.verified} checked={Boolean(draft.verifiedOnly)} onCheckedChange={(v) => patch({ verifiedOnly: v })} />
+            <Switch label={copy.discover.filterLabels.verified} checked={Boolean(draft.verifiedOnly)} onCheckedChange={(v) => patch({ verifiedOnly: v })} />
           </div>
         </div>
       </Sheet>
@@ -307,13 +308,13 @@ function FilterGroup({ title, icon, children }: { title: string; icon: "pin" | "
 
 /** Save these filters; the hub lists them and a new match is told. */
 export function SaveSearchButton({ mode, filters, variant }: { mode: Mode; filters: Draft; variant: "chip" | "primary" }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   const router = useRouter();
   const path = usePathname();
   const [pending, start] = useSafeTransition();
   const [done, setDone] = useState(false);
   const place = filters.city || stateName(filters.stateCode) || null;
-  const base = mode === "rooms" ? (filters.kind ? t.listingKinds[filters.kind] : t.ui.discover.searchRoomsLabel) : t.ui.discover.searchPeopleLabel;
+  const base = mode === "rooms" ? (filters.kind ? copy.listingKinds[filters.kind] : copy.ui.discover.searchRoomsLabel) : copy.ui.discover.searchPeopleLabel;
   const label = place ? `${base}, ${place}` : base;
 
   const save = () =>
@@ -332,13 +333,13 @@ export function SaveSearchButton({ mode, filters, variant }: { mode: Mode; filte
         if (!result.ok) {
           feedback("error");
           if (result.error.startsWith("Sign in")) {
-            banner.error(result.error, { action: { label: t.ui.signInCta, run: () => router.push(`/sign-in?next=${encodeURIComponent(path + window.location.search)}`) } });
+            banner.error(result.error, { action: { label: copy.ui.signInCta, run: () => router.push(`/sign-in?next=${encodeURIComponent(path + window.location.search)}`) } });
           } else banner.error(result.error, { retry: save });
           return;
         }
         feedback("confirm");
         setDone(true);
-        banner.success(t.discover.saved);
+        banner.success(copy.discover.saved);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -347,13 +348,13 @@ export function SaveSearchButton({ mode, filters, variant }: { mode: Mode; filte
   if (variant === "chip") {
     return (
       <Chip behaviour="filter" selected={done} icon="bookmark" disabled={pending || done} onSelectedChange={save} data-testid="discover-save-search">
-        {done ? t.actions.saved : t.discover.saveSearch}
+        {done ? copy.actions.saved : copy.discover.saveSearch}
       </Chip>
     );
   }
   return (
     <Button variant="primary" size="md" leadingIcon="bookmark" loading={pending} done={done} disabled={done} onClick={save} data-testid="discover-save-search">
-      {t.discover.saveSearch}
+      {copy.discover.saveSearch}
     </Button>
   );
 }

@@ -58,6 +58,7 @@ import { ReservePanel } from "./ReservePanel";
 import { readDeclaration } from "@/lib/stays/arrival-queries";
 import { toDoorCharges } from "@/lib/stays/door-total";
 import { RentalPanel } from "./RentalPanel";
+import { RoommatesForHome } from "./RoommatesForHome";
 import { ReserveTable } from "./ReserveTable";
 import { ListingAbout } from "@/components/app/listing/ListingAbout";
 import { ListingAmenities } from "@/components/app/listing/ListingAmenities";
@@ -1446,6 +1447,14 @@ export default async function ListingDetailPage({
                       listingCopy={t.landlord.listing}
                       locale={locale}
                     />
+                  </Suspense>
+                )}
+
+                {/* Vallo Roommates: find roommates for this home, the lister's
+                    "good for sharing" line, and the rooms shared here. */}
+                {isRental && !isSale && (
+                  <Suspense fallback={null}>
+                    <RoommatesForHome listingId={listing.id} isDemo={listing.isDemo} copy={t.roommates} locale={locale} />
                   </Suspense>
                 )}
 

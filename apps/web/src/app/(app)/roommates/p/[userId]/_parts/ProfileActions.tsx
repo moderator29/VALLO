@@ -38,7 +38,7 @@ export function ProfileActions({
   connection: ConnectionState;
   groups: { id: string; name: string }[];
 }) {
-  const t = useScopedCopy("roommates");
+  const copy = useScopedCopy("roommates");
   const router = useRouter();
   const [state, setState] = useState<ConnectionState>(connection);
   const [celebrate, setCelebrate] = useState(false);
@@ -67,9 +67,9 @@ export function ProfileActions({
   if (isSelf) {
     return (
       <div className="nf-rmv-act" data-testid="profile-actions">
-        <p className="nf-rmv-act__line">{t.ui.profile.selfNote}</p>
+        <p className="nf-rmv-act__line">{copy.ui.profile.selfNote}</p>
         <ButtonLink href={ROOMMATES_ROUTES.profile} variant="primary" size="lg" full leadingIcon="pencil">
-          {t.profile.edit}
+          {copy.profile.edit}
         </ButtonLink>
       </div>
     );
@@ -93,7 +93,7 @@ export function ProfileActions({
       {state.state === "none" ? (
         <>
           <Button variant="primary" size="lg" full leadingIcon="heart" onClick={() => setInterestOpen(true)} data-testid="profile-interested">
-            {t.actions.interested}
+            {copy.actions.interested}
           </Button>
           <InterestSheet
             open={interestOpen}
@@ -112,7 +112,7 @@ export function ProfileActions({
         <>
           <p className="nf-rmv-act__line">
             <UiIcon name="hourglass" size={16} />
-            {t.connection.sent}
+            {copy.connection.sent}
           </p>
           <Button
             variant="secondary"
@@ -125,21 +125,21 @@ export function ProfileActions({
                 const result = await withdrawInterest(state.interestId);
                 if (!result.ok) return result;
                 feedback("confirm");
-                banner.info(t.ui.profile.withdrawn);
+                banner.info(copy.ui.profile.withdrawn);
                 setState({ state: "none" });
                 router.refresh();
                 return { ok: true };
               })
             }
           >
-            {t.actions.withdraw}
+            {copy.actions.withdraw}
           </Button>
         </>
       ) : null}
 
       {state.state === "received" ? (
         <>
-          <p className="nf-rmv-act__line nf-rmv-act__line--strong">{fill(t.connection.received, { name: first })}</p>
+          <p className="nf-rmv-act__line nf-rmv-act__line--strong">{fill(copy.connection.received, { name: first })}</p>
           {state.note ? <blockquote className="nf-rmv-act__note">{state.note}</blockquote> : null}
           <div className="nf-rmv-act__pair">
             <Button
@@ -154,14 +154,14 @@ export function ProfileActions({
                   const result = await answerInterest({ id: state.interestId, accept: false });
                   if (!result.ok) return result;
                   feedback("confirm");
-                  banner.info(t.ui.profile.declinedBanner);
+                  banner.info(copy.ui.profile.declinedBanner);
                   setState({ state: "declined" });
                   router.refresh();
                   return { ok: true };
                 })
               }
             >
-              {t.actions.decline}
+              {copy.actions.decline}
             </Button>
             <Button
               variant="primary"
@@ -176,7 +176,7 @@ export function ProfileActions({
                   const result = await answerInterest({ id: state.interestId, accept: true });
                   if (!result.ok) return result;
                   feedback("confirm");
-                  banner.success(t.ui.profile.accepted);
+                  banner.success(copy.ui.profile.accepted);
                   setState({ state: "connected", interestId: state.interestId, conversationId: null });
                   setCelebrate(true);
                   router.refresh();
@@ -184,7 +184,7 @@ export function ProfileActions({
                 })
               }
             >
-              {t.actions.accept}
+              {copy.actions.accept}
             </Button>
           </div>
         </>
@@ -197,22 +197,22 @@ export function ProfileActions({
               <span className="nf-rmv-celebrate__mark" aria-hidden="true">
                 <UiIcon name="check" size={28} />
               </span>
-              <p className="nf-rmv-celebrate__title">{fill(t.connection.celebrate, { name: first })}</p>
-              <p className="nf-rmv-celebrate__body">{t.connection.next}</p>
+              <p className="nf-rmv-celebrate__title">{fill(copy.connection.celebrate, { name: first })}</p>
+              <p className="nf-rmv-celebrate__body">{copy.connection.next}</p>
             </div>
           ) : (
             <p className="nf-rmv-act__line">
               <UiIcon name="circle-check" size={16} filled />
-              {t.connection.accepted}
+              {copy.connection.accepted}
             </p>
           )}
           <Button variant="primary" size="lg" full leadingIcon="chat-bubble" loading={pending && busy === "chat"} onClick={() => message(state.interestId, state.conversationId)} data-testid="profile-message">
-            {celebrate ? t.connection.startChat : t.actions.message}
+            {celebrate ? copy.connection.startChat : copy.actions.message}
           </Button>
           <Button variant="secondary" size="md" full leadingIcon="circle-people" onClick={() => setInviteOpen(true)} data-testid="profile-invite">
-            {t.actions.inviteToGroup}
+            {copy.actions.inviteToGroup}
           </Button>
-          <Sheet open={inviteOpen} onOpenChange={setInviteOpen} title={t.actions.inviteToGroup} description={t.connection.findTogether} closeLabel={t.ui.flow.close} detents={[0.6]}>
+          <Sheet open={inviteOpen} onOpenChange={setInviteOpen} title={copy.actions.inviteToGroup} description={copy.connection.findTogether} closeLabel={copy.ui.flow.close} detents={[0.6]}>
             {groups.length ? (
               <ul className="nf-rmv-picklist">
                 {groups.map((g) => (
@@ -226,7 +226,7 @@ export function ProfileActions({
                           const result = await inviteToGroup({ groupId: g.id, userId });
                           if (!result.ok) return result;
                           feedback("confirm");
-                          banner.success(`${t.groups.invite}: ${g.name}`);
+                          banner.success(`${copy.groups.invite}: ${g.name}`);
                           setInviteOpen(false);
                           return { ok: true };
                         })
@@ -243,9 +243,9 @@ export function ProfileActions({
               </ul>
             ) : (
               <div className="nf-rmv-picknone">
-                <p className="nf-rm-panel__sub">{t.ui.profile.noGroups}</p>
+                <p className="nf-rm-panel__sub">{copy.ui.profile.noGroups}</p>
                 <ButtonLink href={ROOMMATES_ROUTES.newGroup} variant="primary" size="md" leadingIcon="plus">
-                  {t.groups.create}
+                  {copy.groups.create}
                 </ButtonLink>
               </div>
             )}
@@ -256,9 +256,9 @@ export function ProfileActions({
       {state.state === "declined" ? (
         <p className="nf-rmv-act__line">
           <UiIcon name="info" size={16} />
-          {t.connection.declined}
+          {copy.connection.declined}
           <Link href={ROOMMATES_ROUTES.discover} className="nf-rmv-act__link">
-            {t.ui.findRoommate}
+            {copy.ui.findRoommate}
           </Link>
         </p>
       ) : null}

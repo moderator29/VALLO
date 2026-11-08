@@ -1140,4 +1140,32 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+
+  /* ------------------------------------------------------------ the client controls */
+  .nf-rm-togglechips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  .nf-rm-safety {
+    display: grid;
+    gap: 0;
+  }
+  .nf-rm-safety .nf-rm-plate {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    color: var(--nf-content-secondary);
+    background: color-mix(in oklab, var(--nf-content-primary) 6%, transparent);
+  }
+  .nf-rm-sheetfoot {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-xs);
+  }
+  .nf-rm-sheetline {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.55;
+  }
 }

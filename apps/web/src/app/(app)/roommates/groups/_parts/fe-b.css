@@ -327,7 +327,7 @@
     padding: var(--nf-space-2xs) var(--nf-space-sm);
     border-radius: var(--nf-radius-control);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    background: var(--nf-surface-inset);
+    background: var(--nf-btn-glass-fill);
     color: var(--nf-content-primary);
     font: inherit;
     font-size: var(--nf-text-body-sm);
@@ -647,7 +647,7 @@
 
   /* Rows arrive with a short lift, transform and opacity only. */
   .nf-rmb-arrive {
-    animation: nf-rmb-arrive var(--nf-duration-base, 240ms) var(--nf-ease-out, ease-out) both;
+    animation: nf-rmb-arrive var(--nf-duration-entrance) var(--nf-ease-entrance) both;
   }
   @keyframes nf-rmb-arrive {
     from {

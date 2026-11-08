@@ -30,7 +30,7 @@ import "./roommates-kit.css";
 
 export function RoommateCardView({
   card,
-  t,
+  t: copy,
   href,
   action,
   testId,
@@ -44,8 +44,8 @@ export function RoommateCardView({
   testId?: string;
 }) {
   const where = placeText(card.areas[0], card.city);
-  const budget = budgetText(card.budget, t);
-  const stage = card.lifeStage ? t.lifeStages[card.lifeStage] : null;
+  const budget = budgetText(card.budget, copy);
+  const stage = card.lifeStage ? copy.lifeStages[card.lifeStage] : null;
   const school = card.institution ? (card.institution.shortName ?? card.institution.name) : null;
   const score = card.match?.score ?? null;
   return (
@@ -66,7 +66,7 @@ export function RoommateCardView({
           {stage || school ? <p className="nf-rm-card__sub">{[stage, school].filter(Boolean).join(" · ")}</p> : null}
         </div>
         {card.match ? (
-          <MatchRing score={score} size="sm" label={score === null ? t.match.thin : fill(t.match.percent, { n: Math.round(score) })} />
+          <MatchRing score={score} size="sm" label={score === null ? copy.match.thin : fill(copy.match.percent, { n: Math.round(score) })} />
         ) : null}
       </div>
 
@@ -87,23 +87,23 @@ export function RoommateCardView({
         ) : null}
         <li>
           <UiIcon name="calendar-check" size={16} />
-          {moveInText(card.moveInOn, card.moveInFlex, t)}
+          {moveInText(card.moveInOn, card.moveInFlex, copy)}
         </li>
       </ul>
 
-      <LifestyleChips lifestyle={card.lifestyle} t={t} max={3} />
+      <LifestyleChips lifestyle={card.lifestyle} t={copy} max={3} />
 
       {card.match ? (
         card.match.score === null ? (
-          <p className="nf-rm-card__thin">{t.match.thin}</p>
+          <p className="nf-rm-card__thin">{copy.match.thin}</p>
         ) : (
-          <MatchReasons match={card.match} t={t} max={2} />
+          <MatchReasons match={card.match} t={copy} max={2} />
         )
       ) : null}
 
       {card.badges.length || action ? (
         <div className="nf-rm-card__foot">
-          <BadgesRow badges={card.badges} t={t} max={2} size="sm" />
+          <BadgesRow badges={card.badges} t={copy} max={2} size="sm" />
           {action ? <div className="nf-rm-card__action">{action}</div> : null}
         </div>
       ) : null}
@@ -113,7 +113,7 @@ export function RoommateCardView({
 
 export function RoomCardView({
   room,
-  t,
+  t: copy,
   href,
   action,
   today,
@@ -130,18 +130,18 @@ export function RoomCardView({
   linked?: boolean;
   testId?: string;
 }) {
-  const c = t.ui.card;
+  const c = copy.ui.card;
   const cover = room.photoUrls[0] ?? null;
   const priceMinor = room.shareMinor ?? room.rentMinor;
   const priceLabel = room.kind === "room_offer" ? (room.shareMinor !== null ? c.shareLabel : null) : room.shareMinor !== null ? c.perPerson : null;
   const where = placeText(room.area, room.city);
   const facts: { icon: "bed" | "bath" | "users" | "door"; text: string }[] = [];
-  if (room.roomType) facts.push({ icon: "door", text: t.roomTypes[room.roomType] });
+  if (room.roomType) facts.push({ icon: "door", text: copy.roomTypes[room.roomType] });
   if (room.bedrooms !== null) facts.push({ icon: "bed", text: counted(room.bedrooms, c.bedrooms) });
   if (room.bathrooms !== null) facts.push({ icon: "bath", text: counted(room.bathrooms, c.bathrooms) });
   if (room.occupantsNow !== null) facts.push({ icon: "users", text: counted(room.occupantsNow, c.occupants) });
-  const eyebrow = [room.furnished ? t.furnished[room.furnished] : null, room.roomsAvailable ? counted(room.roomsAvailable, c.roomsFree) : null].filter(Boolean).join(" · ");
-  const free = availableText(room.availableFrom, t, today);
+  const eyebrow = [room.furnished ? copy.furnished[room.furnished] : null, room.roomsAvailable ? counted(room.roomsAvailable, c.roomsFree) : null].filter(Boolean).join(" · ");
+  const free = availableText(room.availableFrom, copy, today);
   const title = linked ? (
     <Link href={href ?? ROOMMATES_ROUTES.listing(room.id)} className="nf-rm-card__link">
       {room.title}
@@ -161,8 +161,8 @@ export function RoomCardView({
           </span>
         )}
         <span className="nf-rm-rcard__tags">
-          <KindTag kind={room.kind} t={t} onMedia />
-          {room.verified ? <VerifiedChip t={t} onMedia /> : null}
+          <KindTag kind={room.kind} t={copy} onMedia />
+          {room.verified ? <VerifiedChip t={copy} onMedia /> : null}
         </span>
         {room.photoUrls.length > 1 ? (
           <span className="nf-rm-rcard__count">
@@ -186,7 +186,7 @@ export function RoomCardView({
         <div className="nf-rm-rcard__price">
           {priceMinor !== null ? (
             <span className="nf-rm-price">
-              <Money minor={priceMinor} locale={LOCALE} mode="glance" period={room.rentPeriod} suffix={t.perPeriod[room.rentPeriod]} />
+              <Money minor={priceMinor} locale={LOCALE} mode="glance" period={room.rentPeriod} suffix={copy.perPeriod[room.rentPeriod]} />
             </span>
           ) : null}
           {priceLabel ? <span className="nf-rm-price__label">{priceLabel}</span> : null}
@@ -211,7 +211,7 @@ export function RoomCardView({
             {room.amenities.slice(0, 2).map((a) => (
               <li key={a}>
                 <UiIcon name={AMENITY_ICON[a]} size={14} />
-                {t.amenities[a]}
+                {copy.amenities[a]}
               </li>
             ))}
             {room.amenities.length > 2 ? <li>{`+${room.amenities.length - 2}`}</li> : null}

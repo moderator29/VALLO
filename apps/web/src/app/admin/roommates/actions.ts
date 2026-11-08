@@ -4,17 +4,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
-import { adminRefusal, requireAdmin } from "@/lib/admin/guard";
+import { requireConsole } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/audit";
 import { isNotLive } from "@/lib/features/degrade";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * THE ROOMMATES DESK'S WRITES (FE-B). Each one passes `requireAdmin("moderation")`
- * first, then writes with the service client (the roommate tables are new and
- * not in the generated types, hence the untyped client) and pairs the change
- * with an `audit_log` row: who, what, which record, and the detail. A table
- * that is not there yet answers with the honest sentence, never a fake success.
+ * THE ROOMMATES DESK'S OWN WRITES (FE-B): the schools directory and the
+ * matching weights. Posts, profiles, groups and checks are decided through
+ * the Trust and Safety layer (`lib/admin/cases/actions.ts`), which the lead
+ * owns. These run on the staff member's OWN session, so the database's
+ * staff policies (`private.is_staff()` on `institutions` and
+ * `roommate_match_weights`) decide who may write; only the audit line is
+ * written with the service role, because `audit_log` has no member insert
+ * policy. A table that is not there yet answers with the honest sentence.
  */
 
 const NOT_OPEN = "Vallo Roommates is not open on this server yet.";
@@ -22,98 +25,36 @@ const FAILED = "That did not go through. Try again.";
 const PATH = "/admin/roommates";
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-type Staff = { db: SupabaseClient; typed: ReturnType<typeof createAdminClient>; actorId: string };
+type Staff = { db: SupabaseClient; actorId: string };
 
 async function staff(): Promise<Staff | { error: string }> {
-  const access = await requireAdmin("moderation");
-  if (access.state !== "admin") return { error: adminRefusal(access) };
-  try {
-    const typed = createAdminClient();
-    return { db: typed as unknown as SupabaseClient, typed, actorId: access.user.id };
-  } catch {
-    return { error: "The console is not configured on this server." };
-  }
+  const access = await requireConsole();
+  if (access.state === "unconfigured") return { error: "The console is not configured on this server." };
+  if (access.state === "signed-out") return { error: "Sign in with your operations account to continue." };
+  if (access.state === "step-up") return { error: "Confirm your security key to use the console." };
+  if (access.state !== "console") return { error: "This is for Vallo staff." };
+  return { db: access.supabase as unknown as SupabaseClient, actorId: access.user.id };
 }
 
 function words(error: unknown): string {
-  return isNotLive(error) ? NOT_OPEN : FAILED;
+  if (isNotLive(error)) return NOT_OPEN;
+  if ((error as { code?: string } | null)?.code === "42501") return "Your staff role does not allow this.";
+  return FAILED;
+}
+
+/** Zero rows changed under RLS means the policy refused: say so rather than claim it. */
+function refused(data: unknown[] | null): boolean {
+  return !data || data.length === 0;
 }
 
 async function audit(s: Staff, action: string, entityType: string, entityId: string | null, detail: Record<string, string | number | boolean | null> = {}): Promise<string | null> {
-  const written = await writeAudit(s.typed, { actorId: s.actorId, action, entityType, entityId, detail });
+  let written = false;
+  try {
+    written = await writeAudit(createAdminClient(), { actorId: s.actorId, action, entityType, entityId, detail });
+  } catch {
+    written = false;
+  }
   return written ? null : "Done, but the audit line could not be written. Operations has been alerted.";
-}
-
-/** Verify a post (the "Listing checked by Vallo" mark), or take the mark back. */
-export async function verifyRoommateListing(input: { id: string; verified: boolean }): Promise<ActionResult<{ note: string | null }>> {
-  const s = await staff();
-  if ("error" in s) return fail(s.error);
-  if (!uuid.test(input.id)) return fail(FAILED);
-  const patch = input.verified ? { verified_at: new Date().toISOString(), verified_by: s.actorId } : { verified_at: null, verified_by: null };
-  const { error } = await s.db.from("roommate_listings").update(patch).eq("id", input.id);
-  if (error) return fail(words(error));
-  const note = await audit(s, input.verified ? "roommates.listing.verify" : "roommates.listing.unverify", "roommate_listing", input.id);
-  revalidatePath(PATH);
-  return ok({ note });
-}
-
-/** Take a post down (status removed), with the reason kept in the audit trail. */
-export async function removeRoommateListing(input: { id: string; reason: string }): Promise<ActionResult<{ note: string | null }>> {
-  const s = await staff();
-  if ("error" in s) return fail(s.error);
-  if (!uuid.test(input.id)) return fail(FAILED);
-  const reason = (input.reason ?? "").trim().slice(0, 300);
-  if (reason.length < 4) return fail("Say why the post is coming down.", { reason: "Say why." });
-  const { error } = await s.db.from("roommate_listings").update({ status: "removed" }).eq("id", input.id);
-  if (error) return fail(words(error));
-  const note = await audit(s, "roommates.listing.remove", "roommate_listing", input.id, { reason });
-  revalidatePath(PATH);
-  return ok({ note });
-}
-
-/** Hold a roommate profile for review, or let it go back to active. */
-export async function holdRoommateProfile(input: { userId: string; hold: boolean; reason?: string }): Promise<ActionResult<{ note: string | null }>> {
-  const s = await staff();
-  if ("error" in s) return fail(s.error);
-  if (!uuid.test(input.userId)) return fail(FAILED);
-  const { error } = await s.db.from("roommate_profiles").update({ status: input.hold ? "held" : "active" }).eq("user_id", input.userId);
-  if (error) return fail(words(error));
-  const note = await audit(s, input.hold ? "roommates.profile.hold" : "roommates.profile.unhold", "roommate_profile", input.userId, { reason: (input.reason ?? "").slice(0, 300) || null });
-  revalidatePath(PATH);
-  return ok({ note });
-}
-
-/** A five-minute link to a member's evidence in the private bucket. Logged, because it shows a document. */
-export async function openRoommateEvidence(id: string): Promise<ActionResult<{ url: string }>> {
-  const s = await staff();
-  if ("error" in s) return fail(s.error);
-  if (!uuid.test(id)) return fail(FAILED);
-  const { data, error } = await s.db.from("roommate_verifications").select("evidence_path").eq("id", id).maybeSingle();
-  if (error) return fail(words(error));
-  const path = (data as { evidence_path: string | null } | null)?.evidence_path;
-  if (!path) return fail("This check has no document attached.");
-  const signed = await s.db.storage.from("roommate-evidence").createSignedUrl(path, 300);
-  if (signed.error || !signed.data?.signedUrl) return fail("The document could not be opened. It may have been deleted.");
-  await audit(s, "roommates.evidence.open", "roommate_verification", id);
-  return ok({ url: signed.data.signedUrl });
-}
-
-/** Approve (verified for a year) or reject (with the reason the member reads) a check. */
-export async function decideRoommateVerification(input: { id: string; approve: boolean; reason?: string }): Promise<ActionResult<{ note: string | null }>> {
-  const s = await staff();
-  if ("error" in s) return fail(s.error);
-  if (!uuid.test(input.id)) return fail(FAILED);
-  const reason = (input.reason ?? "").trim().slice(0, 300);
-  if (!input.approve && reason.length < 4) return fail("Say why it was not accepted. The member reads this.", { reason: "Say why." });
-  const now = new Date();
-  const patch = input.approve
-    ? { status: "verified", reviewed_by: s.actorId, reviewed_at: now.toISOString(), expires_at: new Date(now.getTime() + 365 * 24 * 3600 * 1000).toISOString(), reason: null }
-    : { status: "rejected", reviewed_by: s.actorId, reviewed_at: now.toISOString(), reason };
-  const { error } = await s.db.from("roommate_verifications").update(patch).eq("id", input.id).eq("status", "review");
-  if (error) return fail(words(error));
-  const note = await audit(s, input.approve ? "roommates.verification.approve" : "roommates.verification.reject", "roommate_verification", input.id, { reason: reason || null });
-  revalidatePath(PATH);
-  return ok({ note });
 }
 
 /** Turn the school email check on or off for one institution. */
@@ -121,8 +62,9 @@ export async function setInstitutionEmailCheck(input: { id: string; on: boolean 
   const s = await staff();
   if ("error" in s) return fail(s.error);
   if (!uuid.test(input.id)) return fail(FAILED);
-  const { error } = await s.db.from("institutions").update({ email_verify_on: Boolean(input.on) }).eq("id", input.id);
+  const { data, error } = await s.db.from("institutions").update({ email_verify_on: Boolean(input.on) }).eq("id", input.id).select("id");
   if (error) return fail(words(error));
+  if (refused(data)) return fail("Your staff role does not allow this.");
   const note = await audit(s, "roommates.institution.email_check", "institution", input.id, { on: Boolean(input.on) });
   revalidatePath(PATH);
   return ok({ note });
@@ -146,8 +88,9 @@ export async function setInstitutionDomains(input: { id: string; domains: string
   if (!uuid.test(input.id)) return fail(FAILED);
   const domains = readDomains(input.domains ?? "");
   if (!domains) return fail("One of those is not an email domain. Write them like unilag.edu.ng, separated by commas.", { domains: "Check the domains." });
-  const { error } = await s.db.from("institutions").update({ email_domains: domains, ...(domains.length === 0 ? { email_verify_on: false } : {}) }).eq("id", input.id);
+  const { data, error } = await s.db.from("institutions").update({ email_domains: domains, ...(domains.length === 0 ? { email_verify_on: false } : {}) }).eq("id", input.id).select("id");
   if (error) return fail(words(error));
+  if (refused(data)) return fail("Your staff role does not allow this.");
   const note = await audit(s, "roommates.institution.domains", "institution", input.id, { domains: domains.join(",") });
   revalidatePath(PATH);
   return ok({ note });
@@ -197,8 +140,9 @@ export async function saveMatchWeights(input: Record<(typeof PARTS)[number], num
     row[p] = n;
   }
   if (Object.values(row).every((n) => n === 0)) return fail("At least one weight must be above 0.");
-  const { error } = await s.db.from("roommate_match_weights").update({ ...row, updated_at: new Date().toISOString() }).eq("id", true);
+  const { data, error } = await s.db.from("roommate_match_weights").update({ ...row, updated_at: new Date().toISOString() }).eq("id", true).select("id");
   if (error) return fail(words(error));
+  if (refused(data)) return fail("Your staff role does not allow this.");
   const note = await audit(s, "roommates.weights.save", "roommate_match_weights", null, row);
   revalidatePath(PATH);
   return ok({ note });

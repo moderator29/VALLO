@@ -36,7 +36,7 @@ import { ProfileActions } from "./ProfileActions";
 export function RoommateProfileScreen({
   read,
   groups,
-  t,
+  t: copy,
   now,
   userId,
 }: {
@@ -52,22 +52,22 @@ export function RoommateProfileScreen({
     const here = ROOMMATES_ROUTES.person(userId);
     const body =
       read.state === "not-open" ? (
-        <RoommatesEmpty icon="info">{t.notOpen}</RoommatesEmpty>
+        <RoommatesEmpty icon="info">{copy.notOpen}</RoommatesEmpty>
       ) : read.state === "signed-out" ? (
-        <RoommatesEmpty icon="lock" action={<ButtonLink href={`/sign-in?next=${encodeURIComponent(here)}`} variant="primary" size="md">{t.ui.signInCta}</ButtonLink>}>
-          {t.ui.profile.signedOut}
+        <RoommatesEmpty icon="lock" action={<ButtonLink href={`/sign-in?next=${encodeURIComponent(here)}`} variant="primary" size="md">{copy.ui.signInCta}</ButtonLink>}>
+          {copy.ui.profile.signedOut}
         </RoommatesEmpty>
       ) : read.state === "need-profile" ? (
-        <RoommatesEmpty icon="user-pen" action={<ButtonLink href={ROOMMATES_ROUTES.profile} variant="primary" size="md">{t.ui.discover.needProfileCta}</ButtonLink>}>
-          {t.ui.profile.needProfile}
+        <RoommatesEmpty icon="user-pen" action={<ButtonLink href={ROOMMATES_ROUTES.profile} variant="primary" size="md">{copy.ui.discover.needProfileCta}</ButtonLink>}>
+          {copy.ui.profile.needProfile}
         </RoommatesEmpty>
       ) : (
-        <RoommatesEmpty icon="users" action={<ButtonLink href={ROOMMATES_ROUTES.discover} variant="secondary" size="md">{t.ui.findRoommate}</ButtonLink>}>
-          {t.ui.profile.notFound}
+        <RoommatesEmpty icon="users" action={<ButtonLink href={ROOMMATES_ROUTES.discover} variant="secondary" size="md">{copy.ui.findRoommate}</ButtonLink>}>
+          {copy.ui.profile.notFound}
         </RoommatesEmpty>
       );
     return (
-      <PageFrame title={t.title} fallback={ROOMMATES_ROUTES.discover} width="narrow">
+      <PageFrame title={copy.title} fallback={ROOMMATES_ROUTES.discover} width="narrow">
         {body}
       </PageFrame>
     );
@@ -91,27 +91,27 @@ export function RoommateProfileScreen({
     >
       <div className="nf-rmv" data-testid="roommate-profile">
         <div className="nf-rmv__main">
-          <Header p={p} t={t} now={now} />
+          <Header p={p} t={copy} now={now} />
           {p.intro ? (
             <section className="nf-rm-section" aria-labelledby="rmv-about">
-              <SectionHead id="rmv-about" title={t.profile.about} />
+              <SectionHead id="rmv-about" title={copy.profile.about} />
               <p className="nf-rmv__intro">{p.intro}</p>
             </section>
           ) : null}
-          <Facts p={p} t={t} />
+          <Facts p={p} t={copy} />
           {Object.values(p.lifestyle).some((v) => v !== null) ? (
             <section className="nf-rm-section" aria-labelledby="rmv-life">
-              <SectionHead id="rmv-life" title={t.profile.lifestyle} />
-              <LifestyleChips lifestyle={p.lifestyle} t={t} labelled />
+              <SectionHead id="rmv-life" title={copy.profile.lifestyle} />
+              <LifestyleChips lifestyle={p.lifestyle} t={copy} labelled />
             </section>
           ) : null}
           {p.listings.length ? (
             <section className="nf-rm-section" aria-labelledby="rmv-posts">
-              <SectionHead id="rmv-posts" title={t.ui.profile.theirPosts} />
+              <SectionHead id="rmv-posts" title={copy.ui.profile.theirPosts} />
               <CardGrid kind="rooms">
                 {p.listings.map((r) => (
                   <li key={r.id}>
-                    <RoomCardView room={r} t={t} today={today} />
+                    <RoomCardView room={r} t={copy} today={today} />
                   </li>
                 ))}
               </CardGrid>
@@ -121,7 +121,7 @@ export function RoommateProfileScreen({
         </div>
         <aside className="nf-rmv__side">
           <ActionsSlot p={p} groups={groups} />
-          {p.isSelf ? null : <MatchPanel match={p.match ?? { score: null, parts: {}, reasons: [] }} t={t} />}
+          {p.isSelf ? null : <MatchPanel match={p.match ?? { score: null, parts: {}, reasons: [] }} t={copy} />}
         </aside>
       </div>
     </PageFrame>
@@ -136,8 +136,8 @@ function ActionsSlot({ p, groups }: { p: RoommateProfileView; groups: { id: stri
   );
 }
 
-function Header({ p, t, now }: { p: RoommateProfileView; t: RoommatesCopy; now: number }) {
-  const stage = p.lifeStage ? t.lifeStages[p.lifeStage] : null;
+function Header({ p, t: copy, now }: { p: RoommateProfileView; t: RoommatesCopy; now: number }) {
+  const stage = p.lifeStage ? copy.lifeStages[p.lifeStage] : null;
   const school = p.institution ? p.institution.name : null;
   const study = [p.course, p.studyLevel].filter(Boolean).join(", ");
   return (
@@ -154,7 +154,7 @@ function Header({ p, t, now }: { p: RoommateProfileView; t: RoommatesCopy; now: 
           ) : null}
         </h2>
         <p className="nf-rmv-head__sub">
-          {[stage, p.gender ? t.gender[p.gender] : null].filter(Boolean).join(" · ")}
+          {[stage, p.gender ? copy.gender[p.gender] : null].filter(Boolean).join(" · ")}
         </p>
         <ul className="nf-rmv-head__meta">
           {school ? (
@@ -166,39 +166,39 @@ function Header({ p, t, now }: { p: RoommateProfileView; t: RoommatesCopy; now: 
           {p.workplace ? (
             <li>
               <UiIcon name="briefcase" size={16} />
-              {`${t.profile.work} ${p.workplace}`}
+              {`${copy.profile.work} ${p.workplace}`}
             </li>
           ) : null}
           <li>
             <UiIcon name="clock" size={16} />
-            {fill(t.profile.activeAgo, { ago: ago(p.lastActiveAt, { now }) })}
+            {fill(copy.profile.activeAgo, { ago: ago(p.lastActiveAt, { now }) })}
           </li>
           <li>
             <UiIcon name="calendar-check" size={16} />
-            {fill(t.ui.profile.memberSince, { date: dayText(p.memberSince) })}
+            {fill(copy.ui.profile.memberSince, { date: dayText(p.memberSince) })}
           </li>
         </ul>
       </div>
-      <BadgesRow badges={p.badges} t={t} />
+      <BadgesRow badges={p.badges} t={copy} />
     </header>
   );
 }
 
-function Facts({ p, t }: { p: RoommateProfileView; t: RoommatesCopy }) {
+function Facts({ p, copy }: { p: RoommateProfileView; t: RoommatesCopy }) {
   const where = placeText(p.areas.join(", "), p.city, stateName(p.stateCode));
-  const budget = budgetText(p.budget, t);
-  const hint = monthlyHint(p.budget.maxMinor, p.budget.period, t);
+  const budget = budgetText(p.budget, copy);
+  const hint = monthlyHint(p.budget.maxMinor, p.budget.period, copy);
   const wants = [
-    p.roomPref ? t.roomPref[p.roomPref] : null,
-    p.furnishedPref && p.furnishedPref !== "either" ? t.furnishedPref[p.furnishedPref] : null,
-    p.householdSize ? fill(t.ui.profile.household, { n: p.householdSize }) : null,
-    p.genderPref !== "any" ? t.genderPref[p.genderPref] : null,
+    p.roomPref ? copy.roomPref[p.roomPref] : null,
+    p.furnishedPref && p.furnishedPref !== "either" ? copy.furnishedPref[p.furnishedPref] : null,
+    p.householdSize ? fill(copy.ui.profile.household, { n: p.householdSize }) : null,
+    p.genderPref !== "any" ? copy.genderPref[p.genderPref] : null,
   ].filter((x): x is string => Boolean(x));
   const rows: { icon: UiIconName; label: string; value: string; sub?: string | null }[] = [];
-  if (where) rows.push({ icon: "pin", label: t.profile.lookingIn, value: where });
-  if (budget) rows.push({ icon: "wallet", label: t.profile.budget, value: budget, sub: hint });
-  rows.push({ icon: "calendar-check", label: t.profile.moveIn, value: moveInText(p.moveInOn, p.moveInFlex, t) });
-  if (wants.length) rows.push({ icon: "house-heart", label: t.profile.accommodation, value: wants.join(" · ") });
+  if (where) rows.push({ icon: "pin", label: copy.profile.lookingIn, value: where });
+  if (budget) rows.push({ icon: "wallet", label: copy.profile.budget, value: budget, sub: hint });
+  rows.push({ icon: "calendar-check", label: copy.profile.moveIn, value: moveInText(p.moveInOn, p.moveInFlex, copy) });
+  if (wants.length) rows.push({ icon: "house-heart", label: copy.profile.accommodation, value: wants.join(" · ") });
   return (
     <dl className="nf-rmv-facts">
       {rows.map((r) => (
@@ -221,8 +221,8 @@ function Facts({ p, t }: { p: RoommateProfileView; t: RoommatesCopy }) {
             <UiIcon name="circle-people" size={20} />
           </span>
           <div className="nf-rmv-fact__words">
-            <dt>{t.ui.onboarding.intentsTitle}</dt>
-            <dd>{p.intents.map((i) => t.intents[i]).join(" · ")}</dd>
+            <dt>{copy.ui.onboarding.intentsTitle}</dt>
+            <dd>{p.intents.map((i) => copy.intents[i]).join(" · ")}</dd>
           </div>
         </div>
       ) : null}

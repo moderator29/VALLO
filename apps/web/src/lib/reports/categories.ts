@@ -69,6 +69,9 @@ export const REPORT_TARGETS = [
   "review",
   "business",
   "event",
+  /* Vallo Roommates (8 November 2026): a roommate post and a roommate profile. */
+  "roommate_listing",
+  "roommate_profile",
 ] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 

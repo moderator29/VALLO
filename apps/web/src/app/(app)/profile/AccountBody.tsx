@@ -324,6 +324,8 @@ export function AccountBody({
                 label="Notifications"
                 sub="Everything that happened while you were away"
               />
+              {/* Vallo Roommates (8 November 2026): the member's hub. */}
+              <RowLink href="/roommates/me" icon="house-duplex" label="Roommates" sub="Requests, groups and your posts" testId="account-roommates" />
               <RowLink href="/help" icon="ticket" label="Help" sub="FAQs, contact us" />
             </SettingsGroup>
           </div>
