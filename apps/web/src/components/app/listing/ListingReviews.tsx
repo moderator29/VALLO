@@ -4,6 +4,8 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { ReportSheet } from "@/components/app/ReportSheet";
 import { RatingStars } from "@/components/ui/RatingStars";
+import { RatingSummary, type RatingBreakdown } from "@/components/ui/RatingSummary";
+import { RATING_MIN } from "@/lib/reviews/model";
 
 /**
  * Reviews.
@@ -68,20 +70,39 @@ export function ListingReviews({
     );
   }
 
+  const breakdown: RatingBreakdown | undefined =
+    reviews.length >= 3
+      ? reviews.reduce<RatingBreakdown>(
+          (acc, r) => {
+            const idx = Math.max(0, Math.min(4, Math.round(r.rating) - RATING_MIN));
+            acc[idx as 0 | 1 | 2 | 3 | 4]++;
+            return acc;
+          },
+          [0, 0, 0, 0, 0],
+        )
+      : undefined;
+
   return (
     <div>
-      <p className="flex items-baseline gap-inline">
-        <span className="nf-numeric text-[1.75rem] font-bold tracking-tight text-[var(--nf-content-primary)]">
-          {formatRating(rating, locale)}
-        </span>
-        {/* Suppressed at zero: a rating with no reviews behind it states the
-            rating alone rather than advertising an absence. */}
-        {reviewCount > 0 && (
-          <span className={TYPE.bodyLg}>
-            {formatNumber(reviewCount, locale)} {t.common.reviews}
+      {reviews.length >= 3 ? (
+        <RatingSummary
+          rating={rating}
+          count={reviewCount}
+          breakdown={breakdown}
+          locale={locale}
+        />
+      ) : (
+        <p className="flex items-baseline gap-inline">
+          <span className="nf-numeric text-[1.75rem] font-bold tracking-tight text-[var(--nf-content-primary)]">
+            {formatRating(rating, locale)}
           </span>
-        )}
-      </p>
+          {reviewCount > 0 && (
+            <span className={TYPE.bodyLg}>
+              {formatNumber(reviewCount, locale)} {t.common.reviews}
+            </span>
+          )}
+        </p>
+      )}
 
       {reviews.length > 0 ? (
         <ul className="mt-block divide-y divide-[var(--nf-panel-hair)]">

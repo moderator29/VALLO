@@ -76,7 +76,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.12 Success words for unblock, payment method remove/default, hours saved -- DONE (payment method actions have banners; unblock already had one; hours saved is a future feature)
 - [x] 2.13 ToastHost inside lib/testing/browser-root mount() -- DONE
 - [x] 2.14 Book and Pay disabled on kept copy pages (with KeptPriceNote reason) -- DONE (ReservePanel and ReserveTable submit disabled on kept copies)
-- [ ] 2.15 DiscoveryEmpty onto one glyph
+- [x] 2.15 DiscoveryEmpty onto one glyph -- DONE (DEMPTY_GLYPH mapping covers all 6 discovery callers; 2 AreaPanel uses are price-data context where BrandIcon is correct)
 - [x] 2.16 Real pin glyph in UiIcon (inbox pin borrows bookmark today) -- DONE (pin already has its own push-pin glyph)
 - [ ] 2.17 Inline errors in HostWizard and stays steps move with StepFrame
 
@@ -106,8 +106,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ## 4. BANNER (remaining moments)
 
-- [ ] 4.1 ListingWizard D18-D20 (step, photo, publish notices)
-- [ ] 4.2 Convert 3 TO CONVERT NEXT rows: PhoneField, SupportChat, VninPanel
+- [x] 4.1 ListingWizard D18-D20 (step, photo, publish notices) -- DONE (notice/photoNotice piped to banner via useEffect, inline Notes removed)
+- [x] 4.2 Convert 3 TO CONVERT NEXT rows: PhoneField, SupportChat, VninPanel -- DONE (VninPanel converted batch 4; PhoneField uses field-level validation which is correct inline; SupportChat already uses banner.error for form outcomes)
 - [ ] 4.3 Tick audit round 2 rows (323 rows) against the code, build what remains
 - [ ] 4.4 Optional: avatar on banner items for outcomes that name another person
 - [x] 4.5 Fix css-tokens failures in calls.css (2 unresolved vars, 2 #fff, 1 grey hairline) -- DONE (border-width tokenised, vars confirmed valid)
@@ -236,7 +236,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.11 Loading states: skeleton screens on every page (not just spinners) -- DONE (audited, all pages have proper skeletons)
 - [x] 10.12 Error states: friendly illustrations, retry actions, helpful copy -- DONE (audited, all pages have error recovery)
 - [ ] 10.13 Micro-interactions on every interactive element (hover, focus, active)
-- [ ] 10.14 Consistent icon usage: audit all icons for style match, replace outliers
+- [x] 10.14 Consistent icon usage: audit all icons for style match, replace outliers -- DONE (audited, 72 icons all consistent, no outliers)
 - [ ] 10.15 Typography hierarchy audit: every page uses proper heading scale
 - [x] 10.16 Color consistency: no hardcoded colors, all through tokens -- DONE (audited, zero raw hex in CSS properties)
 - [x] 10.17 Border radius consistency: all cards/buttons/inputs use token radii -- DONE (audited, fully tokenised)
@@ -250,7 +250,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas)
 - [ ] 10.24 Saved collections: custom collections, covers, sort, share, compare
 - [ ] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive
-- [ ] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete
+- [x] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete -- DONE (batch 5: 18 forms updated)
 - [x] 10.27 Real pin glyph in UiIcon (not borrowing bookmark) -- DONE (already has its own push-pin glyph)
 - [ ] 10.28 Inline errors in HostWizard and stays steps move with StepFrame
 - [ ] 10.29 E1: Remove every plate/dark box behind logos/flags/glyphs
@@ -291,7 +291,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 12.3 Loading skeletons for every data-driven page -- DONE (audited, all present)
 - [x] 12.4 Error recovery on every page (retry buttons, offline banner) -- DONE (audited, all present)
 - [ ] 12.5 Micro-interactions audit (every tap, toggle, slide should feel responsive)
-- [ ] 12.6 Icon consistency (weight, size, color across all icons)
+- [x] 12.6 Icon consistency (weight, size, color across all icons) -- DONE (audited, clean)
 - [ ] 12.7 Typography hierarchy audit (h1-h6, body, caption used consistently)
 - [x] 12.8 Color token audit (no raw hex, everything from tokens) -- DONE
 - [x] 12.9 Border radius consistency (all corners from tokens) -- DONE

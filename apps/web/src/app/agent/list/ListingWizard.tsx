@@ -149,6 +149,7 @@ import "@/app/css/lister-publish.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { FieldProblem } from "@/components/ui/FieldProblem";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The List Apartment wizard: eight steps, canon reference 03.
@@ -1241,6 +1242,8 @@ export function ListingWizard({
   const [verifyGate, setVerifyGate] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
+  useEffect(() => { if (notice) banner.error(notice); }, [notice]);
+  useEffect(() => { if (photoNotice) banner.error(photoNotice); }, [photoNotice]);
   /** One line per file the last pick refused, naming the file. */
   const [photoProblems, setPhotoProblems] = useState<string[]>([]);
   /** The files the last pick could not upload for a reason a second try can fix. */
@@ -2788,15 +2791,7 @@ export function ListingWizard({
         </div>
       )}
 
-      {/* On the last step a refusal is said beside Send for review, where the
-          lister's thumb is, rather than at the top of a long step. */}
-      {notice && step !== STEP_KEYS.length - 1 && (
-        <div className="mt-group">
-          <Note glyph="flag" role="status">
-            {notice}
-          </Note>
-        </div>
-      )}
+      {/* Notices are said by the banner at the top of the screen (Grade 1). */}
 
       {/* A listing sent back by review reopens with the reviewer's sentence in
           front of the lister. It used to appear only on the workspace row, so
@@ -3150,7 +3145,7 @@ export function ListingWizard({
               onChange={(e) => void onFiles(e.target.files)}
             />
 
-            {photoNotice && <Note glyph="flag" role="status">{photoNotice}</Note>}
+            {/* photoNotice is said by the banner (Grade 1). */}
             {photoProblems.length > 0 && (
               <Note glyph="flag" role="status">
                 {/* Spans, not a list: the note's body is a paragraph. */}
@@ -4648,13 +4643,6 @@ export function ListingWizard({
                     <VerifyGateLink show full className="mt-sm" />
                   </div>
                 ) : null}
-                {notice && (
-                  <div className="mt-heading" data-testid="send-refused">
-                    <Note glyph="flag" role="status">
-                      {notice}
-                    </Note>
-                  </div>
-                )}
                 <PhoneGateLink show={phoneGate && notice !== null} full className="mt-sm" />
                 <VerifyGateLink show={verifyGate && notice !== null} full className="mt-sm" />
                 <Button
