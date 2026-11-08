@@ -58,7 +58,9 @@ export function confirmedAgo(iso: string | null, now: number): string {
   return `Confirmed ${ago.format(-Math.floor(h / 24), "day")}`;
 }
 
-export const STALE_NOTE = _w.status.staleNote;
+/** SW11: wallet status strings from `packages/i18n/src/locales/wallet.en.ts`. */
+const _ws = getDictionary("en").wallet.status;
+export const STALE_NOTE = _ws.staleNote;
 
 /* ------------------------------------------------------- not connected
    The founder, 7 October: draw the real wallet now, even before the key is
@@ -66,8 +68,6 @@ export const STALE_NOTE = _w.status.staleNote;
    figure's place that reads as an amount (any figure would be invented, a
    zero included), and no paragraph about partners or rails. */
 
-/** SW11: source of truth is now `packages/i18n/src/locales/wallet.en.ts`. */
-const _ws = _w.status;
 export const NOT_CONNECTED_FIGURE = _ws.notConnectedFigure;
 export const NOT_CONNECTED_LINE = _ws.notConnected;
 
