@@ -2415,6 +2415,19 @@ $$;
 revoke all on function public.roommate_set_listing_sharing(uuid, boolean, smallint) from public, anon;
 grant execute on function public.roommate_set_listing_sharing(uuid, boolean, smallint) to authenticated;
 
+-- ------------------------------------------------------------ the funnel
+
+-- Eight Roommates steps join the funnel (lib/funnel/roommates.ts). Counts of
+-- steps only, no content; record_funnel_event drops anything unlisted, so
+-- before this runs the app's calls are silently ignored.
+alter table public.funnel_events drop constraint if exists funnel_events_step_check;
+alter table public.funnel_events add constraint funnel_events_step_check check (step = any (array[
+  'landing_view', 'get_started', 'signup_opened', 'step_one_done', 'step_two_done', 'code_sent', 'code_resent',
+  'verified', 'first_search', 'first_result',
+  'roommates_home_view', 'roommates_profile_live', 'roommates_interest_sent', 'roommates_interest_accepted',
+  'roommates_chat_opened', 'roommates_listing_published', 'roommates_viewing_requested', 'roommates_group_created'
+]::text[]));
+
 
 -- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roommates_4_grant_tidy.sql
 

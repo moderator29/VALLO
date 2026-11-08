@@ -115,3 +115,4 @@ create table if not exists public.circle_question_follows (id uuid primary key d
 create table if not exists public.circle_plans (id uuid primary key default gen_random_uuid());
 create table if not exists public.circle_invites (id uuid primary key default gen_random_uuid());
 grant select, insert, update, delete on all tables in schema public to authenticated;
+create table if not exists public.funnel_events (id uuid primary key default gen_random_uuid(), step text, constraint funnel_events_step_check check (step in ('landing_view')));
