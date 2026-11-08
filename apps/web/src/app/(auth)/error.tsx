@@ -42,7 +42,7 @@ export default function AuthError({
   return (
     <div className="text-center">
       <h1 className="nf-h3">{a.errorTitle}</h1>
-      <p className="mt-sm text-[0.875rem] leading-relaxed text-[var(--nf-content-secondary)]">
+      <p className="mt-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
         {a.errorBody}
       </p>
 
@@ -52,7 +52,7 @@ export default function AuthError({
         </Button>
         <Link
           href="/"
-          className="nf-tap py-2 text-[0.875rem] font-semibold text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-primary)]"
+          className="nf-tap py-2 text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-primary)]"
         >
           {a.backHome}
         </Link>
