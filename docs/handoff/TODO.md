@@ -24,8 +24,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 1.10 Shared connection state: connected, slow, unstable, offline, reconnected -- DONE (lib/offline/connection.ts: 5-state manager with navigator.onLine, Network Info API, PerformanceObserver, probe, flap detection)
 - [x] 1.11 Calm Vallo strip for connection changes + banner -- DONE (components/ui/ConnectionLine.tsx: dark pill, phases for offline/kept/slow/back/leaving)
 - [x] 1.12 Offline screen upgrade: status, Try again, saved/recently viewed, a way home, auto recovery -- DONE (app/offline/OfflineScreen.tsx + OfflineRecent.tsx: Vallo mark, retry, recently viewed, auto recovery via ConnectionLine)
-- [ ] 1.13 Cached prices labelled "Saved on your device. Price and availability may have changed."
-- [ ] 1.14 On reconnect: refresh, replay only safe queued actions, never payment/booking without confirmation
+- [x] 1.13 Cached prices labelled "Saved on your device. Price and availability may have changed." -- DONE (KeptPriceNote component shows "Saved on your device. Price and availability may have changed." on cached listing copies; ReservePanel/ReserveTable submit disabled on kept copies)
+- [x] 1.14 On reconnect: refresh, replay only safe queued actions, never payment/booking without confirmation -- DONE (lib/offline/send-or-keep.ts: outbox with tap-key deduplication, lib/offline/replay-guard.ts: oncePerTap idempotency guard, connection.ts reconnected state triggers refresh)
 
 ### Performance (remaining after NATIVE2)
 - [x] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first -- DONE (see 10.35: all auth pages wired with sliced dictionaries, slice-coverage.test.ts updated)

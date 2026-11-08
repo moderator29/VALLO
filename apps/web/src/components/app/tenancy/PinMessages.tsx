@@ -57,6 +57,7 @@ export function PinMessages({
                       banner.error(result.error);
                       return;
                     }
+                    banner.success("Message pinned");
                     router.refresh();
                   } catch (error) {
                     if (!tapFailedOffline(error)) throw error;
