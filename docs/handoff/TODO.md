@@ -33,7 +33,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite
 - [ ] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view)
 - [ ] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts)
-- [ ] 1.20 Defer in-app banner client load to idle (`requestIdleCallback` with 2s ceiling)
+- [x] 1.20 Defer in-app banner client load to idle (`requestIdleCallback` with 2s ceiling) -- DONE (NotifyBanner lazy-loaded via React.lazy + requestIdleCallback with 2s timeout in AppShell)
 
 ### Rich Notifications (code written, needs build 1.0.2 to ship)
 - [ ] 1.21 A1: iOS Notification Service Extension download photo into notification (code exists, needs device test)
@@ -344,16 +344,16 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 |---|---|---|
 | Calls (F1-F6) | 6/6 | 0 (recommendations are ideas, not tasks) |
 | Messages (MSG 1-10) | 10/10 | 0 |
-| Banner moments | ~192/561 | ~369 moments from audit round 2 |
+| Banner moments | ~198/561 | ~363 (6 P1 success banners added; audit found 244 files, 692 usages) |
 | Pages (PAGES 1-5) | 7/7 | Desktop layouts and docs/help audited and confirmed complete |
-| Frontend (FE 1-10) | 12/15 | Listing wizard, saved collections, activity centre |
-| Native (NATIVE 1-8) | 6/8 | Platform layer, iOS shell, offline, build 1.0.2 remain |
+| Frontend (FE 1-10) | 13/15 | Wallet pay fixed; listing wizard, saved collections, activity centre |
+| Native (NATIVE 1-8) | 7/8 | NotifyBanner deferred; platform layer, iOS shell, offline, build 1.0.2 |
 | Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
 | Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
-| Platform Sweep | 28/39 | Admin (7 remaining), perf (4 remaining) |
+| Platform Sweep | 30/39 | Admin (7 remaining), perf (3 remaining) |
 | Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation |
 | UX Quality | 10/10 | All done |
-| More Pages | 5/8 | Privacy, community, NDPR, keyboard shortcuts, inline validation done; listing wizard, collections, activity centre |
+| More Pages | 6/8 | Wallet pay fixed; listing wizard, collections, activity centre remain |
 | Light Mode | 4/4 | All done |
-| Performance | 3/5 | Phone format, dict props done; virtual scroll, map tiles, WebP remain |
+| Performance | 4/5 | Phone format, dict props, deferred banner done; virtual scroll, map tiles, WebP remain |
 | Build/Deploy | 2/4 | tsc clean, vitest clean; build 1.0.2, workflows still ahead |
