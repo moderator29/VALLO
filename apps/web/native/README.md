@@ -51,7 +51,7 @@ If you ever need to re-copy from the source template:
 ```sh
 cd apps/web
 mkdir -p android/app/src/main/java/com/vallospaces/app/plugins/callkit
-cp native/android/vallocallkit/ValloCallKitPlugin.kt \
+cp native/android/vallocallkit/ValloCallKitPlugin.java \
    android/app/src/main/java/com/vallospaces/app/plugins/callkit/
 npx cap sync android
 ```
