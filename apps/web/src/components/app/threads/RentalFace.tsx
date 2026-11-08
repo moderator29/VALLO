@@ -117,7 +117,7 @@ export function RentalFace({
   /* Read once, as the day kit does: whether the agreed time has come. */
   const [clock] = useState(() => now ?? Date.now());
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>, then: () => void) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, then: () => void, successMsg?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     startTransition(async () => {
@@ -126,10 +126,11 @@ export function RentalFace({
           const result = await work();
           if (!result.ok) {
             /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
-            banner.error(result.error ?? copy.failed, { retry: () => run(work, then) });
+            banner.error(result.error ?? copy.failed, { retry: () => run(work, then, successMsg) });
             return;
           }
           then();
+          if (successMsg) banner.success(successMsg);
           router.refresh();
         } finally {
           inFlight.current = false;
