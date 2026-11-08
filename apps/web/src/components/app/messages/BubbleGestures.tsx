@@ -42,6 +42,7 @@ export function BubbleGestures({
   className,
   onLongPress,
   onSwipeReply,
+  isNew,
   children,
 }: {
   side: SwipeSide;
@@ -51,6 +52,8 @@ export function BubbleGestures({
   onLongPress?: () => void;
   /** Sets the reply target. Absent: no swipe. */
   onSwipeReply?: () => void;
+  /** Arrived after the thread opened: drives the bubble entrance animation. */
+  isNew?: boolean;
   children: ReactNode;
 }) {
   const [dx, setDx] = useState(0);
@@ -134,6 +137,7 @@ export function BubbleGestures({
       ) : null}
       <div
         className={className}
+        data-new={isNew || undefined}
         data-swiping={dx !== 0 || undefined}
         style={dx === 0 ? undefined : { transform: `translateX(${dx}px)` }}
         onPointerDown={down}

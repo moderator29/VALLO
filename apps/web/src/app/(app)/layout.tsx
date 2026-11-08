@@ -32,6 +32,7 @@ import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/P
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
+import { GyroTiltInit } from "@/components/motion/GyroTiltInit";
 /* C12: the feed's motion sheet, out of `globals.css`; only this tree draws a post. */
 import "@/app/css/feed-m.css";
 
@@ -146,6 +147,8 @@ export default async function AppLayout({
          navigation while the `social` switch is off (fails open). */
       socialOn={socialOn}
     >
+      {/* 9.2: gyroscope-driven parallax on mobile. */}
+      <GyroTiltInit />
       {/* V-79: counts, on this phone only, what each page could measure. */}
       <DataMeterRecorder />
       {/* V-80: one page view in ten reports its own speed, anonymously. */}

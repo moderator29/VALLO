@@ -2052,6 +2052,7 @@ export function ThreadView({
                     side={m.mine ? "mine" : "theirs"}
                     onLongPress={m.id.startsWith("local-") ? undefined : () => setActionMsg(m)}
                     onSwipeReply={m.id.startsWith("local-") ? undefined : () => setReplyTo(m)}
+                    isNew={!openedWith.has(m.id)}
                     className={`nf-bubble ${
                       m.state === "failed"
                         ? "nf-bubble--failed"
