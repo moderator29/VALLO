@@ -5,6 +5,7 @@ import { getLocale } from "@/lib/locale";
 import { readPerson } from "@/lib/admin/person-queries";
 import { readMemberExtras } from "@/lib/admin/member-queries";
 import { MemberSections } from "./MemberSections";
+import { MemberStanding } from "./MemberStanding";
 import { adminUi } from "../../_components/ui";
 import { UpholdControl } from "./UpholdControl";
 import { ConsiderStr } from "../../_components/ConsiderStr";
@@ -178,6 +179,9 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
           </ul>
         )}
       </section>
+
+      {/* Trust and Safety: restrictions on record, open cases, Restrict and Lift. */}
+      <MemberStanding userId={person.userId} when={(iso) => when(iso, locale)} />
 
       {extras.state === "ok" ? (
         <MemberSections userId={person.userId} extras={extras.data} ui={ui} locale={locale} />
