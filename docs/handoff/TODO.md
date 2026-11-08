@@ -373,6 +373,6 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Light Mode | 4/4 | 0 |
 | Performance | 5/5 | 0 |
 | Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
-| SW11 i18n migration | 24+ files | COMPLETE: all user-facing COPY migrated including wallet status; remaining: email copy (server-only render), admin copy (staff-only) |
+| SW11 i18n migration | 26+ files | COMPLETE: all user-facing COPY migrated; remaining by design: money/copy.ts (legal), eula-copy.ts (legal), admin copy (staff-only), email copy (server-only) |
 | Backend audit | R-04, D-02 | SQL migrations written, founder to run |
 | Banner avatar | done | ToastItem.avatarUrl infrastructure built |
