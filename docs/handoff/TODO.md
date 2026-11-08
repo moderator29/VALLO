@@ -8,10 +8,10 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 1. NATIVE (iOS, Android, Performance, Offline)
 
 ### Platform Layer
-- [ ] 1.1 Platform-aware CSS layer: `data-platform` (ios/android/web) and `data-native` on `<html>` at boot before first paint
-- [ ] 1.2 iOS press highlight and dim vs Android Material touch ripple (transform + opacity only)
-- [ ] 1.3 iOS slide-from-right page transition vs Android fade-through, one shared helper, reduced motion honoured
-- [ ] 1.4 Scroll edge: iOS bounce kept, Android overscroll glow left native
+- [x] 1.1 Platform-aware CSS layer: `data-platform` (ios/android/web) and `data-native` on `<html>` at boot before first paint -- DONE (lib/platform/detect.ts: PLATFORM_SCRIPT inline ES5 sets data-platform and data-native before first paint)
+- [x] 1.2 iOS press highlight and dim vs Android Material touch ripple (transform + opacity only) -- DONE (app/css/platform.css: iOS press dim via -webkit-tap-highlight-color + opacity, Android ink ripple via ::after pseudo with radial-gradient)
+- [x] 1.3 iOS slide-from-right page transition vs Android fade-through, one shared helper, reduced motion honoured -- DONE (app/css/platform.css: iOS slide-from-right, Android fade-through, shared helper, reduced motion gates)
+- [x] 1.4 Scroll edge: iOS bounce kept, Android overscroll glow left native -- DONE (app/css/platform.css: iOS -webkit-overflow-scrolling: touch, Android overscroll-behavior native)
 
 ### iOS Shell Polish (build 1.0.2)
 - [ ] 1.5 Edge swipe back in the web view (`allowsBackForwardNavigationGestures`)
