@@ -172,6 +172,7 @@ describe.skipIf(!hasBrowser)("the in-call controls", () => {
       expect(await page.getByTestId("call-switch").count()).toBe(0);
       await cam.click();
       await page.getByTestId("call-more").click();
+      await page.getByTestId("call-switch").waitFor({ state: "visible" });
       await page.getByTestId("call-switch").click();
 
       await page.getByRole("button", { name: "End call" }).click();

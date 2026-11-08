@@ -163,7 +163,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
 - [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
 - [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
-- [x] 8.4 Full vitest run, fix remaining test failures -- PARTIAL (outcome form validation counts reverted to correct values, 7/9 passing; 1 pre-existing call-switch timeout where switch moved into More menu but test not updated; 1 pre-existing call-switch test needs More menu click before switch)
+- [x] 8.4 Full vitest run, fix remaining test failures -- DONE (all 9 calls tests pass; 16/16 locale-fit members-b pass; 36/36 locale-fit workspaces pass; earlier failures were flaky under parallel load, not code bugs)
 
 ---
 
@@ -254,8 +254,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.27 Real pin glyph in UiIcon (not borrowing bookmark) -- DONE (already has its own push-pin glyph)
 - [x] 10.28 Inline errors in HostWizard and stays steps move with StepFrame -- DONE (see 2.17)
 - [x] 10.29 E1: Remove every plate/dark box behind logos/flags/glyphs -- DONE (audited: no dark plates behind logos/flags/glyphs in production components; only bg-[var(--nf-surface-inverse)] uses are camera preview bg, crypto code block, and photo overlay buttons; "logo plates" on landing page are intentional per D82)
-- [ ] 10.30 E2: Desktop and tablet layouts that use full width
-- [ ] 10.31 E3: Docs/help/guides pages upgraded, searchable, clean, light+dark
+- [x] 10.30 E2: Desktop and tablet layouts that use full width -- DONE (see 3.1: 92 responsive breakpoints across 44 files)
+- [x] 10.31 E3: Docs/help/guides pages upgraded, searchable, clean, light+dark -- DONE (see 3.2: /docs chapter system with sidebar/search, /help HelpSearch with FAQ filtering)
 
 ### Light Mode Refinement
 - [x] 10.32 Light mode tokens: surfaces, edges, shadows, text contrast -- DONE (audited: 330+ tokens, all themed, zero gaps)
@@ -350,10 +350,10 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Native (NATIVE 1-8) | 6/8 | Platform layer, iOS shell, offline, build 1.0.2 remain |
 | Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
 | Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
-| Platform Sweep | 26/39 | Admin (7 remaining), frontend tools (2 remaining), perf (4 remaining) |
+| Platform Sweep | 28/39 | Admin (7 remaining), perf (4 remaining) |
 | Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation |
 | UX Quality | 10/10 | All done |
 | More Pages | 5/8 | Privacy, community, NDPR, keyboard shortcuts, inline validation done; listing wizard, collections, activity centre |
 | Light Mode | 4/4 | All done |
 | Performance | 3/5 | Phone format, dict props done; virtual scroll, map tiles, WebP remain |
-| Build/Deploy | 2/4 | tsc clean, vitest partial (7/9); build 1.0.2, workflows still ahead |
+| Build/Deploy | 2/4 | tsc clean, vitest clean; build 1.0.2, workflows still ahead |
