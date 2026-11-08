@@ -13,6 +13,7 @@ import {
   type KycSubmitResult,
 } from "@/components/verification/kyc";
 import { resolveSession } from "@/lib/actions/session";
+import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
 import { documentToSupersede, type FiledDocument } from "@/lib/agent/supersedes";
 import { ACCEPT_PAY_REQUIRED, ACCEPT_TERMS_REQUIRED, withWorkspaceAcceptance } from "@/lib/legal/workspace-acceptance";
 
@@ -280,10 +281,10 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
 export async function answerVerificationRequest(input: {
   requestId: string;
   path: string;
-}): Promise<{ ok: true } | { ok: false; message: string }> {
+}): Promise<ActionResult> {
   const session = await resolveSession();
   if (session.state !== "signed-in") {
-    return { ok: false, message: "Sign in again to send your photo. Nothing was lost." };
+    return fail("Sign in again to send your photo. Nothing was lost.");
   }
   if (
     typeof input?.requestId !== "string" ||
@@ -291,18 +292,18 @@ export async function answerVerificationRequest(input: {
     typeof input.path !== "string" ||
     !input.path.startsWith(`${session.user.id}/`)
   ) {
-    return { ok: false, message: NOT_YOURS };
+    return fail(NOT_YOURS);
   }
   const { data, error } = await (session.supabase as unknown as {
     rpc(fn: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: unknown }>;
   }).rpc("answer_verification_request", { p_request: input.requestId, p_path: input.path });
   const status = data && typeof data === "object" ? String((data as { status?: unknown }).status ?? "") : "";
-  if (error) return { ok: false, message: FAILED };
+  if (error) return fail(FAILED);
   if (status === "ok") {
     revalidatePath("/verification");
-    return { ok: true };
+    return ok(null);
   }
-  if (status === "closed") return { ok: false, message: "This request is already answered. Thank you." };
-  if (status === "not_yours") return { ok: false, message: NOT_YOURS };
-  return { ok: false, message: FAILED };
+  if (status === "closed") return fail("This request is already answered. Thank you.");
+  if (status === "not_yours") return fail(NOT_YOURS);
+  return fail(FAILED);
 }

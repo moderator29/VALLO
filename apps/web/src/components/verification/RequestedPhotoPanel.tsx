@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { SelfieCapture } from "./SelfieCapture";
 import type { KycSelfie } from "./kyc";
 import type { KycCopy } from "./KycFlow";
+import type { ActionResult } from "@/lib/actions/envelope";
 import { banner } from "@/lib/ui/toast";
 
 /**
@@ -26,7 +27,7 @@ export function RequestedPhotoPanel({
   copy: KycCopy;
   requestId: string;
   message: string;
-  submit: (input: { requestId: string; path: string }) => Promise<{ ok: true } | { ok: false; message: string }>;
+  submit: (input: { requestId: string; path: string }) => Promise<ActionResult>;
 }) {
   const r = copy.request;
   const router = useRouter();
@@ -55,7 +56,7 @@ export function RequestedPhotoPanel({
       try {
         const result = await submit({ requestId, path: photo.path });
         if (!result.ok) {
-          banner.error(result.message);
+          banner.error(result.error);
           return;
         }
         setSent(true);

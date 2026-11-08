@@ -34,14 +34,16 @@ export function SanctionsUpload({ copy }: { copy: Copy }) {
           return;
         }
         const response = await fetch("/api/compliance/sanctions-upload", { method: "POST", body: form }).catch(() => null);
-        const answer: DeskAnswer = ((await response?.json().catch(() => null)) as DeskAnswer | null) ?? { ok: false, error: "failed" };
+        const raw = (await response?.json().catch(() => null)) as DeskAnswer | null;
+        const answer: DeskAnswer = raw ?? { ok: false as const, error: "failed" };
         if (answer.ok) {
+          const msg = answer.data.message;
           banner.success(
-            answer.message === "same"
+            msg === "same"
               ? copy.uploadSame
-              : answer.message.startsWith("waiting:")
-                ? copy.uploadWaiting.replace("{count}", answer.message.replace("waiting:", ""))
-                : copy.uploadDone.replace("{count}", answer.message.replace("loaded:", "")),
+              : msg.startsWith("waiting:")
+                ? copy.uploadWaiting.replace("{count}", msg.replace("waiting:", ""))
+                : copy.uploadDone.replace("{count}", msg.replace("loaded:", "")),
           );
         } else {
           banner.error(answer.error === "incomplete" ? copy.refusedIncomplete : copy.uploadFailed, { retry: () => act(form) });
@@ -97,9 +99,9 @@ function useDeskRun(copy: Copy) {
   const run = (work: () => Promise<DeskAnswer>): void =>
     start(async () => {
       try {
-        const answer = await work().catch(() => ({ ok: false as const, error: "failed" }));
+        const answer = await work().catch(() => ({ ok: false as const, error: "failed" } as DeskAnswer));
         if (!answer.ok) banner.error(deskRefusal(copy, answer.error), { retry: () => run(work) });
-        else if (answer.message === "proposed") banner.success(copy.listProposed);
+        else if (answer.data.message === "proposed") banner.success(copy.listProposed);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

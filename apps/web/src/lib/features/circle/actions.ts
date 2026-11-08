@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
+import { fail, ok, phoneGateRefusal, validate, type ActionResult } from "@/lib/actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "@/lib/actions/session";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { writeInAppNotice } from "@/lib/notify/in-app";
@@ -92,7 +92,7 @@ export async function createCommunity(input: z.input<typeof createSchema>): Prom
       return ok({ slug: outcome.slug });
     }
     if (outcome.reason === "taken") continue;
-    if (outcome.reason === "phone") return { ok: false, error: "Confirm your phone before you start a community.", gate: "phone" };
+    if (outcome.reason === "phone") return phoneGateRefusal("Confirm your phone before you start a community.");
     if (outcome.reason === "limit") return fail("You have started 3 communities this week. Try again next week.");
     if (outcome.reason === "signed_out") return fail(SIGNED_OUT_MESSAGE);
     return fail(FAILED);
