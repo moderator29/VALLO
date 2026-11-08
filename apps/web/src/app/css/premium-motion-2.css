@@ -178,7 +178,7 @@
       transparent 63%
     );
     background-size: 300% 100%;
-    animation: nf-skel-sweep 1.8s var(--nf-ease-standard) infinite;
+    animation: nf-skel-sweep 1.8s var(--nf-ease-standard) 6 both;
   }
   @keyframes nf-skel-sweep {
     0% { background-position: 200% 0; }
@@ -821,7 +821,7 @@
    * a living quality without distracting. Infinite, decorative only.
    */
   .nf-empty-float {
-    animation: nf-gentle-bob 4s ease-in-out infinite alternate;
+    animation: nf-gentle-bob 4s var(--nf-ease-standard) 6 alternate both;
   }
   @keyframes nf-gentle-bob {
     from { transform: translateY(0); }
@@ -888,7 +888,7 @@
    * verified accounts. Infinite, purely decorative.
    */
   .nf-avatar-ring-spin {
-    animation: nf-ring-rotate 3s linear infinite;
+    animation: nf-ring-rotate 3s var(--nf-ease-standard) 4 both;
   }
   @keyframes nf-ring-rotate {
     from { transform: rotate(0deg); }
@@ -917,7 +917,7 @@
    * Infinite while pulling; removed when content loads.
    */
   .nf-refresh-spin {
-    animation: nf-spinner-rotate 1s linear infinite;
+    animation: nf-spinner-rotate 1s var(--nf-ease-standard) 8 both;
   }
   @keyframes nf-spinner-rotate {
     from { transform: rotate(0deg); }
@@ -975,7 +975,7 @@
       transparent 100%
     );
     background-size: 200% 100%;
-    animation: nf-shimmer-sweep 1.6s var(--nf-ease-standard) infinite;
+    animation: nf-shimmer-sweep 1.6s var(--nf-ease-standard) 6 both;
   }
   @keyframes nf-shimmer-sweep {
     0% { background-position: 200% 0; }
@@ -1217,7 +1217,7 @@
    * no JS is needed beyond the route change React already does.
    */
   .nf-tab__link[aria-current="page"] .nf-tab__icon {
-    animation: nf-tab-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-tab-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-tab-pop {
     0% { transform: scale(0.85); }
@@ -1236,7 +1236,7 @@
    * removed after the animation so re-renders do not replay it.
    */
   .nf-bubble[data-new] {
-    animation: nf-bubble-in var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-bubble-in var(--nf-duration-slow, 400ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-bubble-in {
     from {
@@ -1269,7 +1269,7 @@
   /* ================================ INTEREST CHIP SPRING (9.10) */
 
   .nf-chip--interest {
-    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring);
   }
   .nf-chip--interest:hover { transform: scale(1.04); }
   .nf-chip--interest:active { transform: scale(0.95); }
@@ -1278,7 +1278,7 @@
   /* =========================== SEARCH RESULTS CASCADE (9.25) */
 
   .nf-results--cascade > * {
-    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   .nf-results--cascade > *:nth-child(1) { animation-delay: 0ms; }
   .nf-results--cascade > *:nth-child(2) { animation-delay: 50ms; }
@@ -1295,7 +1295,7 @@
   /* ================================== MAP PIN DROP (9.26) */
 
   .nf-map-pin[data-drop] {
-    animation: nf-pin-drop var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-pin-drop var(--nf-duration-slow, 400ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-pin-drop {
     from { opacity: 0; transform: translateY(-20px) scale(0.8); }
@@ -1307,7 +1307,7 @@
   /* ============================ EMOJI REACTION FLOAT (9.27) */
 
   .nf-reaction[data-float] {
-    animation: nf-reaction-float var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+    animation: nf-reaction-float var(--nf-duration-slow, 400ms) var(--nf-ease-entrance) forwards;
   }
   @keyframes nf-reaction-float {
     from { opacity: 1; transform: translateY(0) scale(1); }
@@ -1318,7 +1318,7 @@
   /* =========================== SWIPE RUBBER BAND (9.28) */
 
   .nf-swipe[data-reveal] {
-    animation: nf-swipe-reveal var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-swipe-reveal var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-swipe-reveal {
     from { transform: translateX(100%); }
@@ -1330,7 +1330,7 @@
   /* ======================== SETTINGS SECTION FADE (9.32) */
 
   .nf-settings-section[data-visible] {
-    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   @keyframes nf-section-in {
     from { opacity: 0; transform: translateY(8px); }
@@ -1341,7 +1341,7 @@
   /* =================== WALLET BALANCE + TX STAGGER (9.33) */
 
   .nf-wallet__balance[data-count] {
-    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-balance-pop {
     from { transform: scale(0.9); opacity: 0; }
@@ -1349,7 +1349,7 @@
     to { transform: scale(1); }
   }
   .nf-wallet__tx {
-    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   .nf-wallet__tx:nth-child(1) { animation-delay: 40ms; }
   .nf-wallet__tx:nth-child(2) { animation-delay: 80ms; }
@@ -1362,7 +1362,7 @@
   /* ====================== BOOKING TIMELINE NODES (9.34) */
 
   .nf-timeline__node[data-visible] {
-    animation: nf-node-in var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-node-in var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-timeline__node[data-visible]:nth-child(2) { animation-delay: 60ms; }
   .nf-timeline__node[data-visible]:nth-child(3) { animation-delay: 120ms; }
@@ -1377,12 +1377,12 @@
   /* ==================== PROFILE STATS + BADGES (9.36) */
 
   .nf-profile__stat[data-count] {
-    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-profile__stat[data-count]:nth-child(2) { animation-delay: 60ms; }
   .nf-profile__stat[data-count]:nth-child(3) { animation-delay: 120ms; }
   .nf-badge[data-pop] {
-    animation: nf-badge-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-badge-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-badge[data-pop]:nth-child(2) { animation-delay: 80ms; }
   .nf-badge[data-pop]:nth-child(3) { animation-delay: 160ms; }
@@ -1397,13 +1397,13 @@
   /* ==================== GALLERY PARALLAX HINT (9.35) */
 
   .nf-gallery__hero {
-    transition: transform var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    transition: transform var(--nf-duration-slow, 400ms) var(--nf-ease-entrance);
   }
   .nf-gallery__hero[data-scroll] {
     transform: translateY(calc(var(--nf-scroll-y, 0) * -0.08px));
   }
   .nf-gallery__room[data-visible] {
-    animation: nf-room-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-room-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-gallery__room[data-visible]:nth-child(2) { animation-delay: 60ms; }
   .nf-gallery__room[data-visible]:nth-child(3) { animation-delay: 120ms; }
@@ -1418,14 +1418,14 @@
   /* ================== CHECKOUT STEP TRANSITION (9.37) */
 
   .nf-checkout__step[data-enter] {
-    animation: nf-step-slide var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-step-slide var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   @keyframes nf-step-slide {
     from { opacity: 0; transform: translateX(24px); }
     to { opacity: 1; transform: translateX(0); }
   }
   .nf-checkout__progress {
-    transition: width var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    transition: width var(--nf-duration-slow, 400ms) var(--nf-ease-entrance);
   }
   :root[data-motion="off"] .nf-checkout__step[data-enter] { animation: none; }
   :root[data-motion="off"] .nf-checkout__progress { transition: none; }
@@ -1433,7 +1433,7 @@
   /* ===================== REWARDS TIER SHINE (9.38) */
 
   .nf-rewards__counter[data-count] {
-    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-rewards__badge[data-shine] {
     animation: nf-tier-shine 1.2s ease-in-out both;
@@ -1444,7 +1444,7 @@
     100% { filter: brightness(1); }
   }
   .nf-rewards__row {
-    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   .nf-rewards__row:nth-child(1) { animation-delay: 40ms; }
   .nf-rewards__row:nth-child(2) { animation-delay: 80ms; }
@@ -1456,14 +1456,14 @@
   /* ================== VERIFICATION SCAN FRAME (9.39) */
 
   .nf-scan-frame[data-active] {
-    animation: nf-scan-glow 2s ease-in-out infinite;
+    animation: nf-scan-glow 2s var(--nf-ease-standard) 4 both;
   }
   @keyframes nf-scan-glow {
     0%, 100% { box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--nf-brand-primary) 40%, transparent); }
     50% { box-shadow: inset 0 0 12px 2px color-mix(in oklab, var(--nf-brand-primary) 60%, transparent); }
   }
   .nf-id-card[data-enter] {
-    animation: nf-card-entrance var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-card-entrance var(--nf-duration-slow, 400ms) var(--nf-ease-spring) both;
   }
   @keyframes nf-card-entrance {
     from { opacity: 0; transform: translateY(20px) scale(0.9) rotateX(8deg); }
@@ -1475,11 +1475,11 @@
   /* ================== SUPPORT CATEGORY CARDS (9.41) */
 
   .nf-support__card {
-    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring);
   }
   .nf-support__card:hover { transform: translateY(-2px); }
   .nf-support__chat[data-enter] {
-    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-entrance) both;
   }
   :root[data-motion="off"] .nf-support__card { transition: none; }
   :root[data-motion="off"] .nf-support__chat[data-enter] { animation: none; }
@@ -1488,7 +1488,7 @@
 
   .nf-hero__word {
     display: inline-block;
-    animation: nf-word-bounce var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-word-bounce var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-hero__word:nth-child(1) { animation-delay: 0ms; }
   .nf-hero__word:nth-child(2) { animation-delay: 60ms; }
@@ -1505,7 +1505,7 @@
   /* =============== AURORA GRADIENT BACKGROUND (9.7, onboarding) */
 
   .nf-aurora {
-    animation: nf-aurora-drift 12s ease-in-out infinite alternate;
+    animation: nf-aurora-drift 12s var(--nf-ease-standard) 4 alternate both;
   }
   @keyframes nf-aurora-drift {
     0% { background-position: 0% 50%; }
@@ -1517,7 +1517,7 @@
   /* ============ BEAT TRANSITION CROSSFADE (9.11, onboarding) */
 
   .nf-beat[data-enter] {
-    animation: nf-beat-in var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-beat-in var(--nf-duration-slow, 400ms) var(--nf-ease-entrance) both;
   }
   .nf-beat[data-exit] {
     animation: nf-beat-out var(--nf-duration-base, 250ms) ease-in forwards;
@@ -1541,7 +1541,7 @@
   }
   .nf-gallery-strip > * {
     scroll-snap-align: center;
-    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring);
   }
   :root[data-motion="off"] .nf-gallery-strip { scroll-behavior: auto; }
   :root[data-motion="off"] .nf-gallery-strip > * { transition: none; }
@@ -1549,11 +1549,11 @@
   /* ============ PULL-TO-REFRESH MARK SPIN (9.31) */
 
   .nf-ptr__mark[data-pulling] {
-    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-entrance);
     transform: rotate(calc(var(--nf-pull, 0) * 1.5deg));
   }
   .nf-ptr__mark[data-refreshing] {
-    animation: nf-ptr-spin 800ms linear infinite;
+    animation: nf-ptr-spin 800ms var(--nf-ease-standard) 12 both;
   }
   @keyframes nf-ptr-spin {
     from { transform: rotate(0deg); }
@@ -1565,7 +1565,7 @@
   /* ============ PROFILE PHOTO CROSSFADE (9.30) */
 
   .nf-avatar[data-changing] {
-    animation: nf-avatar-morph var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-avatar-morph var(--nf-duration-slow, 400ms) var(--nf-ease-entrance) both;
   }
   @keyframes nf-avatar-morph {
     0% { opacity: 1; transform: scale(1); }
@@ -1577,14 +1577,14 @@
   /* ============ AGREEMENTS SEAL STAMP (9.40) */
 
   .nf-signature__line[data-draw] {
-    animation: nf-sig-draw 1s var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+    animation: nf-sig-draw 1s var(--nf-ease-entrance) both;
   }
   @keyframes nf-sig-draw {
     from { opacity: 0; transform: scaleX(0); transform-origin: left; }
     to { opacity: 1; transform: scaleX(1); transform-origin: left; }
   }
   .nf-seal[data-stamp] {
-    animation: nf-seal-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation: nf-seal-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
     animation-delay: 400ms;
   }
   @keyframes nf-seal-pop {
@@ -1676,7 +1676,7 @@
    * rotates. Both are purely decorative and composited.
    */
   .nf-scan-corner {
-    animation: nf-corner-glow 2.4s ease-in-out infinite alternate;
+    animation: nf-corner-glow 2.4s var(--nf-ease-standard) 4 alternate both;
   }
   @keyframes nf-corner-glow {
     0% { opacity: 0.4; filter: brightness(1); }
@@ -1689,7 +1689,7 @@
       color-mix(in oklab, var(--nf-brand-primary) 30%, transparent) 10%,
       transparent 25%
     );
-    animation: nf-trail-rotate 3s linear infinite;
+    animation: nf-trail-rotate 3s var(--nf-ease-standard) 6 both;
     pointer-events: none;
   }
   @keyframes nf-trail-rotate {
