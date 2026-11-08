@@ -1,8 +1,7 @@
 "use client";
 
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
-import { NotifyBanner } from "./notify/NotifyBanner";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { useSwipeToClose } from "@/lib/ui/use-swipe-to-close";
 import { WholePrefetchLink } from "@/components/app/WholePrefetchLink";
@@ -20,6 +19,18 @@ import { SideFlip } from "./flip/SideFlip";
 import { SideSync } from "./SideSync";
 import { isDetailPath } from "@/lib/side.constants";
 import type { ProfileSelection, Workspace } from "@/lib/supply/workspaces";
+
+const LazyNotifyBanner = lazy(() =>
+  new Promise<{ default: typeof import("./notify/NotifyBanner").NotifyBanner }>((resolve) => {
+    const load = () =>
+      import("./notify/NotifyBanner").then((m) => ({ default: m.NotifyBanner }));
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => void load().then(resolve), { timeout: 2000 });
+    } else {
+      setTimeout(() => void load().then(resolve), 2000);
+    }
+  }),
+);
 
 /**
  * The consumer shell, for both sides.
@@ -454,8 +465,11 @@ export function AppShell({
         )}
       </main>
 
-      {/* A new notification drops down from the top while the app is open. */}
-      {signedIn && !preview ? <NotifyBanner /> : null}
+      {signedIn && !preview ? (
+        <Suspense>
+          <LazyNotifyBanner />
+        </Suspense>
+      ) : null}
 
       {!immersive && showsTabBar(active) && (
         <ShellDock
