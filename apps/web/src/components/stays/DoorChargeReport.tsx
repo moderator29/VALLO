@@ -7,6 +7,7 @@ import { Field } from "@/components/ui/Field";
 import { reportDoorCharge } from "@/lib/stays/arrival-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /** V-57. One tap from a paid stay: "I was asked for money at the door." */
 export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy: Dictionary["afterTheGate"]["arrival"] }) {
@@ -37,6 +38,8 @@ export function DoorChargeReport({ bookingId, copy }: { bookingId: string; copy:
               return;
             }
             setDone(true);
+            /* The line keeps the record; the banner says it (founder, 7 November 2026). */
+            banner(copy.reportSent, { tone: "success" });
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
           }

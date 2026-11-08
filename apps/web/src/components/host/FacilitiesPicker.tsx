@@ -1,7 +1,7 @@
 "use client";
 
 import { useHostCopy } from "@/components/host/host-copy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
@@ -12,6 +12,7 @@ import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import "@/app/css/catalogue.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * WHAT THE PROPERTY OFFERS. `GOVERNING-10` screen four, the facilities half.
@@ -67,6 +68,11 @@ export function FacilitiesPicker({
   const [ownPicked, setOwnPicked] = useState<Set<string>>(() => new Set(chosen));
   const picked = heldPicked ? new Set(heldPicked) : ownPicked;
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
+  /* Said by the one banner at the top of the screen (founder, 7 November 2026,
+     "THE BANNER EVERYWHERE"); it was a line under the control. */
+  useEffect(() => {
+    if (notice) banner(notice.text, { tone: notice.tone === "error" ? "error" : "success" });
+  }, [notice]);
   const [pending, start] = useSafeTransition();
 
   function toggle(code: string) {
@@ -143,18 +149,6 @@ export function FacilitiesPicker({
         Save the facilities
       </Button>
 
-      {notice && (
-        <p
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`nf-caption mt-row ${
-            notice.tone === "error"
-              ? "text-[var(--nf-state-error)]"
-              : "text-[var(--nf-state-success)]"
-          }`}
-        >
-          {notice.text}
-        </p>
-      )}
     </section>
   );
 }

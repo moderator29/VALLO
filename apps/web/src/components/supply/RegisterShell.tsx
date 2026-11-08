@@ -6,6 +6,7 @@ import { BrandIcon, type BrandIconName } from "@/design-system/icons/BrandIcon";
 import { Button } from "@/components/ui/Button";
 import { StepFrame } from "@/components/ui/StepFrame";
 import { Surface, TYPE } from "@/components/app/Screen";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE FRAME EVERY SCREEN OF THE THREE REGISTRATION FORMS STANDS IN.
@@ -82,8 +83,8 @@ export function RegisterShell({
   secondary?: { label: string; onClick(): void };
   /**
    * A refusal that belongs to the whole screen rather than to one field,
-   * drawn as the frame's notice. `role="alert"` and the error colour AND the
-   * words, because colour alone fails anybody who cannot see it.
+   * said by the one top banner (founder, 7 November 2026) and kept as the
+   * frame's visually hidden notice for a screen reader.
    */
   error?: string | null;
   /** Where the round X leaves to: the chooser the forms are opened from. */
@@ -124,11 +125,9 @@ export function RegisterShell({
       closeLabel={closeLabel}
       {...(error
         ? {
-            notice: (
-              <p role="alert" className="nf-arrive text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-error)]">
-                {error}
-              </p>
-            ),
+            /* Said by the one banner at the top of the screen; the note stays
+               for a screen reader (founder, 7 November 2026). */
+            notice: <FieldProblem id="register-problem" message={error} />,
           }
         : {})}
       primary={

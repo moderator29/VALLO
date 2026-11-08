@@ -1,7 +1,7 @@
 "use client";
 
 import { useHostCopy, useHostPageCopy } from "@/components/host/host-copy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatMoney, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -13,6 +13,7 @@ import type { MyRoomType } from "@/lib/host/queries";
 import { isoDate } from "@/lib/stays/inventory";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * HOW MANY ROOMS ARE ON SALE, AND FOR WHICH NIGHTS.
@@ -65,6 +66,11 @@ function RoomCard({ room, locale }: { room: MyRoomType; locale: Locale }) {
   const [to, setTo] = useState(today);
   const [units, setUnits] = useState(String(room.unitsTotal));
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
+  /* Said by the one banner at the top of the screen (founder, 7 November 2026,
+     "THE BANNER EVERYWHERE"); it was a line under the control. */
+  useEffect(() => {
+    if (notice) banner(notice.text, { tone: notice.tone === "error" ? "error" : "success" });
+  }, [notice]);
   const [pending, start] = useSafeTransition();
 
   const unitsNumber = Number.parseInt(units, 10);
@@ -174,18 +180,6 @@ function RoomCard({ room, locale }: { room: MyRoomType; locale: Locale }) {
         {unitsNumber === 0 ? w.closeThese : w.putOnSale}
       </Button>
 
-      {notice && (
-        <p
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`nf-caption mt-row ${
-            notice.tone === "error"
-              ? "text-[var(--nf-state-error)]"
-              : "text-[var(--nf-state-success)]"
-          }`}
-        >
-          {notice.text}
-        </p>
-      )}
     </section>
   );
 }

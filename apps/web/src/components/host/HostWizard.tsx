@@ -65,6 +65,7 @@ import { HOST_AGREEMENT_VERSION, PAY_ON_VALLO_VERSION } from "@/lib/legal/versio
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE HOST WIZARD, ON `lib/host`.
@@ -257,6 +258,11 @@ export function HostWizard({
   });
   const [pending, start] = useSafeTransition();
   const [notice, setNotice] = useState<Notice>(null);
+  /* Said by the one banner at the top of the screen (founder, 7 November 2026,
+     "THE BANNER EVERYWHERE"); it was a line under the control. */
+  useEffect(() => {
+    if (notice) banner(notice.text, { tone: notice.tone === "error" ? "error" : "success" });
+  }, [notice]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   /*
    * THE HOTEL'S STATED TOTAL, WHICH HAS NO COLUMN ANYWHERE IN THIS DATABASE.
@@ -692,11 +698,6 @@ export function HostWizard({
           <p className={TYPE.body}>
             {hw.wizard.unsavedBody}
           </p>
-          {notice?.tone === "error" && (
-            <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-              {notice.text}
-            </p>
-          )}
           <Button variant="primary" size="lg" full loading={savingLeave} disabled={savingLeave} onClick={() => void saveAndGo()}>
             {leaving?.kind === "back" || leaving?.kind === "history" ? hw.wizard.saveAndGoBack : hw.wizard.saveAndGo}
           </Button>
@@ -824,14 +825,6 @@ export function HostWizard({
         </HeldProvider>
       </div>
 
-      {notice && (
-        <p
-          role={notice.tone === "error" ? "alert" : "status"}
-          className={`mt-md nf-body-sm ${notice.tone === "error" ? "text-[var(--nf-state-error)]" : "text-[var(--nf-state-success)]"}`}
-        >
-          {notice.text}
-        </p>
-      )}
       <PhoneGateLink show={notice?.phoneGate === true} full className="mt-sm" />
 
       {/*

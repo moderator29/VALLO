@@ -22,6 +22,7 @@ import {
 import type { DeskDeposits, DeskWindow } from "@/lib/reservations/deposit-settings";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE RESTAURANT'S TABLE DEPOSIT SETTINGS (track/restaurant-deposits), on the
@@ -333,10 +334,18 @@ export function DepositSettingsCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-inline">
-          <Button variant="primary" disabled={pending || problem !== null} loading={pending} onClick={save} data-testid="deposit-save">
+          <Button
+            variant="primary"
+            disabled={pending || problem !== null}
+            loading={pending}
+            onClick={save}
+            data-testid="deposit-save"
+            aria-describedby={problem && draft.on ? "deposit-problem" : undefined}
+          >
             {pending ? words.saving : words.save}
           </Button>
-          {problem && draft.on ? <p className={TYPE.rowMeta}>{words.problems[problem]}</p> : null}
+          {/* Why Save waits is said by the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="deposit-problem" message={problem && draft.on ? words.problems[problem] : null} />
         </div>
       </div>
     </section>

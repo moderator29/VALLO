@@ -27,6 +27,7 @@ import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { UploadCard, newBatchId, type UploadState } from "./UploadCard";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * GOVERNING-04, THE AGENT FORM.
@@ -535,14 +536,8 @@ function FeeStepper({
           <UiIcon name="plus" size={20} />
         </button>
       </div>
-      {error ? (
-        <p
-          role="alert"
-          className="nf-arrive mt-xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
+      {/* The words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`fee-${label.replace(/\W+/g, "-").toLowerCase()}-problem`} message={error} />
     </div>
   );
 }
