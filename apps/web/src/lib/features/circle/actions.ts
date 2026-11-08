@@ -6,6 +6,8 @@ import { z } from "zod";
 
 import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "@/lib/actions/session";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { writeInAppNotice } from "@/lib/notify/in-app";
 
 import { isNotLive } from "../degrade";
 import { CIRCLE_CATEGORIES, LIMITS, readCreateOutcome, slugFrom } from "./model";
@@ -39,6 +41,19 @@ function wordsFor(error: { code?: string; message?: string } | null): string {
 }
 
 const uuid = z.string().uuid("That could not be found.");
+
+async function communityInfo(db: Db, communityId: string): Promise<{ name: string; slug: string }> {
+  try {
+    const { data } = await db.from("circle_communities").select("name, slug").eq("id", communityId).single();
+    const row = data as { name: string; slug: string } | null;
+    return { name: row?.name ?? "a community", slug: row?.slug ?? "" };
+  } catch { return { name: "a community", slug: "" }; }
+}
+
+function notifyCircle(userId: string, title: string, body: string, href: string): void {
+  const admin = createAdminClient();
+  writeInAppNotice(admin, { user_id: userId, kind: "social", title, body, href }).catch(() => {});
+}
 
 /* ------------------------------------------------------------ communities */
 
@@ -129,6 +144,15 @@ export async function decideJoinRequest(input: {
   });
   if (error) return fail(wordsFor(error));
   if (data !== "approved" && data !== "declined") return fail(data === "not_allowed" ? "Only the people who run this community can answer requests." : FAILED);
+  if (data === "approved") {
+    const ci = await communityInfo(who.db, parsed.data.communityId);
+    notifyCircle(
+      parsed.data.userId,
+      `You were accepted into ${ci.name}`,
+      "You are now a member. Open it to see what is happening.",
+      `/circle/c/${parsed.data.slug}`,
+    );
+  }
   revalidatePath(`/circle/c/${parsed.data.slug}/manage`);
   return ok({ outcome: data });
 }
@@ -240,6 +264,13 @@ export async function sendCircleInvite(input: {
     if (error?.code === "23505") return fail("That person already has a pending invite to this community.");
     return fail(wordsFor(error));
   }
+  const ci = await communityInfo(who.db, parsed.data.communityId);
+  notifyCircle(
+    parsed.data.inviteeId,
+    `You were invited to join ${ci.name}`,
+    "Open the invite to accept or decline.",
+    ci.slug ? `/circle/c/${ci.slug}` : "/circle",
+  );
   revalidatePath("/circle");
   return ok({ id: (data as { id: string }).id });
 }
@@ -249,8 +280,23 @@ export async function acceptCircleInvite(input: { inviteId: string }): Promise<A
   if ("error" in who) return fail(who.error);
   const parsed = validate(z.object({ inviteId: uuid }), input);
   if (!parsed.ok) return fail(parsed.error);
+  const { data: invite } = await who.db
+    .from("circle_invites")
+    .select("inviter_id, community_id")
+    .eq("id", parsed.data.inviteId)
+    .single();
   const { error } = await who.db.rpc("accept_circle_invite", { p_invite_id: parsed.data.inviteId });
   if (error) return fail(wordsFor(error));
+  if (invite) {
+    const inv = invite as { inviter_id: string; community_id: string };
+    const ci = await communityInfo(who.db, inv.community_id);
+    notifyCircle(
+      inv.inviter_id,
+      `Your invite to ${ci.name} was accepted`,
+      "The person you invited is now a member.",
+      ci.slug ? `/circle/c/${ci.slug}` : "/circle",
+    );
+  }
   revalidatePath("/circle");
   return ok(null);
 }
@@ -350,6 +396,23 @@ export async function signUpForPlan(input: { planId: string }): Promise<ActionRe
   if (error) {
     if (error.code === "23505") return fail("You have already signed up for this plan.");
     return fail(wordsFor(error));
+  }
+  const { data: plan } = await who.db
+    .from("circle_plans")
+    .select("organiser_id, title, community_id")
+    .eq("id", parsed.data.planId)
+    .single();
+  if (plan) {
+    const p = plan as { organiser_id: string; title: string; community_id: string };
+    if (p.organiser_id !== who.userId) {
+      const ci = await communityInfo(who.db, p.community_id);
+      notifyCircle(
+        p.organiser_id,
+        `Someone signed up for "${p.title}"`,
+        "A member signed up for your plan.",
+        ci.slug ? `/circle/c/${ci.slug}` : "/circle",
+      );
+    }
   }
   revalidatePath("/circle");
   return ok(null);
@@ -456,6 +519,13 @@ export async function vouchForMember(input: {
     if (error?.code === "23505") return fail("You have already vouched for this person in this community.");
     return fail(wordsFor(error));
   }
+  const ci = await communityInfo(who.db, parsed.data.communityId);
+  notifyCircle(
+    parsed.data.voucheeId,
+    `Someone vouched for you in ${ci.name}`,
+    "A member of the community vouched for you.",
+    ci.slug ? `/circle/c/${ci.slug}` : "/circle",
+  );
   revalidatePath("/circle");
   return ok({ id: (data as { id: string }).id });
 }
