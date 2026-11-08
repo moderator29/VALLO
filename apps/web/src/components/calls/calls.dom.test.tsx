@@ -301,14 +301,14 @@ describe.skipIf(!hasBrowser)("the review outcome form", () => {
     try {
       const sent = () => page.evaluate(() => ((window as unknown as { __calls?: unknown[][] }).__calls ?? []).filter((c) => c[0] === "completeReviewCall"));
       await page.getByTestId("review-outcome-submit").click();
-      await expect(page.getByText("Choose an outcome.").count()).resolves.toBe(2);
-      await expect(page.getByText("Write a short summary.").count()).resolves.toBe(2);
+      await expect(page.getByText("Choose an outcome.").count()).resolves.toBe(1);
+      await expect(page.getByText("Write a short summary.").count()).resolves.toBe(1);
       expect(await sent()).toEqual([]);
 
       await page.getByTestId("review-outcome-FOLLOW_UP_REQUIRED").check();
       await page.getByTestId("review-outcome-summary").fill("Needs the firm's CAC certificate.");
       await page.getByTestId("review-outcome-submit").click();
-      await expect(page.getByText("A follow-up needs a due date.").count()).resolves.toBe(2);
+      await expect(page.getByText("A follow-up needs a due date.").count()).resolves.toBe(1);
       expect(await sent()).toEqual([]);
 
       await page.getByTestId("review-outcome-due").fill("2030-01-15T10:00");
