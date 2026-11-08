@@ -9,6 +9,7 @@ import { ROOMMATES_ROUTES, type RoomCard, type RoommateCard } from "@/lib/featur
 
 import { AMENITY_ICON, availableText, budgetText, counted, fill, LOCALE, moveInText, placeText, type RoommatesCopy } from "./format";
 import { BadgesRow, KindTag, LifestyleChips, MatchReasons, MatchRing, PersonFace, VerifiedChip } from "./Marks";
+import { FreshOnly } from "./Kept";
 import "./roommates-kit.css";
 
 /**
@@ -221,7 +222,11 @@ export function RoomCardView({
         <div className="nf-rm-rcard__poster">
           <PersonFace person={room.owner} size="sm" />
           <span className="nf-rm-rcard__poster-name">{room.owner.name}</span>
-          {free ? <span className="nf-rm-rcard__free">{free}</span> : null}
+          {free ? (
+            <FreshOnly>
+              <span className="nf-rm-rcard__free">{free}</span>
+            </FreshOnly>
+          ) : null}
         </div>
       </div>
     </article>

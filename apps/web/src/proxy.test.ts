@@ -323,6 +323,8 @@ const EXPECTED_PUBLIC = new Set([
   "/host-agreement",
   "/privacy",
   "/safety",
+  /* Vallo Roommates (8 November 2026): the schools directory, a shared address. */
+  "/roommates/campus",
   "/standards",
   "/terms",
   /* Compliance. */
@@ -690,5 +692,29 @@ describe("STORE-17: the preview harness in production", () => {
     expect(isHarnessPath("/gallery/x")).toBe(true);
     expect(isHarnessPath("/previews")).toBe(false);
     expect(isHarnessPath("/listing/preview")).toBe(false);
+  });
+});
+
+describe("Vallo Roommates' shared pages (8 November 2026)", () => {
+  it("opens a shared room and a school's page to a reader with no account", () => {
+    for (const path of ["/roommates/r/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b", "/roommates/campus", "/roommates/campus/unilag"]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  it("keeps everything else under /roommates signed in", () => {
+    for (const path of [
+      "/roommates",
+      "/roommates/me",
+      "/roommates/discover",
+      "/roommates/p/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b",
+      "/roommates/r/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b/edit",
+      "/roommates/r/not-an-id",
+      "/roommates/groups/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b",
+      "/roommates/verify",
+      "/roommates/campus/UNILAG/extra",
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+    }
   });
 });

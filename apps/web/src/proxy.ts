@@ -254,6 +254,20 @@ const PUBLIC_SEGMENTS = new Set([
 const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-image.jpg"]);
 
 /**
+ * Open below a closed first segment, matched on the WHOLE path (Vallo
+ * Roommates, 8 November 2026). A room somebody shared on WhatsApp and a
+ * school's page open for a reader with no account: the page shows what the
+ * database publishes to anyone (`roommate_listing_view` and the institution
+ * page, both SECURITY DEFINER reads that null every private field) and asks
+ * to sign in before any action. Everything else under `/roommates` (people,
+ * the hub, groups, posting, checks) stays signed in.
+ */
+const PUBLIC_NESTED: readonly RegExp[] = [
+  /^\/roommates\/r\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  /^\/roommates\/campus(?:\/[a-z0-9-]{2,80})?$/,
+];
+
+/**
  * The API routes that answer WITHOUT a session, by exact path, and why each
  * one has to.
  *
@@ -399,6 +413,7 @@ export function isPublicPath(
      because `api` is not a public tree: only the endpoints enumerated above
      answer a caller with no session and the rest do not. */
   if (isApiPath(path)) return PUBLIC_API_PATHS.has(path);
+  if (PUBLIC_NESTED.some((pattern) => pattern.test(path))) return true;
   const [, first = ""] = path.split("/");
   return PUBLIC_SEGMENTS.has(first);
 }

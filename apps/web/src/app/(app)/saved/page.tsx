@@ -22,6 +22,7 @@ import { SavedCompare } from "./SavedCompare";
 import { SavedSort, type SavedSortKey } from "./SavedSort";
 import { ShareCollection } from "./ShareCollection";
 import { readSavedChanges } from "@/lib/saved/changes";
+import { SavedRoommates } from "@/components/roommates/SavedRoommates";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -228,6 +229,11 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
             }}
           />
         }
+      />
+      {/* Vallo Roommates: saved posts and people, on the same lists. */}
+      <SavedRoommates
+        onlyKeys={activeList?.keys ?? null}
+        listFor={(kind, id) => (session.state === "signed-in" ? <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} /> : undefined)}
       />
     </PullToRefresh>
   );

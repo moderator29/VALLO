@@ -631,7 +631,7 @@
     position: absolute;
     inset: auto var(--nf-space-sm) var(--nf-space-sm) auto;
     padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-control);
+    border-radius: var(--nf-radius-badge);
     background: var(--nf-surface-control-on-media);
     color: var(--nf-content-on-media);
     font-size: var(--nf-text-caption);
@@ -684,7 +684,7 @@
     display: inline-flex;
     align-items: center;
     padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-control);
+    border-radius: var(--nf-radius-badge);
     background: var(--nf-state-warning-surface);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-caption);
@@ -987,20 +987,27 @@
     align-items: center;
     gap: var(--nf-space-2xs);
     padding-inline: var(--nf-space-sm) var(--nf-space-3xs);
-    min-block-size: 2.5rem;
+    min-block-size: 2.75rem;
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
-    border-radius: var(--nf-radius-control);
+    border-radius: var(--nf-radius-control-sm);
     background: var(--nf-brand-tint-1);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
   }
+  .nf-rmf-tags button:focus-visible,
+  .nf-rmf-rules button:focus-visible,
+  .nf-rmf-photo__tools button:focus-visible,
+  .nf-rmg__nav:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
   .nf-rmf-tags button,
   .nf-rmf-rules button {
     display: grid;
     place-items: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
     border: 0;
     border-radius: var(--nf-radius-sm);
     background: transparent;
@@ -1083,7 +1090,7 @@
   }
   .nf-rmf-range__tag {
     padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-control);
+    border-radius: var(--nf-radius-badge);
     background: var(--nf-brand-tint-1);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
@@ -1179,7 +1186,7 @@
     position: absolute;
     inset: var(--nf-space-xs) auto auto var(--nf-space-xs);
     padding: var(--nf-space-3xs) var(--nf-space-xs);
-    border-radius: var(--nf-radius-control);
+    border-radius: var(--nf-radius-badge);
     background: var(--nf-surface-control-on-media);
     color: var(--nf-content-on-media);
     font-size: var(--nf-text-caption);
@@ -1195,8 +1202,8 @@
   .nf-rmf-photo__tools button {
     display: grid;
     place-items: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
     border: 0;
     border-radius: var(--nf-radius-sm);
     background: var(--nf-surface-control-on-media);
@@ -1464,7 +1471,7 @@
     place-items: center;
     inline-size: 1.75rem;
     block-size: 1.75rem;
-    border-radius: var(--nf-radius-circle);
+    border-radius: var(--nf-radius-sm);
     background: var(--nf-brand-tint-1);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);

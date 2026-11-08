@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { PageFrame } from "@/components/app/PageFrame";
+import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { SafetyRows, SaveButton } from "@/components/roommates/Actions";
+import { FreshOnly } from "@/components/roommates/Kept";
 import {
   AMENITY_ICON,
   BadgesRow,
@@ -181,6 +183,7 @@ function PriceBlock({ l, t: copy, inline = false }: { l: RoomDetail; t: Roommate
         {l.shareMinor !== null ? (l.kind === "room_offer" ? copy.listing.yourShare : copy.ui.card.perPerson) : copy.listing.rent}
         {hint ? ` · ${hint}` : null}
       </span>
+      <KeptPriceNote />
     </div>
   );
 }
@@ -226,29 +229,32 @@ function Poster({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
 }
 
 function Household({ l, t: copy, today }: { l: RoomDetail; t: RoommatesCopy; today: string }) {
-  const rows: { icon: UiIconName; label: string; value: string }[] = [];
+  const rows: { icon: UiIconName; label: string; value: string; fresh?: boolean }[] = [];
   if (l.occupantsNow !== null && l.occupantsMax !== null) rows.push({ icon: "users", label: copy.listing.household, value: fill(copy.listing.occupants, { now: l.occupantsNow, max: l.occupantsMax }) });
   else if (l.occupantsNow !== null) rows.push({ icon: "users", label: copy.listing.household, value: counted(l.occupantsNow, copy.ui.card.occupants) });
   rows.push({ icon: "circle-people", label: copy.discover.filterLabels.gender, value: copy.genderPref[l.genderPref] });
   const free = availableText(l.availableFrom, copy, today);
-  if (free) rows.push({ icon: "calendar-check", label: copy.listing.available, value: free });
+  if (free) rows.push({ icon: "calendar-check", label: copy.listing.available, value: free, fresh: true });
   if (l.minStayMonths) rows.push({ icon: "hourglass", label: copy.listing.minStay, value: counted(l.minStayMonths, copy.ui.card.months) });
   if (l.expiresAt) rows.push({ icon: "clock", label: copy.listingStatus.live, value: fill(copy.listing.expires, { date: dayText(l.expiresAt) }) });
   return (
     <section className="nf-rm-section" aria-labelledby="rml-home">
       <SectionHead id="rml-home" title={copy.ui.listing.facts} />
       <dl className="nf-rmv-facts">
-        {rows.map((r) => (
-          <div key={r.label} className="nf-rmv-fact">
-            <span className="nf-rm-plate" aria-hidden="true">
-              <UiIcon name={r.icon} size={20} />
-            </span>
-            <div className="nf-rmv-fact__words">
-              <dt>{r.label}</dt>
-              <dd>{r.value}</dd>
+        {rows.map((r) => {
+          const fact = (
+            <div key={r.label} className="nf-rmv-fact">
+              <span className="nf-rm-plate" aria-hidden="true">
+                <UiIcon name={r.icon} size={20} />
+              </span>
+              <div className="nf-rmv-fact__words">
+                <dt>{r.label}</dt>
+                <dd>{r.value}</dd>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+          return r.fresh ? <FreshOnly key={r.label}>{fact}</FreshOnly> : fact;
+        })}
       </dl>
     </section>
   );
