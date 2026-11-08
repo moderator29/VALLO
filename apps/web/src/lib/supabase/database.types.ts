@@ -8848,6 +8848,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          archived_at: string | null
           body: string | null
           created_at: string
           href: string | null
@@ -8859,6 +8860,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           body?: string | null
           created_at?: string
           href?: string | null
@@ -8870,6 +8872,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           body?: string | null
           created_at?: string
           href?: string | null
@@ -17167,6 +17170,14 @@ export type Database = {
       note_share_door_open: {
         Args: { p_token: string; p_viewer: string }
         Returns: undefined
+      }
+      notification_category_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          kind: Database["public"]["Enums"]["notification_kind"]
+          total: number
+          unread: number
+        }[]
       }
       notification_severity: {
         Args: {

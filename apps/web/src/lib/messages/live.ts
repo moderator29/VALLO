@@ -775,7 +775,7 @@ export async function loadThread(
 export async function loadNotifications(supabase: Db): Promise<NotificationRow[]> {
   const { data } = await supabase
     .from("notifications")
-    .select("id, user_id, kind, title, body, href, read_at, created_at")
+    .select("id, user_id, kind, title, body, href, read_at, archived_at, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
   return data ?? [];
