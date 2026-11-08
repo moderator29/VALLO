@@ -6,6 +6,7 @@ import type { ResolvedProfileSettings } from "@/lib/profile/model";
 import { groupNuban } from "@/lib/agent/payout-model";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AccountNotificationsCard } from "../../(app)/settings/AccountToggles";
+import { forAccountToggles } from "@/lib/i18n/slice";
 import { AgentLookupCard } from "@/components/app/doors/AgentLookupCard";
 import type { MyAgentLookup } from "@/lib/doors/queries";
 import { AgentHoursCard, ReplyTemplatesCard } from "@/components/agent/AgentToolsCards";
@@ -53,7 +54,7 @@ export function AgentSettingsBody({
       <div className="mx-auto max-w-2xl space-y-md">
         {/* ------------------------------------------------ notifications */}
         {notifications ? (
-          <AccountNotificationsCard t={t} initial={notifications} variant="host" />
+          <AccountNotificationsCard t={forAccountToggles(t)} initial={notifications} variant="host" />
         ) : (
           <div className="nf-panel nf-panel--card block p-panel">
             <p className="nf-overline">Notifications</p>

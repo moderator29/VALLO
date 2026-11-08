@@ -8,6 +8,7 @@ import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { BusinessTierFan } from "@/components/app/artefact/BusinessTierFan";
 import { AccountNotificationsCard } from "../../(app)/settings/AccountToggles";
+import { forAccountToggles } from "@/lib/i18n/slice";
 
 /**
  * The body of /host/settings, apart from its reads, so a harness can draw it
@@ -112,7 +113,7 @@ export function HostSettingsBody({
         ) : null}
 
         {notifications ? (
-          <AccountNotificationsCard t={t} initial={notifications} variant="host" />
+          <AccountNotificationsCard t={forAccountToggles(t)} initial={notifications} variant="host" />
         ) : (
           <div className="nf-panel nf-panel--card p-panel">
             <p className={TYPE.rowMeta}>{page.notificationsUnreachable}</p>

@@ -65,13 +65,18 @@ export const SLICES = {
   proofStrip: ["trustVisible"],
   settingsHub: ["common", "directHome", "experienceSettings", "interests", "memberKit", "passcode", "paymentsPage", "platform", "publicDoors", "settings", "socialProfile", "units"],
   emailAuthForm: ["auth", "authFlow", "common", "publicDoors", "safety", "signUp", "welcomeCards"],
-  codeSignInForm: ["auth", "authFlow", "publicDoors"],
-  verifyCodeForm: ["auth", "authFlow"],
-  finishSetupForm: ["auth", "signUp"],
-  forgotPasswordForm: ["auth", "common"],
-  resetCodeForm: ["auth", "authFlow"],
-  resetPasswordForm: ["auth", "authFlow"],
-  signUpOptions: ["auth", "publicDoors"],
+  codeSignInForm: ["auth", "authFlow", "publicDoors", "signUp"],
+  verifyCodeForm: ["auth", "authFlow", "signUp"],
+  finishSetupForm: ["auth", "safety", "signUp"],
+  forgotPasswordForm: ["auth", "common", "signUp"],
+  resetCodeForm: ["auth", "authFlow", "signUp"],
+  resetPasswordForm: ["auth", "authFlow", "signUp"],
+  signUpOptions: ["auth", "common", "landing", "publicDoors", "side", "stays"],
+  welcomeFlow: ["auth", "common", "interests", "landing", "moveIn", "onboardingMotion", "pickers", "platform", "shape", "side", "signUp", "stays", "success", "welcomeCards"],
+  interestChoices: ["common", "interests", "platform"],
+  stayStackCard: ["catalogue", "restaurantPage", "stays"],
+  accountToggles: ["settings", "shape"],
+  agentNav: ["a11y", "agent"],
 } as const satisfies Record<string, readonly (keyof Dictionary)[]>;
 
 /*
@@ -92,6 +97,11 @@ export const NARROW = {
     trustVisible: ["proof"],
   },
   proofStrip: { trustVisible: ["proof"] },
+  welcomeFlow: {
+    shape: ["wall"],
+    signUp: ["hearAbout"],
+  },
+  interestChoices: { platform: ["lite"] },
 } as const satisfies Record<string, Narrow>;
 
 export function forListingCard(t: Dictionary): Dictionary {
@@ -135,4 +145,19 @@ export function forResetPasswordForm(t: Dictionary): Dictionary {
 }
 export function forSignUpOptions(t: Dictionary): Dictionary {
   return sliceDictionary(t, SLICES.signUpOptions);
+}
+export function forWelcomeFlow(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.welcomeFlow, NARROW.welcomeFlow);
+}
+export function forInterestChoices(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.interestChoices, NARROW.interestChoices);
+}
+export function forStayStackCard(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.stayStackCard);
+}
+export function forAccountToggles(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.accountToggles);
+}
+export function forAgentNav(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.agentNav);
 }
