@@ -9,9 +9,9 @@
 /** Draft patterns that surface the safety card. */
 export const MONEY_TALK_RE = /\b(pay|payment|transfer|account|acct|bank)\b/i;
 
-/** Canonical safety copy, verbatim. */
-export const SAFETY_EDUCATION_COPY =
-  "For your safety, keep every chat and payment inside Vallo. Deals made outside the platform are not protected by us. Pay only after you have inspected the property.";
+/** SW11: source of truth is now `packages/i18n/src/locales/safety.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+export const SAFETY_EDUCATION_COPY = getDictionary("en").safety.education;
 
 /** Session storage key: the card shows once per browsing session. */
 export const SAFETY_EDUCATION_SEEN_KEY = "nf_money_edu_seen";

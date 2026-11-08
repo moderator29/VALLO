@@ -220,28 +220,15 @@ export type StandingCopy = {
   selectable: true;
 };
 
+/** SW11: source of truth is now `packages/i18n/src/locales/workspace.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+const _ws = getDictionary("en").workspaceStanding;
 export const WORKSPACE_STANDING_COPY: Record<WorkspaceStanding, StandingCopy> = {
-  active: { label: null, meaning: null, selectable: true },
-  draft: {
-    label: "Not finished",
-    meaning: "Nothing is submitted until you press the button on the last screen.",
-    selectable: true,
-  },
-  pending: {
-    label: "Pending review",
-    meaning: "A person reads this. You can build listings now; publishing opens when it comes back.",
-    selectable: true,
-  },
-  refused: {
-    label: "Not approved",
-    meaning: "Open it to read why, in full, and to send the missing thing.",
-    selectable: true,
-  },
-  suspended: {
-    label: "Suspended",
-    meaning: "Open it to read the reason. Confirmed stays are untouched.",
-    selectable: true,
-  },
+  active: { ..._ws.active, selectable: true },
+  draft: { ..._ws.draft, selectable: true },
+  pending: { ..._ws.pending, selectable: true },
+  refused: { ..._ws.refused, selectable: true },
+  suspended: { ..._ws.suspended, selectable: true },
 };
 
 /* ------------------------------------------------------------------- copy */

@@ -1,4 +1,5 @@
 import type { MovementKind, MovementStatus, OnboardingState, ProfileGap } from "./funds";
+import { getDictionary } from "@vallo/i18n";
 
 /**
  * WHAT A MEMBER READS ON THE WALLET SCREEN (founder sections 36 to 46;
@@ -168,69 +169,15 @@ export const FILTER_EMPTY = {
 } as const;
 export const TRANSACTIONS_MORE = "Showing your most recent movements.";
 
-/* The move-money screens (the Dribbble "Supay" reference: amount, quick
-   chips, method or recipient, reason, Continue, keypad). */
-export const MOVE_COPY = {
-  enterAmount: "Enter amount",
-  available: "Available",
-  others: "Other",
-  continue: "Continue",
-  change: "Change",
-  method: "Payment method",
-  methodName: "Bank transfer or card",
-  methodSub: "On the payment provider's own page",
-  methodSheet: "Pay with",
-  methodOnly: "This is the one way to add money for now.",
-  sendTo: "Send to",
-  chooseRecipient: "Choose who to send to",
-  reason: "What is it for?",
-  otherReason: "Say what it is for",
-  withdrawTo: "Withdraw to",
-  chooseAccount: "Choose a bank account",
-  review: "Check and confirm",
-  notAvailableTitle: "Not available yet",
-  notAvailableAdd: "Adding money opens when Wallet is connected. Nothing was charged.",
-  notAvailableSend: "Sending opens when Wallet is connected. Nothing was sent.",
-  notAvailableWithdraw: "Withdrawals open when Wallet is connected. Nothing has moved.",
-  backToWallet: "Back to Wallet",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/wallet.en.ts`. */
+const _w = getDictionary("en").wallet;
+export const MOVE_COPY = _w.move;
 
 /* ---------------------------------------------------------- onboarding */
 
-export const ONBOARDING_COPY: Record<OnboardingState, { title: string; body: string }> = {
-  NOT_STARTED: {
-    title: "Set up Wallet",
-    body: "Your money is held by our licensed provider, never by Vallo. To set up Wallet we share your name, email and phone with them, so they can keep your money under your name. Nothing else is shared and nothing is charged.",
-  },
-  PENDING: {
-    title: "Setting up Wallet",
-    body: "We have asked our partner to open your account and are waiting for their answer. This page updates on its own. You do not need to do anything.",
-  },
-  VERIFICATION_REQUIRED: {
-    title: "A few details first",
-    body: "Your account is opened in your own name, so we need these on your profile before we ask our partner to open it.",
-  },
-  ACTIVE: { title: "Wallet is ready", body: "You can add money, withdraw and transfer." },
-  RESTRICTED: {
-    title: "Some actions are paused",
-    body: "Our partner has limited what this account can do for now. Nothing has moved, and nothing will until this is sorted. Contact support and we will find out why.",
-  },
-  SUSPENDED: {
-    title: "Your account is on hold",
-    body: "Our partner has put this account on hold. Your money stays where it is and nothing can move until the hold is lifted. Contact support and we will help.",
-  },
-  FAILED: {
-    title: "We could not set up Wallet",
-    body: "Our licensed provider did not accept the details we sent. Check your name, email and phone on your profile, then try again.",
-  },
-};
+export const ONBOARDING_COPY = _w.onboarding as Record<OnboardingState, { title: string; body: string }>;
 
-/** Payluk keeps one account per mobile number; this one is already on another Payluk account. */
-export const PHONE_TAKEN_COPY = {
-  title: "That number is already in use",
-  body: "Our licensed provider opens one account per mobile number, and the number on your profile already belongs to another account. Use a different mobile number of yours, then try again.",
-  action: "Use a different number",
-} as const;
+export const PHONE_TAKEN_COPY = _w.phoneTaken;
 
 export const GAP_LABEL: Record<ProfileGap, string> = {
   first_name: "Your first name",
@@ -291,29 +238,7 @@ export function movementTone(status: MovementStatus): StatusTone {
 
 /* ----------------------------------------------------- the waiting room */
 
-/** What the screen says while a movement is open. Calm, true, and never a countdown. */
-export const WAITING_COPY: Record<"withdrawal" | "deposit" | "send" | "unknown" | "review", { title: string; body: string }> = {
-  withdrawal: {
-    title: "On its way to your bank",
-    body: "Bank transfers usually land within a few minutes and can take longer at busy times. You can leave this screen: we keep checking and this updates the moment your bank confirms. You will not be charged twice.",
-  },
-  deposit: {
-    title: "Waiting for your bank to confirm",
-    body: "Once your bank confirms the payment it shows as Available. That is usually a few minutes. You can leave this screen; it updates on its own.",
-  },
-  send: {
-    title: "Sending",
-    body: "Sends between members usually settle within a minute. You can leave this screen; it updates on its own and you will not be charged twice.",
-  },
-  unknown: {
-    title: "Checking what happened",
-    body: "We asked for this and did not hear back in time. That does not mean it failed. Please do not try again: we are checking, and this updates on its own. You will not be charged twice.",
-  },
-  review: {
-    title: "Under review",
-    body: "What we heard back did not match what you asked for, so a person is checking it before anything is shown as done. Your money is not lost. We will tell you as soon as it is settled.",
-  },
-};
+export const WAITING_COPY = _w.waiting as Record<"withdrawal" | "deposit" | "send" | "unknown" | "review", { title: string; body: string }>;
 
 export const WAITING_STEPS = {
   withdrawal: ["Request received", "Sent to your bank", "Your bank confirms"],

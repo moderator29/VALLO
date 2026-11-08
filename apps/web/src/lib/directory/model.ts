@@ -35,23 +35,11 @@ export const SIDE_KINDS: Record<Side, readonly DirKind[]> = {
 
 export type DirFilter = "all" | DirKind;
 
-export const KIND_PLURAL: Record<DirKind, string> = {
-  agent: "Agents",
-  landlord: "Landlords",
-  firm: "Firms",
-  hotel: "Hotels",
-  host: "Hosts",
-  shortlet: "Shortlets",
-};
-
-export const KIND_ONE: Record<DirKind, string> = {
-  agent: "Agent",
-  landlord: "Landlord",
-  firm: "Firm",
-  hotel: "Hotel",
-  host: "Host",
-  shortlet: "Shortlet operator",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/directory.en.ts`. */
+import { getDictionary } from "@vallo/i18n";
+const _dir = getDictionary("en").directory;
+export const KIND_PLURAL = _dir.kindPlural as Record<DirKind, string>;
+export const KIND_ONE = _dir.kindOne as Record<DirKind, string>;
 
 const KINDS: readonly DirKind[] = ["agent", "landlord", "firm", "hotel", "host", "shortlet"];
 
@@ -133,20 +121,7 @@ export function factLine(e: Pick<DirEntry, "kind" | "completed" | "liveListings"
   return parts.length ? parts.join(" · ") : "New on Vallo";
 }
 
-export const DIRECTORY_COPY: Record<Side, { title: string; lede: string; search: string; emptyCta: { label: string; href: string } }> = {
-  property: {
-    title: "Find an agent",
-    lede: "Agents, landlords and firms on Vallo. Approved accounts first.",
-    search: "Search by name or area",
-    emptyCta: { label: "Become an agent", href: "/profile/setup" },
-  },
-  stays: {
-    title: "Find a host",
-    lede: "Hotels, hosts and shortlet operators on Vallo. Approved accounts first.",
-    search: "Search by name or area",
-    emptyCta: { label: "List your stay", href: "/profile/setup?side=stays" },
-  },
-};
+export const DIRECTORY_COPY = _dir.copy as Record<Side, { title: string; lede: string; search: string; emptyCta: { label: string; href: string } }>;
 
 export function emptyDirectoryTitle(side: Side, filter: DirFilter, scope: "city" | "global", placeName: string): string {
   const who = filter === "all" ? (side === "property" ? "agents" : "hosts") : KIND_PLURAL[filter].toLowerCase();
