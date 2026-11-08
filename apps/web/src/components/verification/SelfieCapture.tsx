@@ -218,7 +218,7 @@ export function SelfieCapture({
           {(phase === "live" || phase === "starting") && (
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[46%] h-[70%] w-[64%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[var(--nf-content-on-media)] shadow-[0_0_0_100vmax_var(--nf-media-silhouette)]"
+              className="pointer-events-none absolute left-1/2 top-[46%] h-[70%] w-[64%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--nf-content-on-media)] shadow-[0_0_0_100vmax_var(--nf-media-silhouette)]"
             />
           )}
         </div>
