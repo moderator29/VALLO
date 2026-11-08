@@ -140,6 +140,7 @@ export function TenancyReviewForm({
           <TextField
             label={copy.howMuch}
             inputMode="numeric"
+            enterKeyHint="done"
             value={extraNaira}
             onChange={(event) => setExtraNaira(event.target.value.replace(/[^\d,]/g, ""))}
           />

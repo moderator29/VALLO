@@ -131,6 +131,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
                 label="Your password"
                 type="password"
                 autoComplete="current-password"
+                enterKeyHint="next"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 disabled={pending}
@@ -140,6 +141,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
               <TextField
                 label="The code we emailed you"
                 inputMode="numeric"
+                enterKeyHint="go"
                 autoComplete="one-time-code"
                 value={code}
                 onChange={(event) => setCode(event.target.value)}

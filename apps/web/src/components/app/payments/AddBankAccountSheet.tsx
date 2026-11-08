@@ -204,6 +204,7 @@ export function AddBankAccountSheet({
               label={copy.accountNumber}
               hint={copy.accountNumberHint}
               inputMode="numeric"
+              enterKeyHint="done"
               autoComplete="off"
               maxLength={12}
               placeholder="0123 456 789"

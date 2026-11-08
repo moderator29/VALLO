@@ -136,6 +136,7 @@ export function ProposeAreaForm({
         value={name}
         maxLength={60}
         placeholder="Gwagwalada"
+        enterKeyHint="next"
         onChange={(event) => setName(event.target.value)}
         error={fieldErrors.name}
         hint="The name people actually say, not the official one."
@@ -191,6 +192,7 @@ export function ProposeAreaForm({
           value={city}
           maxLength={60}
           placeholder="Abuja"
+          enterKeyHint="done"
           onChange={(event) => setCity(event.target.value)}
           error={fieldErrors.city}
         />

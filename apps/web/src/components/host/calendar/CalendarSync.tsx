@@ -193,6 +193,7 @@ export function CalendarSync({
                 <TextField
                   label={w.icsLabel}
                   inputMode="url"
+                  enterKeyHint="go"
                   autoComplete="off"
                   placeholder="https://www.airbnb.com/calendar/ical/..."
                   value={url}

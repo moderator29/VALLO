@@ -117,6 +117,7 @@ export function RewardsPayoutForm({
         hint={copy.form.accountHint}
         name="accountNumber"
         inputMode="numeric"
+        enterKeyHint="done"
         autoComplete="off"
         maxLength={10}
         value={accountNumber}

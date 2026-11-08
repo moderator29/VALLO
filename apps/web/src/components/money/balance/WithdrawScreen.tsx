@@ -208,6 +208,7 @@ export function WithdrawScreen({
           <TextField
             label="Code"
             inputMode="numeric"
+            enterKeyHint="go"
             autoComplete="one-time-code"
             maxLength={8}
             inputClassName="nf-balance__otp"
@@ -247,6 +248,7 @@ export function WithdrawScreen({
           <TextField
             label="Account number"
             inputMode="numeric"
+            enterKeyHint="done"
             autoComplete="off"
             maxLength={10}
             value={accountNumber}

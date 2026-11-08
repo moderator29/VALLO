@@ -164,7 +164,7 @@ export function SendScreen({
                 </button>
               ))}
             </div>
-            {reason === "Other" ? <TextField label={MOVE_COPY.otherReason} value={other} maxLength={100} showCount onChange={(e) => setOther(e.target.value)} /> : null}
+            {reason === "Other" ? <TextField label={MOVE_COPY.otherReason} value={other} maxLength={100} showCount enterKeyHint="done" onChange={(e) => setOther(e.target.value)} /> : null}
           </div>
           <div className="nf-mw-foot">
             <Keypad value={amount} onChange={setAmount} />
@@ -204,6 +204,7 @@ export function SendScreen({
           <TextField
             label="Code"
             inputMode="numeric"
+            enterKeyHint="go"
             autoComplete="one-time-code"
             maxLength={8}
             inputClassName="nf-balance__otp"
@@ -228,6 +229,7 @@ export function SendScreen({
             label="Their phone number"
             type="tel"
             inputMode="tel"
+            enterKeyHint="done"
             autoComplete="off"
             value={phone}
             onChange={(e) => {

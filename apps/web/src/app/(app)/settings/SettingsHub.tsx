@@ -364,6 +364,7 @@ export function SettingsHub({
         <RowLink href="/privacy" glyph={<HubGlyph name="eye-off" />} label={about.privacy} testId="hub-privacy-policy" />
         <RowLink href="/ai/terms" glyph={<HubGlyph name="bot" />} label="VALLO AI terms and privacy" testId="hub-ai-terms" />
         <RowLink href="/disclaimer" glyph={<HubGlyph name="info" />} label={about.disclaimer} testId="hub-disclaimer" />
+        <RowLink href="/community" glyph={<HubGlyph name="users" />} label={about.community} testId="hub-community" />
       </SettingsGroup>
 
       {/* Vallo's own pages (28 October 2026): drawn only for the networks that have an address. */}

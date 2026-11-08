@@ -60,6 +60,7 @@ export function VninPanel({
         label={copy.label}
         value={vnin}
         autoComplete="off"
+        enterKeyHint="go"
         maxLength={24}
         onChange={(event) => setVnin(event.target.value)}
       />

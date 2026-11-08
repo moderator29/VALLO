@@ -1294,6 +1294,7 @@ export const en = {
          it beside Privacy and Terms rather than hunting for it. `/delete-account`
          has been live and unlinked; this is the line that makes it findable. */
       deleteAccount: "Delete account",
+      community: "Community promise",
       docs: "Docs",
       /*
        * THE ONLY DOOR INTO THE SUPPLY SIDE ON THIS PAGE, AND IT WAS MARKED
@@ -1336,6 +1337,7 @@ export const en = {
     termsLink: "Terms",
     privacyLink: "Privacy policy",
     rulesLink: "Community rules",
+    communityLink: "Community promise",
     helpLink: "Help",
     docsLink: "Docs",
   },
@@ -2152,6 +2154,7 @@ export const en = {
       terms: "Terms",
       privacy: "Privacy policy",
       disclaimer: "Disclaimer",
+      community: "Community promise",
       version: "Version",
       licences: "Open source licences",
     },

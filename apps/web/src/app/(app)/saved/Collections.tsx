@@ -110,6 +110,7 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
           value={name}
           maxLength={COLLECTION_NAME_MAX}
           placeholder={WORDS.namePlaceholder}
+          enterKeyHint="done"
           onChange={(e) => setName(e.target.value)}
           {...(error ? { error } : {})}
         />

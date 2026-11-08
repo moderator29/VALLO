@@ -99,6 +99,11 @@
   .nf-paywall__plan:active {
     transform: scale(0.985);
   }
+  @media (hover: hover) {
+    .nf-paywall__plan:hover:not(:active) {
+      box-shadow: var(--nf-elev-1);
+    }
+  }
   .nf-paywall__plan:focus-visible {
     outline: 2px solid var(--nf-brand-primary);
     outline-offset: 2px;

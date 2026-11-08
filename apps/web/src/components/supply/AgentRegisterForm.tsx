@@ -225,6 +225,7 @@ export function AgentRegisterForm({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 autoComplete="name"
+                enterKeyHint="next"
                 required
                 {...(errors.fullName ? { error: errors.fullName } : {})}
               />
@@ -316,6 +317,7 @@ export function AgentRegisterForm({
                 value={nin}
                 onChange={(e) => setNin(e.target.value.replace(/\D/g, "").slice(0, 11))}
                 inputMode="numeric"
+                enterKeyHint="done"
                 autoComplete="off"
                 required
                 {...(errors.nin ? { error: errors.nin } : {})}

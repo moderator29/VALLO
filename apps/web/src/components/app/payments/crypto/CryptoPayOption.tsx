@@ -370,6 +370,7 @@ function QuoteCard({
             onChange={(event) => onRefund(event.target.value)}
             error={refundError ?? undefined}
             autoComplete="off"
+            enterKeyHint="done"
             spellCheck={false}
             inputMode="text"
           />

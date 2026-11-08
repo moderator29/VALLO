@@ -301,6 +301,7 @@ export function useMoneyStepUp(
               label={byCode ? copy.codeLabel : copy.passwordLabel}
               type={byCode ? "text" : "password"}
               inputMode={byCode ? "numeric" : undefined}
+              enterKeyHint="go"
               autoComplete={byCode ? "one-time-code" : "current-password"}
               value={secret}
               onChange={(event) => setSecret(event.target.value)}

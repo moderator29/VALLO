@@ -58,6 +58,10 @@
   a.wsd-tile:hover {
     border-color: var(--nf-border-brand);
   }
+  a.wsd-tile:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
   .wsd-tile__head {
     display: flex;
     align-items: center;

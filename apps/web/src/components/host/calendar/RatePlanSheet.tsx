@@ -89,6 +89,7 @@ export function RatePlanSheet({
         <TextField
           label={w.rateLabel}
           inputMode="decimal"
+          enterKeyHint="next"
           value={rate}
           onChange={(event) => setRate(event.target.value)}
           error={fields.rateMinor}
@@ -98,6 +99,7 @@ export function RatePlanSheet({
           <TextField
             label={w.shortest}
             inputMode="numeric"
+            enterKeyHint="next"
             value={minStay}
             onChange={(event) => setMinStay(event.target.value)}
             error={fields.minStayNights}
@@ -106,6 +108,7 @@ export function RatePlanSheet({
           <TextField
             label={w.longest}
             inputMode="numeric"
+            enterKeyHint="done"
             value={maxStay}
             onChange={(event) => setMaxStay(event.target.value)}
             error={fields.maxStayNights}

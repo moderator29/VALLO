@@ -202,6 +202,10 @@
   .nf-nav a.nf-nav__row:active {
     background: var(--nf-tier-plate-press);
   }
+  .nf-nav a.nf-nav__row:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
 
   /*
    * THE CURRENT ROW: a 3px leading bar in the brand blue, a tinted fill and

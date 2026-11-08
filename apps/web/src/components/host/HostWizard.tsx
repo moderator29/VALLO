@@ -1168,6 +1168,7 @@ function RegistrationStep({ draft, set, userId, fieldErrors }: StepProps) {
             label={hw.wizard.businessName}
             value={draft.registeredName}
             error={fieldErrors.registeredName}
+            enterKeyHint="next"
             onChange={(event) => set("registeredName", event.target.value)}
           />
           <TextField
@@ -1175,6 +1176,7 @@ function RegistrationStep({ draft, set, userId, fieldErrors }: StepProps) {
             hint={hw.wizard.rcHint}
             value={draft.cacNumber}
             error={fieldErrors.cacNumber}
+            enterKeyHint="next"
             onChange={(event) => set("cacNumber", event.target.value)}
           />
           <TextField
@@ -1182,6 +1184,7 @@ function RegistrationStep({ draft, set, userId, fieldErrors }: StepProps) {
             optionalText={hw.wizard.ifYouHaveOne}
             value={draft.tin}
             error={fieldErrors.tin}
+            enterKeyHint="done"
             onChange={(event) => set("tin", event.target.value)}
           />
         </div>
@@ -1210,6 +1213,7 @@ function RepresentativeStep({ draft, set, userId, fieldErrors }: StepProps) {
             hint={hw.wizard.nameHint}
             value={draft.representativeName}
             error={fieldErrors.representativeName}
+            enterKeyHint="next"
             onChange={(event) => set("representativeName", event.target.value)}
             autoComplete="name"
           />
@@ -1218,6 +1222,7 @@ function RepresentativeStep({ draft, set, userId, fieldErrors }: StepProps) {
             type="tel"
             value={draft.representativePhone}
             error={fieldErrors.representativePhone}
+            enterKeyHint="done"
             onChange={(event) => set("representativePhone", event.target.value)}
             autoComplete="tel"
           />
@@ -1382,6 +1387,7 @@ function PayoutStep({ draft, pending, runAsync, setNotice, set }: StepProps) {
           <TextField
             label={hw.wizard.accountNumber}
             inputMode="numeric"
+            enterKeyHint="done"
             maxLength={10}
             value={number}
             onChange={(e) => { setNumber(e.target.value.replace(/\D/g, "")); setResolved(null); }}

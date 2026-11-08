@@ -122,6 +122,10 @@ export function AcceptTerms({
         <Link href="/eula" className="nf-tap underline underline-offset-4">
           {t.safety.rulesLink}
         </Link>
+        {", "}
+        <Link href="/community" className="nf-tap underline underline-offset-4">
+          {t.safety.communityLink}
+        </Link>
       </p>
 
       {/* NEWS AND UPDATES, UNTICKED BY DEFAULT (NDPR, 8 November 2026).

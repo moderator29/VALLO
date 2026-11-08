@@ -38,6 +38,18 @@
     text-decoration: none;
     color: var(--nf-content-primary);
   }
+  .nf-cb-count {
+    transition: background var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-cb-count:hover {
+      background: var(--nf-surface-raised);
+    }
+  }
+  .nf-cb-count:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
+  }
   .nf-cb-count[aria-current="true"] {
     border-color: var(--nf-border-brand);
   }

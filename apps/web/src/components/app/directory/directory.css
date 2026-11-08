@@ -98,6 +98,19 @@
   box-shadow: var(--nf-platform-card-shadow);
   color: inherit;
   text-decoration: none;
+  transition:
+    border-color var(--nf-duration-fast) var(--nf-ease-standard),
+    box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+}
+@media (hover: hover) {
+  a.nf-dir__card:hover {
+    border-color: var(--nf-selected-edge);
+    box-shadow: var(--nf-elev-1);
+  }
+}
+a.nf-dir__card:focus-visible {
+  outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+  outline-offset: 2px;
 }
 
 .nf-dir__face {

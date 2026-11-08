@@ -419,6 +419,7 @@ function CheckCode({ pack, copy }: { pack: InspectionPack; copy: Copy }) {
         label={copy.codeLabel}
         id={`gate-${pack.inspectionId}`}
         inputMode="numeric"
+        enterKeyHint="go"
         autoComplete="one-time-code"
         maxLength={7}
         value={typed}
@@ -512,6 +513,7 @@ function DelegateForm({
         label={copy.delegateLabel}
         id={`delegate-${inspectionId}`}
         type="email"
+        enterKeyHint="send"
         autoComplete="off"
         value={email}
         onChange={(event) => setEmail(event.target.value)}

@@ -621,6 +621,10 @@
       transform var(--nf-duration-press) var(--nf-ease-press),
       box-shadow var(--nf-duration-base) var(--nf-ease-standard);
   }
+  .nf-card--interactive:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
   .nf-card--interactive:active {
     transform: scale(var(--nf-press-scale-lg));
   }

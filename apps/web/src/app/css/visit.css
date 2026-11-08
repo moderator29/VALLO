@@ -164,6 +164,16 @@
     color: var(--nf-content-link);
     background: none;
     border: 0;
+    transition: background var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-visit__link:hover {
+      background: var(--nf-glass-fill-thin);
+    }
+  }
+  .nf-visit__link:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 1px;
   }
 
   .nf-visit__tools {
