@@ -694,8 +694,16 @@ export const ROOMMATES_ROUTES = {
   nysc: "/roommates/nysc",
 } as const;
 
-/** The public URL of a stored roommate photo (the bucket is public). */
+/**
+ * The public URL of a stored photo. A bare path is in the public
+ * `roommate-photos` bucket; the database returns a linked property's photo as
+ * `listing-photos/<path>` (Vallo's public listing bucket). Full URLs pass
+ * through.
+ */
 export function roommatePhotoUrl(supabaseUrl: string, path: string): string {
   if (/^https?:\/\//.test(path)) return path;
-  return `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/roommate-photos/${path.split("/").map(encodeURIComponent).join("/")}`;
+  const base = `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public`;
+  const enc = (p: string) => p.split("/").map(encodeURIComponent).join("/");
+  if (path.startsWith("listing-photos/")) return `${base}/listing-photos/${enc(path.slice("listing-photos/".length))}`;
+  return `${base}/roommate-photos/${enc(path)}`;
 }

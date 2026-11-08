@@ -197,7 +197,9 @@ export async function readRoomListing(id: string): Promise<ListingRead> {
   const res = await rpc<RoomDetail | null>(v.db, "roommate_listing_view", { p_id: id }, "read.roommates.listing");
   if (!res.live) return { state: "not-open" };
   if (!res.data) return { state: "not-found" };
-  return { state: "ok", listing: withRoomPhotos(res.data), signedIn: v.id !== null };
+  const l = withRoomPhotos(res.data);
+  const linked = l.linkedListing ? { ...l.linkedListing, photoUrl: l.linkedListing.photoUrl ? photo(l.linkedListing.photoUrl) : null } : null;
+  return { state: "ok", listing: { ...l, linkedListing: linked }, signedIn: v.id !== null };
 }
 
 /* ------------------------------------------------------------------ my own */
@@ -490,7 +492,7 @@ export async function readRoommateGroup(id: string): Promise<GroupRead> {
     group: {
       ...g,
       shortlist: (g.shortlist ?? []).map((s) =>
-        s.kind === "room" && s.target.photoUrl ? { ...s, target: { ...s.target, photoUrl: photo(s.target.photoUrl) } } : s,
+        s.target.photoUrl ? { ...s, target: { ...s.target, photoUrl: photo(s.target.photoUrl) } } : s,
       ),
     },
   };
