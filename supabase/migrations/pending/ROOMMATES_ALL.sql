@@ -10,6 +10,8 @@
 --   Part 3  the feed card column, "good for sharing" on property listings,
 --           two Circle categories and three Vallo-started communities
 --   Part 5  the schools directory (55 schools, email domains checked)
+--   Part 6  bookkeeping: the migration list records this drop and three
+--           hand-run migrations of 8 November
 --
 -- Safe to run twice: every table and index is IF NOT EXISTS, every policy
 -- is dropped before it is created, every function is CREATE OR REPLACE,
@@ -2463,5 +2465,24 @@ insert into public.institutions (slug, name, short_name, kind, state_code, city,
   ('federal-college-of-education-technical-akoka', 'Federal College of Education (Technical), Akoka', 'FCE Akoka', 'college', 'LA', 'Akoka', '{}', false),
   ('adeniran-ogunsanya-college-of-education', 'Adeniran Ogunsanya College of Education', 'AOCOED', 'college', 'LA', 'Otto-Ijanikin', '{aocoed.edu.ng}', false)
 on conflict (slug) do nothing;
+
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roommates_6_bookkeeping.sql
+
+-- VALLO ROOMMATES, PART 6: BOOKKEEPING.
+--
+-- Three migrations from 8 November were run by hand in the SQL Editor, so
+-- their effects are live but the migration list does not name them. This
+-- records them under the versions the repository files carry, and records
+-- this Roommates drop itself, so the live list and the repository agree
+-- (`scripts/check-migrations.mjs --online`). Nothing else changes.
+
+insert into supabase_migrations.schema_migrations (version, name)
+values
+  ('20261108190000', 'circle_remove_member'),
+  ('20261108200000', 'risk_alerts_last_seen'),
+  ('20261108210000', 'd02_merge_host_policies'),
+  ('20261109000000', 'roommates_all')
+on conflict (version) do nothing;
 
 commit;

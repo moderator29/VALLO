@@ -17,6 +17,8 @@ cd "$(dirname "$0")"
 --   Part 3  the feed card column, "good for sharing" on property listings,
 --           two Circle categories and three Vallo-started communities
 --   Part 5  the schools directory (55 schools, email domains checked)
+--   Part 6  bookkeeping: the migration list records this drop and three
+--           hand-run migrations of 8 November
 --
 -- Safe to run twice: every table and index is IF NOT EXISTS, every policy
 -- is dropped before it is created, every function is CREATE OR REPLACE,
@@ -32,7 +34,7 @@ cd "$(dirname "$0")"
 
 begin;
 HEAD
-  for part in roommates_1_core.sql roommates_2_engine.sql roommates_3_integrations.sql roommates_5_institutions.sql; do
+  for part in roommates_1_core.sql roommates_2_engine.sql roommates_3_integrations.sql roommates_5_institutions.sql roommates_6_bookkeeping.sql; do
     printf '\n\n-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %s\n\n' "$part"
     cat "$part"
   done

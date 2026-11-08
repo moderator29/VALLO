@@ -81,3 +81,4 @@ grant execute on all functions in schema private to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
 grant select on all tables in schema public to anon;
 grant execute on function auth.uid() to anon, authenticated;
+create schema supabase_migrations; create table supabase_migrations.schema_migrations (version text primary key, statements text[], name text);
