@@ -232,7 +232,7 @@ function Household({ l, t: copy, today }: { l: RoomDetail; t: RoommatesCopy; tod
   const rows: { icon: UiIconName; label: string; value: string; fresh?: boolean }[] = [];
   if (l.occupantsNow !== null && l.occupantsMax !== null) rows.push({ icon: "users", label: copy.listing.household, value: fill(copy.listing.occupants, { now: l.occupantsNow, max: l.occupantsMax }) });
   else if (l.occupantsNow !== null) rows.push({ icon: "users", label: copy.listing.household, value: counted(l.occupantsNow, copy.ui.card.occupants) });
-  rows.push({ icon: "circle-people", label: copy.discover.filterLabels.gender, value: copy.genderPref[l.genderPref] });
+  rows.push({ icon: "circle-people", label: copy.ui.create.household, value: copy.genderPref[l.genderPref] });
   const free = availableText(l.availableFrom, copy, today);
   if (free) rows.push({ icon: "calendar-check", label: copy.listing.available, value: free, fresh: true });
   if (l.minStayMonths) rows.push({ icon: "hourglass", label: copy.listing.minStay, value: counted(l.minStayMonths, copy.ui.card.months) });

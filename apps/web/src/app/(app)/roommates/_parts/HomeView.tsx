@@ -42,7 +42,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
 
   if (!home.live) {
     return (
-      <PageFrame title={copy.title} subtitle={copy.tagline} fallback="/home" width="wide">
+      <PageFrame title={copy.title} fallback="/home" width="wide">
         <div className="nf-rmp" data-testid="roommates-home">
           {hero}
           <RoommatesEmpty icon="info" testId="roommates-not-open">
@@ -154,7 +154,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
   const order = active ? [stats, recommended, rooms, together, journeys, schools, nysc, how] : [journeys, stats, how, rooms, recommended, together, schools, nysc];
 
   return (
-    <PageFrame title={copy.title} subtitle={copy.tagline} fallback="/home" width="wide">
+    <PageFrame title={copy.title} fallback="/home" width="wide">
       <div className="nf-rmp" data-testid="roommates-home">
         {hero}
         <Pending home={home} t={copy} />

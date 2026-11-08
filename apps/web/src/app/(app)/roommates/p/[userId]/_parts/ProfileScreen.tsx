@@ -221,7 +221,7 @@ function Facts({ p, t: copy }: { p: RoommateProfileView; t: RoommatesCopy }) {
             <UiIcon name="circle-people" size={20} />
           </span>
           <div className="nf-rmv-fact__words">
-            <dt>{copy.ui.onboarding.intentsTitle}</dt>
+            <dt>{copy.ui.profile.hereFor}</dt>
             <dd>{p.intents.map((i) => copy.intents[i]).join(" · ")}</dd>
           </div>
         </div>
