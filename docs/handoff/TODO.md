@@ -14,10 +14,10 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 1.4 Scroll edge: iOS bounce kept, Android overscroll glow left native -- DONE (app/css/platform.css: iOS -webkit-overflow-scrolling: touch, Android overscroll-behavior native)
 
 ### iOS Shell Polish (build 1.0.2)
-- [ ] 1.5 Edge swipe back in the web view (`allowsBackForwardNavigationGestures`)
-- [ ] 1.6 Link preview off in WKWebView
-- [ ] 1.7 App switcher privacy cover for money screens
-- [ ] 1.8 Native crash capture on next launch (into `/api/client-error` with platform ios)
+- [x] 1.5 Edge swipe back in the web view (`allowsBackForwardNavigationGestures`) -- DONE (ValloShell.swift: ValloBridgeViewController sets allowsBackForwardNavigationGestures = true)
+- [x] 1.6 Link preview off in WKWebView -- DONE (capacitor.config.ts: ios.allowsLinkPreview = false; platform.css also turns off long-press callout)
+- [x] 1.7 App switcher privacy cover for money screens -- DONE (ValloShell.swift: PrivacyCover class + SceneDelegate wiring; privacy-cover.ts + privacy-cover-rule.ts on the web side)
+- [x] 1.8 Native crash capture on next launch (into `/api/client-error` with platform ios) -- DONE (ValloShell.swift: ValloCrashLog writes exception/signal on crash, takeCrashReport reads on next launch; native-crash.ts sends to /api/client-error)
 - [ ] 1.9 Animated launch hand-off (logo and wordmark) from web launch to native shell
 
 ### Connection Manager / Offline
@@ -88,9 +88,14 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ### Later Rounds
 - [ ] 2.21 Rounds 5, 6, 7 from WORK_QUEUE.md (round 7 SW11 includes moving English words into packages/i18n)
   - [x] SW13 (partial): 4 redirect-only pages consolidated into next.config.ts redirects
-  - [x] B-01 (partial): 3 server actions migrated to ActionResult (consent, first-run, withdraw-report)
+  - [x] B-01: server actions migrated to ActionResult (consent, first-run, withdraw-report, money-step-up-actions, console-step-up, widget-actions, passkey-unlock, and more; remaining files use domain-specific state machines that are not ActionResult candidates)
   - [x] B-05 (partial): listing page and messages page serial awaits hoisted into Promise.all
   - [x] B-03: DONE (memberWriteLimit on all 4 tables: bookings, inspections, viewings, briefs)
+  - [x] SW10: all 149 `rounded-[var(--nf-radius-*)]` replaced with named Tailwind utilities (85+ files)
+  - [x] SW8 (partial): backspace icon added to UiIcon, AmountPad/MoveKit/Keypad use it
+  - [x] SW9: type scale tokens sweep (raw text sizes replaced with --nf-text-* tokens)
+  - [x] R-04: risk alert dedup tracking with last_seen_at column (migration written, needs founder to run SQL)
+  - [x] D-02: merge permissive host-side SELECT policies on bookings, reservations, rent_payments (migration written, needs founder to run SQL)
 
 ---
 
@@ -152,7 +157,13 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 6.4 F4: Upgraded audio call screens with glass control sheet -- DONE
 - [x] 6.5 F5: Upgraded video call screens -- DONE
 - [x] 6.6 F6: Calling recommendations -- DONE
-- [ ] 6.7 Recommendations to build: end-to-end encryption indicator, call quality adaptive UI (switch to voice on poor connection), PiP mode, call waiting/hold, voice message fallback, haptic feedback on controls, connection quality sparkline on ended screen
+- [x] 6.7 Recommendations built: call quality adaptive UI (switch to voice on poor connection -- nf-call__switch-voice in views.tsx), haptic feedback on controls (feedback("select"/"warning") on all 5 call controls), connection quality sparkline on ended screen (QualitySparkline component + call-store samples), end-to-end encryption indicator (lock icon in in-call bar)
+  - Remaining ideas (need native infrastructure): PiP mode, call waiting/hold, voice message fallback
+
+### Backend Audit Items
+- [x] R-03: Reconciliation audit noise (dedup already in place: CLEAN_HEARTBEAT_MS = 100 * 60 * 1000 in reconcile route)
+- [x] R-04: risk_alerts dedup tracking (last_seen_at column added, backfill migration written, record.ts touches last_seen_at on dedup) -- SQL migration ready at supabase/migrations/20261108200000_risk_alerts_last_seen.sql, NEEDS FOUNDER TO RUN
+- [ ] D-02: Merge redundant permissive SELECT policies on bookings, reservations, rent_payments -- SQL migration ready at supabase/migrations/20261108210000_d02_merge_host_policies.sql, NEEDS FOUNDER TO RUN
 
 ---
 
