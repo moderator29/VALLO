@@ -280,6 +280,11 @@ const nextConfig: NextConfig = {
       { source: "/docs/your-wallet", destination: "/docs/paying-on-vallo", permanent: false },
       { source: "/docs/money-and-the-guarantee", destination: "/docs/paying-on-vallo", permanent: false },
       { source: "/docs/booking-and-paying", destination: "/docs/booking-a-stay", permanent: false },
+      /* SW13: redirect-only pages moved here from their page.tsx files. */
+      { source: "/around/manage", destination: "/around/settings", permanent: true },
+      { source: "/profile/setup/firm", destination: "/profile/setup/agent", permanent: false },
+      { source: "/settings/invite/referrals", destination: "/rewards/referrals", permanent: false },
+      { source: "/settings/invite/referrals/:id", destination: "/rewards/referrals", permanent: false },
     ];
   },
 
