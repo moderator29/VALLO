@@ -180,7 +180,7 @@ export function TenancyReportCard({
               <li key={photo.id} className="aspect-square overflow-hidden rounded-[var(--nf-radius-sm)]">
                 {/* A signed, short-lived URL to a private object: never cached by next/image. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url ?? ""} alt={photo.item ? ROOM_COPY[photo.item].title : ""} className="h-full w-full object-cover" />
+                <img src={photo.url ?? ""} alt={photo.item ? ROOM_COPY[photo.item].title : ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />
               </li>
             ))}
         </ul>

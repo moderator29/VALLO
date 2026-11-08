@@ -135,7 +135,7 @@ export function DeskPerson({
       <span className="nf-desk-person__avatar" aria-hidden="true">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- a 32px avatar from the account's own storage.
-          <img src={avatarUrl} alt="" width={32} height={32} />
+          <img src={avatarUrl} alt="" width={32} height={32} loading="lazy" decoding="async" />
         ) : (
           initial
         )}
