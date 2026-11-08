@@ -914,3 +914,18 @@ export async function submitRoommateDocument(input: { kind: "student_id" | "nysc
   refresh(ROOMMATES_ROUTES.verify, ROOMMATES_ROUTES.hub);
   return ok({ id: (data as { id: string }).id });
 }
+
+/* ------------------------------------------------------------------ feed */
+
+/** Share a live roommate post to the Vallo feed with a line of your own (its own card there). */
+export async function shareRoommateListingToFeed(input: { listingId: string; body?: string }): Promise<ActionResult<{ postId: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  if (!uuid.safeParse(input.listingId).success) return fail(FAILED);
+  const body = (input.body ?? "").trim();
+  if (body.length > 2000) return fail("Keep it to 2,000 characters.");
+  const res = await call<string>(who.db, "roommate_share_to_feed", { p_listing: input.listingId, p_body: body || null });
+  if (res.error || !res.data) return fail(res.error ?? FAILED);
+  refresh("/around");
+  return ok({ postId: res.data });
+}

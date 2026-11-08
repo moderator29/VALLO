@@ -17,6 +17,8 @@ export const CIRCLE_CATEGORIES = [
   "building",
   "professionals",
   "general",
+  "student_housing",
+  "roommates",
 ] as const;
 export type CircleCategory = (typeof CIRCLE_CATEGORIES)[number];
 
@@ -31,6 +33,8 @@ export const CATEGORY_LABEL: Record<CircleCategory, string> = {
   building: "Building and renovation",
   professionals: "Professionals",
   general: "General",
+  student_housing: "Student and NYSC housing",
+  roommates: "Roommates and shared living",
 };
 
 export const CIRCLE_TYPES = ["discussion", "question", "guide", "opportunity", "announcement"] as const;

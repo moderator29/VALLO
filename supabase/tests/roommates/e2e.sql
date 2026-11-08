@@ -8,7 +8,7 @@ insert into public.social_profiles (user_id, handle, display_label, avatar_path)
  ('00000000-0000-0000-0000-00000000000c','chidi','Chidi',null),('00000000-0000-0000-0000-00000000000e','emeka','Emeka',null);
 insert into public.user_roles values ('00000000-0000-0000-0000-00000000000d','admin');
 insert into public.confirmed_phones values ('00000000-0000-0000-0000-00000000000b','+234',now());
-insert into public.institutions (slug,name,short_name,kind,state_code,city,email_domains,email_verify_on) values ('university-of-lagos','University of Lagos','UNILAG','university','LA','Lagos','{unilag.edu.ng}',true);
+insert into public.institutions (slug,name,short_name,kind,state_code,city,email_domains,email_verify_on) values ('university-of-lagos','University of Lagos','UNILAG','university','LA','Lagos','{unilag.edu.ng}',true) on conflict (slug) do nothing;
 insert into public.agents (id,user_id) values ('00000000-0000-0000-0000-0000000000f1','00000000-0000-0000-0000-00000000000e');
 insert into public.listings (id, agent_id, title, status, state_code, city, area, bedrooms, rent_amount_minor, rent_period) values
  ('00000000-0000-0000-0000-0000000000f2','00000000-0000-0000-0000-0000000000f1','3 bed flat Yaba','PUBLISHED','LA','Lagos','Yaba',3,360000000,'year');
@@ -17,14 +17,14 @@ set role authenticated;
 -- A creates a profile
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000a',false);
 insert into public.roommate_profiles (user_id,status,intents,intro,life_stage,institution_id,state_code,city,areas,budget_min_minor,budget_max_minor,budget_period,move_in_on,move_in_flex,room_pref,cleanliness,social,sleep,smoking,pets,guests,gender,gender_pref)
- select auth.uid(),'active','{find_roommate,find_together}','Final year student who loves a calm home','student',(select id from public.institutions limit 1),'LA','Lagos','{Yaba,Akoka}',100000000,180000000,'year',current_date+30,'fixed','private',3,1,'early','never','none','rarely','female','female';
+ select auth.uid(),'active','{find_roommate,find_together}','Final year student who loves a calm home','student',(select id from public.institutions where slug='university-of-lagos'),'LA','Lagos','{Yaba,Akoka}',100000000,180000000,'year',current_date+30,'fixed','private',3,1,'early','never','none','rarely','female','female';
 -- discover before B exists
 select public.roommate_discover('{}'::jsonb) as a_discover_empty;
 -- B
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000b',false);
 select public.roommate_discover('{}'::jsonb) ->> 'needProfile' as b_need_profile;
 insert into public.roommate_profiles (user_id,status,intents,life_stage,institution_id,state_code,city,areas,budget_min_minor,budget_max_minor,budget_period,move_in_on,move_in_flex,room_pref,cleanliness,social,sleep,smoking,pets,gender,gender_pref,gender_visible)
- select auth.uid(),'active','{find_roommate}','student',(select id from public.institutions limit 1),'LA','Lagos','{Yaba}',120000000,200000000,'year',current_date+40,'flexible','private',2,1,'early','never','fine','female','any',false;
+ select auth.uid(),'active','{find_roommate}','student',(select id from public.institutions where slug='university-of-lagos'),'LA','Lagos','{Yaba}',120000000,200000000,'year',current_date+40,'flexible','private',2,1,'early','never','fine','female','any',false;
 -- C (male smoker, Abuja)
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000c',false);
 insert into public.roommate_profiles (user_id,status,intents,state_code,city,budget_max_minor,budget_period,smoking,social,gender,gender_pref)
@@ -57,7 +57,7 @@ set role authenticated;
 -- E (lister, no profile) posts a room linked to listing
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-00000000000e',false);
 insert into public.roommate_listings (owner_id,kind,status,title,description,state_code,city,area,institution_id,listing_id,rent_minor,rent_period,share_minor,deposit_minor,occupants_max,room_type,furnished,amenities,available_from,authority,authority_declared_at,photos)
- select auth.uid(),'room_offer','live','Ensuite room in a 3 bed flat, Yaba','Calm home near UNILAG','LA','Lagos','Yaba',(select id from public.institutions limit 1),'00000000-0000-0000-0000-0000000000f2',360000000,'year',120000000,20000000,3,'ensuite','furnished','{wifi,security}',current_date+20,'tenant_permitted',now(),'{00000000-0000-0000-0000-00000000000e/a.jpg}'
+ select auth.uid(),'room_offer','live','Ensuite room in a 3 bed flat, Yaba','Calm home near UNILAG','LA','Lagos','Yaba',(select id from public.institutions where slug='university-of-lagos'),'00000000-0000-0000-0000-0000000000f2',360000000,'year',120000000,20000000,3,'ensuite','furnished','{wifi,security}',current_date+20,'tenant_permitted',now(),'{00000000-0000-0000-0000-00000000000e/a.jpg}'
  returning id as room_id \gset
 -- room offer without declaration must fail
 do $$ begin insert into public.roommate_listings (owner_id,kind,status,title,city,rent_minor) values (auth.uid(),'room_offer','live','No declaration room','Lagos',1000); raise exception 'should have failed'; exception when check_violation then raise notice 'undeclared room refused'; end $$;

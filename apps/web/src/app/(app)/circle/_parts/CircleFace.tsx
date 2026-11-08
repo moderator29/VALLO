@@ -33,6 +33,8 @@ export const CATEGORY_GLYPH: Record<CircleCategory, UiIconName> = {
   building: "land-plot",
   professionals: "briefcase",
   general: "circle-people",
+  student_housing: "bed",
+  roommates: "users",
 };
 
 export function CommunityGlyph({ category, size = "md" }: { category: CircleCategory; size?: "md" | "lg" }) {

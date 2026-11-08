@@ -17,7 +17,7 @@ create type public.social_status as enum ('LIVE','HELD','REMOVED');
 create type public.app_role as enum ('user','agent','admin','super_admin');
 
 create table public.states (code text primary key, name text);
-insert into public.states values ('LA','Lagos'),('FC','FCT (Abuja)'),('OY','Oyo'),('RI','Rivers'),('OG','Ogun'),('EN','Enugu');
+insert into public.states values ('AB','Abia'),('AD','Adamawa'),('AK','Akwa Ibom'),('AN','Anambra'),('BA','Bauchi'),('BE','Benue'),('BO','Borno'),('BY','Bayelsa'),('CR','Cross River'),('DE','Delta'),('EB','Ebonyi'),('ED','Edo'),('EK','Ekiti'),('EN','Enugu'),('FC','FCT (Abuja)'),('GO','Gombe'),('IM','Imo'),('JI','Jigawa'),('KD','Kaduna'),('KE','Kebbi'),('KN','Kano'),('KO','Kogi'),('KT','Katsina'),('KW','Kwara'),('LA','Lagos'),('NA','Nasarawa'),('NI','Niger'),('OG','Ogun'),('ON','Ondo'),('OS','Osun'),('OY','Oyo'),('PL','Plateau'),('RI','Rivers'),('SO','Sokoto'),('TA','Taraba'),('YO','Yobe'),('ZA','Zamfara');
 create table public.profiles (id uuid primary key, display_name text, avatar_url text, settings jsonb default '{}', created_at timestamptz default now());
 create table public.user_roles (user_id uuid, role public.app_role);
 create table public.areas (id uuid primary key default gen_random_uuid(), slug text, name text, state_code text, city text);
@@ -35,9 +35,9 @@ create table public.saved_collection_items (collection_id uuid, kind text, targe
 create table public.identity_verifications (id uuid primary key default gen_random_uuid(), subject_id uuid, outcome text);
 create table public.identity_checks (id uuid primary key default gen_random_uuid(), subject_id uuid, status text);
 create table public.confirmed_phones (user_id uuid primary key, phone text, confirmed_at timestamptz);
-create table public.posts (id uuid primary key default gen_random_uuid(), author_id uuid, kind public.post_kind, body text, listing_id uuid, payload jsonb, status public.social_status default 'LIVE', community_id uuid, circle_type text, created_at timestamptz default now(),
+create table public.posts (id uuid primary key default gen_random_uuid(), author_id uuid, author_kind text default 'USER', kind public.post_kind, body text, listing_id uuid, payload jsonb, status public.social_status default 'LIVE', community_id uuid, circle_type text, created_at timestamptz default now(),
   constraint posts_listing_chk check (listing_id is null or kind in ('SHOWCASE','SYSTEM')));
-create table public.circle_communities (id uuid primary key default gen_random_uuid(), slug text, name text, category text,
+create table public.circle_communities (id uuid primary key default gen_random_uuid(), slug text unique, name text, description text default '', visibility text default 'public', rules text[] default '{}', started_by_vallo boolean default false, category text,
   constraint circle_communities_category_check check (category in ('neighbourhood','renting','buying','landlords','investing','short_lets','design','building','professionals','general')));
 create table public.reports (id uuid primary key default gen_random_uuid(), reporter_id uuid, target_type text, target_id text, reason text, status text default 'open', created_at timestamptz default now());
 create table public.audit_log (id uuid primary key default gen_random_uuid(), actor_id uuid, action text, entity_type text, entity_id text, metadata jsonb, created_at timestamptz default now());
