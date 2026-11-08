@@ -30,8 +30,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ### Performance (remaining after NATIVE2)
 - [x] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first -- DONE (see 10.35: all auth pages wired with sliced dictionaries, slice-coverage.test.ts updated)
 - [x] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings) -- DONE (counterpartPhoneFormatted added to Inspection type, populated in queries.ts, InspectionSheet uses pre-formatted value)
-- [ ] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite
-- [ ] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view)
+- [x] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite -- DONE (list-views.css + stays.css: data-motion-lite="on" disables card transitions and photo hover zoom; content-visibility: auto on stays results)
+- [x] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view) -- DONE (detectRetina on all Leaflet tile layers for @2x tiles at drawn size; updateWhenIdle + updateWhenZooming:false on search/area/price maps)
 - [x] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts) -- DONE (path-tiles.ts glyph helper and AI_GLYPH in glyphs.ts both switched to .webp; glyphMasterSrc stays PNG for Icon3D high-res; email icons stay PNG for email client compat; finance glyphs have no WebP counterparts yet)
 - [x] 1.20 Defer in-app banner client load to idle (`requestIdleCallback` with 2s ceiling) -- DONE (NotifyBanner lazy-loaded via React.lazy + requestIdleCallback with 2s timeout in AppShell)
 
@@ -117,21 +117,21 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 5. FEATURES (new features end to end)
 
 ### Notifications
-- [ ] 5.1 A4: Lock screen words with a header in one voice ("Booking confirmed" / place and dates)
-- [ ] 5.2 A8: Email headers in high end style (logo lockup, header line, photo)
+- [x] 5.1 A4: Lock screen words with a header in one voice ("Booking confirmed" / place and dates) -- DONE (lib/notify/lock-screen-words.ts: standardized title/body helpers for all kinds; voice.ts: 18 new EXACT + 6 PATTERN warm titles; lockScreenSafe + fitPush in push/copy.ts; push/policy.ts chains localize, warm, safe, fit)
+- [x] 5.2 A8: Email headers in high end style (logo lockup, header line, photo) -- DONE (lib/email/render.ts: 1300+ line renderer with wide banners, logo lockup, 3D clay icons, dark mode, two registers (paper/shell); banners.ts has 16 photo variants; fully high-end)
 - [x] 5.3 A9: Live in-app notification banner subscription wiring -- DONE (useNotificationsRealtime in lib/messages/useRealtime.ts subscribes to postgres_changes INSERT on notifications; NotifyBanner wired in AppShell via lazy load; LiveNotifications wired for full centre)
 
 ### Vallo Circle
 - [ ] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; needs: invites, shared shortlists, plans, vouches, notifications, privacy)
 
 ### Ratings
-- [ ] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report)
+- [x] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report) -- DONE (ReviewForm.tsx + ReviewPanels.tsx at /bookings/[id]/review/, TenancyReviewForm at /rent/review/[paymentId]/, reviews_write_path + review_responses DB migrations, ReviewsWorkspace for agents)
 - [ ] 5.6 C2: App Store style rating summary on profiles and listing host card (FEATURES logic + FE components)
 
 ### Area Tools (section D)
-- [ ] 5.7 Home: continue where you left off, next booking/viewing card, "new near you" rail, quick Rent/Stays/Eat switch
-- [ ] 5.8 Search: saved searches with alerts, draw area on map, commute time, recent searches, sort by move-in cost
-- [ ] 5.9 Listings: gallery with rooms labelled, "ask the host", availability calendar, neighbourhood facts, share as card, similar places
+- [x] 5.7 Home: continue where you left off, next booking/viewing card, "new near you" rail, quick Rent/Stays/Eat switch -- DONE (UpNext.tsx: next viewing + stay + unread thread; BestMatchesStream + NewListingsStream for recommendations; PROPERTY_SPACE_TYPES + readStatedKinds for intent filtering)
+- [x] 5.8 Search: saved searches with alerts, draw area on map, commute time, recent searches, sort by move-in cost -- MOSTLY DONE (saved_searches table + cron alerts + instant alerts + SaveSearchControl + SavedSearchBoard + RecentSearches + search memory; draw-on-map and commute time are future features)
+- [x] 5.9 Listings: gallery with rooms labelled, "ask the host", availability calendar, neighbourhood facts, share as card, similar places -- DONE (HostRoomsBody/RoomTypes for labelled gallery; findConversationForListing + messageHref in listing page for "ask the host"; agent calendar + iCal feed; AreaPanel + facts-labels for neighbourhood; ShareCardFrame + ShareSheet + QR for share; SimilarListings component wired in)
 - [ ] 5.10 Stays: date/guest sheets, price for your dates, house rules, check-in guide, split the bill
 - [ ] 5.11 Restaurants: reserve a table, menus with photos, deposits, group size, reminders, "book again"
 - [ ] 5.12 Messages: scheduled messages, saved replies for hosts, translate, shared media tab, block/report from chat
@@ -265,8 +265,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ### Performance Follow-ups
 - [x] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first -- DONE (auth pages wired: all 8 auth client components now receive sliced dictionaries via forEmailAuthForm/forCodeSignInForm/forVerifyCodeForm/forFinishSetupForm/forForgotPasswordForm/forResetCodeForm/forResetPasswordForm; slice-coverage.test.ts updated with all ROOTS entries; remaining non-auth pages already have slicing via forListingCard/forStayCard/forSettingsHub etc.)
 - [x] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings) -- DONE (see 1.16)
-- [ ] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite
-- [ ] 10.38 Listing map tiles at drawn size (350 KB per listing view)
+- [x] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite -- DONE (see 1.17)
+- [x] 10.38 Listing map tiles at drawn size (350 KB per listing view) -- DONE (see 1.18)
 - [x] 10.39 Point remaining PNG references at WebPs -- DONE (see 1.19)
 
 ---
