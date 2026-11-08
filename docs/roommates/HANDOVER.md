@@ -32,6 +32,22 @@ Tested on a local Postgres with the touched parts of the live schema
 (`supabase/tests/roommates/local_stub.sql`, then `e2e.sql`,
 `e2e_feed.sql`, `e2e_trust.sql`): all pass, twice over.
 
+After the paste, add these to the write-grant allowlist in
+`supabase/tests/probes/db-06.sql` (they match the policies exactly):
+`institutions idu`, `roommate_group_expenses idu`, `roommate_group_posts id`,
+`roommate_group_shortlist id`, `roommate_group_votes idu`,
+`roommate_groups u`, `roommate_listings idu`, `roommate_match_weights u`,
+`roommate_profiles idu`, `roommate_saved_searches idu`,
+`roommate_verifications u`. Every other new table is read-only to members
+(writes go through functions).
+
+Four database probes fail on the LIVE data today, before any of this work
+is applied, and are not code faults on this branch: `b3-rate-gate` (no
+non-demo draft listing exists to exercise), `db-10-step2` and
+`new-a4-01-step2` (the SCUML item 17 mandate rule now refuses the probe's
+test listing), `db-p2-02` (one probe-raised alert is still open in
+`/admin/alerts`; closing it clears the probe).
+
 ## 2. Supabase settings after the paste
 
 - Storage buckets are created by the SQL (roommate-photos, roommate-evidence,

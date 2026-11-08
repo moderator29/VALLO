@@ -677,7 +677,11 @@ revoke all on public.roommate_email_codes from anon, authenticated;
 grant select on public.institutions, public.roommate_match_weights to anon, authenticated;
 grant select on public.roommate_listings to anon;
 grant select, insert, update, delete on public.roommate_profiles, public.roommate_listings, public.roommate_saved_searches,
-  public.roommate_group_shortlist, public.roommate_group_votes, public.roommate_group_posts, public.roommate_group_expenses to authenticated;
+  public.roommate_group_votes, public.roommate_group_expenses to authenticated;
+-- Shortlist entries and board posts are added and removed, never edited:
+-- the grants match the policies exactly (probe db-06).
+grant select, insert, delete on public.roommate_group_shortlist, public.roommate_group_posts to authenticated;
+revoke update on public.roommate_group_shortlist, public.roommate_group_posts from authenticated;
 grant select, update on public.roommate_groups, public.roommate_verifications, public.institutions, public.roommate_match_weights to authenticated;
 grant insert, delete on public.institutions to authenticated;
 grant select on public.roommate_interests, public.roommate_group_members, public.roommate_viewings to authenticated;
