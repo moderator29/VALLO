@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { reencodePhoto, type ReencodeResult } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { publishStory } from "@/lib/social/stories-actions";
 import { uploadFailureText, uploadToStorage, withTimeout } from "@/lib/media/upload";

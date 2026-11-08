@@ -5,6 +5,7 @@ import { requireConsole } from "@/lib/admin/guard";
 import { RESTRICTION_LABEL, type RestrictionKind } from "@/lib/admin/cases/model";
 import { isNotLive } from "@/lib/features/degrade";
 import { reportReadFault } from "@/lib/observability/read-error";
+import { requestNow } from "@/lib/format/when";
 
 import { MemberStandingControls } from "./MemberStandingControls";
 
@@ -29,7 +30,7 @@ export async function MemberStanding({ userId, when }: { userId: string; when: (
   if (cases.error && !isNotLive(cases.error)) await reportReadFault("read.admin.member-standing", cases.error);
   const list = (rows.data ?? []) as Row[];
   const open = (cases.data ?? []) as { id: string; number: number; status: string }[];
-  const now = Date.now();
+  const now = requestNow();
   return (
     <section className="mt-section-tight nf-panel nf-panel--card nf-admin-card p-card" aria-label="Standing" data-testid="person-standing">
       <div className="flex items-center justify-between gap-sm">

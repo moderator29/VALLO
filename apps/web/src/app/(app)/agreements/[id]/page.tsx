@@ -29,11 +29,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 export const dynamic = "force-dynamic";
 
-function str(terms: Record<string, unknown>, key: string): string | null {
-  const v = terms[key];
-  return typeof v === "string" && v.length > 0 ? v : null;
-}
-
 function num(terms: Record<string, unknown>, key: string): number | null {
   const v = terms[key];
   return typeof v === "number" && Number.isFinite(v) ? v : null;

@@ -4,13 +4,13 @@ import { type AgreementDetail, UNNAMED_OWNER, UNNAMED_RENTER } from "@/lib/agree
 import type { WordedChange } from "@/components/app/agreements/AgreementChanges";
 import { AgreementChanges } from "@/components/app/agreements/AgreementChanges";
 import { AgreementVersions } from "@/components/app/agreements/AgreementVersions";
-import { AgreementHistory, eventLabel } from "@/components/app/agreements/AgreementHistory";
+import { AgreementHistory } from "@/components/app/agreements/AgreementHistory";
 import type { RecordEvent, VersionEntry, VersionDiff } from "@/components/app/agreements/version-register";
 import { Tracker } from "@/components/ui/Tracker";
 import { DecisionCard } from "@/components/app/confirm/DecisionCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { Section, TYPE } from "@/components/app/Screen";
-import { CLAIM_STATUS_LABEL, agreementStatusLabel, agreementStatusTone } from "@/components/app/agreements/status";
+import { CLAIM_STATUS_LABEL, agreementStatusTone } from "@/components/app/agreements/status";
 import type { TrackStep } from "@/components/app/status/StatusTrack";
 import { DocActions, DocHead, DocNote, DocRow, DocRows, DocState, DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { PrintDocumentTile } from "@/components/app/money/PrintDocumentTile";

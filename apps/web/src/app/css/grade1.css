@@ -205,7 +205,7 @@
 .nf-toast__avatar {
   inline-size: 1.75rem;
   block-size: 1.75rem;
-  border-radius: var(--nf-radius-full);
+  border-radius: var(--nf-radius-circle);
   object-fit: cover;
   flex-shrink: 0;
 }

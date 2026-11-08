@@ -173,7 +173,7 @@ export function CaseActions({
           ) : null}
         </div>
       )}
-      {!can.resolve ? <p className="nf-caption text-[var(--nf-content-muted)]">Your role can view, note and escalate this case. Decisions sit with its module's moderators and Trust and Safety.</p> : null}
+      {!can.resolve ? <p className="nf-caption text-[var(--nf-content-muted)]">Your role can view, note and escalate this case. Decisions sit with its module&apos;s moderators and Trust and Safety.</p> : null}
 
       <ActionSheet open={open === "note"} onClose={() => setOpen(null)} title="Internal note" description="Only staff see notes." apply="Add note" pending={pending} disabled={text.trim().length < 2}
         onApply={() => run(() => addCaseNote({ caseId, body: text }), "Note added.")}>
