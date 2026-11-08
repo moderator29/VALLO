@@ -94,7 +94,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
   - [x] SW10: all 149 `rounded-[var(--nf-radius-*)]` replaced with named Tailwind utilities (85+ files)
   - [x] SW8 (partial): backspace icon added to UiIcon, AmountPad/MoveKit/Keypad use it
   - [x] SW9: type scale tokens sweep (raw text sizes replaced with --nf-text-* tokens)
-  - [x] SW11: 18 COPY files migrated to packages/i18n (safety, reports, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search, reminders, social, pro, contact-policy, balance-copy, instant-pay)
+  - [x] SW11: 22+ COPY files migrated to packages/i18n (safety, reports, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search, reminders, social, pro, contact-policy, balance-copy, instant-pay, listings-labels, badge, bookings-lifecycle, social-flag, social-posts, social-areas, wallet-history-kind). Remaining by design: money/copy.ts (1169 lines, cross-referenced legal copy), eula-copy.ts (legal), admin copy (staff-only), email copy (server-only template literals)
   - [x] R-04: risk alert dedup tracking with last_seen_at column (migration written, needs founder to run SQL)
   - [x] D-02: merge permissive host-side SELECT policies on bookings, reservations, rent_payments (migration written, needs founder to run SQL)
 
@@ -373,6 +373,6 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Light Mode | 4/4 | 0 |
 | Performance | 5/5 | 0 |
 | Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
-| SW11 i18n migration | 22+ files | listings-labels, badge, bookings-lifecycle, social-flag added; remaining: email copy (server-only), admin copy (staff-only), money/copy.ts (large/cross-referenced) |
+| SW11 i18n migration | 24+ files | COMPLETE: all user-facing COPY migrated including wallet status; remaining: email copy (server-only render), admin copy (staff-only) |
 | Backend audit | R-04, D-02 | SQL migrations written, founder to run |
 | Banner avatar | done | ToastItem.avatarUrl infrastructure built |
