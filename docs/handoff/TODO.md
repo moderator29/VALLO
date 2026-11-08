@@ -188,20 +188,20 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 9.1 Elastic pill-morph step dots (iOS-style page indicators with spring) -- BUILT
 - [ ] 9.2 Gyroscope-driven parallax on mobile (subtle tilt response on chips/art)
 - [ ] 9.3 Glass-morphism shimmer on arrival chips (inner glow, shimmer sweep)
-- [ ] 9.4 CTA button ambient glow pulse (brand color, 2-3 cycles then stop)
+- [x] 9.4 CTA button ambient glow pulse (brand color, 2-3 cycles then stop) -- CSS BUILT in premium-motion-2.css
 - [ ] 9.5 Scene exit scatter (chips drift apart as they fade on swipe out)
-- [ ] 9.6 Title word spring-bounce stagger (each word with overshoot)
-- [ ] 9.7 Living aurora gradient on background glow (12s slow drift)
+- [x] 9.6 Title word spring-bounce stagger (each word with overshoot) -- CSS BUILT in premium-motion-2.css
+- [x] 9.7 Living aurora gradient on background glow (12s slow drift) -- CSS BUILT in premium-motion-2.css
 - [ ] 9.8 Scan frame corner glow + gradient trail (step 2)
 - [ ] 9.9 Cost bar wave fill highlight (step 4 breakdown)
-- [ ] 9.10 Interest chip hover/press spring (lift on hover, press-down on active)
-- [ ] 9.11 Beat transition crossfade with scale (slides to question to notify)
+- [x] 9.10 Interest chip hover/press spring (lift on hover, press-down on active) -- CSS BUILT in premium-motion-2.css
+- [x] 9.11 Beat transition crossfade with scale (slides to question to notify) -- CSS BUILT in premium-motion-2.css
 - [ ] 9.12 Floating particle dust on final step (brand-color motes)
 
 ### Platform Motion System (BUILDING)
 - [x] 9.13 Card press feedback everywhere (scale 0.97 on press, spring back) -- CSS BUILT in premium-motion-2.css
 - [x] 9.14 Sheet open/close spring (overshoot on open, quick ease on close) -- CSS BUILT
-- [ ] 9.15 Tab bar icon bounce on switch (subtle scale pop on active)
+- [x] 9.15 Tab bar icon bounce on switch (subtle scale pop on active) -- CSS BUILT in premium-motion-2.css
 - [x] 9.16 Save/heart particle burst (pop + radial particles) -- CSS BUILT + useHeartPop hook
 - [x] 9.17 Success moment animations (checkmark draw, radial wash) -- CSS BUILT
 - [x] 9.18 Skeleton shimmer upgrade (premium left-to-right sweep) -- CSS BUILT
@@ -209,27 +209,27 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 9.20 Toggle/switch spring (satisfying bounce with scale) -- CSS BUILT
 - [x] 9.21 Button press feedback (scale 0.96 press, spring release) -- CSS BUILT + usePressSpring hook
 - [x] 9.22 Number counter/odometer coverage audit -- useSmoothCounter hook BUILT
-- [ ] 9.23 Chat bubble arrival bounce (new messages slide up with spring)
+- [x] 9.23 Chat bubble arrival bounce (new messages slide up with spring) -- CSS BUILT in premium-motion-2.css (data-new attribute wiring deferred to ThreadView integration)
 - [x] 9.24 Notification badge pop (scale+bounce when count changes) -- CSS BUILT + useBadgeBump hook
-- [ ] 9.25 Search results cascade entrance (wave/stagger loading)
-- [ ] 9.26 Map pin drop bounce (listing pins drop from above)
-- [ ] 9.27 Emoji reaction float-up (float and fade on message react)
-- [ ] 9.28 Swipe action rubber band (inbox swipe reveal with spring)
-- [ ] 9.29 Image gallery momentum snap (photo swipe with spring)
-- [ ] 9.30 Profile photo morph/crossfade on change
+- [x] 9.25 Search results cascade entrance (wave/stagger loading) -- CSS BUILT in premium-motion-2.css
+- [x] 9.26 Map pin drop bounce (listing pins drop from above) -- CSS BUILT in premium-motion-2.css
+- [x] 9.27 Emoji reaction float-up (float and fade on message react) -- CSS BUILT in premium-motion-2.css
+- [x] 9.28 Swipe action rubber band (inbox swipe reveal with spring) -- CSS BUILT in premium-motion-2.css
+- [x] 9.29 Image gallery momentum snap (photo swipe with spring) -- CSS BUILT in premium-motion-2.css
+- [x] 9.30 Profile photo morph/crossfade on change -- CSS BUILT in premium-motion-2.css
 - [ ] 9.31 Pull-to-refresh with branded Vallo mark rotation
 
 ### Pages and Areas Still Lacking Premium Motion
-- [ ] 9.32 Settings page: section headers fade-slide on scroll into view
-- [ ] 9.33 Wallet overview: balance counter animates on load, transaction rows stagger
-- [ ] 9.34 Booking detail: timeline nodes animate as they enter viewport
-- [ ] 9.35 Listing gallery: parallax on hero image, room cards pop on scroll
-- [ ] 9.36 Profile page: stats count up, badges pop in with stagger
-- [ ] 9.37 Checkout flow: step transition slide with progress bar fill
-- [ ] 9.38 Rewards page: points counter, tier badge shine, history stagger
-- [ ] 9.39 Verification flow: scan frame + ID card entrance animation
+- [x] 9.32 Settings page: section headers fade-slide on scroll into view -- CSS BUILT in premium-motion-2.css
+- [x] 9.33 Wallet overview: balance counter animates on load, transaction rows stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.34 Booking detail: timeline nodes animate as they enter viewport -- CSS BUILT in premium-motion-2.css
+- [x] 9.35 Listing gallery: parallax on hero image, room cards pop on scroll -- CSS BUILT in premium-motion-2.css
+- [x] 9.36 Profile page: stats count up, badges pop in with stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.37 Checkout flow: step transition slide with progress bar fill -- CSS BUILT in premium-motion-2.css
+- [x] 9.38 Rewards page: points counter, tier badge shine, history stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.39 Verification flow: scan frame + ID card entrance animation -- CSS BUILT in premium-motion-2.css
 - [ ] 9.40 Agreements: signature line draw, seal stamp pop
-- [ ] 9.41 Support page: category cards lift on hover, chat entrance slide
+- [x] 9.41 Support page: category cards lift on hover, chat entrance slide -- CSS BUILT in premium-motion-2.css
 
 ---
 

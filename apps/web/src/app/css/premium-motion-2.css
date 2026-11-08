@@ -1226,4 +1226,343 @@
   :root[data-motion="off"] .nf-bubble[data-new] {
     animation: none;
   }
+
+  /* ====================================== CTA GLOW PULSE (9.4) */
+
+  .nf-cta--glow {
+    animation: nf-cta-glow 1.6s ease-in-out 3 both;
+  }
+  @keyframes nf-cta-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--nf-brand-rgb, 59 130 246), 0); }
+    50% { box-shadow: 0 0 18px 4px rgba(var(--nf-brand-rgb, 59 130 246), 0.35); }
+  }
+  :root[data-motion="off"] .nf-cta--glow { animation: none; }
+
+  /* ================================ INTEREST CHIP SPRING (9.10) */
+
+  .nf-chip--interest {
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+  }
+  .nf-chip--interest:hover { transform: scale(1.04); }
+  .nf-chip--interest:active { transform: scale(0.95); }
+  :root[data-motion="off"] .nf-chip--interest { transition: none; }
+
+  /* =========================== SEARCH RESULTS CASCADE (9.25) */
+
+  .nf-results--cascade > * {
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  .nf-results--cascade > *:nth-child(1) { animation-delay: 0ms; }
+  .nf-results--cascade > *:nth-child(2) { animation-delay: 50ms; }
+  .nf-results--cascade > *:nth-child(3) { animation-delay: 100ms; }
+  .nf-results--cascade > *:nth-child(4) { animation-delay: 150ms; }
+  .nf-results--cascade > *:nth-child(5) { animation-delay: 200ms; }
+  .nf-results--cascade > *:nth-child(6) { animation-delay: 250ms; }
+  @keyframes nf-cascade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  :root[data-motion="off"] .nf-results--cascade > * { animation: none; }
+
+  /* ================================== MAP PIN DROP (9.26) */
+
+  .nf-map-pin[data-drop] {
+    animation: nf-pin-drop var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-pin-drop {
+    from { opacity: 0; transform: translateY(-20px) scale(0.8); }
+    70% { opacity: 1; transform: translateY(2px) scale(1.02); }
+    to { transform: translateY(0) scale(1); }
+  }
+  :root[data-motion="off"] .nf-map-pin[data-drop] { animation: none; }
+
+  /* ============================ EMOJI REACTION FLOAT (9.27) */
+
+  .nf-reaction[data-float] {
+    animation: nf-reaction-float var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+  }
+  @keyframes nf-reaction-float {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-16px) scale(1.15); }
+  }
+  :root[data-motion="off"] .nf-reaction[data-float] { animation: none; }
+
+  /* =========================== SWIPE RUBBER BAND (9.28) */
+
+  .nf-swipe[data-reveal] {
+    animation: nf-swipe-reveal var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-swipe-reveal {
+    from { transform: translateX(100%); }
+    70% { transform: translateX(-4%); }
+    to { transform: translateX(0); }
+  }
+  :root[data-motion="off"] .nf-swipe[data-reveal] { animation: none; }
+
+  /* ======================== SETTINGS SECTION FADE (9.32) */
+
+  .nf-settings-section[data-visible] {
+    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  @keyframes nf-section-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  :root[data-motion="off"] .nf-settings-section[data-visible] { animation: none; }
+
+  /* =================== WALLET BALANCE + TX STAGGER (9.33) */
+
+  .nf-wallet__balance[data-count] {
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-balance-pop {
+    from { transform: scale(0.9); opacity: 0; }
+    60% { transform: scale(1.04); opacity: 1; }
+    to { transform: scale(1); }
+  }
+  .nf-wallet__tx {
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  .nf-wallet__tx:nth-child(1) { animation-delay: 40ms; }
+  .nf-wallet__tx:nth-child(2) { animation-delay: 80ms; }
+  .nf-wallet__tx:nth-child(3) { animation-delay: 120ms; }
+  .nf-wallet__tx:nth-child(4) { animation-delay: 160ms; }
+  .nf-wallet__tx:nth-child(5) { animation-delay: 200ms; }
+  :root[data-motion="off"] .nf-wallet__balance[data-count],
+  :root[data-motion="off"] .nf-wallet__tx { animation: none; }
+
+  /* ====================== BOOKING TIMELINE NODES (9.34) */
+
+  .nf-timeline__node[data-visible] {
+    animation: nf-node-in var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-timeline__node[data-visible]:nth-child(2) { animation-delay: 60ms; }
+  .nf-timeline__node[data-visible]:nth-child(3) { animation-delay: 120ms; }
+  .nf-timeline__node[data-visible]:nth-child(4) { animation-delay: 180ms; }
+  .nf-timeline__node[data-visible]:nth-child(5) { animation-delay: 240ms; }
+  @keyframes nf-node-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  :root[data-motion="off"] .nf-timeline__node[data-visible] { animation: none; }
+
+  /* ==================== PROFILE STATS + BADGES (9.36) */
+
+  .nf-profile__stat[data-count] {
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-profile__stat[data-count]:nth-child(2) { animation-delay: 60ms; }
+  .nf-profile__stat[data-count]:nth-child(3) { animation-delay: 120ms; }
+  .nf-badge[data-pop] {
+    animation: nf-badge-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-badge[data-pop]:nth-child(2) { animation-delay: 80ms; }
+  .nf-badge[data-pop]:nth-child(3) { animation-delay: 160ms; }
+  @keyframes nf-badge-pop {
+    from { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    to { transform: scale(1); }
+  }
+  :root[data-motion="off"] .nf-profile__stat[data-count],
+  :root[data-motion="off"] .nf-badge[data-pop] { animation: none; }
+
+  /* ==================== GALLERY PARALLAX HINT (9.35) */
+
+  .nf-gallery__hero {
+    transition: transform var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  .nf-gallery__hero[data-scroll] {
+    transform: translateY(calc(var(--nf-scroll-y, 0) * -0.08px));
+  }
+  .nf-gallery__room[data-visible] {
+    animation: nf-room-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-gallery__room[data-visible]:nth-child(2) { animation-delay: 60ms; }
+  .nf-gallery__room[data-visible]:nth-child(3) { animation-delay: 120ms; }
+  .nf-gallery__room[data-visible]:nth-child(4) { animation-delay: 180ms; }
+  @keyframes nf-room-pop {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  :root[data-motion="off"] .nf-gallery__hero,
+  :root[data-motion="off"] .nf-gallery__room[data-visible] { transition: none; animation: none; }
+
+  /* ================== CHECKOUT STEP TRANSITION (9.37) */
+
+  .nf-checkout__step[data-enter] {
+    animation: nf-step-slide var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  @keyframes nf-step-slide {
+    from { opacity: 0; transform: translateX(24px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .nf-checkout__progress {
+    transition: width var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+  :root[data-motion="off"] .nf-checkout__step[data-enter] { animation: none; }
+  :root[data-motion="off"] .nf-checkout__progress { transition: none; }
+
+  /* ===================== REWARDS TIER SHINE (9.38) */
+
+  .nf-rewards__counter[data-count] {
+    animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-rewards__badge[data-shine] {
+    animation: nf-tier-shine 1.2s ease-in-out both;
+  }
+  @keyframes nf-tier-shine {
+    0% { filter: brightness(1); }
+    40% { filter: brightness(1.3); }
+    100% { filter: brightness(1); }
+  }
+  .nf-rewards__row {
+    animation: nf-cascade-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  .nf-rewards__row:nth-child(1) { animation-delay: 40ms; }
+  .nf-rewards__row:nth-child(2) { animation-delay: 80ms; }
+  .nf-rewards__row:nth-child(3) { animation-delay: 120ms; }
+  :root[data-motion="off"] .nf-rewards__counter[data-count],
+  :root[data-motion="off"] .nf-rewards__badge[data-shine],
+  :root[data-motion="off"] .nf-rewards__row { animation: none; }
+
+  /* ================== VERIFICATION SCAN FRAME (9.39) */
+
+  .nf-scan-frame[data-active] {
+    animation: nf-scan-glow 2s ease-in-out infinite;
+  }
+  @keyframes nf-scan-glow {
+    0%, 100% { box-shadow: inset 0 0 0 2px rgba(var(--nf-brand-rgb, 59 130 246), 0.4); }
+    50% { box-shadow: inset 0 0 12px 2px rgba(var(--nf-brand-rgb, 59 130 246), 0.6); }
+  }
+  .nf-id-card[data-enter] {
+    animation: nf-card-entrance var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-card-entrance {
+    from { opacity: 0; transform: translateY(20px) scale(0.9) rotateX(8deg); }
+    to { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+  }
+  :root[data-motion="off"] .nf-scan-frame[data-active],
+  :root[data-motion="off"] .nf-id-card[data-enter] { animation: none; }
+
+  /* ================== SUPPORT CATEGORY CARDS (9.41) */
+
+  .nf-support__card {
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+  }
+  .nf-support__card:hover { transform: translateY(-2px); }
+  .nf-support__chat[data-enter] {
+    animation: nf-section-in var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  :root[data-motion="off"] .nf-support__card { transition: none; }
+  :root[data-motion="off"] .nf-support__chat[data-enter] { animation: none; }
+
+  /* ============= TITLE WORD SPRING STAGGER (9.6, onboarding) */
+
+  .nf-hero__word {
+    display: inline-block;
+    animation: nf-word-bounce var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  .nf-hero__word:nth-child(1) { animation-delay: 0ms; }
+  .nf-hero__word:nth-child(2) { animation-delay: 60ms; }
+  .nf-hero__word:nth-child(3) { animation-delay: 120ms; }
+  .nf-hero__word:nth-child(4) { animation-delay: 180ms; }
+  .nf-hero__word:nth-child(5) { animation-delay: 240ms; }
+  @keyframes nf-word-bounce {
+    from { opacity: 0; transform: translateY(8px); }
+    60% { opacity: 1; transform: translateY(-3px); }
+    to { transform: translateY(0); }
+  }
+  :root[data-motion="off"] .nf-hero__word { animation: none; }
+
+  /* =============== AURORA GRADIENT BACKGROUND (9.7, onboarding) */
+
+  .nf-aurora {
+    animation: nf-aurora-drift 12s ease-in-out infinite alternate;
+  }
+  @keyframes nf-aurora-drift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  :root[data-motion="off"] .nf-aurora { animation: none; }
+
+  /* ============ BEAT TRANSITION CROSSFADE (9.11, onboarding) */
+
+  .nf-beat[data-enter] {
+    animation: nf-beat-in var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  .nf-beat[data-exit] {
+    animation: nf-beat-out var(--nf-duration-base, 250ms) ease-in forwards;
+  }
+  @keyframes nf-beat-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes nf-beat-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.03); }
+  }
+  :root[data-motion="off"] .nf-beat[data-enter],
+  :root[data-motion="off"] .nf-beat[data-exit] { animation: none; }
+
+  /* ============ IMAGE GALLERY MOMENTUM SNAP (9.29) */
+
+  .nf-gallery-strip {
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+  }
+  .nf-gallery-strip > * {
+    scroll-snap-align: center;
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
+  }
+  :root[data-motion="off"] .nf-gallery-strip { scroll-behavior: auto; }
+  :root[data-motion="off"] .nf-gallery-strip > * { transition: none; }
+
+  /* ============ PULL-TO-REFRESH MARK SPIN (9.31) */
+
+  .nf-ptr__mark[data-pulling] {
+    transition: transform var(--nf-duration-base, 250ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+    transform: rotate(calc(var(--nf-pull, 0) * 1.5deg));
+  }
+  .nf-ptr__mark[data-refreshing] {
+    animation: nf-ptr-spin 800ms linear infinite;
+  }
+  @keyframes nf-ptr-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  :root[data-motion="off"] .nf-ptr__mark[data-pulling] { transition: none; }
+  :root[data-motion="off"] .nf-ptr__mark[data-refreshing] { animation: none; }
+
+  /* ============ PROFILE PHOTO CROSSFADE (9.30) */
+
+  .nf-avatar[data-changing] {
+    animation: nf-avatar-morph var(--nf-duration-slow, 400ms) var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  @keyframes nf-avatar-morph {
+    0% { opacity: 1; transform: scale(1); }
+    40% { opacity: 0.4; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  :root[data-motion="off"] .nf-avatar[data-changing] { animation: none; }
+
+  /* ============ AGREEMENTS SEAL STAMP (9.40) */
+
+  .nf-signature__line[data-draw] {
+    animation: nf-sig-draw 1s var(--nf-ease-out, cubic-bezier(0.16, 1, 0.3, 1)) both;
+  }
+  @keyframes nf-sig-draw {
+    from { opacity: 0; transform: scaleX(0); transform-origin: left; }
+    to { opacity: 1; transform: scaleX(1); transform-origin: left; }
+  }
+  .nf-seal[data-stamp] {
+    animation: nf-seal-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    animation-delay: 400ms;
+  }
+  @keyframes nf-seal-pop {
+    from { opacity: 0; transform: scale(1.4) rotate(-8deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+  :root[data-motion="off"] .nf-signature__line[data-draw],
+  :root[data-motion="off"] .nf-seal[data-stamp] { animation: none; }
 }
