@@ -8,10 +8,11 @@ import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
-import { countWords } from "@/lib/features/circle/model";
+import { compactCount, countWords } from "@/lib/features/circle/model";
 import type { CirclePostView, HomeStats } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 import { initial } from "@/lib/text/initial";
+import { CircleComposeFab as ComposeFab, TabIntoView } from "./CircleClient";
 import "./circle-visuals.css";
 
 /**
@@ -34,6 +35,32 @@ import "./circle-visuals.css";
 
 export type CircleFace = { label: string; avatar: string | null };
 
+/** A steady tone per name, so the same member always wears the same colour. */
+function toneOf(name: string): number {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  return h % 5;
+}
+
+/** A member with no photograph: their initial on one of five Vallo tones, never a flat blue disc. */
+export function CircleInitial({ name }: { name: string }) {
+  return (
+    <span className="nf-cinit" data-tone={toneOf(name)} aria-hidden="true">
+      {initial(name || "M")}
+    </span>
+  );
+}
+
+/** A featured card's picture: an object chosen by what the post is about. */
+function topicIcon(post: CirclePostView): Icon3DName {
+  const text = `${post.title} ${post.community?.name ?? ""}`.toLowerCase();
+  if (/(borehole|repair|plumb|leak|fix|generator|power|electric)/.test(text)) return "toolbox";
+  if (/(flood|area|estate|street|neighbour|road|island|mainland)/.test(text)) return "map";
+  if (/(caution|rent|fee|price|cost|pay|naira|budget|deposit|money)/.test(text)) return "coin";
+  if (/(bedroom|flat|house|home|apartment|landlord|tenant|room)/.test(text)) return "home-small";
+  return post.type === "question" ? "assistant" : "local-talks";
+}
+
 /**
  * THE HERO (rebuilt 8 November 2026, the founder's reference sheets in Vallo
  * blue): one big picture from the art slots with a scrim, the headline, the
@@ -55,8 +82,11 @@ export function CircleBanner({
 }) {
   const H = CIRCLE_COPY.home;
   const art = FEATURE_ART.circleHero;
-  const shown = faces.filter((f) => f.avatar).slice(0, 4);
+  const withPhoto = faces.filter((f) => f.avatar);
+  /* Real photographs first; members without one wear their tinted initial. */
+  const shown = (withPhoto.length ? withPhoto : faces).slice(0, 4);
   const members = stats?.members ?? 0;
+  const more = Math.max(0, members - shown.length);
   return (
     <section className="nf-cbn" data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
       <span className="nf-cbn__art" aria-hidden="true">
@@ -74,9 +104,14 @@ export function CircleBanner({
               <span className="nf-cbn__faces" aria-hidden="true">
                 {shown.map((face, index) => (
                   <span key={`${face.label}-${index}`} className="nf-cbn__face">
-                    <RemoteImage src={face.avatar as string} alt="" width={72} height={72} sizes="36px" loading="lazy" />
+                    {face.avatar ? (
+                      <RemoteImage src={face.avatar} alt="" width={72} height={72} sizes="36px" loading="lazy" />
+                    ) : (
+                      <CircleInitial name={face.label} />
+                    )}
                   </span>
                 ))}
+                {more > 0 ? <span className="nf-cbn__more nf-numeric">{`+${compactCount(more)}`}</span> : null}
               </span>
             ) : null}
             <span className="nf-cbn__count">
@@ -140,13 +175,14 @@ export function CircleDestinations() {
   );
 }
 
-/** Popular and Latest, as one clean underline row in the address. */
-export function CircleSortRow({ active, base }: { active: "popular" | "newest"; base: string }) {
+/** Popular, Latest and (signed in) Following, as one clean underline row in the address. */
+export function CircleSortRow({ active, base, following = false }: { active: "popular" | "newest" | "following"; base: string; following?: boolean }) {
   const H = CIRCLE_COPY.home;
   const join = base.includes("?") ? "&" : "?";
   const items = [
     { key: "popular" as const, label: H.popular },
     { key: "newest" as const, label: H.latest },
+    ...(following ? [{ key: "following" as const, label: H.following }] : []),
   ];
   return (
     <nav className="nf-csort" aria-label={H.sortsLabel}>
@@ -168,7 +204,7 @@ export function CircleFeaturedCard({ post, now }: { post: CirclePostView; now: n
   return (
     <Link href={`/circle/p/${post.id}`} className="nf-cfeat" data-testid="circle-featured-card">
       <span className="nf-cfeat__thumb" aria-hidden="true">
-        <Icon3D name={post.type === "question" ? "assistant" : "local-talks"} size={56} />
+        <Icon3D name={topicIcon(post)} size={56} />
       </span>
       <span className="nf-cfeat__body">
         <span className="nf-cfeat__kicker">{post.community?.name ?? (post.type === "question" ? C.question : CIRCLE_COPY.tabs.discussions)}</span>
@@ -179,7 +215,7 @@ export function CircleFeaturedCard({ post, now }: { post: CirclePostView; now: n
               {post.author?.avatar ? (
                 <RemoteImage src={post.author.avatar} alt="" width={56} height={56} sizes="28px" loading="lazy" />
               ) : (
-                <span className="nf-ccard__monogram">{initial(post.author?.label ?? "M")}</span>
+                <CircleInitial name={post.author?.label ?? "Member"} />
               )}
             </span>
             <span className="nf-cfeat__name">{post.author?.label ?? "Member"}</span>
@@ -203,14 +239,9 @@ export function CircleFeaturedCard({ post, now }: { post: CirclePostView; now: n
   );
 }
 
-/** The floating compose button, over the dock, one per screen. */
+/** The floating compose button (client: it hides while the hero action shows). */
 export function CircleComposeFab({ signedIn }: { signedIn: boolean }) {
-  const H = CIRCLE_COPY.home;
-  return (
-    <Link href={signedIn ? "/circle/new" : "/sign-in?next=%2Fcircle%2Fnew"} className="nf-cfab" aria-label={H.compose} data-testid="circle-compose">
-      <UiIcon name="pencil" size={22} />
-    </Link>
-  );
+  return <ComposeFab href={signedIn ? "/circle/new" : "/sign-in?next=%2Fcircle%2Fnew"} label={CIRCLE_COPY.home.compose} />;
 }
 
 export type CircleTab = { key: string; label: string; href: string };
@@ -219,6 +250,7 @@ export type CircleTab = { key: string; label: string; href: string };
 export function CircleTabs({ items, active, searchHref }: { items: readonly CircleTab[]; active: string; searchHref?: string }) {
   return (
     <nav className="nf-ctabs" aria-label={CIRCLE_COPY.tabsLabel} data-testid="circle-tabs">
+      <TabIntoView />
       <ul className="nf-ctabs__row">
         {items.map((item) => (
           <li key={item.key}>
@@ -253,7 +285,7 @@ function Byline({ post, now }: { post: CirclePostView; now: number }) {
         {author?.avatar ? (
           <RemoteImage src={author.avatar} alt="" width={80} height={80} sizes="40px" loading="lazy" />
         ) : (
-          <span className="nf-ccard__monogram">{initial(author?.label ?? "M")}</span>
+          <CircleInitial name={author?.label ?? "Member"} />
         )}
       </span>
       <span className="nf-ccard__who">

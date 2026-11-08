@@ -8,7 +8,7 @@ import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ButtonLink } from "@/components/ui/Button";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
-import { readCircleHome, readCirclePosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
+import { readCircleHome, readCirclePosts, readFollowingPosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 import { getDictionary } from "@vallo/i18n";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
@@ -31,6 +31,7 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   const tab = readTab(params.tab);
   const sort = readSort(params.sort);
+  const following = params.sort === "following";
   const cursor = typeof params.cursor === "string" ? params.cursor : null;
   const now = requestNow();
   const home = await readCircleHome();
@@ -56,7 +57,7 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
           <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} />
           {tab === "for-you" ? <CircleDestinations /> : null}
           <CircleTabs items={tabs} active={tab} />
-          {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, cursor, now, home })}
+          {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, following, cursor, now, home })}
         </div>
       </PullToRefresh>
       <CircleComposeFab signedIn={home.signedIn} />
@@ -67,12 +68,14 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
 async function TabBody({
   tab,
   sort,
+  following,
   cursor,
   now,
   home,
 }: {
   tab: CircleTab;
   sort: ReturnType<typeof readSort>;
+  following: boolean;
   cursor: string | null;
   now: number;
   home: Awaited<ReturnType<typeof readCircleHome>>;
@@ -168,12 +171,15 @@ async function TabBody({
   }
 
   const type = TAB_TYPE[tab] ?? null;
-  const page = await readCirclePosts({ type, sort, cursor });
+  /* Following: posts from the communities the reader joined, of this tab's kind. */
+  const page = following
+    ? await readFollowingPosts({ sort: "newest", cursor }).then((f) => ({ ...f, posts: type ? f.posts.filter((p) => p.type === type) : f.posts }))
+    : await readCirclePosts({ type, sort, cursor });
   const base = `/circle?tab=${tab}`;
   const emptyWords = tab === "ask" ? C.empty.questions : tab === "guides" ? C.empty.guides : tab === "opportunities" ? C.empty.opportunities : C.empty.posts;
   return (
     <div className="nf-circle-section">
-      <CircleSortRow active={sort === "popular" ? "popular" : "newest"} base={base} />
+      <CircleSortRow active={following ? "following" : sort === "popular" ? "popular" : "newest"} base={base} following={home.signedIn} />
       {tab === "guides" ? (
         <ButtonLink href="/guides" variant="secondary" size="sm" arrow>
           {C.guides.open}
@@ -181,7 +187,7 @@ async function TabBody({
       ) : null}
       {page.posts.length ? <PostList posts={page.posts} now={now} /> : <CircleEmpty>{emptyWords}</CircleEmpty>}
       {page.next ? (
-        <ButtonLink href={`${base}&sort=${sort}&cursor=${encodeURIComponent(page.next)}`} variant="secondary" size="md">
+        <ButtonLink href={`${base}&sort=${following ? "following" : sort}&cursor=${encodeURIComponent(page.next)}`} variant="secondary" size="md">
           Older posts
         </ButtonLink>
       ) : null}

@@ -28,7 +28,7 @@ export default async function PreviewCircle({ searchParams }: { searchParams: Pr
     <div className="px-md">
     <PageFrame title={CIRCLE_COPY.title} subtitle={CIRCLE_COPY.tagline} fallback="/preview/features" width="wide" actions={<ButtonLink href="#" variant="secondary" size="sm" leadingIcon="feed">{CIRCLE_COPY.home.feed}</ButtonLink>}>
       <div className="nf-circle">
-        <CircleBanner faces={[]} stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
+        <CircleBanner faces={first ? [] : [{ label: "Kemi A.", avatar: null }, { label: "Tunde O.", avatar: null }, { label: "Ada N.", avatar: null }, { label: "Bayo L.", avatar: null }]} stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
         <CircleDestinations />
         <CircleTabs items={tabs} active="for-you" />
         {first ? (

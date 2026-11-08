@@ -32,13 +32,13 @@ export const circleEn = {
     members: { one: "{count} member", other: "{count} members" },
     exploreTitle: "Explore Circle",
     dest: {
-      discussions: "Discus\u00adsions",
+      discussions: "Discussions",
       ask: "Ask a question",
-      /* Soft hyphens (U+00AD) so a narrow tile breaks at a syllable, on every engine. */
-      neighbourhoods: "Neighbour\u00adhoods",
+      /* Short whole words: a tile label never breaks inside a word (founder, round 3). */
+      neighbourhoods: "Areas",
       insights: "Market insights",
-      professionals: "Profes\u00adsionals",
-      opportunities: "Oppor\u00adtunities",
+      professionals: "Experts",
+      opportunities: "Openings",
       guides: "Guides",
       roommates: "Roommates",
     },
@@ -46,6 +46,7 @@ export const circleEn = {
     sortsLabel: "Order",
     popular: "Popular",
     latest: "Latest",
+    following: "Following",
     compose: "Start a discussion",
     feed: "Feed",
     replies: { one: "{count} reply", other: "{count} replies" },

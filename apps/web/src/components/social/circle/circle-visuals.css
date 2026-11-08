@@ -205,13 +205,15 @@
     --nf-cdest-fill: var(--nf-brand-tint-2);
   }
   /* Long words break at a syllable with a hyphen, never mid-letter. */
+  /* Whole words only: a label wraps between words, never inside one. */
   .nf-cdest__label {
     max-inline-size: 100%;
     font-size: var(--nf-text-caption);
     font-weight: 600;
     line-height: 1.25;
-    hyphens: auto;
+    hyphens: manual;
     overflow-wrap: normal;
+    word-break: keep-all;
   }
   @media (max-width: 24rem) {
     .nf-cdest__grid {
@@ -377,7 +379,11 @@
     gap: var(--nf-space-xs);
     border-block-end: var(--nf-border-width) solid var(--nf-divider);
   }
+  /* The row fades at its edges so a tab past the edge reads as more, not cut. */
   .nf-ctabs__row {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, var(--nf-content-primary) var(--nf-space-sm), var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, var(--nf-content-primary) var(--nf-space-sm), var(--nf-content-primary) calc(100% - var(--nf-space-xl)), transparent 100%);
+    padding-inline: var(--nf-space-sm) var(--nf-space-xl);
     display: flex;
     flex: 1;
     gap: var(--nf-space-md);
@@ -602,5 +608,60 @@
     box-shadow:
       inset 0 0 0 var(--nf-border-width) var(--nf-brand-tint-2),
       var(--nf-card-shadow);
+  }
+
+  /* ---------------------------------------------------- tinted initials */
+  .nf-cinit {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    block-size: 100%;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-gradient-brand-ink);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
+  .nf-cinit[data-tone="1"] {
+    background: var(--nf-brand-tint-2);
+    color: var(--nf-brand-primary);
+  }
+  .nf-cinit[data-tone="2"] {
+    background: color-mix(in oklab, var(--nf-spark) 24%, var(--nf-surface-primary));
+    color: var(--nf-content-primary);
+  }
+  .nf-cinit[data-tone="3"] {
+    background: var(--nf-state-success-surface);
+    color: var(--nf-state-success);
+  }
+  .nf-cinit[data-tone="4"] {
+    background: var(--nf-state-info-surface);
+    color: var(--nf-state-info);
+  }
+  .nf-cbn__more {
+    display: grid;
+    place-items: center;
+    min-inline-size: 2.25rem;
+    block-size: 2.25rem;
+    margin-inline-start: calc(var(--nf-space-sm) * -1);
+    padding-inline: var(--nf-space-2xs);
+    border: 2px solid var(--nf-surface-artwork);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+  }
+
+  /* The FAB steps aside while the hero's own action is on screen. */
+  .nf-cfab[data-hidden] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1rem) scale(0.9);
+  }
+  .nf-cfab {
+    transition:
+      transform var(--nf-duration-base) var(--nf-ease-entrance),
+      opacity var(--nf-duration-base) var(--nf-ease-entrance);
   }
 }

@@ -797,4 +797,9 @@
   :root[data-theme="light"] .nf-cglyph {
     box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-tint-2);
   }
+
+  /* Room at the foot for the compose button, so it never rests over content. */
+  [data-testid="circle-home"] {
+    padding-block-end: calc(var(--nf-space-3xl) + var(--nf-space-md));
+  }
 }
