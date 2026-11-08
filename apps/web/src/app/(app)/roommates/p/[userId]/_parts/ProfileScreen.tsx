@@ -14,7 +14,6 @@ import {
   fill,
   lagosDay,
   monthlyHint,
-  moveInText,
   placeText,
   stateName,
   type RoommatesCopy,
@@ -147,8 +146,8 @@ function Header({ p, t: copy, now }: { p: RoommateProfileView; t: RoommatesCopy;
       <div className="nf-rmv-head__words">
         <h2 className="nf-rmv-head__name">
           {p.name}
-          {p.badges.length ? (
-            <span className="nf-rm-card__tick" aria-hidden="true">
+          {p.badges.includes("identity") ? (
+            <span className="nf-rm-card__tick" role="img" aria-label={copy.verification.kinds.identity}>
               <UiIcon name="verified" size={20} filled />
             </span>
           ) : null}
@@ -197,7 +196,7 @@ function Facts({ p, t: copy }: { p: RoommateProfileView; t: RoommatesCopy }) {
   const rows: { icon: UiIconName; label: string; value: string; sub?: string | null }[] = [];
   if (where) rows.push({ icon: "pin", label: copy.profile.lookingIn, value: where });
   if (budget) rows.push({ icon: "wallet", label: copy.profile.budget, value: budget, sub: hint });
-  rows.push({ icon: "calendar-check", label: copy.profile.moveIn, value: moveInText(p.moveInOn, p.moveInFlex, copy) });
+  rows.push({ icon: "calendar-check", label: copy.profile.moveIn, value: p.moveInFlex === "asap" ? copy.moveInFlex.asap : p.moveInOn ? dayText(p.moveInOn) : copy.moveInFlex.flexible });
   if (wants.length) rows.push({ icon: "house-heart", label: copy.profile.accommodation, value: wants.join(" · ") });
   return (
     <dl className="nf-rmv-facts">

@@ -182,7 +182,14 @@ function Pending({ home, t: copy }: { home: RoommatesHome; t: RoommatesCopy }) {
       </span>
       <span className="nf-rmp-pending__words">
         <span className="nf-rmp-pending__title">{copy.ui.openHub}</span>
-        <span className="nf-rmp-pending__line">{lines.join(" · ")}</span>
+        <span className="nf-rmp-pending__line">
+          {lines.map((line, i) => (
+            <span key={line} className="nf-rmp-pending__part">
+              {i > 0 ? <span aria-hidden="true">{"· "}</span> : null}
+              {line}
+            </span>
+          ))}
+        </span>
       </span>
       <UiIcon name="chevron-right" size={20} />
     </Link>

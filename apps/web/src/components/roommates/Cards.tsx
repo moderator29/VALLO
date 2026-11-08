@@ -58,8 +58,8 @@ export function RoommateCardView({
             <Link href={href ?? ROOMMATES_ROUTES.person(card.userId)} className="nf-rm-card__link">
               {card.name}
             </Link>
-            {card.badges.length ? (
-              <span className="nf-rm-card__tick" aria-hidden="true">
+            {card.badges.includes("identity") ? (
+              <span className="nf-rm-card__tick" role="img" aria-label={copy.verification.kinds.identity}>
                 <UiIcon name="verified" size={16} filled />
               </span>
             ) : null}

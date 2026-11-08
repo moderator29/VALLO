@@ -63,6 +63,14 @@
     font-size: var(--nf-text-caption);
     line-height: 1.45;
   }
+  .nf-rmp-pending__line:has(.nf-rmp-pending__part) {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: var(--nf-space-2xs);
+  }
+  .nf-rmp-pending__part {
+    white-space: nowrap;
+  }
   .nf-rmp-safety__go {
     display: none;
     align-items: center;
@@ -668,6 +676,20 @@
   }
 
   /* ------------------------------------------------------------ a post's own parts */
+  .nf-rml-title {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    color: var(--nf-content-primary);
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+  }
   .nf-rml-summary {
     display: grid;
     gap: var(--nf-space-sm);

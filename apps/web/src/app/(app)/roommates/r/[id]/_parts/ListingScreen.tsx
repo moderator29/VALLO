@@ -8,7 +8,6 @@ import {
   AMENITY_ICON,
   BadgesRow,
   CostBreakdown,
-  KindTag,
   PersonFace,
   RoommatesEmpty,
   SectionHead,
@@ -59,7 +58,7 @@ export function RoomListingScreen({ read, groups, t: copy, now }: { read: Listin
   const today = lagosDay(now);
   return (
     <PageFrame
-      title={l.title}
+      title={copy.listingKinds[l.kind]}
       fallback={ROOMMATES_ROUTES.rooms}
       width="wide"
       actions={
@@ -150,8 +149,8 @@ function Summary({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   const where = placeText(l.area, l.city, stateName(l.stateCode));
   return (
     <section className="nf-rml-summary">
+      <h1 className="nf-rml-title">{l.title}</h1>
       <div className="nf-rml-summary__tags">
-        <KindTag kind={l.kind} t={copy} />
         {l.verified ? <VerifiedChip t={copy} /> : null}
         {l.status !== "live" ? <span className="nf-rml-status">{copy.listingStatus[l.status]}</span> : null}
       </div>
