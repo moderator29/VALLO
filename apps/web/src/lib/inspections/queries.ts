@@ -117,28 +117,28 @@ async function readSide(column: "lister_id" | "requester_id"): Promise<Inspectio
       readBadgeTiers(session.supabase, counterpartIds),
     ]);
 
-    const inspections: Inspection[] = rows.map((row) => ({
-      id: row.id,
-      listingId: row.listing_id,
-      listingTitle: titles.get(row.listing_id) ?? null,
-      state: row.state,
-      requestedAt: row.requested_at,
-      slotAt: row.slot_at,
-      note: row.note,
-      listerNote: row.lister_note,
-      createdAt: row.created_at,
-      respondedAt: row.responded_at,
-      conversationId: row.conversation_id,
-      counterpartName:
-        names.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
-      counterpartPhone:
-        numbers.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
-      counterpartPhoneFormatted:
-        (() => { const p = numbers.get(column === "lister_id" ? row.requester_id : row.lister_id); return p ? formatPhone(p) : null; })(),
-      counterpartBadge:
-        badges.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
-      outcome: row.outcome,
-    }));
+    const inspections: Inspection[] = rows.map((row) => {
+      const cpId = column === "lister_id" ? row.requester_id : row.lister_id;
+      const phone = numbers.get(cpId) ?? null;
+      return {
+        id: row.id,
+        listingId: row.listing_id,
+        listingTitle: titles.get(row.listing_id) ?? null,
+        state: row.state,
+        requestedAt: row.requested_at,
+        slotAt: row.slot_at,
+        note: row.note,
+        listerNote: row.lister_note,
+        createdAt: row.created_at,
+        respondedAt: row.responded_at,
+        conversationId: row.conversation_id,
+        counterpartName: names.get(cpId) ?? null,
+        counterpartPhone: phone,
+        counterpartPhoneFormatted: phone ? formatPhone(phone) : null,
+        counterpartBadge: badges.get(cpId) ?? null,
+        outcome: row.outcome,
+      };
+    });
 
     inspections.sort((a, b) => {
       const openDelta = Number(isOpen(b.state)) - Number(isOpen(a.state));
@@ -325,6 +325,7 @@ export async function readOpenInspectionForConversation(
       callableNumbersFor(session.user.id, [counterpartId]),
       readBadgeTiers(session.supabase, [counterpartId]),
     ]);
+    const phone = numbers.get(counterpartId) ?? null;
     return {
       id: row.id,
       listingId: row.listing_id,
@@ -338,8 +339,8 @@ export async function readOpenInspectionForConversation(
       respondedAt: row.responded_at,
       conversationId: row.conversation_id,
       counterpartName: names.get(counterpartId) ?? null,
-      counterpartPhone: numbers.get(counterpartId) ?? null,
-      counterpartPhoneFormatted: (() => { const p = numbers.get(counterpartId); return p ? formatPhone(p) : null; })(),
+      counterpartPhone: phone,
+      counterpartPhoneFormatted: phone ? formatPhone(phone) : null,
       counterpartBadge: badges.get(counterpartId) ?? null,
       outcome: row.outcome,
     };

@@ -324,7 +324,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 15. PERFORMANCE
 
 - [ ] 15.1 Dictionary prop audit (only pass needed keys, not full dict)
-- [ ] 15.2 Phone format deferred loading
+- [x] 15.2 Phone format deferred loading -- DONE (see 1.16: formatPhone moved server-side)
 - [ ] 15.3 Search results virtual scroll for long lists
 - [ ] 15.4 Map tile lazy loading
 - [ ] 15.5 WebP image format across all uploaded images
@@ -344,16 +344,16 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 |---|---|---|
 | Calls (F1-F6) | 6/6 | 0 (recommendations are ideas, not tasks) |
 | Messages (MSG 1-10) | 10/10 | 0 |
-| Banner moments | ~190/561 | ~371 moments from audit round 2 |
-| Pages (PAGES 1-5) | 4.5/5 | Desktop layouts, docs/help |
-| Frontend (FE 1-10) | 7/10 | Light mode, listing wizard, universal systems, E1, rounds 5-7 |
-| Native (NATIVE 1-8) | 4-6/8 | Platform layer, iOS shell, offline, perf fixes, build 1.0.2 |
+| Banner moments | ~192/561 | ~369 moments from audit round 2 |
+| Pages (PAGES 1-5) | 5/5 | Desktop layouts and docs/help remain as stretch goals |
+| Frontend (FE 1-10) | 12/15 | Listing wizard, saved collections, activity centre |
+| Native (NATIVE 1-8) | 5-6/8 | Platform layer, iOS shell, offline, perf fixes, build 1.0.2 |
 | Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
 | Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
-| Platform Sweep | 12/39 | Admin (polish done), UX sweep (6 done), frontend tools (7 remaining), light mode (3), perf (5) |
-| Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation still ahead |
-| UX Quality | 6/10 | Empty states, skeletons, error recovery, colours, radii, shadows all clean; spacing, icons, micro-interactions, type still ahead |
-| More Pages | 3/8 | Privacy, community, NDPR done; listing wizard, collections, activity centre, shortcuts, validation still ahead |
-| Light Mode | 0/4 | Token audit, worst screens, icon contrast, shadows |
-| Performance | 0/5 | Dict props, phone format, virtual scroll, map tiles, WebP |
-| Build/Deploy | 0/4 | Build 1.0.2, workflows, clean gates |
+| Platform Sweep | 24/39 | Admin (7 remaining), frontend tools (3 remaining), perf (5 remaining) |
+| Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation |
+| UX Quality | 10/10 | All done (spacing, empty states, skeletons, errors, micro-interactions, icons, typography, colours, radii, shadows) |
+| More Pages | 5/8 | Privacy, community, NDPR, keyboard shortcuts, inline validation done; listing wizard, collections, activity centre |
+| Light Mode | 4/4 | All done |
+| Performance | 1/5 | Phone format done; dict props audited (141 files, auth pages worst); virtual scroll, map tiles, WebP remain |
+| Build/Deploy | 1/4 | tsc clean; build 1.0.2, workflows, vitest still ahead |
