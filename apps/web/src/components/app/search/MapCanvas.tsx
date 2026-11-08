@@ -262,6 +262,9 @@ export function MapCanvas({
     const layer = leaflet.tileLayer(tiles.url, {
       maxZoom: tiles.maxZoom,
       minZoom: 4,
+      detectRetina: true,
+      updateWhenZooming: false,
+      updateWhenIdle: true,
     });
     layer.on("tileload", () => {
       tilesLoaded.current += 1;

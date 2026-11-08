@@ -66,6 +66,7 @@ export function AreaMap({
       const provider = tileProvider(theme);
       const tiles = leaflet.tileLayer(provider.url, {
         maxZoom: provider.maxZoom,
+        detectRetina: true,
         updateWhenIdle: true,
         keepBuffer: 1,
       });

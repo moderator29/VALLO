@@ -141,7 +141,7 @@ export function PinMap({
 
       const opened = themeRef.current;
       const provider = tileProvider(opened);
-      const tiles = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom });
+      const tiles = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom, detectRetina: true, updateWhenIdle: true });
       tiles.on("tileerror", () => {
         if (!cancelled) setImagery("offline");
       });
@@ -182,7 +182,7 @@ export function PinMap({
     void import("leaflet").then((leaflet) => {
       if (cancelled || !mapRef.current) return;
       const provider = tileProvider(theme);
-      const next = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom });
+      const next = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom, detectRetina: true, updateWhenIdle: true });
       next.addTo(mapRef.current);
       current.layer.remove();
       tilesRef.current = { layer: next, theme };
