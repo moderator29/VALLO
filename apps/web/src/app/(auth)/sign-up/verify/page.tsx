@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forVerifyCodeForm } from "@/lib/i18n/slice";
 import { pendingSignUpEmail, resendSignUpCode, verifySignUpCode } from "@/lib/auth/actions";
 import { VerifyCodeForm } from "@/components/auth/VerifyCodeForm";
 
@@ -34,7 +35,7 @@ export default async function VerifySignUpPage({
 
   return (
     <VerifyCodeForm
-      t={t}
+      t={forVerifyCodeForm(t)}
       verify={verifySignUpCode}
       resend={resendSignUpCode}
       email={email}

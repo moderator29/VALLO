@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forSignUpOptions } from "@/lib/i18n/slice";
 import { resolveProviderStates } from "@/lib/auth/providers";
 import { requestSurface } from "@/lib/auth/surface";
 import { phoneSignInEnabled } from "@/lib/auth/phone-sign-in-flag";
@@ -72,7 +73,7 @@ export default async function SignUpPage({
   const ready = (id: "google" | "apple") => providers.some((p) => p.id === id && p.configured);
   return (
     <SignUpOptions
-      t={t}
+      t={forSignUpOptions(t)}
       googleReady={ready("google")}
       appleReady={ready("apple")}
       surface={surface}

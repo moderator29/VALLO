@@ -6,6 +6,7 @@ import { firstRunCookieFrom } from "@/components/app/welcome/first-run-seen";
 import { hasSessionCookie, signInFirstRunRedirect } from "./first-run-gate";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forEmailAuthForm } from "@/lib/i18n/slice";
 import { resolveProviderStates } from "@/lib/auth/providers";
 import { requestSurface } from "@/lib/auth/surface";
 import { chooserEmail, signInWithEmail, signUpMethodForEmail } from "@/lib/auth/actions";
@@ -104,7 +105,7 @@ export default async function SignInPage({
     <>
       <EmailAuthForm
         mode="sign-in"
-        t={t}
+        t={forEmailAuthForm(t)}
         action={signInWithEmail}
         next={next}
         initialEmail={address}

@@ -160,7 +160,7 @@ export function AddMoneyScreen({
               <p className="nf-body-sm text-center text-[var(--nf-content-secondary)]">
                 The payment page opens in a new tab. Come back here when you have paid; nothing is added until your bank confirms.
               </p>
-              <Button variant="primary" size="lg" full onClick={() => window.open(start.hosted.kind === "checkout_url" ? start.hosted.url : "", "_blank", "noopener")}>
+              <Button variant="secondary" size="lg" full onClick={() => window.open(start.hosted.kind === "checkout_url" ? start.hosted.url : "", "_blank", "noopener")}>
                 Open the payment page
               </Button>
             </>
@@ -177,9 +177,6 @@ export function AddMoneyScreen({
               </dl>
             </div>
           ) : null}
-          <Button variant="secondary" size="lg" full loading={busy} onClick={paid}>
-            I have paid
-          </Button>
           <p className="nf-caption text-center text-[var(--nf-content-muted)]">Reference {start.movement.reference}</p>
         </div>
       ) : null}
@@ -227,7 +224,11 @@ export function AddMoneyScreen({
           ? {
               primary: { label: "Continue to pay", onClick: begin, loading: busy, testId: "move-confirm" },
             }
-          : {})}
+          : step === "pay"
+            ? {
+                primary: { label: "I have paid", onClick: paid, loading: busy, testId: "move-paid" },
+              }
+            : {})}
     >
       {body}
     </StepFrame>

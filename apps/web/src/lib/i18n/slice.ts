@@ -64,6 +64,14 @@ export const SLICES = {
   priceCheck: ["home", "priceCheck"],
   proofStrip: ["trustVisible"],
   settingsHub: ["common", "directHome", "experienceSettings", "interests", "memberKit", "passcode", "paymentsPage", "platform", "publicDoors", "settings", "socialProfile", "units"],
+  emailAuthForm: ["auth", "authFlow", "common", "publicDoors", "safety", "signUp", "welcomeCards"],
+  codeSignInForm: ["auth", "authFlow", "publicDoors"],
+  verifyCodeForm: ["auth", "authFlow"],
+  finishSetupForm: ["auth", "signUp"],
+  forgotPasswordForm: ["auth", "common"],
+  resetCodeForm: ["auth", "authFlow"],
+  resetPasswordForm: ["auth", "authFlow"],
+  signUpOptions: ["auth", "publicDoors"],
 } as const satisfies Record<string, readonly (keyof Dictionary)[]>;
 
 /*
@@ -103,4 +111,28 @@ export function forProofStrip(t: Dictionary): Dictionary {
 }
 export function forSettingsHub(t: Dictionary): Dictionary {
   return sliceDictionary(t, SLICES.settingsHub);
+}
+export function forEmailAuthForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.emailAuthForm);
+}
+export function forCodeSignInForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.codeSignInForm);
+}
+export function forVerifyCodeForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.verifyCodeForm);
+}
+export function forFinishSetupForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.finishSetupForm);
+}
+export function forForgotPasswordForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.forgotPasswordForm);
+}
+export function forResetCodeForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.resetCodeForm);
+}
+export function forResetPasswordForm(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.resetPasswordForm);
+}
+export function forSignUpOptions(t: Dictionary): Dictionary {
+  return sliceDictionary(t, SLICES.signUpOptions);
 }

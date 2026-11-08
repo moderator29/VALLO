@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forEmailAuthForm } from "@/lib/i18n/slice";
 import { chooserEmail, signUpWithEmail } from "@/lib/auth/actions";
 import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
 import { resolveProviderStates } from "@/lib/auth/providers";
@@ -38,7 +39,7 @@ export default async function SignUpEmailPage({
       <FunnelBeacon step="signup_opened" />
       <EmailAuthForm
         mode="sign-up"
-        t={t}
+        t={forEmailAuthForm(t)}
         action={signUpWithEmail}
         next={next}
         initialEmail={emailFromQuery(email) || (await chooserEmail())}
