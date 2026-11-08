@@ -781,12 +781,18 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <rect x="3" y="13.5" width="18" height="7.5" rx="2" />
     </>
   ),
-  // [key]
+  /* The Vallo house key (the founder, 8 November 2026: replace the generic
+     key everywhere with something of our own). The bow is a house, roof and
+     walls on the family's radius, with a round window that doubles as the
+     key ring; the blade drops from the door with two teeth. It reads as
+     "your home" at 12px, where a plain key read as a password. */
   key: (
     <>
-      <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
-      <path d="m21 2-9.6 9.6" />
-      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="M11.4 2.45a1 1 0 0 1 1.2 0l4.6 3.45a2 2 0 0 1 .8 1.6V11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7.5a2 2 0 0 1 .8-1.6z" />
+      <circle cx="12" cy="8.25" r="1.5" />
+      <path d="M12 13v8.5" />
+      <path d="M12 16.5h3" />
+      <path d="M12 19.5h2" />
     </>
   ),
   // [x]: never the typographic multiplication sign.
@@ -1628,12 +1634,13 @@ const FILLED: Partial<Record<UiIconName, FilledTwin>> = {
     ),
   },
   key: {
-    body: <circle cx="7.5" cy="15.5" r="5.5" />,
-    cut: <circle cx="7.5" cy="15.5" r="1.5" fill="black" stroke="none" />,
+    body: <path d="M11.4 2.45a1 1 0 0 1 1.2 0l4.6 3.45a2 2 0 0 1 .8 1.6V11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7.5a2 2 0 0 1 .8-1.6z" />,
+    cut: <circle cx="12" cy="8.25" r="1.6" fill="black" stroke="none" />,
     keep: (
       <>
-        <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
-        <path d="m21 2-9.6 9.6" />
+        <path d="M12 13v8.5" />
+        <path d="M12 16.5h3" />
+        <path d="M12 19.5h2" />
       </>
     ),
   },
