@@ -82,3 +82,25 @@ grant select, insert, update, delete on all tables in schema public to authentic
 grant select on all tables in schema public to anon;
 grant execute on function auth.uid() to anon, authenticated;
 create schema supabase_migrations; create table supabase_migrations.schema_migrations (version text primary key, statements text[], name text);
+-- Trust and Safety stand-ins
+do $$ begin create type public.staff_scope as enum ('listing_approval','kyc_review','moderation','support','agreements','guarantee','finance','compliance','operations'); exception when duplicate_object then null; end $$;
+do $$ begin create type public.report_status as enum ('open','reviewing','resolved','dismissed','withdrawn'); exception when duplicate_object then null; end $$;
+alter table public.reports alter column status drop default;
+alter table public.reports alter column status type public.report_status using status::public.report_status;
+alter table public.reports alter column status set default 'open';
+alter table public.reports add column if not exists category text, add column if not exists resolved_at timestamptz, add column if not exists resolved_by uuid;
+alter table public.reports add constraint reports_category_chk check (category is null or category in ('off_platform_payment','scam','unsafe','not_as_described','unavailable','offensive','duplicate','other'));
+create table if not exists public.staff_grants (user_id uuid, scopes public.staff_scope[], revoked_at timestamptz);
+create table if not exists public.staff_handbook_acks (user_id uuid, version int);
+create or replace function private.staff_handbook_version() returns int language sql stable as $$ select 1 $$;
+create or replace function private.console_step_up_ok() returns boolean language sql stable as $$ select true $$;
+create or replace function private.staff_can(p_user uuid, p_scope text) returns boolean language sql stable security definer set search_path to '' as $$
+  select p_user is not null and (exists (select 1 from public.user_roles r where r.user_id = p_user and r.role in ('admin','super_admin'))
+    or exists (select 1 from public.staff_grants g where g.user_id = p_user and g.revoked_at is null and p_scope = any (g.scopes::text[])
+               and exists (select 1 from public.staff_handbook_acks a where a.user_id = p_user and a.version = private.staff_handbook_version()))) $$;
+create table if not exists public.messages (id uuid primary key default gen_random_uuid(), conversation_id uuid, sender_id uuid, body text, created_at timestamptz default now());
+alter table public.posts add column if not exists title text, add column if not exists removed_at timestamptz, add column if not exists hold_reason text;
+alter table public.circle_communities add column if not exists status text default 'live', add column if not exists member_count int default 0, add column if not exists post_count int default 0,
+  add column if not exists last_activity_at timestamptz, add column if not exists created_by uuid, add column if not exists created_at timestamptz default now();
+grant execute on all functions in schema private to authenticated;
+grant select, insert, update, delete on all tables in schema public to authenticated;

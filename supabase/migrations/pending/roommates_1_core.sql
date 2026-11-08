@@ -142,9 +142,15 @@ create trigger roommate_profiles_set_updated_at before update on public.roommate
   for each row execute function public.set_updated_at();
 
 -- A held profile (staff moderation) stays held: the owner cannot lift it.
+-- Not security definer on purpose: it must see the caller's own role.
 create or replace function private.roommate_profile_guard()
-returns trigger language plpgsql security definer set search_path to '' as $$
+returns trigger language plpgsql set search_path to '' as $$
 begin
+  -- Staff tools write through SECURITY DEFINER functions (current_user is
+  -- then the function owner), and those functions check the staff scope.
+  if current_user not in ('authenticated', 'anon') then
+    return new;
+  end if;
   if tg_op = 'UPDATE' and old.status = 'held' and new.status <> 'held' and not private.is_staff() then
     raise exception 'This profile is under review. Our team will be in touch.' using errcode = 'RM101';
   end if;
@@ -246,9 +252,9 @@ create trigger roommate_listings_limit before insert on public.roommate_listings
 -- never live without the declaration of the right to offer it, and a listing
 -- linked to a Vallo property must point at a published one.
 create or replace function private.roommate_listing_guard()
-returns trigger language plpgsql security definer set search_path to '' as $$
+returns trigger language plpgsql set search_path to '' as $$
 declare
-  staff boolean := private.is_staff();
+  staff boolean := private.is_staff() or current_user not in ('authenticated', 'anon');
 begin
   if tg_op = 'UPDATE' and not staff then
     if old.status = 'removed' then
