@@ -273,6 +273,7 @@ export function CommentsSheet({
         (row) => ({ id: row.id, parentId: row.parentId, deleted: row.removed }),
       ),
     );
+    banner.success("Comment deleted");
     router.refresh();
     return true;
   };

@@ -301,7 +301,10 @@ export function InspectionSheet({
   /* A move made from a sheet: the sheet draws the refusal itself, and on
      success the card re-reads. */
   function settle(result: StepResult): StepResult {
-    if (result.ok) startTransition(() => router.refresh());
+    if (result.ok) {
+      banner.success("Updated");
+      startTransition(() => router.refresh());
+    }
     return result;
   }
   const answerWith = (state: "PROPOSED" | "DECLINED", when: string | null, note: string) =>

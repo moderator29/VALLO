@@ -24,6 +24,7 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
         banner.error(result.error);
         return;
       }
+      banner.success("Reply saved");
       setTitle("");
       setBody("");
       router.refresh();
@@ -37,6 +38,7 @@ export function ReplyTemplatesCard({ templates }: { templates: ReplyTemplate[] }
         banner.error(result.error);
         return;
       }
+      banner.success("Reply removed");
       router.refresh();
     });
   }

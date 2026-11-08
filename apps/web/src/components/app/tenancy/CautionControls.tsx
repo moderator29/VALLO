@@ -34,7 +34,7 @@ type Copy = Dictionary["afterTheGate"]["tenancy"];
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  function run(work: () => Promise<{ ok: boolean; error?: string }>) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, successMsg: string) {
     start(async () => {
       try {
         const result = await work();
@@ -42,6 +42,7 @@ function useRun() {
           banner.error(result.error ?? "That did not go through. Try again.");
           return;
         }
+        banner.success(successMsg);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -74,7 +75,8 @@ export function DeductionAnswer({
                 tenancyId,
                 deductionId,
                 answer: "accepted",
-              })
+              }),
+              "Deduction accepted"
             )
           }
         >
@@ -90,7 +92,8 @@ export function DeductionAnswer({
                 tenancyId,
                 deductionId,
                 answer: "disputed",
-              })
+              }),
+              "Deduction disputed"
             )
           }
         >
@@ -140,7 +143,8 @@ export function ProposeDeduction({
             amountNaira: amount,
             photoId,
             note,
-          })
+          }),
+          "Deduction proposed"
         );
       }}
     >
@@ -342,7 +346,7 @@ export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string
       className="mt-xs grid gap-sm"
       onSubmit={(event) => {
         event.preventDefault();
-        run(() => contestCautionReturn({ tenancyId, returnId, note }));
+        run(() => contestCautionReturn({ tenancyId, returnId, note }), "Return contested");
       }}
     >
       <Field label={copy.contestNote}>
@@ -365,7 +369,7 @@ export function EscalateCaution({ tenancyId, obligationId, copy }: { tenancyId: 
         full
         loading={pending}
         disabled={pending}
-        onClick={() => run(() => escalateCaution({ tenancyId, obligationId }))}
+        onClick={() => run(() => escalateCaution({ tenancyId, obligationId }), "Escalated to Vallo Guarantee")}
       >
         {copy.escalateSubmit}
       </Button>
