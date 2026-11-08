@@ -282,6 +282,94 @@ export async function withdrawCircleInvite(input: { inviteId: string }): Promise
   return ok(null);
 }
 
+/* ------------------------------------------------------------------ plans */
+
+const planSchema = z.object({
+  communityId: uuid,
+  title: z.string().trim().min(3, "Give it a title of 3 letters or more.").max(140, "Keep the title to 140 characters."),
+  description: z.string().trim().max(2000, "Keep it to 2,000 characters."),
+  maxMembers: z.number().int().min(2).max(100).nullable(),
+  scheduledAt: z.string().nullable(),
+  location: z.string().trim().max(200, "Keep the location to 200 characters.").nullable(),
+});
+
+export async function createCirclePlan(input: z.input<typeof planSchema>): Promise<ActionResult<{ id: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(planSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const { data, error } = await who.db
+    .from("circle_plans")
+    .insert({
+      community_id: parsed.data.communityId,
+      organiser_id: who.userId,
+      title: parsed.data.title,
+      description: parsed.data.description,
+      max_members: parsed.data.maxMembers,
+      scheduled_at: parsed.data.scheduledAt,
+      location: parsed.data.location,
+    })
+    .select("id")
+    .single();
+  if (error || !data) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok({ id: (data as { id: string }).id });
+}
+
+export async function updateCirclePlan(input: {
+  planId: string;
+  status: "completed" | "cancelled";
+}): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(
+    z.object({
+      planId: uuid,
+      status: z.enum(["completed", "cancelled"]),
+    }),
+    input,
+  );
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_plans")
+    .update({ status: parsed.data.status, updated_at: new Date().toISOString() })
+    .eq("id", parsed.data.planId);
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+export async function signUpForPlan(input: { planId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ planId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_plan_signups")
+    .insert({ plan_id: parsed.data.planId, user_id: who.userId });
+  if (error) {
+    if (error.code === "23505") return fail("You have already signed up for this plan.");
+    return fail(wordsFor(error));
+  }
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+export async function withdrawFromPlan(input: { planId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ planId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_plan_signups")
+    .delete()
+    .eq("plan_id", parsed.data.planId)
+    .eq("user_id", who.userId);
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
 /* --------------------------------------------------------- shared shortlists */
 
 export async function shareShortlist(input: {

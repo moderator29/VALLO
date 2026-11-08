@@ -642,6 +642,88 @@ export async function readSentInvites(communityId: string): Promise<CircleInvite
   }));
 }
 
+/* ------------------------------------------------------------------ plans */
+
+export type CirclePlanView = {
+  id: string;
+  communityId: string;
+  title: string;
+  description: string;
+  status: "open" | "full" | "completed" | "cancelled";
+  maxMembers: number | null;
+  scheduledAt: string | null;
+  location: string | null;
+  organiser: CircleAuthor | null;
+  signupCount: number;
+  signedUp: boolean;
+  isOrganiser: boolean;
+  createdAt: string;
+};
+
+export async function readCommunityPlans(communityId: string): Promise<CirclePlanView[]> {
+  const v = await viewer();
+  if (!v) return [];
+  const { data, error } = await v.db
+    .from("circle_plans")
+    .select("id, community_id, organiser_id, title, description, status, max_members, scheduled_at, location, created_at")
+    .eq("community_id", communityId)
+    .in("status", ["open", "full"])
+    .order("created_at", { ascending: false })
+    .limit(30);
+  await reportReadFault("read.circle.plans", ...faults(error));
+  if (error) return [];
+  const rows = (data ?? []) as {
+    id: string;
+    community_id: string;
+    organiser_id: string;
+    title: string;
+    description: string;
+    status: "open" | "full" | "completed" | "cancelled";
+    max_members: number | null;
+    scheduled_at: string | null;
+    location: string | null;
+    created_at: string;
+  }[];
+  if (rows.length === 0) return [];
+  const planIds = rows.map((r) => r.id);
+  const organiserIds = [...new Set(rows.map((r) => r.organiser_id))];
+  const [organisers, signups, mySignups] = await Promise.all([
+    readAuthors(v.db, organiserIds),
+    v.db
+      .from("circle_plan_signups")
+      .select("plan_id", { count: "exact" })
+      .in("plan_id", planIds),
+    v.id
+      ? v.db
+          .from("circle_plan_signups")
+          .select("plan_id")
+          .eq("user_id", v.id)
+          .in("plan_id", planIds)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  await reportReadFault("read.circle.plans", ...faults(signups.error, mySignups.error));
+  const countByPlan = new Map<string, number>();
+  for (const row of (signups.data ?? []) as { plan_id: string }[]) {
+    countByPlan.set(row.plan_id, (countByPlan.get(row.plan_id) ?? 0) + 1);
+  }
+  const mySet = new Set(((mySignups.data ?? []) as { plan_id: string }[]).map((s) => s.plan_id));
+  return rows.map((r) => ({
+    id: r.id,
+    communityId: r.community_id,
+    title: r.title,
+    description: r.description,
+    status: r.status,
+    maxMembers: r.max_members,
+    scheduledAt: r.scheduled_at,
+    location: r.location,
+    organiser: organisers.get(r.organiser_id) ?? null,
+    signupCount: countByPlan.get(r.id) ?? 0,
+    signedUp: mySet.has(r.id),
+    isOrganiser: r.organiser_id === v.id,
+    createdAt: r.created_at,
+  }));
+}
+
 /* --------------------------------------------------------- shared shortlists */
 
 export type SharedShortlistView = {
