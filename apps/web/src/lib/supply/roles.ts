@@ -1,4 +1,5 @@
 import { VERIFICATION_ORDER, type RungDefinition } from "@/lib/trust/verification";
+import { getDictionary } from "@vallo/i18n";
 
 /**
  * THE SUPPLY SIDE, AS DATA. ONE VOCABULARY, READ BY EVERY SURFACE.
@@ -221,7 +222,6 @@ export type StandingCopy = {
 };
 
 /** SW11: source of truth is now `packages/i18n/src/locales/workspace.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
 const _ws = getDictionary("en").workspaceStanding;
 export const WORKSPACE_STANDING_COPY: Record<WorkspaceStanding, StandingCopy> = {
   active: { ..._ws.active, selectable: true },
@@ -423,10 +423,9 @@ export const DATED_FACTS = {
  * where it stands and the mark stays dark, which is worth more than a badge
  * that lies.
  */
-export const PROOF_PENDING_COPY = {
-  ownership: "Ownership document received, not yet checked.",
-  mandate: "Mandate received, not yet checked.",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/supply-roles.en.ts`. */
+const _sr = getDictionary("en").supplyRoles;
+export const PROOF_PENDING_COPY = _sr.proofPending;
 
 /**
  * THE ANSWER THAT KEEPS NINE OWNERS IN TEN IN THE PRODUCT.
@@ -446,7 +445,7 @@ export const PROOF_PENDING_COPY = {
  * becomes copy. What ships is the behaviour, which needs no citation.
  */
 export const NO_DOCUMENT_ANSWER = {
-  label: "I have none of these",
+  label: _sr.noDocumentLabel,
   reassurance:
     "That is a normal answer in Nigeria and it does not stop you listing. Your listing goes live the same way; it just will not carry the ownership mark until you can show us something.",
 } as const;

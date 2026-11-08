@@ -105,6 +105,16 @@ import { directoryCopyEn, directoryKindPluralEn, directoryKindOneEn } from "./di
 import { workspaceStandingEn } from "./workspace.en";
 /* Wallet/money copy (SW11): move, onboarding, phone taken, waiting. */
 import { walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletWaitingEn } from "./wallet.en";
+/* Settings search copy (SW11). */
+import { settingsSearchEn } from "./settings-search.en";
+/* Inspection report copy (SW11). */
+import { roomCopyEn, instantRoomCopyEn } from "./inspections.en";
+/* Supply roles copy (SW11). */
+import { proofPendingEn, noDocumentLabelEn } from "./supply-roles.en";
+/* Places copy (SW11). */
+import { placesCopyEn, placesFailureEn } from "./places.en";
+/* Leaderboard copy (SW11). */
+import { leaderboardEn } from "./leaderboard.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -7402,6 +7412,25 @@ export const en = {
     phoneTaken: walletPhoneTakenEn,
     waiting: walletWaitingEn,
   },
+  /* Settings search copy (SW11). */
+  settingsSearch: settingsSearchEn,
+  /* Inspection report copy (SW11). */
+  inspections: {
+    rooms: roomCopyEn,
+    instantRoom: instantRoomCopyEn,
+  },
+  /* Supply roles copy (SW11). */
+  supplyRoles: {
+    proofPending: proofPendingEn,
+    noDocumentLabel: noDocumentLabelEn,
+  },
+  /* Places copy (SW11). */
+  places: {
+    copy: placesCopyEn,
+    failure: placesFailureEn,
+  },
+  /* Leaderboard copy (SW11). */
+  leaderboard: leaderboardEn,
 
 };
 

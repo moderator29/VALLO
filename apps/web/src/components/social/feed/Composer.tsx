@@ -6,7 +6,6 @@ import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
 import { notePublished } from "./publish-flight";
-import { toast } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -478,7 +477,7 @@ export function Composer({
            recommendation 2; SuccessSheet's own rule: small news keeps a quiet
            toast). The payoff is the card itself landing at the top of the feed;
            this is the one plain sentence of what happened, said once. */
-        toast.success(
+        banner.success(
           parentId
             ? "Replied."
             : areaId && areaName
