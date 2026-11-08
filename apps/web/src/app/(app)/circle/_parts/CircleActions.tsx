@@ -6,12 +6,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import {
   acceptAnswer,
+  acceptCircleInvite,
   decideJoinRequest,
+  declineCircleInvite,
   followQuestion,
   joinCommunity,
   leaveCommunity,
   replyInCircle,
+  sendCircleInvite,
   setHelpful,
+  withdrawCircleInvite,
 } from "@/lib/features/circle/actions";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
@@ -226,6 +230,90 @@ export function ReplyBox({ rootId, parentId, question }: { rootId: string; paren
         </Button>
       </div>
     </form>
+  );
+}
+
+export function InviteActions({ inviteId, isMine }: { inviteId: string; isMine: boolean }) {
+  const router = useRouter();
+  const { pending, run } = useRun();
+  if (isMine) {
+    return (
+      <Button
+        variant="quiet"
+        size="sm"
+        disabled={pending}
+        data-testid="circle-withdraw-invite"
+        onClick={() =>
+          run(async () => withdrawCircleInvite({ inviteId }), undefined, () => {
+            banner.success(CIRCLE_COPY.invite.withdrawn);
+            router.refresh();
+          })
+        }
+      >
+        {CIRCLE_COPY.invite.withdraw}
+      </Button>
+    );
+  }
+  return (
+    <span className="flex items-center gap-sm">
+      <Button
+        variant="primary"
+        size="sm"
+        disabled={pending}
+        data-testid="circle-accept-invite"
+        onClick={() =>
+          run(async () => acceptCircleInvite({ inviteId }), undefined, () => {
+            banner.success(CIRCLE_COPY.invite.accepted);
+            router.refresh();
+          })
+        }
+      >
+        {CIRCLE_COPY.invite.accept}
+      </Button>
+      <Button
+        variant="quiet"
+        size="sm"
+        disabled={pending}
+        data-testid="circle-decline-invite"
+        onClick={() =>
+          run(async () => declineCircleInvite({ inviteId }), undefined, () => {
+            banner.success(CIRCLE_COPY.invite.declined);
+            router.refresh();
+          })
+        }
+      >
+        {CIRCLE_COPY.invite.decline}
+      </Button>
+    </span>
+  );
+}
+
+export function SendInviteButton({
+  communityId,
+  inviteeId,
+  inviteeName,
+}: {
+  communityId: string;
+  inviteeId: string;
+  inviteeName: string;
+}) {
+  const router = useRouter();
+  const { pending, run } = useRun();
+  return (
+    <Button
+      variant="secondary"
+      size="sm"
+      loading={pending}
+      data-testid="circle-send-invite"
+      onClick={() =>
+        run(async () => sendCircleInvite({ communityId, inviteeId }), undefined, () => {
+          banner.success(`${CIRCLE_COPY.invite.inviteSent} to ${inviteeName}`);
+          router.refresh();
+        })
+      }
+    >
+      {CIRCLE_COPY.invite.inviteMember}
+    </Button>
   );
 }
 

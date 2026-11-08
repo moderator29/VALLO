@@ -537,6 +537,113 @@ export async function readMyCommunities(): Promise<{ signedIn: boolean; live: bo
   return { signedIn: true, live: true, communities: out.sort((a, b) => a.name.localeCompare(b.name)) };
 }
 
+/* ---------------------------------------------------------------- invites */
+
+export type CircleInviteView = {
+  id: string;
+  communityId: string;
+  communityName: string;
+  communitySlug: string;
+  inviter: CircleAuthor | null;
+  invitee: CircleAuthor | null;
+  status: "pending" | "accepted" | "declined" | "withdrawn";
+  createdAt: string;
+  decidedAt: string | null;
+  isMine: boolean;
+};
+
+export async function readMyInvites(): Promise<{ signedIn: boolean; invites: CircleInviteView[] }> {
+  const v = await viewer();
+  if (!v?.id) return { signedIn: false, invites: [] };
+  const { data, error } = await v.db
+    .from("circle_invites")
+    .select("id, community_id, inviter_id, invitee_id, status, created_at, decided_at")
+    .eq("invitee_id", v.id)
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  await reportReadFault("read.circle.invites", ...faults(error));
+  if (error) return { signedIn: true, invites: [] };
+  const rows = (data ?? []) as {
+    id: string;
+    community_id: string;
+    inviter_id: string;
+    invitee_id: string;
+    status: "pending" | "accepted" | "declined" | "withdrawn";
+    created_at: string;
+    decided_at: string | null;
+  }[];
+  if (rows.length === 0) return { signedIn: true, invites: [] };
+  const communityIds = [...new Set(rows.map((r) => r.community_id))];
+  const inviterIds = [...new Set(rows.map((r) => r.inviter_id))];
+  const [communities, inviters] = await Promise.all([
+    v.db.from("circle_communities").select("id, slug, name").in("id", communityIds),
+    readAuthors(v.db, inviterIds),
+  ]);
+  await reportReadFault("read.circle.invites", ...faults(communities.error));
+  const byCommunity = new Map(
+    ((communities.data ?? []) as { id: string; slug: string; name: string }[]).map((c) => [c.id, c]),
+  );
+  return {
+    signedIn: true,
+    invites: rows.map((r) => {
+      const c = byCommunity.get(r.community_id);
+      return {
+        id: r.id,
+        communityId: r.community_id,
+        communityName: c?.name ?? "",
+        communitySlug: c?.slug ?? "",
+        inviter: inviters.get(r.inviter_id) ?? null,
+        invitee: null,
+        status: r.status,
+        createdAt: r.created_at,
+        decidedAt: r.decided_at,
+        isMine: false,
+      };
+    }),
+  };
+}
+
+export async function readSentInvites(communityId: string): Promise<CircleInviteView[]> {
+  const v = await viewer();
+  if (!v?.id) return [];
+  const { data, error } = await v.db
+    .from("circle_invites")
+    .select("id, community_id, inviter_id, invitee_id, status, created_at, decided_at")
+    .eq("community_id", communityId)
+    .eq("inviter_id", v.id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  await reportReadFault("read.circle.sent-invites", ...faults(error));
+  if (error) return [];
+  const rows = (data ?? []) as {
+    id: string;
+    community_id: string;
+    inviter_id: string;
+    invitee_id: string;
+    status: "pending" | "accepted" | "declined" | "withdrawn";
+    created_at: string;
+    decided_at: string | null;
+  }[];
+  if (rows.length === 0) return [];
+  const inviteeIds = [...new Set(rows.map((r) => r.invitee_id))];
+  const invitees = await readAuthors(v.db, inviteeIds);
+  return rows.map((r) => ({
+    id: r.id,
+    communityId: r.community_id,
+    communityName: "",
+    communitySlug: "",
+    inviter: null,
+    invitee: invitees.get(r.invitee_id) ?? null,
+    status: r.status,
+    createdAt: r.created_at,
+    decidedAt: r.decided_at,
+    isMine: true,
+  }));
+}
+
+/* ---------------------------------------------------------------- listings */
+
 /** A live listing to attach to a question ("Ask about this place"), or null. Never a draft. */
 export async function readListingForAsk(id: unknown): Promise<{ id: string; title: string; area: string | null } | null> {
   if (typeof id !== "string" || !/^[0-9a-f-]{36}$/i.test(id)) return null;

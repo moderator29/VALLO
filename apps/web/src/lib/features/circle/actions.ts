@@ -216,6 +216,74 @@ export async function acceptAnswer(input: { questionId: string; answerId: string
   return ok({ acceptedId: data === "accepted" ? parsed.data.answerId : null });
 }
 
+/* ---------------------------------------------------------------- invites */
+
+export async function sendCircleInvite(input: {
+  communityId: string;
+  inviteeId: string;
+}): Promise<ActionResult<{ id: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ communityId: uuid, inviteeId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  if (parsed.data.inviteeId === who.userId) return fail("You cannot invite yourself.");
+  const { data, error } = await who.db
+    .from("circle_invites")
+    .insert({
+      community_id: parsed.data.communityId,
+      inviter_id: who.userId,
+      invitee_id: parsed.data.inviteeId,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    if (error?.code === "23505") return fail("That person already has a pending invite to this community.");
+    return fail(wordsFor(error));
+  }
+  revalidatePath("/circle");
+  return ok({ id: (data as { id: string }).id });
+}
+
+export async function acceptCircleInvite(input: { inviteId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ inviteId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db.rpc("accept_circle_invite", { p_invite_id: parsed.data.inviteId });
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+export async function declineCircleInvite(input: { inviteId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ inviteId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db.rpc("decline_circle_invite", { p_invite_id: parsed.data.inviteId });
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+export async function withdrawCircleInvite(input: { inviteId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ inviteId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_invites")
+    .update({ status: "withdrawn", decided_at: new Date().toISOString() })
+    .eq("id", parsed.data.inviteId)
+    .eq("inviter_id", who.userId)
+    .eq("status", "pending");
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+/* ---------------------------------------------------------------- follows */
+
 export async function followQuestion(input: { questionId: string; on: boolean }): Promise<ActionResult<{ on: boolean }>> {
   const who = await member();
   if ("error" in who) return fail(who.error);

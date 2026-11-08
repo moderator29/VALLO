@@ -7,10 +7,11 @@ import { CircleBanner, CirclePostCard, CircleTabs, type CircleFace } from "@/com
 import { ButtonLink } from "@/components/ui/Button";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_SORTS, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
-import { readCircleHome, readCirclePosts, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
+import { readCircleHome, readCirclePosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 
 import { CircleEmpty, CommunityCard, StarterCommunities } from "./_parts/CircleCards";
+import { InviteList } from "./_parts/InviteList";
 
 export const metadata: Metadata = { title: CIRCLE_COPY.title, description: CIRCLE_COPY.tagline };
 export const dynamic = "force-dynamic";
@@ -71,9 +72,11 @@ async function TabBody({
         </Section>
       );
     }
+    const { invites } = home.signedIn ? await readMyInvites() : { invites: [] };
     return (
       <div className="nf-circle nf-circle--split">
         <div className="nf-circle">
+          {invites.length > 0 && <InviteList invites={invites} />}
           <Section title={C.sections.trending} more="/circle?tab=discussions">
             {home.trending.length ? <PostList posts={home.trending} now={now} /> : <CircleEmpty>{C.empty.posts}</CircleEmpty>}
           </Section>
