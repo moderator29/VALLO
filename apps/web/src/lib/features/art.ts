@@ -22,12 +22,19 @@ export type ArtSlot = {
 };
 
 export const FEATURE_ART = {
-  roommatesHero: { src: "/brand/photos/living-room-dusk.webp", fit: "cover", focus: "60% 50%" },
-  roommatesPromo: { src: "/brand/photos/bedroom-02.webp", fit: "cover", focus: "50% 50%" },
-  roommatesOnboarding: { src: "/brand/photos/bedroom-01.webp", fit: "cover", focus: "50% 60%" },
-  roommatesPublished: { src: "/brand/photos/living-room-day.webp", fit: "cover", focus: "50% 50%" },
-  circleHero: { src: "/brand/photos/villa-exterior-sunset.webp", fit: "cover", focus: "50% 50%" },
-  circlePromo: { src: "/brand/photos/terrace-lounge-night.webp", fit: "cover", focus: "50% 50%" },
+  // The founder's commissioned people art (main @ 2b0aecea, 8 November 2026),
+  // sliced to WebP at 1x and 2x in `public/brand/features`. The cut-outs
+  // (`contain`) are people on a transparent ground, stood at the banner's end
+  // edge over a Vallo gradient; the two scene plates (`cover`) carry their own
+  // night-blue ground. `backdrop` is the empty blue-hour room behind a banner
+  // when a cut-out needs a bed of its own.
+  roommatesHero: { src: "/brand/features/roommatesHero.webp", fit: "contain", focus: "50% 50%" },
+  roommatesPromo: { src: "/brand/features/roommatesPromo.webp", fit: "contain", focus: "50% 50%" },
+  roommatesOnboarding: { src: "/brand/features/roommatesOnboarding.webp", fit: "cover", focus: "50% 45%" },
+  roommatesPublished: { src: "/brand/features/roommatesPublished.webp", fit: "contain", focus: "50% 50%" },
+  circleHero: { src: "/brand/features/circleHero.webp", fit: "cover", focus: "50% 40%" },
+  circlePromo: { src: "/brand/features/circlePromo.webp", fit: "contain", focus: "50% 50%" },
+  backdrop: { src: "/brand/features/backdrop.webp", fit: "cover", focus: "50% 50%" },
 } as const satisfies Record<string, ArtSlot>;
 
 export type FeatureArtName = keyof typeof FEATURE_ART;
