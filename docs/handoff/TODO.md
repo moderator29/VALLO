@@ -362,9 +362,9 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Banner moments | ~198/561 | ~363 (audit round 2 still ahead) |
 | Pages (PAGES 1-5) | 7/7 | 0 |
 | Frontend (FE 1-10) | 15/15 | 0 (all items done or assessed as not needed) |
-| Native (NATIVE 1-8) | 20/26 | 6 items need build 1.0.2 or device testing |
+| Native (NATIVE 1-8) | 21/26 | 5 items need build 1.0.2 or device testing |
 | Features (all sections) | 14/14 | 0 (all section D/E/F features done) |
-| Motion/Animation | 37/41 | 4 left (2.3 mostly done; remaining are JS-dependent or future) |
+| Motion/Animation | 41/41 | 0 (gyro tilt JS wired, chat bubble animation wired, all CSS built) |
 | Platform Sweep | 39/39 | 0 (all admin, perf, light mode done) |
 | Admin Panel | 8/8 | 0 |
 | UX Quality | 10/10 | 0 |
@@ -372,5 +372,6 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Light Mode | 4/4 | 0 |
 | Performance | 5/5 | 0 |
 | Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
-| SW11 i18n migration | 6+ files | circle, reminders, social, pro, experience-social migrated; balance-copy, places-model next |
+| SW11 i18n migration | 18 files | circle, reminders, social, pro, safety, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search migrated |
 | Backend audit | R-04, D-02 | SQL migrations written, founder to run |
+| Banner avatar | done | ToastItem.avatarUrl infrastructure built |
