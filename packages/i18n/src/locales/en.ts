@@ -93,6 +93,8 @@ import {
 } from "./social.en";
 /* The reminders screen's words, moved from lib/features/notices/copy.ts (SW11). */
 import { remindersEn } from "./reminders.en";
+/* The /pro page's words (SW11), moved from app/(app)/pro/pro-copy.ts. */
+import { proEn } from "./pro.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -784,6 +786,7 @@ export const en = {
     bot: socialBotEn,
     pidgin: socialPidginEn,
     followFirst: socialFollowFirstEn,
+    contactPolicy: socialContactPolicyEn,
   },
 
   /**
@@ -7365,6 +7368,8 @@ export const en = {
 
   /* Circle (SW11): the community feature. */
   circle: circleEn,
+  /* The /pro page (SW11). */
+  pro: proEn,
 
 };
 
