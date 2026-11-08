@@ -40,15 +40,15 @@
 :root form.nf-composer .nf-composer__box .nf-composer__tool {
   grid-column: 1;
   grid-row: 1;
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
   color: var(--nf-content-primary);
 }
 :root:root form.nf-composer .nf-composer__box .nf-composer__field {
   grid-column: 2;
   grid-row: 1;
   align-self: center;
-  min-block-size: 2.5rem;
+  min-block-size: 2.75rem;
   margin: 0;
   padding: calc(var(--nf-space-xs) + 1px) var(--nf-space-3xs);
   line-height: 1.4;
