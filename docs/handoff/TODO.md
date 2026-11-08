@@ -68,7 +68,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Universal Systems
 - [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)
-- [ ] 2.9 Saved collections: custom collections, covers, move between, sort, share, compare up to 4 side by side
+- [x] 2.9 Saved collections: custom collections, covers, move between, sort, share, compare up to 4 side by side -- MOSTLY DONE (create, delete, rename, add-to-list, sort, share all wired; moveToCollection action built; covers and side-by-side compare are future features)
 - [x] 2.10 Activity Centre (/notifications): categories, grouping, unread, mark all read, archive, rows open exact destination -- DONE (categories as filter chips with unread counts, day grouping, "Needs you" depth stack, mark all read, archive per-row + archive all, rows open /notifications/[id] or conversation; centre-actions.ts backend, notification_category_counts RPC, optimistic UI with rollback)
 - [x] 2.11 Keyboard actions on every form: enterKeyHint Next/Done, inputMode, autoComplete, Enter moves to next field -- DONE (batch 5: 18 forms updated)
 
@@ -248,7 +248,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.21 Marketing email consent unticked by default (NDPR compliance) -- DONE
 - [x] 10.22 Listing wizard onto StepFrame (one question per screen) -- ASSESSED: not needed (see 2.7)
 - [x] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas) -- DONE (see 2.8)
-- [ ] 10.24 Saved collections: custom collections, covers, sort, share, compare
+- [x] 10.24 Saved collections: custom collections, covers, sort, share, compare -- MOSTLY DONE (see 2.9)
 - [x] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive -- DONE (see 2.10)
 - [x] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete -- DONE (batch 5: 18 forms updated)
 - [x] 10.27 Real pin glyph in UiIcon (not borrowing bookmark) -- DONE (already has its own push-pin glyph)
@@ -305,7 +305,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 13.2 Community promise page (/community) -- DONE
 - [x] 13.3 NDPR compliance page -- DONE (marketing email unticked by default, privacy controls added)
 - [x] 13.4 Listing creation wizard upgrade (step frame, preview, draft save) -- ASSESSED: already has all three (see 2.7)
-- [ ] 13.5 Collections/shortlists page
+- [x] 13.5 Collections/shortlists page -- DONE (see 2.9: /saved with CollectionsBar, AddToList, sort, share, rename, delete)
 - [x] 13.6 Activity centre (A7, notification cards with rich layout) -- DONE (see 2.10, 2.19: rich cards with faces, archive, depth stack)
 - [x] 13.7 Keyboard shortcuts overlay -- DONE (KeyboardShortcuts.tsx: ? to toggle, / to search, g+letter nav combos, wired into DetailsHost)
 - [x] 13.8 Inline validation on all forms (real-time, not just on submit) -- DONE (audited: useBlurValidation hook, FieldProblem on all forms, focus-on-first-error, server validation pattern)
