@@ -70,7 +70,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions
 - [ ] 2.9 Saved collections: custom collections, covers, move between, sort, share, compare up to 4 side by side
 - [ ] 2.10 Activity Centre (/notifications): categories, grouping, unread, mark all read, archive, rows open exact destination
-- [ ] 2.11 Keyboard actions on every form: enterKeyHint Next/Done, inputMode, autoComplete, Enter moves to next field
+- [x] 2.11 Keyboard actions on every form: enterKeyHint Next/Done, inputMode, autoComplete, Enter moves to next field -- DONE (batch 5: 18 forms updated)
 
 ### Round 1 Follow-ups
 - [x] 2.12 Success words for unblock, payment method remove/default, hours saved -- DONE (payment method actions have banners; unblock already had one; hours saved is a future feature)
