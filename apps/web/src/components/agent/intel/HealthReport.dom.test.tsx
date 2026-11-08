@@ -66,7 +66,9 @@ const entry = (theme: "dark" | "light", kind: "needs" | "whole") => `
     fix: needs ? { key: "no-viewing", values: { enquired: 3 } } : null,
     now: NOW,
   });
-  mount(<div style={{ maxWidth: 640, padding: 16 }}><HealthReport health={health} listingId="00000000-0000-4000-8000-000000000001" t={getDictionary("en")} locale="en" /></div>);
+  import { ToastHost } from "@/components/ui/ToastHost";
+  /* "Confirmed" is said by the one top banner (founder, 7 November 2026). */
+  mount(<div style={{ maxWidth: 640, padding: 16 }}><HealthReport health={health} listingId="00000000-0000-4000-8000-000000000001" t={getDictionary("en")} locale="en" /><ToastHost /></div>);
 `;
 
 const ROWS = ["floorPlan", "amenities", "inspection", "photos", "availability", "verification"];

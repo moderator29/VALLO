@@ -348,7 +348,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/leaderboard` | PAGES | PageFrame top | yes | yes | yes | LeaderboardScreen top is PageHeader large; loading in shape (was generic) |
+| `/leaderboard` | PAGES | PageFrame top | yes | yes | yes | LeaderboardScreen top is PageHeader large; loading in shape (was generic); header lifted above the stage (seen 390/360 light and dark) |
 
 ## Member: legal
 
@@ -637,7 +637,7 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/support` | PAGES | own | yes | yes | yes | kept: SupportHero greeting top; floating Back to move into a header (job 6) |
+| `/support` | PAGES | PageFrame | yes | yes | yes | E2: Back inside the page header (PageFrame "Help and support"), the hero below; loading matches |
 | `/support/messages` | MSG |  |  |  |  |  |
 | `/support/messages/[id]` | MSG |  |  |  |  |  |
 | `/support/new` | PAGES | StepFrame | yes | yes | yes | R3 job 3: four steps (kind as OptionCards, topic, details, photo and Send); loading in the frame shape. Seen via /preview/support?screen=new |
