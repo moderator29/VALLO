@@ -38,7 +38,7 @@ export function FirstRunCard({ href }: { href: string }) {
       </span>
       <span className="nf-rmo__scrim" aria-hidden="true" />
       <span className="nf-rmo__object" aria-hidden="true">
-        <Icon3D name="team" size={72} classic />
+        <Icon3D name="team" size={56} classic />
       </span>
       <div className="nf-rmo__words">
         <h2 id="rmo-title" className="nf-rmo__title">

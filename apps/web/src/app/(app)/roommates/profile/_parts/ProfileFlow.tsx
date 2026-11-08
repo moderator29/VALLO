@@ -9,6 +9,7 @@ import { budgetText, fill, lifestyleFacts, moveInText, naira, placeText, type Ro
 import { SchoolPicker } from "@/components/roommates/SchoolPicker";
 import { STATE_OPTIONS, stateName } from "@/components/roommates/states";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
 import { SelectField, TextArea, TextField } from "@/components/ui/Field";
 import { NairaField } from "@/components/ui/NairaField";
 import { OptionCards } from "@/components/ui/OptionCards";
@@ -48,7 +49,7 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 type Draft = Omit<MyRoommateProfile, "status">;
 const TOTAL = 7;
 
-const INTENT_ICON: Record<Intent, UiIconName> = { find_roommate: "users", find_room: "bed", offer_room: "door", find_together: "circle-people" };
+const INTENT_ART: Record<Intent, Icon3DName> = { find_roommate: "team", find_room: "search", offer_room: "home-small", find_together: "map" };
 const STAGE_ICON: Record<LifeStage, UiIconName> = { student: "id-card", corps_member: "certificate", graduate: "file-check", professional: "briefcase", other: "user" };
 
 /** The max budget shortcuts, by period, in kobo. Shortcuts only: any figure can be typed. */
@@ -207,8 +208,8 @@ export function ProfileFlow({
                   patch({ intents: on ? p.intents.filter((x) => x !== i) : [...p.intents, i] });
                 }}
               >
-                <span className="nf-rmf-card__glyph" aria-hidden="true">
-                  <UiIcon name={INTENT_ICON[i]} size={24} />
+                <span className="nf-rmf-card__art" aria-hidden="true">
+                  <Icon3D name={INTENT_ART[i]} size={52} classic />
                 </span>
                 <span className="nf-rmf-card__title">{copy.journeys[i].title}</span>
                 <span className="nf-rmf-card__body">{copy.journeys[i].body}</span>

@@ -956,6 +956,13 @@
       radial-gradient(90% 80% at 100% 0%, var(--nf-rm-tint-2), transparent 70%),
       var(--nf-surface-primary);
   }
+  .nf-rmf-card__art {
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    margin-block-end: var(--nf-space-xs);
+  }
   .nf-rmf-card__glyph {
     display: grid;
     place-items: center;
@@ -1596,6 +1603,15 @@
   }
   .nf-rm-dock .nf-rmv-act__pair {
     display: flex;
+  }
+  .nf-rm-dock .nf-btn {
+    padding-inline: var(--nf-space-sm);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-rm-dock .nf-btn > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .nf-rm-dock :is(.nf-rmv-act__line, .nf-rmv-act__note, [data-testid="listing-owner-actions"] .nf-rmv-act__pair, .nf-rmv-celebrate, [data-testid="listing-delete"], [data-testid="listing-shortlist"], [data-testid="profile-invite"]) {
     display: none;

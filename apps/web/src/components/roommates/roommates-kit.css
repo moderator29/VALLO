@@ -1374,18 +1374,16 @@
     position: relative;
     isolation: isolate;
     display: grid;
-    align-items: end;
-    min-block-size: 26rem;
     overflow: hidden;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, var(--nf-surface-artwork));
     border-radius: var(--nf-radius-island);
     background: var(--nf-surface-artwork);
     color: var(--nf-content-primary);
     box-shadow: var(--nf-elevation-floating);
   }
   .nf-rmo__art {
-    position: absolute;
-    inset: 0 0 35% 0;
-    z-index: -2;
+    position: relative;
+    aspect-ratio: 16 / 9;
   }
   .nf-rmo__art img {
     object-fit: cover;
@@ -1393,17 +1391,31 @@
   .nf-rmo__scrim {
     position: absolute;
     inset: 0;
-    z-index: -1;
-    background: linear-gradient(180deg, color-mix(in oklab, var(--nf-surface-artwork) 5%, transparent) 0%, color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent) 40%, var(--nf-surface-artwork) 64%);
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, transparent 22%, color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent) 40%, var(--nf-surface-artwork) 52%);
   }
   .nf-rmo__object {
     position: absolute;
-    inset: var(--nf-space-md) auto auto var(--nf-space-md);
+    inset: var(--nf-space-md) var(--nf-space-md) auto auto;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    inline-size: 5rem;
+    block-size: 5rem;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 22%, transparent);
+    border-radius: var(--nf-radius-xl);
+    background: color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+    backdrop-filter: blur(var(--nf-glass-blur));
   }
   .nf-rmo__words {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--nf-space-sm);
-    padding: var(--nf-space-lg) var(--nf-space-md);
+    margin-block-start: calc(var(--nf-space-2xl) * -1);
+    padding: 0 var(--nf-space-md) var(--nf-space-lg);
   }
   .nf-rmo__title {
     margin: 0;
@@ -1452,22 +1464,29 @@
   .nf-rmo__actions > :first-child {
     flex: 1 1 12rem;
   }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-rmo__object {
+      animation: nf-rmh-float 3.2s var(--nf-ease-standard) 8 alternate both;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-rmo__object {
+    animation: none;
+  }
   @media (min-width: 48rem) {
     .nf-rmo {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: stretch;
     }
     .nf-rmo__art {
-      inset: 0 0 0 50%;
+      order: 2;
+      aspect-ratio: auto;
+      min-block-size: 22rem;
     }
     .nf-rmo__scrim {
-      background: linear-gradient(90deg, var(--nf-surface-artwork) 50%, color-mix(in oklab, var(--nf-surface-artwork) 20%, transparent) 75%);
-    }
-    .nf-rmo__object {
-      inset: auto var(--nf-space-lg) var(--nf-space-lg) auto;
+      background: linear-gradient(90deg, var(--nf-surface-artwork) 50%, color-mix(in oklab, var(--nf-surface-artwork) 30%, transparent) 70%, transparent 100%);
     }
     .nf-rmo__words {
       align-content: center;
+      margin: 0;
       padding: var(--nf-space-xl);
     }
   }
