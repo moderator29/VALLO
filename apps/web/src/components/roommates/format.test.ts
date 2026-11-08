@@ -41,7 +41,7 @@ describe("the roommates kit's words and figures", () => {
   it("words the move-in by how flexible it is", () => {
     expect(moveInText(null, "asap", t)).toBe(t.ui.card.moveInAsap);
     expect(moveInText(null, "flexible", t)).toBe(t.ui.card.moveInFlexible);
-    expect(moveInText("2027-02-01", "fixed", t)).toMatch(/^Moves in /);
+    expect(moveInText("2027-02-01", "fixed", t)).toMatch(/^Move-in /);
   });
 
   it("joins a place without repeating a part", () => {

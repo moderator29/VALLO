@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { requireConsole } from "@/lib/admin/guard";
-import { isNotLive } from "@/lib/features/degrade";
+import { faults, isNotLive } from "@/lib/features/degrade";
 import { reportReadFault } from "@/lib/observability/read-error";
 import type { RoomCard, PersonRef, BadgeKind } from "@/lib/features/roommates/model";
 import { roommatePhotoUrl } from "@/lib/features/roommates/model";
@@ -36,9 +36,11 @@ async function call<T>(fn: string, args: Record<string, unknown>, kind: `read.${
   if (!("db" in who)) return { state: who.state };
   const { data, error } = await who.db.rpc(fn, args);
   if (error) {
+    /* Reported first; an absent function or a role refusal is the expected
+       state and is filtered out, so only a real fault reaches the crash log. */
+    await reportReadFault(kind, ...faults(error).filter((e) => (e as { code?: string }).code !== "42501"));
     if (isNotLive(error)) return { state: "not-open" };
     if (error.code === "42501") return { state: "forbidden" };
-    await reportReadFault(kind, error);
     return { state: "forbidden" };
   }
   return { state: "ok", data: data as T };

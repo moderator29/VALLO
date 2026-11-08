@@ -3,7 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { resolveSessionClaims } from "@/lib/actions/session";
-import { isNotLive } from "@/lib/features/degrade";
+import { faults, isNotLive } from "@/lib/features/degrade";
 import { reportReadFault } from "@/lib/observability/read-error";
 import type { RestrictionKind } from "@/lib/admin/cases/model";
 
@@ -38,8 +38,8 @@ export async function readMyStanding(): Promise<Standing> {
   const db = claims.supabase as unknown as SupabaseClient;
   const { data, error } = await db.rpc("my_standing");
   if (error) {
+    await reportReadFault("read.standing", ...faults(error));
     if (isNotLive(error)) return { state: "not-open" };
-    await reportReadFault("read.standing", error);
     return { state: "ok", restrictions: [], reports: [] };
   }
   const d = (data ?? {}) as { restrictions?: StandingRestriction[]; reports?: StandingReport[] };

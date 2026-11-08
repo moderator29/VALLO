@@ -72,8 +72,9 @@ function withLifestyle<T extends { lifestyle?: unknown }>(row: T): T {
 async function rpc<T>(db: Db, fn: string, args: Record<string, unknown>, kind: `read.${string}`): Promise<{ live: boolean; data: T | null }> {
   const { data, error } = await db.rpc(fn, args);
   if (error) {
-    if (isNotLive(error)) return { live: false, data: null };
+    /* Reported first (an absent function is filtered out by `faults`). */
     await reportReadFault(kind, ...faults(error));
+    if (isNotLive(error)) return { live: false, data: null };
     return { live: true, data: null };
   }
   return { live: true, data: (data as T) ?? null };
@@ -215,8 +216,8 @@ export async function readMyRoommateProfile(): Promise<MyProfileRead> {
     v.db.from("social_profiles").select("display_label, avatar_path").eq("user_id", v.id).maybeSingle(),
   ]);
   if (row.error) {
-    if (isNotLive(row.error)) return { state: "not-open" };
     await reportReadFault("read.roommates.mine", ...faults(row.error));
+    if (isNotLive(row.error)) return { state: "not-open" };
   }
   if (social.error) await reportReadFault("read.roommates.mine", ...faults(social.error));
   const s = social.data as { display_label: string | null; avatar_path: string | null } | null;
@@ -522,8 +523,8 @@ export async function listInstitutions(input: { q?: string; stateCode?: string |
   if (q) query = query.or(`name.ilike.%${q.replace(/[%_,()]/g, " ")}%,short_name.ilike.%${q.replace(/[%_,()]/g, " ")}%`);
   const { data, error } = await query;
   if (error) {
-    if (isNotLive(error)) return { live: false, items: [] };
     await reportReadFault("read.roommates.institutions", ...faults(error));
+    if (isNotLive(error)) return { live: false, items: [] };
     return { live: true, items: [] };
   }
   return {

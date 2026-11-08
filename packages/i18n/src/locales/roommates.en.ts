@@ -387,7 +387,7 @@ export const roommatesEn = {
     card: {
       moveInAsap: "Ready to move now",
       moveInFlexible: "Flexible move-in",
-      moveInOn: "Moves in {date}",
+      moveInOn: "Move-in {date}",
       budgetUpTo: "Up to {amount}",
       budgetFrom: "From {amount}",
       budgetRange: "{min} to {max}",
@@ -463,6 +463,7 @@ export const roommatesEn = {
       celebrateNext: "What to do next",
       editProfile: "Edit my profile",
       selfNote: "This is how others see your roommate profile.",
+      hereFor: "Here for",
       shareFailed: "That link could not be shared. Try again.",
       blockLine: "You will not see each other on Vallo, and they are not told.",
       cancel: "Cancel",
