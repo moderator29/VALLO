@@ -6,28 +6,30 @@ import type { CommunityView, JoinRequest } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 
 import { CircleEmpty } from "./CircleCards";
-import { RequestDecision } from "./CircleActions";
+import { CommunitySettingsForm, RequestDecision } from "./CircleActions";
 import { CircleFace } from "./CircleFace";
 
 /**
- * JOIN REQUESTS FOR A PRIVATE COMMUNITY, DRAWN (the page reads and checks
- * the viewer runs it; RLS shows nobody else any request). One row a person:
- * their face and name, when they asked, Accept or Decline.
+ * JOIN REQUESTS + COMMUNITY SETTINGS for the owner and moderators.
+ * Requests at the top (the urgent work), settings below.
  */
 export function ManageScreen({
   community,
   requests,
   now,
+  role,
   fallback,
 }: {
   community: CommunityView;
   requests: JoinRequest[];
   now: number;
+  role: "owner" | "moderator" | "member";
   fallback?: string;
 }) {
   const M = CIRCLE_COPY.manage;
+  const W = CIRCLE_COPY.community;
   return (
-    <PageFrame title={CIRCLE_COPY.community.manage} subtitle={community.name} fallback={fallback ?? `/circle/c/${community.slug}`} width="narrow">
+    <PageFrame title={W.manage} subtitle={community.name} fallback={fallback ?? `/circle/c/${community.slug}`} width="narrow">
       <div className="nf-circle" data-testid="circle-manage">
         {requests.length === 0 ? (
           <CircleEmpty icon="users">{CIRCLE_COPY.empty.requests}</CircleEmpty>
@@ -54,6 +56,22 @@ export function ManageScreen({
             </ul>
           </section>
         )}
+
+        <section className="nf-circle-section" aria-labelledby="circle-settings-title">
+          <div className="nf-circle-section__head">
+            <h2 id="circle-settings-title" className="nf-circle-section__title">{W.settingsTitle}</h2>
+          </div>
+          <CommunitySettingsForm
+            communityId={community.id}
+            slug={community.slug}
+            name={community.name}
+            description={community.description}
+            visibility={community.visibility}
+            rules={community.rules}
+            isOwner={role === "owner"}
+          />
+        </section>
+
         <p className="nf-circle-note">
           <UiIcon name="shield-check" size={16} />
           <span>{M.note}</span>

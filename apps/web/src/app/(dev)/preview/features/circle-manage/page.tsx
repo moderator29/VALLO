@@ -10,7 +10,7 @@ export default async function PreviewCircleManage({ searchParams }: { searchPara
   const empty = (await searchParams).empty === "1";
   return (
     <div className="px-md">
-      <ManageScreen community={communityPage("private").community} requests={empty ? [] : REQUESTS} now={NOW} fallback="/preview/features" />
+      <ManageScreen community={communityPage("private").community} requests={empty ? [] : REQUESTS} now={NOW} role="owner" fallback="/preview/features" />
     </div>
   );
 }

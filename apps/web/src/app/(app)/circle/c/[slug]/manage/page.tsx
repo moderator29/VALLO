@@ -18,5 +18,5 @@ export default async function ManageCommunityPage({ params }: { params: Promise<
   const runner = page.membership?.status === "active" && (page.membership.role === "owner" || page.membership.role === "moderator");
   if (!runner) redirect(`/circle/c/${slug}`);
   const requests = await readJoinRequests(page.community.id);
-  return <ManageScreen community={page.community} requests={requests} now={requestNow()} />;
+  return <ManageScreen community={page.community} requests={requests} now={requestNow()} role={page.membership!.role} />;
 }

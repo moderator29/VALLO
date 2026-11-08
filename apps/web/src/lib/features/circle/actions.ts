@@ -140,6 +140,7 @@ export async function updateCommunitySettings(input: z.input<typeof updateCommun
   if (data === "bad_visibility") return fail("Visibility must be public or private.");
   if (data !== "ok") return fail(FAILED);
   revalidatePath(`/circle/c/${parsed.data.slug}`);
+  revalidatePath(`/circle/c/${parsed.data.slug}/manage`);
   revalidatePath("/circle");
   return ok(null);
 }
@@ -271,39 +272,7 @@ export async function acceptAnswer(input: { questionId: string; answerId: string
   return ok({ acceptedId: data === "accepted" ? parsed.data.answerId : null });
 }
 
-/* ---------------------------------------------------- community settings */
-
-const updateSchema = z.object({
-  communityId: uuid,
-  slug: z.string(),
-  name: z.string().trim().min(LIMITS.nameMin, "Give it a name of 3 letters or more.").max(LIMITS.nameMax, "Keep the name to 60 characters.").optional(),
-  description: z.string().trim().max(LIMITS.descriptionMax, "Keep the description to 500 characters.").optional(),
-  visibility: z.enum(["public", "private"]).optional(),
-  rules: z.array(z.string().trim().max(LIMITS.ruleMax, "Keep each rule to 200 characters.")).max(LIMITS.rulesMax, "Ten rules at most.").optional(),
-});
-
-export async function updateCommunity(input: z.input<typeof updateSchema>): Promise<ActionResult<null>> {
-  const who = await member();
-  if ("error" in who) return fail(who.error);
-  const parsed = validate(updateSchema, input);
-  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
-  const { data, error } = await who.db.rpc("circle_update_community", {
-    p_community: parsed.data.communityId,
-    p_name: parsed.data.name ?? null,
-    p_description: parsed.data.description ?? null,
-    p_visibility: parsed.data.visibility ?? null,
-    p_rules: parsed.data.rules?.filter((r) => r.length > 0) ?? null,
-  });
-  if (error) return fail(wordsFor(error));
-  if (data === "not_member") return fail("You are not a member of this community.");
-  if (data === "not_allowed") return fail("Only the people who run this community can change its settings.");
-  if (data === "bad_visibility") return fail("Visibility must be public or private.");
-  if (data !== "ok") return fail(FAILED);
-  revalidatePath(`/circle/c/${parsed.data.slug}`);
-  revalidatePath(`/circle/c/${parsed.data.slug}/manage`);
-  revalidatePath("/circle");
-  return ok(null);
-}
+/* --------------------------------------------------------- member removal */
 
 export async function removeMember(input: {
   communityId: string;

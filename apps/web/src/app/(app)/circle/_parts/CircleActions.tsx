@@ -12,9 +12,11 @@ import {
   followQuestion,
   joinCommunity,
   leaveCommunity,
+  removeMember,
   replyInCircle,
   sendCircleInvite,
   setHelpful,
+  updateCommunitySettings,
   vouchForMember,
   withdrawCircleInvite,
   withdrawVouch,
@@ -405,6 +407,141 @@ export function RequestDecision({ communityId, userId, slug }: { communityId: st
       </Button>
       <Button variant="quiet" size="sm" disabled={pending} onClick={() => decide(false)} data-testid="circle-decline">
         {CIRCLE_COPY.manage.decline}
+      </Button>
+    </span>
+  );
+}
+
+export function CommunitySettingsForm({
+  communityId,
+  slug,
+  name,
+  description,
+  visibility,
+  rules,
+  isOwner,
+}: {
+  communityId: string;
+  slug: string;
+  name: string;
+  description: string;
+  visibility: "public" | "private";
+  rules: string[];
+  isOwner: boolean;
+}) {
+  const router = useRouter();
+  const { pending, run } = useRun();
+  const [n, setN] = useState(name);
+  const [d, setD] = useState(description);
+  const [v, setV] = useState(visibility);
+  const [r, setR] = useState(rules.join("\n"));
+  const words = CIRCLE_COPY.community;
+  return (
+    <form
+      className="grid gap-row"
+      data-testid="community-settings"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const ruleLines = r.split("\n").map((l) => l.trim()).filter((l) => l.length > 0);
+        run(
+          async () =>
+            updateCommunitySettings({
+              communityId,
+              slug,
+              name: n.trim() !== name ? n : null,
+              description: d.trim() !== description ? d : null,
+              visibility: v !== visibility ? v : null,
+              rules: ruleLines.join("\n") !== rules.join("\n") ? ruleLines : null,
+            }),
+          undefined,
+          () => {
+            banner.success(words.saved);
+            router.refresh();
+          },
+        );
+      }}
+    >
+      <label className="block">
+        <span className="nf-label">{words.nameLabel}</span>
+        <input className="nf-field mt-2xs w-full" maxLength={60} value={n} onChange={(e) => setN(e.target.value)} required />
+      </label>
+      <label className="block">
+        <span className="nf-label">{words.descriptionLabel}</span>
+        <textarea className="nf-field mt-2xs min-h-[4rem] w-full" maxLength={500} value={d} onChange={(e) => setD(e.target.value)} />
+      </label>
+      {isOwner && (
+        <fieldset className="block">
+          <legend className="nf-label">{words.visibilityLabel}</legend>
+          <p className="nf-caption mt-2xs">{words.visibilityHelp}</p>
+          <div className="mt-xs flex gap-row">
+            <label className="flex items-center gap-2xs">
+              <input type="radio" name="visibility" value="public" checked={v === "public"} onChange={() => setV("public")} />
+              <span>{words.publicWord}</span>
+            </label>
+            <label className="flex items-center gap-2xs">
+              <input type="radio" name="visibility" value="private" checked={v === "private"} onChange={() => setV("private")} />
+              <span>{words.privateWord}</span>
+            </label>
+          </div>
+        </fieldset>
+      )}
+      <label className="block">
+        <span className="nf-label">{words.rulesLabel}</span>
+        <textarea
+          className="nf-field mt-2xs min-h-[6rem] w-full"
+          maxLength={2200}
+          value={r}
+          placeholder="One rule per line (up to 10)"
+          onChange={(e) => setR(e.target.value)}
+        />
+      </label>
+      <Button type="submit" variant="primary" full loading={pending} disabled={pending}>
+        Save
+      </Button>
+    </form>
+  );
+}
+
+export function RemoveMemberButton({
+  communityId,
+  userId,
+  slug,
+  memberName,
+}: {
+  communityId: string;
+  userId: string;
+  slug: string;
+  memberName: string;
+}) {
+  const router = useRouter();
+  const { pending, run } = useRun();
+  const [sure, setSure] = useState(false);
+  if (!sure) {
+    return (
+      <Button variant="quiet" size="sm" disabled={pending} data-testid="circle-remove-member" onClick={() => setSure(true)}>
+        Remove
+      </Button>
+    );
+  }
+  return (
+    <span className="flex items-center gap-sm" data-testid="circle-remove-confirm">
+      <Button
+        variant="secondary"
+        size="sm"
+        className="nf-btn--edge-danger"
+        loading={pending}
+        onClick={() =>
+          run(async () => removeMember({ communityId, userId, slug }), () => setSure(false), () => {
+            banner.success(`${memberName} was removed`);
+            setSure(false);
+            router.refresh();
+          })
+        }
+      >
+        Remove {memberName}
+      </Button>
+      <Button variant="quiet" size="sm" disabled={pending} onClick={() => setSure(false)}>
+        Cancel
       </Button>
     </span>
   );
