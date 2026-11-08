@@ -73,8 +73,8 @@ const RULING_ENTRY = `
   window.__release = (value) => window.__answer(value);
   mount(
     <div style={{ width: 360, padding: 16 }}>
-      <ToastHost />
       <ArrivalRuling bookingId="booking-slot" copy={t.arrivalCheck.admin} slide={t.experienceUi} />
+      <ToastHost />
     </div>,
   );
 `;
@@ -167,6 +167,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the console's arrival ruling", 
       await page.waitForFunction(() => document.querySelector("[data-testid=arrival-ruling-slide]")?.getAttribute("data-state") === "confirmed");
       expect(await slide(page).textContent()).toContain(f.slide.confirmed);
       expect(await page.locator("[role=status]").first().textContent()).toBe(f.slide.confirmed);
+      /* And the one top banner says what the ruling did (founder, 7 November 2026). */
+      await page.getByText("Report upheld").waitFor();
       /* The page is asked to draw the ruled record. */
       expect(await routerCalls(page)).toEqual([["refresh"]]);
       /* Money never springs back to looking unconfirmed. */

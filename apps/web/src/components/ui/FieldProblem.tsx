@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { banner } from "@/lib/ui/toast";
+import { banner, currentToast } from "@/lib/ui/toast";
 
 /**
  * A FIELD WITH A PROBLEM, SAID BY THE ONE BANNER (founder, 7 November 2026,
@@ -21,6 +21,14 @@ import { banner } from "@/lib/ui/toast";
 
 let asked: string | null = null;
 
+/**
+ * A form's own summary of the same refusal ("Add your name and an email
+ * address so we can reply") is said by its handler a moment before the
+ * fields render their problems; that summary stays, rather than being
+ * replaced by the first field's narrower words.
+ */
+const SUMMARY_WINDOW_MS = 400;
+
 /** Say a field's problem in the banner; the first asked in one tick wins. */
 export function sayFieldProblem(message: string): void {
   if (asked !== null) return;
@@ -28,7 +36,10 @@ export function sayFieldProblem(message: string): void {
   queueMicrotask(() => {
     const said = asked;
     asked = null;
-    if (said) banner.error(said, { "data-testid": "banner-field" });
+    if (!said) return;
+    const showing = currentToast();
+    if (showing && showing.tone === "error" && showing.message !== said && Date.now() - showing.shownAt < SUMMARY_WINDOW_MS) return;
+    banner.error(said, { "data-testid": "banner-field" });
   });
 }
 

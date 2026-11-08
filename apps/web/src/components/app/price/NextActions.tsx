@@ -38,7 +38,7 @@ export function NextActions({
         /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
         if (result.ok) {
           setState("saved");
-          banner.success(copy.alertSaved);
+          banner(copy.alertSaved, { tone: "success" });
         } else {
           setState("failed");
           banner.error(result.error, { retry: setAlert });
