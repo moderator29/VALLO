@@ -63,7 +63,7 @@ async function readSharing(listingId: string): Promise<{ ok: boolean; max: numbe
       .maybeSingle();
     /* An absent column (the SQL not pasted yet) is the expected state: no line. */
     if (error || !data) return null;
-    const row = data as { shared_living_ok: boolean | null; max_occupants: number | null };
+    const row = data as unknown as { shared_living_ok: boolean | null; max_occupants: number | null };
     return { ok: row.shared_living_ok === true, max: row.max_occupants ?? null };
   } catch {
     return null;

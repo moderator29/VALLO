@@ -305,8 +305,6 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/settings/invite": "/settings",
   /* W6, D25: the referral hub's inner pages. */
   "/settings/invite/how-it-works": "/settings/invite",
-  "/settings/invite/referrals": "/settings/invite",
-  "/settings/invite/referrals/[id]": "/settings/invite/referrals",
   /* D51, Round 3 C3: the Rewards Balance and its inner pages. Linked from the
      member navigation (the Rewards row in `nav-model.ts`), the settings hub
      and the invite hub; until the rewards read is live (R-C3-1) the page

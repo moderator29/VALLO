@@ -241,6 +241,7 @@ export const experienceInboxEn = {
         booking: "Shared a booking",
         stay: "Shared a stay",
         passport: "Shared a passport",
+        roommate: "Shared a room",
       },
       /* The options sheet (`ThreadOptionsSheet`). */
       close: "Close",

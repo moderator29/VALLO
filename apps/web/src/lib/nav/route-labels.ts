@@ -202,8 +202,6 @@ const NAMES: Readonly<Record<string, string>> = {
   "/settings/standing": "your account standing",
   "/settings/invite": "your invite link",
   "/settings/invite/how-it-works": "how invites work",
-  "/settings/invite/referrals": "who joined with your code",
-  "/settings/invite/referrals/[id]": "this referral",
   "/rewards": "your rewards",
   "/pro": "Vallo Pro",
   "/pro/confirm": "confirming your plan",
