@@ -91,6 +91,7 @@ public class MainActivity extends BridgeActivity {
            bridge is created by super.onCreate. */
         ValloCrashLog.install(this);
         registerPlugin(ValloShellPlugin.class);
+        registerPlugin(com.vallospaces.app.plugins.callkit.ValloCallKitPlugin.class);
         super.onCreate(savedInstanceState);
         /* The opening (founder's rulings, 7 November 2026): the exact mark
            drawn in over the launch navy, as on the iPhone (LaunchMark). */

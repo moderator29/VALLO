@@ -499,13 +499,17 @@
         from those devices. Such a device gets voice calls, or a clear
         "no camera found" on the call screen.
 
-        Background ringing, ConnectionService and a lock-screen call UI are
-        NOT built: no FOREGROUND_SERVICE, no MANAGE_OWN_CALLS, no
-        USE_FULL_SCREEN_INTENT. See docs/video-calling/VIDEO-CALLING-MOBILE-COMPATIBILITY.md.
+        ValloCallKit (November 2026): FOREGROUND_SERVICE and
+        USE_FULL_SCREEN_INTENT are now declared for the incoming-call
+        notification that wakes the screen when the phone is locked.
+        MANAGE_OWN_CALLS is not needed: we use notifications, not
+        ConnectionService. See native/README.md.
     -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />

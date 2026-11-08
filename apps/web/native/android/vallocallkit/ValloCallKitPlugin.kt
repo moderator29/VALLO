@@ -1,4 +1,4 @@
-package com.vallo.app.plugins.callkit
+package com.vallospaces.app.plugins.callkit
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
