@@ -33,6 +33,7 @@ import {
 } from "@/lib/social/posts-queries";
 import {
   getAgentProperties,
+  getAgentRatingAggregate,
   getAgentReviews,
   getProfileMediaGrid,
 } from "@/lib/social/profile-tabs-queries";
@@ -51,6 +52,7 @@ import { FOLLOW_TO_MESSAGE, messageDoor } from "@/lib/social/message-door";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ownershipSeenFor } from "@/lib/trust/ownership-seen";
 import { OwnershipSeenMark } from "@/components/trust/OwnershipSeenMark";
+import { RatingSummary } from "@/components/ui/RatingSummary";
 
 /**
  * `/u/[handle]`: a person's page.
@@ -190,7 +192,7 @@ export default async function SocialProfilePage({
     });
 
     const supabase = await createClient();
-    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen] =
+    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg] =
       await Promise.all([
         isAgentPage ? Promise.resolve([]) : getProfileFeed(userId),
         isAgentPage ? Promise.resolve([]) : getProfileReplies(userId),
@@ -212,6 +214,7 @@ export default async function SocialProfilePage({
            it would open (on, and no block either way). Signed out: no button,
            and no read. */
         view.signedIn && !view.isOwner ? passportIsOpen(userId) : Promise.resolve(false),
+        isAgentPage ? getAgentRatingAggregate(agentId) : Promise.resolve(null),
       ]);
     const passportAction = view.isOwner ? (
       <ButtonLink href="/settings/passport" size="sm" variant="secondary" leadingIcon="id-card" data-testid="profile-your-passport">
@@ -314,6 +317,17 @@ export default async function SocialProfilePage({
           <p className="px-gutter pb-row">
             <OwnershipSeenMark seenAt={ownershipSeen} label={t.supply.register.owner.proof.seenMark} />
           </p>
+        ) : null}
+
+        {ratingAgg && ratingAgg.count > 0 ? (
+          <section className="px-gutter pb-row" data-testid="profile-rating-summary">
+            <RatingSummary
+              rating={ratingAgg.average}
+              count={ratingAgg.count}
+              breakdown={ratingAgg.breakdown}
+              locale={locale}
+            />
+          </section>
         ) : null}
 
         <ProfileTabs

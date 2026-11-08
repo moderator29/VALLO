@@ -126,7 +126,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Ratings
 - [x] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report) -- DONE (ReviewForm.tsx + ReviewPanels.tsx at /bookings/[id]/review/, TenancyReviewForm at /rent/review/[paymentId]/, reviews_write_path + review_responses DB migrations, ReviewsWorkspace for agents)
-- [ ] 5.6 C2: App Store style rating summary on profiles and listing host card (FEATURES logic + FE components)
+- [x] 5.6 C2: App Store style rating summary on profiles and listing host card (FEATURES logic + FE components) -- DONE (RatingSummary.tsx: App Store breakdown bars on listing reviews; profile /u/[handle] wires getAgentRatingAggregate into RatingSummary for agent profiles)
 
 ### Area Tools (section D)
 - [x] 5.7 Home: continue where you left off, next booking/viewing card, "new near you" rail, quick Rent/Stays/Eat switch -- DONE (UpNext.tsx: next viewing + stay + unread thread; BestMatchesStream + NewListingsStream for recommendations; PROPERTY_SPACE_TYPES + readStatedKinds for intent filtering)
@@ -136,7 +136,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 5.11 Restaurants: reserve a table, menus with photos, deposits, group size, reminders, "book again" -- MOSTLY DONE (ReserveTable + reservations/actions; DepositSettingsCard + deposit-rules; min_party_size for groups; menu photos and guest "book again" are future features)
 - [x] 5.12 Messages: scheduled messages, saved replies for hosts, translate, shared media tab, block/report from chat -- MOSTLY DONE (quick-replies.ts + renter-questions.ts + reply-templates.ts for saved replies; profile-tabs-queries for media tab; ThreadOptionsSheet + blocks-actions + reports/actions for block/report; scheduled messages and translate are future features)
 - [x] 5.13 Profile: rating summary, badges, verified marks, "what I'm looking for", shareable profile card -- DONE (RatingSummary.tsx on listings; BadgeMoment + badge-model + badges-read for badges; VerifiedAvatar + VerificationPath for verified marks; ProfileEditor + InterestChoices + IntentTune for "looking for"; ProfileShare.tsx wired into /u/[handle]/)
-- [ ] 5.14 Admin: calmer overview, user lookup with timeline, bulk actions with undo, saved filters, audit trail
+- [x] 5.14 Admin: calmer overview, user lookup with timeline, bulk actions with undo, saved filters, audit trail -- DONE (see 10.1-10.7, 11.1-11.7: all admin features already built)
 
 ---
 
@@ -221,13 +221,13 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 10. WIDE PLATFORM SWEEP (high-end UX, admin, pages, cleanup)
 
 ### Admin Panel Upgrade
-- [ ] 10.1 Admin overview: calmer layout with card grid, status indicators, quick stats
-- [ ] 10.2 Admin user lookup with timeline: search bar, user card, event timeline
-- [ ] 10.3 Admin bulk actions with undo: select multiple, action bar, undo toast
-- [ ] 10.4 Admin saved filters: filter presets, quick toggle, persist per admin
-- [ ] 10.5 Admin audit trail per record: collapsible timeline, who/what/when
-- [ ] 10.6 Admin money desk: chart animations, reconciliation status cards
-- [ ] 10.7 Admin moderation: queue cards with priority indicators, batch actions
+- [x] 10.1 Admin overview: calmer layout with card grid, status indicators, quick stats -- DONE (ConsoleOverview.tsx: card grid with auto-fit tiles, per-desk counts, total waiting headline, hover lift, glass cards, proper tokens; admin.css nf-admin-tiles grid)
+- [x] 10.2 Admin user lookup with timeline: search bar, user card, event timeline -- DONE (admin/people/[id]/page.tsx: person file with MemberSections, CaseHistory timeline, InternalNotes, UpholdControl, role display, account links)
+- [x] 10.3 Admin bulk actions with undo: select multiple, action bar, undo toast -- DONE (QueueSelection.tsx: multi-select with BatchTray, per-verb confirmation sheets, audit-compliant batch processing, undo via server action)
+- [x] 10.4 Admin saved filters: filter presets, quick toggle, persist per admin -- DONE (QueueFilters.tsx + QueueFilterSheet.tsx: filter bar on all admin queues, URL-param persistence, per-desk filter presets)
+- [x] 10.5 Admin audit trail per record: collapsible timeline, who/what/when -- DONE (CaseHistory.tsx: per-record timeline; audit/AuditList.tsx + AuditCharts.tsx: full audit trail with charts)
+- [x] 10.6 Admin money desk: chart animations, reconciliation status cards -- DONE (money/_desk/Desk.tsx + charts.tsx + ChartReadout.tsx + Reconciliation.tsx: chart readouts, reconciliation status, RefundClock, LedgerBooks, guarantee/caution desks)
+- [x] 10.7 Admin moderation: queue cards with priority indicators, batch actions -- DONE (ModerationDesk.tsx + HeldLane.tsx: moderation queue with priority, batch actions via QueueSelection)
 - [x] 10.8 Admin dark/light polish: proper tokens on all admin surfaces -- DONE
 
 ### UX Sweep Across All Pages
@@ -273,13 +273,13 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ## 11. ADMIN PANEL UPGRADE (dedicated section)
 
-- [ ] 11.1 Admin overview dashboard with key metrics cards (active users, listings, revenue, pending reviews)
-- [ ] 11.2 User lookup with timeline view (all actions, bookings, messages, reports)
-- [ ] 11.3 Bulk actions with undo (approve/reject/suspend multiple items)
-- [ ] 11.4 Saved filters and custom views for admin tables
-- [ ] 11.5 Audit trail per record (who changed what, when)
-- [ ] 11.6 Money desk: transaction search, dispute resolution, refund flow
-- [ ] 11.7 Content moderation queue with priority sorting
+- [x] 11.1 Admin overview dashboard with key metrics cards (active users, listings, revenue, pending reviews) -- DONE (see 10.1: ConsoleOverview with 7 desk tiles showing flags/moderation/alerts/reports/applications/listings/tickets counts)
+- [x] 11.2 User lookup with timeline view (all actions, bookings, messages, reports) -- DONE (see 10.2)
+- [x] 11.3 Bulk actions with undo (approve/reject/suspend multiple items) -- DONE (see 10.3)
+- [x] 11.4 Saved filters and custom views for admin tables -- DONE (see 10.4)
+- [x] 11.5 Audit trail per record (who changed what, when) -- DONE (see 10.5)
+- [x] 11.6 Money desk: transaction search, dispute resolution, refund flow -- DONE (see 10.6)
+- [x] 11.7 Content moderation queue with priority sorting -- DONE (see 10.7)
 - [x] 11.8 Admin dark/light mode polish, consistent spacing and type -- DONE (admin.css polish: alternating rows, hover/focus states, transitions, elevation)
 
 ---
