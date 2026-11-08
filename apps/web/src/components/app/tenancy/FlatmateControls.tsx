@@ -41,6 +41,7 @@ function useRun() {
           banner.error(result.error ?? "That did not go through. Try again.");
           return;
         }
+        banner.success("Done");
         if (onOk) onOk();
         else router.refresh();
       } catch (error) {

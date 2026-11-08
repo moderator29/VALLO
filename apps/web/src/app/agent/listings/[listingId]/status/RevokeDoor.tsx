@@ -39,6 +39,7 @@ export function RevokeDoor({ token, copy }: { token: string; copy: Copy }) {
                       banner.error(copy.revokeFailed);
                       return;
                     }
+                    banner.success("Link closed");
                     setConfirming(false);
                     router.refresh();
                   } catch (error) {

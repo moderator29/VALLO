@@ -18,8 +18,7 @@ export function AcknowledgeHandbook({ version }: { version: string }) {
         const result = await acknowledgeHandbook({ version });
         if (!result.ok) banner.error(result.error, { retry: acknowledge });
         else {
-          /* Straight into the console, where their desks and their
-             position are now open, rather than staying on this page. */
+          banner.success("Handbook acknowledged");
           router.replace("/admin");
           router.refresh();
         }

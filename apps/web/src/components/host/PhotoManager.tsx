@@ -119,6 +119,7 @@ export function PhotoManager({
           setOrder(null);
           return;
         }
+        banner.success("Reordered");
         router.refresh();
         setOrder(null);
       } catch (error) {
@@ -163,6 +164,7 @@ export function PhotoManager({
         banner.error(result.error);
         return;
       }
+      banner.success("Photo added");
       router.refresh();
     } finally {
       setBusy(false);
@@ -178,6 +180,7 @@ export function PhotoManager({
           banner.error(result.error);
           return;
         }
+        banner.success("Photo removed");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

@@ -75,6 +75,7 @@ export function BusinessReviewDecision({
           return;
         }
         setNote("");
+        banner.success(decision === "approve" ? "Approved" : decision === "more_info" ? "Info requested" : "Declined");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -171,6 +172,7 @@ export function PublishControl({
           banner.error(result.error, { retry: run });
           return;
         }
+        banner.success("Published");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -233,6 +235,7 @@ export function RungDecision({
           return;
         }
         setNote("");
+        banner.success(status === "passed" ? "Passed" : "Failed");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

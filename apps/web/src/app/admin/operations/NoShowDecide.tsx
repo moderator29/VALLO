@@ -30,6 +30,7 @@ export function NoShowDecide({ inspectionId }: { inspectionId: string }) {
             banner.error(result.error, { retry: () => decide(upheld) });
             return;
           }
+          banner.success(upheld ? "No-show stands" : "No-show removed");
           router.refresh();
         } finally {
           inFlight.current = false;

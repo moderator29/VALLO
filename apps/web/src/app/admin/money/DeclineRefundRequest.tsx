@@ -32,6 +32,7 @@ export function DeclineRefundRequest({
           banner.error(result.error, { retry: submit });
           return;
         }
+        banner.success("Refund declined");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

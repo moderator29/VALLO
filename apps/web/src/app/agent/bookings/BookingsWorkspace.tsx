@@ -95,6 +95,7 @@ function DecisionSheet({
           if (result.fieldErrors?.reason) setReasonError(result.fieldErrors.reason);
           return;
         }
+        banner.success(state.kind === "accept" ? "Booking accepted" : "Booking declined");
         onClose();
         router.refresh();
       } catch (error) {

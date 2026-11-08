@@ -42,6 +42,7 @@ function useDecision() {
           banner.error(result.error ?? "That did not go through. Try again.", { retry: () => run(fn) });
           return;
         }
+        banner.success("Done");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

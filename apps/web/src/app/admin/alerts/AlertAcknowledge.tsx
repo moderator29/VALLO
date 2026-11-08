@@ -29,6 +29,7 @@ export function AlertAcknowledge({ alertId }: { alertId: string }) {
           banner.error(result.error, { retry: acknowledge });
           return;
         }
+        banner.success("Alert acknowledged");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

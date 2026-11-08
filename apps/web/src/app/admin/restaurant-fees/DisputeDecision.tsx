@@ -19,6 +19,7 @@ export function DisputeDecision({ reservationId }: { reservationId: string }) {
           banner.error(result.error, { retry: () => decide(outcome) });
           return;
         }
+        banner.success(outcome === "SEATED" ? "Counted as seated" : "Counted as no-show");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

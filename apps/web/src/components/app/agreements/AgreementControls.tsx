@@ -37,6 +37,7 @@ function useAction() {
           banner.error(result.error ?? "That did not go through.");
           return;
         }
+        banner.success("Saved");
         after?.();
         if (done) router.replace(withDone(window.location.pathname, done), { scroll: false });
         else router.refresh();

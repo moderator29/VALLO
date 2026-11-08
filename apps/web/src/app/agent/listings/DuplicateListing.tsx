@@ -86,6 +86,7 @@ export function DuplicateListing({
                       banner.error(result.error);
                       return;
                     }
+                    banner.success("Listings created");
                     setMade(result.data.ids);
                     setAsked(result.data.asked);
                     router.refresh();

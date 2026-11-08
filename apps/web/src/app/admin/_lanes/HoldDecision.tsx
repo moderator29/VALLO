@@ -45,6 +45,7 @@ export function HoldDecision({
           banner.error(result.error, { retry: () => run(decision) });
           return;
         }
+        banner.success(decision === "RELEASE" ? "Released" : "Removed");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

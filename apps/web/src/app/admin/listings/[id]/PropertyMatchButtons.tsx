@@ -32,7 +32,10 @@ export function PropertyMatchButtons({
       try {
         const result = await decidePropertyMatch({ listingId, otherId, decision });
         if (!result.ok) banner.error(result.error, { retry: () => decide(decision) });
-        else router.refresh();
+        else {
+          banner.success(decision === "join" ? "Joined" : "Kept apart");
+          router.refresh();
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -62,7 +65,10 @@ export function PropertySplitButton({ listingId, label }: { listingId: string; l
       try {
         const result = await splitFromProperty({ listingId });
         if (!result.ok) banner.error(result.error, { retry: split });
-        else router.refresh();
+        else {
+          banner.success("Split from property");
+          router.refresh();
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -99,7 +105,10 @@ export function ReopenControl({ listingId, copy }: { listingId: string; copy: Di
       try {
         const result = await reopenClosedListing({ listingId, note });
         if (!result.ok) banner.error(result.error, { retry: reopen });
-        else router.refresh();
+        else {
+          banner.success("Listing reopened");
+          router.refresh();
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

@@ -31,6 +31,7 @@ export function NoteForm({
         else {
           setBody("");
           setScope("");
+          banner.success("Note saved");
           router.refresh();
         }
       } catch (error) {

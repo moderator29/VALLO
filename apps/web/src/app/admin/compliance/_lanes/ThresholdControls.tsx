@@ -23,6 +23,7 @@ function useRun() {
           if (result.error) banner.error(result.error, { retry: () => run(work) });
           return;
         }
+        banner.success("Done");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

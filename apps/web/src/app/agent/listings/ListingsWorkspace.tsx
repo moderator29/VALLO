@@ -187,9 +187,8 @@ function ConfirmSheet({
           );
           return;
         }
+        banner.success(state.kind === "submit" ? "Sent for review" : "Taken down");
         onClose();
-        /* A listing sent for review lands back here with the moment named; the
-           page checks it is really in review before the sheet opens. */
         if (state.kind === "submit") {
           router.replace(withDone("/agent/listings", "listing-submitted", { listing: state.listing.id }), { scroll: false });
         } else {
