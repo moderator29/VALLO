@@ -118,6 +118,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   /* ---------------------------------------------------------- the website */
   "/": ROOT,
   "/about": "/",
+  /* The Community Promise, a company page beside About (founder, 7 November 2026). */
+  "/community": "/",
   /* V-82: a public area price page sits under the landing page, as the
      company pages do; it is a statement about a market, not a shelf. */
   "/areas/[state]/[area]": "/",
@@ -264,6 +266,27 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/circle/c/[slug]/new": "/circle/c/[slug]",
   "/circle/c/[slug]/manage": "/circle/c/[slug]",
   "/circle/p/[id]": "/circle",
+  /* VALLO ROOMMATES (8 November 2026, docs/roommates/WORK_PLAN.md). One
+     product under one root: the home goes back to Home like Circle, every
+     page under it goes up to it, a post's edit goes up to the post, a
+     school's page to the schools, and a group's dashboard to the groups. */
+  "/roommates": "/home",
+  "/roommates/discover": "/roommates",
+  "/roommates/p/[userId]": "/roommates/discover",
+  "/roommates/r/[id]": "/roommates/discover",
+  "/roommates/r/[id]/edit": "/roommates/r/[id]",
+  "/roommates/new": "/roommates",
+  "/roommates/profile": "/roommates",
+  "/roommates/campus": "/roommates",
+  "/roommates/campus/[slug]": "/roommates/campus",
+  "/roommates/nysc": "/roommates",
+  "/roommates/safety": "/roommates",
+  "/roommates/me": "/roommates",
+  "/roommates/groups": "/roommates",
+  "/roommates/groups/new": "/roommates/groups",
+  "/roommates/groups/[id]": "/roommates/groups",
+  "/roommates/split": "/roommates",
+  "/roommates/verify": "/roommates/me",
   /* The compare tray's table (29 October 2026): places set aside from the
      catalogue, so back is the home screen like Saved. */
   "/compare": "/home",
@@ -496,6 +519,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/reference": "/admin/settings",
   "/admin/settings": "/admin",
   "/admin/social": "/admin",
+  "/admin/roommates": "/admin",
   "/admin/standing": "/admin",
   "/admin/stops": "/admin",
   "/admin/people/[id]": "/admin/people",
@@ -524,6 +548,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/agent/inspections": "/agent/dashboard",
   "/agent/listings": "/agent/dashboard",
   "/agent/listings/[listingId]/calendar": "/agent/listings",
+  /* Roommates (8 November 2026): the lister marks a home good for sharing. */
+  "/agent/listings/[listingId]/sharing": "/agent/listings",
   "/agent/listings/[listingId]/health": "/agent/listings",
   /* V-08: the TO LET board, under the listing's workspace like its calendar. */
   "/agent/listings/[listingId]/board": "/agent/listings",

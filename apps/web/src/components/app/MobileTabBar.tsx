@@ -154,6 +154,9 @@ export const TAB_BAR_ROUTES = [
      crypto market (V-83), parked on a branch. */
   "/inspections",
   "/restaurants",
+  /* Vallo Roommates (8 November 2026): its home, the hub and the groups keep
+     the dock like Circle's pages do. Nothing in the dock changes. */
+  "/roommates",
   "/assistant",
   /*
    * TWO NOTES THAT DESCRIBED A LIST THIS ONE IS NOT STOOD HERE, AND BOTH ARE

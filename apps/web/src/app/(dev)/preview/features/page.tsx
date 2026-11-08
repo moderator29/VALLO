@@ -19,6 +19,7 @@ const PAGES = [
   "circle-manage",
   "circle-manage?empty=1",
   "circle-discussion",
+  "roommates",
 ];
 
 export default function PreviewFeaturesIndex() {
