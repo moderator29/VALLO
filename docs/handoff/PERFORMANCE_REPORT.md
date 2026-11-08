@@ -343,3 +343,118 @@ Everything WebKit-specific is unmeasured:
 
 The founder's iPhone run in DEVICE_TEST_MATRIX.md (steps 1, 2 and 6) is the
 first real iOS measurement this project will have.
+
+## RUN 2 (Agent NATIVE, 8 November 2026): the first-load fixes, before and after
+
+**Every number in this section is SIMULATED** (Playwright Chromium, CDP
+throttling, no phone), except the file sizes, which are bytes on disk.
+
+### How before and after were made
+
+Two production builds of the SAME tree, built one at a time under the build
+lock: "after" is the working tree (`.next-native`); "before" is a copy of it
+with only the changed files put back as they were at `01b74c9`
+(`ReservePanel.tsx`, `NotifyBanner.tsx`, `useRealtime.ts`, `glyphs.ts`,
+`Icon3D.tsx`, and `funds.ts`, `balance-ui.tsx`, `WithdrawScreen.tsx` before
+the wallet change). So the difference between them is these changes and
+nothing any other agent did in between.
+
+Scripts (session scratchpad, `native2/`): `bundle.js` and `chunkfind.cjs`
+(first-load JavaScript per route from the client manifests, gzip level 9,
+and which routes carry the supabase-js and libphonenumber chunks),
+`firstload.cjs` (budget Android: 6x CPU, Fast 3G, 360x800 at 2x, cache off,
+median of 3 cold loads), `whyimport.cjs` (the import chain that pulls a
+module in).
+
+### 1. What changed
+
+1. **The guest's phone field loads with "booking for someone else"**
+   (`ReservePanel.tsx`, next/dynamic). The space is held while it loads; a
+   chunk that cannot be fetched now draws a plain number box posting the
+   same `guestPhone` instead of throwing the panel into the error screen.
+2. **supabase-js left the member layout.** `NotifyBanner` and every hook in
+   `useRealtime.ts` load the client inside the effect that opens the
+   channel (`whenLoaded`): a channel is opened once the client arrives, never
+   opened if its screen left first, and removed by the same stop as before.
+   Held by `lib/platform/first-load-guards.test.ts` (static imports, one
+   `whenLoaded` per `.channel(`, and the open, never-open and no-client cases
+   run against a mocked loader).
+3. **libphonenumber left every wallet page.** `balance-ui.tsx` and
+   `WithdrawScreen.tsx` imported `isOpenMovement` and `lastFour` from
+   `lib/money/funds.ts`, which imports the phone rules. Both helpers moved
+   to `lib/money/funds-light.ts` (no imports); `funds.ts` re-exports them, so
+   no other caller changed.
+4. **Every glyph has a 192 px WebP** for the plain `<img>` spots (empty
+   states, the tracker, the in-app banner, discovery empties, listing
+   status), which no optimiser resizes. `Icon3D` keeps the PNG master through
+   next/image. Held by `design-system/icons/glyph-files.test.ts`.
+
+### 2. First-load JavaScript (gzipped KB, from the build manifests)
+
+| Route | Before | After | Saved |
+|---|---|---|---|
+| /stay/[id] | 352 | 244 | 108 |
+| /listing/[id] | 342 | 234 | 108 |
+| /wallet (and /wallet/send, add, withdraw, settings, transactions) | 308 | 203 | 105 |
+| /bookings | 296 | 230 | 66 |
+| /search | 274 | 209 | 65 |
+| /around | 268 | 202 | 66 |
+| /home | 255 | 189 | 66 |
+| /messages | 228 | 162 | 66 |
+| /welcome | 105 | 104 | 1 |
+
+| Chunk in first load | Before | After |
+|---|---|---|
+| supabase-js (67 KB gzip) | 198 routes | 14 routes |
+| libphonenumber (40 KB gzip) | 34 routes | 21 routes |
+
+Still carrying libphonenumber (members' routes): /bookings (through
+`InspectionSheet`'s `formatPhone`), /settings/phone, the profile setup
+pages, sign-in code and phone, sign-up phone, /agent/inspections, the
+mandate form, /admin/listings. Most of them draw a phone field, so they need
+it; /bookings and /agent/inspections do not (Recommend next).
+
+### 3. Loads on budget Android (6x CPU, Fast 3G, medians of 3, ms and KB)
+
+Harness pages (the member routes need a session this build cannot make):
+
+| Page | JS before load: before | after | Load event: before | after | FCP: before | after |
+|---|---|---|---|---|---|---|
+| /preview/home-dock (the member shell) | 360 | 293 | 8973 | 8573 | 4804 | 4776 |
+| /preview/session-b/sweep-home/listing-parts (with ReservePanel) | 397 | 289 | 7824 | 7490 | 4332 | 4396 |
+| /preview/p5/wallet | 331 | 290 | 7253 | 7170 | 4080 | 4052 |
+
+Read it plainly: the JavaScript a budget phone must fetch before the page's
+load event fell by 41 to 108 KB, and the load event came 80 to 400 ms
+sooner. First contentful paint did not move (the server's HTML paints first
+either way). On the shell harness the supabase chunk still arrives, after
+load instead of before it (all JS 361 KB in both), so the end of the last
+long task moved later (9838 to 10848 ms): the work is not gone on a page
+that opens a channel, it is out of the way of the first screen. A page that
+opens no channel never pays it.
+
+### 4. Glyph files (bytes on disk, not simulated)
+
+| | PNG master | WebP 192 px |
+|---|---|---|
+| empty-reviews (drawn at 88 px) | 57.6 KB | 8.8 KB |
+| all 64 glyphs | 4.98 MB | 651 KB |
+
+So each plain glyph spot fetches about a seventh of what it did (about 60
+to 110 KB less per glyph on screen). Against the PNG scaled to 192 px the
+WebP differs by a mean of under 1.6 of 255 per pixel on white and on navy
+(near lossless). WebP is supported by iOS 14 and later (the app targets 15)
+and every Android WebView.
+
+### 5. The prop-size guard (job 5)
+
+`lib/platform/client-prop-size.test.ts` reads every server file and every
+prop that is the dictionary or a slice of it handed to a `"use client"`
+component, serialised from the English dictionary; over 50 KB fails, with
+an allow list. Its first run found **14 whole-dictionary props (656 KB raw
+each)**, allow-listed as "fix requested", among them every sign-in and
+sign-up form, the second branch of /welcome, AgentShell's mobile nav (every
+agent page) and PromotedSlot's ListingCard. Live /sign-in measured 220 KB
+gzipped of document, 681 KB of flight, 670 KB of it `t` (flight.py, live
+main). `scripts/check-flight-props.mjs` is its running twin over real
+flight payloads (`BASE_URL=... node scripts/check-flight-props.mjs`).
