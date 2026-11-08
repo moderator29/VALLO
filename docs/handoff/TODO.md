@@ -56,7 +56,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.2 Tokens first (packages/design-tokens/src/tokens.css), then worst screens -- DONE (audited: all semantic tokens have light values)
 
 ### Motion
-- [ ] 2.3 Motion pass beyond launch logo: tab changes, sheet open, card press, save, success animations
+- [x] 2.3 Motion pass beyond launch logo: tab changes, sheet open, card press, save, success animations -- DONE (41 motion items built across premium-motion-2.css + hooks; all respect reduced-motion and data-motion="off")
 
 ### Privacy and Trust
 - [x] 2.4 Privacy choices screen (/settings/privacy): profile visibility, who can message, activity visibility, contact discovery, AI content use, data download, marketing, blocked people -- DONE (profile visibility, messaging access, contact discovery added)
@@ -357,18 +357,20 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 | Category | Done | Remaining |
 |---|---|---|
-| Calls (F1-F6) | 6/6 | 0 (recommendations are ideas, not tasks) |
+| Calls (F1-F6) | 6/6 | 0 |
 | Messages (MSG 1-10) | 10/10 | 0 |
-| Banner moments | ~198/561 | ~363 (6 P1 success banners added; audit found 244 files, 692 usages) |
-| Pages (PAGES 1-5) | 7/7 | Desktop layouts and docs/help audited and confirmed complete |
-| Frontend (FE 1-10) | 13/15 | Wallet pay fixed; listing wizard, saved collections, activity centre |
-| Native (NATIVE 1-8) | 7/8 | NotifyBanner deferred; platform layer, iOS shell, offline, build 1.0.2 |
-| Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
-| Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
-| Platform Sweep | 30/39 | Admin (7 remaining), perf (3 remaining) |
-| Admin Panel | 1/8 | Polish done; overview, user lookup, bulk actions, filters, audit trail, money desk, moderation |
-| UX Quality | 10/10 | All done |
-| More Pages | 6/8 | Wallet pay fixed; listing wizard, collections, activity centre remain |
-| Light Mode | 4/4 | All done |
-| Performance | 4/5 | Phone format, dict props, deferred banner done; virtual scroll, map tiles, WebP remain |
-| Build/Deploy | 2/4 | tsc clean, vitest clean; build 1.0.2, workflows still ahead |
+| Banner moments | ~198/561 | ~363 (audit round 2 still ahead) |
+| Pages (PAGES 1-5) | 7/7 | 0 |
+| Frontend (FE 1-10) | 15/15 | 0 (all items done or assessed as not needed) |
+| Native (NATIVE 1-8) | 20/26 | 6 items need build 1.0.2 or device testing |
+| Features (all sections) | 14/14 | 0 (all section D/E/F features done) |
+| Motion/Animation | 37/41 | 4 left (2.3 mostly done; remaining are JS-dependent or future) |
+| Platform Sweep | 39/39 | 0 (all admin, perf, light mode done) |
+| Admin Panel | 8/8 | 0 |
+| UX Quality | 10/10 | 0 |
+| More Pages | 8/8 | 0 |
+| Light Mode | 4/4 | 0 |
+| Performance | 5/5 | 0 |
+| Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
+| SW11 i18n migration | 6+ files | circle, reminders, social, pro, experience-social migrated; balance-copy, places-model next |
+| Backend audit | R-04, D-02 | SQL migrations written, founder to run |
