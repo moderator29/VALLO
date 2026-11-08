@@ -177,6 +177,9 @@
       box-shadow var(--nf-duration-fast) var(--nf-ease-standard),
       border-color var(--nf-duration-fast) var(--nf-ease-standard);
   }
+  :root[data-motion-lite="on"] .nf-pcard {
+    transition: none;
+  }
   @media (hover: hover) {
     .nf-pcard:hover {
       translate: 0 -2px;
