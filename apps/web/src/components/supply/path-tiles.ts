@@ -14,7 +14,7 @@ import { TIERED_OBJECTS, solidSrc, tieredSrc, type TieredObjectName } from "@/de
  */
 const tier = (name: TieredObjectName): string => tieredSrc(TIERED_OBJECTS[name]);
 /** The founder's glyph sheet of 1 November 2026, cut into one transparent 256px file each. */
-const glyph = (name: string): string => `/brand/glyphs/${name}.png`;
+const glyph = (name: string): string => `/brand/glyphs/${name}.webp`;
 
 /** The listing wizard's eight steps (`ListingWizard` STEP_KEYS). */
 export const LISTING_STEP_TILES: Readonly<Record<string, string>> = {

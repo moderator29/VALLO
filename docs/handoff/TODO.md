@@ -32,7 +32,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings) -- DONE (counterpartPhoneFormatted added to Inspection type, populated in queries.ts, InspectionSheet uses pre-formatted value)
 - [ ] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite
 - [ ] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view)
-- [ ] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts)
+- [x] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts) -- DONE (path-tiles.ts glyph helper and AI_GLYPH in glyphs.ts both switched to .webp; glyphMasterSrc stays PNG for Icon3D high-res; email icons stay PNG for email client compat; finance glyphs have no WebP counterparts yet)
 - [x] 1.20 Defer in-app banner client load to idle (`requestIdleCallback` with 2s ceiling) -- DONE (NotifyBanner lazy-loaded via React.lazy + requestIdleCallback with 2s timeout in AppShell)
 
 ### Rich Notifications (code written, needs build 1.0.2 to ship)
@@ -267,7 +267,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings) -- DONE (see 1.16)
 - [ ] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite
 - [ ] 10.38 Listing map tiles at drawn size (350 KB per listing view)
-- [ ] 10.39 Point remaining PNG references at WebPs
+- [x] 10.39 Point remaining PNG references at WebPs -- DONE (see 1.19)
 
 ---
 
