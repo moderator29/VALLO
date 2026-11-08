@@ -92,7 +92,7 @@ export const PROFESSIONAL_LABEL: Record<ProfessionalKind, string> = {
   property_manager: "Property manager",
   surveyor: "Surveyor",
   lawyer: "Property lawyer",
-  valuer: "Valuer",
+  valuer: "Estate surveyor and valuer",
   builder: "Builder",
   investor: "Investor",
 };
