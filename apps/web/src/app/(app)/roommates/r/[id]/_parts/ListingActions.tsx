@@ -453,6 +453,26 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
                   className="nf-rmv-pick"
                   onClick={() => {
                     feedback("select");
+                    setOpen(false);
+                    router.push(`/messages/share/roommate/${id}`);
+                  }}
+                  data-testid="listing-share-chat"
+                >
+                  <span className="nf-rm-plate" aria-hidden="true">
+                    <UiIcon name="chat-bubble" size={20} />
+                  </span>
+                  <span className="nf-rmv-pick__name">{L.shareChat}</span>
+                  <UiIcon name="chevron-right" size={18} />
+                </button>
+              </li>
+            ) : null}
+            {signedIn ? (
+              <li>
+                <button
+                  type="button"
+                  className="nf-rmv-pick"
+                  onClick={() => {
+                    feedback("select");
                     setFeed(true);
                   }}
                   data-testid="listing-share-feed"

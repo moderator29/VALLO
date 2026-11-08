@@ -505,6 +505,7 @@ export const roommatesEn = {
       noCosts: "The lister has not added the costs yet. Ask before you arrange a viewing.",
       whenMissing: "Choose a day and time for the viewing.",
       shareLink: "Share the link",
+      shareChat: "Send in a chat",
       feedTitle: "Share to your feed",
       feedBody: "Your followers see this room as a post, with a line from you if you like.",
       feedLine: "Add a line",

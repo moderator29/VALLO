@@ -24,6 +24,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  *
  *   /messages/share/listing/<listingId>   send this listing to a thread
  *   /messages/share/booking/<bookingId>   send this booking to a thread
+ *   /messages/share/roommate/<postId>     send this Vallo Roommates post to a thread
  *   /messages/share/into/<conversationId> send one of my things into this thread
  *
  * The first two are the "Share to chat" destination a listing page or a
@@ -43,7 +44,7 @@ export default async function SharePage({
 }) {
   const { kind, id } = await params;
   if (!UUID_RE.test(id)) notFound();
-  if (kind !== "listing" && kind !== "booking" && kind !== "stay" && kind !== "into") notFound();
+  if (kind !== "listing" && kind !== "booking" && kind !== "stay" && kind !== "roommate" && kind !== "into") notFound();
 
   const session = await resolveSession();
   const inbox = getDictionary(await getLocale()).experienceInbox;
@@ -55,7 +56,9 @@ export default async function SharePage({
         ? `/listing/${id}`
         : kind === "stay"
           ? `/stay/${id}`
-          : `/bookings/${id}`;
+          : kind === "roommate"
+            ? `/roommates/r/${id}`
+            : `/bookings/${id}`;
 
   if (session.state !== "signed-in") {
     const next = returnHref(`/messages/share/${kind}/${id}`, "", "message");

@@ -23,6 +23,16 @@ describe("a share body", () => {
     expect(parseShare(body)).toEqual({ kind: "stay", id: ID });
   });
 
+  it("round-trips a Vallo Roommates post onto its own route", () => {
+    const body = shareBody({ kind: "roommate", id: ID });
+    expect(body).toBe(`Shared a room\n/roommates/r/${ID}`);
+    expect(shareHref({ kind: "roommate", id: ID })).toBe(`/roommates/r/${ID}`);
+    expect(parseShare(body)).toEqual({ kind: "roommate", id: ID });
+    expect(parseShare(`/roommates/r/${ID}`)).toEqual({ kind: "roommate", id: ID });
+    expect(sharePreview(body)).toBe("Shared a room");
+    expect(parseShare(`/roommates/p/${ID}`)).toBeNull();
+  });
+
   it("keeps stay and listing apart, because their ids come from different tables", () => {
     expect(parseShare(`/stay/${ID}`)).toEqual({ kind: "stay", id: ID });
     expect(parseShare(`/listing/${ID}`)).toEqual({ kind: "listing", id: ID });

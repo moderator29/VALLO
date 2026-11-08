@@ -88,7 +88,30 @@ export type ChatCardBooking = {
   rating: number | null;
 };
 
-export type ChatCardData = ChatCardListing | ChatCardBooking;
+/**
+ * A Vallo Roommates post (`/roommates/r/<id>`): the cover photograph or none,
+ * what kind of post it is, where, the price per period (the share when the
+ * lister gave one) and the facts the post states. Nothing is defaulted.
+ */
+export type ChatCardRoommate = {
+  kind: "roommate";
+  id: string;
+  title: string;
+  area: string;
+  city: string;
+  photo: string | null;
+  /** "Room available", "Roommate wanted", "Find together". */
+  kindLabel: string;
+  /** Checked by Vallo, from the post's own flag. */
+  verified: boolean;
+  /** Pre-formatted on the server, "" when the post gives no figure. */
+  priceLabel: string;
+  periodLabel: string;
+  /** "Private room", "2 bedrooms", already counted on the server. */
+  facts: string[];
+};
+
+export type ChatCardData = ChatCardListing | ChatCardBooking | ChatCardRoommate;
 
 /**
  * Every card the thread draws. The picker and the forward control only ever
@@ -182,6 +205,63 @@ export function ChatCard({
   /* A passport is never forwarded: it is the sender's own, shown in this
      conversation, so it carries no forward control whatever `forwardable` says. */
   if (card.kind === "passport") return <PassportChatCard card={card} />;
+  if (card.kind === "roommate") {
+    const self: SharedRef = { kind: "roommate", id: card.id };
+    return (
+      <article className={CARD} data-testid="chat-card-roommate" aria-label={card.title}>
+        <div className="nf-chat-card__photo">
+          {card.photo ? (
+            <Image src={card.photo} alt="" fill sizes="(max-width: 640px) 80vw, 320px" className="object-cover" />
+          ) : (
+            <span className="absolute inset-0 grid place-items-center text-[var(--nf-brand-quiet)]" aria-hidden="true">
+              <UiIcon name="bed" size={28} />
+            </span>
+          )}
+        </div>
+        {card.verified && (
+          <span className="nf-badge nf-badge--verified nf-chat-card__badge">
+            <UiIcon name="verified" size={12} />
+            {w.verified}
+          </span>
+        )}
+        <div className="nf-chat-card__body">
+          <div className="nf-chat-card__head">
+            <p className="nf-chat-card__title">{card.title}</p>
+            {forwardable && <Forward target={self} label={w.forward.roommate} />}
+          </div>
+          <p className="nf-chat-card__place">
+            <UiIcon name="users" size={16} className="shrink-0 text-[var(--nf-brand-secondary)]" />
+            <span>{`${w.roommates} · ${card.kindLabel}`}</span>
+          </p>
+          {card.area || card.city ? (
+            <p className="nf-chat-card__place">
+              <UiIcon name="location" size={16} className="shrink-0 text-[var(--nf-brand-secondary)]" />
+              <span>{[card.area, card.city].filter(Boolean).join(", ")}</span>
+            </p>
+          ) : null}
+          {card.facts.length > 0 && (
+            <div className="nf-chat-card__features">
+              {card.facts.map((fact) => (
+                <span key={fact}>{fact}</span>
+              ))}
+            </div>
+          )}
+          {card.priceLabel ? (
+            <p className="nf-chat-card__price-row">
+              <span className="nf-chat-card__price">{card.priceLabel}</span>
+              {card.periodLabel && <span className="nf-chat-card__unit">{card.periodLabel}</span>}
+            </p>
+          ) : null}
+          <div className="nf-chat-card__actions">
+            <Link href={shareHref(self)} className="nf-btn nf-btn--primary nf-btn--sm">
+              {w.viewRoom}
+              <UiIcon name="chevron-right" size={16} />
+            </Link>
+          </div>
+        </div>
+      </article>
+    );
+  }
   if (card.kind === "listing") {
     /* What this card IS, decided once, so the primary link, the forward and
        the foot cannot disagree about it. */

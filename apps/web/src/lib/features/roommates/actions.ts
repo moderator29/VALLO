@@ -10,6 +10,7 @@ import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "@/lib/actions/session";
 import { sendEmail } from "@/lib/email/client";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { recordRoommatesStep } from "@/lib/funnel/roommates";
 
 import { isNotLive } from "../degrade";
 import {
@@ -174,6 +175,7 @@ export async function saveRoommateProfile(
   const { error } = await who.db.from("roommate_profiles").upsert(row, { onConflict: "user_id" });
   if (error) return fail(wordsFor(error));
   refresh(ROOMMATES_ROUTES.home, ROOMMATES_ROUTES.profile, ROOMMATES_ROUTES.hub);
+  if (options.publish) void recordRoommatesStep("roommates_profile_live");
   return ok({ status });
 }
 
@@ -302,12 +304,14 @@ export async function saveRoommateListing(input: ListingDraft, options: { publis
     const { error } = await who.db.from("roommate_listings").update(row).eq("id", d.id).eq("owner_id", who.userId);
     if (error) return fail(wordsFor(error));
     refresh(ROOMMATES_ROUTES.listing(d.id), ROOMMATES_ROUTES.hub, ROOMMATES_ROUTES.home);
+    if (options.publish) void recordRoommatesStep("roommates_listing_published");
     return ok({ id: d.id, status });
   }
   const { data, error } = await who.db.from("roommate_listings").insert({ ...row, owner_id: who.userId }).select("id").single();
   if (error || !data) return fail(wordsFor(error));
   const id = (data as { id: string }).id;
   refresh(ROOMMATES_ROUTES.hub, ROOMMATES_ROUTES.home);
+  if (options.publish) void recordRoommatesStep("roommates_listing_published");
   return ok({ id, status });
 }
 
@@ -361,6 +365,7 @@ export async function expressInterest(input: { toId: string; listingId?: string 
   if (res.error || !res.data) return fail(res.error ?? FAILED);
   refresh(ROOMMATES_ROUTES.person(input.toId), ROOMMATES_ROUTES.hub);
   if (input.listingId) refresh(ROOMMATES_ROUTES.listing(input.listingId));
+  void recordRoommatesStep("roommates_interest_sent");
   return ok({ id: res.data });
 }
 
@@ -371,6 +376,7 @@ export async function answerInterest(input: { id: string; accept: boolean }): Pr
   const res = await call<string>(who.db, "roommate_answer_interest", { p_id: input.id, p_accept: Boolean(input.accept) });
   if (res.error) return fail(res.error);
   refresh(ROOMMATES_ROUTES.hub);
+  if (input.accept) void recordRoommatesStep("roommates_interest_accepted");
   return ok({ status: res.data ?? (input.accept ? "accepted" : "declined") });
 }
 
@@ -401,6 +407,7 @@ export async function openRoommateChat(interestId: string): Promise<ActionResult
   if (!uuid.safeParse(interestId).success) return fail(FAILED);
   const res = await call<string>(who.db, "roommate_open_chat", { p_interest: interestId });
   if (res.error || !res.data) return fail(res.error ?? "We could not open this chat just now. Please try again.");
+  void recordRoommatesStep("roommates_chat_opened");
   return ok({ conversationId: res.data });
 }
 
@@ -431,6 +438,7 @@ export async function createRoommateGroup(input: GroupInput): Promise<ActionResu
   const res = await call<string>(who.db, "roommate_create_group", { p: parsed.data });
   if (res.error || !res.data) return fail(res.error ?? FAILED);
   refresh(ROOMMATES_ROUTES.hub, ROOMMATES_ROUTES.groups);
+  void recordRoommatesStep("roommates_group_created");
   return ok({ id: res.data });
 }
 
@@ -685,6 +693,7 @@ export async function requestRoommateViewing(input: z.input<typeof viewingSchema
   });
   if (res.error || !res.data) return fail(res.error ?? FAILED);
   refresh(ROOMMATES_ROUTES.listing(v.listingId), ROOMMATES_ROUTES.hub);
+  void recordRoommatesStep("roommates_viewing_requested");
   return ok({ id: res.data });
 }
 
