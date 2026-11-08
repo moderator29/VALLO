@@ -183,7 +183,7 @@ export function VisitStatus({
       /* Said by the one banner at the top of the screen (Grade 1). */
       const result = await acceptProposedTime({ id: row.id });
       if (!result.ok) banner.error(result.error, { retry: () => void accept() });
-      else router.refresh();
+      else { banner.success("Viewing confirmed."); router.refresh(); }
     } finally {
       setBusy(false);
     }

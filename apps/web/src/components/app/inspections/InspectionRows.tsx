@@ -192,7 +192,7 @@ function InspectionRow({
 
   const timeCome = Date.parse(shown) <= clock;
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, successMsg?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     startTransition(async () => {
@@ -203,6 +203,7 @@ function InspectionRow({
             banner.error(result.error ?? flowCopy.failed);
             return;
           }
+          if (successMsg) banner.success(successMsg);
           setJustChanged(true);
           router.refresh();
         } finally {
@@ -307,7 +308,7 @@ function InspectionRow({
             size="sm"
             variant="primary"
             disabled={pending}
-            onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }))}
+            onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }), "Viewing confirmed.")}
           >
             {VIEWING_WORDS.confirm}
           </Button>
@@ -327,7 +328,7 @@ function InspectionRow({
               size="sm"
               variant="primary"
               disabled={pending}
-              onClick={() => run(() => acceptProposedTime({ id: inspection.id }))}
+              onClick={() => run(() => acceptProposedTime({ id: inspection.id }), "Time accepted.")}
             >
               {VIEWING_WORDS.acceptTime}
             </Button>
@@ -349,7 +350,7 @@ function InspectionRow({
                 size="sm"
                 variant="secondary"
                 disabled={pending}
-                onClick={() => run(() => closeInspection({ id: inspection.id, state: "COMPLETED" }))}
+                onClick={() => run(() => closeInspection({ id: inspection.id, state: "COMPLETED" }), "Viewing completed.")}
               >
                 {VIEWING_WORDS.markInspected}
               </Button>

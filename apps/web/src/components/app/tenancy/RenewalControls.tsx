@@ -25,7 +25,7 @@ type Copy = Dictionary["afterTheGate"]["tenancy"];
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void) {
+  function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void, successMsg?: string) {
     start(async () => {
       try {
         const result = await work();
@@ -34,6 +34,7 @@ function useRun() {
           return;
         }
         if (after) after(result.data);
+        if (successMsg) banner.success(successMsg);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -64,7 +65,7 @@ export function RenewalOfferForm({
       data-testid="renewal-offer"
       onSubmit={(event) => {
         event.preventDefault();
-        run(() => offerRenewal({ tenancyId, rentNaira: rent, serviceNaira: service, feesNaira: fees }));
+        run(() => offerRenewal({ tenancyId, rentNaira: rent, serviceNaira: service, feesNaira: fees }), undefined, "Renewal offer sent.");
       }}
     >
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.renewalOfferHelp}</p>
@@ -85,10 +86,10 @@ export function RenewalAnswer({ tenancyId, copy }: { tenancyId: string; copy: Co
     <div data-testid="renewal-answer">
       <p className="nf-body-sm font-semibold">{copy.renewalAsk}</p>
       <div className="mt-xs flex flex-wrap gap-sm">
-        <Button size="sm" variant="primary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "renewing" }))}>
+        <Button size="sm" variant="primary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "renewing" }), undefined, "Renewal accepted.")}>
           {copy.renewing}
         </Button>
-        <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "leaving" }))}>
+        <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "leaving" }), undefined, "Decision saved.")}>
           {copy.leaving}
         </Button>
       </div>

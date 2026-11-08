@@ -274,7 +274,7 @@ export function InspectionSheet({
   const submittable = canSubmit(reportLive, inspection.state, saved, outcome, photoNeed) && timeCome;
   const photosMissing = photosShort(saved, photoNeed);
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void, successMsg?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
     startTransition(async () => {
@@ -287,6 +287,7 @@ export function InspectionSheet({
             return;
           }
           after?.();
+          if (successMsg) banner.success(successMsg);
           router.refresh();
         } finally {
           inFlight.current = false;
@@ -772,7 +773,7 @@ export function InspectionSheet({
               <Button
                 variant="primary"
                 disabled={pending}
-                onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }))}
+                onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }), undefined, "Viewing confirmed.")}
                 data-testid="inspection-confirm"
               >
                 {VIEWING_WORDS.confirm}
@@ -790,7 +791,7 @@ export function InspectionSheet({
               <Button
                 variant="primary"
                 disabled={pending}
-                onClick={() => run(() => acceptProposedTime({ id: inspection.id }))}
+                onClick={() => run(() => acceptProposedTime({ id: inspection.id }), undefined, "Time accepted.")}
                 data-testid="inspection-accept-time"
               >
                 {VIEWING_WORDS.acceptTime}
