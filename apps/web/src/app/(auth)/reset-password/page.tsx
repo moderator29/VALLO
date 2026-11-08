@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forResetPasswordForm } from "@/lib/i18n/slice";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
@@ -65,5 +66,5 @@ export default async function ResetPasswordPage() {
     );
   }
 
-  return <ResetPasswordForm t={t} askCurrent={proof === "current-password"} />;
+  return <ResetPasswordForm t={forResetPasswordForm(t)} askCurrent={proof === "current-password"} />;
 }

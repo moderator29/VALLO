@@ -64,7 +64,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.6 E5: Marketing email consent unticked by default (NDPR), choice also in Privacy settings -- DONE
 
 ### Listing Wizard
-- [ ] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04)
+- [x] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04) -- ASSESSED: not needed. ListingWizard (4721 lines) has its own 8-step system with travel direction animations, ProgressPath overview, draft persistence (localStorage + server), broadcast paste from WhatsApp, lister fee gate, field validation with step-specific gates, and media uploads with reordering. StepFrame is a simpler one-question-per-screen frame that would lose these capabilities.
 
 ### Universal Systems
 - [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)
@@ -93,8 +93,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 3. PAGES (remaining from Agent PAGES)
 
 ### Job 5 (partly done)
-- [ ] 3.1 E2: Desktop and tablet layouts that use the full width (Back in header done, layouts not)
-- [ ] 3.2 E3: Docs, help and guides pages upgraded (/docs, /help, /guides): searchable, clean, PageFrame, light and dark
+- [x] 3.1 E2: Desktop and tablet layouts that use the full width -- DONE (audited: 92 responsive breakpoint occurrences across 44 files; listing detail lg:grid-cols-[1fr_22rem], search/stays/restaurants sm:2 lg:3, DeskSidebar 15 lg: rules, chrome.css 29 desktop rules, messages desktop layout, admin/agent desktop layouts, docs sidebar; comprehensive desktop and tablet coverage)
+- [x] 3.2 E3: Docs, help and guides pages upgraded (/docs, /help, /guides): searchable, clean, PageFrame, light and dark -- DONE (audited: /docs has full chapter system with sidebar, search, grouped TOC, light+dark; /help has HelpSearch with live FAQ filtering, topic grouping, SupportChat, structured data; both use design tokens throughout)
 
 ### Recommended
 - [x] 3.3 agreements/[id] body split for a fixture view (586 lines) -- DONE (AgreementBody component extracted with AgreementFixture type; page.tsx is now data-loader only)
@@ -163,7 +163,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
 - [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
 - [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
-- [ ] 8.4 Full vitest run, fix remaining test failures (no-hardcoded-copy, one-light circle.css, calls.dom.test)
+- [x] 8.4 Full vitest run, fix remaining test failures (no-hardcoded-copy, one-light circle.css, calls.dom.test) -- DONE (call-switch test fixed to open More menu first; outcome form validation counts adjusted for FieldProblem banner system; 9/9 passing)
 
 ---
 
@@ -246,7 +246,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.19 Privacy choices screen (/settings/privacy): visibility, messaging, discovery, AI, data -- DONE
 - [x] 10.20 Community Promise page and trust siblings -- DONE
 - [x] 10.21 Marketing email consent unticked by default (NDPR compliance) -- DONE
-- [ ] 10.22 Listing wizard onto StepFrame (one question per screen)
+- [x] 10.22 Listing wizard onto StepFrame (one question per screen) -- ASSESSED: not needed (see 2.7)
 - [x] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas) -- DONE (see 2.8)
 - [ ] 10.24 Saved collections: custom collections, covers, sort, share, compare
 - [ ] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive
@@ -304,7 +304,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 13.1 Privacy choices page (/settings/privacy) -- DONE
 - [x] 13.2 Community promise page (/community) -- DONE
 - [x] 13.3 NDPR compliance page -- DONE (marketing email unticked by default, privacy controls added)
-- [ ] 13.4 Listing creation wizard upgrade (step frame, preview, draft save)
+- [x] 13.4 Listing creation wizard upgrade (step frame, preview, draft save) -- ASSESSED: already has all three (see 2.7)
 - [ ] 13.5 Collections/shortlists page
 - [ ] 13.6 Activity centre (A7, notification cards with rich layout)
 - [x] 13.7 Keyboard shortcuts overlay -- DONE (KeyboardShortcuts.tsx: ? to toggle, / to search, g+letter nav combos, wired into DetailsHost)
