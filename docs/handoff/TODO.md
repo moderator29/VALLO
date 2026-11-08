@@ -28,7 +28,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 1.14 On reconnect: refresh, replay only safe queued actions, never payment/booking without confirmation
 
 ### Performance (remaining after NATIVE2)
-- [ ] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first
+- [x] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first -- DONE (see 10.35: all auth pages wired with sliced dictionaries, slice-coverage.test.ts updated)
 - [x] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings) -- DONE (counterpartPhoneFormatted added to Inspection type, populated in queries.ts, InspectionSheet uses pre-formatted value)
 - [ ] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite
 - [ ] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view)
@@ -100,7 +100,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 3.3 agreements/[id] body split for a fixture view (586 lines) -- DONE (AgreementBody component extracted with AgreementFixture type; page.tsx is now data-loader only)
 - [x] 3.4 DrawUpAgreement, PaymentGate, CautionControls onto StepFrame -- ASSESSED: not step-flows. DrawUpAgreement is a single form (68 lines); PaymentGate is an info card (96 lines); CautionControls are 5 independent action forms (374 lines). None are multi-step wizards. StepFrame is for one-question-per-screen flows. These stay as embedded forms.
 - [x] 3.5 Rewards WithdrawFlow and RewardsPayoutForm onto StepFrame -- ASSESSED: WithdrawFlow already has its own state machine (enter/quoting/quoted/confirming/done) with proper phase transitions, loading states, and error handling. RewardsPayoutForm is a single form. Neither benefits from StepFrame.
-- [ ] 3.6 Wallet "pay" step review (two buttons in content, none in footer)
+- [x] 3.6 Wallet "pay" step review (two buttons in content, none in footer) -- DONE ("I have paid" moved to StepFrame footer as primary; "Open the payment page" demoted to secondary; SendScreen/WithdrawScreen correct as-is with DragToConfirm)
 
 ---
 
@@ -163,7 +163,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
 - [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
 - [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
-- [x] 8.4 Full vitest run, fix remaining test failures (no-hardcoded-copy, one-light circle.css, calls.dom.test) -- DONE (call-switch test fixed to open More menu first; outcome form validation counts adjusted for FieldProblem banner system; 9/9 passing)
+- [x] 8.4 Full vitest run, fix remaining test failures -- PARTIAL (outcome form validation counts reverted to correct values, 7/9 passing; 1 pre-existing call-switch timeout where switch moved into More menu but test not updated; 1 pre-existing call-switch test needs More menu click before switch)
 
 ---
 
@@ -263,7 +263,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.34 Light mode icons and glyphs: proper contrast on light backgrounds -- DONE (audited: interactive tokens flip correctly, washes use ink-based in light)
 
 ### Performance Follow-ups
-- [ ] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first
+- [x] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first -- DONE (auth pages wired: all 8 auth client components now receive sliced dictionaries via forEmailAuthForm/forCodeSignInForm/forVerifyCodeForm/forFinishSetupForm/forForgotPasswordForm/forResetCodeForm/forResetPasswordForm; slice-coverage.test.ts updated with all ROOTS entries; remaining non-auth pages already have slicing via forListingCard/forStayCard/forSettingsHub etc.)
 - [x] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings) -- DONE (see 1.16)
 - [ ] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite
 - [ ] 10.38 Listing map tiles at drawn size (350 KB per listing view)
@@ -323,7 +323,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ## 15. PERFORMANCE
 
-- [ ] 15.1 Dictionary prop audit (only pass needed keys, not full dict)
+- [x] 15.1 Dictionary prop audit (only pass needed keys, not full dict) -- DONE (see 10.35/1.15: auth pages wired with sliced dictionaries; listingCard/stayCard/settingsHub/etc. already had slices)
 - [x] 15.2 Phone format deferred loading -- DONE (see 1.16: formatPhone moved server-side)
 - [ ] 15.3 Search results virtual scroll for long lists
 - [ ] 15.4 Map tile lazy loading
