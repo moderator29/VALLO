@@ -32,12 +32,13 @@ export const circleEn = {
     members: { one: "{count} member", other: "{count} members" },
     exploreTitle: "Explore Circle",
     dest: {
-      discussions: "Discussions",
+      discussions: "Discus\u00adsions",
       ask: "Ask a question",
-      neighbourhoods: "Neighbourhoods",
+      /* Soft hyphens (U+00AD) so a narrow tile breaks at a syllable, on every engine. */
+      neighbourhoods: "Neighbour\u00adhoods",
       insights: "Market insights",
-      professionals: "Professionals",
-      opportunities: "Opportunities",
+      professionals: "Profes\u00adsionals",
+      opportunities: "Oppor\u00adtunities",
       guides: "Guides",
       roommates: "Roommates",
     },

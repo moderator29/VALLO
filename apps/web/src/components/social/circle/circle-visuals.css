@@ -12,241 +12,367 @@
  */
 @layer components {
   /* ------------------------------------------------------------ banner */
+  /* Rebuilt 8 November 2026: one big picture from the art slots under a blue
+     scrim, the headline, the line, the faces and the count, one action. A
+     night island in both themes, so the picture and the white words keep
+     their contrast. Width is the container's, never its content's. */
   .nf-cbn {
     position: relative;
     isolation: isolate;
     display: grid;
-    justify-items: center;
-    gap: var(--nf-space-xs);
+    align-items: end;
+    min-inline-size: 0;
+    min-block-size: clamp(22rem, 62vw, 28rem);
     overflow: hidden;
-    padding: var(--nf-space-md) var(--nf-space-md) var(--nf-space-lg);
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, transparent);
     border-radius: var(--nf-radius-island);
-    background:
-      radial-gradient(120% 70% at 50% 0%, color-mix(in oklab, var(--nf-brand-primary) 34%, transparent), transparent 70%),
-      radial-gradient(90% 60% at 100% 100%, color-mix(in oklab, var(--nf-spark) 12%, transparent), transparent 70%),
-      var(--nf-surface-artwork);
+    background: var(--nf-surface-artwork);
     color: var(--nf-content-primary);
-    text-align: center;
     box-shadow: var(--nf-elevation-floating);
   }
-  .nf-cbn__feed {
+  .nf-cbn__art {
     position: absolute;
-    inset: var(--nf-space-sm) auto auto var(--nf-space-sm);
-    z-index: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--nf-space-2xs);
-    block-size: 2.5rem;
-    padding-inline: var(--nf-space-sm);
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 18%, transparent);
-    border-radius: var(--nf-act-radius-sm);
-    background: color-mix(in oklab, var(--nf-content-primary) 8%, transparent);
-    color: var(--nf-content-primary);
-    font-size: var(--nf-text-caption);
-    font-weight: 700;
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    inset: 0;
+    z-index: -2;
   }
-  .nf-cbn__feed:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: var(--nf-focus-ring-offset);
-  }
-
-  /* The stage: the photograph tilted a few degrees on a brand bloom, an orbit
-     line behind it, the faces at three points around it, the Circle mark at
-     its corner. */
-  .nf-cbn__stage {
-    position: relative;
-    inline-size: min(100%, 20rem);
-    aspect-ratio: 16 / 11;
-    margin-block: var(--nf-space-xl) var(--nf-space-xs);
-  }
-  .nf-cbn__bloom {
-    position: absolute;
-    inset: 8% 4%;
-    border-radius: var(--nf-radius-circle);
-    background: radial-gradient(closest-side, color-mix(in oklab, var(--nf-brand-primary) 55%, transparent), transparent);
-    filter: blur(24px);
-    opacity: 0.8;
-  }
-  .nf-cbn__orbit {
-    position: absolute;
-    inset: -6% -10%;
-    border: var(--nf-border-width) dashed color-mix(in oklab, var(--nf-content-primary) 16%, transparent);
-    border-radius: var(--nf-radius-circle);
-    transform: rotate(-8deg);
-  }
-  .nf-cbn__photo {
-    position: absolute;
-    inset: 6% 12%;
-    overflow: hidden;
-    border: 2px solid color-mix(in oklab, var(--nf-content-primary) 22%, transparent);
-    border-radius: var(--nf-radius-xl);
-    box-shadow: var(--nf-elevation-dialog);
-    transform: rotate(-4deg);
-  }
-  .nf-cbn__photo img {
+  .nf-cbn__art img {
     object-fit: cover;
   }
-  .nf-cbn__face {
+  .nf-cbn__scrim {
     position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(180deg, color-mix(in oklab, var(--nf-surface-artwork) 10%, transparent) 0%, color-mix(in oklab, var(--nf-surface-artwork) 55%, transparent) 45%, var(--nf-surface-artwork) 100%),
+      radial-gradient(90% 60% at 0% 100%, color-mix(in oklab, var(--nf-brand-primary) 40%, transparent), transparent 70%);
+  }
+  .nf-cbn__body {
     display: grid;
-    place-items: center;
-    inline-size: 3.25rem;
-    block-size: 3.25rem;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    padding: var(--nf-space-lg) var(--nf-space-md);
+  }
+  .nf-cbn__title {
+    max-inline-size: 18ch;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h1);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    overflow-wrap: anywhere;
+  }
+  .nf-cbn__line {
+    max-inline-size: 34rem;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body);
+    line-height: 1.5;
+  }
+  .nf-cbn__people {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-cbn__faces {
+    display: flex;
+  }
+  .nf-cbn__face {
+    display: block;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
     overflow: hidden;
-    border: 2px solid var(--nf-content-primary);
+    border: 2px solid var(--nf-surface-artwork);
     border-radius: var(--nf-radius-circle);
     background: var(--nf-gradient-brand-ink);
-    box-shadow: var(--nf-elevation-floating);
+  }
+  .nf-cbn__face + .nf-cbn__face {
+    margin-inline-start: calc(var(--nf-space-sm) * -1);
   }
   .nf-cbn__face img {
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
   }
-  .nf-cbn__face[data-at="0"] {
-    inset: 8% auto auto -2%;
-  }
-  .nf-cbn__face[data-at="1"] {
-    inset: -8% 4% auto auto;
-  }
-  .nf-cbn__face[data-at="2"] {
-    inset: auto auto -6% 18%;
-    inline-size: 2.75rem;
-    block-size: 2.75rem;
-  }
-  .nf-cbn__monogram {
-    color: var(--nf-content-on-brand);
+  .nf-cbn__count-n {
     font-weight: 700;
-  }
-  .nf-cbn__mark {
-    position: absolute;
-    inset: auto -2% 0 auto;
-    display: grid;
-    place-items: center;
-    inline-size: 4rem;
-    block-size: 4rem;
-    border-radius: var(--nf-radius-circle);
-    background: var(--nf-gradient-brand-ink);
-    color: var(--nf-content-on-brand);
-    box-shadow:
-      inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 30%, transparent),
-      0 14px 30px -12px color-mix(in oklab, var(--nf-brand-primary) 80%, transparent);
-  }
-  .nf-cbn__title {
-    margin-block-start: var(--nf-space-xs);
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h1);
-    font-weight: 700;
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-  }
-  .nf-cbn__line {
-    max-inline-size: 22rem;
-    color: var(--nf-content-secondary);
-    font-size: var(--nf-text-body-sm);
-    line-height: 1.5;
-  }
-
-  /* The LIVE counts: three tiles on one soft glass strip. */
-  .nf-cbn__stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    inline-size: 100%;
-    margin-block-start: var(--nf-space-sm);
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 12%, transparent);
-    border-radius: var(--nf-radius-xl);
-    background: color-mix(in oklab, var(--nf-content-primary) 5%, transparent);
-  }
-  .nf-cbn__stat {
-    display: grid;
-    justify-items: center;
-    gap: var(--nf-space-3xs);
-    padding: var(--nf-space-sm) var(--nf-space-2xs);
-  }
-  .nf-cbn__stat + .nf-cbn__stat {
-    border-inline-start: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 10%, transparent);
-  }
-  .nf-cbn__stat-glyph {
-    color: var(--nf-brand-quiet);
-  }
-  .nf-cbn__stat-n {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h3);
-    font-weight: 700;
-    line-height: 1.1;
-  }
-  .nf-cbn__stat-word {
-    color: var(--nf-content-muted);
-    font-size: var(--nf-text-caption);
   }
   .nf-cbn__actions {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: var(--nf-space-xs);
-    inline-size: 100%;
-    margin-block-start: var(--nf-space-sm);
+    margin-block-start: var(--nf-space-2xs);
   }
   .nf-cbn__actions > * {
-    flex: 1 1 10rem;
+    flex: 1 1 14rem;
+    max-inline-size: 22rem;
+  }
+  @media (min-width: 48rem) {
+    .nf-cbn__body {
+      padding: var(--nf-space-2xl) var(--nf-space-xl);
+    }
   }
 
-  /* The one-time arrival. */
+  /* The arrival: the picture drifts once, slowly; the words rise on a stagger. */
   @media (prefers-reduced-motion: no-preference) {
-    .nf-cbn__photo {
-      animation: nf-cbn-settle var(--nf-duration-entrance) var(--nf-ease-spring) both;
+    .nf-cbn__art {
+      animation: nf-cbn-drift 18s var(--nf-ease-standard) both;
     }
-    .nf-cbn__face,
-    .nf-cbn__mark {
-      animation: nf-cbn-float-in var(--nf-duration-entrance) var(--nf-ease-spring) both;
-      animation-delay: 180ms;
+    .nf-cbn__body > * {
+      animation: nf-cbn-rise var(--nf-duration-entrance) var(--nf-ease-entrance) both;
     }
-    .nf-cbn__face[data-at="1"] {
-      animation-delay: 260ms;
+    .nf-cbn__body > :nth-child(2) {
+      animation-delay: 80ms;
     }
-    .nf-cbn__face[data-at="2"] {
-      animation-delay: 340ms;
+    .nf-cbn__body > :nth-child(3) {
+      animation-delay: 160ms;
     }
-    .nf-cbn__mark {
-      animation-delay: 420ms;
-    }
-    .nf-cbn__stat {
-      animation: nf-cbn-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
-      animation-delay: calc(360ms + var(--nf-cbn-i, 0) * 40ms);
+    .nf-cbn__body > :nth-child(4) {
+      animation-delay: 240ms;
     }
   }
-  @keyframes nf-cbn-settle {
+  @keyframes nf-cbn-drift {
     from {
-      opacity: 0;
-      transform: rotate(-10deg) scale(0.9) translateY(12px);
+      transform: scale(1.12) translate3d(-2%, 1%, 0);
     }
-  }
-  @keyframes nf-cbn-float-in {
-    from {
-      opacity: 0;
-      transform: scale(0.6) translateY(10px);
+    to {
+      transform: scale(1.02) translate3d(0, 0, 0);
     }
   }
   @keyframes nf-cbn-rise {
     from {
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(10px);
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-cbn__photo, .nf-cbn__face, .nf-cbn__mark, .nf-cbn__stat) {
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-cbn__art, .nf-cbn__body > *) {
     animation: none;
   }
-  :root[data-save-data="on"] .nf-cbn__feed {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
+
+  /* ------------------------------------------------------- destinations */
+  .nf-cdest {
+    display: grid;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+  }
+  .nf-cdest__title {
+    font-size: var(--nf-text-h4);
+    font-weight: 700;
+  }
+  .nf-cdest__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--nf-space-sm) var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-cdest__tile {
+    display: grid;
+    justify-items: center;
+    gap: var(--nf-space-2xs);
+    min-block-size: 44px;
+    color: var(--nf-content-primary);
+    text-align: center;
+    text-decoration: none;
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-cdest__tile:active {
+    transform: scale(0.95);
+  }
+  .nf-cdest__tile:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+    border-radius: var(--nf-radius-lg);
+  }
+  .nf-cdest__art {
+    display: grid;
+    place-items: center;
+    inline-size: 100%;
+    max-inline-size: 4.5rem;
+    aspect-ratio: 1;
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-cdest-fill, var(--nf-brand-tint-1));
+  }
+  .nf-cdest__tile[data-tone="1"] {
+    --nf-cdest-fill: var(--nf-brand-tint-2);
+  }
+  .nf-cdest__tile[data-tone="2"] {
+    --nf-cdest-fill: var(--nf-state-info-surface);
+  }
+  .nf-cdest__tile[data-tone="3"] {
+    --nf-cdest-fill: var(--nf-brand-tint-2);
+  }
+  /* Long words break at a syllable with a hyphen, never mid-letter. */
+  .nf-cdest__label {
+    max-inline-size: 100%;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    line-height: 1.25;
+    hyphens: auto;
+    overflow-wrap: normal;
+  }
+  @media (max-width: 24rem) {
+    .nf-cdest__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 48rem) {
+    .nf-cdest__grid {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-cdest__grid > li {
+      animation: nf-cbn-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+      animation-delay: calc(var(--nf-cdest-i, 0) * 40ms);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-cdest__grid > li {
+    animation: none;
+  }
+
+  /* -------------------------------------------------------------- sort */
+  .nf-csort {
+    display: flex;
+    gap: var(--nf-space-md);
+    border-block-end: var(--nf-border-width) solid var(--nf-divider);
+  }
+  .nf-csort__item {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-csort__item[aria-current="page"] {
+    color: var(--nf-content-primary);
+    box-shadow: inset 0 -3px 0 var(--nf-brand-primary);
+  }
+
+  /* ---------------------------------------------------------- featured */
+  .nf-cfeat {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: var(--nf-space-sm);
+    align-items: start;
+    min-inline-size: 0;
+    padding: var(--nf-space-sm);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-cfeat:active {
+    transform: scale(0.99);
+  }
+  .nf-cfeat:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-cfeat__thumb {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-brand-tint-1);
+  }
+  .nf-cfeat__body {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-cfeat__kicker {
+    overflow: hidden;
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-cfeat__title {
+    display: -webkit-box;
+    overflow: hidden;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .nf-cfeat__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-2xs) var(--nf-space-sm);
+    margin-block-start: var(--nf-space-2xs);
+  }
+  .nf-cfeat__by {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+  }
+  .nf-cfeat__face {
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+  }
+  .nf-cfeat__name {
+    overflow: hidden;
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .nf-cfeat__counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-sm);
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+
+  /* -------------------------------------------------------- compose FAB */
+  .nf-cfab {
+    position: fixed;
+    inset-inline-end: max(var(--nf-space-md), env(safe-area-inset-right));
+    /* Above the dock: its clearance already carries the safe area. */
+    inset-block-end: var(--nf-tabbar-clearance);
+    z-index: var(--nf-z-sticky);
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: var(--nf-elevation-floating);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-cfab:active {
+    transform: scale(0.92);
+  }
+  .nf-cfab:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (min-width: 64rem) {
+    .nf-cfab {
+      inset-block-end: max(var(--nf-space-xl), env(safe-area-inset-bottom));
+    }
   }
 
   /* -------------------------------------------------------------- tabs */
   .nf-ctabs {
     display: flex;
+    min-inline-size: 0;
     align-items: center;
     gap: var(--nf-space-xs);
     border-block-end: var(--nf-border-width) solid var(--nf-divider);
@@ -275,13 +401,10 @@
   .nf-ctabs__tab[aria-current="page"] {
     color: var(--nf-content-primary);
   }
-  .nf-ctabs__tab[aria-current="page"]::after {
-    content: "";
-    position: absolute;
-    inset: auto 0 -1px;
-    block-size: 3px;
-    border-radius: var(--nf-radius-pill);
-    background: var(--nf-brand-primary);
+  /* The live tab's bar is an inset shadow, not ::after: `.nf-tap`'s 44px
+     touch box owned ::after and drew the bar as a blue slab over the word. */
+  .nf-ctabs__tab[aria-current="page"] {
+    box-shadow: inset 0 -3px 0 var(--nf-brand-primary);
   }
   .nf-ctabs__tab:focus-visible,
   .nf-ctabs__search:focus-visible {
@@ -460,6 +583,7 @@
   }
   .nf-ccard__foot {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--nf-space-sm);
@@ -469,5 +593,14 @@
     color: var(--nf-content-secondary);
     font-size: var(--nf-text-caption);
     font-weight: 700;
+  }
+
+  /* LIGHT: paper surfaces, no translucent blue over them (the founder,
+     8 November 2026). Solid tints and a solid edge only. */
+  :root[data-theme="light"] .nf-ccard--question {
+    background: var(--nf-surface-primary);
+    box-shadow:
+      inset 0 0 0 var(--nf-border-width) var(--nf-brand-tint-2),
+      var(--nf-card-shadow);
   }
 }

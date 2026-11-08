@@ -5,8 +5,12 @@
   `.nf-circle-card` when they land; the layout here stays.
 */
 @layer components {
+  /* One column that is the container's width, never its widest child's:
+     `minmax(0, 1fr)` stops a nowrap row (the section tabs) from widening the
+     whole column past the screen, which clipped the Circle at the right edge. */
   .nf-circle {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--nf-space-xl);
     min-width: 0;
   }
@@ -789,5 +793,8 @@
       transition: none;
     }
   }
-}
 
+  :root[data-theme="light"] .nf-cglyph {
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-tint-2);
+  }
+}

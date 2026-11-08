@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { PageFrame } from "@/components/app/PageFrame";
-import { CircleBanner, CirclePostCard, CircleTabs, type CircleFace } from "@/components/social/circle/CircleVisuals";
+import { CircleBanner, CircleComposeFab, CircleDestinations, CircleFeaturedCard, CirclePostCard, CircleSortRow, CircleTabs, type CircleFace } from "@/components/social/circle/CircleVisuals";
+import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ButtonLink } from "@/components/ui/Button";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
-import { CIRCLE_SORTS, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
+import { CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
 import { readCircleHome, readCirclePosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 import { getDictionary } from "@vallo/i18n";
@@ -42,12 +43,23 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
       subtitle={C.tagline}
       fallback="/home"
       width="wide"
+      /* The door into the feed lives in the header (the founder: each has a
+         button into the other), never inside the hero. */
+      actions={
+        <ButtonLink href="/around" variant="secondary" size="sm" leadingIcon="feed" data-testid="circle-feed-door">
+          {C.home.feed}
+        </ButtonLink>
+      }
     >
-      <div className="nf-circle" data-testid="circle-home">
-        <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} feedHref="/around" feedLabel={C.toFeed} />
-        <CircleTabs items={tabs} active={tab} />
-        {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, cursor, now, home })}
-      </div>
+      <PullToRefresh>
+        <div className="nf-circle" data-testid="circle-home">
+          <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} />
+          {tab === "for-you" ? <CircleDestinations /> : null}
+          <CircleTabs items={tabs} active={tab} />
+          {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, cursor, now, home })}
+        </div>
+      </PullToRefresh>
+      <CircleComposeFab signedIn={home.signedIn} />
     </PageFrame>
   );
 }
@@ -80,8 +92,18 @@ async function TabBody({
       <div className="nf-circle nf-circle--split">
         <div className="nf-circle">
           {invites.length > 0 && <InviteList invites={invites} />}
-          <Section title={C.sections.trending} more="/circle?tab=discussions">
-            {home.trending.length ? <PostList posts={home.trending} now={now} /> : <CircleEmpty>{C.empty.posts}</CircleEmpty>}
+          <Section title={C.home.featured} more="/circle?tab=discussions">
+            {home.trending.length ? (
+              <ul className="nf-circle-list" data-testid="circle-featured">
+                {home.trending.map((p) => (
+                  <li key={p.id}>
+                    <CircleFeaturedCard post={p} now={now} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CircleEmpty>{C.empty.posts}</CircleEmpty>
+            )}
           </Section>
           <Section title={C.sections.questions} more="/circle?tab=ask">
             {home.questions.length ? <PostList posts={home.questions} now={now} /> : <CircleEmpty>{C.empty.questions}</CircleEmpty>}
@@ -151,13 +173,7 @@ async function TabBody({
   const emptyWords = tab === "ask" ? C.empty.questions : tab === "guides" ? C.empty.guides : tab === "opportunities" ? C.empty.opportunities : C.empty.posts;
   return (
     <div className="nf-circle-section">
-      <nav className="nf-circle-sort" aria-label={C.sortLabel}>
-        {CIRCLE_SORTS.map((s) => (
-          <ButtonLink key={s} href={`${base}&sort=${s}`} size="sm" variant={s === sort ? "primary" : "quiet"} aria-current={s === sort ? "page" : undefined}>
-            {C.sorts[s]}
-          </ButtonLink>
-        ))}
-      </nav>
+      <CircleSortRow active={sort === "popular" ? "popular" : "newest"} base={base} />
       {tab === "guides" ? (
         <ButtonLink href="/guides" variant="secondary" size="sm" arrow>
           {C.guides.open}

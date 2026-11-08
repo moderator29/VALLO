@@ -1,5 +1,6 @@
 import { PageFrame } from "@/components/app/PageFrame";
-import { CircleBanner, CirclePostCard, CircleTabs } from "@/components/social/circle/CircleVisuals";
+import { CircleBanner, CircleComposeFab, CircleDestinations, CircleFeaturedCard, CirclePostCard, CircleTabs } from "@/components/social/circle/CircleVisuals";
+import { ButtonLink } from "@/components/ui/Button";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CIRCLE_TABS } from "@/lib/features/circle/model";
 import type { CirclePostView, CommunityView } from "@/lib/features/circle/queries";
@@ -25,9 +26,10 @@ export default async function PreviewCircle({ searchParams }: { searchParams: Pr
   return (
     /* The app shell's 16px gutter, which the harness layout does not draw. */
     <div className="px-md">
-    <PageFrame title={CIRCLE_COPY.title} subtitle={CIRCLE_COPY.tagline} fallback="/preview/features" width="wide">
+    <PageFrame title={CIRCLE_COPY.title} subtitle={CIRCLE_COPY.tagline} fallback="/preview/features" width="wide" actions={<ButtonLink href="#" variant="secondary" size="sm" leadingIcon="feed">{CIRCLE_COPY.home.feed}</ButtonLink>}>
       <div className="nf-circle">
-        <CircleBanner feedHref="#" faces={first ? [] : [{ label: "Kemi A.", avatar: null }, { label: "Tunde O.", avatar: null }]} stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
+        <CircleBanner faces={[]} stats={first ? { members: 0, posts: 0, active: 0, communities: 0 } : { members: 1204, posts: 386, active: 97, communities: 14 }} signedIn />
+        <CircleDestinations />
         <CircleTabs items={tabs} active="for-you" />
         {first ? (
           <section className="nf-circle-section">
@@ -38,10 +40,10 @@ export default async function PreviewCircle({ searchParams }: { searchParams: Pr
           <div className="nf-circle nf-circle--split">
             <div className="nf-circle">
               <section className="nf-circle-section">
-                <h2 className="nf-circle-section__title">{CIRCLE_COPY.sections.trending}</h2>
+                <h2 className="nf-circle-section__title">{CIRCLE_COPY.home.featured}</h2>
                 <ul className="nf-circle-list">
-                  <li><CirclePostCard post={post("1", "Landlords: how do you handle a tenant who pays late every month?", "discussion", 12, 8, 3)} now={NOW} /></li>
-                  <li><CirclePostCard post={post("2", "Is a borehole worth it in Ajah, or is the estate water enough?", "discussion", 5, 2, 20)} now={NOW} /></li>
+                  <li><CircleFeaturedCard post={post("1", "Landlords: how do you handle a tenant who pays late every month?", "discussion", 12, 8, 3)} now={NOW} /></li>
+                  <li><CircleFeaturedCard post={post("2", "Is a borehole worth it in Ajah, or is the estate water enough?", "discussion", 5, 2, 20)} now={NOW} /></li>
                 </ul>
               </section>
               <section className="nf-circle-section">
@@ -63,6 +65,7 @@ export default async function PreviewCircle({ searchParams }: { searchParams: Pr
           </div>
         )}
       </div>
+      <CircleComposeFab signedIn />
     </PageFrame>
     </div>
   );
