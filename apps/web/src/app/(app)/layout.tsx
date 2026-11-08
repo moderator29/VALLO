@@ -5,6 +5,7 @@
 import "@/app/social.css";
 import "@/app/social-feed.css";
 import "@/app/css/motion.css";
+import "@/app/css/premium-motion-2.css";
 import "@/app/css/passcode.css";
 import "@/app/css/photo-viewer.css";
 import "@/app/css/filter-tiles.css";

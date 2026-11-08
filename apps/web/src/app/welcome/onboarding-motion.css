@@ -134,7 +134,9 @@
   /* ------------------------------------------------------ the step dots
      The Plasma reference's dots (the founder, 8 October 2026): small and
      centred between the line and the button, the current one a short blue
-     bar, the rest quiet. Each dot is a 44px target; the mark inside is 8px. */
+     bar, the rest quiet. Each dot is a 44px target; the mark inside is 8px.
+     UPGRADE (8 November 2026): the active dot morphs into an elastic pill
+     with a spring transition, like iOS page indicators. */
 
   .nf-om-progress {
     grid-area: progress;
@@ -158,14 +160,18 @@
     content: "";
     width: 0.5rem;
     height: 0.5rem;
-    border-radius: var(--nf-radius-xs);
+    border-radius: var(--nf-radius-pill);
     background: color-mix(in oklab, var(--nf-content-primary) 24%, transparent);
-    transition: background-color var(--nf-duration-base) var(--nf-ease-standard);
+    transition:
+      width 480ms cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 320ms var(--nf-ease-standard),
+      transform 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  /* Where you are: the brand blue (D78: blue is the identity). */
+  /* Where you are: the brand blue, morphing into a pill (iOS-style). */
   .nf-om-dot[data-current]::before {
     width: 1.375rem;
     background: var(--nf-brand-primary);
+    transform: scaleY(1.1);
   }
   .nf-om-dot:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
@@ -183,10 +189,11 @@
   .nf-om-scene {
     --om-shift: 1;
     --om-alpha: 0;
+    --om-zoom: 1.02;
     position: absolute;
     inset: 0;
     opacity: var(--om-alpha);
-    transform: translate3d(calc(var(--om-shift) * 42%), 0, 0);
+    transform: translate3d(calc(var(--om-shift) * 42%), 0, 0) scale(var(--om-zoom));
     transition:
       transform 640ms var(--nf-ease-entrance),
       opacity 420ms var(--nf-ease-standard);
@@ -196,9 +203,11 @@
   .nf-om-scene[data-state="active"] {
     --om-shift: 0;
     --om-alpha: 1;
+    --om-zoom: 1;
   }
   .nf-om-scene[data-state="prev"] {
     --om-shift: -1;
+    --om-zoom: 0.98;
   }
   .nf-om[data-dragging] :is(.nf-om-scene, .nf-om-copy) {
     transition: none;
@@ -634,6 +643,49 @@
     box-shadow: var(--nf-act-shadow), var(--nf-capsule-reflection);
   }
 
+  /* ----------------------------------------- TITLE WORD STAGGER (9.3)
+     Each word in the title reveals with a clip-path wipe from the bottom,
+     staggered by --nf-om-wi (word index). The clip approach looks cleaner
+     than translateY for headings: letters stay on the baseline while the
+     reveal sweeps upward. */
+  .nf-om-title-word {
+    display: inline-block;
+    clip-path: inset(0 0 100% 0);
+    animation: nf-om-title-word-in 480ms var(--nf-ease-entrance) both;
+    animation-delay: calc(280ms + var(--nf-om-wi, 0) * 65ms);
+  }
+  @keyframes nf-om-title-word-in {
+    from {
+      clip-path: inset(0 0 100% 0);
+      transform: translate3d(0, 0.3em, 0);
+    }
+    to {
+      clip-path: inset(0 0 0% 0);
+      transform: none;
+    }
+  }
+
+  /* ------------------------------------------- PROGRESS BAR (9.7)
+     A thin bar under the step dots that fills based on current step.
+     --nf-om-progress drives the width (0% to 100%). The spring
+     transition overshoots slightly for a lively feel. */
+  .nf-om-bar {
+    width: 100%;
+    max-width: 8rem;
+    height: 3px;
+    margin: var(--nf-space-2xs) auto 0;
+    border-radius: var(--nf-radius-pill);
+    background: color-mix(in oklab, var(--nf-content-primary) 10%, transparent);
+    overflow: hidden;
+  }
+  .nf-om-bar__fill {
+    height: 100%;
+    width: var(--nf-om-progress, 0%);
+    border-radius: inherit;
+    background: var(--nf-brand-primary);
+    transition: width 480ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   /* ---------------------------------------------------------- the motion */
 
   /* The arrival: art first, then each piece, then the title and the body. */
@@ -692,8 +744,14 @@
   .nf-om[data-quiet] .nf-om-dot::before {
     transition: none;
   }
-  .nf-om[data-quiet] :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part) {
+  .nf-om[data-quiet] :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part, .nf-om-title-word) {
     animation: none;
+  }
+  .nf-om[data-quiet] .nf-om-title-word {
+    clip-path: none;
+  }
+  .nf-om[data-quiet] .nf-om-bar__fill {
+    transition: none;
   }
   @media (prefers-reduced-motion: reduce) {
     .nf-om :is(.nf-om-scene, .nf-om-copy) {
@@ -702,8 +760,14 @@
     .nf-om .nf-om-dot::before {
       transition: none;
     }
-    .nf-om :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part) {
+    .nf-om :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part, .nf-om-title-word) {
       animation: none;
+    }
+    .nf-om .nf-om-title-word {
+      clip-path: none;
+    }
+    .nf-om .nf-om-bar__fill {
+      transition: none;
     }
   }
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-om :is(.nf-om-scene, .nf-om-copy) {
@@ -712,16 +776,29 @@
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-om .nf-om-dot::before {
     transition: none;
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-om :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part) {
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-om :is(.nf-om-pop, .nf-om-float, .nf-om-count, .nf-om-words > *, .nf-om-scan__frame, .nf-om-scan__line, .nf-om-total__part, .nf-om-title-word) {
     animation: none;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-om .nf-om-title-word {
+    clip-path: none;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-om .nf-om-bar__fill {
+    transition: none;
   }
 
   @keyframes nf-om-pop {
-    from {
+    0% {
       opacity: 0;
-      transform: translate3d(0, 14px, 0) scale(0.86);
+      transform: translate3d(0, 14px, 0) scale(0.3);
     }
-    to {
+    60% {
+      opacity: 1;
+      transform: translate3d(0, -2px, 0) scale(1.12);
+    }
+    80% {
+      transform: translate3d(0, 1px, 0) scale(0.97);
+    }
+    100% {
       opacity: 1;
       transform: none;
     }

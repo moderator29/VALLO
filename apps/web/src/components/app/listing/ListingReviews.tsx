@@ -3,6 +3,7 @@ import type { ListingReview } from "@/lib/reviews/queries";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { ReportSheet } from "@/components/app/ReportSheet";
+import { RatingStars } from "@/components/ui/RatingStars";
 
 /**
  * Reviews.
@@ -27,23 +28,6 @@ import { ReportSheet } from "@/components/app/ReportSheet";
  * for the review list. It is a section on the ground now, and the reviews are a
  * hairline-divided list rather than a box inside a box.
  */
-function Stars({ rating }: { rating: number }) {
-  return (
-    <span className="flex items-center gap-3xs" aria-hidden="true">
-      {Array.from({ length: 5 }, (_, i) => (
-        <UiIcon
-          key={i}
-          name="star"
-          size={ICON.inline}
-          filled={i < rating}
-          className={
-            i < rating ? "text-[var(--nf-rating)]" : "text-[var(--nf-content-muted)] opacity-40"
-          }
-        />
-      ))}
-    </span>
-  );
-}
 
 export function ListingReviews({
   rating,
@@ -104,7 +88,7 @@ export function ListingReviews({
           {reviews.map((review) => (
             <li key={review.id} className="py-md first:pt-0">
               <p className="flex flex-wrap items-center gap-x-inline gap-y-inline-tight">
-                <Stars rating={review.rating} />
+                <RatingStars rating={review.rating} />
                 <span className="sr-only">{review.rating} out of 5.</span>
                 <span className={TYPE.rowTitle}>{review.author}</span>
                 <span className={TYPE.caption}>{review.when}</span>

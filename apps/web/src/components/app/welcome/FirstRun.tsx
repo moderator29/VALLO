@@ -794,6 +794,9 @@ export function FirstRun({
             data-testid={`welcome-dot-${i + 1}`}
           />
         ))}
+        <div className="nf-om-bar" aria-hidden="true">
+          <div className="nf-om-bar__fill" style={{ "--nf-om-progress": `${((index + 1) / total) * 100}%` } as CSSProperties} />
+        </div>
       </div>
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">

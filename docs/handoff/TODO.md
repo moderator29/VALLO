@@ -167,10 +167,174 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ---
 
-## 9. FOUNDER DECISIONS STILL PENDING
+## 9. MOTION AND ANIMATION (platform-wide premium feel)
 
-- [ ] 9.1 Portrait lock: recommended yes, awaiting founder answer
-- [ ] 9.2 Wallet "pay" step layout review (two buttons in content, none in footer)
+### Welcome/Onboarding Upgrade (BUILDING)
+- [x] 9.1 Elastic pill-morph step dots (iOS-style page indicators with spring) -- BUILT
+- [ ] 9.2 Gyroscope-driven parallax on mobile (subtle tilt response on chips/art)
+- [ ] 9.3 Glass-morphism shimmer on arrival chips (inner glow, shimmer sweep)
+- [ ] 9.4 CTA button ambient glow pulse (brand color, 2-3 cycles then stop)
+- [ ] 9.5 Scene exit scatter (chips drift apart as they fade on swipe out)
+- [ ] 9.6 Title word spring-bounce stagger (each word with overshoot)
+- [ ] 9.7 Living aurora gradient on background glow (12s slow drift)
+- [ ] 9.8 Scan frame corner glow + gradient trail (step 2)
+- [ ] 9.9 Cost bar wave fill highlight (step 4 breakdown)
+- [ ] 9.10 Interest chip hover/press spring (lift on hover, press-down on active)
+- [ ] 9.11 Beat transition crossfade with scale (slides to question to notify)
+- [ ] 9.12 Floating particle dust on final step (brand-color motes)
+
+### Platform Motion System (BUILDING)
+- [x] 9.13 Card press feedback everywhere (scale 0.97 on press, spring back) -- CSS BUILT in premium-motion-2.css
+- [x] 9.14 Sheet open/close spring (overshoot on open, quick ease on close) -- CSS BUILT
+- [ ] 9.15 Tab bar icon bounce on switch (subtle scale pop on active)
+- [x] 9.16 Save/heart particle burst (pop + radial particles) -- CSS BUILT + useHeartPop hook
+- [x] 9.17 Success moment animations (checkmark draw, radial wash) -- CSS BUILT
+- [x] 9.18 Skeleton shimmer upgrade (premium left-to-right sweep) -- CSS BUILT
+- [x] 9.19 List stagger entrance (items fade-slide in one by one) -- CSS BUILT + useStaggerReveal hook
+- [x] 9.20 Toggle/switch spring (satisfying bounce with scale) -- CSS BUILT
+- [x] 9.21 Button press feedback (scale 0.96 press, spring release) -- CSS BUILT + usePressSpring hook
+- [x] 9.22 Number counter/odometer coverage audit -- useSmoothCounter hook BUILT
+- [ ] 9.23 Chat bubble arrival bounce (new messages slide up with spring)
+- [x] 9.24 Notification badge pop (scale+bounce when count changes) -- CSS BUILT + useBadgeBump hook
+- [ ] 9.25 Search results cascade entrance (wave/stagger loading)
+- [ ] 9.26 Map pin drop bounce (listing pins drop from above)
+- [ ] 9.27 Emoji reaction float-up (float and fade on message react)
+- [ ] 9.28 Swipe action rubber band (inbox swipe reveal with spring)
+- [ ] 9.29 Image gallery momentum snap (photo swipe with spring)
+- [ ] 9.30 Profile photo morph/crossfade on change
+- [ ] 9.31 Pull-to-refresh with branded Vallo mark rotation
+
+### Pages and Areas Still Lacking Premium Motion
+- [ ] 9.32 Settings page: section headers fade-slide on scroll into view
+- [ ] 9.33 Wallet overview: balance counter animates on load, transaction rows stagger
+- [ ] 9.34 Booking detail: timeline nodes animate as they enter viewport
+- [ ] 9.35 Listing gallery: parallax on hero image, room cards pop on scroll
+- [ ] 9.36 Profile page: stats count up, badges pop in with stagger
+- [ ] 9.37 Checkout flow: step transition slide with progress bar fill
+- [ ] 9.38 Rewards page: points counter, tier badge shine, history stagger
+- [ ] 9.39 Verification flow: scan frame + ID card entrance animation
+- [ ] 9.40 Agreements: signature line draw, seal stamp pop
+- [ ] 9.41 Support page: category cards lift on hover, chat entrance slide
+
+---
+
+## 10. WIDE PLATFORM SWEEP (high-end UX, admin, pages, cleanup)
+
+### Admin Panel Upgrade
+- [ ] 10.1 Admin overview: calmer layout with card grid, status indicators, quick stats
+- [ ] 10.2 Admin user lookup with timeline: search bar, user card, event timeline
+- [ ] 10.3 Admin bulk actions with undo: select multiple, action bar, undo toast
+- [ ] 10.4 Admin saved filters: filter presets, quick toggle, persist per admin
+- [ ] 10.5 Admin audit trail per record: collapsible timeline, who/what/when
+- [ ] 10.6 Admin money desk: chart animations, reconciliation status cards
+- [ ] 10.7 Admin moderation: queue cards with priority indicators, batch actions
+- [ ] 10.8 Admin dark/light polish: proper tokens on all admin surfaces
+
+### UX Sweep Across All Pages
+- [ ] 10.9 Every page reviewed for consistent spacing, typography, card styles
+- [ ] 10.10 Empty states: branded illustrations, helpful actions, not just text
+- [ ] 10.11 Loading states: skeleton screens on every page (not just spinners)
+- [ ] 10.12 Error states: friendly illustrations, retry actions, helpful copy
+- [ ] 10.13 Micro-interactions on every interactive element (hover, focus, active)
+- [ ] 10.14 Consistent icon usage: audit all icons for style match, replace outliers
+- [ ] 10.15 Typography hierarchy audit: every page uses proper heading scale
+- [ ] 10.16 Color consistency: no hardcoded colors, all through tokens
+- [ ] 10.17 Border radius consistency: all cards/buttons/inputs use token radii
+- [ ] 10.18 Shadow/elevation consistency: proper depth hierarchy on all surfaces
+
+### Frontend Tools and Polish
+- [ ] 10.19 Privacy choices screen (/settings/privacy): visibility, messaging, discovery, AI, data
+- [ ] 10.20 Community Promise page and trust siblings
+- [ ] 10.21 Marketing email consent unticked by default (NDPR compliance)
+- [ ] 10.22 Listing wizard onto StepFrame (one question per screen)
+- [ ] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas)
+- [ ] 10.24 Saved collections: custom collections, covers, sort, share, compare
+- [ ] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive
+- [ ] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete
+- [ ] 10.27 Real pin glyph in UiIcon (not borrowing bookmark)
+- [ ] 10.28 Inline errors in HostWizard and stays steps move with StepFrame
+- [ ] 10.29 E1: Remove every plate/dark box behind logos/flags/glyphs
+- [ ] 10.30 E2: Desktop and tablet layouts that use full width
+- [ ] 10.31 E3: Docs/help/guides pages upgraded, searchable, clean, light+dark
+
+### Light Mode Refinement
+- [ ] 10.32 Light mode tokens: surfaces, edges, shadows, text contrast
+- [ ] 10.33 Light mode worst screens: cards, sheets, inputs, bottom bar, side nav
+- [ ] 10.34 Light mode icons and glyphs: proper contrast on light backgrounds
+
+### Performance Follow-ups
+- [ ] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first
+- [ ] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings)
+- [ ] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite
+- [ ] 10.38 Listing map tiles at drawn size (350 KB per listing view)
+- [ ] 10.39 Point remaining PNG references at WebPs
+
+---
+
+## 11. ADMIN PANEL UPGRADE (dedicated section)
+
+- [ ] 11.1 Admin overview dashboard with key metrics cards (active users, listings, revenue, pending reviews)
+- [ ] 11.2 User lookup with timeline view (all actions, bookings, messages, reports)
+- [ ] 11.3 Bulk actions with undo (approve/reject/suspend multiple items)
+- [ ] 11.4 Saved filters and custom views for admin tables
+- [ ] 11.5 Audit trail per record (who changed what, when)
+- [ ] 11.6 Money desk: transaction search, dispute resolution, refund flow
+- [ ] 11.7 Content moderation queue with priority sorting
+- [ ] 11.8 Admin dark/light mode polish, consistent spacing and type
+
+---
+
+## 12. UX QUALITY SWEEP
+
+- [ ] 12.1 Consistent spacing across all pages (gap-block, gap-row, padding)
+- [ ] 12.2 Empty states for every list/table (illustrated, with CTA)
+- [ ] 12.3 Loading skeletons for every data-driven page
+- [ ] 12.4 Error recovery on every page (retry buttons, offline banner)
+- [ ] 12.5 Micro-interactions audit (every tap, toggle, slide should feel responsive)
+- [ ] 12.6 Icon consistency (weight, size, color across all icons)
+- [ ] 12.7 Typography hierarchy audit (h1-h6, body, caption used consistently)
+- [ ] 12.8 Color token audit (no raw hex, everything from tokens)
+- [ ] 12.9 Border radius consistency (all corners from tokens)
+- [ ] 12.10 Shadow depth system audit (elevation 1-4 used consistently)
+
+---
+
+## 13. MORE PAGES AND TOOLS
+
+- [ ] 13.1 Privacy choices page (/settings/privacy)
+- [ ] 13.2 Community promise page (/community)
+- [ ] 13.3 NDPR compliance page
+- [ ] 13.4 Listing creation wizard upgrade (step frame, preview, draft save)
+- [ ] 13.5 Collections/shortlists page
+- [ ] 13.6 Activity centre (A7, notification cards with rich layout)
+- [ ] 13.7 Keyboard shortcuts overlay
+- [ ] 13.8 Inline validation on all forms (real-time, not just on submit)
+
+---
+
+## 14. LIGHT MODE POLISH
+
+- [ ] 14.1 Light mode token audit (every --nf token has a light value)
+- [ ] 14.2 Fix worst light mode screens (identified in prior audit)
+- [ ] 14.3 Light mode icon colors (ensure contrast meets WCAG AA)
+- [ ] 14.4 Light mode shadows and elevation (softer, appropriate for light)
+
+---
+
+## 15. PERFORMANCE
+
+- [ ] 15.1 Dictionary prop audit (only pass needed keys, not full dict)
+- [ ] 15.2 Phone format deferred loading
+- [ ] 15.3 Search results virtual scroll for long lists
+- [ ] 15.4 Map tile lazy loading
+- [ ] 15.5 WebP image format across all uploaded images
+
+---
+
+## 16. FOUNDER DECISIONS STILL PENDING
+
+- [ ] 16.1 Portrait lock: recommended yes, awaiting founder answer
+- [ ] 16.2 Wallet "pay" step layout review (two buttons in content, none in footer)
 
 ---
 
@@ -185,4 +349,11 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Frontend (FE 1-10) | 2/10 | Light mode, privacy, listing wizard, universal systems, E1, A7, C2, rounds 5-7 |
 | Native (NATIVE 1-8) | 4-6/8 | Platform layer, iOS shell, offline, perf fixes, build 1.0.2 |
 | Features (FEATURES) | 2/many | Circle finish, ratings, lock screen words, emails, area tools |
+| Motion/Animation | 9/41 | 11 welcome upgrades, 10 platform motion items, 10 page-specific animations |
+| Platform Sweep | 0/39 | Admin (8), UX sweep (10), frontend tools (13), light mode (3), perf (5) |
+| Admin Panel | 0/8 | Overview, user lookup, bulk actions, filters, audit trail, money desk, moderation, polish |
+| UX Quality | 0/10 | Spacing, empty states, skeletons, error recovery, micro-interactions, icons, type, colors, radii, shadows |
+| More Pages | 0/8 | Privacy, community, NDPR, listing wizard, collections, activity centre, shortcuts, validation |
+| Light Mode | 0/4 | Token audit, worst screens, icon contrast, shadows |
+| Performance | 0/5 | Dict props, phone format, virtual scroll, map tiles, WebP |
 | Build/Deploy | 0/4 | Build 1.0.2, workflows, clean gates |

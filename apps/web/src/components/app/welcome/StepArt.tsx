@@ -108,6 +108,9 @@ export function StepArt({ art, priority }: { art: Art; priority: boolean }) {
   return (
     <>
       <span className="nf-gs-sky" />
+      <span className="nf-gs-dust" aria-hidden="true" />
+      <span className="nf-gs-dust" aria-hidden="true" />
+      <span className="nf-gs-dust" aria-hidden="true" />
       <span className="nf-gs-hills" />
       <span className="nf-gs-hero">
         <span className="nf-gs-hero__float">

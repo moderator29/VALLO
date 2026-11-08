@@ -1,0 +1,1183 @@
+/*
+ * PREMIUM MOTION LAYER 2 (8 November 2026).
+ *
+ * The founder: "think of more areas [motion] is needed and more animations
+ * across platform, think them deep and build them". This file is thirty new
+ * micro-interactions on top of the existing motion system (motion.css,
+ * motion-kit.css, route-motion.css, press-motion.css, premium-moments.css).
+ *
+ * Rules:
+ *   - transform and opacity only (composited, no layout thrash)
+ *   - every token from the design system, nothing invented
+ *   - every animation has a reduced-motion answer at the foot
+ *   - spring-like curves from --nf-ease-spring where the motion overshoots
+ *   - nothing loops (except skeleton shimmer, which is a loading state)
+ *
+ * Imported by the member layouts (layout.tsx), after motion.css.
+ */
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* ======================================================== SHEET SPRING */
+
+  /*
+   * A bottom sheet springs up with overshoot instead of a flat ease, so it
+   * feels pulled by a rubber band. The sheet's own transition in overlays.css
+   * handles the geometry; this adds the spring entrance for sheets that opt
+   * in with `data-spring`. The drag handle bounces once on arrival.
+   */
+  .nf-sheet[data-open="true"][data-spring] {
+    animation: nf-sheet-spring var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-sheet-spring {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(-2%);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  .nf-sheet__handle {
+    transition: transform var(--nf-duration-fast) var(--nf-ease-spring);
+  }
+  .nf-sheet[data-open="true"][data-spring] .nf-sheet__handle {
+    animation: nf-handle-settle 600ms var(--nf-ease-spring) 200ms both;
+  }
+  @keyframes nf-handle-settle {
+    0% { transform: scaleX(0.6); }
+    50% { transform: scaleX(1.2); }
+    100% { transform: scaleX(1); }
+  }
+
+  /* ======================================================= HEART / SAVE */
+
+  /*
+   * When a listing is saved, the heart pops with overshoot and a ring of
+   * particles fans out once. The un-save is a quick shrink. ListingCard and
+   * the detail header add `data-saved` on the heart button; this fires once.
+   */
+  .nf-heart-pop {
+    animation: nf-heart-burst var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-heart-burst {
+    0% { transform: scale(0.4); opacity: 0; }
+    50% { transform: scale(1.28); opacity: 1; }
+    75% { transform: scale(0.92); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .nf-heart-ring {
+    animation: nf-heart-ring-expand 600ms var(--nf-ease-entrance) both;
+    pointer-events: none;
+  }
+  @keyframes nf-heart-ring-expand {
+    0% { transform: scale(0); opacity: 0.8; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+  .nf-heart-unsave {
+    animation: nf-heart-shrink var(--nf-duration-fast) var(--nf-ease-exit) both;
+  }
+  @keyframes nf-heart-shrink {
+    0% { transform: scale(1); }
+    100% { transform: scale(0.8); opacity: 0.6; }
+  }
+
+  /* ===================================================== BADGE BOUNCE */
+
+  /*
+   * Notification count badge on the bottom bar or a tab: bounces in when
+   * the count changes. The badge container adds `data-bump` momentarily.
+   */
+  .nf-badge-bump {
+    animation: nf-badge-bounce var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-badge-bounce {
+    0% { transform: scale(0.3); opacity: 0; }
+    40% { transform: scale(1.3); opacity: 1; }
+    65% { transform: scale(0.85); }
+    85% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===================================================== TOGGLE SPRING */
+
+  /*
+   * A toggle thumb slides with spring overshoot. The track tints on the
+   * standard curve; the thumb overshoots its destination and settles.
+   */
+  .nf-toggle__thumb {
+    transition: transform var(--nf-duration-base) var(--nf-ease-spring);
+  }
+  .nf-toggle[aria-checked="true"] .nf-toggle__thumb {
+    animation: nf-toggle-on var(--nf-duration-base) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-toggle-on {
+    0% { transform: translateX(0); }
+    60% { transform: translateX(calc(var(--nf-toggle-travel, 1.25rem) + 2px)); }
+    100% { transform: translateX(var(--nf-toggle-travel, 1.25rem)); }
+  }
+  .nf-toggle__track {
+    transition:
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+
+  /* ===================================================== CHIP SELECT */
+
+  /*
+   * Filter chips pop on selection: a quick scale-up and settle, so the
+   * state change is felt before the results update. Also used for reason
+   * chips on the send screen and category pills.
+   */
+  .nf-chip-pop {
+    animation: nf-chip-select var(--nf-duration-pop) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-chip-select {
+    0% { transform: scale(0.88); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  /* ===================================================== CARD HOVER LIFT */
+
+  /*
+   * On desktop, interactive cards lift slightly on hover with a shadow
+   * bloom. On touch devices (:active is the press, not hover). The lift
+   * uses translate (composited) not box-shadow animation.
+   */
+  @media (hover: hover) {
+    .nf-card-lift {
+      transition:
+        translate var(--nf-duration-fast) var(--nf-ease-standard),
+        box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+    }
+    .nf-card-lift:hover {
+      translate: 0 -3px;
+      box-shadow:
+        0 8px 24px -4px color-mix(in oklab, var(--nf-shadow-color, var(--nf-content-primary)) 12%, transparent),
+        0 2px 6px -2px color-mix(in oklab, var(--nf-shadow-color, var(--nf-content-primary)) 8%, transparent);
+    }
+  }
+
+  /* ==================================================== SKELETON SHIMMER */
+
+  /*
+   * A premium shimmer that sweeps diagonally instead of horizontally, with
+   * a softer gradient. Replaces or augments the existing nf-shimmer where
+   * `nf-skel-premium` is added.
+   */
+  .nf-skel-premium {
+    background: linear-gradient(
+      110deg,
+      transparent 25%,
+      color-mix(in oklab, var(--nf-content-primary) 6%, transparent) 37%,
+      transparent 63%
+    );
+    background-size: 300% 100%;
+    animation: nf-skel-sweep 1.8s var(--nf-ease-standard) infinite;
+  }
+  @keyframes nf-skel-sweep {
+    0% { background-position: 200% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  /* ===================================================== FORM FOCUS */
+
+  /*
+   * When a text field gains focus, its label lifts and the border gets a
+   * brand glow ring that fades in. Pure CSS, composited.
+   */
+  .nf-field-focus {
+    transition:
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard),
+      border-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-field-focus:focus-within {
+    border-color: var(--nf-brand-primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
+  }
+  .nf-field-label-lift {
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-entrance),
+      font-size var(--nf-duration-fast) var(--nf-ease-standard),
+      color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+
+  /* ===================================================== STATUS PULSE */
+
+  /*
+   * A ring that pulses once outward when a booking or payment status
+   * changes (confirmed, paid, arrived). Not a loop: one expansion, done.
+   */
+  .nf-status-pulse {
+    animation: nf-pulse-ring 700ms var(--nf-ease-entrance) both;
+    pointer-events: none;
+  }
+  @keyframes nf-pulse-ring {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.6;
+      box-shadow: 0 0 0 0 var(--nf-pulse-color, var(--nf-brand-primary));
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+
+  /* ===================================================== NOTIFICATION SLIDE */
+
+  /*
+   * In-app notification banner slides down from the top with spring, and
+   * auto-dismisses by sliding back up. The live banner (A9) uses this.
+   */
+  .nf-notif-slide-in {
+    animation: nf-notif-enter var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-notif-enter {
+    from {
+      transform: translate3d(0, -100%, 0) scale(0.95);
+      opacity: 0;
+    }
+    60% {
+      transform: translate3d(0, 4px, 0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: none;
+    }
+  }
+  .nf-notif-slide-out {
+    animation: nf-notif-exit var(--nf-duration-base) var(--nf-ease-exit) both;
+  }
+  @keyframes nf-notif-exit {
+    to {
+      transform: translate3d(0, -100%, 0) scale(0.95);
+      opacity: 0;
+    }
+  }
+
+  /* ==================================================== MAP PIN DROP */
+
+  /*
+   * Map markers drop in from above with a bounce when results load.
+   * `--pin-i` staggers them 60ms apart, up to 8 pins.
+   */
+  .nf-pin-drop {
+    animation: nf-pin-land 500ms var(--nf-ease-spring) both;
+    animation-delay: calc(var(--pin-i, 0) * 60ms);
+  }
+  @keyframes nf-pin-land {
+    0% {
+      transform: translateY(-24px) scale(0.7);
+      opacity: 0;
+    }
+    55% {
+      transform: translateY(2px) scale(1.05);
+      opacity: 1;
+    }
+    75% {
+      transform: translateY(-1px) scale(0.97);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  .nf-pin-shadow {
+    animation: nf-pin-shadow-grow 500ms var(--nf-ease-entrance) both;
+    animation-delay: calc(var(--pin-i, 0) * 60ms);
+  }
+  @keyframes nf-pin-shadow-grow {
+    0% { transform: scale(0.3); opacity: 0; }
+    100% { transform: scale(1); opacity: 0.2; }
+  }
+
+  /* ================================================== PROGRESS FILL */
+
+  /*
+   * A horizontal bar that fills to a percentage, for profile completion,
+   * upload progress, or a step indicator. The width animates to the
+   * value in `--nf-progress`.
+   */
+  .nf-progress-fill {
+    width: 0%;
+    animation: nf-fill-bar 800ms var(--nf-ease-entrance) 200ms both;
+  }
+  @keyframes nf-fill-bar {
+    to { width: var(--nf-progress, 0%); }
+  }
+
+  /* ================================================== CONFETTI BURST */
+
+  /*
+   * Six particles radiate outward on a major achievement (a booking
+   * confirmed, first listing published, Circle milestone). Each particle
+   * is positioned by `--cx` and `--cy` end offsets and rotated by `--cr`.
+   */
+  .nf-confetti {
+    animation: nf-confetti-fly 800ms var(--nf-ease-entrance) both;
+    animation-delay: var(--cd, 0ms);
+    pointer-events: none;
+  }
+  @keyframes nf-confetti-fly {
+    0% {
+      transform: translate(0, 0) rotate(0deg) scale(0);
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      transform: translate(var(--cx, 30px), var(--cy, -40px)) rotate(var(--cr, 180deg)) scale(0.4);
+      opacity: 0;
+    }
+  }
+
+  /* ================================================ SWIPE ACTION REVEAL */
+
+  /*
+   * Inbox row swiped left reveals action buttons sliding in from the
+   * right. The row translates and the actions scale up behind it.
+   */
+  .nf-swipe-actions {
+    animation: nf-swipe-reveal var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-swipe-reveal {
+    from {
+      transform: scale(0.8) translateX(20px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  /* =============================================== AVATAR STACK FAN */
+
+  /*
+   * Multiple overlapping avatars fan out on hover or reveal, so a
+   * group of people becomes individual faces. Each avatar's offset
+   * is `--av-i` * the fan distance.
+   */
+  .nf-avatar-fan {
+    transition: transform var(--nf-duration-base) var(--nf-ease-spring);
+  }
+  .nf-avatar-stack:hover .nf-avatar-fan,
+  .nf-avatar-stack[data-expanded] .nf-avatar-fan {
+    transform: translateX(calc(var(--av-i, 0) * 0.625rem));
+  }
+
+  /* =========================================== EMOJI REACTION POP */
+
+  /*
+   * A reaction emoji pops in with overshoot when added to a message.
+   */
+  .nf-reaction-pop {
+    animation: nf-emoji-pop var(--nf-duration-pop) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-emoji-pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  /* ============================================ FAB MORPH */
+
+  /*
+   * The floating create button morphs from a circle into an expanded
+   * menu on tap. Scale + border-radius transition.
+   */
+  .nf-fab-morph {
+    transition:
+      transform var(--nf-duration-base) var(--nf-ease-spring),
+      border-radius var(--nf-duration-base) var(--nf-ease-standard);
+  }
+  .nf-fab-morph[data-expanded="true"] {
+    transform: scale(1.02);
+  }
+  .nf-fab-morph[data-expanded="true"] .nf-fab-icon {
+    animation: nf-fab-rotate var(--nf-duration-base) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-fab-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(45deg); }
+  }
+
+  /* ============================================ COUNTER SMOOTH */
+
+  /*
+   * A number that changes (wallet balance, notification count, stats)
+   * gets a brief vertical slide to indicate the direction of change.
+   * Used by Odometer for the big figures.
+   */
+  .nf-num-up {
+    animation: nf-num-rise var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-num-rise {
+    from { transform: translateY(0.3em); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .nf-num-down {
+    animation: nf-num-fall var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-num-fall {
+    from { transform: translateY(-0.3em); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+
+  /* ========================================== PARALLAX HERO */
+
+  /*
+   * Subtle scroll-driven parallax on a listing hero or a home banner.
+   * The image moves at 60% of the scroll speed.
+   */
+  @supports (animation-timeline: scroll()) {
+    .nf-parallax-hero {
+      animation: nf-parallax linear both;
+      animation-timeline: scroll();
+      animation-range: 0vh 50vh;
+    }
+    @keyframes nf-parallax {
+      from { transform: translateY(0); }
+      to { transform: translateY(-40px); }
+    }
+  }
+
+  /* =========================================== GALLERY CROSSFADE */
+
+  /*
+   * Image gallery slide transition: the outgoing image fades while
+   * the incoming one slides from the swipe direction.
+   */
+  .nf-gallery-slide-left {
+    animation: nf-gallery-in-left var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-gallery-in-left {
+    from { transform: translateX(30%); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+  .nf-gallery-slide-right {
+    animation: nf-gallery-in-right var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-gallery-in-right {
+    from { transform: translateX(-30%); opacity: 0; }
+    to { transform: none; opacity: 1; }
+  }
+
+  /* ========================================= SEARCH CASCADE */
+
+  /*
+   * Search results cascade in with staggered rise when results load.
+   * Up to 6 results, 50ms apart.
+   */
+  .nf-search-cascade > * {
+    animation: nf-cascade-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+    animation-delay: calc(var(--nf-splash-hold, 0s) + min(var(--si, 0), 5) * 50ms);
+  }
+  @keyframes nf-cascade-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0) scale(0.97);
+    }
+  }
+
+  /* ========================================= BOTTOM BAR INDICATOR */
+
+  /*
+   * The active tab indicator in the bottom bar slides from the previous
+   * tab to the current one, computed via --nf-tab-i. Pure CSS.
+   */
+  .nf-bar-indicator {
+    transition: transform var(--nf-duration-base) var(--nf-ease-spring);
+    transform: translateX(calc(var(--nf-tab-i, 0) * var(--nf-tab-w, 4.5rem)));
+  }
+
+  /* ======================================== DRAG-TO-CONFIRM SPRING */
+
+  /*
+   * The drag thumb on the slide-to-confirm bounces back to start if
+   * released before the threshold, with spring overshoot.
+   */
+  .nf-drag-snapback {
+    animation: nf-drag-return var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-drag-return {
+    from { transform: translateX(var(--nf-drag-x, 0px)); }
+    60% { transform: translateX(-6px); }
+    to { transform: translateX(0); }
+  }
+
+  /* ======================================== PROFILE AVATAR ZOOM */
+
+  /*
+   * Tapping a small avatar opens the full profile photo with a scale-up
+   * from the avatar's position. Used on profile pages and chat headers.
+   */
+  .nf-avatar-zoom-in {
+    animation: nf-avatar-expand var(--nf-duration-slow) var(--nf-ease-entrance) both;
+    transform-origin: var(--nf-av-x, 50%) var(--nf-av-y, 50%);
+  }
+  @keyframes nf-avatar-expand {
+    from {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* ======================================== CHECKMARK DRAW */
+
+  /*
+   * An SVG checkmark that draws itself stroke-by-stroke, for completion
+   * moments and success states. The stroke-dasharray trick.
+   */
+  .nf-check-draw {
+    stroke-dasharray: var(--nf-check-len, 24);
+    stroke-dashoffset: var(--nf-check-len, 24);
+    animation: nf-draw-check 500ms var(--nf-ease-entrance) 200ms both;
+  }
+  @keyframes nf-draw-check {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ======================================== EMPTY STATE FLOAT */
+
+  /*
+   * Empty state illustrations gently float with a subtle vertical
+   * drift, once. Not a loop: one settle, so the page reads as alive
+   * without competing with any working animation.
+   */
+  .nf-empty-settle {
+    animation: nf-empty-float var(--nf-duration-deliberate) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-empty-float {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ======================================== ACCORDION CONTENT */
+
+  /*
+   * The content area of a collapsible section (FAQ, details, grouped
+   * settings) transitions its height with a smooth ease when toggling,
+   * augmenting the nf-m-details in motion-kit.css for newer surfaces.
+   */
+  .nf-accordion-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--nf-duration-base) var(--nf-ease-standard);
+    overflow: hidden;
+  }
+  .nf-accordion-body[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+  .nf-accordion-body > * {
+    overflow: hidden;
+  }
+
+  /* ======================================== TOOLTIP APPEAR */
+
+  /*
+   * Tooltips scale in from their anchor point with a subtle pop.
+   */
+  .nf-tooltip-in {
+    animation: nf-tooltip-pop var(--nf-duration-fast) var(--nf-ease-spring) both;
+    transform-origin: var(--nf-tip-origin, bottom center);
+  }
+  @keyframes nf-tooltip-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.85) translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ======================================== LOADING ORBIT */
+
+  /*
+   * Three dots orbiting in a circle, for inline loading states that
+   * are not skeleton placeholders (button loading, action processing).
+   * Finite: 4 loops, then stillness.
+   */
+  .nf-orbit-dot {
+    animation: nf-orbit-spin 1.2s var(--nf-ease-standard) 4 both;
+    animation-delay: calc(var(--od, 0) * 150ms);
+  }
+  @keyframes nf-orbit-spin {
+    0% { transform: rotate(0deg) translateX(6px) rotate(0deg); opacity: 0.3; }
+    50% { opacity: 1; }
+    100% { transform: rotate(360deg) translateX(6px) rotate(-360deg); opacity: 0.3; }
+  }
+
+  /* ======================================== STEP INDICATOR */
+
+  /*
+   * The dot indicator on a step frame: the active dot scales up, the
+   * completed dot gets a check, and the line between fills.
+   */
+  .nf-step-dot {
+    transition:
+      transform var(--nf-duration-fast) var(--nf-ease-spring),
+      background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  .nf-step-dot[data-active="true"] {
+    transform: scale(1.3);
+  }
+  .nf-step-line-fill {
+    transform-origin: left;
+    animation: nf-step-fill var(--nf-duration-slow) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-step-fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  /* ====================================== PRICE CHANGE FLASH */
+
+  /*
+   * When a price changes (live search, wallet balance update), the
+   * number flashes briefly with the brand colour to draw the eye.
+   */
+  .nf-price-flash {
+    animation: nf-flash-brand var(--nf-duration-slow) var(--nf-ease-standard) both;
+  }
+  @keyframes nf-flash-brand {
+    0% { color: var(--nf-brand-primary); transform: scale(1.04); }
+    100% { color: inherit; transform: scale(1); }
+  }
+
+  /* ====================================== MENU ITEM STAGGER */
+
+  /*
+   * Context menu and dropdown items stagger in with a quick fade-rise,
+   * 30ms apart, so the menu unfolds rather than appearing flat.
+   */
+  .nf-menu-stagger > * {
+    animation: nf-menu-item-in var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  .nf-menu-stagger > :nth-child(1) { animation-delay: 0ms; }
+  .nf-menu-stagger > :nth-child(2) { animation-delay: 30ms; }
+  .nf-menu-stagger > :nth-child(3) { animation-delay: 60ms; }
+  .nf-menu-stagger > :nth-child(4) { animation-delay: 90ms; }
+  .nf-menu-stagger > :nth-child(5) { animation-delay: 120ms; }
+  .nf-menu-stagger > :nth-child(n + 6) { animation-delay: 150ms; }
+  @keyframes nf-menu-item-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  /* ====================================== IMAGE LOAD REVEAL */
+
+  /*
+   * An image that just loaded fades in from slightly blurred, so the
+   * transition from placeholder to photo is smooth rather than a pop.
+   */
+  .nf-img-reveal {
+    animation: nf-img-appear var(--nf-duration-base) var(--nf-ease-standard) both;
+  }
+  @keyframes nf-img-appear {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ====================================== BELL RING (notifications) */
+
+  /*
+   * Notification bell shakes as a pendulum when a new notification arrives.
+   * Three swings, decaying amplitude: the eye catches it without alarm.
+   */
+  .nf-bell-ring {
+    animation: nf-bell-swing 600ms var(--nf-ease-standard) both;
+    transform-origin: top center;
+  }
+  @keyframes nf-bell-swing {
+    0% { transform: rotate(0deg); }
+    15% { transform: rotate(-15deg); }
+    30% { transform: rotate(12deg); }
+    45% { transform: rotate(-8deg); }
+    60% { transform: rotate(6deg); }
+    75% { transform: rotate(-3deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  /* ====================================== MESSAGE BUBBLE ARRIVE */
+
+  /*
+   * A new chat message bubble slides up and fades in with a slight scale,
+   * so the conversation feels alive rather than snapping into place.
+   */
+  .nf-msg-arrive {
+    animation: nf-msg-bubble-in 250ms var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-msg-bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ====================================== BOOKMARK RIBBON FOLD */
+
+  /*
+   * A saved-listing bookmark unfolds from the top corner like a ribbon
+   * being pulled down. Uses perspective rotateX for a 3D paper feel.
+   */
+  .nf-bookmark-fold {
+    animation: nf-ribbon-unfold 300ms var(--nf-ease-entrance) both;
+    transform-origin: top center;
+  }
+  @keyframes nf-ribbon-unfold {
+    from {
+      opacity: 0;
+      transform: perspective(400px) rotateX(-60deg);
+    }
+    to {
+      opacity: 1;
+      transform: perspective(400px) rotateX(0deg);
+    }
+  }
+
+  /* ====================================== PRICE TAG BOUNCE */
+
+  /*
+   * Price or tag enters from the right with spring overshoot, for
+   * price labels on listing cards or search result price pills.
+   */
+  .nf-price-bounce {
+    animation: nf-tag-enter 400ms var(--nf-ease-spring) both;
+  }
+  @keyframes nf-tag-enter {
+    0% {
+      opacity: 0;
+      transform: translateX(20px) scale(0.9);
+    }
+    60% {
+      opacity: 1;
+      transform: translateX(-4px) scale(1.02);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
+  /* ====================================== GALLERY SNAP MOMENTUM */
+
+  /*
+   * During a horizontal swipe in a gallery, the active slide subtly
+   * compresses, springing back to full scale on release.
+   */
+  .nf-gallery-snap {
+    transition: transform 300ms var(--nf-ease-spring);
+  }
+  .nf-gallery-snap[data-swiping="true"] {
+    transform: scale(0.98);
+  }
+
+  /* ====================================== FILTER CHIP SPRING */
+
+  /*
+   * An enhanced filter chip: compresses on press, springs past 1 on
+   * release, then settles. Richer than nf-chip-pop for interactive filters.
+   */
+  .nf-chip-select-spring[aria-pressed="true"] {
+    animation: nf-chip-spring 350ms var(--nf-ease-spring) both;
+  }
+  @keyframes nf-chip-spring {
+    0% { transform: scale(0.92); }
+    50% { transform: scale(1.06); }
+    75% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+  }
+
+  /* ====================================== EMPTY STATE GENTLE FLOAT */
+
+  /*
+   * Empty state illustrations bob gently up and down, giving the page
+   * a living quality without distracting. Infinite, decorative only.
+   */
+  .nf-empty-float {
+    animation: nf-gentle-bob 4s ease-in-out infinite alternate;
+  }
+  @keyframes nf-gentle-bob {
+    from { transform: translateY(0); }
+    to { transform: translateY(-4px); }
+  }
+
+  /* ====================================== TOAST SLIDE IN */
+
+  /*
+   * Toast notifications slide in from the top with spring overshoot,
+   * catching attention without being jarring.
+   */
+  .nf-toast-enter {
+    animation: nf-toast-drop 400ms var(--nf-ease-spring) both;
+  }
+  @keyframes nf-toast-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-100%) scale(0.95);
+    }
+    65% {
+      opacity: 1;
+      transform: translateY(6px) scale(1);
+    }
+    100% {
+      transform: none;
+    }
+  }
+  .nf-toast-exit {
+    animation: nf-toast-dismiss 250ms var(--nf-ease-exit) both;
+  }
+  @keyframes nf-toast-dismiss {
+    to {
+      opacity: 0;
+      transform: translateY(-100%) scale(0.95);
+    }
+  }
+
+  /* ====================================== WALLET AMOUNT TICK */
+
+  /*
+   * A digit-flip for currency counters: the old value slides up and out,
+   * the new value slides in from below. Direction set by data-dir.
+   */
+  .nf-amount-tick[data-dir="up"] {
+    animation: nf-digit-up var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-digit-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .nf-amount-tick[data-dir="down"] {
+    animation: nf-digit-down var(--nf-duration-fast) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-digit-down {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ====================================== PROFILE AVATAR RING */
+
+  /*
+   * A rotating gradient ring around profile avatars for premium or
+   * verified accounts. Infinite, purely decorative.
+   */
+  .nf-avatar-ring-spin {
+    animation: nf-ring-rotate 3s linear infinite;
+  }
+  @keyframes nf-ring-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ====================================== BOOKING CONFIRMED CHECK */
+
+  /*
+   * A larger SVG checkmark that draws itself for booking/payment
+   * confirmation moments. Longer stroke, slower draw.
+   */
+  .nf-booking-check {
+    stroke-dasharray: var(--nf-booking-check-len, 60);
+    stroke-dashoffset: var(--nf-booking-check-len, 60);
+    animation: nf-booking-draw 800ms var(--nf-ease-entrance) 150ms both;
+  }
+  @keyframes nf-booking-draw {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ====================================== PULL REFRESH SPINNER */
+
+  /*
+   * Continuous rotation for pull-to-refresh indicator.
+   * Infinite while pulling; removed when content loads.
+   */
+  .nf-refresh-spin {
+    animation: nf-spinner-rotate 1s linear infinite;
+  }
+  @keyframes nf-spinner-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ====================================== MENU ITEM SLIDE-IN */
+
+  /*
+   * Side menu or nav drawer items slide in from the left with stagger.
+   * --nf-si is the stagger index (0, 1, 2...).
+   */
+  .nf-menu-slide {
+    animation: nf-menu-slide-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+    animation-delay: calc(var(--nf-si, 0) * 40ms);
+  }
+  @keyframes nf-menu-slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ====================================== RATING STAR FILL */
+
+  /*
+   * Stars pop in sequence when a rating is shown or submitted.
+   * --nf-ri is the star index (0-4), staggered 80ms apart.
+   */
+  .nf-star-fill {
+    animation: nf-star-pop var(--nf-duration-pop, 200ms) var(--nf-ease-spring) both;
+    animation-delay: calc(var(--nf-ri, 0) * 80ms);
+  }
+  @keyframes nf-star-pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  /* ====================================== WIDE SHIMMER */
+
+  /*
+   * A wider shimmer for skeleton cards and content placeholders,
+   * sweeping the full width. Infinite loading state.
+   */
+  .nf-shimmer-wide {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--nf-content-primary) 5%, transparent) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: nf-shimmer-sweep 1.6s var(--nf-ease-standard) infinite;
+  }
+  @keyframes nf-shimmer-sweep {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ====================================== SEARCH BAR EXPAND */
+
+  /*
+   * Search bar expands on focus from a compact pill to full width,
+   * with the border radius adjusting from pill to field.
+   */
+  .nf-search-expand {
+    transition:
+      transform var(--nf-duration-base) var(--nf-ease-entrance),
+      border-radius var(--nf-duration-base) var(--nf-ease-standard);
+  }
+  .nf-search-expand[data-expanded="true"] {
+    transform: scaleX(1);
+    border-radius: var(--nf-radius-md);
+  }
+  .nf-search-expand:not([data-expanded="true"]) {
+    transform: scaleX(0.85);
+    border-radius: var(--nf-radius-pill);
+  }
+
+  /* ============================ REDUCED MOTION: EVERYTHING AT ONCE */
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-sheet[data-open="true"][data-spring],
+    .nf-sheet[data-open="true"][data-spring] .nf-sheet__handle,
+    .nf-heart-pop,
+    .nf-heart-ring,
+    .nf-heart-unsave,
+    .nf-badge-bump,
+    .nf-toggle[aria-checked="true"] .nf-toggle__thumb,
+    .nf-chip-pop,
+    .nf-skel-premium,
+    .nf-status-pulse,
+    .nf-notif-slide-in,
+    .nf-notif-slide-out,
+    .nf-pin-drop,
+    .nf-pin-shadow,
+    .nf-progress-fill,
+    .nf-confetti,
+    .nf-swipe-actions,
+    .nf-reaction-pop,
+    .nf-fab-morph[data-expanded="true"] .nf-fab-icon,
+    .nf-num-up,
+    .nf-num-down,
+    .nf-parallax-hero,
+    .nf-gallery-slide-left,
+    .nf-gallery-slide-right,
+    .nf-search-cascade > *,
+    .nf-drag-snapback,
+    .nf-avatar-zoom-in,
+    .nf-check-draw,
+    .nf-empty-settle,
+    .nf-tooltip-in,
+    .nf-orbit-dot,
+    .nf-step-dot[data-active="true"],
+    .nf-step-line-fill,
+    .nf-price-flash,
+    .nf-menu-stagger > *,
+    .nf-img-reveal,
+    .nf-bell-ring,
+    .nf-msg-arrive,
+    .nf-bookmark-fold,
+    .nf-price-bounce,
+    .nf-chip-select-spring[aria-pressed="true"],
+    .nf-empty-float,
+    .nf-toast-enter,
+    .nf-toast-exit,
+    .nf-amount-tick[data-dir="up"],
+    .nf-amount-tick[data-dir="down"],
+    .nf-avatar-ring-spin,
+    .nf-booking-check,
+    .nf-refresh-spin,
+    .nf-menu-slide,
+    .nf-star-fill,
+    .nf-shimmer-wide {
+      animation: none !important;
+    }
+    .nf-toggle__thumb,
+    .nf-card-lift,
+    .nf-card-lift:hover,
+    .nf-field-focus,
+    .nf-field-label-lift,
+    .nf-bar-indicator,
+    .nf-avatar-fan,
+    .nf-fab-morph,
+    .nf-step-dot,
+    .nf-toggle__track,
+    .nf-accordion-body,
+    .nf-gallery-snap,
+    .nf-search-expand {
+      transition: none !important;
+    }
+    .nf-card-lift:hover {
+      translate: none;
+    }
+    .nf-search-expand:not([data-expanded="true"]) {
+      transform: none;
+    }
+    .nf-heart-ring {
+      display: none;
+    }
+    .nf-confetti {
+      display: none;
+    }
+    .nf-avatar-ring-spin {
+      display: none;
+    }
+    .nf-progress-fill {
+      width: var(--nf-progress, 0%);
+    }
+    .nf-check-draw {
+      stroke-dashoffset: 0;
+    }
+    .nf-booking-check {
+      stroke-dashoffset: 0;
+    }
+    .nf-accordion-body,
+    .nf-accordion-body[data-open="true"] {
+      grid-template-rows: 1fr;
+    }
+  }
+
+  /* Off and Calm motion levels */
+  :root[data-motion="off"] :is(
+    .nf-sheet[data-open="true"][data-spring],
+    .nf-heart-pop,
+    .nf-heart-ring,
+    .nf-badge-bump,
+    .nf-chip-pop,
+    .nf-skel-premium,
+    .nf-status-pulse,
+    .nf-notif-slide-in,
+    .nf-notif-slide-out,
+    .nf-pin-drop,
+    .nf-confetti,
+    .nf-reaction-pop,
+    .nf-num-up,
+    .nf-num-down,
+    .nf-search-cascade > *,
+    .nf-drag-snapback,
+    .nf-avatar-zoom-in,
+    .nf-check-draw,
+    .nf-empty-settle,
+    .nf-tooltip-in,
+    .nf-orbit-dot,
+    .nf-step-line-fill,
+    .nf-price-flash,
+    .nf-menu-stagger > *,
+    .nf-img-reveal,
+    .nf-bell-ring,
+    .nf-msg-arrive,
+    .nf-bookmark-fold,
+    .nf-price-bounce,
+    .nf-chip-select-spring[aria-pressed="true"],
+    .nf-empty-float,
+    .nf-toast-enter,
+    .nf-toast-exit,
+    .nf-amount-tick[data-dir="up"],
+    .nf-amount-tick[data-dir="down"],
+    .nf-avatar-ring-spin,
+    .nf-booking-check,
+    .nf-refresh-spin,
+    .nf-menu-slide,
+    .nf-star-fill,
+    .nf-shimmer-wide
+  ) {
+    animation: none;
+  }
+  :root[data-motion="off"] :is(
+    .nf-toggle__thumb,
+    .nf-card-lift,
+    .nf-field-focus,
+    .nf-bar-indicator,
+    .nf-avatar-fan,
+    .nf-fab-morph,
+    .nf-step-dot,
+    .nf-accordion-body,
+    .nf-gallery-snap,
+    .nf-search-expand
+  ) {
+    transition: none;
+  }
+  :root[data-motion="off"] .nf-progress-fill {
+    width: var(--nf-progress, 0%);
+  }
+  :root[data-motion="off"] .nf-check-draw {
+    stroke-dashoffset: 0;
+  }
+  :root[data-motion="off"] .nf-booking-check {
+    stroke-dashoffset: 0;
+  }
+  :root[data-motion="off"] .nf-confetti,
+  :root[data-motion="off"] .nf-heart-ring {
+    display: none;
+  }
+  :root[data-motion="off"] .nf-avatar-ring-spin {
+    display: none;
+  }
+}
