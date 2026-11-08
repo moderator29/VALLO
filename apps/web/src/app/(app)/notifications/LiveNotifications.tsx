@@ -18,6 +18,7 @@ import { warmBody, warmTitle } from "@/lib/notify/voice";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { banner } from "@/lib/ui/toast";
 import { loadOlderNotifications } from "@/lib/notify/inbox-actions";
+import { archiveNotifications, archiveAllNotifications } from "@/lib/notify/centre-actions";
 import { toNotificationItem, type NotificationItem } from "@/lib/notify/links";
 import { lagosTimeLabel } from "@/lib/messages/time";
 import { useNotificationsRealtime, type LiveNotificationRow } from "@/lib/messages/useRealtime";
@@ -176,6 +177,37 @@ export function LiveNotifications({
     });
   }, [items, router, c.empty.title]);
 
+  const archiveOne = useCallback(
+    (id: string) => {
+      const before = items;
+      setItems((prev) => prev.filter((n) => n.id !== id));
+      void archiveNotifications({ ids: [id] }).then((result) => {
+        if (result.ok) {
+          banner.success(c.archived);
+          router.refresh();
+          return;
+        }
+        setItems(before);
+        banner.error(result.error, { "data-testid": "notifications-problem" });
+      });
+    },
+    [items, router, c.archived],
+  );
+
+  const archiveAll = useCallback(() => {
+    const before = items;
+    setItems([]);
+    void archiveAllNotifications().then((result) => {
+      if (result.ok) {
+        banner.success(c.archivedAll);
+        router.refresh();
+        return;
+      }
+      setItems(before);
+      banner.error(result.error, { "data-testid": "notifications-problem" });
+    });
+  }, [items, router, c.archivedAll]);
+
   /* Older rows, a page at a time, after the last row on screen. */
   const showOlder = useCallback(() => {
     const last = items.at(-1);
@@ -230,6 +262,11 @@ export function LiveNotifications({
           {unreadCount > 0 ? (
             <Button variant="ghost" size="sm" onClick={markAll} data-testid="notifications-mark-all">
               {c.markAllRead}
+            </Button>
+          ) : null}
+          {items.length > 0 ? (
+            <Button variant="ghost" size="sm" onClick={archiveAll} data-testid="notifications-archive-all">
+              {c.archiveAll}
             </Button>
           ) : null}
           {/* Per-family preferences, one tap from here (north star 16.4): the
@@ -333,8 +370,8 @@ export function LiveNotifications({
         />
       ) : (
         <div className="nf-notif">
-          <Section id="needs" label={c.sections.needsYou} entries={sectioned.needsYou} c={c} locale={locale} markOne={markOne} faces={faces} needs />
-          <Section id="new" label={c.sections.fresh} entries={sectioned.fresh} c={c} locale={locale} markOne={markOne} faces={faces} />
+          <Section id="needs" label={c.sections.needsYou} entries={sectioned.needsYou} c={c} locale={locale} markOne={markOne} archiveOne={archiveOne} faces={faces} needs />
+          <Section id="new" label={c.sections.fresh} entries={sectioned.fresh} c={c} locale={locale} markOne={markOne} archiveOne={archiveOne} faces={faces} />
           {days.map((day) => (
             <Section
               key={day.key}
@@ -344,6 +381,7 @@ export function LiveNotifications({
               c={c}
               locale={locale}
               markOne={markOne}
+              archiveOne={archiveOne}
               faces={faces}
             />
           ))}
@@ -382,6 +420,7 @@ function Section({
   c,
   locale,
   markOne,
+  archiveOne,
   faces,
   needs = false,
 }: {
@@ -391,6 +430,7 @@ function Section({
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  archiveOne(id: string): void;
   faces: Map<string, string>;
   needs?: boolean;
 }) {
@@ -455,7 +495,7 @@ function Section({
     >
       {groups.map((g, i) =>
         g.rows.length > 1 ? (
-          <GroupRow key={g.key} rows={g.rows} c={c} locale={locale} markOne={markOne} faces={faces} behind={stacked && i > 0} />
+          <GroupRow key={g.key} rows={g.rows} c={c} locale={locale} markOne={markOne} archiveOne={archiveOne} faces={faces} behind={stacked && i > 0} />
         ) : needs ? (
           <NeedsRow
             key={g.key}
@@ -464,11 +504,12 @@ function Section({
             c={c}
             locale={locale}
             markOne={markOne}
+            archiveOne={archiveOne}
             face={faces.get(g.lead.id)}
             behind={stacked && i > 0}
           />
         ) : (
-          <NoticeRow key={g.key} n={g.lead} c={c} locale={locale} markOne={markOne} face={faces.get(g.lead.id)} />
+          <NoticeRow key={g.key} n={g.lead} c={c} locale={locale} markOne={markOne} archiveOne={archiveOne} face={faces.get(g.lead.id)} />
         ),
       )}
     </ListGroup>
@@ -537,12 +578,14 @@ function NoticeRow({
   c,
   locale,
   markOne,
+  archiveOne,
   face,
 }: {
   n: NotificationItem;
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  archiveOne(id: string): void;
   face?: string;
 }) {
   const family = familyOf(n);
@@ -558,6 +601,15 @@ function NoticeRow({
         <RowBody n={n} c={c} locale={locale} family={family} face={face} />
         <span className="nf-list-row__end">
           <UnreadMark read={n.read} c={c} />
+          <button
+            type="button"
+            className="nf-notif__archive-btn"
+            aria-label={c.archiveOne}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); archiveOne(n.id); }}
+            data-testid="notification-archive"
+          >
+            <UiIcon name="archive" size={16} />
+          </button>
         </span>
         <UiIcon name="chevron-right" size={16} className="nf-notif__chev" />
       </Link>
@@ -571,6 +623,7 @@ function GroupRow({
   c,
   locale,
   markOne,
+  archiveOne,
   faces,
   behind = false,
 }: {
@@ -578,6 +631,7 @@ function GroupRow({
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  archiveOne(id: string): void;
   faces: Map<string, string>;
   /** Behind the front card of a stacked "Needs you": seen, not reachable. */
   behind?: boolean;
@@ -618,7 +672,7 @@ function GroupRow({
       {open ? (
         <ul className="nf-notif__bundle">
           {rows.map((n) => (
-            <NoticeRow key={n.id} n={n} c={c} locale={locale} markOne={markOne} face={faces.get(n.id)} />
+            <NoticeRow key={n.id} n={n} c={c} locale={locale} markOne={markOne} archiveOne={archiveOne} face={faces.get(n.id)} />
           ))}
         </ul>
       ) : null}
@@ -633,6 +687,7 @@ function NeedsRow({
   c,
   locale,
   markOne,
+  archiveOne,
   face,
   behind = false,
 }: {
@@ -641,6 +696,7 @@ function NeedsRow({
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  archiveOne(id: string): void;
   face?: string;
   /** Behind the front card of a stacked "Needs you": seen, not reachable. */
   behind?: boolean;
@@ -671,6 +727,15 @@ function NeedsRow({
             {c.verbs[verb]}
           </ButtonLink>
         ) : null}
+        <button
+          type="button"
+          className="nf-notif__archive-btn"
+          aria-label={c.archiveOne}
+          onClick={() => archiveOne(n.id)}
+          data-testid="notification-archive"
+        >
+          <UiIcon name="archive" size={16} />
+        </button>
       </div>
     </li>
   );

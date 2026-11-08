@@ -492,6 +492,43 @@
     animation: none;
   }
 
+  /* The per-row archive button: a quiet icon that appears on hover/focus,
+     always visible on touch devices. */
+  .nf-notif__archive-btn {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: var(--nf-radius-circle);
+    background: transparent;
+    color: var(--nf-content-muted);
+    cursor: pointer;
+    transition: color var(--nf-duration-fast), background var(--nf-duration-fast);
+  }
+  .nf-notif__archive-btn:hover,
+  .nf-notif__archive-btn:focus-visible {
+    color: var(--nf-content-primary);
+    background: var(--nf-surface-inset);
+  }
+  @media (pointer: fine) {
+    .nf-notif__row .nf-notif__archive-btn {
+      opacity: 0;
+    }
+    .nf-notif__row:hover .nf-notif__archive-btn,
+    .nf-notif__row:focus-within .nf-notif__archive-btn {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-notif__archive-btn {
+      transition: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-notif__archive-btn {
+    transition: none;
+  }
+
   /* A7: face (avatar) on a notification row, matching the banner's style. */
   .nf-notif__face {
     display: block;
