@@ -348,6 +348,7 @@ export const roommatesEn = {
      profile and listing pages, the two flows, schools, NYSC and safety. */
   ui: {
     eyebrow: "Shared living on Vallo",
+    deck: { previous: "Previous person", next: "Next person", count: "{n} of {total}" },
     firstRun: {
       title: "Find your ideal roommate",
       body: "Tell us where, your budget and how you like to live. We show you the people who fit.",

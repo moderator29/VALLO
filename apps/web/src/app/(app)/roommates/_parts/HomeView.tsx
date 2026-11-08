@@ -21,6 +21,7 @@ import {
 import { PromoBanner } from "@/components/app/PromoBanner";
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { FirstRunCard } from "@/components/roommates/FirstRunCard";
+import { PeopleDeck } from "@/components/roommates/PeopleDeck";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
@@ -78,6 +79,8 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
     <section className="nf-rm-section" aria-labelledby="rm-recommended" key="recommended">
       <SectionHead id="rm-recommended" title={copy.home.recommended} more={home.recommended.length ? ROOMMATES_ROUTES.discover : undefined} moreLabel={copy.home.seeAll} />
       {home.recommended.length ? (
+        <>
+        <PeopleDeck people={home.recommended} />
         <CardRail testId="roommates-recommended">
           {home.recommended.map((p) => (
             <li key={p.userId}>
@@ -85,6 +88,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
             </li>
           ))}
         </CardRail>
+        </>
       ) : (
         <RoommatesEmpty
           icon="users"

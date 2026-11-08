@@ -1257,6 +1257,56 @@
     animation: none;
   }
 
+  /* ------------------------------------------------------------ the people deck (phones) */
+  .nf-rm-deck {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  .nf-rm-deck + .nf-rm-rail {
+    display: none;
+  }
+  .nf-rm-deck__stack {
+    display: grid;
+    padding-block-end: var(--nf-space-md);
+  }
+  .nf-rm-deck__card {
+    grid-area: 1 / 1;
+    touch-action: pan-y;
+    transform-origin: 50% 100%;
+    transform: translateY(calc(var(--nf-rm-depth, 0) * 12px)) scale(calc(1 - var(--nf-rm-depth, 0) * 0.05));
+    opacity: calc(1 - var(--nf-rm-depth, 0) * 0.3);
+    user-select: none;
+  }
+  .nf-rm-deck__card[data-depth="0"] {
+    z-index: 3;
+    cursor: grab;
+  }
+  .nf-rm-deck__card[data-depth="1"] {
+    z-index: 2;
+  }
+  .nf-rm-deck__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-md);
+  }
+  .nf-rm-deck__count {
+    min-inline-size: 4rem;
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+  @media (min-width: 48rem) {
+    .nf-rm-deck {
+      display: none;
+    }
+    .nf-rm-deck + .nf-rm-rail {
+      display: grid;
+    }
+  }
+
   /* ------------------------------------------------------------ the client controls */
   .nf-rm-togglechips {
     display: flex;
