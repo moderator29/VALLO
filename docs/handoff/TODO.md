@@ -87,6 +87,10 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Later Rounds
 - [ ] 2.21 Rounds 5, 6, 7 from WORK_QUEUE.md (round 7 SW11 includes moving English words into packages/i18n)
+  - [x] SW13 (partial): 4 redirect-only pages consolidated into next.config.ts redirects
+  - [x] B-01 (partial): 3 server actions migrated to ActionResult (consent, first-run, withdraw-report)
+  - [x] B-05 (partial): listing page and messages page serial awaits hoisted into Promise.all
+  - [x] B-03: DONE (memberWriteLimit on all 4 tables: bookings, inspections, viewings, briefs)
 
 ---
 
