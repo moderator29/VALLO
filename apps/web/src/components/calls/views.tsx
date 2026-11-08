@@ -8,6 +8,7 @@ import { fill, type MediaErrorKind, type MediaPlatform } from "@/lib/calls/scree
 import type { CallKind } from "@/lib/calls/types";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
+import { feedback } from "@/lib/ui/feedback";
 
 export type CallsCopy = Dictionary["calls"];
 
@@ -247,7 +248,7 @@ export function IncomingCallView({
           variant="end"
           large
           disabled={busy}
-          onClick={onDecline}
+          onClick={() => { feedback("select"); onDecline(); }}
           testId="call-decline"
         />
         {kind === "VIDEO" ? (
@@ -258,7 +259,7 @@ export function IncomingCallView({
             variant="quiet"
             large
             disabled={busy}
-            onClick={() => onAccept("AUDIO")}
+            onClick={() => { feedback("confirm"); onAccept("AUDIO"); }}
             testId="call-accept-voice"
           />
         ) : null}
@@ -269,7 +270,7 @@ export function IncomingCallView({
           variant="accept"
           large
           disabled={busy}
-          onClick={() => onAccept(kind)}
+          onClick={() => { feedback("confirm"); onAccept(kind); }}
           testId="call-accept"
         />
       </div>
@@ -560,6 +561,11 @@ export function InCallView({
               <button type="button" className="nf-call-row__back" onClick={onResumeCamera} aria-label={copy.inCall.resumeCamera}>
                 <UiIcon name="video" size={20} filled />
               </button>
+            ) : banner === "weak" && isVideo && cameraOn ? (
+              <button type="button" className="nf-call__switch-voice" onClick={onToggleCamera} aria-label={copy.inCall.switchToVoice}>
+                <UiIcon name="phone" size={16} />
+                <span>{copy.inCall.switchToVoice}</span>
+              </button>
             ) : null}
           </div>
         ) : remoteMicMuted ? (
@@ -591,7 +597,7 @@ export function InCallView({
           caption={micOn ? copy.inCall.mute.split(" ")[0]! : copy.inCall.unmute.split(" ")[0]!}
           variant="media"
           pressed={!micOn}
-          onClick={() => { onInteraction(); onToggleMic(); }}
+          onClick={() => { onInteraction(); feedback("select"); onToggleMic(); }}
           testId="call-mic"
         />
         {canCamera ? (
@@ -601,7 +607,7 @@ export function InCallView({
             caption={copy.inCall.cameraIsOff.split(" ")[0]!}
             variant="media"
             pressed={!cameraOn}
-            onClick={() => { onInteraction(); onToggleCamera(); }}
+            onClick={() => { onInteraction(); feedback("select"); onToggleCamera(); }}
             testId="call-camera"
           />
         ) : null}
@@ -612,7 +618,7 @@ export function InCallView({
             caption={speakerOn ? copy.inCall.speakerOn : copy.inCall.speakerOff}
             variant="media"
             pressed={speakerOn}
-            onClick={() => { onInteraction(); onNextOutput(); }}
+            onClick={() => { onInteraction(); feedback("select"); onNextOutput(); }}
             testId="call-output"
           />
         ) : null}
@@ -664,7 +670,7 @@ export function InCallView({
           variant="end"
           large
           disabled={ending}
-          onClick={() => { onInteraction(); onEnd(); }}
+          onClick={() => { onInteraction(); feedback("warning"); onEnd(); }}
           testId="call-end"
         />
       </div>
@@ -782,6 +788,20 @@ export function ConfirmEnd({ copy, onConfirm, onCancel }: { copy: CallsCopy; onC
   );
 }
 
+/* ----------------------------------------------------------- sparkline */
+
+function QualitySparkline({ samples }: { samples: number[] }) {
+  const w = 120;
+  const h = 24;
+  const step = w / Math.max(samples.length - 1, 1);
+  const points = samples.map((q, i) => `${i * step},${h - (q / 3) * h}`).join(" ");
+  return (
+    <svg className="nf-call__sparkline" width={w} height={h} viewBox={`0 0 ${w} ${h}`} aria-hidden="true" role="img">
+      <polyline points={points} fill="none" stroke="var(--nf-call-sparkline, var(--nf-content-tertiary))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /* --------------------------------------------------------------- ended */
 
 export function EndedView({
@@ -792,6 +812,7 @@ export function EndedView({
   words,
   duration,
   missed = false,
+  qualitySamples,
   backLabel,
   onBack,
   onCallBack,
@@ -806,6 +827,8 @@ export function EndedView({
   /** "4 min 12 s" or empty. */
   duration?: string;
   missed?: boolean;
+  /** Quality samples (0-3) from the call, shown as a sparkline. */
+  qualitySamples?: number[];
   backLabel: string;
   onBack: () => void;
   onCallBack?: () => void;
@@ -819,6 +842,7 @@ export function EndedView({
       </p>
       <Hero name={name} photo={photo} status={words}>
         {duration ? <p className="nf-call__note">{fill(copy.ended.lasted, { duration })}</p> : null}
+        {qualitySamples && qualitySamples.length > 1 ? <QualitySparkline samples={qualitySamples} /> : null}
       </Hero>
       <div className="nf-call__stack">
         <Button variant="primary" size="lg" full onClick={onBack} data-autofocus data-testid="call-back">

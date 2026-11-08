@@ -185,6 +185,7 @@ export function EndedScreen({ active, copy }: { active: ActiveCall; copy: CallsC
       words={endReasonWords(s)}
       duration={s.state === "ENDED" && s.connectedAt ? durationWords(s.durationSeconds) : ""}
       missed={missed}
+      qualitySamples={active.qualitySamples}
       backLabel={s.reviewId ? copy.ended.backReview : copy.ended.back}
       onBack={back}
       onCallBack={callBack}

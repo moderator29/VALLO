@@ -46,6 +46,8 @@ export type ActiveCall = {
   resume: boolean;
   /** A sentence to show on the incoming screen: the answer did not go through. */
   notice: string | null;
+  /** Quality samples (0-3) collected every 5 s during the call, for the ended sparkline. */
+  qualitySamples: number[];
 };
 
 type State = {
@@ -101,6 +103,7 @@ export function showCall(
       recovery: opts.recovery ?? null,
       resume: opts.resume ?? false,
       notice: null,
+      qualitySamples: current && current.snapshot.id === snapshot.id ? current.qualitySamples : [],
     },
   });
   return true;
@@ -150,6 +153,14 @@ export function setAnsweredWith(kind: CallKind | null): void {
 export function setCallNotice(notice: string | null): void {
   if (!state.active) return;
   set({ ...state, active: { ...state.active, notice } });
+}
+
+/** Record one connection quality sample (0-3) during the call, for the ended sparkline. */
+export function pushQualitySample(quality: number): void {
+  if (!state.active) return;
+  const samples = state.active.qualitySamples;
+  if (samples.length > 0 && samples[samples.length - 1] === quality) return;
+  set({ ...state, active: { ...state.active, qualitySamples: [...samples, quality] } });
 }
 
 /** The person tapped Rejoin: media may now be asked for. */

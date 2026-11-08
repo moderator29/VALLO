@@ -1180,4 +1180,50 @@
   :root[data-motion="off"] .nf-avatar-ring-spin {
     display: none;
   }
+
+  /* ======================================= TAB BAR ICON BOUNCE (9.15) */
+
+  /*
+   * The active tab's icon bounces once when it becomes current. The
+   * animation runs on the `aria-current` attribute the tab link sets, so
+   * no JS is needed beyond the route change React already does.
+   */
+  .nf-tab__link[aria-current="page"] .nf-tab__icon {
+    animation: nf-tab-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-tab-pop {
+    0% { transform: scale(0.85); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  :root[data-motion="off"] .nf-tab__link[aria-current="page"] .nf-tab__icon {
+    animation: none;
+  }
+
+  /* ==================================== CHAT BUBBLE ARRIVAL (9.23) */
+
+  /*
+   * New chat messages slide up with a subtle spring bounce.
+   * The message component adds `data-new` on arrival; the attribute is
+   * removed after the animation so re-renders do not replay it.
+   */
+  .nf-bubble[data-new] {
+    animation: nf-bubble-in var(--nf-duration-slow, 400ms) var(--nf-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+  }
+  @keyframes nf-bubble-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.95);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-2px) scale(1.01);
+    }
+    to {
+      transform: translateY(0) scale(1);
+    }
+  }
+  :root[data-motion="off"] .nf-bubble[data-new] {
+    animation: none;
+  }
 }
