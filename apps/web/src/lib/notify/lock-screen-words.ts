@@ -221,6 +221,55 @@ export function supportReply(): LockScreenWords {
 }
 
 // ---------------------------------------------------------------------------
+// Vallo Roommates (8 November 2026): the same sentences the SQL writes
+// (`roommates_2_engine.sql`), capped for a lock screen.
+// ---------------------------------------------------------------------------
+
+export function roommateInterest(from: string, note?: string | null): LockScreenWords {
+  return { title: cap(`${from} is interested in sharing a home`, 50), body: cap(note || "Open Roommates to answer", 90) };
+}
+
+export function roommateAccepted(from: string): LockScreenWords {
+  return { title: cap(`${from} accepted. You are connected`, 50), body: "Start a chat when you are ready" };
+}
+
+export function roommateGroupInvite(from: string, group: string): LockScreenWords {
+  return { title: cap(`${from} invited you to ${group}`, 50), body: "Open the group to accept or decline" };
+}
+
+export function roommateJoinRequest(from: string, group: string): LockScreenWords {
+  return { title: cap(`${from} asked to join ${group}`, 50), body: "Open the group to answer" };
+}
+
+export function roommateViewingRequest(from: string, when?: string | null): LockScreenWords {
+  return { title: cap(`${from} asked to view your room`, 50), body: cap(when || "Open Roommates to answer", 90) };
+}
+
+export function roommateSearchMatch(label: string, title: string): LockScreenWords {
+  return { title: cap(`A new post matches "${label}"`, 50), body: cap(title, 90) };
+}
+
+// ---------------------------------------------------------------------------
+// Trust and Safety and Circle
+// ---------------------------------------------------------------------------
+
+export function safetyMessage(body: string): LockScreenWords {
+  return { title: "A message from Vallo Trust and Safety", body: cap(body, 90) };
+}
+
+export function reportOutcome(): LockScreenWords {
+  return { title: "We looked into your report", body: "Tap to see the outcome" };
+}
+
+export function circleReply(from: string, title: string): LockScreenWords {
+  return { title: cap(`${from} replied in Circle`, 50), body: cap(title, 90) };
+}
+
+export function circleMention(from: string, title: string): LockScreenWords {
+  return { title: cap(`${from} mentioned you`, 50), body: cap(title, 90) };
+}
+
+// ---------------------------------------------------------------------------
 // Generic fallback
 // ---------------------------------------------------------------------------
 

@@ -63,6 +63,9 @@ export const experienceInboxEn = {
       check: "Check",
       renew: "Renew",
       open: "Open",
+      viewRequest: "View request",
+      openGroup: "Open group",
+      seeOutcome: "See outcome",
     },
     group: {
       messages: { one: "{count} new message", other: "{count} new messages" },

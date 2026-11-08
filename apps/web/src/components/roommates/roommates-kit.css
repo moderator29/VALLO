@@ -14,6 +14,17 @@
  * in-app Calm and Off) shows the resting state at once.
  */
 @layer components {
+  /* SOLID TINTS (the founder, 8 November 2026: light mode is paper, never a
+     translucent blue wash). Each is the brand or the ink mixed INTO the
+     surface, so it is an opaque colour in both themes; declared on every
+     theme scope so a night island resolves its own. */
+  :root,
+  [data-theme] {
+    --nf-rm-tint: color-mix(in oklab, var(--nf-brand-primary) 11%, var(--nf-surface-primary));
+    --nf-rm-tint-2: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-surface-primary));
+    --nf-rm-ink-wash: color-mix(in oklab, var(--nf-content-primary) 6%, var(--nf-surface-primary));
+    --nf-rm-ok-wash: color-mix(in oklab, var(--nf-state-success) 13%, var(--nf-surface-primary));
+  }
   /* ------------------------------------------------------------ marks */
   .nf-rm-face {
     position: relative;
@@ -87,7 +98,7 @@
   }
   .nf-rm-ring__track {
     fill: none;
-    stroke: color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
+    stroke: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-surface-primary));
     stroke-width: 4;
   }
   .nf-rm-ring__arc {
@@ -122,14 +133,14 @@
     gap: var(--nf-space-3xs);
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-radius-badge);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
     font-weight: 600;
     white-space: nowrap;
   }
   .nf-rm-matchbadge[data-thin] {
-    background: color-mix(in oklab, var(--nf-content-primary) 6%, transparent);
+    background: color-mix(in oklab, var(--nf-content-primary) 6%, var(--nf-surface-primary));
     color: var(--nf-content-secondary);
   }
 
@@ -168,14 +179,14 @@
     gap: var(--nf-space-3xs);
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-radius-badge);
-    background: var(--nf-state-success-surface);
+    background: var(--nf-rm-ok-wash);
     color: var(--nf-state-success);
     font-size: var(--nf-text-caption);
     font-weight: 600;
     white-space: nowrap;
   }
   .nf-rm-badge--more {
-    background: color-mix(in oklab, var(--nf-content-primary) 6%, transparent);
+    background: color-mix(in oklab, var(--nf-content-primary) 6%, var(--nf-surface-primary));
     color: var(--nf-content-secondary);
   }
 
@@ -206,7 +217,7 @@
     inline-size: 1.75rem;
     block-size: 1.75rem;
     border-radius: var(--nf-radius-sm);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-brand-primary);
   }
   .nf-rm-life__text {
@@ -230,18 +241,18 @@
     gap: var(--nf-space-3xs);
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-radius-badge);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
     font-weight: 600;
     white-space: nowrap;
   }
   .nf-rm-kind[data-kind="roommate_wanted"] {
-    background: color-mix(in oklab, var(--nf-content-primary) 7%, transparent);
+    background: color-mix(in oklab, var(--nf-content-primary) 7%, var(--nf-surface-primary));
     color: var(--nf-content-primary);
   }
   .nf-rm-verified {
-    background: var(--nf-state-success-surface);
+    background: var(--nf-rm-ok-wash);
     color: var(--nf-state-success);
   }
   .nf-rm-kind[data-on-media],
@@ -262,7 +273,7 @@
     inline-size: 2.5rem;
     block-size: 2.5rem;
     border-radius: var(--nf-radius-md);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-brand-primary);
   }
   .nf-rm-plate--lg {
@@ -461,7 +472,7 @@
     gap: var(--nf-space-xs);
     block-size: 100%;
     background:
-      radial-gradient(80% 70% at 30% 20%, var(--nf-brand-tint-1), transparent 70%),
+      radial-gradient(80% 70% at 30% 20%, var(--nf-rm-tint), transparent 70%),
       var(--nf-surface-secondary);
     color: var(--nf-brand-quiet);
     font-size: var(--nf-text-caption);
@@ -801,7 +812,7 @@
     border: var(--nf-border-width) solid var(--nf-tier-card-edge);
     border-radius: var(--nf-radius-card);
     background:
-      radial-gradient(90% 80% at 100% 0%, var(--nf-brand-tint-1), transparent 65%),
+      radial-gradient(90% 80% at 100% 0%, var(--nf-rm-tint), transparent 65%),
       var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     color: var(--nf-content-primary);
@@ -829,7 +840,7 @@
     block-size: 2.5rem;
     margin-block-end: var(--nf-space-xs);
     border-radius: var(--nf-radius-md);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-brand-primary);
   }
   .nf-rm-journey__title {
@@ -862,7 +873,7 @@
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-tier-card-edge));
     border-radius: var(--nf-radius-card);
     background:
-      radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 10%, transparent), transparent 70%),
+      radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-primary)), transparent 70%),
       var(--nf-surface-primary);
     box-shadow: var(--nf-card-shadow);
     min-inline-size: 0;
@@ -1045,7 +1056,7 @@
     position: absolute;
     inset: 2.5rem auto 0 calc(1.125rem - 1px);
     inline-size: 2px;
-    background: color-mix(in oklab, var(--nf-brand-primary) 26%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 26%, var(--nf-surface-primary));
   }
   .nf-rm-how__n {
     display: grid;
@@ -1118,7 +1129,7 @@
     block-size: 0.5rem;
     overflow: hidden;
     border-radius: var(--nf-radius-pill);
-    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-primary));
   }
   .nf-rm-bar__fill {
     position: absolute;
@@ -1226,7 +1237,7 @@
     inline-size: 2.25rem;
     block-size: 2.25rem;
     color: var(--nf-content-secondary);
-    background: color-mix(in oklab, var(--nf-content-primary) 6%, transparent);
+    background: color-mix(in oklab, var(--nf-content-primary) 6%, var(--nf-surface-primary));
   }
   .nf-rm-sheetfoot {
     display: grid;

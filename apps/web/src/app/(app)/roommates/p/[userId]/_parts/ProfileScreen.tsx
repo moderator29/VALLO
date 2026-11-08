@@ -123,6 +123,10 @@ export function RoommateProfileScreen({
           {p.isSelf ? null : <MatchPanel match={p.match ?? { score: null, parts: {}, reasons: [] }} t={copy} />}
         </aside>
       </div>
+      <div className="nf-rm-dock" data-testid="roommates-dock">
+        {p.isSelf ? null : <SaveButton kind="person" id={p.userId} />}
+        <ProfileActions userId={p.userId} name={p.name} isSelf={p.isSelf} connection={p.connection} groups={groups} />
+      </div>
     </PageFrame>
   );
 }

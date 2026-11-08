@@ -105,10 +105,29 @@
       transform: translateY(-120%);
     }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .nf-notify,
-    .nf-notify[data-leaving] {
-      animation-name: none;
+  /* Reduced motion: a fade, never a slide (the founder, 8 November 2026). */
+  @keyframes nf-notify-fade-in {
+    from {
+      opacity: 0;
     }
+  }
+  @keyframes nf-notify-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-notify {
+      animation-name: nf-notify-fade-in;
+    }
+    .nf-notify[data-leaving] {
+      animation-name: nf-notify-fade-out;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-notify {
+    animation-name: nf-notify-fade-in;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-notify[data-leaving] {
+    animation-name: nf-notify-fade-out;
   }
 }

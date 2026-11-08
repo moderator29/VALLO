@@ -12,7 +12,6 @@ import {
   RoommatesEmpty,
   SectionHead,
   VerifiedChip,
-  availableText,
   counted,
   dayText,
   fill,
@@ -155,6 +154,23 @@ export function RoomListingScreen({
           <CostBreakdown cost={l} t={copy} />
         </aside>
       </div>
+      {/* The phone's dock: the one decision of the screen, always in reach. */}
+      <div className="nf-rm-dock" data-testid="roommates-dock">
+        {l.isOwner || !read.signedIn ? null : <SaveButton kind="room" id={l.id} />}
+        <ListingActions
+          id={l.id}
+          title={l.title}
+          status={l.status}
+          isOwner={l.isOwner}
+          signedIn={read.signedIn}
+          owner={{ userId: l.owner.userId, name: l.owner.name }}
+          connection={l.connection}
+          myViewing={l.myViewing}
+          groups={groups}
+          viewCount={l.viewCount}
+          interestCount={l.interestCount}
+        />
+      </div>
     </PageFrame>
   );
 }
@@ -246,10 +262,9 @@ function Household({ l, t: copy, today }: { l: RoomDetail; t: RoommatesCopy; tod
   if (l.occupantsNow !== null && l.occupantsMax !== null) rows.push({ icon: "users", label: copy.listing.household, value: fill(copy.listing.occupants, { now: l.occupantsNow, max: l.occupantsMax }) });
   else if (l.occupantsNow !== null) rows.push({ icon: "users", label: copy.listing.household, value: counted(l.occupantsNow, copy.ui.card.occupants) });
   rows.push({ icon: "circle-people", label: copy.ui.create.household, value: copy.genderPref[l.genderPref] });
-  const free = availableText(l.availableFrom, copy, today);
-  if (free) rows.push({ icon: "calendar-check", label: copy.listing.available, value: free, fresh: true });
+  if (l.availableFrom) rows.push({ icon: "calendar-check", label: copy.listing.available, value: l.availableFrom <= today ? copy.ui.listing.now : dayText(l.availableFrom, false), fresh: true });
   if (l.minStayMonths) rows.push({ icon: "hourglass", label: copy.listing.minStay, value: counted(l.minStayMonths, copy.ui.card.months) });
-  if (l.expiresAt) rows.push({ icon: "clock", label: copy.listingStatus.live, value: fill(copy.listing.expires, { date: dayText(l.expiresAt) }) });
+  if (l.expiresAt) rows.push({ icon: "clock", label: copy.ui.listing.listedUntil, value: dayText(l.expiresAt) });
   return (
     <section className="nf-rm-section" aria-labelledby="rml-home">
       <SectionHead id="rml-home" title={copy.ui.listing.facts} />

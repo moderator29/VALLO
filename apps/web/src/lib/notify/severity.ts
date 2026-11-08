@@ -23,7 +23,7 @@
 export type Severity = "action" | "update" | "fyi";
 
 /** The one verb an action row offers inline. Words live in the dictionary. */
-export type SeverityVerb = "reply" | "confirm" | "review" | "addDetails" | "check" | "renew" | "open";
+export type SeverityVerb = "reply" | "confirm" | "review" | "addDetails" | "check" | "renew" | "open" | "viewRequest" | "openGroup" | "seeOutcome";
 
 export type SeverityRule = {
   /** What the founder reads in the sign-off table. */
@@ -46,6 +46,22 @@ export const SEVERITY_RULES: readonly SeverityRule[] = [
   { describes: "You were invited to share a move-in", title: /invited to share a move-in/i, severity: "action", verb: "open" },
   { describes: "A held payment is paused", title: /held payment is paused/i, severity: "action", verb: "open" },
   { describes: "A new support ticket (staff)", title: /^a new support ticket/i, severity: "action", verb: "open" },
+  /* VALLO ROOMMATES (8 November 2026): the SQL writes these through
+     `private.notify_social`, so they arrive as kind "social" and must be read
+     before the feed's catch-all below. The sender's face comes from `?from=`. */
+  { describes: "Someone is interested in sharing a home with you", kind: ["social"], title: / is interested in sharing a home$/i, severity: "action", verb: "viewRequest" },
+  { describes: "Someone asked to view your room", kind: ["social"], title: / asked to view your room$/i, severity: "action", verb: "review" },
+  { describes: "You were invited to a roommate group", kind: ["social"], href: /^\/roommates\/(?:me|groups)/, title: / invited you to /i, severity: "action", verb: "openGroup" },
+  { describes: "Someone asked to join your roommate group", kind: ["social"], title: / asked to join /i, severity: "action", verb: "review" },
+  { describes: "A roommate connection, group or viewing changed", kind: ["social"], href: /^\/roommates\//, severity: "update" },
+  /* TRUST AND SAFETY: a message from staff needs reading; outcomes are updates. */
+  { describes: "A message from Vallo Trust and Safety", title: /^a message from vallo trust and safety$/i, severity: "action", verb: "open" },
+  { describes: "The outcome of your report or appeal", href: /^\/settings\/standing/, title: /^(we looked into your report|your appeal was)/i, severity: "update", verb: "seeOutcome" },
+  { describes: "A restriction on your account was set or lifted", href: /^\/settings\/standing/, severity: "update", verb: "seeOutcome" },
+  /* CIRCLE: replies and mentions want an answer; held or restored posts are news. */
+  { describes: "A reply to your post, or a mention, in Circle", href: /^\/circle\/p\//, title: /(replied|answered|mentioned you)/i, severity: "action", verb: "reply" },
+  { describes: "A Circle community invite", href: /^\/circle/, title: /invited you to/i, severity: "action", verb: "open" },
+  { describes: "Your Circle post was held or restored", href: /^\/circle/, title: /(held|restored|is back)/i, severity: "update" },
   { describes: "Likes, reposts, new followers and badges", kind: ["social"], title: /(liked|reposted|new follower|you earned)/i, severity: "fyi" },
   { describes: "Your post, story, event, bio or comment is live or being looked at", title: /( is live$| is being checked$)/i, severity: "fyi" },
   { describes: "We received your question; your request was sent", title: /^(we have your question|booking request sent)/i, severity: "fyi" },

@@ -17,6 +17,17 @@
  * opacity, once, and reduced motion shows the resting state.
  */
 @layer components {
+  /* SOLID TINTS (the founder, 8 November 2026: light mode is paper, never a
+     translucent blue wash). Each is the brand or the ink mixed INTO the
+     surface, so it is an opaque colour in both themes; declared on every
+     theme scope so a night island resolves its own. */
+  :root,
+  [data-theme] {
+    --nf-rm-tint: color-mix(in oklab, var(--nf-brand-primary) 11%, var(--nf-surface-primary));
+    --nf-rm-tint-2: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-surface-primary));
+    --nf-rm-ink-wash: color-mix(in oklab, var(--nf-content-primary) 6%, var(--nf-surface-primary));
+    --nf-rm-ok-wash: color-mix(in oklab, var(--nf-state-success) 13%, var(--nf-surface-primary));
+  }
   .nf-rmp {
     display: grid;
     gap: var(--nf-space-2xl);
@@ -32,7 +43,7 @@
     padding: var(--nf-space-sm) var(--nf-space-md);
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     border-radius: var(--nf-radius-card);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-primary);
     text-decoration: none;
   }
@@ -114,7 +125,7 @@
     block-size: 0.5rem;
     overflow: hidden;
     border-radius: var(--nf-radius-pill);
-    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-primary));
   }
   .nf-rmp-progress__fill {
     position: absolute;
@@ -470,7 +481,7 @@
     padding: var(--nf-space-sm) var(--nf-space-md);
     border-inline-start: 3px solid var(--nf-brand-primary);
     border-radius: var(--nf-radius-sm);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     line-height: 1.5;
@@ -491,7 +502,7 @@
     padding: var(--nf-space-md);
     border-radius: var(--nf-radius-card);
     background:
-      radial-gradient(80% 90% at 50% 0%, color-mix(in oklab, var(--nf-state-success) 18%, transparent), transparent 70%),
+      radial-gradient(80% 90% at 50% 0%, color-mix(in oklab, var(--nf-state-success) 18%, var(--nf-surface-primary)), transparent 70%),
       var(--nf-surface-secondary);
     text-align: center;
   }
@@ -562,7 +573,7 @@
   }
   .nf-rmv-pick[aria-pressed="true"] {
     border-color: var(--nf-brand-primary);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
   }
   .nf-rmv-pick:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
@@ -602,7 +613,7 @@
     gap: var(--nf-space-xs);
     aspect-ratio: 16 / 10;
     background:
-      radial-gradient(80% 70% at 30% 20%, var(--nf-brand-tint-1), transparent 70%),
+      radial-gradient(80% 70% at 30% 20%, var(--nf-rm-tint), transparent 70%),
       var(--nf-surface-secondary);
     color: var(--nf-content-muted);
     font-size: var(--nf-text-body-sm);
@@ -942,7 +953,7 @@
   .nf-rmf-card[aria-pressed="true"] {
     border-color: var(--nf-brand-primary);
     background:
-      radial-gradient(90% 80% at 100% 0%, var(--nf-brand-tint-2), transparent 70%),
+      radial-gradient(90% 80% at 100% 0%, var(--nf-rm-tint-2), transparent 70%),
       var(--nf-surface-primary);
   }
   .nf-rmf-card__glyph {
@@ -952,7 +963,7 @@
     block-size: 2.75rem;
     margin-block-end: var(--nf-space-xs);
     border-radius: var(--nf-radius-md);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-brand-primary);
   }
   .nf-rmf-card__title {
@@ -1012,7 +1023,7 @@
     min-block-size: 2.75rem;
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     border-radius: var(--nf-radius-control-sm);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
@@ -1061,7 +1072,7 @@
     padding: var(--nf-space-xs) var(--nf-space-sm);
     border: var(--nf-border-width) solid var(--nf-brand-primary);
     border-radius: var(--nf-radius-control);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
   }
   .nf-rmf-school__name {
     display: grid;
@@ -1086,7 +1097,7 @@
     block-size: 0.375rem;
     margin-inline: var(--nf-space-xs);
     border-radius: var(--nf-radius-pill);
-    background: color-mix(in oklab, var(--nf-brand-primary) 14%, transparent);
+    background: color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-primary));
   }
   .nf-rmf-range__fill {
     position: absolute;
@@ -1113,7 +1124,7 @@
   .nf-rmf-range__tag {
     padding: var(--nf-space-3xs) var(--nf-space-xs);
     border-radius: var(--nf-radius-badge);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
     font-weight: 700;
@@ -1142,7 +1153,7 @@
     border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
     border-radius: var(--nf-radius-card);
     background:
-      radial-gradient(100% 120% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 14%, transparent), transparent 70%),
+      radial-gradient(100% 120% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 14%, var(--nf-surface-primary)), transparent 70%),
       var(--nf-surface-primary);
   }
   .nf-rmf-total__label {
@@ -1193,7 +1204,7 @@
     align-content: center;
     gap: var(--nf-space-2xs);
     border: var(--nf-border-width-strong) dashed var(--nf-brand-edge);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-link);
     font: inherit;
     font-size: var(--nf-text-body-sm);
@@ -1494,7 +1505,7 @@
     inline-size: 1.75rem;
     block-size: 1.75rem;
     border-radius: var(--nf-radius-sm);
-    background: var(--nf-brand-tint-1);
+    background: var(--nf-rm-tint);
     color: var(--nf-content-link);
     font-size: var(--nf-text-caption);
     font-weight: 700;
@@ -1548,5 +1559,61 @@
 
   :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-rmv-head .nf-rm-face, .nf-rmv-celebrate, .nf-rmv-celebrate__mark, .nf-rmf-done__mark, .nf-rmf-done__title, .nf-rmf-done__body, .nf-rmf-done__actions, .nf-rmf-photo--busy > svg) {
     animation: none;
+  }
+
+  /* ------------------------------------------------------------ the phone's dock */
+  /*
+   * A detail screen's one decision, pinned above the tab bar and clear of the
+   * home indicator and the gesture bar. Status lines, the second-row choices
+   * and owner housekeeping stay in the page's own card; the dock carries the
+   * main action and Save. Hidden where the side column shows the card.
+   */
+  .nf-rm-dock {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: var(--nf-tabbar-clearance, 0px);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-sm) max(var(--nf-pad-shell), env(safe-area-inset-right)) max(var(--nf-space-sm), calc(env(safe-area-inset-bottom) - var(--nf-tabbar-clearance, 0px))) max(var(--nf-pad-shell), env(safe-area-inset-left));
+    border-block-start: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    background: color-mix(in oklab, var(--nf-surface-primary) 92%, transparent);
+    box-shadow: var(--nf-elevation-floating);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+    backdrop-filter: blur(var(--nf-glass-blur));
+  }
+  .nf-rm-dock .nf-rmv-act {
+    display: flex;
+    flex: 1;
+    gap: var(--nf-space-xs);
+    min-inline-size: 0;
+  }
+  .nf-rm-dock .nf-rmv-act > *,
+  .nf-rm-dock .nf-rmv-act__pair {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+  .nf-rm-dock .nf-rmv-act__pair {
+    display: flex;
+  }
+  .nf-rm-dock :is(.nf-rmv-act__line, .nf-rmv-act__note, [data-testid="listing-owner-actions"] .nf-rmv-act__pair, .nf-rmv-celebrate, [data-testid="listing-delete"], [data-testid="listing-shortlist"], [data-testid="profile-invite"]) {
+    display: none;
+  }
+  .nf-rmv {
+    padding-block-end: 5.5rem;
+  }
+  :root[data-save-data="on"] .nf-rm-dock {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--nf-surface-primary);
+  }
+  @media (min-width: 64rem) {
+    .nf-rm-dock {
+      display: none;
+    }
+    .nf-rmv {
+      padding-block-end: 0;
+    }
   }
 }
