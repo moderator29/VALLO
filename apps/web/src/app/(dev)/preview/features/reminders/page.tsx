@@ -1,5 +1,6 @@
+import { getDictionary } from "@vallo/i18n";
+import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
-import { REMINDERS_COPY } from "@/lib/features/notices/copy";
 
 import { PreviewReminders } from "./PreviewReminders";
 
@@ -12,11 +13,12 @@ export default async function PreviewRemindersPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const live = (await searchParams).live !== "0";
+  const r = getDictionary(await getLocale()).reminders;
   return (
     /* The app shell's 16px gutter, which the harness layout does not draw. */
     <div className="px-md">
-    <PageFrame title={REMINDERS_COPY.title} subtitle={REMINDERS_COPY.subtitle} fallback="/preview/features" width="narrow">
-      <PreviewReminders live={live} />
+    <PageFrame title={r.title} subtitle={r.subtitle} fallback="/preview/features" width="narrow">
+      <PreviewReminders live={live} copy={r} />
     </PageFrame>
     </div>
   );

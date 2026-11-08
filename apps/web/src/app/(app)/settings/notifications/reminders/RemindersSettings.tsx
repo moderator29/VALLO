@@ -5,8 +5,8 @@ import { useState } from "react";
 import { RowLink, RowSwitch, SettingsGroup } from "@/components/app/account/rows";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { setReminderPreference } from "@/lib/features/notices/actions";
-import { REMINDERS_COPY } from "@/lib/features/notices/copy";
 import type { NoticePreferences, NoticeTopic } from "@/lib/features/notices/model";
+import type { Dictionary } from "@vallo/i18n/core";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -34,14 +34,15 @@ const NUDGES: readonly NoticeTopic[] = ["nudge_phone", "nudge_identity", "nudge_
 export function RemindersSettings({
   initial,
   live,
+  copy,
   save = setReminderPreference,
 }: {
   initial: NoticePreferences;
   live: boolean;
+  copy: Dictionary["reminders"];
   /** The preview harness passes a stand-in; the app always uses the action. */
   save?: typeof setReminderPreference;
 }) {
-  const copy = REMINDERS_COPY;
   const [prefs, setPrefs] = useState<NoticePreferences>(initial);
   const [pending, start] = useSafeTransition();
 
