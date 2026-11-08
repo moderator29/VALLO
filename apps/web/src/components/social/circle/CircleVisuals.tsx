@@ -1,10 +1,14 @@
 import Image from "next/image";
+import { plural } from "@vallo/i18n/core";
+import { CountUp } from "@/components/motion/CountUp";
+import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
+import { FEATURE_ART } from "@/lib/features/art";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
-import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
-import { compactCount, countWords } from "@/lib/features/circle/model";
+import { countWords } from "@/lib/features/circle/model";
 import type { CirclePostView, HomeStats } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 import { initial } from "@/lib/text/initial";
@@ -28,107 +32,184 @@ import "./circle-visuals.css";
  * trust first. Words come from `CIRCLE_COPY` (English, Agent FEATURES').
  */
 
-const STAT_ICON: Record<"members" | "posts" | "active", UiIconName> = {
-  members: "circle-people",
-  posts: "chat-bubble",
-  active: "trending-up",
-};
-
 export type CircleFace = { label: string; avatar: string | null };
 
+/**
+ * THE HERO (rebuilt 8 November 2026, the founder's reference sheets in Vallo
+ * blue): one big picture from the art slots with a scrim, the headline, the
+ * line, ONE strong action, and the real members' faces with the LIVE member
+ * count. The picture drifts once, slowly; the words arrive on a short
+ * stagger; the count counts up once. Reduced motion shows the resting state.
+ * Only members with a photograph are drawn in the stack: an initial floating
+ * on a photograph read as broken, and a face is never invented.
+ */
 export function CircleBanner({
   stats,
   signedIn,
   faces = [],
-  photoUrl = "/brand/photos/villa-exterior-sunset.webp",
-  feedHref = "/around",
-  feedLabel = "Feed",
 }: {
-  /** From `circle_home_stats`. Null (the read is not live) draws no numbers. */
+  /** From `circle_home_stats`. Null (the read is not live) draws no number. */
   stats: HomeStats | null;
   signedIn: boolean;
-  /** Real members only, up to three, drawn around the photograph. None given,
-      none drawn: a face is never invented. */
   faces?: readonly CircleFace[];
-  /** One of Vallo's own sample listing photographs (`public/brand/photos`). */
-  photoUrl?: string;
-  /** The door back into the feed (the founder: each has a button into the other). */
-  feedHref?: string;
-  feedLabel?: string;
 }) {
-  const s = CIRCLE_COPY.stats;
-  const tiles = stats
-    ? ([
-        { key: "members", n: stats.members, words: s.members },
-        { key: "posts", n: stats.posts, words: s.posts },
-        { key: "active", n: stats.active, words: s.active },
-      ] as const)
-    : [];
-  const shown = faces.slice(0, 3);
+  const H = CIRCLE_COPY.home;
+  const art = FEATURE_ART.circleHero;
+  const shown = faces.filter((f) => f.avatar).slice(0, 4);
+  const members = stats?.members ?? 0;
   return (
     <section className="nf-cbn" data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
-      <Link href={feedHref} className="nf-tap nf-cbn__feed" data-testid="circle-feed-door">
-        <UiIcon name="feed" size={16} />
-        <span>{feedLabel}</span>
-      </Link>
-
-      <div className="nf-cbn__stage" aria-hidden="true">
-        <span className="nf-cbn__bloom" />
-        <span className="nf-cbn__orbit" />
-        <span className="nf-cbn__photo">
-          <Image src={photoUrl} alt="" fill sizes="(max-width: 640px) 70vw, 420px" priority={false} />
-        </span>
-        {shown.map((face, index) => (
-          <span key={`${face.label}-${index}`} className="nf-cbn__face" data-at={index}>
-            {face.avatar ? (
-              <RemoteImage src={face.avatar} alt="" width={112} height={112} sizes="56px" loading="lazy" />
-            ) : (
-              <span className="nf-cbn__monogram">{initial(face.label)}</span>
-            )}
-          </span>
-        ))}
-        <span className="nf-cbn__mark">
-          <UiIcon name="circle-people" size={28} filled weight="bold" />
-        </span>
-      </div>
-
-      <h2 id="circle-banner-title" className="nf-cbn__title">
-        {CIRCLE_COPY.title}
-      </h2>
-      <p className="nf-cbn__line">{CIRCLE_COPY.heroLine}</p>
-
-      {tiles.length > 0 ? (
-        <dl className="nf-cbn__stats" data-testid="circle-stats">
-          {tiles.map((tile, index) => (
-            <div
-              key={tile.key}
-              className="nf-cbn__stat"
-              style={{ "--nf-cbn-i": index } as React.CSSProperties}
-              aria-label={countWords(tile.n, tile.words[0], tile.words[1])}
-            >
-              <span className="nf-cbn__stat-glyph" aria-hidden="true">
-                <UiIcon name={STAT_ICON[tile.key]} size={18} />
+      <span className="nf-cbn__art" aria-hidden="true">
+        <Image src={art.src} alt="" fill sizes="(max-width: 768px) 100vw, 960px" priority style={{ objectFit: art.fit, objectPosition: art.focus }} />
+      </span>
+      <span className="nf-cbn__scrim" aria-hidden="true" />
+      <div className="nf-cbn__body">
+        <h2 id="circle-banner-title" className="nf-cbn__title">
+          {H.heroTitle}
+        </h2>
+        <p className="nf-cbn__line">{H.heroLine}</p>
+        {stats && members > 0 ? (
+          <p className="nf-cbn__people" data-testid="circle-stats">
+            {shown.length ? (
+              <span className="nf-cbn__faces" aria-hidden="true">
+                {shown.map((face, index) => (
+                  <span key={`${face.label}-${index}`} className="nf-cbn__face">
+                    <RemoteImage src={face.avatar as string} alt="" width={72} height={72} sizes="36px" loading="lazy" />
+                  </span>
+                ))}
               </span>
-              <dd className="nf-cbn__stat-n nf-numeric" aria-hidden="true">
-                {compactCount(tile.n)}
-              </dd>
-              <dt className="nf-cbn__stat-word" aria-hidden="true">
-                {tile.words[1]}
-              </dt>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-
-      <div className="nf-cbn__actions">
-        <ButtonLink href={signedIn ? "/circle/ask" : "/sign-in?next=/circle/ask"} variant="primary" size="md" leadingIcon="chat-bubble">
-          {CIRCLE_COPY.ask}
-        </ButtonLink>
-        <ButtonLink href={signedIn ? "/circle/new" : "/sign-in?next=/circle/new"} variant="glass" size="md">
-          {CIRCLE_COPY.start}
-        </ButtonLink>
+            ) : null}
+            <span className="nf-cbn__count">
+              <span className="sr-only">{plural(members, H.members, "en")}</span>
+              <span aria-hidden="true">
+                <CountUp value={members} className="nf-numeric nf-cbn__count-n" /> {plural(members, H.members, "en").replace(/^[\d,.]+\s*/, "")}
+              </span>
+            </span>
+          </p>
+        ) : null}
+        <div className="nf-cbn__actions">
+          <ButtonLink
+            href={signedIn ? "/circle/ask" : "/sign-up?next=%2Fcircle"}
+            variant="primary"
+            size="lg"
+            leadingIcon={signedIn ? "chat-bubble" : "circle-people"}
+            data-testid="circle-hero-cta"
+          >
+            {signedIn ? H.joined : H.join}
+          </ButtonLink>
+        </div>
       </div>
     </section>
+  );
+}
+
+const DESTINATIONS: { key: keyof typeof CIRCLE_COPY.home.dest; href: string; icon: Icon3DName }[] = [
+  { key: "discussions", href: "/circle?tab=discussions", icon: "local-talks" },
+  { key: "ask", href: "/circle/ask", icon: "assistant" },
+  { key: "neighbourhoods", href: "/circle?tab=neighbourhoods", icon: "map" },
+  { key: "insights", href: "/price", icon: "analytics" },
+  { key: "professionals", href: "/circle?tab=professionals", icon: "team" },
+  { key: "opportunities", href: "/circle?tab=opportunities", icon: "megaphone" },
+  { key: "guides", href: "/circle?tab=guides", icon: "checklist" },
+  { key: "roommates", href: "/roommates", icon: "home-small" },
+];
+
+/**
+ * THE DESTINATIONS: a grid of coloured tiles, each with the founder's clay
+ * object. Every tile opens a real place (Market insights is Price Check; there
+ * is no Events tile because Circle has no events yet).
+ */
+export function CircleDestinations() {
+  const H = CIRCLE_COPY.home;
+  return (
+    <nav className="nf-cdest" aria-label={H.exploreTitle} data-testid="circle-destinations">
+      <h2 className="nf-cdest__title">{H.exploreTitle}</h2>
+      <ul className="nf-cdest__grid">
+        {DESTINATIONS.map((d, i) => (
+          <li key={d.key} style={{ "--nf-cdest-i": i } as React.CSSProperties}>
+            <Link href={d.href} className="nf-cdest__tile" data-tone={i % 4} data-testid={`circle-dest-${d.key}`}>
+              <span className="nf-cdest__art">
+                <Icon3D name={d.icon} size={44} />
+              </span>
+              <span className="nf-cdest__label">{H.dest[d.key]}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/** Popular and Latest, as one clean underline row in the address. */
+export function CircleSortRow({ active, base }: { active: "popular" | "newest"; base: string }) {
+  const H = CIRCLE_COPY.home;
+  const join = base.includes("?") ? "&" : "?";
+  const items = [
+    { key: "popular" as const, label: H.popular },
+    { key: "newest" as const, label: H.latest },
+  ];
+  return (
+    <nav className="nf-csort" aria-label={H.sortsLabel}>
+      {items.map((it) => (
+        <Link key={it.key} href={`${base}${join}sort=${it.key}`} className="nf-csort__item" aria-current={it.key === active ? "page" : undefined} scroll={false}>
+          {it.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * A FEATURED DISCUSSION: a picture tile (the community's object, or the
+ * listing the post is about), the title, the line, and the true counts.
+ */
+export function CircleFeaturedCard({ post, now }: { post: CirclePostView; now: number }) {
+  const H = CIRCLE_COPY.home;
+  return (
+    <Link href={`/circle/p/${post.id}`} className="nf-cfeat" data-testid="circle-featured-card">
+      <span className="nf-cfeat__thumb" aria-hidden="true">
+        <Icon3D name={post.type === "question" ? "assistant" : "local-talks"} size={56} />
+      </span>
+      <span className="nf-cfeat__body">
+        <span className="nf-cfeat__kicker">{post.community?.name ?? (post.type === "question" ? C.question : CIRCLE_COPY.tabs.discussions)}</span>
+        <span className="nf-cfeat__title">{post.title}</span>
+        <span className="nf-cfeat__foot">
+          <span className="nf-cfeat__by">
+            <span className="nf-ccard__face nf-cfeat__face" aria-hidden="true">
+              {post.author?.avatar ? (
+                <RemoteImage src={post.author.avatar} alt="" width={56} height={56} sizes="28px" loading="lazy" />
+              ) : (
+                <span className="nf-ccard__monogram">{initial(post.author?.label ?? "M")}</span>
+              )}
+            </span>
+            <span className="nf-cfeat__name">{post.author?.label ?? "Member"}</span>
+          </span>
+          <span className="nf-cfeat__counts nf-numeric">
+            <span className="nf-ccard__count">
+              <UiIcon name="chat-bubble" size={14} />
+              {plural(post.answers, H.replies, "en")}
+            </span>
+            {post.helpful > 0 ? (
+              <span className="nf-ccard__count">
+                <UiIcon name="heart" size={14} />
+                {plural(post.helpful, H.helpful, "en")}
+              </span>
+            ) : null}
+            <span className="nf-cfeat__ago">{agoShort(post.createdAt, { now })}</span>
+          </span>
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+/** The floating compose button, over the dock, one per screen. */
+export function CircleComposeFab({ signedIn }: { signedIn: boolean }) {
+  const H = CIRCLE_COPY.home;
+  return (
+    <Link href={signedIn ? "/circle/new" : "/sign-in?next=%2Fcircle%2Fnew"} className="nf-cfab" aria-label={H.compose} data-testid="circle-compose">
+      <UiIcon name="pencil" size={22} />
+    </Link>
   );
 }
 
@@ -143,7 +224,7 @@ export function CircleTabs({ items, active, searchHref }: { items: readonly Circ
           <li key={item.key}>
             <Link
               href={item.href}
-              className="nf-tap nf-ctabs__tab"
+              className="nf-ctabs__tab"
               {...(item.key === active ? { "aria-current": "page" as const } : {})}
               data-testid={`circle-tab-${item.key}`}
               scroll={false}

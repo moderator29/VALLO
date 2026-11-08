@@ -208,7 +208,7 @@ function FactsRow({ l, t: copy }: { l: RoomDetail; t: RoommatesCopy }) {
   if (l.bedrooms !== null) facts.push({ icon: "bed", text: counted(l.bedrooms, c.bedrooms) });
   if (l.bathrooms !== null) facts.push({ icon: "bath", text: counted(l.bathrooms, c.bathrooms) });
   if (l.furnished) facts.push({ icon: "house", text: copy.furnished[l.furnished] });
-  if (l.roomsAvailable) facts.push({ icon: "key", text: counted(l.roomsAvailable, c.roomsFree) });
+  if (l.roomsAvailable) facts.push({ icon: "bed", text: counted(l.roomsAvailable, c.roomsFree) });
   if (!facts.length) return null;
   return (
     <ul className="nf-rml-facts">

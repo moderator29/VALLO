@@ -1,17 +1,33 @@
 /**
- * THE ART SLOTS (8 November 2026). One place that says which picture a
- * hero or a promo card draws, so the founder's commissioned people art can
- * replace a slot without anybody touching a component. Every path is under
- * `public/` and is Vallo's own; nothing here is a sample person or a stock
- * face. Pure, client-safe.
+ * THE FEATURE ART SLOTS (8 November 2026). Every big banner on a feature
+ * screen draws its picture from a named slot here, never from a path typed
+ * into a component, so new art lands by changing one line.
+ *
+ * Today each slot points at one of Vallo's own room or place photographs
+ * (`public/brand/photos`). The founder is commissioning people art; when a
+ * file arrives it goes in `public/brand/features/<slot>.webp` and the slot
+ * is repointed. Every banner is designed for both kinds of picture: a full
+ * photograph (`fit: "cover"`) or a cut-out of people on a transparent ground
+ * (`fit: "contain"`, anchored to the banner's end edge).
+ *
+ * Decorative only: a slot is never shown as a listing, a member or a room.
  */
-export type ArtSlot = { src: string; alt: string; width: number; height: number };
+export type ArtSlot = {
+  /** A public path. */
+  src: string;
+  /** "cover" fills the banner (a photograph); "contain" stands a cut-out at the end edge. */
+  fit: "cover" | "contain";
+  /** Where a cover photograph is anchored, as CSS `object-position`. */
+  focus?: string;
+};
 
-export const ART = {
-  /** The Vallo Circle hero: a home at dusk, the community's front door. */
-  circleHero: { src: "/brand/photos/skyline-waterfront-dusk.webp", alt: "", width: 1600, height: 1000 },
-  /** The Circle promo card (the door to Circle from elsewhere). */
-  circlePromo: { src: "/brand/photos/living-room-dusk.webp", alt: "", width: 1200, height: 800 },
+export const FEATURE_ART = {
+  roommatesHero: { src: "/brand/photos/living-room-dusk.webp", fit: "cover", focus: "60% 50%" },
+  roommatesPromo: { src: "/brand/photos/bedroom-02.webp", fit: "cover", focus: "50% 50%" },
+  roommatesOnboarding: { src: "/brand/photos/bedroom-01.webp", fit: "cover", focus: "50% 60%" },
+  roommatesPublished: { src: "/brand/photos/living-room-day.webp", fit: "cover", focus: "50% 50%" },
+  circleHero: { src: "/brand/photos/villa-exterior-sunset.webp", fit: "cover", focus: "50% 50%" },
+  circlePromo: { src: "/brand/photos/terrace-lounge-night.webp", fit: "cover", focus: "50% 50%" },
 } as const satisfies Record<string, ArtSlot>;
 
-export type ArtKey = keyof typeof ART;
+export type FeatureArtName = keyof typeof FEATURE_ART;

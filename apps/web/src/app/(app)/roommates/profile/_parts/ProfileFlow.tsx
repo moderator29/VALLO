@@ -47,7 +47,7 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 type Draft = Omit<MyRoommateProfile, "status">;
 const TOTAL = 7;
 
-const INTENT_ICON: Record<Intent, UiIconName> = { find_roommate: "users", find_room: "bed", offer_room: "key", find_together: "circle-people" };
+const INTENT_ICON: Record<Intent, UiIconName> = { find_roommate: "users", find_room: "bed", offer_room: "door", find_together: "circle-people" };
 const STAGE_ICON: Record<LifeStage, UiIconName> = { student: "id-card", corps_member: "certificate", graduate: "file-check", professional: "briefcase", other: "user" };
 
 /** The max budget shortcuts, by period, in kobo. Shortcuts only: any figure can be typed. */

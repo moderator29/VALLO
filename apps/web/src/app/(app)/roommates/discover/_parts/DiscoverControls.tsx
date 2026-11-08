@@ -259,7 +259,7 @@ export function DiscoverControls({
             </>
           ) : (
             <>
-              <FilterGroup title={copy.discover.filterLabels.kind} icon="key">
+              <FilterGroup title={copy.discover.filterLabels.kind} icon="door">
                 <ChoiceChips label={copy.discover.filterLabels.kind} anyLabel={d.any} value={draft.kind ?? null} options={LISTING_KINDS.map((v) => ({ value: v, label: copy.listingKinds[v] }))} onChange={(v) => patch({ kind: v })} />
               </FilterGroup>
               <FilterGroup title={copy.discover.filterLabels.roomType} icon="door">
@@ -292,7 +292,7 @@ export function DiscoverControls({
   );
 }
 
-function FilterGroup({ title, icon, children }: { title: string; icon: "pin" | "id-card" | "wallet" | "calendar-check" | "users" | "circle-people" | "key" | "door" | "bed" | "sort"; children: ReactNode }) {
+function FilterGroup({ title, icon, children }: { title: string; icon: "pin" | "id-card" | "wallet" | "calendar-check" | "users" | "circle-people" | "door" | "bed" | "sort"; children: ReactNode }) {
   return (
     <section className="nf-rmd-group">
       <h3 className="nf-rmd-group__title">

@@ -51,7 +51,7 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 const TOTAL = 8;
 const BUCKET = "roommate-photos";
 const MAX_BYTES = 10 * 1024 * 1024;
-const KIND_ICON: Record<ListingKind, UiIconName> = { room_offer: "key", roommate_wanted: "users", together: "circle-people" };
+const KIND_ICON: Record<ListingKind, UiIconName> = { room_offer: "door", roommate_wanted: "users", together: "circle-people" };
 
 /* ------------------------------------------------------------------ the device copy */
 

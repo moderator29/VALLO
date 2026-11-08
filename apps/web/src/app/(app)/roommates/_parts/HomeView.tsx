@@ -111,7 +111,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
         <RoommatesEmpty
           icon="bed"
           action={
-            <ButtonLink href={home.signedIn ? `${ROOMMATES_ROUTES.create}?kind=room_offer` : signInTo(`${ROOMMATES_ROUTES.create}?kind=room_offer`)} variant="primary" size="md" leadingIcon="key">
+            <ButtonLink href={home.signedIn ? `${ROOMMATES_ROUTES.create}?kind=room_offer` : signInTo(`${ROOMMATES_ROUTES.create}?kind=room_offer`)} variant="primary" size="md" leadingIcon="door">
               {copy.ui.offerRoom}
             </ButtonLink>
           }

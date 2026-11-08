@@ -141,7 +141,7 @@ export function LifestyleChips({ lifestyle, t: copy, max, labelled = false }: { 
   );
 }
 
-const KIND_ICON = { room_offer: "key", roommate_wanted: "users", together: "circle-people" } as const;
+const KIND_ICON = { room_offer: "door", roommate_wanted: "users", together: "circle-people" } as const;
 
 export function KindTag({ kind, t: copy, onMedia = false }: { kind: ListingKind; t: RoommatesCopy; onMedia?: boolean }) {
   return (
