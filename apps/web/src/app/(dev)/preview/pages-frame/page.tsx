@@ -4,6 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { AppShell } from "@/components/app/AppShell";
 import SettingsLayout from "@/app/(app)/settings/layout";
 import { ApplyWizard } from "@/components/agent/ApplyWizard";
+import { AssistantSettingsBody } from "@/app/(app)/settings/ai-assistant/page";
 import { forApply } from "@/components/agent/agent-copy";
 import { ROLE_COPY } from "@/components/roles/roles";
 import "@/app/css/home.css";
@@ -133,6 +134,29 @@ export default async function PagesFramePreview({
   const { p = "/settings", loading } = await searchParams;
   /* The professional application with no session: the wizard itself, on its
      real copy, since the route asks for a sign-in first. */
+  /* The assistant switched on, with sample rows (no real person's data). */
+  if (p === "ai-assistant-on") {
+    const now = "2026-11-06T10:30:00Z";
+    return (
+      <Suspense>
+        <AppShell t={getDictionary("en")} userName="Seyi Omojuni" userHandle="seyifunmi" signedIn unreadNotifications={2} preview={{ route: "/settings/ai-assistant" }}>
+          <SettingsLayout>
+            <AssistantSettingsBody
+              state={{ enabled: true, permissions: ["discovery", "saved_prefs", "bookings_viewings"], epoch: 1, signedIn: true, acceptedAt: now, termsVersion: "2026-11-01", privacyVersion: "2026-11-01", needsReaccept: false }}
+              audit={[
+                { id: 1, at: now, event: "tool_call", permission: "bookings_viewings", tool: "list_bookings", outcome: "ok" },
+                { id: 2, at: "2026-11-05T18:02:00Z", event: "permission_granted", permission: "discovery", tool: null, outcome: "ok" },
+              ]}
+              learned={[
+                { key: "area:lekki", value: true, source: "search", weight: 0.8, updated_at: now },
+                { key: "bedrooms:2", value: 2, source: "search", weight: 0.6, updated_at: now },
+              ]}
+            />
+          </SettingsLayout>
+        </AppShell>
+      </Suspense>
+    );
+  }
   if (p === "apply-wizard") {
     const t = getDictionary("en");
     return <ApplyWizard t={forApply(t)} role="professional" intro={ROLE_COPY.professional.setup.involves} closeHref="/profile/setup" />;

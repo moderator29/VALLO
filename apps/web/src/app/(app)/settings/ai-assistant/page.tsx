@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { PageFrame } from "@/components/app/PageFrame";
 import { resolveSession } from "@/lib/actions/session";
 import { AUDIT_WORDS } from "@/lib/assistant/permissions";
-import { readAssistantState, readAuditRows, readLearnedPreferences } from "@/lib/assistant/access";
+import { readAssistantState, readAuditRows, readLearnedPreferences, type AssistantState, type AuditRow, type LearnedPreference } from "@/lib/assistant/access";
 import { dateTimeLabel } from "@/lib/format/when";
 import { LearnedList, LegalLinks, MasterSwitch, PermissionRows } from "./AssistantControls";
 import "@/app/css/home.css";
@@ -30,6 +30,24 @@ export default async function AiAssistantSettingsPage() {
     ? await Promise.all([readAuditRows(session.supabase, 30), readLearnedPreferences(session.supabase)])
     : [[], []];
 
+  return <AssistantSettingsBody state={state} audit={audit} learned={learned} />;
+}
+
+
+/**
+ * The screen itself, from what the page read. Exported so the preview
+ * harness (`/preview/pages-frame?p=ai-assistant-on`) can draw the switched-on
+ * state with sample rows; the page is its only real caller.
+ */
+export function AssistantSettingsBody({
+  state,
+  audit,
+  learned,
+}: {
+  state: AssistantState;
+  audit: readonly AuditRow[];
+  learned: readonly LearnedPreference[];
+}) {
   return (
     <PageFrame title="VALLO AI Assistant" subtitle="Your personal property assistant" fallback="/settings" width="narrow">
       <div className="space-y-block">
