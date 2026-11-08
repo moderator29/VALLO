@@ -76,7 +76,7 @@ export const SLICES = {
   interestChoices: ["common", "interests", "platform"],
   stayStackCard: ["catalogue", "restaurantPage", "stays"],
   accountToggles: ["settings", "shape"],
-  agentNav: ["a11y", "agent"],
+  agentNav: ["a11y", "agent", "agentListings", "experienceFeatures", "experienceInbox", "experienceRewards", "experienceShell", "feedV2", "frontDoor", "home", "landlord", "nav", "passportV2", "priceCheck", "settings", "shape", "stays", "supply", "verification"],
 } as const satisfies Record<string, readonly (keyof Dictionary)[]>;
 
 /*

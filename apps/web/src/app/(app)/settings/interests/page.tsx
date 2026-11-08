@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
+import { forInterestChoices } from "@/lib/i18n/slice";
 import { getLocale } from "@/lib/locale";
 import { withNext } from "@/lib/auth/next-link";
 import { PageFrame } from "@/components/app/PageFrame";
@@ -55,7 +56,7 @@ export default async function InterestsSettingsPage() {
       testId="interests-settings"
     >
       <div className="nf-panel nf-panel--card block p-lg sm:p-lg">
-        <InterestChoices initial={state.interests} mode="settings" t={t} />
+        <InterestChoices initial={state.interests} mode="settings" t={forInterestChoices(t)} />
       </div>
     </PageFrame>
   );

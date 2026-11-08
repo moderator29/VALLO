@@ -30,6 +30,11 @@ const ROOTS: Record<keyof typeof SLICES, string> = {
   resetCodeForm: "components/auth/ResetCodeForm.tsx",
   resetPasswordForm: "components/auth/ResetPasswordForm.tsx",
   signUpOptions: "components/auth/SignUpOptions.tsx",
+  welcomeFlow: "components/app/welcome/FirstRun.tsx",
+  interestChoices: "components/app/welcome/InterestChoices.tsx",
+  stayStackCard: "components/app/stays/StayStackCard.tsx",
+  accountToggles: "app/(app)/settings/AccountToggles.tsx",
+  agentNav: "components/agent/AgentMobileNav.tsx",
 };
 
 describe("every dictionary slice carries what its component can reach", () => {

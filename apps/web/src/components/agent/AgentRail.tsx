@@ -5,6 +5,7 @@ import { AgentIdentityCard } from "./AgentNav";
 import { noWorkspaceDoor } from "./agent-doors";
 import { buildAgentNav } from "./agent-nav-model";
 import { DeskSidebar } from "@/components/app/desk/DeskSidebar";
+import { forAgentNav } from "@/lib/i18n/slice";
 
 /**
  * Agent Mode navigation rail (desktop, lg and up).
@@ -50,7 +51,7 @@ export function AgentRail({
           />
           {/* This rail only renders inside Agent Mode, so the switch always
               offers Personal, independent of the cookie's current value. */}
-          <ModeSwitcher t={t} current="working" variant="menu" />
+          <ModeSwitcher t={forAgentNav(t)} current="working" variant="menu" />
         </>
       }
     />

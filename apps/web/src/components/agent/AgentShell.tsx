@@ -4,6 +4,7 @@ import { AgentRail } from "./AgentRail";
 import { AgentMobileNav } from "./AgentMobileNav";
 import { getUnreadMessageCount } from "@/lib/agent/messages-queries";
 import { agentTitleFor } from "./agent-nav-model";
+import { forAgentNav } from "@/lib/i18n/slice";
 import { WorkspaceHeader } from "@/components/workspace/WorkspaceHeader";
 import { getShellIdentity } from "@/lib/app/shell-queries";
 import { PepBanner } from "@/components/compliance/PepBanner";
@@ -101,7 +102,7 @@ export async function AgentShell({
           back={chromeBack ? "/home" : false}
           menu={
             <AgentMobileNav
-              t={t}
+              t={forAgentNav(t)}
               active={active}
               profile={profile}
               unreadMessages={unreadMessages}
