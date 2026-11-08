@@ -1056,7 +1056,13 @@
     .nf-refresh-spin,
     .nf-menu-slide,
     .nf-star-fill,
-    .nf-shimmer-wide {
+    .nf-shimmer-wide,
+    .nf-chip--glass::after,
+    .nf-scatter-exit,
+    .nf-scan-corner,
+    .nf-scan-trail,
+    .nf-cost-bar::after,
+    .nf-dust-mote {
       animation: none !important;
     }
     .nf-toggle__thumb,
@@ -1071,8 +1077,12 @@
     .nf-toggle__track,
     .nf-accordion-body,
     .nf-gallery-snap,
-    .nf-search-expand {
+    .nf-search-expand,
+    .nf-gyro-tilt {
       transition: none !important;
+    }
+    .nf-gyro-tilt {
+      transform: none !important;
     }
     .nf-card-lift:hover {
       translate: none;
@@ -1083,7 +1093,11 @@
     .nf-heart-ring {
       display: none;
     }
-    .nf-confetti {
+    .nf-confetti,
+    .nf-chip--glass::after,
+    .nf-scan-trail,
+    .nf-cost-bar::after,
+    .nf-dust-mote {
       display: none;
     }
     .nf-avatar-ring-spin {
@@ -1146,7 +1160,13 @@
     .nf-refresh-spin,
     .nf-menu-slide,
     .nf-star-fill,
-    .nf-shimmer-wide
+    .nf-shimmer-wide,
+    .nf-chip--glass::after,
+    .nf-scatter-exit,
+    .nf-scan-corner,
+    .nf-scan-trail,
+    .nf-cost-bar::after,
+    .nf-dust-mote
   ) {
     animation: none;
   }
@@ -1160,9 +1180,13 @@
     .nf-step-dot,
     .nf-accordion-body,
     .nf-gallery-snap,
-    .nf-search-expand
+    .nf-search-expand,
+    .nf-gyro-tilt
   ) {
     transition: none;
+  }
+  :root[data-motion="off"] .nf-gyro-tilt {
+    transform: none;
   }
   :root[data-motion="off"] .nf-progress-fill {
     width: var(--nf-progress, 0%);
@@ -1174,7 +1198,11 @@
     stroke-dashoffset: 0;
   }
   :root[data-motion="off"] .nf-confetti,
-  :root[data-motion="off"] .nf-heart-ring {
+  :root[data-motion="off"] .nf-heart-ring,
+  :root[data-motion="off"] .nf-chip--glass::after,
+  :root[data-motion="off"] .nf-scan-trail,
+  :root[data-motion="off"] .nf-cost-bar::after,
+  :root[data-motion="off"] .nf-dust-mote {
     display: none;
   }
   :root[data-motion="off"] .nf-avatar-ring-spin {
@@ -1565,4 +1593,174 @@
   }
   :root[data-motion="off"] .nf-signature__line[data-draw],
   :root[data-motion="off"] .nf-seal[data-stamp] { animation: none; }
+
+  /* ============ GYROSCOPE PARALLAX (9.2) */
+
+  /*
+   * Subtle tilt-driven parallax on chips and art. CSS custom properties
+   * --nf-tilt-x and --nf-tilt-y are set by a DeviceOrientation listener
+   * in JS; the CSS moves the element proportionally. Without JS the
+   * properties default to 0 and nothing moves.
+   */
+  .nf-gyro-tilt {
+    transform: translate3d(
+      calc(var(--nf-tilt-x, 0) * 0.6px),
+      calc(var(--nf-tilt-y, 0) * 0.6px),
+      0
+    );
+    transition: transform 120ms linear;
+    will-change: transform;
+  }
+  :root[data-motion="off"] .nf-gyro-tilt { transform: none; transition: none; }
+
+  /* ============ GLASS SHIMMER ON CHIPS (9.3) */
+
+  /*
+   * Arrival chips get an inner glow and a single shimmer sweep that
+   * plays once on mount, like light catching frosted glass.
+   */
+  .nf-chip--glass {
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 1px 0 0 color-mix(in oklab, white 18%, transparent);
+  }
+  .nf-chip--glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      110deg,
+      transparent 30%,
+      color-mix(in oklab, white 22%, transparent) 45%,
+      transparent 55%
+    );
+    animation: nf-glass-sweep 800ms var(--nf-ease-entrance, ease-out) 200ms both;
+    pointer-events: none;
+  }
+  @keyframes nf-glass-sweep {
+    from { translate: -100% 0; }
+    to { translate: 100% 0; }
+  }
+  :root[data-motion="off"] .nf-chip--glass::after { animation: none; display: none; }
+
+  /* ============ SCENE EXIT SCATTER (9.5) */
+
+  /*
+   * Chips drift apart as they fade when a scene or section exits. Each
+   * chip's drift direction comes from --nf-scatter-x and --nf-scatter-y
+   * set per element (defaults fan outward).
+   */
+  .nf-scatter-exit {
+    animation: nf-scatter-out 500ms var(--nf-ease-exit, ease-in) both;
+  }
+  @keyframes nf-scatter-out {
+    from {
+      opacity: 1;
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translate(
+        var(--nf-scatter-x, 20px),
+        var(--nf-scatter-y, -15px)
+      ) scale(0.85);
+    }
+  }
+  :root[data-motion="off"] .nf-scatter-exit { animation: none; opacity: 0; }
+
+  /* ============ SCAN FRAME CORNER GLOW (9.8) */
+
+  /*
+   * The four corners of the verification scan frame glow and a gradient
+   * trail chases around the border. The corner glow pulses; the trail
+   * rotates. Both are purely decorative and composited.
+   */
+  .nf-scan-corner {
+    animation: nf-corner-glow 2.4s ease-in-out infinite alternate;
+  }
+  @keyframes nf-corner-glow {
+    0% { opacity: 0.4; filter: brightness(1); }
+    100% { opacity: 1; filter: brightness(1.4); }
+  }
+  .nf-scan-trail {
+    background: conic-gradient(
+      from var(--nf-trail-angle, 0deg),
+      transparent 0%,
+      color-mix(in oklab, var(--nf-brand-primary, #3b82f6) 30%, transparent) 10%,
+      transparent 25%
+    );
+    animation: nf-trail-rotate 3s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes nf-trail-rotate {
+    from { --nf-trail-angle: 0deg; }
+    to { --nf-trail-angle: 360deg; }
+  }
+  @property --nf-trail-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+  }
+  :root[data-motion="off"] .nf-scan-corner { animation: none; }
+  :root[data-motion="off"] .nf-scan-trail { animation: none; display: none; }
+
+  /* ============ COST BAR WAVE FILL (9.9) */
+
+  /*
+   * The cost breakdown bar on step 4 fills with a wave highlight that
+   * sweeps once after the bar reaches its width, adding a liquid feel.
+   */
+  .nf-cost-bar {
+    position: relative;
+    overflow: hidden;
+  }
+  .nf-cost-bar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, white 20%, transparent) 40%,
+      color-mix(in oklab, white 30%, transparent) 50%,
+      color-mix(in oklab, white 20%, transparent) 60%,
+      transparent 100%
+    );
+    animation: nf-wave-pass 700ms var(--nf-ease-entrance, ease-out) 600ms both;
+    pointer-events: none;
+  }
+  @keyframes nf-wave-pass {
+    from { translate: -100% 0; }
+    to { translate: 100% 0; }
+  }
+  :root[data-motion="off"] .nf-cost-bar::after { animation: none; display: none; }
+
+  /* ============ FLOATING PARTICLE DUST (9.12) */
+
+  /*
+   * Brand-coloured motes float upward on the final confirmation step,
+   * like gentle dust catching light. Each particle is an element with
+   * --nf-dust-x (horizontal drift), --nf-dust-delay and --nf-dust-dur
+   * set individually. Finite: plays once per mount.
+   */
+  .nf-dust-mote {
+    animation: nf-dust-rise var(--nf-dust-dur, 2s) var(--nf-ease-out, ease-out) var(--nf-dust-delay, 0ms) both;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+  @keyframes nf-dust-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(0) translateX(0) scale(0.5);
+    }
+    20% {
+      opacity: 0.7;
+      transform: translateY(-10px) translateX(calc(var(--nf-dust-x, 0px) * 0.3)) scale(0.8);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) translateX(var(--nf-dust-x, 0px)) scale(0.3);
+    }
+  }
+  :root[data-motion="off"] .nf-dust-mote { animation: none; display: none; }
 }

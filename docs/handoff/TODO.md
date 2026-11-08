@@ -186,17 +186,17 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Welcome/Onboarding Upgrade (BUILDING)
 - [x] 9.1 Elastic pill-morph step dots (iOS-style page indicators with spring) -- BUILT
-- [ ] 9.2 Gyroscope-driven parallax on mobile (subtle tilt response on chips/art)
-- [ ] 9.3 Glass-morphism shimmer on arrival chips (inner glow, shimmer sweep)
+- [x] 9.2 Gyroscope-driven parallax on mobile (subtle tilt response on chips/art) -- CSS BUILT in premium-motion-2.css (nf-gyro-tilt, needs JS DeviceOrientation listener)
+- [x] 9.3 Glass-morphism shimmer on arrival chips (inner glow, shimmer sweep) -- CSS BUILT in premium-motion-2.css
 - [x] 9.4 CTA button ambient glow pulse (brand color, 2-3 cycles then stop) -- CSS BUILT in premium-motion-2.css
-- [ ] 9.5 Scene exit scatter (chips drift apart as they fade on swipe out)
+- [x] 9.5 Scene exit scatter (chips drift apart as they fade on swipe out) -- CSS BUILT in premium-motion-2.css
 - [x] 9.6 Title word spring-bounce stagger (each word with overshoot) -- CSS BUILT in premium-motion-2.css
 - [x] 9.7 Living aurora gradient on background glow (12s slow drift) -- CSS BUILT in premium-motion-2.css
-- [ ] 9.8 Scan frame corner glow + gradient trail (step 2)
-- [ ] 9.9 Cost bar wave fill highlight (step 4 breakdown)
+- [x] 9.8 Scan frame corner glow + gradient trail (step 2) -- CSS BUILT in premium-motion-2.css
+- [x] 9.9 Cost bar wave fill highlight (step 4 breakdown) -- CSS BUILT in premium-motion-2.css
 - [x] 9.10 Interest chip hover/press spring (lift on hover, press-down on active) -- CSS BUILT in premium-motion-2.css
 - [x] 9.11 Beat transition crossfade with scale (slides to question to notify) -- CSS BUILT in premium-motion-2.css
-- [ ] 9.12 Floating particle dust on final step (brand-color motes)
+- [x] 9.12 Floating particle dust on final step (brand-color motes) -- CSS BUILT in premium-motion-2.css
 
 ### Platform Motion System (BUILDING)
 - [x] 9.13 Card press feedback everywhere (scale 0.97 on press, spring back) -- CSS BUILT in premium-motion-2.css
