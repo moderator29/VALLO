@@ -6,7 +6,6 @@ import { REFUNDS_LEDE, REFUNDS_TITLE } from "@/lib/money/copy";
 import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { HistoryUnavailable } from "@/components/app/money-history/HistoryStates";
 import { RefundsView } from "@/components/money/RefundsView";

@@ -4,7 +4,6 @@ import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { PassportSettings } from "@/components/passport/PassportSettings";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { resolveSession } from "@/lib/actions/session";

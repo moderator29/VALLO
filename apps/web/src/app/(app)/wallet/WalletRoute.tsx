@@ -4,7 +4,6 @@ import { readMyBalance } from "@/lib/money/member-wallet";
 import { BALANCE_LEDE } from "@/lib/money/balance-copy";
 import { isWalletFilter } from "@/lib/money/wallet-view";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { BalanceView, type WalletScreen } from "@/components/money/balance/BalanceView";
 import { WalletHeader } from "@/components/money/balance/WalletChrome";
