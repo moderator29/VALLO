@@ -37,6 +37,8 @@ import {
   isCallRow,
   type NotificationFamily,
 } from "./family";
+import { useNotificationFaces } from "./use-notification-faces";
+import { RemoteImage } from "@/components/ui/RemoteImage";
 
 /**
  * The notification centre (north star 16.3 and 16.4).
@@ -214,6 +216,10 @@ export function LiveNotifications({
     [items, family],
   );
 
+  /* A7: resolve the sender's or actor's face for the first rows (batch,
+     two queries at most). The map is notification id to avatar path. */
+  const faces = useNotificationFaces(shown, userId);
+
   const header = (
     <PageHeader
       variant="large"
@@ -327,8 +333,8 @@ export function LiveNotifications({
         />
       ) : (
         <div className="nf-notif">
-          <Section id="needs" label={c.sections.needsYou} entries={sectioned.needsYou} c={c} locale={locale} markOne={markOne} needs />
-          <Section id="new" label={c.sections.fresh} entries={sectioned.fresh} c={c} locale={locale} markOne={markOne} />
+          <Section id="needs" label={c.sections.needsYou} entries={sectioned.needsYou} c={c} locale={locale} markOne={markOne} faces={faces} needs />
+          <Section id="new" label={c.sections.fresh} entries={sectioned.fresh} c={c} locale={locale} markOne={markOne} faces={faces} />
           {days.map((day) => (
             <Section
               key={day.key}
@@ -338,6 +344,7 @@ export function LiveNotifications({
               c={c}
               locale={locale}
               markOne={markOne}
+              faces={faces}
             />
           ))}
         </div>
@@ -375,6 +382,7 @@ function Section({
   c,
   locale,
   markOne,
+  faces,
   needs = false,
 }: {
   id: string;
@@ -383,6 +391,7 @@ function Section({
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  faces: Map<string, string>;
   needs?: boolean;
 }) {
   /* THE DEPTH STACK (the founder's reference 1, 7 October): "Needs you" is
@@ -446,7 +455,7 @@ function Section({
     >
       {groups.map((g, i) =>
         g.rows.length > 1 ? (
-          <GroupRow key={g.key} rows={g.rows} c={c} locale={locale} markOne={markOne} behind={stacked && i > 0} />
+          <GroupRow key={g.key} rows={g.rows} c={c} locale={locale} markOne={markOne} faces={faces} behind={stacked && i > 0} />
         ) : needs ? (
           <NeedsRow
             key={g.key}
@@ -455,10 +464,11 @@ function Section({
             c={c}
             locale={locale}
             markOne={markOne}
+            face={faces.get(g.lead.id)}
             behind={stacked && i > 0}
           />
         ) : (
-          <NoticeRow key={g.key} n={g.lead} c={c} locale={locale} markOne={markOne} />
+          <NoticeRow key={g.key} n={g.lead} c={c} locale={locale} markOne={markOne} face={faces.get(g.lead.id)} />
         ),
       )}
     </ListGroup>
@@ -467,7 +477,17 @@ function Section({
 
 /* --------------------------------------------------------------------- rows */
 
-function plateFor(family: NotificationFamily, n?: NotificationItem) {
+function plateFor(family: NotificationFamily, n?: NotificationItem, face?: string) {
+  /* A7: when a face (avatar) is available, show it as a round photo instead of
+     the family glyph icon plate, matching the rich card style the founder asked
+     for. The glyph stays as fallback. */
+  if (face) {
+    return (
+      <span className="nf-notif__face">
+        <RemoteImage src={face} alt="" width={80} height={80} sizes="36px" />
+      </span>
+    );
+  }
   return (
     <IconPlate size="sm" shape="round" tone={FAMILY_TONE[family]}>
       <UiIcon name={n ? glyphOf(n) : FAMILY_GLYPH[family]} size={ICON_PLATE_GLYPH.sm} />
@@ -495,10 +515,10 @@ function FigureLine({ n, locale }: { n: NotificationItem; locale: Locale }) {
   );
 }
 
-function RowBody({ n, c, locale, family }: { n: NotificationItem; c: Copy; locale: Locale; family: NotificationFamily }) {
+function RowBody({ n, c, locale, family, face }: { n: NotificationItem; c: Copy; locale: Locale; family: NotificationFamily; face?: string }) {
   return (
     <>
-      <span className="nf-list-row__lead">{plateFor(family, n)}</span>
+      <span className="nf-list-row__lead">{plateFor(family, n, face)}</span>
       <span className="nf-list-row__text">
         <span className="nf-list-row__title">{warmTitle(n.title)}</span>
         {n.body ? <span className="nf-list-row__sub nf-notif__body">{warmBody(n.body)}</span> : null}
@@ -517,11 +537,13 @@ function NoticeRow({
   c,
   locale,
   markOne,
+  face,
 }: {
   n: NotificationItem;
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  face?: string;
 }) {
   const family = familyOf(n);
   return (
@@ -533,7 +555,7 @@ function NoticeRow({
         data-testid="notification-row"
         data-family={family}
       >
-        <RowBody n={n} c={c} locale={locale} family={family} />
+        <RowBody n={n} c={c} locale={locale} family={family} face={face} />
         <span className="nf-list-row__end">
           <UnreadMark read={n.read} c={c} />
         </span>
@@ -549,12 +571,14 @@ function GroupRow({
   c,
   locale,
   markOne,
+  faces,
   behind = false,
 }: {
   rows: NotificationItem[];
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  faces: Map<string, string>;
   /** Behind the front card of a stacked "Needs you": seen, not reachable. */
   behind?: boolean;
 }) {
@@ -577,7 +601,7 @@ function GroupRow({
         data-testid="notification-bundle"
         data-family={family}
       >
-        <span className="nf-list-row__lead">{plateFor(family, lead)}</span>
+        <span className="nf-list-row__lead">{plateFor(family, lead, faces.get(lead.id))}</span>
         <span className="nf-list-row__text">
           <span className="nf-list-row__title">{title}</span>
           <span className="nf-list-row__sub nf-notif__body">{warmBody(lead.body) || warmTitle(lead.title)}</span>
@@ -594,7 +618,7 @@ function GroupRow({
       {open ? (
         <ul className="nf-notif__bundle">
           {rows.map((n) => (
-            <NoticeRow key={n.id} n={n} c={c} locale={locale} markOne={markOne} />
+            <NoticeRow key={n.id} n={n} c={c} locale={locale} markOne={markOne} face={faces.get(n.id)} />
           ))}
         </ul>
       ) : null}
@@ -609,6 +633,7 @@ function NeedsRow({
   c,
   locale,
   markOne,
+  face,
   behind = false,
 }: {
   n: NotificationItem;
@@ -616,6 +641,7 @@ function NeedsRow({
   c: Copy;
   locale: Locale;
   markOne(id: string): void;
+  face?: string;
   /** Behind the front card of a stacked "Needs you": seen, not reachable. */
   behind?: boolean;
 }) {
@@ -632,7 +658,7 @@ function NeedsRow({
           onClick={() => !n.read && markOne(n.id)}
           className="nf-notif__needs-open"
         >
-          <RowBody n={n} c={c} locale={locale} family={family} />
+          <RowBody n={n} c={c} locale={locale} family={family} face={face} />
         </Link>
         {verb && n.href ? (
           <ButtonLink

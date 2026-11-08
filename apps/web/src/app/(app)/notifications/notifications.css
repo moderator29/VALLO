@@ -491,4 +491,19 @@
   [data-save-data="on"] .nf-notif-quiet__card--1 {
     animation: none;
   }
+
+  /* A7: face (avatar) on a notification row, matching the banner's style. */
+  .nf-notif__face {
+    display: block;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--nf-radius-circle);
+    overflow: hidden;
+    flex: none;
+  }
+  .nf-notif__face img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
