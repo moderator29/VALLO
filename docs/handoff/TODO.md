@@ -118,7 +118,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 4.1 ListingWizard D18-D20 (step, photo, publish notices) -- DONE (notice/photoNotice piped to banner via useEffect, inline Notes removed)
 - [x] 4.2 Convert 3 TO CONVERT NEXT rows: PhoneField, SupportChat, VninPanel -- DONE (VninPanel converted batch 4; PhoneField uses field-level validation which is correct inline; SupportChat already uses banner.error for form outcomes)
 - [ ] 4.3 Tick audit round 2 rows (323 rows) against the code, build what remains
-- [ ] 4.4 Optional: avatar on banner items for outcomes that name another person
+- [x] 4.4 Optional: avatar on banner items for outcomes that name another person -- DONE (ToastItem.avatarUrl and ToastOptions.avatarUrl added to toast.ts; ToastHost renders 28px circle avatar in place of tone glyph when present; .nf-toast__avatar CSS in grade1.css; callers pass avatarUrl on block/mute/report outcomes incrementally)
 - [x] 4.5 Fix css-tokens failures in calls.css (2 unresolved vars, 2 #fff, 1 grey hairline) -- DONE (border-width tokenised, vars confirmed valid)
 
 ---
