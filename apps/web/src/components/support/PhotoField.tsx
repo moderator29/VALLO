@@ -68,7 +68,7 @@ export function PhotoField({
         <img
           src={value.previewUrl}
           alt="The photo you are attaching"
-          className="h-16 w-16 shrink-0 rounded-[var(--nf-radius-sm)] border border-[var(--nf-border-subtle)] object-cover"
+          className="h-16 w-16 shrink-0 rounded-sm border border-[var(--nf-border-subtle)] object-cover"
         />
         <span className="nf-caption min-w-0 flex-1 text-[var(--nf-content-secondary)]">Photo attached</span>
         <Button variant="quiet" size="sm" onClick={remove} disabled={disabled}>
@@ -98,7 +98,7 @@ export function PhotoField({
       {picker}
       <label
         htmlFor={id}
-        className="flex min-h-11 cursor-pointer items-center gap-group rounded-[var(--nf-radius-lg)] border border-dashed border-[var(--nf-border-default)] bg-[var(--nf-surface-primary)] p-card-sm"
+        className="flex min-h-11 cursor-pointer items-center gap-group rounded-lg border border-dashed border-[var(--nf-border-default)] bg-[var(--nf-surface-primary)] p-card-sm"
       >
         <UiIcon name="picture" size={20} className="shrink-0 text-[var(--nf-content-secondary)]" />
         <span className="min-w-0 flex-1">

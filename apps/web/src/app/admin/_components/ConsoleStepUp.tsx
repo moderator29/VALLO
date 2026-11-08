@@ -51,7 +51,7 @@ export function ConsoleStepUp({ name }: { name: string }) {
           return;
         }
         const done = await finishConsoleStepUp({ challenge: begun.challenge, ...proof });
-        if ("ok" in done) router.refresh();
+        if (done.ok) router.refresh();
         else banner.error(done.error === "rejected" ? "That key was not accepted. Try again." : "That did not go through. Try again.", { retry: confirm });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -61,8 +61,8 @@ export function ConsoleStepUp({ name }: { name: string }) {
   const sendCode = (): void =>
     start(async () => {
       try {
-        const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-        if ("ok" in sent) setCodeSent(true);
+        const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+        if (sent.ok) setCodeSent(true);
         else banner.error("The code did not send. Try again in a moment.", { retry: sendCode });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -73,9 +73,9 @@ export function ConsoleStepUp({ name }: { name: string }) {
     start(async () => {
       try {
         const begun = await beginEnrol({ code: code.trim(), password: needsKey === "password" ? password : undefined }).catch(
-          () => ({ error: "failed" as const }),
+          () => ({ ok: false as const, error: "failed" }),
         );
-        if ("error" in begun) {
+        if (!begun.ok) {
           banner.error(
             begun.error === "password_recent"
               ? "Your password changed in the last day, so it cannot vouch for a new key yet. Ask a super admin, or try tomorrow."
@@ -86,13 +86,13 @@ export function ConsoleStepUp({ name }: { name: string }) {
           );
           return;
         }
-        const made = await createPlatformKey({ challenge: begun.challenge, userId: begun.userId, email: begun.email, rpId: begun.rpId, rpName: "Vallo", exclude: [] });
+        const made = await createPlatformKey({ challenge: begun.data.challenge, userId: begun.data.userId, email: begun.data.email, rpId: begun.data.rpId, rpName: "Vallo", exclude: [] });
         if (!made) {
           banner.error("Your device did not make a key. Use the device you will keep, and allow its screen lock.", { retry: enrolHere });
           return;
         }
-        const done = await finishEnrol({ challenge: begun.challenge, ...made, label: "Console" }).catch(() => ({ error: "failed" as const }));
-        if (!("ok" in done)) {
+        const done = await finishEnrol({ challenge: begun.data.challenge, ...made, label: "Console" }).catch(() => ({ ok: false as const, error: "failed" }));
+        if (!done.ok) {
           banner.error("The new key was not saved. Try again.", { retry: enrolHere });
           return;
         }

@@ -538,6 +538,9 @@ export function InCallView({
           <span className="nf-call__live" aria-hidden="true" />
           {clock}
         </span>
+        <span className="nf-call__encrypted" aria-label={copy.inCall.encrypted}>
+          <UiIcon name="lock" size={14} />
+        </span>
         <span className="nf-call__quality" aria-hidden="true">
           {[1, 2, 3].map((n) => (
             <i key={n} {...(quality >= n ? { "data-lit": "" } : {})} />

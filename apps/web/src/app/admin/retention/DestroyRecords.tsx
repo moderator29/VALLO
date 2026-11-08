@@ -101,7 +101,7 @@ export function DestroyRecords({
         </div>
       ) : (
         <form
-          className="mt-group rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm"
+          className="mt-group rounded-md border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm"
           onSubmit={(event) => {
             event.preventDefault();
             if (confirmationMatches(typed)) run();

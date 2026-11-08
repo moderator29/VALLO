@@ -668,7 +668,7 @@ export function Composer({
       {error && strandedPost ? (
         <div
           role="group"
-          className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
+          className="mt-xs rounded-md border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
         >
           <p className="leading-relaxed">{error}</p>
           {strandedPost ? (

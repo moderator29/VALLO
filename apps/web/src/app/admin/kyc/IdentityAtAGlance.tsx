@@ -38,7 +38,7 @@ function Face({
   const src = side === "back" ? `/api/documents/${doc?.id}?side=back` : `/api/documents/${doc?.id}`;
   return (
     <figure className="grid gap-2xs" data-testid={`glance-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-secondary)]">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-secondary)]">
         {doc && media === "image" ? (
           // eslint-disable-next-line @next/next/no-img-element -- streamed from our own origin behind staff auth, never optimised or cached
           <img src={src} alt={label} className="absolute inset-0 h-full w-full object-contain" loading="lazy" />
@@ -80,7 +80,7 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
   if (!id && !selfie) return null;
   const bank = subject.payoutNameCheck;
   return (
-    <section className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm" aria-label="Identity at a glance" data-testid="identity-at-a-glance">
+    <section className="mt-sm rounded-md border border-[var(--nf-border-subtle)] p-sm" aria-label="Identity at a glance" data-testid="identity-at-a-glance">
       <h4 className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">Identity at a glance</h4>
       <div className="mt-xs grid max-w-md grid-cols-2 gap-sm">
         <Face doc={id} label={id?.issuingCountry ? `Their ID (issued in ${id.issuingCountry})` : "Their ID"} missing="No ID filed yet." />
@@ -108,7 +108,7 @@ export function IdentityAtAGlance({ subject, decidable }: { subject: KycSubjectV
       </dl>
       {bank && (
         <p
-          className={`mt-2xs inline-block rounded-[var(--nf-radius-sm)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-semibold ${
+          className={`mt-2xs inline-block rounded-sm px-xs py-3xs text-[length:var(--nf-text-overline)] font-semibold ${
             bank.match ? "bg-[var(--nf-status-approved-surface)] text-[var(--nf-status-approved)]" : "bg-[var(--nf-status-rejected-surface)] text-[var(--nf-status-rejected)]"
           }`}
           data-testid="glance-bank-match"

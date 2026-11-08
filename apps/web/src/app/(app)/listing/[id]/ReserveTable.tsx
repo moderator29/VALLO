@@ -350,7 +350,7 @@ export function ReserveTable({
             iconOnly
             onClick={() => setParty((n) => Math.max(1, n - 1))}
             aria-label={w.fewerGuests}
-            className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
+            className="grid h-11 w-11 rounded-sm place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party <= 1}
           >
             <UiIcon name="minus" size={16} aria-hidden />
@@ -367,7 +367,7 @@ export function ReserveTable({
               const next = Number(event.target.value);
               setParty(Number.isFinite(next) ? Math.min(MAX_PARTY, Math.max(1, next)) : 1);
             }}
-            className="h-11 w-16 nf-glass--well rounded-[var(--nf-radius-sm)] border px-xs py-0 text-center text-[length:var(--nf-text-body-sm)] tabular-nums text-[var(--nf-content-primary)]"
+            className="h-11 w-16 nf-glass--well rounded-sm border px-xs py-0 text-center text-[length:var(--nf-text-body-sm)] tabular-nums text-[var(--nf-content-primary)]"
           />
           <Button
             variant="glass"
@@ -375,7 +375,7 @@ export function ReserveTable({
             iconOnly
             onClick={() => setParty((n) => Math.min(MAX_PARTY, n + 1))}
             aria-label={w.moreGuests}
-            className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
+            className="grid h-11 w-11 rounded-sm place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party >= MAX_PARTY}
           >
             <UiIcon name="plus" size={16} aria-hidden />
@@ -409,7 +409,7 @@ export function ReserveTable({
           rows={2}
           maxLength={500}
           placeholder={w.notePlaceholder}
-          className="mt-2xs w-full nf-glass--well rounded-[var(--nf-radius-control)] border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
+          className="mt-2xs w-full nf-glass--well rounded-control border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
         />
       </div>
 

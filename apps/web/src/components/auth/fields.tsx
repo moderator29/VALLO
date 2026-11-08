@@ -315,7 +315,7 @@ export function PasswordField({
           onClick={() => setVisible((v) => !v)}
           aria-pressed={visible}
           aria-label={visible ? t.signUp.hidePassword : t.signUp.showPassword}
-          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-[var(--nf-radius-control)] text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-secondary)]"
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-control text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-secondary)]"
         >
           <EyeGlyph off={visible} />
         </button>

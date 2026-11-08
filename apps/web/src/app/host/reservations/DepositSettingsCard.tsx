@@ -240,7 +240,7 @@ export function DepositSettingsCard({
                     aria-label={words.fewer}
                     disabled={draft.minPartySize <= PARTY_MIN}
                     onClick={() => set({ minPartySize: Math.max(PARTY_MIN, (draft.minPartySize ?? 2) - 1) })}
-                    className="grid h-11 w-11 place-items-center rounded-[var(--nf-radius-sm)]"
+                    className="grid h-11 w-11 place-items-center rounded-sm"
                   >
                     <UiIcon name="minus" size={16} aria-hidden />
                   </Button>
@@ -254,7 +254,7 @@ export function DepositSettingsCard({
                     aria-label={words.more}
                     disabled={draft.minPartySize >= PARTY_MAX}
                     onClick={() => set({ minPartySize: Math.min(PARTY_MAX, (draft.minPartySize ?? 2) + 1) })}
-                    className="grid h-11 w-11 place-items-center rounded-[var(--nf-radius-sm)]"
+                    className="grid h-11 w-11 place-items-center rounded-sm"
                   >
                     <UiIcon name="plus" size={16} aria-hidden />
                   </Button>

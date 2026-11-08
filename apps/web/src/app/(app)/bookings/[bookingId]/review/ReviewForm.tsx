@@ -170,7 +170,7 @@ export function ReviewForm({
             return (
               <label
                 key={value}
-                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--nf-radius-md)] transition-colors hover:bg-[var(--nf-surface-raised)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--nf-brand-primary)]"
+                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--nf-surface-raised)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--nf-brand-primary)]"
               >
                 <input
                   type="radio"

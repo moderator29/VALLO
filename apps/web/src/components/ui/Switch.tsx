@@ -90,7 +90,7 @@ export function Switch({
          * rule instead of nowhere. The radius is the capsule the settings render
          * draws, per the amended radius law.
          */
-        "nf-switch relative h-8 w-13 shrink-0 cursor-pointer rounded-[var(--nf-radius-pill)]",
+        "nf-switch relative h-8 w-13 shrink-0 cursor-pointer rounded-pill",
         /*
          * The 44pt floor, as a pseudo element rather than a child span.
          *
@@ -130,7 +130,7 @@ export function Switch({
       */}
       <span
         aria-hidden="true"
-        className="nf-switch__thumb absolute left-1 top-1/2 block size-6 rounded-[var(--nf-radius-pill)] transition-transform motion-reduce:transition-none"
+        className="nf-switch__thumb absolute left-1 top-1/2 block size-6 rounded-pill transition-transform motion-reduce:transition-none"
         style={{
           /* 1.25rem of travel on a 52px track with a 24px knob and a 4px
              inset each side, less the hairline the track now carries. The

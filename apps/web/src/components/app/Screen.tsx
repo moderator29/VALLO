@@ -426,7 +426,7 @@ export function Surface({
       data-testid={testId}
       className={`${
         tone === "glass"
-          ? "nf-glass nf-surface--glass rounded-[var(--nf-radius-xl)]"
+          ? "nf-glass nf-surface--glass rounded-xl"
           : panelClass({ variant: "card", className: "block" })
       } p-card sm:p-cell ${className ?? ""}`}
     >

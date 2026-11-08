@@ -152,11 +152,17 @@
    * `rounded-3xl` on an injected element returns 0px whether or not the name
    * resolves. That is the probe failing, not the scale.
    */
+  --radius-xs: var(--nf-radius-xs);
   --radius-sm: var(--nf-radius-sm);
   --radius-md: var(--nf-radius-md);
   --radius-lg: var(--nf-radius-lg);
   --radius-xl: var(--nf-radius-xl);
   --radius-2xl: var(--nf-radius-2xl);
+  --radius-card: var(--nf-radius-card);
+  --radius-control: var(--nf-radius-control);
+  --radius-pill: var(--nf-radius-pill);
+  --radius-segment: var(--nf-radius-segment);
+  --radius-circle: var(--nf-radius-circle);
 
   /*
    * THE MEASURE, bridged so `max-w-measure-lede` resolves.

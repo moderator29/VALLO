@@ -52,7 +52,7 @@ export function DocsSidebar({ items }: { items: DocChapterIndexEntry[] }) {
           onClick={() => setOpenAt(open ? null : pathname)}
           aria-expanded={open}
           aria-controls={panelId}
-          className="nf-tap flex min-h-11 w-full items-center justify-between gap-row rounded-[var(--nf-radius-control)] border border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] shadow-[var(--nf-rim-lit)] px-group py-inline text-left lg:hidden"
+          className="nf-tap flex min-h-11 w-full items-center justify-between gap-row rounded-control border border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] shadow-[var(--nf-rim-lit)] px-group py-inline text-left lg:hidden"
         >
           <span className="flex min-w-0 items-center gap-inline">
             <UiIcon
@@ -142,7 +142,7 @@ function ChapterLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={`nf-tap flex min-h-11 items-center gap-inline rounded-[var(--nf-radius-sm)] border-l-2 py-inline pr-inline pl-inline text-[length:var(--nf-text-caption)] leading-snug transition-colors ${
+      className={`nf-tap flex min-h-11 items-center gap-inline rounded-sm border-l-2 py-inline pr-inline pl-inline text-[length:var(--nf-text-caption)] leading-snug transition-colors ${
         active
           ? "border-l-[var(--nf-selected-edge)] bg-[image:var(--nf-selected-fill)] shadow-[var(--nf-selected-shadow-inline)] font-semibold text-[var(--nf-content-on-brand)]"
           : "border-l-transparent text-[var(--nf-content-secondary)] hover:bg-[var(--nf-glass-fill-thin)] hover:text-[var(--nf-content-primary)]"

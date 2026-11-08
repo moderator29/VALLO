@@ -581,7 +581,7 @@ function Lightbox({
         >
           <UiIcon name="close" size={20} />
         </Button>
-        <p className="nf-numeric pointer-events-none rounded-[var(--nf-radius-xs)] nf-media-chip nf-media-chip--caption px-sm py-xs font-semibold">
+        <p className="nf-numeric pointer-events-none rounded-xs nf-media-chip nf-media-chip--caption px-sm py-xs font-semibold">
           <span className="sr-only">Photo </span>
           {active + 1} / {items.length}
         </p>

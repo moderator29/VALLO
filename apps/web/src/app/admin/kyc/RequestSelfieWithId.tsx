@@ -38,7 +38,7 @@ export function RequestSelfieWithId({
 
   if (open) {
     return (
-      <p className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]" data-testid="request-open">
+      <p className="mt-sm rounded-md border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]" data-testid="request-open">
         <span className="font-semibold text-[var(--nf-content-primary)]">Asked for a selfie holding their ID</span> on{" "}
         {new Date(open.requestedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" })}. Waiting for them to send it.
         <span className="mt-3xs block text-[var(--nf-content-muted)]">They were sent: {open.message}</span>

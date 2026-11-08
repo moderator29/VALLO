@@ -212,7 +212,10 @@ export async function recordAlert(input: AlertInput): Promise<AlertOutcome> {
     } catch {
       existingId = null;
     }
-    if (existingId) return { ok: true, id: existingId, deduplicated: true };
+    if (existingId) {
+      await admin.from("risk_alerts").update({ last_seen_at: new Date().toISOString() }).eq("id", existingId);
+      return { ok: true, id: existingId, deduplicated: true };
+    }
 
     const { data, error } = await admin
       .from("risk_alerts")

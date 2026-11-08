@@ -11,9 +11,9 @@ const src = (p: string) => readFileSync(join(process.cwd(), "src", p), "utf8");
 
 describe("small text never sits in a capsule", () => {
   it("the Agent Mode badge, the admin count badges and the wizard's photo badge", () => {
-    expect(src("components/agent/AgentNav.tsx")).toContain("gap-xs rounded-[var(--nf-radius-xs)] px-sm py-2xs");
+    expect(src("components/agent/AgentNav.tsx")).toContain("gap-xs rounded-xs px-sm py-2xs");
     for (const file of ["app/admin/reference/ReferenceEditors.tsx", "app/admin/social/page.tsx"]) {
-      expect(src(file), file).not.toContain("rounded-[var(--nf-radius-control)] border");
+      expect(src(file), file).not.toContain("rounded-control border");
     }
     expect(src("components/agent/ApplyWizard.tsx")).not.toMatch(/gap-2xs rounded-\[var\(--nf-radius-control\)\] bg-/);
   });

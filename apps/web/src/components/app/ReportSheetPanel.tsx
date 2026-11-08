@@ -174,7 +174,7 @@ export function ReportSheetPanel({
                           return (
                             <label
                               key={code}
-                              className={`flex cursor-pointer items-start gap-sm rounded-[var(--nf-radius-md)] border p-sm transition-colors ${
+                              className={`flex cursor-pointer items-start gap-sm rounded-md border p-sm transition-colors ${
                                 active
                                   ? "border-[var(--nf-brand-primary)] bg-[color-mix(in_oklab,var(--nf-brand-primary)_10%,transparent)]"
                                   : "border-[var(--nf-border-subtle)]"

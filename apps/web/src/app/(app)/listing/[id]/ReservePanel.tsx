@@ -194,7 +194,7 @@ function Stepper({
           aria-label={moreLabel}
           disabled={value >= max}
           onClick={() => onChange(Math.min(max, value + 1))}
-          className="h-11 w-11 rounded-[var(--nf-radius-sm)] disabled:opacity-40"
+          className="h-11 w-11 rounded-sm disabled:opacity-40"
         >
           <span aria-hidden="true" className="text-[length:var(--nf-text-body)] leading-none">
             +

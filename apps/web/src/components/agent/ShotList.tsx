@@ -55,7 +55,7 @@ export function ShotList({
       <ul className="grid gap-xs">
         {photos.map((photo, index) => (
           <li key={photo.id} className="flex items-center gap-sm">
-            <RemoteImage src={photo.url} alt="" width={96} height={72} sizes="4rem" className="h-12 w-16 shrink-0 rounded-[var(--nf-radius-sm)] object-cover" />
+            <RemoteImage src={photo.url} alt="" width={96} height={72} sizes="4rem" className="h-12 w-16 shrink-0 rounded-sm object-cover" />
             <label className="sr-only" htmlFor={`shot-${photo.id}`}>
               {copy.labelFor.replace("{n}", String(index + 1))}
             </label>

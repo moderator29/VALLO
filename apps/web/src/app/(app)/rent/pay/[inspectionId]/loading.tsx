@@ -80,7 +80,7 @@ export default async function LoadingRentPay() {
           <h2 className="nf-h3">{c.howToPay}</h2>
           <ul className="mt-block grid gap-row">
             <li className="nf-panel nf-panel--card flex-row items-start gap-group p-card">
-              <span aria-hidden="true" className="block h-12 w-12 shrink-0 rounded-[var(--nf-radius-md)] nf-skeleton nf-skeleton--text" />
+              <span aria-hidden="true" className="block h-12 w-12 shrink-0 rounded-md nf-skeleton nf-skeleton--text" />
               <div className="min-w-0 flex-1">
                 {/* A move-in total is nearly always above the card limit
                     (LARGE_PAYMENT_KOBO, N500,000), so the option is drawn as the

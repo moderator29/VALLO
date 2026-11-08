@@ -145,7 +145,7 @@ export function RateResolution({
             aria-checked={stars === n}
             aria-label={copy.starLabel.replace("{n}", String(n)).replace("{word}", (starWords[n - 1] ?? "").toLowerCase())}
             onClick={() => setStars(n)}
-            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--nf-radius-control)]"
+            className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control"
             data-testid={`support-star-${n}`}
           >
             <UiIcon

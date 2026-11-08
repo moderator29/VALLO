@@ -123,7 +123,7 @@ export async function RentalPanel({
         {steps.map((step, i) => (
           <li key={step.label} className="flex items-start gap-sm">
             {/* KEPT ROUND: an ordinal marker in an <ol>, not a control. */}
-            <span className="nf-numeric nf-caption mt-3xs grid h-6 w-6 shrink-0 place-items-center rounded-[var(--nf-radius-xs)] border border-[var(--nf-panel-edge)] font-bold text-[var(--nf-content-secondary)]">
+            <span className="nf-numeric nf-caption mt-3xs grid h-6 w-6 shrink-0 place-items-center rounded-xs border border-[var(--nf-panel-edge)] font-bold text-[var(--nf-content-secondary)]">
               {i + 1}
             </span>
             <span className="min-w-0">

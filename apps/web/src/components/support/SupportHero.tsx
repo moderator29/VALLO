@@ -49,7 +49,7 @@ export function SupportHero({
   return (
     <section
       aria-labelledby="support-hero-title"
-      className="nf-support-hero relative overflow-hidden rounded-[var(--nf-radius-xl)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card"
+      className="nf-support-hero relative overflow-hidden rounded-xl border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card"
       data-testid="support-hero"
     >
       <div className="flex items-start gap-group">

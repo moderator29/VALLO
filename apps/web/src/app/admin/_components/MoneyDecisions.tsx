@@ -242,7 +242,7 @@ export function FeeRateForm({
   }
 
   return (
-    <div className="mt-group rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-card">
+    <div className="mt-group rounded-md border border-[var(--nf-border-subtle)] p-card">
       <p className="nf-body font-semibold text-content">
         Change the rate
       </p>

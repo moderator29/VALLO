@@ -170,7 +170,7 @@ function CryptoSheet({
       <Sheet open onOpenChange={(next) => (next ? undefined : onClose())} title={t.sheetTitle} closeLabel={t.done} detents={[0.92]}>
         <div className="grid gap-block pb-lg">
           {/* The dark hero over light content (reference 05): the one figure that matters. */}
-          <div className="rounded-[var(--nf-radius-xl)] bg-[var(--nf-surface-inverse)] px-lg py-lg text-[var(--nf-content-on-inverse)]">
+          <div className="rounded-xl bg-[var(--nf-surface-inverse)] px-lg py-lg text-[var(--nf-content-on-inverse)]">
             <p className="nf-caption opacity-80">{step.kind === "pick" || step.kind === "quoting" ? t.chargeLabel : t.sendExactly}</p>
             {step.kind === "pick" || step.kind === "quoting" ? (
               <Amount
@@ -295,7 +295,7 @@ function ChoiceList({ items, value, onChoose }: { items: { id: string; label: st
             <button
               type="button"
               onClick={() => onChoose(item.id)}
-              className={`flex min-h-[3.25rem] w-full items-center justify-between rounded-[var(--nf-radius-md)] px-md text-left ${
+              className={`flex min-h-[3.25rem] w-full items-center justify-between rounded-md px-md text-left ${
                 selected ? "bg-[var(--nf-surface-inset)]" : ""
               }`}
             >

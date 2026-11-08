@@ -110,7 +110,7 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
         catalogue, and the button inside it is already `danger`.
       */}
       {confirming && (
-        <div className="mt-group rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm">
+        <div className="mt-group rounded-md border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm">
           <p className="nf-body font-semibold text-content">
             This will take {countOf(live.length, "exampleProperties")}
             {cities.size > 0 &&

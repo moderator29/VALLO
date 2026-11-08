@@ -12337,6 +12337,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string | null
           id: string
+          last_seen_at: string
           resolved_at: string | null
           resolved_by: string | null
           severity: Database["public"]["Enums"]["alert_severity"]
@@ -12351,6 +12352,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          last_seen_at?: string
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -12365,6 +12367,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          last_seen_at?: string
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]

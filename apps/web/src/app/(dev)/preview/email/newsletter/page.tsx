@@ -32,7 +32,7 @@ export default async function NewsletterEmailPreview({
           <iframe
             title="Newsletter at phone width"
             srcDoc={html}
-            className="block h-[4200px] w-[390px] max-w-full rounded-[var(--nf-radius-md)] border border-[var(--nf-border-default)]"
+            className="block h-[4200px] w-[390px] max-w-full rounded-md border border-[var(--nf-border-default)]"
             data-testid="newsletter-frame-phone"
           />
         </section>
@@ -41,13 +41,13 @@ export default async function NewsletterEmailPreview({
           <iframe
             title="Newsletter at desktop width"
             srcDoc={html}
-            className="block h-[3600px] w-[640px] rounded-[var(--nf-radius-md)] border border-[var(--nf-border-default)]"
+            className="block h-[3600px] w-[640px] rounded-md border border-[var(--nf-border-default)]"
           />
         </section>
       </div>
       <section aria-label="Plain text" className="mt-md">
         <h2 className="nf-h4 mb-xs">Plain text</h2>
-        <pre className="nf-body-sm overflow-x-auto whitespace-pre-wrap rounded-[var(--nf-radius-md)] border border-[var(--nf-border-default)] p-card-sm">
+        <pre className="nf-body-sm overflow-x-auto whitespace-pre-wrap rounded-md border border-[var(--nf-border-default)] p-card-sm">
           {message.text}
         </pre>
       </section>

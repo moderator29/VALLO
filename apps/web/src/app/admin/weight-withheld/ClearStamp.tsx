@@ -70,7 +70,7 @@ export function ClearStamp({ kind, subject, copy }: { kind: "review" | "report";
 
   return (
     <form
-      className="basis-full rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-warning)_45%,transparent)] p-card-sm"
+      className="basis-full rounded-md border border-[color-mix(in_oklab,var(--nf-state-warning)_45%,transparent)] p-card-sm"
       onSubmit={(event) => {
         event.preventDefault();
         setNoteError(null);

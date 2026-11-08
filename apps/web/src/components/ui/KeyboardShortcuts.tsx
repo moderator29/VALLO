@@ -129,7 +129,7 @@ export function KeyboardShortcuts() {
         role="dialog"
         aria-modal="true"
         aria-label="Keyboard shortcuts"
-        className="fixed inset-x-0 top-1/2 z-[var(--nf-z-overlay)] mx-auto w-full max-w-lg -translate-y-1/2 rounded-[var(--nf-radius-lg)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-elevated)] p-block shadow-[var(--nf-elev-4)]"
+        className="fixed inset-x-0 top-1/2 z-[var(--nf-z-overlay)] mx-auto w-full max-w-lg -translate-y-1/2 rounded-lg border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-elevated)] p-block shadow-[var(--nf-elev-4)]"
       >
         <div className="flex items-center justify-between">
           <h2 className="nf-h3 text-[var(--nf-content-primary)]">
@@ -137,7 +137,7 @@ export function KeyboardShortcuts() {
           </h2>
           <button
             onClick={close}
-            className="nf-tap rounded-[var(--nf-radius-control)] p-inline text-[var(--nf-content-muted)] transition-colors duration-[var(--nf-duration-fast)] ease-[var(--nf-ease-standard)] hover:text-[var(--nf-content-primary)]"
+            className="nf-tap rounded-control p-inline text-[var(--nf-content-muted)] transition-colors duration-[var(--nf-duration-fast)] ease-[var(--nf-ease-standard)] hover:text-[var(--nf-content-primary)]"
             aria-label="Close"
           >
             <span aria-hidden="true" className="text-xl leading-none">&times;</span>
@@ -163,7 +163,7 @@ export function KeyboardShortcuts() {
                       {shortcut.keys.split(" ").map((k, i) => (
                         <kbd
                           key={i}
-                          className="inline-flex min-w-[1.75rem] items-center justify-center rounded-[var(--nf-radius-sm)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] px-inline-tight py-3xs nf-caption font-medium text-[var(--nf-content-primary)]"
+                          className="inline-flex min-w-[1.75rem] items-center justify-center rounded-sm border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] px-inline-tight py-3xs nf-caption font-medium text-[var(--nf-content-primary)]"
                         >
                           {k}
                         </kbd>

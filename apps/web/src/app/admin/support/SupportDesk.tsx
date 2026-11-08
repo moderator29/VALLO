@@ -280,7 +280,7 @@ function MemberContext({ detail, now }: { detail: SupportTicketDetail; now: numb
               <li key={t.id}>
                 <Link
                   href={`/admin/support?ticket=${t.id}`}
-                  className="flex min-h-11 flex-wrap items-center gap-x-xs rounded-[var(--nf-radius-sm)] px-2xs text-[length:var(--nf-text-caption)] hover:bg-[var(--nf-glass-fill-strong)]"
+                  className="flex min-h-11 flex-wrap items-center gap-x-xs rounded-sm px-2xs text-[length:var(--nf-text-caption)] hover:bg-[var(--nf-glass-fill-strong)]"
                 >
                   <span className="nf-numeric text-[var(--nf-content-muted)]">{t.reference}</span>
                   <span className="font-semibold">{supportTopicLabel(t.topic) ?? "A general question"}</span>
@@ -318,7 +318,7 @@ function Notes({ detail }: { detail: SupportTicketDetail }) {
           ) : (
             <ul className="grid gap-xs">
               {detail.notes.map((n) => (
-                <li key={n.id} className="rounded-[var(--nf-radius-sm)] bg-[var(--nf-surface-raised)] p-xs">
+                <li key={n.id} className="rounded-sm bg-[var(--nf-surface-raised)] p-xs">
                   <p className="whitespace-pre-wrap text-[length:var(--nf-text-body-sm)]">{n.body}</p>
                   <p className="mt-3xs nf-caption text-[var(--nf-content-muted)]">
                     {n.mine ? "You" : n.author} · {when(n.at)}
@@ -409,7 +409,7 @@ function Ticket({
         </p>
 
         {detail.mode === "escalated" ? (
-          <p className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-brand)] p-sm nf-body-sm" role="note">
+          <p className="mt-sm rounded-md border border-[var(--nf-border-brand)] p-sm nf-body-sm" role="note">
             Support handed this ticket to your desk. You can read it, add a note, and hand it back with what you found.
             Support keeps talking to the member.
           </p>
@@ -418,7 +418,7 @@ function Ticket({
         {live.length > 0 ? (
           <ul className="mt-sm grid gap-xs" aria-label="Escalations">
             {live.map((e) => (
-              <li key={e.id} className="rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-sm">
+              <li key={e.id} className="rounded-md border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-sm">
                 <p className="nf-body-sm">
                   <span className="font-semibold">With the {ESCALATION_TARGET_LABEL[e.toScope].name.toLowerCase()} desk</span>
                   <span className="text-[var(--nf-content-secondary)]">
@@ -459,7 +459,7 @@ function Ticket({
                 {detail.thread.map((m) => (
                   <li
                     key={m.id}
-                    className={`rounded-[var(--nf-radius-md)] p-sm ${m.role === "admin" ? "ml-lg bg-[var(--nf-brand-primary-soft)]" : "mr-lg bg-[var(--nf-surface-raised)]"}`}
+                    className={`rounded-md p-sm ${m.role === "admin" ? "ml-lg bg-[var(--nf-brand-primary-soft)]" : "mr-lg bg-[var(--nf-surface-raised)]"}`}
                   >
                     <span className="flex flex-wrap items-center gap-xs">
                       <span className="nf-overline text-[var(--nf-content-muted)]">

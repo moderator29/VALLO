@@ -95,7 +95,7 @@ export function CloseListingSheet({
           <label
             key={value}
             data-on={reason === value || undefined}
-            className="flex min-h-[48px] cursor-pointer items-center gap-sm rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] px-md text-[length:var(--nf-text-body-sm)] data-[on]:border-[var(--nf-brand-secondary)]"
+            className="flex min-h-[48px] cursor-pointer items-center gap-sm rounded-control border border-[var(--nf-border-subtle)] px-md text-[length:var(--nf-text-body-sm)] data-[on]:border-[var(--nf-brand-secondary)]"
           >
             <input
               type="radio"

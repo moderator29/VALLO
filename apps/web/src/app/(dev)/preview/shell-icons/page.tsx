@@ -23,7 +23,7 @@ export default async function ShellIconsPreview({
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-40 rounded-[var(--nf-radius-xl)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)]"
+            className="h-40 rounded-xl border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)]"
           />
         ))}
       </div>

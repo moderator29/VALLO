@@ -654,7 +654,7 @@ export function ApplyWizard({
           {state.message && state.ok && (
             <p
               role="status"
-              className="rounded-[var(--nf-radius-md)] border px-md py-sm text-[length:var(--nf-text-caption)]"
+              className="rounded-md border px-md py-sm text-[length:var(--nf-text-caption)]"
               style={
                 state.ok
                   ? {
@@ -790,7 +790,7 @@ function UploadZone({
              one, so the file itself is the label in both cases. */
           <>
             {slot.isPdf && (
-              <span className="rounded-[var(--nf-radius-xs)] border border-[var(--nf-border-default)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold tracking-wide text-[var(--nf-content-secondary)]">
+              <span className="rounded-xs border border-[var(--nf-border-default)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold tracking-wide text-[var(--nf-content-secondary)]">
                 PDF
               </span>
             )}
@@ -811,7 +811,7 @@ function UploadZone({
           </span>
         )}
         {done && !slot?.uploading && (
-          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-2xs rounded-[var(--nf-radius-xs)] bg-[var(--nf-brand-primary)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold text-[var(--nf-content-on-brand)]">
+          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-2xs rounded-xs bg-[var(--nf-brand-primary)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold text-[var(--nf-content-on-brand)]">
             <UiIcon name="verified" size={12} />
             Uploaded
           </span>

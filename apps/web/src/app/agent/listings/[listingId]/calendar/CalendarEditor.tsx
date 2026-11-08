@@ -194,7 +194,7 @@ export function CalendarEditor({
                             : "open"
                     }`}
                     className={[
-                      "nf-body-sm flex h-11 items-center justify-center rounded-[var(--nf-radius-sm)] font-normal transition-colors",
+                      "nf-body-sm flex h-11 items-center justify-center rounded-sm font-normal transition-colors",
                       mode === "past" && "cursor-default text-[var(--nf-content-muted)] opacity-35",
                       /*
                        * `--nf-content-on-brand`, not `text-white`.
@@ -291,7 +291,7 @@ export function CalendarEditor({
 function Key({ className, label }: { className: string; label: string }) {
   return (
     <li className="flex items-center gap-xs">
-      <span className={`block h-3 w-3 rounded-[var(--nf-radius-xs)] ${className}`} aria-hidden="true" />
+      <span className={`block h-3 w-3 rounded-xs ${className}`} aria-hidden="true" />
       {label}
     </li>
   );

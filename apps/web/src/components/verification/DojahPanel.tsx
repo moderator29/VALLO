@@ -155,7 +155,7 @@ export function DojahPanel({
             src={url}
             title={copy.frameTitle}
             allow="camera; geolocation"
-            className="block h-[min(80dvh,46rem)] w-full rounded-[var(--nf-radius-card)] border-0"
+            className="block h-[min(80dvh,46rem)] w-full rounded-card border-0"
             data-testid="dojah-frame"
           />
         ) : null}

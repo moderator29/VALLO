@@ -87,8 +87,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         } else {
           proof = byCode ? { code: password.trim() } : { password };
         }
-        const begun = await beginEnrol(proof).catch(() => ({ error: "failed" as const }));
-        if ("error" in begun) {
+        const begun = await beginEnrol(proof).catch(() => ({ ok: false as const, error: "failed" }));
+        if (!begun.ok) {
           const refused = staffHasKey ? copy.staffAnotherKey : copy.rejected;
           fail(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
           if (begun.error === "password_recent") {
@@ -106,7 +106,7 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
          * Face ID sheet never rose. So the proof is checked here, and the
          * next tap, on its own button, goes straight to the phone.
          */
-        setArmed(begun);
+        setArmed(begun.data);
         setEnrolling(true);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -132,9 +132,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         return;
       }
       const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
-        error: "failed" as const,
+        ok: false as const,
+        error: "failed",
       }));
-      if ("error" in done) {
+      if (!done.ok) {
         banner.error(done.error === "rejected" ? copy.rejected : copy.failed);
         return;
       }
@@ -161,8 +162,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         /* Removing a phone asks for a proof for exactly that. */
         const stepUp = await lock.prove({ kind: "remove_lock", target: id });
         if (stepUp === null) return;
-        const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ error: "failed" as const }));
-        if ("error" in done) {
+        const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ ok: false as const, error: "failed" }));
+        if (!done.ok) {
           banner.error(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
           return;
         }
@@ -266,8 +267,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                   onClick={() =>
                     start(async () => {
                       try {
-                        const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                        if ("error" in sent) banner.error(copy.failed);
+                        const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+                        if (!sent.ok) banner.error(copy.failed);
                         else setCodeSent(true);
                       } catch (error) {
                         if (!tapFailedOffline(error)) throw error;
@@ -289,8 +290,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
               onClick={() =>
                 start(async () => {
                   try {
-                    const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                    if ("error" in sent) banner.error(copy.failed);
+                    const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+                    if (!sent.ok) banner.error(copy.failed);
                     else setCodeSent(true);
                   } catch (error) {
                     if (!tapFailedOffline(error)) throw error;

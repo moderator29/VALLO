@@ -177,7 +177,7 @@ export function TenancyReportCard({
             .filter((photo) => photo.url)
             .slice(0, 12)
             .map((photo) => (
-              <li key={photo.id} className="aspect-square overflow-hidden rounded-[var(--nf-radius-sm)]">
+              <li key={photo.id} className="aspect-square overflow-hidden rounded-sm">
                 {/* A signed, short-lived URL to a private object: never cached by next/image. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={photo.url ?? ""} alt={photo.item ? ROOM_COPY[photo.item].title : ""} className="h-full w-full object-cover" loading="lazy" decoding="async" />

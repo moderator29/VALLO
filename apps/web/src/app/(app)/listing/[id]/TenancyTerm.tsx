@@ -154,7 +154,7 @@ function StepButton({
          (GOVERNING-chat-booking-card.png: back, call, overflow, send) draws every
          one of them as a rounded square. A surface with no reference inherits the
          register, and the register's control is the rectangle. */
-      className="grid h-9 w-9 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-primary)] disabled:opacity-35"
+      className="grid h-9 w-9 rounded-sm place-items-center text-[var(--nf-content-primary)] disabled:opacity-35"
     >
       <UiIcon name={icon} size={16} />
     </Button>

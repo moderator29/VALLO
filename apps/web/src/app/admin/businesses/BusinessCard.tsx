@@ -229,7 +229,7 @@ export function BusinessCard({
                         width={128}
                         height={96}
                         sizes="128px"
-                        className="h-24 w-32 rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] object-cover"
+                        className="h-24 w-32 rounded-md border border-[var(--nf-border-subtle)] object-cover"
                       />
                     </li>
                   ))}

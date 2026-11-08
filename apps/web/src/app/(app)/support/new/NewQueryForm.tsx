@@ -375,7 +375,7 @@ function ChoiceList({
             <button
               type="button"
               onClick={() => onPick(item.key)}
-              className="flex min-h-14 w-full cursor-pointer items-center gap-group rounded-[var(--nf-radius-control)] px-xs py-xs text-left hover:bg-[var(--nf-surface-inset)]"
+              className="flex min-h-14 w-full cursor-pointer items-center gap-group rounded-control px-xs py-xs text-left hover:bg-[var(--nf-surface-inset)]"
               data-testid={`support-choice-${item.key}`}
             >
               <span className="min-w-0 flex-1">
@@ -418,7 +418,7 @@ function RecordList({
                     type="button"
                     onClick={() => onPick(record)}
                     aria-pressed={chosen}
-                    className="flex min-h-14 w-full cursor-pointer items-center gap-group rounded-[var(--nf-radius-control)] px-xs py-xs text-left hover:bg-[var(--nf-surface-inset)]"
+                    className="flex min-h-14 w-full cursor-pointer items-center gap-group rounded-control px-xs py-xs text-left hover:bg-[var(--nf-surface-inset)]"
                   >
                     <span className="min-w-0 flex-1">
                       <span className="nf-body-sm block break-words font-semibold text-[var(--nf-content-primary)]">
@@ -453,7 +453,7 @@ export function FiledView({ filed, topic, copy }: { filed: Filed; topic: string 
       </p>
       <div className="mt-group flex justify-center">
         <span
-          className="nf-numeric shrink-0 whitespace-nowrap rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-sm py-xs text-[length:var(--nf-text-body-lg)] font-bold tracking-wide text-[var(--nf-content-primary)]"
+          className="nf-numeric shrink-0 whitespace-nowrap rounded-control border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-sm py-xs text-[length:var(--nf-text-body-lg)] font-bold tracking-wide text-[var(--nf-content-primary)]"
           data-testid="support-filed-reference"
         >
           {filed.reference}

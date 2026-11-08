@@ -60,7 +60,7 @@ function Photos({ items, w }: { items: TicketAttachment[]; w: ThreadWords }) {
             href={item.url}
             target="_blank"
             rel="noreferrer"
-            className="block overflow-hidden rounded-[var(--nf-radius-sm)] border border-[var(--nf-border-subtle)]"
+            className="block overflow-hidden rounded-sm border border-[var(--nf-border-subtle)]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- a signed private link, not an optimisable asset */}
             <img src={item.url} alt={w.photoAlt} className="h-28 w-28 object-cover" loading="lazy" />
@@ -68,7 +68,7 @@ function Photos({ items, w }: { items: TicketAttachment[]; w: ThreadWords }) {
         ) : (
           <span
             key={item.id}
-            className="nf-caption inline-flex h-28 w-28 items-center justify-center rounded-[var(--nf-radius-sm)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] p-xs text-center text-[var(--nf-content-muted)]"
+            className="nf-caption inline-flex h-28 w-28 items-center justify-center rounded-sm border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] p-xs text-center text-[var(--nf-content-muted)]"
           >
             {w.photoAttached}
           </span>

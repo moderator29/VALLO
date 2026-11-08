@@ -232,25 +232,25 @@ export function useMoneyStepUp(
     if (!status || !intent.current) return;
     setBusy(true);
     setError(null);
-    const begun = await beginMoneyConfirm(intent.current).catch(() => ({ error: "failed" as const }));
-    if ("error" in begun) {
+    const begun = await beginMoneyConfirm(intent.current).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!begun.ok) {
       setBusy(false);
-      setError(begun.error);
+      setError(begun.error as "rejected" | "failed");
       return;
     }
-    const proof = await assertPlatformKey({ challenge: begun.challenge, rpId: status.rpId, allow: status.credentialIds });
+    const proof = await assertPlatformKey({ challenge: begun.data.challenge, rpId: status.rpId, allow: status.credentialIds });
     if (!proof) {
       setBusy(false);
       setError("rejected");
       return;
     }
-    const done = await finishMoneyConfirm({ challenge: begun.challenge, ...proof }).catch(() => ({ error: "failed" as const }));
-    if ("error" in done) {
+    const done = await finishMoneyConfirm({ challenge: begun.data.challenge, ...proof }).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!done.ok) {
       setBusy(false);
-      setError(done.error);
+      setError(done.error as "rejected" | "failed");
       return;
     }
-    release(done.stepUp);
+    release(done.data.stepUp);
   };
 
   const byCode = status?.fallback === "email-code" || forceCode;
@@ -258,9 +258,9 @@ export function useMoneyStepUp(
   const askForCode = async () => {
     setBusy(true);
     setError(null);
-    const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
+    const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
     setBusy(false);
-    if ("error" in sent) setError("failed");
+    if (!sent.ok) setError("failed");
     else setCodeSent(true);
   };
 
@@ -269,10 +269,10 @@ export function useMoneyStepUp(
     setBusy(true);
     setError(null);
     const proof = byCode ? { code: secret.trim() } : { password: secret };
-    const done = await confirmWithFallback({ proof, intent: intent.current }).catch(() => ({ error: "failed" as const }));
-    if ("error" in done) {
+    const done = await confirmWithFallback({ proof, intent: intent.current }).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!done.ok) {
       setBusy(false);
-      setError(done.error);
+      setError(done.error as "rejected" | "failed" | "password_recent");
       if (done.error === "password_recent") {
         setForceCode(true);
         setCodeSent(false);
@@ -280,7 +280,7 @@ export function useMoneyStepUp(
       }
       return;
     }
-    release(done.stepUp);
+    release(done.data.stepUp);
   };
 
   const sheet = (

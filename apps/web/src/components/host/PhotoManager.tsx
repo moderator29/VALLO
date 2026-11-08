@@ -231,7 +231,7 @@ export function PhotoManager({
                 width={400}
                 height={300}
                 sizes="(min-width: 640px) 200px, 45vw"
-                className="h-32 w-full rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] object-cover"
+                className="h-32 w-full rounded-md border border-[var(--nf-border-subtle)] object-cover"
               />
               {/* STACKED, NOT A ROW. At 390 two of these sit side by side and
                   a label beside a control has about 80px to live in: the

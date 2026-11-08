@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import { feedback } from "@/lib/ui/feedback";
 
 /**
@@ -132,16 +133,7 @@ export function Keypad({
         }}
         aria-label={deleteLabel}
       >
-        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
-          <path
-            d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7Zm3.5 4.5 5 5m0-5-5 5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <UiIcon name="backspace" size={26} />
       </button>
     </div>
   );

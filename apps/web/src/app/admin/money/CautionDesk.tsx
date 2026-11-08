@@ -68,7 +68,7 @@ function DisputeItem({ row, locale, words }: { row: CautionDispute; locale: Loca
         {row.photoUrl ? (
           // A signed, short-lived URL to a private object.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.photoUrl} alt="" className="mt-xs h-24 w-24 rounded-[var(--nf-radius-sm)] object-cover" />
+          <img src={row.photoUrl} alt="" className="mt-xs h-24 w-24 rounded-sm object-cover" />
         ) : null}
       </div>
       <div className="nf-admin-queue-row__actions">

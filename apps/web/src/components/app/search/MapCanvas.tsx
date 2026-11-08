@@ -719,7 +719,7 @@ export function MapCanvas({
                chooses is not a decision. 6px on 17.12 is 0.35 with 5px of
                straight edge down each side, and it does not move when the
                padding does. Same fix as `.nf-notif__count` in `home.css`. */
-            className="nf-numeric nf-map-cluster-drop nf-tap pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-[var(--nf-radius-xs)] border border-[var(--nf-selected-edge)] px-sm py-xs text-[length:var(--nf-text-caption)] font-bold text-[var(--nf-content-on-brand)] transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--nf-focus-ring)] active:scale-95 motion-reduce:transition-none"
+            className="nf-numeric nf-map-cluster-drop nf-tap pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-xs border border-[var(--nf-selected-edge)] px-sm py-xs text-[length:var(--nf-text-caption)] font-bold text-[var(--nf-content-on-brand)] transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--nf-focus-ring)] active:scale-95 motion-reduce:transition-none"
           >
             <span className="nf-map-pin-breathe inline-block">{group.items.length}</span>
             <span className="sr-only"> places grouped here, open them</span>
@@ -910,7 +910,7 @@ export function MapCanvas({
               role="status"
               aria-live="polite"
               data-testid="map-locate-message"
-              className="nf-btn--glass pointer-events-auto mr-auto max-w-[62%] rounded-[var(--nf-radius-control)] px-sm py-xs text-[length:var(--nf-text-overline)] leading-snug text-[var(--nf-content-secondary)]"
+              className="nf-btn--glass pointer-events-auto mr-auto max-w-[62%] rounded-control px-sm py-xs text-[length:var(--nf-text-overline)] leading-snug text-[var(--nf-content-secondary)]"
             >
               {locateMessage}
             </p>

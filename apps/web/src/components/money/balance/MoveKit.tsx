@@ -114,10 +114,7 @@ export function Keypad({ value, onChange }: { value: string; onChange(next: stri
           disabled={key === "del" ? value === "" : value.length >= 11 || (value === "" && (key === "0" || key === "00"))}
         >
           {key === "del" ? (
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z" />
-              <path d="M12.5 9.5l5 5M17.5 9.5l-5 5" />
-            </svg>
+            <UiIcon name="backspace" size={24} />
           ) : (
             key
           )}

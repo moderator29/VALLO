@@ -85,7 +85,7 @@ export default async function StatusPage({ params }: { params: Promise<{ listing
           alt={copy.image}
           width={1080}
           height={1920}
-          className="mx-auto h-auto w-full max-w-[18rem] rounded-[var(--nf-radius-md)]"
+          className="mx-auto h-auto w-full max-w-[18rem] rounded-md"
           data-testid="status-image"
         />
         <StatusShare path={read.path} imagePath={imagePath} copy={copy} />

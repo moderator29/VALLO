@@ -225,7 +225,9 @@ export type UiIconName =
   | "phone-incoming"
   | "phone-outgoing"
   | "switch-camera"
-  | "volume";
+  | "volume"
+  /* The numpad backspace: a pointed rectangle with an X through it [delete]. */
+  | "backspace";
 
 /*
  * THE OUTLINES. Lucide names in brackets where the drawing is Lucide's, so the
@@ -1409,6 +1411,13 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <circle cx="12" cy="12" r="10" />
       <line x1="10" x2="10" y1="15" y2="9" />
       <line x1="14" x2="14" y1="15" y2="9" />
+    </>
+  ),
+  // [delete] The numpad backspace.
+  backspace: (
+    <>
+      <path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z" />
+      <path d="m12.5 9.5 5 5M17.5 9.5l-5 5" />
     </>
   ),
 };

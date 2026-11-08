@@ -126,7 +126,7 @@ export function AssistantSidebar({
                     /* The active row is the shared selected state (the platform
                        sweep, 23 September; audit S10): the console's nav row
                        on, not a 16 per cent tint of its own. */
-                    className={`w-full rounded-[var(--nf-radius-control)] border px-sm py-sm pr-2xl text-left transition-colors ${
+                    className={`w-full rounded-control border px-sm py-sm pr-2xl text-left transition-colors ${
                       active
                         ? "nf-ai__row--on"
                         : "border-transparent hover:bg-[image:var(--nf-btn-glass-fill)]"
@@ -158,7 +158,7 @@ export function AssistantSidebar({
                     /* Drawn 32px; the transparent `after:` square is its 44px
                        target (W12). Not `nf-tap`: that class sets `position:
                        relative` unlayered, which would beat `absolute` here. */
-                    className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 after:absolute after:left-1/2 after:top-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 items-center justify-center rounded-[var(--nf-radius-sm)] text-[var(--nf-content-muted)] opacity-70 transition-colors hover:bg-[image:var(--nf-btn-glass-fill)] hover:text-[var(--nf-content-primary)] group-hover:opacity-100"
+                    className="absolute right-1.5 top-1/2 flex h-8 w-8 -translate-y-1/2 after:absolute after:left-1/2 after:top-1/2 after:size-11 after:-translate-x-1/2 after:-translate-y-1/2 items-center justify-center rounded-sm text-[var(--nf-content-muted)] opacity-70 transition-colors hover:bg-[image:var(--nf-btn-glass-fill)] hover:text-[var(--nf-content-primary)] group-hover:opacity-100"
                   >
                     <UiIcon name="trash" size={16} />
                   </button>
@@ -187,7 +187,7 @@ export function AssistantSidebar({
           type="button"
           onClick={() => setSettingsOpen(true)}
           aria-haspopup="dialog"
-          className="nf-tap flex w-full items-center gap-md rounded-[var(--nf-radius-control)] px-sm py-sm text-left text-[var(--nf-content-secondary)] transition-colors hover:bg-[image:var(--nf-btn-glass-fill)] hover:text-[var(--nf-content-primary)]"
+          className="nf-tap flex w-full items-center gap-md rounded-control px-sm py-sm text-left text-[var(--nf-content-secondary)] transition-colors hover:bg-[image:var(--nf-btn-glass-fill)] hover:text-[var(--nf-content-primary)]"
         >
           <UiIcon name="settings-gear" size={20} className="shrink-0" />
           <span className="flex-1 text-[length:var(--nf-text-caption)] font-semibold">Settings</span>

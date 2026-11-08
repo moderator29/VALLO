@@ -810,7 +810,7 @@ export function StayCancel({
             type="button"
             onClick={() => setReason(option.code)}
             aria-pressed={reason === option.code}
-            className={`rounded-[var(--nf-radius-md)] border p-sm text-left ${
+            className={`rounded-md border p-sm text-left ${
               reason === option.code
                 ? "border-[var(--nf-brand-primary)] bg-[var(--nf-brand-primary-soft)]"
                 : "border-[var(--nf-border-subtle)]"
@@ -828,7 +828,7 @@ export function StayCancel({
 
       <p
         aria-live="polite"
-        className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-primary)]"
+        className="mt-sm rounded-md border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-primary)]"
       >
         {previewing || !preview
           ? copy.sheet.working

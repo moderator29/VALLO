@@ -74,7 +74,7 @@ export function AffordabilityLine({
       : null;
 
   return (
-    <section className="mt-md rounded-[var(--nf-radius-card)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-md" aria-labelledby={`${noteId}-t`} data-testid="detail-affordability">
+    <section className="mt-md rounded-card border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-md" aria-labelledby={`${noteId}-t`} data-testid="detail-affordability">
       <h3 id={`${noteId}-t`} className="nf-h4">
         {copy.title}
       </h3>

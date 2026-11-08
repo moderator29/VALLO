@@ -331,6 +331,13 @@
     border-radius: var(--nf-radius-circle);
     background: var(--nf-spark);
   }
+  .nf-call__encrypted {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--nf-content-on-media-muted);
+    opacity: 0.7;
+  }
   .nf-call__quality {
     display: inline-flex;
     align-items: flex-end;

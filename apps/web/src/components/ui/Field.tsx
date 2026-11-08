@@ -455,7 +455,7 @@ export function TextField({
               aria-label={clearable}
               /* 44pt of hit area on a 20px glyph, the same overlay trick the
                  chips use: the icon stays small, the target does not. */
-              className={`${SLOT} right-1 pointer-events-auto grid size-11 place-items-center rounded-[var(--nf-radius-control)] hover:text-[var(--nf-content-primary)]`}
+              className={`${SLOT} right-1 pointer-events-auto grid size-11 place-items-center rounded-control hover:text-[var(--nf-content-primary)]`}
             >
               <UiIcon name="close" size={16} />
             </button>

@@ -83,7 +83,7 @@ export function SupportEscalate({
             {free.map((t) => (
               <label
                 key={t}
-                className={`flex min-h-11 cursor-pointer items-start gap-xs rounded-[var(--nf-radius-md)] border p-sm ${
+                className={`flex min-h-11 cursor-pointer items-start gap-xs rounded-md border p-sm ${
                   scope === t ? "border-[var(--nf-border-brand)]" : "border-[var(--nf-border-subtle)]"
                 }`}
               >

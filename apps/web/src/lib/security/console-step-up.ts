@@ -19,6 +19,7 @@
 
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { fail, ok, type ActionResult } from "../actions/envelope";
 import { resolveSession } from "../actions/session";
 import { consume, subjectForUser } from "./rate-limit";
 import { admin, ceremonyOrigin, listConsoleCredentialIds, mintChallenge, takeChallenge } from "./money-step-up";
@@ -79,15 +80,15 @@ const assertionSchema = z.object({
   signature: z.string().min(10).max(2000),
 });
 
-export async function finishConsoleStepUp(input: unknown): Promise<{ ok: true } | { error: "rejected" | "failed" }> {
+export async function finishConsoleStepUp(input: unknown): Promise<ActionResult<null>> {
   const parsed = assertionSchema.safeParse(input);
-  if (!parsed.success) return { error: "rejected" };
+  if (!parsed.success) return fail("rejected");
   const now = await current();
   const a = admin();
-  if (!now || !a) return { error: "failed" };
+  if (!now || !a) return fail("failed");
   const userId = now.session.user.id;
   const paced = await consume({ bucket: "console_step_up", subject: subjectForUser(userId), limit: 10, windowSeconds: 900 });
-  if (!paced.allowed) return { error: "rejected" };
+  if (!paced.allowed) return fail("rejected");
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const loose = a as any;
@@ -97,7 +98,7 @@ export async function finishConsoleStepUp(input: unknown): Promise<{ ok: true } 
     .eq("user_id", userId)
     .eq("credential_id", parsed.data.credentialId)
     .maybeSingle();
-  if (!key) return { error: "rejected" };
+  if (!key) return fail("rejected");
   const row = key as { id: string; public_key_spki: string; alg: Alg; sign_count: number };
   const { origin, rpId } = await ceremonyOrigin();
   const verdict = verifyAssertion({
@@ -111,11 +112,11 @@ export async function finishConsoleStepUp(input: unknown): Promise<{ ok: true } 
     origins: [origin],
     rpId,
   });
-  if (!verdict.ok) return { error: "rejected" };
+  if (!verdict.ok) return fail("rejected");
   /* The challenge was minted for THIS session; a proof made on another
      session (or for money) is refused here. */
   const digest = await takeChallenge(a, userId, parsed.data.challenge, "money");
-  if (digest !== digestFor(now.sessionId)) return { error: "rejected" };
+  if (digest !== digestFor(now.sessionId)) return fail("rejected");
 
   await loose
     .from("money_credentials")
@@ -128,7 +129,7 @@ export async function finishConsoleStepUp(input: unknown): Promise<{ ok: true } 
     { user_id: userId, session_id: now.sessionId, credential_id: parsed.data.credentialId, verified_at: new Date().toISOString(), expires_at: expires },
     { onConflict: "user_id,session_id" },
   );
-  if (error) return { error: "failed" };
+  if (error) return fail("failed");
   await loose.from("audit_log").insert({
     actor_id: userId,
     action: "console.step_up",
@@ -136,5 +137,5 @@ export async function finishConsoleStepUp(input: unknown): Promise<{ ok: true } 
     entity_id: userId,
     metadata: { expires_at: expires },
   });
-  return { ok: true };
+  return ok(null);
 }

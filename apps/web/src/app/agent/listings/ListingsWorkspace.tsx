@@ -389,7 +389,7 @@ function ListingRow({
           </label>
         ) : null}
         <span
-          className="relative block h-[5.25rem] w-[5.25rem] shrink-0 overflow-hidden rounded-[var(--nf-radius-md)]"
+          className="relative block h-[5.25rem] w-[5.25rem] shrink-0 overflow-hidden rounded-md"
           style={{ background: "var(--nf-surface-raised)" }}
         >
           {listing.coverUrl ? (

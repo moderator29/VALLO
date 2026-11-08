@@ -35,7 +35,7 @@ export default function G2Preview() {
 
       <section aria-label="Every object at 32 on four grounds" className="mt-xs grid grid-cols-4 gap-xs">
         {GROUNDS.map((ground) => (
-          <div key={ground.id} className={`${ground.className} rounded-[var(--nf-radius-md)] p-2xs`}>
+          <div key={ground.id} className={`${ground.className} rounded-md p-2xs`}>
             <p className="nf-caption truncate text-center">{ground.label}</p>
             <div className="mt-2xs grid grid-cols-2 justify-items-center gap-x-2xs gap-y-3xs">
               {G2_OBJECTS.map((object) => (
@@ -54,7 +54,7 @@ export default function G2Preview() {
       {GROUNDS.map((ground) => (
         <section key={ground.id} id={ground.id} className="mt-section">
           <h2 className="nf-h3">{ground.label}</h2>
-          <ul className={`${ground.className} mt-xs flex flex-col gap-xs rounded-[var(--nf-radius-lg)] p-xs`}>
+          <ul className={`${ground.className} mt-xs flex flex-col gap-xs rounded-lg p-xs`}>
             {G2_OBJECTS.map((object) => (
               <li key={object.name} className="flex items-center gap-xs">
                 <div className="flex shrink-0 items-end gap-xs">

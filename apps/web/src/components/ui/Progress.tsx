@@ -143,7 +143,7 @@ export function Progress({
         aria-valuenow={indeterminate ? undefined : clamped}
         aria-valuetext={indeterminate ? undefined : text}
         className={[
-          "w-full overflow-hidden rounded-[var(--nf-radius-pill)]",
+          "w-full overflow-hidden rounded-pill",
           TRACK_HEIGHT[size],
           /*
            * Indeterminate borrows `.nf-skeleton`'s sweep. A looping animation
@@ -163,7 +163,7 @@ export function Progress({
         {indeterminate ? null : (
           <span
             className={[
-              "nf-progress__fill block h-full rounded-[var(--nf-radius-pill)] transition-transform motion-reduce:transition-none",
+              "nf-progress__fill block h-full rounded-pill transition-transform motion-reduce:transition-none",
               glass ? "nf-progress__fill--lit" : "",
             ]
               .filter(Boolean)
@@ -237,7 +237,7 @@ export function SegmentedProgress({
         return (
           <span
             key={i}
-            className="h-1.5 flex-1 overflow-hidden rounded-[var(--nf-radius-pill)]"
+            className="h-1.5 flex-1 overflow-hidden rounded-pill"
             style={TRACK}
           >
             {/*
@@ -247,7 +247,7 @@ export function SegmentedProgress({
               which is the worst possible time to ask for a layout pass.
             */}
             <span
-              className="block h-full origin-left rounded-[var(--nf-radius-pill)] transition-transform motion-reduce:transition-none"
+              className="block h-full origin-left rounded-pill transition-transform motion-reduce:transition-none"
               style={{
                 background: TONE_FILL[tone],
                 transform: `scaleX(${done ? 1 : 0})`,

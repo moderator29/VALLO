@@ -48,12 +48,12 @@ function Cell({ label, children }: { label: string; children: ReactNode }) {
 function Pair({ children }: { children: ReactNode }) {
   return (
     <div className="grid gap-sm lg:grid-cols-2">
-      <div className="rounded-[var(--nf-radius-card)] border border-[var(--nf-card-border)] bg-[var(--nf-surface-primary)] p-md">
+      <div className="rounded-card border border-[var(--nf-card-border)] bg-[var(--nf-surface-primary)] p-md">
         {children}
       </div>
       <div
         data-theme="dark"
-        className="rounded-[var(--nf-radius-card)] border border-[var(--nf-card-border)] bg-[var(--nf-surface-elevated)] p-md"
+        className="rounded-card border border-[var(--nf-card-border)] bg-[var(--nf-surface-elevated)] p-md"
       >
         {children}
       </div>
@@ -147,7 +147,7 @@ export default function ButtonSystemPreview() {
           {PALETTE.map((p) => (
             <li key={p.token} className="flex flex-col items-center gap-2xs">
               <span
-                className="block size-8 rounded-[var(--nf-radius-circle)] border border-[var(--nf-card-border)]"
+                className="block size-8 rounded-circle border border-[var(--nf-card-border)]"
                 style={{ background: `var(${p.token})` }}
               />
               <span className="text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-primary)]">{p.name}</span>

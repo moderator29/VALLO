@@ -194,7 +194,7 @@ export function SelfieCapture({
       {/* The stage: the live camera, the photo just taken, or the saved one. */}
       {(phase === "live" || phase === "starting" || phase === "captured" || phase === "saving" || (phase === "saved" && savedUrl)) && (
         <div
-          className="relative mx-auto mt-md aspect-[3/4] w-full max-w-xs overflow-hidden rounded-[var(--nf-radius-card)] bg-[var(--nf-surface-inverse)]"
+          className="relative mx-auto mt-md aspect-[3/4] w-full max-w-xs overflow-hidden rounded-card bg-[var(--nf-surface-inverse)]"
           data-testid="selfie-stage"
         >
           {(phase === "live" || phase === "starting") && (

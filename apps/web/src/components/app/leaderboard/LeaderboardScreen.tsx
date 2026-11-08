@@ -50,7 +50,7 @@ import { Beams, Podium, RankRows, ScopeToggle } from "./parts";
 import "./leaderboard.css";
 import "./leaderboard-motion.css";
 
-export type SetHidden = (hidden: boolean, businessId?: string) => Promise<{ ok: boolean }>;
+export type SetHidden = (hidden: boolean, businessId?: string) => Promise<{ ok: boolean; data?: unknown; error?: string }>;
 
 /**
  * /leaderboard (D76). The founder's reference, built to the Plasma level:

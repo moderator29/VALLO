@@ -163,7 +163,7 @@ export function ListingCard({
         until now this screen showed them one figure and no breakdown at all.
       */}
       {listing.moveIn && (
-        <div className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm">
+        <div className="mt-xs rounded-md border border-[var(--nf-border-subtle)] p-sm">
           <p className="text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-primary)]">
             To move in: {formatMoney(listing.moveIn.totalMinor, locale)}
             <span className="ml-2xs font-normal text-[var(--nf-content-muted)]">
@@ -196,7 +196,7 @@ export function ListingCard({
         million naira hiding behind it.
       */}
       {listing.purchase && (
-        <div className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm">
+        <div className="mt-xs rounded-md border border-[var(--nf-border-subtle)] p-sm">
           <p className="text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-primary)]">
             To buy: {formatMoney(listing.purchase.totalMinor, locale)}
             <span className="ml-2xs font-normal text-[var(--nf-content-muted)]">
@@ -250,7 +250,7 @@ export function ListingCard({
                   width={128}
                   height={96}
                   sizes="128px"
-                  className="h-24 w-32 rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] object-cover"
+                  className="h-24 w-32 rounded-md border border-[var(--nf-border-subtle)] object-cover"
                 />
               </li>
             ))}
@@ -286,7 +286,7 @@ export function ListingCard({
                     controls
                     preload="none"
                     playsInline
-                    className="h-40 w-64 rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] object-cover"
+                    className="h-40 w-64 rounded-md border border-[var(--nf-border-subtle)] object-cover"
                   />
                 ) : (
                   <p className="text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">

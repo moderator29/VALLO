@@ -218,7 +218,7 @@ export function RetireTerm({ term, copy }: { term: string; copy: RetireCopy }) {
   }
   return (
     <form
-      className="basis-full rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm"
+      className="basis-full rounded-md border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm"
       onSubmit={(event) => {
         event.preventDefault();
         setError(null);

@@ -41,7 +41,7 @@ export function OfflineNote({ forceOffline = false, what = "Your message" }: { f
     <p
       role="status"
       data-testid="support-offline"
-      className="nf-caption flex items-start gap-inline rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] bg-[var(--nf-state-warning-surface)] px-sm py-xs text-[var(--nf-content-primary)]"
+      className="nf-caption flex items-start gap-inline rounded-control border border-[var(--nf-border-subtle)] bg-[var(--nf-state-warning-surface)] px-sm py-xs text-[var(--nf-content-primary)]"
     >
       <UiIcon name="info" size={16} className="mt-3xs shrink-0 text-[var(--nf-state-warning)]" />
       <span className="min-w-0">
