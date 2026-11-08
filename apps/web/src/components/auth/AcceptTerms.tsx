@@ -124,8 +124,8 @@ export function AcceptTerms({
         </Link>
       </p>
 
-      {/* NEWS AND UPDATES, TICKED BY DEFAULT (the founder, 4 November 2026).
-          Uncontrolled on purpose: it starts ticked and the person can untick
+      {/* NEWS AND UPDATES, UNTICKED BY DEFAULT (NDPR, 8 November 2026).
+          Uncontrolled on purpose: it starts unticked and the person can tick
           it. The hidden `marketingAsked` marks that this form showed the box,
           so the server can tell "unticked" (a no) from "a request that never
           carried the box" (no answer, the default stands). */}
@@ -135,7 +135,6 @@ export function AcceptTerms({
           type="checkbox"
           name="marketingEmail"
           value="yes"
-          defaultChecked
           data-testid="marketing-email"
           className="mt-3xs h-5 w-5 shrink-0 accent-[var(--nf-brand-primary)]"
         />

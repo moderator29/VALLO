@@ -307,6 +307,14 @@ export type TextFieldProps = Omit<
   "size" | "className" | "id"
 > &
   Omit<FieldProps, "children"> & {
+    /**
+     * Tells the mobile keyboard what the enter key should say.
+     *
+     * Already part of `InputHTMLAttributes`, surfaced here so callers see it
+     * beside `inputMode` and `autoComplete` without digging into the HTML
+     * attribute spread. Passed straight through to the `<input>`.
+     */
+    enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
     leadingIcon?: UiIconName;
     /**
      * A leading glyph that is not a `UiIcon`: a glass `BrandIcon` in the well,
@@ -467,6 +475,14 @@ export type SelectFieldProps = Omit<
   "size" | "className" | "id"
 > &
   Omit<FieldProps, "children"> & {
+    /**
+     * Tells the mobile keyboard what the enter key should say.
+     *
+     * Not part of `SelectHTMLAttributes` (the spec ties it to text inputs),
+     * but mobile browsers respect it on a `<select>` when a soft keyboard is
+     * open beside a picker. Passed straight through to the `<select>`.
+     */
+    enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
     leadingIcon?: UiIconName;
     /** See `TextFieldProps.glyph`. */
     glyph?: ReactNode;
@@ -484,6 +500,7 @@ export function SelectField({
   optionalText,
   hideLabel,
   className,
+  enterKeyHint,
   leadingIcon,
   glyph,
   material,
@@ -522,6 +539,7 @@ export function SelectField({
           <select
             {...rest}
             {...control}
+            enterKeyHint={enterKeyHint}
             /*
              * `appearance-none` is not cosmetic here. The native control paints
              * its own arrow at its own size in its own colour, differently in
