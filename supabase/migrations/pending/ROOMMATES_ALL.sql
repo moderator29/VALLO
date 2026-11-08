@@ -2463,6 +2463,58 @@ $function$;
 revoke all on function public.record_funnel_event(text, uuid, text, text, text) from public;
 grant execute on function public.record_funnel_event(text, uuid, text, text, text) to anon, authenticated;
 
+-- ------------------------------------------------------------ Circle: Following
+-- The Circle home's "Following" list (8 November 2026): top-level LIVE posts
+-- in the live communities the caller is an active member of, newest first or
+-- most helpful first, keyset paged. SECURITY DEFINER so it reads one indexed
+-- join instead of the posts policy per row; it therefore re-checks everything
+-- the policy would: a signed-in caller, an active membership, a live
+-- community, a LIVE post (held, removed and deleted never come back), and no
+-- block in either direction between the caller and the author.
+create or replace function public.circle_following_posts(
+  p_sort text default 'newest',
+  p_before timestamptz default null,
+  p_before_id uuid default null,
+  p_limit integer default 20)
+returns setof public.posts
+language plpgsql
+stable security definer
+set search_path to ''
+as $function$
+declare
+  me uuid := (select auth.uid());
+  lim integer := least(greatest(coalesce(p_limit, 20), 1), 50);
+begin
+  if me is null then
+    raise exception 'Sign in to see the communities you follow.' using errcode = '42501';
+  end if;
+  return query
+    select p.*
+      from public.posts p
+      join public.circle_memberships m
+        on m.community_id = p.community_id and m.user_id = me and m.status = 'active'
+      join public.circle_communities c
+        on c.id = p.community_id and c.status = 'live'
+     where p.depth = 0
+       and p.status = 'LIVE'
+       and (p.author_id is null or not private.blocked_between(me, p.author_id))
+       and (
+         p_sort = 'popular'
+         or p_before is null
+         or p.created_at < p_before
+         or (p.created_at = p_before and p_before_id is not null and p.id < p_before_id)
+       )
+     order by
+       case when p_sort = 'popular' then p.helpful_count end desc nulls last,
+       case when p_sort = 'popular' then p.reply_count end desc nulls last,
+       p.created_at desc,
+       p.id desc
+     limit lim;
+end;
+$function$;
+revoke all on function public.circle_following_posts(text, timestamptz, uuid, integer) from public, anon;
+grant execute on function public.circle_following_posts(text, timestamptz, uuid, integer) to authenticated;
+
 
 -- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roommates_4_grant_tidy.sql
 

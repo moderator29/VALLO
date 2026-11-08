@@ -58,10 +58,14 @@ export const SEVERITY_RULES: readonly SeverityRule[] = [
   { describes: "A message from Vallo Trust and Safety", title: /^a message from vallo trust and safety$/i, severity: "action", verb: "open" },
   { describes: "The outcome of your report or appeal", href: /^\/settings\/standing/, title: /^(we looked into your report|your appeal was)/i, severity: "update", verb: "seeOutcome" },
   { describes: "A restriction on your account was set or lifted", href: /^\/settings\/standing/, severity: "update", verb: "seeOutcome" },
-  /* CIRCLE: replies and mentions want an answer; held or restored posts are news. */
-  { describes: "A reply to your post, or a mention, in Circle", href: /^\/circle\/p\//, title: /(replied|answered|mentioned you)/i, severity: "action", verb: "reply" },
-  { describes: "A Circle community invite", href: /^\/circle/, title: /invited you to/i, severity: "action", verb: "open" },
-  { describes: "Your Circle post was held or restored", href: /^\/circle/, title: /(held|restored|is back)/i, severity: "update" },
+  /* CIRCLE, matched to the titles the SQL writes (20261107210200
+     features_circle_1_core, 20260804121638 social notifications): a reply,
+     an answer or a mention wants a reply; a join request wants a decision;
+     an accepted answer, a welcome and a removed post are news. */
+  { describes: "A reply, an answer or a mention in Circle", href: /^\/circle\/p\//, title: /^(new reply|new answer|you were mentioned)$/i, severity: "action", verb: "reply" },
+  { describes: "Someone asked to join your Circle community", href: /^\/circle\/c\/[^/]+\/manage/, title: /^join request: /i, severity: "action", verb: "review" },
+  { describes: "Your answer was accepted, or you were let into a community", href: /^\/circle\//, title: /^(answer accepted|welcome to )/i, severity: "update" },
+  { describes: "Your post was removed", title: /^your post was removed$/i, severity: "update" },
   { describes: "Likes, reposts, new followers and badges", kind: ["social"], title: /(liked|reposted|new follower|you earned)/i, severity: "fyi" },
   { describes: "Your post, story, event, bio or comment is live or being looked at", title: /( is live$| is being checked$)/i, severity: "fyi" },
   { describes: "We received your question; your request was sent", title: /^(we have your question|booking request sent)/i, severity: "fyi" },

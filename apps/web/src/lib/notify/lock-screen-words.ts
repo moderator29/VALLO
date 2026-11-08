@@ -277,3 +277,27 @@ export function circleMention(from: string, title: string): LockScreenWords {
 export function generic(title: string, body: string): LockScreenWords {
   return { title: cap(title, 50), body: cap(body, 90) };
 }
+
+/**
+ * THE PUSH PATH'S READER (8 November 2026): a notification row as the
+ * database wrote it, turned into the lock-screen words of the helper that
+ * fits it, or null when none does (the push keeps the row's own words). Used
+ * by `lib/push/policy.ts` for English lock screens.
+ */
+export function lockScreenWordsFor(n: { title: string; body: string | null; href?: string | null }): LockScreenWords | null {
+  const title = n.title.trim();
+  const body = (n.body ?? "").trim();
+  const href = n.href ?? "";
+  let m: RegExpExecArray | null;
+  if ((m = /^(.+) is interested in sharing a home$/i.exec(title))) return roommateInterest(m[1]!, body || null);
+  if ((m = /^(.+) accepted\. You are connected$/i.exec(title))) return roommateAccepted(m[1]!);
+  if (href.startsWith("/roommates") && (m = /^(.+) invited you to (.+)$/i.exec(title))) return roommateGroupInvite(m[1]!, m[2]!);
+  if (href.startsWith("/roommates") && (m = /^(.+) asked to join (.+)$/i.exec(title))) return roommateJoinRequest(m[1]!, m[2]!);
+  if ((m = /^(.+) asked to view your room$/i.exec(title))) return roommateViewingRequest(m[1]!, body || null);
+  if ((m = /^A new post matches "(.+)"$/i.exec(title))) return roommateSearchMatch(m[1]!, body);
+  if (/^a message from vallo trust and safety$/i.test(title)) return safetyMessage(body);
+  if (/^we looked into your report$/i.test(title)) return reportOutcome();
+  if (href.startsWith("/circle/") && (m = /^@?(\S+) (?:replied|answered): (.*)$/i.exec(body))) return circleReply(`@${m[1]!.replace(/^@/, "")}`, m[2]!);
+  if (href.startsWith("/circle/") && (m = /^@?(\S+) mentioned you: (.*)$/i.exec(body))) return circleMention(`@${m[1]!.replace(/^@/, "")}`, m[2]!);
+  return null;
+}

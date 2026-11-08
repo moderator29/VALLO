@@ -392,3 +392,24 @@ describe("decide with a muted conversation", () => {
     expect(other.action).not.toBe("suppress");
   });
 });
+
+describe("lock-screen words on the push path (8 November 2026)", () => {
+  it("uses the roommate helper's words for a request with no note", () => {
+    const decision = decide({
+      notification: {
+        queueId: "q-rm",
+        userId: "u1",
+        kind: "social" as QueuedNotification["kind"],
+        title: "Ada is interested in sharing a home",
+        body: null,
+        href: "/roommates/me?tab=requests",
+        createdAt: at("2026-03-02T11:59:00Z"),
+        expiresAt: at("2026-03-03T12:00:00Z"),
+      },
+      settings: {},
+      now: at("2026-03-02T12:00:00Z"),
+    });
+    expect(decision.action).toBe("send");
+    if (decision.action === "send") expect(decision.payload.body).toBe("Open Roommates to answer");
+  });
+});

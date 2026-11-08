@@ -7,6 +7,7 @@ import type { PushPayload } from "./types";
 import { actionsFor, recipientLocale } from "./actions";
 import { DEFAULT_LOCALE, localizePush, pushSummary, type Locale } from "@vallo/i18n";
 import { severityOf } from "@/lib/notify/severity";
+import { lockScreenWordsFor } from "@/lib/notify/lock-screen-words";
 import { familyOf } from "./family";
 
 /**
@@ -198,7 +199,10 @@ export function decide(input: {
   /* A11: the database wrote this in English; the lock screen shows it in the
      recipient's language where the catalogue has it (machine drafts for ha,
      yo and ig, awaiting native review), and in English otherwise. */
-  const localised = localizePush({ title: notification.title, body: notification.body }, locale);
+  /* The lock-screen helpers (lib/notify/lock-screen-words.ts) for the rows
+     they know, in English; every other row keeps its own words. */
+  const helped = locale === "en" ? lockScreenWordsFor(notification) : null;
+  const localised = helped ? { title: helped.title, body: helped.body } : localizePush({ title: notification.title, body: notification.body }, locale);
   /* THE VOICE (3 November 2026): English lock screens say it the way the app
      does ("You have a new follower"), held to the 40-character title limit. */
   const text = locale === "en" ? { ...localised, title: warmTitle(localised.title, PUSH_TITLE_MAX), body: warmBody(localised.body) } : localised;
