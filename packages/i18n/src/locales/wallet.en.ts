@@ -62,6 +62,13 @@ export const walletPhoneTakenEn = {
   action: "Use a different number",
 };
 
+export const walletHistoryKindLabelEn = {
+  payment: "Payment",
+  refund: "Refund",
+  earning: "Your share",
+  reversal: "Reversed by a refund",
+};
+
 export const walletWaitingEn = {
   withdrawal: {
     title: "On its way to your bank",
@@ -83,4 +90,17 @@ export const walletWaitingEn = {
     title: "Under review",
     body: "What we heard back did not match what you asked for, so a person is checking it before anything is shown as done. Your money is not lost. We will tell you as soon as it is settled.",
   },
+};
+
+export const walletStatusEn = {
+  notConnectedFigure: "Not connected yet",
+  notConnected: "Opens when Wallet is connected",
+  unreachableFigure: "Not available right now",
+  unreachableLine: "We could not read your figures just now. Nothing has moved.",
+  staleNote: "These are the last figures we confirmed. Money moves again once we reconnect.",
+  activityEmpty: {
+    title: "No activity yet",
+    body: "Money you add, send or withdraw shows here.",
+  },
+  recordsLabel: "Your money",
 };

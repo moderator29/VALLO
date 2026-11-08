@@ -90,6 +90,11 @@ import {
   socialPidginEn,
   socialFollowFirstEn,
   socialContactPolicyEn,
+  socialPostKindLabelEn,
+  socialPostKindHintEn,
+  socialPostKindPlaceholderEn,
+  socialAreaKindLabelEn,
+  socialAreaKindHintEn,
 } from "./social.en";
 /* The reminders screen's words, moved from lib/features/notices/copy.ts (SW11). */
 import { remindersEn } from "./reminders.en";
@@ -104,13 +109,13 @@ import { directoryCopyEn, directoryKindPluralEn, directoryKindOneEn } from "./di
 /* Workspace standing copy (SW11): draft, pending, refused, suspended. */
 import { workspaceStandingEn } from "./workspace.en";
 /* Wallet/money copy (SW11): move, onboarding, phone taken, waiting. */
-import { walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletWaitingEn } from "./wallet.en";
+import { walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletWaitingEn, walletHistoryKindLabelEn, walletStatusEn } from "./wallet.en";
 /* Settings search copy (SW11). */
 import { settingsSearchEn } from "./settings-search.en";
 /* Inspection report copy (SW11). */
 import { roomCopyEn, instantRoomCopyEn } from "./inspections.en";
 /* Supply roles copy (SW11). */
-import { proofPendingEn, noDocumentLabelEn } from "./supply-roles.en";
+import { proofPendingEn, noDocumentLabelEn, listingRoleFilterLabelEn, listingRoleFilterHeadingEn } from "./supply-roles.en";
 /* Places copy (SW11). */
 import { placesCopyEn, placesFailureEn } from "./places.en";
 /* Leaderboard copy (SW11). */
@@ -815,6 +820,11 @@ export const en = {
     pidgin: socialPidginEn,
     followFirst: socialFollowFirstEn,
     contactPolicy: socialContactPolicyEn,
+    postKindLabel: socialPostKindLabelEn,
+    postKindHint: socialPostKindHintEn,
+    postKindPlaceholder: socialPostKindPlaceholderEn,
+    areaKindLabel: socialAreaKindLabelEn,
+    areaKindHint: socialAreaKindHintEn,
   },
 
   /**
@@ -7419,6 +7429,8 @@ export const en = {
     onboarding: walletOnboardingEn,
     phoneTaken: walletPhoneTakenEn,
     waiting: walletWaitingEn,
+    status: walletStatusEn,
+    historyKindLabel: walletHistoryKindLabelEn,
   },
   /* Settings search copy (SW11). */
   settingsSearch: settingsSearchEn,
@@ -7431,6 +7443,8 @@ export const en = {
   supplyRoles: {
     proofPending: proofPendingEn,
     noDocumentLabel: noDocumentLabelEn,
+    roleFilterLabel: listingRoleFilterLabelEn,
+    roleFilterHeading: listingRoleFilterHeadingEn,
   },
   /* Places copy (SW11). */
   places: {

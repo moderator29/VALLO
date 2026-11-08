@@ -9,3 +9,11 @@ export const proofPendingEn = {
 };
 
 export const noDocumentLabelEn = "I have none of these";
+
+export const listingRoleFilterLabelEn = {
+  owner: "Owner direct",
+  agent: "Agent",
+  firm: "Registered firm",
+};
+
+export const listingRoleFilterHeadingEn = "Who is offering it";

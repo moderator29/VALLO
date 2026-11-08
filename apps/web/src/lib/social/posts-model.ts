@@ -10,6 +10,8 @@
  */
 import { getDictionary } from "@vallo/i18n";
 
+const _s = getDictionary("en").social;
+
 export const POST_KINDS = ["GIST", "ASK", "REPLY", "SHOWCASE", "SYSTEM"] as const;
 
 export type PostKind = (typeof POST_KINDS)[number];
@@ -19,20 +21,10 @@ export const COMPOSABLE_KINDS = ["GIST", "ASK"] as const;
 
 export type ComposableKind = (typeof COMPOSABLE_KINDS)[number];
 
-export const KIND_LABEL: Record<ComposableKind, string> = {
-  GIST: "Say something",
-  ASK: "Ask a question",
-};
-
-export const KIND_HINT: Record<ComposableKind, string> = {
-  GIST: "Anything worth knowing about the place.",
-  ASK: "Something you want an answer to. People who know the area will see it.",
-};
-
-export const KIND_PLACEHOLDER: Record<ComposableKind, string> = {
-  GIST: "What is happening?",
-  ASK: "What do you want to know?",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+export const KIND_LABEL: Record<ComposableKind, string> = _s.postKindLabel as Record<ComposableKind, string>;
+export const KIND_HINT: Record<ComposableKind, string> = _s.postKindHint as Record<ComposableKind, string>;
+export const KIND_PLACEHOLDER: Record<ComposableKind, string> = _s.postKindPlaceholder as Record<ComposableKind, string>;
 
 export const POST_MAX = 2000;
 
@@ -111,8 +103,6 @@ export const PROFILE_REPORT_REASONS: readonly ReportReason[] = [
   "OTHER",
 ];
 
-/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
-const _s = getDictionary("en").social;
 export const POST_COPY = _s.post;
 export const POST_FAILURE = _s.postFailure;
 

@@ -1,5 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 
+const _s = getDictionary("en").social;
+
 /**
  * Around: the shapes and the words for places.
  *
@@ -18,19 +20,9 @@ export const AREA_KINDS = ["CITY", "AREA", "ESTATE", "CAMPUS"] as const;
 
 export type AreaKind = (typeof AREA_KINDS)[number];
 
-export const AREA_KIND_LABEL: Record<AreaKind, string> = {
-  CITY: "City",
-  AREA: "Area",
-  ESTATE: "Estate",
-  CAMPUS: "Campus",
-};
-
-export const AREA_KIND_HINT: Record<AreaKind, string> = {
-  CITY: "A whole city, like Abuja.",
-  AREA: "A neighbourhood people name in conversation, like Yaba or Gwagwalada.",
-  ESTATE: "One gated estate, where the gate and the generator are shared.",
-  CAMPUS: "A university or polytechnic and the streets around it.",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+export const AREA_KIND_LABEL: Record<AreaKind, string> = _s.areaKindLabel as Record<AreaKind, string>;
+export const AREA_KIND_HINT: Record<AreaKind, string> = _s.areaKindHint as Record<AreaKind, string>;
 
 export const AREA_STATUSES = [
   "PROPOSED",
@@ -96,8 +88,6 @@ export const MODERATOR_REASON_MIN = 40;
 
 export const MODERATOR_REASON_MAX = 600;
 
-/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
-const _s = getDictionary("en").social;
 export const AREA_COPY = _s.area;
 export const AREA_FAILURE = _s.areaFailure;
 

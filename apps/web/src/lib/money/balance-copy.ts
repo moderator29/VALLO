@@ -58,7 +58,7 @@ export function confirmedAgo(iso: string | null, now: number): string {
   return `Confirmed ${ago.format(-Math.floor(h / 24), "day")}`;
 }
 
-export const STALE_NOTE = "These are the last figures we confirmed. Money moves again once we reconnect.";
+export const STALE_NOTE = _w.status.staleNote;
 
 /* ------------------------------------------------------- not connected
    The founder, 7 October: draw the real wallet now, even before the key is
@@ -66,18 +66,20 @@ export const STALE_NOTE = "These are the last figures we confirmed. Money moves 
    figure's place that reads as an amount (any figure would be invented, a
    zero included), and no paragraph about partners or rails. */
 
-export const NOT_CONNECTED_FIGURE = "Not connected yet";
-export const NOT_CONNECTED_LINE = "Opens when Wallet is connected";
+/** SW11: source of truth is now `packages/i18n/src/locales/wallet.en.ts`. */
+const _ws = _w.status;
+export const NOT_CONNECTED_FIGURE = _ws.notConnectedFigure;
+export const NOT_CONNECTED_LINE = _ws.notConnected;
 
 /** Connected, but the figures could not be read just now. */
-export const UNREACHABLE_FIGURE = "Not available right now";
-export const UNREACHABLE_LINE = "We could not read your figures just now. Nothing has moved.";
+export const UNREACHABLE_FIGURE = _ws.unreachableFigure;
+export const UNREACHABLE_LINE = _ws.unreachableLine;
 
-export const ACTIVITY_EMPTY = { title: "No activity yet", body: "Money you add, send or withdraw shows here." } as const;
+export const ACTIVITY_EMPTY = _ws.activityEmpty;
 
 /* The founder's ruling, 7 October: the wallet is where all money lives, so
    the records the side nav used to list sit on the wallet as one group. */
-export const WALLET_RECORDS_LABEL = "Your money";
+export const WALLET_RECORDS_LABEL = _ws.recordsLabel;
 export const WALLET_RECORDS = [
   { href: "/payments", title: "Payments", icon: "credit-card" },
   { href: "/receipts", title: "Receipts", icon: "receipt" },

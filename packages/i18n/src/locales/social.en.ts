@@ -145,6 +145,37 @@ export const socialFollowFirstEn = {
   body: "They take new messages only from people who follow them. Follow them from their profile and the Message button appears.",
 };
 
+/** SW11: post compose kind labels, hints and placeholders from posts-model.ts. */
+export const socialPostKindLabelEn = {
+  GIST: "Say something",
+  ASK: "Ask a question",
+};
+
+export const socialPostKindHintEn = {
+  GIST: "Anything worth knowing about the place.",
+  ASK: "Something you want an answer to. People who know the area will see it.",
+};
+
+export const socialPostKindPlaceholderEn = {
+  GIST: "What is happening?",
+  ASK: "What do you want to know?",
+};
+
+/** SW11: area kind labels and hints from areas-model.ts. */
+export const socialAreaKindLabelEn = {
+  CITY: "City",
+  AREA: "Area",
+  ESTATE: "Estate",
+  CAMPUS: "Campus",
+};
+
+export const socialAreaKindHintEn = {
+  CITY: "A whole city, like Abuja.",
+  AREA: "A neighbourhood people name in conversation, like Yaba or Gwagwalada.",
+  ESTATE: "One gated estate, where the gate and the generator are shared.",
+  CAMPUS: "A university or polytechnic and the streets around it.",
+};
+
 /** SW11: the contact policy words from profiles-model.ts. */
 export const socialContactPolicyEn = {
   REQUEST: {

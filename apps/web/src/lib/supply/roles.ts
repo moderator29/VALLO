@@ -223,6 +223,7 @@ export type StandingCopy = {
 
 /** SW11: source of truth is now `packages/i18n/src/locales/workspace.en.ts`. */
 const _ws = getDictionary("en").workspaceStanding;
+const _sr = getDictionary("en").supplyRoles;
 export const WORKSPACE_STANDING_COPY: Record<WorkspaceStanding, StandingCopy> = {
   active: { ..._ws.active, selectable: true },
   draft: { ..._ws.draft, selectable: true },
@@ -358,23 +359,9 @@ export const LISTING_ROLE_SENTENCE: Record<ListingRole, string> = {
   firm: "Listed by {name}",
 };
 
-/** The filter drawer's own label for each value, shorter than the sentence. */
-export const LISTING_ROLE_FILTER_LABEL: Record<ListingRole, string> = {
-  owner: "Owner direct",
-  agent: "Agent",
-  firm: "Registered firm",
-};
-
-/**
- * What the drawer calls the question these three answer.
- *
- * Here rather than in `packages/i18n` for the same reason the labels above are
- * here: the three values, the sentence, the short label and the heading are
- * one vocabulary, and this module exists because there were three of them in
- * the tree disagreeing with each other. A heading kept somewhere else is the
- * fourth.
- */
-export const LISTING_ROLE_FILTER_HEADING = "Who is offering it";
+/** SW11: source of truth is now `packages/i18n/src/locales/supply-roles.en.ts`. */
+export const LISTING_ROLE_FILTER_LABEL: Record<ListingRole, string> = _sr.roleFilterLabel as Record<ListingRole, string>;
+export const LISTING_ROLE_FILTER_HEADING = _sr.roleFilterHeading;
 
 /**
  * The three dated facts, on three different subjects.
@@ -423,8 +410,6 @@ export const DATED_FACTS = {
  * where it stands and the mark stays dark, which is worth more than a badge
  * that lies.
  */
-/** SW11: source of truth is now `packages/i18n/src/locales/supply-roles.en.ts`. */
-const _sr = getDictionary("en").supplyRoles;
 export const PROOF_PENDING_COPY = _sr.proofPending;
 
 /**
