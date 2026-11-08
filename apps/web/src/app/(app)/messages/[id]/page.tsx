@@ -203,7 +203,7 @@ export default async function ConversationPage({
        under the lister's own client for the quick replies' figures. */
     const desk = listingThread && role === "host";
     /* Saved replies, for the lister only: the answers they give all day. */
-    const savedReplies = role === "host" ? templatesAsReplies(await readMyReplyTemplates()) : [];
+    const savedRepliesP = role === "host" ? readMyReplyTemplates() : Promise.resolve([]);
     /* B6: the renter's question chips, on a listing thread nobody has written
        in yet. The listing is read for the same reason as the desk's: to leave
        out what it already answers. */
@@ -228,6 +228,7 @@ export default async function ConversationPage({
       accountMoment,
       showMe,
       chatHintGaps,
+      savedRepliesRaw,
     ] = await Promise.all([
       /* The shared listings and bookings, expanded into cards for this reader. */
       resolveCards(
@@ -293,7 +294,9 @@ export default async function ConversationPage({
         role,
         listingId: thread.listing?.id ?? null,
       }),
+      savedRepliesP,
     ]);
+    const savedReplies = templatesAsReplies(savedRepliesRaw);
     /* "On Vallo since" is drawn once, small, under the line that keeps chats
        and payments inside Vallo (founder, 11 October 2026): taken out of the
        person line, and the Record's copy of it is not drawn either. No row,

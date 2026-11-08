@@ -122,7 +122,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 5.3 A9: Live in-app notification banner subscription wiring -- DONE (useNotificationsRealtime in lib/messages/useRealtime.ts subscribes to postgres_changes INSERT on notifications; NotifyBanner wired in AppShell via lazy load; LiveNotifications wired for full centre)
 
 ### Vallo Circle
-- [ ] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; invites DONE with migration + actions + UI; needs: shared shortlists, plans, vouches, notifications, privacy)
+- [x] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; invites DONE, vouches DONE, shared shortlists DONE, plans DONE; notifications on invite/vouch/plan DONE; community settings update + privacy controls DONE)
 
 ### Ratings
 - [x] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report) -- DONE (ReviewForm.tsx + ReviewPanels.tsx at /bookings/[id]/review/, TenancyReviewForm at /rent/review/[paymentId]/, reviews_write_path + review_responses DB migrations, ReviewsWorkspace for agents)

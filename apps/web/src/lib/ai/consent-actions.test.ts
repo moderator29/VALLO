@@ -68,7 +68,7 @@ describe("STORE-07: withdrawing agreement to the AI disclosure", () => {
     expect(await hasAiConsent({ supabase: client(), userId: "u1" })).toBe(true);
     expect(jar.has(AI_CONSENT_COOKIE)).toBe(true);
 
-    expect(await withdrawAiConsent()).toEqual({ ok: true });
+    expect(await withdrawAiConsent()).toEqual({ ok: true, data: null });
 
     expect(jar.has(AI_CONSENT_COOKIE)).toBe(false);
     expect(db.settings.aiConsent).toBeNull();
@@ -89,7 +89,7 @@ describe("STORE-07: withdrawing agreement to the AI disclosure", () => {
     db.signedIn = false;
     jar.set(AI_CONSENT_COOKIE, consentCookieValue());
     expect(await hasAiConsent({})).toBe(true);
-    expect(await withdrawAiConsent()).toEqual({ ok: true });
+    expect(await withdrawAiConsent()).toEqual({ ok: true, data: null });
     expect(await hasAiConsent({})).toBe(false);
     expect(db.writes).toHaveLength(0);
   });
@@ -97,12 +97,12 @@ describe("STORE-07: withdrawing agreement to the AI disclosure", () => {
   it("reports a failed account write instead of claiming it is withdrawn", async () => {
     db.settings = { aiConsent: { version: AI_CONSENT_VERSION, at: "2026-09-24T10:00:00.000Z" } };
     db.writeError = { message: "down" };
-    expect(await withdrawAiConsent()).toEqual({ ok: false });
+    expect((await withdrawAiConsent()).ok).toBe(false);
   });
 
   it("does not overwrite the settings it could not read", async () => {
     db.readError = { message: "down" };
-    expect(await withdrawAiConsent()).toEqual({ ok: false });
+    expect((await withdrawAiConsent()).ok).toBe(false);
     expect(db.writes).toHaveLength(0);
   });
 });

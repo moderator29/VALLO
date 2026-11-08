@@ -34,7 +34,7 @@ export function AiConsentCard({ t, consented }: { t: AiConsentCopy; consented: b
   const withdraw = () => {
     startTransition(async () => {
       try {
-        const result = await withdrawAiConsent().catch(() => ({ ok: false }));
+        const result = await withdrawAiConsent().catch(() => ({ ok: false as const, error: "Network error" }));
         if (!result.ok) {
           banner.error(copy.failed, { retry: withdraw });
           return;

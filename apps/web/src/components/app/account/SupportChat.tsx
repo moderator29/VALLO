@@ -297,7 +297,7 @@ export function SupportChat({
         /* Sending is agreeing (29 October 2026): no card in the chat. The
            agreement is recorded, then the message goes. */
         setConsent("yes");
-        const recorded = await recordAiConsent().catch(() => ({ ok: false }));
+        const recorded = await recordAiConsent().catch(() => ({ ok: false as const, error: "Network error" }));
         if (!recorded.ok) setConsent("ask");
         return send(raw, recorded.ok ? "yes" : "declined");
       }

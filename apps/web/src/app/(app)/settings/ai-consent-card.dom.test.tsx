@@ -13,7 +13,7 @@ import { getDictionary } from "@vallo/i18n";
 import { axe, closeAxe, hasBrowser } from "@/lib/a11y/axe";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => undefined, push: () => undefined }) }));
-vi.mock("@/lib/ai/consent-actions", () => ({ withdrawAiConsent: async () => ({ ok: true }) }));
+vi.mock("@/lib/ai/consent-actions", () => ({ withdrawAiConsent: async () => ({ ok: true, data: null }) }));
 
 import { AiConsentCard } from "./AiConsentCard";
 

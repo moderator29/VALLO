@@ -52,13 +52,13 @@ export function MyReports({ list, locale }: { list: MyReportsList; locale: Local
       try {
         const result = await withdrawMyReport({ id });
         /* The outcome goes to the one banner (Grade 1). */
-        if (result.state === "ok") {
+        if (!result.ok) {
+          banner.error(copy.withdrawFailed, { retry: () => send(id) });
+        } else if (result.data.state === "ok") {
           banner.success(copy.withdrawn);
           router.refresh();
-        } else if (result.state === "closed") {
-          banner.info(copy.withdrawClosed);
         } else {
-          banner.error(copy.withdrawFailed, { retry: () => send(id) });
+          banner.info(copy.withdrawClosed);
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
