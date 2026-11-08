@@ -122,3 +122,38 @@ alter table public.funnel_events add constraint funnel_events_step_check check (
   'roommates_home_view', 'roommates_profile_live', 'roommates_interest_sent', 'roommates_interest_accepted',
   'roommates_chat_opened', 'roommates_listing_published', 'roommates_viewing_requested', 'roommates_group_created'
 ]::text[]));
+
+-- Signed-in Roommates milestones count once per ACCOUNT (the first time each
+-- person does it), like 'verified'; the home view stays one per visit. Same
+-- function as 20260930084814, one list longer.
+create or replace function public.record_funnel_event(
+  p_step text, p_visit uuid, p_locale text, p_surface text, p_door text default null)
+returns void
+language plpgsql
+volatile security definer
+set search_path to ''
+as $function$
+declare
+  who uuid := null;
+begin
+  if p_visit is null then
+    return;
+  end if;
+  if p_step in ('verified', 'first_search', 'first_result',
+                'roommates_profile_live', 'roommates_interest_sent', 'roommates_interest_accepted',
+                'roommates_chat_opened', 'roommates_listing_published', 'roommates_viewing_requested',
+                'roommates_group_created') then
+    who := (select auth.uid());
+    if who is null then
+      return;
+    end if;
+  end if;
+  insert into public.funnel_events (step, visit_id, locale, surface, door, user_id)
+  values (p_step, p_visit, p_locale, p_surface, p_door, who)
+  on conflict do nothing;
+exception when check_violation then
+  return;
+end;
+$function$;
+revoke all on function public.record_funnel_event(text, uuid, text, text, text) from public;
+grant execute on function public.record_funnel_event(text, uuid, text, text, text) to anon, authenticated;
