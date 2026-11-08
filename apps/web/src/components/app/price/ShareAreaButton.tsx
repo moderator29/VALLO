@@ -155,11 +155,13 @@ function MintableShare({
      */
     if (card.seal === null) {
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     const result = await shareAreaPrices({ seal: card.seal });
     if (!result.ok) {
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     const door = await createShareLink({ kind: "price_area", targetId: result.data.id });
@@ -167,6 +169,7 @@ function MintableShare({
       /* No door, no link. The in-app address answers a stranger with a
          sign-in page, so offering it would be offering a dead card. */
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     setDoorPath(door.data.path);
@@ -226,9 +229,6 @@ function MintableShare({
             <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.making}</p>
           )}
 
-          {state === "failed" && (
-            <p className="nf-body-sm text-[var(--nf-state-error)]">{copy.failed}</p>
-          )}
 
           {state === "made" && href !== null && (
             <div className="nf-pc-share__link">

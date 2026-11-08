@@ -20,6 +20,7 @@ import type { ActionResult } from "@/lib/actions/envelope";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE CHARGEBACKS DESK'S CONTROLS: the next moves on a case, recording a new
@@ -394,8 +395,8 @@ function OpenSheet({ copy, defaults, onClose }: { copy: DeskCopy; defaults?: Ope
       }
     });
 
-  const fieldError = (key: string) =>
-    errors[key] ? <span className="mt-2xs block text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">{errors[key]}</span> : null;
+  /* A field's problem is said by the one banner; the note stays for a screen reader (founder, 7 November 2026). */
+  const fieldError = (key: string) => <FieldProblem id={`chargeback-${key}-problem`} message={errors[key]} />;
 
   return (
     <Sheet

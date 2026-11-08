@@ -365,10 +365,12 @@ export function StopsDesk({
     FormData
   >(liftAgentStop, null);
   /* A refusal is said by the one banner at the top of the screen (Grade 1);
-     a missing reason stays under its field, and what was done stays on the
-     agent's card as its record. */
-  useActionBanner(liftState);
-  useActionBanner(stopState && !stopState.ok && stopState.fieldErrors?.reason ? null : stopState);
+     the banner also says what was done (founder, 7 November 2026), and the
+     agent's card keeps the counts as its record. */
+  useActionBanner(liftState, { ok: liftState?.ok ? `${liftState.data.displayName} is trading again` : undefined });
+  useActionBanner(stopState && !stopState.ok && stopState.fieldErrors?.reason ? null : stopState, {
+    ok: stopState?.ok ? `${stopState.data.displayName} has been stopped and told why` : undefined,
+  });
 
   return (
     <div className="space-y-section-tight">

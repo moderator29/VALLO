@@ -56,7 +56,6 @@ export function ReviewActionBar({
   /* C8: reason codes as chips; each sends the lister one reviewed sentence. */
   const [codes, setCodes] = useState<string[]>([]);
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [armed, setArmed] = useState(false);
   const disarm = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -80,7 +79,6 @@ export function ReviewActionBar({
   const withLister = status === "MORE_INFO_REQUIRED";
 
   const run = (decision: Decision): void => {
-    setError(null);
     startTransition(async () => {
       try {
         const sendsReasons = decision === "reject" || decision === "request_changes";
@@ -95,7 +93,7 @@ export function ReviewActionBar({
              outcome, and the banner says it (a retry except for a rejection,
              which is confirmed by pressing Reject twice). */
           const about = result.fieldErrors?.["notes"];
-          if (about) setError(about);
+          if (about) banner.error(about);
           else banner.error(result.error, decision === "reject" ? undefined : { retry: () => run(decision) });
           /* An approval that could not go live has still moved the status. */
           router.refresh();
@@ -223,11 +221,6 @@ export function ReviewActionBar({
           </p>
         ) : null}
         {pending ? <p className="nf-rv-msg">Recording the decision.</p> : null}
-        {error ? (
-          <p className="nf-rv-msg nf-rv-msg--error" role="alert">
-            {error}
-          </p>
-        ) : null}
       </div>
     </div>
   );

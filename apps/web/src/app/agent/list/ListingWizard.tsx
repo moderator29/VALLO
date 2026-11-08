@@ -2,7 +2,7 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { VerifyGateLink } from "@/components/app/VerifyGateLink";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatDate, formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { ShotList } from "@/components/agent/ShotList";
@@ -148,6 +148,7 @@ import "@/app/css/catalogue.css";
 import "@/app/css/lister-publish.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The List Apartment wizard: eight steps, canon reference 03.
@@ -510,6 +511,7 @@ function Field({
   fromMessage?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const problemId = useId();
   return (
     <label className="block">
       <span className="nf-label">
@@ -517,13 +519,10 @@ function Field({
         {fromMessage}
       </span>
       {children}
-      {error ? (
-        <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </span>
-      ) : hint ? (
-        <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">{hint}</span>
-      ) : null}
+      {hint ? <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">{hint}</span> : null}
+      {/* A field's problem is said by the one banner; the note stays for a
+          screen reader (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */}
+      <FieldProblem id={problemId} message={error} />
     </label>
   );
 }
@@ -3034,11 +3033,7 @@ export function ListingWizard({
                     }
                     placeholder="150"
                   />
-                  {fieldErrors.sizeSqm && (
-                    <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.sizeSqm}
-                    </span>
-                  )}
+                  <FieldProblem id="wizard-sizeSqm-problem" message={fieldErrors.sizeSqm} />
                 </FactRow>
 
                 {asks("furnishing") && (
@@ -3089,11 +3084,7 @@ export function ListingWizard({
                       placeholder="5"
                     />
                   </div>
-                  {(fieldErrors.floor || fieldErrors.totalFloors) && (
-                    <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.floor ?? fieldErrors.totalFloors}
-                    </span>
-                  )}
+                  <FieldProblem id="wizard-floor-problem" message={fieldErrors.floor ?? fieldErrors.totalFloors} />
                 </FactRow>
                 )}
               </div>
@@ -3443,11 +3434,7 @@ export function ListingWizard({
         {step === 3 && asks("amenities") && (
           <div>
             <Note>{copy.amenities.intro}</Note>
-            {fieldErrors.amenities && (
-              <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-                {fieldErrors.amenities}
-              </p>
-            )}
+            <FieldProblem id="wizard-amenities-problem" message={fieldErrors.amenities} />
             {/* Three across, a glyph over one word, a round tick on the ones
                 that are on. They were wrapping chips, which put the same list
                 on the screen with none of the render's grid, none of its
@@ -3568,15 +3555,10 @@ export function ListingWizard({
                   moreLabel={counterAria("more", copy.drawn.supply.backupHours)}
                   onChange={(v) => set("powerBackupHours", String(v))}
                 />
-                {fieldErrors.powerBackupHours ? (
-                  <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                    {fieldErrors.powerBackupHours}
-                  </span>
-                ) : (
-                  <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">
-                    &quot;Generator&quot; on its own tells a guest nothing; the hours are the answer.
-                  </span>
-                )}
+                <FieldProblem id="wizard-powerBackupHours-problem" message={fieldErrors.powerBackupHours} />
+                <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">
+                  &quot;Generator&quot; on its own tells a guest nothing; the hours are the answer.
+                </span>
               </div>
             )}
 
@@ -3939,11 +3921,7 @@ export function ListingWizard({
                     {TENURE_CHOICES.find((c) => c.value === values.tenure)?.blurb ??
                       "A buyer will ask before anything else. Answering here saves both of you a journey."}
                   </p>
-                  {fieldErrors.tenure && (
-                    <p className="nf-body-sm mt-inline-tight font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.tenure}
-                    </p>
-                  )}
+                  <FieldProblem id="wizard-tenure-problem" message={fieldErrors.tenure} />
                 </fieldset>
 
                 <fieldset>

@@ -96,8 +96,8 @@ export function TermForm({
         <label className="nf-label" htmlFor={`${id}-term`}>
           {copy.termLabel}
         </label>
-        <input id={`${id}-term`} className="nf-field" value={term} maxLength={100} onChange={(e) => setTerm(e.target.value)} aria-invalid={errors["term"] ? true : undefined} />
-        {errors["term"] && <p className="nf-caption mt-xs text-[var(--nf-state-error)]">{errors["term"]}</p>}
+        <input id={`${id}-term`} className="nf-field" value={term} maxLength={100} onChange={(e) => setTerm(e.target.value)} aria-invalid={errors["term"] ? true : undefined} aria-describedby={errors["term"] ? `${id}-term-problem` : undefined} />
+        <FieldProblem id={`${id}-term-problem`} message={errors["term"]} />
       </div>
       <Select id={`${id}-category`} label={copy.categoryLabel} value={category} options={categories} onChange={setCategory} />
       <Select id={`${id}-action`} label={copy.actionLabel} value={action} options={actions} onChange={setAction} error={errors["action"]} />
@@ -106,17 +106,17 @@ export function TermForm({
         <label className="nf-label" htmlFor={`${id}-reason`}>
           {copy.reasonLabel}
         </label>
-        <textarea id={`${id}-reason`} className="nf-field" rows={2} maxLength={400} value={reason} onChange={(e) => setReason(e.target.value)} aria-invalid={errors["reason"] ? true : undefined} />
+        <textarea id={`${id}-reason`} className="nf-field" rows={2} maxLength={400} value={reason} onChange={(e) => setReason(e.target.value)} aria-invalid={errors["reason"] ? true : undefined} aria-describedby={errors["reason"] ? `${id}-reason-problem` : undefined} />
         <p className="nf-caption mt-xs">{copy.reasonHint}</p>
-        {errors["reason"] && <p className="nf-caption text-[var(--nf-state-error)]">{errors["reason"]}</p>}
+        <FieldProblem id={`${id}-reason-problem`} message={errors["reason"]} />
       </div>
       {action === "refuse" && (
         <div className="sm:col-span-2">
           <label className="nf-label" htmlFor={`${id}-refusal`}>
             {copy.refusalLabel}
           </label>
-          <textarea id={`${id}-refusal`} className="nf-field" rows={2} maxLength={400} value={refusalReason} onChange={(e) => setRefusalReason(e.target.value)} aria-invalid={errors["refusalReason"] ? true : undefined} />
-          {errors["refusalReason"] && <p className="nf-caption text-[var(--nf-state-error)]">{errors["refusalReason"]}</p>}
+          <textarea id={`${id}-refusal`} className="nf-field" rows={2} maxLength={400} value={refusalReason} onChange={(e) => setRefusalReason(e.target.value)} aria-invalid={errors["refusalReason"] ? true : undefined} aria-describedby={errors["refusalReason"] ? `${id}-refusal-problem` : undefined} />
+          <FieldProblem id={`${id}-refusal-problem`} message={errors["refusalReason"]} />
         </div>
       )}
       <div className="flex flex-wrap items-center gap-inline sm:col-span-2">

@@ -21,7 +21,7 @@
  */
 
 /** Open a channel once the client has loaded; the returned stop is safe to call at any time. */
-function whenLoaded(open: (supabase: BrowserClient) => () => void): () => void {
+export function whenLoaded(open: (supabase: BrowserClient) => () => void): () => void {
   let cancelled = false;
   let stop: (() => void) | null = null;
   void loadBrowserClient()

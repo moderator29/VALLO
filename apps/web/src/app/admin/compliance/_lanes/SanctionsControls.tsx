@@ -23,17 +23,16 @@ export function SanctionsUpload({ copy }: { copy: Copy }) {
   const router = useRouter();
   /* The file's size is the field's own rule, said under it; what the upload
      did is the outcome, and the banner says it. */
-  const [tooLarge, setTooLarge] = useState(false);
   const [pending, start] = useSafeTransition();
   const act = (form: FormData): void =>
     start(async () => {
       try {
         const file = form.get("file");
         if (file instanceof File && file.size > 4 * 1024 * 1024) {
-          setTooLarge(true);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(copy.uploadTooLarge);
           return;
         }
-        setTooLarge(false);
         const response = await fetch("/api/compliance/sanctions-upload", { method: "POST", body: form }).catch(() => null);
         const answer: DeskAnswer = ((await response?.json().catch(() => null)) as DeskAnswer | null) ?? { ok: false, error: "failed" };
         if (answer.ok) {
@@ -71,11 +70,6 @@ export function SanctionsUpload({ copy }: { copy: Copy }) {
           {copy.uploadGo}
         </Button>
       </div>
-      {tooLarge && (
-        <p className="nf-body-sm mt-row" role="alert">
-          {copy.uploadTooLarge}
-        </p>
-      )}
     </form>
   );
 }

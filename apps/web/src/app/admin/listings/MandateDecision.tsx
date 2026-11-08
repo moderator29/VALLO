@@ -61,6 +61,8 @@ export function MandateDecision({ mandateId, copy }: { mandateId: string; copy: 
         /* The decided line stays as the card's record (nothing re-reads it
            here); the banner says it as it happens. */
         setDone(decision === "approve" ? "approved" : "rejected");
+        /* The line keeps the record; the banner says it (founder, 7 November 2026). */
+        banner.success(decision === "approve" ? d.approved : d.rejected);
         banner.success(decision === "approve" ? d.approved : d.rejected);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
