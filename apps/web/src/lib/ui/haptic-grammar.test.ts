@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
  * `navigator.vibrate(` anywhere else would be a second grammar.
  */
 const SRC = join(__dirname, "..", "..");
-const ALLOWED = new Set(["lib/ui/feedback.ts", "lib/native/device.ts"]);
+const ALLOWED = new Set(["lib/ui/feedback.ts"]);
 
 function files(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {

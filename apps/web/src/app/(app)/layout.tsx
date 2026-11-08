@@ -95,10 +95,9 @@ export default async function AppLayout({
   /* The startup track (13 October 2026): the gate's key read joins it, for
      the same reason. It used to wait for the gate's decision, in series. */
   void passkeyOfferedThisRequest();
-  /* NO PHONE STEP AT THE DOOR (founder, 6 November 2026). The number is
-     asked at the first deal by the moments gate (`lib/phone-otp/gate.ts`),
-     never before a member may use the app. `/sign-up/phone` still works for
-     anyone who opens it, and Settings, Phone is where it is added any time. */
+  /* The number is asked at the first deal by the moments gate
+     (`lib/phone-otp/gate.ts`), not at sign-up. Settings, Phone is where
+     it is added any time. */
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
   /*

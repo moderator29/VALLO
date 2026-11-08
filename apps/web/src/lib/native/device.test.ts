@@ -38,7 +38,7 @@ vi.mock("@capacitor/core", () => ({
   },
 }));
 
-import { canCapturePhoto, capturePhoto, nativeHaptic, nativeShare, photoFile } from "./device";
+import { canCapturePhoto, capturePhoto, nativeShare, photoFile } from "./device";
 
 function inShell(native: boolean) {
   vi.stubGlobal("window", native ? { Capacitor: { isNativePlatform: () => true, getPlatform: () => "ios" } } : {});
@@ -54,7 +54,6 @@ describe("on the website", () => {
   it("handles nothing and loads no plugin", async () => {
     inShell(false);
     expect(await nativeShare({ url: "https://www.vallospaces.com/listing/x" })).toBe("unhandled");
-    expect(await nativeHaptic()).toBe(false);
     expect(await canCapturePhoto()).toBe(false);
     expect(await capturePhoto()).toBeNull();
     expect(seam.share).not.toHaveBeenCalled();
@@ -79,14 +78,6 @@ describe("inside the shell", () => {
     inShell(true);
     seam.available.delete("Share");
     expect(await nativeShare({ url: "u" })).toBe("unhandled");
-  });
-
-  it("taps the haptic engine", async () => {
-    inShell(true);
-    expect(await nativeHaptic("tap")).toBe(true);
-    expect(seam.impact).toHaveBeenCalledWith({ style: "LIGHT" });
-    expect(await nativeHaptic("success")).toBe(true);
-    expect(seam.notification).toHaveBeenCalledWith({ type: "SUCCESS" });
   });
 
   it("returns the camera's photograph as an image File", async () => {
