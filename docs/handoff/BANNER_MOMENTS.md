@@ -151,98 +151,98 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 | C67 | components/app/price/ShareAreaButton.tsx:177 | Area link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
 | C68 | components/site/MoveInCalculator.tsx:115 | Calculator link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
 | C69 | components/ui/ExternalLinkSheet.tsx:127 | External link copied | label turns "Copied" | "Link copied" | success | none | done (batch 2) |
-| C70 | components/social/PlacePicker.tsx:264 | Place search failed | red line | the failure | error | Try again | todo |
-| C71 | components/social/feed/ListingPicker.tsx:115 | Listing picker failed | note | the failure | error | Try again | todo |
-| C72 | components/social/feed/Composer.tsx:661 | Post not published | red line | the refusal | error | Try again | todo |
-| C73 | components/social/feed/Composer.tsx:654 | Post waiting (offline) | caption | "Saved on your device. It posts when you're back online" | info | none | todo |
-| C74 | components/support/PhotoField.tsx:93 | Support photo refused | red caption | the refusal | error | none | todo |
-| C75 | components/support/PhotoField.tsx:119 | Support photo upload failed | red caption | the failure | error | Try again | todo |
-| C76 | components/passport/PassportThreadRows.tsx:118 | Passport share change failed | red caption | the failure | error | Try again | todo |
-| C77 | components/passport/PassportSettings.tsx:101 | Passport setting not saved | red span | the failure | error | Try again | todo |
-| C78 | components/passport/PassportSettings.tsx | Passport setting saved | no word | "Your passport setting is saved" | success | none | todo |
-| C79 | components/site/NewsletterForm.tsx:62 | Newsletter email refused | red caption | its words | error | none | todo (field) |
-| C80 | components/site/NewsletterForm.tsx:33 | Newsletter subscribed | status line replaces the form | kept panel + "You're on the list" | success | none | todo |
-| C81 | components/app/safety/UnsafeSheet.tsx:154 | Unsafe report filed | record panel in the sheet | kept + "Your report is sent" | success | none | todo |
+| C70 | components/social/PlacePicker.tsx:264 | Place search failed | red line | the failure | error | Try again | done (batch 3) |
+| C71 | components/social/feed/ListingPicker.tsx:115 | Listing picker failed | note | the failure | error | Try again | done (batch 3) |
+| C72 | components/social/feed/Composer.tsx:661 | Post not published | red line | the refusal | error | Try again | done (batch 3) |
+| C73 | components/social/feed/Composer.tsx:654 | Post waiting (offline) | caption | "Saved on your device. It posts when you're back online" | info | none | done (batch 3) |
+| C74 | components/support/PhotoField.tsx:93 | Support photo refused | red caption | the refusal | error | none | done (batch 3) |
+| C75 | components/support/PhotoField.tsx:119 | Support photo upload failed | red caption | the failure | error | Try again | done (batch 3) |
+| C76 | components/passport/PassportThreadRows.tsx:118 | Passport share change failed | red caption | the failure | error | Try again | done (batch 3) |
+| C77 | components/passport/PassportSettings.tsx:101 | Passport setting not saved | red span | the failure | error | Try again | done (batch 3) |
+| C78 | components/passport/PassportSettings.tsx | Passport setting saved | no word | "Your passport setting is saved" | success | none | done (batch 3) |
+| C79 | components/site/NewsletterForm.tsx:62 | Newsletter email refused | red caption | its words | error | none | done (batch 3) |
+| C80 | components/site/NewsletterForm.tsx:33 | Newsletter subscribed | status line replaces the form | kept panel + "You're on the list" | success | none | done (batch 3) |
+| C81 | components/app/safety/UnsafeSheet.tsx:154 | Unsafe report filed | record panel in the sheet | kept + "Your report is sent" | success | none | done (batch 3) |
 | C82 | components/app/assistant/PersonHandoff.tsx:145 | Handed to a person | record | kept (assistant owner) | n/a | n/a | kept |
 | C83 | app/(app)/settings/invite/InviteShare.tsx:30 | Invite link copied | label "Copied" | "Invite link copied" (via A6) | success | none | done (batch 1) |
 | C84 | components/app/account/InviteTicket.tsx | Invite code or link copied | label "Copied" | "Invite link copied" (via A6) | success | none | done (already through useCopy) |
 | C85 | components/app/listing/ListingCode.tsx:71 | Listing code copied | label "Copied" | "Code copied" (via A6) | success | none | done (batch 1) |
 | C86 | components/app/payments/crypto/CryptoPaymentStatus.tsx:124 | Wallet address copied | label "Copied" | "Address copied" (via A6) | success | none | todo |
 | C87 | components/app/payments/PaymentMethodsPanel.tsx:250 | Adding a card | status line while it works | kept: progress, not an outcome | n/a | n/a | kept |
-| C88 | components/compliance/PepQuestion.tsx:45 | PEP answer saved | "Saved." in the card head | "Your answer is saved" | success | none | todo |
-| C89 | components/compliance/PepQuestion.tsx:125 | PEP answer refused | caption | the refusal | error | Try again | todo |
-| C90 | components/compliance/PepQuestion.tsx:84 | PEP field refused | caption under the field | its words | error | none | todo (field) |
-| C91 | app/(app)/messages/new/FirstMessage.tsx:111 | First message not sent | caption | the refusal | error | Try again | todo (MSG file) |
-| C92 | app/(app)/messages/share/SharePicker.tsx:251 | Share to a thread failed | red caption | the refusal | error | Try again | todo (MSG file) |
-| C93 | app/(app)/messages/Inbox.tsx:860 | Inbox action failed | red line | the refusal | error | Try again | todo (MSG file) |
-| C94 | components/app/messages/StageControl.tsx:150 | Stage change refused | red line | the refusal | error | Try again | todo (MSG file) |
-| C95 | components/app/messages/StageControl.tsx:270 | Stage change refused (second form) | red line | the refusal | error | Try again | todo (MSG file) |
-| C96 | components/app/messages/AvailabilityCard.tsx:128 | Availability answer refused | red line | the refusal | error | Try again | todo (MSG file) |
-| C97 | components/app/messages/ForwardSheet.tsx:139 | Forward refused | red line | the refusal | error | Try again | todo (MSG file) |
-| C98 | components/app/messages/ShareSheet.tsx:211 | Share failed | red caption | the refusal | error | Try again | todo (MSG file) |
-| C99 | app/(app)/messages/[id]/ThreadOptionsSheet.tsx:337 | Thread option failed | alert in the sheet | the refusal | error | Try again | todo (MSG file) |
-| C100 | components/calls/CallButtons.tsx:122 | Call could not start | note beside the call buttons | the note | error | Try again | todo |
+| C88 | components/compliance/PepQuestion.tsx:45 | PEP answer saved | "Saved." in the card head | "Your answer is saved" | success | none | done (batch 3) |
+| C89 | components/compliance/PepQuestion.tsx:125 | PEP answer refused | caption | the refusal | error | Try again | done (batch 3) |
+| C90 | components/compliance/PepQuestion.tsx:84 | PEP field refused | caption under the field | its words | error | none | done (batch 3) |
+| C91 | app/(app)/messages/new/FirstMessage.tsx:111 | First message not sent | caption | the refusal | error | Try again | done (batch 3) |
+| C92 | app/(app)/messages/share/SharePicker.tsx:251 | Share to a thread failed | red caption | the refusal | error | Try again | done (batch 3) |
+| C93 | app/(app)/messages/Inbox.tsx:860 | Inbox action failed | red line | the refusal | error | Try again | done (batch 3) |
+| C94 | components/app/messages/StageControl.tsx:150 | Stage change refused | red line | the refusal | error | Try again | done (batch 3) |
+| C95 | components/app/messages/StageControl.tsx:270 | Stage change refused (second form) | red line | the refusal | error | Try again | done (batch 3) |
+| C96 | components/app/messages/AvailabilityCard.tsx:128 | Availability answer refused | red line | the refusal | error | Try again | done (batch 3) |
+| C97 | components/app/messages/ForwardSheet.tsx:139 | Forward refused | red line | the refusal | error | Try again | done (batch 3) |
+| C98 | components/app/messages/ShareSheet.tsx:211 | Share failed | red caption | the refusal | error | Try again | kept (the QR could not be drawn, in place of the QR) |
+| C99 | app/(app)/messages/[id]/ThreadOptionsSheet.tsx:337 | Thread option failed | alert in the sheet | the refusal | error | Try again | done (batch 3) |
+| C100 | components/calls/CallButtons.tsx:122 | Call could not start | note beside the call buttons | the note | error | Try again | done (batch 3) |
 
 ## D. Agent workspace (app/agent, components/agent, supply)
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| D1 | app/agent/reviews/ReplyForm.tsx:75 | Review reply removal refused | warning caption | the refusal | error | Try again | todo |
-| D2 | app/agent/reviews/ReplyForm.tsx:104 | Review reply refused | field error | its words | error | none | todo (field via A1) |
-| D3 | app/agent/reviews/ReplyForm.tsx | Review reply posted, removed | the reply shows | "Your reply is posted" / "Your reply is removed" | success | none | todo |
-| D4 | app/agent/bookings/ReservationsBoard.tsx:85 | Reservation decision refused | red caption | the refusal | error | none | todo |
-| D5 | app/agent/bookings/ReservationsBoard.tsx | Reservation accepted or declined | refresh only | "Reservation updated" (the decision's own words) | success | none | todo |
-| D6 | app/agent/listings/[listingId]/calendar/CalendarEditor.tsx:275 | Calendar block or open refused | red alert | the refusal | error | Try again | todo |
-| D7 | app/agent/listings/[listingId]/calendar/CalendarEditor.tsx:61 | Dates blocked or opened | refresh only | "Dates blocked" / "Dates open again" | success | none | todo |
-| D8 | app/agent/listings/OwnerAskStrip.tsx:76 | Owner ask refused | red caption | the refusal | error | Try again | todo |
-| D9 | app/agent/listings/OwnerAskStrip.tsx:36 | Owner asked | green status line | "Request sent to the owner" | success | none | todo |
-| D10 | app/agent/listings/CloseListingSheet.tsx:112 | Close listing refused | alert in the sheet | the refusal | error | Try again | todo |
-| D11 | app/agent/portfolio/PortfolioControls.tsx:156 | Pitch refused | red caption | the refusal | error | Try again | todo |
-| D12 | app/agent/portfolio/PortfolioControls.tsx:121 | Pitch sent | status line replaces the button | "Your pitch is sent" | success | none | todo |
-| D13 | app/agent/listings/[listingId]/mandate/MandateForm.tsx:72 | Mandate sent | status line replaces the form | "Mandate sent for review" | success | none | todo |
+| D1 | app/agent/reviews/ReplyForm.tsx:75 | Review reply removal refused | warning caption | the refusal | error | Try again | done (batch 3) |
+| D2 | app/agent/reviews/ReplyForm.tsx:104 | Review reply refused | field error | its words | error | none | done (batch 3) |
+| D3 | app/agent/reviews/ReplyForm.tsx | Review reply posted, removed | the reply shows | "Your reply is posted" / "Your reply is removed" | success | none | done (batch 3) |
+| D4 | app/agent/bookings/ReservationsBoard.tsx:85 | Reservation decision refused | red caption | the refusal | error | none | done (batch 3) |
+| D5 | app/agent/bookings/ReservationsBoard.tsx | Reservation accepted or declined | refresh only | "Reservation updated" (the decision's own words) | success | none | done (batch 3) |
+| D6 | app/agent/listings/[listingId]/calendar/CalendarEditor.tsx:275 | Calendar block or open refused | red alert | the refusal | error | Try again | done (batch 3) |
+| D7 | app/agent/listings/[listingId]/calendar/CalendarEditor.tsx:61 | Dates blocked or opened | refresh only | "Dates blocked" / "Dates open again" | success | none | done (batch 3) |
+| D8 | app/agent/listings/OwnerAskStrip.tsx:76 | Owner ask refused | red caption | the refusal | error | Try again | done (batch 3) |
+| D9 | app/agent/listings/OwnerAskStrip.tsx:36 | Owner asked | green status line | "Request sent to the owner" | success | none | done (batch 3) |
+| D10 | app/agent/listings/CloseListingSheet.tsx:112 | Close listing refused | alert in the sheet | the refusal | error | Try again | done (batch 3) |
+| D11 | app/agent/portfolio/PortfolioControls.tsx:156 | Pitch refused | red caption | the refusal | error | Try again | done (batch 3) |
+| D12 | app/agent/portfolio/PortfolioControls.tsx:121 | Pitch sent | status line replaces the button | "Your pitch is sent" | success | none | done (batch 3) |
+| D13 | app/agent/listings/[listingId]/mandate/MandateForm.tsx:72 | Mandate sent | status line replaces the form | "Mandate sent for review" | success | none | done (batch 3) |
 | D14 | app/agent/listings/[listingId]/mandate/page.tsx:119 | Mandate renewal refused (record state) | red line on the page | kept: the mandate's recorded state | n/a | n/a | kept |
 | D15 | app/agent/earnings/EarningsWorkspace.tsx:88 | Earnings read failed | alert | kept: page state | n/a | n/a | kept |
 | D16 | app/agent/analytics/page.tsx:176 | Analytics read failed | alert | kept: page state | n/a | n/a | kept |
 | D17 | app/agent/list/ListingWizard.tsx:520 | Listing wizard load error | error block | kept: page state | n/a | n/a | kept |
-| D18 | app/agent/list/ListingWizard.tsx:2794 | Wizard notice (draft saved, refused) | note under the step | the notice | per notice | none | todo |
-| D19 | app/agent/list/ListingWizard.tsx:3162 | Photo notice | note under photos | the notice | warning | none | todo |
-| D20 | app/agent/list/ListingWizard.tsx:4673 | Publish notice | note at the end | the notice | per notice | none | todo |
-| D21 | components/agent/UnitQuestions.tsx:62 | Unit answers not saved | red line | the refusal | error | Try again | todo |
-| D22 | components/agent/ViewingWindows.tsx:203 | Viewing windows not saved | red line | the refusal | error | Try again | todo |
-| D23 | components/agent/ViewingWindows.tsx | Viewing windows saved | no word | "Viewing times saved" | success | none | todo |
-| D24 | components/agent/ApplyWizard.tsx:593 | Documents missing | red caption | its words | error | none | todo (field) |
-| D25 | components/agent/ApplyWizard.tsx:647 | Terms not agreed | red caption | its words | error | none | todo (field) |
-| D26 | components/agent/ApplyWizard.tsx:672 | Application refused | alert | the refusal | error | Try again | todo |
-| D27 | components/agent/ApplyWizard.tsx:879 | Upload refused | red caption | the refusal | error | Try again | todo |
-| D28 | components/agent/PayoutAccounts.tsx:253 | Payout account check refused | alert | the refusal | error | none | todo |
-| D29 | components/agent/PayoutAccounts.tsx:343 | Payout account not saved | alert | the refusal | error | Try again | todo |
-| D30 | components/agent/PayoutAccounts.tsx | Payout account added, removed, made default | refresh only | "Payout account added" / "Payout account removed" / "Default payout account changed" | success | none | todo |
-| D31 | components/agent/CompoundQuestions.tsx:92 | Compound answers refused | red span | the refusal | error | none | todo |
-| D32 | components/agent/intel/ConfirmAvailable.tsx:68 | Still available confirmed, or failed | status line under the button | "Marked as still available" / the failure | success / error | Try again | todo |
-| D33 | components/agent/RespondToReview.tsx:43 | Response sent | record panel | kept panel + "Your response is posted" | success | none | todo |
-| D34 | components/supply/UploadCard.tsx:206 | Registration upload refused | red caption | the refusal | error | Try again | todo |
-| D35 | components/supply/AgentRegisterForm.tsx:540 | Agent registration refused | alert | the refusal | error | Try again | todo |
-| D36 | components/supply/RegisterShell.tsx:133 | Registration step refused | alert | the refusal | error | none | todo |
-| D37 | components/legal/WorkspaceAcceptance.tsx:85 | Workspace terms not accepted | red caption | its words | error | none | todo (field) |
-| D38 | app/agent/promotion, components/promotion/PromotionResults.tsx:41 | Promotion notice (paid, cancelled) | notice block on the results page | the notice title | success / info | none | todo |
+| D18 | app/agent/list/ListingWizard.tsx:2794 | Wizard notice (draft saved, refused) | note under the step | the notice | per notice | none | todo (ListingWizard notices: field errors done in batch 3, the step notices not yet) |
+| D19 | app/agent/list/ListingWizard.tsx:3162 | Photo notice | note under photos | the notice | warning | none | todo (ListingWizard photo notice) |
+| D20 | app/agent/list/ListingWizard.tsx:4673 | Publish notice | note at the end | the notice | per notice | none | todo (ListingWizard publish notice) |
+| D21 | components/agent/UnitQuestions.tsx:62 | Unit answers not saved | red line | the refusal | error | Try again | done (batch 3) |
+| D22 | components/agent/ViewingWindows.tsx:203 | Viewing windows not saved | red line | the refusal | error | Try again | done (batch 3) |
+| D23 | components/agent/ViewingWindows.tsx | Viewing windows saved | no word | "Viewing times saved" | success | none | done (batch 3) |
+| D24 | components/agent/ApplyWizard.tsx:593 | Documents missing | red caption | its words | error | none | done (batch 3) |
+| D25 | components/agent/ApplyWizard.tsx:647 | Terms not agreed | red caption | its words | error | none | done (batch 3) |
+| D26 | components/agent/ApplyWizard.tsx:672 | Application refused | alert | the refusal | error | Try again | done (batch 3) |
+| D27 | components/agent/ApplyWizard.tsx:879 | Upload refused | red caption | the refusal | error | Try again | done (batch 3) |
+| D28 | components/agent/PayoutAccounts.tsx:253 | Payout account check refused | alert | the refusal | error | none | done (batch 3) |
+| D29 | components/agent/PayoutAccounts.tsx:343 | Payout account not saved | alert | the refusal | error | Try again | done (batch 3) |
+| D30 | components/agent/PayoutAccounts.tsx | Payout account added, removed, made default | refresh only | "Payout account added" / "Payout account removed" / "Default payout account changed" | success | none | done (batch 3) |
+| D31 | components/agent/CompoundQuestions.tsx:92 | Compound answers refused | red span | the refusal | error | none | done (batch 3) |
+| D32 | components/agent/intel/ConfirmAvailable.tsx:68 | Still available confirmed, or failed | status line under the button | "Marked as still available" / the failure | success / error | Try again | done (batch 3) |
+| D33 | components/agent/RespondToReview.tsx:43 | Response sent | record panel | kept panel + "Your response is posted" | success | none | done (round 1 already: banner.error; the record panel stays) |
+| D34 | components/supply/UploadCard.tsx:206 | Registration upload refused | red caption | the refusal | error | Try again | done (batch 3) |
+| D35 | components/supply/AgentRegisterForm.tsx:540 | Agent registration refused | alert | the refusal | error | Try again | done (batch 3) |
+| D36 | components/supply/RegisterShell.tsx:133 | Registration step refused | alert | the refusal | error | none | done (batch 3) |
+| D37 | components/legal/WorkspaceAcceptance.tsx:85 | Workspace terms not accepted | red caption | its words | error | none | done (batch 3) |
+| D38 | app/agent/promotion, components/promotion/PromotionResults.tsx:41 | Promotion notice (paid, cancelled) | notice block on the results page | the notice title | success / info | none | kept (a page notice that no promotion has run: content) |
 
 ## E. Host (app/host, components/host, stays)
 
 | # | File:line | Moment | Today | Banner words | Tone | Retry/Undo | Status |
 |---|---|---|---|---|---|---|---|
-| E1 | components/host/HostWizard.tsx:696 | Host wizard step refused | red line | the refusal | error | none | todo |
-| E2 | components/host/HostWizard.tsx:827 | Host wizard notice (saved, sent) | notice block | the notice | success / error | none | todo |
-| E3 | components/host/HostWizard.tsx:731 | Sent back by review | status panel | kept: the application's recorded state | n/a | n/a | kept |
-| E4 | components/host/FacilitiesPicker.tsx:146 | Facilities saved or refused | notice under the picker | "Facilities saved" / the refusal | success / error | Try again | todo |
-| E5 | components/host/RoomNightsEditor.tsx:177 | Room nights saved or refused | notice | "Room nights saved" / the refusal | success / error | Try again | todo |
-| E6 | components/host/stays/FacilitiesStep.tsx:200 | Facilities step refused | note | the refusal | error | none | todo |
-| E7 | components/host/stays/TablesStep.tsx:224 | Tables step refused | red note | the refusal | error | none | todo |
-| E8 | components/host/stays/HotelStep.tsx:130 | Hotel step refused | note | the refusal | error | none | todo |
-| E9 | components/host/dashboard/FrontDeskPanel.tsx:188 | Front desk mark refused | red span in the row | the refusal | error | Try again | todo |
-| E10 | components/host/dashboard/FrontDeskPanel.tsx:92 | Guest checked in, checked out | the row mark changes | "Checked in" / "Checked out" | success | none | todo |
-| E11 | components/host/reviews/HostReviewCard.tsx:220 | Host review reply refused | red line | the refusal | error | Try again | todo |
-| E12 | components/stays/DoorChargeReport.tsx:20 | Door charge reported | green line replaces the form | "Report sent. Thank you" | success | none | todo |
-| E13 | app/host/reservations/DepositSettingsCard.tsx:339 | Deposit settings problem | caption | its words | error | none | todo (field) |
+| E1 | components/host/HostWizard.tsx:696 | Host wizard step refused | red line | the refusal | error | none | done (batch 3) |
+| E2 | components/host/HostWizard.tsx:827 | Host wizard notice (saved, sent) | notice block | the notice | success / error | none | done (batch 3) |
+| E3 | components/host/HostWizard.tsx:731 | Sent back by review | status panel | kept: the application's recorded state | n/a | n/a | kept (the application's recorded state) |
+| E4 | components/host/FacilitiesPicker.tsx:146 | Facilities saved or refused | notice under the picker | "Facilities saved" / the refusal | success / error | Try again | done (batch 3) |
+| E5 | components/host/RoomNightsEditor.tsx:177 | Room nights saved or refused | notice | "Room nights saved" / the refusal | success / error | Try again | done (batch 3) |
+| E6 | components/host/stays/FacilitiesStep.tsx:200 | Facilities step refused | note | the refusal | error | none | done (batch 3) |
+| E7 | components/host/stays/TablesStep.tsx:224 | Tables step refused | red note | the refusal | error | none | done (batch 3) |
+| E8 | components/host/stays/HotelStep.tsx:130 | Hotel step refused | note | the refusal | error | none | done (batch 3) |
+| E9 | components/host/dashboard/FrontDeskPanel.tsx:188 | Front desk mark refused | red span in the row | the refusal | error | Try again | done (batch 3) |
+| E10 | components/host/dashboard/FrontDeskPanel.tsx:92 | Guest checked in, checked out | the row mark changes | "Checked in" / "Checked out" | success | none | done (batch 3) |
+| E11 | components/host/reviews/HostReviewCard.tsx:220 | Host review reply refused | red line | the refusal | error | Try again | done (batch 3) |
+| E12 | components/stays/DoorChargeReport.tsx:20 | Door charge reported | green line replaces the form | "Report sent. Thank you" | success | none | done (batch 3) |
+| E13 | app/host/reservations/DepositSettingsCard.tsx:339 | Deposit settings problem | caption | its words | error | none | done (batch 3) |
 | E14 | components/host/StatementView.tsx:79 | Statement read failed | line | kept: page state | n/a | n/a | kept |
 | E15 | components/host/reviews/HostReviewsView.tsx:50 | Reviews read failed | line | kept: page state | n/a | n/a | kept |
 | E16 | components/host/DecideView.tsx:57 | Decide view read failed | line | kept: page state | n/a | n/a | kept |
@@ -262,40 +262,40 @@ Status: `todo`, `done` (with the batch), `kept` (with the reason), `skipped`
 | F7 | app/admin/payments/MethodLookup.tsx:122 | Removal reason refused | red line | its words | error | none | done (batch 1) |
 | F8 | app/admin/bookings/reservations/ReservationDecisions.tsx:181 | Decision reason refused | red line | its words | error | none | done (batch 1) |
 | F9 | app/admin/blocked-terms/TermForms.tsx:157 | Term field refused | red caption | its words | error | none | done (batch 1) |
-| F10 | app/admin/blocked-terms/TermForms.tsx:235 | Term form refused | red line | the refusal | error | none | done (field select now sr-only + banner) |
+| F10 | app/admin/blocked-terms/TermForms.tsx:235 | Term form refused | red line | the refusal | error | none | done (batch 3) |
 | F11 | app/admin/referrals/ReferralControls.tsx:529 | Referral decision reason refused | red line | its words | error | none | done (batch 1) |
-| F12 | app/admin/listings/[id]/ReviewActionBar.tsx:227 | Listing review decision refused | red line | the refusal | error | Try again | todo |
-| F13 | app/admin/listings/[id]/ReviewActionBar.tsx:226 | "Recording the decision." progress line | line | kept: progress state | n/a | n/a | kept |
-| F14 | app/admin/listings/MandateDecision.tsx:37 | Mandate approved or rejected | status line replaces the buttons | "Mandate approved" / "Mandate rejected" | success | none | todo |
-| F15 | app/admin/stops/StopsDesk.tsx:237 | Member trading again | green status line | "{name} is trading again" | success | none | todo |
-| F16 | app/admin/stops/StopsDesk.tsx:330 | Stop placed | green status line | the line's words | success | none | todo |
-| F17 | app/admin/stops/RecallPanel.tsx:80 | Recall sent | status line | "Recall sent to {count} people" | success | none | todo |
-| F18 | app/admin/settings/SampleEmails.tsx:68 | Sample emails sent | status note | the note | success / error | Try again | todo |
-| F19 | app/admin/_lanes/HeldLane.tsx:302 | Held payment decision note | note | the note when it is an outcome | success / error | none | todo |
-| F20 | app/admin/_review/parts.tsx:155 | Review panel note | note | the note when it is an outcome | per note | none | todo |
-| F21 | app/admin/compliance/_lanes/SanctionsControls.tsx:75 | Sanctions list file too large | alert | "That file is too large" (its words) | error | none | todo |
+| F12 | app/admin/listings/[id]/ReviewActionBar.tsx:227 | Listing review decision refused | red line | the refusal | error | Try again | done (batch 3) |
+| F13 | app/admin/listings/[id]/ReviewActionBar.tsx:226 | "Recording the decision." progress line | line | kept: progress state | n/a | n/a | kept (progress line) |
+| F14 | app/admin/listings/MandateDecision.tsx:37 | Mandate approved or rejected | status line replaces the buttons | "Mandate approved" / "Mandate rejected" | success | none | done (batch 3) |
+| F15 | app/admin/stops/StopsDesk.tsx:237 | Member trading again | green status line | "{name} is trading again" | success | none | done (batch 3) |
+| F16 | app/admin/stops/StopsDesk.tsx:330 | Stop placed | green status line | the line's words | success | none | done (batch 3) |
+| F17 | app/admin/stops/RecallPanel.tsx:80 | Recall sent | status line | "Recall sent to {count} people" | success | none | done (round 1 already) |
+| F18 | app/admin/settings/SampleEmails.tsx:68 | Sample emails sent | status note | the note | success / error | Try again | done (round 1 already; the running count stays as progress) |
+| F19 | app/admin/_lanes/HeldLane.tsx:302 | Held payment decision note | note | the note when it is an outcome | success / error | none | kept (a static note prop, guidance) |
+| F20 | app/admin/_review/parts.tsx:155 | Review panel note | note | the note when it is an outcome | per note | none | kept (a static note prop, guidance) |
+| F21 | app/admin/compliance/_lanes/SanctionsControls.tsx:75 | Sanctions list file too large | alert | "That file is too large" (its words) | error | none | done (batch 3) |
 | F22 | app/admin/compliance/_lanes/StrControls.tsx:403 | STR working | status | kept: progress | n/a | n/a | kept |
-| F23 | components/compliance/RiskOverrideForm.tsx:61 | Risk override refused | caption | the refusal | error | none | todo |
-| F24 | components/compliance/RiskOverrideForm.tsx:56 | Risk override saved | caption | "Risk override saved" | success | none | todo |
-| F25 | components/compliance/ApproveForm.tsx:50 | EDD approve refused | caption | the refusal | error | none | todo |
-| F26 | components/compliance/ApproveForm.tsx:45 | EDD approved | caption | "Approved" (the form's own saved words) | success | none | todo |
-| F27 | components/compliance/EddReviewCard.tsx:119 | EDD review refused | caption | the refusal | error | none | todo |
-| F28 | components/compliance/EddReviewCard.tsx:109 | EDD review saved | caption | its saved words | success | none | todo |
-| F29 | components/compliance/PepFlagForm.tsx:61 | PEP flag refused | caption | the refusal | error | none | todo |
-| F30 | components/compliance/PepFlagForm.tsx:56 | PEP flag saved | caption | its saved words | success | none | todo |
-| F31 | components/compliance/ReopenEddButton.tsx:24 | EDD reopen refused | caption | the refusal | error | none | todo |
-| F32 | components/compliance/ReopenEddButton.tsx:19 | EDD reopened | caption | its saved words | success | none | todo |
-| F33 | components/calls/admin/RequestReviewCall.tsx:164 | Review call request refused | red line | the refusal | error | Try again | todo |
-| F34 | components/calls/admin/ReviewOutcomeForm.tsx:86 | Review outcome field refused | red line | its words | error | none | todo (field) |
-| F35 | components/calls/admin/ReviewOutcomeForm.tsx:110 | Review outcome refused | red line | the refusal | error | Try again | todo |
-| F36 | components/calls/admin/ReviewDesk.tsx:148 | Review desk note | note | the note | per note | none | todo |
-| F37 | components/calls/admin/ReviewDesk.tsx:259 | Review desk action refused | red line | the refusal | error | Try again | todo |
-| F38 | components/calls/admin/ReviewDesk.tsx:301 | Review desk action refused | red line | the refusal | error | Try again | todo |
-| F39 | components/calls/admin/ReviewDesk.tsx:381 | Review desk action refused | red line | the refusal | error | Try again | todo |
-| F40 | components/calls/SubjectReviewCard.tsx:130 | Subject review refused | red line | the refusal | error | Try again | todo |
-| F41 | components/calls/SubjectReviewCard.tsx:105 | Subject review saved | status line | its saved words | success | none | todo |
-| F42 | components/calls/views.tsx:237 | Call view action refused | red line | the refusal | error | Try again | todo |
-| F43 | components/calls/views.tsx:326 | Call view action refused | red line | the refusal | error | Try again | todo |
+| F23 | components/compliance/RiskOverrideForm.tsx:61 | Risk override refused | caption | the refusal | error | none | done (batch 3) |
+| F24 | components/compliance/RiskOverrideForm.tsx:56 | Risk override saved | caption | "Risk override saved" | success | none | done (batch 3) |
+| F25 | components/compliance/ApproveForm.tsx:50 | EDD approve refused | caption | the refusal | error | none | done (batch 3) |
+| F26 | components/compliance/ApproveForm.tsx:45 | EDD approved | caption | "Approved" (the form's own saved words) | success | none | done (batch 3) |
+| F27 | components/compliance/EddReviewCard.tsx:119 | EDD review refused | caption | the refusal | error | none | done (batch 3) |
+| F28 | components/compliance/EddReviewCard.tsx:109 | EDD review saved | caption | its saved words | success | none | done (batch 3) |
+| F29 | components/compliance/PepFlagForm.tsx:61 | PEP flag refused | caption | the refusal | error | none | done (batch 3) |
+| F30 | components/compliance/PepFlagForm.tsx:56 | PEP flag saved | caption | its saved words | success | none | done (batch 3) |
+| F31 | components/compliance/ReopenEddButton.tsx:24 | EDD reopen refused | caption | the refusal | error | none | done (batch 3) |
+| F32 | components/compliance/ReopenEddButton.tsx:19 | EDD reopened | caption | its saved words | success | none | done (batch 3) |
+| F33 | components/calls/admin/RequestReviewCall.tsx:164 | Review call request refused | red line | the refusal | error | Try again | done (batch 3) |
+| F34 | components/calls/admin/ReviewOutcomeForm.tsx:86 | Review outcome field refused | red line | its words | error | none | done (batch 3) |
+| F35 | components/calls/admin/ReviewOutcomeForm.tsx:110 | Review outcome refused | red line | the refusal | error | Try again | done (batch 3) |
+| F36 | components/calls/admin/ReviewDesk.tsx:148 | Review desk note | note | the note | per note | none | done (batch 3) |
+| F37 | components/calls/admin/ReviewDesk.tsx:259 | Review desk action refused | red line | the refusal | error | Try again | done (batch 3) |
+| F38 | components/calls/admin/ReviewDesk.tsx:301 | Review desk action refused | red line | the refusal | error | Try again | done (batch 3) |
+| F39 | components/calls/admin/ReviewDesk.tsx:381 | Review desk action refused | red line | the refusal | error | Try again | done (batch 3) |
+| F40 | components/calls/SubjectReviewCard.tsx:130 | Subject review refused | red line | the refusal | error | Try again | done (batch 3) |
+| F41 | components/calls/SubjectReviewCard.tsx:105 | Subject review saved | status line | its saved words | success | none | done (batch 3) |
+| F42 | components/calls/views.tsx:237 | Call view action refused | red line | the refusal | error | Try again | kept (the call screen's own live status over the call) |
+| F43 | components/calls/views.tsx:326 | Call view action refused | red line | the refusal | error | Try again | kept (the call screen's own live status) |
 | F44 | app/admin/_lanes/SafetyHolds.tsx:28, app/admin/listings/[id]/FeeAcceptancePanel.tsx:23, app/admin/_components/ActingFor.tsx:40, app/admin/compliance/_lanes/{StrLane,PepLane,RiskLane,BeneficialOwnershipLane}.tsx, app/admin/compliance/error.tsx, app/admin/account-recovery/page.tsx:60, app/admin/people/[id]/MemberSections.tsx:42 | Desk could not be read | alert or line in the panel | kept: a page state, the panel has nothing else to show | n/a | n/a | kept |
 | F45 | app/admin/compliance/_lanes/SanctionsLane.tsx:77,95,153 | Sanctions list facts (none loaded, list shrank) | alert lines | kept: facts about the list a reviewer must see while working | n/a | n/a | kept |
 | F46 | app/(site)/landlord/[token]/ReplyActions.tsx:82 | Landlord reply refused | alert | the refusal | error | Try again | done (batch 1) |
@@ -655,3 +655,37 @@ Listed in the tables with status `kept`; reasons are on each row.
 | G3 | app/(app)/rent/pay/[inspectionId]/saved-card-action.ts:14 | charge rent saved card for | silent / inline | per action | success/error | Try again | todo |
 | G4 | components/app/messages/media-actions.ts:57 | save media | silent / inline | per action | success/error | Try again | todo |
 | G5 | components/app/messages/media-actions.ts:83 | share media | silent / inline | per action | success/error | Try again | todo |
+
+## Also built beyond the rows (batch 3)
+
+ProfileEditor (handle, bio, pronouns, link, home area: red edge + banner),
+ListingWizard field errors (the shared field wrapper, size, floor, amenities,
+power hours, tenure), TermForms (term, reason, refusal), ChargebackActions
+fields, ShareAreaButton and PriceCheckScreen failures ("notify me" saved or
+refused), MoveInCalculator fields, HostReviewCard (answer posted, removed,
+contest sent), PortfolioControls withdraw ("Invitation withdrawn").
+
+## The guard (job 3)
+
+`apps/web/src/lib/ui/no-inline-outcome.test.ts` with
+`apps/web/src/lib/ui/inline-outcomes.ts`: fails when a page or component
+gains `role="alert"` or a line in the error ink outside its allow-list, and
+fails when an allowed file drops one until its row comes down. Rows marked
+TO CONVERT NEXT there are outcomes still waiting: PhoneField's live hint,
+SupportChat's escalation line, VninPanel's message.
+
+## Left for the next pass
+
+- D18 to D20 ListingWizard step, photo and publish notices.
+- PhoneField, SupportChat, VninPanel (in the guard as TO CONVERT NEXT).
+- A field refused twice with the very same words re-says it only where the
+  caller passes `when` (a `useActionState` answer); client-side checks that
+  set the same string twice stay quiet the second time (the red edge stays).
+- The audit round 2 rows (sections D to G after "Kept on purpose", found by
+  the lead per server action) are not ticked here: many of their callers
+  were built in batches 1 to 3 (for example payout accounts, review replies,
+  front desk marks, blocks, passport settings, briefs, calendar blocks), so
+  the next pass should tick those against the code first, then build the
+  rest. Their IDs repeat the letters of sections A to F; name them "R2-D14"
+  and so on in hand-offs to avoid confusion.
+
