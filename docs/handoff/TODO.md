@@ -21,9 +21,9 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 1.9 Animated launch hand-off (logo and wordmark) from web launch to native shell
 
 ### Connection Manager / Offline
-- [ ] 1.10 Shared connection state: connected, slow, unstable, offline, reconnected
-- [ ] 1.11 Calm Vallo strip for connection changes + banner
-- [ ] 1.12 Offline screen upgrade: status, Try again, saved/recently viewed, a way home, auto recovery
+- [x] 1.10 Shared connection state: connected, slow, unstable, offline, reconnected -- DONE (lib/offline/connection.ts: 5-state manager with navigator.onLine, Network Info API, PerformanceObserver, probe, flap detection)
+- [x] 1.11 Calm Vallo strip for connection changes + banner -- DONE (components/ui/ConnectionLine.tsx: dark pill, phases for offline/kept/slow/back/leaving)
+- [x] 1.12 Offline screen upgrade: status, Try again, saved/recently viewed, a way home, auto recovery -- DONE (app/offline/OfflineScreen.tsx + OfflineRecent.tsx: Vallo mark, retry, recently viewed, auto recovery via ConnectionLine)
 - [ ] 1.13 Cached prices labelled "Saved on your device. Price and availability may have changed."
 - [ ] 1.14 On reconnect: refresh, replay only safe queued actions, never payment/booking without confirmation
 
@@ -119,7 +119,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ### Notifications
 - [ ] 5.1 A4: Lock screen words with a header in one voice ("Booking confirmed" / place and dates)
 - [ ] 5.2 A8: Email headers in high end style (logo lockup, header line, photo)
-- [ ] 5.3 A9: Live in-app notification banner subscription wiring (FE built the banner; FEATURES owns the realtime subscription)
+- [x] 5.3 A9: Live in-app notification banner subscription wiring -- DONE (useNotificationsRealtime in lib/messages/useRealtime.ts subscribes to postgres_changes INSERT on notifications; NotifyBanner wired in AppShell via lazy load; LiveNotifications wired for full centre)
 
 ### Vallo Circle
 - [ ] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; needs: invites, shared shortlists, plans, vouches, notifications, privacy)
@@ -325,8 +325,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 - [x] 15.1 Dictionary prop audit (only pass needed keys, not full dict) -- DONE (see 10.35/1.15: auth pages wired with sliced dictionaries; listingCard/stayCard/settingsHub/etc. already had slices)
 - [x] 15.2 Phone format deferred loading -- DONE (see 1.16: formatPhone moved server-side)
-- [ ] 15.3 Search results virtual scroll for long lists
-- [ ] 15.4 Map tile lazy loading
+- [x] 15.3 Search results virtual scroll for long lists -- DONE (content-visibility: auto on .nf-results--one/--rows items beyond first 4, with contain-intrinsic-size for stable scrollbar)
+- [x] 15.4 Map tile lazy loading -- DONE (AreaMap already dynamic-imports Leaflet; tiles load idle-first with updateWhenIdle + keepBuffer:1; search MapCanvas loads on tab interaction)
 - [ ] 15.5 WebP image format across all uploaded images
 
 ---

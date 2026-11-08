@@ -64,7 +64,11 @@ export function AreaMap({
         tap: false,
       } as import("leaflet").MapOptions);
       const provider = tileProvider(theme);
-      const tiles = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom });
+      const tiles = leaflet.tileLayer(provider.url, {
+        maxZoom: provider.maxZoom,
+        updateWhenIdle: true,
+        keepBuffer: 1,
+      });
       tiles.on("tileerror", () => {
         if (!cancelled) setOffline(true);
       });
