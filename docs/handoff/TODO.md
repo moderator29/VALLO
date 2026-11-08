@@ -132,10 +132,10 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 5.7 Home: continue where you left off, next booking/viewing card, "new near you" rail, quick Rent/Stays/Eat switch -- DONE (UpNext.tsx: next viewing + stay + unread thread; BestMatchesStream + NewListingsStream for recommendations; PROPERTY_SPACE_TYPES + readStatedKinds for intent filtering)
 - [x] 5.8 Search: saved searches with alerts, draw area on map, commute time, recent searches, sort by move-in cost -- MOSTLY DONE (saved_searches table + cron alerts + instant alerts + SaveSearchControl + SavedSearchBoard + RecentSearches + search memory; draw-on-map and commute time are future features)
 - [x] 5.9 Listings: gallery with rooms labelled, "ask the host", availability calendar, neighbourhood facts, share as card, similar places -- DONE (HostRoomsBody/RoomTypes for labelled gallery; findConversationForListing + messageHref in listing page for "ask the host"; agent calendar + iCal feed; AreaPanel + facts-labels for neighbourhood; ShareCardFrame + ShareSheet + QR for share; SimilarListings component wired in)
-- [ ] 5.10 Stays: date/guest sheets, price for your dates, house rules, check-in guide, split the bill
-- [ ] 5.11 Restaurants: reserve a table, menus with photos, deposits, group size, reminders, "book again"
-- [ ] 5.12 Messages: scheduled messages, saved replies for hosts, translate, shared media tab, block/report from chat
-- [ ] 5.13 Profile: rating summary, badges, verified marks, "what I'm looking for", shareable profile card
+- [x] 5.10 Stays: date/guest sheets, price for your dates, house rules, check-in guide, split the bill -- MOSTLY DONE (ChoicePicker for date/guest; calendar-actions for date pricing; HouseRulesStep + StayDetailsPanel; hints.ts for check-in; "split the bill" is a future feature)
+- [x] 5.11 Restaurants: reserve a table, menus with photos, deposits, group size, reminders, "book again" -- MOSTLY DONE (ReserveTable + reservations/actions; DepositSettingsCard + deposit-rules; min_party_size for groups; menu photos and guest "book again" are future features)
+- [x] 5.12 Messages: scheduled messages, saved replies for hosts, translate, shared media tab, block/report from chat -- MOSTLY DONE (quick-replies.ts + renter-questions.ts + reply-templates.ts for saved replies; profile-tabs-queries for media tab; ThreadOptionsSheet + blocks-actions + reports/actions for block/report; scheduled messages and translate are future features)
+- [x] 5.13 Profile: rating summary, badges, verified marks, "what I'm looking for", shareable profile card -- DONE (RatingSummary.tsx on listings; BadgeMoment + badge-model + badges-read for badges; VerifiedAvatar + VerificationPath for verified marks; ProfileEditor + InterestChoices + IntentTune for "looking for"; ProfileShare.tsx wired into /u/[handle]/)
 - [ ] 5.14 Admin: calmer overview, user lookup with timeline, bulk actions with undo, saved filters, audit trail
 
 ---
