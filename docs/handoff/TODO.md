@@ -122,7 +122,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 5.3 A9: Live in-app notification banner subscription wiring -- DONE (useNotificationsRealtime in lib/messages/useRealtime.ts subscribes to postgres_changes INSERT on notifications; NotifyBanner wired in AppShell via lazy load; LiveNotifications wired for full centre)
 
 ### Vallo Circle
-- [ ] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; needs: invites, shared shortlists, plans, vouches, notifications, privacy)
+- [ ] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; invites DONE with migration + actions + UI; needs: shared shortlists, plans, vouches, notifications, privacy)
 
 ### Ratings
 - [x] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report) -- DONE (ReviewForm.tsx + ReviewPanels.tsx at /bookings/[id]/review/, TenancyReviewForm at /rent/review/[paymentId]/, reviews_write_path + review_responses DB migrations, ReviewsWorkspace for agents)
@@ -327,7 +327,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 15.2 Phone format deferred loading -- DONE (see 1.16: formatPhone moved server-side)
 - [x] 15.3 Search results virtual scroll for long lists -- DONE (content-visibility: auto on .nf-results--one/--rows items beyond first 4, with contain-intrinsic-size for stable scrollbar)
 - [x] 15.4 Map tile lazy loading -- DONE (AreaMap already dynamic-imports Leaflet; tiles load idle-first with updateWhenIdle + keepBuffer:1; search MapCanvas loads on tab interaction)
-- [ ] 15.5 WebP image format across all uploaded images
+- [x] 15.5 WebP image format across all uploaded images -- DONE (reencodePhoto outputs WebP when browser supports it, fallback JPEG; all upload paths updated: avatar, cover, listing, story, inspection, support ticket, messages, video thumbnail)
 
 ---
 

@@ -282,6 +282,111 @@ export async function withdrawCircleInvite(input: { inviteId: string }): Promise
   return ok(null);
 }
 
+/* --------------------------------------------------------- shared shortlists */
+
+export async function shareShortlist(input: {
+  communityId: string;
+  collectionId: string;
+  title: string;
+  description: string;
+}): Promise<ActionResult<{ id: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(
+    z.object({
+      communityId: uuid,
+      collectionId: uuid,
+      title: z.string().trim().min(1, "Give it a name.").max(120, "Keep the name to 120 characters."),
+      description: z.string().trim().max(500, "Keep the description to 500 characters."),
+    }),
+    input,
+  );
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const { data, error } = await who.db
+    .from("circle_shared_shortlists")
+    .insert({
+      community_id: parsed.data.communityId,
+      collection_id: parsed.data.collectionId,
+      shared_by: who.userId,
+      title: parsed.data.title,
+      description: parsed.data.description,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    if (error?.code === "23505") return fail("This collection is already shared in this community.");
+    return fail(wordsFor(error));
+  }
+  revalidatePath("/circle");
+  return ok({ id: (data as { id: string }).id });
+}
+
+export async function unshareShortlist(input: { shortlistId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ shortlistId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_shared_shortlists")
+    .delete()
+    .eq("id", parsed.data.shortlistId);
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
+/* ---------------------------------------------------------------- vouches */
+
+export async function vouchForMember(input: {
+  communityId: string;
+  voucheeId: string;
+  note: string;
+}): Promise<ActionResult<{ id: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(
+    z.object({
+      communityId: uuid,
+      voucheeId: uuid,
+      note: z.string().trim().max(280, "Keep the vouch to 280 characters."),
+    }),
+    input,
+  );
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  if (parsed.data.voucheeId === who.userId) return fail("You cannot vouch for yourself.");
+  const { data, error } = await who.db
+    .from("circle_vouches")
+    .insert({
+      community_id: parsed.data.communityId,
+      voucher_id: who.userId,
+      vouchee_id: parsed.data.voucheeId,
+      note: parsed.data.note,
+    })
+    .select("id")
+    .single();
+  if (error || !data) {
+    if (error?.code === "23505") return fail("You have already vouched for this person in this community.");
+    return fail(wordsFor(error));
+  }
+  revalidatePath("/circle");
+  return ok({ id: (data as { id: string }).id });
+}
+
+export async function withdrawVouch(input: { vouchId: string }): Promise<ActionResult<null>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(z.object({ vouchId: uuid }), input);
+  if (!parsed.ok) return fail(parsed.error);
+  const { error } = await who.db
+    .from("circle_vouches")
+    .delete()
+    .eq("id", parsed.data.vouchId)
+    .eq("voucher_id", who.userId);
+  if (error) return fail(wordsFor(error));
+  revalidatePath("/circle");
+  return ok(null);
+}
+
 /* ---------------------------------------------------------------- follows */
 
 export async function followQuestion(input: { questionId: string; on: boolean }): Promise<ActionResult<{ on: boolean }>> {

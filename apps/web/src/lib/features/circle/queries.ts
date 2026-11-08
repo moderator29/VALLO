@@ -642,6 +642,120 @@ export async function readSentInvites(communityId: string): Promise<CircleInvite
   }));
 }
 
+/* --------------------------------------------------------- shared shortlists */
+
+export type SharedShortlistView = {
+  id: string;
+  communityId: string;
+  collectionId: string;
+  title: string;
+  description: string;
+  sharedBy: CircleAuthor | null;
+  createdAt: string;
+  isMine: boolean;
+};
+
+export async function readCommunityShortlists(communityId: string): Promise<SharedShortlistView[]> {
+  const v = await viewer();
+  if (!v) return [];
+  const { data, error } = await v.db
+    .from("circle_shared_shortlists")
+    .select("id, community_id, collection_id, title, description, shared_by, created_at")
+    .eq("community_id", communityId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  await reportReadFault("read.circle.shortlists", ...faults(error));
+  if (error) return [];
+  const rows = (data ?? []) as {
+    id: string;
+    community_id: string;
+    collection_id: string;
+    title: string;
+    description: string;
+    shared_by: string;
+    created_at: string;
+  }[];
+  if (rows.length === 0) return [];
+  const sharerIds = [...new Set(rows.map((r) => r.shared_by))];
+  const sharers = await readAuthors(v.db, sharerIds);
+  return rows.map((r) => ({
+    id: r.id,
+    communityId: r.community_id,
+    collectionId: r.collection_id,
+    title: r.title,
+    description: r.description,
+    sharedBy: sharers.get(r.shared_by) ?? null,
+    createdAt: r.created_at,
+    isMine: r.shared_by === v.id,
+  }));
+}
+
+/* ---------------------------------------------------------------- vouches */
+
+export type CircleVouchView = {
+  id: string;
+  communityId: string;
+  communityName: string;
+  voucher: CircleAuthor | null;
+  vouchee: CircleAuthor | null;
+  note: string;
+  createdAt: string;
+  isMine: boolean;
+};
+
+export async function readVouchesForMember(userId: string): Promise<CircleVouchView[]> {
+  const v = await viewer();
+  if (!v) return [];
+  const { data, error } = await v.db
+    .from("circle_vouches")
+    .select("id, community_id, voucher_id, vouchee_id, note, created_at")
+    .eq("vouchee_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  await reportReadFault("read.circle.vouches", ...faults(error));
+  if (error) return [];
+  const rows = (data ?? []) as {
+    id: string;
+    community_id: string;
+    voucher_id: string;
+    vouchee_id: string;
+    note: string;
+    created_at: string;
+  }[];
+  if (rows.length === 0) return [];
+  const communityIds = [...new Set(rows.map((r) => r.community_id))];
+  const voucherIds = [...new Set(rows.map((r) => r.voucher_id))];
+  const [communities, vouchers] = await Promise.all([
+    v.db.from("circle_communities").select("id, slug, name").in("id", communityIds),
+    readAuthors(v.db, voucherIds),
+  ]);
+  await reportReadFault("read.circle.vouches", ...faults(communities.error));
+  const byCommunity = new Map(
+    ((communities.data ?? []) as { id: string; slug: string; name: string }[]).map((c) => [c.id, c]),
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    communityId: r.community_id,
+    communityName: byCommunity.get(r.community_id)?.name ?? "",
+    voucher: vouchers.get(r.voucher_id) ?? null,
+    vouchee: null,
+    note: r.note,
+    createdAt: r.created_at,
+    isMine: r.voucher_id === v.id,
+  }));
+}
+
+export async function readVouchCount(userId: string): Promise<number> {
+  const v = await viewer();
+  if (!v) return 0;
+  const { count, error } = await v.db
+    .from("circle_vouches")
+    .select("id", { count: "exact", head: true })
+    .eq("vouchee_id", userId);
+  await reportReadFault("read.circle.vouch-count", ...faults(error));
+  return count ?? 0;
+}
+
 /* ---------------------------------------------------------------- listings */
 
 /** A live listing to attach to a question ("Ask about this place"), or null. Never a draft. */

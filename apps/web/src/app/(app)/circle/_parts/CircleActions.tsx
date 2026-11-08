@@ -15,7 +15,9 @@ import {
   replyInCircle,
   sendCircleInvite,
   setHelpful,
+  vouchForMember,
   withdrawCircleInvite,
+  withdrawVouch,
 } from "@/lib/features/circle/actions";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
@@ -313,6 +315,80 @@ export function SendInviteButton({
       }
     >
       {CIRCLE_COPY.invite.inviteMember}
+    </Button>
+  );
+}
+
+export function VouchButton({
+  communityId,
+  voucheeId,
+  voucheeName,
+}: {
+  communityId: string;
+  voucheeId: string;
+  voucheeName: string;
+}) {
+  const router = useRouter();
+  const [note, setNote] = useState("");
+  const [open, setOpen] = useState(false);
+  const { pending, run } = useRun();
+  if (!open) {
+    return (
+      <Button variant="quiet" size="sm" data-testid="circle-vouch" onClick={() => setOpen(true)}>
+        {CIRCLE_COPY.vouch.vouchFor}
+      </Button>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-xs" data-testid="circle-vouch-form">
+      <textarea
+        className="nf-field min-h-[3rem]"
+        maxLength={280}
+        placeholder={CIRCLE_COPY.vouch.notePlaceholder}
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+      />
+      <div className="flex gap-sm">
+        <Button
+          variant="primary"
+          size="sm"
+          loading={pending}
+          onClick={() =>
+            run(async () => vouchForMember({ communityId, voucheeId, note }), undefined, () => {
+              banner.success(`${CIRCLE_COPY.vouch.sent} for ${voucheeName}`);
+              setOpen(false);
+              setNote("");
+              router.refresh();
+            })
+          }
+        >
+          {CIRCLE_COPY.vouch.vouchFor}
+        </Button>
+        <Button variant="quiet" size="sm" disabled={pending} onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function WithdrawVouchButton({ vouchId }: { vouchId: string }) {
+  const router = useRouter();
+  const { pending, run } = useRun();
+  return (
+    <Button
+      variant="quiet"
+      size="sm"
+      disabled={pending}
+      data-testid="circle-withdraw-vouch"
+      onClick={() =>
+        run(async () => withdrawVouch({ vouchId }), undefined, () => {
+          banner.success(CIRCLE_COPY.vouch.withdrawn);
+          router.refresh();
+        })
+      }
+    >
+      {CIRCLE_COPY.vouch.withdraw}
     </Button>
   );
 }
