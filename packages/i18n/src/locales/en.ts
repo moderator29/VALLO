@@ -115,6 +115,14 @@ import { proofPendingEn, noDocumentLabelEn } from "./supply-roles.en";
 import { placesCopyEn, placesFailureEn } from "./places.en";
 /* Leaderboard copy (SW11). */
 import { leaderboardEn } from "./leaderboard.en";
+/* Listings labels (SW11): period suffix, rent period, tenure, sale status, water supply. */
+import { periodSuffixEn, rentPeriodLabelEn, tenureLabelEn, saleStatusLabelEn, waterLabelEn } from "./listings-labels.en";
+/* Badge tier copy (SW11). */
+import { badgeTierLabelEn, badgeTierMeaningEn } from "./badge.en";
+/* Booking lifecycle copy (SW11). */
+import { noShowMessagesEn } from "./bookings-lifecycle.en";
+/* Social kill-switch copy (SW11). */
+import { socialFlagEn } from "./social-flag.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -7431,6 +7439,25 @@ export const en = {
   },
   /* Leaderboard copy (SW11). */
   leaderboard: leaderboardEn,
+  /* Listings labels (SW11). */
+  listingsLabels: {
+    periodSuffix: periodSuffixEn,
+    rentPeriodLabel: rentPeriodLabelEn,
+    tenureLabel: tenureLabelEn,
+    saleStatusLabel: saleStatusLabelEn,
+    waterLabel: waterLabelEn,
+  },
+  /* Badge tier copy (SW11). */
+  badge: {
+    tierLabel: badgeTierLabelEn,
+    tierMeaning: badgeTierMeaningEn,
+  },
+  /* Booking lifecycle copy (SW11). */
+  bookingsLifecycle: {
+    noShowMessages: noShowMessagesEn,
+  },
+  /* Social kill-switch copy (SW11). */
+  socialFlag: socialFlagEn,
 
 };
 

@@ -164,7 +164,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ### Backend Audit Items
 - [x] R-03: Reconciliation audit noise (dedup already in place: CLEAN_HEARTBEAT_MS = 100 * 60 * 1000 in reconcile route)
 - [x] R-04: risk_alerts dedup tracking (last_seen_at column added, backfill migration written, record.ts touches last_seen_at on dedup) -- SQL migration ready at supabase/migrations/20261108200000_risk_alerts_last_seen.sql, NEEDS FOUNDER TO RUN
-- [ ] D-02: Merge redundant permissive SELECT policies on bookings, reservations, rent_payments -- SQL migration ready at supabase/migrations/20261108210000_d02_merge_host_policies.sql, NEEDS FOUNDER TO RUN
+- [x] D-02: Merge redundant permissive SELECT policies on bookings, reservations, rent_payments -- SQL migration ready at supabase/migrations/20261108210000_d02_merge_host_policies.sql, NEEDS FOUNDER TO RUN
 
 ---
 
@@ -373,6 +373,6 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 | Light Mode | 4/4 | 0 |
 | Performance | 5/5 | 0 |
 | Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
-| SW11 i18n migration | 18+ files | COMPLETE: all user-facing COPY objects migrated; email copy stays inline (server-only) |
+| SW11 i18n migration | 22+ files | listings-labels, badge, bookings-lifecycle, social-flag added; remaining: email copy (server-only), admin copy (staff-only), money/copy.ts (large/cross-referenced) |
 | Backend audit | R-04, D-02 | SQL migrations written, founder to run |
 | Banner avatar | done | ToastItem.avatarUrl infrastructure built |

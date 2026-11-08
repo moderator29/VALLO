@@ -1,3 +1,4 @@
+import { getDictionary } from "@vallo/i18n";
 import { z } from "zod";
 import { HOLD_WINDOW_HOURS } from "../agent/bookings-model";
 
@@ -195,21 +196,14 @@ export function noShowDecision(
 }
 
 /** What a host reads when the answer is not "recorded". */
+/** SW11: source of truth is now `packages/i18n/src/locales/bookings-lifecycle.en.ts`. */
 export const NO_SHOW_MESSAGES: Record<
   Exclude<NoShowDecision, "record"> | "missing" | "rent_charge",
   string
-> = {
-  already: "This stay is already recorded as a no show.",
-  not_confirmed:
-    "Only a confirmed stay can be recorded as a no show. Reload the page to see where this one stands.",
-  not_arrived:
-    "Arrival day has not come yet, so there is nothing to record. You can record a no show from 12:00 the day after check-in.",
-  too_early:
-    "A guest can still arrive late on the day. You can record a no show from 12:00 the day after check-in.",
-  rent_charge:
-    "A move-in is not recorded as a no show. If your tenant has not moved in, contact support and we will look into it.",
-  missing: "We could not find that booking. Reload the page to see your current stays.",
-};
+> = getDictionary("en").bookingsLifecycle.noShowMessages as Record<
+  Exclude<NoShowDecision, "record"> | "missing" | "rent_charge",
+  string
+>;
 
 export const MAX_NO_SHOW_NOTE_LENGTH = 500;
 
