@@ -12,9 +12,10 @@
  * closure; the native side never sees them. The bridge carries only what the
  * OS needs to draw and route the call, never a secret.
  *
- * IMPLEMENTATION NOTE: the native Swift and Kotlin are NOT wired here. This
- * file defines the typed API the web side will call through Capacitor's
- * plugin bridge (`@capacitor/core` registerPlugin). The native plugins
+ * IMPLEMENTATION NOTE: the native Swift (CXProvider) and Kotlin (notification
+ * + AudioManager) plugins live in `native/ios/ValloCallKit/` and
+ * `native/android/vallocallkit/`. After `cap sync`, copy them into the
+ * generated native project per `native/README.md`. The native plugins
  * register under the name "ValloCallKit" on both platforms.
  */
 
