@@ -78,7 +78,7 @@
   flex: 1;
   height: 0.5rem;
   border-radius: var(--nf-radius-pill);
-  background: var(--nf-surface-tint);
+  background: var(--nf-surface-raised);
   overflow: hidden;
 }
 

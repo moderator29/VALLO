@@ -10,6 +10,7 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE vNIN ROUTE TO THE IDENTITY RUNG (V-49). Drawn by the verification page
@@ -28,20 +29,23 @@ export function VninPanel({
   merchantCode: string;
 }) {
   const [vnin, setVnin] = useState("");
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [pending, startTransition] = useSafeTransition();
   const [matched, setMatched] = useState(false);
   const matchedWords = success ? successCopy(success, "identityMatched") : null;
 
   function submit() {
-    setMessage(null);
     startTransition(async () => {
       try {
         const result = await verifyIdentityWithVnin({ vnin });
-        setMessage(result.ok ? { tone: "ok", text: result.data.message } : { tone: "error", text: result.error });
-        /* Only a match the server calls "passed" is celebrated. "pending" keeps
-           its own sentence and no sheet: nothing has been decided yet. */
-        if (result.ok && result.data.status === "passed") setMatched(true);
+        if (result.ok) {
+          if (result.data.status === "passed") {
+            setMatched(true);
+          } else {
+            banner.success(result.data.message);
+          }
+        } else {
+          banner.error(result.error, { retry: submit });
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -62,14 +66,6 @@ export function VninPanel({
       <Button type="button" variant="primary" full loading={pending} onClick={submit} disabled={vnin.trim() === ""}>
         {pending ? copy.checking : copy.submit}
       </Button>
-      {message && (
-        <p
-          role={message.tone === "error" ? "alert" : "status"}
-          className={`nf-body-sm ${message.tone === "error" ? "text-[var(--nf-state-error)]" : "text-[var(--nf-content-primary)]"}`}
-        >
-          {message.text}
-        </p>
-      )}
       {success && matchedWords ? (
         <SuccessSheet
           open={matched}

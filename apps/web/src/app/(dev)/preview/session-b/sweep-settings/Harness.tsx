@@ -337,7 +337,7 @@ export function SweepSettingsHarness({ v }: { v: string }) {
       <div className="mx-auto max-w-2xl">
         <PageHeader title={hub.privacy} subtitle={hub.privacySub} fallback="/settings" />
         <div className="space-y-block">
-          <AccountPrivacyCard t={t} initialPrivacy={{ hideActivity: false, showOccupation: false, showHomeTown: false }} initialDataSaver={false} />
+          <AccountPrivacyCard t={t} initialPrivacy={{ hideActivity: false, showOccupation: false, showHomeTown: false, profileVisibility: "everyone", messagingAccess: "everyone", contactDiscovery: true }} initialDataSaver={false} />
           <SecurityCard t={t}>
             <DevicesRow t={t} signedIn count={2} />
           </SecurityCard>

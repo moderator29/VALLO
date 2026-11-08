@@ -2,11 +2,12 @@
 
 import { useCallback, useState } from "react";
 import { setLite } from "@/lib/ui/lite";
-import { RowSwitch, SettingsGroup } from "@/components/app/account/rows";
+import { RowSelect, RowSwitch, SettingsGroup } from "@/components/app/account/rows";
 import { banner } from "@/lib/ui/toast";
 import { updateSettings } from "@/lib/profile/actions";
 import type { NotifyToggleCopy, PrivacyToggleCopy } from "@/components/app/account/settings-copy";
 import type { ResolvedProfileSettings, SettingsPatch } from "@/lib/profile/schema";
+import type { VisibilityLevel } from "@/lib/profile/model";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
@@ -158,12 +159,57 @@ export function AccountPrivacyCard({
   const [hideActivity, setHideActivity] = useState(initialPrivacy.hideActivity);
   const [showOccupation, setShowOccupation] = useState(initialPrivacy.showOccupation);
   const [showHomeTown, setShowHomeTown] = useState(initialPrivacy.showHomeTown);
+  const [profileVisibility, setProfileVisibility] = useState(initialPrivacy.profileVisibility);
+  const [messagingAccess, setMessagingAccess] = useState(initialPrivacy.messagingAccess);
+  const [contactDiscovery, setContactDiscovery] = useState(initialPrivacy.contactDiscovery);
   const [dataSaver, setDataSaver] = useState(initialDataSaver);
   const { save, pending } = useSettingsSaver(t.settings.account.saved);
   const copy = t.settings.notify;
 
+  const visibilityOptions: { value: VisibilityLevel; label: string }[] = [
+    { value: "everyone", label: copy.visibilityEveryone },
+    { value: "verified", label: copy.visibilityVerified },
+    { value: "connections", label: copy.visibilityConnections },
+  ];
+
   return (
     <SettingsGroup label={t.settings.privacy.label}>
+      <RowSelect
+        icon="eye"
+        label={copy.profileVisibility}
+        sub={copy.profileVisibilitySub}
+        value={profileVisibility}
+        options={visibilityOptions}
+        onChange={(next) => {
+          const previous = profileVisibility;
+          setProfileVisibility(next);
+          save({ privacy: { profileVisibility: next } }, () => setProfileVisibility(previous));
+        }}
+      />
+      <RowSelect
+        icon="chat-bubble"
+        label={copy.messagingAccess}
+        sub={copy.messagingAccessSub}
+        value={messagingAccess}
+        options={visibilityOptions}
+        onChange={(next) => {
+          const previous = messagingAccess;
+          setMessagingAccess(next);
+          save({ privacy: { messagingAccess: next } }, () => setMessagingAccess(previous));
+        }}
+      />
+      <RowSwitch
+        icon="search"
+        label={copy.contactDiscovery}
+        sub={copy.contactDiscoverySub}
+        checked={contactDiscovery}
+        onChange={(next) => {
+          const previous = contactDiscovery;
+          setContactDiscovery(next);
+          save({ privacy: { contactDiscovery: next } }, () => setContactDiscovery(previous));
+        }}
+        disabled={pending}
+      />
       <RowSwitch
         icon="user"
         label={copy.hideActivity}

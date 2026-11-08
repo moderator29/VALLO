@@ -1,6 +1,6 @@
 "use client";
 
-import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
+import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
@@ -146,6 +146,7 @@ export function ReserveTable({
 }) {
   const w = copy.table;
   const heading = title === undefined ? w.title : title;
+  const isKept = useKeptCopy();
   const todayIso = lagosDayIso(0);
   const days = useMemo(() => Array.from({ length: 14 }, (_, i) => lagosDayIso(i)), []);
 
@@ -439,7 +440,7 @@ export function ReserveTable({
 
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
-      <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0}>
+      <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0 || isKept}>
         {pending ? w.sending : w.submit}
       </Button>
 

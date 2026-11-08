@@ -1,6 +1,6 @@
 "use client";
 
-import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
+import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
 import { useActionState, useEffect, useId, useState, useMemo } from "react";
@@ -239,6 +239,7 @@ export function ReservePanel({
   // The panel renders twice on one page (inline on phones, sticky aside from
   // lg up), so input ids must be instance-unique.
   const uid = useId();
+  const isKept = useKeptCopy();
 
   /* The counted phrases on this panel used to be written as
      `nights === 1 ? "night" : "nights"`, which is two defects in one
@@ -816,7 +817,7 @@ export function ReservePanel({
         <PhoneGateLink show={isPhoneGate(state)} full className="mt-block" />
 
         <div className="mt-block grid gap-row">
-          <Button type="submit" variant="primary" full disabled={!ready} loading={pending}>
+          <Button type="submit" variant="primary" full disabled={!ready || isKept} loading={pending}>
             {w.reserve}
           </Button>
           {/* The second action under the blue Reserve is the warm spark (D81). */}

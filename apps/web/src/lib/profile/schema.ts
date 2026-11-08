@@ -32,6 +32,7 @@ import {
   PHONE_SHAPE_RE,
   ResolvedProfileSettings,
   SETTINGS_DEFAULTS,
+  VISIBILITY_LEVELS,
   phoneDigits,
 } from "./model";
 export * from "./model";
@@ -127,7 +128,14 @@ const storedSettingsSchema = z
       .partial()
       .catch({}),
     privacy: z
-      .object({ hideActivity: z.boolean(), showOccupation: z.boolean(), showHomeTown: z.boolean() })
+      .object({
+        hideActivity: z.boolean(),
+        showOccupation: z.boolean(),
+        showHomeTown: z.boolean(),
+        profileVisibility: z.enum(VISIBILITY_LEVELS),
+        messagingAccess: z.enum(VISIBILITY_LEVELS),
+        contactDiscovery: z.boolean(),
+      })
       .partial().catch({}),
     locale: z.enum(LOCALE_CODES).optional().catch(undefined),
     dataSaver: z.boolean().optional().catch(undefined),
@@ -171,7 +179,14 @@ export const settingsPatchSchema = z
       .partial()
       .optional(),
     privacy: z
-      .object({ hideActivity: z.boolean(), showOccupation: z.boolean(), showHomeTown: z.boolean() })
+      .object({
+        hideActivity: z.boolean(),
+        showOccupation: z.boolean(),
+        showHomeTown: z.boolean(),
+        profileVisibility: z.enum(VISIBILITY_LEVELS),
+        messagingAccess: z.enum(VISIBILITY_LEVELS),
+        contactDiscovery: z.boolean(),
+      })
       .partial().optional(),
     locale: z.enum(LOCALE_CODES).optional(),
     dataSaver: z.boolean().optional(),

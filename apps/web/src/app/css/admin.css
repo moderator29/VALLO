@@ -383,6 +383,9 @@
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     box-shadow: var(--nf-rim-lit);
+    transition:
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
   }
   .nf-admin-bar__search input::placeholder {
     color: var(--nf-content-secondary);
@@ -758,11 +761,14 @@
     box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
     transition:
       border-color var(--nf-duration-fast) var(--nf-ease-standard),
-      box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+      box-shadow var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-fast) var(--nf-ease-standard);
   }
   @media (hover: hover) {
     .nf-admin-tile:hover {
       border-color: var(--nf-selected-edge);
+      transform: translateY(-1px);
+      box-shadow: var(--nf-panel-rim), var(--nf-panel-glow), var(--nf-elev-1);
     }
   }
   .nf-admin-tile:focus-visible {
@@ -1226,6 +1232,17 @@
     height: 2.25rem;
     border-radius: var(--nf-radius-sm);
     color: var(--nf-content-muted);
+    transition: background var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-admin-row__kebab:hover {
+      background: var(--nf-glass-fill-thin);
+      color: var(--nf-content-primary);
+    }
+  }
+  .nf-admin-row__kebab:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 1px;
   }
   .nf-admin-row__body {
     padding: var(--nf-space-xs) var(--nf-space-sm) var(--nf-space-md);
@@ -1389,8 +1406,10 @@
     .nf-admin-alerts__row,
     .nf-admin-pager__page,
     .nf-admin-row__view,
+    .nf-admin-row__kebab,
     .nf-admin-select,
-    .nf-admin-panel__link {
+    .nf-admin-panel__link,
+    .nf-admin-bar__search input {
       transition: none;
     }
   }
@@ -1819,6 +1838,9 @@
     font-size: var(--nf-text-body-sm);
     white-space: normal;
   }
+  .nf-admin-dt tbody tr:nth-child(even) td {
+    background: color-mix(in oklab, var(--nf-brand-primary) 3%, transparent);
+  }
   @media (hover: hover) {
     .nf-admin-dt tbody tr:hover td {
       background: var(--nf-surface-raised);
@@ -1920,6 +1942,11 @@
   .nf-admin-dist__row:last-child {
     border-bottom: 0;
   }
+  @media (hover: hover) {
+    .nf-admin-dist__row:not(.nf-admin-dist__row--head):hover {
+      background: color-mix(in oklab, var(--nf-brand-primary) 8%, transparent);
+    }
+  }
   .nf-admin-dist__row--head {
     min-height: 2rem;
     font-size: var(--nf-text-caption);
@@ -1996,6 +2023,10 @@
     a.nf-admin-alerts__row:hover {
       background: color-mix(in oklab, var(--nf-brand-primary) 10%, transparent);
     }
+  }
+  a.nf-admin-alerts__row:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: -2px;
   }
   .nf-admin-alerts__text {
     display: grid;
