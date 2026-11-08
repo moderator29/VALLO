@@ -217,7 +217,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 9.28 Swipe action rubber band (inbox swipe reveal with spring) -- CSS BUILT in premium-motion-2.css
 - [x] 9.29 Image gallery momentum snap (photo swipe with spring) -- CSS BUILT in premium-motion-2.css
 - [x] 9.30 Profile photo morph/crossfade on change -- CSS BUILT in premium-motion-2.css
-- [ ] 9.31 Pull-to-refresh with branded Vallo mark rotation
+- [x] 9.31 Pull-to-refresh with branded Vallo mark rotation -- CSS BUILT in premium-motion-2.css
 
 ### Pages and Areas Still Lacking Premium Motion
 - [x] 9.32 Settings page: section headers fade-slide on scroll into view -- CSS BUILT in premium-motion-2.css
@@ -228,7 +228,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 9.37 Checkout flow: step transition slide with progress bar fill -- CSS BUILT in premium-motion-2.css
 - [x] 9.38 Rewards page: points counter, tier badge shine, history stagger -- CSS BUILT in premium-motion-2.css
 - [x] 9.39 Verification flow: scan frame + ID card entrance animation -- CSS BUILT in premium-motion-2.css
-- [ ] 9.40 Agreements: signature line draw, seal stamp pop
+- [x] 9.40 Agreements: signature line draw, seal stamp pop -- CSS BUILT in premium-motion-2.css
 - [x] 9.41 Support page: category cards lift on hover, chat entrance slide -- CSS BUILT in premium-motion-2.css
 
 ---
