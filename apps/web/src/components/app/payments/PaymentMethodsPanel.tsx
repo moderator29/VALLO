@@ -125,20 +125,29 @@ export function PaymentMethodsPanel({
      second attempt takes a fresh key and is allowed through. */
   const [setupKey, setSetupKey] = useState(() => newIdempotencyKey());
 
+  /* What the action did, said by the one banner (founder, 7 November 2026). */
+  const METHOD_WORDS = {
+    cardRemoved: "Card removed",
+    cardDefault: "Default card updated",
+    accountRemoved: "Account removed",
+    accountDefault: "Default payout account updated",
+  } as const;
+
   /* A refusal is said by the one banner at the top of the screen (Grade 1),
      which sits above these sheets, with Try again. */
-  function run(work: () => Promise<{ ok: boolean; error?: string }>, then?: () => void) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, then?: () => void, successWord?: string) {
     startTransition(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          banner.error(result.error ?? copy.readFailed, { retry: () => run(work, then) });
+          banner.error(result.error ?? copy.readFailed, { retry: () => run(work, then, successWord) });
           return;
         }
+        if (successWord) banner.success(successWord);
         then?.();
         router.refresh();
       } catch {
-        banner.error(copy.readFailed, { retry: () => run(work, then) });
+        banner.error(copy.readFailed, { retry: () => run(work, then, successWord) });
       }
     });
   }
@@ -389,7 +398,7 @@ export function PaymentMethodsPanel({
                 <RowButton
                   icon="verified"
                   label={copy.makeDefault}
-                  onClick={() => run(() => setDefaultPaymentMethod(openCard.id), close)}
+                  onClick={() => run(() => setDefaultPaymentMethod(openCard.id), close, METHOD_WORDS.cardDefault)}
                   disabled={pending}
                   chevron={false}
                 />
@@ -411,7 +420,7 @@ export function PaymentMethodsPanel({
                       variant="danger"
                       full
                       loading={pending}
-                      onClick={() => run(() => removePaymentMethod(openCard.id), close)}
+                      onClick={() => run(() => removePaymentMethod(openCard.id), close, METHOD_WORDS.cardRemoved)}
                     >
                       {copy.removeCardConfirm}
                     </Button>
@@ -449,7 +458,7 @@ export function PaymentMethodsPanel({
                         setDefaultBankAccount(openAccount.id, stepUp),
                       );
                       return result ?? { ok: false, error: lockWords.notConfirmed };
-                    }, close)
+                    }, close, METHOD_WORDS.accountDefault)
                   }
                   disabled={pending}
                   chevron={false}
@@ -480,7 +489,7 @@ export function PaymentMethodsPanel({
                             removeBankAccount(openAccount.id, stepUp),
                           );
                           return result ?? { ok: false, error: lockWords.notConfirmed };
-                        }, close)
+                        }, close, METHOD_WORDS.accountRemoved)
                       }
                     >
                       {copy.removeAccountConfirm}

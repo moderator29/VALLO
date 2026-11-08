@@ -1082,7 +1082,7 @@
   gap: var(--nf-space-3xs);
   border-radius: var(--nf-radius-md);
   background: var(--nf-surface-raised);
-  border: 1px solid var(--nf-border-subtle);
+  border: var(--nf-border-width) solid var(--nf-border-subtle);
   box-shadow: var(--nf-elevation-floating);
 }
 .nf-call-menu__item {
