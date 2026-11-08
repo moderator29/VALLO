@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./core": "./src/core.ts",
     "./mail": "./src/mail.ts",
-    "./locales/*": "./src/locales/*"
+    "./locales/*": "./src/locales/*",
+    "./en/*": "./src/locales/*.en.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

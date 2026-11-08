@@ -1,5 +1,6 @@
 import { VERIFICATION_ORDER, type RungDefinition } from "@/lib/trust/verification";
-import { getDictionary } from "@vallo/i18n";
+import { workspaceStandingEn } from "@vallo/i18n/en/workspace";
+import { listingRoleFilterHeadingEn, listingRoleFilterLabelEn, noDocumentLabelEn, proofPendingEn } from "@vallo/i18n/en/supply-roles";
 
 /**
  * THE SUPPLY SIDE, AS DATA. ONE VOCABULARY, READ BY EVERY SURFACE.
@@ -222,8 +223,8 @@ export type StandingCopy = {
 };
 
 /** SW11: source of truth is now `packages/i18n/src/locales/workspace.en.ts`. */
-const _ws = getDictionary("en").workspaceStanding;
-const _sr = getDictionary("en").supplyRoles;
+const _ws = workspaceStandingEn;
+const _sr = { proofPending: proofPendingEn, noDocumentLabel: noDocumentLabelEn, roleFilterLabel: listingRoleFilterLabelEn, roleFilterHeading: listingRoleFilterHeadingEn };
 export const WORKSPACE_STANDING_COPY: Record<WorkspaceStanding, StandingCopy> = {
   active: { ..._ws.active, selectable: true },
   draft: { ..._ws.draft, selectable: true },

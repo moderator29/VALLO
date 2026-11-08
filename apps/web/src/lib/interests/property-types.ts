@@ -41,8 +41,8 @@ export const PROPERTY_TYPES = Constants.public.Enums.property_type;
  * versus "home". Every line here describes what the platform actually lists.
  */
 /** SW11: source of truth is now the `interests` section of the i18n dictionary. */
-import { getDictionary } from "@vallo/i18n";
-const _i = getDictionary("en").interests;
+import { interestsHintsEn, interestsMarketsEn } from "@vallo/i18n/en/interests";
+const _i = { markets: interestsMarketsEn, hints: interestsHintsEn };
 export const INTEREST_COPY: Record<PropertyType, { label: string; hint: string }> =
   Object.fromEntries(
     PROPERTY_TYPES.map((t) => [t, { label: (_i.markets as Record<string, string>)[t] ?? t, hint: (_i.hints as Record<string, string>)[t] ?? "" }])

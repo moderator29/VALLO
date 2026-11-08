@@ -80,6 +80,7 @@ import { chargebacksEn } from "./chargebacks.en";
 import { circleEn } from "./circle.en";
 /* Vallo Roommates: roommate discovery and shared homes. */
 import { roommatesEn } from "./roommates.en";
+import { interestsHintsEn, interestsMarketsEn } from "./interests.en";
 /* The social layer (SW11): posts, stories, areas, the bot, profiles. */
 import {
   socialPostEn,
@@ -1661,18 +1662,7 @@ export const en = {
    * claiming a save that never happened.
    */
   interests: {
-    markets: {
-      apartment: "Apartments",
-      hotel: "Hotels",
-      home: "Homes",
-      villa: "Villas",
-      shortlet: "Shortlets",
-      rental: "Rentals",
-      shop: "Shops",
-      office: "Offices",
-      land: "Land",
-      restaurant: "Restaurants",
-    },
+    markets: interestsMarketsEn,
     tune: {
       open: "Change what comes first",
       title: "What should come first?",
@@ -1691,18 +1681,7 @@ export const en = {
     /* The line under each market name on the nine cards. It exists because
        "rental" and "shortlet" are not the same thing to somebody arriving for
        the first time, and neither is "apartment" versus "home". */
-    hints: {
-      apartment: "Nightly stays in a flat",
-      hotel: "Rooms, booked by the night",
-      home: "A whole house for your stay",
-      villa: "Larger private places",
-      shortlet: "A few nights to a few weeks",
-      rental: "Somewhere to live, by the year",
-      shop: "Retail space, by the year",
-      office: "Workspace, by the year",
-      land: "Plots to buy or lease",
-      restaurant: "Tables at places to eat",
-    },
+    hints: interestsHintsEn,
     /* The screen the cards live on, at the door and in settings. */
     question: "What are you here for?",
     save: "Save what I am here for",

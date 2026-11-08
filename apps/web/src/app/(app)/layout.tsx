@@ -5,7 +5,6 @@
 import "@/app/social.css";
 import "@/app/social-feed.css";
 import "@/app/css/motion.css";
-import "@/app/css/premium-motion-2.css";
 import "@/app/css/passcode.css";
 import "@/app/css/photo-viewer.css";
 import "@/app/css/filter-tiles.css";
@@ -15,6 +14,8 @@ import "@/app/css/money-history.css";
 import "@/app/css/flow-m.css";
 import "@/app/css/detail-m.css";
 import "@/app/css/member-loop.css";
+/* The second premium motion layer, after the member sheets (css-diet C6 keeps their order first). */
+import "@/app/css/premium-motion-2.css";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";

@@ -1,5 +1,5 @@
 import type { MovementKind, MovementStatus, OnboardingState, ProfileGap } from "./funds";
-import { getDictionary } from "@vallo/i18n";
+import { walletHistoryKindLabelEn, walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletStatusEn, walletWaitingEn } from "@vallo/i18n/en/wallet";
 
 /**
  * WHAT A MEMBER READS ON THE WALLET SCREEN (founder sections 36 to 46;
@@ -59,7 +59,7 @@ export function confirmedAgo(iso: string | null, now: number): string {
 }
 
 /** SW11: wallet status strings from `packages/i18n/src/locales/wallet.en.ts`. */
-const _ws = getDictionary("en").wallet.status;
+const _ws = walletStatusEn;
 export const STALE_NOTE = _ws.staleNote;
 
 /* ------------------------------------------------------- not connected
@@ -172,7 +172,7 @@ export const FILTER_EMPTY = {
 export const TRANSACTIONS_MORE = "Showing your most recent movements.";
 
 /** SW11: source of truth is now `packages/i18n/src/locales/wallet.en.ts`. */
-const _w = getDictionary("en").wallet;
+const _w = { move: walletMoveEn, onboarding: walletOnboardingEn, phoneTaken: walletPhoneTakenEn, waiting: walletWaitingEn, status: walletStatusEn, historyKindLabel: walletHistoryKindLabelEn };
 export const MOVE_COPY = _w.move;
 
 /* ---------------------------------------------------------- onboarding */

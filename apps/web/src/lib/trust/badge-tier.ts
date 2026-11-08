@@ -1,4 +1,4 @@
-import { getDictionary } from "@vallo/i18n";
+import { badgeTierLabelEn, badgeTierMeaningEn } from "@vallo/i18n/en/badge";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -64,7 +64,7 @@ export function hasBadge(tier: BadgeTier): boolean {
  * not claim an inspection, a payout account or anything about a property.
  */
 /** SW11: source of truth is now `packages/i18n/src/locales/badge.en.ts`. */
-const _b = getDictionary("en").badge;
+const _b = { tierLabel: badgeTierLabelEn, tierMeaning: badgeTierMeaningEn };
 export const BADGE_TIER_LABEL: Record<BadgeTier, string> = _b.tierLabel as Record<BadgeTier, string>;
 export const BADGE_TIER_MEANING: Record<BadgeTier, string> = _b.tierMeaning as Record<BadgeTier, string>;
 

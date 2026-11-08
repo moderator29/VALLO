@@ -27,8 +27,8 @@ export function isRequirementKey(value: unknown): value is RequirementKey {
 }
 
 /** SW11: source of truth is now `packages/i18n/src/locales/referral.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-const _ref = getDictionary("en").referral;
+import { referralRequirementsEn, referralStepsEn } from "@vallo/i18n/en/referral";
+const _ref = { requirements: referralRequirementsEn, steps: referralStepsEn };
 export const REQUIREMENT_COPY = _ref.requirements as Record<RequirementKey, string>;
 
 /**

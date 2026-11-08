@@ -28,8 +28,8 @@ export type ContactPolicy = (typeof CONTACT_POLICIES)[number];
  * harassment surface.
  */
 /** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-const _dict = getDictionary("en").social;
+import { socialContactPolicyEn, socialPidginEn } from "@vallo/i18n/en/social";
+const _dict = { contactPolicy: socialContactPolicyEn, pidgin: socialPidginEn };
 export const CONTACT_POLICY_COPY = _dict.contactPolicy as Record<ContactPolicy, { title: string; detail: string }>;
 export const PIDGIN_COPY = _dict.pidgin;
 

@@ -30,8 +30,8 @@ export const REPORT_CATEGORIES = [
 export type ReportCategory = (typeof REPORT_CATEGORIES)[number];
 
 /** SW11: source of truth is now `packages/i18n/src/locales/safety.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-const _safety = getDictionary("en").safety;
+import { safetyReportTargetNounEn, safetyReportsEn } from "@vallo/i18n/en/safety";
+const _safety = { reports: safetyReportsEn, reportTargetNoun: safetyReportTargetNounEn };
 export const REPORT_CATEGORY_COPY = _safety.reports as Record<ReportCategory, { label: string; hint: string }>;
 
 /** The order the categories are offered in. Serious first, tidy last. */

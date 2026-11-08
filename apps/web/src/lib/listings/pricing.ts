@@ -21,7 +21,7 @@
  * Money is integer kobo throughout. Nothing in this file divides.
  */
 
-import { getDictionary } from "@vallo/i18n";
+import { periodSuffixEn, rentPeriodLabelEn, saleStatusLabelEn, tenureLabelEn, waterLabelEn } from "@vallo/i18n/en/listings-labels";
 
 export type ListingIntent = "rent" | "sale";
 export type RentPeriod = "month" | "quarter" | "year";
@@ -149,7 +149,7 @@ export function headlinePeriod(headline: Headline): PricePeriod | "sale" {
  * the English cannot drift apart.
  */
 /** SW11: source of truth is now `packages/i18n/src/locales/listings-labels.en.ts`. */
-const _ll = getDictionary("en").listingsLabels;
+const _ll = { periodSuffix: periodSuffixEn, rentPeriodLabel: rentPeriodLabelEn, tenureLabel: tenureLabelEn, saleStatusLabel: saleStatusLabelEn, waterLabel: waterLabelEn };
 export const PERIOD_SUFFIX: PeriodWords = _ll.periodSuffix as PeriodWords;
 
 /**

@@ -499,7 +499,9 @@ export function InCallView({
             : null;
 
   /* Whether we need a "More" button: only when there are overflow items. */
-  const hasMore = isVideo && (canSwitchCamera || true /* placeholder items */);
+  /* More opens only when it holds something that works: a call offers no
+     screen sharing or group add, so those are not drawn as dead rows. */
+  const hasMore = isVideo && canSwitchCamera;
 
   return (
     <CallFrame
@@ -649,16 +651,6 @@ export function InCallView({
                     {copy.inCall.switchCamera}
                   </button>
                 ) : null}
-                <button type="button" className="nf-call__more-item" role="menuitem" disabled>
-                  <UiIcon name="share" size={20} />
-                  Share screen
-                  <span>Coming soon</span>
-                </button>
-                <button type="button" className="nf-call__more-item" role="menuitem" disabled>
-                  <UiIcon name="users" size={20} />
-                  Add to group
-                  <span>Coming soon</span>
-                </button>
               </div>
             ) : null}
           </span>

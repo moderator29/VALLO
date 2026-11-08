@@ -1,5 +1,5 @@
 import type { InspectionOutcome, InspectionState } from "./types";
-import { getDictionary } from "@vallo/i18n";
+import { roomCopyEn } from "@vallo/i18n/en/inspections";
 
 /**
  * THE INSPECTION REPORT, AS THE SCREEN HOLDS IT.
@@ -32,7 +32,7 @@ export const ROOM_ITEMS = [
 export type RoomItem = (typeof ROOM_ITEMS)[number];
 
 /** SW11: source of truth is now `packages/i18n/src/locales/inspections.en.ts`. */
-export const ROOM_COPY = getDictionary("en").inspections.rooms as Record<RoomItem, { title: string; detail: string }>;
+export const ROOM_COPY = roomCopyEn as Record<RoomItem, { title: string; detail: string }>;
 
 export type InspectionReport = {
   notes: string | null;

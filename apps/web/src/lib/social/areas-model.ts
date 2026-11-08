@@ -1,6 +1,6 @@
-import { getDictionary } from "@vallo/i18n";
+import { socialAreaEn, socialAreaFailureEn, socialAreaKindHintEn, socialAreaKindLabelEn } from "@vallo/i18n/en/social";
 
-const _s = getDictionary("en").social;
+const _s = { area: socialAreaEn, areaFailure: socialAreaFailureEn, areaKindHint: socialAreaKindHintEn, areaKindLabel: socialAreaKindLabelEn };
 
 /**
  * Around: the shapes and the words for places.

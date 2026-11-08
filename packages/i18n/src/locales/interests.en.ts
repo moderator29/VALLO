@@ -1,17 +1,31 @@
 /**
- * Interest/property-type copy (SW11). Moved from
- * `lib/interests/property-types.ts` (INTEREST_COPY).
+ * What brings someone to Vallo (the interests picker), the two parts shared
+ * code reads on the client: the market names and their one-line hints.
+ * Moved out of en.ts so a client module can read them through
+ * `@vallo/i18n/en/interests` without the whole dictionary.
  */
+export const interestsMarketsEn = {
+  apartment: "Apartments",
+  hotel: "Hotels",
+  home: "Homes",
+  villa: "Villas",
+  shortlet: "Shortlets",
+  rental: "Rentals",
+  shop: "Shops",
+  office: "Offices",
+  land: "Land",
+  restaurant: "Restaurants",
+};
 
-export const interestsEn = {
-  apartment: { label: "Apartments", hint: "Nightly stays in a flat" },
-  hotel: { label: "Hotels", hint: "Rooms, booked by the night" },
-  home: { label: "Homes", hint: "A whole house for your stay" },
-  villa: { label: "Villas", hint: "Larger private places" },
-  shortlet: { label: "Shortlets", hint: "A few nights to a few weeks" },
-  rental: { label: "Rentals", hint: "Somewhere to live, by the year" },
-  shop: { label: "Shops", hint: "Retail space, by the year" },
-  office: { label: "Offices", hint: "Workspace, by the year" },
-  land: { label: "Land", hint: "Plots to buy or lease" },
-  restaurant: { label: "Restaurants", hint: "Tables you can reserve" },
+export const interestsHintsEn = {
+  apartment: "Nightly stays in a flat",
+  hotel: "Rooms, booked by the night",
+  home: "A whole house for your stay",
+  villa: "Larger private places",
+  shortlet: "A few nights to a few weeks",
+  rental: "Somewhere to live, by the year",
+  shop: "Retail space, by the year",
+  office: "Workspace, by the year",
+  land: "Plots to buy or lease",
+  restaurant: "Tables at places to eat",
 };

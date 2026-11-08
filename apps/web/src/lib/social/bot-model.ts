@@ -91,8 +91,8 @@ export const BOT_REFUSALS: Record<"off" | "month" | "day" | "person", string> = 
 };
 
 /** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-export const BOT_COPY = getDictionary("en").social.bot;
+import { socialBotEn } from "@vallo/i18n/en/social";
+export const BOT_COPY = socialBotEn;
 
 /**
  * The one line under a bot reply that says where the answer came from.

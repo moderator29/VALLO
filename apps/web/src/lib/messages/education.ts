@@ -10,8 +10,8 @@
 export const MONEY_TALK_RE = /\b(pay|payment|transfer|account|acct|bank)\b/i;
 
 /** SW11: source of truth is now `packages/i18n/src/locales/safety.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-export const SAFETY_EDUCATION_COPY = getDictionary("en").safety.education;
+import { safetyEducationEn } from "@vallo/i18n/en/safety";
+export const SAFETY_EDUCATION_COPY = safetyEducationEn;
 
 /** Session storage key: the card shows once per browsing session. */
 export const SAFETY_EDUCATION_SEEN_KEY = "nf_money_edu_seen";

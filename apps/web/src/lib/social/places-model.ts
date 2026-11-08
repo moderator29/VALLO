@@ -16,7 +16,7 @@
 
 import type { AreaStatus } from "./areas-model";
 import { countOf } from "@vallo/i18n/core";
-import { getDictionary } from "@vallo/i18n";
+import { placesCopyEn, placesFailureEn } from "@vallo/i18n/en/places";
 
 /** One of the 774 rows in `public.local_governments`. */
 export type LgaNode = {
@@ -94,7 +94,7 @@ export const ENTER_SQLSTATE = {
 } as const;
 
 /** SW11: static strings from `packages/i18n/src/locales/places.en.ts`. */
-const _pf = getDictionary("en").places;
+const _pf = { copy: placesCopyEn, failure: placesFailureEn };
 
 export const ENTER_FAILURE = _pf.failure;
 

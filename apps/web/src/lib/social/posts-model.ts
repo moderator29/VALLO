@@ -8,9 +8,9 @@
  * The database is the authority for every bound below. These schemas exist so a
  * person gets a useful sentence before the round trip, not to be the check.
  */
-import { getDictionary } from "@vallo/i18n";
+import { socialPostEn, socialPostFailureEn, socialPostKindHintEn, socialPostKindLabelEn, socialPostKindPlaceholderEn } from "@vallo/i18n/en/social";
 
-const _s = getDictionary("en").social;
+const _s = { post: socialPostEn, postFailure: socialPostFailureEn, postKindLabel: socialPostKindLabelEn, postKindHint: socialPostKindHintEn, postKindPlaceholder: socialPostKindPlaceholderEn };
 
 export const POST_KINDS = ["GIST", "ASK", "REPLY", "SHOWCASE", "SYSTEM"] as const;
 

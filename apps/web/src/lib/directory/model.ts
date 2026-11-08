@@ -36,8 +36,8 @@ export const SIDE_KINDS: Record<Side, readonly DirKind[]> = {
 export type DirFilter = "all" | DirKind;
 
 /** SW11: source of truth is now `packages/i18n/src/locales/directory.en.ts`. */
-import { getDictionary } from "@vallo/i18n";
-const _dir = getDictionary("en").directory;
+import { directoryCopyEn, directoryKindOneEn, directoryKindPluralEn } from "@vallo/i18n/en/directory";
+const _dir = { copy: directoryCopyEn, kindPlural: directoryKindPluralEn, kindOne: directoryKindOneEn };
 export const KIND_PLURAL = _dir.kindPlural as Record<DirKind, string>;
 export const KIND_ONE = _dir.kindOne as Record<DirKind, string>;
 

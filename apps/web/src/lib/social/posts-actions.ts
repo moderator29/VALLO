@@ -70,7 +70,7 @@ function messageForPostError(code: string | undefined, fallback: string): string
     case "RM013":
       return "You can only showcase a listing of your own that is live.";
     case "RM027":
-      return "That listing is not live, so it cannot be featured.";
+      return "That listing is paused or not published, so it cannot be featured.";
     case "42501":
       return POST_FAILURE.notInArea;
     case "23514":

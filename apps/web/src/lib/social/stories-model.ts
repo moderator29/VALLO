@@ -1,4 +1,4 @@
-import { getDictionary } from "@vallo/i18n";
+import { socialStoryEn, socialStoryFailureEn } from "@vallo/i18n/en/social";
 
 /**
  * Stories.
@@ -63,7 +63,7 @@ export const STORY_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 export const STORY_BUCKET = "social-media";
 
 /** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
-const _s = getDictionary("en").social;
+const _s = { story: socialStoryEn, storyFailure: socialStoryFailureEn };
 export const STORY_COPY = _s.story;
 export const STORY_FAILURE = _s.storyFailure;
 

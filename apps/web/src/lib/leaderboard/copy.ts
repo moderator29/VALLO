@@ -1,5 +1,5 @@
 import { plural, type PluralForms } from "@vallo/i18n/core";
-import { getDictionary } from "@vallo/i18n";
+import { leaderboardEn } from "@vallo/i18n/en/leaderboard";
 import type { Board, LeaderKind, Movement, Period, Scope } from "./model";
 
 /**
@@ -9,7 +9,7 @@ import type { Board, LeaderKind, Movement, Period, Scope } from "./model";
  *
  * SW11: static strings now live in `packages/i18n/src/locales/leaderboard.en.ts`.
  */
-const _lb = getDictionary("en").leaderboard;
+const _lb = leaderboardEn;
 
 export const LEADERBOARD_TITLE = _lb.title;
 

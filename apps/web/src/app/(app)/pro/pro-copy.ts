@@ -4,7 +4,7 @@
  * consumer's import unchanged and applies the type constraints that
  * reference app-side types.
  */
-import { getDictionary } from "@vallo/i18n";
+import { proEn } from "@vallo/i18n/en/pro";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { PlanPerk, PlanQuotaKey } from "./pro-state";
 
@@ -20,7 +20,7 @@ export type ProPlanWords = {
   tag: string;
 };
 
-const _p = getDictionary("en").pro;
+const _p = proEn;
 
 export const PRO_COPY = {
   ..._p,

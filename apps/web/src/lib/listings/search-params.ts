@@ -1,4 +1,4 @@
-import { getDictionary } from "@vallo/i18n";
+import { waterLabelEn } from "@vallo/i18n/en/listings-labels";
 import { LISTING_ROLES, type ListingRole } from "@/lib/supply/roles";
 import { WATER_SOURCES, type ListingKind, type ListingSearchFilter, type WaterSupply } from "./types";
 import { UNIT_SHAPES, shapeFromSlug, shapeSlug, type UnitShape } from "./unit-shape";
@@ -249,7 +249,7 @@ export function waterSlug(value: WaterSupply): string {
 }
 
 /** SW11: source of truth is now `packages/i18n/src/locales/listings-labels.en.ts`. */
-export const WATER_LABEL: Record<WaterSupply, string> = getDictionary("en").listingsLabels.waterLabel as Record<WaterSupply, string>;
+export const WATER_LABEL: Record<WaterSupply, string> = waterLabelEn as Record<WaterSupply, string>;
 
 /** The raw shape Next hands a page, before anything has been trusted. */
 export type RawSearchParams = Record<string, string | string[] | undefined>;
