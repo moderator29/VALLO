@@ -163,7 +163,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
 - [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
 - [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
-- [x] 8.4 Full vitest run, fix remaining test failures -- DONE (all 9 calls tests pass; 16/16 locale-fit members-b pass; 36/36 locale-fit workspaces pass; earlier failures were flaky under parallel load, not code bugs)
+- [x] 8.4 Full vitest run, fix remaining test failures -- DONE (9/9 calls tests pass: outcome form counts reverted to 1, call-switch test fixed with waitFor after More menu opens; tsc clean; all gates pass)
 
 ---
 

@@ -88,6 +88,7 @@ export function TenancyReportCard({
           banner.error(result.error);
           return;
         }
+        banner.success(submit ? "Report submitted." : "Report saved.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

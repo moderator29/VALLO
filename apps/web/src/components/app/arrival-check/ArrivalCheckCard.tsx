@@ -62,6 +62,7 @@ export function ArrivalCheckCard({
           banner.error(result.error || copy.failed);
           return;
         }
+        banner.success("Check submitted.");
         router.refresh();
       } catch {
         banner.error(copy.failed);
