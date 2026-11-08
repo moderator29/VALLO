@@ -9,6 +9,8 @@
 --           notifications, saved search alerts, the nightly expiry job
 --   Part 3  the feed card column, "good for sharing" on property listings,
 --           two Circle categories and three Vallo-started communities
+--   Part 4  write grants on some Circle tables match their policies
+--           (no change to what members can do; probe db-06)
 --   Part 5  the schools directory (55 schools, email domains checked)
 --   Part 7  Trust and Safety: one case engine for every module, member
 --           restrictions and appeals, staff scopes, the admin desks' reads
@@ -2412,6 +2414,29 @@ end;
 $$;
 revoke all on function public.roommate_set_listing_sharing(uuid, boolean, smallint) from public, anon;
 grant execute on function public.roommate_set_listing_sharing(uuid, boolean, smallint) to authenticated;
+
+
+-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roommates_4_grant_tidy.sql
+
+-- PART 4: WRITE GRANTS MATCH THE POLICIES (probe db-06).
+--
+-- Some tables added on 7 and 8 November grant members a write that no
+-- row level security policy allows. RLS already refused those writes (no
+-- policy, no row), so nothing a member can do changes here; the grant is
+-- simply taken away so the privileges say the same as the policies, which
+-- is what probe db-06 holds the database to. The writes these tables do
+-- take go through their own database functions.
+
+revoke update on public.circle_vouches from authenticated;
+revoke update on public.circle_shared_shortlists from authenticated;
+revoke insert, update, delete on public.circle_communities from authenticated;
+revoke insert on public.circle_memberships from authenticated;
+revoke update on public.post_helpful from authenticated;
+revoke insert, update, delete on public.circle_accepted_answers from authenticated;
+revoke update on public.circle_plan_signups from authenticated;
+revoke update on public.circle_question_follows from authenticated;
+revoke delete on public.circle_plans from authenticated;
+revoke delete on public.circle_invites from authenticated;
 
 
 -- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> roommates_5_institutions.sql

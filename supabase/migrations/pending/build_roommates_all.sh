@@ -16,6 +16,8 @@ cd "$(dirname "$0")"
 --           notifications, saved search alerts, the nightly expiry job
 --   Part 3  the feed card column, "good for sharing" on property listings,
 --           two Circle categories and three Vallo-started communities
+--   Part 4  write grants on some Circle tables match their policies
+--           (no change to what members can do; probe db-06)
 --   Part 5  the schools directory (55 schools, email domains checked)
 --   Part 7  Trust and Safety: one case engine for every module, member
 --           restrictions and appeals, staff scopes, the admin desks' reads
@@ -43,7 +45,7 @@ alter type public.staff_scope add value if not exists 'analyst';
 
 begin;
 HEAD
-  for part in roommates_1_core.sql roommates_2_engine.sql roommates_3_integrations.sql roommates_5_institutions.sql roommates_7_trust_safety.sql roommates_6_bookkeeping.sql; do
+  for part in roommates_1_core.sql roommates_2_engine.sql roommates_3_integrations.sql roommates_4_grant_tidy.sql roommates_5_institutions.sql roommates_7_trust_safety.sql roommates_6_bookkeeping.sql; do
     printf '\n\n-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %s\n\n' "$part"
     cat "$part"
   done

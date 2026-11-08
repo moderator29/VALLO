@@ -104,3 +104,14 @@ alter table public.circle_communities add column if not exists status text defau
   add column if not exists last_activity_at timestamptz, add column if not exists created_by uuid, add column if not exists created_at timestamptz default now();
 grant execute on all functions in schema private to authenticated;
 grant select, insert, update, delete on all tables in schema public to authenticated;
+-- Circle tables part 4 tidies the grants on (shape irrelevant here).
+create table if not exists public.circle_vouches (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_shared_shortlists (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_memberships (id uuid primary key default gen_random_uuid());
+create table if not exists public.post_helpful (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_accepted_answers (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_plan_signups (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_question_follows (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_plans (id uuid primary key default gen_random_uuid());
+create table if not exists public.circle_invites (id uuid primary key default gen_random_uuid());
+grant select, insert, update, delete on all tables in schema public to authenticated;

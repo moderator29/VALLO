@@ -23,6 +23,7 @@ What it contains, in order:
 | 0 | Four staff scopes: trust_safety, roommates, circle, analyst |
 | 1 | Tables and RLS: institutions, roommate profiles, room posts, interests, groups (members, shortlist, votes, board, costs), viewings, verifications, email codes, saved searches; storage buckets roommate-photos (public) and roommate-evidence (private); saved collections take roommate kinds; a direct chat is allowed between two connected roommates |
 | 2 | The matching engine and every read and write (SECURITY DEFINER, caller checked), notifications with the sender's face, saved search alerts, nightly expiry |
+| 4 | Write grants on ten Circle tables tidied to match their policies (no change to what members can do; probe db-06) |
 | 3 | Feed column for roommate posts, "Good for sharing" on property listings, two Circle categories and three Vallo communities |
 | 5 | The schools directory: 55 schools, 50 email domains confirmed from public sources |
 | 7 | Trust and Safety: cases, case timeline and evidence, restrictions enforced in the database, appeals, the admin reads and writes, the overview numbers |
