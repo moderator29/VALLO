@@ -183,7 +183,7 @@ export function VisitStatus({
       /* Said by the one banner at the top of the screen (Grade 1). */
       const result = await acceptProposedTime({ id: row.id });
       if (!result.ok) banner.error(result.error, { retry: () => void accept() });
-      else { banner.success("Viewing confirmed."); router.refresh(); }
+      else { banner.success(copy.sheets.confirmedBanner); router.refresh(); }
     } finally {
       setBusy(false);
     }
@@ -425,7 +425,7 @@ export function VisitStatus({
           onConfirm={async () => {
             const result = await withdraw();
             if (result.ok) {
-              banner.success("Viewing cancelled");
+              banner.success(copy.sheets.cancelledBanner);
               router.refresh();
             }
             return result;
@@ -445,7 +445,7 @@ export function VisitStatus({
           onConfirm={async () => {
             const result = await withdraw();
             if (result.ok) {
-              banner.success("Viewing cancelled");
+              banner.success(copy.sheets.cancelledBanner);
               router.replace(`/listing/${listingId}/visit`);
             }
             return result;

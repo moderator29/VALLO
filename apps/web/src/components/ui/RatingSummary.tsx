@@ -1,4 +1,4 @@
-import { formatNumber, formatRating, type Locale } from "@vallo/i18n/core";
+import { countOf, formatRating, type Locale } from "@vallo/i18n/core";
 import { RATING_MAX, RATING_MIN } from "@/lib/reviews/model";
 import { RatingStars } from "./RatingStars";
 import "./rating-summary.css";
@@ -51,7 +51,7 @@ export function RatingSummary({
     <div
       className="nf-rating-summary"
       role="figure"
-      aria-label={`${formatRating(rating, locale)} out of ${RATING_MAX}, ${formatNumber(count, locale)} ratings`}
+      aria-label={`${formatRating(rating, locale)} out of ${RATING_MAX}, ${countOf(count, "ratings", locale)}`}
     >
       {/* Left column: the large number, stars and count. */}
       <div className="nf-rating-summary__score">
@@ -62,7 +62,7 @@ export function RatingSummary({
         <RatingStars rating={rating} size={16} />
         {total > 0 && (
           <span className="nf-rating-summary__count">
-            {formatNumber(total, locale)} {total === 1 ? "rating" : "ratings"}
+            {countOf(total, "ratings", locale)}
           </span>
         )}
       </div>

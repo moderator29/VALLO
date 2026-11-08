@@ -215,7 +215,7 @@ export function AddMoneyScreen({
       total={3}
       eyebrow={ACTION_LABEL.add}
       title={step === "amount" ? ADD_STEP.amount : step === "confirm" ? MOVE_COPY.review : ADD_STEP.pay}
-      direction={at === 1 ? "back" : "forward"}
+      direction={step === "amount" ? "back" : "forward"}
       {...(step === "confirm" ? { onBack: () => setStep("amount") } : {})}
       closeHref={links.overview}
       {...(step === "amount"

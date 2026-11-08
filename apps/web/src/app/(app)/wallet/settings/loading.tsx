@@ -9,7 +9,7 @@ import "@/app/css/money-wallet.css";
  */
 export default function LoadingWalletSettings() {
   return (
-    <MoneyWait label="Loading wallet settings" className="nf-page">
+    <MoneyWait label="Loading settings" className="nf-page">
       <div className="nf-mw" data-testid="wallet-settings-loading">
         <PageHeaderSkeleton layout="large" />
         {[0, 1, 2].map((group) => (

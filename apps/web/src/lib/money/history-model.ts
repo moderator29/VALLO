@@ -1,4 +1,4 @@
-import { getDictionary } from "@vallo/i18n";
+import { historyKindLabelEn } from "@vallo/i18n/en/history-kinds";
 import type { StatusTone } from "@/components/ui/StatusPill";
 import { formatMoneyDate } from "./dates";
 
@@ -68,8 +68,8 @@ export const DIRECTION: Record<HistoryKind, HistoryDirection> = {
  * What a row is called when the listing's title could not be read. The
  * platform view draws no sign at all: it is nobody's money, only a record.
  */
-/** SW11: source of truth is now `packages/i18n/src/locales/wallet.en.ts`. */
-export const KIND_LABEL: Record<HistoryKind, string> = getDictionary("en").wallet.historyKindLabel as Record<HistoryKind, string>;
+/** SW11: source of truth is now `packages/i18n/src/locales/history-kinds.en.ts`. */
+export const KIND_LABEL: Record<HistoryKind, string> = historyKindLabelEn as Record<HistoryKind, string>;
 
 /* ------------------------------------------------------------------ parsing */
 

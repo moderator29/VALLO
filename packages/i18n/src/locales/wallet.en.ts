@@ -62,12 +62,9 @@ export const walletPhoneTakenEn = {
   action: "Use a different number",
 };
 
-export const walletHistoryKindLabelEn = {
-  payment: "Payment",
-  refund: "Refund",
-  earning: "Your share",
-  reversal: "Reversed by a refund",
-};
+/* The history rows' kinds live in their own module so the history screen can
+   read them on the client without this file's other words. */
+export { historyKindLabelEn as walletHistoryKindLabelEn } from "./history-kinds.en";
 
 export const walletWaitingEn = {
   withdrawal: {

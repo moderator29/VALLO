@@ -69,6 +69,7 @@ export const unitsEn = {
   stays: { one: "1 stay", other: "{count} stays" },
   spaces: { one: "1 space", other: "{count} spaces" },
   reviews: { one: "1 review", other: "{count} reviews" },
+  ratings: { one: "1 rating", other: "{count} ratings" },
   lines: { one: "1 line", other: "{count} lines" },
   things: { one: "1 thing", other: "{count} things" },
   digitsToGo: {

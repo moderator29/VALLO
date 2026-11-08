@@ -65,8 +65,9 @@ export function hasBadge(tier: BadgeTier): boolean {
  */
 /** SW11: source of truth is now `packages/i18n/src/locales/badge.en.ts`. */
 const _b = { tierLabel: badgeTierLabelEn, tierMeaning: badgeTierMeaningEn };
-export const BADGE_TIER_LABEL: Record<BadgeTier, string> = _b.tierLabel as Record<BadgeTier, string>;
-export const BADGE_TIER_MEANING: Record<BadgeTier, string> = _b.tierMeaning as Record<BadgeTier, string>;
+/* `none` is the absence of a badge: nothing to say, so nothing in the dictionary. */
+export const BADGE_TIER_LABEL: Record<BadgeTier, string> = { none: "", ..._b.tierLabel };
+export const BADGE_TIER_MEANING: Record<BadgeTier, string> = { none: "", ..._b.tierMeaning };
 
 /**
  * The published badge for a set of people, in one read.

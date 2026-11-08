@@ -298,7 +298,7 @@ export function WithdrawScreen({
       total={3}
       eyebrow={ACTION_LABEL.withdraw}
       title={step === "amount" ? WITHDRAW_STEP.amount : step === "review" ? MOVE_COPY.review : WITHDRAW_STEP.code}
-      direction={at === 1 ? "back" : "forward"}
+      direction={step === "amount" ? "back" : "forward"}
       {...(step === "review" ? { onBack: backFromReview } : {})}
       closeHref={links.overview}
       {...(step === "amount"

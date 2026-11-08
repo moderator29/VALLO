@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { useClientMount } from "@/lib/ui/client-mount";
+import { screenName } from "@/lib/nav/route-labels";
 
 /**
  * Keyboard shortcut overlay, shown on "?" and hidden on Escape.
@@ -18,6 +19,8 @@ import { useClientMount } from "@/lib/ui/client-mount";
 
 type Shortcut = { keys: string; label: string; href?: string; action?: string };
 
+const MONEY_SCREEN = "/wallet";
+
 const SHORTCUTS: { section: string; items: Shortcut[] }[] = [
   {
     section: "Navigation",
@@ -28,7 +31,8 @@ const SHORTCUTS: { section: string; items: Shortcut[] }[] = [
       { keys: "g n", label: "Go to Notifications", href: "/notifications" },
       { keys: "g b", label: "Go to Plans", href: "/bookings" },
       { keys: "g v", label: "Go to Saved", href: "/saved" },
-      { keys: "g w", label: "Go to Wallet", href: "/wallet" },
+      /* The money screen by its own route label (D78), never a hand-typed name. */
+      { keys: "g w", label: ["Go to", screenName(MONEY_SCREEN) ?? ""].join(" ").trim(), href: MONEY_SCREEN },
       { keys: "g t", label: "Go to Settings", href: "/settings" },
     ],
   },
@@ -140,7 +144,7 @@ export function KeyboardShortcuts() {
             className="nf-tap rounded-control p-inline text-[var(--nf-content-muted)] transition-colors duration-[var(--nf-duration-fast)] ease-[var(--nf-ease-standard)] hover:text-[var(--nf-content-primary)]"
             aria-label="Close"
           >
-            <span aria-hidden="true" className="text-xl leading-none">&times;</span>
+            <span aria-hidden="true" className="text-[length:var(--nf-text-h4)] leading-none">&times;</span>
           </button>
         </div>
 

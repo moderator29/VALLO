@@ -253,6 +253,9 @@ export const visitEn = {
     confirmCancel: "Yes, cancel it",
     confirmChange: "Cancel and pick again",
     keep: "Keep it",
+    /** The banner after each move (Grade 1: every outcome is a banner). */
+    confirmedBanner: "Viewing confirmed.",
+    cancelledBanner: "Viewing cancelled",
   },
 
   /** The lister in a sentence ("The owner will confirm shortly"), by role. */

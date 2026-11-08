@@ -194,6 +194,8 @@ export const en = {
    * share every sentence that does not name what is being paid for.
    */
   checkout: {
+    /** Announced while the room checkout loads (its skeleton). */
+    loadingRoom: "Loading the room",
     /* ROOM BOOKINGS 1: asking for a hotel room. */
     roomsLabel: "Rooms",
     requestRoom: "Request this room",
@@ -7387,7 +7389,7 @@ export const en = {
   reminders: remindersEn,
 
   /* Circle (SW11): the community feature. */
-  circle: circleEn,
+  circleCopy: circleEn,
   /* Vallo Roommates. */
   roommates: roommatesEn,
   /* The /pro page (SW11). */
@@ -7407,7 +7409,7 @@ export const en = {
   /* Workspace standing copy (SW11). */
   workspaceStanding: workspaceStandingEn,
   /* Wallet/money copy (SW11). */
-  wallet: {
+  walletCopy: {
     move: walletMoveEn,
     onboarding: walletOnboardingEn,
     phoneTaken: walletPhoneTakenEn,
@@ -7445,7 +7447,7 @@ export const en = {
     waterLabel: waterLabelEn,
   },
   /* Badge tier copy (SW11). */
-  badge: {
+  badgeCopy: {
     tierLabel: badgeTierLabelEn,
     tierMeaning: badgeTierMeaningEn,
   },

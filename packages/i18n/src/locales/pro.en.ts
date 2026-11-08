@@ -16,7 +16,7 @@ export const proEn = {
     last: "Pro.",
     body: "Pro adds tools to the workspace you already run: your leads, your calendar, your numbers. Everything free on Vallo today stays free.",
     fragment: {
-      source: "Agent mode",
+      source: "Agent workspace",
       title: "Pro view",
       line: "Appears in your workspace once you hold a plan",
       words: ["Leads", "Clients", "Analytics"],

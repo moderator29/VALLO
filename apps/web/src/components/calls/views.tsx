@@ -501,7 +501,7 @@ export function InCallView({
   /* Whether we need a "More" button: only when there are overflow items. */
   /* More opens only when it holds something that works: a call offers no
      screen sharing or group add, so those are not drawn as dead rows. */
-  const hasMore = isVideo && canSwitchCamera;
+  const hasMore = isVideo && canSwitchCamera && cameraOn;
 
   return (
     <CallFrame

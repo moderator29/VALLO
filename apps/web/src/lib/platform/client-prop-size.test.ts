@@ -42,19 +42,6 @@ const SRC = resolve(__dirname, "../..");
  */
 const PENDING = "whole dictionary, fix requested (Agent NATIVE, 7 Nov 2026)";
 const ALLOW: Record<string, string> = {
-  "app/(app)/settings/interests/page.tsx -> InterestChoices.t": PENDING,
-  "app/(auth)/reset-password/page.tsx -> ResetPasswordForm.t": PENDING,
-  "app/(auth)/sign-in/code/page.tsx -> CodeSignInForm.t": PENDING,
-  "app/(auth)/sign-in/page.tsx -> EmailAuthForm.t": PENDING,
-  "app/(auth)/sign-in/phone/page.tsx -> CodeSignInForm.t": PENDING,
-  "app/(auth)/sign-up/email/page.tsx -> EmailAuthForm.t": PENDING,
-  "app/(auth)/sign-up/finish/page.tsx -> FinishSetupForm.t": PENDING,
-  "app/(auth)/sign-up/verify/page.tsx -> VerifyCodeForm.t": PENDING,
-  "app/agent/settings/AgentSettingsBody.tsx -> AccountNotificationsCard.t": PENDING,
-  "app/host/settings/HostSettingsBody.tsx -> AccountNotificationsCard.t": PENDING,
-  "app/welcome/page.tsx -> FirstRun.t": PENDING,
-  "components/agent/AgentRail.tsx -> ModeSwitcher.t": PENDING,
-  "components/agent/AgentShell.tsx -> AgentMobileNav.t": PENDING,
   "components/promotion/PromotedSlot.tsx -> ListingCard.t": PENDING,
 };
 
