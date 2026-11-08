@@ -121,6 +121,7 @@ export type Inspection = {
    * the only place it may be changed.
    */
   counterpartPhone?: string | null;
+  counterpartPhoneFormatted?: string | null;
   /**
    * The other party's badge tier, read from `public.person_badge` (Session
    * A's one source; never computed here). Optional for the same reason as

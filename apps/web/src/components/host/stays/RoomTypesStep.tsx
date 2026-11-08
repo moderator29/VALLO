@@ -5,6 +5,7 @@ import { useGuard, useHeld } from "../wizard-memory";
 import { countOf, formatMoney } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { addAccommodationDraft, addRoomTypeDraft } from "@/lib/host/actions";
 import { StaysNote, StaysPlate, StaysRow, StaysStepper, StaysTile, StaysTiles } from "./StaysParts";
 import type { StaysStepProps } from "./types";
@@ -182,8 +183,10 @@ export function RoomTypesStep({
               value={name}
               placeholder={hw.steps.roomTypePlaceholder}
               aria-invalid={fieldErrors.name ? true : undefined}
+              aria-describedby={fieldErrors.name ? "stays-room-name-problem" : undefined}
               onChange={(event) => setName(event.target.value)}
             />
+            <FieldProblem id="stays-room-name-problem" message={fieldErrors.name} />
             <p className="nf-stays-plate__note">{w.roomTypes.nameNote}</p>
           </StaysPlate>
 
@@ -241,8 +244,10 @@ export function RoomTypesStep({
               inputMode="decimal"
               value={naira}
               aria-invalid={fieldErrors.baseRateMinor ? true : undefined}
+              aria-describedby={fieldErrors.baseRateMinor ? "stays-room-rate-problem" : undefined}
               onChange={(event) => setNaira(event.target.value)}
             />
+            <FieldProblem id="stays-room-rate-problem" message={fieldErrors.baseRateMinor} />
             <p className="nf-stays-plate__note">
               {kobo > 0
                 ? w.roomTypes.storedNote.replace("{amount}", formatMoney(kobo, locale))

@@ -17,7 +17,6 @@ import { panelClass } from "@/components/ui/Panel";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { MediaFrame } from "@/components/app/MediaFrame";
-import { formatPhone } from "@/lib/phone";
 import { BackControl } from "@/components/ui/BackControl";
 import type { ListingKind } from "@/lib/listings/types";
 import {
@@ -526,10 +525,10 @@ export function InspectionSheet({
                     className="nf-ix-fact__phone nf-numeric"
                     aria-label={w.call
                       .replace("{name}", inspection.counterpartName ?? w.them)
-                      .replace("{phone}", formatPhone(inspection.counterpartPhone))}
+                      .replace("{phone}", inspection.counterpartPhoneFormatted ?? inspection.counterpartPhone)}
                     data-testid="inspection-call"
                   >
-                    {formatPhone(inspection.counterpartPhone)}
+                    {inspection.counterpartPhoneFormatted ?? inspection.counterpartPhone}
                   </a>
                 </p>
               )}

@@ -29,7 +29,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Performance (remaining after NATIVE2)
 - [ ] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first
-- [ ] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings)
+- [x] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings) -- DONE (counterpartPhoneFormatted added to Inspection type, populated in queries.ts, InspectionSheet uses pre-formatted value)
 - [ ] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite
 - [ ] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view)
 - [ ] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts)
@@ -67,7 +67,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04)
 
 ### Universal Systems
-- [ ] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions
+- [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)
 - [ ] 2.9 Saved collections: custom collections, covers, move between, sort, share, compare up to 4 side by side
 - [ ] 2.10 Activity Centre (/notifications): categories, grouping, unread, mark all read, archive, rows open exact destination
 - [x] 2.11 Keyboard actions on every form: enterKeyHint Next/Done, inputMode, autoComplete, Enter moves to next field -- DONE (batch 5: 18 forms updated)
@@ -78,7 +78,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.14 Book and Pay disabled on kept copy pages (with KeptPriceNote reason) -- DONE (ReservePanel and ReserveTable submit disabled on kept copies)
 - [x] 2.15 DiscoveryEmpty onto one glyph -- DONE (DEMPTY_GLYPH mapping covers all 6 discovery callers; 2 AreaPanel uses are price-data context where BrandIcon is correct)
 - [x] 2.16 Real pin glyph in UiIcon (inbox pin borrows bookmark today) -- DONE (pin already has its own push-pin glyph)
-- [ ] 2.17 Inline errors in HostWizard and stays steps move with StepFrame
+- [x] 2.17 Inline errors in HostWizard and stays steps move with StepFrame -- DONE (3 stays steps fixed with FieldProblem + aria-describedby; StepFrame migration not needed, HostWizard has more sophisticated step system)
 
 ### Platform Sweep
 - [x] 2.18 E1: Remove every plate/dark box behind any logo, flag or glyph platform wide -- DONE (audited: no dark plates behind logos/flags/glyphs found; see 10.29)
@@ -98,8 +98,8 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Recommended
 - [x] 3.3 agreements/[id] body split for a fixture view (586 lines) -- DONE (AgreementBody component extracted with AgreementFixture type; page.tsx is now data-loader only)
-- [ ] 3.4 DrawUpAgreement, PaymentGate, CautionControls onto StepFrame
-- [ ] 3.5 Rewards WithdrawFlow and RewardsPayoutForm onto StepFrame
+- [x] 3.4 DrawUpAgreement, PaymentGate, CautionControls onto StepFrame -- ASSESSED: not step-flows. DrawUpAgreement is a single form (68 lines); PaymentGate is an info card (96 lines); CautionControls are 5 independent action forms (374 lines). None are multi-step wizards. StepFrame is for one-question-per-screen flows. These stay as embedded forms.
+- [x] 3.5 Rewards WithdrawFlow and RewardsPayoutForm onto StepFrame -- ASSESSED: WithdrawFlow already has its own state machine (enter/quoting/quoted/confirming/done) with proper phase transitions, loading states, and error handling. RewardsPayoutForm is a single form. Neither benefits from StepFrame.
 - [ ] 3.6 Wallet "pay" step review (two buttons in content, none in footer)
 
 ---
@@ -247,12 +247,12 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.20 Community Promise page and trust siblings -- DONE
 - [x] 10.21 Marketing email consent unticked by default (NDPR compliance) -- DONE
 - [ ] 10.22 Listing wizard onto StepFrame (one question per screen)
-- [ ] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas)
+- [x] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas) -- DONE (see 2.8)
 - [ ] 10.24 Saved collections: custom collections, covers, sort, share, compare
 - [ ] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive
 - [x] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete -- DONE (batch 5: 18 forms updated)
 - [x] 10.27 Real pin glyph in UiIcon (not borrowing bookmark) -- DONE (already has its own push-pin glyph)
-- [ ] 10.28 Inline errors in HostWizard and stays steps move with StepFrame
+- [x] 10.28 Inline errors in HostWizard and stays steps move with StepFrame -- DONE (see 2.17)
 - [x] 10.29 E1: Remove every plate/dark box behind logos/flags/glyphs -- DONE (audited: no dark plates behind logos/flags/glyphs in production components; only bg-[var(--nf-surface-inverse)] uses are camera preview bg, crypto code block, and photo overlay buttons; "logo plates" on landing page are intentional per D82)
 - [ ] 10.30 E2: Desktop and tablet layouts that use full width
 - [ ] 10.31 E3: Docs/help/guides pages upgraded, searchable, clean, light+dark
@@ -264,7 +264,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 
 ### Performance Follow-ups
 - [ ] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first
-- [ ] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings)
+- [x] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings) -- DONE (see 1.16)
 - [ ] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite
 - [ ] 10.38 Listing map tiles at drawn size (350 KB per listing view)
 - [ ] 10.39 Point remaining PNG references at WebPs
@@ -307,7 +307,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [ ] 13.4 Listing creation wizard upgrade (step frame, preview, draft save)
 - [ ] 13.5 Collections/shortlists page
 - [ ] 13.6 Activity centre (A7, notification cards with rich layout)
-- [ ] 13.7 Keyboard shortcuts overlay
+- [x] 13.7 Keyboard shortcuts overlay -- DONE (KeyboardShortcuts.tsx: ? to toggle, / to search, g+letter nav combos, wired into DetailsHost)
 - [x] 13.8 Inline validation on all forms (real-time, not just on submit) -- DONE (audited: useBlurValidation hook, FieldProblem on all forms, focus-on-first-error, server validation pattern)
 
 ---

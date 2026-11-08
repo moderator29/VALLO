@@ -4,6 +4,7 @@ import { useHostCopy } from "@/components/host/host-copy";
 import { differs, useGuard, useHeld } from "../wizard-memory";
 import { formatMoney } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { addAccommodationDraft, setShortletPlaceDraft, syncPropertyRatesDraft } from "@/lib/host/actions";
 import { PLACE_TYPES, type PlaceTypeId } from "@/lib/host/stays-setup";
 import { StaysCountRow, StaysNote, StaysPlate, StaysTile, StaysTiles } from "./StaysParts";
@@ -206,9 +207,11 @@ export function PlaceStep({
             inputMode="decimal"
             value={naira}
             aria-invalid={fieldErrors.nightlyRateMinor ? true : undefined}
+            aria-describedby={fieldErrors.nightlyRateMinor ? "stays-place-rate-problem" : undefined}
             onChange={(event) => setNaira(event.target.value)}
           />
         </div>
+        <FieldProblem id="stays-place-rate-problem" message={fieldErrors.nightlyRateMinor} />
         <p className="nf-stays-plate__note">
           {kobo > 0
             ? w.common.storedPerNight.replace("{amount}", formatMoney(kobo, locale))

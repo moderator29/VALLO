@@ -6,6 +6,7 @@ import { callableNumbersFor } from "../security/counterpart-contact";
 import type { Database } from "../supabase/database.types";
 import { isOpen, type Inspection, type InspectionOutcome, type InspectionState, type NoShow } from "./types";
 import { badgeTierFrom, type BadgeTier } from "./badge";
+import { formatPhone } from "../phone";
 
 /**
  * READING INSPECTIONS, FROM BOTH SIDES.
@@ -132,6 +133,8 @@ async function readSide(column: "lister_id" | "requester_id"): Promise<Inspectio
         names.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
       counterpartPhone:
         numbers.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
+      counterpartPhoneFormatted:
+        (() => { const p = numbers.get(column === "lister_id" ? row.requester_id : row.lister_id); return p ? formatPhone(p) : null; })(),
       counterpartBadge:
         badges.get(column === "lister_id" ? row.requester_id : row.lister_id) ?? null,
       outcome: row.outcome,
@@ -275,6 +278,7 @@ export async function readOpenInspectionFor(listingId: string): Promise<Inspecti
          listing page. It resolves no counterpart, so it claims none. */
       counterpartName: null,
       counterpartPhone: null,
+      counterpartPhoneFormatted: null,
       outcome: row.outcome,
     };
   } catch {
@@ -335,6 +339,7 @@ export async function readOpenInspectionForConversation(
       conversationId: row.conversation_id,
       counterpartName: names.get(counterpartId) ?? null,
       counterpartPhone: numbers.get(counterpartId) ?? null,
+      counterpartPhoneFormatted: (() => { const p = numbers.get(counterpartId); return p ? formatPhone(p) : null; })(),
       counterpartBadge: badges.get(counterpartId) ?? null,
       outcome: row.outcome,
     };

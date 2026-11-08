@@ -172,6 +172,7 @@ export const INSPECTION: Inspection = {
   /* A number the read would have allowed: the sheet draws the call line only
      when `lib/security/counterpart-contact.ts` gave one. */
   counterpartPhone: "+2348010000000",
+  counterpartPhoneFormatted: "+234 801 000 0000",
   outcome: null,
 };
 
