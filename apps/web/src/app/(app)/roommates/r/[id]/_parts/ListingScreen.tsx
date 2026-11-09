@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getDictionary } from "@vallo/i18n";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
@@ -68,6 +69,8 @@ export function RoomListingScreen({
   }
   const l = read.listing;
   const today = lagosDay(now);
+  const sharePriceMinor = l.shareMinor ?? l.rentMinor;
+  const shareCard = getDictionary("en").shareCard;
   return (
     <PageFrame
       title={copy.listingKinds[l.kind]}
@@ -76,7 +79,17 @@ export function RoomListingScreen({
       actions={
         <span className="nf-rmv-headacts">
           {l.isOwner || !read.signedIn ? null : <SaveButton kind="room" id={l.id} />}
-          <ListingShareMenu id={l.id} title={l.title} signedIn={read.signedIn} />
+          <ListingShareMenu
+            id={l.id}
+            title={l.title}
+            signedIn={read.signedIn}
+            cover={l.photoUrls[0]}
+            priceMinor={sharePriceMinor}
+            period={l.rentPeriod}
+            roomsFree={l.roomsAvailable}
+            shareCopy={{ title: shareCard.title, share: shareCard.share, background: shareCard.background, stats: shareCard.stats, name: shareCard.name, copied: shareCard.copied }}
+            shareWords={{ cover: shareCard.presets.cover, perMonth: shareCard.listingStats.perMonth, roomsFree: shareCard.listingStats.roomsFree, listingLead: shareCard.leads.listing, priceLead: shareCard.leads.price }}
+          />
         </span>
       }
     >

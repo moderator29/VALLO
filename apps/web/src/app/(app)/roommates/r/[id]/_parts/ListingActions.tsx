@@ -4,7 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { InterestSheet } from "@/components/roommates/Actions";
-import { dayText, fill } from "@/components/roommates/format";
+import { dayText, fill, naira } from "@/components/roommates/format";
+import { ShareComposer, type ShareCopy } from "@/components/share/ShareComposer";
+import { plural, type PluralForms } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { TextArea, TextField } from "@/components/ui/Field";
 import { Segmented } from "@/components/ui/Segmented";
@@ -20,7 +22,7 @@ import {
   setRoommateListingStatus,
   shareRoommateListingToFeed,
 } from "@/lib/features/roommates/actions";
-import { LIMITS, ROOMMATES_ROUTES, type ConnectionState, type ListingStatus, type ViewingMode, type ViewingStatus } from "@/lib/features/roommates/model";
+import { LIMITS, ROOMMATES_ROUTES, monthlyMinor, type ConnectionState, type ListingStatus, type Period, type ViewingMode, type ViewingStatus } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { shareOrCopy } from "@/lib/ui/clipboard";
 import { feedback } from "@/lib/ui/feedback";
@@ -375,12 +377,33 @@ function ViewingSheet({ open, onOpenChange, listingId }: { open: boolean; onOpen
 }
 
 /** Share: the link (the system sheet, or the clipboard), and for a member, to their feed with a line of their own. */
-export function ListingShareMenu({ id, title, signedIn }: { id: string; title: string; signedIn: boolean }) {
+export function ListingShareMenu({
+  id,
+  title,
+  signedIn,
+  cover,
+  priceMinor,
+  period,
+  roomsFree,
+  shareCopy,
+  shareWords,
+}: {
+  id: string;
+  title: string;
+  signedIn: boolean;
+  cover?: string;
+  priceMinor?: number | null;
+  period?: Period;
+  roomsFree?: number | null;
+  shareCopy?: ShareCopy;
+  shareWords?: { cover: string; perMonth: string; roomsFree: PluralForms; listingLead: string; priceLead: string };
+}) {
   const copy = useScopedCopy("roommates");
   const L = copy.ui.listing;
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState(false);
+  const [card, setCard] = useState(false);
   const [line, setLine] = useState("");
   const [pending, start] = useSafeTransition();
 
@@ -392,6 +415,31 @@ export function ListingShareMenu({ id, title, signedIn }: { id: string; title: s
     else if (outcome === "failed") banner.error(copy.ui.profile.shareFailed);
     if (outcome !== "cancelled") setOpen(false);
   };
+
+  const monthly = typeof priceMinor === "number" ? monthlyMinor(priceMinor, period ?? "year") : null;
+  const stats =
+    shareWords && (monthly !== null || typeof roomsFree === "number")
+      ? [
+          monthly !== null ? { value: naira(monthly), label: shareWords.perMonth } : null,
+          typeof roomsFree === "number" && roomsFree > 0 ? { value: String(roomsFree), label: plural(roomsFree, shareWords.roomsFree, "en").replace(/^[\d,.]+\s*/, "") } : null,
+        ].filter((x): x is { value: string; label: string } => x !== null)
+      : [];
+  const shareSubject =
+    shareWords
+      ? {
+          ...(cover ? { avatar: cover } : { initial: title }),
+          headline: title,
+          stats,
+          url: ROOMMATES_ROUTES.listing(id),
+          ...(monthly !== null
+            ? { leads: [
+                { id: "listing", label: shareWords.listingLead, headline: title },
+                { id: "price", label: shareWords.priceLead, headline: naira(monthly), sub: shareWords.perMonth },
+              ] }
+            : {}),
+        }
+      : null;
+  const shareBackgrounds = cover ? [{ id: "cover", label: shareWords?.cover ?? "Photo", kind: "image" as const, src: cover }, { id: "glow", label: "Brand glow", kind: "aurora" as const, variant: "glow" as const }, { id: "ink", label: "Night", kind: "aurora" as const, variant: "ink" as const }] : undefined;
 
   const post = () =>
     start(async () => {
