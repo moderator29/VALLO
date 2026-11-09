@@ -8,8 +8,8 @@ export default function LoadingDiscover() {
     <LoadingShell label="Loading discover" className="mx-auto w-full max-w-6xl">
       <PageHeaderSkeleton layout="large" subtitle />
       <div className="nf-rmp">
-        <Skeleton height="2.75rem" radius="md" />
         <Skeleton height="3rem" radius="xl" />
+        <Skeleton height="2.75rem" radius="md" />
         <div className="nf-rm-grid">
           <RoommateCardSkeleton />
           <RoomCardSkeleton />

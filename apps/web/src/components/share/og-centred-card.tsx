@@ -35,6 +35,8 @@ export const OG_CARD_SIZE = { width: 1200, height: 630 };
 /** The family stack for the display line: Poppins, then Inter's naira sign. */
 export const OG_DISPLAY = "Poppins, InterNaira";
 
+export type OgCentredStat = { label: string; value: string };
+
 export type OgCentredInput = {
   /** A data URL already fetched with a timeout, or null for the glow. */
   photo?: string | null;
@@ -46,7 +48,21 @@ export type OgCentredInput = {
   sub?: string | null;
   /** Bottom right, quiet: a listing code or the address. */
   footRight?: string | null;
+  /** A round avatar (a data URL) centred above the display: a person or a community. */
+  avatar?: string | null;
+  /** When there is no avatar, a tinted initials circle is drawn from this name. */
+  initial?: string | null;
+  /** Up to three public counts drawn under the display (followers, posts, rooms free). */
+  stats?: readonly OgCentredStat[];
 };
+
+/** A steady tone per name, so the same subject keeps its colour (matches the in-app card). */
+const AVATAR_TONES = [OG_BRAND, "#5C9FFF", "#10B981", "#00C8FF", "#0069FE"];
+function toneOf(name: string): string {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  return AVATAR_TONES[h % AVATAR_TONES.length]!;
+}
 
 /** The logo, bottom left: the new mark and wordmark (D81, `og-logo.tsx`). */
 function WordMark() {
@@ -135,6 +151,29 @@ export function ogCentredCard(input: OgCentredInput) {
           textAlign: "center",
         }}
       >
+        {input.avatar ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={input.avatar} alt="" width={150} height={150} style={{ width: 150, height: 150, borderRadius: 75, objectFit: "cover", marginBottom: 26 }} />
+        ) : input.initial ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 150,
+              height: 150,
+              borderRadius: 75,
+              marginBottom: 26,
+              background: toneOf(input.initial),
+              color: OG_INK,
+              fontFamily: OG_DISPLAY,
+              fontWeight: 600,
+              fontSize: 72,
+            }}
+          >
+            {(Array.from(input.initial.trim())[0] ?? "V").toLocaleUpperCase()}
+          </div>
+        ) : null}
         {input.eyebrow ? (
           <div
             style={{
@@ -181,6 +220,16 @@ export function ogCentredCard(input: OgCentredInput) {
             }}
           >
             {input.sub}
+          </div>
+        ) : null}
+        {input.stats && input.stats.length ? (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 44, marginTop: 30 }}>
+            {input.stats.map((st, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{ display: "flex", color: OG_INK, fontFamily: OG_DISPLAY, fontWeight: 600, fontSize: 40 }}>{st.value}</div>
+                <div style={{ display: "flex", color: OG_INK_MUTED, fontSize: 24, marginTop: 4, textTransform: "uppercase", letterSpacing: 1 }}>{st.label}</div>
+              </div>
+            ))}
           </div>
         ) : null}
       </div>

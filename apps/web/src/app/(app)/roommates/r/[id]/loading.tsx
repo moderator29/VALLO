@@ -8,7 +8,7 @@ export default function LoadingRoomListing() {
       <PageHeaderSkeleton layout="large" />
       <div className="nf-rmv">
         <div className="nf-rmv__main">
-          <Skeleton height="20rem" radius="xl" />
+          <Skeleton radius="xl" className="aspect-[4/3] md:aspect-[16/10]" />
           <Skeleton height="4rem" radius="lg" />
           <Skeleton height="6rem" radius="lg" />
         </div>

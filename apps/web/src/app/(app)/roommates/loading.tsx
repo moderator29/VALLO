@@ -8,7 +8,7 @@ export default function LoadingRoommates() {
     <LoadingShell label="Loading Vallo Roommates" className="mx-auto w-full max-w-6xl">
       <PageHeaderSkeleton layout="large" subtitle />
       <div className="nf-rmp">
-        <Skeleton height="18rem" radius="xl" />
+        <Skeleton height="32rem" radius="xl" />
         <div className="nf-rm-journeys">
           <Skeleton height="9rem" radius="lg" />
           <Skeleton height="9rem" radius="lg" />
