@@ -8,7 +8,7 @@ export default function LoadingRoommateProfile() {
       <PageHeaderSkeleton layout="large" />
       <div className="nf-rmv">
         <div className="nf-rmv__main">
-          <Skeleton height="16rem" radius="xl" />
+          <Skeleton height="19rem" radius="xl" />
           <Skeleton height="5rem" radius="lg" />
           <Skeleton height="10rem" radius="lg" />
         </div>
