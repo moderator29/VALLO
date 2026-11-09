@@ -64,7 +64,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.6 E5: Marketing email consent unticked by default (NDPR), choice also in Privacy settings -- DONE
 
 ### Listing Wizard
-- [x] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04) -- ASSESSED: not needed. ListingWizard (4721 lines) has its own 8-step system with travel direction animations, ProgressPath overview, draft persistence (localStorage + server), broadcast paste from WhatsApp, lister fee gate, field validation with step-specific gates, and media uploads with reordering. StepFrame is a simpler one-question-per-screen frame that would lose these capabilities.
+- [ ] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04) -- REOPENED 9 Nov 2026: the founder's brief (P1.1) asks for exactly this, and the brief wins over an assessment. Keep every capability listed below while re-flowing it. Earlier note: ASSESSED: not needed. ListingWizard (4721 lines) has its own 8-step system with travel direction animations, ProgressPath overview, draft persistence (localStorage + server), broadcast paste from WhatsApp, lister fee gate, field validation with step-specific gates, and media uploads with reordering. StepFrame is a simpler one-question-per-screen frame that would lose these capabilities.
 
 ### Universal Systems
 - [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)

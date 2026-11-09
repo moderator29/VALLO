@@ -17,6 +17,27 @@ and PAGE_LEDGER.md (every page, ticked as passed).
   their state in `pending/README.md`; applied ones are filed under their
   version and recorded in APPLIED.txt and the live migration list.
 
+## Session of 9 November 2026 (lead plus two agents, three workers at most)
+
+Branch `platform-grade-1-readiness` was re-cut from `main` (which holds the
+whole upgrade; the old branch's 181 commits were checked and are all in
+main). Vercel stays off for it. CI runs only on `main`, pull requests to
+`main`, or by hand, and this session cannot start it by hand (GitHub refuses
+the dispatch permission), so the founder starts it from Actions, CI, Run
+workflow, or says yes to a draft pull request that never merges.
+
+| Worker | Doing | State |
+|---|---|---|
+| Lead | setup, state report, CI probes, pending SQL, every commit | Probes b3-rate-gate, db-10-step2, new-a4-01-step2 fixed and passing live (8efbdbe7b); /api/build endpoint restored (the `build/` ignore rule had hidden it); example collection date applied live |
+| Agent 1 | money copy sweep (batch one): every screen promising protected, held, secured or escrowed payment | Writes `docs/handoff/MONEY_COPY_SWEEP.md`; NO copy changes until the founder approves the list |
+| Agent 2 | protected payments Phase 1: audit of every reference to the old provider | Writes `docs/handoff/PAYMENTS_MIGRATION_AUDIT.md`; no code until the founder has seen it |
+
+Next after batch one: the four shared components spread (PageFrame is on 96
+of 275 ledger pages, StepFrame on a handful), the listing wizard one question
+per screen (P1.1, reopened: the earlier "not needed" assessment contradicts
+the founder's brief), the free commercial map (still CARTO, non-commercial
+tiles), the payment rail design pass.
+
 ## Agents (8 November 2026, early hours)
 
 | Agent | Done | Now | Next |
