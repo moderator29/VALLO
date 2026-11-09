@@ -147,11 +147,7 @@ const RETIRED: { label: string; pattern: RegExp }[] = [
  * below, so the entry is removed in the same change.
  */
 const RETIRED_ELSEWHERE: { file: string; text: string; why: string }[] = [
-  {
-    file: SELF,
-    text: "At launch the Guarantee covers rentals and stays paid through Vallo.",
-    why: "GUARANTEE_SCOPE, kept until the lead confirms it has no reader (rule (k)); nothing outside a test reads it today",
-  },
+
   {
     file: "apps/web/src/lib/bookings/actions.ts",
     text: "This stay is paid into escrow, so it cannot be cancelled here.",
@@ -215,9 +211,16 @@ describe("rule (d): a money sentence kept as a dictionary key equals its constan
     expect(at(path)).toBe(copy[name]);
   });
 
-  it.each(LOCALES.filter((l) => l !== "en"))("%s carries the English until a native reader translates it", (locale) => {
+  /* The other locales: each reworded key's old translation was taken out, so
+     the screen falls back to this English until a native reader translates it
+     (never invented here, and never pasted in as English, which the
+     completeness gate refuses). The one exception is the card review refusal,
+     whose translations lost only their escrow sentence. */
+  const KEPT_TRANSLATED = new Set(["payChoice.refused.card_needs_review"]);
+  it.each(LOCALES.filter((l) => l !== "en"))("%s serves the English for every reworded key, until a native reader translates it", (locale) => {
     const dict = getDictionary(locale) as unknown as Record<string, unknown>;
     for (const [path, name] of Object.entries(DICTIONARY_CONSTANTS)) {
+      if (KEPT_TRANSLATED.has(path)) continue;
       const value = path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown> | undefined)?.[key], dict);
       expect(value, `${locale} ${path}`).toBe(copy[name]);
     }

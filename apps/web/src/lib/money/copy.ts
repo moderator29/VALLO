@@ -269,15 +269,6 @@ export const NO_RENTER_FEES_LINE =
   "Vallo charges renters and guests nothing: no fee to look, to book or to pay, and nothing added to the price on the listing. Listing is free. When a payment is made, Vallo's platform fee comes out of the lister's share.";
 
 /**
- * Retired with the Guarantee (D51), kept ONLY because the published Terms and
- * Disclaimer still carry their Guarantee sections and must not change without
- * counsel and a new Terms version. No other surface may read this. The patch
- * that retires it is in the C2 report (terms-guarantee.patch).
- */
-export const GUARANTEE_SCOPE =
-  "At launch the Guarantee covers rentals and stays paid through Vallo. It does not cover property purchases.";
-
-/**
  * A payment made BEFORE the Guarantee was retired carried a contribution, and
  * its claim window is honoured: shown only on an agreement whose frozen terms
  * carry a non-zero `guarantee_bps`. Never on a new payment.
@@ -1215,8 +1206,10 @@ export const PAY_CHOICE_CARD_REVIEW = `A person at Vallo looks at this deal befo
 /** The payment step's refusals that carried escrow (sweep item 24; `payChoice.refused` in the dictionary). */
 export const PAY_REFUSED_SALE = `${SALE_PAYMENT_NOT_OPEN} ${SALE_NEVER_PAID_ON_VALLO}`;
 export const PAY_REFUSED_NOT_OPEN = "This payment is not open on Vallo.";
+/* The refusal's first sentence as it stood, with "Escrow is open." removed, so
+   the existing Yoruba, Hausa and Igbo stay true by the same deletion. */
 export const PAY_REFUSED_CARD_REVIEW =
-  "Paying by card on this deal needs a person at Vallo to check it first. Nothing has been charged.";
+  "Paying by card is not open on this deal now, because it would need a person at Vallo to check it first.";
 
 /* The calm fallback from the escrow step to card (founder instruction,
    13 October 2026: nobody is stranded). */

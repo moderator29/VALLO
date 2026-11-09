@@ -78,9 +78,9 @@ describe("no renter or guest surface shows a Vallo fee", () => {
 
 describe("the Guarantee is retired from the money sentences (D51)", () => {
   const sentences = Object.entries(copy).filter(([, v]) => typeof v === "string") as [string, string][];
-  const ALLOWED = new Set(["GUARANTEE_SCOPE", "LEGACY_GUARANTEE_CLAIM"]);
+  const ALLOWED = new Set(["LEGACY_GUARANTEE_CLAIM"]);
 
-  it("offers it nowhere but the two kept for the legal text and old claims", () => {
+  it("offers it nowhere but the one kept for old claims (GUARANTEE_SCOPE went with the Terms rewrite, 9 November 2026)", () => {
     const offering = sentences.filter(([name, text]) => /guarantee/i.test(text) && !ALLOWED.has(name)).map(([n]) => n);
     expect(offering).toEqual([]);
   });

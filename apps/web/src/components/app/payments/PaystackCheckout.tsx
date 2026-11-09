@@ -116,8 +116,9 @@ export type PaystackCheckoutProps = {
   /** Our reference. Shown to the person, and the key `confirm` reads by. */
   reference: string;
   /**
-   * The hosted page. NEVER navigated to automatically. It is offered as a
-   * control only when the in-app checkout could not be opened at all.
+   * The hosted page's address, which the server still returns. Never used:
+   * the payment never leaves the app (founder, 9 November 2026), so it is not
+   * navigated to and not offered. Accepted so callers need no change.
    */
   authorizationUrl?: string;
   /** Integer kobo, for the pending and settled sheets. */
@@ -197,7 +198,6 @@ type Phase =
 export function PaystackCheckout({
   accessCode,
   reference,
-  authorizationUrl,
   amountMinor,
   locale,
   confirm,
@@ -495,9 +495,10 @@ export function PaystackCheckout({
   }
 
   if (phase.kind === "unavailable") {
-    /* The hosted page is offered, never taken. See the note at the top of this
-       file on why an automatic fallback would be the bug we came to fix. */
-    const hosted = (authorizationUrl ?? "").trim();
+    /* THE PAYMENT NEVER LEAVES THE APP (founder, 9 November 2026). This sheet
+       used to offer Paystack's hosted page, which took the member off Vallo
+       until it was done. It never does now, on the web or in the native shell:
+       the member closes it and tries again here when the window can open. */
     return (
       <ResultSheet
         open
@@ -508,34 +509,20 @@ export function PaystackCheckout({
           }
         }}
         state="failed"
-        verdict="Cannot pay here"
-        consequence={`${phase.offline ? offlineWord : phase.message} You can try again in a moment, or open the payment page on Paystack's own site, which will take you off Vallo until it is done.`}
+        verdict="Cannot pay here right now"
+        consequence={`${phase.offline ? offlineWord : phase.message} Nothing has been charged. Close this and try again in a moment.`}
         fact={fact}
         locale={locale}
-        actions={
-          hosted.length > 0
-            ? [
-                { label: "Open Paystack's payment page", href: hosted, tone: "primary" },
-                {
-                  label: "Not now",
-                  tone: "quiet",
-                  onClick: () => {
-                    finished.current = true;
-                    handlers.current.onCancelled();
-                  },
-                },
-              ]
-            : [
-                {
-                  label: "Close",
-                  tone: "primary",
-                  onClick: () => {
-                    finished.current = true;
-                    handlers.current.onCancelled();
-                  },
-                },
-              ]
-        }
+        actions={[
+          {
+            label: "Close",
+            tone: "primary",
+            onClick: () => {
+              finished.current = true;
+              handlers.current.onCancelled();
+            },
+          },
+        ]}
       />
     );
   }
