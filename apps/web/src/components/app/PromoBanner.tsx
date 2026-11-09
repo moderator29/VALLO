@@ -32,6 +32,7 @@ export function PromoBanner({
   return (
     <Link href={href} className="nf-promo" data-theme="dark" data-testid={testId}>
       <span className="nf-promo__glow" aria-hidden="true" />
+      <span className="nf-promo__shimmer" aria-hidden="true" />
       <span className="nf-promo__words">
         <span className="nf-promo__eyebrow">{eyebrow}</span>
         <span className="nf-promo__title">{title}</span>

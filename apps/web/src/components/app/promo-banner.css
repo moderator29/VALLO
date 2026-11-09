@@ -28,6 +28,15 @@
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
   }
+  .nf-promo__shimmer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, color-mix(in oklab, var(--nf-content-on-brand) 22%, transparent) 50%, transparent 62%);
+    transform: translateX(-120%);
+    opacity: 0;
+  }
   .nf-promo__glow {
     position: absolute;
     inset: -40% -10% -40% 45%;
@@ -36,6 +45,8 @@
     background: radial-gradient(closest-side, color-mix(in oklab, var(--nf-content-on-brand) 26%, transparent), transparent);
   }
   .nf-promo__words {
+    position: relative;
+    z-index: 1;
     display: grid;
     gap: var(--nf-space-2xs);
     min-inline-size: 0;
@@ -71,12 +82,17 @@
     font-weight: 700;
   }
   .nf-promo__art {
+    position: relative;
+    z-index: 1;
     display: grid;
     place-items: center;
   }
   @media (prefers-reduced-motion: no-preference) {
     .nf-promo__art {
       animation: nf-promo-float 3s var(--nf-ease-standard) 6 alternate both;
+    }
+    .nf-promo__shimmer {
+      animation: nf-promo-shimmer 2.6s var(--nf-ease-standard) 1200ms 3 both;
     }
   }
   @keyframes nf-promo-float {
@@ -87,7 +103,24 @@
       transform: translateY(-8px) rotate(3deg);
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-promo__art {
+  @keyframes nf-promo-shimmer {
+    0% {
+      opacity: 0;
+      transform: translateX(-120%);
+    }
+    12% {
+      opacity: 1;
+    }
+    34% {
+      opacity: 0;
+      transform: translateX(120%);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(120%);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-promo__art, .nf-promo__shimmer) {
     animation: none;
   }
 }

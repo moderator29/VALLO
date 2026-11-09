@@ -1490,8 +1490,33 @@
     .nf-rmo__object {
       animation: nf-rmh-float 3.2s var(--nf-ease-standard) 8 alternate both;
     }
+    .nf-rmo__art img {
+      animation: nf-rmo-slide var(--nf-duration-entrance) var(--nf-ease-entrance) both;
+    }
+    .nf-rmo__title,
+    .nf-rmo__body,
+    .nf-rmo__actions {
+      animation: nf-rm-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+      animation-delay: calc(140ms + var(--nf-rmo-i, 0) * 70ms);
+    }
+    .nf-rmo__steps li {
+      animation: nf-rmo-step var(--nf-duration-base) var(--nf-ease-spring) both;
+      animation-delay: calc(260ms + var(--nf-rmo-i, 0) * 110ms);
+    }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-rmo__object {
+  @keyframes nf-rmo-slide {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(1.03);
+    }
+  }
+  @keyframes nf-rmo-step {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-rmo__object, .nf-rmo__art img, .nf-rmo__title, .nf-rmo__body, .nf-rmo__actions, .nf-rmo__steps li) {
     animation: none;
   }
   @media (min-width: 48rem) {

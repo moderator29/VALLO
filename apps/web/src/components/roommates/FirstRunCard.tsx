@@ -1,5 +1,7 @@
 "use client";
 
+import type { CSSProperties } from "react";
+
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -46,12 +48,12 @@ export function FirstRunCard({ href }: { href: string }) {
         </h2>
         <p className="nf-rmo__body">{w.body}</p>
         <ol className="nf-rmo__steps">
-          {w.steps.map((s, i) => (
-            <li key={s}>
+          {w.steps.map((step, i) => (
+            <li key={step} style={{ "--nf-rmo-i": i } as CSSProperties}>
               <span className="nf-rmo__n" aria-hidden="true">
                 {i + 1}
               </span>
-              {s}
+              {step}
             </li>
           ))}
         </ol>

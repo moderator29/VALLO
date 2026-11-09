@@ -202,6 +202,7 @@
 /* Motion sweep: route transitions, press on rows, toast and tab ink. */
 @import "./css/route-motion.css";
 @import "./css/press-motion.css";
+@import "./css/share.css";
 /* The small things: toast, connection line, back to top, pull to refresh,
    the late spinner, the done check, the card menu, the field counter. */
 @import "./css/details.css";
