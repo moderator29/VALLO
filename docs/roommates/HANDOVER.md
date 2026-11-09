@@ -107,8 +107,55 @@ Dev only: `/preview/features/roommates?screen=...` (fictional data).
 | Screenshots of the real screens | rounds 1 and 2 sent (preview harness, fictional data) |
 | iOS and Android devices | NOT TESTED on a device (Capacitor build not run in this session) |
 
-## 6. Known limitations
+## 6. The 9 November design round (the founder's review pass)
 
+After the first screens shipped, the founder reviewed them and asked for a
+deeper pass. All of this is on the branch:
+
+- **Roommates rebuilt** on a shared motion primitive (`MotionScene`): the hero
+  is a living scene (the people art over a blurred room, floating 3D objects, a
+  spring entrance, a slow breathe, pointer and tilt parallax), the "Your post
+  is live" celebration drops the 3D house and bursts confetti once, the
+  first-run and promo banners animate, and the verification screen carries the
+  same banner. All of it is off under reduced motion / Calm / save-data, and it
+  is contained to these feature areas (the app launch screen is untouched).
+- **Vallo Circle rebuilt**: the clipped hero and empty tab pill are fixed, the
+  hero carries the real community art with an avatar stack and a counting
+  member number, the destinations are a grid of 3D icon tiles with whole-word
+  labels, and the thread, community cover and post flow (with a "Posted!"
+  moment and a type picker) are restyled.
+- **Notifications**: every Roommates, Trust and Safety and Circle event lands
+  in the inbox in the right lane, with the sender's face, a deep link and an
+  action, plus lock-screen wording and an in-app message banner.
+- **The feature art**: the founder's seven commissioned images are wired into
+  `lib/features/art.ts` (`public/brand/features`, WebP 1x and 2x).
+- **Share cards** (`components/share/ShareComposer.tsx`, `ShareSheet.tsx`): our
+  own pump.fun-style share card in Vallo blue, opened from the real Share
+  controls on a profile, a roommate listing, a roommate profile and a Circle
+  post. Background presets (brand auroras + the lister's own photo), a Darken
+  toggle, "what to show" toggles, variant tabs, a tinted-initials fallback, and
+  the `MediaPill` capsule buttons. The forwarded link is the short Vallo one
+  (`/u/<handle>`, `/roommates/r/<id>`, `/circle/p/<id>`); the roommate listing
+  card unfurls fully as an image in a chat. **Open decision for the founder:**
+  the profile and Circle *pages* are sign-in gated, so their cards do not
+  unfurl externally yet; opening `^/u/<handle>$` and `^/circle/p/<id>$` to the
+  public (as `/roommates/r/<id>` already is) would fix that, but it makes those
+  pages publicly viewable, so it waits on a yes and a public-data check.
+- **Icons**: the generic key is now the Vallo house key platform-wide; `search`
+  is redrawn to the App Store magnifier; a new `stack` glyph (the App Store
+  "Apps" look) leads the Saved "All" tab; content icons are one step smaller
+  platform-wide (nav rails unchanged).
+- **The chat watermark**: Vallo's mark rests faint behind a quiet assistant or
+  messages thread and clears when the conversation starts.
+
+The spec that drove the share and controls work is
+`docs/design/SHARE_AND_CONTROLS.md`; the ChatGPT prompts for the art are in
+`docs/design/CHATGPT_BANNER_PROMPTS.md`.
+
+## 7. Known limitations
+
+- The profile and Circle share cards do not unfurl externally yet (the open
+  decision above).
 - Group chat is a group board, not a real-time chat thread (Vallo's
   conversations are two-person).
 - Paying each other inside a household is recorded only; Vallo never moves
@@ -116,3 +163,6 @@ Dev only: `/preview/features/roommates?screen=...` (fictional data).
 - Two-person approval for permanent suspensions is proposed, not built.
 - A property listing's "Good for sharing" is set from the lister's own page,
   not yet inside the listing wizard.
+- Native: NOT tested on a physical device in this session (the iOS and Android
+  builds compile in CI; the iOS job also hits an occasional Swift Package
+  Manager cache flake unrelated to the app).
