@@ -32,12 +32,15 @@ Line numbers are as of this audit. "Applied" migrations are in
 
 | Class | Rows |
 |---|---|
-| REPLACE | 44 |
-| PRESERVE-SHARED | 67 |
-| HISTORICAL-LEAVE | 22 |
-| DEAD-REMOVE | 8 |
-| COMPAT-KEEP | 36 |
-| **Total** | **177** |
+| REPLACE | 45 |
+| PRESERVE-SHARED | 90 |
+| HISTORICAL-LEAVE | 16 |
+| DEAD-REMOVE | 9 |
+| COMPAT-KEEP | 31 |
+| **Total** | **191** |
+
+A row is one table line in sections 2 to 9; some rows group several files of
+the same kind (for example the wallet screens), so the file count is higher.
 
 Scale of the raw search, for context (apps, packages, supabase, docs, .github,
 case-insensitive): `payluk` 1,321 lines in 171 files; `escrow` 4,185 lines in
@@ -177,7 +180,7 @@ That test must be rewritten, not worked around.
 | Applied migrations naming Payluk (b2_ledger, b3_payluk_commission_sweep, b3_fee_acceptance_record, b4_referral_rewards_engine, b6_member_money_rail, d73b, d68d, d77, d84, pov05, cbh01, chargebacks_record_state_recovery, dojah_1, 20261006030027) | HISTORICAL-LEAVE | Never edit an applied migration. |
 | `supabase/migrations/APPLIED.txt` | HISTORICAL-LEAVE | Ledger of applied versions. |
 | `pending/rollback/rb03_rail_for_booking_and_agreement.sql`, `rb04_settle_booking_charge.sql`, `rb05_partner_hold_and_sweep.sql` (rb05 holds the Payluk-requiring open body), `nt_notice_triggers_off.sql` | HISTORICAL-LEAVE | Rollback snapshots of live definitions. |
-| Legacy escrow migrations (20260809 to 20260925, 13 files) | HISTORICAL-LEAVE | September custody design, retired. |
+| Legacy escrow migrations (20260809 to 20260925, 12 files named for escrow, plus track_a1 which retired them) | HISTORICAL-LEAVE | September custody design, retired. |
 
 ---
 
@@ -306,7 +309,7 @@ That test must be rewritten, not worked around.
 | nt02 `private.tell_arrangement` notice texts | In-app notices | REPLACE | Refund notice promises "5 to 10 working days" (SPECS screen 9: no arrival time unless contractual); must use the shared state labels. |
 | `packages/i18n/src/locales/en.ts` pay-choice block (around line 6498), `ha.ts`, `ig.ts`, `yo.ts` escrow strings | Choice dictionary | REPLACE | "Escrow" labels; English only for new copy, translations only when verified. |
 | `lib/copy/custody-words.test.ts:186 to 205` (Payluk exemptions) | Copy gate exemptions | COMPAT-KEEP | Exempts the Payluk merchant reason; extend the gate for the new rail. |
-| `docs/payments/payluk-source/*` (37 files), `docs/payments/PAYLUK_LIVE_DOCS_FINDINGS.md` | Vendored Payluk docs and findings | HISTORICAL-LEAVE | Source record for the Payluk code. |
+| `docs/payments/payluk-source/*` (36 files), `docs/payments/PAYLUK_LIVE_DOCS_FINDINGS.md` | Vendored Payluk docs and findings | HISTORICAL-LEAVE | Source record for the Payluk code. |
 | `docs/adr/0003-...md`, `docs/adr/0004-...md` | ADRs naming Payluk | HISTORICAL-LEAVE | Write a new ADR that supersedes the provider choice; ADR 0003's principle stands. |
 | `docs/RULINGS.md`, `docs/DECISIONS_2026-10-13.md`, `docs/sessions/founder-corpus/*`, `docs/handoff/SURVEY_B_WORKSPACES_BACKEND.md` | Decision logs and snapshots | HISTORICAL-LEAVE | Records. |
 | `docs/payments/VALLO_PAYMENTS_ARCHITECTURE.md`, `VALLO_FINANCIAL_LAYER.md`, `VALLO_PRICING.md`, `DIASPORA_PAYMENTS.md`, `RELEASE_RUNBOOK.md`, `docs/MONEY_ARCHITECTURE.md` | Current architecture and runbooks | REPLACE | Describe Payluk as the provider; update in Phase 6. |
@@ -325,7 +328,7 @@ That test must be rewritten, not worked around.
 | `lib/payments/providers/kill-switch.test.ts` | REPLACE | Generalise with the kill switch. |
 | `lib/money/fund-model.test.ts`, `fund-fallback-actions.test.ts`, `held-model.test.ts` | REPLACE | Follow their models. |
 | `lib/money/member-wallet-actions.test.ts`, `funds.test.ts`, `open-failure.test.ts`, `components/money/balance/BalanceScreen.dom.test.tsx` | COMPAT-KEEP | Wallet rail. |
-| `lib/payouts/commission-sweep.test.ts`, `lib/admin/reads/money-desk-sweep.test.ts` | DEAD-REMOVE | Go with the dead code (counted with their modules). |
+| `lib/payouts/commission-sweep.test.ts`, `lib/admin/reads/money-desk-sweep.test.ts` | DEAD-REMOVE | Go with the dead code they test. |
 | `lib/ledger/record.test.ts` (recordEscrowCommission block), `lib/ledger/events.test.ts` | PRESERVE-SHARED | Ledger rules; drop the escrow block with its function. |
 | `lib/money/status.test.ts` | PRESERVE-SHARED | Vocabulary rules (unknown is under review, never success). |
 | `lib/copy/provider-name.test.ts` | REPLACE | Conflicts with the 9 November ruling; rewrite to allow the provider's name only through the constants module and the legal pages. |

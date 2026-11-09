@@ -270,9 +270,19 @@ Verify each against the source before changing it.
 | Kill switches | env `PAYMENTS_KILL_PAYLUK`, flag `payments_payluk_on`, `private.rentals_protected_pay_on` | Built |
 | Safety rails | card charge refused while partner holds; both-ways funding alerts; unfunded arrangement cancels after 2h | Built |
 
-**What does not exist: the HTTP client.** There is no provider API call
-anywhere in the codebase. That is the gap. Everything else is scaffolding
-waiting for it.
+**What does not exist: a client for the NEW provider.** (Corrected 9
+November 2026 against the code, see `PAYMENTS_MIGRATION_AUDIT.md`.) A full
+Payluk HTTP client exists (`lib/payments/providers/payluk-client.ts`,
+`payluk-arrangements.ts`, `payluk.ts`) but was never run against Payluk
+itself; nothing calls the new provider. Also true in the code, and not in the
+table above: `provider_arrangements.provider` only allows `'payluk'`; the
+protected rail writes nothing to the ledger (`recordEscrowCommission` is
+never called); the two hour cancel of an unfunded arrangement covers stays,
+not rent; `hold_in_escrow` is a capability flag with no methods; custody
+words are policed by `custody-words.test.ts` and a database trigger, not by
+`check-valuation-words.mjs`; and `provider-name.test.ts` still forbids naming
+the partner to a member, which the section 3 ruling now requires at the pay
+step, so that test is rewritten with the rail.
 
 ---
 
