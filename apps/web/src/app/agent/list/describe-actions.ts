@@ -4,6 +4,7 @@ import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
 import { resolveSession, SIGNED_OUT_MESSAGE } from "@/lib/actions/session";
 import { hasAiConsent } from "@/lib/ai/consent-server";
 import { MAX_TITLE_LENGTH } from "@/lib/agent/listings-model";
+import { consume, subjectForUser } from "@/lib/security/rate-limit";
 
 /**
  * "WRITE WITH AI" ON THE LISTING WIZARD'S FINISH STEP (P1.1, R18.11, R35).
@@ -93,6 +94,9 @@ function tidy(text: string, max: number, oneLine: boolean): string {
   return out.trim().slice(0, max).trim();
 }
 
+/** At most 10 AI listing writes per person per day (founder, 7 November 2026). */
+const AI_LISTING_BUCKET = { bucket: "ai_listing_write", limit: 10, windowSeconds: 86_400 } as const;
+
 export async function writeListingWithAi(raw: AiListingInput): Promise<ActionResult<AiListingAnswer>> {
   const session = await resolveSession();
   if (session.state !== "signed-in") return fail(SIGNED_OUT_MESSAGE);
@@ -101,6 +105,20 @@ export async function writeListingWithAi(raw: AiListingInput): Promise<ActionRes
   const apiKey = (process.env.ANTHROPIC_API_KEY ?? "").trim();
   const model = (process.env.ASSISTANT_MODEL ?? "").trim();
   if (!apiKey || !model) return ok({ kind: "unavailable" });
+
+  /* The founder's ruling (7 November 2026): the AI listing description, at most
+     10 per person per day. Counted only when a write would really run. A
+     broken limiter lets the write through (degraded): nothing here costs a
+     member money, and the cap is a cost guard, not a safety gate. */
+  const verdict = await consume({
+    bucket: AI_LISTING_BUCKET.bucket,
+    subject: subjectForUser(session.user.id),
+    limit: AI_LISTING_BUCKET.limit,
+    windowSeconds: AI_LISTING_BUCKET.windowSeconds,
+  });
+  if (!verdict.allowed) {
+    return fail("You have used today's 10 AI writes. Nothing changed. Rewrite from your answers, or try the AI again tomorrow.");
+  }
 
   const input = fenced(raw);
   try {
