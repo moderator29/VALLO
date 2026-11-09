@@ -261,13 +261,37 @@
     box-shadow: var(--nf-btn-glass-shadow) !important;
     overflow: hidden;
   }
+
+  /*
+   * THE VECTOR GROUND (OpenFreeMap, 9 November 2026; `lib/maps/base-layer.ts`).
+   *
+   * MapLibre draws through the Leaflet bridge into `.leaflet-gl-layer`, a
+   * div in the tile pane that Leaflet moves with the view. MapLibre's own
+   * stylesheet is not loaded (70 KB, nearly all of it for controls this
+   * product never shows), so the three rules it would have supplied for the
+   * container and its canvas are written here. The ground never takes a
+   * pointer: Leaflet owns every gesture, MapLibre only paints.
+   */
+  .leaflet-gl-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .leaflet-gl-layer .maplibregl-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
 }
 
 /* ======================================================= THE STILL AREA MAP
-   `AreaMapTile`: four tiles of the live map's own style laid so the area's
-   centroid sits at the centre, one pin, and (on a large tile) the credit.
-   The quiet ground under the tiles is what shows on a data-saver connection
-   or when a tile fails, so the frame is never a hole. */
+   `AreaMapTile`: one canvas painted from OpenFreeMap's vector tiles in the
+   live map's palette (or, on the paid MapTiler path, four raster tiles laid
+   so the area's centroid sits at the centre), one pin, and (on a large tile)
+   the credit. The quiet ground under the imagery is what shows on a
+   data-saver connection or when a tile fails, so the frame is never a hole. */
 @layer components {
   .nf-area-tile {
     position: relative;
@@ -299,6 +323,19 @@
   .nf-area-tile__img[data-loaded] {
     opacity: 1;
   }
+  .nf-area-tile__canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--nf-duration-base) var(--nf-ease-standard);
+  }
+  .nf-area-tile__canvas[data-loaded] {
+    opacity: 1;
+  }
   /* The pin: a brand disc with a white ring and a soft halo for the area it
      stands for, centred, never a teardrop that would point at an address. */
   .nf-area-tile__pin {
@@ -325,7 +362,7 @@
     font-size: var(--nf-text-overline);
     color: var(--nf-content-on-media);
   }
-  :root[data-save-data="on"] :is(.nf-area-tile__sheet, .nf-area-tile__credits) {
+  :root[data-save-data="on"] :is(.nf-area-tile__sheet, .nf-area-tile__canvas, .nf-area-tile__credits) {
     display: none;
   }
   .nf-area-tile__credits a {
@@ -337,7 +374,8 @@
 
 @layer components {
   @media (prefers-reduced-motion: reduce) {
-    .nf-area-tile__img {
+    .nf-area-tile__img,
+    .nf-area-tile__canvas {
       transition: none;
     }
   }
