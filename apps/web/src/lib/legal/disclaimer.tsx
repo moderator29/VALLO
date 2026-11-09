@@ -11,6 +11,7 @@
  * Every money sentence is read from `lib/money/copy.ts`.
  */
 import Link from "next/link";
+import { DISCLAIMER_UPDATED_ISO, longDate } from "./versions";
 import { COMPANY_FORMAL_NAME, COMPANY_TRADING_NAME } from "./company";
 import {
   NO_CUSTODY_SENTENCE,
@@ -19,7 +20,7 @@ import {
   PRIVATE_FEE_NOTE,
 } from "@/lib/money/copy";
 
-export const DISCLAIMER_UPDATED = "25 September 2026";
+export const DISCLAIMER_UPDATED = longDate(DISCLAIMER_UPDATED_ISO);
 
 const LINK = "font-semibold text-[var(--nf-content-link)] hover:underline";
 

@@ -154,6 +154,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/standards": "/",
   "/styleguide": "/",
   "/terms": "/",
+  /* The legal index (9 November 2026): every policy as a card. */
+  "/legal": "/",
 
   /* ------------------------------------------------------------- the door
    *

@@ -87,3 +87,20 @@ export const ACCEPTED_AT_SIGNUP = [
 ];
 
 export type LegalDocument = (typeof ACCEPTED_AT_SIGNUP)[number]["document"];
+
+/**
+ * THE DATE EACH DOCUMENT SHOWS AS "LAST UPDATED", read from its version, so a
+ * page can never again show a date older than the text under it (found 9
+ * November 2026: Terms and Privacy both said 25 September after two changes).
+ * The Disclaimer forms part of the Terms and moves with them.
+ */
+export const TERMS_UPDATED_ISO = TERMS_VERSION;
+export const PRIVACY_UPDATED_ISO = PRIVACY_VERSION;
+export const DISCLAIMER_UPDATED_ISO = TERMS_VERSION;
+
+const LONG_DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Lagos" });
+/** "9 November 2026" from "2026-11-09". */
+export function longDate(iso: string): string {
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
+  return Number.isNaN(d.getTime()) ? iso : LONG_DATE.format(d);
+}

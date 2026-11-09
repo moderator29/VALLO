@@ -251,7 +251,11 @@ const PUBLIC_SEGMENTS = new Set([
  * chunks, the brand and icon directories, the fonts, the PWA assets,
  * `/.well-known/`, `/sw.js` and `/manifest.webmanifest`.
  */
-const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-image.jpg"]);
+/* `/legal` (9 November 2026): the legal index, every policy as a card, open to a
+   visitor with no account, who must be able to read every policy before
+   signing up. Only the bare index: the in-app copies under `/legal/*` stay
+   signed in, and their public twins are `/terms`, `/privacy`, `/disclaimer`. */
+const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-image.jpg", "/legal"]);
 
 /**
  * Open below a closed first segment, matched on the WHOLE path (Vallo

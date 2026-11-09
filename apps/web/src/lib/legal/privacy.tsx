@@ -14,6 +14,7 @@
  */
 
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
+import { PRIVACY_UPDATED_ISO, longDate } from "./versions";
 import { GRACE_WINDOW_DAYS } from "@/lib/account-deletion/constants";
 import {
   COMPANY_DOMAIN,
@@ -25,7 +26,7 @@ import {
 } from "./company";
 
 /** The date on the page; moves with PRIVACY_VERSION (`./versions`). */
-export const PRIVACY_UPDATED = "25 September 2026";
+export const PRIVACY_UPDATED = longDate(PRIVACY_UPDATED_ISO);
 
 export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNode }[] = [
   {

@@ -26,19 +26,25 @@ export function DocShell({
   section: DocSectionName;
   /** Where the section name leads: its own index. */
   sectionHref: string;
-  /** The way back into the product, labelled. Defaults to home. */
-  back?: { href: string; label: string };
+  /**
+   * The way back into the product, labelled. Defaults to home. `false` where
+   * the surrounding frame already draws Back (the public site's back bar), so
+   * a page never shows two.
+   */
+  back?: { href: string; label: string } | false;
   children: ReactNode;
   /** A wider column for an index of cards or a manual with a rail. */
   wide?: boolean;
 }) {
-  const home = back ?? { href: "/", label: "Back to Vallo" };
+  const home = back === false ? null : (back ?? { href: "/", label: "Back to Vallo" });
   return (
     <div className="nf-doc-shell" data-width={wide ? "wide" : undefined}>
       <div className="nf-doc-shell__bar">
-        <Link href={home.href} className="nf-doc-shell__back nf-tap" aria-label={home.label}>
-          <UiIcon name="arrow-left" size={20} />
-        </Link>
+        {home ? (
+          <Link href={home.href} className="nf-doc-shell__back nf-tap" aria-label={home.label}>
+            <UiIcon name="arrow-left" size={20} />
+          </Link>
+        ) : null}
         <Link href={sectionHref} className="nf-doc-shell__section">
           <LogoMark size={26} className="nf-doc-shell__mark" />
           <span>{section}</span>

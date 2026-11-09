@@ -196,6 +196,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/standards": "Standards",
   "/styleguide": "the style guide",
   "/terms": "Terms",
+  "/legal": "Legal",
   "/inspections/gate/[id]": "the gate code",
   "/rent/share/[id]": "the rent share",
   "/settings/passport": "your passport",

@@ -3,7 +3,7 @@ import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { SiteHead } from "@/components/site/SiteHead";
 import Link from "next/link";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
-import { TERMS_SECTIONS as sections } from "@/lib/legal/terms";
+import { TERMS_SECTIONS as sections, TERMS_UPDATED } from "@/lib/legal/terms";
 import "@/app/css/site.css";
 
 /* A10: the title and description in the page's own language, with its
@@ -34,7 +34,7 @@ export default function TermsPage() {
         title="Terms of service"
         lede="The rules of the platform, in plain language: what you can expect from Vallo, and what Vallo expects from you."
       >
-        <p className="nf-site-badge">Last updated: 25 September 2026</p>
+        <p className="nf-site-badge">Last updated: {TERMS_UPDATED}</p>
       </SiteHead>
     <div className="nf-shell pb-section">
       <div className="mx-auto max-w-3xl">

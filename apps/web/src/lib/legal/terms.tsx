@@ -132,6 +132,10 @@
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { COMPANY_FORMAL_NAME, COMPANY_TRADING_NAME } from "./company";
+import { TERMS_UPDATED_ISO, longDate } from "./versions";
+
+/** "Last updated" for the Terms, from their version. */
+export const TERMS_UPDATED = longDate(TERMS_UPDATED_ISO);
 import {
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,

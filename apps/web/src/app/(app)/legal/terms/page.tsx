@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { TERMS_SECTIONS } from "@/lib/legal/terms";
+import { TERMS_SECTIONS, TERMS_UPDATED } from "@/lib/legal/terms";
 import { LegalDocument } from "../LegalDocument";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export default function AppTermsPage() {
     <LegalDocument
       title="Terms of service"
       intro="The agreement between you and Vallo when you use the platform, book a place, or list one."
-      updated="25 September 2026"
+      updated={TERMS_UPDATED}
       sections={TERMS_SECTIONS}
       otherHref="/legal/privacy"
       otherLabel="Privacy policy"

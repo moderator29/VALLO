@@ -326,6 +326,8 @@ const EXPECTED_PUBLIC = new Set([
   /* Vallo Roommates (8 November 2026): the schools directory, a shared address. */
   "/roommates/campus",
   "/standards",
+  /* 9 November 2026: the legal index, so a visitor reads every policy before signing up. */
+  "/legal",
   "/terms",
   /* Compliance. */
   "/delete-account",
