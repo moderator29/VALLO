@@ -595,6 +595,14 @@
   .nf-rmh .nf-scene__words {
     max-inline-size: 40rem;
   }
+  .nf-rmh .nf-scene__veil {
+    background: linear-gradient(180deg, transparent 0%, transparent 20%, color-mix(in oklab, var(--nf-surface-artwork) 58%, transparent) 48%, var(--nf-surface-artwork) 88%);
+  }
+  @media (min-width: 48rem) {
+    .nf-rmh .nf-scene__veil {
+      background: linear-gradient(90deg, var(--nf-surface-artwork) 20%, color-mix(in oklab, var(--nf-surface-artwork) 55%, transparent) 55%, transparent 78%);
+    }
+  }
   .nf-rmh__eyebrow {
     justify-self: start;
     margin: 0;
