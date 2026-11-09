@@ -13,6 +13,8 @@ import { getLocale } from "@/lib/locale";
 
 import { Empty, Plate, Section, Tag, fill } from "../groups/_parts/kit";
 import "../groups/_parts/fe-b.css";
+import { VerificationBanner } from "@/components/roommates/VerificationBanner";
+
 import { DocumentCheck, EmailCheck } from "./VerifyFlows";
 
 export const metadata: Metadata = { title: "Add a check" };
@@ -45,6 +47,7 @@ export default async function RoommateVerifyPage() {
   return (
     <PageFrame title={V.title} subtitle={V.subtitle} fallback={ROOMMATES_ROUTES.hub} width="wide">
       <div className="nf-rmb" data-testid="roommates-verify">
+        <VerificationBanner title={V.title} line={R.verification.honest} />
         <Section title={V.current} id="rm-verify-current">
           {hub.verifications.length === 0 ? (
             <Empty>{V.none}</Empty>

@@ -1556,4 +1556,36 @@
     border-radius: var(--nf-radius-lg);
     background: var(--nf-rm-tint);
   }
+
+  /* ------------------------------------------------------------ the verification header */
+  .nf-rmvb {
+    min-block-size: 15rem;
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 30%, var(--nf-surface-artwork));
+  }
+  .nf-rmvb .nf-scene__stage {
+    min-block-size: 15rem;
+  }
+  .nf-rmvb__title {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h2);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .nf-rmvb__line {
+    max-inline-size: 30rem;
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-rmvb .nf-scene__words > * {
+      animation: nf-rm-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+      animation-delay: calc(500ms + var(--nf-rm-i, 0) * 70ms);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-rmvb .nf-scene__words > * {
+    animation: none;
+  }
 }
