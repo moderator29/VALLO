@@ -97,7 +97,9 @@ export function CollectionsBar({ collections, active }: { collections: SavedColl
   return (
     <div className="mb-heading" data-testid="saved-collections">
       <div className="nf-scroll-x nf-scroll-x--gutter flex gap-xs" role="tablist" aria-label="Lists">
-        <button type="button" role="tab" aria-selected={!current} className={`nf-chip${!current ? " nf-chip--on" : ""}`} onClick={() => go(null)}>
+        {/* "All" leads with the App Store stack glyph (SHARE_AND_CONTROLS.md section 3): every saved thing in one place. */}
+        <button type="button" role="tab" aria-selected={!current} className={`nf-chip inline-flex items-center gap-2xs${!current ? " nf-chip--on" : ""}`} onClick={() => go(null)}>
+          <UiIcon name="stack" size={14} />
           {WORDS.all}
         </button>
         {collections.map((c) => (
