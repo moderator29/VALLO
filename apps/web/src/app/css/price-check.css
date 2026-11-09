@@ -71,9 +71,14 @@
     background: var(--nf-surface-inset);
     box-shadow: var(--nf-panel-rim), var(--nf-panel-glow);
   }
+  /* Its own stacking context (z-index 0), so Leaflet's panes (z-index 200
+     to 400 inside it) stay under the centre pin and the credit beside it.
+     Without it the map pane painted over both: the pin a reader is placing
+     and the credit the map data's licence requires. */
   .nf-pc-map__canvas {
     position: absolute;
     inset: 0;
+    z-index: 0;
   }
 
   /* The pin itself. A head and a stem, drawn rather than imported, because a
@@ -106,14 +111,18 @@
     background: var(--nf-brand-primary);
   }
 
-  /* The attribution the tile providers' terms require. It travels with the
-     tile URL in lib/maps/tiles.ts; this is only where it sits. */
+  /* The attribution the map data's terms require. It travels with the
+     provider in lib/maps/tiles.ts; this is only where it sits. */
   .nf-pc-map__credit {
     position: absolute;
+    z-index: var(--nf-z-content);
     right: var(--nf-space-2xs);
     bottom: var(--nf-space-2xs);
-    display: flex;
-    gap: var(--nf-space-2xs);
+    /* Inline text, not a flex row: three credits (OpenFreeMap's terms name
+       OpenMapTiles and OpenStreetMap) wrap between names, never inside one. */
+    display: block;
+    max-inline-size: calc(100% - 2 * var(--nf-space-2xs));
+    text-align: end;
     padding: var(--nf-space-3xs) var(--nf-space-2xs);
     border-radius: var(--nf-radius-xs);
     color: var(--nf-content-on-media-muted);
@@ -121,6 +130,9 @@
     border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
     background: var(--nf-btn-glass-fill);
     box-shadow: var(--nf-btn-glass-shadow);
+  }
+  .nf-pc-map__credit a {
+    white-space: nowrap;
   }
 
   /* When the tile engine cannot be reached. The pin still works, because the

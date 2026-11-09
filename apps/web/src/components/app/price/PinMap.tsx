@@ -215,10 +215,13 @@ export function PinMap({
               <div className="nf-pc-pin__stem" />
             </div>
             <p className="nf-pc-map__credit">
-              {credits.map((credit) => (
-                <a key={credit.label} href={credit.href} rel="noreferrer noopener" target="_blank" className="nf-tap">
-                  {credit.label}
-                </a>
+              {credits.map((credit, index) => (
+                <span key={credit.label}>
+                  {index > 0 ? " · " : null}
+                  <a href={credit.href} rel="noreferrer noopener" target="_blank" className="nf-tap">
+                    {credit.label}
+                  </a>
+                </span>
               ))}
             </p>
           </>
