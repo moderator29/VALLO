@@ -17,4 +17,11 @@ describe("tileMosaic", () => {
     expect(tileMosaic(Number.NaN, 3, "{z}")).toBeNull();
     expect(tileMosaic(89, 3, "{z}")).toBeNull();
   });
+
+  it("has no tiles to lay out for a vector-only provider, and still places the point", () => {
+    const mosaic = tileMosaic(6.4474, 3.47, "");
+    expect(mosaic?.urls).toEqual([]);
+    expect(mosaic?.pointX).toBeGreaterThanOrEqual(256);
+    expect(mosaic?.pointY).toBeLessThanOrEqual(512);
+  });
 });

@@ -1,3 +1,4 @@
+/* eslint-disable nf/no-raw-colour -- a WebGL style and a 2D canvas cannot read a CSS custom property; the map's palette is stated once, here, beside the tokens it answers */
 import type { MapTheme } from "./tiles";
 
 /**

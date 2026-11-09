@@ -31,13 +31,11 @@ export type MvtTile = Map<string, MvtLayer>;
 const utf8 = typeof TextDecoder === "undefined" ? null : new TextDecoder("utf-8");
 
 class Reader {
+  readonly buf: Uint8Array;
   pos: number;
   readonly end: number;
-  constructor(
-    readonly buf: Uint8Array,
-    start = 0,
-    end = buf.length,
-  ) {
+  constructor(buf: Uint8Array, start = 0, end = buf.length) {
+    this.buf = buf;
     this.pos = start;
     this.end = end;
   }

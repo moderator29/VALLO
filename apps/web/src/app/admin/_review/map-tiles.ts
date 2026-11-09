@@ -6,6 +6,13 @@
  * see where the pin is, not to pan. The tile URLs come from the product's own
  * provider choice (`lib/maps/tiles.ts`), which also carries the attribution
  * its licence requires. Pure arithmetic, tested; no request is made here.
+ *
+ * ONLY A RASTER PROVIDER HAS A MOSAIC. OpenFreeMap, the free commercial-use
+ * provider the product draws on (9 November 2026), serves vector tiles only,
+ * so there is no image URL to lay out: an empty template gives a mosaic with
+ * the point's position and no tiles, and the panel shows its pin on its own
+ * ground. The CARTO raster tiles this used to draw were non-commercial only.
+ * With a MapTiler key set, the mosaic is MapTiler's raster tiles as before.
  */
 
 export type TileMosaic = {
@@ -32,7 +39,7 @@ export function tileMosaic(
   const tx = Math.floor(x);
   const ty = Math.floor(y);
   const urls: string[] = [];
-  for (let row = -1; row <= 1; row++) {
+  for (let row = -1; row <= 1 && template.length > 0; row++) {
     for (let col = -1; col <= 1; col++) {
       const cx = (((tx + col) % n) + n) % n;
       const cy = Math.min(n - 1, Math.max(0, ty + row));

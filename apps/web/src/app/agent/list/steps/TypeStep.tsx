@@ -1,7 +1,6 @@
 "use client";
 
-import { Note } from "./parts";
-import { Choice, TYPE_ART, TYPE_OBJECT, TYPE_REALISTIC } from "./parts";
+import { Choice, Note, TYPE_ART, TYPE_OBJECT, TYPE_REALISTIC } from "./parts";
 import type { StepCtx } from "./context";
 import { typesFor } from "./model";
 

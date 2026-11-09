@@ -56,8 +56,13 @@ export type TileProvider = {
    * Leaflet URL template, `{z}/{x}/{y}` with `{r}` for retina.
    */
   kind: "vector" | "raster";
-  /** The raster template, for a `raster` provider; null for a vector one. */
-  url: string | null;
+  /**
+   * The raster template, for a `raster` provider. EMPTY for a vector one:
+   * there is no image URL to give, and an empty string (rather than null)
+   * keeps every caller that lays out raster tiles honest without a type
+   * change: it simply has nothing to lay out.
+   */
+  url: string;
   /** The MapLibre style, for a `vector` provider; null for a raster one. */
   style: string | null;
   /** The TileJSON that names the current vector tile URLs; null for raster. */
@@ -133,7 +138,7 @@ export function tileProvider(theme: MapTheme): TileProvider {
   return {
     id: "openfreemap",
     kind: "vector",
-    url: null,
+    url: "",
     /* One style for both themes; the theme is applied as paint overrides. */
     style: OPENFREEMAP_STYLE,
     tileJson: OPENFREEMAP_TILEJSON,

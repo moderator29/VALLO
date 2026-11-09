@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { useAppliedTheme } from "@/lib/theme/theme-client";
-import { tileProvider, warnIfNonCommercialTiles } from "@/lib/maps/tiles";
+import { tileProvider } from "@/lib/maps/tiles";
+import type { BaseLayer } from "@/lib/maps/base-layer";
+import { prefersCalm } from "@/lib/ui/calm";
+import "@/app/css/map.css";
 import "./area-map.css";
 
 /**
@@ -15,8 +18,10 @@ import "./area-map.css";
  * browser; the circle is drawn wide enough that nobody reads it as a pin. The
  * exact address arrives with a confirmed booking, as the line above it says.
  *
- * The tiles carry their provider's credit (`lib/maps/tiles.ts` is a licensing
- * module before a rendering one). Without tiles the frame says so in words
+ * The ground is OpenFreeMap's, drawn by `lib/maps/base-layer.ts` (MapLibre
+ * on a capable device, plain canvases on a budget one) and it carries its
+ * provider's credit (`lib/maps/tiles.ts` is a licensing module before a
+ * rendering one). Without imagery the frame says so in words
  * and names the area, rather than drawing a grey void with a circle in it.
  * The map does not take the page's scroll: one finger scrolls the page, the
  * map pans with a drag once it has been tapped.
@@ -38,22 +43,32 @@ export function AreaMap({
   const theme = useAppliedTheme();
   const [offline, setOffline] = useState(false);
   const credits = tileProvider(theme).credits;
+  const baseRef = useRef<BaseLayer | null>(null);
+  /* The theme as of the latest render, read when the ground is first built;
+     later changes repaint the ground in place rather than rebuilding the map. */
+  const themeRef = useRef(theme);
+  useEffect(() => {
+    themeRef.current = theme;
+    baseRef.current?.setTheme(theme);
+  }, [theme]);
 
   useEffect(() => {
     let cancelled = false;
     let map: import("leaflet").Map | null = null;
     const frame = frameRef.current;
     if (!frame) return;
-    warnIfNonCommercialTiles();
     void (async () => {
       let leaflet: typeof import("leaflet");
+      let ground: typeof import("@/lib/maps/base-layer");
       try {
-        leaflet = await import("leaflet");
+        /* Both by import(): no map code in the page's first load. */
+        [leaflet, ground] = await Promise.all([import("leaflet"), import("@/lib/maps/base-layer")]);
       } catch {
         if (!cancelled) setOffline(true);
         return;
       }
       if (cancelled) return;
+      const calm = prefersCalm();
       map = leaflet.map(frame, {
         center: [lat, lng],
         zoom: 14,
@@ -62,27 +77,30 @@ export function AreaMap({
         scrollWheelZoom: false,
         dragging: true,
         tap: false,
+        zoomAnimation: !calm,
+        fadeAnimation: !calm,
       } as import("leaflet").MapOptions);
-      const provider = tileProvider(theme);
-      const tiles = leaflet.tileLayer(provider.url, {
-        maxZoom: provider.maxZoom,
-        detectRetina: true,
-        updateWhenIdle: true,
-        keepBuffer: 1,
+      let painted = false;
+      baseRef.current = ground.addBaseLayer(leaflet, map, themeRef.current, {
+        raster: { keepBuffer: 1 },
+        onLoad: () => {
+          painted = true;
+        },
+        onError: () => {
+          if (!cancelled && !painted) setOffline(true);
+        },
       });
-      tiles.on("tileerror", () => {
-        if (!cancelled) setOffline(true);
-      });
-      tiles.addTo(map);
       leaflet
         .circle([lat, lng], { radius: 650, className: "nf-areamap__circle", interactive: false })
         .addTo(map);
     })();
     return () => {
       cancelled = true;
+      baseRef.current?.remove();
+      baseRef.current = null;
       map?.remove();
     };
-  }, [lat, lng, theme]);
+  }, [lat, lng]);
 
   if (offline) {
     return (

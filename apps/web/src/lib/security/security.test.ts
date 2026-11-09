@@ -209,16 +209,36 @@ describe("contentSecurityPolicy", () => {
      *
      * Both halves are asserted. The wildcard must be gone, and the map must
      * still be reachable: tightening this directive and forgetting the
-     * basemaps turns the map into a grey box, and that is exactly the mistake
-     * this test exists to catch.
+     * basemap host turns the map into a grey box, and that is exactly the
+     * mistake this test exists to catch.
      */
     const value = directive(policy(), "img-src") ?? "";
     expect(/(^|\s)https:(\s|$)/.test(value)).toBe(false);
-    expect(value).toContain("https://basemaps.cartocdn.com");
+    /* MapTiler's raster tiles are images, for the day its key is set. CARTO
+       is gone: its tiles were non-commercial only (9 November 2026). */
     expect(value).toContain("https://api.maptiler.com");
+    expect(value).not.toContain("cartocdn");
     // A chosen photo is previewed from a blob before it is ever uploaded.
     expect(value).toContain("blob:");
     expect(value).toContain("data:");
+  });
+
+  it("lets the map fetch its data from OpenFreeMap, and from nowhere wider", () => {
+    /*
+     * OpenFreeMap's vector tiles, TileJSON, style, glyphs and sprite are all
+     * fetched (MapLibre and its worker, or the lightweight canvas painter),
+     * so the host belongs in `connect-src`. One named host, never a wildcard,
+     * and not in `img-src`, where nothing of it is drawn as an <img>.
+     */
+    const value = policy();
+    const connect = directive(value, "connect-src") ?? "";
+    expect(connect).toContain("https://tiles.openfreemap.org");
+    expect(connect).not.toMatch(/\*\.openfreemap/);
+    expect(directive(value, "img-src") ?? "").not.toContain("openfreemap");
+    expect(value).not.toContain("cartocdn");
+    /* MapLibre's worker: same origin, or a blob if the assets ever move. */
+    expect(directive(value, "worker-src")).toContain("'self'");
+    expect(directive(value, "worker-src")).toContain("blob:");
   });
 
   it("allows the service worker and the manifest it needs", () => {

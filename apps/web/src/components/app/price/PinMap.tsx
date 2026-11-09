@@ -3,7 +3,10 @@
 import { useAppliedTheme } from "@/lib/theme/theme-client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { tileProvider, warnIfNonCommercialTiles } from "@/lib/maps/tiles";
+import "@/app/css/map.css";
+import { tileProvider } from "@/lib/maps/tiles";
+import type { BaseLayer } from "@/lib/maps/base-layer";
+import { prefersCalm } from "@/lib/ui/calm";
 import { NIGERIA_CENTRE, withinNigeria } from "@/lib/price-check/address";
 
 /**
@@ -12,8 +15,8 @@ import { NIGERIA_CENTRE, withinNigeria } from "@/lib/price-check/address";
  * ---------------------------------------------------------------------------
  * WHY A PIN AT ALL.
  *
- * There is no geocoder in this tree. `lib/maps/tiles.ts` is a tile licensing
- * module and it is the whole of `lib/maps`. A geocoder for Nigeria is a
+ * There is no geocoder in this tree. `lib/maps` is a tile licensing module
+ * and the painters for its imagery, nothing more. A geocoder for Nigeria is a
  * licensing decision, a cost and a dependency, and it would be wrong more
  * often than a person dragging a pin. More to the point, many Nigerian
  * properties have no formal address at all, so a field demanding one refuses
@@ -86,12 +89,13 @@ export function PinMap({
 
   const [imagery, setImagery] = useState<"loading" | "ready" | "offline">("loading");
   /* THE MAP FOLLOWS THE PAGE'S THEME, live (track L; light mode came back on
-     25 September 2026). Dark cartography at night, light cartography on the
-     light theme. The map is built once below with the theme it opened in, and
-     the effect after it swaps only the tile layer when the theme changes, so
-     the reader's pan, zoom and pin are never lost to a switch. */
+     25 September 2026). Vallo's navy at night, paper on the light theme. The
+     map is built once below with the theme it opened in, and the effect after
+     it repaints only the ground when the theme changes
+     (`lib/maps/base-layer.ts`), so the reader's pan, zoom and pin are never
+     lost to a switch. */
   const theme = useAppliedTheme();
-  const tilesRef = useRef<{ layer: { remove(): void }; theme: string } | null>(null);
+  const baseRef = useRef<BaseLayer | null>(null);
   /* The theme as of the latest render. The first render after hydration
      answers the server's "dark", and Leaflet loads asynchronously, so the map
      reads this ref at the moment it adds its tiles rather than the value it
@@ -114,12 +118,12 @@ export function PinMap({
     const frame = frameRef.current;
     if (!frame) return;
 
-    warnIfNonCommercialTiles();
-
     void (async () => {
       let leaflet: LeafletModule;
+      let ground: typeof import("@/lib/maps/base-layer");
       try {
-        leaflet = await import("leaflet");
+        /* Both by import(): no map code in the page's first load. */
+        [leaflet, ground] = await Promise.all([import("leaflet"), import("@/lib/maps/base-layer")]);
       } catch {
         if (!cancelled) setImagery("offline");
         return;
@@ -136,20 +140,22 @@ export function PinMap({
         zoom: lat !== null ? 16 : 6,
         zoomControl: true,
         attributionControl: false,
+        /* Reduced motion: zooms jump instead of gliding. */
+        zoomAnimation: !prefersCalm(),
+        fadeAnimation: !prefersCalm(),
       });
       mapRef.current = map;
 
-      const opened = themeRef.current;
-      const provider = tileProvider(opened);
-      const tiles = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom, detectRetina: true, updateWhenIdle: true });
-      tiles.on("tileerror", () => {
-        if (!cancelled) setImagery("offline");
+      let painted = false;
+      baseRef.current = ground.addBaseLayer(leaflet, map, themeRef.current, {
+        onLoad: () => {
+          painted = true;
+          if (!cancelled) setImagery("ready");
+        },
+        onError: () => {
+          if (!cancelled && !painted) setImagery("offline");
+        },
       });
-      tiles.on("load", () => {
-        if (!cancelled) setImagery("ready");
-      });
-      tiles.addTo(map);
-      tilesRef.current = { layer: tiles, theme: opened };
       if (!cancelled) setTilesReady(true);
 
       /* `moveend` and not `move`: one coordinate per gesture rather than one
@@ -164,6 +170,8 @@ export function PinMap({
 
     return () => {
       cancelled = true;
+      baseRef.current?.remove();
+      baseRef.current = null;
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -172,24 +180,10 @@ export function PinMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* The tile swap for a theme change. Leaflet is already loaded by the time a
-     map exists, so the import resolves from cache. */
+  /* The ground's repaint for a theme change, in place. `tilesReady` catches a
+     change that landed while Leaflet was still loading. */
   useEffect(() => {
-    const map = mapRef.current;
-    const current = tilesRef.current;
-    if (!map || !current || current.theme === theme) return;
-    let cancelled = false;
-    void import("leaflet").then((leaflet) => {
-      if (cancelled || !mapRef.current) return;
-      const provider = tileProvider(theme);
-      const next = leaflet.tileLayer(provider.url, { maxZoom: provider.maxZoom, detectRetina: true, updateWhenIdle: true });
-      next.addTo(mapRef.current);
-      current.layer.remove();
-      tilesRef.current = { layer: next, theme };
-    });
-    return () => {
-      cancelled = true;
-    };
+    baseRef.current?.setTheme(theme);
   }, [theme, tilesReady]);
 
   const recentre = useCallback(() => {

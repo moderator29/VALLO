@@ -101,7 +101,9 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     } catch {
       /* A layer that failed half way through onAdd cannot always remove itself. */
       try {
-        map.off((layer as Leaflet.Layer & { getEvents?: () => Leaflet.LeafletEventHandlerFnMap }).getEvents?.() ?? {}, layer);
+        const events = (layer as Leaflet.Layer & { getEvents?: () => Leaflet.LeafletEventHandlerFnMap }).getEvents?.();
+        /* Leaflet's typings omit `off(map, context)`, which it implements. */
+        if (events) (map as unknown as { off(events: object, context: unknown): void }).off(events, layer);
       } catch {
         /* nothing left to undo */
       }
@@ -113,7 +115,7 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     layer.on("tileerror", () => options.onError?.());
   };
 
-  const useRaster = () => {
+  const startRaster = () => {
     kind = "raster";
     const tiles = tileProvider(theme);
     if (!tiles.url) return;
@@ -129,7 +131,7 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     current = layer;
   };
 
-  const useLite = () => {
+  const startLite = () => {
     if (disposed) return;
     detach();
     kind = "lite";
@@ -141,9 +143,11 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     current = layer;
   };
 
-  const useGl = async () => {
+  const startGl = async () => {
     const tiles = tileProvider(theme);
-    if (!tiles.style) return useLite();
+    if (!tiles.style) return startLite();
+    /* Said while MapLibre is still arriving, so a caller can wait for it. */
+    kind = "gl";
     try {
       const [{ createGlLayer }, base] = await Promise.all([import("./gl-layer"), loadBaseStyle(tiles.style)]);
       if (disposed) return;
@@ -166,16 +170,16 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
       /* A context lost for good, or a style that never finishes: hand the
          map to the lite layer rather than leave the reader on a blank ground. */
       startTimer = window.setTimeout(() => {
-        if (!loaded) useLite();
+        if (!loaded) startLite();
       }, GL_START_TIMEOUT);
     } catch {
-      useLite();
+      startLite();
     }
   };
 
-  if (provider.kind === "raster") useRaster();
-  else if (liteMapWanted()) useLite();
-  else void useGl();
+  if (provider.kind === "raster") startRaster();
+  else if (liteMapWanted()) startLite();
+  else void startGl();
 
   return {
     kind: () => kind,
@@ -186,7 +190,7 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
       else if (kind === "lite" && current) (current as LiteLayer).setTheme(next);
       else if (kind === "raster") {
         detach();
-        useRaster();
+        startRaster();
       }
     },
     remove() {

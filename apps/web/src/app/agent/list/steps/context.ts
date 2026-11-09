@@ -16,6 +16,12 @@ export type StepCtx = {
   mark: (...keys: (keyof Values)[]) => ReactNode;
   errors: Record<string, string>;
   copy: Dictionary["agentListings"];
+  /** The searcher's move-in words, so the agent's breakdown reads as the listing's does. */
+  moveInCopy: Dictionary["moveIn"];
+  /** V-46: who each move-in line is paid to. */
+  moneyMapCopy?: Dictionary["afterTheGate"]["moneyMap"];
+  /** V-13: the sentence that refuses an unexplained remainder in the total. */
+  remainderCopy?: Dictionary["afterTheGate"]["remainder"];
   locale: Locale;
   kind: ListingKind;
   asks: (fact: ListingFact) => boolean;

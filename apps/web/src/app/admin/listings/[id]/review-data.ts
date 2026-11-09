@@ -47,6 +47,9 @@ export async function loadListingReview(
   ]);
   const closedReason = closedReasons[found.id] ?? null;
   const decidable = found.status !== "PUBLISHED" && found.status !== "REJECTED" && closedReason === null;
+  /* The Location panel's mosaic needs raster tiles. OpenFreeMap serves vector
+     tiles only, so with no MapTiler key the template is empty, the mosaic has
+     no images and no credit is owed for imagery that is not drawn. */
   const dark = tileProvider("dark");
   return {
     ...base,
@@ -57,7 +60,9 @@ export async function loadListingReview(
     closedReason,
     decidable,
     nextId: extra?.nextId ?? null,
-    tiles: { dark: dark.url, credit: dark.credits.map((credit) => credit.label).join(", ") },
+    tiles: dark.url
+      ? { dark: dark.url, credit: dark.credits.map((credit) => credit.label).join(", ") }
+      : { dark: "", credit: "" },
   };
 }
 

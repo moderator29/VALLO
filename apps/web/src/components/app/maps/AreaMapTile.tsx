@@ -2,7 +2,6 @@
 
 import { useAppliedTheme } from "@/lib/theme/theme-client";
 import { tileProvider, warnIfNonCommercialTiles, type MapTheme } from "@/lib/maps/tiles";
-import { paintStill } from "@/lib/maps/still";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import "@/app/css/map.css";
 
@@ -60,16 +59,13 @@ function project(lat: number, lng: number, zoom: number): { x: number; y: number
 /** The vector still: one canvas, painted once it is near the screen and again on a theme change. */
 function VectorSheet({ lat, lng, zoom, theme, tileJson, onFail }: { lat: number; lng: number; zoom: number; theme: MapTheme; tileJson: string; onFail(): void }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const [near, setNear] = useState(false);
+  /* Without IntersectionObserver (an old webview) the sheet paints at once. */
+  const [near, setNear] = useState(() => typeof IntersectionObserver === "undefined");
   const [painted, setPainted] = useState(false);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
-    if (typeof IntersectionObserver === "undefined") {
-      setNear(true);
-      return;
-    }
+    if (!canvas || typeof IntersectionObserver === "undefined") return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
@@ -95,7 +91,10 @@ function VectorSheet({ lat, lng, zoom, theme, tileJson, onFail }: { lat: number;
     if (width < 8 || height < 8) return;
     let cancelled = false;
     const fontFamily = getComputedStyle(canvas).fontFamily || "system-ui, sans-serif";
-    paintStill(canvas, { lat, lng, zoom, theme, width, height, tileJson, fontFamily })
+    /* The painter arrives by import(), so a page with a still map carries none
+       of it until a tile nears the screen. */
+    import("@/lib/maps/still")
+      .then(({ paintStill }) => paintStill(canvas, { lat, lng, zoom, theme, width, height, tileJson, fontFamily }))
       .then(() => {
         if (!cancelled) setPainted(true);
       })

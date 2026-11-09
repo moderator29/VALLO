@@ -21,6 +21,9 @@ export const WIZARD_WORDS = {
     continue: "Continue",
     backToCheck: "Back to Check your listing",
     submit: "Submit for review",
+    another: "List another property",
+    toListings: "Go to my listings",
+    needsTitle: "Add a title on the Finish step first, then we can send this listing for review.",
   },
 
   /* The eyebrow over each step: the section the question belongs to. */
@@ -47,6 +50,7 @@ export const WIZARD_WORDS = {
     rent: { label: "A property to let", detail: "A longer let, paid yearly, quarterly or monthly: a home, a shop, an office or land." },
     sale: { label: "A property for sale", detail: "Sold outright, with a title to transfer." },
     pickFirst: "Choose one to continue.",
+    needsAnswers: "Say where the property is first, then your photos attach to this listing.",
     broadcastLead: "Already posted it on WhatsApp?",
   },
 
@@ -233,6 +237,7 @@ export const WIZARD_WORDS = {
     fixTitleMany: "{count} things to fix",
     readyTitle: "Ready to submit",
     readyBody: "Nothing is missing. Submit it and it goes into the review queue.",
+    feeAccept: "Agree to the fee figures below before you send.",
     change: "Change",
     fix: "Fix",
     notSet: "Not set",
@@ -262,6 +267,7 @@ export const WIZARD_WORDS = {
     kinds: { stay: "A stay, by the night", rent: "To let", sale: "For sale" },
     photosLine: "{count} photos and videos ({recommended} recommended)",
     accessSet: "Added, private until a booking is confirmed",
+    answered: "Answered",
     chargesCount: "{count} declared",
     chargesNone: "None declared",
     doorDeclared: "Declared",

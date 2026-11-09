@@ -3,7 +3,7 @@
 import { Money } from "@/components/ui/Money";
 import { useAppliedTheme } from "@/lib/theme/theme-client";
 import { tileProvider } from "@/lib/maps/tiles";
-import { addBaseLayer, type BaseLayer } from "@/lib/maps/base-layer";
+import type { BaseLayer } from "@/lib/maps/base-layer";
 import { prefersCalm } from "@/lib/ui/calm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
@@ -92,6 +92,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 type LeafletModule = typeof import("leaflet");
 type LeafletMap = import("leaflet").Map;
+/** The ground module, loaded with Leaflet by `import()`, never in the route's first load. */
+type GroundModule = typeof import("@/lib/maps/base-layer");
 
 type LocatePhase = "idle" | "working" | "located" | "denied" | "unavailable" | "failed";
 type Locate = { phase: LocatePhase; at?: LatLng };
@@ -132,6 +134,7 @@ export function MapCanvas({
   const mapRef = useRef<LeafletMap | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
   const baseRef = useRef<BaseLayer | null>(null);
+  const groundRef = useRef<GroundModule | null>(null);
   const rafRef = useRef(0);
   const tilesLoaded = useRef(0);
   const tilesFailed = useRef(0);
@@ -212,8 +215,12 @@ export function MapCanvas({
 
     void (async () => {
       try {
-        const leaflet = (await import("leaflet")).default;
+        const [leaflet, ground] = await Promise.all([
+          import("leaflet").then((module) => module.default),
+          import("@/lib/maps/base-layer"),
+        ]);
         if (disposed || !canvasRef.current) return;
+        groundRef.current = ground;
         const calm = prefersCalm();
         map = leaflet.map(canvasRef.current, {
           zoomControl: false,
@@ -267,12 +274,13 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     const leaflet = leafletRef.current;
-    if (!map || !leaflet) return;
+    const ground = groundRef.current;
+    if (!map || !leaflet || !ground) return;
     if (baseRef.current) {
       baseRef.current.setTheme(theme);
       return;
     }
-    baseRef.current = addBaseLayer(leaflet, map, theme, {
+    baseRef.current = ground.addBaseLayer(leaflet, map, theme, {
       minZoom: 4,
       raster: { updateWhenZooming: false, updateWhenIdle: true },
       onLoad: () => {
@@ -287,11 +295,20 @@ export function MapCanvas({
   }, [theme, engineReady]);
 
   // No tile has painted after a fair wait: say so rather than wait forever.
+  // While MapLibre is still arriving (a slow connection, a first visit) the
+  // wait is the ground's own: it hands over to the lite map at twelve
+  // seconds, and the note is only shown once neither has painted.
   useEffect(() => {
     if (imagery !== "loading") return;
-    const timer = window.setTimeout(() => {
-      if (tilesLoaded.current === 0) setImagery("offline");
-    }, 6000);
+    let timer = 0;
+    const check = (after: number, waited: number) => {
+      timer = window.setTimeout(() => {
+        if (tilesLoaded.current > 0) return;
+        if (baseRef.current?.kind() === "gl" && waited < 18_000) check(3000, waited + 3000);
+        else setImagery("offline");
+      }, after);
+    };
+    check(6000, 6000);
     return () => window.clearTimeout(timer);
   }, [imagery]);
 
@@ -651,7 +668,7 @@ export function MapCanvas({
         const move = pan[event.key];
         if (move) {
           event.preventDefault();
-          map.panBy(move);
+          map.panBy(move, { animate: !prefersCalm() });
           return;
         }
         if (event.key === "+" || event.key === "=") {
