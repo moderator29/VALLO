@@ -81,6 +81,7 @@ export type UiIconName =
   | "settings-gear"
   | "heart"
   | "grid"
+  | "stack"
   | "key"
   | "sliders"
   /* The search bar's order control: lines shortening downward [arrow-down-wide-narrow]. */
@@ -388,10 +389,14 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
     </>
   ),
   // [search]
+  /* The magnifier, on the App Store tab bar's proportions (the founder,
+     9 November 2026: our search should read exactly like that one): a slightly
+     smaller glass set high and left, with a longer 45-degree handle reaching
+     into the lower-right corner. */
   search: (
     <>
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.34-4.34" />
+      <circle cx="10.5" cy="10.5" r="6.75" />
+      <path d="m20.25 20.25-4.9-4.9" />
     </>
   ),
   /* The dock's Search (B1 second ruling, references 44 and 45): a magnifier
@@ -767,6 +772,16 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <rect width="7" height="7" x="14" y="3" rx="1.5" />
       <rect width="7" height="7" x="14" y="14" rx="1.5" />
       <rect width="7" height="7" x="3" y="14" rx="1.5" />
+    </>
+  ),
+  /* A stack of rounded cards, the App Store "Apps" tab's shape (the founder,
+     9 November 2026: use that layered-box look across the platform). Two cards
+     offset behind a lifted front one; it reads as a collection, a library, a
+     set of things. */
+  stack: (
+    <>
+      <rect width="12" height="12" x="3" y="9" rx="2.5" />
+      <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5H17a2.5 2.5 0 0 1 2.5 2.5V15a2.5 2.5 0 0 1-2 2.45" />
     </>
   ),
   // [zap]
