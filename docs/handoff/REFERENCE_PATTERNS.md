@@ -737,3 +737,157 @@ open items first (BUILD 7.5); the per-transaction timeline in plain sentences
 5. Confirmation screens always offer the receipt and the next action.
 6. Every fee named, every condition shown before pay, nothing free that is
    not free.
+
+## Batch 7 (9 November 2026, 16 images): the written surface (help, guides, legal, search)
+
+Sent with DOCS_AND_PRESENCE_UPGRADE.md. Hauslet's documentation shell: a
+"Pages" / "Legal" / "Help Center" header with the brand glyph and a round
+search control. Patterns only: none of their colours (lilac and purple),
+logo, wording or screenshots enter Vallo. Every Vallo version is dark neon
+blue by default and light when chosen, built from the kit in
+`components/docs/` (DocShell, DocCard, DocTable, DocHeader, DocSummary,
+DocToc, DocCallout, DocSearchSheet).
+
+**One thing NOT to learn from them.** Their payout pages describe a custody
+model: "Hauslet collects the guest's full payment, then transfers your share",
+and a balance that moves Pending, Clearing, Available, Paid. Vallo never holds
+money (ADR 0002): a card payment is split at the moment of payment by
+Paystack, so there is no Vallo balance to clear. Our payout table has its own,
+true states (the payment clearing at the processor, the share settling to the
+bank, paid, reversed), and our fee table is computed from the live money
+policy, never typed.
+
+### R85. Guide step with a real screenshot: "How many rooms does it have?"
+The guide's "Step 4: Details" paragraph, then the actual wizard screen as an
+image: eyebrow DETAILS, the question, number chips for Bedrooms and
+Bathrooms (1 to 9, 10+), Toilets (optional, 0 to 8, 9+) with the selected chip
+outlined, a floor area field, the green "Saved" tick top right, and the
+wizard's own foot (Back, "Step 6 of 12", Continue) captured with it. Then one
+sentence of what differs for a shortlet.
+Vallo takes: each guide step = a short paragraph plus the real step captured
+WITH its chrome (counter, Saved mark, Back and Continue), produced by the
+capture harness so it can be regenerated, in both themes.
+
+### R86. "What's your nightly rate?"
+A naira field with the currency prefix and a "/ night" suffix, a quiet info
+note under it ("Weekend rates, discounts and booking rules can be set after
+you create the draft"), the step foot "Step 8 of 12". Then a paragraph on
+extra charges (fixed or percent, per stay or per night, "or choose None").
+Vallo takes: the field shape (prefix, unit suffix) and the deferred-settings
+note; our listing wizard's price step and the guide that shows it.
+
+### R87. "Where is the property?" and the privacy note
+Search field, then State (select) and Area beside it, Street address, House
+number (optional), and a tinted panel "Who sees the exact location"
+(approximate area publicly, exact address after a confirmed booking,
+confirming the pin is the publisher's own check, not a platform
+verification). In the guide, a grey "Note:" callout repeats the rule in
+plain words, then "Next, place the map pin on the entrance".
+Vallo takes: the privacy note at the moment of entry (ours already keeps exact
+points private; say so in the same honest terms) and the DocCallout note.
+
+### R88. Connection cards and the property type grid
+"What's your connection to this property?" as four radio cards with a line
+icon, title and one line (landlord, agent, developer, independent). Then
+"Which best describes it?" as a grid of small tiles with an icon and a word
+(Apartment, Flat, Duplex, Studio, Room, Serviced Apartment, Guesthouse,
+Penthouse, Bungalow, Terrace, Maisonette, Mansion, Fully Detached,
+Semi-Detached). Top right, an honest save mark: "Saved in this browser"
+before sign-in, which becomes account saving from the type step.
+Vallo takes: the honest save mark that says WHERE it is saved (device or
+account); our wizard already keeps drafts both ways.
+
+### R89. "What are you listing today?"
+Three radio cards: Shortlet (booked by the night), Property for rent (paid
+yearly, quarterly or monthly), Property for sale (outright or in
+instalments). "Step 1 of 12" with no Back on the first step.
+
+### R90. "Before you start", then Step 1 with action chips
+A checklist of what to have in hand (at least 3 photos, most use 8; the
+address; the price and extra charges; a verified ID, required before going
+live). Step 1 explains where to start and shows a row of the dashboard's own
+action chips (Add listing, Applications, Find leads, Calendar), then says the
+steps are the same on the web and in the app.
+Vallo takes: "Before you start" as a DocSummary variant at the top of every
+how-to, and a picture of the real control the reader is about to tap.
+
+### R91. The guides index ("Pages")
+A huge title, a one-line promise ("Guides, tips and stories for finding,
+renting, buying and hosting homes"), horizontally scrolling category chips
+(All selected solid, then Resources for hosts, Safety, Renting tips), a
+featured card whose image is a real desktop screenshot of the wizard (with a
+"Steps to Publish" rail on the left), a kicker "FEATURED . RESOURCES FOR
+HOSTS", the title, a description, "<team> . <date>", then "Latest".
+Vallo takes: the guides index as a magazine; the featured image is our own
+capture; the selected chip is Vallo blue (no black controls).
+
+### R92. A legal article body (refunds)
+Numbered section headings ("2. When Can You Raise a Dispute?") with a rule
+under each, inline links to sibling policies, a bullet list of conditions.
+Long but readable because every section is numbered and anchored.
+
+### R93. TABLE OF CONTENTS
+A large grey card: a numbered-list icon and "TABLE OF CONTENTS", then each
+section as its own white rounded row with a chevron ("1. Refunds" to
+"6. Contact").
+Vallo takes: DocToc, better: the row being read is marked as you scroll.
+
+### R94. The payout states table
+State / What it means / Withdrawable?, four rows (Pending, Clearing,
+Available, Paid with "Already sent"), then a line that every movement is a
+ledger line. Plain text states.
+Vallo takes: the three-column shape; ours draws the state as a toned pill and
+the last column as a mark (DocTable), with OUR true states (see the note
+above).
+
+### R95. The legal index (top)
+"The terms, policies, and standards that govern ...", a rule, an intro
+paragraph saying what the platform is and what the documents cover, then
+cards: a tinted rounded icon square, a bold title, one sentence, a chevron
+(Terms of Service, Privacy Policy, Payments Terms of Service, Booking and
+Cancellation Policy).
+
+### R96. The legal index (continued)
+More cards (Refunds and Dispute Resolution, Acceptable Use, How Host Payouts
+Work, Host Standards and Nondiscrimination, Refer and earn terms), then "Still
+have questions?".
+Vallo takes: DocCard and DocHelpPanel; our own documents and words.
+
+### R97. An article head: "How Host Payouts Work"
+Category pill (icon plus "Hosting & Earnings"), big title, "Last updated:"
+with the date in bold, a rule, an intro that states the scope, a sentence of
+links to the two sibling documents, then a tinted bullet panel (the at a
+glance version).
+Vallo takes: exactly DocHeader plus DocSummary; the date is real and checked.
+
+### R98. The fee example table
+Line / Example / Who receives it: booking subtotal, host service fee (minus),
+"Your payout" row emphasised, guest service fee, VAT for shortlets, "Guest
+pays" total. Then a note that a security deposit never passes through the
+platform.
+Vallo takes: the worked example as a table, BUT computed live from the money
+policy the checkout uses (the fee calculator, DOCS_AND_PRESENCE_UPGRADE.md
+4.6), with the member able to put in their own amount.
+
+### R99. Search results inside the sheet
+"Search help" sheet with a close X, the query in a large rounded field with a
+clear button, results grouped under a small grey kind label (GUIDES), each
+with a title, the document it sits in in grey, and a snippet with the matched
+words in bold; the first result sits on a tinted plate.
+Vallo takes: our SupportResults already names the section; add the bold
+match in the snippet and the tinted first result.
+
+### R100. The search sheet, empty
+"Search help" with a close X, a large rounded field ("Search help, policies
+and guides"), "Popular topics" chips (Cancellation, Refunds, Caution fee,
+Payouts, Verify my ID, List my property), and "Looking for a place? Search
+homes" with an arrow.
+Vallo takes: DocSearchSheet already has this shape; add "Caution fee" (a
+real Nigerian renting question) to our chips.
+
+### Patterns this batch adds
+1. A guide step is prose plus the real screen WITH its step chrome.
+2. "Before you start" at the top of every how-to.
+3. Honest save marks that say where a draft lives.
+4. Worked examples as tables, computed, with "who receives it".
+5. Search grouped by kind, the parent document named, the match in bold.
