@@ -691,9 +691,11 @@ a page map of the platform.
 5. **Architecture.** Decide the shared pieces first (feedback banner, motion
    tokens, sheet component, stepper component, page frame, connection state),
    so every page uses the same parts.
-6. **Implement in groups** (P0, then P1, then P2). TWO AGENTS MAXIMUM, which
-   means you plus ONE at a time (the founder, 9 November). Use it for work
-   that is genuinely separate by file, for example:
+6. **Implement in groups** (P0, then P1, then P2). **SIX AGENTS PER BATCH**,
+   up to eight where the work is genuinely independent by file (the founder, 9
+   November 2026, raising this from two: "go hard on things, 5-6 agents on
+   batch"). Before you launch a batch, write down which paths each agent owns
+   and check no two overlap. Examples of a clean split:
    - You build the shared components and the member screens; the agent audits
      native behaviour (status bar, keyboard, haptics, back button, deep links)
      and reports findings for you to apply.
@@ -781,13 +783,25 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    work, the current state, the codebase map, the Hauslet patterns, the design
    language, the priority list, the gates. Then apps/web/AGENTS.md, then the
    docs it lists in section 3.
-5. Load the Supabase MCP tools and confirm you can query the project.
-6. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+5. READ the three payments documents, in this order, because the protected
+   payment rail is part of YOUR job now:
+     docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
+     docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
+                                                 plus the provider's own
+                                                 commercial and presentation
+                                                 terms in the appendix)
+   Build that rail to ready, flagged OFF, in this same branch. Do not switch
+   it on: the agreement is not signed yet.
+6. Load the Supabase MCP tools and confirm you can query the project.
+7. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
    for platform-grade-1-readiness.
 
 MY RULES
-- TWO AGENTS MAXIMUM at any time (you plus one). Never two writers in the
-  same files: split the work by file or do it in sequence yourself.
+- SIX AGENTS PER BATCH, up to eight when the work is genuinely independent
+  by file. Go hard, run them in parallel, use the session. The one rule that
+  does not bend: never two writers in the same files. Split every batch by
+  file ownership first and name the owned paths in each agent's brief. Where
+  the work cannot be split cleanly, do it in sequence yourself.
 - STUDY EVERY REFERENCE IMAGE I SEND before you design or build a screen.
   They are the standard, not decoration.
 - EVERYTHING lives on the branch platform-grade-1-readiness. Commit often,
@@ -856,6 +870,22 @@ START HERE
    our inner world, the motion system and a possible mascot, the whole-platform
    container and icon pass, Face ID where it belongs, the support and social
    media admin desks, performance measurements, docs).
+6. IN PARALLEL, from the first batch, the PROTECTED PAYMENT RAIL. It has its
+   own documents and its own agents, and it does not wait for the UX work:
+   the design pass first, then the audit of every reference to the old
+   provider, then the adapter, the webhooks, the reconciliation, the state
+   mapping, the member screens, the receipts, the help articles, the tests.
+   Build it to ready and leave every flag and kill switch OFF. Report it to me
+   as "ready, switched off, waiting on the signed agreement". Read
+   PROTECTED_PAYMENTS_BUILD.md section 3 before you design a payment screen:
+   the interface is ours, with one small disclosed partner mark at the payment
+   step and the provider's funds wording shown unaltered.
+
+A WORD ON THE MONEY COPY, DO THIS IN BATCH ONE
+Sweep every screen in the platform for words that promise protected, held,
+secured or escrowed payment. The protected rail is NOT live and has never
+held a naira. Any screen promising it today is a false promise. Bring me the
+list and your proposed replacement copy before you change it.
 
 As my screenshots arrive, number them and record every pattern in
 docs/handoff/REFERENCE_PATTERNS.md. Show me your top 30 recommendations

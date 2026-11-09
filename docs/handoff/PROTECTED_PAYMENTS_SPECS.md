@@ -21,14 +21,18 @@ that one disagree, that one wins.
    regulated payment infrastructure partner where appropriate", which is too
    loose: read section 3 of `PROTECTED_PAYMENTS_BUILD.md` for exactly where
    the provider and the custodian bank may and must appear, and build to that.
-2. **This is not urgent and must not jump its gates.** Nothing here is on the
-   launch path. Gate 1 is written provider approval of our categories.
+2. **BUILD IT NOW, but it does not go live until the gates are green.**
+   Changed by the founder on 9 November 2026. Build the design, the adapter,
+   the webhooks, the reconciliation and the screens. Keep the flags and kill
+   switches OFF. No member sees a protected payment path until the agreement
+   is signed and Vallo's categories are approved in writing.
 3. **Design first, then build.** They are separate jobs in that order. One
    session doing both at once ships a payment screen that looks finished and
    is not.
 
-**Also binding:** 2 agents maximum (you plus one). Re-audit after every piece
-of work. The founder is sending reference images: study every one before
+**Also binding:** SIX AGENTS PER BATCH, up to eight on genuinely independent
+work (raised from two by the founder on 9 November 2026). Never two writers in
+the same files. Re-audit after every piece of work. The founder is sending reference images: study every one before
 designing or building a screen.
 
 ---

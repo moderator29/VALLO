@@ -40,8 +40,13 @@ for. Do not paraphrase it from memory. Open it.
 **This document overrides it** wherever they differ. The three corrections in
 section 0B are the known differences.
 
-**Two agents maximum** (you plus one), and **study every reference image the
-founder sends** before you design or build a screen.
+**SIX AGENTS PER BATCH** (the founder, 9 November 2026, raising this from two:
+"go hard on things, 5-6 agents on batch"). Up to eight where the work is
+genuinely independent by file. The old two-agent limit is withdrawn. The rule
+that has NOT changed: never two writers in the same files. Split every batch by
+file ownership before you launch it, and say in each agent's brief exactly
+which paths it owns. Also **study every reference image the founder sends**
+before you design or build a screen.
 
 ---
 
@@ -50,18 +55,29 @@ founder sends** before you design or build a screen.
 An earlier draft of this work, written outside the repository, got three
 things wrong. The founder has agreed all three corrections. They are binding.
 
-1. **The provider is invisible in the interface.** The earlier draft said the
-   provider should "appear as the regulated payment infrastructure partner".
-   It does not. Section 3 is the rule: no name, no logo, no "powered by", no
-   link out, anywhere a member can see. Named only in the Terms, on receipts
-   and in the help centre, where honesty and consumer protection require it.
+1. **The interface is Vallo's, with ONE small disclosed partner mark at the
+   payment step.** Superseded and corrected on 9 November 2026: the founder
+   has chosen the provider's middle presentation option, not full white label.
+   So there is no provider-hosted checkout, no redirect out to pay, no
+   provider-branded screens, and no "powered by" line scattered through the
+   product. There IS a small, quiet secured-by mark beside the pay button, and
+   the provider's supplied funds wording must appear UNALTERED at or before
+   payment. **Section 3 is the rule. Read it before you design a payment
+   screen.** The full white label option was declined because it costs a fixed
+   monthly fee and removes only that one mark: the provider is named in the
+   Terms, privacy policy, help centre and on receipts under every option.
 
-2. **This work is not urgent and must not jump its gates.** The earlier draft
-   read as a migration to start immediately. It is not on the launch path at
-   all (section 10). Section 0 lists the gates, and the first of them is a
-   written answer from the provider that does not exist yet. Starting the
-   adapter before those gates are green is the single most expensive mistake
-   available here.
+2. **BUILD IT NOW. Switching it on is still gated.** Changed on 9 November
+   2026 by the founder: "we already have what it takes for it to be built,
+   build it now while we and the provider tackle the rest." So start. Do the
+   design pass, write the adapter, the webhooks, the reconciliation, the
+   screens, the tests. What you must NOT do is turn it on: the kill switches
+   in section 4 stay OFF, the feature flag stays false, and no member sees a
+   protected payment path until the gates in section 0 are green, which
+   includes a signed agreement and written approval of Vallo's categories.
+   Build to ready, stop at the switch, and tell the founder it is ready.
+   Shipping a dark, tested, flagged-off rail is exactly right. Shipping a live
+   one before the paperwork is the expensive mistake.
 
 3. **Design and build are separate jobs, done in that order.** The design pass
    (flow, screens, copy, motion) is a product designer's work and comes first.
