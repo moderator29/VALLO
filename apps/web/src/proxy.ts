@@ -274,10 +274,16 @@ const PUBLIC_NESTED: readonly RegExp[] = [
    * they see in the chat is drawn. Each image reads public data only
    * (`loadPublicProfile`, `roommate_listing_view`, the thread read under its
    * own policy), so there is nothing private to leak.
+   *
+   * Next gives a generated metadata route a content hash in its own path
+   * (`/opengraph-image-14v420`), and that hashed address is what it writes into
+   * the page's `og:image`, so the hashed form is the one an unfurler actually
+   * fetches. The suffix is optional here so both the bare and the hashed path
+   * open, and it can only ever be this one leaf under these exact trees.
    */
-  new RegExp(`^/u/[a-z0-9_.]{1,40}/opengraph-image$`, "i"),
-  new RegExp(`^/roommates/r/${UUID_SEG}/opengraph-image$`, "i"),
-  new RegExp(`^/circle/p/${UUID_SEG}/opengraph-image$`, "i"),
+  new RegExp(`^/u/[a-z0-9_.]{1,40}/opengraph-image(?:-[a-z0-9]+)?$`, "i"),
+  new RegExp(`^/roommates/r/${UUID_SEG}/opengraph-image(?:-[a-z0-9]+)?$`, "i"),
+  new RegExp(`^/circle/p/${UUID_SEG}/opengraph-image(?:-[a-z0-9]+)?$`, "i"),
 ];
 
 /**
