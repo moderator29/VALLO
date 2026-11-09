@@ -22,6 +22,15 @@ export const shareCardEn = {
     price: "Price",
     group: "Group",
   },
+  /* The signed-out "Join Vallo" prompt on a public profile or Circle post
+     (SHARE_AND_CONTROLS.md 1.2; founder, 9 November 2026). A visitor with no
+     account reads the page but every action takes them here to sign up. */
+  joinPrompt: {
+    title: "Join Vallo",
+    profile: "Create a free account to follow, message and see more.",
+    circle: "Create a free account to reply and join the conversation.",
+    action: "Join Vallo",
+  },
   /* Preset background labels. */
   presets: { glow: "Brand glow", brand: "Brand", ink: "Night", cover: "Photo" },
   profileStats: { followers: { one: "1 follower", other: "{count} followers" }, posts: { one: "1 post", other: "{count} posts" } },

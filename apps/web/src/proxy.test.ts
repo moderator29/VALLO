@@ -500,7 +500,11 @@ describe("who may see the platform with no session", () => {
       "/rent",
       "/price",
       "/post/anything",
-      "/u/somebody",
+      /* `/u/somebody` is no longer here: the bare profile page opened to a
+         signed-out reader on 9 November 2026 (SHARE_AND_CONTROLS.md 1.2). Its
+         sub-routes, below, stay shut. */
+      "/u/somebody/edit",
+      "/u/somebody/followers",
       "/escrow",
       "/verification",
       "/crypto",
@@ -738,13 +742,25 @@ describe("the forwarded link's card (SHARE_AND_CONTROLS.md section 1.2)", () => 
     }
   });
 
-  it("opens only that one leaf, never the page or a sibling route", () => {
+  /* The founder opened the two pages themselves on 9 November 2026, so an
+     unfurler can read each page's og:image. A shared room already opened this
+     way; the profile and the Circle post now join it. The pages read public
+     data only (ANON_PROFILE_COLUMNS; posts_select -> LIVE post in a live public
+     community), so there is nothing private behind the open door. */
+  it("opens the bare page an unfurler reads the og:image from", () => {
+    for (const path of ["/u/adaeze", `/roommates/r/${id}`, `/circle/p/${id}`]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  it("keeps the sub-routes shut, open or closed, signed in", () => {
     for (const path of [
-      "/u/adaeze",
+      "/u/adaeze/edit",
       "/u/adaeze/followers",
+      "/u/adaeze/message",
       "/u/adaeze/followers/opengraph-image",
-      `/circle/p/${id}`,
       `/circle/p/${id}/replies/opengraph-image`,
+      "/u",
     ]) {
       expect(isPublicPath(path), path).toBe(false);
     }

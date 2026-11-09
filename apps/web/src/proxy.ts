@@ -267,19 +267,36 @@ const PUBLIC_NESTED: readonly RegExp[] = [
   new RegExp(`^/roommates/r/${UUID_SEG}$`, "i"),
   /^\/roommates\/campus(?:\/[a-z0-9-]{2,80})?$/,
   /*
-   * THE FORWARDED LINK PREVIEW (SHARE_AND_CONTROLS.md section 1.2). An
-   * unfurler has no session, so the image a shared link draws must answer
-   * without one. Only the `opengraph-image` route is opened, never the page:
-   * a profile or a Circle post still asks a stranger to sign in, but the card
-   * they see in the chat is drawn. Each image reads public data only
-   * (`loadPublicProfile`, `roommate_listing_view`, the thread read under its
-   * own policy), so there is nothing private to leak.
+   * THE FORWARDED LINK AND ITS PAGE (SHARE_AND_CONTROLS.md section 1.2; the
+   * founder opened these two pages on 9 November 2026). A profile and a Circle
+   * post open for a reader with no account, the same as a shared room already
+   * does, so the link somebody forwards unfurls as its own card: an unfurler
+   * fetches the PAGE to read its `og:image`, so the page itself has to answer.
    *
-   * Next gives a generated metadata route a content hash in its own path
-   * (`/opengraph-image-14v420`), and that hashed address is what it writes into
-   * the page's `og:image`, so the hashed form is the one an unfurler actually
-   * fetches. The suffix is optional here so both the bare and the hashed path
-   * open, and it can only ever be this one leaf under these exact trees.
+   * Each page shows only what the database already publishes to anyone. A
+   * profile reads through `loadPublicProfile`, which hands a signed-out viewer
+   * `ANON_PROFILE_COLUMNS` (never the occupation, LGA, state or home area) and
+   * a held bio comes back empty; a blocked profile never returns at all
+   * (`social_profiles_select`). A Circle post reads through `readThread`, and
+   * `posts_select` lets a signed-out viewer reach ONLY a LIVE post in a live
+   * PUBLIC community whose author they are not blocked with, so a held, a
+   * removed or a private-community post returns null and the page is a 404.
+   * The signed-out view shows a "Join Vallo" prompt in place of reply, message
+   * and follow actions; nothing on either page writes, and the owner redirect
+   * to `/profile` only fires for a signed-in owner.
+   *
+   * Only the bare page opens. The sub-routes (`/u/<h>/edit`, `/message`,
+   * `/followers`, a Circle reply thread) carry no second segment here and stay
+   * signed in.
+   */
+  new RegExp(`^/u/[a-z0-9_.]{1,40}$`, "i"),
+  new RegExp(`^/circle/p/${UUID_SEG}$`, "i"),
+  /*
+   * THE OPENGRAPH IMAGE. Next gives a generated metadata route a content hash
+   * in its own path (`/opengraph-image-14v420`), and that hashed address is
+   * what it writes into the page's `og:image`, so the hashed form is the one an
+   * unfurler actually fetches. The suffix is optional so both the bare and the
+   * hashed path open, and it can only ever be this one leaf under these trees.
    */
   new RegExp(`^/u/[a-z0-9_.]{1,40}/opengraph-image(?:-[a-z0-9]+)?$`, "i"),
   new RegExp(`^/roommates/r/${UUID_SEG}/opengraph-image(?:-[a-z0-9]+)?$`, "i"),

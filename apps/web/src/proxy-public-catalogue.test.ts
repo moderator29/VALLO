@@ -22,7 +22,10 @@ vi.mock("@/lib/security/rate-limit", async () => {
 });
 
 const CATALOGUE = ["/search", "/stays", "/stays/search", "/restaurants", "/listing/ed000000-0000-4000-8000-00000000003a", "/stay/abc", "/restaurant/abc"];
-const ALWAYS_GATED = ["/u/somebody", "/messages", "/messages/new?listing=abc", "/wallet", "/bookings", "/saved", "/home", "/settings"];
+/* `/u/somebody` (the bare profile page) opened to signed-out readers on 9
+   November 2026, so it is no longer always gated; its `/edit` sub-route stays
+   shut and stands in here. */
+const ALWAYS_GATED = ["/u/somebody/edit", "/messages", "/messages/new?listing=abc", "/wallet", "/bookings", "/saved", "/home", "/settings"];
 
 async function visit(path: string, env: Record<string, string>, extraHeaders: Record<string, string> = {}) {
   vi.unstubAllEnvs();

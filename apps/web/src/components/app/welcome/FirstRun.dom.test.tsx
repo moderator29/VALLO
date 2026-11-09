@@ -145,7 +145,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("Get started", () => {
       expect(await step(page)).toBe(2);
       expect(await counter(page)).toBe("2 of 4");
       expect(await title(page)).toBe(named(f.slides.know));
-      expect(await page.locator("[aria-live='polite']").textContent()).toContain("2 of 4");
+      /* The card's own counter region (a <p>), scoped so it never catches the
+         toast host's polite lane (a <div>) that the harness also mounts. */
+      expect(await page.locator("p[aria-live='polite']").textContent()).toContain("2 of 4");
       await page.keyboard.press("ArrowRight");
       expect(await step(page)).toBe(3);
       expect(await counter(page)).toBe("3 of 4");

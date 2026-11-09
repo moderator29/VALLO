@@ -3,9 +3,11 @@ import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 
 import { PageFrame } from "@/components/app/PageFrame";
+import { PromoBanner } from "@/components/app/PromoBanner";
 import { CircleShareButton } from "@/components/social/circle/CircleShare";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { withNext } from "@/lib/auth/next-link";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { countWords } from "@/lib/features/circle/model";
 import type { CircleAuthor, Thread } from "@/lib/features/circle/queries";
@@ -151,16 +153,19 @@ export function ThreadScreen({ thread, now, fallback }: { thread: Thread; now: n
             {T.locked}
           </CircleEmpty>
         ) : (
-          <CircleEmpty
-            icon="user"
-            action={
-              <ButtonLink href={`/sign-in?next=${encodeURIComponent(`/circle/p/${post.id}`)}`} variant="primary" size="md">
-                {CIRCLE_COPY.signInCta}
-              </ButtonLink>
-            }
-          >
-            {CIRCLE_COPY.signIn}
-          </CircleEmpty>
+          /* VIEW-ONLY SIGNED OUT (founder, 9 November 2026). A visitor with no
+             account reads the post and its answers but takes no action: the
+             reply box is not drawn, the helpful toggle is inert, and this Join
+             prompt is their one way on, to sign up carrying this page. */
+          <PromoBanner
+            eyebrow={share.joinPrompt.title}
+            title={share.joinPrompt.title}
+            body={share.joinPrompt.circle}
+            href={withNext("/sign-up", `/circle/p/${post.id}`)}
+            cta={share.joinPrompt.action}
+            art="local-talks"
+            testId="join-vallo-circle"
+          />
         )}
       </div>
     </PageFrame>

@@ -4,6 +4,7 @@ import { sheetWordsOf } from "@/components/social/sheet-words";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageHeader } from "@/components/app/PageHeader";
+import { PromoBanner } from "@/components/app/PromoBanner";
 import { ButtonLink } from "@/components/ui/Button";
 import { FollowButton } from "@/components/social/profile/FollowButton";
 import { ProfileHeader } from "@/components/social/profile/ProfileHeader";
@@ -279,8 +280,12 @@ export default async function SocialProfilePage({
              and when they ask first, the button only for a viewer who follows
              them, and "Follow to message" for everybody else. Signed out, the
              link leads to a sign-in that returns here. */
+          /* VIEW-ONLY SIGNED OUT (founder, 9 November 2026). A visitor with no
+             account reads the profile but takes no action from it: the message
+             control is not drawn for them at all, and the Join banner below is
+             their one way on. Follow is already a link to sign up. */
           message={
-            door === "message" ? (
+            !view.signedIn ? undefined : door === "message" ? (
               <ButtonLink href={`/u/${view.profile.handle}/message`} size="sm" variant="secondary" leadingIcon="messages" className="shrink-0">
                 {t.socialProfile.message}
               </ButtonLink>
@@ -318,6 +323,20 @@ export default async function SocialProfilePage({
             />
           }
         />
+
+        {!view.signedIn ? (
+          <div className="px-gutter pb-row">
+            <PromoBanner
+              eyebrow={t.shareCard.joinPrompt.title}
+              title={t.shareCard.joinPrompt.title}
+              body={t.shareCard.joinPrompt.profile}
+              href={withNext("/sign-up", `/u/${view.profile.handle}`)}
+              cta={t.shareCard.joinPrompt.action}
+              art="team"
+              testId="join-vallo-profile"
+            />
+          </div>
+        ) : null}
 
         {ownershipSeen ? (
           <p className="px-gutter pb-row">
