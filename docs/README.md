@@ -40,7 +40,7 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 | [payments/VALLO_PRICING.md](payments/VALLO_PRICING.md) | What Vallo charges and what the provider charges: the commission as policy data, the retired Guarantee, why no VAT yet, the withdrawal bands and the referral economics |
 | [payments/VALLO_FINANCIAL_LAYER.md](payments/VALLO_FINANCIAL_LAYER.md) | Vallo presents, the provider holds: what Payluk provides endpoint by endpoint, the four conditions under which a balance surface is legal, and the provider abstraction |
 | [payments/VALLO_PAYMENTS_ARCHITECTURE.md](payments/VALLO_PAYMENTS_ARCHITECTURE.md) | Paystack, Payluk and Yellow Card: the provider interface, the ledger, the two tracks and the legal gate. Section 0 is an evidence warning that must be read before any Payluk code |
-| [payments/PAYLUK_LIVE_DOCS_FINDINGS.md](payments/PAYLUK_LIVE_DOCS_FINDINGS.md), [payments/payluk-source/](payments/payluk-source/) | What Payluk's live documentation actually says, and the saved source pages the client is written against |
+| [payments/PAYLUK_LIVE_DOCS_FINDINGS.md](payments/PAYLUK_LIVE_DOCS_FINDINGS.md) | What Payluk's live documentation said. Payluk is being retired (founder, 9 November 2026); its saved source pages were removed as dead material and remain in git history |
 | [payments/RELEASE_RUNBOOK.md](payments/RELEASE_RUNBOOK.md) | The steps that open the escrow rail in production |
 | [ROOM_CHECKOUT.md](ROOM_CHECKOUT.md) | Hotel rooms: how a guest requests and pays for a room, how the host is paid, test mode, switching `room_bookings` on |
 | [promotion/VALLO_PROMOTION.md](promotion/VALLO_PROMOTION.md) | Paid promotion: the tiers, what each buys, and the rules the placements obey |

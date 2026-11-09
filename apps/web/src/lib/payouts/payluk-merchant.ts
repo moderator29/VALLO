@@ -15,8 +15,9 @@
  *    (concepts_fees-and-settlement.txt).
  *  - 10 requests per minute per key; read `RateLimit: limit=10, remaining=N,
  *    reset=S` and back off before a 429 (authentication.txt).
- *  - NO route withdraws the merchant wallet (findings section 7 item 6). See
- *    `withdrawMerchantWallet` below.
+ *  - NO route withdraws the merchant wallet (findings section 7 item 6)
+ *    (there is no route for it; the Payluk commission sweep that would have
+ *    called it was removed as dead code on 9 November 2026).
  *
  * Pure apart from `fetch`, which is injected, so every branch is a unit test.
  */
@@ -111,30 +112,4 @@ export async function readMerchantBalance(config: PaylukMerchantConfig, fetchImp
     return { failed: true, code: "unreadable", detail: "Balance fields missing or not naira.", rateLimitRemaining: remaining };
   }
   return { mainMinor: main, escrowMinor: escrow, currency: typeof data.currency === "string" ? data.currency : "", rateLimitRemaining: remaining };
-}
-
-export type MerchantWithdrawal =
-  | { kind: "not_available"; reason: string }
-  | { kind: "submitted"; reference: string; amountMinor: number };
-
-/**
- * THE UNIMPLEMENTED BOUNDARY. Withdrawing Vallo's merchant wallet to Vallo's
- * bank has no documented Payluk API route: every payment route requires a
- * `customer-id` (a merchant CUSTOMER's wallet, not the merchant's), and the
- * merchant-account section documents only `GET /v1/merchant/balance` and
- * `GET /v1/merchant/transactions`. Findings section 7 item 6: "no API route
- * for a merchant-wallet withdrawal; presumably dashboard only. Close with
- * Payluk in writing."
- *
- * So this returns `not_available`, always, until Payluk documents the route.
- * When it does: create the intent with Vallo's own reference, read `fee`
- * back, return `submitted`, and let the `payment.withdrawal.*` webhook (or a
- * `GET /v1/merchant/transactions?reference=` read-back) confirm it. Never
- * mark it done from the submit alone.
- */
-export async function withdrawMerchantWallet(): Promise<MerchantWithdrawal> {
-  return {
-    kind: "not_available",
-    reason: "Payluk documents no API route that withdraws the merchant wallet. Withdraw from the Payluk dashboard and record it.",
-  };
 }
