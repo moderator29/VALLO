@@ -18,7 +18,7 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
-const CSS = productCss("app/css/inner-m.css", "app/css/flow-m.css", "app/css/catalogue.css", "app/css/lister-publish.css");
+const CSS = productCss("app/css/inner-m.css", "app/css/flow-m.css", "app/css/grade1.css", "app/css/catalogue.css", "app/css/lister-publish.css", "app/agent/list/steps/listing-steps.css");
 
 const ID = "00000000-0000-4000-8000-000000000001";
 const P = (n: number) => `00000000-0000-4000-8000-0000000000a${n}`;
@@ -50,7 +50,7 @@ function entry(photoCount: number, withVideo: boolean): string {
         copy={t.agentListings} reference={t.listingReference} moveInCopy={t.moveIn}
         compoundCopy={t.shape.compound} serviceCopy={t.shape.service} unitCopy={t.shape.unit} floodCopy={t.shape.neighbours}
         locale="en" userId="00000000-0000-4000-8000-0000000000ff" states={STATE_CODES.map((code) => ({ code, name: code }))}
-        amenities={AMENITY_CHOICES} initial={DRAFT} canPersist startAt={1} initialFeePolicy={null}
+        amenities={AMENITY_CHOICES} initial={DRAFT} canPersist startAt="photos" initialFeePolicy={null}
       />,
     );
   `;

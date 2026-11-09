@@ -131,7 +131,7 @@ function lastStep(feeGateBlocking: boolean | undefined, initialFeePolicy: Lister
       amenities={AMENITY_CHOICES}
       initial={DRAFT}
       canPersist={false}
-      startAt={7}
+      startAt="check"
       {...(feeGateBlocking === undefined ? {} : { feeGateBlocking })}
       initialFeePolicy={initialFeePolicy}
     />
