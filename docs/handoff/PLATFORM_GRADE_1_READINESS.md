@@ -74,12 +74,15 @@ Store submission.
    Vercel. Keep it that way. Do not run `vercel` CLI deploys. Do not open
    preview links. Verify locally (`next build`, `next start`, Playwright in the
    sandbox) and on GitHub only.
-3. **GitHub Actions minutes are exhausted** for the account (100 percent of the
-   included minutes, 6 November 2026). CI on `main` will not start until the
-   founder fixes billing or the month resets. Do NOT trigger workflows. Do not
-   rely on CI for verification: run the gates yourself (section 9). iOS builds
-   (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
-   tell the founder before any new iOS build is needed.
+3. **GitHub Actions are running again, and you SHOULD use them** (the founder,
+   9 November 2026, replacing the 6 November rule that said never to trigger
+   them because the included minutes were exhausted). CI is the only thing
+   that can run the database probes, which need a live connection you do not
+   have, so a branch is not proven until CI has seen it. Use it like this:
+   run the fast gates locally first (section 9), push, read the run, fix what
+   is red, push again. Do not burn a 35 minute run to discover a lint error.
+   The iOS and Android workflows use macOS minutes at roughly ten times the
+   rate: tell the founder before starting one of those, every time.
 4. **Agents: TWO SUBAGENTS, plus you the lead. Three workers at once, never
    more.** (The founder, 9 November 2026, settling this after trying higher
    numbers: "two agents with the session itself".) Launch both at the start of
@@ -894,8 +897,12 @@ MY RULES
   go and tell me what went live.
 - NEVER deploy to Vercel, never open a preview, never run the Vercel CLI.
   Previews cost me real money (96 USD for nothing once already).
-- NEVER trigger GitHub Actions. My included minutes are used up. Run the
-  checks yourself locally instead.
+- GITHUB ACTIONS ARE BACK ON and you SHOULD use them (my ruling, 9 November
+  2026, replacing the old "never trigger Actions" rule from when my minutes
+  were exhausted). Push, let CI run, read the result, fix what is red. Run the
+  fast gates locally first so you are not burning a 35 minute run to find a
+  lint error. iOS and Android builds cost about ten times as much, so tell me
+  before you start one.
 - No em dashes anywhere: code, copy, docs, commit messages, chat.
 - This is an UPGRADE, not a rebuild. Keep Capacitor, the backend, the
   database, every working feature. Do not delete features. Do not replace

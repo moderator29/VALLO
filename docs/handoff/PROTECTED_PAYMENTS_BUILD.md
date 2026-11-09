@@ -32,8 +32,10 @@ The short form, because these are the ones that get broken:
   or a ledger entry goes anywhere near an automatic apply.
 - **NEVER deploy to Vercel**, never open a preview, never run the Vercel CLI.
   Previews already cost the founder about 96 USD for nothing.
-- **NEVER trigger GitHub Actions.** The included minutes are exhausted. Run
-  the gates yourself locally.
+- **GitHub Actions are back on and you SHOULD use them** (the founder, 9
+  November 2026). CI is the only place the database probes can run, so push
+  and read the result rather than guessing. Run the fast gates locally first.
+  The iOS and Android workflows cost about ten times as much: ask first.
 - **No em dashes anywhere**: code, copy, docs, commits, chat.
 - **English only** for new copy unless a translation is verified.
 - **Never print, paste or commit credentials.** Sandbox and live keys go into
