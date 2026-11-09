@@ -67,6 +67,11 @@ permissions:
 jobs:
   debug:
     name: Android debug build
+    # Founder rule (9 November 2026): the phone builds burn minutes about ten
+    # times faster and need his word first. The working branch's draft pull
+    # request exists only to run CI, so its pushes never start a phone build;
+    # main, other pull requests and a by-hand run are unchanged.
+    if: ${{ !(github.event_name == 'pull_request' && github.head_ref == 'platform-grade-1-readiness') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     env:
