@@ -57,7 +57,6 @@ const ALLOWED = new Map<string, InlineOutcomeCounts & { why: string }>([
   ["app/host/bookings/page.tsx", { alert: 1, errorText: 0, why: "bookings could not be read: a page state" }],
   ["app/host/calendar/page.tsx", { alert: 1, errorText: 0, why: "the calendar could not be read: a page state" }],
   ["components/agent/intel/RangeSwitch.tsx", { alert: 0, errorText: 1, why: "a falling figure in red: data" }],
-  ["components/app/ListingCard.tsx", { alert: 0, errorText: 2, why: "kept for callers of the card's note; SaveControl sets it to null since round 1, the banner says it" }],
   ["components/app/PhoneField.tsx", { alert: 0, errorText: 1, why: "TO CONVERT NEXT (BANNER_MOMENTS.md): the phone field's live hint turns red on a bad number" }],
   ["components/app/ResultSheet.tsx", { alert: 1, errorText: 0, why: "a failed payment's result sheet: the sheet is the outcome" }],
   ["components/app/account/SupportChat.tsx", { alert: 0, errorText: 1, why: "TO CONVERT NEXT (BANNER_MOMENTS.md): the support chat's escalation status line" }],
@@ -81,7 +80,6 @@ const ALLOWED = new Map<string, InlineOutcomeCounts & { why: string }>([
   ["components/ui/AIResponse.tsx", { alert: 1, errorText: 0, why: "an assistant answer that did not come, in the answer block" }],
   ["components/ui/Field.tsx", { alert: 0, errorText: 1, why: "the required-field asterisk" }],
   ["components/verification/KycFlow.tsx", { alert: 1, errorText: 1, why: "the review step's checklist of what is missing" }],
-  ["components/verification/VninPanel.tsx", { alert: 0, errorText: 1, why: "TO CONVERT NEXT (BANNER_MOMENTS.md): the vNIN check's message line" }],
 ]);
 
 function walk(dir: string, out: string[] = []): string[] {

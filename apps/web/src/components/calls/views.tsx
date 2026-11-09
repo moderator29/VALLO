@@ -662,7 +662,7 @@ export function InCallView({
           variant="end"
           large
           disabled={ending}
-          onClick={() => { onInteraction(); feedback("warning"); onEnd(); }}
+          onClick={() => { onInteraction(); feedback("confirm"); onEnd(); }}
           testId="call-end"
         />
       </div>

@@ -1,10 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useOverlay } from "@/lib/ui/use-overlay";
-import { useClientMount } from "@/lib/ui/client-mount";
+import { Sheet } from "@/components/ui/Sheet";
 import { screenName } from "@/lib/nav/route-labels";
 
 /**
@@ -55,14 +53,8 @@ function isTyping(el: EventTarget | null): boolean {
 
 export function KeyboardShortcuts() {
   const [open, setOpen] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const mounted = useClientMount();
   const router = useRouter();
   const pendingRef = useRef<string | null>(null);
-
-  const close = useCallback(() => setOpen(false), []);
-
-  useOverlay({ open, onClose: close, panelRef });
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -119,36 +111,13 @@ export function KeyboardShortcuts() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, router]);
 
-  if (!mounted || !open) return null;
-
-  return createPortal(
-    <>
-      <div
-        className="fixed inset-0 z-[var(--nf-z-overlay)] bg-[var(--nf-overlay-backdrop)]"
-        onClick={close}
-        aria-hidden="true"
-      />
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Keyboard shortcuts"
-        className="fixed inset-x-0 top-1/2 z-[var(--nf-z-overlay)] mx-auto w-full max-w-lg -translate-y-1/2 rounded-lg border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-elevated)] p-block shadow-[var(--nf-elev-4)]"
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="nf-h3 text-[var(--nf-content-primary)]">
-            Keyboard shortcuts
-          </h2>
-          <button
-            onClick={close}
-            className="nf-tap rounded-control p-inline text-[var(--nf-content-muted)] transition-colors duration-[var(--nf-duration-fast)] ease-[var(--nf-ease-standard)] hover:text-[var(--nf-content-primary)]"
-            aria-label="Close"
-          >
-            <span aria-hidden="true" className="text-[length:var(--nf-text-h4)] leading-none">&times;</span>
-          </button>
-        </div>
-
-        <div className="mt-row space-y-block">
+  /* UI-18: the overlay rides the shared `Sheet` (card variant) rather than
+     drawing its own backdrop and surface, so focus trap, scroll lock, Escape
+     and the scrim all come from the one implementation. */
+  return (
+    <Sheet open={open} onOpenChange={setOpen} title="Keyboard shortcuts" card closeLabel="Close">
+      <div className="space-y-block">
+        <div className="space-y-block">
           {SHORTCUTS.map((group) => (
             <div key={group.section}>
               <p className="nf-body-sm mb-inline font-semibold text-[var(--nf-content-muted)]">
@@ -184,7 +153,6 @@ export function KeyboardShortcuts() {
           Press <kbd className="font-semibold">?</kbd> to toggle this overlay
         </p>
       </div>
-    </>,
-    document.body,
+    </Sheet>
   );
 }

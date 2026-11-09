@@ -737,6 +737,8 @@ export const LITERAL_EXPANSIONS: Readonly<Record<string, readonly string[]>> = {
  * because a thing nobody wrote down is a thing nobody checked.
  */
 export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
+  "/settings/invite/referrals": "D85: an address that hands on to the one referrals list at /rewards/referrals, not a page of its own.",
+  "/settings/invite/referrals/[id]": "D85: one referral's address, handed on to the referrals list; there is no per-referral page.",
   "/agent/listings/[listingId]/board/image": "V-08: the board as a PNG, not a page.",
   "/s/[token]/status": "V-71: the door's card as a Status PNG, not a page.",
   "/api/account/export": "the member's own data as a JSON download, not a page.",
