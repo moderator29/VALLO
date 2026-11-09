@@ -35,13 +35,31 @@ Store submission.
 
 ## 1. THE FOUNDER'S RULES (NON-NEGOTIABLE)
 
-1. **Branch.** ONE branch, `platform-grade-1-readiness`, cut from the latest
-   `main`, and EVERY piece of this work lives on it from the first audit note
-   to the last polish commit. `main` already carries this handoff, the
-   founder's verbatim brief and all the fixes up to 7 November 2026, so cut
-   from `origin/main` and push the branch up immediately
-   (`git push -u origin platform-grade-1-readiness`). Commit and push to it
-   often: Vercel builds nothing for this branch, so pushing is free and it
+1. **Branch. CONTINUE THE EXISTING WORK, DO NOT START A NEW LINE OF IT.**
+   (The founder, 9 November 2026: work on the branch the last two sessions
+   worked on.) Two sessions have already put 336 commits into this upgrade.
+   That work is on `origin/claude/fervent-cray-1vzbp1`, which contains every
+   commit of `origin/platform-grade-1-readiness` plus 155 more, so it is a
+   strict superset and no work is lost by taking it. The founder wants it all
+   under the name he chose, so the first commands of the session are:
+
+   ```
+   git fetch origin
+   git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
+   git merge origin/main
+   git push -u origin platform-grade-1-readiness
+   ```
+
+   The merge picks up `main`'s newest work, including
+   `PROTECTED_PAYMENTS_BUILD.md` and `PROTECTED_PAYMENTS_SPECS.md`, which do
+   not exist on the work branch yet. Resolve any conflict, never reset it
+   away, and report what was resolved. Do NOT cut a fresh branch from `main`:
+   that silently throws away everything the last two sessions built, which is
+   the single most expensive mistake available in this document.
+
+   From then on: ONE branch, `platform-grade-1-readiness`, and EVERY piece of
+   this work lives on it from the first note to the last polish commit.
+   Commit and push to it often: Vercel builds nothing for this branch, so pushing is free and it
    means nothing is ever lost with a session. Do not open side branches for
    sub-pieces, and do not work directly on `main`. Never push to `main`, and
    never merge into `main`, unless the founder's message contains the words
@@ -61,13 +79,18 @@ Store submission.
    rely on CI for verification: run the gates yourself (section 9). iOS builds
    (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
    tell the founder before any new iOS build is needed.
-4. **Agents: 3 maximum at any one time (the founder's number, 7 November
-   2026).** Fewer, better briefed, no collisions. The shape that works: YOU
-   are the lead and you write code; up to TWO subagents run beside you on work
-   that touches DIFFERENT files. Brief each one in full (it knows nothing you
-   do not tell it), name the exact files it owns, and never let it touch a
-   file you or the other agent is editing. If a job cannot be split cleanly by
-   file, do it yourself in sequence rather than racing.
+4. **Agents: TWO SUBAGENTS, plus you the lead. Three workers at once, never
+   more.** (The founder, 9 November 2026, settling this after trying higher
+   numbers: "two agents with the session itself".) Launch both at the start of
+   a batch and keep them busy; do not run one and leave the other idle. The
+   rule that does NOT bend: never two writers in the same files. Before you
+   launch a batch, write down the exact paths you and each agent own, check
+   that no two overlap, and put the owned paths in the agent's brief. Brief
+   each one in full: it knows nothing you do not tell it, including the
+   founder's rules in this section. If a job cannot be split cleanly by file,
+   do it yourself in sequence rather than racing. A batch that "mostly worked"
+   is a batch that damaged files: read the diff of every agent's work before
+   you commit it, and never report a batch as done on an agent's word alone.
 5. **Re-audit every piece of work.** After each workstream: re-read the diff
    adversarially, run the gates, look at the screens at phone width (390 x 844
    and 360 x 800) in light and dark, then fix what you find. Only then move on.
@@ -78,6 +101,26 @@ Store submission.
    invent Yoruba, Hausa or Igbo strings.
 8. **Never print, paste or commit credentials.** Keys go in Vercel or Supabase
    settings by the founder, never in chat.
+8B. **SQL: apply what you safely can, accumulate the rest into ONE block for
+   the founder.** (His ruling, 9 November 2026.) He does not want SQL dripping
+   into the chat in pieces while you work.
+   - Every migration you write goes in `supabase/migrations/pending/` with a
+     dated name and a one-line note in `pending/README.md` saying what it does
+     and what it depends on. Nothing lives only in a chat message.
+   - Where you can apply it yourself through the Supabase tools and it is
+     additive and reversible (new table, new column, new policy, new function,
+     a backfill you have counted first), apply it, say plainly that you did,
+     and move the file out of `pending/` into its version folder.
+   - Anything you cannot or should not apply yourself (destructive changes,
+     drops, data deletions, anything touching live money rows, anything you
+     are not certain of) stays in `pending/` and is NOT shown to him yet.
+   - At the END of a group of work, give him ONE message with ONE SQL block
+     holding everything still outstanding, in the correct dependency order,
+     ready to paste and run in one go, with a short plain-language line above
+     it saying what it does and what he should see when it succeeds. One
+     block, once, not a trickle.
+   - Never run a destructive statement yourself. Never ask him to run SQL you
+     have not read end to end.
 9. **No model identifiers** in commits, PR text, code comments or docs.
 10. **Do not copy Hauslet's (or X's) branding, logos, exact screens, text or
     assets.** Learn the patterns, then build a distinct Vallo version that is
@@ -691,18 +734,18 @@ a page map of the platform.
 5. **Architecture.** Decide the shared pieces first (feedback banner, motion
    tokens, sheet component, stepper component, page frame, connection state),
    so every page uses the same parts.
-6. **Implement in groups** (P0, then P1, then P2). THREE AGENTS MAXIMUM,
-   which means you plus two at a time (the founder's number, 7 November). Use
-   them for work that is genuinely separate by file, for example:
-   - You build the shared components and the member screens; agent A audits
+6. **Implement in groups** (P0, then P1, then P2). **TWO SUBAGENTS plus you
+   the lead, three workers at once, never more** (the founder, 9 November
+   2026). Launch both at the start of each batch and keep them busy. Before
+   you launch, write down which paths you and each agent own and check no two
+   overlap. Examples of a clean split:
+   - You build the shared components and the member screens; the agent audits
      native behaviour (status bar, keyboard, haptics, back button, deep links)
-     and reports findings for you to apply; agent B measures performance and
-     writes the before and after numbers.
-   - You build the listing wizard; agent A sweeps pages against the design
-     language checklist and lists what is off; agent B drafts the help centre
-     articles from the finished screens.
-   - You build the admin desks; agent A writes the docs the AI assistant and
-     support rely on; agent B runs the regression suites and reports failures.
+     and reports findings for you to apply.
+   - You build the listing wizard; the agent sweeps pages against the design
+     language checklist and lists what is off.
+   - You build the admin desks; the agent writes the docs the AI assistant and
+     support rely on, then runs the regression suites.
    Never two writers in one area. The lead (you) reviews and integrates
    everything.
 7. **Re-audit each group** (section 9) before the next.
@@ -764,32 +807,87 @@ From `apps/web`:
 VALLO: PLATFORM GRADE 1 READINESS. You are taking over my platform upgrade.
 Repo moderator29/read-it-well. Supabase project uccixoonmbhrnyczyigt.
 
+YOU ARE CONTINUING WORK, NOT STARTING IT
+Two sessions before you have already done a great deal of this upgrade. There
+are 336 commits of it. DO NOT start from main and DO NOT redo the audit, the
+recommendations or the reference-pattern notes: they exist, they are good, and
+redoing them burns my session for nothing. Your first job is to find out what
+is already done, then carry on from the first thing that is not.
+
 SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
-1. git fetch origin main
-2. Create your one working branch from main, and do EVERY piece of this work
-   on it, start to finish:
-     git checkout -b platform-grade-1-readiness origin/main
+1. Fetch everything:
+     git fetch origin
+2. Pick up the SAME branch the last two sessions worked on. The full work is
+   on origin/claude/fervent-cray-1vzbp1, which contains every commit of
+   origin/platform-grade-1-readiness plus 155 more. I want it all living under
+   the name platform-grade-1-readiness, so do exactly this:
+     git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
+     git merge origin/main
      git push -u origin platform-grade-1-readiness
-   main already carries the handoff, the brief and all the fixes up to
-   7 November 2026, so there is nothing else to pull in. If the branch
-   already exists on origin, check it out and continue on it rather than
-   making a second one. Never open a different branch for a sub-piece of the
-   work: one branch, every commit, so I can see the whole upgrade in one
-   place and Vercel stays switched off for it.
-3. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
+   The merge brings in main's newest work, including the payments documents in
+   step 6, which do not exist on the work branch yet. If that merge conflicts,
+   resolve it, do not reset it away, and tell me what you resolved. From then
+   on: ONE branch, platform-grade-1-readiness, every commit, start to finish.
+   Never open a different branch for a sub-piece of the work, so I can see the
+   whole upgrade in one place and Vercel stays switched off for it.
+3. READ THE STATE OF THE WORK before any other document, in this order:
+     docs/handoff/STATE.md             who was doing what, how to resume
+     docs/handoff/AGENT_QUEUES.md      the ordered jobs, with DONE marks
+     docs/handoff/FEATURE_BACKLOG.md   every ask of mine, with owner and state
+     docs/handoff/FOUNDER_DECISIONS.md my rulings, newest last
+     docs/handoff/PAGE_LEDGER.md       every page, ticked as passed
+     docs/handoff/TODO.md and docs/handoff/WORK_QUEUE.md
+   Then check git log against them. Tell me, in plain language and before you
+   build anything, what is done, what is half done, and what you are picking
+   up first. If a document and the code disagree, the code wins and you fix
+   the document. Keep every one of those files up to date as you go: the next
+   session will depend on them the way you depend on them now.
+4. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
    message, word for word, and it is your MAIN SOURCE OF TRUTH. Where anything
    else disagrees with it, it wins. Re-read it at the start of every phase.
-4. READ docs/handoff/PLATFORM_GRADE_1_READINESS.md completely: my rules, how I
+5. READ docs/handoff/PLATFORM_GRADE_1_READINESS.md completely: my rules, how I
    work, the current state, the codebase map, the Hauslet patterns, the design
    language, the priority list, the gates. Then apps/web/AGENTS.md, then the
-   docs it lists in section 3.
-5. Load the Supabase MCP tools and confirm you can query the project.
-6. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+   docs it lists in section 3. Also read what the last sessions already wrote,
+   and build on it rather than rewriting it: AUDIT_2026-11.md,
+   RECOMMENDATIONS.md, REFERENCE_PATTERNS.md, PERFORMANCE_REPORT.md,
+   DEVICE_TEST_MATRIX.md, BANNER_MOMENTS.md, NATIVE_BUILD_QUEUE.md, and
+   docs/UX_SYSTEM.md if it exists.
+6. READ the two payments documents, in this order, because the protected
+   payment rail is part of YOUR job now:
+     docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
+     docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
+                                                 plus the provider's own
+                                                 commercial and presentation
+                                                 terms in the appendix)
+   Build that rail to ready, flagged OFF, in this same branch. Do not switch
+   it on: the agreement is not signed yet.
+7. Load the Supabase MCP tools and confirm you can query the project.
+8. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
    for platform-grade-1-readiness.
+9. Check supabase/migrations/pending/ and its README. Anything waiting there
+   is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
-- THREE AGENTS MAXIMUM at any time (you plus two). Never two writers in the
-  same files: split the work by file or do it in sequence yourself.
+- TWO AGENTS, plus you the session lead. Three workers at once, never more.
+  Launch both at the start of every batch and keep them busy: do not run one
+  and leave the other idle. The one rule that does not bend: never two writers
+  in the same files. Split every batch by file ownership first and name the
+  owned paths in each agent's brief. Read the diff of every agent's work
+  yourself before you commit it, and never report a batch as done on an
+  agent's word alone. Where the work cannot be split cleanly, do it in
+  sequence yourself.
+- SQL: do not drip it into the chat while you work. Put every migration in
+  supabase/migrations/pending/ with a note in its README. Apply the safe,
+  additive, reversible ones yourself through the Supabase tools and tell me
+  you did. Everything else waits. Then at the END of a group of work, send me
+  ONE message with ONE SQL block holding everything still outstanding, in the
+  right order, ready for me to paste and run in one go, with one plain line
+  above it saying what it does and what I should see when it works. Never run
+  a destructive statement yourself, and never hand me SQL you have not read
+  end to end.
+- STUDY EVERY REFERENCE IMAGE I SEND before you design or build a screen.
+  They are the standard, not decoration.
 - EVERYTHING lives on the branch platform-grade-1-readiness. Commit often,
   push to that branch often (it costs nothing: Vercel is switched off for it).
   Never push to main, and never merge into main, unless my message literally
@@ -836,11 +934,15 @@ uniform enhancement, not too much and not too little. Clean architecture,
 like a project that had a proper plan before it was built.
 
 START HERE
-1. The read-only audit (handoff section 6 step 2), written to
-   docs/handoff/AUDIT_2026-11.md.
-2. The design language decided and written to docs/UX_SYSTEM.md, then the
-   four shared components (feedback banner, sheet, step frame, page frame),
-   because they are what makes 559 pages look like one product.
+1. The state report from setup step 3: what is done, what is half done, what
+   you are picking up first. Short, plain, no jargon. The audit in
+   docs/handoff/AUDIT_2026-11.md and the recommendations already exist, so
+   extend them where you find something new, do not start them again.
+2. The design language and the four shared components (feedback banner, sheet,
+   step frame, page frame) were being built by the last sessions. Check their
+   state first. If they exist, finish and spread them across every page. If
+   they do not, build them now, because they are what makes 559 pages look
+   like one product.
 3. The P0 work: passcode optional with a dismissible dashboard alert; phone
    number out of sign-up and asked before the first deal; verification
    required before deals and rebuilt as a premium stepper; the global
@@ -856,6 +958,22 @@ START HERE
    our inner world, the motion system and a possible mascot, the whole-platform
    container and icon pass, Face ID where it belongs, the support and social
    media admin desks, performance measurements, docs).
+6. IN PARALLEL, from the first batch, the PROTECTED PAYMENT RAIL. It has its
+   own documents and its own agents, and it does not wait for the UX work:
+   the design pass first, then the audit of every reference to the old
+   provider, then the adapter, the webhooks, the reconciliation, the state
+   mapping, the member screens, the receipts, the help articles, the tests.
+   Build it to ready and leave every flag and kill switch OFF. Report it to me
+   as "ready, switched off, waiting on the signed agreement". Read
+   PROTECTED_PAYMENTS_BUILD.md section 3 before you design a payment screen:
+   the interface is ours, with one small disclosed partner mark at the payment
+   step and the provider's funds wording shown unaltered.
+
+A WORD ON THE MONEY COPY, DO THIS IN BATCH ONE
+Sweep every screen in the platform for words that promise protected, held,
+secured or escrowed payment. The protected rail is NOT live and has never
+held a naira. Any screen promising it today is a false promise. Bring me the
+list and your proposed replacement copy before you change it.
 
 As my screenshots arrive, number them and record every pattern in
 docs/handoff/REFERENCE_PATTERNS.md. Show me your top 30 recommendations
