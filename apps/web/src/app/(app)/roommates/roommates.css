@@ -1629,6 +1629,19 @@
   .nf-rm-dock :is(.nf-rmv-act__line, .nf-rmv-act__note, [data-testid="listing-owner-actions"] .nf-rmv-act__pair, .nf-rmv-celebrate, [data-testid="listing-delete"], [data-testid="listing-shortlist"], [data-testid="profile-invite"]) {
     display: none;
   }
+  /* NARROW PHONES: the dock keeps both decisions in reach, but the long
+     secondary ("Request a viewing") folds to its calendar glyph so the primary
+     action never truncates to "I'm int...". The button carries the same words
+     as its aria-label, so the icon-only control still names itself to a reader. */
+  @media (max-width: 27rem) {
+    .nf-rm-dock [data-testid="listing-viewing"] {
+      flex: 0 0 auto;
+      inline-size: auto;
+    }
+    .nf-rm-dock [data-testid="listing-viewing"] .nf-btn__label {
+      display: none;
+    }
+  }
   .nf-rmv {
     padding-block-end: 5.5rem;
   }

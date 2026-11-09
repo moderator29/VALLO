@@ -236,7 +236,7 @@ export function ListingActions(props: ListingActionsProps) {
           {fill(L.yourViewing, { status: copy.viewings.status[props.myViewing.status].toLowerCase(), date: dayText(props.myViewing.proposedAt) })}
         </p>
       ) : (
-        <Button variant="secondary" size="lg" full leadingIcon="calendar-booking" onClick={() => setSheet("viewing")} data-testid="listing-viewing">
+        <Button variant="secondary" size="lg" full leadingIcon="calendar-booking" aria-label={copy.actions.requestViewing} onClick={() => setSheet("viewing")} data-testid="listing-viewing">
           {copy.actions.requestViewing}
         </Button>
       )}
