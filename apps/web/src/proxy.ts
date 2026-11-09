@@ -262,9 +262,22 @@ const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-im
  * to sign in before any action. Everything else under `/roommates` (people,
  * the hub, groups, posting, checks) stays signed in.
  */
+const UUID_SEG = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 const PUBLIC_NESTED: readonly RegExp[] = [
-  /^\/roommates\/r\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  new RegExp(`^/roommates/r/${UUID_SEG}$`, "i"),
   /^\/roommates\/campus(?:\/[a-z0-9-]{2,80})?$/,
+  /*
+   * THE FORWARDED LINK PREVIEW (SHARE_AND_CONTROLS.md section 1.2). An
+   * unfurler has no session, so the image a shared link draws must answer
+   * without one. Only the `opengraph-image` route is opened, never the page:
+   * a profile or a Circle post still asks a stranger to sign in, but the card
+   * they see in the chat is drawn. Each image reads public data only
+   * (`loadPublicProfile`, `roommate_listing_view`, the thread read under its
+   * own policy), so there is nothing private to leak.
+   */
+  new RegExp(`^/u/[a-z0-9_.]{1,40}/opengraph-image$`, "i"),
+  new RegExp(`^/roommates/r/${UUID_SEG}/opengraph-image$`, "i"),
+  new RegExp(`^/circle/p/${UUID_SEG}/opengraph-image$`, "i"),
 ];
 
 /**
