@@ -2,7 +2,9 @@
 
 import { Money } from "@/components/ui/Money";
 import { useAppliedTheme } from "@/lib/theme/theme-client";
-import { tileProvider, warnIfNonCommercialTiles } from "@/lib/maps/tiles";
+import { tileProvider } from "@/lib/maps/tiles";
+import { addBaseLayer, type BaseLayer } from "@/lib/maps/base-layer";
+import { prefersCalm } from "@/lib/ui/calm";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import "leaflet/dist/leaflet.css";
@@ -41,7 +43,7 @@ const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on t
 /**
  * The discovery map.
  *
- * Leaflet is used for exactly one thing: tiles, pan and zoom. Every mark on
+ * Leaflet is used for exactly one thing: the ground, pan and zoom. Every mark on
  * top of it is an ordinary React button positioned by projecting the listing's
  * coordinate into container space on each frame. That buys three things a
  * divIcon cannot: the pins are real focusable controls with real keyboard
@@ -58,9 +60,13 @@ const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on t
 /*
  * The tile URLs used to be two constants here, on CARTO's free basemaps, which
  * are NON-COMMERCIAL USE ONLY - and a marketplace taking a booking fee is a
- * commercial use. `lib/maps/tiles.ts` owns the choice now, carries the
- * attribution each provider's terms require, and moves the whole map to a paid
- * provider the moment NEXT_PUBLIC_MAPTILER_KEY is set.
+ * commercial use. `lib/maps/tiles.ts` owns the provider now (OpenFreeMap's
+ * free, commercial-use vector tiles, or MapTiler if a key is ever set) and the
+ * attribution its terms require; `lib/maps/base-layer.ts` decides how the
+ * ground is drawn: MapLibre GL through the Leaflet bridge on a capable
+ * device, OpenFreeMap's tiles painted on plain canvases on a budget one or
+ * when WebGL or MapLibre cannot be had. Either way Leaflet still owns the
+ * camera, so every mark below is projected exactly as before.
  */
 
 /** Grid cell for clustering, in CSS pixels. Roughly two pin widths. */
@@ -86,7 +92,6 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 type LeafletModule = typeof import("leaflet");
 type LeafletMap = import("leaflet").Map;
-type LeafletTileLayer = import("leaflet").TileLayer;
 
 type LocatePhase = "idle" | "working" | "located" | "denied" | "unavailable" | "failed";
 type Locate = { phase: LocatePhase; at?: LatLng };
@@ -126,7 +131,7 @@ export function MapCanvas({
   const canvasRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const leafletRef = useRef<LeafletModule | null>(null);
-  const tileRef = useRef<LeafletTileLayer | null>(null);
+  const baseRef = useRef<BaseLayer | null>(null);
   const rafRef = useRef(0);
   const tilesLoaded = useRef(0);
   const tilesFailed = useRef(0);
@@ -209,8 +214,13 @@ export function MapCanvas({
       try {
         const leaflet = (await import("leaflet")).default;
         if (disposed || !canvasRef.current) return;
+        const calm = prefersCalm();
         map = leaflet.map(canvasRef.current, {
           zoomControl: false,
+          /* Reduced motion: zooms jump instead of gliding, tiles appear
+             instead of fading in. */
+          zoomAnimation: !calm,
+          fadeAnimation: !calm,
           // Attribution is rendered by this component instead, so it can sit
           // clear of the docked card rather than underneath it.
           attributionControl: false,
@@ -244,38 +254,36 @@ export function MapCanvas({
       disposed = true;
       if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
+      baseRef.current?.remove();
+      baseRef.current = null;
       map?.remove();
       mapRef.current = null;
       leafletRef.current = null;
-      tileRef.current = null;
     };
   }, []);
 
-  // Tiles follow the active theme: dark cartography at night, paper by day.
+  // The ground follows the active theme: Vallo's navy at night, paper by day.
+  // Built once, then repainted in place, so a theme switch never resets the view.
   useEffect(() => {
     const map = mapRef.current;
     const leaflet = leafletRef.current;
     if (!map || !leaflet) return;
-    tileRef.current?.remove();
-    warnIfNonCommercialTiles();
-    const tiles = tileProvider(theme);
-    const layer = leaflet.tileLayer(tiles.url, {
-      maxZoom: tiles.maxZoom,
+    if (baseRef.current) {
+      baseRef.current.setTheme(theme);
+      return;
+    }
+    baseRef.current = addBaseLayer(leaflet, map, theme, {
       minZoom: 4,
-      detectRetina: true,
-      updateWhenZooming: false,
-      updateWhenIdle: true,
+      raster: { updateWhenZooming: false, updateWhenIdle: true },
+      onLoad: () => {
+        tilesLoaded.current += 1;
+        setImagery("ready");
+      },
+      onError: () => {
+        tilesFailed.current += 1;
+        if (tilesLoaded.current === 0 && tilesFailed.current >= 3) setImagery("offline");
+      },
     });
-    layer.on("tileload", () => {
-      tilesLoaded.current += 1;
-      setImagery("ready");
-    });
-    layer.on("tileerror", () => {
-      tilesFailed.current += 1;
-      if (tilesLoaded.current === 0 && tilesFailed.current >= 3) setImagery("offline");
-    });
-    layer.addTo(map);
-    tileRef.current = layer;
   }, [theme, engineReady]);
 
   // No tile has painted after a fair wait: say so rather than wait forever.
@@ -438,7 +446,7 @@ export function MapCanvas({
   const choose = useCallback(
     (listing: MapListing) => {
       setSelectedId(listing.id);
-      mapRef.current?.panTo([listing.lat, listing.lng], { animate: true });
+      mapRef.current?.panTo([listing.lat, listing.lng], { animate: !prefersCalm() });
     },
     [setSelectedId],
   );
@@ -452,10 +460,11 @@ export function MapCanvas({
     const map = mapRef.current;
     const leaflet = leafletRef.current;
     if (!map || !leaflet) return;
-    map.flyToBounds(
-      leaflet.latLngBounds(group.items.map((item) => [item.lat, item.lng] as [number, number])),
-      { paddingTopLeft: [56, 56], paddingBottomRight: [56, DOCK_ROOM + 24], maxZoom: 16 },
-    );
+    const bounds = leaflet.latLngBounds(group.items.map((item) => [item.lat, item.lng] as [number, number]));
+    const fit = { paddingTopLeft: [56, 56] as [number, number], paddingBottomRight: [56, DOCK_ROOM + 24] as [number, number], maxZoom: 16 };
+    /* No flight under reduced motion: the view simply arrives. */
+    if (prefersCalm()) map.fitBounds(bounds, { ...fit, animate: false });
+    else map.flyToBounds(bounds, fit);
   }, []);
 
   const searchThisArea = useCallback(() => {
