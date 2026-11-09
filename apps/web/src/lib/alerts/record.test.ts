@@ -26,6 +26,8 @@ vi.mock("../supabase/admin", () => ({
       order: () => lookup,
       limit: () => lookup,
       maybeSingle: async () => ({ data: existing, error: null }),
+      /* The fold touches the open alert's `last_seen_at` (R-04 dedup). */
+      update: () => ({ eq: async () => ({ error: null }) }),
       insert: (row: unknown) => {
         inserted.push(row);
         return {

@@ -196,10 +196,17 @@ async function readAuthors(db: Db, ids: string[]): Promise<Map<string, CircleAut
   if (ids.length === 0) return out;
   const [profiles, agents] = await Promise.all([
     db.from("social_profiles").select("user_id, handle, display_label, avatar_path, is_agent").in("user_id", ids),
-    db.from("agents").select("user_id, verified").in("user_id", ids).eq("verified", true),
+    /* The verified tick has ONE derivation: the published `agent_badges` row,
+       never `agents.verified` (the hand-set boolean). Reach it through the
+       embed, as every other surface does (agent-badge-derivation, Rule 12). */
+    db.from("agents").select("user_id, agent_badges(verified)").in("user_id", ids),
   ]);
   await reportReadFault("read.circle.authors", ...faults(profiles.error, agents.error));
-  const verified = new Set(((agents.data ?? []) as { user_id: string }[]).map((a) => a.user_id));
+  const verified = new Set(
+    ((agents.data ?? []) as { user_id: string; agent_badges: { verified: boolean }[] | null }[])
+      .filter((a) => a.agent_badges?.some((b) => b.verified))
+      .map((a) => a.user_id),
+  );
   for (const p of (profiles.data ?? []) as {
     user_id: string;
     handle: string | null;
