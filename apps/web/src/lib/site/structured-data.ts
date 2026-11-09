@@ -9,7 +9,7 @@ import { SUPPORT_EMAIL } from "@/lib/support-email";
  *
  *   Organization  the legal name printed in the footer, the logo file that
  *                 ships in `public/brand`, the support contact only when
- *                 `NEXT_PUBLIC_SUPPORT_EMAIL` is set, and `sameAs` only for
+ *                 the one contact address (`CONTACT_EMAIL`) is offered, and `sameAs` only for
  *                 the social accounts the footer itself draws
  *                 (`lib/brand/socials.ts`; an account with no address is not
  *                 claimed).

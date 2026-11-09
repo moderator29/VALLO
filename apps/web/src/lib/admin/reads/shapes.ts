@@ -196,8 +196,8 @@ export type PersonTier = "gold" | "platinum";
  * the console names them.
  */
 export const QA_ACCOUNT_IDS = [
-  "957b3bd2-cce3-425d-bba9-5cd876ca3d62", // phantomfcalls+qamember@gmail.com, the QA member
-  "03f3dd52-ea28-4852-9abe-e5b0a67c2a43", // phantomfcalls+qaadmi@gmail.com, the QA admin
+  "957b3bd2-cce3-425d-bba9-5cd876ca3d62", // the QA member
+  "03f3dd52-ea28-4852-9abe-e5b0a67c2a43", // the QA admin
 ] as const;
 
 /** Is this person one of the QA accounts? For labelling a row "QA" in a list. */

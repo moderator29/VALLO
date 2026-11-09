@@ -1,5 +1,5 @@
 import "server-only";
-import { BRAND_DOMAIN } from "@/lib/brand-domain";
+import { CONTACT_EMAIL } from "@/lib/support-email";
 
 /**
  * Resend client. Server-only, typed, no SDK.
@@ -29,7 +29,7 @@ const REQUEST_TIMEOUT_MS = 10_000;
  * Resend refuses a From whose domain is not verified on the account, so
  * `vallospaces.com` must be a verified sending domain there.
  */
-export const COMPANY_ADDRESS = `hello@${BRAND_DOMAIN}`;
+export const COMPANY_ADDRESS = CONTACT_EMAIL;
 
 /** The sender used when EMAIL_FROM is not set. */
 const DEFAULT_FROM = `Vallo <${COMPANY_ADDRESS}>`;

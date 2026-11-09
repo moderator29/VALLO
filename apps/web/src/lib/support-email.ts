@@ -1,3 +1,5 @@
+import { BRAND_DOMAIN } from "@/lib/brand-domain";
+
 /**
  * The one way to reach a person, and the one place that decides what it is.
  *
@@ -35,13 +37,21 @@
  * deliberately offer the mail application read `SUPPORT_MAILTO_HREF`.
  */
 
-const CONFIGURED = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "";
+/**
+ * THE ONE CONTACT ADDRESS (the founder, 9 November 2026: "One address
+ * everywhere: hello@vallospaces.com. Put it in one constant and import it").
+ * It is the company mailbox the email sender already uses at both ends
+ * (`lib/email/client.ts`), so it is a real inbox a person reads. Every
+ * surface that names an address imports this; nothing types it by hand.
+ */
+export const CONTACT_EMAIL = `hello@${BRAND_DOMAIN}`;
 
 /**
- * The address, when there is one. **Null is the normal case today**, so any
- * caller that renders this must handle null rather than assuming a string.
+ * The address members are offered beside the contact form. It used to come
+ * from `NEXT_PUBLIC_SUPPORT_EMAIL` and was null while that was unset; there is
+ * one address now, so it is always this one.
  */
-export const SUPPORT_EMAIL: string | null = CONFIGURED.length > 0 ? CONFIGURED : null;
+export const SUPPORT_EMAIL: string = CONTACT_EMAIL;
 
 /**
  * Where "contact support" goes. `/contact`, always, in both worlds.
@@ -59,9 +69,7 @@ export const SUPPORT_HREF = "/contact";
  * THE ONE PERMITTED EXIT FROM VALLO, and it is only an exit because whoever
  * clicks it has asked to be emailed. Never use it as a default href.
  */
-export const SUPPORT_MAILTO_HREF: string | null = SUPPORT_EMAIL
-  ? `mailto:${SUPPORT_EMAIL}`
-  : null;
+export const SUPPORT_MAILTO_HREF: string = `mailto:${SUPPORT_EMAIL}`;
 
 /**
  * What the link says. It labels `SUPPORT_HREF`, so it names the form.
@@ -90,7 +98,7 @@ export const SUPPORT_SENTENCE = "open the contact form at vallospaces.com/contac
  * Read it to decide whether to OFFER the mail application beside the form.
  * Never to decide where the primary control goes.
  */
-export const SUPPORT_MAILBOX: boolean = SUPPORT_EMAIL !== null;
+export const SUPPORT_MAILBOX: boolean = true;
 
 /** @deprecated Use `SUPPORT_HREF`, which is correct with no mailbox too. */
 export const SUPPORT_MAILTO: string = SUPPORT_HREF;
