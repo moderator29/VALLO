@@ -1,5 +1,5 @@
 import { OgLogo } from "./og-logo";
-import { OG_BRAND, OG_CANVAS, OG_CHIP, OG_INK, OG_INK_MUTED, OG_INK_SECONDARY, ogAlpha } from "@/lib/price-check/og-palette";
+import { OG_AVATAR_TONES, OG_BRAND, OG_CANVAS, OG_CHIP, OG_INK, OG_INK_MUTED, OG_INK_SECONDARY, ogAlpha } from "@/lib/price-check/og-palette";
 
 /**
  * THE CARD A LINK UNFURLS AS, BUILT FOR THE PLACE IT IS SEEN (W3, round 5).
@@ -57,7 +57,7 @@ export type OgCentredInput = {
 };
 
 /** A steady tone per name, so the same subject keeps its colour (matches the in-app card). */
-const AVATAR_TONES = [OG_BRAND, "#5C9FFF", "#10B981", "#00C8FF", "#0069FE"];
+const AVATAR_TONES = OG_AVATAR_TONES;
 function toneOf(name: string): string {
   let h = 0;
   for (const ch of name) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
