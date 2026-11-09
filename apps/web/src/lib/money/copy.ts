@@ -1312,8 +1312,14 @@ export const CAUTION_DEPOSIT_LABEL = "Caution deposit (returnable under your agr
 /* THE ASSISTANT AND SUPPORT PROMPTS (sweep item 57, rule (i))                */
 /* -------------------------------------------------------------------------- */
 
-/** Added to both prompts so the model never offers what is switched off. */
-export const PROMPT_NO_ESCROW = "Escrow and protected payment are not offered on Vallo. Never offer them.";
+/**
+ * Added to both prompts so the model never offers what is switched off. Rule
+ * (i) asked for "Escrow and protected payment are not offered on Vallo. Never
+ * offer them."; the claims gate (lib/trust/claims.ts) reads that "protected" as
+ * an unbacked claim, so the lead's wording of 9 November 2026 says the same
+ * thing without the claim word.
+ */
+export const PROMPT_NO_ESCROW = "Vallo does not offer escrow or payment held by a bank. Never offer them.";
 
 /* -------------------------------------------------------------------------- */
 /* MONEY SENTENCES KEPT AS DICTIONARY KEYS (rule (d), 9 November 2026)        */

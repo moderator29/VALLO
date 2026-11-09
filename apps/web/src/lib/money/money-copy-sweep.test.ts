@@ -334,8 +334,10 @@ describe("the founder's exact words (9 November 2026)", () => {
     }
   });
 
+  /* Rule (i)'s words carried "protected", which the claims gate refuses as an
+     unbacked claim; the lead's rewording (9 November 2026) says the same. */
   it("rule (i): the prompts' line", () => {
-    expect(copy.PROMPT_NO_ESCROW).toBe("Escrow and protected payment are not offered on Vallo. Never offer them.");
+    expect(copy.PROMPT_NO_ESCROW).toBe("Vallo does not offer escrow or payment held by a bank. Never offer them.");
   });
 
   it("rule (j): the governing sentence protects nothing and names no processor", () => {
