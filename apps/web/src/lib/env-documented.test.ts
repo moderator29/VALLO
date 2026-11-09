@@ -34,6 +34,10 @@ const PLATFORM = new Set([
   "VERCEL_URL",
   "VERCEL_GIT_COMMIT_SHA",
   "VERCEL_PROJECT_PRODUCTION_URL",
+  /* Injected by the platform at build and deploy time, never set by hand: the
+     deploy's own id, and the build id the client stamps on error reports. */
+  "VERCEL_DEPLOYMENT_ID",
+  "NEXT_PUBLIC_BUILD_ID",
 ]);
 
 function sourceFiles(dir: string, out: string[] = []): string[] {
