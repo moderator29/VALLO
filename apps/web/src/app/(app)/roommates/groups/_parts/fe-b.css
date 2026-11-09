@@ -49,10 +49,14 @@
     box-shadow: var(--nf-card-shadow);
     color: var(--nf-content-primary);
   }
-  /* The founder's dark dashboard, in Vallo blue: the smoked blue container. */
+  /* The founder's dashboard tile, theme-aware: a smoked navy at night and
+     solid paper with a faint brand tint in the light, never a dark slab on a
+     paper page. Same recipe as the kit's stat tiles. */
   .nf-rmb-card--smoked {
-    border-color: var(--nf-smoked-glass-edge);
-    background: var(--nf-smoked-glass-fill);
+    border-color: color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-tier-card-edge));
+    background:
+      radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 10%, transparent), transparent 70%),
+      var(--nf-surface-primary);
   }
   .nf-rmb-list {
     display: grid;
@@ -473,14 +477,17 @@
     min-width: 0;
     padding: var(--nf-space-md);
     border-radius: var(--nf-radius-card);
-    border: var(--nf-border-width) solid var(--nf-smoked-glass-edge);
-    background: var(--nf-smoked-glass-fill);
-    color: var(--nf-content-on-brand);
+    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 18%, var(--nf-tier-card-edge));
+    background:
+      radial-gradient(120% 100% at 0% 0%, color-mix(in oklab, var(--nf-brand-primary) 10%, transparent), transparent 70%),
+      var(--nf-surface-primary);
+    box-shadow: var(--nf-card-shadow);
+    color: var(--nf-content-primary);
   }
   .nf-rmg-tile dt {
     font-size: var(--nf-text-caption);
     font-weight: 600;
-    opacity: 0.8;
+    color: var(--nf-content-muted);
   }
   .nf-rmg-tile dd {
     margin: 0;
@@ -493,7 +500,7 @@
   .nf-rmg-tile__unit {
     font-size: var(--nf-text-body-sm);
     font-weight: 400;
-    opacity: 0.72;
+    color: var(--nf-content-muted);
   }
   .nf-rmg-split {
     display: grid;

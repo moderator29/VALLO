@@ -80,6 +80,7 @@ import { chargebacksEn } from "./chargebacks.en";
 import { circleEn } from "./circle.en";
 /* Vallo Roommates: roommate discovery and shared homes. */
 import { roommatesEn } from "./roommates.en";
+import { shareCardEn } from "./share.en";
 import { interestsHintsEn, interestsMarketsEn } from "./interests.en";
 /* The social layer (SW11): posts, stories, areas, the bot, profiles. */
 import {
@@ -7392,6 +7393,8 @@ export const en = {
   circleCopy: circleEn,
   /* Vallo Roommates. */
   roommates: roommatesEn,
+  /* The share composer card (9 November 2026). */
+  shareCard: shareCardEn,
   /* The /pro page (SW11). */
   pro: proEn,
 

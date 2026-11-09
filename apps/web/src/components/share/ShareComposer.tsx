@@ -27,17 +27,31 @@ export type ShareBackground =
 
 export type ShareStat = { label: string; value: string };
 
+/** A card variant: a tab that changes what the card leads with. */
+export type ShareLead = { id: string; label: string; headline: string; sub?: string };
+
 export type ShareSubject = {
   /** The round media at the top of the card: a face or a cover. */
   avatar?: string;
+  /** When there is no avatar, the initials tile is drawn from this name (never a gap). */
+  initial?: string;
   /** The handle chip under the avatar (@name, or an area). */
   handle?: string;
   /** The big line: a name, a title, a headline number. */
   headline: string;
   stats?: ShareStat[];
+  /** Optional lead tabs (Profile / Stats, Listing / Price): each sets the headline. */
+  leads?: ShareLead[];
   /** The clean link this card points at, e.g. /u/ada or /roommates/r/abc. */
   url: string;
 };
+
+/** A steady tone per name, so the same person always wears the same colour. */
+function toneOf(name: string): number {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.codePointAt(0)!) >>> 0;
+  return h % 5;
+}
 
 const DEFAULT_BG: ShareBackground[] = [
   { id: "glow", label: "Brand glow", kind: "aurora", variant: "glow" },
@@ -58,7 +72,10 @@ export function ShareComposer({
   const [bgId, setBgId] = useState(backgrounds[0]?.id);
   const [showStats, setShowStats] = useState(true);
   const [showHandle, setShowHandle] = useState(true);
+  const [leadId, setLeadId] = useState(subject.leads?.[0]?.id);
   const bg = backgrounds.find((b) => b.id === bgId) ?? backgrounds[0];
+  const lead = subject.leads?.find((l) => l.id === leadId) ?? subject.leads?.[0] ?? null;
+  const headline = lead?.headline ?? subject.headline;
   const t = {
     share: copy?.share ?? "Share",
     background: copy?.background ?? "Background",
@@ -77,7 +94,7 @@ export function ShareComposer({
     feedback("confirm");
     const url = typeof window !== "undefined" ? `${window.location.origin}${subject.url}` : subject.url;
     if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      void navigator.share({ title: subject.headline, url }).catch(() => {});
+      void navigator.share({ title: headline, url }).catch(() => {});
       return;
     }
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -93,6 +110,25 @@ export function ShareComposer({
 
   return (
     <div className="nf-share">
+      {subject.leads && subject.leads.length > 1 ? (
+        <div className="nf-share__tabs" role="tablist" aria-label={t.background}>
+          {subject.leads.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              role="tab"
+              aria-selected={l.id === (lead?.id ?? "")}
+              className="nf-share__tab"
+              onClick={() => {
+                setLeadId(l.id);
+                feedback("select");
+              }}
+            >
+              {l.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="nf-share__stage">
         <motion.div
           className="nf-share-card"
@@ -112,9 +148,14 @@ export function ShareComposer({
               <span className="nf-share-card__avatar">
                 <Image src={subject.avatar} alt="" fill sizes="88px" />
               </span>
+            ) : subject.initial ? (
+              <span className="nf-share-card__avatar nf-share-card__initial" data-tone={toneOf(subject.initial)}>
+                {Array.from(subject.initial.trim())[0]?.toLocaleUpperCase() ?? "V"}
+              </span>
             ) : null}
             {showHandle && subject.handle ? <span className="nf-share-card__handle">{subject.handle}</span> : null}
-            <span className="nf-share-card__headline">{subject.headline}</span>
+            <span className="nf-share-card__headline">{headline}</span>
+            {lead?.sub ? <span className="nf-share-card__sub">{lead.sub}</span> : null}
             {showStats && subject.stats?.length ? (
               <span className="nf-share-card__stats">
                 {subject.stats.map((s, i) => (
