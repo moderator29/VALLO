@@ -20,8 +20,8 @@ export const shareCardEn = {
   },
   /* Preset background labels. */
   presets: { glow: "Brand glow", brand: "Brand", ink: "Night", cover: "Photo" },
-  profileStats: { followers: ["follower", "followers"], posts: ["post", "posts"] },
-  listingStats: { perMonth: "a month", roomsFree: ["room free", "rooms free"], perPerson: "each" },
+  profileStats: { followers: { one: "1 follower", other: "{count} followers" }, posts: { one: "1 post", other: "{count} posts" } },
+  listingStats: { perMonth: "a month", roomsFree: { one: "1 room free", other: "{count} rooms free" }, perPerson: "each" },
 };
 
 export type ShareCardEn = typeof shareCardEn;
