@@ -10,6 +10,7 @@ export const shareCardEn = {
   stats: "Stats",
   name: "Name",
   copied: "Link copied",
+  makeCard: "Make a share card",
   /* The card-variant tabs: what the card leads with. */
   leads: {
     profile: "Profile",

@@ -88,7 +88,7 @@ export function RoomListingScreen({
             period={l.rentPeriod}
             roomsFree={l.roomsAvailable}
             shareCopy={{ title: shareCard.title, share: shareCard.share, background: shareCard.background, stats: shareCard.stats, name: shareCard.name, copied: shareCard.copied }}
-            shareWords={{ cover: shareCard.presets.cover, perMonth: shareCard.listingStats.perMonth, roomsFree: shareCard.listingStats.roomsFree, listingLead: shareCard.leads.listing, priceLead: shareCard.leads.price }}
+            shareWords={{ cover: shareCard.presets.cover, perMonth: shareCard.listingStats.perMonth, roomsFree: shareCard.listingStats.roomsFree, listingLead: shareCard.leads.listing, priceLead: shareCard.leads.price, makeCard: shareCard.makeCard }}
           />
         </span>
       }

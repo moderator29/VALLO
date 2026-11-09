@@ -396,7 +396,7 @@ export function ListingShareMenu({
   period?: Period;
   roomsFree?: number | null;
   shareCopy?: ShareCopy;
-  shareWords?: { cover: string; perMonth: string; roomsFree: PluralForms; listingLead: string; priceLead: string };
+  shareWords?: { cover: string; perMonth: string; roomsFree: PluralForms; listingLead: string; priceLead: string; makeCard: string };
 }) {
   const copy = useScopedCopy("roommates");
   const L = copy.ui.listing;
@@ -469,12 +469,15 @@ export function ListingShareMenu({
         open={open}
         onOpenChange={(o) => {
           setOpen(o);
-          if (!o) setFeed(false);
+          if (!o) {
+            setFeed(false);
+            setCard(false);
+          }
         }}
-        title={feed ? L.feedTitle : copy.actions.share}
+        title={card ? copy.actions.share : feed ? L.feedTitle : copy.actions.share}
         {...(feed ? { description: L.feedBody } : {})}
         closeLabel={copy.ui.flow.close}
-        detents={[0.55]}
+        detents={card ? [0.92] : [0.55]}
         {...(feed
           ? {
               footer: (
@@ -485,10 +488,23 @@ export function ListingShareMenu({
             }
           : {})}
       >
-        {feed ? (
+        {card && shareSubject && shareCopy ? (
+          <ShareComposer subject={shareSubject} backgrounds={shareBackgrounds} copy={shareCopy} />
+        ) : feed ? (
           <TextArea label={L.feedLine} optionalText={copy.ui.flow.optional} value={line} maxLength={2000} rows={4} onChange={(e) => setLine(e.target.value)} />
         ) : (
           <ul className="nf-rmv-picklist">
+            {shareSubject && shareCopy ? (
+              <li>
+                <button type="button" className="nf-rmv-pick" onClick={() => { feedback("select"); setCard(true); }} data-testid="listing-share-card">
+                  <span className="nf-rm-plate" aria-hidden="true">
+                    <UiIcon name="stack" size={20} />
+                  </span>
+                  <span className="nf-rmv-pick__name">{shareWords?.makeCard ?? L.shareLink}</span>
+                  <UiIcon name="chevron-right" size={18} />
+                </button>
+              </li>
+            ) : null}
             <li>
               <button type="button" className="nf-rmv-pick" onClick={link}>
                 <span className="nf-rm-plate" aria-hidden="true">
