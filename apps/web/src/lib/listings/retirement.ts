@@ -32,8 +32,14 @@
  * here, change `listings.demo_retire_after` in a migration, and say in the
  * migration header what changed about the world. What is not allowed is
  * deleting the check because it went red.
+ *
+ * MOVED ON 9 November 2026 (founder), from 2026-11-07 to 2027-05-07: the
+ * catalogue is still filling with real listings mid-launch, so the example
+ * collection stays for another run rather than leaving every city page and the
+ * map blank. The reason and the new write onto the rows are in
+ * `supabase/migrations/pending/example_collection_retirement_extended_to_2027-05-07.sql`.
  */
-export const EXAMPLE_COLLECTION_RETIREMENT = "2026-11-07";
+export const EXAMPLE_COLLECTION_RETIREMENT = "2027-05-07";
 
 /** Midnight Lagos on the retirement day, as an instant. */
 export function retirementInstant(): Date {
