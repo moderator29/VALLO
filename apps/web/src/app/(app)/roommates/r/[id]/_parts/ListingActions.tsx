@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { InterestSheet } from "@/components/roommates/Actions";
 import { dayText, fill, naira } from "@/components/roommates/format";
-import { ShareComposer, type ShareCopy } from "@/components/share/ShareComposer";
+import { ShareComposer } from "@/components/share/ShareComposer";
+import { type ShareCopy } from "@/components/share/ShareSheet";
 import { plural, type PluralForms } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { TextArea, TextField } from "@/components/ui/Field";

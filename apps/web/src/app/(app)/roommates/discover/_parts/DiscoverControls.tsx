@@ -38,6 +38,11 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 import { discoverHref, type Draft, type Mode } from "./href";
 
+const BUDGET_STEPS: Record<"month" | "year", number[]> = {
+  month: [5_000_000, 8_000_000, 12_000_000, 20_000_000],
+  year: [50_000_000, 80_000_000, 120_000_000, 200_000_000],
+};
+
 /** The filters both modes share, carried across the People | Rooms switch. */
 function shared(f: Draft): Draft {
   return { q: f.q ?? "", stateCode: f.stateCode ?? null, city: f.city ?? null, institutionId: f.institutionId ?? null, maxMinor: f.maxMinor ?? null, period: f.period ?? "year", moveBy: f.moveBy ?? null, verifiedOnly: f.verifiedOnly ?? false };
