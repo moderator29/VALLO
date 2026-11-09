@@ -1,11 +1,11 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
 
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
+import { MotionScene, type SceneObject } from "@/components/ui/MotionScene";
 import { Odometer } from "@/components/ui/Odometer";
-import { FEATURE_ART, type ArtSlot } from "@/lib/features/art";
+import { FEATURE_ART } from "@/lib/features/art";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type Intent, type PersonRef } from "@/lib/features/roommates/model";
 
@@ -47,50 +47,49 @@ export function RoommatesHero({
 }) {
   const lines = copy.tagline.split(". ").map((s, i, all) => (i < all.length - 1 ? `${s}.` : s));
   const last = lines.pop() ?? "";
-  const art: ArtSlot = FEATURE_ART.roommatesHero;
   const showPeople = faces.length > 0 || (peopleCount !== null && peopleCount > 0);
   return (
-    <section className="nf-rmh" data-theme="dark" data-fit={art.fit} aria-labelledby="rm-hero-title" data-testid="roommates-hero">
-      <div className="nf-rmh__art" aria-hidden="true">
-        <Image src={art.src} alt="" fill priority sizes="(max-width: 768px) 100vw, 1152px" style={art.focus ? { objectPosition: art.focus } : undefined} />
+    <MotionScene
+      art={FEATURE_ART.roommatesHero}
+      backdrop={FEATURE_ART.backdrop}
+      objects={HERO_OBJECTS}
+      className="nf-rmh"
+      testId="roommates-hero"
+    >
+      <p className="nf-rmh__eyebrow" style={{ "--nf-rm-i": 0 } as CSSProperties}>
+        {greeting ?? copy.ui.eyebrow}
+      </p>
+      <h2 id="rm-hero-title" className="nf-rmh__title" style={{ "--nf-rm-i": 1 } as CSSProperties}>
+        {lines.map((l) => (
+          <span key={l}>{l} </span>
+        ))}
+        <span className="nf-rmh__accentword">{last}</span>
+      </h2>
+      <p className="nf-rmh__line" style={{ "--nf-rm-i": 2 } as CSSProperties}>
+        {copy.heroLine}
+      </p>
+      <div className="nf-rmh__actions" style={{ "--nf-rm-i": 3 } as CSSProperties}>
+        <ButtonLink href={findHref} variant="primary" size="lg" leadingIcon="search" glow className="nf-rm-sheen" data-testid="roommates-find">
+          {copy.ui.findRoommate}
+        </ButtonLink>
+        <ButtonLink href={postHref} variant="secondary" size="lg" leadingIcon="plus" data-testid="roommates-post">
+          {copy.actions.create}
+        </ButtonLink>
       </div>
-      <span className="nf-rmh__scrim" aria-hidden="true" />
-      <span className="nf-rmh__accent" aria-hidden="true">
-        <span className="nf-rmh__accent-tile">
-          <Icon3D name="team" size={64} classic />
-        </span>
-      </span>
-      <div className="nf-rmh__words">
-        <p className="nf-rmh__eyebrow" style={{ "--nf-rm-i": 0 } as CSSProperties}>
-          {greeting ?? copy.ui.eyebrow}
+      {showPeople ? (
+        <p className="nf-rmh__people" style={{ "--nf-rm-i": 4 } as CSSProperties} data-testid="roommates-hero-people">
+          {faces.length ? <FaceStack people={faces} max={4} size="sm" /> : null}
+          {peopleCount !== null && peopleCount > 0 ? <span>{counted(peopleCount, copy.ui.peopleLooking)}</span> : null}
         </p>
-        <h2 id="rm-hero-title" className="nf-rmh__title" style={{ "--nf-rm-i": 1 } as CSSProperties}>
-          {lines.map((l) => (
-            <span key={l}>{l} </span>
-          ))}
-          <span className="nf-rmh__accentword">{last}</span>
-        </h2>
-        <p className="nf-rmh__line" style={{ "--nf-rm-i": 2 } as CSSProperties}>
-          {copy.heroLine}
-        </p>
-        <div className="nf-rmh__actions" style={{ "--nf-rm-i": 3 } as CSSProperties}>
-          <ButtonLink href={findHref} variant="primary" size="lg" leadingIcon="search" glow className="nf-rm-sheen" data-testid="roommates-find">
-            {copy.ui.findRoommate}
-          </ButtonLink>
-          <ButtonLink href={postHref} variant="secondary" size="lg" leadingIcon="plus" data-testid="roommates-post">
-            {copy.actions.create}
-          </ButtonLink>
-        </div>
-        {showPeople ? (
-          <p className="nf-rmh__people" style={{ "--nf-rm-i": 4 } as CSSProperties} data-testid="roommates-hero-people">
-            {faces.length ? <FaceStack people={faces} max={4} size="sm" /> : null}
-            {peopleCount !== null && peopleCount > 0 ? <span>{counted(peopleCount, copy.ui.peopleLooking)}</span> : null}
-          </p>
-        ) : null}
-      </div>
-    </section>
+      ) : null}
+    </MotionScene>
   );
 }
+
+const HERO_OBJECTS: SceneObject[] = [
+  { name: "team", at: "tr", size: 56 },
+  { name: "home-small", at: "tl", size: 44 },
+];
 
 const JOURNEY_ART: Record<Intent, Icon3DName> = {
   find_roommate: "team",

@@ -132,6 +132,7 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
       body = (
         <Celebration
           testId="post-live"
+          artSlot={FEATURE_ART.roommatesPublished}
           title={t.create.published}
           body={t.create.publishedBody.replace("{city}", "Lagos")}
           actions={

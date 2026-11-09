@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { RoomCardView } from "@/components/roommates/Cards";
 import { Celebration } from "@/components/roommates/Celebrate";
+import { FEATURE_ART } from "@/lib/features/art";
 import { ChoiceChips, ToggleChips } from "@/components/roommates/ChoiceChips";
 import { AMENITY_ICON, counted, fill, naira } from "@/components/roommates/format";
 import { CostBreakdown } from "@/components/roommates/Panels";
@@ -245,6 +246,7 @@ export function PostFlow({
     return (
       <Celebration
         testId="post-live"
+        artSlot={FEATURE_ART.roommatesPublished}
         title={copy.create.published}
         body={fill(copy.create.publishedBody, { city: done.city })}
         actions={

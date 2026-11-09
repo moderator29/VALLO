@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import { countOf, formatRating, type Locale } from "@vallo/i18n/core";
 import { RATING_MAX, RATING_MIN } from "@/lib/reviews/model";
 import { RatingStars } from "./RatingStars";
@@ -80,7 +82,7 @@ export function RatingSummary({
                 <div className="nf-rating-summary__track">
                   <div
                     className="nf-rating-summary__fill"
-                    style={{ width: `${pct}%` }}
+                    style={{ "--nf-rating-scale": (pct / 100).toFixed(4) } as CSSProperties}
                   />
                 </div>
               </div>

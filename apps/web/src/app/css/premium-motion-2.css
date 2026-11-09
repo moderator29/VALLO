@@ -157,9 +157,7 @@
     }
     .nf-card-lift:hover {
       translate: 0 -3px;
-      box-shadow:
-        0 8px 24px -4px color-mix(in oklab, var(--nf-shadow-color, var(--nf-content-primary)) 12%, transparent),
-        0 2px 6px -2px color-mix(in oklab, var(--nf-shadow-color, var(--nf-content-primary)) 8%, transparent);
+      box-shadow: var(--nf-card-shadow-hover);
     }
   }
 
@@ -200,10 +198,12 @@
     border-color: var(--nf-brand-primary);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 18%, transparent);
   }
+  /* The floating label lifts and shrinks by TRANSFORM (a scale), never by
+     animating font-size, which would re-lay out the field on every frame. */
   .nf-field-label-lift {
+    transform-origin: left center;
     transition:
       transform var(--nf-duration-fast) var(--nf-ease-entrance),
-      font-size var(--nf-duration-fast) var(--nf-ease-standard),
       color var(--nf-duration-fast) var(--nf-ease-standard);
   }
 
@@ -304,12 +304,15 @@
    * upload progress, or a step indicator. The width animates to the
    * value in `--nf-progress`.
    */
+  /* A fill grows by scaleX (composited), never by animating width. */
   .nf-progress-fill {
-    width: 0%;
+    inline-size: 100%;
+    transform-origin: left center;
+    transform: scaleX(0);
     animation: nf-fill-bar 800ms var(--nf-ease-entrance) 200ms both;
   }
   @keyframes nf-fill-bar {
-    to { width: var(--nf-progress, 0%); }
+    to { transform: scaleX(var(--nf-progress-scale, 1)); }
   }
 
   /* ================================================== CONFETTI BURST */
@@ -430,24 +433,6 @@
   @keyframes nf-num-fall {
     from { transform: translateY(-0.3em); opacity: 0; }
     to { transform: none; opacity: 1; }
-  }
-
-  /* ========================================== PARALLAX HERO */
-
-  /*
-   * Subtle scroll-driven parallax on a listing hero or a home banner.
-   * The image moves at 60% of the scroll speed.
-   */
-  @supports (animation-timeline: scroll()) {
-    .nf-parallax-hero {
-      animation: nf-parallax linear both;
-      animation-timeline: scroll();
-      animation-range: 0vh 50vh;
-    }
-    @keyframes nf-parallax {
-      from { transform: translateY(0); }
-      to { transform: translateY(-40px); }
-    }
   }
 
   /* =========================================== GALLERY CROSSFADE */
@@ -1255,16 +1240,6 @@
     animation: none;
   }
 
-  /* ====================================== CTA GLOW PULSE (9.4) */
-
-  .nf-cta--glow {
-    animation: nf-cta-glow 1.6s ease-in-out 3 both;
-  }
-  @keyframes nf-cta-glow {
-    0%, 100% { box-shadow: 0 0 0 0 transparent; }
-    50% { box-shadow: 0 0 18px 4px color-mix(in oklab, var(--nf-brand-primary) 35%, transparent); }
-  }
-  :root[data-motion="off"] .nf-cta--glow { animation: none; }
 
   /* ================================ INTEREST CHIP SPRING (9.10) */
 
@@ -1424,8 +1399,10 @@
     from { opacity: 0; transform: translateX(24px); }
     to { opacity: 1; transform: translateX(0); }
   }
+  /* The step bar fills by scaleX (composited), set from `--nf-progress-scale`. */
   .nf-checkout__progress {
-    transition: width var(--nf-duration-slow, 400ms) var(--nf-ease-entrance);
+    transform-origin: left center;
+    transition: transform var(--nf-duration-slow, 400ms) var(--nf-ease-entrance);
   }
   :root[data-motion="off"] .nf-checkout__step[data-enter] { animation: none; }
   :root[data-motion="off"] .nf-checkout__progress { transition: none; }
@@ -1436,7 +1413,7 @@
     animation: nf-balance-pop var(--nf-duration-base, 250ms) var(--nf-ease-spring) both;
   }
   .nf-rewards__badge[data-shine] {
-    animation: nf-tier-shine 1.2s ease-in-out both;
+    animation: nf-tier-shine 1.2s var(--nf-ease-standard) both;
   }
   @keyframes nf-tier-shine {
     0% { filter: brightness(1); }
@@ -1520,7 +1497,7 @@
     animation: nf-beat-in var(--nf-duration-slow, 400ms) var(--nf-ease-entrance) both;
   }
   .nf-beat[data-exit] {
-    animation: nf-beat-out var(--nf-duration-base, 250ms) ease-in forwards;
+    animation: nf-beat-out var(--nf-duration-base, 250ms) var(--nf-ease-exit) forwards;
   }
   @keyframes nf-beat-in {
     from { opacity: 0; transform: scale(0.96); }
@@ -1608,7 +1585,7 @@
       calc(var(--nf-tilt-y, 0) * 0.6px),
       0
     );
-    transition: transform 120ms linear;
+    transition: transform 120ms var(--nf-ease-standard);
     will-change: transform;
   }
   :root[data-motion="off"] .nf-gyro-tilt { transform: none; transition: none; }
@@ -1634,7 +1611,7 @@
       color-mix(in oklab, white 22%, transparent) 45%,
       transparent 55%
     );
-    animation: nf-glass-sweep 800ms var(--nf-ease-entrance, ease-out) 200ms both;
+    animation: nf-glass-sweep 800ms var(--nf-ease-entrance) 200ms both;
     pointer-events: none;
   }
   @keyframes nf-glass-sweep {
@@ -1651,7 +1628,7 @@
    * set per element (defaults fan outward).
    */
   .nf-scatter-exit {
-    animation: nf-scatter-out 500ms var(--nf-ease-exit, ease-in) both;
+    animation: nf-scatter-out 500ms var(--nf-ease-exit) both;
   }
   @keyframes nf-scatter-out {
     from {
@@ -1726,7 +1703,7 @@
       color-mix(in oklab, white 20%, transparent) 60%,
       transparent 100%
     );
-    animation: nf-wave-pass 700ms var(--nf-ease-entrance, ease-out) 600ms both;
+    animation: nf-wave-pass 700ms var(--nf-ease-entrance) 600ms both;
     pointer-events: none;
   }
   @keyframes nf-wave-pass {
@@ -1744,7 +1721,7 @@
    * set individually. Finite: plays once per mount.
    */
   .nf-dust-mote {
-    animation: nf-dust-rise var(--nf-dust-dur, 2s) var(--nf-ease-out, ease-out) var(--nf-dust-delay, 0ms) both;
+    animation: nf-dust-rise var(--nf-dust-dur, 2s) var(--nf-ease-entrance) var(--nf-dust-delay, 0ms) both;
     pointer-events: none;
     will-change: transform, opacity;
   }

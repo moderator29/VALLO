@@ -7,6 +7,8 @@ import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
 import { useMotionGate } from "@/components/motion/useMotionGate";
 import type { ArtSlot } from "@/lib/features/art";
 
+import "./motion-scene.css";
+
 /**
  * A MOTION SCENE: the one motion language every big banner shares (the
  * founder, 8 November 2026, "make the platform be animations and motion").

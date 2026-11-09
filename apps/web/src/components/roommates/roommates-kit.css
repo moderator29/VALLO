@@ -586,46 +586,13 @@
    * A night island in both themes: the picture and the scrim are its ground.
    */
   .nf-rmh {
-    position: relative;
-    isolation: isolate;
-    display: grid;
-    align-items: end;
-    min-block-size: 34rem;
-    overflow: hidden;
+    min-block-size: 32rem;
     border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-brand-primary) 34%, var(--nf-surface-artwork));
-    border-radius: var(--nf-radius-island);
-    background: var(--nf-surface-artwork);
-    color: var(--nf-content-primary);
-    box-shadow: var(--nf-elevation-floating);
   }
-  .nf-rmh__art {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
+  .nf-rmh .nf-scene__stage {
+    min-block-size: 32rem;
   }
-  .nf-rmh__art img {
-    object-fit: cover;
-  }
-  .nf-rmh[data-fit="contain"] .nf-rmh__art {
-    inset: 0 0 0 auto;
-    inline-size: 70%;
-  }
-  .nf-rmh[data-fit="contain"] .nf-rmh__art img {
-    object-fit: contain;
-    object-position: 100% 100%;
-  }
-  .nf-rmh__scrim {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      linear-gradient(180deg, color-mix(in oklab, var(--nf-surface-artwork) 10%, transparent) 0%, color-mix(in oklab, var(--nf-surface-artwork) 55%, transparent) 38%, var(--nf-surface-artwork) 82%),
-      radial-gradient(120% 70% at 0% 100%, color-mix(in oklab, var(--nf-brand-primary) 38%, transparent), transparent 70%);
-  }
-  .nf-rmh__words {
-    display: grid;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-lg);
+  .nf-rmh .nf-scene__words {
     max-inline-size: 40rem;
   }
   .nf-rmh__eyebrow {
@@ -683,24 +650,6 @@
   .nf-rmh__people .nf-rm-face[data-ring] {
     box-shadow: 0 0 0 2px var(--nf-surface-artwork);
   }
-  .nf-rmh__accent {
-    position: absolute;
-    inset: var(--nf-space-lg) var(--nf-space-lg) auto auto;
-  }
-  .nf-rmh__accent-tile {
-    display: grid;
-    place-items: center;
-    inline-size: 5.5rem;
-    block-size: 5.5rem;
-    border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-content-primary) 22%, transparent);
-    border-radius: var(--nf-radius-xl);
-    background:
-      radial-gradient(80% 80% at 30% 20%, color-mix(in oklab, var(--nf-content-primary) 20%, transparent), transparent 70%),
-      color-mix(in oklab, var(--nf-brand-primary) 30%, transparent);
-    box-shadow: var(--nf-elevation-floating);
-    -webkit-backdrop-filter: blur(var(--nf-glass-blur));
-    backdrop-filter: blur(var(--nf-glass-blur));
-  }
   .nf-rm-sheen {
     position: relative;
     overflow: hidden;
@@ -714,53 +663,24 @@
     pointer-events: none;
   }
   @media (min-width: 48rem) {
-    .nf-rmh {
-      align-items: center;
-      min-block-size: 30rem;
+    .nf-rmh,
+    .nf-rmh .nf-scene__stage {
+      min-block-size: 29rem;
     }
-    .nf-rmh__scrim {
-      background:
-        linear-gradient(90deg, var(--nf-surface-artwork) 0%, color-mix(in oklab, var(--nf-surface-artwork) 82%, transparent) 38%, color-mix(in oklab, var(--nf-surface-artwork) 10%, transparent) 72%),
-        radial-gradient(70% 90% at 0% 50%, color-mix(in oklab, var(--nf-brand-primary) 34%, transparent), transparent 70%);
-    }
-    .nf-rmh__words {
+    .nf-rmh .nf-scene__words {
       padding: var(--nf-space-2xl) var(--nf-space-xl);
     }
     .nf-rmh__title {
       font-size: var(--nf-text-display);
     }
-    .nf-rmh__accent {
-      inset: auto var(--nf-space-2xl) var(--nf-space-2xl) auto;
-    }
-    .nf-rmh__accent-tile {
-      inline-size: 7rem;
-      block-size: 7rem;
-    }
   }
   @media (prefers-reduced-motion: no-preference) {
-    .nf-rmh__art {
-      animation: nf-rmh-drift 30s var(--nf-ease-standard) 2 alternate both;
-    }
-    .nf-rmh__words > * {
+    .nf-rmh .nf-scene__words > * {
       animation: nf-rm-rise var(--nf-duration-entrance) var(--nf-ease-entrance) both;
-      animation-delay: calc(80ms + var(--nf-rm-i, 0) * 60ms);
-    }
-    .nf-rmh__accent {
-      animation: nf-rm-pop var(--nf-duration-entrance) var(--nf-ease-spring) both 320ms;
-    }
-    .nf-rmh__accent-tile {
-      animation: nf-rmh-float 3.2s var(--nf-ease-standard) 8 alternate both;
+      animation-delay: calc(560ms + var(--nf-rm-i, 0) * 70ms);
     }
     .nf-rm-sheen::after {
-      animation: nf-rm-sheen 1.4s var(--nf-ease-standard) 900ms 2 both;
-    }
-  }
-  @keyframes nf-rmh-drift {
-    from {
-      transform: scale(1.04) translate3d(0, 0, 0);
-    }
-    to {
-      transform: scale(1.12) translate3d(-2%, -1.5%, 0);
+      animation: nf-rm-sheen 1.4s var(--nf-ease-standard) 1300ms 2 both;
     }
   }
   @keyframes nf-rmh-float {
@@ -776,15 +696,12 @@
       transform: translateX(120%);
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-rmh__art, .nf-rmh__words > *, .nf-rmh__accent, .nf-rmh__accent-tile, .nf-rm-sheen::after) {
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-rmh .nf-scene__words > *, .nf-rm-sheen::after) {
     animation: none;
   }
-  :root:is([data-save-data="on"], [data-motion-lite="on"]) :is(.nf-rmh__eyebrow, .nf-rmh__accent-tile) {
+  :root:is([data-save-data="on"], [data-motion-lite="on"]) .nf-rmh__eyebrow {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-  }
-  :root:is([data-save-data="on"], [data-motion-lite="on"]) .nf-rmh__art {
-    animation: none;
   }
 
   /* ------------------------------------------------------------ journeys */
@@ -1357,6 +1274,15 @@
     padding: var(--nf-space-2xl) var(--nf-pad-shell) max(var(--nf-space-2xl), env(safe-area-inset-bottom));
     text-align: center;
   }
+  .nf-rmy__art[data-image] {
+    inline-size: 11rem;
+    block-size: 11rem;
+  }
+  .nf-rmy__art[data-image] img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
   .nf-rmy__art {
     position: relative;
     display: grid;
@@ -1417,6 +1343,9 @@
     .nf-rmy__art {
       animation: nf-rm-pop var(--nf-duration-entrance) var(--nf-ease-spring) both;
     }
+    .nf-rmy__art[data-image] {
+      animation: nf-rmy-drop 760ms var(--nf-ease-spring) both;
+    }
     .nf-rmy__title,
     .nf-rmy__body,
     .nf-rmy__actions {
@@ -1426,6 +1355,23 @@
     .nf-rmy__piece {
       animation: nf-rmy-burst 1.1s var(--nf-ease-entrance) both;
       animation-delay: calc(120ms + var(--nf-rmy-i, 0) * 12ms);
+    }
+  }
+  @keyframes nf-rmy-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(-120%) scale(0.7, 1.25);
+    }
+    55% {
+      opacity: 1;
+      transform: translateY(6%) scale(1.12, 0.84);
+    }
+    72% {
+      transform: translateY(-3%) scale(0.95, 1.06);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1, 1);
     }
   }
   @keyframes nf-rmy-burst {

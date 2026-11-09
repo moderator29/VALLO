@@ -1,0 +1,181 @@
+/*
+ * THE MOTION SCENE (`MotionScene.tsx`): the layered, living banner stage the
+ * feature banners share. Every rule here follows the platform's motion
+ * doctrine from the start: transform and opacity only (parallax rides the
+ * `translate` property so the subject's framer-motion `transform` composes
+ * with it and neither fights the other), named easing tokens, nothing that
+ * loops for ever, and tokenised elevation. One switch, `data-quiet` (set by
+ * `useMotionGate` under reduced motion, Calm, Off or save-data), stills it
+ * all and shows the final frame.
+ */
+@layer components {
+  .nf-scene {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    overflow: hidden;
+    border-radius: var(--nf-radius-island);
+    background: var(--nf-surface-artwork);
+    color: var(--nf-content-primary);
+    box-shadow: var(--nf-elevation-floating);
+  }
+  .nf-scene__stage {
+    grid-area: 1 / 1;
+    position: relative;
+    min-block-size: 20rem;
+  }
+  .nf-scene__words {
+    grid-area: 1 / 1;
+    position: relative;
+    z-index: 5;
+    display: grid;
+    align-content: end;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-lg);
+  }
+
+  /* The brand bed and the soft veil that keeps the words legible. */
+  .nf-scene__bed {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(120% 90% at 85% 10%, color-mix(in oklab, var(--nf-brand-primary) 34%, transparent), transparent 70%),
+      radial-gradient(90% 80% at 0% 100%, color-mix(in oklab, var(--nf-brand-secondary) 18%, transparent), transparent 70%),
+      var(--nf-surface-artwork);
+  }
+  .nf-scene__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, transparent 34%, color-mix(in oklab, var(--nf-surface-artwork) 45%, transparent) 62%, var(--nf-surface-artwork) 94%);
+  }
+
+  /* Each layer takes a parallax offset from `--nf-scene-x/y` (-1..1) by its
+     depth, on the `translate` property so a subject animated by framer-motion
+     (`transform`) composes with it. */
+  .nf-scene__layer {
+    position: absolute;
+    inset: 0;
+  }
+  .nf-scene__layer img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-scene__backdrop {
+    z-index: 1;
+    filter: blur(5px) saturate(1.05);
+    opacity: 0.55;
+    translate: calc(var(--nf-scene-x, 0) * 6px) calc(var(--nf-scene-y, 0) * 5px);
+  }
+  .nf-scene__subject {
+    z-index: 3;
+    translate: calc(var(--nf-scene-x, 0) * -18px) calc(var(--nf-scene-y, 0) * -10px);
+  }
+  .nf-scene__subject[data-fit="contain"] {
+    inset: 0 0 0 auto;
+    inline-size: min(78%, 26rem);
+  }
+  .nf-scene__subject[data-fit="contain"] img {
+    object-fit: contain;
+    object-position: 100% 100%;
+  }
+  .nf-scene[data-anchor="center"] .nf-scene__subject[data-fit="contain"] {
+    inset: 0;
+    inline-size: 100%;
+  }
+  .nf-scene[data-anchor="center"] .nf-scene__subject[data-fit="contain"] img {
+    object-position: 50% 100%;
+  }
+
+  /* The floating 3D objects at the corners. */
+  .nf-scene__object {
+    position: absolute;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    translate: calc(var(--nf-scene-x, 0) * 10px) calc(var(--nf-scene-y, 0) * 8px);
+  }
+  .nf-scene__object[data-at="tl"] {
+    inset: var(--nf-space-md) auto auto var(--nf-space-md);
+  }
+  .nf-scene__object[data-at="tr"] {
+    inset: var(--nf-space-md) var(--nf-space-md) auto auto;
+  }
+  .nf-scene__object[data-at="bl"] {
+    inset: auto auto var(--nf-space-lg) var(--nf-space-md);
+  }
+  .nf-scene__object[data-at="br"] {
+    inset: auto var(--nf-space-md) var(--nf-space-lg) auto;
+  }
+
+  /* A few slow brand particles rising behind the subject, once. */
+  .nf-scene__particles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    translate: calc(var(--nf-scene-x, 0) * 8px) calc(var(--nf-scene-y, 0) * 6px);
+  }
+  .nf-scene__particle {
+    position: absolute;
+    inset-block-end: 12%;
+    inset-inline-start: calc(12% + var(--nf-scene-p, 0) * 15%);
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
+    opacity: 0;
+  }
+  .nf-scene__particle:nth-child(3n) {
+    background: color-mix(in oklab, var(--nf-spark) 60%, transparent);
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-scene:not([data-quiet]) .nf-scene__object {
+      animation: nf-scene-float 4s var(--nf-ease-standard) 6 alternate both;
+      animation-delay: calc(400ms + var(--nf-scene-p, 0) * 120ms);
+    }
+    .nf-scene:not([data-quiet]) .nf-scene__particle {
+      animation: nf-scene-rise 6s var(--nf-ease-standard) 4 both;
+      animation-delay: calc(var(--nf-scene-p, 0) * 700ms);
+    }
+  }
+  @keyframes nf-scene-float {
+    from {
+      transform: translateY(0) rotate(-3deg);
+    }
+    to {
+      transform: translateY(-10px) rotate(3deg);
+    }
+  }
+  @keyframes nf-scene-rise {
+    0% {
+      opacity: 0;
+      transform: translateY(0) scale(0.6);
+    }
+    30% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-9rem) scale(1);
+    }
+  }
+
+  /* Stilled: the final frame, no drift, no particles, no float. */
+  .nf-scene[data-quiet] .nf-scene__particles {
+    display: none;
+  }
+  .nf-scene[data-quiet] :is(.nf-scene__backdrop, .nf-scene__subject, .nf-scene__object, .nf-scene__particles) {
+    translate: none;
+    animation: none;
+  }
+  :root:is([data-save-data="on"], [data-motion-lite="on"]) .nf-scene__backdrop {
+    filter: none;
+  }
+}
