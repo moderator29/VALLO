@@ -15,6 +15,8 @@ import { LIMITS } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { blockUserSafely } from "@/lib/safety/blocks-actions";
 import { shareOrCopy } from "@/lib/ui/clipboard";
+import { ShareButton as ShareLauncher, type ShareCopy } from "@/components/share/ShareSheet";
+import type { ShareSubject } from "@/components/share/ShareComposer";
 import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -88,8 +90,21 @@ export function SaveButton({ kind, id, signedIn = true }: { kind: "person" | "ro
   );
 }
 
-export function ShareButton({ path, title }: { path: string; title: string }) {
+export function ShareButton({ path, title, subject, shareCopy }: { path: string; title: string; subject?: ShareSubject; shareCopy?: ShareCopy }) {
   const copy = useScopedCopy("roommates");
+  /* With a subject, Share opens the Vallo card composer (SHARE_AND_CONTROLS.md
+     section 1); without one it falls back to the link, for old call sites. */
+  if (subject && shareCopy) {
+    return (
+      <ShareLauncher subject={subject} copy={shareCopy}>
+        {(open) => (
+          <Button variant="icon" round iconOnly aria-label={copy.actions.share} data-testid="roommates-share" onClick={open}>
+            <UiIcon name="share" size={20} />
+          </Button>
+        )}
+      </ShareLauncher>
+    );
+  }
   return (
     <Button
       variant="icon"
