@@ -298,6 +298,12 @@ export default async function SocialProfilePage({
             <ProfileShare
               handle={view.profile.handle}
               displayLabel={view.profile.displayLabel}
+              avatarUrl={view.profile.avatarUrl || undefined}
+              followers={view.profile.followerCount}
+              posts={view.profile.postCount}
+              copy={{ title: t.shareCard.title, share: t.shareCard.share, background: t.shareCard.background, stats: t.shareCard.stats, name: t.shareCard.name, copied: t.shareCard.copied }}
+              statWords={{ followers: t.shareCard.profileStats.followers, posts: t.shareCard.profileStats.posts }}
+              leadWords={{ profile: t.shareCard.leads.profile, stats: t.shareCard.leads.stats }}
             />
           }
           menu={
