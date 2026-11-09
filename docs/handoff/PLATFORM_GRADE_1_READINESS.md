@@ -35,27 +35,28 @@ Store submission.
 
 ## 1. THE FOUNDER'S RULES (NON-NEGOTIABLE)
 
-1. **Branch. CONTINUE THE EXISTING WORK, DO NOT START A NEW LINE OF IT.**
-   (The founder, 9 November 2026: work on the branch the last two sessions
-   worked on.) Two sessions have already put 336 commits into this upgrade.
-   That work is on `origin/claude/fervent-cray-1vzbp1`, which contains every
-   commit of `origin/platform-grade-1-readiness` plus 155 more, so it is a
-   strict superset and no work is lost by taking it. The founder wants it all
-   under the name he chose, so the first commands of the session are:
+1. **Branch. `main` NOW HOLDS THE WHOLE UPGRADE: CUT FROM IT.** (Updated 9
+   November 2026, after the founder said to push everything to main.) The
+   upgrade work the last two sessions built, all 336 commits of it, was merged
+   into `main` along with this handoff and the payments documents, so there is
+   no longer a separate line of work to rescue:
 
    ```
    git fetch origin
-   git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
-   git merge origin/main
+   git checkout -B platform-grade-1-readiness origin/main
    git push -u origin platform-grade-1-readiness
    ```
 
-   The merge picks up `main`'s newest work, including
-   `PROTECTED_PAYMENTS_BUILD.md` and `PROTECTED_PAYMENTS_SPECS.md`, which do
-   not exist on the work branch yet. Resolve any conflict, never reset it
-   away, and report what was resolved. Do NOT cut a fresh branch from `main`:
-   that silently throws away everything the last two sessions built, which is
-   the single most expensive mistake available in this document.
+   Check it before you trust it: `git log --oneline -5` should show the merge
+   that brought the upgrade onto `main`, and `docs/handoff/STATE.md`,
+   `AGENT_QUEUES.md` and `PROTECTED_PAYMENTS_BUILD.md` should all be present.
+   If any is missing, STOP and tell the founder rather than starting work on a
+   tree with the upgrade missing from it.
+
+   You are still CONTINUING work, not starting it. Everything the last two
+   sessions built is underneath you now, which is why setup step 3 has you
+   read the state files before touching anything. Do not redo the audit or
+   the recommendations.
 
    From then on: ONE branch, `platform-grade-1-readiness`, and EVERY piece of
    this work lives on it from the first note to the last polish commit.
@@ -808,8 +809,8 @@ VALLO: PLATFORM GRADE 1 READINESS. You are taking over my platform upgrade.
 Repo moderator29/read-it-well. Supabase project uccixoonmbhrnyczyigt.
 
 YOU ARE CONTINUING WORK, NOT STARTING IT
-Two sessions before you have already done a great deal of this upgrade. There
-are 336 commits of it. DO NOT start from main and DO NOT redo the audit, the
+Two sessions before you have already done a great deal of this upgrade, 336
+commits of it, and it is all on main now. DO NOT redo the audit, the
 recommendations or the reference-pattern notes: they exist, they are good, and
 redoing them burns my session for nothing. Your first job is to find out what
 is already done, then carry on from the first thing that is not.
@@ -817,19 +818,17 @@ is already done, then carry on from the first thing that is not.
 SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
 1. Fetch everything:
      git fetch origin
-2. Pick up the SAME branch the last two sessions worked on. The full work is
-   on origin/claude/fervent-cray-1vzbp1, which contains every commit of
-   origin/platform-grade-1-readiness plus 155 more. I want it all living under
-   the name platform-grade-1-readiness, so do exactly this:
-     git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
-     git merge origin/main
+2. main now holds the whole upgrade, so cut your one working branch from it:
+     git checkout -B platform-grade-1-readiness origin/main
      git push -u origin platform-grade-1-readiness
-   The merge brings in main's newest work, including the payments documents in
-   step 6, which do not exist on the work branch yet. If that merge conflicts,
-   resolve it, do not reset it away, and tell me what you resolved. From then
-   on: ONE branch, platform-grade-1-readiness, every commit, start to finish.
-   Never open a different branch for a sub-piece of the work, so I can see the
-   whole upgrade in one place and Vercel stays switched off for it.
+   Then check it before you trust it: git log --oneline -5 should show the
+   merge that brought the upgrade onto main, and docs/handoff/STATE.md,
+   AGENT_QUEUES.md and PROTECTED_PAYMENTS_BUILD.md should all be there. If any
+   of them is missing, STOP and tell me, rather than working on a tree with
+   the upgrade missing from it. From then on: ONE branch,
+   platform-grade-1-readiness, every commit, start to finish. Never open a
+   different branch for a sub-piece of the work, so I can see the whole
+   upgrade in one place and Vercel stays switched off for it.
 3. READ THE STATE OF THE WORK before any other document, in this order:
      docs/handoff/STATE.md             who was doing what, how to resume
      docs/handoff/AGENT_QUEUES.md      the ordered jobs, with DONE marks
