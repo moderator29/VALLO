@@ -80,7 +80,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the requested photo", () => {
     const { page, close } = await mountInBrowser({
       entry: ENTRY,
       init: INIT,
-      actions: { answerVerificationRequest: `async () => ({ ok: false, message: "This request is already answered. Thank you." })` },
+      actions: { answerVerificationRequest: `async () => ({ ok: false, error: "This request is already answered. Thank you." })` },
     });
     try {
       await page.getByTestId("selfie-file").setInputFiles({ name: "me-with-id.jpg", mimeType: "image/jpeg", buffer: JPEG });

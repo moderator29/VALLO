@@ -495,6 +495,7 @@
   /* The per-row archive button: a quiet icon that appears on hover/focus,
      always visible on touch devices. */
   .nf-notif__archive-btn {
+    position: relative;
     display: grid;
     place-items: center;
     width: 2rem;
@@ -504,6 +505,17 @@
     background: transparent;
     color: var(--nf-content-muted);
     cursor: pointer;
+  }
+  /* 44px tappable while the drawn circle stays 2rem: a transparent, centred
+     hit area, the same device as `.nf-icon-btn::before` (controls.css). */
+  .nf-notif__archive-btn::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
   }
   .nf-notif__archive-btn:hover,
   .nf-notif__archive-btn:focus-visible {

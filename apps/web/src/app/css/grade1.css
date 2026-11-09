@@ -1206,5 +1206,20 @@ form.nf-composer .nf-composer__send:active {
   padding: var(--nf-space-sm) var(--nf-space-lg);
   font-size: var(--nf-text-body);
 }
+/*
+ * The compact ICON button keeps its full 44px tap target after the ladder
+ * above shrank the painted `sm` rung to 40px. A text rung is wide enough on
+ * its own, but an icon-only `sm` is square, so without this its `::before`
+ * hit area (buttons.css) is only 40px across. Widen that area, centred, so
+ * the drawn circle stays 40 and the finger still gets 44 (WCAG 2.5.8) - the
+ * same device as `.nf-icon-btn::before` (controls.css). Height is already
+ * floored to 2.75rem by the base `.nf-btn--sm::before`.
+ */
+.nf-btn--icon.nf-btn--sm::before {
+  left: 50%;
+  right: auto;
+  width: max(100%, 2.75rem);
+  transform: translate(-50%, -50%);
+}
 }
 
