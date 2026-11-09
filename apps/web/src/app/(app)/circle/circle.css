@@ -480,7 +480,7 @@
   }
   .nf-ccom__rules-n {
     color: var(--nf-content-muted);
-    font-weight: 500;
+    font-weight: 600;
   }
   .nf-ccom__rules .nf-circle-rules {
     display: grid;
@@ -533,7 +533,7 @@
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     font-family: var(--nf-font-display);
-    font-weight: 800;
+    font-weight: 700;
   }
   .nf-cthread__qword {
     color: var(--nf-content-link);
@@ -657,7 +657,7 @@
   }
   .nf-cperson__lead {
     color: var(--nf-content-muted);
-    font-weight: 500;
+    font-weight: 600;
   }
   .nf-cperson__label {
     overflow: hidden;

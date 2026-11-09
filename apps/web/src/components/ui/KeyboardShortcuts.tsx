@@ -167,7 +167,7 @@ export function KeyboardShortcuts() {
                       {shortcut.keys.split(" ").map((k, i) => (
                         <kbd
                           key={i}
-                          className="inline-flex min-w-[1.75rem] items-center justify-center rounded-sm border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] px-inline-tight py-3xs nf-caption font-medium text-[var(--nf-content-primary)]"
+                          className="inline-flex min-w-[1.75rem] items-center justify-center rounded-sm border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] px-inline-tight py-3xs nf-caption font-semibold text-[var(--nf-content-primary)]"
                         >
                           {k}
                         </kbd>
@@ -181,7 +181,7 @@ export function KeyboardShortcuts() {
         </div>
 
         <p className="mt-row nf-caption text-center text-[var(--nf-content-muted)]">
-          Press <kbd className="font-medium">?</kbd> to toggle this overlay
+          Press <kbd className="font-semibold">?</kbd> to toggle this overlay
         </p>
       </div>
     </>,

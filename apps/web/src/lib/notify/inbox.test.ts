@@ -4,11 +4,12 @@ import { loadNotificationPage, olderThan } from "./inbox";
 
 type Call = { method: string; args: unknown[] };
 
-/** A PostgREST builder stand-in that records the chain and answers with `result`. */
+/** A PostgREST builder stand-in that records the chain and answers with `result`.
+ * `is` is here because the read also filters out archived rows (`.is("archived_at", null)`). */
 function fakeClient(result: { data: unknown[] | null; error: unknown }) {
   const calls: Call[] = [];
   const builder: Record<string, unknown> = {};
-  for (const method of ["select", "order", "or"]) {
+  for (const method of ["select", "order", "or", "is"]) {
     builder[method] = (...args: unknown[]) => {
       calls.push({ method, args });
       return builder;

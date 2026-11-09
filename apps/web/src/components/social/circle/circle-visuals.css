@@ -566,7 +566,7 @@
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     font-family: var(--nf-font-display);
-    font-weight: 800;
+    font-weight: 700;
   }
   .nf-ccard__q-word {
     color: var(--nf-content-link);

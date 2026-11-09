@@ -1090,7 +1090,7 @@
   }
   .nf-pcf__period {
     color: var(--nf-content-secondary);
-    font-weight: 500;
+    font-weight: 600;
   }
   .nf-pcf__caption {
     display: -webkit-box;
@@ -1291,7 +1291,7 @@
   }
   .nf-plc__period {
     color: var(--nf-content-muted);
-    font-weight: 500;
+    font-weight: 600;
   }
   .nf-plc__view {
     display: inline-flex;
