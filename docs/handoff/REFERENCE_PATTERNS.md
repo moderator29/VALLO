@@ -528,3 +528,212 @@ conversation pinned first with a black brand tile ("Hauslet Support",
 tags "Support . Support"). Vallo: the pinned Vallo Assistant row, with the
 human support reached from inside it, and the store screenshots for 1.0.1
 taken from the upgraded inbox.
+
+## Batch 6 (9 November 2026, 14 images): payments, for the protected rail and every Paystack checkout
+
+Copies of the Vallo concepts and spec pages: `refs/payments/` (third-party
+screens are described only). The founder sent these for the payment work ("These are the refs etc for the
+works"). Six are Vallo concept mockups (R71, R75 to R77) and three are pages of
+the commissioned design spec as he read it (R72, R79, R80); the rest are other
+products' checkouts, for pattern only. Every Vallo screen built from these is
+dark neon blue by default (page about #000612, cards #040a20, raised #0b1838,
+accent #0066FF), light opt-in; the mockups are light and are not a ruling on
+the theme.
+
+**Read this before copying any WORDS from these images.** The mockups were
+drawn before the copy rules were settled, and several lines in them break
+them. PROTECTED_PAYMENTS_BUILD.md section 2 and 3 win:
+- "Your payment is safe!", "Held Safely", "Your money is secure and
+  protected", "Funds held securely", "Pay with confidence. Your money is held
+  securely" (R71, R75, R76): never. The protected screens carry the
+  provider's funds wording UNALTERED (short at the pay step, full on the
+  confirmation and the receipt), from one constants module, and the line
+  "Your payment is held by a licensed bank until you confirm check-in. Vallo
+  never holds your money." Nothing else may describe where money sits.
+- "Held at a CBN-licensed bank" without the bank's name (R71, R75): the bank
+  is NAMED, in the provider's agreed words. Naming it is the trust line.
+- A protected option on a SHORT-LET (R75 card 1, R76 card 1 "Protected Bank
+  Transfer, Recommended"): shortlets, hotels and restaurants launch on card
+  (Paystack split at charge, chargeback is the protection). A protected
+  option appears only for a category the provider has approved in writing,
+  and every category defaults to disabled.
+- "Protection Fee" (R75): if a fee exists it is named honestly and shown
+  before commitment; never "free protection" (R72's own copy rule).
+- "Recommended" on the protected card (R72, R75): allowed only where both
+  rails are genuinely open for that deal; card is never labelled unsafe.
+- None of this shows while the rail is OFF. Today these screens stay dark.
+
+### R71. Vallo concept: "Protected" hero after funding
+Deep navy to neon blue header with the wordmark and bell, a glass shield with
+a tick over a soft skyline, a green "Protected" pill, a big title, the
+promise in two lines, the property card (photo, title, area pin, amount), a
+three-step vertical timeline (Payment received by bank with time, Funds
+protected with time, Confirm check-in "before <date>, then the funds are
+released to the host"), a bank card with a building glyph, a full width
+primary "View transaction details" and a quiet "Back to home".
+Vallo takes: the vault-closing moment (BUILD 7.2 "PROTECTED"), the timeline
+as the spine of the screen, one primary and one quiet action, the property
+card so the member knows WHICH deal. Changes: the provider's words, the bank
+named, the timeline driven only by signed provider webhooks (never the
+frontend), the shield animates once (draw, then settle) and is static under
+reduced motion; dark default.
+
+### R72. Spec, Screen 1 "Choose how to pay"
+Eyebrow "COMPLETE YOUR BOOKING", title, a sub line; two big option cards:
+protected bank transfer (selected border, "Recommended" chip, shield amount,
+the promise, rows Payment method / Protection fee / Total to transfer, "The
+exact fee and any other charges are shown before you continue") and Pay by
+card ("Standard card checkout", "Card payments follow the standard payment
+terms and may not include the protected holding arrangement"); a line that
+release conditions are in the agreement; one primary "Continue with
+protected transfer". Copy rules under it: no "free protection" when a fee
+exists; never call card unsafe; show the full total.
+Vallo takes: OptionCards with the honest side-by-side (BUILD 7.1), the total
+before commitment, the primary that names the chosen rail.
+
+### R73. Behance travel app: room booking, payment, confirmed
+Three screens: a booking form (stay card, dates and guests chips, a
+"Booking conditions" card with prepayment, child rate, free cancellation in
+green, View details; guest details, phone with a flag, passport, date of
+birth, comments, privacy tick, "Pay EUR 69"); payment (the same stay card,
+saved card radio, "Use a new card" with a camera scan icon, MM/YY and CVV,
+"Total for 3 nights", Pay); confirmed (illustration, "Booking confirmed",
+Contact hotel and View on map, "View trip details" primary).
+Vallo takes: the conditions card BEFORE pay, the stay card repeated on every
+step so context never drops, the amount inside the pay button, the confirmed
+screen's next actions (message host, map, trip). Vallo already asks phone at
+the first deal, never passport for a stay guest (founder ruling).
+
+### R74. Dinnery (restaurant reservation): summary, payment, success
+Summary with the venue, guests and time, the pre-ordered items with prices,
+subtotal, booking fee, total, "Make payment"; payment method radio list
+(card, bank transfer, USSD) under a saved card; add card; "Reservation
+successful" with a ring tick and "View reservations"; every screen in light
+AND dark.
+Vallo takes: the restaurant deposit as a line item with its name, the method
+list for the card rail (Paystack offers card, bank transfer and USSD under
+one checkout), and proof that both themes are designed, not inverted.
+
+### R75. Vallo concept: five rails in one family (shortlet, hotel, restaurant, rent, protected detail)
+A deep blue header with a real photo, a tinted category pill (Short-let
+Booking, Hotel Booking, Restaurant Reservation, Property Rent), title, area,
+rating; a price block (room total, service fee, total); for rent "Annual
+rent, 12 months", a promise card and a four-tick explainer (Transfer funds,
+We confirm payment, Funds held securely, Release after handover) and "Get
+payment details"; a restaurant card with "Pay securely with Paystack" and a
+lock line; a "Booking confirmed" with the reference and a copy icon,
+"View booking details" and "Download receipt"; a footer strip (Protected
+payments, Flexible options, Clear status, Easy receipts, Dispute support).
+Vallo takes: ONE checkout family across every deal type, the category pill,
+the copyable reference, Download receipt on every confirmation, the
+four-step explainer before a rent transfer (worded as "We confirm with the
+bank", never "funds held securely"). The footer strip is marketing, not a
+product screen.
+
+### R76. Same image as R75 (sent twice). Recorded once.
+
+### R77. Vallo concept: card first checkout (shortlet, card entry, success, rent, restaurant)
+Card radio first ("Pay with card, Visa, Mastercard, Verve, Secure and instant
+payment") then "Pay with bank transfer (Paystack)"; a card entry screen with
+the amount large and "Secured by Paystack" small under Pay; a success with
+confetti, "Payment successful" pill, "Booking confirmed!", the booking card
+with reference and total paid, View booking details, Download receipt, and
+"A confirmation has been sent to your email and in-app notifications"; rent
+with "Protected transfer ... until you confirm possession" and "How it
+works"; restaurant "Reservation fee (non-refundable)" named in the line.
+Vallo takes: this is the honest LAUNCH shape for shortlets, hotels and
+restaurants (card, Paystack split), the small processor line under Pay, the
+non-refundable label ON the fee line, the confirmation that says where the
+copy went. Confetti only on success and only once, honouring reduced motion
+and the Motion setting.
+
+### R78. HomeToGo payments
+Order summary with "Due now" and "Due at the location" split; a four-step
+progress (Personal details, Book and pay, Payment details, Done); payment
+methods (card with brand marks, PayPal, Google Pay, SEPA, Klarna; "Pay now"
+and "Pay later" groups); card form with a green tick per valid field and a
+lock in the pay button; a final cost breakdown with Paid vs Due at location
+and what is included.
+Vallo takes: the split between what is paid now and what is paid later
+(rent: inspection fee now, rent later; restaurant: deposit now, bill at the
+table), the progress on StepFrame, per-field valid ticks.
+
+### R79. Spec, "THE VALLO PROMISE" and the transaction journey
+"Your money. Your agreement. Your moment." with three ticks: Held by the
+designated bank; Released under your agreement; A clear process if
+something goes wrong. Italic rule: use this promise only after the custody
+arrangement, licensing and category are verified; the exact bank name
+belongs in the legal disclosure. Then the buyer journey, numbered: choose how
+to pay; review the protection agreement (property, seller, amount, duration,
+condition, dispute and refund terms); Vallo creates the transaction and says
+the transfer has not arrived yet; transfer funds (designated account,
+exact amount, unique reference, expiry); payment confirmation by the partner,
+the app waits until then.
+Vallo takes: the journey as the screen order of the protected rail, and the
+promise card as a trust surface that renders ONLY when the category is
+approved and the flag is on.
+
+### R80. Spec, Screen 3 "Funding instructions"
+Eyebrow "VALLO PAYMENT REFERENCE", an "Awaiting transfer" status pill, the
+amount huge, "Transfer the exact amount shown below", a sunken card of Bank,
+Account name, Account number (copy), Transfer reference (copy), "Transfer
+expires in 14:32" with a draining progress bar, an info line that a transfer
+to another account may not be matched, primary "I've made the transfer" and
+under it "This does not confirm payment. We'll verify the transfer with the
+bank." The note under the screen: that button only refreshes status; it
+must not mark the transaction funded.
+Vallo takes all of it: amount first, account details second, expiry and
+instructions third; every value from the provider, never typed by the member
+or hard-coded; copy with a confirming banner; the honest button.
+
+### R81. Spec, the five visual references, and the rule above them
+"Paystack payments are ordinary payments, not escrow. Protected rent
+payments must remain a separate flow, only enabled when the actual provider
+integration and custody arrangement are verified." 01 Short-let payments
+(Dribbble "Confirm and pay": listing card with rating, "Your trip" rows for
+dates and guests with Edit, price details line by line, total).
+Vallo takes: the rule, verbatim in spirit, as the line between the two
+rails in code (separate routes, separate copy constants, separate tests).
+
+### R82. 02 Hotels and accommodation
+Dark luxury hotel app: a photo-led discover screen, a hotel page with
+amenities and a "Book now" bar, a booking summary card (price, subtotal,
+total) over a "Secure payment" radio list and a warm gold "Confirm & Pay".
+Vallo takes: the dark ground done richly (photo, depth, one warm accent is
+theirs; Vallo's one accent is #0066FF), the summary card sitting ABOVE the
+method choice.
+
+### R83. 03 Restaurants and reservations
+Hugo's Dining: room choice as a segmented control (Main room, Terrace), date
+and time rows, table size, deposit with "Cancellation policy" beside it; the
+summary with a green deposit and an amber note "The reservation for the
+table is withdrawn after 30 minutes of delay".
+Vallo takes: the policy note in amber at the moment of payment, the deposit
+shown as the only thing paid now, the area choice where the venue has one.
+
+### R84. 04 All other Vallo Paystack payments, and the transaction screens
+Sproutly: an invoice dashboard with totals paid and pending, a bar chart of
+distribution, an activity list, and a "How would you like to pay?" sheet
+(settlement wallet with its balance, bank transfer with the account and a
+copy chip, Cancel and Pay). Below, a P2P money app: wallet balance card with
+Withdraw and Top up, recent activity with pending tags, a "Transaction
+progress" timeline (accepted, processing, completed) with "I no longer want
+to proceed" as a quiet red link, and a transaction summary before "Create
+transaction".
+Vallo takes: for promotions, subscriptions, inspection fees and services, the
+pay sheet with methods and the copy chip; the payments home with totals and
+open items first (BUILD 7.5); the per-transaction timeline in plain sentences
+(BUILD 7.5); the quiet cancel link only where cancelling is truly allowed.
+
+### Patterns this batch adds
+1. One checkout family for every deal type: category pill, the thing being
+   paid for on every step, a line-by-line breakdown, the total in the
+   button, one primary.
+2. Two rails, kept apart in code and in words: card (live) and protected
+   (built, off). The protected rail's words come from one constants module
+   holding the provider's text unaltered.
+3. The funding screen order: amount, account, expiry, honest button.
+4. A transaction timeline everywhere money moves, driven by the server.
+5. Confirmation screens always offer the receipt and the next action.
+6. Every fee named, every condition shown before pay, nothing free that is
+   not free.
