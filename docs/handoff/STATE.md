@@ -29,8 +29,10 @@ workflow, or says yes to a draft pull request that never merges.
 | Worker | Doing | State |
 |---|---|---|
 | Lead | setup, state report, CI probes, pending SQL, every commit | Probes b3-rate-gate, db-10-step2, new-a4-01-step2 fixed and passing live (8efbdbe7b); /api/build endpoint restored (the `build/` ignore rule had hidden it); example collection date applied live |
-| Agent 1 | money copy sweep (batch one): every screen promising protected, held, secured or escrowed payment | Writes `docs/handoff/MONEY_COPY_SWEEP.md`; NO copy changes until the founder approves the list |
-| Agent 2 | protected payments Phase 1: audit of every reference to the old provider | Writes `docs/handoff/PAYMENTS_MIGRATION_AUDIT.md`; no code until the founder has seen it |
+| Agent 1 (done) | money copy sweep (batch one): every screen promising protected, held, secured or escrowed payment | Writes `docs/handoff/MONEY_COPY_SWEEP.md`; NO copy changes until the founder approves the list |
+| Agent 2 (done) | protected payments Phase 1: audit of every reference to the old provider | Writes `docs/handoff/PAYMENTS_MIGRATION_AUDIT.md`; no code until the founder has seen it |
+
+Batch two (running): an agent puts app/agent/** and app/host/** on PageFrame (not the wizard, not money pages); another puts app/admin/** on PageHead (not the money desks). Found live: the old escrow switch is ON since 8 Oct, a pending file switches it off.
 
 Next after batch one: the four shared components spread (PageFrame is on 96
 of 275 ledger pages, StepFrame on a handful), the listing wizard one question
