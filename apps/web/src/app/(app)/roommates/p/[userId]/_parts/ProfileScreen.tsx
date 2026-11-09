@@ -1,3 +1,5 @@
+import { getDictionary } from "@vallo/i18n";
+
 import { PageFrame } from "@/components/app/PageFrame";
 import { SafetyRows, SaveButton, ShareButton } from "@/components/roommates/Actions";
 import {
@@ -74,6 +76,7 @@ export function RoommateProfileScreen({
 
   const p = read.profile;
   const today = lagosDay(now);
+  const share = getDictionary("en").shareCard;
   return (
     <PageFrame
       title={p.name}
@@ -83,7 +86,17 @@ export function RoommateProfileScreen({
         p.isSelf ? null : (
           <span className="nf-rmv-headacts">
             <SaveButton kind="person" id={p.userId} />
-            <ShareButton path={ROOMMATES_ROUTES.person(p.userId)} title={p.name} />
+            <ShareButton
+              path={ROOMMATES_ROUTES.person(p.userId)}
+              title={p.name}
+              subject={{
+                ...(p.avatarUrl ? { avatar: p.avatarUrl } : { initial: p.name }),
+                ...(p.handle ? { handle: `@${p.handle}` } : p.city ? { handle: p.city } : {}),
+                headline: p.name,
+                url: ROOMMATES_ROUTES.person(p.userId),
+              }}
+              shareCopy={{ title: share.title, share: share.share, background: share.background, stats: share.stats, name: share.name, copied: share.copied }}
+            />
           </span>
         )
       }
