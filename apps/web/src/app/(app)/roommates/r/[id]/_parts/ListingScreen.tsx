@@ -103,6 +103,7 @@ export function RoomListingScreen({
             emptyLabel={copy.ui.card.noPhoto}
             prevLabel={copy.ui.listing.prevPhoto}
             nextLabel={copy.ui.listing.nextPhoto}
+            morphId={l.id}
           />
           <Summary l={l} t={copy} />
           <FactsRow l={l} t={copy} />

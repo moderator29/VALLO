@@ -10,6 +10,7 @@ import { ROOMMATES_ROUTES, type RoomCard, type RoommateCard } from "@/lib/featur
 import { AMENITY_ICON, availableText, budgetText, counted, fill, LOCALE, moveInText, placeText, type RoommatesCopy } from "./format";
 import { BadgesRow, KindTag, LifestyleChips, MatchReasons, MatchRing, PersonFace, VerifiedChip } from "./Marks";
 import { FreshOnly } from "./Kept";
+import { RoomCardLink } from "./RoomCardLink";
 import "./roommates-kit.css";
 
 /**
@@ -144,15 +145,19 @@ export function RoomCardView({
   const eyebrow = [room.furnished ? copy.furnished[room.furnished] : null, room.roomsAvailable ? counted(room.roomsAvailable, c.roomsFree) : null].filter(Boolean).join(" · ");
   const free = availableText(room.availableFrom, copy, today);
   const title = linked ? (
-    <Link href={href ?? ROOMMATES_ROUTES.listing(room.id)} className="nf-rm-card__link">
+    <RoomCardLink id={room.id} href={href ?? ROOMMATES_ROUTES.listing(room.id)} className="nf-rm-card__link">
       {room.title}
-    </Link>
+    </RoomCardLink>
   ) : (
     room.title
   );
+  /* The photograph flies into the listing's hero: name the box so a tap on the
+     stretched link can pair the two (RoomCardLink, Gallery). Only a real cover
+     flies; a calm "no photo" tile has nothing to morph. */
+  const morph = linked && cover ? { "data-morph-id": room.id } : null;
   return (
     <article className="nf-rm-card nf-rm-rcard" data-testid={testId ?? "room-card"}>
-      <div className="nf-rm-rcard__media">
+      <div className={cover && linked ? "nf-rm-rcard__media nf-vt-morph" : "nf-rm-rcard__media"} {...morph}>
         {cover ? (
           <RemoteImage src={cover} alt="" width={640} height={480} sizes="(max-width: 640px) 92vw, 360px" loading="lazy" />
         ) : (

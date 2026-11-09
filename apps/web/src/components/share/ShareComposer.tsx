@@ -67,18 +67,19 @@ export function ShareComposer({
   backgrounds?: ShareBackground[];
   copy?: { share?: string; background?: string; stats?: string; handle?: string; copied?: string; yours?: string; presets?: string; darken?: string };
 }) {
-  const [bgId, setBgId] = useState(backgrounds[0]?.id);
   const [showStats, setShowStats] = useState(true);
   const [showHandle, setShowHandle] = useState(true);
-  const [leadId, setLeadId] = useState(subject.leads?.[0]?.id);
-  const [darken, setDarken] = useState(false);
-  const bg = backgrounds.find((b) => b.id === bgId) ?? backgrounds[0];
   /* The "Yours / Presets" split (SHARE_AND_CONTROLS.md section 5.1): a member's
-     own photos on one tab, the Vallo aurora presets on the other. */
+     own photos on one tab, the Vallo aurora presets on the other. A listing
+     opens on its own cover; everything else opens on the first preset. */
   const ownBgs = backgrounds.filter((b) => b.kind === "image");
   const presetBgs = backgrounds.filter((b) => b.kind === "aurora");
   const hasSplit = ownBgs.length > 0 && presetBgs.length > 0;
   const [bgGroup, setBgGroup] = useState<"yours" | "presets">(ownBgs.length > 0 ? "yours" : "presets");
+  const [leadId, setLeadId] = useState(subject.leads?.[0]?.id);
+  const [darken, setDarken] = useState(false);
+  const [bgId, setBgId] = useState((ownBgs[0] ?? backgrounds[0])?.id);
+  const bg = backgrounds.find((b) => b.id === bgId) ?? backgrounds[0];
   const shownBgs = hasSplit ? (bgGroup === "yours" ? ownBgs : presetBgs) : backgrounds;
   const lead = subject.leads?.find((l) => l.id === leadId) ?? subject.leads?.[0] ?? null;
   const headline = lead?.headline ?? subject.headline;
