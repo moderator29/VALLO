@@ -718,3 +718,35 @@ describe("Vallo Roommates' shared pages (8 November 2026)", () => {
     }
   });
 });
+
+describe("the forwarded link's card (SHARE_AND_CONTROLS.md section 1.2)", () => {
+  const id = "6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b";
+  /* Next gives a generated metadata route a content hash in its own path, and
+     that hashed address is the one it writes into the page's og:image, so the
+     unfurler fetches the hashed form. Both the bare and the hashed path must
+     open, for each of the three cards. */
+  it("opens the opengraph-image route, bare and content-hashed", () => {
+    for (const path of [
+      "/u/adaeze/opengraph-image",
+      "/u/adaeze/opengraph-image-14v420",
+      `/roommates/r/${id}/opengraph-image`,
+      `/roommates/r/${id}/opengraph-image-13m5mx`,
+      `/circle/p/${id}/opengraph-image`,
+      `/circle/p/${id}/opengraph-image-1n8374`,
+    ]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  it("opens only that one leaf, never the page or a sibling route", () => {
+    for (const path of [
+      "/u/adaeze",
+      "/u/adaeze/followers",
+      "/u/adaeze/followers/opengraph-image",
+      `/circle/p/${id}`,
+      `/circle/p/${id}/replies/opengraph-image`,
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+    }
+  });
+});
