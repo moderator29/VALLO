@@ -6,7 +6,7 @@ import { Sheet } from "@/components/ui/Sheet";
 
 import { ShareComposer, type ShareBackground, type ShareSubject } from "./ShareComposer";
 
-export type ShareCopy = { title: string; share: string; background: string; stats: string; name: string; copied: string };
+export type ShareCopy = { title: string; share: string; background: string; stats: string; name: string; copied: string; yours?: string; presets?: string; darken?: string };
 
 /**
  * THE SHARE COMPOSER IN A BOTTOM SHEET (9 November 2026, SHARE_AND_CONTROLS.md

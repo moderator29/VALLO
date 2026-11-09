@@ -11,6 +11,9 @@ export const shareCardEn = {
   name: "Name",
   copied: "Link copied",
   makeCard: "Make a share card",
+  yours: "Yours",
+  presetsTab: "Presets",
+  darken: "Darken",
   /* The card-variant tabs: what the card leads with. */
   leads: {
     profile: "Profile",

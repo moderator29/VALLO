@@ -87,7 +87,7 @@ export function RoomListingScreen({
             priceMinor={sharePriceMinor}
             period={l.rentPeriod}
             roomsFree={l.roomsAvailable}
-            shareCopy={{ title: shareCard.title, share: shareCard.share, background: shareCard.background, stats: shareCard.stats, name: shareCard.name, copied: shareCard.copied }}
+            shareCopy={{ title: shareCard.title, share: shareCard.share, background: shareCard.background, stats: shareCard.stats, name: shareCard.name, copied: shareCard.copied, yours: shareCard.yours, presets: shareCard.presetsTab, darken: shareCard.darken }}
             shareWords={{ cover: shareCard.presets.cover, perMonth: shareCard.listingStats.perMonth, roomsFree: shareCard.listingStats.roomsFree, listingLead: shareCard.leads.listing, priceLead: shareCard.leads.price, makeCard: shareCard.makeCard }}
           />
         </span>

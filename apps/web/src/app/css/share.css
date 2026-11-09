@@ -189,6 +189,19 @@
     font-weight: 600;
     opacity: 0.86;
   }
+  .nf-share-card__darken {
+    position: absolute;
+    inset: 0;
+    background: var(--nf-scrim-cover);
+  }
+  .nf-share__bgtabs {
+    display: inline-flex;
+    gap: var(--nf-space-3xs);
+    align-self: center;
+    padding: var(--nf-space-3xs);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-inset);
+  }
   .nf-share__tabs {
     display: inline-flex;
     gap: var(--nf-space-3xs);

@@ -65,13 +65,21 @@ export function ShareComposer({
 }: {
   subject: ShareSubject;
   backgrounds?: ShareBackground[];
-  copy?: { share?: string; background?: string; stats?: string; handle?: string; copied?: string };
+  copy?: { share?: string; background?: string; stats?: string; handle?: string; copied?: string; yours?: string; presets?: string; darken?: string };
 }) {
   const [bgId, setBgId] = useState(backgrounds[0]?.id);
   const [showStats, setShowStats] = useState(true);
   const [showHandle, setShowHandle] = useState(true);
   const [leadId, setLeadId] = useState(subject.leads?.[0]?.id);
+  const [darken, setDarken] = useState(false);
   const bg = backgrounds.find((b) => b.id === bgId) ?? backgrounds[0];
+  /* The "Yours / Presets" split (SHARE_AND_CONTROLS.md section 5.1): a member's
+     own photos on one tab, the Vallo aurora presets on the other. */
+  const ownBgs = backgrounds.filter((b) => b.kind === "image");
+  const presetBgs = backgrounds.filter((b) => b.kind === "aurora");
+  const hasSplit = ownBgs.length > 0 && presetBgs.length > 0;
+  const [bgGroup, setBgGroup] = useState<"yours" | "presets">(ownBgs.length > 0 ? "yours" : "presets");
+  const shownBgs = hasSplit ? (bgGroup === "yours" ? ownBgs : presetBgs) : backgrounds;
   const lead = subject.leads?.find((l) => l.id === leadId) ?? subject.leads?.[0] ?? null;
   const headline = lead?.headline ?? subject.headline;
   const t = {
@@ -80,6 +88,9 @@ export function ShareComposer({
     stats: copy?.stats ?? "Stats",
     handle: copy?.handle ?? "Name",
     copied: copy?.copied ?? "Link copied",
+    yours: copy?.yours ?? "Yours",
+    presets: copy?.presets ?? "Presets",
+    darken: copy?.darken ?? "Darken",
   };
 
   const cycleBackground = () => {
@@ -131,7 +142,10 @@ export function ShareComposer({
         <div className="nf-share-card nf-share-card--enter">
           <div className="nf-share-card__bg">
             {bg?.kind === "image" ? (
-              <Image src={bg.src} alt="" fill sizes="320px" />
+              <>
+                <Image src={bg.src} alt="" fill sizes="320px" />
+                {darken ? <span className="nf-share-card__darken" aria-hidden /> : null}
+              </>
             ) : (
               <span className={`nf-aurora nf-aurora--${bg?.kind === "aurora" ? bg.variant : "glow"}`} />
             )}
@@ -170,8 +184,18 @@ export function ShareComposer({
         </div>
       </div>
 
+      {hasSplit ? (
+        <div className="nf-share__bgtabs" role="tablist" aria-label={t.background}>
+          <button type="button" role="tab" aria-selected={bgGroup === "yours"} className="nf-share__tab" onClick={() => { setBgGroup("yours"); setBgId(ownBgs[0]?.id); feedback("select"); }}>
+            {t.yours}
+          </button>
+          <button type="button" role="tab" aria-selected={bgGroup === "presets"} className="nf-share__tab" onClick={() => { setBgGroup("presets"); setBgId(presetBgs[0]?.id); feedback("select"); }}>
+            {t.presets}
+          </button>
+        </div>
+      ) : null}
       <div className="nf-share__swatches" role="group" aria-label={t.background}>
-        {backgrounds.map((b) => (
+        {shownBgs.map((b) => (
           <button
             key={b.id}
             type="button"
@@ -189,6 +213,19 @@ export function ShareComposer({
       </div>
 
       <div className="nf-share__toggles">
+        {bg?.kind === "image" ? (
+          <MediaPill
+            label={t.darken}
+            tone="light"
+            pressed={darken}
+            onClick={() => {
+              setDarken((v) => !v);
+              feedback("select");
+            }}
+            media={<UiIcon name={darken ? "check" : "close"} size={18} />}
+            trailing={<span className="nf-media-pill__chev">{darken ? "On" : "Off"}</span>}
+          />
+        ) : null}
         {subject.stats?.length ? (
           <MediaPill
             label={t.stats}
