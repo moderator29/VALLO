@@ -21,6 +21,37 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, "..", "..", "..");
 const OUT = join(REPO, "docs", "marketing", "source");
 mkdirSync(OUT, { recursive: true });
+/* The guides' shots are served by the web app, at web size (plan.mjs, GUIDES). */
+const GUIDE_OUT = join(REPO, "apps", "web", "public", "help", "shots");
+mkdirSync(GUIDE_OUT, { recursive: true });
+const outFor = (cap) => (cap.dest === "guides" ? GUIDE_OUT : OUT);
+
+/*
+ * NO CAPTURE SHOWS AN EMAIL ADDRESS (founder, 9 November 2026). Every
+ * email-shaped string in the page's text and fields is blanked before the
+ * shot; then, if the signed-in account's own address can still be found
+ * anywhere on the page, the capture fails and nothing is written. The address
+ * is read from the environment and never printed: the error names no address.
+ */
+const ACCOUNT_EMAIL = (process.env.QA_MEMBER_EMAIL ?? "").trim().toLowerCase();
+async function blankEmails(page) {
+  await page.evaluate(() => {
+    const shape = () => /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (node.nodeValue && shape().test(node.nodeValue)) node.nodeValue = node.nodeValue.replace(shape(), "Email hidden");
+    }
+    for (const field of document.querySelectorAll("input, textarea")) {
+      if (field.value && shape().test(field.value)) field.value = field.value.replace(shape(), "Email hidden");
+    }
+  });
+  if (!ACCOUNT_EMAIL) return;
+  const still = await page.evaluate((needle) => {
+    const fields = [...document.querySelectorAll("input, textarea")].map((f) => f.value).join(" ");
+    return `${document.body?.innerText ?? ""} ${fields}`.toLowerCase().includes(needle);
+  }, ACCOUNT_EMAIL);
+  if (still) throw new Error("the signed-in account's email address is still on the page; nothing written");
+}
 
 const args = process.argv.slice(2);
 const only = args.includes("--only") ? args[args.indexOf("--only") + 1].split(",") : null;
@@ -149,7 +180,7 @@ async function captureOnce(cap, ctx) {
 
 for (const cap of CAPTURES) {
   if (only && !only.includes(cap.id)) continue;
-  const file = join(OUT, `${cap.id}.webp`);
+  const file = join(outFor(cap), `${cap.id}.webp`);
   if (skipExisting && existsSync(file)) continue;
   if (kindOnly && (cap.kind ?? "mobile") !== kindOnly) continue;
   const needsAuth = cap.auth !== false;
@@ -183,18 +214,26 @@ for (const cap of CAPTURES) {
       return r.width > 8 && r.height > 8 && r.bottom > 0 && r.top < innerHeight && im.complete && im.naturalWidth === 0;
     }).map((im) => im.currentSrc || im.src).slice(0, 3));
     if (broken.length) throw new Error(`broken image: ${broken.join(", ")}`);
+    await blankEmails(page);
     const shot = await page.screenshot({ type: "png" });
     const webp = await sharp(shot).webp({ quality: 95, effort: 6 }).toBuffer();
     if (webp.length < 50_000) throw new Error(`only ${Math.round(webp.length / 1000)} KB: a blank or broken page`);
     if (cap.id.endsWith("-lt")) {
-      const darkFile = join(OUT, `${cap.id.slice(0, -3)}.webp`);
+      const darkFile = join(outFor(cap), `${cap.id.slice(0, -3)}.webp`);
       if (existsSync(darkFile)) {
         const [a, b] = await Promise.all([webp, readFileSync(darkFile)].map((buf) => sharp(buf).resize(64, 64, { fit: "fill" }).greyscale().raw().toBuffer()));
         const mean = (buf) => buf.reduce((sum, v) => sum + v, 0) / buf.length;
         if (Math.abs(mean(a) - mean(b)) < 12) throw new Error("the light twin is as dark as its dark capture: this page keeps one theme");
       }
     }
-    writeFileSync(file, webp);
+    /* A guide shot is served on a help page: brought to 2x of the phone
+       (880 px) or the desktop width, and a lighter quality. */
+    writeFileSync(
+      file,
+      cap.dest === "guides"
+        ? await sharp(webp).resize({ width: kind === "desktop" ? 1440 : 880 }).webp({ quality: 85, effort: 6 }).toBuffer()
+        : webp,
+    );
     if (cap.full) {
       await loadWholePage(page);
       /* Shot at the device scale, then brought to 2x (880 px wide) for the
@@ -202,7 +241,7 @@ for (const cap of CAPTURES) {
       const whole = await page.screenshot({ type: "png", fullPage: true });
       await sharp(whole, { limitInputPixels: false }).resize({ width: kind === "desktop" ? 2880 : 880 }).webp({ quality: 92, effort: 6 }).toFile(join(OUT, `${cap.id}-full.webp`));
     }
-    record(cap.id, { url: page.url().replace(BASE, ""), at: new Date().toISOString(), kind, theme: cap.theme ?? "dark", signedIn: needsAuth, ...(cap.locale ? { locale: cap.locale } : {}) });
+    record(cap.id, { url: page.url().replace(BASE, ""), at: new Date().toISOString(), kind, theme: cap.theme ?? "dark", signedIn: needsAuth, ...(cap.locale ? { locale: cap.locale } : {}), ...(cap.usedBy ? { usedBy: cap.usedBy, dest: "apps/web/public/help/shots" } : {}) });
     console.log(`ok    ${cap.id.padEnd(22)} ${page.url().replace(BASE, "")}`);
   } catch (err) {
     record(cap.id, { failed: String(err.message ?? err).split("\n")[0], at: new Date().toISOString() });

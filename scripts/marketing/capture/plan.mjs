@@ -300,8 +300,73 @@ const SHOWCASE = [
   ...SHOWCASE_BASE,
   ...SHOWCASE_BASE.map((c) => ({ ...c, id: `${c.id}-lt`, theme: "light" })),
 ];
+/*
+ * THE GUIDES SET (DOCS_AND_PRESENCE_UPGRADE.md section 5, 9 November 2026).
+ * The screens the help centre and the step-by-step guides embed, captured
+ * signed in, in both themes, written to apps/web/public/help/shots/<id>.webp
+ * at web size (`dest: "guides"`), never to the marketing folder. `usedBy`
+ * names the guide that shows each one; capture-report.json carries it, and
+ * apps/web/src/components/docs/guide-shots.test.ts fails when a page references a
+ * shot this plan no longer produces.
+ *
+ * Every capture blanks every email address on the page before the shot, and
+ * refuses to write one that still shows the signed-in account's address
+ * (run.mjs). What these write to production, only to the QA account: nothing
+ * beyond what the steps below type; the wizard captures stop before the step
+ * that saves a server draft.
+ *
+ * NOT IN THIS SET, AND WHY: the wizard's steps after Location type answers
+ * that save a real draft, so they are captured from a QA draft once one is
+ * seeded (add its id as LISTING_DRAFT and the steps here); the admin desks ask
+ * for the staff security key at the console door, which a script cannot press,
+ * so the staff manual's shots are taken with a staff member present or from
+ * the preview harness.
+ */
+const LIST_NEW = "/agent/list?new=1";
+const CONTINUE = "[data-testid=step-continue]";
+const GUIDE_BASE = [
+  /* How to list your property (guides/how-to-list) */
+  { id: "g-list-kind", usedBy: "how-to-list", steps: go(LIST_NEW) },
+  { id: "g-list-type", usedBy: "how-to-list", steps: [{ goto: LIST_NEW }, { click: "[role=radio]" }, { click: CONTINUE }, { wait: 1200 }] },
+  { id: "g-list-location", usedBy: "how-to-list", steps: [{ goto: LIST_NEW }, { click: "[role=radio]" }, { click: CONTINUE }, { click: "[role=radio]" }, { click: CONTINUE }, { wait: 1200 }] },
+  /* How verification works (help/verification) */
+  { id: "g-verify-start", usedBy: "how-verification-works", steps: go("/verification") },
+  /* How bookings and payments work (help/paying) */
+  { id: "g-stay", usedBy: "how-paying-works", steps: go(STAY) },
+  { id: "g-stay-dates", usedBy: "how-paying-works", steps: go(STAYS_DATES) },
+  { id: "g-receipts", usedBy: "how-paying-works", steps: go("/receipts") },
+  { id: "g-payments", usedBy: "how-paying-works", steps: go("/payments") },
+  /* Messages, voice notes and reactions (help/messages) */
+  { id: "g-inbox", usedBy: "messages", steps: INBOX },
+  { id: "g-thread", usedBy: "messages", steps: go(THREAD) },
+  /* The host and agent desks (guides/hosting, guides/agents) */
+  { id: "g-host", usedBy: "hosting", steps: go("/host") },
+  { id: "g-agent", usedBy: "agents", steps: go("/agent/dashboard") },
+  { id: "g-agent-listings", usedBy: "agents", steps: go("/agent/listings") },
+  /* Circle and Roommates, the first screens a newcomer meets */
+  { id: "g-circle", usedBy: "circle", steps: go("/circle") },
+  { id: "g-roommates", usedBy: "roommates", steps: go("/roommates") },
+  /* The states members photograph and send to support */
+  { id: "g-saved", usedBy: "saved-and-offline", steps: go("/saved") },
+  { id: "g-offline", usedBy: "saved-and-offline", steps: go("/offline") },
+  { id: "g-notifications", usedBy: "notifications", steps: go("/notifications") },
+  /* The help centre itself, for the index cards */
+  { id: "g-help", usedBy: "help-home", auth: false, steps: go("/help") },
+];
+const GUIDES = [
+  ...GUIDE_BASE.map((c) => ({ ...c, dest: "guides" })),
+  ...GUIDE_BASE.map((c) => ({ ...c, id: `${c.id}-lt`, theme: "light", dest: "guides" })),
+  ...["g-list-kind", "g-host", "g-agent", "g-help"].map((id) => {
+    const c = GUIDE_BASE.find((g) => g.id === id);
+    return { ...c, id: `d-${id}`, kind: "desktop", dest: "guides" };
+  }),
+];
+/** Every guide shot id, for the reference check. */
+export const GUIDE_SHOT_IDS = GUIDES.map((c) => c.id);
+
 export const CAPTURES = [
   ...BASE_CAPTURES,
+  ...GUIDES,
   ...SHOWCASE,
   ...LIGHT_TWINS.map((id) => {
     const cap = BASE_CAPTURES.find((c) => c.id === id);
