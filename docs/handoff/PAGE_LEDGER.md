@@ -72,54 +72,54 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/agent/analytics` | FE |  |  |  |  |  |
-| `/agent/analytics/[metric]` | FE |  |  |  |  |  |
-| `/agent/analytics/listings/[listingId]` | FE |  |  |  |  |  |
+| `/agent/analytics` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/analytics/[metric]` | FE | PageFrame |  |  |  | PageFrame; the text Back link became the header Back. Not seen: needs an agent session |
+| `/agent/analytics/listings/[listingId]` | FE | PageFrame |  |  |  | PageFrame; the text Back link became the header Back. Not seen: needs an agent session |
 | `/agent/assistant` | FE |  |  |  |  |  |
-| `/agent/bookings` | FE |  |  |  |  |  |
-| `/agent/dashboard` | FE |  |  |  |  |  |
-| `/agent/earnings` | FE |  |  |  |  |  |
-| `/agent/firm` | FE |  |  |  |  |  |
+| `/agent/bookings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/dashboard` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs an agent session |
+| `/agent/earnings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/firm` | FE | PageFrame |  |  |  | PageFrame; the firm picker in the tab row. Not seen: needs an agent session |
 | `/agent/inspections` | FE |  |  |  |  |  |
 | `/agent/list` | FE |  |  |  |  |  |
-| `/agent/listings` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/arrival` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/board` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/calendar` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/health` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/mandate` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/promotion` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/status` | FE |  |  |  |  |  |
-| `/agent/messages` | FE |  |  |  |  |  |
+| `/agent/listings` | FE | PageFrame |  |  |  | PageFrame; Start a listing and Firm desk in the header actions. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/arrival` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/board` | FE | PageFrame |  |  |  | PageFrame (narrow); print layout unchanged. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/calendar` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/health` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/mandate` | FE | PageFrame |  |  |  | PageFrame (narrow). Not seen: needs an agent session |
+| `/agent/listings/[listingId]/promotion` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/status` | FE | PageFrame |  |  |  | PageFrame (narrow). Not seen: needs an agent session |
+| `/agent/messages` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
 | `/agent/messages/[id]` | FE |  |  |  |  |  |
 | `/agent/notifications` | FE |  |  |  |  |  |
-| `/agent/portfolio` | FE |  |  |  |  |  |
+| `/agent/portfolio` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
 | `/agent/promotion` | FE |  |  |  |  |  |
-| `/agent/reviews` | FE |  |  |  |  |  |
-| `/agent/settings` | FE |  |  |  |  |  |
-| `/agent/verification` | FE |  |  |  |  |  |
+| `/agent/reviews` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/verification` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
 
 ## Host workspace
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/host` | FE |  |  |  |  |  |
+| `/host` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs a host session |
 | `/host/apply` | FE |  |  |  |  |  |
-| `/host/arrival` | FE |  |  |  |  |  |
+| `/host/arrival` | FE | PageFrame |  |  |  | PageFrame; business chips in the tab row. Not seen: needs a host session |
 | `/host/assistant` | FE |  |  |  |  |  |
 | `/host/bookings` | FE |  |  |  |  |  |
-| `/host/calendar` | FE |  |  |  |  |  |
+| `/host/calendar` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row; Back now in the header. Not seen: needs a host session |
 | `/host/decide` | FE |  |  |  |  |  |
 | `/host/earnings` | FE |  |  |  |  |  |
 | `/host/earnings/statement` | FE |  |  |  |  |  |
 | `/host/notifications` | FE |  |  |  |  |  |
-| `/host/photos` | FE |  |  |  |  |  |
-| `/host/reservations` | FE |  |  |  |  |  |
+| `/host/photos` | FE | PageFrame |  |  |  | PageFrame; venue chips in the tab row. Not seen: needs a host session |
+| `/host/reservations` | FE | PageFrame |  |  |  | PageFrame; the desk keeps its search. Not seen: needs a host session |
 | `/host/reviews` | FE |  |  |  |  |  |
-| `/host/rooms` | FE |  |  |  |  |  |
-| `/host/settings` | FE |  |  |  |  |  |
+| `/host/rooms` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row. Not seen: needs a host session |
+| `/host/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
 | `/host/start` | FE |  |  |  |  |  |
-| `/host/transfer` | FE |  |  |  |  |  |
+| `/host/transfer` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
 
 ## Member: about
 

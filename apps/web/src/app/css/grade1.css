@@ -477,6 +477,14 @@
   max-inline-size: 48rem;
   padding-block-end: calc(var(--nf-tabbar-clearance, 0px) + var(--nf-space-xl));
 }
+/* Inside a shell whose main already clears the dock (`nf-main--docked` in the
+   app and agent shells, `nf-host__body--docked` in the host shell), the frame
+   keeps only its own foot: clearing the dock twice left an empty band the
+   height of the dock under every framed page (found 9 November 2026). */
+.nf-main--docked .nf-g1page,
+.nf-host__body--docked .nf-g1page {
+  padding-block-end: var(--nf-space-xl);
+}
 .nf-g1page[data-width="narrow"] {
   max-inline-size: 36rem;
 }

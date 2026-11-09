@@ -102,6 +102,24 @@
     text-overflow: ellipsis;
     color: var(--nf-content-primary);
   }
+  /* One title at a time: while a framed page's large title is in view the
+     bar's copy waits, and it fades in once the title has scrolled under the
+     bar (`LargeTitleFold` sets both attributes). */
+  .nf-ws-bar[data-large-title] .nf-ws-bar__title {
+    opacity: 0;
+    transition: opacity 160ms var(--nf-ease-standard);
+  }
+  .nf-ws-bar[data-large-title][data-folded] .nf-ws-bar__title {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-ws-bar[data-large-title] .nf-ws-bar__title {
+      transition: none;
+    }
+  }
+  :root[data-motion="off"] .nf-ws-bar[data-large-title] .nf-ws-bar__title {
+    transition: none;
+  }
   /* THE BELL, to reference 23: a bold line bell of about 22px with nothing
      drawn around it and a small dot for unread. The glyph is the 24 step
      drawn into a 22px box, and its line is set heavier than the icon
