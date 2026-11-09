@@ -139,7 +139,7 @@ export const CSV_HEADER = [
   "Vallo commission (NGN)",
   "Guarantee contribution (NGN)",
   "Your share (NGN)",
-  "Paystack reference",
+  "Payment reference",
   "Booking",
 ];
 

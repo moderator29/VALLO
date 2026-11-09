@@ -76,13 +76,7 @@ const MODULE = "lib/money/copy.ts";
  * each with its owner. The list may only shrink: a line that is gone fails
  * the last test, so its entry goes in the same change.
  */
-const NAMED_ELSEWHERE: { file: string; text: string; why: string }[] = [
-  {
-    file: "lib/host/statement.ts",
-    text: '"Paystack reference",',
-    why: "the host statement's CSV column (an earnings export, not a receipt); owned by the host workspace. The on-screen column already says Payment reference.",
-  },
-];
+const NAMED_ELSEWHERE: { file: string; text: string; why: string }[] = [];
 
 /** Dictionary subtrees only staff read. */
 const STAFF_PATHS = [/^admin\./, /^afterTheGate\.admin\./, /^subscriptions\.admin\./, /^referralDesk\./, /^chargebacks\.desk\./];

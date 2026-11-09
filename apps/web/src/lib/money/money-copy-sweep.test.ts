@@ -146,14 +146,7 @@ const RETIRED: { label: string; pattern: RegExp }[] = [
  * its owner. The list may only shrink: a line that is gone fails the last test
  * below, so the entry is removed in the same change.
  */
-const RETIRED_ELSEWHERE: { file: string; text: string; why: string }[] = [
-
-  {
-    file: "apps/web/src/lib/bookings/actions.ts",
-    text: "This stay is paid into escrow, so it cannot be cancelled here.",
-    why: "class B (sweep), behind an open Payluk arrangement that cannot exist while the rail is off; owned by the bookings track",
-  },
-];
+const RETIRED_ELSEWHERE: { file: string; text: string; why: string }[] = [];
 
 /**
  * Trees left out of the near-miss scan only: the payment plumbing's own refusal

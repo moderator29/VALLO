@@ -489,12 +489,12 @@ export async function cancel(
        a stay is never cancelled while the partner may be taking its money. */
     if (heldStatus === "preparing" || heldStatus === "unknown" || heldStatus === "payment_processing") {
       return fail(
-        "Your escrow payment is still being confirmed by the payment partner, so this stay cannot be cancelled yet. Nothing is charged twice; check back in a few minutes.",
+        "Your payment is still being confirmed by the payment partner, so this stay cannot be cancelled yet. Nothing is charged twice; check back in a few minutes.",
       );
     }
     if (heldStatus !== null) {
       return fail(
-        "This stay is paid into escrow, so it cannot be cancelled here. Open the agreement to see where your money is held, or contact support and we will sort it out with you.",
+        "This stay was paid through the payment partner, so it cannot be cancelled here. Open the agreement to see where the payment stands, or contact support and we will sort it out with you.",
       );
     }
   }
