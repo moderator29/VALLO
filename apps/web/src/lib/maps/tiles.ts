@@ -80,13 +80,15 @@ const OSM: MapCreditLink = {
 };
 
 /**
- * OpenFreeMap's credit, in the order and words its own TileJSON carries:
- * OpenFreeMap, then "© OpenMapTiles", then the data from OpenStreetMap.
+ * OpenFreeMap's credit. The two marks its terms REQUIRE come first, in the
+ * words its attribution note gives ("© OpenMapTiles Data from
+ * OpenStreetMap", with OpenStreetMap's own "© OpenStreetMap contributors"
+ * form); OpenFreeMap itself is optional and credited anyway, last.
  */
 const OPENFREEMAP_CREDITS: MapCreditLink[] = [
-  { label: "OpenFreeMap", href: "https://openfreemap.org" },
   { label: "© OpenMapTiles", href: "https://www.openmaptiles.org/" },
   OSM,
+  { label: "OpenFreeMap", href: "https://openfreemap.org" },
 ];
 
 /** The one host OpenFreeMap serves styles, tiles, glyphs and sprites from. */
