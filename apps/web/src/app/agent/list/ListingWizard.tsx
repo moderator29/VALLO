@@ -130,6 +130,7 @@ import { TermsStep } from "./steps/TermsStep";
 import { PhotosStep } from "./steps/PhotosStep";
 import { DescribeStep } from "./steps/DescribeStep";
 import { CheckStep, type Fix } from "./steps/CheckStep";
+import { FocusKeeper } from "./steps/FocusKeeper";
 
 /**
  * The listing wizard: ONE QUESTION PER SCREEN (P1.1, November 2026).
@@ -1826,7 +1827,7 @@ export function ListingWizard({
                 <PushPrompt moment="listing_published" />
               </>
             ) : (
-              <div className="nf-lw-publish__send mt-heading grid gap-md">
+              <div className="nf-lw-publish__send mt-heading grid grid-cols-1 gap-md">
                 <CheckStep
                   ctx={ctx}
                   steps={steps}
@@ -1952,7 +1953,8 @@ export function ListingWizard({
       {...(secondary ? { secondary } : {})}
       {...(hasNotice ? { notice: notices } : {})}
     >
-      <div className="nf-lw-wizard grid gap-md" data-step={current.id}>
+      <div className="nf-lw-wizard grid grid-cols-1 gap-md" data-step={current.id}>
+        <FocusKeeper frameTestId="listing-steps" />
         {/* Photos and videos in the one picker (founder, 12 October). Always in
             the frame, so the photo step and the check page share one input. */}
         <input

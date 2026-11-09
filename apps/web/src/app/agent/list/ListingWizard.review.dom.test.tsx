@@ -99,6 +99,7 @@ describe.runIf(hasBrowser)("the wizard's way back, its save of an emptied box, a
       /* Only what is open is listed; a met requirement has no line. */
       expect(await page.locator('[data-testid="send-check-title"]').count()).toBe(0);
 
+      console.log("RECT", await page.evaluate(() => { const b = document.querySelector('[aria-label="Fix: Asking price and title deed"]')!; const r = b.getBoundingClientRect(); const chain: string[] = []; let e: Element | null = b; while (e) { const cs = getComputedStyle(e); if (cs.overflow !== "visible" || cs.transform !== "none" || cs.position === "fixed") chain.push(`${e.tagName}.${e.className} ${cs.overflow} ${cs.transform} ${cs.position} ${JSON.stringify(e.getBoundingClientRect())}`); e = e.parentElement; } return JSON.stringify({ r, h: innerHeight, w: innerWidth, chain }); }));
       await line.getByRole("button", { name: "Fix: Asking price and title deed" }).click();
       /* The title deed is asked on the sale's terms step. */
       await titleBecomes(page, "What title comes with it?");

@@ -136,6 +136,18 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
     }
   });
 
+  it("TEMP typing keeps focus", async () => {
+    const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS });
+    try {
+      const input = page.locator('input[placeholder="Lagos"]');
+      await input.click();
+      await page.keyboard.type("ab");
+      expect(await input.inputValue() + "|" + (await page.evaluate(() => `${document.activeElement?.tagName}.${document.activeElement?.className}`))).toBe("x");
+    } finally {
+      await close();
+    }
+  });
+
   it("under reduced motion, the question simply changes: nothing travels", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS, reducedMotion: true });
     try {
@@ -167,9 +179,11 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
           })),
           focused: document.activeElement === field.querySelector("input"),
           still: document.querySelector(".nf-g1step__title")?.textContent,
+          active: `${document.activeElement?.tagName}.${document.activeElement?.className}#${document.activeElement?.id}`,
         };
       });
       expect(shake.motions).toEqual([{ name: "nf-lw-shake", duration: 160, easing: "cubic-bezier(0.7, 0, 0.2, 1)" }]);
+      console.log("ACTIVE", shake.active);
       expect(shake.focused).toBe(true);
       expect(shake.still).toBe("Describe the property");
     } finally {
