@@ -33,6 +33,36 @@
 -- passport_settings_insert_own and passport_settings_update_own (both
 -- `to authenticated`, `user_id = (select auth.uid())` in using and with check).
 -- No delete grant: switching the passport off is an update.
+--
+-- 9 November 2026: the Roommates release (migration roommates_all, applied
+-- live the same day) and the moderation desk brought write grants this list
+-- never declared, which is what the probe is for. Each one was checked against
+-- pg_policies before being written down, and they split two ways.
+--
+-- Declared here, because a permissive policy for `authenticated` stands behind
+-- every command: institutions idu, roommate_group_expenses idu,
+-- roommate_group_posts id, roommate_group_shortlist id, roommate_group_votes
+-- idu, roommate_listings idu, roommate_profiles idu, roommate_saved_searches
+-- idu. Three more are declared for UPDATE only, because that is the only
+-- command a policy allows and the only one the app uses directly (a group is
+-- created through the definer roommate_create_group, then edited with a plain
+-- update): roommate_groups u, roommate_match_weights u, roommate_verifications
+-- u.
+--
+-- NOT declared, and revoked instead by
+-- pending/revoke_write_grants_with_no_policy_2026-11-09.sql: every write grant
+-- with no permissive policy behind it. RLS is on for all of them with a read
+-- policy present, so those writes were already refused and nothing used them
+-- (the two places the app touches these tables, readMyActiveGroups and the
+-- thread's RoommateMatch line, are reads). A grant no policy can ever satisfy
+-- is not security, it is litter, and the probe's third assertion is right to
+-- refuse it: member_restrictions idu, moderation_appeals idu,
+-- moderation_case_events idu, moderation_case_evidence idu,
+-- moderation_case_reports idu, moderation_cases idu (staff decisions land
+-- through the definer moderation_decide), roommate_group_members idu,
+-- roommate_interests idu, roommate_viewings idu, and the insert and delete
+-- halves of roommate_groups, roommate_match_weights and
+-- roommate_verifications.
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -104,6 +134,7 @@ begin
       ('inspection_reports', 'iu'),
       ('inspection_requests', 'idu'),
       ('inspection_truth', 'i'),
+      ('institutions', 'idu'),
       ('kyc_consents', 'i'),
       ('landmarks', 'idu'),
       ('listing_access', 'idu'),
@@ -148,6 +179,16 @@ begin
       ('risk_alerts', 'idu'),
       ('room_inventory', 'idu'),
       ('room_types', 'idu'),
+      ('roommate_group_expenses', 'idu'),
+      ('roommate_group_posts', 'id'),
+      ('roommate_group_shortlist', 'id'),
+      ('roommate_group_votes', 'idu'),
+      ('roommate_groups', 'u'),
+      ('roommate_listings', 'idu'),
+      ('roommate_match_weights', 'u'),
+      ('roommate_profiles', 'idu'),
+      ('roommate_saved_searches', 'idu'),
+      ('roommate_verifications', 'u'),
       ('saved_collection_items', 'idu'),
       ('saved_collections', 'idu'),
       ('saved_items', 'idu'),

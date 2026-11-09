@@ -748,6 +748,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/admin/oversight/export": "the oversight tables as a CSV download, not a page.",
   "/api/assistant": "POST only, the assistant's model call.",
   "/api/auth/email-hook": "Supabase Auth's send-email webhook.",
+  "/api/build": "GET only, the build id the running page should be on, so a page that has been open across a release reloads itself once (DeployWatch) instead of waiting for the app to be deleted and installed again.",
   "/api/client-error": "the browser's error beacon.",
   "/api/passcode/touch": "POST only, the passcode unlock's heartbeat (docs/PASSCODE.md).",
   "/api/vitals": "the browser's field speed beacon (V-80).",
