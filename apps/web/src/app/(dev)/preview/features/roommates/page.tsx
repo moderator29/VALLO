@@ -19,6 +19,7 @@ import { GroupDashboardView } from "@/app/(app)/roommates/groups/[id]/_parts/Gro
 import { SplitCalculator } from "@/app/(app)/roommates/split/SplitCalculator";
 import { ProfileFlowScreen } from "@/app/(app)/roommates/profile/_parts/ProfileFlowScreen";
 import { PostFlowScreen } from "@/app/(app)/roommates/new/_parts/PostFlowScreen";
+import { VerificationBanner } from "@/components/roommates/VerificationBanner";
 import { PageFrame } from "@/components/app/PageFrame";
 import { Celebration } from "@/components/roommates/Celebrate";
 import { FirstRunCard } from "@/components/roommates/FirstRunCard";
@@ -35,7 +36,7 @@ import { GROUP, HOME, HOME_NEW, HUB, NOW, PEOPLE, PROFILE, ROOMS, ROOM_DETAIL, U
  * refuses on Vercel and in production. Every person here is invented.
  *
  *   home, home-new, first-run, people, rooms, profile, listing, campus, safety,
- *   nysc, hub, hub-requests, group, split, onboarding, post, published
+ *   nysc, hub, hub-requests, group, split, onboarding, post, published, verify
  */
 export const dynamic = "force-dynamic";
 
@@ -93,6 +94,15 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
       break;
     case "safety":
       body = <SafetyView t={t} />;
+      break;
+    case "verify":
+      body = (
+        <PageFrame title={t.verifyX.title} subtitle={t.verifyX.subtitle} fallback="/roommates">
+          <div className="nf-rmb">
+            <VerificationBanner title={t.verifyX.title} line={t.verification.honest} />
+          </div>
+        </PageFrame>
+      );
       break;
     case "hub":
       body = <RoommatesHubView hub={HUB} tab="connections" now={NOW} />;
