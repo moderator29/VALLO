@@ -1,7 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { describe, expect, it } from "vitest";
 import { unbackedClaim } from "@/lib/trust/claims";
-import { NO_INSPECTION_FEE, PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
+import { AGREEMENT_PAYMENT_OPENS, NO_INSPECTION_FEE, PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
 import { landingDoor } from "./doors";
 
 /*
@@ -31,9 +31,12 @@ describe("the hero's facts", () => {
   });
 
   /* D68d: payment opens when both parties confirm; the rail decides whether a
-     person looks first. Still never before the agreement. */
+     person looks first. Still never before the agreement. 9 November 2026:
+     payment for rentals is not open and Vallo takes none for a purchase, so
+     the rental gate says so, and the stay's gate keeps the agreement rule. */
   it("say the payment gate: pay only after the agreement", () => {
-    expect(PAYMENT_GATE_SENTENCE.toLowerCase()).toMatch(/as soon as .*both of you confirm the agreement/);
+    expect(PAYMENT_GATE_SENTENCE.toLowerCase()).toMatch(/payment for rentals is not open on vallo yet\. you can view, inspect and agree terms now/);
+    expect(AGREEMENT_PAYMENT_OPENS.toLowerCase()).toMatch(/as soon as .*both of you confirm the agreement/);
     expect(hero.facts.agree.toLowerCase()).toMatch(/only once you both agree/);
   });
 

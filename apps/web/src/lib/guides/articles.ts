@@ -382,7 +382,7 @@ export const GUIDES: readonly Guide[] = [
         title: "Booking and paying",
         blocks: [
           `You choose your dates and see the full price before you book. ${PRICE_IS_THE_PRICE} ${HOTEL_ROOM_BY_CARD} A shortlet host may accept each request themselves. ${STAYS_PAID_BY_CARD} You pay on Vallo, never by transfer to a host's own account.`,
-          { quote: "Either way you pay on Vallo, never by transfer to a host's own account." },
+          { quote: "You pay on Vallo, never by transfer to a host's own account." },
           "A restaurant table is a request, not a payment: you ask for a date, a time and a party size, the restaurant answers, and you pay the restaurant when you eat.",
         ],
       },
