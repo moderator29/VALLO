@@ -100,25 +100,67 @@ The approved formulation:
 
 ---
 
-## 3. WHITE LABEL: THE FOUNDER'S RULING, 9 NOVEMBER 2026
+## 3. HOW THE PROVIDER APPEARS: THE RULING, 9 NOVEMBER 2026
 
-**The provider's name and logo do not appear in the Vallo interface.** Not on
-the payment choice screen, not on the funding screen, not on the protected
-transaction screen, not in a "powered by" line, and not as a link out. The
-member's experience is Vallo's, start to finish. The provider operates in the
-code, the webhooks and the contracts.
+**This section was rewritten on 9 November 2026 and replaces an earlier
+"white label, provider invisible" rule. Build to what is below, not to
+anything you may find quoted elsewhere in these documents.**
 
-**The one exception, and it is not optional.** The institution that holds the
-money MUST be named where the law and plain honesty require it:
-- in the Terms, in the section about payments;
-- on the receipt for a protected payment;
-- in the help centre article explaining how protected payment works;
-- wherever a member asks "who is holding my money", which they will.
+The provider offers three presentation options. Vallo is taking the middle
+one: **own checkout and pay button, with a small "Secured by <provider>" mark
+at the payment step, at standard fees.** The expensive full white label option
+was declined for launch because it costs a fixed monthly fee, is changeable
+later on 30 days notice, and removes only that one mark: under every option
+the provider is still named in the Terms, the privacy policy, the help centre
+and on receipts.
 
-Hiding the custodian entirely would be a consumer-protection problem and would
-undermine the exact trust the feature exists to build. Brand the EXPERIENCE,
-disclose the CUSTODIAN. Put the question to the solicitor with the other
-custody questions.
+**So: the interface is Vallo's, with one disclosed partner mark.**
+
+What this means for what you build:
+
+1. **The flow, the layout, the copy, the states, the receipts, the help are
+   all Vallo's.** No provider-hosted checkout page. No redirect out to the
+   provider to pay. No provider-branded screens. The member funds, tracks and
+   releases a protected payment inside Vallo.
+
+2. **At the payment step, a small partner mark appears.** One line, quiet,
+   secondary weight, near the pay button. It is a trust signal, not a brand
+   takeover. Do not stretch it, do not centre it in the hero, do not make it
+   compete with the amount or the pay button.
+
+3. **The funds wording the provider supplies must appear unaltered at or
+   before payment.** Two lengths are allowed, a full one and a short one. Use
+   the short one at the payment step and the full one on the confirmation and
+   on the receipt. **Do not paraphrase it, do not soften it, do not translate
+   it, do not split it.** The exact approved strings live in
+   `PROTECTED_PAYMENTS_SPECS.md`. Put them in one constants module, import
+   them everywhere, and add a test that fails if any screen renders a
+   near-miss variant.
+
+4. **The custodian bank is named in that wording.** This is a feature, not a
+   leak. A named CBN licensed bank holding the money is the strongest trust
+   line Vallo has on a rail with no track record. Treat it as copy to feature,
+   not copy to bury.
+
+5. **The provider and the custodian are named in full** in the Terms payments
+   section, the privacy policy, the help centre article on protected payment,
+   on every protected payment receipt, and anywhere a member asks who is
+   holding their money. The custodian may only be named with the wording the
+   provider has agreed.
+
+6. **Vallo must never be presented as building, operating, holding or
+   licensing the escrow.** The existing valuation and custody word gates
+   (`apps/web/scripts/check-valuation-words.mjs`, the custody-words tests)
+   already police the worst of this. Extend them rather than work around them.
+
+7. **Members must be told that identity verification and the holding of funds
+   are carried out by third parties.** This belongs in the flow, not only in
+   the Terms: one plain line the member actually sees, before they pay.
+
+**If the founder later moves to full white label**, the only change is that
+the payment-step mark comes out. Everything in points 3 to 7 stays. Build the
+mark as a single component behind one flag so that switch is a one-line
+change, not a sweep.
 
 ---
 

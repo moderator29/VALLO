@@ -10,11 +10,17 @@ that one disagree, that one wins.
 
 **The three overrides, repeated here so they cannot be missed:**
 
-1. **The provider is invisible in the interface.** The engineering spec below
-   says the provider should "appear as the regulated payment infrastructure
-   partner where appropriate". IT MUST NOT. No name, no logo, no "powered by",
-   no link out, anywhere a member can see. The custodian bank IS named in the
-   Terms, on receipts and in the help centre, which the design spec gets right.
+1. **The interface is Vallo's, with ONE small disclosed partner mark at the
+   payment step.** Updated 9 November 2026: Vallo is taking the provider's
+   middle presentation option, not full white label. So there is no
+   provider-hosted checkout, no redirect out to pay, no provider-branded
+   screens, and no "powered by" line scattered through the product. There IS a
+   small, quiet "Secured by <provider>" mark beside the pay button, and the
+   provider's supplied funds wording must appear UNALTERED at or before
+   payment. The engineering spec below says the provider should "appear as the
+   regulated payment infrastructure partner where appropriate", which is too
+   loose: read section 3 of `PROTECTED_PAYMENTS_BUILD.md` for exactly where
+   the provider and the custodian bank may and must appear, and build to that.
 2. **This is not urgent and must not jump its gates.** Nothing here is on the
    launch path. Gate 1 is written provider approval of our categories.
 3. **Design first, then build.** They are separate jobs in that order. One
@@ -749,3 +755,85 @@ important event traceable. Every amount reconciling. Every promise matching what
 the payment partner has actually confirmed.
 
 That is how Vallo builds trust beyond the payment itself.
+
+---
+
+# APPENDIX: THE PROVIDER'S COMMERCIAL AND PRESENTATION TERMS
+
+Added 9 November 2026, from the provider's own document "How EscrowPay appears
+on your platform", sent in reply to the founder's questions. These are the
+provider's stated terms, not Vallo's invention. Verify them against the signed
+agreement before relying on a number.
+
+## The option Vallo is taking
+
+The provider offers three presentation options, chosen by ticking clause 5.1
+of their API Services Agreement, changeable later on 30 days written notice:
+
+| Option | What it is | Fee |
+|---|---|---|
+| 1 | Their "Pay with" button at your checkout | Standard fees |
+| 2 | **Your own checkout and pay button, with a small "Secured by" mark at the payment step** | **Standard fees** |
+| 3 | Full white label, your brand only in app and website | Standard fees plus ₦250,000 per month from go live, on request only |
+
+**Vallo is taking Option 2.** Build to Option 2. Section 3 of
+`PROTECTED_PAYMENTS_BUILD.md` says exactly what that means on screen.
+
+Option 3 was declined for launch: the provider is named in the Terms, privacy
+policy, help centre and on receipts under EVERY option, so the monthly fee
+buys only the removal of the payment-step mark, and a named CBN licensed
+custodian at the payment step is a trust signal Vallo cannot yet generate on
+its own. Note also that Option 3 carries non-circumvention for the agreement
+term plus 12 months.
+
+## Standard fees, all options
+
+Money in:
+- up to ₦250,000: 1.5% plus ₦150, capped at ₦3,000
+- ₦250,001 to ₦50,000,000: 1.25% plus ₦150, uncapped
+- above ₦50,000,000: agreed in advance. This is a pricing band, NOT a
+  transaction limit.
+
+Money out:
+- ₦40 up to ₦50,000
+- ₦70 above ₦50,000
+
+Identity verification: ₦80 per user, once, charged only on a successful lookup.
+
+Do not hardcode these in display copy. Fees shown to a member must come from
+one configuration module so a repricing is one edit.
+
+## True under every option
+
+- Funds are held by the custodian bank and move only on Vallo's instruction.
+- The provider never holds members' money.
+- Every member verifies identity once.
+- **Vallo must tell members that identity verification and the holding of
+  funds are carried out by third parties.** This belongs in the flow, not only
+  in the Terms.
+- Vallo runs its own dispute process.
+
+## The funds wording, to appear unaltered at or before payment
+
+Two approved lengths. Put both in one constants module, import them, and add a
+test that fails on any near-miss variant rendered anywhere in the product.
+
+Full, for the confirmation screen and the receipt:
+
+> Your payment is held by Rubies Microfinance Bank, licensed by the Central
+> Bank of Nigeria, and released to the seller once you confirm delivery.
+
+Short, for the payment step:
+
+> Held by Rubies MFB, a CBN licensed bank, until you confirm delivery.
+
+Do not paraphrase, soften, translate, split or reorder either one. The
+custodian bank may only be named with wording the provider has agreed, and the
+two strings above are that wording.
+
+## Funding methods
+
+Bank transfer only at the time of writing. No cards. This is why the launch
+plan keeps the existing card rail for shortlets, hotels and restaurants and
+sends rent down the protected rail: see section 6 of
+`PROTECTED_PAYMENTS_BUILD.md` on paying from outside Nigeria.
