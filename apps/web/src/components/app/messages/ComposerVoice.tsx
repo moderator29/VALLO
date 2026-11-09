@@ -64,6 +64,16 @@ export function ComposerVoice({
   const held = useRef<{ x: number; pointerId: number | null } | null>(null);
   const [dx, setDx] = useState(0);
   const finishing = useRef(false);
+  /* A quick tap reaches the "hold the microphone" hint from two sides at once:
+     `start` sees the finger already gone (reason "released") and `finish`
+     reports the recording was "tooShort". Both are the same gesture, so the
+     hint is shown once per gesture, not twice. Reset when a new press begins. */
+  const hintShown = useRef(false);
+  const holdHint = useCallback(() => {
+    if (hintShown.current) return;
+    hintShown.current = true;
+    banner.info(WORDS.hold);
+  }, []);
 
   const send = useCallback(
     async (finish: () => Promise<VoiceRecording | "tooShort" | null>, wasRecording: boolean) => {
@@ -71,14 +81,14 @@ export function ComposerVoice({
       finishing.current = true;
       try {
         const out = await finish();
-        if (out === "tooShort") banner.info(WORDS.hold);
+        if (out === "tooShort") holdHint();
         else if (out) onVoice(out);
         else if (wasRecording) banner.error(WORDS.failed);
       } finally {
         finishing.current = false;
       }
     },
-    [onVoice],
+    [onVoice, holdHint],
   );
 
   const recorder = useVoiceRecorder({
@@ -97,13 +107,14 @@ export function ComposerVoice({
   const begin = (x: number, pointerId: number | null) => {
     if (held.current || finishing.current) return;
     held.current = { x, pointerId };
+    hintShown.current = false;
     setDx(0);
     void recorder.start(() => held.current !== null).then((result) => {
       if (result.ok) return;
       held.current = null;
       if (result.reason === "denied") banner.error(WORDS.denied);
       else if (result.reason === "unsupported") banner.error(WORDS.unsupported);
-      else if (result.reason === "released") banner.info(WORDS.hold);
+      else if (result.reason === "released") holdHint();
       else banner.error(WORDS.failed);
     });
   };

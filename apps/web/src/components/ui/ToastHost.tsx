@@ -42,7 +42,24 @@ function useToastItem(): ToastItem | null {
   return useSyncExternalStore(subscribeToast, currentToast, () => null);
 }
 
+/* A SINGLETON, even if it is mounted twice. In the app it is mounted once in
+   the root layout, but a browser test's harness provides one (browser-root's
+   `mount`) while some test entries still add their own, so two can coexist.
+   Two live hosts would each draw the current banner, and an assertion that a
+   message appears once would see it twice. The first host alive draws; any
+   later one draws nothing. `primary` defaults true so the single real host in
+   the app never flashes empty waiting for an effect. */
+let liveToastHosts = 0;
+
 export function ToastHost() {
+  const [primary, setPrimary] = useState(true);
+  useEffect(() => {
+    liveToastHosts += 1;
+    setPrimary(liveToastHosts === 1);
+    return () => {
+      liveToastHosts -= 1;
+    };
+  }, []);
   const item = useToastItem();
   /* The item on screen, kept through its exit so it can leave rather than vanish. */
   const [shown, setShown] = useState<ToastItem | null>(null);
@@ -66,6 +83,9 @@ export function ToastHost() {
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
+
+  /* A second host (a test harness one beside the app's) draws nothing. */
+  if (!primary) return null;
 
   return (
     /* No name and no role: an empty landmark on every page is noise, and the
