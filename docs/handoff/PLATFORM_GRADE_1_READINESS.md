@@ -855,7 +855,14 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    RECOMMENDATIONS.md, REFERENCE_PATTERNS.md, PERFORMANCE_REPORT.md,
    DEVICE_TEST_MATRIX.md, BANNER_MOMENTS.md, NATIVE_BUILD_QUEUE.md, and
    docs/UX_SYSTEM.md if it exists.
-6. READ the two payments documents, in this order, because the protected
+6. READ docs/handoff/DOCS_AND_PRESENCE_UPGRADE.md. That is my follow up to
+   the prompt you already have: the documents, the help centre, the legal
+   pages, the guides with real screenshots of our own platform, the admin
+   manual, where members reach all of it from, and deleting the old stuff we
+   no longer use (Payluk and the rest). It is for YOU, this same session, on
+   this same branch. I am sending more Hauslet screenshots of those exact
+   screens: study every one.
+7. READ the two payments documents, in this order, because the protected
    payment rail is part of YOUR job now:
      docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
      docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
@@ -864,10 +871,10 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
                                                  terms in the appendix)
    Build that rail to ready, flagged OFF, in this same branch. Do not switch
    it on: the agreement is not signed yet.
-7. Load the Supabase MCP tools and confirm you can query the project.
-8. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+8. Load the Supabase MCP tools and confirm you can query the project.
+9. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
    for platform-grade-1-readiness.
-9. Check supabase/migrations/pending/ and its README. Anything waiting there
+10. Check supabase/migrations/pending/ and its README. Anything waiting there
    is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
