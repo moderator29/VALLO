@@ -1145,8 +1145,10 @@ a fall is emerald. The line is alerts raised per day.
 | vallo_remind_renewals | pg_cron `20 7 * * *` | daily 08:20 | | tells tenants and listers a tenancy ends in 90, 60 or 30 days (V-93) |
 | vallo_sweep_rent_splits | pg_cron `25 7 * * *` | daily 08:25 | | refunds the paid shares of a flatmate split still short on move-in day, or cancelled (V-86) |
 | vallo_threshold_reminders | pg_cron `5 * * * *` | hourly at :05 | | tells staff three days and one day before a threshold report to the NFIU is due (SCUML item 7) |
+| vallo_send_feature_notices | pg_cron `10 17 * * *` | daily 18:10 | | sends the daily feature notices to members who opted in, one topic at a time (A5, `private.send_feature_notices`) |
+| vallo_send_gentle_nudges | pg_cron `20 10 * * *` | daily 11:20 | | sends the gentle nudges to members who opted in, never more than the opt-in allows (A6, `private.send_gentle_nudges`) |
 
-21 Vercel Cron jobs and 40 pg_cron jobs in all. The numbers are derived,
+21 Vercel Cron jobs and 42 pg_cron jobs in all. The numbers are derived,
 not remembered: the Vercel list is `VERCEL_JOBS` in
 `lib/admin/reads/jobs.ts`, held equal to `vercel.json` by a test, and the
 database list is `PG_CRON_JOBS` in the same file, held equal by

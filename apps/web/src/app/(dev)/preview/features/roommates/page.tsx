@@ -99,7 +99,7 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
       body = (
         <PageFrame title={t.verifyX.title} subtitle={t.verifyX.subtitle} fallback="/roommates">
           <div className="nf-rmb">
-            <VerificationBanner title={t.verifyX.title} line={t.verification.honest} />
+            <VerificationBanner title={t.verifyX.title} line={dict.roommates.verification.honest} />
           </div>
         </PageFrame>
       );

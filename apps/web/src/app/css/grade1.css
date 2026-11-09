@@ -159,7 +159,7 @@
 }
 .nf-toast-host .nf-toast__text {
   font-size: var(--nf-text-body-sm);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.35;
 }
 /* The retry: a word, not a button row; its 44px target comes from padding. */
@@ -323,7 +323,7 @@
   min-block-size: 1.5rem;
   color: var(--nf-content-secondary);
   font-size: var(--nf-text-caption);
-  font-weight: 500;
+  font-weight: 600;
 }
 .nf-g1step__save[data-save="saved"],
 .nf-g1step__save[data-save="device"] {

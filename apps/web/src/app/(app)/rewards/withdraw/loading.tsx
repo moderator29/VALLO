@@ -12,7 +12,7 @@ export default function LoadingRewardsWithdraw() {
     <LoadingShell label="Loading the withdrawal" className="mx-auto w-full max-w-xl">
       <PageHeaderSkeleton layout="large" subtitle />
       <div className="grid gap-sm">
-        <Skeleton width="70%" height="0.9375rem" radius="sm" />
+        <Skeleton width="72%" height="0.9375rem" radius="sm" />
         <div>
           <Skeleton width="30%" height="0.875rem" radius="sm" />
           <Skeleton className="mt-xs" height="3rem" radius="md" />

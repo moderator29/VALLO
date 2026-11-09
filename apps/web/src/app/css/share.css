@@ -53,7 +53,7 @@
     width: 2rem;
     height: 2rem;
     flex: 0 0 auto;
-    border-radius: 999px;
+    border-radius: var(--nf-radius-circle);
     overflow: hidden;
     background: color-mix(in oklab, var(--nf-content-primary) 8%, transparent);
   }
@@ -163,7 +163,7 @@
     position: relative;
     width: 5.5rem;
     height: 5.5rem;
-    border-radius: 999px;
+    border-radius: var(--nf-radius-circle);
     overflow: hidden;
     background: var(--nf-surface-inset);
     box-shadow: var(--nf-elevation-raised);

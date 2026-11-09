@@ -29,6 +29,8 @@ const ALLOWED: Record<string, string> = {
   "app/css/auth.css height": "the founder's restoration (7 October 2026): the login, sign-up and passcode screens back exactly as they were before the redesign",
   "app/css/auth.css margin-top": "the founder's restoration (7 October 2026): the login, sign-up and passcode screens back exactly as they were before the redesign",
   "app/css/auth.css font-size": "the founder's restoration (7 October 2026): the login, sign-up and passcode screens back exactly as they were before the redesign",
+  "app/welcome/onboarding-motion.css width":
+    "the onboarding upgrade (8-9 November 2026): the iOS-style page-indicator dot morphs its width into a short pill, and the thin step progress bar fills by width; both are tiny, isolated pieces off any list or scroll, and both go still under reduced motion, Calm and Off",
 };
 
 const strip = (text: string) => text.replace(/\/\*[\s\S]*?\*\//g, "");
