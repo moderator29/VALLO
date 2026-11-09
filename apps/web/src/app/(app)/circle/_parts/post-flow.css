@@ -43,7 +43,11 @@
   }
   .nf-cposted {
     display: grid;
-    place-items: center;
-    padding-block: var(--nf-space-xl);
+    justify-items: center;
+    gap: var(--nf-space-xl);
+    padding-block: var(--nf-space-xl) var(--nf-space-md);
+  }
+  .nf-cposted .nf-btn {
+    max-inline-size: 20rem;
   }
 }

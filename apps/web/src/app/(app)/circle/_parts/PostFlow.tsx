@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { StepFrame } from "@/components/ui/StepFrame";
+import { Button } from "@/components/ui/Button";
 import { createCirclePost } from "@/lib/features/circle/actions";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { Icon3D } from "@/components/ui/Icon3D";
@@ -134,10 +135,12 @@ export function PostFlow({
         closeHref="/circle"
         direction="forward"
         primary={{ label: P.view, onClick: () => router.push(`/circle/p/${posted.id}`), testId: "circle-posted-view" }}
-        secondary={{ label: P.back, onClick: () => router.push("/circle") }}
       >
         <div className="nf-cposted" data-testid="circle-posted">
           <SuccessBadge />
+          <Button variant="quiet" size="md" full onClick={() => router.push("/circle")}>
+            {P.back}
+          </Button>
         </div>
       </StepFrame>
     );
