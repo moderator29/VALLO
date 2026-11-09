@@ -31,7 +31,12 @@
    seated restaurant table) and the Host Agreement applies to hosts. */
 /* 2026-11-03: section 7 says what verifying involves, who reviews it, the
    photo holding the ID a reviewer may ask for, and what false documents lead to. */
-export const TERMS_VERSION = "2026-11-03";
+/* 2026-11-09 (founder): the Vallo Guarantee is retired. Section 14 is now
+   "What Vallo does, and what it does not do"; section 4 names Paystack as the
+   processor and drops the Guarantee reserve; section 7 no longer points at
+   Guarantee claims. Existing members are shown the change once
+   (`lib/legal/terms-update.ts`). */
+export const TERMS_VERSION = "2026-11-09";
 
 /**
  * The privacy notice moves with them today and has its own constant anyway,
@@ -48,7 +53,9 @@ export const TERMS_VERSION = "2026-11-03";
    the ID on request, decided by a person); the selfie's explicit consent; the
    phone-code senders (Termii, Twilio) and the wallet provider (Payluk) named;
    who can open verification documents and how. */
-export const PRIVACY_VERSION = "2026-11-03";
+/* 2026-11-09: the Guarantee reserve leg is gone from the payment data and the
+   processor list; Guarantee claims are described as made before it retired. */
+export const PRIVACY_VERSION = "2026-11-09";
 
 /**
  * The Host Agreement (`lib/legal/host-agreement.tsx`, page /host-agreement),

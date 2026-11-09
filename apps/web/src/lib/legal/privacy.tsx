@@ -110,17 +110,17 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           </li>
           <li>
             <strong>Payment data.</strong> Payment references, amounts, how each payment
-            was split (the lister&rsquo;s share, the Vallo Guarantee contribution and
-            our commission), refunds, and, if you save them, a card token and the bank
+            was split (the lister&rsquo;s share and our commission), refunds, and, if you save them, a card token and the bank
             account you nominate for payouts. We do not keep a wallet or a balance for
             you, because we never hold your money. Card numbers are handled by Paystack;
             we never see or store your full card number.
           </li>
           <li>
-            <strong>Agreements and Guarantee claims.</strong> The agreements you draw
-            up and confirm, their versions, Vallo&rsquo;s decision and its reason, and,
-            if you make a claim on the Vallo Guarantee, what you claimed, the photographs
-            and evidence you upload, and the decision.
+            <strong>Agreements, and claims made before 9 November 2026.</strong> The
+            agreements you draw up and confirm, their versions, Vallo&rsquo;s decision and
+            its reason, and, if you made a claim on the Vallo Guarantee while it ran (it was
+            retired on 9 November 2026), what you claimed, the photographs and evidence you
+            uploaded, and the decision.
           </li>
           <li>
             <strong>Verification data.</strong> If you list property or get paid on
@@ -285,7 +285,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
               <li>Vercel (United States): hosting the website and app.</li>
               <li>
                 Paystack (Nigeria): card and bank payments, splitting each payment to the
-                lister&rsquo;s bank account and the Guarantee reserve, refunds, and
+                lister&rsquo;s bank account, refunds, and
                 confirming the account holder&rsquo;s name on the bank account you
                 nominate for payouts.
               </li>
@@ -404,8 +404,8 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         </p>
         <p>
           <strong>Money is never deleted with an account.</strong> On the day the deletion
-          runs we check again. If a payment or a refund is still in progress, a Guarantee
-          claim is open, or money is owed to you or by you, the deletion
+          runs we check again. If a payment or a refund is still in progress, a claim
+          made before 9 November 2026 is still open, or money is owed to you or by you, the deletion
           waits: nothing is destroyed, a person at Vallo is told, and we contact you to
           settle it first. Your code to stop the deletion keeps working while it waits.
         </p>

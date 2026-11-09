@@ -47,7 +47,7 @@ export default async function AgreementsDeskPage() {
       ? await readGuaranteeDesk(claimsAccess.supabase, claimsAccess.userClient)
       : null;
   const claimsPanel = claimsDesk ? (
-    <Panel title="Guarantee claims" id="claims">
+    <Panel title="Guarantee claims (made before it retired)" id="claims">
       {claimsDesk.state !== "ok" ? (
         <p className="nf-body">The claims could not be read just now. Refresh to try again.</p>
       ) : (
@@ -58,7 +58,7 @@ export default async function AgreementsDeskPage() {
   if (access.state !== "admin") {
     return (
       <div className="nf-console">
-        <PageHead title="Guarantee claims" lede="Decide each claim against the inspection report and the agreement. The claimant reads your reason." />
+        <PageHead title="Guarantee claims" lede="The Vallo Guarantee was retired on 9 November 2026. Decide each claim made before then against the inspection report and the agreement. The claimant reads your reason." />
         {claimsPanel}
       </div>
     );

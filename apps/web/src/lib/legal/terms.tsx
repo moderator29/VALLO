@@ -111,9 +111,10 @@
  *   19  Governing law, which must stay consistent with the Co-Founder and
  *       Investment Agreement: Nigerian law, and arbitration in Abuja under the
  *       Arbitration and Mediation Act 2023.
- *   14  The Vallo Guarantee: a discretionary, capped, reviewed protection
- *       funded from a reserve. It must not read as insurance or as an
- *       unconditional promise to pay.
+ *   14  What Vallo does, and what it does not do. Until 9 November 2026 this
+ *       was the Vallo Guarantee, a discretionary, capped protection funded from
+ *       a reserve; the founder retired it, and the section now makes only
+ *       specific promises Vallo can keep, never a guarantee of the deal.
  *
  * AND ONE CORRECTION OF FACT MADE ON 22 SEPTEMBER, recorded here because a
  * legal document should carry its own history. Section 7 described the
@@ -132,7 +133,6 @@ import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { COMPANY_FORMAL_NAME, COMPANY_TRADING_NAME } from "./company";
 import {
-  GUARANTEE_SCOPE,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
@@ -252,11 +252,10 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
             shown before you confirm anything.
           </li>
           <li>
-            <strong>{NO_CUSTODY_SENTENCE}</strong> Our payment processor splits every
-            payment at the moment it is made: the share of the owner or agent goes to the
-            bank account on their payout details, the Vallo Guarantee contribution
-            described in section 14 goes to a separate reserve, and our commission, if
-            any, goes to us. {COMPANY_TRADING_NAME} has no wallet and keeps no balance for
+            <strong>{NO_CUSTODY_SENTENCE}</strong> Card payments are handled by Paystack,
+            our payment processor, which splits every payment at the moment it is made:
+            the share of the owner or agent goes to the bank account on their payout
+            details in the same transaction, and our commission, if any, goes to us. {COMPANY_TRADING_NAME} has no wallet and keeps no balance for
             you, so there is nothing to top up, nothing held and nothing to withdraw.
           </li>
           <li>
@@ -466,8 +465,8 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
         <p>
           After a rental inspection you submit the inspection report on the platform:
           eight items, each with its photographs. It is the record of the property as you
-          found it, it is what an agreement is drawn up from, and it is what any claim on
-          the Vallo Guarantee is compared with.
+          found it, it is what an agreement is drawn up from, and it is the record we
+          look at first if something goes wrong (section 14).
         </p>
       </>
     ),
@@ -546,37 +545,49 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
-    title: "14. The Vallo Guarantee",
+    title: "14. What Vallo does, and what it does not do",
     body: (
       <>
         <p>
-          Between 1 and 2 percent of every payment made through the platform is set
-          aside, at the moment of payment, in a reserve kept apart from{" "}
-          {COMPANY_TRADING_NAME}&rsquo;s own money. The exact percentage is shown on the
-          agreement before you pay. {GUARANTEE_SCOPE}
+          This section says plainly what {COMPANY_TRADING_NAME} does for you and what it
+          does not. It replaces the Vallo Guarantee, which was retired on 9 November
+          2026.
         </p>
         <ul>
           <li>
-            A claim is made from the agreement on the platform, with evidence, within the
-            claim window: 72 hours from move-in on a rental or from check-in on a stay.
+            We check the identity of members and review listings before they go live.
           </li>
           <li>
-            A person at {COMPANY_TRADING_NAME} reviews every claim against the inspection
-            report and the agreement, and approves it, in full or in part, or declines it
-            with a reason.
+            <strong>{COMPANY_TRADING_NAME} never holds your money.</strong>
           </li>
           <li>
-            <strong>
-              A claim is capped at what you paid for that booking and by what is in the
-              reserve at the time it is decided.
-            </strong>{" "}
-            An approved claim is paid to your bank account from the reserve.
+            Card payments are handled by Paystack, and the owner&rsquo;s share reaches
+            their bank account in the same transaction.
           </li>
           <li>
-            The Guarantee is not insurance, it is not a deposit and it creates no
-            balance in your name. Anything arranged or paid outside the platform is not
-            covered.
+            Payment held by a licensed bank until you confirm is not open yet. When it
+            opens we will say so, and these Terms will be updated with a new version and
+            date.
           </li>
+          <li>
+            {COMPANY_TRADING_NAME} is not a party to your tenancy or your sale, is not
+            acting as agent for either side, and does not guarantee the transaction.
+          </li>
+        </ul>
+        <p>
+          <strong>What we will do if something goes wrong.</strong>
+        </p>
+        <ul>
+          <li>
+            Investigate, using the inspection report and the messages on the platform as
+            the record.
+          </li>
+          <li>
+            Act on members who break the rules, up to and including suspension and
+            removal.
+          </li>
+          <li>Give you the evidence we hold.</li>
+          <li>Refund anything {COMPANY_TRADING_NAME} itself charged.</li>
         </ul>
       </>
     ),

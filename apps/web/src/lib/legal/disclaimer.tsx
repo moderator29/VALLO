@@ -13,7 +13,6 @@
 import Link from "next/link";
 import { COMPANY_FORMAL_NAME, COMPANY_TRADING_NAME } from "./company";
 import {
-  GUARANTEE_SCOPE,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
@@ -42,7 +41,7 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
         </p>
         <p>
           We cannot see any of it, cannot verify any of it and cannot recover money paid
-          that way. None of it is covered by the Vallo Guarantee. If anybody asks you to
+          that way. If anybody asks you to
           move a payment or a conversation off the platform, report them.
         </p>
       </>
@@ -87,13 +86,13 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
-    title: "5. The Vallo Guarantee is limited",
+    title: "5. Vallo does not guarantee the deal",
     body: (
       <p>
-        {GUARANTEE_SCOPE} A claim is reviewed by a person, must be made within the claim
-        window, and is capped by what you paid for that booking and by what is in the
-        reserve when it is decided. It is not insurance. The Terms of service, section 14,
-        set out exactly how it works.
+        Vallo is not a party to your tenancy or your sale, is not acting as agent for
+        either side, and does not guarantee the transaction. The Vallo Guarantee was
+        retired on 9 November 2026. The Terms of service, section 14, set out what Vallo
+        does and does not do, and exactly what we will do if something goes wrong.
       </p>
     ),
   },

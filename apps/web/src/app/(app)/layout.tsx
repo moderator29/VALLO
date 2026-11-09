@@ -16,6 +16,7 @@ import "@/app/css/detail-m.css";
 import "@/app/css/member-loop.css";
 /* The second premium motion layer, after the member sheets (css-diet C6 keeps their order first). */
 import "@/app/css/premium-motion-2.css";
+import { Suspense } from "react";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";
@@ -29,6 +30,7 @@ import { getShellIdentity, getShellWorkspaces } from "@/lib/app/shell-queries";
 import { getSide } from "@/lib/side";
 import { shellDictionary } from "@/lib/i18n/shell-dictionary";
 import { AppShell } from "@/components/app/AppShell";
+import { TermsUpdateMount } from "@/components/app/legal/TermsUpdateMount";
 import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/PasscodeGate";
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
@@ -148,6 +150,13 @@ export default async function AppLayout({
          navigation while the `social` switch is off (fails open). */
       socialOn={socialOn}
     >
+      {/* 9 November 2026: the new Terms (the Guarantee retired), shown once to
+          each existing member at their next visit, and never to a new one. */}
+      {signedIn ? (
+        <Suspense fallback={null}>
+          <TermsUpdateMount />
+        </Suspense>
+      ) : null}
       {/* 9.2: gyroscope-driven parallax on mobile. */}
       <GyroTiltInit />
       {/* V-79: counts, on this phone only, what each page could measure. */}
