@@ -7,10 +7,63 @@ without exception.
 
 ---
 
-## 0. DO NOT START UNTIL THESE ARE TRUE
+## 0. THE BRANCH, AND THE FOUNDER'S RULES
 
-This build touches real money. Every gate below must be green before one line
-of adapter code is written. If any is red, STOP and tell the founder.
+**Every piece of this work goes on `platform-grade-1-readiness`, continuing
+the branch the last two sessions worked on.** Do not cut a fresh branch from
+`main`: that throws away 336 commits of existing work. The exact commands and
+the reason are in rule 1 of `PLATFORM_GRADE_1_READINESS.md` section 1. Read
+that whole section: its rules govern this build too, not just the UX work.
+The short form, because these are the ones that get broken:
+
+- **ONE branch**, `platform-grade-1-readiness`, continued not recreated.
+  Commit and push to it often: Vercel is switched off for it, so it is free.
+  Never push to `main` and never merge into `main` unless the founder's
+  message literally contains "push to main".
+- **SIX AGENTS PER BATCH**, up to eight on genuinely independent work. Never
+  two writers in the same files. Name the owned paths in every agent's brief.
+  Read the diff of every agent's work yourself before committing it.
+- **NEVER deploy to Vercel**, never open a preview, never run the Vercel CLI.
+  Previews already cost the founder about 96 USD for nothing.
+- **NEVER trigger GitHub Actions.** The included minutes are exhausted. Run
+  the gates yourself locally.
+- **No em dashes anywhere**: code, copy, docs, commits, chat.
+- **English only** for new copy unless a translation is verified.
+- **Never print, paste or commit credentials.** Sandbox and live keys go into
+  Vercel or Supabase by the founder himself, never into the repository, never
+  into chat, never into a test fixture.
+- **No model identifiers** in commits, PR text, code comments or docs.
+- **Re-audit after every piece of work**: re-read the diff adversarially, run
+  the gates, look at every money screen at 390x844 and 360x800 in light and
+  dark, then fix what you find.
+- **Never claim something works unless you ran it.** Say "built, not tested on
+  a device" when that is the truth. On a payment screen this matters more than
+  anywhere else in the product.
+- **Company payments need all three founders' approval.** Never add a paid
+  service, plan or dependency with a running cost without asking.
+- **Talk to the founder in plain language**, the answer first, no jargon. He
+  is not an engineer. After each group of work, tell him in numbered steps
+  exactly what he needs to do on his phone or in a dashboard.
+- **Work autonomously.** Everything in these documents is approved. Ask only
+  when money would be spent, something is irreversible or public, or two
+  honest readings of his words would build different things, and then ask once
+  with your recommendation attached.
+
+---
+
+## 0. DO NOT GO LIVE UNTIL THESE ARE TRUE
+
+**Build now, switch on later.** The founder ruled on 9 November 2026 that the
+rail is to be built immediately, flagged OFF, while the commercial terms are
+being settled. So the gates below are GO-LIVE gates, not build gates: build
+the design, the adapter, the webhooks, the reconciliation, the screens and the
+tests, and leave every flag and kill switch off until each gate is green. If
+you are ever tempted to switch one on yourself, do not: report the rail as
+ready and let the founder decide.
+
+This build touches real money. Every gate below must be green before a single
+member can reach a protected payment path. If any is red, the flags stay off
+and you tell the founder.
 
 1. **The provider has answered in writing**, and the answers are acceptable:
    - refunds return to the payer's ORIGINAL bank account, not a balance held
@@ -21,10 +74,18 @@ of adapter code is written. If any is red, STOP and tell the founder.
    - our transaction categories are approved in writing.
 2. **The signed business agreement exists** and the founder has read it.
 3. **Sandbox credentials are in the environment**, never in the repository.
-4. **The founder has said to start.**
+4. **The founder has said to switch it on.**
 
 A successful sandbox transaction is NOT approval. Approval is a written
 statement from the provider naming our use case.
+
+**Known state, 9 November 2026.** The provider has answered the first round of
+questions and has set out its three presentation options; the founder has
+chosen the middle one (section 3). Still outstanding: the signed API Services
+Agreement, sandbox credentials, written approval of Vallo's categories,
+settlement timing after release, dispute handling, whether cards are coming,
+and any per-transaction or per-day limits. So gate 1 is PARTLY green, gates 2
+and 3 are red, gate 4 is red. Build on. Switch nothing on.
 
 ---
 

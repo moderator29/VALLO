@@ -35,13 +35,31 @@ Store submission.
 
 ## 1. THE FOUNDER'S RULES (NON-NEGOTIABLE)
 
-1. **Branch.** ONE branch, `platform-grade-1-readiness`, cut from the latest
-   `main`, and EVERY piece of this work lives on it from the first audit note
-   to the last polish commit. `main` already carries this handoff, the
-   founder's verbatim brief and all the fixes up to 7 November 2026, so cut
-   from `origin/main` and push the branch up immediately
-   (`git push -u origin platform-grade-1-readiness`). Commit and push to it
-   often: Vercel builds nothing for this branch, so pushing is free and it
+1. **Branch. CONTINUE THE EXISTING WORK, DO NOT START A NEW LINE OF IT.**
+   (The founder, 9 November 2026: work on the branch the last two sessions
+   worked on.) Two sessions have already put 336 commits into this upgrade.
+   That work is on `origin/claude/fervent-cray-1vzbp1`, which contains every
+   commit of `origin/platform-grade-1-readiness` plus 155 more, so it is a
+   strict superset and no work is lost by taking it. The founder wants it all
+   under the name he chose, so the first commands of the session are:
+
+   ```
+   git fetch origin
+   git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
+   git merge origin/main
+   git push -u origin platform-grade-1-readiness
+   ```
+
+   The merge picks up `main`'s newest work, including
+   `PROTECTED_PAYMENTS_BUILD.md` and `PROTECTED_PAYMENTS_SPECS.md`, which do
+   not exist on the work branch yet. Resolve any conflict, never reset it
+   away, and report what was resolved. Do NOT cut a fresh branch from `main`:
+   that silently throws away everything the last two sessions built, which is
+   the single most expensive mistake available in this document.
+
+   From then on: ONE branch, `platform-grade-1-readiness`, and EVERY piece of
+   this work lives on it from the first note to the last polish commit.
+   Commit and push to it often: Vercel builds nothing for this branch, so pushing is free and it
    means nothing is ever lost with a session. Do not open side branches for
    sub-pieces, and do not work directly on `main`. Never push to `main`, and
    never merge into `main`, unless the founder's message contains the words
@@ -61,13 +79,17 @@ Store submission.
    rely on CI for verification: run the gates yourself (section 9). iOS builds
    (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
    tell the founder before any new iOS build is needed.
-4. **Agents: 2 maximum at any one time (the founder reduced it again on
-   9 November 2026).** Fewer, better briefed, no collisions. The shape that
-   works: YOU are the lead and you write code; ONE subagent runs beside you on
-   work that touches DIFFERENT files. Brief each one in full (it knows nothing you
-   do not tell it), name the exact files it owns, and never let it touch a
-   file you or the other agent is editing. If a job cannot be split cleanly by
-   file, do it yourself in sequence rather than racing.
+4. **Agents: SIX PER BATCH, up to eight on genuinely independent work (the
+   founder raised this from two on 9 November 2026: "go hard on things, 5-6
+   agents on batch").** Go hard, run them in parallel, use the session. The
+   rule that does NOT bend: never two writers in the same files. Before you
+   launch a batch, write down the exact paths each agent owns, check that no
+   two overlap, and put the owned paths in the agent's brief. Brief each one
+   in full: it knows nothing you do not tell it, including the founder's rules
+   in this section. If a job cannot be split cleanly by file, do it yourself
+   in sequence rather than racing. A batch that "mostly worked" is a batch
+   that damaged files: read the diff of every agent's work before you commit
+   it, and never report a batch as done on an agent's word alone.
 5. **Re-audit every piece of work.** After each workstream: re-read the diff
    adversarially, run the gates, look at the screens at phone width (390 x 844
    and 360 x 800) in light and dark, then fix what you find. Only then move on.
@@ -764,26 +786,53 @@ From `apps/web`:
 VALLO: PLATFORM GRADE 1 READINESS. You are taking over my platform upgrade.
 Repo moderator29/read-it-well. Supabase project uccixoonmbhrnyczyigt.
 
+YOU ARE CONTINUING WORK, NOT STARTING IT
+Two sessions before you have already done a great deal of this upgrade. There
+are 336 commits of it. DO NOT start from main and DO NOT redo the audit, the
+recommendations or the reference-pattern notes: they exist, they are good, and
+redoing them burns my session for nothing. Your first job is to find out what
+is already done, then carry on from the first thing that is not.
+
 SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
-1. git fetch origin main
-2. Create your one working branch from main, and do EVERY piece of this work
-   on it, start to finish:
-     git checkout -b platform-grade-1-readiness origin/main
+1. Fetch everything:
+     git fetch origin
+2. Pick up the SAME branch the last two sessions worked on. The full work is
+   on origin/claude/fervent-cray-1vzbp1, which contains every commit of
+   origin/platform-grade-1-readiness plus 155 more. I want it all living under
+   the name platform-grade-1-readiness, so do exactly this:
+     git checkout -B platform-grade-1-readiness origin/claude/fervent-cray-1vzbp1
+     git merge origin/main
      git push -u origin platform-grade-1-readiness
-   main already carries the handoff, the brief and all the fixes up to
-   7 November 2026, so there is nothing else to pull in. If the branch
-   already exists on origin, check it out and continue on it rather than
-   making a second one. Never open a different branch for a sub-piece of the
-   work: one branch, every commit, so I can see the whole upgrade in one
-   place and Vercel stays switched off for it.
-3. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
+   The merge brings in main's newest work, including the payments documents in
+   step 6, which do not exist on the work branch yet. If that merge conflicts,
+   resolve it, do not reset it away, and tell me what you resolved. From then
+   on: ONE branch, platform-grade-1-readiness, every commit, start to finish.
+   Never open a different branch for a sub-piece of the work, so I can see the
+   whole upgrade in one place and Vercel stays switched off for it.
+3. READ THE STATE OF THE WORK before any other document, in this order:
+     docs/handoff/STATE.md             who was doing what, how to resume
+     docs/handoff/AGENT_QUEUES.md      the ordered jobs, with DONE marks
+     docs/handoff/FEATURE_BACKLOG.md   every ask of mine, with owner and state
+     docs/handoff/FOUNDER_DECISIONS.md my rulings, newest last
+     docs/handoff/PAGE_LEDGER.md       every page, ticked as passed
+     docs/handoff/TODO.md and docs/handoff/WORK_QUEUE.md
+   Then check git log against them. Tell me, in plain language and before you
+   build anything, what is done, what is half done, and what you are picking
+   up first. If a document and the code disagree, the code wins and you fix
+   the document. Keep every one of those files up to date as you go: the next
+   session will depend on them the way you depend on them now.
+4. READ docs/handoff/FOUNDER_BRIEF_VERBATIM.md completely. That is my own
    message, word for word, and it is your MAIN SOURCE OF TRUTH. Where anything
    else disagrees with it, it wins. Re-read it at the start of every phase.
-4. READ docs/handoff/PLATFORM_GRADE_1_READINESS.md completely: my rules, how I
+5. READ docs/handoff/PLATFORM_GRADE_1_READINESS.md completely: my rules, how I
    work, the current state, the codebase map, the Hauslet patterns, the design
    language, the priority list, the gates. Then apps/web/AGENTS.md, then the
-   docs it lists in section 3.
-5. READ the three payments documents, in this order, because the protected
+   docs it lists in section 3. Also read what the last sessions already wrote,
+   and build on it rather than rewriting it: AUDIT_2026-11.md,
+   RECOMMENDATIONS.md, REFERENCE_PATTERNS.md, PERFORMANCE_REPORT.md,
+   DEVICE_TEST_MATRIX.md, BANNER_MOMENTS.md, NATIVE_BUILD_QUEUE.md, and
+   docs/UX_SYSTEM.md if it exists.
+6. READ the two payments documents, in this order, because the protected
    payment rail is part of YOUR job now:
      docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
      docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
@@ -792,9 +841,11 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
                                                  terms in the appendix)
    Build that rail to ready, flagged OFF, in this same branch. Do not switch
    it on: the agreement is not signed yet.
-6. Load the Supabase MCP tools and confirm you can query the project.
-7. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+7. Load the Supabase MCP tools and confirm you can query the project.
+8. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
    for platform-grade-1-readiness.
+9. Check supabase/migrations/pending/ and its README. Anything waiting there
+   is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
 - SIX AGENTS PER BATCH, up to eight when the work is genuinely independent
@@ -850,11 +901,15 @@ uniform enhancement, not too much and not too little. Clean architecture,
 like a project that had a proper plan before it was built.
 
 START HERE
-1. The read-only audit (handoff section 6 step 2), written to
-   docs/handoff/AUDIT_2026-11.md.
-2. The design language decided and written to docs/UX_SYSTEM.md, then the
-   four shared components (feedback banner, sheet, step frame, page frame),
-   because they are what makes 559 pages look like one product.
+1. The state report from setup step 3: what is done, what is half done, what
+   you are picking up first. Short, plain, no jargon. The audit in
+   docs/handoff/AUDIT_2026-11.md and the recommendations already exist, so
+   extend them where you find something new, do not start them again.
+2. The design language and the four shared components (feedback banner, sheet,
+   step frame, page frame) were being built by the last sessions. Check their
+   state first. If they exist, finish and spread them across every page. If
+   they do not, build them now, because they are what makes 559 pages look
+   like one product.
 3. The P0 work: passcode optional with a dismissible dashboard alert; phone
    number out of sign-up and asked before the first deal; verification
    required before deals and rebuilt as a premium stepper; the global
