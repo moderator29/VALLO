@@ -1,6 +1,9 @@
 import Link from "next/link";
 
+import { getDictionary } from "@vallo/i18n";
+
 import { PageFrame } from "@/components/app/PageFrame";
+import { CircleShareButton } from "@/components/social/circle/CircleShare";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
@@ -24,9 +27,26 @@ export function ThreadScreen({ thread, now, fallback }: { thread: Thread; now: n
   const question = post.type === "question";
   const T = CIRCLE_COPY.thread;
   const back = fallback ?? (post.community ? `/circle/c/${post.community.slug}` : "/circle");
+  const share = getDictionary("en").shareCard;
 
   return (
-    <PageFrame title={question ? CIRCLE_COPY.card.question : CIRCLE_COPY.tabs.discussions} fallback={back} width="default">
+    <PageFrame
+      title={question ? CIRCLE_COPY.card.question : CIRCLE_COPY.tabs.discussions}
+      fallback={back}
+      width="default"
+      actions={
+        <CircleShareButton
+          label={share.share}
+          copy={{ title: share.title, share: share.share, background: share.background, stats: share.stats, name: share.name, copied: share.copied }}
+          subject={{
+            ...(post.author?.avatar ? { avatar: post.author.avatar } : { initial: post.author?.label ?? post.title }),
+            ...(post.community ? { handle: post.community.name } : {}),
+            headline: post.title,
+            url: `/circle/p/${post.id}`,
+          }}
+        />
+      }
+    >
       <div className="nf-circle-thread" data-testid="circle-thread">
         <article className={`nf-cthread${question ? " nf-cthread--question" : ""}`}>
           <span className="nf-cthread__eyebrow">
