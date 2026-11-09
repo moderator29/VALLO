@@ -14,21 +14,21 @@ screenshots taken and the rough edges fixed, copy in the locale files.
 
 What exists already (lead built the pieces; build on them, do not re-create):
 
-- `components/share/ShareComposer.tsx` — the composer: a brand share card, a
+- `components/share/ShareComposer.tsx`: the composer: a brand share card, a
   row of background presets, show-on-card toggles, and the two bottom pills
   ("Background", "Share"). Harness: `/preview/features/share`, `?kind=listing`.
-- `app/css/share.css` — the card, the pills, and the brand aurora backgrounds
+- `app/css/share.css`: the card, the pills, and the brand aurora backgrounds
   (`.nf-aurora--glow/brand/ink`).
-- `components/ui/MediaPill.tsx` — the control family below.
+- `components/ui/MediaPill.tsx`: the control family below.
 
 To finish:
 
 1. **Open it from the real Share controls**, in a bottom `Sheet`
    (`components/ui/Sheet.tsx`), so tapping Share opens the composer, not the
    bare OS sheet:
-   - Profile — `components/social/profile/ProfileShare.tsx`. Subject: handle,
+   - Profile: `components/social/profile/ProfileShare.tsx`. Subject: handle,
      name, avatar, two public stats, url `/u/<handle>`.
-   - Roommate listing — the share control on `/roommates/r/[id]`. Subject: the
+   - Roommate listing: the share control on `/roommates/r/[id]`. Subject: the
      cover photo as a background preset, the title, rent / your-share /
      rooms-free stats, url `/roommates/r/<id>`.
    - Roommate profile, and a Circle post where a share control exists.
@@ -37,13 +37,13 @@ To finish:
 2. **The forwarded preview**: upgrade `app/s/[token]/opengraph-image.tsx`
    (and/or `components/share/og-share-card.tsx`) so the image a link unfurls to
    is the same design as the in-app card (brand ground, avatar, headline,
-   stats, the Vallo mark). The link stays short — `/s/<token>` or
-   `/u/<handle>` — never a long query-string link.
+   stats, the Vallo mark). The link stays short: `/s/<token>` or
+   `/u/<handle>`: never a long query-string link.
 3. **Fill the card** so it never looks empty: with a real avatar or cover it is
    full; for a profile with no photo, show the tinted initials tile, not a gap.
 4. **Card variants** worth adding (pump.fun's tabs were Callout / Profit /
    Multiple): a simple tab row on the composer to switch what the card leads
-   with — e.g. a profile's "match %", a listing's "your share a month", a
+   with: e.g. a profile's "match %", a listing's "your share a month", a
    group's "spaces left". Keep it to the data we actually have.
 
 ## 2. The MediaPill control family (use it widely)
@@ -72,7 +72,7 @@ capsule is the picker/selector signal only.
 - `search` is redrawn to the App Store magnifier's proportions. No call-site
   change needed; it updates everywhere.
 - `stack` is a new glyph: the App Store "Apps" tab's layered-cards look. Use it
-  for collections, libraries and "all of X" entries — the saved hub, a
+  for collections, libraries and "all of X" entries: the saved hub, a
   community list, the side-nav entry for a collection. Keep the other nav
   glyphs as they are.
 
@@ -86,14 +86,14 @@ present now. No further work unless a screenshot shows it off.
 From the pump.fun screenshots, the patterns worth having in our style, for the
 kind of platform we are (property, roommates, community):
 
-- **Background presets with a "Yours / Presets" split** — let a lister use one
+- **Background presets with a "Yours / Presets" split**: let a lister use one
   of their own listing photos as the card background, or a Vallo preset.
 - **A crop / darken control** on a photo background (pump.fun's "Framing" +
   "Darken 40%"), so text always holds over a busy photo.
-- **"Show on card" toggles** (already in the composer) — keep them to the
+- **"Show on card" toggles** (already in the composer): keep them to the
   fields that exist.
-- **A share card for a wins moment** — "Found a place", "Matched", "Group is
-  full", "Verified" — a celebration card a member can share, in our voice and
+- **A share card for a wins moment**: "Found a place", "Matched", "Group is
+  full", "Verified": a celebration card a member can share, in our voice and
   within the claims rules (nothing unbacked).
 
 Propose the shortlist in your report before building the extra ones, so the

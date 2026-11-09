@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 
 import { MediaPill } from "@/components/ui/MediaPill";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -68,7 +67,6 @@ export function ShareComposer({
   backgrounds?: ShareBackground[];
   copy?: { share?: string; background?: string; stats?: string; handle?: string; copied?: string };
 }) {
-  const reduce = useReducedMotion();
   const [bgId, setBgId] = useState(backgrounds[0]?.id);
   const [showStats, setShowStats] = useState(true);
   const [showHandle, setShowHandle] = useState(true);
@@ -130,12 +128,7 @@ export function ShareComposer({
         </div>
       ) : null}
       <div className="nf-share__stage">
-        <motion.div
-          className="nf-share-card"
-          initial={reduce ? false : { opacity: 0, scale: 0.94, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 24 }}
-        >
+        <div className="nf-share-card nf-share-card--enter">
           <div className="nf-share-card__bg">
             {bg?.kind === "image" ? (
               <Image src={bg.src} alt="" fill sizes="320px" />
@@ -174,7 +167,7 @@ export function ShareComposer({
               Vallo
             </span>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <div className="nf-share__swatches" role="group" aria-label={t.background}>

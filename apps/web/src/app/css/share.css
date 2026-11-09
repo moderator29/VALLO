@@ -95,6 +95,21 @@
     gap: var(--nf-space-lg);
     padding-bottom: max(var(--nf-space-md), env(safe-area-inset-bottom));
   }
+  /* The card settles in once, transform and opacity only, resting under reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-share-card--enter {
+      animation: nf-share-card-in var(--nf-duration-entrance) var(--nf-ease-spring) both;
+    }
+  }
+  @keyframes nf-share-card-in {
+    from {
+      opacity: 0;
+      transform: scale(0.94) translateY(10px);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-share-card--enter {
+    animation: none;
+  }
   .nf-share__stage {
     display: grid;
     place-items: center;
