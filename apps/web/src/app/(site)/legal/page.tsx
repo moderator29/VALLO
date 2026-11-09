@@ -25,7 +25,7 @@ export default function LegalIndexPage() {
         </h1>
         <p className="max-w-measure-body text-[length:var(--nf-text-body)] leading-relaxed text-[var(--nf-content-secondary)]">
           Vallo is a marketplace for homes to rent and buy, shortlets, hotels and restaurant tables in Nigeria. These
-          documents say how the platform works, how we keep the community safe, and your rights and responsibilities as a
+          documents say how the platform works, how we look after the community, and your rights and responsibilities as a
           renter, guest, buyer, owner, agent or host. Each one shows the date it last changed.
         </p>
       </header>

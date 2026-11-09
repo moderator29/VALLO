@@ -61,7 +61,7 @@ export const LEGAL_DOCUMENTS: LegalDocumentEntry[] = [
     href: "/safety",
     icon: "shield-check",
     title: "Safety",
-    description: "How to view, agree and pay safely, and what to do when something feels wrong.",
+    description: "How to view, agree and pay with care, and what to do when something feels wrong.",
   },
   {
     href: "/host-agreement",
