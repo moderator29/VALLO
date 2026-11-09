@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { MediaPill } from "@/components/ui/MediaPill";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import { FieldProblem } from "@/components/ui/FieldProblem";
 import { Sheet } from "@/components/ui/Sheet";
 import { formatMoney, plural } from "@vallo/i18n/core";
@@ -104,9 +106,15 @@ export function StageControl({ groupId, stage }: { groupId: string; stage: Group
   const { pending, run } = useRun();
   return (
     <>
-      <Button variant="secondary" size="sm" trailingIcon="chevron-down" onClick={() => setOpen(true)} data-testid="rm-group-stage">
-        {D.changeStage}
-      </Button>
+      {/* A selector pill that shows the current stage and opens the chooser (MediaPill, SHARE_AND_CONTROLS.md section 2). */}
+      <MediaPill
+        label={D.stage}
+        sub={R.groups.stage[stage]}
+        tone="light"
+        media={<UiIcon name="flag" size={18} />}
+        trailingIcon="chevron-down"
+        onClick={() => setOpen(true)}
+      />
       <Sheet open={open} onOpenChange={setOpen} title={D.changeStage} detents={[0.6]} testId="rm-group-stage-sheet">
         <div role="radiogroup" aria-label={D.stage} className="grid gap-sm">
           {STAGES.map((s) => (

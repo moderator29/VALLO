@@ -287,6 +287,19 @@
     block-size: 2rem;
     border-radius: var(--nf-radius-sm);
   }
+  .nf-rmd-budget {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .nf-rmd-budget__tag {
+    padding: var(--nf-space-3xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-rm-tint, var(--nf-brand-tint-1));
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
   .nf-rmd-group__body {
     display: grid;
     gap: var(--nf-space-sm);

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { ChoiceChips } from "@/components/roommates/ChoiceChips";
+import { naira } from "@/components/roommates/format";
 
 import { STATE_OPTIONS, stateName } from "@/components/roommates/states";
 import { Button } from "@/components/ui/Button";
@@ -228,10 +229,20 @@ export function DiscoverControls({
           ) : null}
 
           <FilterGroup title={copy.discover.filterLabels.budget} icon="wallet">
+            <div className="nf-rmd-budget">
+              <span className="nf-rmd-budget__tag">{draft.maxMinor ? `${copy.ui.card.budgetUpTo.replace("{amount}", naira(draft.maxMinor))}${copy.perPeriod[draft.period ?? "year"]}` : d.any}</span>
+            </div>
             <NairaField
               label={d.maxBudget}
               value={draft.maxMinor ? String(Math.round(draft.maxMinor / 100)) : ""}
               onValueChange={(v) => patch({ maxMinor: v ? Math.round(Number(v) * 100) : null })}
+            />
+            <ChoiceChips
+              label={d.maxBudget}
+              anyLabel={d.any}
+              value={BUDGET_STEPS[draft.period ?? "year"].includes(draft.maxMinor ?? -1) ? (draft.maxMinor ?? null) : null}
+              options={BUDGET_STEPS[draft.period ?? "year"].map((v) => ({ value: v, label: naira(v) }))}
+              onChange={(v) => patch({ maxMinor: v })}
             />
             <Segmented
               variant="solid"
