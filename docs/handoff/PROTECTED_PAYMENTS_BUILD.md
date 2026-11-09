@@ -28,6 +28,33 @@ statement from the provider naming our use case.
 
 ---
 
+## 0B. THREE CORRECTIONS THE FOUNDER HAS RULED ON (9 NOVEMBER 2026)
+
+An earlier draft of this work, written outside the repository, got three
+things wrong. The founder has agreed all three corrections. They are binding.
+
+1. **The provider is invisible in the interface.** The earlier draft said the
+   provider should "appear as the regulated payment infrastructure partner".
+   It does not. Section 3 is the rule: no name, no logo, no "powered by", no
+   link out, anywhere a member can see. Named only in the Terms, on receipts
+   and in the help centre, where honesty and consumer protection require it.
+
+2. **This work is not urgent and must not jump its gates.** The earlier draft
+   read as a migration to start immediately. It is not on the launch path at
+   all (section 10). Section 0 lists the gates, and the first of them is a
+   written answer from the provider that does not exist yet. Starting the
+   adapter before those gates are green is the single most expensive mistake
+   available here.
+
+3. **Design and build are separate jobs, done in that order.** The design pass
+   (flow, screens, copy, motion) is a product designer's work and comes first.
+   The build (adapter, webhooks, reconciliation, state machine) is an
+   engineer's work and comes after, against a finished design. One session
+   doing both at once produces a payment screen that looks finished and is
+   not, which is the worst outcome in this entire document.
+
+---
+
 ## 1. WHAT THIS IS, IN ONE PARAGRAPH
 
 A buyer pays. The money goes to a designated account at a CBN-licensed bank,
@@ -145,41 +172,185 @@ agreed limits. Not everything at once.
 
 ---
 
-## 6. THE FRONTEND
+## 6. WHO IS ALLOWED TO PAY FOR WHAT, AND FROM WHERE
 
-Design comes from the ChatGPT design pass the founder is running, plus
-`PLATFORM_GRADE_1_READINESS.md` section 4B (the Grade 1 design language).
-Build it with the shared components: `PageFrame`, `Sheet`, `StepFrame`,
-`FeedbackBanner`.
+**The founder's ruling, 9 November 2026.** Protected payment is funded by
+naira bank transfer from a Nigerian bank account. That has a consequence the
+interface must state plainly and early:
 
-**The screens:**
-1. **Payment choice.** Protected (bank transfer) or card, where policy allows.
-   Accurate fees. Never advertise protection on an unapproved category.
-2. **Funding instructions.** Vallo reference, property, amount, the bank
-   details the provider returned, expiry, copy buttons, live status, a refresh
-   that asks OUR backend. Account details are never hardcoded and never
-   editable by the member.
-3. **Protected.** The hero screen. The money is safe, here is what happens
-   next, here is when it releases.
-4. **Release and refund controls.** Role-aware, server-validated, confirmation
-   before anything irreversible. Never say released or refunded before the
-   provider confirms.
-5. **Dispute.** Open, reason, evidence, both statements, admin review,
-   decision history.
-6. **Timeline and receipt** on every transaction.
+| Deal | Can be paid from abroad? | How |
+|---|---|---|
+| Shortlet | **Yes** | Card, any country |
+| Hotel room | **Yes** | Card, any country |
+| Restaurant table | **Yes** | Card, any country |
+| **Annual rent / apartment** | **No** | Naira transfer from a Nigerian bank |
+| Sale, land | No | Solicitor, off platform |
 
-**States that must each look different and be unmistakable:** awaiting
-transfer, transfer received, protected, handover pending, under review,
-release processing, released, refund processing, refunded, action required,
-failed.
+**Renting a home on Vallo requires paying from Nigeria.** This is not a bug to
+apologise for, it is how large Nigerian payments move, and card limits make
+rent by card impossible anyway. But a member in London who finds a flat,
+books an inspection and only discovers this at the payment screen will feel
+cheated. So:
 
-**Never:** a screen that looks functional but is not wired; a member marking
-their own payment as made; a screenshot accepted as proof; the words
-"released" or "refunded" before provider confirmation.
+1. **Say it on the listing, not at checkout.** A rental listing viewed from
+   outside Nigeria shows a calm line near the price: "Renting a home is paid
+   by bank transfer in naira, from a Nigerian account."
+2. **Say it again before they invest effort**, at the point they request an
+   inspection or open an agreement.
+3. **Offer the real way out**, because this is how it actually happens: a
+   family member or friend in Nigeria can be named as the payer on the
+   agreement, and they pay. Build that: a named payer who is not the tenant,
+   recorded on the agreement, with both consenting.
+4. **Never dead-end anyone.** No screen may say only "not available in your
+   country". It says what they CAN do and offers to tell them when card
+   funding for rent exists.
+5. **Detect, do not assume.** Base the notice on where they are paying from,
+   not on a guess about nationality. A Nigerian in Nigeria with a foreign
+   card still has a path; a diaspora member with a Nigerian account can pay
+   normally.
+
+Browsing, searching, saving, messaging, inspections and agreements are open to
+everyone, everywhere. Only the rent payment step is restricted.
 
 ---
 
-## 7. SAFETY, NON-NEGOTIABLE
+## 7. THE FRONTEND, IN FULL
+
+Design comes from the founder's ChatGPT design pass plus
+`PLATFORM_GRADE_1_READINESS.md` section 4B. Build with the shared components
+(`PageFrame`, `Sheet`, `StepFrame`, `FeedbackBanner`). Nothing below is
+optional: a half-built money screen is worse than none.
+
+### 7.1 Before money moves
+
+- **Payment choice.** Protected transfer or card, where policy allows both.
+  Honest fees, side by side, with what protection actually means in one
+  sentence each. Never offer protection on an unapproved category.
+- **What you pay.** A full breakdown before anything is committed: the price,
+  every extra charge by name, the total, and who receives what. No surprises
+  at the end.
+- **Who you are paying.** The counterparty, their verified badge, how long on
+  Vallo, their response record. People feel safe when the other person is
+  real. Show it at the moment of payment, not only on the profile.
+- **Eligibility notice** (section 6) where it applies.
+- **The promise, in one line**, with a link to the full explainer.
+
+### 7.2 The protected rail, screen by screen
+
+- **Funding instructions.** Account name, number, bank, the reference, the
+  exact amount, the expiry. Every field copyable with one tap and a confirming
+  toast. A large, obvious "we are watching for your transfer" state. Never
+  hardcoded, never editable by the member.
+- **Waiting.** Honest about timing (transfers can take minutes), a refresh
+  that asks OUR backend, and what to do if it has been too long.
+- **PROTECTED.** The hero. The money is safe, here is where it is, here is
+  exactly what releases it and when. This screen carries the entire product
+  promise. It should feel like a vault closing: calm, certain, premium.
+- **The milestone.** Check-in or key handover, with the confirm action, what
+  confirming means, and the alternative if something is wrong.
+- **Release in progress**, then **released**, with the receipt.
+- **Dispute**: open, reason, photo evidence, both statements, review status,
+  decision history.
+- **Refund in progress**, then **refunded**, to the original account.
+
+### 7.3 The card rail, treated with equal care
+
+The card rail carries the launch and must not feel like the poor relation:
+
+- Checkout handoff and return, with the app state preserved if they leave.
+- Processing, paid, failed with a real reason and a retry that resumes the
+  same attempt rather than opening a second one.
+- Refund states with the five-business-day clock already built, shown
+  honestly: asked, started at the processor, back on your card.
+- **Chargeback rights explained** where card is the protection, because on
+  shortlets it genuinely is.
+
+### 7.4 Receipts, and the help inside them
+
+A receipt is the artefact a member keeps, forwards to a landlord, shows an
+accountant, or takes to court. Treat it as a product, not a footer.
+
+Every receipt carries: the Vallo reference, date and time, what was paid for
+with the property named, the full amount breakdown line by line, who paid, who
+was paid, the rail used, the current status, **the custodian bank named** for
+a protected payment, and the release or refund history with timestamps.
+
+It must be **shareable and savable as a PDF**, readable months later, and
+correct in both themes.
+
+**Help lives inside the receipt**, not in a distant help centre:
+- "Something wrong with this payment?" opens the dispute or support path with
+  the transaction already attached, so nobody re-types a reference.
+- "Where is my money?" explains the current state in that member's own words.
+- "Who is holding this?" names the bank and links to the explainer.
+
+### 7.5 Transactions and history
+
+- **A payments home**: everything in one place, both rails, newest first.
+- Filter by status, deal type, property, date range. Search by reference or
+  property name.
+- Each row: what, who, how much, status, when. Unmistakable at a glance.
+- **Export** a date range to CSV or PDF for a landlord, an accountant or a
+  visa application.
+- **A timeline on every transaction**: every state change with a timestamp and
+  a plain sentence. "You paid", "Your money was protected", "You confirmed
+  check-in", "The host was paid". This is also the audit trail.
+- Open items surface first: anything needing action, anything stuck.
+
+### 7.6 The seller's side, designed with equal weight
+
+A host watching money they cannot touch yet is as anxious as the buyer. Build
+for them:
+- "Paid and protected. You will be paid when your guest checks in."
+- Exactly when release happens, and the automatic release if the guest never
+  confirms.
+- Their own receipt, their own history, their own export.
+- What to do if the guest does not show.
+- Payout account state, and a warning long before a payout could fail.
+
+### 7.7 Trust surfaces
+
+- **"How your money is protected"**: a proper explainer page with the real
+  flow, the custodian named, what happens if something goes wrong, and what
+  Vallo does and does not do. Written to be read by a nervous person.
+- **Verified badges** on the counterparty at the payment moment.
+- **A human, one tap away** from every money screen. Fear needs a person.
+- **Honest limits**: say what protection does NOT cover, before they pay.
+
+### 7.8 Every failure state, designed
+
+Offline mid-payment. App closed and reopened mid-flow. Transfer of the wrong
+amount. Transfer after expiry. Duplicate transfer. Provider outage. Payout
+account rejected. Dispute while a release is already processing. Each gets a
+designed screen with a plain sentence and a way forward. None gets a spinner
+or a raw error.
+
+### 7.9 Notifications and email
+
+Every money event reaches the member twice, in app and by email, in the warm
+voice already built (`lib/notify/voice.ts`): protected, released, refunded,
+dispute opened, dispute decided, action needed, payout failed. Each one says
+what happened, what it means, and what to do next. Lock-screen copy must be
+readable in forty characters.
+
+### 7.10 Motion and polish
+
+Money screens earn more motion than anywhere else, because motion here means
+reassurance. The money landing in protection, the vault closing, the release
+completing, the receipt being issued: each deserves a moment. Fast, never
+blocking, always respecting reduced motion. One accent colour carrying
+meaning. Nothing that makes a nervous person feel the screen is unstable.
+
+### 7.11 Admin
+
+An operations view of every arrangement with its provider state beside ours, a
+reconciliation report with mismatches first, the dispute desk with evidence
+from both sides, and the refund clock already built. Staff need to answer
+"where is my money" in under thirty seconds.
+
+---
+
+## 8. SAFETY, NON-NEGOTIABLE
 
 1. No frontend declares funded, released or refunded.
 2. No duplicate funding, release or refund.
@@ -196,7 +367,7 @@ their own payment as made; a screenshot accepted as proof; the words
 
 ---
 
-## 8. CATEGORY ELIGIBILITY
+## 9. CATEGORY ELIGIBILITY
 
 Build a configuration layer: `residential_rent`, `shortlet`, `hotel_booking`,
 `commercial_rent`, `property_sale`, `land_sale`, `event_space`, `other`. Each
@@ -207,7 +378,7 @@ must never be able to bypass this from the client.
 
 ---
 
-## 9. THE LAUNCH POSITION (9 NOVEMBER 2026)
+## 10. THE LAUNCH POSITION (9 NOVEMBER 2026)
 
 The founder launches in days, and this build is NOT on that path:
 
