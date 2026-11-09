@@ -90,9 +90,10 @@ describe("the Guarantee is retired from the money sentences (D51)", () => {
     expect(sentences.filter(([, text]) => bad.test(text)).map(([n]) => n)).toEqual([]);
   });
 
+  /* The founder's sentence, with "and protect" dropped on 9 November 2026. */
   it("keeps the governing sentence verbatim", () => {
     expect(copy.GOVERNING_SENTENCE).toBe(
-      "Vallo uses regulated financial infrastructure partners to process and protect eligible transactions. Vallo does not hold customer funds.",
+      "Vallo uses regulated financial infrastructure partners to process eligible transactions. Vallo does not hold customer funds.",
     );
   });
 });
