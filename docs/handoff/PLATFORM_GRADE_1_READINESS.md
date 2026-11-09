@@ -79,17 +79,18 @@ Store submission.
    rely on CI for verification: run the gates yourself (section 9). iOS builds
    (`Native iOS` workflow, macOS minutes at roughly 10x) also need minutes:
    tell the founder before any new iOS build is needed.
-4. **Agents: SIX PER BATCH, up to eight on genuinely independent work (the
-   founder raised this from two on 9 November 2026: "go hard on things, 5-6
-   agents on batch").** Go hard, run them in parallel, use the session. The
+4. **Agents: TWO SUBAGENTS, plus you the lead. Three workers at once, never
+   more.** (The founder, 9 November 2026, settling this after trying higher
+   numbers: "two agents with the session itself".) Launch both at the start of
+   a batch and keep them busy; do not run one and leave the other idle. The
    rule that does NOT bend: never two writers in the same files. Before you
-   launch a batch, write down the exact paths each agent owns, check that no
-   two overlap, and put the owned paths in the agent's brief. Brief each one
-   in full: it knows nothing you do not tell it, including the founder's rules
-   in this section. If a job cannot be split cleanly by file, do it yourself
-   in sequence rather than racing. A batch that "mostly worked" is a batch
-   that damaged files: read the diff of every agent's work before you commit
-   it, and never report a batch as done on an agent's word alone.
+   launch a batch, write down the exact paths you and each agent own, check
+   that no two overlap, and put the owned paths in the agent's brief. Brief
+   each one in full: it knows nothing you do not tell it, including the
+   founder's rules in this section. If a job cannot be split cleanly by file,
+   do it yourself in sequence rather than racing. A batch that "mostly worked"
+   is a batch that damaged files: read the diff of every agent's work before
+   you commit it, and never report a batch as done on an agent's word alone.
 5. **Re-audit every piece of work.** After each workstream: re-read the diff
    adversarially, run the gates, look at the screens at phone width (390 x 844
    and 360 x 800) in light and dark, then fix what you find. Only then move on.
@@ -100,6 +101,26 @@ Store submission.
    invent Yoruba, Hausa or Igbo strings.
 8. **Never print, paste or commit credentials.** Keys go in Vercel or Supabase
    settings by the founder, never in chat.
+8B. **SQL: apply what you safely can, accumulate the rest into ONE block for
+   the founder.** (His ruling, 9 November 2026.) He does not want SQL dripping
+   into the chat in pieces while you work.
+   - Every migration you write goes in `supabase/migrations/pending/` with a
+     dated name and a one-line note in `pending/README.md` saying what it does
+     and what it depends on. Nothing lives only in a chat message.
+   - Where you can apply it yourself through the Supabase tools and it is
+     additive and reversible (new table, new column, new policy, new function,
+     a backfill you have counted first), apply it, say plainly that you did,
+     and move the file out of `pending/` into its version folder.
+   - Anything you cannot or should not apply yourself (destructive changes,
+     drops, data deletions, anything touching live money rows, anything you
+     are not certain of) stays in `pending/` and is NOT shown to him yet.
+   - At the END of a group of work, give him ONE message with ONE SQL block
+     holding everything still outstanding, in the correct dependency order,
+     ready to paste and run in one go, with a short plain-language line above
+     it saying what it does and what he should see when it succeeds. One
+     block, once, not a trickle.
+   - Never run a destructive statement yourself. Never ask him to run SQL you
+     have not read end to end.
 9. **No model identifiers** in commits, PR text, code comments or docs.
 10. **Do not copy Hauslet's (or X's) branding, logos, exact screens, text or
     assets.** Learn the patterns, then build a distinct Vallo version that is
@@ -713,11 +734,11 @@ a page map of the platform.
 5. **Architecture.** Decide the shared pieces first (feedback banner, motion
    tokens, sheet component, stepper component, page frame, connection state),
    so every page uses the same parts.
-6. **Implement in groups** (P0, then P1, then P2). **SIX AGENTS PER BATCH**,
-   up to eight where the work is genuinely independent by file (the founder, 9
-   November 2026, raising this from two: "go hard on things, 5-6 agents on
-   batch"). Before you launch a batch, write down which paths each agent owns
-   and check no two overlap. Examples of a clean split:
+6. **Implement in groups** (P0, then P1, then P2). **TWO SUBAGENTS plus you
+   the lead, three workers at once, never more** (the founder, 9 November
+   2026). Launch both at the start of each batch and keep them busy. Before
+   you launch, write down which paths you and each agent own and check no two
+   overlap. Examples of a clean split:
    - You build the shared components and the member screens; the agent audits
      native behaviour (status bar, keyboard, haptics, back button, deep links)
      and reports findings for you to apply.
@@ -848,11 +869,23 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
-- SIX AGENTS PER BATCH, up to eight when the work is genuinely independent
-  by file. Go hard, run them in parallel, use the session. The one rule that
-  does not bend: never two writers in the same files. Split every batch by
-  file ownership first and name the owned paths in each agent's brief. Where
-  the work cannot be split cleanly, do it in sequence yourself.
+- TWO AGENTS, plus you the session lead. Three workers at once, never more.
+  Launch both at the start of every batch and keep them busy: do not run one
+  and leave the other idle. The one rule that does not bend: never two writers
+  in the same files. Split every batch by file ownership first and name the
+  owned paths in each agent's brief. Read the diff of every agent's work
+  yourself before you commit it, and never report a batch as done on an
+  agent's word alone. Where the work cannot be split cleanly, do it in
+  sequence yourself.
+- SQL: do not drip it into the chat while you work. Put every migration in
+  supabase/migrations/pending/ with a note in its README. Apply the safe,
+  additive, reversible ones yourself through the Supabase tools and tell me
+  you did. Everything else waits. Then at the END of a group of work, send me
+  ONE message with ONE SQL block holding everything still outstanding, in the
+  right order, ready for me to paste and run in one go, with one plain line
+  above it saying what it does and what I should see when it works. Never run
+  a destructive statement yourself, and never hand me SQL you have not read
+  end to end.
 - STUDY EVERY REFERENCE IMAGE I SEND before you design or build a screen.
   They are the standard, not decoration.
 - EVERYTHING lives on the branch platform-grade-1-readiness. Commit often,

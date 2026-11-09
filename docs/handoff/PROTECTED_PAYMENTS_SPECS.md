@@ -30,9 +30,9 @@ that one disagree, that one wins.
    session doing both at once ships a payment screen that looks finished and
    is not.
 
-**Also binding:** SIX AGENTS PER BATCH, up to eight on genuinely independent
-work (raised from two by the founder on 9 November 2026). Never two writers in
-the same files. Re-audit after every piece of work. The founder is sending reference images: study every one before
+**Also binding:** TWO SUBAGENTS plus the lead, three workers at once, never
+more (the founder, 9 November 2026). Never two writers in the same files.
+Re-audit after every piece of work. The founder is sending reference images: study every one before
 designing or building a screen.
 
 ---

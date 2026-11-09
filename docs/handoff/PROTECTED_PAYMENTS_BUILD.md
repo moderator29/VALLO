@@ -20,9 +20,16 @@ The short form, because these are the ones that get broken:
   Commit and push to it often: Vercel is switched off for it, so it is free.
   Never push to `main` and never merge into `main` unless the founder's
   message literally contains "push to main".
-- **SIX AGENTS PER BATCH**, up to eight on genuinely independent work. Never
-  two writers in the same files. Name the owned paths in every agent's brief.
-  Read the diff of every agent's work yourself before committing it.
+- **TWO SUBAGENTS plus you the lead**, three workers at once, never more.
+  Never two writers in the same files. Name the owned paths in every agent's
+  brief. Read the diff of every agent's work yourself before committing it.
+- **SQL goes into `supabase/migrations/pending/` with a note in its README,
+  not into the chat.** Apply the safe, additive, reversible ones yourself
+  through the Supabase tools and say that you did. Everything else waits, and
+  at the end of a group of work the founder gets ONE message with ONE ordered
+  SQL block to run in one go. On this build in particular: never run a
+  destructive statement yourself, and nothing that touches a live money row
+  or a ledger entry goes anywhere near an automatic apply.
 - **NEVER deploy to Vercel**, never open a preview, never run the Vercel CLI.
   Previews already cost the founder about 96 USD for nothing.
 - **NEVER trigger GitHub Actions.** The included minutes are exhausted. Run
@@ -101,13 +108,13 @@ for. Do not paraphrase it from memory. Open it.
 **This document overrides it** wherever they differ. The three corrections in
 section 0B are the known differences.
 
-**SIX AGENTS PER BATCH** (the founder, 9 November 2026, raising this from two:
-"go hard on things, 5-6 agents on batch"). Up to eight where the work is
-genuinely independent by file. The old two-agent limit is withdrawn. The rule
-that has NOT changed: never two writers in the same files. Split every batch by
-file ownership before you launch it, and say in each agent's brief exactly
-which paths it owns. Also **study every reference image the founder sends**
-before you design or build a screen.
+**TWO SUBAGENTS, plus you the lead: three workers at once, never more** (the
+founder, 9 November 2026: "two agents with the session itself"). Launch both at
+the start of each batch and keep them busy. The rule that never bends: never
+two writers in the same files. Split every batch by file ownership before you
+launch it, and say in each agent's brief exactly which paths it owns. Also
+**study every reference image the founder sends** before you design or build a
+screen.
 
 ---
 
