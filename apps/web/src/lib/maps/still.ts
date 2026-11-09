@@ -79,5 +79,5 @@ export async function paintStill(
     paintVectorTile(target, tile, palette);
     labels.push(...placeLabels(target, tile));
   }
-  drawLabels(ctx, labels, palette, { w, h, keepClear: { x: w / 2, y: h / 2, r: 22 } }, input.fontFamily, w * h > 60_000 ? 4 : 2);
+  drawLabels(ctx, labels, palette, { w, h, keepClear: { x: w / 2, y: h / 2, r: 22 } }, input.fontFamily, w * h < 12_000 ? 0 : w * h > 60_000 ? 4 : 2);
 }
