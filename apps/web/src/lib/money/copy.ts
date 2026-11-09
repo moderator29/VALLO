@@ -198,6 +198,8 @@ export const LISTING_STAY_PAY_AFTER =
 
 /** Rent: everything but the payment step (the founder's approved rent line). */
 export const RENT_NOT_OPEN_SHORT = "Payment for rentals is not open on Vallo yet.";
+/** What a renter can do instead, said under the short line where it is the heading. */
+export const RENT_NOT_OPEN_NEXT = "You can view, inspect and agree terms now. Nothing has been charged.";
 export const RENT_PAYMENT_NOT_OPEN = `${RENT_NOT_OPEN_SHORT} You can view, inspect and agree terms now.`;
 
 /** A sale, rule (c) of 9 November 2026: never, at any stage. */

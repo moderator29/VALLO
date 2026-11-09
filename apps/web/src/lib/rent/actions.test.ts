@@ -10,11 +10,15 @@
  */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fakeSupabase } from "../testing/fake-supabase";
+import { RENT_PAYMENT_NOT_OPEN } from "../money/copy";
 
 const state = vi.hoisted(() => ({
   session: null as unknown,
   admin: null as unknown,
   flag: true,
+  /* The tests below the gate pin the path as it works once rent payment is
+     opened; the gate itself is pinned in its own block at the end. */
+  rentOpen: true,
   payWithSavedCard: vi.fn(async (_input: unknown) => ({ ok: true, data: { status: "paid" } })),
 }));
 
@@ -26,6 +30,11 @@ vi.mock("../actions/session", () => ({
 vi.mock("next/cache", () => ({ revalidatePath: () => undefined }));
 vi.mock("../flags", () => ({ isFeatureEnabled: async () => state.flag }));
 vi.mock("@/lib/supabase/service", () => ({ getAdminClient: () => state.admin }));
+vi.mock("./payment-open", () => ({
+  get RENT_PAYMENT_OPEN() {
+    return state.rentOpen;
+  },
+}));
 vi.mock("../bookings/checkout", () => ({ payWithSavedCard: (i: unknown) => state.payWithSavedCard(i) }));
 
 const { startRentPayment, payRentWithSavedCard } = await import("./actions");
@@ -43,6 +52,7 @@ function rpcAnswers(answer: { data?: unknown; error?: unknown }) {
 
 beforeEach(() => {
   state.flag = true;
+  state.rentOpen = true;
   state.payWithSavedCard.mockClear();
   state.session = { state: "signed-in", user: { id: ME }, supabase: fakeSupabase().client };
   rpcAnswers({ data: { status: "ok", booking_id: "b1", rent_payment_id: "r1", total_minor: 150_000_000 } });
@@ -123,5 +133,25 @@ describe("payRentWithSavedCard", () => {
     tenantOfCharge(ME);
     expect((await payRentWithSavedCard({ inspectionId: "x", methodId: "m1" })).ok).toBe(false);
     expect(state.payWithSavedCard).not.toHaveBeenCalled();
+  });
+});
+
+describe("payment for rentals is not open (9 November 2026, RENT_PAYMENT_OPEN false)", () => {
+  it("opens no charge and charges no card, saying why, before anything is read", async () => {
+    state.rentOpen = false;
+    const own = fakeSupabase({ rent_payments: { select: { data: { booking_id: "b1", tenant_id: ME } } } });
+    state.session = { state: "signed-in", user: { id: ME }, supabase: own.client };
+    const opened = await startRentPayment({ inspectionId: INSPECTION, moveIn: future(3) });
+    expect(opened).toMatchObject({ ok: false, error: RENT_PAYMENT_NOT_OPEN });
+    const charged = await payRentWithSavedCard({ inspectionId: INSPECTION, methodId: "m1" });
+    expect(charged).toMatchObject({ ok: false, error: RENT_PAYMENT_NOT_OPEN });
+    expect(admin.calls).toHaveLength(0);
+    expect(own.calls).toHaveLength(0);
+    expect(state.payWithSavedCard).not.toHaveBeenCalled();
+  });
+
+  it("is the launch position", async () => {
+    const actual = await vi.importActual<typeof import("./payment-open")>("./payment-open");
+    expect(actual.RENT_PAYMENT_OPEN).toBe(false);
   });
 });

@@ -9,6 +9,8 @@ import {
   PAY_CHOICE_ROOM_ONLY,
   PAY_CHOICE_SALE_ONLY,
   PAY_ONLY_THROUGH_VALLO,
+  RENT_NOT_OPEN_NEXT,
+  RENT_NOT_OPEN_SHORT,
 } from "@/lib/money/copy";
 import type { PayChoice } from "@/lib/payments/rail-choice";
 
@@ -106,8 +108,29 @@ describe("the payment step's choice (ruling 2)", () => {
 
 });
 
+describe("a rental while payment for rentals is not open (9 November 2026)", () => {
+  const rent = { id: "ag-2", kind: "rent", bookingId: null, inspectionId: "in-1" };
+
+  it("says so and offers no rail, no radio and no Continue, even with card stored", () => {
+    for (const choice of [both, { ...both, options: ["card"] as PayChoice["options"], escrowPaused: true as const, chosen: "card" as const }]) {
+      const out = html(choice, { agreement: rent });
+      const text = words(out);
+      expect(out).toContain('data-mode="rent_not_open"');
+      expect(text).toContain(RENT_NOT_OPEN_SHORT);
+      expect(text).toContain(RENT_NOT_OPEN_NEXT);
+      expect(out).not.toContain('type="radio"');
+      expect(out).not.toContain("pay-choice-card");
+      expect(out).not.toContain("pay-choice-continue");
+      expect(text).not.toContain("Paystack");
+    }
+  });
+});
+
 describe.skipIf(!hasBrowser && !process.env.CI)("the payment step's choice (axe)", () => {
   it("has no axe violations", async () => {
     expect(await axe(`<h1>Pay</h1>${html(both)}`)).toEqual([]);
+    expect(
+      await axe(`<h1>Pay</h1>${html(both, { agreement: { id: "ag-2", kind: "rent", bookingId: null, inspectionId: "in-1" } })}`),
+    ).toEqual([]);
   });
 });

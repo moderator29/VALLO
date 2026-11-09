@@ -13,6 +13,8 @@ import {
   PAY_CHOICE_ROOM_ONLY,
   PAY_CHOICE_SALE_ONLY,
   PAY_ONLY_THROUGH_VALLO,
+  RENT_NOT_OPEN_NEXT,
+  RENT_NOT_OPEN_SHORT,
 } from "@/lib/money/copy";
 import { payChoiceView, payNextHref, readChoiceRefusal, type PayChoice, type PayRail } from "@/lib/payments/rail-choice";
 import { choosePaymentRail } from "@/lib/payments/rail-choice-actions";
@@ -29,7 +31,8 @@ type Choose = (input: { agreementId: string; choice: PayRail }) => Promise<Actio
  * THE PAYMENT STEP'S CHOICE (founder ruling 2, 13 October 2026).
  *
  * 9 November 2026: the protected rail is switched off, so today the step
- * draws card (`card_escrow_paused`) on a rent or a shortlet, and on a
+ * draws card (`card_escrow_paused`) on a stay, on a rental the fact that
+ * payment for rentals is not open (`rent_not_open`, never card), and on a
  * purchase the fact that Vallo takes no payment for it (`escrow_paused`).
  * The two-option choice below is drawn only while the rail is live.
  *
@@ -64,7 +67,7 @@ export function PayChoiceCard({
   /** The agreement's status, so a card choice waiting on a person is said. */
   agreementStatus?: string;
 }) {
-  const view = payChoiceView(choice);
+  const view = payChoiceView(choice, agreement.kind);
   const [selected, setSelected] = useState<PayRail | null>(view.selected);
   const [review, setReview] = useState(false);
   const [pending, startTransition] = useSafeTransition();
@@ -72,6 +75,24 @@ export function PayChoiceCard({
   const titleId = useId();
 
   if (view.mode === "none" || !choice) return null;
+
+  /* A rental while payment for rentals is not open: the fact, no rail, no
+     Continue (9 November 2026, `lib/rent/payment-open`). */
+  if (view.mode === "rent_not_open") {
+    return (
+      <section className="nf-paychoice" aria-labelledby={titleId} data-testid="pay-choice" data-mode={view.mode}>
+        <h2 id={titleId} className="nf-paychoice__title">
+          {RENT_NOT_OPEN_SHORT}
+        </h2>
+        <p className="nf-paychoice__note" data-testid="pay-choice-rent-not-open">
+          {RENT_NOT_OPEN_NEXT}
+        </p>
+        <p className="nf-paychoice__note" data-testid="pay-choice-inside">
+          {PAY_ONLY_THROUGH_VALLO}
+        </p>
+      </section>
+    );
+  }
 
   const go = (rail: PayRail) => {
     const next = payNextHref(rail, agreement);

@@ -33,7 +33,9 @@ import { payWithSavedCard } from "../bookings/checkout";
 import { isFeatureEnabled } from "../flags";
 import type { ChargeSavedCardOutcome } from "../payments/charge-saved-card";
 import { getAdminClient } from "@/lib/supabase/service";
+import { RENT_PAYMENT_NOT_OPEN } from "../money/copy";
 import { ALREADY_LET_MESSAGE, readOpenOutcome } from "./db";
+import { RENT_PAYMENT_OPEN } from "./payment-open";
 import { lagosToday, rentPaymentIdSchema, startRentPaymentSchema, whyNotMoveIn } from "./schema";
 
 const PAUSED_MESSAGE = "Payments are paused for maintenance. Please try again in a little while.";
@@ -68,6 +70,10 @@ export async function startRentPayment(input: {
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  /* Payment for rentals is not open (9 November 2026): no charge is opened,
+     so nothing can be paid, whatever the page in front of the caller says. */
+  if (!RENT_PAYMENT_OPEN) return fail(RENT_PAYMENT_NOT_OPEN);
 
   if (!(await isFeatureEnabled("bookings"))) return fail(PAUSED_MESSAGE);
 
@@ -184,6 +190,8 @@ export async function payRentWithSavedCard(input: {
   const session = await resolveSession();
   if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
   if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  if (!RENT_PAYMENT_OPEN) return fail(RENT_PAYMENT_NOT_OPEN);
 
   const parsed = validate(rentPaymentIdSchema, { inspectionId: input.inspectionId });
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
