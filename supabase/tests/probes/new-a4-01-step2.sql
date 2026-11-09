@@ -7,6 +7,12 @@
 -- rounded to 500 m. A signed-in member still gets the exact point, and an
 -- owner can still take a live listing back to a draft (the generated columns
 -- do not trip the owner-write guard).
+-- 9 November 2026: brought up to the rules of 20260929110457 (private
+-- columns and exact points stay private), which tightened what this probe was
+-- written against: every caller of the map functions, signed in or
+-- not, gets the public point (two decimals); the exact place comes only from
+-- listing_exact_location. Its sibling probe was
+-- updated on 29 September; this one joined the run on 13 October unchanged.
 do $$
 declare
   member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
@@ -18,6 +24,16 @@ declare
   agent uuid;
   lid uuid := gen_random_uuid();
 begin
+  -- 29 September: the console's second factor. An admin or a staff member
+  -- holds their role only on a session that proved a security key, so this
+  -- probe's session carries one for every admin and for the QA member (who
+  -- some probes make staff), rolled back with everything else.
+  insert into public.console_step_ups (user_id, session_id, expires_at)
+  select console_probe_uid, '00000000-0000-4000-8000-00000000c0de', now() + interval '1 hour'
+    from (select user_id from public.user_roles where role in ('admin', 'super_admin')
+          union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
+          union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
+  on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
   -- A live listing at a known exact point, for the comparisons below.
   -- 17 October 2026: the QA member now holds a live agents row (one side per
   -- account), so inserting a second one failed on agents_user_id_key before
@@ -29,8 +45,18 @@ begin
   insert into public.agents (user_id, display_name) values (member, 'Probe NEW-A4-01 lister') returning id into agent;
   insert into public.listings (id, agent_id, title, property_type, status, listing_role, listing_intent,
                                rent_amount_minor, rent_period, latitude, longitude, state_code, city, area)
-  values (lid, agent, 'Probe NEW-A4-01', 'apartment', 'PUBLISHED', 'agent', 'rent',
+  values (lid, agent, 'Probe NEW-A4-01', 'apartment', 'DRAFT', 'agent', 'rent',
           150000000, 'year', 6.51234, 3.38765, 'LA', 'Lagos', 'Yaba');
+  -- SCUML item 17 (live 29 Sep): an agent listing goes live only on an
+  -- approved mandate, and a mandate needs its listing to exist, so the
+  -- fixture is filed as a draft, given a mandate as the platform would, then
+  -- published (the same fixture db-10 and new-a4-01 use; this step-2 probe
+  -- missed the change because it joined the run on 13 October).
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  values (lid, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now());
+  update public.listings set status = 'PUBLISHED' where id = lid;
 
   set local role anon;
   perform set_config('request.jwt.claims', '{"role":"anon"}', true);
@@ -80,17 +106,17 @@ begin
   perform * from public.comparable_supply_near(6.5125, 3.3877, 'apartment', 'rent', null, 3000);
   perform * from public.area_supply_census('LA', 'Lagos', 'Yaba', 'rent');
 
-  -- CONTROL: a signed-in member still gets the exact point.
+  -- A signed-in member gets the public point from the map too (29 September).
   reset role;
   set local role authenticated;
-  perform set_config('request.jwt.claims', json_build_object('sub', admin, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', admin, 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text, true);
   select latitude, longitude into r from public.listings_in_bounds(3.0, 6.0, 4.0, 7.0) where id = lid;
-  if r.latitude is distinct from 6.51234 then
-    raise exception 'PROBE_FAIL new-a4-01: member map point is %', row_to_json(r);
+  if r.latitude is distinct from 6.51 then
+    raise exception 'PROBE_FAIL new-a4-01: signed-in map point is %', row_to_json(r);
   end if;
 
   -- CONTROL: the owner takes the live listing back to a draft.
-  perform set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text, true);
   update public.listings set status = 'DRAFT' where id = lid and agent_id = agent;
   get diagnostics n = row_count;
   if n <> 1 then raise exception 'PROBE_FAIL new-a4-01: owner unpublish rows=%', n; end if;

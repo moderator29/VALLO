@@ -8,6 +8,9 @@ node_modules/
 out/
 dist/
 build/
+# ...but not the /api/build endpoint (DeployWatch), which this rule hid from
+# every commit since 6 November 2026.
+!apps/web/src/app/api/build/
 
 # env
 .env
