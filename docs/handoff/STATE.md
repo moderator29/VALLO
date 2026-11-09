@@ -32,7 +32,10 @@ workflow, or says yes to a draft pull request that never merges.
 | Agent 1 (done) | money copy sweep (batch one): every screen promising protected, held, secured or escrowed payment | Writes `docs/handoff/MONEY_COPY_SWEEP.md`; NO copy changes until the founder approves the list |
 | Agent 2 (done) | protected payments Phase 1: audit of every reference to the old provider | Writes `docs/handoff/PAYMENTS_MIGRATION_AUDIT.md`; no code until the founder has seen it |
 
-Batch two (running): an agent puts app/agent/** and app/host/** on PageFrame (not the wizard, not money pages); another puts app/admin/** on PageHead (not the money desks). Found live: the old escrow switch is ON since 8 Oct, a pending file switches it off.
+Batch two DONE (9 Nov): app/agent and app/host on PageFrame (29 pages, 13 skipped with reasons in the commit and ledger), app/admin on PageHead (37 desks, 23 loading files); the lead fixed the workspace bar's doubled title and the double dock clearance under every framed page (34379580c).
+Batch three (running): Agent MAP moves every map to OpenFreeMap vector tiles with MapLibre (lazy, with a lightweight fallback), owning lib/maps, the map components and csp.ts; Agent WIZARD re-flows app/agent/list onto StepFrame one question per screen, owning app/agent/list/** only.
+Left from batch two: fees, restaurant-fees, chargebacks and bookings/[bookingId] heads, agent/promotion, host/bookings, host/earnings (after the money copy lands); DecideView and HostReviewsView headers; agent/inspections hero decision; screenshots with real agent, host and staff sessions.
+Earlier note, batch two (running): an agent puts app/agent/** and app/host/** on PageFrame (not the wizard, not money pages); another puts app/admin/** on PageHead (not the money desks). Found live: the old escrow switch is ON since 8 Oct, a pending file switches it off.
 
 Next after batch one: the four shared components spread (PageFrame is on 96
 of 275 ledger pages, StepFrame on a handful), the listing wizard one question
