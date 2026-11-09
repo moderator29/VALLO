@@ -1,5 +1,6 @@
 import { MoneyWait } from "@/components/app/money-history/MoneyWait";
-import { BALANCE_TITLE, FIGURE_LABEL } from "@/lib/money/balance-copy";
+import { FIGURE_LABEL } from "@/lib/money/balance-copy";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import "@/app/css/money-wallet.css";
 
 /**
@@ -12,10 +13,8 @@ export default function LoadingWallet() {
   return (
     <MoneyWait label="Loading Wallet" className="nf-page">
       <div className="nf-mw" data-testid="wallet-loading">
-        <div className="nf-mw-head">
-          <span className="nf-mw-head__btn" aria-hidden="true" />
-          <p className="nf-mw-head__title">{BALANCE_TITLE}</p>
-        </div>
+        {/* The page's one top (round 3): the round back, the large title. */}
+        <PageHeaderSkeleton layout="large" />
         <span className="nf-skeleton block" style={{ height: "3.25rem", borderRadius: "var(--nf-radius-segment)" }} aria-hidden="true" />
         <section className="nf-mw-card" data-theme="dark" aria-hidden="true">
           <div className="nf-mw-card__head">

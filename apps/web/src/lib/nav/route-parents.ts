@@ -118,6 +118,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   /* ---------------------------------------------------------- the website */
   "/": ROOT,
   "/about": "/",
+  /* The Community Promise, a company page beside About (founder, 7 November 2026). */
+  "/community": "/",
   /* V-82: a public area price page sits under the landing page, as the
      company pages do; it is a statement about a market, not a shelf. */
   "/areas/[state]/[area]": "/",
@@ -182,7 +184,6 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/sign-up": "/welcome",
   "/sign-up/email": "/sign-up",
   "/sign-up/verify": "/sign-up/email",
-  "/sign-up/phone": ROOT,
   /* B-2: the terms and 18+ step for a new Google or Apple account. The
      person is already signed in and every app route leads back here until
      it is done, so there is nothing above it to go back to: a root, like
@@ -258,6 +259,34 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/listing/[id]/visit": "/listing/[id]",
   "/listing/[id]/visit/[inspectionId]": "/listing/[id]",
   "/saved": "/home",
+  "/circle": "/home",
+  "/circle/ask": "/circle",
+  "/circle/new": "/circle",
+  "/circle/c/[slug]": "/circle",
+  "/circle/c/[slug]/new": "/circle/c/[slug]",
+  "/circle/c/[slug]/manage": "/circle/c/[slug]",
+  "/circle/p/[id]": "/circle",
+  /* VALLO ROOMMATES (8 November 2026, docs/roommates/WORK_PLAN.md). One
+     product under one root: the home goes back to Home like Circle, every
+     page under it goes up to it, a post's edit goes up to the post, a
+     school's page to the schools, and a group's dashboard to the groups. */
+  "/roommates": "/home",
+  "/roommates/discover": "/roommates",
+  "/roommates/p/[userId]": "/roommates/discover",
+  "/roommates/r/[id]": "/roommates/discover",
+  "/roommates/r/[id]/edit": "/roommates/r/[id]",
+  "/roommates/new": "/roommates",
+  "/roommates/profile": "/roommates",
+  "/roommates/campus": "/roommates",
+  "/roommates/campus/[slug]": "/roommates/campus",
+  "/roommates/nysc": "/roommates",
+  "/roommates/safety": "/roommates",
+  "/roommates/me": "/roommates",
+  "/roommates/groups": "/roommates",
+  "/roommates/groups/new": "/roommates/groups",
+  "/roommates/groups/[id]": "/roommates/groups",
+  "/roommates/split": "/roommates",
+  "/roommates/verify": "/roommates/me",
   /* The compare tray's table (29 October 2026): places set aside from the
      catalogue, so back is the home screen like Saved. */
   "/compare": "/home",
@@ -269,13 +298,13 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/rent/review/[paymentId]": "/bookings",
   "/record/[code]": "/search",
   "/settings/passport": "/settings",
+  /* Trust and Safety (8 November 2026): the member's own restrictions, appeals and report outcomes. */
+  "/settings/standing": "/settings",
   /* The Vallo passport of another member, opened from a profile or a chat. */
   "/passport/[who]": "/around",
   "/settings/invite": "/settings",
   /* W6, D25: the referral hub's inner pages. */
   "/settings/invite/how-it-works": "/settings/invite",
-  "/settings/invite/referrals": "/settings/invite",
-  "/settings/invite/referrals/[id]": "/settings/invite/referrals",
   /* D51, Round 3 C3: the Rewards Balance and its inner pages. Linked from the
      member navigation (the Rewards row in `nav-model.ts`), the settings hub
      and the invite hub; until the rewards read is live (R-C3-1) the page
@@ -381,6 +410,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
 
   /* ------------------------------------------------------------- account */
   "/assistant": "/home",
+  /* Grade 1 (P1.4): Talk to a person, an inner page of the assistant. */
+  "/assistant/person": "/assistant",
   "/notifications": "/home",
   /* D22: every notification's designed full view, reached by a route so back
      behaves and a push lands. Its way up is the list it belongs to. */
@@ -413,6 +444,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/support/messages/[id]": "/support/messages",
   "/settings/interests": "/settings",
   "/settings/notifications": "/settings",
+  "/settings/notifications/reminders": "/settings/notifications",
   "/settings/payments": "/settings",
   "/settings/place": "/settings",
   "/settings/ai-assistant": "/settings",
@@ -487,6 +519,13 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/reference": "/admin/settings",
   "/admin/settings": "/admin",
   "/admin/social": "/admin",
+  "/admin/roommates": "/admin",
+  /* Trust and Safety (8 November 2026): the case queue, one case, restrictions, appeals, the Circle desk. */
+  "/admin/cases": "/admin",
+  "/admin/cases/[id]": "/admin/cases",
+  "/admin/trust": "/admin",
+  "/admin/appeals": "/admin",
+  "/admin/circle": "/admin",
   "/admin/standing": "/admin",
   "/admin/stops": "/admin",
   "/admin/people/[id]": "/admin/people",
@@ -501,6 +540,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/blocked-terms": "/admin/queue",
   "/admin/weight-withheld": "/admin/social",
   "/admin/call-usage": "/admin/operations",
+  "/admin/crashes": "/admin/operations",
   "/admin/retention": "/admin/operations",
 
   /* ---------------------------------------------------- the agent console */
@@ -514,6 +554,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/agent/inspections": "/agent/dashboard",
   "/agent/listings": "/agent/dashboard",
   "/agent/listings/[listingId]/calendar": "/agent/listings",
+  /* Roommates (8 November 2026): the lister marks a home good for sharing. */
+  "/agent/listings/[listingId]/sharing": "/agent/listings",
   "/agent/listings/[listingId]/health": "/agent/listings",
   /* V-08: the TO LET board, under the listing's workspace like its calendar. */
   "/agent/listings/[listingId]/board": "/agent/listings",
@@ -695,6 +737,8 @@ export const LITERAL_EXPANSIONS: Readonly<Record<string, readonly string[]>> = {
  * because a thing nobody wrote down is a thing nobody checked.
  */
 export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
+  "/settings/invite/referrals": "D85: an address that hands on to the one referrals list at /rewards/referrals, not a page of its own.",
+  "/settings/invite/referrals/[id]": "D85: one referral's address, handed on to the referrals list; there is no per-referral page.",
   "/agent/listings/[listingId]/board/image": "V-08: the board as a PNG, not a page.",
   "/s/[token]/status": "V-71: the door's card as a Status PNG, not a page.",
   "/api/account/export": "the member's own data as a JSON download, not a page.",

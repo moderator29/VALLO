@@ -1,12 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { animate, stagger } from "framer-motion";
 import { motionQuiet } from "@/lib/motion/gate";
 import { EASE_LAND } from "@/components/ui/ported-motion";
 import { notePublished } from "./publish-flight";
-import { toast } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -14,10 +13,12 @@ import { initial as initialOf } from "@/lib/text/initial";
 /* The composer's own look (`nf-compose-who` and the page bar) lives here. It used to arrive only with a PostCard, so a composer opened before any post had loaded drew unstyled: the face collapsed into a bare "?" beside "You" (29 October 2026). */
 import "./feed-v2.css";
 import { Segmented } from "@/components/ui/Segmented";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { attachPostMedia, dropPost, replyToPost } from "@/lib/social/posts-actions";
+import type { ListingOption } from "@/lib/features/post-listing/actions";
+import { ListingPicker, PickedListing } from "./ListingPicker";
 import { sendOrKeep } from "@/lib/offline/send-or-keep";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { summonBot } from "@/lib/social/bot-actions";
@@ -39,6 +40,7 @@ import {
 } from "@/lib/social/posts-model";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Writing something.
@@ -79,6 +81,8 @@ type Picture = {
   key: string;
   blob: Blob;
   preview: string;
+  contentType: string;
+  extension: string;
   /** Measured AFTER the re-encode, so the row records what was stored. */
   width: number | null;
   height: number | null;
@@ -166,6 +170,12 @@ export function Composer({
   const body = draft ?? ownBody;
   const setBody = (next: string) => (onDraftChange ? onDraftChange(next) : setOwnBody(next));
   const [error, setError] = useState<string | null>(null);
+  /* A refusal is said by the one banner at the top of the screen (founder,
+     7 November 2026, "THE BANNER EVERYWHERE"); only a post whose picture was
+     lost keeps its recovery panel here, with its two ways on. */
+  useEffect(() => {
+    if (error) banner.error(error, { "data-testid": "composer-problem" });
+  }, [error]);
   /* V-40: the post was kept for when the signal returns. */
   const [keptNote, setKeptNote] = useState<string | null>(null);
   const OUTBOX = useClientCopy().platform.outbox;
@@ -174,6 +184,11 @@ export function Composer({
   /* The post that landed without its pictures. While this is set, the retry is
      on screen and it sends the same pictures to that same post. */
   const [strandedPost, setStrandedPost] = useState<string | null>(null);
+  /* A real Vallo listing featured on the post (the brief, part 2.2), and
+     whether its picker is open. The picker is mounted on first use only. */
+  const [listing, setListing] = useState<ListingOption | null>(null);
+  const [picking, setPicking] = useState(false);
+  const [pickerUsed, setPickerUsed] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   /* Decided on mount: an opening plays once, not on every keystroke, and
@@ -271,16 +286,15 @@ export function Composer({
         refusal = POST_FAILURE.pictureTooBig;
         continue;
       }
-      const blob = await reencodeToJpeg(file, { maxEdge: POST_IMAGE_MAX_EDGE });
-      if (!blob) {
-        /* Deliberately not falling back to the original file. */
+      const encoded = await reencodePhoto(file, { maxEdge: POST_IMAGE_MAX_EDGE });
+      if (!encoded) {
         refusal = POST_FAILURE.pictureReencode;
         continue;
       }
       let width: number | null = null;
       let height: number | null = null;
       try {
-        const bitmap = await createImageBitmap(blob);
+        const bitmap = await createImageBitmap(encoded.blob);
         width = bitmap.width;
         height = bitmap.height;
         bitmap.close();
@@ -288,7 +302,7 @@ export function Composer({
         /* A row with no dimensions still renders; the tile just cannot reserve
            its space before the picture arrives. */
       }
-      prepared.push({ key: crypto.randomUUID(), blob, preview: URL.createObjectURL(blob), width, height });
+      prepared.push({ key: crypto.randomUUID(), blob: encoded.blob, preview: URL.createObjectURL(encoded.blob), contentType: encoded.contentType, extension: encoded.extension, width, height });
     }
 
     if (chosen.length > room) refusal = POST_FAILURE.pictureTooMany;
@@ -334,13 +348,13 @@ export function Composer({
 
       const uploaded: { path: string; width: number | null; height: number | null }[] = [];
       for (const picture of items) {
-        const path = `${user.id}/${postId}/${crypto.randomUUID()}.jpg`;
+        const path = `${user.id}/${postId}/${crypto.randomUUID()}.${picture.extension}`;
         const upload = await uploadToStorage({
           supabase,
           bucket: POST_MEDIA_BUCKET,
           path,
           body: picture.blob,
-          contentType: "image/jpeg",
+          contentType: picture.contentType,
         });
         if (!upload.ok) return false;
         uploaded.push({ path, width: picture.width, height: picture.height });
@@ -383,6 +397,11 @@ export function Composer({
         try {
           if (parentId) {
             result = await withTimeout(replyToPost({ parentId, body }), 30_000);
+          } else if (listing) {
+            /* A featured listing needs the connection to be checked as live,
+               so it is sent now rather than kept for later. */
+            const fields = { ...(areaId ? { areaId } : {}), kind, body, listingId: listing.id };
+            result = await withTimeout(dropPost(fields), 30_000);
           } else if (pictures.length === 0) {
             const fields: { kind: "GIST" | "ASK"; body: string; areaId?: string } = areaId ? { areaId, kind, body } : { kind, body };
             const done = await sendOrKeep("drop_post", fields, (tapKey) => dropPost({ ...fields, tapKey }));
@@ -390,6 +409,7 @@ export function Composer({
               setBody("");
               setError(null);
               setKeptNote(OUTBOX.waiting);
+              banner.info(OUTBOX.waiting);
               return;
             }
             if (done.state === "not_kept") {
@@ -457,7 +477,7 @@ export function Composer({
            recommendation 2; SuccessSheet's own rule: small news keeps a quiet
            toast). The payoff is the card itself landing at the top of the feed;
            this is the one plain sentence of what happened, said once. */
-        toast.success(
+        banner.success(
           parentId
             ? "Replied."
             : areaId && areaName
@@ -465,6 +485,7 @@ export function Composer({
               : "Posted. Everyone on Vallo can see it.",
         );
         setBody("");
+        setListing(null);
         onDone?.();
         router.refresh();
 
@@ -582,6 +603,8 @@ export function Composer({
         aria-label={isReply ? "Your reply" : KIND_LABEL[kind]}
       />
 
+      {listing ? <PickedListing option={listing} onRemove={() => setListing(null)} disabled={pending} /> : null}
+
       {pictures.length > 0 ? (
         <>
           <ul className="nf-compose-pics" aria-label="The pictures on this post">
@@ -641,10 +664,10 @@ export function Composer({
         </p>
       ) : null}
 
-      {error ? (
+      {error && strandedPost ? (
         <div
-          role="alert"
-          className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
+          role="group"
+          className="mt-xs rounded-md border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)]"
         >
           <p className="leading-relaxed">{error}</p>
           {strandedPost ? (
@@ -708,6 +731,23 @@ export function Composer({
               <span>Ask locals</span>
             </button>
           ) : null}
+          {!isReply ? (
+            <button
+              type="button"
+              className="nf-compose-page__tool"
+              aria-pressed={listing !== null}
+              aria-haspopup="dialog"
+              onClick={() => {
+                setPickerUsed(true);
+                setPicking(true);
+              }}
+              disabled={pending}
+              data-testid="composer-feature-listing"
+            >
+              <UiIcon name="home" size={20} />
+              <span>Listing</span>
+            </button>
+          ) : null}
           <CharacterRing left={left} max={POST_MAX} />
         </div>
       ) : (
@@ -754,6 +794,17 @@ export function Composer({
         </Button>
       </div>
       )}
+
+      {pickerUsed ? (
+        <ListingPicker
+          open={picking}
+          onClose={() => setPicking(false)}
+          onPick={(option) => {
+            setListing(option);
+            setPicking(false);
+          }}
+        />
+      ) : null}
 
       <input
         ref={fileInput}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { resolveSession } from "@/lib/actions/session";
@@ -38,24 +39,21 @@ export default async function NewSupportQueryPage({
 
   if (session.state !== "signed-in") {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={title} fallback="/support" />
+      <PageFrame title={title} fallback="/support" width="narrow">
+        <div>
         <EmptyState
           icon="support-chat"
           title={w.newSignedOutTitle}
           body={w.newSignedOutBody}
-          action={
-            <ButtonLink href="/sign-in?next=%2Fsupport%2Fnew" variant="primary" size="lg">
-              {w.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: w.signIn, href: "/sign-in?next=%2Fsupport%2Fnew" }} />}
           secondary={
             <ButtonLink href="/contact" variant="ghost" size="lg">
               {w.contactForm}
             </ButtonLink>
           }
         />
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
@@ -67,9 +65,10 @@ export default async function NewSupportQueryPage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl pb-[env(safe-area-inset-bottom)]">
-      <PageHeader title={title} subtitle={w.newSub} fallback="/support" />
+    <PageFrame title={title} subtitle={w.newSub} fallback="/support" width="narrow">
+      <div className="pb-[env(safe-area-inset-bottom)]">
       <NewQueryForm initialKind={kind} initialTopic={topic} records={records} copy={getDictionary(await getLocale()).experienceInbox.support.form} />
-    </div>
+      </div>
+    </PageFrame>
   );
 }

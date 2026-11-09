@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { confirmListingsAvailable } from "@/lib/agent/freshness-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * "STILL AVAILABLE", FOR ONE LISTING, FROM ITS HEALTH PAGE (C5's action).
@@ -40,11 +41,15 @@ export function ConfirmAvailable({
     start(async () => {
       try {
         const result = await confirmListingsAvailable({ listingIds: [listingId] }).catch(() => null);
+        /* Said by the one banner at the top of the screen; the button keeps
+           its tick (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
         if (result?.ok) {
           setState("done");
+          banner.success(done);
           router.refresh();
         } else {
           setState("failed");
+          banner.error(failed, { retry: confirm });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -65,9 +70,6 @@ export function ConfirmAvailable({
       >
         {label}
       </Button>
-      <p className="nf-caption mt-xs min-h-[1lh] text-[var(--nf-content-secondary)]" role="status" aria-live="polite">
-        {state === "done" ? done : state === "failed" ? failed : ""}
-      </p>
     </div>
   );
 }

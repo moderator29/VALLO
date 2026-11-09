@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import "@/components/ui/underline-tabs.css";
 
 import { useState } from "react";
@@ -76,13 +77,11 @@ function DecisionSheet({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [reasonError, setReasonError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const copy = state.kind === "accept" ? t.accept : t.decline;
 
   function run() {
-    setError(null);
     setReasonError(null);
     startTransition(async () => {
       try {
@@ -92,10 +91,11 @@ function DecisionSheet({
             : await declineBooking({ bookingId: state.booking.id, reason: reason.trim() });
 
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           if (result.fieldErrors?.reason) setReasonError(result.fieldErrors.reason);
           return;
         }
+        banner.success(state.kind === "accept" ? "Booking accepted" : "Booking declined");
         onClose();
         router.refresh();
       } catch (error) {
@@ -187,20 +187,6 @@ function DecisionSheet({
           </ChipRow>
         </div>
       )}
-
-      {error && (
-        <p
-          className="mt-sm rounded-[var(--nf-container-radius)] p-sm text-[length:var(--nf-text-caption)] font-semibold"
-          style={{
-            background: "var(--nf-state-warning-surface)",
-            color: "var(--nf-state-warning)",
-          }}
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
-
     </Sheet>
   );
 }

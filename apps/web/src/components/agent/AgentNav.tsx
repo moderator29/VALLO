@@ -30,7 +30,7 @@ export function AgentModePill({ label, className }: { label: string; className?:
   return (
     <span
       className={[
-        "inline-flex w-fit items-center gap-xs rounded-[var(--nf-radius-xs)] px-sm py-2xs text-[length:var(--nf-text-overline)] font-bold",
+        "inline-flex w-fit items-center gap-xs rounded-xs px-sm py-2xs text-[length:var(--nf-text-overline)] font-bold",
         className ?? "",
       ].join(" ")}
       style={{

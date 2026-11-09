@@ -7,6 +7,7 @@ import { saveSearch } from "@/lib/saved/searches-actions";
 import { listingSearchHref, listingSearchParams, type CheckFacts } from "@/lib/price-check/next-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * WHAT NEXT, beneath an answered Price Check (track L). Three steps a person
@@ -28,18 +29,19 @@ export function NextActions({
 }) {
   const href = listingSearchHref(facts);
   const [state, setState] = useState<"idle" | "saved" | "failed">("idle");
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const setAlert = () => {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await saveSearch({ params: listingSearchParams(facts) });
-        if (result.ok) setState("saved");
-        else {
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        if (result.ok) {
+          setState("saved");
+          banner(copy.alertSaved, { tone: "success" });
+        } else {
           setState("failed");
-          setError(result.error);
+          banner.error(result.error, { retry: setAlert });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -92,11 +94,6 @@ export function NextActions({
             )}
             {state !== "saved" && (
               <p className="mt-inline-tight nf-caption text-[var(--nf-content-muted)]">{copy.alertBody}</p>
-            )}
-            {error && (
-              <p role="alert" className="mt-inline-tight nf-caption text-[var(--nf-state-error)]">
-                {error}
-              </p>
             )}
           </div>
         </li>

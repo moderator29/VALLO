@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -39,7 +40,6 @@ export function ModeratorApply({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useSafeTransition();
 
@@ -61,8 +61,11 @@ export function ModeratorApply({
             startTransition(async () => {
               try {
                 const result = await withdrawModeratorApplication({ areaId });
-                if (result.ok) router.refresh();
-                else setError(result.error);
+                /* Said by the one banner at the top of the screen (Grade 1). */
+                if (result.ok) {
+                  banner.success("Your application is withdrawn.");
+                  router.refresh();
+                } else banner.error(result.error);
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
               }
@@ -71,11 +74,6 @@ export function ModeratorApply({
         >
           {pending ? "Withdrawing" : "Withdraw it"}
         </Button>
-        {error ? (
-          <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-            {error}
-          </p>
-        ) : null}
       </div>
     );
   }
@@ -106,7 +104,6 @@ export function ModeratorApply({
       onSubmit={(event) => {
         event.preventDefault();
         if (pending) return;
-        setError(null);
         setFieldErrors({});
         startTransition(async () => {
           try {
@@ -114,10 +111,11 @@ export function ModeratorApply({
             if (result.ok) {
               setOpen(false);
               setReason("");
+              banner.success("Application sent. We read every one and will tell you what we decide.");
               router.refresh();
               return;
             }
-            setError(result.error);
+            banner.error(result.error);
             setFieldErrors(result.fieldErrors ?? {});
           } catch (error) {
             if (!tapFailedOffline(error)) throw error;
@@ -171,15 +169,6 @@ export function ModeratorApply({
             : `${reason.trim().length}/${MODERATOR_REASON_MAX}`
         }
       />
-
-      {error ? (
-        <p
-          role="alert"
-          className="nf-panel nf-panel--card block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
 
       <div className="flex flex-wrap gap-xs">
         <Button

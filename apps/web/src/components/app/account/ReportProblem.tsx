@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { RowButton } from "@/components/app/account/rows";
@@ -50,7 +51,9 @@ export function ReportProblemRow() {
         setText("");
         setFiled(result.data.reference);
       } else {
-        setError(result.error);
+        /* An empty box is the field's own error; a refusal is said by the one
+           banner at the top of the screen (Grade 1), above this sheet. */
+        banner.error(result.error, { retry: send });
       }
     });
   }

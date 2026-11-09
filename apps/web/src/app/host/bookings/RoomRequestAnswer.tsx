@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -53,16 +54,14 @@ export function RoomRequestAnswer({
 }) {
   const [open, setOpen] = useState<"accept" | "decline" | null>(null);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
   const run = (act: () => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
       try {
-        setError(null);
         const result = await act();
-        if (!result.ok) setError(result.error ?? words.failed);
+        if (!result.ok) banner.error(result.error ?? words.failed);
         else {
           setOpen(null);
           router.refresh();
@@ -109,7 +108,6 @@ export function RoomRequestAnswer({
         onOpenChange={(next) => {
           if (!next && !pending) {
             setOpen(null);
-            setError(null);
           }
         }}
         title={(open === "decline" ? words.declineTitle : words.acceptTitle).replace("{name}", first)}
@@ -132,7 +130,6 @@ export function RoomRequestAnswer({
             ]}
             everyone={everyone}
             told={words.told.replace("{name}", first)}
-            error={error}
             cancel={
               <Button variant="secondary" size="md" disabled={pending} onClick={() => setOpen(null)}>
                 {words.cancel}
@@ -159,7 +156,6 @@ export function RoomRequestAnswer({
             summary={facts}
             next={[{ icon: "calendar-check", text: words.nextNightsBack }]}
             told={words.told.replace("{name}", first)}
-            error={error}
             cancel={
               <Button variant="secondary" size="md" disabled={pending} onClick={() => setOpen(null)}>
                 {words.keepIt}

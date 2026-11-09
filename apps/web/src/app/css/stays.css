@@ -312,6 +312,10 @@
   .nf-stays-list .nf-stays-row {
     padding: var(--nf-space-xs) var(--nf-space-sm);
   }
+  .nf-stays-list > :nth-child(n + 5) {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 88px;
+  }
 
   /* ---------------------------------------------------------- the steppers */
 

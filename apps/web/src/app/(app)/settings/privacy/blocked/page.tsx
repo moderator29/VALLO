@@ -3,7 +3,7 @@ import Link from "next/link";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { withNext } from "@/lib/auth/next-link";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { loadMyBlocks } from "@/lib/safety/blocks-queries";
 import { BlockedEmpty, BlockedList, type BlockedRow } from "./BlockedList";
 
@@ -35,8 +35,7 @@ export default async function BlockedAccountsPage() {
   const list = await loadMyBlocks();
 
   return (
-    <div className="mx-auto max-w-lg" data-testid="blocked-settings">
-      <PageHeader title={copy.screenTitle} fallback="/settings/privacy" />
+    <PageFrame title={copy.screenTitle} fallback="/settings/privacy" width="narrow" testId="blocked-settings">
       {list.state === "signed-out" ? (
         <div className="nf-panel nf-panel--card block p-card text-center">
           <p className="nf-body-sm text-content-2">{copy.signedOut}</p>
@@ -81,6 +80,6 @@ export default async function BlockedAccountsPage() {
           )}
         </div>
       )}
-    </div>
+    </PageFrame>
   );
 }

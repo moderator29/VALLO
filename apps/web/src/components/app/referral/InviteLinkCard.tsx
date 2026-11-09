@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import "./rewards.css";
 import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -20,21 +21,22 @@ type Copy = Dictionary["experienceRewards"]["invite"];
  * refuses still leaves the person a way to take it. Three ways to send it:
  *
  *   Copy link   `copyText`. Done flashes the button; a refusal says so in
- *               the card and tells the person to press and hold the link.
+ *               the banner and tells the person to press and hold the link.
  *   Share       Vallo's own sheet (`ActionSheetIllustrated`): copy the link,
  *               WhatsApp, or the phone's own sheet through `shareOrCopy`,
  *               whose four outcomes are each answered honestly:
  *                 shared     the system sheet confirmed it: nothing to add
  *                 cancelled  the person changed their mind: nothing at all
  *                 copied     there was no sheet, so the link was copied, and
- *                            the card says exactly that
- *                 failed     neither worked, and the card says how to copy it
+ *                            the banner says exactly that
+ *                 failed     neither worked, and the banner says how to copy it
  *   QR code     drawn in the browser by `lib/crypto/qr.ts`, never by an image
  *               service, for somebody standing next to you.
  *
  * THE MESSAGE THAT TRAVELS sells the product, never the bounty (D51): it is
  * `copy.shareText`, which says what Vallo does for the person receiving it.
- * What the status line says is announced politely and never as an alert.
+ * What each tap did is said by the one banner at the top of the screen
+ * (Grade 1): a copy that fell back is info, a refused clipboard an error.
  */
 export function InviteLinkCard({
   url,
@@ -49,25 +51,23 @@ export function InviteLinkCard({
   dismissLabel: string;
 }) {
   const [copied, flash] = useDoneFlash();
-  const [status, setStatus] = useState("");
   const [sheet, setSheet] = useState(false);
   const [qr, setQr] = useState(false);
   const qrId = useId();
   const text = copy.shareText.replace("{url}", url);
   const [codeBefore = "", codeAfter = ""] = copy.code.split("{code}");
 
+  const say = { "data-testid": "rewards-invite-status" };
   const copyLink = async () => {
-    setStatus("");
     if (await copyText(url)) {
       feedback("select");
       flash();
     } else {
-      setStatus(copy.copyFailed);
+      banner.error(copy.copyFailed, say);
     }
   };
 
   const shareMore = async () => {
-    setStatus("");
     const outcome: ShareOutcome = await shareOrCopy({ url, text, title: copy.sheetTitle });
     switch (outcome) {
       case "shared":
@@ -75,10 +75,10 @@ export function InviteLinkCard({
         return;
       case "copied":
         feedback("select");
-        setStatus(copy.sharedAsCopy);
+        banner.info(copy.sharedAsCopy, say);
         return;
       case "failed":
-        setStatus(copy.copyFailed);
+        banner.error(copy.copyFailed, say);
         return;
     }
   };
@@ -143,9 +143,6 @@ export function InviteLinkCard({
           </>
         ) : null}
       </div>
-      <p className="nf-rewards-invite__status" role="status" data-testid="rewards-invite-status">
-        {status}
-      </p>
 
       <ActionSheetIllustrated
         open={sheet}

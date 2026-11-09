@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { LoadingShell, SettingsGroupSkeleton } from "@/components/app/ScreenSkeleton";
+import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on the support home (Round 3 sweep, C3).
@@ -13,10 +13,11 @@ import { LoadingShell, SettingsGroupSkeleton } from "@/components/app/ScreenSkel
  */
 export default function LoadingSupport() {
   return (
-    <LoadingShell label="Loading help and support" className="mx-auto w-full max-w-2xl">
-      <Skeleton circle width="2.75rem" />
-      <div className="mt-row space-y-block">
-        <div aria-hidden="true" className="rounded-[var(--nf-radius-xl)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card">
+    <LoadingShell label="Loading help and support" className="mx-auto w-full max-w-xl">
+      {/* E2 (round 3): the page's large top, Back inside it. */}
+      <PageHeaderSkeleton layout="large" />
+      <div className="space-y-block">
+        <div aria-hidden="true" className="rounded-xl border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card">
           <div className="flex items-start gap-group">
             <div className="min-w-0 flex-1">
               <Skeleton width="80%" height="1.75rem" radius="sm" />

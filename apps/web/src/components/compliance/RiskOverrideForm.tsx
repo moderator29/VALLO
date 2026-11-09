@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/Button";
 import { Radio } from "@/components/ui/Check";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { overrideRiskClass } from "@/lib/compliance/risk-actions";
+import { useActionBanner } from "@/components/ui/use-action-banner";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /** SCUML item 15: staff set a person's risk class by hand, with a reason. Staff only. */
 export function RiskOverrideForm({ copy }: { copy: Dictionary["complianceRisk"]["lane"] }) {
   const [state, action, pending] = useActionState<ActionResult<null> | null, FormData>(overrideRiskClass, null);
+  /* Saved or refused, said by the one banner at the top of the screen (founder, 7 November 2026). */
+  useActionBanner(state, { ok: copy.saved });
   const err = state && !state.ok ? state : null;
   return (
     <form action={action} className="grid gap-sm" data-testid="risk-override-form">
@@ -18,8 +22,16 @@ export function RiskOverrideForm({ copy }: { copy: Dictionary["complianceRisk"][
         <label htmlFor="risk-person" className="nf-label block">
           {copy.person}
         </label>
-        <input id="risk-person" name="person" required autoComplete="off" className="nf-field mt-xs min-h-[44px] w-full" />
-        {err?.fieldErrors?.person ? <p className="nf-caption mt-2xs text-[var(--nf-state-warning)]">{err.fieldErrors.person}</p> : null}
+        <input
+          id="risk-person"
+          name="person"
+          required
+          autoComplete="off"
+          className="nf-field mt-xs min-h-[44px] w-full"
+          aria-invalid={err?.fieldErrors?.person ? true : undefined}
+          aria-describedby={err?.fieldErrors?.person ? "risk-person-problem" : undefined}
+        />
+        <FieldProblem id="risk-person-problem" message={err?.fieldErrors?.person} when={state} />
       </div>
       <fieldset>
         <legend className="sr-only">{copy.overrideTitle}</legend>
@@ -52,16 +64,6 @@ export function RiskOverrideForm({ copy }: { copy: Dictionary["complianceRisk"][
       <Button type="submit" variant="primary" loading={pending}>
         {copy.set}
       </Button>
-      {state?.ok ? (
-        <p role="status" className="nf-caption text-[var(--nf-content-secondary)]">
-          {copy.saved}
-        </p>
-      ) : null}
-      {err ? (
-        <p role="alert" className="nf-caption text-[var(--nf-state-warning)]">
-          {err.error}
-        </p>
-      ) : null}
     </form>
   );
 }

@@ -12,11 +12,10 @@ import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 /* C12: `nf-agent-mode-option` lives in the workspace sheet, which left `globals.css`. */
 import "@/app/css/agent.css";
-import { Button } from "@/components/ui/Button";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy } from "@/lib/ui/success-moments";
 import { PhoneField } from "@/components/app/PhoneField";
-import { SegmentedProgress } from "@/components/ui/Progress";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { Switch } from "@/components/ui/Switch";
 import { WorkspaceAcceptance } from "@/components/legal/WorkspaceAcceptance";
 import { TextField, SelectField as UiSelectField } from "@/components/ui/Field";
@@ -26,6 +25,8 @@ import {
   rejectFileIssue,
 } from "@/components/verification/kyc";
 import { uploadToStorage } from "@/lib/media/upload";
+import { FieldProblem } from "@/components/ui/FieldProblem";
+import { banner } from "@/lib/ui/toast";
 
 const EMPTY: ApplicationResult = { ok: false };
 const DRAFT_KEY = "nf_agent_application_draft";
@@ -176,11 +177,29 @@ const TYPE_OF_ROLE: Record<SetupRole, AgentType> = {
 
 export type SetupRole = "owner" | "professional";
 
-export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
+const FORM_ID = "agent-apply";
+
+export function ApplyWizard({
+  t,
+  role,
+  intro,
+  closeHref = "/profile/setup",
+}: {
+  t: ApplyCopy;
+  role?: SetupRole;
+  /** What the application involves, under the first step's title. */
+  intro?: string;
+  closeHref?: string;
+}) {
   const a = t.agent.apply;
   const stepTitles = [a.steps.personal, a.steps.identity, a.steps.business, a.steps.documents, a.steps.payout, a.steps.review];
 
   const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const go = (next: number) => {
+    setDirection(next < step ? "back" : "forward");
+    setStep(next);
+  };
   const [agreed, setAgreed] = useState(false);
   /* Ruling 6 (13 October 2026): the two ticks before the application is sent. */
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -191,6 +210,12 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
   const [values, setValues] = useState<Values>({});
   const [docs, setDocs] = useState<Record<string, DocumentSlot>>({});
   const [state, formAction, pending] = useActionState(submitAgentApplication, EMPTY);
+  /* Filed or refused, said by the one banner at the top of the screen
+     (founder, 7 November 2026, "THE BANNER EVERYWHERE"); a filed application
+     also keeps its reference on the page. */
+  useEffect(() => {
+    if (state.message) banner(state.message, { tone: state.ok ? "success" : "error" });
+  }, [state]);
   const [successClosed, setSuccessClosed] = useState(false);
   const restored = useRef(false);
 
@@ -407,8 +432,36 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
      stays under it as the record once it is closed. */
   const appliedWords = successCopy(t.success, "agentApplied");
 
+  /* SW5 (round 3): THE STEP FRAME, full screen like verification and the
+     registrations. Its progress bar, "Step N of M" and Back replace the old
+     segmented bar, the numbered markers and the footer's back and next; the
+     form stays one form with every step in the DOM, so every field still
+     reaches the server action. The draft line is the frame's save state. */
   return (
-    <div className="mx-auto max-w-2xl">
+    <StepFrame
+      overlay
+      testId="apply-steps"
+      step={step + 1}
+      total={stepTitles.length}
+      stepLabel={`${step + 1} / ${stepTitles.length}`}
+      eyebrow={a.title}
+      title={stepTitles[step] ?? a.title}
+      {...(step === 0 && intro ? { subtitle: intro } : {})}
+      direction={direction}
+      {...(step > 0 ? { onBack: () => go(step - 1) } : {})}
+      backLabel={a.back}
+      closeHref={closeHref}
+      save={state.ok ? "idle" : "device"}
+      saveWords={{ device: a.draftSaved }}
+      primary={
+        step < last
+          ? { label: a.next, onClick: () => go(Math.min(last, step + 1)), testId: "apply-next" }
+          : /* Disabled once the application is filed. The action has no
+               "already applied" guard of its own, so a second press wrote a
+               second SUBMITTED row against the same account. */
+            { label: a.submit, type: "submit", form: FORM_ID, loading: pending || uploading, disabled: state.ok, testId: "apply-submit" }
+      }
+    >
       <SuccessSheet
         open={state.ok && !successClosed}
         onOpenChange={(open) => {
@@ -420,71 +473,7 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
         body={appliedWords.body}
         primary={{ label: t.success.continue }}
       />
-      {/*
-        Progress, then the step markers.
-
-        The 2px connector rules between the circles were the progress bar, and
-        they told assistive technology nothing: `role="progressbar"` appeared
-        nowhere in this codebase, so a screen reader user filling in a six-step
-        application had no way to ask how much was left. `SegmentedProgress`
-        states the position properly and animates the fill on the compositor.
-
-        The numbered circles stay, because they are the only way back to a
-        finished step, and each button keeps a 44pt target: `min-h-11` on the
-        button itself rather than the `nf-tap` overlay, so the target is the
-        control instead of a pseudo-element sitting over it.
-      */}
-      <SegmentedProgress
-        steps={stepTitles.length}
-        current={step + 1}
-        /* The same "1 / 6" the footer already shows, plus the step's own name.
-           There is no `stepCounter` key in this dictionary slice yet, so the
-           bar reuses the wording that is already on the screen rather than
-           inventing an English sentence in a four-locale flow. */
-        label={`${step + 1} / ${stepTitles.length}: ${stepTitles[step]}`}
-        className="mb-sm"
-      />
-      <ol className="mb-xs flex items-start sm:mb-xl" aria-label={a.title}>
-        {stepTitles.map((title, i) => {
-          const done = i < step;
-          const current = i === step;
-          return (
-            /* Every marker takes an equal share now. `last:flex-none` existed
-               only because the final step had no connector rule after it. */
-            <li key={title} className="flex-1">
-              <button
-                type="button"
-                onClick={() => i <= step && setStep(i)}
-                disabled={i > step}
-                aria-current={current ? "step" : undefined}
-                className="flex min-h-11 w-full flex-col items-center justify-center gap-xs"
-                title={title}
-              >
-                {/* KEPT ROUND: the marker is an indicator, not the control.
-                    The control is the button around it and it carries no radius
-                    of its own. */}
-                <span
-                  className="nf-numeric grid h-8 w-8 place-items-center rounded-[var(--nf-radius-sm)] text-[length:var(--nf-text-overline)] font-bold transition-colors sm:h-9 sm:w-9 sm:text-[length:var(--nf-text-caption)]"
-                  style={{
-                    background: done || current ? "var(--nf-gradient-agent)" : "var(--nf-surface-raised)",
-                    color: done || current ? "var(--nf-content-on-brand)" : "var(--nf-content-muted)",
-                  }}
-                >
-                  {done ? <UiIcon name="verified" size={16} /> : i + 1}
-                </span>
-                <span className="hidden max-w-[7rem] text-center text-[length:var(--nf-text-overline)] font-normal leading-tight text-[var(--nf-content-muted)] sm:block">
-                  {title}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-      <p className="mb-5 text-center text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-secondary)] sm:hidden">
-        {stepTitles[step]}
-      </p>
-
-      <form action={formAction} className="nf-panel nf-panel--card block p-panel sm:p-xl">
+      <form id={FORM_ID} action={formAction} className="block">
         {/* Keep every step in the DOM so all fields reach the server action;
             only the active step is shown. */}
 
@@ -589,11 +578,8 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
               <UploadZone id="registration" label={a.documents.registration} hint={a.documents.chooseFile} slot={docs.registration} onFile={onFile} />
             )}
           </div>
-          {err?.documents && (
-            <p role="alert" className="text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-              {err.documents}
-            </p>
-          )}
+          {/* The words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="apply-documents-problem" message={err?.documents} when={state} />
           <p className="text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
             These files are stored privately and are only ever seen by the Vallo team reviewing
             your application. They are never shown on your public profile.
@@ -643,9 +629,7 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
             label={a.fields.agreeTerms}
             className="nf-panel nf-panel--card block p-sm"
           />
-          {err?.agreeTerms && (
-            <p role="alert" className="text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">{err.agreeTerms}</p>
-          )}
+          <FieldProblem id="apply-terms-problem" message={err?.agreeTerms} when={state} />
 
           {acceptTerms && <input type="hidden" name="acceptTerms" value="on" />}
           {acceptPay && <input type="hidden" name="acceptPayOnVallo" value="on" />}
@@ -667,10 +651,10 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
             the four state tokens carry the meaning, so this picks the state
             rather than a colour.
           */}
-          {state.message && (
+          {state.message && state.ok && (
             <p
-              role="alert"
-              className="rounded-[var(--nf-radius-md)] border px-md py-sm text-[length:var(--nf-text-caption)]"
+              role="status"
+              className="rounded-md border px-md py-sm text-[length:var(--nf-text-caption)]"
               style={
                 state.ok
                   ? {
@@ -690,60 +674,18 @@ export function ApplyWizard({ t, role }: { t: ApplyCopy; role?: SetupRole }) {
           )}
         </fieldset>
 
-        {/* Nav */}
-        <div className="mt-7 flex items-center justify-between gap-md">
-          <Button
-            variant="secondary"
-            onClick={() => setStep((s) => Math.max(0, s - 1))}
-            disabled={step === 0}
-            leadingIcon="arrow-left"
-          >
-            {a.back}
-          </Button>
-
-          <span className="nf-numeric text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
-            {step + 1} / {stepTitles.length}
-          </span>
-
-          {step < last ? (
-            <Button
-              variant="primary"
-              onClick={() => setStep((s) => Math.min(last, s + 1))}
-              trailingIcon="arrow-right"
-            >
-              {a.next}
-            </Button>
-          ) : (
-            /* Disabled once the application is filed. The action has no
-               "already applied" guard of its own, so a second press wrote a
-               second SUBMITTED row against the same account: two references
-               support would be asked about, and two items in the review queue
-               describing one person. The reference is on screen at that point,
-               so there is nothing left for this button to do. */
-            <Button
-              type="submit"
-              variant="primary"
-              loading={pending || uploading}
-              disabled={state.ok}
-            >
-              {a.submit}
-            </Button>
-          )}
-        </div>
       </form>
 
-      {/* Once filed, the draft is deleted (above), so "draft saved" would be false. */}
-      {state.ok ? null : (
-        <p className="mt-sm text-center text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">{a.draftSaved}</p>
-      )}
-    </div>
+    </StepFrame>
   );
 }
 
 function Legend({ title, sub }: { title: string; sub?: string }) {
   return (
     <div className="mb-xs">
-      <h2 className="nf-h3">{title}</h2>
+      {/* The step frame's title says the step; the legend stays for the
+          reader and only shows when it names something else. */}
+      <h2 className="sr-only">{title}</h2>
       {sub && <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{sub}</p>}
     </div>
   );
@@ -848,7 +790,7 @@ function UploadZone({
              one, so the file itself is the label in both cases. */
           <>
             {slot.isPdf && (
-              <span className="rounded-[var(--nf-radius-xs)] border border-[var(--nf-border-default)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold tracking-wide text-[var(--nf-content-secondary)]">
+              <span className="rounded-xs border border-[var(--nf-border-default)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold tracking-wide text-[var(--nf-content-secondary)]">
                 PDF
               </span>
             )}
@@ -869,17 +811,14 @@ function UploadZone({
           </span>
         )}
         {done && !slot?.uploading && (
-          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-2xs rounded-[var(--nf-radius-xs)] bg-[var(--nf-brand-primary)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold text-[var(--nf-content-on-brand)]">
+          <span className="absolute bottom-1.5 right-1.5 flex items-center gap-2xs rounded-xs bg-[var(--nf-brand-primary)] px-xs py-3xs text-[length:var(--nf-text-overline)] font-bold text-[var(--nf-content-on-brand)]">
             <UiIcon name="verified" size={12} />
             Uploaded
           </span>
         )}
       </label>
-      {slot?.error && (
-        <p role="alert" className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {slot.error}
-        </p>
-      )}
+      {/* An upload that failed is said by the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${id}-problem`} message={slot?.error} />
       <input
         id={id}
         type="file"

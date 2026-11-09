@@ -1,5 +1,6 @@
 import "server-only";
 
+import { recordCrash } from "./crash-log";
 import { scrubContext, scrubError, type AllowedContextKey } from "./scrub";
 
 /**
@@ -212,6 +213,25 @@ export function buildEvent(input: ReportInput): Record<string, unknown> {
  * timeout is what keeps that from costing the reader anything.
  */
 export async function reportError(input: ReportInput): Promise<ReportOutcome> {
+  /* THE CRASH LOG (7 November 2026): a server or edge error is written to
+     Vallo's own table as well, read at /admin/crashes. A browser report is
+     written by its intake route (`/api/client-error`), which knows the
+     platform, so it is not written twice here. */
+  const context = (input.context ?? {}) as Record<string, unknown>;
+  const kind = context.kind;
+  /* An alert's own page (`alert.*`) already has its desk at /admin/alerts. */
+  if (context.runtime !== "browser" && !(typeof kind === "string" && kind.startsWith("alert."))) {
+    const route = context.routePath;
+    await recordCrash({
+      error: input.error,
+      source: "server",
+      kind: typeof kind === "string" ? kind : "server.error",
+      area: typeof route === "string" ? route : null,
+      release: releaseName() ?? null,
+      ref: null,
+    });
+  }
+
   const target = dsn();
   if (target === null) {
     // Configured absent, or configured wrong. Either way: silence. The

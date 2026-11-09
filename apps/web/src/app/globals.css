@@ -202,9 +202,15 @@
 /* Motion sweep: route transitions, press on rows, toast and tab ink. */
 @import "./css/route-motion.css";
 @import "./css/press-motion.css";
+@import "./css/share.css";
 /* The small things: toast, connection line, back to top, pull to refresh,
    the late spinner, the done check, the card menu, the field counter. */
 @import "./css/details.css";
+/* Platform Grade 1 (November 2026): the shared Grade 1 surfaces. */
+@import "./css/grade1.css";
+@import "./css/messages-g1.css";
+/* Agent NATIVE: one app at home on both phones (iOS and Android adapt). */
+@import "./css/platform.css";
 /* D81: the warm spark used more (the orange button, the light sweep, the
    states that point, the waits). After every partial whose states it warms,
    before the motion setting so "off" still wins. */

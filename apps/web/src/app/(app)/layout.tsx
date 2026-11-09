@@ -14,6 +14,8 @@ import "@/app/css/money-history.css";
 import "@/app/css/flow-m.css";
 import "@/app/css/detail-m.css";
 import "@/app/css/member-loop.css";
+/* The second premium motion layer, after the member sheets (css-diet C6 keeps their order first). */
+import "@/app/css/premium-motion-2.css";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";
@@ -31,10 +33,7 @@ import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/P
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
-import { redirect } from "next/navigation";
-import { resolveSession } from "@/lib/actions/session";
-import { phoneOwedAtSignup } from "@/lib/phone-otp/signup-gate-server";
-import { SIGNUP_PHONE_PATH } from "@/lib/phone-otp/signup-gate";
+import { GyroTiltInit } from "@/components/motion/GyroTiltInit";
 /* C12: the feed's motion sheet, out of `globals.css`; only this tree draws a post. */
 import "@/app/css/feed-m.css";
 
@@ -98,14 +97,9 @@ export default async function AppLayout({
   /* The startup track (13 October 2026): the gate's key read joins it, for
      the same reason. It used to wait for the gate's decision, in series. */
   void passkeyOfferedThisRequest();
-  /* A NEW ACCOUNT CONFIRMS A MOBILE NUMBER FIRST (29 October 2026): an account
-     made after the rollout, with a vendor wired and no confirmed number, goes
-     to the step before any member screen. Older accounts answer from their
-     own `created_at` with no read (`lib/phone-otp/signup-gate-server.ts`). */
-  const gateSession = await resolveSession();
-  if (gateSession.state === "signed-in" && (await phoneOwedAtSignup(gateSession.supabase, gateSession.user))) {
-    redirect(SIGNUP_PHONE_PATH);
-  }
+  /* The number is asked at the first deal by the moments gate
+     (`lib/phone-otp/gate.ts`), not at sign-up. Settings, Phone is where
+     it is added any time. */
   const locale: Locale = await getLocale();
   const t = getDictionary(locale);
   /*
@@ -154,6 +148,8 @@ export default async function AppLayout({
          navigation while the `social` switch is off (fails open). */
       socialOn={socialOn}
     >
+      {/* 9.2: gyroscope-driven parallax on mobile. */}
+      <GyroTiltInit />
       {/* V-79: counts, on this phone only, what each page could measure. */}
       <DataMeterRecorder />
       {/* V-80: one page view in ten reports its own speed, anonymously. */}

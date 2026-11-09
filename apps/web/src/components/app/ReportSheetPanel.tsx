@@ -2,7 +2,8 @@
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useActionState, useId, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
@@ -74,6 +75,12 @@ export function ReportSheetPanel({
   >(reportSomething, null);
 
   const close = onClose;
+
+  /* A refusal is said by the one banner at the top of the screen (Grade 1),
+     above this sheet; the phone step, when that is the reason, stays as its link. */
+  useEffect(() => {
+    if (state && !state.ok) banner.error(state.error);
+  }, [state]);
 
   /*
    * THE SUCCESS SHEET, over the report sheet's own "we have it" panel, once
@@ -167,7 +174,7 @@ export function ReportSheetPanel({
                           return (
                             <label
                               key={code}
-                              className={`flex cursor-pointer items-start gap-sm rounded-[var(--nf-radius-md)] border p-sm transition-colors ${
+                              className={`flex cursor-pointer items-start gap-sm rounded-md border p-sm transition-colors ${
                                 active
                                   ? "border-[var(--nf-brand-primary)] bg-[color-mix(in_oklab,var(--nf-brand-primary)_10%,transparent)]"
                                   : "border-[var(--nf-border-subtle)]"
@@ -216,14 +223,6 @@ export function ReportSheetPanel({
                       />
                     </div>
 
-                    {state && !state.ok && (
-                      <p
-                        role="alert"
-                        className="rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-secondary)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]"
-                      >
-                        {state.error}
-                      </p>
-                    )}
                     <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
                     <div className="grid gap-xs">

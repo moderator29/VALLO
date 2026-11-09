@@ -7,6 +7,7 @@ import { Radio } from "@/components/ui/Check";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { approveEddDecision, decideEddReview } from "@/lib/compliance/edd-actions";
 import type { EddStage } from "@/lib/compliance/edd";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * SCUML items 20, 15 and 19: one enhanced due diligence review on the
@@ -30,7 +31,9 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
   const [decideState, decide, deciding] = useActionState<ActionResult<null> | null, FormData>(decideEddReview, null);
   const [approveState, approve, approving] = useActionState<ActionResult<null> | null, FormData>(approveEddDecision, null);
   const id = `edd-${view.reviewId}`;
-  const err = (decideState && !decideState.ok ? decideState : null) ?? (approveState && !approveState.ok ? approveState : null);
+  /* Saved or refused, said by the one banner at the top of the screen (founder, 7 November 2026). */
+  useActionBanner(decideState, { ok: copy.decisionSaved });
+  useActionBanner(approveState, { ok: copy.approved });
 
   return (
     <li className="nf-admin-case" data-testid="edd-review">
@@ -105,21 +108,6 @@ export function EddReviewCard({ view, copy }: { view: EddCardView; copy: Copy })
 
       {view.stage === "own_decision" ? <p className="nf-caption mt-inline text-[var(--nf-content-muted)]">{copy.ownDecision}</p> : null}
 
-      {decideState?.ok ? (
-        <p role="status" className="nf-caption mt-sm text-[var(--nf-content-secondary)]">
-          {copy.decisionSaved}
-        </p>
-      ) : null}
-      {approveState?.ok ? (
-        <p role="status" className="nf-caption mt-sm text-[var(--nf-content-secondary)]">
-          {copy.approved}
-        </p>
-      ) : null}
-      {err ? (
-        <p role="alert" className="nf-caption mt-sm text-[var(--nf-state-warning)]">
-          {err.error}
-        </p>
-      ) : null}
     </li>
   );
 }

@@ -5,7 +5,7 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 export default function LoadingRentShare() {
   return (
     <LoadingShell label="Loading your share">
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton layout="large" />
       <div className="mt-md space-y-xs">
         <Skeleton width="80%" height="1.25rem" radius="sm" />
         <Skeleton width="50%" height="0.9375rem" radius="sm" />

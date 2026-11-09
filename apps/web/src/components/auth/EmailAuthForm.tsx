@@ -1,5 +1,4 @@
 "use client";
-import { PhoneField } from "@/components/app/PhoneField";
 import "@/app/css/auth.css";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
@@ -14,6 +13,8 @@ import { EmailTakenNotice } from "./EmailTakenNotice";
 import { SocialDoors } from "./SocialDoors";
 import { AuthPillButton } from "./slate";
 import { signUpMethodForEmail, startGoogleOAuth } from "@/lib/auth/actions";
+import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -29,7 +30,7 @@ const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 const SIGNUP_DRAFT_KEY = "vallo_signup_draft";
 
-type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password" | "phone", string>>;
+type SignUpErrors = Partial<Record<"firstName" | "surname" | "email" | "password", string>>;
 
 /**
  * The email form, on its own screen, in the Slate dress.
@@ -113,6 +114,7 @@ export function EmailAuthForm({
   emailReady?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  useAuthBanner(state);
   const isSignUp = mode === "sign-up";
   /*
    * F-12: A REFUSED SUBMIT PUTS THE CURSOR ON THE FIRST THING TO FIX. Every
@@ -181,7 +183,6 @@ export function EmailAuthForm({
   }, [isSignUp]);
 
   const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState("");
   /*
    * THE ACCEPTANCE, AND WHY IT IS STATE RATHER THAN A `required` ATTRIBUTE.
    *
@@ -205,7 +206,6 @@ export function EmailAuthForm({
     if (!email) errors.email = t.signUp.emailRequired;
     else if (!EMAIL_SHAPE.test(email)) errors.email = t.signUp.emailInvalid;
     if (password.length < 8) errors.password = t.signUp.passwordShort;
-    if (!phone.trim()) errors.phone = t.signUp.phoneRequired;
     return errors;
   }
 
@@ -216,11 +216,8 @@ export function EmailAuthForm({
       <div className="nf-slate-stagger">
         <h1 className="nf-auth__title">{isSignUp ? t.common.signUp : t.common.signIn}</h1>
 
-        {!isSignUp && notice ? (
-          <p role="status" className="nf-auth__notice">
-            {notice}
-          </p>
-        ) : null}
+        {/* The arrival sentence (`?notice=`) is said by the one banner (founder, 7 November 2026). */}
+        <BannerOnArrival message={!isSignUp && notice ? notice : null} tone="info" />
 
         {!isSignUp && accountMethod === "google" && (
           <div className="nf-auth__notice" role="status">
@@ -345,21 +342,9 @@ export function EmailAuthForm({
               check={signUpMethodForEmail}
               initialEmail={initialEmail}
             />
-            {/* Required, any country, Nigeria first (2 November 2026). */}
-            <PhoneField
-              id="phone"
-              name="phone"
-              label={t.signUp.phoneLabel}
-              hint={t.signUp.phoneHint}
-              value={phone}
-              onChange={(next) => {
-                setPhone(next);
-                if (localErrors.phone) setLocalErrors((e) => ({ ...e, phone: undefined }));
-              }}
-              autoComplete="tel"
-              required
-              error={fieldError("phone")}
-            />
+            {/* No phone number here (founder, 6 November 2026: "phone number
+                should be removed from sign up"). It is asked at the first deal
+                instead, by the moments gate (`lib/phone-otp/gate.ts`). */}
             <div>
               <PasswordField
                 t={t}
@@ -438,24 +423,8 @@ export function EmailAuthForm({
           </>
         )}
 
-        {state.message && (
-          <p role="alert" className="nf-auth__alert">
-            {state.message}
-            {/*
-              THE WAY OUT, when the refusal has one and it is somewhere else.
-              Inside the alert rather than under it, so a screen reader that
-              has just been handed the sentence is handed the link with it.
-            */}
-            {state.action && (
-              <>
-                {" "}
-                <Link href={state.action.href} className="nf-auth__notice-link">
-                  {state.action.label}
-                </Link>
-              </>
-            )}
-          </p>
-        )}
+        {/* The refusal and its one way out are said by the one banner at the
+            top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
         {/* On sign up the pill rides a bar pinned to the foot of the screen,
             so the one primary action is in view from the first field to the

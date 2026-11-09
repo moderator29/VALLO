@@ -15,10 +15,20 @@
  *                         the database, and a refused delete says why
  *
  * A swipe on the bubble is the other way to Reply (`BubbleGestures`).
+ *
+ * GRADE 1 (P1.3): above the actions, the eight reactions in one row
+ * (`lib/messages/reactions.ts`). The reader's own is marked; choosing it
+ * again takes it away, choosing another replaces it. Drawn only when the
+ * thread can react at all (`react`), so a database without reactions offers
+ * no row that cannot work.
  */
 
 import { useEffect } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
+import { REACTION_EMOJI, REACTION_NAMES, type ReactionEmoji } from "@/lib/messages/reactions";
+
+/* GRADE 1 (P1.3): English only for now; the menu's dictionary has no word for the row yet. */
+const REACT_WORDS = { label: "React to this message", yours: "{name}, your reaction. Tap to remove it" };
 
 export type MessageMenuProps = {
   /** The menu's words (`experienceInbox.thread.menu`). */
@@ -33,6 +43,8 @@ export type MessageMenuProps = {
   onDeleteForMe: () => void;
   onDeleteForEveryone: () => void;
   onClose: () => void;
+  /** The reaction row: the reader's current reaction and what a choice does. Absent draws no row. */
+  react?: { mine?: ReactionEmoji; onPick: (emoji: ReactionEmoji) => void } | null;
 };
 
 export function MessageMenu({
@@ -46,6 +58,7 @@ export function MessageMenu({
   onDeleteForMe,
   onDeleteForEveryone,
   onClose,
+  react = null,
 }: MessageMenuProps) {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -59,6 +72,27 @@ export function MessageMenu({
     <>
       <button type="button" className="nf-msg-menu__scrim" aria-label={words.close} onClick={onClose} />
       <div role="menu" aria-label={words.label} className="nf-msg-menu" data-testid="message-menu">
+        {react ? (
+          <div role="group" aria-label={REACT_WORDS.label} className="nf-msg-menu__reactions" data-testid="reaction-row">
+            {REACTION_EMOJI.map((emoji) => {
+              const mine = react.mine === emoji;
+              return (
+                <button
+                  key={emoji}
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={mine}
+                  aria-label={mine ? REACT_WORDS.yours.replace("{name}", REACTION_NAMES[emoji]) : REACTION_NAMES[emoji]}
+                  className="nf-msg-menu__emoji"
+                  data-mine={mine || undefined}
+                  onClick={() => react.onPick(emoji)}
+                >
+                  <span aria-hidden="true">{emoji}</span>
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
         <button type="button" role="menuitem" className="nf-msg-menu__item" onClick={onReply}>
           {words.reply}
         </button>

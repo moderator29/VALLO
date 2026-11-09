@@ -42,7 +42,7 @@ type FlagCopy = Dictionary["admin"]["flags"];
 function Fragment({ text }: { text: string }) {
   return (
     <code
-      className="nf-numeric rounded-[var(--nf-radius-xs)] px-xs py-3xs text-[length:var(--nf-text-caption)] font-semibold"
+      className="nf-numeric rounded-xs px-xs py-3xs text-[length:var(--nf-text-caption)] font-semibold"
       style={{ background: "var(--nf-state-warning-surface)", color: "var(--nf-state-warning)" }}
     >
       {text}
@@ -118,7 +118,7 @@ function FlagCard({
         role={roleLabel[flag.senderRole].toLocaleLowerCase(locale)}
       />
 
-      <div className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-sm">
+      <div className="mt-sm rounded-md border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-raised)] p-sm">
         <p className="nf-overline text-[var(--nf-content-muted)]">
           {copy.context}
         </p>
@@ -129,7 +129,7 @@ function FlagCard({
           {flag.context.map((line) => (
             <li
               key={line.id}
-              className="rounded-[var(--nf-radius-sm)] p-xs"
+              className="rounded-sm p-xs"
               style={
                 line.flagged
                   ? {

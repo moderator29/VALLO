@@ -26,33 +26,17 @@ export function isRequirementKey(value: unknown): value is RequirementKey {
   return typeof value === "string" && (REQUIREMENT_KEYS as readonly string[]).includes(value);
 }
 
-/** What the person you invite has to do, one line per key. */
-export const REQUIREMENT_COPY: Record<RequirementKey, string> = {
-  phone_verified: "Confirms their own phone number",
-  email_verified: "Confirms their own email address",
-  onboarding_completed: "Finishes setting up their account",
-  meaningful_activity: "Completes a payment of their own on Vallo",
-  business_profile_completed: "Completes their business profile",
-  business_verified: "Passes Vallo's business review",
-  property_owner_verified: "Has their ownership of a property accepted",
-  space_published: "Publishes a space that passes review",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/referral.en.ts`. */
+import { referralRequirementsEn, referralStepsEn } from "@vallo/i18n/en/referral";
+const _ref = { requirements: referralRequirementsEn, steps: referralStepsEn };
+export const REQUIREMENT_COPY = _ref.requirements as Record<RequirementKey, string>;
 
 /**
  * The same steps as the end of a sentence about the person invited ("once
  * they ..."), so a member reads what "signs up fully" means under the live
  * campaign, from its keys, before they invite anybody (D85).
  */
-export const REQUIREMENT_STEP: Record<RequirementKey, string> = {
-  phone_verified: "confirm their phone number",
-  email_verified: "confirm their email address",
-  onboarding_completed: "finish setting up their account",
-  meaningful_activity: "complete a payment of their own on Vallo",
-  business_profile_completed: "complete their business profile",
-  business_verified: "pass Vallo's business review",
-  property_owner_verified: "have their ownership of a property accepted",
-  space_published: "publish a space that passes review",
-};
+export const REQUIREMENT_STEP = _ref.steps as Record<RequirementKey, string>;
 
 /** "a", "a and b", "a, b and c". */
 function joinSteps(steps: readonly string[]): string {

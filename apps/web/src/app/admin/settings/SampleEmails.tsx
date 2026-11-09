@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { sendSampleBatch } from "@/lib/admin/sample-emails";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Send every kind of email, as a marked sample, to the addresses written here
@@ -28,7 +29,8 @@ export function SampleEmails({ initial }: { initial: string }) {
       for (;;) {
         const result = await sendSampleBatch({ to: addresses, offset });
         if (!result.ok) {
-          setNote(result.error);
+          setNote(null);
+          banner.error(result.error, { retry: () => void run() });
           return;
         }
         sent += result.data.sent;
@@ -36,15 +38,17 @@ export function SampleEmails({ initial }: { initial: string }) {
         offset = result.data.nextOffset;
         setNote(`Sent ${offset} of ${result.data.total} emails to each address.`);
         if (result.data.done) {
-          setNote(
-            failed > 0
-              ? `Finished with ${failed} that did not send. ${sent} did.`
-              : `Done. All ${result.data.total} samples are on their way to ${addresses.length === 1 ? "that address" : "both addresses"}.`,
-          );
+          setNote(null);
+          if (failed > 0) banner.warning(`Finished with ${failed} that did not send. ${sent} did.`);
+          else
+            banner.success(
+              `Done. All ${result.data.total} samples are on their way.`,
+            );
           return;
         }
       }
     } catch (error) {
+      setNote(null);
       if (!tapFailedOffline(error)) throw error;
     } finally {
       setBusy(false);

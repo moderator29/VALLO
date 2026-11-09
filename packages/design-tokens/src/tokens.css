@@ -3938,17 +3938,24 @@
    and bell on the warm canvas, Q2 keeps navy for hero bands only). */
 :root[data-theme="light"] :is(.nf-app-header, .nf-ws-bar)[data-theme="dark"] {
   /* ----------------------------------------------------------- the ground */
-  /* Warm paper (the clean unified sweep, 29 September 2026; spec section
-     1.1): the canvas is NOT white and the cards are, so a card exists
-     because of its fill, not only its border. */
-  --nf-surface-canvas: #F4F4F1;
-  --nf-canvas-base: #F4F4F1;
+  /* Paper (the clean unified sweep, 29 September 2026; spec section 1.1):
+     the canvas is NOT white and the cards are, so a card exists because of
+     its fill and its shadow, not a border.
+     COOL PAPER (light mode pass, 7 November 2026). The warm paper
+     (#F4F4F1, wells #F0F0EC and #ECECE7) sat a yellow step away from the
+     blue brand, and beside it every well and hairline read as a muddy grey.
+     The ground is now a neutral paper with a breath of the brand's own blue
+     (hue about 220, chroma under 1 per cent), so white cards, blue ink and
+     the wells all sit in one temperature. Lightness is unchanged within half
+     a step, so every ink below keeps its measured contrast. */
+  --nf-surface-canvas: #F5F6F8;
+  --nf-canvas-base: #F5F6F8;
   --nf-surface-primary: #FFFFFF;
-  --nf-surface-secondary: #FAFAF8;
+  --nf-surface-secondary: #FCFCFD;
   --nf-surface-elevated: #FFFFFF;
-  --nf-surface-raised: #F0F0EC;
-  --nf-surface-inset: #ECECE7;
-  --nf-card-border: rgb(17 19 24 / 0.08);
+  --nf-surface-raised: #EFF1F4;
+  --nf-surface-inset: #ECEEF2;
+  --nf-card-border: rgb(17 24 39 / 0.07);
   /* The card's shadow is the Paper `raised` rung (Session 3; the elevation
      block at the foot of this file): the blue-tinted shadow the north star
      calls the single highest-value detail in Paper. It was a neutral ink
@@ -3961,14 +3968,15 @@
   --nf-card-shadow-hover: var(--nf-elevation-floating);
 
   /* ------------------------------------------------------------ the inks */
-  /* Measured on #F4F4F1, #FFFFFF and the raised well #F0F0EC: primary
-     16.3:1 at worst, secondary 7.1:1, subtle 5.4:1, muted 4.8:1. Muted is a
+  /* Measured on #F5F6F8, #FFFFFF and the raised well #EFF1F4: primary
+     16.1:1 at worst, secondary 7.2:1, subtle 5.5:1, muted 4.8:1 (on the
+     warm paper they were 16.3, 7.1, 5.4 and 4.8). Muted is a
      step deeper than the spec's #686E78, which measured 4.49:1 on the raised
      well (the segmented track's off labels). */
-  --nf-content-primary: #111318;
-  --nf-content-secondary: #4A505A;
-  --nf-content-subtle: #5C626C;
-  --nf-content-muted: #646A74;
+  --nf-content-primary: #0F1219;
+  --nf-content-secondary: #474E5A;
+  --nf-content-subtle: #59606C;
+  --nf-content-muted: #626975;
   /* See the night block: one rung up from muted for words on a tinted panel
      (#5C626C is 4.8:1 on the scam wash #DCE6E9, where muted is 4.3:1). */
   --nf-content-muted-on-tint: #5C626C;
@@ -4004,14 +4012,25 @@
      border, so a card, a row edge and a divider never draw two near-equal
      greys side by side. */
   --nf-border-subtle: var(--nf-card-border);
-  --nf-border-default: rgb(17 19 24 / 0.12);
-  --nf-border-strong: rgb(17 19 24 / 0.20);
-  --nf-divider: rgb(17 19 24 / 0.07);
+  --nf-border-default: rgb(17 24 39 / 0.11);
+  --nf-border-strong: rgb(17 24 39 / 0.19);
+  --nf-divider: rgb(17 24 39 / 0.065);
   --nf-interactive-hover: rgb(11 13 23 / 0.05);
   --nf-interactive-active: rgb(11 13 23 / 0.09);
   --nf-interactive-disabled: rgb(11 13 23 / 0.04);
   --nf-overlay-backdrop: rgb(11 13 23 / 0.40);
   --nf-scrim-drawer: rgb(11 13 23 / 0.32);
+  /* THE FIELD ON PAPER (light mode pass, 7 November 2026; read only by
+     `app/css/light.css`). A form field was the night's sunken well carried
+     into daylight: a grey inset fill with an inner shadow, which on paper is
+     the muddy grey box the founder named. On paper a field is a white sheet
+     with the brand edge (the rule for controls: a brand edge, never a grey
+     hairline) and a hair of contact shadow; focus deepens the edge to the
+     brand and lays a soft brand halo outside it. */
+  --nf-paper-field-fill: #FFFFFF;
+  --nf-paper-field-edge: color-mix(in oklab, var(--nf-brand-primary) 22%, rgb(17 24 39 / 0.10));
+  --nf-paper-field-edge-hover: color-mix(in oklab, var(--nf-brand-primary) 38%, rgb(17 24 39 / 0.10));
+  --nf-paper-field-halo: color-mix(in oklab, var(--nf-brand-primary) 16%, transparent);
 
   /* ------------------------------------------------ the states, on white */
   --nf-state-success: #047857;
@@ -4554,10 +4573,31 @@
 :root[data-theme="light"] [data-theme="light"],
 :root[data-theme="light"] :is(.nf-app-header, .nf-ws-bar)[data-theme="dark"] {
   --nf-elevation-flat: 0 0 0 0 transparent;
-  --nf-elevation-raised: 0 1px 2px rgb(1 1 24 / 0.04), 0 8px 24px -10px rgb(0 95 232 / 0.16);
-  --nf-elevation-floating: 0 1px 2px rgb(1 1 24 / 0.05), 0 16px 40px -14px rgb(0 95 232 / 0.24);
-  --nf-elevation-overlay: 0 -1px 2px rgb(1 1 24 / 0.04), 0 -16px 40px -16px rgb(0 95 232 / 0.18);
-  --nf-elevation-dialog: 0 2px 6px rgb(1 1 24 / 0.06), 0 24px 64px -18px rgb(0 95 232 / 0.30);
+  /* SHADOWS THAT READ ON WHITE (light mode pass, 7 November 2026). The
+     contact layer was 4 per cent, which on a white card over paper is
+     nothing: the card was held up by its fill alone and read flat. Each rung
+     is now three layers in the same two inks: a crisp contact (the edge the
+     eye uses instead of a hairline), a short soft spread that gives the
+     object weight, and the long blue ambient that is Paper's signature. */
+  --nf-elevation-raised:
+    0 0 0 0.5px rgb(1 1 24 / 0.05),
+    0 1px 2px rgb(1 1 24 / 0.06),
+    0 4px 10px -4px rgb(1 1 24 / 0.05),
+    0 12px 28px -14px rgb(0 95 232 / 0.18);
+  --nf-elevation-floating:
+    0 0 0 0.5px rgb(1 1 24 / 0.05),
+    0 2px 4px rgb(1 1 24 / 0.06),
+    0 10px 22px -10px rgb(1 1 24 / 0.10),
+    0 22px 48px -18px rgb(0 95 232 / 0.26);
+  --nf-elevation-overlay:
+    0 -1px 2px rgb(1 1 24 / 0.05),
+    0 -8px 20px -10px rgb(1 1 24 / 0.08),
+    0 -18px 44px -18px rgb(0 95 232 / 0.20);
+  --nf-elevation-dialog:
+    0 0 0 0.5px rgb(1 1 24 / 0.05),
+    0 2px 6px rgb(1 1 24 / 0.07),
+    0 14px 32px -12px rgb(1 1 24 / 0.12),
+    0 28px 68px -20px rgb(0 95 232 / 0.32);
 
   /* Plate on Paper: white with a 6 per cent ink hairline. */
   --nf-tier-plate-fill: #FFFFFF;

@@ -1,11 +1,9 @@
-import { LoadingShell } from "@/components/app/ScreenSkeleton";
-import { NewQuerySkeleton } from "@/components/support/SupportSkeletons";
+import { StepFrameSkeleton } from "@/app/(app)/_frame/StepFrameSkeleton";
 
-/** The wait on a new support query: the fields in their places. */
+/**
+ * Writing to support, while it loads (SW12, round 3): the step frame's own shape, so the flow lands on it
+ * with nothing moving.
+ */
 export default function LoadingNewSupportQuery() {
-  return (
-    <LoadingShell label="Loading the form" className="mx-auto w-full max-w-2xl">
-      <NewQuerySkeleton />
-    </LoadingShell>
-  );
+  return <StepFrameSkeleton label="Loading the form" rows={2} />;
 }

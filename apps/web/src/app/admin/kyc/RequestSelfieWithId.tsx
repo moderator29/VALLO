@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { requestSelfieWithId } from "@/lib/admin/kyc-actions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * "ASK FOR A SELFIE HOLDING THEIR ID" (2 November 2026).
@@ -31,11 +33,12 @@ export function RequestSelfieWithId({
   const [writing, setWriting] = useState(false);
   const [message, setMessage] = useState(DEFAULT_REQUEST);
   const [error, setError] = useState<string | null>(null);
+  const problemId = useId();
   const [pending, start] = useTransition();
 
   if (open) {
     return (
-      <p className="mt-sm rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]" data-testid="request-open">
+      <p className="mt-sm rounded-md border border-[var(--nf-border-subtle)] p-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]" data-testid="request-open">
         <span className="font-semibold text-[var(--nf-content-primary)]">Asked for a selfie holding their ID</span> on{" "}
         {new Date(open.requestedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" })}. Waiting for them to send it.
         <span className="mt-3xs block text-[var(--nf-content-muted)]">They were sent: {open.message}</span>
@@ -49,10 +52,13 @@ export function RequestSelfieWithId({
       try {
         const result = await requestSelfieWithId({ subjectId, message });
         if (!result.ok) {
-          setError(result.fieldErrors?.["message"] ?? result.error);
+          const about = result.fieldErrors?.["message"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: send });
           return;
         }
         setWriting(false);
+        banner.success("Selfie with ID requested. They have been sent your message.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -68,6 +74,8 @@ export function RequestSelfieWithId({
             <span className="nf-label">Why you need it (they are sent this, word for word)</span>
             <textarea
               className="nf-field min-h-[88px] resize-y"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? problemId : undefined}
               value={message}
               maxLength={600}
               onChange={(e) => setMessage(e.target.value)}
@@ -88,11 +96,8 @@ export function RequestSelfieWithId({
           Ask for a selfie holding their ID
         </Button>
       )}
-      {error && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={problemId} message={error} />
     </div>
   );
 }

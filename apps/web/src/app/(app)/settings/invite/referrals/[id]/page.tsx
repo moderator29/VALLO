@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
  * per-referral page because there is nothing more a member may read about one
  * person than that line (a first name and a stage; never a reason for a
  * review).
+ *
+ * Kept as a declared route (not a next.config redirect) so the referral list's
+ * address resolves here; the honesty guard holds it to handing on to the list.
  */
 export default function InviteReferralPage(): never {
   redirect("/rewards/referrals");

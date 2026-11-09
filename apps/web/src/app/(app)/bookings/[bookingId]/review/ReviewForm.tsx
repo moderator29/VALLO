@@ -16,6 +16,7 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { Button } from "@/components/ui/Button";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-40: the review goes now, or, with no signal, is kept and sent when the
@@ -91,8 +92,12 @@ export function ReviewForm({
   const [successClosed, setSuccessClosed] = useState(false);
   const posted = success ? successCopy(success, "reviewPosted") : null;
 
+  /* A refusal is said by the one banner at the top of the screen (Grade 1);
+     the phone step, when that is what stands in the way, stays as its link. */
   useEffect(() => {
-    if (state?.ok) router.refresh();
+    if (!state) return;
+    if (state.ok) router.refresh();
+    else banner.error(state.error);
   }, [state, router]);
 
   if (state?.ok) {
@@ -165,7 +170,7 @@ export function ReviewForm({
             return (
               <label
                 key={value}
-                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-[var(--nf-radius-md)] transition-colors hover:bg-[var(--nf-surface-raised)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--nf-brand-primary)]"
+                className="relative flex h-11 w-11 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[var(--nf-surface-raised)] has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[var(--nf-brand-primary)]"
               >
                 <input
                   type="radio"
@@ -230,14 +235,6 @@ export function ReviewForm({
         </p>
       </div>
 
-      {state && !state.ok && (
-        <p
-          role="alert"
-          className="nf-panel nf-panel--card mt-block block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] p-card-sm nf-body-sm leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {state.error}
-        </p>
-      )}
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
       <Button type="submit" variant="primary" full disabled={pending} className="mt-block">

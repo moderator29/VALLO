@@ -1,67 +1,37 @@
 import { plural, type PluralForms } from "@vallo/i18n/core";
+import { leaderboardEn } from "@vallo/i18n/en/leaderboard";
 import type { Board, LeaderKind, Movement, Period, Scope } from "./model";
 
 /**
  * The leaderboards' words, in one place (D76). English; plain; a count is
  * always said with its unit, and nothing here promises a prize, because the
  * boards carry none.
+ *
+ * SW11: static strings now live in `packages/i18n/src/locales/leaderboard.en.ts`.
  */
+const _lb = leaderboardEn;
 
-export const LEADERBOARD_TITLE = "Leaderboard";
+export const LEADERBOARD_TITLE = _lb.title;
 
-export const GROUP_LABEL = { referrals: "Referrals", top: "Top on Vallo" } as const;
+export const GROUP_LABEL = _lb.groupLabel;
 
-export const BOARD_LABEL: Record<Board, string> = {
-  referrals: "Referrals",
-  property: "Agents and landlords",
-  hotels: "Hotels and stays",
-  restaurants: "Restaurants",
-};
+export const BOARD_LABEL: Record<Board, string> = _lb.boardLabel as Record<Board, string>;
 
-/** The short label on the sub-board switch. */
-export const BOARD_SHORT: Record<Board, string> = {
-  referrals: "Referrals",
-  property: "Agents",
-  hotels: "Hotels",
-  restaurants: "Restaurants",
-};
+export const BOARD_SHORT: Record<Board, string> = _lb.boardShort as Record<Board, string>;
 
-/** What a board counts, as the small unit beside the figure, in the locale's plural forms. */
-const UNIT_FORMS: Record<Board, PluralForms> = {
-  referrals: { one: "referral", other: "referrals" },
-  property: { one: "deal", other: "deals" },
-  hotels: { one: "stay", other: "stays" },
-  restaurants: { one: "table", other: "tables" },
-};
+const UNIT_FORMS: Record<Board, PluralForms> = _lb.unitForms as Record<Board, PluralForms>;
 
 export function unitFor(board: Board, n: number): string {
   return plural(n, UNIT_FORMS[board]);
 }
 
-/** One plain line under the title: what the board ranks. */
-export const BOARD_MEASURE: Record<Board, string> = {
-  referrals: "Ranked by friends who joined with your link.",
-  property: "Ranked by rent deals paid through Vallo.",
-  hotels: "Ranked by completed stays booked on Vallo.",
-  restaurants: "Ranked by completed table reservations.",
-};
+export const BOARD_MEASURE: Record<Board, string> = _lb.boardMeasure as Record<Board, string>;
 
-export const KIND_LABEL: Record<LeaderKind, string> = {
-  member: "Member",
-  agent: "Agent",
-  landlord: "Landlord",
-  firm: "Firm",
-  hotel: "Hotel",
-  resort: "Resort",
-  guest_house: "Guest house",
-  serviced_apartments: "Serviced apartments",
-  shortlet_operator: "Shortlets",
-  restaurant: "Restaurant",
-};
+export const KIND_LABEL: Record<LeaderKind, string> = _lb.kindLabel as Record<LeaderKind, string>;
 
-export const SCOPE_LABEL: Record<Scope, string> = { city: "City", global: "Global" };
+export const SCOPE_LABEL: Record<Scope, string> = _lb.scopeLabel as Record<Scope, string>;
 
-export const PERIOD_LABEL: Record<Period, string> = { month: "This month", all: "All time" };
+export const PERIOD_LABEL: Record<Period, string> = _lb.periodLabel as Record<Period, string>;
 
 /** The month subtitle: "October 2026". */
 export function periodSubtitle(period: Period, now: Date = new Date()): string {
@@ -88,69 +58,33 @@ export function placeWord(scope: Scope, placeName: string | null): string {
   return scope === "global" ? "Nigeria" : (placeName ?? "your city");
 }
 
-/** The empty board: honest, and it says what to do. */
 export function emptyTitle(scope: Scope, placeName: string | null): string {
   return scope === "global" ? "Be the first on Vallo" : `Be the first in ${placeName ?? "your city"}`;
 }
 
-export const EMPTY_BODY: Record<Board, string> = {
-  referrals: "Nobody has a referral on this board yet. Invite a friend; it counts as soon as they sign up.",
-  property: "No rent deal has been paid through Vallo here yet. The first verified agent or landlord to close one takes the top spot.",
-  hotels: "No stay has been completed here yet. The first approved hotel to host a guest through Vallo takes the top spot.",
-  restaurants: "No reservation has been completed here yet. The first approved restaurant to seat a guest through Vallo takes the top spot.",
-};
+export const EMPTY_BODY: Record<Board, string> = _lb.emptyBody as Record<Board, string>;
 
-/** The next step from an empty board, or the explainer. */
-export const CLIMB_ACTION: Record<Board, { label: string; href: string }> = {
-  referrals: { label: "Invite friends", href: "/settings/invite" },
-  property: { label: "Become an agent", href: "/profile/setup" },
-  hotels: { label: "Add your hotel", href: "/profile/setup?side=stays" },
-  restaurants: { label: "Add your restaurant", href: "/profile/setup?side=stays" },
-};
+export const CLIMB_ACTION: Record<Board, { label: string; href: string }> = _lb.climbAction as Record<Board, { label: string; href: string }>;
 
-export const NOT_LIVE_TITLE = "Leaderboards open soon";
-export const NOT_LIVE_BODY =
-  "The boards are built and waiting for their switch. When they open they rank real activity only, so nobody is shown until they have earned a place.";
+export const NOT_LIVE_TITLE = _lb.notLiveTitle;
+export const NOT_LIVE_BODY = _lb.notLiveBody;
 
-export const ERROR_TITLE = "The board did not load";
-export const ERROR_BODY = "Nothing is wrong with your account. Pull down or try again in a moment.";
+export const ERROR_TITLE = _lb.errorTitle;
+export const ERROR_BODY = _lb.errorBody;
 
-/** The "how to climb" explainer, three cards (the Plasma explainer). */
-export const CLIMB_STEPS: Record<Board, { title: string; body: string }[]> = {
-  referrals: [
-    { title: "Share your link", body: "Every friend who signs up with your link is yours. Nobody can claim them after." },
-    { title: "It counts when they join", body: "A friend counts the moment they finish signing up with your link." },
-    { title: "Climb every month", body: "The month board starts fresh on the first. All time keeps every referral." },
-  ],
-  property: [
-    { title: "Get approved", body: "Only approved agents, landlords and firms are ranked. Approval is free." },
-    { title: "Close through Vallo", body: "Each rent deal paid through Vallo counts once, for the listing's agent and their firm." },
-    { title: "Climb every month", body: "The month board starts fresh on the first. Your city is where the home is." },
-  ],
-  hotels: [
-    { title: "Get approved", body: "Only approved, published hotels and stays are ranked." },
-    { title: "Host through Vallo", body: "Each stay booked on Vallo counts once the guest has checked out." },
-    { title: "Climb every month", body: "The month board starts fresh on the first. All time keeps every stay." },
-  ],
-  restaurants: [
-    { title: "Get approved", body: "Only approved, published restaurants are ranked." },
-    { title: "Seat guests through Vallo", body: "Each reservation counts once it is marked completed." },
-    { title: "Climb every month", body: "The month board starts fresh on the first. All time keeps every table." },
-  ],
-};
+export const CLIMB_STEPS: Record<Board, { title: string; body: string }[]> = _lb.climbSteps as Record<Board, { title: string; body: string }[]>;
 
-export const EXPLAINER_TITLE = "How to climb";
-export const EXPLAINER_DONE = "Got it";
+export const EXPLAINER_TITLE = _lb.explainerTitle;
+export const EXPLAINER_DONE = _lb.explainerDone;
 
-export const PRIVACY_LINE =
-  "Boards show a public name, a count and a city. Never an amount, a phone number or an email.";
-export const OPT_OUT_LABEL = "Show me on leaderboards";
-export const OPT_OUT_BODY = "Turn this off to take yourself off every board. You can come back any time.";
+export const PRIVACY_LINE = _lb.privacyLine;
+export const OPT_OUT_LABEL = _lb.optOutLabel;
+export const OPT_OUT_BODY = _lb.optOutBody;
 
-export const SHARE_TITLE = "Share your rank";
-export const SHARE_ACTION = "Share";
-export const SHARE_COPY = "Copy link";
-export const SHARE_COPIED = "Link copied";
+export const SHARE_TITLE = _lb.shareTitle;
+export const SHARE_ACTION = _lb.shareAction;
+export const SHARE_COPY = _lb.shareCopy;
+export const SHARE_COPIED = _lb.shareCopied;
 
 export function shareText(rank: number, board: Board, place: string, period: Period): string {
   const when = period === "month" ? "this month" : "of all time";
@@ -161,7 +95,7 @@ export function youPill(rank: number | null): string {
   return rank === null ? "You" : `You, #${rank}`;
 }
 
-export const NOT_ON_BOARD = "You are not on this board yet";
+export const NOT_ON_BOARD = _lb.notOnBoard;
 
 /** The earned moment's title, by place: first is said as first. */
 const EARNED_TITLE: Partial<Record<number, (place: string) => string>> = {

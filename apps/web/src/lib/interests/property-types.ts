@@ -40,22 +40,13 @@ export const PROPERTY_TYPES = Constants.public.Enums.property_type;
  * thing to somebody arriving for the first time, and neither is "apartment"
  * versus "home". Every line here describes what the platform actually lists.
  */
-export const INTEREST_COPY: Record<PropertyType, { label: string; hint: string }> = {
-  apartment: { label: "Apartments", hint: "Nightly stays in a flat" },
-  hotel: { label: "Hotels", hint: "Rooms, booked by the night" },
-  home: { label: "Homes", hint: "A whole house for your stay" },
-  villa: { label: "Villas", hint: "Larger private places" },
-  shortlet: { label: "Shortlets", hint: "A few nights to a few weeks" },
-  rental: { label: "Rentals", hint: "Somewhere to live, by the year" },
-  shop: { label: "Shops", hint: "Retail space, by the year" },
-  office: { label: "Offices", hint: "Workspace, by the year" },
-  land: { label: "Land", hint: "Plots to buy or lease" },
-  /* The one market here that is not somewhere to sleep or work. It reached
-     this list by growing the enum rather than by being designed into it, so
-     the hint says what a Vallo restaurant is that a Google one is not: a
-     table somebody will actually hold for you. */
-  restaurant: { label: "Restaurants", hint: "Tables you can reserve" },
-};
+/** SW11: source of truth is now the `interests` section of the i18n dictionary. */
+import { interestsHintsEn, interestsMarketsEn } from "@vallo/i18n/en/interests";
+const _i = { markets: interestsMarketsEn, hints: interestsHintsEn };
+export const INTEREST_COPY: Record<PropertyType, { label: string; hint: string }> =
+  Object.fromEntries(
+    PROPERTY_TYPES.map((t) => [t, { label: (_i.markets as Record<string, string>)[t] ?? t, hint: (_i.hints as Record<string, string>)[t] ?? "" }])
+  ) as Record<PropertyType, { label: string; hint: string }>;
 
 /**
  * Read a stored array back into known values.

@@ -17,6 +17,8 @@ import {
   type FeeLine,
   type MoveInInput,
 } from "@/lib/site/move-in-calculator";
+import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type Copy = Dictionary["publicDoors"]["moveIn"];
 
@@ -113,6 +115,8 @@ export function MoveInCalculator({
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
+      /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
+      banner(copy.copied, { tone: "success" });
       window.setTimeout(() => setCopied(false), 2400);
     } catch {
       setCopied(false);
@@ -158,8 +162,10 @@ export function MoveInCalculator({
             />
           </div>
           <p id={`${id}-rent-hint`} className="nf-caption text-[var(--nf-content-muted)]">
-            {invalid === "rent" ? copy.invalid : copy.rentHint}
+            {copy.rentHint}
           </p>
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id={`${id}-rent-problem`} message={invalid === "rent" ? copy.invalid : null} />
         </div>
 
         <div className="nf-calc__row">
@@ -265,7 +271,7 @@ export function MoveInCalculator({
                     ]}
                   />
                 </div>
-                {invalid === key && <p className="nf-caption text-[var(--nf-state-error)]">{copy.invalid}</p>}
+                <FieldProblem id={`${id}-${key}-problem`} message={invalid === key ? copy.invalid : null} />
               </div>
             );
           })}

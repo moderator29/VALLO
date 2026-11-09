@@ -1,4 +1,5 @@
 import "server-only";
+import { CHIME_ANDROID, androidChannelFor, richAndroidData, wantsRichAndroid } from "../family";
 
 import { createPrivateKey, sign as signWithKey } from "node:crypto";
 
@@ -231,9 +232,23 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: {
+        message: wantsRichAndroid(target.appVersion, payload)
+          ? {
+              /* A2: a 1.0.2 shell draws this itself (ValloMessagingService):
+                 the photo as the large icon beside the text and as the big
+                 picture. A data message, so only a shell that said it can
+                 draw one is ever sent one (lib/push/family.ts). */
+              token: target.token,
+              data: richAndroidData(payload),
+              android: {
+                priority: payload.urgent ? "HIGH" : "NORMAL",
+                ...(payload.ttlSeconds ? { ttl: `${payload.ttlSeconds}s` } : {}),
+              },
+            }
+          : {
           token: target.token,
-          notification: { title: payload.title, body: payload.body },
+          /* A2: the picture as the big picture and its thumbnail in the shade. */
+          notification: { title: payload.title, body: payload.body, ...(payload.image ? { image: payload.image } : {}) },
           /* Data values must be strings. A number here is a 400 that reads
              as a generic INVALID_ARGUMENT. */
           data: { href: payload.href, tag: payload.tag, actions: actionsAsData(payload.actions) },
@@ -245,7 +260,14 @@ export async function sendFcm(target: PushTarget, payload: PushPayload): Promise
               /* The channel must already exist on the handset or Android 8
                  and above drops the notification silently. It is created by
                  the shell; the name here has to match. */
-              channel_id: payload.call ? "vallo_calls" : payload.quiet && payload.tag === "vallo-missed-call" ? "vallo_missed" : "vallo_default",
+              channel_id: androidChannelFor(payload),
+              /* A2: the monochrome Vallo mark, named so a push never depends
+                 on the manifest default; it is tinted with the brand accent
+                 by `default_notification_color` (@color/vallo_notification). */
+              icon: "ic_stat_vallo",
+              /* A10: the chime, for Android 7 and below (from Android 8 the
+                 channel's own sound plays, set when the shell creates it). */
+              ...(payload.quiet || payload.call ? {} : { sound: CHIME_ANDROID }),
               /* Android's own collapsing, so one conversation is one row in
                  the shade rather than eleven. */
               tag: payload.tag,

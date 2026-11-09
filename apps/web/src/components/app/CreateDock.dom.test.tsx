@@ -73,9 +73,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false }) });
     try {
       const options = await optionsOf(page);
-      expect(options.map((o) => o.id)).toEqual(["create-story", "create-post", "create-list", "create-viewing"]);
-      expect(options.map((o) => o.text)).toEqual(["Post to story", "Post to feed", "List a property", "Book a viewing"]);
-      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/around?compose=1", "/profile/setup", "/search"]);
+      expect(options.map((o) => o.id)).toEqual(["create-story", "create-post", "create-list", "create-viewing", "create-roommate"]);
+      expect(options.map((o) => o.text)).toEqual(["Post to story", "Post to feed", "List a property", "Book a viewing", "Find a roommate or share a room"]);
+      expect(options.map((o) => o.href)).toEqual(["/stories/new", "/around?compose=1", "/profile/setup", "/search", "/roommates/new"]);
       /* Clean: one icon, one line and a short line under it; no chevron. */
       for (const option of options) {
         expect(option.icons, option.text).toBe(1);
@@ -88,10 +88,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
     }
   });
 
-  it("gives a host on the property side the same four, not a fifth", async () => {
+  it("gives a host on the property side the same five, not a sixth", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: true }) });
     try {
-      expect((await optionsOf(page)).length).toBe(4);
+      expect((await optionsOf(page)).length).toBe(5);
     } finally {
       await close();
     }
@@ -111,7 +111,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
   it("hides the two post options when the social switch is off, and keeps List and the booking row", async () => {
     const { page, close } = await mountInBrowser({ entry: entry({ isHost: false, socialOn: false }) });
     try {
-      expect((await optionsOf(page)).map((o) => o.id)).toEqual(["create-list", "create-viewing"]);
+      expect((await optionsOf(page)).map((o) => o.id)).toEqual(["create-list", "create-viewing", "create-roommate"]);
     } finally {
       await close();
     }
@@ -126,6 +126,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("CreateDock", () => {
         "/sign-up?next=%2Faround%3Fcompose%3D1",
         "/sign-up?next=%2Fprofile%2Fsetup",
         "/search",
+        "/sign-up?next=%2Froommates%2Fnew",
       ]);
     } finally {
       await close();

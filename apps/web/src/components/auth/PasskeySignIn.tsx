@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/Button";
 import { passkeySignInEnabled } from "@/lib/auth/passkey-flag";
 import { safeReturnPath } from "@/lib/security/return-path";
 import "@/app/css/auth.css";
+import { banner } from "@/lib/ui/toast";
+import { showSuccess } from "@/lib/ui/success-moments";
 
 /**
  * A3. "Sign in with a passkey", drawn only when the flag is on and the
@@ -25,7 +27,6 @@ export function passkeyLanding(next: string | undefined): string {
 export function PasskeySignIn({ label, next, failed }: { label: string; next?: string; failed: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
   /* False on the server and in the first client pass, so hydration agrees. */
   const supported = useSyncExternalStore(
     () => () => {},
@@ -48,7 +49,6 @@ export function PasskeySignIn({ label, next, failed }: { label: string; next?: s
         loading={busy}
         onClick={async () => {
           setBusy(true);
-          setError(false);
           try {
             /* Fetched now, not with the screen: supabase-js is about 65KB
                gzipped, and every visit to sign in paid for it whether or not
@@ -59,9 +59,12 @@ export function PasskeySignIn({ label, next, failed }: { label: string; next?: s
             };
             const { error: failure } = await auth.signInWithPasskey();
             if (failure) {
-              if (!/abort|cancel|NotAllowed/i.test(failure.name ?? "")) setError(true);
+              /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+              if (!/abort|cancel|NotAllowed/i.test(failure.name ?? "")) banner.error(failed, { "data-testid": "banner-auth" });
               return;
             }
+            /* "Signed in. Welcome back." at the top of wherever it lands. */
+            showSuccess("signed-in");
             router.replace(passkeyLanding(next));
             router.refresh();
           } finally {
@@ -71,11 +74,6 @@ export function PasskeySignIn({ label, next, failed }: { label: string; next?: s
       >
         {label}
       </Button>
-      {error && (
-        <p role="alert" className="nf-auth__notice">
-          {failed}
-        </p>
-      )}
     </div>
   );
 }

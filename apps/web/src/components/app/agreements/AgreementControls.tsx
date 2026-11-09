@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { amendAgreement, cancelAgreement, confirmAgreement, createClaimEvidenceUpload, fileGuaranteeClaim } from "@/lib/agreements/actions";
@@ -18,10 +19,10 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * paid and inside the claim window, raise a Guarantee claim.
  */
 
+/* What an action did is said by the one banner at the top of the screen (Grade 1). */
 function useAction() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   /*
    * `done` names the success moment this action ends in. The page re-renders
    * with `?done=<flag>` (which also refreshes it), checks the agreement, and
@@ -31,12 +32,12 @@ function useAction() {
   const run = (work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void, done?: RecordDoneFlag) =>
     start(async () => {
       try {
-        setError(null);
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? "That did not go through.");
+          banner.error(result.error ?? "That did not go through.");
           return;
         }
+        banner.success("Saved");
         after?.();
         if (done) router.replace(withDone(window.location.pathname, done), { scroll: false });
         else router.refresh();
@@ -44,7 +45,7 @@ function useAction() {
         if (!tapFailedOffline(error)) throw error;
       }
     });
-  return { pending, error, run };
+  return { pending, run };
 }
 
 export function ConfirmTerms({
@@ -61,7 +62,7 @@ export function ConfirmTerms({
   changes?: { key: string; label: string; before: string; after: string }[];
   changesLead?: string;
 }) {
-  const { pending, error, run } = useAction();
+  const { pending, run } = useAction();
   const [read, setRead] = useState(false);
   /* The confirm step (plan item 22): the button opens the one confirm panel,
      whose primary makes exactly the call this button made before. */
@@ -72,7 +73,6 @@ export function ConfirmTerms({
         <input type="checkbox" checked={read} onChange={(e) => setRead(e.target.checked)} />
         <span>I have read these terms (version {version}) and I agree to them.</span>
       </label>
-      {error && !asking ? <p role="alert" className="text-[var(--nf-status-error)]">{error}</p> : null}
       <Button variant="primary" full disabled={!read || pending || disabled} onClick={() => setAsking(true)}>
         Confirm these terms
       </Button>
@@ -115,7 +115,6 @@ export function ConfirmTerms({
             { icon: "credit-card", text: "Payment opens then. An escrow payment opens straight away." },
             { icon: "shield-check", text: "A card payment waits for a person at Vallo only when something about the deal needs a second look." },
           ]}
-          error={error}
           cancel={
             <Button variant="secondary" disabled={pending} onClick={() => setAsking(false)}>
               Not yet
@@ -149,7 +148,7 @@ export function AmendTerms({
   notes: string;
   minDate: string;
 }) {
-  const { pending, error, run } = useAction();
+  const { pending, run } = useAction();
   const [open, setOpen] = useState(false);
   const [a, setA] = useState(moveIn);
   const [b, setB] = useState(handoverOn);
@@ -182,7 +181,6 @@ export function AmendTerms({
         <span className="nf-label">Notes</span>
         <textarea className="nf-field mt-2xs min-h-[4.5rem] w-full" maxLength={2000} value={n} onChange={(e) => setN(e.target.value)} />
       </label>
-      {error ? <p role="alert" className="text-[var(--nf-status-error)]">{error}</p> : null}
       <div className="flex flex-wrap gap-inline">
         <Button type="submit" variant="primary" disabled={pending}>
           Save the new terms
@@ -203,11 +201,10 @@ export function CancelAgreement({
   /** "secondary" where it sits as a secondary beside another (the Awaiting you card). */
   variant?: "ghost" | "secondary";
 }) {
-  const { pending, error, run } = useAction();
+  const { pending, run } = useAction();
   const [sure, setSure] = useState(false);
   return (
     <div className="grid gap-inline">
-      {error && !sure ? <p role="alert" className="text-[var(--nf-status-error)]">{error}</p> : null}
       <Button
         variant={variant === "secondary" ? "secondary" : "quiet"}
         /* DESTRUCTIVE WITHOUT THE ROSE WORD (auditor A7 N4). The label was
@@ -236,7 +233,6 @@ export function CancelAgreement({
           tone="error"
           title="Cancel this agreement?"
           context="Nobody can confirm or pay under it once it is cancelled."
-          error={error}
           cancel={
             <Button variant="secondary" disabled={pending} onClick={() => setSure(false)}>
               Keep it
@@ -275,24 +271,23 @@ const ITEMS: { key: string; label: string }[] = [
 ];
 
 export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capNaira: string }) {
-  const { pending, error, run } = useAction();
+  const { pending, run } = useAction();
   const [items, setItems] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [paths, setPaths] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  /* A photo that did not upload is said so. Swallowing it left the count at
-     "0 added" with no reason, and the claim went without the evidence. */
+  /* A photo that did not upload is said so, by the one banner (Grade 1).
+     Swallowing it left the count at "0 added" with no reason, and the claim
+     went without the evidence. */
   async function addFile(file: File) {
     setUploading(true);
-    setUploadError(null);
     try {
       const prepared = await createClaimEvidenceUpload({ agreementId, fileName: file.name });
       if (!prepared.ok) {
-        setUploadError(prepared.error);
+        banner.error(prepared.error);
         return;
       }
       /* The browser client loads now, when a photo is chosen, not with the
@@ -300,7 +295,7 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
          is the same failure the member already reads for an upload. */
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
+        banner.error("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }
       const uploaded = await uploadToStorage({
@@ -312,7 +307,7 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
         signedToken: prepared.data.token,
       });
       if (!uploaded.ok) {
-        setUploadError("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
+        banner.error("That photo did not upload. Use a JPG, PNG, WEBP, HEIC or PDF under 10 MB, and try again.");
         return;
       }
       setPaths((now) => [...now, prepared.data.path]);
@@ -385,17 +380,11 @@ export function ClaimForm({ agreementId, capNaira }: { agreementId: string; capN
           }}
         />
         <span className="nf-caption">{uploading ? "Adding photo" : `${paths.length} added`}</span>
-        {uploadError ? (
-          <span role="alert" className="nf-caption text-[var(--nf-status-error)]">
-            {uploadError}
-          </span>
-        ) : null}
       </label>
       <label className="block">
         <span className="nf-label">Amount you are claiming (₦, at most {capNaira})</span>
         <input className="nf-field mt-2xs w-full" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </label>
-      {error ? <p role="alert" className="text-[var(--nf-status-error)]">{error}</p> : null}
       <Button type="submit" variant="primary" full disabled={pending || uploading}>
         Send the claim to Vallo
       </Button>

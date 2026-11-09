@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
@@ -37,8 +38,8 @@ export function ManagePlan({
   const router = useRouter();
   const [asking, setAsking] = useState(false);
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<string | null>(null);
+  /* Cancelled on this visit: the button goes, and the banner says so. */
+  const [done, setDone] = useState(false);
   const m = copy.manage;
 
   let tone: StatusTone = "brand";
@@ -69,14 +70,21 @@ export function ManagePlan({
   const cancel = () =>
     start(async () => {
       try {
-        setError(null);
+        /* Said by the one banner at the top of the screen (Grade 1). */
         const result = await cancelSubscription(live.id);
-        if (!result.ok) return setError(result.error);
+        if (!result.ok) {
+          banner.error(result.error, { "data-testid": "pro-cancel-error" });
+          return;
+        }
         if (!result.data.cancelled) {
-          return setError(copy.errors[result.data.reason as keyof typeof copy.errors] ?? copy.errors.cancel_failed);
+          banner.error(copy.errors[result.data.reason as keyof typeof copy.errors] ?? copy.errors.cancel_failed, {
+            "data-testid": "pro-cancel-error",
+          });
+          return;
         }
         setAsking(false);
-        setDone(m.cancelled);
+        setDone(true);
+        banner.success(m.cancelled, { "data-testid": "pro-cancel-done" });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -95,16 +103,6 @@ export function ManagePlan({
           {line}
         </p>
       ))}
-      {done ? (
-        <p className="nf-pro-mine__body" role="status" data-testid="pro-cancel-done">
-          {done}
-        </p>
-      ) : null}
-      {error ? (
-        <p className="nf-pro-buy__error" role="alert" data-testid="pro-cancel-error">
-          {error}
-        </p>
-      ) : null}
       {cancellable ? (
         <Button variant="secondary" full onClick={() => setAsking(true)} data-testid="pro-cancel">
           {copy.actions.cancel}

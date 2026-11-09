@@ -30,8 +30,26 @@ export const GLYPHS = [
 
 export type GlyphName = (typeof GLYPHS)[number];
 
-export function glyphSrc(name: GlyphName): string {
+/*
+ * A SMALL WEBP FOR THE PLAIN IMAGE SPOTS (performance audit, 7 and 8
+ * November 2026). A plain `<img>` gets no resizing from the image optimiser,
+ * so the listing page's empty reviews state fetched the whole 249px PNG
+ * (57.6 KB) to draw it at 88px, and every other glyph in an empty state, a
+ * tracker or the in-app banner did the same (55 to 124 KB each, drawn at 24
+ * to 96px). Every glyph now also ships as a 192px WebP (96px, the largest
+ * plain spot, at twice the density; 651 KB for all 64 against 4.98 MB of
+ * PNG, about 10 KB each, near lossless against the PNG scaled to 192px),
+ * which `glyphSrc` hands out. `glyphMasterSrc` stays the full PNG for
+ * `Icon3D`, whose optimiser cuts its own sizes and may draw a glyph at 144px
+ * or more; the PNGs stay for it and for anything outside this app that
+ * names them. Both held by `glyph-files.test.ts`.
+ */
+export function glyphMasterSrc(name: GlyphName): string {
   return `/brand/glyphs/${name}.png`;
+}
+
+export function glyphSrc(name: GlyphName): string {
+  return `/brand/glyphs/${name}.webp`;
 }
 
 /** A listing's status as its glyph. Unknown statuses draw nothing. */

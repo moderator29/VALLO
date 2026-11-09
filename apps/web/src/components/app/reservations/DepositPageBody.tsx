@@ -80,7 +80,7 @@ export function DepositPageBody({
 
       <section className="nf-panel nf-panel--card p-card" aria-labelledby="deposit-table">
         <div className="flex items-start gap-row">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--nf-radius-sm)] bg-[var(--nf-surface-raised)]">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-sm bg-[var(--nf-surface-raised)]">
             <UiIcon name="utensils" size={20} aria-hidden />
           </span>
           <div className="min-w-0">

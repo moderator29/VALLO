@@ -75,7 +75,12 @@ const SEVERITY: Record<AlertSeverity, DbSeverity> = {
  * still open is still the news, so a day is the window; once somebody
  * closes it, the next failure opens a fresh one.
  */
-const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1_000;
+/* 26 hours, not 24 (R-04, 7 November 2026): a daily job fires about 24
+   hours after its last run, often a few seconds more, so a strict day let
+   every run open a fresh copy: "Store: readiness, red" stood at 25 open
+   alerts for one unchanged fault. Two spare hours fold a daily repeat into
+   the alert already open. */
+const DEDUP_WINDOW_MS = 26 * 60 * 60 * 1_000;
 
 const MAX_STRING = 200;
 const MAX_DESCRIPTION = 2_000;
@@ -207,7 +212,10 @@ export async function recordAlert(input: AlertInput): Promise<AlertOutcome> {
     } catch {
       existingId = null;
     }
-    if (existingId) return { ok: true, id: existingId, deduplicated: true };
+    if (existingId) {
+      await admin.from("risk_alerts").update({ last_seen_at: new Date().toISOString() }).eq("id", existingId);
+      return { ok: true, id: existingId, deduplicated: true };
+    }
 
     const { data, error } = await admin
       .from("risk_alerts")

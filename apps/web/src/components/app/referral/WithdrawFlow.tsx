@@ -1,7 +1,8 @@
 "use client";
 
 import "./rewards.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -75,6 +76,15 @@ export function WithdrawFlow({
 }) {
   const [typed, setTyped] = useState("");
   const [phase, setPhase] = useState<Phase>({ at: "enter", error: null });
+  /* Said by the one banner at the top of the screen (founder, 7 November
+     2026): a refusal on the quote, and the request once it is in. The
+     amount field says its own problem through its Field. */
+  useEffect(() => {
+    if (phase.at === "quoted" && phase.error) banner.error(phase.error);
+    else if (phase.at === "done") banner.success(copy.done.title, { "data-testid": "banner-rewards-withdrawn" });
+    // Once per phase.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
   const minimum = money(minimumMinor, locale);
   const to = copy.toValue.replace("{bank}", destination.bankName).replace("{last4}", destination.accountLast4);
 
@@ -192,11 +202,6 @@ export function WithdrawFlow({
               <dd data-testid="withdraw-receive">{money(quote.receiveMinor, locale)}</dd>
             </div>
           </dl>
-          {error ? (
-            <p className="nf-rewards-error" role="alert">
-              {error}
-            </p>
-          ) : null}
           <Button
             type="button"
             variant="primary"

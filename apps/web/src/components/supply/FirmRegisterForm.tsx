@@ -218,6 +218,7 @@ export function FirmRegisterForm({
                 placeholder={mine.details.namePlaceholder}
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
+                enterKeyHint="next"
                 required
                 {...(errors.businessName ? { error: errors.businessName } : {})}
               />
@@ -228,6 +229,7 @@ export function FirmRegisterForm({
                 placeholder={mine.details.rcPlaceholder}
                 value={rcNumber}
                 onChange={(e) => setRcNumber(e.target.value)}
+                enterKeyHint="next"
                 required
                 {...(errors.rcNumber ? { error: errors.rcNumber } : {})}
               />
@@ -243,6 +245,7 @@ export function FirmRegisterForm({
                 placeholder={mine.details.officePlaceholder}
                 value={officeAddress}
                 onChange={(e) => setOfficeAddress(e.target.value)}
+                enterKeyHint="next"
                 required
                 trailing={
                   <span aria-hidden="true">
@@ -258,6 +261,7 @@ export function FirmRegisterForm({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 autoComplete="name"
+                enterKeyHint="next"
                 required
                 {...(errors.fullName ? { error: errors.fullName } : {})}
               />
@@ -279,6 +283,7 @@ export function FirmRegisterForm({
                 label={mine.details.lasrera}
                 value={lasreraNumber}
                 onChange={(e) => setLasreraNumber(e.target.value)}
+                enterKeyHint="done"
                 {...(errors.lasreraNumber ? { error: errors.lasreraNumber } : {})}
               />
             </RegField>
@@ -353,6 +358,7 @@ export function FirmRegisterForm({
                   onChange={(e) => setPrincipalEmail(e.target.value)}
                   type="email"
                   inputMode="email"
+                  enterKeyHint="done"
                   autoComplete="off"
                   required
                   {...(errors.principalEmail ? { error: errors.principalEmail } : {})}
@@ -410,6 +416,7 @@ export function FirmRegisterForm({
                   <TextField
                     label={mine.team.name}
                     value={draftName}
+                    enterKeyHint="next"
                     onChange={(e) => setDraftName(e.target.value)}
                   />
                 </RegField>
@@ -417,6 +424,7 @@ export function FirmRegisterForm({
                   <TextField
                     label={mine.team.email}
                     value={draftEmail}
+                    enterKeyHint="done"
                     onChange={(e) => setDraftEmail(e.target.value)}
                     type="email"
                     inputMode="email"

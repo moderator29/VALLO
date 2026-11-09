@@ -31,6 +31,7 @@ import { NextActions } from "./NextActions";
 import { shareAreaCopy } from "./share-copy";
 import { AnsweredResult, ComparablesRail, Disclaimer, RefusalPanel, StripPlot } from "./ResultPanel";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * PRICE CHECK, THE WHOLE SCREEN.
@@ -265,7 +266,12 @@ export function PriceCheckScreen(props: PriceCheckScreenProps) {
       propertyType,
       listingIntent: intent,
       bedrooms: bedrooms === "" ? null : Number(bedrooms),
-    }).then((answer) => setWatched(answer.ok ? "saved" : "failed"));
+    }).then((answer) => {
+      setWatched(answer.ok ? "saved" : "failed");
+      /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+      if (answer.ok) banner(copy.notify.saved, { tone: "success" });
+      else banner.error(copy.notify.failed);
+    });
   }, [point, stateCode, lgaCode, area, propertyType, intent, bedrooms]);
 
   const typeNames = useMemo<Record<string, string>>(
@@ -719,9 +725,6 @@ function RefusalActions({
   return (
     <div className="flex w-full max-w-sm flex-col gap-row">
       {rendered}
-      {watched === "failed" && (
-        <p className="nf-body-sm text-[var(--nf-state-error)]">{copy.notify.failed}</p>
-      )}
     </div>
   );
 }

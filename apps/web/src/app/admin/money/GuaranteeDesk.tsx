@@ -6,6 +6,7 @@ import { decideClaim, markClaimPaid } from "@/lib/admin/agreements-actions";
 import type { ClaimRow } from "@/lib/admin/reads/agreements";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import type { RulingWords } from "../_components/rulings";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * GUARANTEE CLAIMS, DECIDED BY A PERSON.
@@ -34,14 +35,16 @@ function ClaimItem({ claim, locale, words }: { claim: ClaimRow; locale: Locale; 
   const [amount, setAmount] = useState(String(claim.requestedMinor / 100));
   const [reason, setReason] = useState("");
   const [reference, setReference] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
 
   /* A ruling is a slide, and a slide is only confirmed once the server has
      said so: this returns what the server said, so the track never claims a
      decision that was refused. */
   const run = async (fn: () => Promise<{ ok: boolean; error?: string }>, done: string): Promise<boolean> => {
     const result = await fn();
-    setMessage(result.ok ? done : (result.error ?? "That did not go through."));
+    /* The outcome goes to the banner. No retry on a refusal: a ruling moves
+       money, so trying again means sliding again. */
+    if (result.ok) banner.success(done);
+    else banner.error(result.error ?? "That did not go through.");
     return result.ok;
   };
 
@@ -63,11 +66,6 @@ function ClaimItem({ claim, locale, words }: { claim: ClaimRow; locale: Locale; 
         {claim.decisionReason ? (
           <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-secondary)]">
             Reason: {claim.decisionReason}
-          </p>
-        ) : null}
-        {message ? (
-          <p role="status" className="mt-2xs text-[length:var(--nf-text-caption)]">
-            {message}
           </p>
         ) : null}
       </div>

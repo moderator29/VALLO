@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { State } from "@/components/ui/State";
 import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -37,7 +38,6 @@ export function SaturdayRoute({
   className?: string;
 }) {
   const [said, setSaid] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const time = (iso: string) => formatDate(new Date(iso), locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Lagos" });
 
@@ -76,12 +76,15 @@ export function SaturdayRoute({
              late" message again. */
           disabled={said !== null}
           onClick={() => {
-            setError(null);
             start(async () => {
               try {
                 const result = await sayRunningLate({ conversationId: next.conversationId, slotAt: next.slotAt });
-                if (!result.ok) setError(result.error);
-                else setSaid(copy.lateSent.replace("{name}", next.counterpartName ?? copy.someone));
+                if (!result.ok) banner.error(result.error);
+                else {
+                  const line = copy.lateSent.replace("{name}", next.counterpartName ?? copy.someone);
+                  setSaid(line);
+                  banner.success(line);
+                }
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
               }
@@ -90,12 +93,6 @@ export function SaturdayRoute({
         >
           {copy.lateAction}
         </Button>
-      )}
-      {said && <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]" role="status">{said}</p>}
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
       )}
     </section>
   );

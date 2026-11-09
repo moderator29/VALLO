@@ -96,23 +96,19 @@
       animation-range: cover 0% cover 100%;
     }
   }
-  /* The rail's pictures move under the finger, sideways; a vertical
-     parallax inside each card would fight the swipe and overflow its own
-     corner, so the rail keeps them still. */
-  .nf-post__media--rail img {
-    animation: none;
-  }
   @media print {
     .nf-post,
     .nf-post__media img {
       animation: none;
     }
   }
+  /* A calm rise (7 November 2026): 28px and a hair of scale, where it was
+     64px, so a card settles into the column rather than flying up it. */
   @keyframes nf-feed-arrive {
     from {
       opacity: 0;
-      translate: 0 64px;
-      scale: 0.985;
+      translate: 0 28px;
+      scale: 0.99;
     }
     to {
       opacity: 1;
@@ -208,6 +204,71 @@
 
   /* ------------------------------------------------------------ repost */
 
+  /*
+   * THE HEART, WHEN IT IS TURNED ON (7 November 2026). Three things at once,
+   * each on transform and opacity only, each played once by the tap and never
+   * by a page load (`data-pop` and `data-roll` are set only by the tap):
+   *
+   *   the glyph   springs from 0.7 past 1.2 and settles at its size;
+   *   the burst   a dotted ring in the spark (CLEAN_UNIFIED_DIRECTION 18 lists
+   *               "the feed like button's brief dotted burst") opens from the
+   *               glyph's centre and fades;
+   *   the count   rolls up into place, the new figure arriving from below.
+   */
+  .nf-act-pill--like[data-pop] svg {
+    animation: nf-feed-heart-glyph var(--nf-duration-slow) var(--nf-ease-spring) both;
+  }
+  @keyframes nf-feed-heart-glyph {
+    0% {
+      scale: 0.7;
+    }
+    55% {
+      scale: 1.2;
+    }
+    100% {
+      scale: 1;
+    }
+  }
+  .nf-act-pill--like::after {
+    content: "";
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: calc(var(--nf-space-sm) - 4px);
+    inline-size: 28px;
+    block-size: 28px;
+    margin-block-start: -14px;
+    border: 2px dotted var(--nf-spark);
+    border-radius: var(--nf-radius-circle);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .nf-act-pill--like[data-pop]::after {
+    animation: nf-feed-burst var(--nf-duration-slow) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-feed-burst {
+    0% {
+      opacity: 0.95;
+      scale: 0.45;
+    }
+    100% {
+      opacity: 0;
+      scale: 1.55;
+    }
+  }
+  .nf-act-pill__count[data-roll] {
+    animation: nf-feed-count var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @keyframes nf-feed-count {
+    from {
+      opacity: 0;
+      translate: 0 0.6em;
+    }
+    to {
+      opacity: 1;
+      translate: none;
+    }
+  }
+
   .nf-act-pill--repost[data-pop] svg {
     animation: nf-feed-turn var(--nf-duration-slow) var(--nf-ease-entrance) both;
   }
@@ -218,49 +279,6 @@
     to {
       rotate: none;
     }
-  }
-
-  /* ----------------------------------------------- the For you / Following pill */
-
-  /*
-   * THE SEGMENTED PILL SLIDES (motion 6, `drift` 240ms). The track is two
-   * equal halves now (it was 297 to 315 in the founder's render, a 3 per cent
-   * difference nobody can see, and a sliding thumb needs equal halves to
-   * travel by exactly its own width), the lit fill is the `__thumb`, and the
-   * current link only lifts its label above it. Transform only.
-   */
-  .nf-feed-seg {
-    grid-template-columns: 1fr 1fr;
-    position: relative;
-  }
-  .nf-feed-seg .nf-feed-seg__thumb {
-    position: absolute;
-    inset-block: -1px;
-    inset-inline-start: -1px;
-    inline-size: calc(50% + 1px);
-    border: 1px solid transparent;
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-selected-fill);
-    border-color: var(--nf-selected-edges);
-    box-shadow: var(--nf-selected-shadow-inline);
-    pointer-events: none;
-    transition: translate var(--nf-duration-base) var(--nf-ease-spring);
-  }
-  .nf-feed-seg[data-live="following"] .nf-feed-seg__thumb {
-    translate: 100% 0;
-  }
-  .nf-feed-seg[data-live="following"] .nf-feed-seg__thumb:dir(rtl) {
-    translate: -100% 0;
-  }
-  /* The fill moved to the thumb; the current link keeps only its label. */
-  .nf-feed-seg .nf-feed-seg__link[aria-current="page"] {
-    background: none;
-    border-color: transparent;
-    box-shadow: none;
-    z-index: 1;
-  }
-  .nf-feed-seg .nf-feed-seg__link {
-    z-index: 1;
   }
 
   /* ----------------------------------------------------------- stories */
@@ -283,8 +301,18 @@
    */
   .nf-story-ring {
     --nf-ring-lit: var(--nf-state-info);
+    --nf-ring-lit-mid: var(--nf-brand-primary);
     --nf-ring-lit-end: var(--nf-brand-primary);
     --nf-ring-seen: color-mix(in oklab, var(--nf-content-muted) 55%, transparent);
+  }
+  /* On paper the info blue is the deep, AA-safe #0369A1, which beside the
+     brand reads as a dull teal at the start of the sweep. A ring is a
+     graphic, not words, so it takes a bright azure from the brand and the
+     cyan instead (light mode pass, 7 November 2026), and an opened ring is a
+     quieter grey that does not smudge on white. */
+  :root[data-theme="light"] .nf-story-ring:not(:where([data-theme="dark"] *)) {
+    --nf-ring-lit: color-mix(in oklab, var(--nf-brand-primary) 62%, var(--nf-act-cyan));
+    --nf-ring-seen: color-mix(in oklab, var(--nf-content-muted) 42%, transparent);
   }
   .nf-story-ring__disc[style*="--nf-ring"] {
     background:
@@ -335,8 +363,7 @@
   .nf-story--seq .nf-story__top,
   .nf-story--seq .nf-story__card,
   .nf-story--seq .nf-story__actions,
-  .nf-story--seq .nf-story__pile,
-  .nf-story--seq .nf-story__commentbar {
+  .nf-story--seq .nf-story__pile {
     animation: nf-story-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
   }
   .nf-story--seq .nf-story__top {
@@ -351,9 +378,6 @@
   }
   .nf-story--seq .nf-story__pile {
     animation-delay: 240ms;
-  }
-  .nf-story--seq .nf-story__commentbar {
-    animation-delay: 300ms;
   }
   @keyframes nf-story-rise {
     from {
@@ -381,13 +405,15 @@
     .nf-post > *,
     .nf-post__media img,
     .nf-act-pill--like[data-pop],
+    .nf-act-pill--like[data-pop] svg,
+    .nf-act-pill--like[data-pop]::after,
+    .nf-act-pill__count[data-roll],
     .nf-act-pill--repost[data-pop] svg,
     .nf-story--seq .nf-story__image,
     .nf-story--seq .nf-story__top,
     .nf-story--seq .nf-story__card,
     .nf-story--seq .nf-story__actions,
-    .nf-story--seq .nf-story__pile,
-    .nf-story--seq .nf-story__commentbar {
+    .nf-story--seq .nf-story__pile {
       animation: none;
     }
     /* The lead six keep a 160ms fade and lose the lift: the order is still
@@ -405,13 +431,18 @@
       }
     }
     .nf-act-pill,
-    .nf-feed-seg .nf-feed-seg__thumb,
     .nf-story-ring__item {
       transition: none;
     }
     .nf-act-pill:active,
-    .nf-post__attach:active {
+    .nf-post__attach:active,
+    .nf-feed-prompt:active,
+    .nf-pc__comment:active {
       transform: none;
+    }
+    .nf-feed-prompt,
+    .nf-pc__comment {
+      transition: none;
     }
     .nf-story-ring__item:active {
       scale: none;
@@ -422,7 +453,8 @@
       transition: none;
     }
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-act-pill--like[data-pop], .nf-act-pill--repost[data-pop] svg) {
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-act-pill--like[data-pop], .nf-act-pill--like[data-pop] svg, .nf-act-pill__count[data-roll], .nf-act-pill--repost[data-pop] svg),
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-act-pill--like[data-pop]::after {
     animation: none;
   }
   :root:is([data-motion="calm"], [data-motion="off"]) .nf-pic {

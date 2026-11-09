@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/Check";
 import { grantStaff, revokeStaff } from "@/lib/admin/staff-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 export type PositionOption = { value: string; label: string; summary: string; scopes: string[] };
 
@@ -21,30 +22,34 @@ export function GrantStaffForm({
   const [position, setPosition] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
   const [note, setNote] = useState("");
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
+
+  function grant() {
+    start(async () => {
+      try {
+        const result = await grantStaff({ email, scopes: picked, position: position || null, note });
+        if (!result.ok) banner.error(result.error, { retry: grant });
+        else {
+          banner.success("Access given. They have been told by email and in the app.");
+          setEmail("");
+          setPosition("");
+          setPicked([]);
+          setNote("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <form
       className="grid gap-xs"
       onSubmit={(e) => {
         e.preventDefault();
-        start(async () => {
-          try {
-            const result = await grantStaff({ email, scopes: picked, position: position || null, note });
-            if (!result.ok) setMessage({ ok: false, text: result.error });
-            else {
-              setMessage({ ok: true, text: "Access given. They have been told by email and in the app." });
-              setEmail("");
-              setPosition("");
-              setPicked([]);
-              setNote("");
-              router.refresh();
-            }
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        grant();
       }}
     >
       <label className="grid gap-2xs nf-body">
@@ -103,34 +108,36 @@ export function GrantStaffForm({
           Give access
         </Button>
       </div>
-      {message ? (
-        <p className="nf-body" role={message.ok ? "status" : "alert"}>
-          {message.text}
-        </p>
-      ) : null}
     </form>
   );
 }
 
 export function RevokeStaffForm({ userId }: { userId: string }) {
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
+
+  function revoke() {
+    start(async () => {
+      try {
+        const result = await revokeStaff({ userId, reason });
+        if (!result.ok) banner.error(result.error, { retry: revoke });
+        else {
+          banner.success("Access revoked");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <form
       className="mt-2xs flex flex-wrap items-end gap-xs"
       onSubmit={(e) => {
         e.preventDefault();
-        start(async () => {
-          try {
-            const result = await revokeStaff({ userId, reason });
-            if (!result.ok) setError(result.error);
-            else router.refresh();
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        revoke();
       }}
     >
       <label className="grid gap-2xs nf-caption">
@@ -140,11 +147,6 @@ export function RevokeStaffForm({ userId }: { userId: string }) {
       <Button type="submit" variant="secondary" size="sm" disabled={pending || reason.trim().length < 5}>
         End access
       </Button>
-      {error ? (
-        <p className="nf-caption" role="alert">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

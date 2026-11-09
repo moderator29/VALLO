@@ -30,7 +30,14 @@ export type FeatureKey =
   | "social"
   /* Meetups. Built to SOCIAL_AUDIT section 6 and off until slice 4 safety is
      proven in production and a named person is watching the queue. */
-  | "events";
+  | "events"
+  /* Platform Grade 1 (P0.3): a listing is sent for review only by a lister
+     whose identity check is sent or approved. On unless a row says off. */
+  | "listing_verification"
+  /* Founder, 7 November 2026: a renter verifies their identity before the
+     first payment of a rental of 5 months or more. Stays never ask. On
+     unless a row says off. */
+  | "rental_verification";
 
 export async function isFeatureEnabled(key: FeatureKey): Promise<boolean> {
   if (!isSupabaseConfigured()) return true;

@@ -268,6 +268,7 @@ export function OwnerRegisterForm({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 autoComplete="name"
+                enterKeyHint="next"
                 required
                 {...(errors.fullName ? { error: errors.fullName } : {})}
               />
@@ -291,6 +292,7 @@ export function OwnerRegisterForm({
                 value={nin}
                 onChange={(e) => setNin(e.target.value.replace(/\D/g, "").slice(0, 11))}
                 inputMode="numeric"
+                enterKeyHint="done"
                 /* Never autofilled, never remembered by the browser, and never
                    logged anywhere by this platform. */
                 autoComplete="off"
@@ -354,6 +356,7 @@ export function OwnerRegisterForm({
                 hint={own.where.areaHint}
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
+                enterKeyHint="done"
                 {...(errors.area ? { error: errors.area } : {})}
               />
             </RegField>

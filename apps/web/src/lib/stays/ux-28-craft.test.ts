@@ -14,7 +14,10 @@ describe("flow craft", () => {
   it("(a) the chooser draws no second back arrow", () => {
     const chooser = src("components/supply/AddWorkspaceChooser.tsx");
     expect(chooser).not.toContain("aria-label={copy.back}");
-    expect(chooser).toContain("{copy.chooseAgain}");
+    /* The overview step offers "choose again" instead of a second back arrow.
+       Since the StepFrame migration it is the frame's `secondary` action
+       (`label: copy.chooseAgain`), not an inline `{copy.chooseAgain}` node. */
+    expect(chooser).toContain("copy.chooseAgain");
   });
 
   it("(b) checkout shows 'Sat 10 Oct', not an ISO date", () => {

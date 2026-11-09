@@ -15,7 +15,7 @@ export default async function LoadingBookings() {
   const t = getDictionary(await getLocale());
   return (
     <LoadingShell label={t.memberFlows.loading.plans} className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton layout="large" />
 
       <div className="nf-panel nf-panel--card block p-md sm:p-lg">
         <div className="flex items-start gap-md">

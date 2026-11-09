@@ -1293,10 +1293,6 @@
     color: var(--nf-state-error);
   }
 
-  .nf-rv-msg--ok {
-    color: var(--nf-state-success);
-  }
-
   /* ------------------------------------------------------------ safety panel */
   .nf-rv-safety {
     display: grid;

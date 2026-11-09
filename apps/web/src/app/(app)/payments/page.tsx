@@ -5,9 +5,9 @@ import { readMyPayments } from "@/lib/money/history";
 import { RowDownload } from "@/components/app/account/rows";
 import { parseBefore } from "@/lib/money/history-model";
 import { HISTORY_NOT_A_BALANCE } from "@/lib/money/copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { HistoryUnavailable } from "@/components/app/money-history/HistoryStates";
 import { PaymentsView } from "@/components/money/PaymentsView";
@@ -50,18 +50,15 @@ export default async function PaymentsPage({
 
   return (
     <main className="nf-page nf-md nf-history">
-      <PageHeader title={words.title} fallback="/home" />
+      <PageFrame title={words.title} fallback="/home">
+      <div>
 
       {read.state === "signed-out" ? (
         <EmptyState
           icon="receipt-check"
           title={words.signInTitle}
           body={HISTORY_NOT_A_BALANCE}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/payments")} variant="primary" size="lg">
-              {words.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: words.signIn, href: withNext("/sign-in", "/payments") }} />}
         />
       ) : read.state === "error" ? (
         <div className="mt-block">
@@ -90,6 +87,8 @@ export default async function PaymentsPage({
         />
         </>
       )}
+      </div>
+    </PageFrame>
     </main>
   );
 }

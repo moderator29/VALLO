@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -61,7 +62,6 @@ export function PayChoiceCard({
 }) {
   const view = payChoiceView(choice);
   const [selected, setSelected] = useState<PayRail | null>(view.selected);
-  const [error, setError] = useState<string | null>(null);
   const [review, setReview] = useState(false);
   const [pending, startTransition] = useSafeTransition();
   const router = useRouter();
@@ -78,7 +78,6 @@ export function PayChoiceCard({
 
   const onContinue = () => {
     if (!selected) return;
-    setError(null);
     if (!view.canChoose) {
       go(selected);
       return;
@@ -88,7 +87,7 @@ export function PayChoiceCard({
         const result = await choose({ agreementId: agreement.id, choice: selected });
         if (!result.ok) {
           const code = readChoiceRefusal(result.error);
-          setError(code === "unavailable" && !(result.error in copy.refused) ? result.error : copy.refused[code]);
+          banner.error(code === "unavailable" && !(result.error in copy.refused) ? result.error : copy.refused[code]);
           return;
         }
         /* The gate read the new rail and a person looks first: say so, and stay
@@ -177,11 +176,6 @@ export function PayChoiceCard({
       <p className="nf-paychoice__note" data-testid="pay-choice-inside">
         {PAY_ONLY_THROUGH_VALLO}
       </p>
-      {error ? (
-        <p className="nf-paychoice__error" role="alert">
-          {error}
-        </p>
-      ) : null}
       {showContinue && choice.payer && selected ? (
         <Button variant="primary" full onClick={onContinue} disabled={pending} data-testid="pay-choice-continue">
           {pending ? copy.saving : copy.continue}

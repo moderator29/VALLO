@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { TierBadge } from "@/components/trust/TierBadge";
 import { useRef, useState } from "react";
 import Link from "next/link";
@@ -158,7 +159,6 @@ function InspectionRow({
   } = viewingWords(viewingCopy);
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the row: a time to offer, or a final move asked
      before it is made (the same two sheets the card and the thread open). */
   const [sheet, setSheet] = useState<
@@ -192,18 +192,18 @@ function InspectionRow({
 
   const timeCome = Date.parse(shown) <= clock;
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, successMsg?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
-    setError(null);
     startTransition(async () => {
       try {
         try {
           const result = await work();
           if (!result.ok) {
-            setError(result.error ?? flowCopy.failed);
+            banner.error(result.error ?? flowCopy.failed);
             return;
           }
+          if (successMsg) banner.success(successMsg);
           setJustChanged(true);
           router.refresh();
         } finally {
@@ -292,11 +292,6 @@ function InspectionRow({
         </span>
       </div>
 
-      {error && (
-        <p role="alert" className={`${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
 
       {/*
         THE CONTROLS, and only when it is actually this person's move.
@@ -313,7 +308,7 @@ function InspectionRow({
             size="sm"
             variant="primary"
             disabled={pending}
-            onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }))}
+            onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }), "Viewing confirmed.")}
           >
             {VIEWING_WORDS.confirm}
           </Button>
@@ -333,7 +328,7 @@ function InspectionRow({
               size="sm"
               variant="primary"
               disabled={pending}
-              onClick={() => run(() => acceptProposedTime({ id: inspection.id }))}
+              onClick={() => run(() => acceptProposedTime({ id: inspection.id }), "Time accepted.")}
             >
               {VIEWING_WORDS.acceptTime}
             </Button>
@@ -355,7 +350,7 @@ function InspectionRow({
                 size="sm"
                 variant="secondary"
                 disabled={pending}
-                onClick={() => run(() => closeInspection({ id: inspection.id, state: "COMPLETED" }))}
+                onClick={() => run(() => closeInspection({ id: inspection.id, state: "COMPLETED" }), "Viewing completed.")}
               >
                 {VIEWING_WORDS.markInspected}
               </Button>

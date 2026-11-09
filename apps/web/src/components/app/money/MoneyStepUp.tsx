@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { banner } from "@/lib/ui/toast";
 import { flushSync } from "react-dom";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
 import { Button } from "@/components/ui/Button";
@@ -67,6 +68,13 @@ export function useMoneyStepUp(
   const [forceCode, setForceCode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<"rejected" | "failed" | "password_recent" | null>(null);
+  /* A refusal is said by the one banner at the top of the screen, over the
+     sheet (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  useEffect(() => {
+    if (error) banner.error(error === "rejected" ? copy.rejected : error === "password_recent" ? copy.passwordRecent : copy.failed);
+    // The words follow the refusal, not the copy object.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
   const bypass = useRef(false);
   const form = useRef<HTMLFormElement | null>(null);
   const intent = useRef<MoneyIntent | null>(null);
@@ -224,25 +232,25 @@ export function useMoneyStepUp(
     if (!status || !intent.current) return;
     setBusy(true);
     setError(null);
-    const begun = await beginMoneyConfirm(intent.current).catch(() => ({ error: "failed" as const }));
-    if ("error" in begun) {
+    const begun = await beginMoneyConfirm(intent.current).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!begun.ok) {
       setBusy(false);
-      setError(begun.error);
+      setError(begun.error as "rejected" | "failed");
       return;
     }
-    const proof = await assertPlatformKey({ challenge: begun.challenge, rpId: status.rpId, allow: status.credentialIds });
+    const proof = await assertPlatformKey({ challenge: begun.data.challenge, rpId: status.rpId, allow: status.credentialIds });
     if (!proof) {
       setBusy(false);
       setError("rejected");
       return;
     }
-    const done = await finishMoneyConfirm({ challenge: begun.challenge, ...proof }).catch(() => ({ error: "failed" as const }));
-    if ("error" in done) {
+    const done = await finishMoneyConfirm({ challenge: begun.data.challenge, ...proof }).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!done.ok) {
       setBusy(false);
-      setError(done.error);
+      setError(done.error as "rejected" | "failed");
       return;
     }
-    release(done.stepUp);
+    release(done.data.stepUp);
   };
 
   const byCode = status?.fallback === "email-code" || forceCode;
@@ -250,9 +258,9 @@ export function useMoneyStepUp(
   const askForCode = async () => {
     setBusy(true);
     setError(null);
-    const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
+    const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
     setBusy(false);
-    if ("error" in sent) setError("failed");
+    if (!sent.ok) setError("failed");
     else setCodeSent(true);
   };
 
@@ -261,10 +269,10 @@ export function useMoneyStepUp(
     setBusy(true);
     setError(null);
     const proof = byCode ? { code: secret.trim() } : { password: secret };
-    const done = await confirmWithFallback({ proof, intent: intent.current }).catch(() => ({ error: "failed" as const }));
-    if ("error" in done) {
+    const done = await confirmWithFallback({ proof, intent: intent.current }).catch(() => ({ ok: false as const, error: "failed" }));
+    if (!done.ok) {
       setBusy(false);
-      setError(done.error);
+      setError(done.error as "rejected" | "failed" | "password_recent");
       if (done.error === "password_recent") {
         setForceCode(true);
         setCodeSent(false);
@@ -272,7 +280,7 @@ export function useMoneyStepUp(
       }
       return;
     }
-    release(done.stepUp);
+    release(done.data.stepUp);
   };
 
   const sheet = (
@@ -293,6 +301,7 @@ export function useMoneyStepUp(
               label={byCode ? copy.codeLabel : copy.passwordLabel}
               type={byCode ? "text" : "password"}
               inputMode={byCode ? "numeric" : undefined}
+              enterKeyHint="go"
               autoComplete={byCode ? "one-time-code" : "current-password"}
               value={secret}
               onChange={(event) => setSecret(event.target.value)}
@@ -317,11 +326,6 @@ export function useMoneyStepUp(
         <Button type="button" variant="ghost" full disabled={busy} onClick={close}>
           {copy.cancel}
         </Button>
-        {error && (
-          <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-            {error === "rejected" ? copy.rejected : error === "password_recent" ? copy.passwordRecent : copy.failed}
-          </p>
-        )}
       </div>
     </Sheet>
   );

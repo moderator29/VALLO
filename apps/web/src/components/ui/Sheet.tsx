@@ -96,6 +96,7 @@ export function Sheet({
   detents = [0.92],
   /** Hides the visible title while keeping it as the accessible name. */
   hideTitle = false,
+  description,
   initialFocus,
   footer,
   closeLabel,
@@ -114,6 +115,11 @@ export function Sheet({
   title: string;
   detents?: number[];
   hideTitle?: boolean;
+  /**
+   * GRADE 1: one sentence of why, under the title, the way every reference
+   * sheet explains itself ("Make sure your name matches your ID"). Plain text.
+   */
+  description?: string;
   /**
    * THE FILTER SHEET'S ANATOMY, as three opt-in props. The search render
    * draws a header row (title left, a glass close square right) and a footer
@@ -175,6 +181,9 @@ export function Sheet({
   testId?: string;
   children: ReactNode;
 }) {
+  /* GRADE 1 (survey SW3): every sheet has a close X unless it is a centred
+     card (a moment with its own Continue). A caller's own words still win. */
+  closeLabel = closeLabel ?? (card ? undefined : "Close");
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const restoreFocus = useRef<HTMLElement | null>(null);
@@ -430,11 +439,30 @@ export function Sheet({
      * still focusable before using it rather than focusing nothing.
      */
     const wanted = initialFocus?.current;
-    const target =
-      wanted && node.contains(wanted) && !wanted.hasAttribute("disabled")
-        ? wanted
-        : (node.querySelector<HTMLElement>(FOCUSABLE) ?? node);
-    target.focus({ preventScroll: true });
+    /*
+     * Grade 1: the sheet's own content first, not its close X. A candidate
+     * is only taken if focus really lands on it: the first focusable node in
+     * a body is often a visually hidden control (a custom radio's input, a
+     * file input), and `focus()` on a node that is not rendered does nothing
+     * and says nothing, which left focus on the page behind the sheet. So
+     * each candidate is tried in order (the named node, the body's own
+     * controls, then anything in the sheet) and the sheet itself is the floor.
+     */
+    const candidates: HTMLElement[] = [
+      ...(wanted && node.contains(wanted) && !wanted.hasAttribute("disabled") ? [wanted] : []),
+      ...node.querySelectorAll<HTMLElement>(`.nf-sheet__body :is(${FOCUSABLE})`),
+      ...node.querySelectorAll<HTMLElement>(FOCUSABLE),
+    ];
+    let landed = false;
+    for (const candidate of candidates) {
+      if (candidate.getClientRects().length === 0) continue;
+      candidate.focus({ preventScroll: true });
+      if (document.activeElement === candidate) {
+        landed = true;
+        break;
+      }
+    }
+    if (!landed) node.focus({ preventScroll: true });
     /* `mounted` too: a sheet that is open during hydration renders nothing
        on that first pass (the portal latch), so the node only exists once
        `mounted` flips, and without it here first focus never happened. */
@@ -646,6 +674,7 @@ export function Sheet({
             {face.title}
           </h2>
         )}
+        {description && !hideTitle ? <p className="nf-sheet__desc px-gutter">{description}</p> : null}
         <div className="nf-sheet__body px-gutter pb-lg">{face.children}</div>
         {face.reset || face.apply ? (
           <div className="nf-sheet__foot px-gutter">

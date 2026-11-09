@@ -6,6 +6,7 @@ import { PolicyPicker } from "./PolicyPicker";
 import { countOf, formatMoney, formatNumber } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { addAccommodationDraft, addRatePlanDraft, syncPropertyRatesDraft } from "@/lib/host/actions";
 import { MEAL_PLANS, mealPlanLabel } from "@/lib/host/stays-setup";
 import { StaysNote, StaysRow, StaysTile, StaysTiles } from "./StaysParts";
@@ -305,8 +306,10 @@ function RateEditor({
         value={naira}
         placeholder={String(Math.round(baseRateMinor / 100))}
         aria-invalid={fieldErrors.rateMinor ? true : undefined}
+        aria-describedby={fieldErrors.rateMinor ? `rate-${roomTypeId}-problem` : undefined}
         onChange={(event) => setNaira(event.target.value)}
       />
+      <FieldProblem id={`rate-${roomTypeId}-problem`} message={fieldErrors.rateMinor} />
       <p className="nf-stays-plate__note">
         {kobo > 0 ? w.common.storedPerNight.replace("{amount}", formatMoney(kobo, locale)) : w.rates.enterPrice}
       </p>

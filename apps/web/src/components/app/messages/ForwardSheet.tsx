@@ -10,6 +10,7 @@ import { TYPE } from "@/components/app/Screen";
 import { forwardMessage } from "@/lib/messages/message-actions";
 import { readForwardTargets } from "@/lib/messages/forward-targets";
 import { asSentence, matchTargets, type ForwardTarget } from "./forward";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE FORWARD CHOOSER (founder, 11 October 2026): a bottom sheet over the
@@ -54,7 +55,6 @@ export function ForwardSheet({
   const [unreachable, setUnreachable] = useState(false);
   const [query, setQuery] = useState("");
   const [sendingTo, setSendingTo] = useState<string | null>(null);
-  const [refusal, setRefusal] = useState<string | null>(null);
 
   /* Each opening starts clean: a render-time reset on the prop, the idiom
      `Sheet` uses, so a reopen never flashes the last search or refusal. */
@@ -66,7 +66,6 @@ export function ForwardSheet({
       setUnreachable(false);
       setQuery("");
       setSendingTo(null);
-      setRefusal(null);
     }
   }
 
@@ -97,14 +96,14 @@ export function ForwardSheet({
   const choose = async (target: ForwardTarget) => {
     if (!messageId || sendingTo) return;
     setSendingTo(target.id);
-    setRefusal(null);
     const result = await forwardMessage({ messageId, conversationId: target.id }).catch(() => ({
       ok: false as const,
       error: words.failed,
     }));
     setSendingTo(null);
     if (result.ok) onForwarded(target);
-    else setRefusal(asSentence(result.error || words.failed));
+    /* Said by the one banner above the sheet, which stays open (founder, 7 November 2026). */
+    else banner.error(asSentence(result.error || words.failed), { "data-testid": "forward-refusal" });
   };
 
   const hasTargets = (targets?.length ?? 0) > 0;
@@ -135,11 +134,6 @@ export function ForwardSheet({
         />
       ) : null}
 
-      {refusal ? (
-        <p role="alert" className="mt-sm nf-body-sm text-[var(--nf-state-error)]" data-testid="forward-refusal">
-          {refusal}
-        </p>
-      ) : null}
 
       {targets === null ? (
         <p role="status" className="mt-md nf-body-sm text-[var(--nf-content-muted)]" data-testid="forward-loading">

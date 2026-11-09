@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -62,7 +63,6 @@ export function BalanceOnboarding({
   const [current, setCurrent] = useState(state);
   const [missing, setMissing] = useState(gaps);
   const [why, setWhy] = useState<OpenFailure | null>(failure);
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const phoneTaken = current === "FAILED" && why === "phone_taken";
   const copy = phoneTaken ? PHONE_TAKEN_COPY : ONBOARDING_COPY[current];
@@ -71,11 +71,11 @@ export function BalanceOnboarding({
 
   const open = async () => {
     setBusy(true);
-    setError(null);
     const r = await reach(() => openBalanceAccount());
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      /* Said by the one banner at the top of the screen (Grade 1). */
+      banner.error(r.error, { retry: () => void open() });
       return;
     }
     setCurrent(r.data.state);
@@ -188,11 +188,6 @@ export function BalanceOnboarding({
         ]}
       />
 
-      {error ? (
-        <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      ) : null}
 
       <ListGroup label="Who does what">
         {WHO_DOES_WHAT.map((row) => (

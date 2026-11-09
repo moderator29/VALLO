@@ -1,6 +1,10 @@
+import type { ReactNode } from "react";
+import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import "./feed-v2.css";
-import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
+import { UiIcon } from "@/design-system/icons/UiIcon";
+import { ActiveInView } from "@/components/ui/ActiveInView";
+import type { FeedCategory } from "./categories";
 
 /**
  * The feed's modes. `for-you` and `friends` are the two the control draws.
@@ -27,27 +31,86 @@ export function liveTab(active: FeedTab): "for-you" | "friends" {
 }
 
 /**
- * For you / Friends, as the underline tab row (founder, 1 November 2026: the
- * sports app's tabs). Each is a link carrying `?tab=`, so the choice survives
- * a reload and puts a real entry in the history; `aria-current` marks the
- * live one. Every tab is 44px tall.
+ * THE CATEGORY CHIPS (founder, 7 November 2026, the feed reference): For
+ * you, Friends, Properties, Stays, Restaurants, one row that scrolls sideways
+ * on a narrow phone. Each is a link (`?tab=` for Friends, `?cat=` for a
+ * category), so the choice survives a reload and is a real history entry;
+ * `aria-current` marks the one live chip. Chips are soft rectangles, never
+ * capsules, 40px painted inside a 44px target. The live chip is the ink
+ * fill; the rest sit on the quiet well with no border.
  */
-export function FeedTabs({ active, t }: { active: FeedTab; t: Dictionary }) {
+export function FeedTabs({
+  active,
+  category = null,
+  t,
+}: {
+  active: FeedTab;
+  category?: FeedCategory | null;
+  t: Dictionary;
+}) {
   const words = t.feedV2.feed;
-  const live = liveTab(active);
-  const segments = [
-    { tab: "for-you", label: words.tabForYou, href: "/around" },
-    { tab: "friends", label: words.tabFriends, href: "/around?tab=friends" },
+  const live = category ?? liveTab(active);
+  const chips = [
+    { key: "for-you", label: words.tabForYou, href: "/around" },
+    { key: "friends", label: words.tabFriends, href: "/around?tab=friends" },
+    { key: "properties", label: words.catProperties, href: "/around?cat=properties" },
+    { key: "stays", label: words.catStays, href: "/around?cat=stays" },
+    { key: "restaurants", label: words.catRestaurants, href: "/around?cat=restaurants" },
   ] as const;
 
   return (
-    <UnderlineTabs
-      label={words.tabsLabel}
-      active={live}
-      items={segments.map((segment) => ({ key: segment.tab, label: segment.label, href: segment.href }))}
-      data-testid="feed-tabs"
-      itemTestIdPrefix="feed-tab-"
-      className="nf-feed-utabs"
-    />
+    <nav className="nf-feed-cats" aria-label={words.categoriesLabel} data-testid="feed-tabs">
+      <ActiveInView as="ul" className="nf-feed-cats__row" watch={live}>
+        {chips.map((chip) => (
+          <li key={chip.key}>
+            <Link
+              href={chip.href}
+              className="nf-tap nf-feed-cat"
+              {...(chip.key === live ? { "aria-current": "page" as const } : {})}
+              data-testid={`feed-tab-${chip.key}`}
+              scroll={false}
+            >
+              {chip.label}
+            </Link>
+          </li>
+        ))}
+      </ActiveInView>
+    </nav>
+  );
+}
+
+/**
+ * THE FEED'S HEAD (the reference): the large title, one quiet line under it,
+ * and at the right the way into Circle and the people search. The bell is the
+ * shell header's, directly above, so it is not drawn twice. The place chip
+ * rides on the quiet line, because where is a filter on this feed, not its
+ * name.
+ */
+export function FeedHead({ t, place }: { t: Dictionary; place?: ReactNode }) {
+  const words = t.feedV2.feed;
+  return (
+    <header className="nf-feed-head" data-testid="feed-head">
+      <div className="nf-feed-head__row">
+        <h1 className="nf-feed-head__title">{words.title}</h1>
+        <div className="nf-feed-head__actions">
+          <Link
+            href="/circle"
+            className="nf-tap nf-feed-circle-door"
+            aria-label={words.circleDoorLabel}
+            data-testid="feed-circle-door"
+          >
+            <UiIcon name="circle-people" size={18} />
+            <span>{words.circleDoor}</span>
+          </Link>
+          <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople} data-testid="feed-find-people">
+            <UiIcon name="search" size={20} />
+          </Link>
+        </div>
+      </div>
+      <div className="nf-feed-head__sub">
+        <p className="nf-feed-head__line">{words.subtitle}</p>
+        {place ? <div className="nf-feed-head__place">{place}</div> : null}
+      </div>
+    </header>
   );
 }

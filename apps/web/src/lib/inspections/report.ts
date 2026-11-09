@@ -1,4 +1,5 @@
 import type { InspectionOutcome, InspectionState } from "./types";
+import { roomCopyEn } from "@vallo/i18n/en/inspections";
 
 /**
  * THE INSPECTION REPORT, AS THE SCREEN HOLDS IT.
@@ -30,17 +31,8 @@ export const ROOM_ITEMS = [
 
 export type RoomItem = (typeof ROOM_ITEMS)[number];
 
-/** The render's own words, row by row. */
-export const ROOM_COPY: Record<RoomItem, { title: string; detail: string }> = {
-  exterior: { title: "Exterior", detail: "Building structure, compound, security, parking" },
-  interior: { title: "Interior", detail: "Rooms, walls, ceilings, doors, windows" },
-  kitchen: { title: "Kitchen", detail: "Cabinets, appliances, plumbing, ventilation" },
-  bathrooms: { title: "Bathrooms", detail: "Fixtures, tiles, water pressure, drainage" },
-  utilities: { title: "Utilities", detail: "Power, water, internet, AC" },
-  appliances: { title: "Appliances", detail: "Fridge, cooker, washing machine, others" },
-  safety: { title: "Safety", detail: "Smoke detectors, fire safety, locks, security" },
-  overall: { title: "Overall condition", detail: "General notes and photos" },
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/inspections.en.ts`. */
+export const ROOM_COPY = roomCopyEn as Record<RoomItem, { title: string; detail: string }>;
 
 export type InspectionReport = {
   notes: string | null;

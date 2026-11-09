@@ -225,7 +225,7 @@ export function DistrictChips({
                here rather than on `Chip` because these are tabs: `Chip` speaks
                radio, toggle and link, and a tab needs `role="tab"`,
                `aria-selected`, `aria-controls` and this row's roving focus. */
-            className={`nf-chip nf-district__chip${selected ? " nf-chip--active" : ""}`}
+            className={`nf-chip nf-chip--glass nf-district__chip${selected ? " nf-chip--active" : ""}`}
             onClick={() => onPick(chip.key)}
           >
             {chip.label}

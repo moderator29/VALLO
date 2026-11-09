@@ -27,7 +27,7 @@ export type StayCategory = {
 };
 
 export const STAY_CATEGORY_TILES: readonly StayCategory[] = [
-  { key: "hotels", object: "hotel", type: "hotel" },
+  { key: "hotels", object: "midrise-block", type: "hotel" },
   { key: "apartments", object: "apartment-block", type: "apartment" },
   { key: "resorts", object: "stilt-beach-house", type: "resort" },
   { key: "guestHouses", object: "bungalow", type: "guest_house" },

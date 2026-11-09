@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { decideBack, performBack } from "@/lib/nav/use-back";
 import { settlePausedBack } from "@/lib/nav/paused-back";
 import { startNativeRuntime } from "@/lib/native/boot";
+import { notePrivacyPath } from "@/lib/native/privacy-cover";
 
 /**
  * Mounts the native runtime. Renders nothing.
@@ -46,6 +47,7 @@ const SETTLE_MS = 800;
 
 export function NativeRuntime() {
   const router = useRouter();
+  const pathname = usePathname();
   /* Read at press time, never captured: the runtime starts once, and a path
      captured at render would be stale for a press that lands mid-navigation. */
   const pressedAt = useRef<{ path: string; at: number } | null>(null);
@@ -74,12 +76,22 @@ export function NativeRuntime() {
             router,
           );
         },
+        /* Grade 1 (P0.5): coming back after a minute or more shows today. */
+        refresh: () => router.refresh(),
       }),
     /* NOT keyed on the pathname: re-running tore the whole runtime down and
        re-registered the listener on every navigation, and a press inside that
        async gap fell through to the web view's own back (or closed the app). */
     [router],
   );
+
+  /* Build 1.0.2: the app switcher cover follows the screen (money and
+     identity screens are covered, lib/native/privacy-cover-rule.ts). Plugin
+     free: on the website, and in a shell without the cover, this only sets a
+     flag nobody reads. */
+  useEffect(() => {
+    notePrivacyPath(pathname ?? "/");
+  }, [pathname]);
 
   return null;
 }

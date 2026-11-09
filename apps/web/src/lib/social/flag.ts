@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getDictionary } from "@vallo/i18n";
 import { isFeatureEnabled, type FeatureKey } from "../flags";
 
 /**
@@ -40,10 +41,11 @@ export async function isSocialEnabled(): Promise<boolean> {
  * the feature was never built. Somebody who was reading a place five minutes
  * ago deserves to know that their words are still there.
  */
-export const SOCIAL_OFF_TITLE = "Around is paused";
+/** SW11: source of truth is now `packages/i18n/src/locales/social-flag.en.ts`. */
+const _sf = getDictionary("en").socialFlag;
+export const SOCIAL_OFF_TITLE = _sf.offTitle;
 
-export const SOCIAL_OFF_BODY =
-  "Places, posts and people are switched off for a moment while we sort something out. Nothing has been deleted and nothing you wrote has gone anywhere. The rest of Vallo works as normal.";
+export const SOCIAL_OFF_BODY = _sf.offBody;
 
 /**
  * The same fact, as one line, for an action that cannot go through.
@@ -54,5 +56,4 @@ export const SOCIAL_OFF_BODY =
  * nothing, because the sentence they could act on is the one about their words
  * still being there.
  */
-export const SOCIAL_OFF_MESSAGE =
-  "Around is paused for a moment. Nothing you wrote has gone anywhere, and it comes back on as soon as we are done.";
+export const SOCIAL_OFF_MESSAGE = _sf.offMessage;

@@ -143,11 +143,11 @@ function Section({ title, note, children }: { title: string; note: string; child
 function Grounds({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid gap-group">
-      <div className="rounded-[var(--nf-radius-xl)] bg-[var(--nf-surface-canvas)] p-card-sm">
+      <div className="rounded-xl bg-[var(--nf-surface-canvas)] p-card-sm">
         <p className="nf-overline mb-inline">canvas</p>
         {children}
       </div>
-      <div className="rounded-[var(--nf-radius-xl)] border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card-sm">
+      <div className="rounded-xl border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-primary)] p-card-sm">
         <p className="nf-overline mb-inline">card</p>
         {children}
       </div>
@@ -244,7 +244,7 @@ export function GalleryBoard() {
             {RECIPES.map((r) => (
               <div key={r.token} className="w-32">
                 <div
-                  className="h-20 rounded-[var(--nf-radius-xl)] border border-[var(--nf-border-subtle)] bg-[var(--nf-glass-card-fill)]"
+                  className="h-20 rounded-xl border border-[var(--nf-border-subtle)] bg-[var(--nf-glass-card-fill)]"
                   style={{ boxShadow: `var(${r.token})` }}
                 />
                 <Caption>{r.label}</Caption>
@@ -264,7 +264,7 @@ export function GalleryBoard() {
             {GLOW.map((g) => (
               <div key={g.token} className="w-20">
                 <div
-                  className="h-20 w-20 rounded-[var(--nf-radius-circle)]"
+                  className="h-20 w-20 rounded-circle"
                   style={{ background: `radial-gradient(circle, var(${g.token}) 0%, transparent 70%)` }}
                 />
                 <Caption>{g.label}</Caption>
@@ -275,7 +275,7 @@ export function GalleryBoard() {
             {EDGES.map((e) => (
               <div key={e.token} className="w-24">
                 <div
-                  className="h-14 rounded-[var(--nf-radius-lg)] bg-[var(--nf-glass-card-fill)]"
+                  className="h-14 rounded-lg bg-[var(--nf-glass-card-fill)]"
                   style={{ boxShadow: `inset 0 0 0 1px var(${e.token})` }}
                 />
                 <Caption>{e.label}</Caption>
@@ -329,7 +329,7 @@ export function GalleryBoard() {
         title="The ambient layer"
         note="The aurora with its photograph, and the section glow behind a headline. The plate is the sign-in render's wave through a CSS background, dimmed into the canvas colour and dissolved through the mask stops the canvas already uses; it is a modifier of the aurora, so in daylight it is off with every other ambient layer and the box below is the plain ground there. Neither moves: the one ambient animation a viewport is allowed stays with the canvas bloom."
       >
-        <div className="relative isolate min-h-64 overflow-hidden rounded-[var(--nf-radius-xl)] bg-[var(--nf-surface-canvas)]">
+        <div className="relative isolate min-h-64 overflow-hidden rounded-xl bg-[var(--nf-surface-canvas)]">
           <div className="nf-aurora nf-aurora--plate" aria-hidden="true" />
           <div className="relative z-10 p-card">
             <p className="nf-overline">nf-aurora nf-aurora--plate</p>
@@ -341,13 +341,13 @@ export function GalleryBoard() {
                 at the two plate fills, so the two can be read against the
                 plate they were written for. */}
             <div className="mt-group grid gap-inline">
-              <div className="nf-glass nf-glass--plate rounded-[var(--nf-radius-2xl)] p-card-sm">
+              <div className="nf-glass nf-glass--plate rounded-2xl p-card-sm">
                 <p className="nf-h4">nf-glass--plate</p>
                 <p className="mt-inline-tight text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
                   The canvas at 58, the lit brand rim, the bloom outside.
                 </p>
               </div>
-              <div className="nf-glass nf-glass--plate nf-glass--plate-strong rounded-[var(--nf-radius-2xl)] p-card-sm">
+              <div className="nf-glass nf-glass--plate nf-glass--plate-strong rounded-2xl p-card-sm">
                 <p className="nf-h4">nf-glass--plate-strong</p>
                 <p className="mt-inline-tight text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
                   The canvas at 70, for a tile carrying a figure over a picture.
@@ -390,7 +390,7 @@ export function GalleryBoard() {
           {ELEVATION.map((cls) => (
             <div
               key={cls}
-              className={`${cls} grid h-24 w-32 place-items-center rounded-[var(--nf-radius-lg)] bg-[var(--nf-surface-elevated)] text-[length:var(--nf-text-caption)]`}
+              className={`${cls} grid h-24 w-32 place-items-center rounded-lg bg-[var(--nf-surface-elevated)] text-[length:var(--nf-text-caption)]`}
             >
               {cls.replace("nf-", "")}
             </div>
@@ -406,7 +406,7 @@ export function GalleryBoard() {
           {GLASS.map(({ cls, label }) => (
             <div
               key={label}
-              className={`${cls} grid h-24 w-32 place-items-center rounded-[var(--nf-radius-lg)] text-[length:var(--nf-text-caption)]`}
+              className={`${cls} grid h-24 w-32 place-items-center rounded-lg text-[length:var(--nf-text-caption)]`}
             >
               {label}
             </div>
@@ -466,7 +466,7 @@ export function GalleryBoard() {
                 ].map((box) => (
                   <div key={box.label} className="text-center">
                     <div className={`nf-card ${box.cls}`}>
-                      <div className="h-8 w-16 rounded-[var(--nf-radius-sm)] bg-[var(--nf-brand-tint-2)]" />
+                      <div className="h-8 w-16 rounded-sm bg-[var(--nf-brand-tint-2)]" />
                     </div>
                     <p className="mt-inline-tight text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
                       {box.label}

@@ -74,6 +74,34 @@
           {
             "/": "/restaurants/*",
             "comment": "The restaurant shelves and their search."
+          },
+          {
+            "/": "/messages/*",
+            "comment": "A message thread (N6, 7 November 2026). The link in a member's own new-message email or SMS opens the thread in the app, where they are already signed in. Only the two people in the thread can read it, so a forwarded link meets the sign-in wall, exactly as on the web."
+          },
+          {
+            "/": "/notifications/*",
+            "comment": "One notification (N6). The links in a member's own emails open the right notification in the app."
+          },
+          {
+            "/": "/bookings/*",
+            "comment": "One booking (N6). /bookings/<id> from a member's own confirmation email opens in the app; the bare /bookings list stays out (see /trips above), since the pattern needs the slash and an id after it."
+          },
+          {
+            "/": "/circle",
+            "comment": "Vallo Circle (7 November 2026, coming): the Circle itself opens in the app."
+          },
+          {
+            "/": "/circle/*",
+            "comment": "Vallo Circle: an invite or a shared Circle page opens in the app."
+          },
+          {
+            "/": "/roommates",
+            "comment": "Vallo Roommates (8 November 2026): the Roommates home opens in the app."
+          },
+          {
+            "/": "/roommates/*",
+            "comment": "Vallo Roommates: a shared room, a roommate profile, a group invite or a school page opens in the app."
           }
         ]
       }

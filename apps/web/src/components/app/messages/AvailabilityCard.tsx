@@ -8,6 +8,7 @@ import { answerStillAvailable } from "@/lib/availability/actions";
 import { laterWindow, type AvailabilityAnswer, type AvailabilityCheck } from "@/lib/availability/check";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-14: THE "STILL AVAILABLE?" CARD at the top of a listing thread.
@@ -45,20 +46,20 @@ export function AvailabilityCard({
   const router = useRouter();
   const [picking, setPicking] = useState(false);
   const [from, setFrom] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const range = laterWindow(today);
 
   function answer(value: AvailabilityAnswer, date?: string) {
-    setError(null);
     start(async () => {
       try {
         const result = await answerStillAvailable({ checkId: check.id, answer: value, ...(date ? { from: date } : {}) });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setPicking(false);
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        banner.success("Your answer is sent");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -124,11 +125,6 @@ export function AvailabilityCard({
         </div>
       )}
 
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

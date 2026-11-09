@@ -299,7 +299,7 @@ export function Segmented<T extends string>({
               "nf-segmented__item relative z-1 inline-flex min-w-0 items-center justify-center gap-inline transition-colors",
               /* A quiet segment paints 36px inside the 44px track; `nf-tap` keeps its
                  target at 44 (base.css). */
-              pill ? "rounded-[var(--nf-radius-segment)] font-semibold" : "nf-tap rounded-[var(--nf-radius-segment)] font-semibold",
+              pill ? "rounded-segment font-semibold" : "nf-tap rounded-segment font-semibold",
               seg,
               full ? "flex-1 !h-auto min-h-9 py-xs" : "",
               /* On the capsule the selected ink is on-brand and comes from the

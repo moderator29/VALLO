@@ -179,7 +179,10 @@ begin
   perform set_config('vallo.recording_unknown_charge', '', true);
 
   revoke select on public.rent_payments from authenticated;
-  drop policy rent_payments_select_tenant on public.rent_payments;
+  -- D-02 (20261108210000) merged the tenant's select policy into
+  -- rent_payments_select_party; drop whichever this database has.
+  drop policy if exists rent_payments_select_tenant on public.rent_payments;
+  drop policy if exists rent_payments_select_party on public.rent_payments;
 
   -- Reviews, as the guest through the API role.
   set local role authenticated;

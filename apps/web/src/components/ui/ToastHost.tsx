@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { useRootFlag } from "@/lib/ui/root-flag";
 import {
   currentToast,
@@ -12,13 +12,16 @@ import {
 } from "@/lib/ui/toast";
 
 /**
- * THE ONE PLACE A TOAST IS DRAWN (details pass). Mounted once, in the root
- * layout, so every screen, sheet and workspace shares one placement: above
- * the dock on a phone (the dock's own clearance token, so it never covers the
- * tabs), bottom centre on a desktop.
+ * THE ONE PLACE A FEEDBACK BANNER IS DRAWN (Platform Grade 1, P0.4). Mounted
+ * once, in the root layout, so every screen, sheet and workspace shares one
+ * placement: a wide rounded banner at the TOP, under the status bar and the
+ * notch (safe-area aware), centred and capped in width on a desktop. It used
+ * to sit above the dock as a small pill (details pass, 30 September); the
+ * founder's brief moved it to the top, where the references put it.
  *
- *   - Swipe it sideways or down to dismiss; it follows the finger and springs
- *     back if let go early.
+ *   - An X on every banner, and swipe it up or sideways to dismiss.
+ *
+ *   - It follows the finger and springs back if let go early.
  *   - Holding it (or hovering on a desktop) stops the clock, so a sentence is
  *     never taken away mid-read.
  *   - Escape dismisses it from a keyboard.
@@ -39,7 +42,24 @@ function useToastItem(): ToastItem | null {
   return useSyncExternalStore(subscribeToast, currentToast, () => null);
 }
 
+/* A SINGLETON, even if it is mounted twice. In the app it is mounted once in
+   the root layout, but a browser test's harness provides one (browser-root's
+   `mount`) while some test entries still add their own, so two can coexist.
+   Two live hosts would each draw the current banner, and an assertion that a
+   message appears once would see it twice. The first host alive draws; any
+   later one draws nothing. `primary` defaults true so the single real host in
+   the app never flashes empty waiting for an effect. */
+let liveToastHosts = 0;
+
 export function ToastHost() {
+  const [primary, setPrimary] = useState(true);
+  useEffect(() => {
+    liveToastHosts += 1;
+    setPrimary(liveToastHosts === 1);
+    return () => {
+      liveToastHosts -= 1;
+    };
+  }, []);
   const item = useToastItem();
   /* The item on screen, kept through its exit so it can leave rather than vanish. */
   const [shown, setShown] = useState<ToastItem | null>(null);
@@ -64,22 +84,39 @@ export function ToastHost() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `shown` is read, the change that matters is `item`
   }, [item]);
 
+  /* A second host (a test harness one beside the app's) draws nothing. */
+  if (!primary) return null;
+
   return (
     /* No name and no role: an empty landmark on every page is noise, and the
        two live lanes inside do the announcing (axe: aria-prohibited-attr). */
     <div className="nf-toast-host">
       <div aria-live="polite" aria-atomic="true" className="nf-toast-host__lane">
-        {shown && shown.tone !== "error" ? (
+        {shown && !urgent(shown.tone) ? (
           <ToastCard key={shown.id} item={shown} leaving={leaving} />
         ) : null}
       </div>
       <div aria-live="assertive" aria-atomic="true" className="nf-toast-host__lane">
-        {shown && shown.tone === "error" ? (
+        {shown && urgent(shown.tone) ? (
           <ToastCard key={shown.id} item={shown} leaving={leaving} />
         ) : null}
       </div>
     </div>
   );
+}
+
+/** One clean mark per tone (docs/UX_SYSTEM.md, "Feedback"). */
+const MARK: Record<ToastItem["tone"], UiIconName> = {
+  neutral: "info",
+  info: "info",
+  success: "check",
+  warning: "alert-triangle",
+  error: "alert-triangle",
+};
+
+/** Error and warning are announced at once; the rest politely. */
+function urgent(tone: ToastItem["tone"]): boolean {
+  return tone === "error" || tone === "warning";
 }
 
 function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
@@ -130,8 +167,9 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
     const d = drag.current;
     if (!d || d.id !== event.pointerId) return;
     d.dx = event.clientX - d.x;
-    /* Down only: pushing it up would carry it over the page it is reporting on. */
-    d.dy = Math.max(0, event.clientY - d.y);
+    /* Up only (Grade 1, the banner is at the top): pulling it down would
+       carry it over the page it is reporting on. */
+    d.dy = Math.min(0, event.clientY - d.y);
     setOffset({ x: d.dx, y: d.dy });
   };
   const onPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
@@ -140,10 +178,11 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
     setDragging(false);
     if (!d) return;
     const elapsed = Math.max(1, event.timeStamp - d.t);
-    const along = Math.abs(d.dx) >= d.dy ? d.dx : d.dy;
+    const sideways = Math.abs(d.dx) >= Math.abs(d.dy);
+    const along = sideways ? d.dx : d.dy;
     if (swipeDismisses(along, along / elapsed)) {
       /* Carry on in the direction of the throw, then go. */
-      setOffset(Math.abs(d.dx) >= d.dy ? { x: Math.sign(d.dx) * 420, y: 0 } : { x: 0, y: 160 });
+      setOffset(sideways ? { x: Math.sign(d.dx) * 420, y: 0 } : { x: 0, y: -160 });
       window.setTimeout(() => dismissToast(item.id), 120);
       return;
     }
@@ -151,7 +190,7 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
     start();
   };
 
-  const fade = offset ? Math.max(0, 1 - Math.max(Math.abs(offset.x) / 240, offset.y / 120)) : undefined;
+  const fade = offset ? Math.max(0, 1 - Math.max(Math.abs(offset.x) / 240, Math.abs(offset.y) / 120)) : undefined;
 
   return (
     <div
@@ -159,7 +198,7 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
       data-tone={item.tone}
       data-leaving={leaving || undefined}
       data-dragging={dragging || undefined}
-      role={item.tone === "error" ? "alert" : "status"}
+      role={urgent(item.tone) ? "alert" : "status"}
       className="nf-toast"
       style={
         offset
@@ -175,28 +214,45 @@ function ToastCard({ item, leaving }: { item: ToastItem; leaving: boolean }) {
         if (!drag.current) start();
       }}
     >
-      {item.tone === "success" ? (
+      {item.avatarUrl ? (
+        <img
+          src={item.avatarUrl}
+          alt=""
+          className="nf-toast__avatar"
+          width={28}
+          height={28}
+        />
+      ) : (
         <span className="nf-toast__mark" aria-hidden="true">
-          <UiIcon name="check" size={16} />
+          <UiIcon name={MARK[item.tone]} size={20} />
         </span>
-      ) : item.tone === "error" ? (
-        <span className="nf-toast__mark" aria-hidden="true">
-          <UiIcon name="alert-triangle" size={16} />
-        </span>
-      ) : null}
-      <p className="nf-toast__text">{item.message}</p>
-      {item.action ? (
-        <button
-          type="button"
-          className="nf-toast__action"
-          onClick={() => {
-            item.action?.run();
-            dismissToast(item.id);
-          }}
-        >
-          {item.action.label}
-        </button>
-      ) : null}
+      )}
+      {/* The sentence and its action stack, so a long failure keeps the
+          whole width to read in and "Try again" sits under it. */}
+      <div className="nf-toast__body">
+        <p className="nf-toast__text">{item.message}</p>
+        {item.action ? (
+          <button
+            type="button"
+            className="nf-toast__action"
+            onClick={() => {
+              item.action?.run();
+              dismissToast(item.id);
+            }}
+          >
+            {item.action.label}
+          </button>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        className="nf-toast__close"
+        aria-label="Dismiss"
+        data-testid="banner-close"
+        onClick={() => dismissToast(item.id)}
+      >
+        <UiIcon name="close" size={16} />
+      </button>
     </div>
   );
 }

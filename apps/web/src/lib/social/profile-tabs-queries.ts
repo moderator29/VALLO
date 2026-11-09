@@ -199,6 +199,53 @@ export async function getAgentReviews(agentId: string | null): Promise<ReviewCar
   }
 }
 
+export type RatingAggregate = {
+  average: number;
+  count: number;
+  breakdown: [number, number, number, number, number];
+};
+
+export async function getAgentRatingAggregate(agentId: string | null): Promise<RatingAggregate | null> {
+  if (!isSupabaseConfigured() || !agentId) return null;
+  const { supabase } = await reader();
+
+  try {
+    const { data: listings } = await supabase
+      .from("listings")
+      .select("id")
+      .eq("agent_id", agentId)
+      .eq("status", "PUBLISHED")
+      .limit(100);
+    const ids = ((listings ?? []) as { id: string }[]).map((l) => l.id);
+    if (ids.length === 0) return null;
+
+    const { data, error } = await readCountedReviews<{ rating: number }>((table) =>
+      (supabase as unknown as SupabaseClient)
+        .from(table)
+        .select("rating")
+        .in("listing_id", ids),
+    );
+    if (error || !data || data.length === 0) return null;
+
+    const breakdown: [number, number, number, number, number] = [0, 0, 0, 0, 0];
+    let sum = 0;
+    for (const row of data) {
+      const r = Math.round(Number(row.rating));
+      const idx = r - 1;
+      if (idx >= 0 && idx <= 4) {
+        const arr = breakdown as number[];
+        arr[idx] = (arr[idx] ?? 0) + 1;
+        sum += r;
+      }
+    }
+    const count = breakdown.reduce((a, b) => a + b, 0);
+    if (count === 0) return null;
+    return { average: sum / count, count, breakdown };
+  } catch {
+    return null;
+  }
+}
+
 /* -------------------------------------------------------------------- Media */
 
 export type MediaTile = {

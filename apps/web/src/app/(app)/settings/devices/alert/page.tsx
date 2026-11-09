@@ -3,7 +3,7 @@ import { withNext } from "@/lib/auth/next-link";
 import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
 import { resolveSession } from "@/lib/actions/session";
@@ -83,8 +83,7 @@ export default async function NewSignInAlertPage({
 
   if (device.state === "signed-out") {
     return (
-      <div className="mx-auto max-w-lg">
-        <PageHeader title={copy.screenTitle} fallback="/settings/devices" />
+      <PageFrame title={copy.screenTitle} fallback="/settings/devices" width="narrow">
         <EmptyState
           icon="globe-pin"
           title={t.settings.devices.accountTitle}
@@ -98,7 +97,7 @@ export default async function NewSignInAlertPage({
             />
           }
         />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -114,8 +113,7 @@ export default async function NewSignInAlertPage({
 
   if (device.state === "missing") {
     return (
-      <div className="mx-auto max-w-lg space-y-block" data-testid="sign-in-alert-missing">
-        <PageHeader title={copy.screenTitle} fallback="/settings/devices" />
+      <PageFrame title={copy.screenTitle} fallback="/settings/devices" width="narrow" testId="sign-in-alert-missing">
         <EmptyState
           icon="globe-pin"
           title={copy.unknownTitle}
@@ -123,15 +121,14 @@ export default async function NewSignInAlertPage({
           action={<EmptyActions primary={{ label: copy.openDevices, href: "/settings/devices" }} />}
         />
         {notMe}
-      </div>
+      </PageFrame>
     );
   }
 
   const firstSeen = phrase(copy.firstSeen, sessionWhen(device.firstSeenAt, device.readAt), t);
 
   return (
-    <div className="mx-auto max-w-lg space-y-block" data-testid="sign-in-alert">
-      <PageHeader title={copy.screenTitle} fallback="/settings/devices" />
+    <PageFrame title={copy.screenTitle} fallback="/settings/devices" width="narrow" testId="sign-in-alert">
       <div className="nf-panel nf-panel--card block p-card">
         <p className="nf-caption text-muted">{copy.heading}</p>
         <p className="nf-h3 mt-row text-content" data-testid="sign-in-alert-device">
@@ -145,6 +142,6 @@ export default async function NewSignInAlertPage({
         <p className="nf-caption mt-row text-muted">{copy.yesNote}</p>
       </div>
       {notMe}
-    </div>
+    </PageFrame>
   );
 }

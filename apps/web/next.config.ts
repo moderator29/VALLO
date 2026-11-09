@@ -280,6 +280,13 @@ const nextConfig: NextConfig = {
       { source: "/docs/your-wallet", destination: "/docs/paying-on-vallo", permanent: false },
       { source: "/docs/money-and-the-guarantee", destination: "/docs/paying-on-vallo", permanent: false },
       { source: "/docs/booking-and-paying", destination: "/docs/booking-a-stay", permanent: false },
+      /* SW13: redirect-only pages moved here from their page.tsx files.
+         The two /settings/invite/referrals routes stay as declared page.tsx
+         redirects, not here: the invite hub links them and the honesty guard
+         holds those routes to handing on to /rewards/referrals. A config
+         redirect here would shadow those pages. */
+      { source: "/around/manage", destination: "/around/settings", permanent: true },
+      { source: "/profile/setup/firm", destination: "/profile/setup/agent", permanent: false },
     ];
   },
 

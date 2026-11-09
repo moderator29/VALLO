@@ -1,4 +1,6 @@
 import { VERIFICATION_ORDER, type RungDefinition } from "@/lib/trust/verification";
+import { workspaceStandingEn } from "@vallo/i18n/en/workspace";
+import { listingRoleFilterHeadingEn, listingRoleFilterLabelEn, noDocumentLabelEn, proofPendingEn } from "@vallo/i18n/en/supply-roles";
 
 /**
  * THE SUPPLY SIDE, AS DATA. ONE VOCABULARY, READ BY EVERY SURFACE.
@@ -220,28 +222,15 @@ export type StandingCopy = {
   selectable: true;
 };
 
+/** SW11: source of truth is now `packages/i18n/src/locales/workspace.en.ts`. */
+const _ws = workspaceStandingEn;
+const _sr = { proofPending: proofPendingEn, noDocumentLabel: noDocumentLabelEn, roleFilterLabel: listingRoleFilterLabelEn, roleFilterHeading: listingRoleFilterHeadingEn };
 export const WORKSPACE_STANDING_COPY: Record<WorkspaceStanding, StandingCopy> = {
-  active: { label: null, meaning: null, selectable: true },
-  draft: {
-    label: "Not finished",
-    meaning: "Nothing is submitted until you press the button on the last screen.",
-    selectable: true,
-  },
-  pending: {
-    label: "Pending review",
-    meaning: "A person reads this. You can build listings now; publishing opens when it comes back.",
-    selectable: true,
-  },
-  refused: {
-    label: "Not approved",
-    meaning: "Open it to read why, in full, and to send the missing thing.",
-    selectable: true,
-  },
-  suspended: {
-    label: "Suspended",
-    meaning: "Open it to read the reason. Confirmed stays are untouched.",
-    selectable: true,
-  },
+  active: { ..._ws.active, selectable: true },
+  draft: { ..._ws.draft, selectable: true },
+  pending: { ..._ws.pending, selectable: true },
+  refused: { ..._ws.refused, selectable: true },
+  suspended: { ..._ws.suspended, selectable: true },
 };
 
 /* ------------------------------------------------------------------- copy */
@@ -371,23 +360,9 @@ export const LISTING_ROLE_SENTENCE: Record<ListingRole, string> = {
   firm: "Listed by {name}",
 };
 
-/** The filter drawer's own label for each value, shorter than the sentence. */
-export const LISTING_ROLE_FILTER_LABEL: Record<ListingRole, string> = {
-  owner: "Owner direct",
-  agent: "Agent",
-  firm: "Registered firm",
-};
-
-/**
- * What the drawer calls the question these three answer.
- *
- * Here rather than in `packages/i18n` for the same reason the labels above are
- * here: the three values, the sentence, the short label and the heading are
- * one vocabulary, and this module exists because there were three of them in
- * the tree disagreeing with each other. A heading kept somewhere else is the
- * fourth.
- */
-export const LISTING_ROLE_FILTER_HEADING = "Who is offering it";
+/** SW11: source of truth is now `packages/i18n/src/locales/supply-roles.en.ts`. */
+export const LISTING_ROLE_FILTER_LABEL: Record<ListingRole, string> = _sr.roleFilterLabel as Record<ListingRole, string>;
+export const LISTING_ROLE_FILTER_HEADING = _sr.roleFilterHeading;
 
 /**
  * The three dated facts, on three different subjects.
@@ -436,10 +411,7 @@ export const DATED_FACTS = {
  * where it stands and the mark stays dark, which is worth more than a badge
  * that lies.
  */
-export const PROOF_PENDING_COPY = {
-  ownership: "Ownership document received, not yet checked.",
-  mandate: "Mandate received, not yet checked.",
-} as const;
+export const PROOF_PENDING_COPY = _sr.proofPending;
 
 /**
  * THE ANSWER THAT KEEPS NINE OWNERS IN TEN IN THE PRODUCT.
@@ -459,7 +431,7 @@ export const PROOF_PENDING_COPY = {
  * becomes copy. What ships is the behaviour, which needs no citation.
  */
 export const NO_DOCUMENT_ANSWER = {
-  label: "I have none of these",
+  label: _sr.noDocumentLabel,
   reassurance:
     "That is a normal answer in Nigeria and it does not stop you listing. Your listing goes live the same way; it just will not carry the ownership mark until you can show us something.",
 } as const;

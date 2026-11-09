@@ -26,10 +26,12 @@ import {
   MAX_PHONE_LENGTH,
 } from "@/lib/profile/model";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { banner } from "@/lib/ui/toast";
 import { NO_FACTS, rowValue, type BelongingsFacts } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { SwitchRoleRow } from "./SwitchRoleRow";
 import { COVER_INPUT_ID } from "./AccountHero";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * EVERYTHING UNDER YOUR OWN IDENTITY, BUILT TO `50E032EA`.
@@ -322,6 +324,8 @@ export function AccountBody({
                 label="Notifications"
                 sub="Everything that happened while you were away"
               />
+              {/* Vallo Roommates (8 November 2026): the member's hub. */}
+              <RowLink href="/roommates/me" icon="house-duplex" label="Roommates" sub="Requests, groups and your posts" testId="account-roommates" />
               <RowLink href="/help" icon="ticket" label="Help" sub="FAQs, contact us" />
             </SettingsGroup>
           </div>
@@ -383,13 +387,20 @@ function DetailsSheet({
 
   // A successful save closes the sheet and refreshes the tree, so every other
   // surface showing this name agrees before the sheet has finished leaving.
+  // The outcome is said by the one banner at the top of the screen (Grade 1);
+  // a field's own error stays under that field.
   useEffect(() => {
-    if (!state?.ok) return;
+    if (!state) return;
+    if (!state.ok) {
+      if (!state.fieldErrors) banner.error(state.error);
+      return;
+    }
     setFirstName(state.data.firstName);
     setSurname(state.data.surname);
     setNickname(state.data.nickname);
     setPhone(state.data.phone);
     onClose();
+    banner.success("Your profile has been updated");
     router.refresh();
   }, [state, onClose, router]);
 
@@ -444,15 +455,6 @@ function DetailsSheet({
           placeholder="0803 123 4567"
           optional
         />
-
-        {state && !state.ok && !state.fieldErrors && (
-          <p
-            role="alert"
-            className="rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-          >
-            {state.error}
-          </p>
-        )}
 
         <p className="text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
           Your name is what hosts see when you message or book. Your phone number stays
@@ -517,9 +519,11 @@ function Field({
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${name}-problem` : undefined}
         className="nf-field"
       />
-      {error && <span className="mt-2xs block text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">{error}</span>}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={`${name}-problem`} message={error} />
     </label>
   );
 }

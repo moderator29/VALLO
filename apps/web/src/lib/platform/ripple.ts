@@ -1,0 +1,311 @@
+/**
+ * THE ANDROID TOUCH RIPPLE (Agent NATIVE, job 1, 7 November 2026).
+ *
+ * Brief section 11: Material-inspired touch feedback on Android, while iOS
+ * keeps its press highlight and dim. On Android a press is answered the way the
+ * platform answers it: a soft ink spreads from under the finger across the
+ * pressed control, holds while the finger stays, and fades when it lifts. Icon
+ * buttons get the round, centred version. Started only inside the Android
+ * shell (`lib/native/boot.ts`), so the website and iOS never load this file.
+ *
+ * WHY AN OVERLAY AND NOT A CHILD OR A PSEUDO-ELEMENT. A child span inside the
+ * pressed control would become its `:last-child` for a third of a second and
+ * every `> :last-child` rule in the product would jump; `::before` and
+ * `::after` are already taken by the buttons' sheen, the chips' rings and the
+ * cards' edges. So the ink is drawn in ONE fixed layer above the control, cut
+ * to the control's box and radius, and the control's DOM and styles are never
+ * touched.
+ *
+ * CHEAP ON A BUDGET PHONE. Per press: one `getBoundingClientRect`, one
+ * `getComputedStyle`, two nodes, and two compositor-only animations
+ * (`transform` and `opacity`). Nothing per frame on the main thread, nothing
+ * at all while scrolling.
+ *
+ * A SCROLL IS NOT A PRESS. Android waits its tap timeout before it draws a
+ * press inside a scrolling list, so a fling never lights up every row it
+ * passes. The same here: the ink starts `PRESS_DELAY_MS` after the finger lands,
+ * or at once when the finger lifts sooner (a quick tap), and a finger that
+ * moves past `SLOP_PX` or a `pointercancel` (the browser taking the gesture for
+ * a scroll) takes it away.
+ *
+ * REDUCED MOTION, CALM AND OFF: the ink does not travel. The whole control
+ * takes the pressed tint at once and lets it go on release: feedback without
+ * movement.
+ */
+
+export type Box = { left: number; top: number; width: number; height: number };
+export type RippleGeometry = {
+  /** The pressed control's box, in viewport coordinates. */
+  box: Box;
+  /** The ink circle, in the box's coordinates: its centre and diameter. */
+  ink: { x: number; y: number; size: number };
+  /** Icon buttons and other small round controls: a centred circle. */
+  round: boolean;
+};
+
+/** Android's own tap timeout is 100ms; a little less reads as immediate. */
+export const PRESS_DELAY_MS = 80;
+/** Movement that turns a press into a drag (Android's touch slop is 8dp). */
+export const SLOP_PX = 10;
+/** The pressed tint at its height, over the control's own text colour: a
+    little stronger on the night theme, where a dark screen swallows it. */
+export const INK_OPACITY = { night: 0.14, day: 0.1 } as const;
+/** A control bigger than this share of the screen is a surface, not a control. */
+const MAX_AREA_SHARE = 0.7;
+/** Small and square: an icon button, a round avatar control. */
+const ROUND_MAX_PX = 56;
+const ROUND_ASPECT_SLACK_PX = 8;
+/** A tap that lifts at once still shows its ink for at least this long. */
+const MIN_VISIBLE_MS = 140;
+/** How far up the tree a rounded card that clips the control is looked for. */
+const CLIP_SEARCH_DEPTH = 4;
+
+/** What takes a ripple. The nearest one to the finger wins. */
+export const RIPPLE_TARGETS =
+  'a[href], button, summary, label.nf-srow, [role="button"], [role="tab"], [role="menuitem"], [role="option"], [role="link"], [role="switch"], [role="radio"], [role="checkbox"]';
+
+/** What never takes one: typing, the dock (it has its own ink and haptic), opt outs. */
+const RIPPLE_EXCLUDED =
+  ':disabled, [aria-disabled="true"], [data-ripple="none"], [data-press="none"], .nf-skip-link, input, textarea, select, [contenteditable="true"]';
+const RIPPLE_EXCLUDED_INSIDE = '.nf-tabbar, [data-ripple="none"]';
+
+/**
+ * The geometry of one ripple, or null when there is nothing to draw (the
+ * control is off screen, empty, or so large that it is a surface).
+ */
+export function rippleGeometry(rect: Box, point: { x: number; y: number }, viewport: { width: number; height: number }): RippleGeometry | null {
+  if (rect.width <= 0 || rect.height <= 0) return null;
+  if (rect.width * rect.height > viewport.width * viewport.height * MAX_AREA_SHARE) return null;
+  const onScreen =
+    rect.left < viewport.width && rect.top < viewport.height && rect.left + rect.width > 0 && rect.top + rect.height > 0;
+  if (!onScreen) return null;
+
+  const round =
+    rect.width <= ROUND_MAX_PX && rect.height <= ROUND_MAX_PX && Math.abs(rect.width - rect.height) <= ROUND_ASPECT_SLACK_PX;
+  if (round) {
+    return { box: rect, ink: { x: rect.width / 2, y: rect.height / 2, size: Math.max(rect.width, rect.height) }, round };
+  }
+
+  /* From under the finger, large enough to reach the farthest corner. */
+  const x = Math.min(Math.max(point.x - rect.left, 0), rect.width);
+  const y = Math.min(Math.max(point.y - rect.top, 0), rect.height);
+  const w = rect.width;
+  const h = rect.height;
+  const reach = Math.max(Math.hypot(x, y), Math.hypot(w - x, y), Math.hypot(x, h - y), Math.hypot(w - x, h - y));
+  return { box: rect, ink: { x, y, size: Math.ceil(reach * 2) }, round };
+}
+
+/** How long the ink takes to spread: a touch longer across a wide card than a chip. */
+export function spreadMs(size: number): number {
+  return Math.round(Math.min(480, Math.max(260, size * 0.9)));
+}
+
+/** The nearest control that takes a ripple, or null. */
+export function rippleTarget(from: Element | null): HTMLElement | null {
+  const el = from?.closest(RIPPLE_TARGETS);
+  if (!(el instanceof HTMLElement)) return null;
+  if (el.matches(RIPPLE_EXCLUDED) || el.closest(RIPPLE_EXCLUDED_INSIDE)) return null;
+  return el;
+}
+
+type Live = {
+  host: HTMLElement;
+  ink: HTMLElement;
+  shownAt: number;
+  still: boolean;
+};
+
+/** The motion tokens' curves, read once from the stylesheet so script and CSS
+    share one ladder; the fallbacks are the same tokens' values. */
+function curves(): { spread: string; fadeIn: string; fadeOut: string } {
+  const read = (name: string, fallback: string) => {
+    try {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+  return {
+    spread: read("--nf-ease-entrance", "cubic-bezier(0.16, 1, 0.3, 1)"),
+    fadeIn: read("--nf-ease-standard", "cubic-bezier(0.22, 0.61, 0.36, 1)"),
+    fadeOut: read("--nf-ease-exit", "cubic-bezier(0.4, 0, 1, 1)"),
+  };
+}
+let ladder: ReturnType<typeof curves> | null = null;
+
+function quietMotion(reduced: MediaQueryList | null): boolean {
+  const level = document.documentElement.dataset.motion;
+  return level === "calm" || level === "off" || reduced?.matches === true;
+}
+
+/** The nearest rounded ancestor that clips this control (a grouped card
+    around its rows), so the ink is cut to the card's corners too. */
+function clippingCard(el: HTMLElement): { rect: DOMRect; radius: string } | null {
+  let node = el.parentElement;
+  for (let depth = 0; node && depth < CLIP_SEARCH_DEPTH; depth += 1, node = node.parentElement) {
+    const cs = getComputedStyle(node);
+    const clips = cs.overflowX !== "visible" || cs.overflowY !== "visible";
+    if (clips && cs.borderRadius && cs.borderRadius !== "0px") return { rect: node.getBoundingClientRect(), radius: cs.borderRadius };
+    if (clips) return null;
+  }
+  return null;
+}
+
+function layer(className: string, box: Box, radius: string, position: "fixed" | "absolute"): HTMLElement {
+  const el = document.createElement(className === "nf-ripple" ? "div" : "span");
+  el.className = className;
+  el.style.cssText = `position:${position};left:${box.left}px;top:${box.top}px;width:${box.width}px;height:${box.height}px;border-radius:${radius}`;
+  return el;
+}
+
+function draw(target: HTMLElement, point: { x: number; y: number }, reduced: MediaQueryList | null): Live | null {
+  const r = target.getBoundingClientRect();
+  const geometry = rippleGeometry(
+    { left: r.left, top: r.top, width: r.width, height: r.height },
+    point,
+    { width: window.innerWidth, height: window.innerHeight },
+  );
+  if (!geometry) return null;
+  const style = getComputedStyle(target);
+  /* Inline text (a link inside a sentence) wraps across lines: its box is not
+     the shape the reader sees, so it keeps the shared tint only. */
+  if (style.display === "inline") return null;
+
+  const radius = geometry.round ? "var(--nf-radius-circle)" : style.borderRadius || "0";
+  const card = geometry.round ? null : clippingCard(target);
+  const box = geometry.box;
+  let host: HTMLElement;
+  let frame: HTMLElement;
+  if (card) {
+    /* Two layers: the card's corners, then the control's own box inside it. */
+    const c = card.rect;
+    host = layer("nf-ripple", { left: c.left, top: c.top, width: c.width, height: c.height }, card.radius, "fixed");
+    frame = layer("nf-ripple__frame", { left: box.left - c.left, top: box.top - c.top, width: box.width, height: box.height }, radius, "absolute");
+    host.appendChild(frame);
+  } else {
+    host = layer("nf-ripple", box, radius, "fixed");
+    frame = host;
+  }
+  host.setAttribute("aria-hidden", "true");
+
+  const ink = document.createElement("span");
+  ink.className = "nf-ripple__ink";
+  const still = quietMotion(reduced);
+  const size = still ? Math.ceil(Math.hypot(box.width, box.height)) * 2 : geometry.ink.size;
+  const cx = still ? box.width / 2 : geometry.ink.x;
+  const cy = still ? box.height / 2 : geometry.ink.y;
+  ink.style.cssText = `width:${size}px;height:${size}px;left:${cx - size / 2}px;top:${cy - size / 2}px;background-color:${style.color}`;
+  frame.appendChild(ink);
+  document.body.appendChild(host);
+
+  const peak = document.documentElement.dataset.theme === "light" ? INK_OPACITY.day : INK_OPACITY.night;
+  try {
+    if (still) {
+      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 1, fill: "forwards" });
+    } else {
+      const ease = (ladder ??= curves());
+      ink.animate([{ transform: "scale(0.12)" }, { transform: "scale(1)" }], {
+        duration: spreadMs(size),
+        easing: ease.spread,
+        fill: "forwards",
+      });
+      ink.animate([{ opacity: 0 }, { opacity: peak }], { duration: 75, easing: ease.fadeIn, fill: "forwards" });
+    }
+  } catch {
+    /* No Web Animations: the ink shows at its resting style and still goes. */
+    ink.style.opacity = String(peak);
+  }
+  return { host, ink, shownAt: performance.now(), still };
+}
+
+function release(live: Live, fast = false): void {
+  const held = performance.now() - live.shownAt;
+  const wait = fast ? 0 : Math.max(0, MIN_VISIBLE_MS - held);
+  const remove = () => live.host.remove();
+  window.setTimeout(() => {
+    try {
+      const fade = live.ink.animate([{ opacity: getComputedStyle(live.ink).opacity }, { opacity: 0 }], {
+        duration: fast ? 90 : live.still ? 150 : 220,
+        easing: (ladder ??= curves()).fadeOut,
+        fill: "forwards",
+      });
+      fade.onfinish = remove;
+      fade.oncancel = remove;
+      /* A ceiling, in case the animation never reports back (a hidden tab). */
+      window.setTimeout(remove, 600);
+    } catch {
+      remove();
+    }
+  }, wait);
+}
+
+/**
+ * Listen for presses on the whole document and draw the ripple. Returns the
+ * teardown, which also takes away any ink still on screen.
+ */
+export function startRipple(): () => void {
+  if (typeof window === "undefined" || typeof document === "undefined") return () => {};
+  let reduced: MediaQueryList | null = null;
+  try {
+    reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  } catch {
+    reduced = null;
+  }
+
+  type Press = { id: number; target: HTMLElement; x: number; y: number; timer: number; live: Live | null };
+  let press: Press | null = null;
+
+  const begin = (p: Press) => {
+    window.clearTimeout(p.timer);
+    if (!p.live) p.live = draw(p.target, { x: p.x, y: p.y }, reduced);
+  };
+  const end = (fast: boolean) => {
+    const p = press;
+    press = null;
+    if (!p) return;
+    window.clearTimeout(p.timer);
+    if (p.live) release(p.live, fast);
+  };
+
+  const onDown = (event: PointerEvent) => {
+    if (!event.isPrimary || event.button !== 0) return;
+    end(true);
+    const target = rippleTarget(event.target instanceof Element ? event.target : null);
+    if (!target) return;
+    const next: Press = { id: event.pointerId, target, x: event.clientX, y: event.clientY, timer: 0, live: null };
+    next.timer = window.setTimeout(() => begin(next), PRESS_DELAY_MS);
+    press = next;
+  };
+  const onMove = (event: PointerEvent) => {
+    if (!press || event.pointerId !== press.id) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > SLOP_PX) end(true);
+  };
+  const onUp = (event: PointerEvent) => {
+    if (!press || event.pointerId !== press.id) return;
+    /* A quick tap: the finger lifted before the press delay. Show it now. */
+    begin(press);
+    end(false);
+  };
+  const onCancel = (event: PointerEvent) => {
+    if (press && event.pointerId === press.id) end(true);
+  };
+  /* The page going away mid-press (a navigation, the app backgrounded). */
+  const onHide = () => end(true);
+
+  const opts: AddEventListenerOptions = { capture: true, passive: true };
+  document.addEventListener("pointerdown", onDown, opts);
+  document.addEventListener("pointermove", onMove, opts);
+  document.addEventListener("pointerup", onUp, opts);
+  document.addEventListener("pointercancel", onCancel, opts);
+  document.addEventListener("visibilitychange", onHide);
+
+  return () => {
+    end(true);
+    document.removeEventListener("pointerdown", onDown, opts);
+    document.removeEventListener("pointermove", onMove, opts);
+    document.removeEventListener("pointerup", onUp, opts);
+    document.removeEventListener("pointercancel", onCancel, opts);
+    document.removeEventListener("visibilitychange", onHide);
+    document.querySelectorAll(".nf-ripple").forEach((n) => n.remove());
+  };
+}

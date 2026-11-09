@@ -17,7 +17,10 @@ function tsx(dir: string, out: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) tsx(path, out);
-    else if (name.endsWith(".tsx") && !name.includes(".test.")) out.push(path);
+    /* An `opengraph-image.tsx` renders a static social-share picture through
+       Satori (`next/og`), never screen-reader markup, so there is no place for
+       a spoken form beside its compact figure; the rule does not reach it. */
+    else if (name.endsWith(".tsx") && !name.includes(".test.") && name !== "opengraph-image.tsx") out.push(path);
   }
   return out;
 }

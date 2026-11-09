@@ -138,6 +138,9 @@ const HEAVY_SITES: Record<string, string> = {
 /** Where the kind is decided from a map or an outcome, never a literal. */
 const DECIDED_SITES: Record<string, RegExp> = {
   "components/ui/SuccessSheet.tsx": /^feel$/,
+  /* Grade 1: the account moments are banners, felt with the moment's own
+     haptic from `successCopy` (momentFeel), exactly as the sheet was. */
+  "components/ui/SuccessFlagHost.tsx": /^haptic$/,
   "components/app/ResultSheet.tsx": /^kind$/,
   "components/app/inspections/GateHandshake.tsx": /^ok \? "success" : "error"$/,
 };

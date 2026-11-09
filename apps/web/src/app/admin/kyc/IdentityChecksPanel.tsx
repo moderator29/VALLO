@@ -87,7 +87,7 @@ function CheckBody({ check, decidable }: { check: IdentityCheckView; decidable: 
           src ? (
             <figure key={label} className="grid gap-inline-tight">
               {/* eslint-disable-next-line @next/next/no-img-element -- streamed from our own origin behind staff auth, never optimised or cached */}
-              <img src={src} alt={`${label} for this check`} className="w-full rounded-[var(--nf-radius-card)] object-cover" loading="lazy" />
+              <img src={src} alt={`${label} for this check`} className="w-full rounded-card object-cover" loading="lazy" />
               <figcaption className="nf-caption text-[var(--nf-content-muted)]">{label}</figcaption>
             </figure>
           ) : null,

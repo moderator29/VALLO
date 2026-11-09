@@ -1,10 +1,12 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { TYPE } from "@/components/app/Screen";
 import { earliestLagosInput, lagosWallClockToIso } from "@/lib/inspections/when";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE TWO SHEETS EVERY VIEWING SURFACE OPENS.
@@ -51,16 +53,17 @@ export type StepSheetWords = {
 
 const FALLBACK = "That did not go through. Try again in a moment.";
 
+/* A refusal in the sheet is said by the one banner above it; the words stay
+   here for a screen reader (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
 function Refusal({ error }: { error: string | null }) {
-  if (!error) return null;
-  return (
-    <p role="alert" className={`mt-sm ${TYPE.rowMeta} text-[var(--nf-state-error)]`} data-testid="viewing-sheet-error">
-      {error}
-    </p>
-  );
+  return <FieldProblem id="viewing-sheet-error" message={error} />;
 }
 
-/** One call at a time; the answer and the busy state for the sheet to draw. */
+/**
+ * One call at a time; the busy state, and a field's own refusal for the sheet
+ * to draw under that field. Any other refusal is said by the one banner at the
+ * top of the screen (Grade 1), which sits above the sheet, with Try again.
+ */
 function useOneCall() {
   const inFlight = useRef(false);
   const [busy, setBusy] = useState(false);
@@ -73,12 +76,14 @@ function useOneCall() {
     try {
       const result = await work();
       if (!result.ok) {
-        setError((field ? result.fieldErrors?.[field] : undefined) ?? result.error ?? FALLBACK);
+        const onField = field ? result.fieldErrors?.[field] : undefined;
+        if (onField) setError(onField);
+        else banner.error(result.error ?? FALLBACK, { retry: () => void call(work, onDone, field) });
         return;
       }
       onDone();
     } catch {
-      setError(FALLBACK);
+      banner.error(FALLBACK, { retry: () => void call(work, onDone, field) });
     } finally {
       inFlight.current = false;
       setBusy(false);
@@ -118,6 +123,8 @@ export function ViewingTimeSheet({
             step={900}
             onChange={(event) => setWhen(event.target.value)}
             className="nf-field mt-2xs w-full"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "viewing-sheet-error" : undefined}
             data-testid="viewing-time-when"
           />
         </label>

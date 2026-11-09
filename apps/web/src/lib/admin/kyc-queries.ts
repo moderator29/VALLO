@@ -55,6 +55,10 @@ export type KycDocumentView = {
    * the bytes come from `/api/documents/<id>` on our own origin.
    */
   media: DocumentMedia;
+  /** Grade 1: how to draw the back of a two-sided ID, or null when none was filed. */
+  backMedia: DocumentMedia | null;
+  /** Grade 1: the ISO code of the country that issued an ID, when the flow asked. */
+  issuingCountry: string | null;
   /** True when this replaces an earlier attempt. */
   isResubmission: boolean;
   /** The name as printed on an approved ID, typed by the reviewer. Null otherwise. */
@@ -128,7 +132,7 @@ export type KycQueue = {
 };
 
 const DOCUMENT_COLUMNS =
-  "id, application_id, uploader_id, kind, subtype, storage_path, issued_on, review_status, rejection_reason, reviewed_by, reviewed_at, supersedes_id, uploaded_at";
+  "id, application_id, uploader_id, kind, subtype, storage_path, back_storage_path, issuing_country, issued_on, review_status, rejection_reason, reviewed_by, reviewed_at, supersedes_id, uploaded_at";
 
 function isTooOld(kind: string, issuedOn: string | null): boolean {
   if (kind !== "address") return false;
@@ -320,6 +324,8 @@ export async function getKycQueue(filter?: AdminQueueFilter): Promise<AdminRead<
         reviewedAt: doc.reviewed_at,
         reviewedByName: doc.reviewed_by ? (names.get(doc.reviewed_by) ?? null) : null,
         media: documentMedia(doc.storage_path),
+        backMedia: doc.back_storage_path ? documentMedia(doc.back_storage_path) : null,
+        issuingCountry: doc.issuing_country ?? null,
         isResubmission: doc.supersedes_id !== null,
         tooOld: isTooOld(doc.kind, doc.issued_on),
         nameOnDocument: idNames.get(doc.id) ?? null,

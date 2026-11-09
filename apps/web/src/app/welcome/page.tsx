@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
+import { forWelcomeFlow } from "@/lib/i18n/slice";
 import { getLocale } from "@/lib/locale";
 import { FirstRun } from "@/components/app/welcome/FirstRun";
 import { WelcomeStage } from "@/components/app/welcome/WelcomeStage";
@@ -90,7 +91,7 @@ export default async function WelcomePage({
     return (
       <WelcomeStage>
         <FirstRun
-          t={t}
+          t={forWelcomeFlow(t)}
           interests={[]}
           showCards
           asked
@@ -113,7 +114,7 @@ export default async function WelcomePage({
   return (
     <WelcomeStage>
       <FirstRun
-        t={t}
+        t={forWelcomeFlow(t)}
         interests={plan.intent.interests}
         /* A17: a device that has already been shown the steps (the intro or
            the tour, before the account existed) goes straight to the
@@ -146,3 +147,4 @@ async function arrivalAsks() {
     hearAbout: typeof heard === "string" && heard ? heard : null,
   };
 }
+

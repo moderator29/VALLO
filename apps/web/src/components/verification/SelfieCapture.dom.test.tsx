@@ -16,15 +16,20 @@ const ENTRY = `
   import { getDictionary } from "@vallo/i18n";
   import { mount } from "@/lib/testing/browser-root";
   import { SelfieCapture } from "@/components/verification/SelfieCapture";
+  import { ToastHost } from "@/components/ui/ToastHost";
   function Harness() {
     const [selfie, setSelfie] = useState(null);
+    /* Outcomes are said by the one top banner (founder, 7 November 2026). */
     return (
+      <>
+      <ToastHost />
       <SelfieCapture
         copy={getDictionary("en").experienceAccount.kyc}
         batchId="batch-1"
         selfie={selfie}
         onChange={(next) => { window.__selfie = next; setSelfie(next); }}
       />
+      </>
     );
   }
   mount(<Harness />);

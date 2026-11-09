@@ -6,7 +6,7 @@ import { getDictionary, plural } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getStayDetail } from "@/lib/stays/queries";
 import { readStayDates } from "@/components/app/stays/model";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { Amount } from "@/components/ui/Amount";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -15,7 +15,6 @@ import { ICON, TYPE } from "@/components/app/Screen";
 import { formatMoneyDate } from "@/lib/money/dates";
 import { cancelStanding, termsFromPolicyRules } from "@/lib/trust/cancellation";
 import { ROOM_BOOKINGS_FLAG, STAYS_INSTANT_PAY_FLAG, flagIsOn } from "@/lib/flags/read";
-import { INSTANT_ROOM_COPY } from "@/lib/bookings/instant-pay";
 import { resolveSession } from "@/lib/actions/session";
 import { returnHref } from "@/components/auth/auth-intent";
 import { withNext } from "@/lib/auth/next-link";
@@ -91,8 +90,8 @@ export default async function RoomCheckoutPage({
     : "/stays";
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.checkout.title} subtitle={detail?.accommodation.name} fallback={backHref} />
+    <PageFrame title={t.checkout.title} subtitle={detail?.accommodation.name} fallback={backHref} width="narrow">
+      <div>
 
       {detail && room && plan && (
         <Panel variant="card" aria-labelledby="nf-room-pick" data-testid="room-pick">
@@ -160,8 +159,8 @@ export default async function RoomCheckoutPage({
             maxRooms={room.units_total}
             copy={{
               roomsLabel: t.checkout.roomsLabel,
-              requestRoom: instantOn ? INSTANT_ROOM_COPY.action : t.checkout.requestRoom,
-              requestRoomBody: instantOn ? INSTANT_ROOM_COPY.body : t.checkout.requestRoomBody,
+              requestRoom: instantOn ? t.checkout.instantRoomAction : t.checkout.requestRoom,
+              requestRoomBody: instantOn ? t.checkout.instantRoomBody : t.checkout.requestRoomBody,
               roomChoices: Array.from({ length: Math.min(10, room.units_total) }, (_, i) => plural(i + 1, t.counts.rooms, locale)),
             }}
           />
@@ -199,6 +198,7 @@ export default async function RoomCheckoutPage({
         <UiIcon name="info" size={ICON.inline} className="mt-3xs shrink-0" />
         <span>{t.checkout.onlyYourBooking}</span>
       </p>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

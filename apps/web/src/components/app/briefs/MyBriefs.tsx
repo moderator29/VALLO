@@ -3,7 +3,6 @@
 import { State } from "@/components/ui/State";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { closeBrief } from "@/lib/briefs/actions";
@@ -11,6 +10,7 @@ import { briefLine } from "@/lib/briefs/brief";
 import type { MyBrief } from "@/lib/briefs/queries";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-95: THE RENTER'S BRIEFS AND THEIR ANSWERS. Each answer is a published
@@ -20,6 +20,9 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 
 type Copy = Dictionary["frontDoor"]["briefs"];
+
+/* What closing did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { closed: "Brief closed. Agents will no longer answer it." };
 
 export function MyBriefs({
   briefs,
@@ -34,7 +37,6 @@ export function MyBriefs({
   locale: Locale;
 }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   if (briefs === null) return <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.unreachable}</p>;
@@ -88,8 +90,12 @@ export function MyBriefs({
                   start(async () => {
                     try {
                       const result = await closeBrief({ id: brief.id });
-                      if (!result.ok) setError(result.error);
-                      else router.refresh();
+                      /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+                      if (!result.ok) banner.error(result.error);
+                      else {
+                        banner.success(WORDS.closed);
+                        router.refresh();
+                      }
                     } catch (error) {
                       if (!tapFailedOffline(error)) throw error;
                     }
@@ -102,11 +108,6 @@ export function MyBriefs({
           </li>
         );
       })}
-      {error && (
-        <li className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </li>
-      )}
     </ul>
   );
 }

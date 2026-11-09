@@ -7,6 +7,7 @@ import { fillMacro, SUPPORT_MACROS, type SupportMacro } from "@/lib/admin/suppor
 import { sendSupportReply } from "@/lib/admin/support-workbench-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE REPLY BOX. Saved replies fill it (never send it); the agent reads,
@@ -32,32 +33,27 @@ export function SupportComposer({
   const box = useRef<HTMLTextAreaElement>(null);
   const [body, setBody] = useState("");
   const [picked, setPicked] = useState<SupportMacro | null>(null);
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
 
   const use = (macro: SupportMacro) => {
     const text = fillMacro(macro, { firstName, reference });
     setBody((prev) => (prev.trim() ? `${prev.trimEnd()}\n\n${text}` : text));
     setPicked(macro);
-    setMessage(null);
     requestAnimationFrame(() => box.current?.focus());
   };
 
-  const send = (then: "keep" | "resolve") => {
+  const send = (then: "keep" | "resolve"): void => {
     if (body.trim().length < 2 || pending) return;
     start(async () => {
       try {
         const result = await sendSupportReply({ ticketId, body, then, status });
         if (!result.ok) {
-          setMessage({ ok: false, text: result.error });
+          banner.error(result.error, { retry: () => send(then) });
           return;
         }
         setBody("");
         setPicked(null);
-        setMessage({
-          ok: true,
-          text: then === "resolve" ? "Sent, and the ticket is resolved." : "Sent. It is on their thread now.",
-        });
+        banner.success(then === "resolve" ? "Sent, and the ticket is resolved." : "Sent. It is on their thread now.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -139,14 +135,6 @@ export function SupportComposer({
           ? "The reply goes on their support thread and they are told in the app. They read it as from Vallo support, with your first name."
           : "They filed without an account, so the app cannot tell them. The reply waits at the link their filing email carried."}
       </p>
-      {message ? (
-        <p
-          role={message.ok ? "status" : "alert"}
-          className={`mt-xs nf-caption ${message.ok ? "text-[var(--nf-state-success)]" : "text-[var(--nf-state-warning)]"}`}
-        >
-          {message.text}
-        </p>
-      ) : null}
     </section>
   );
 }

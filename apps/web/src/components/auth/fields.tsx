@@ -4,6 +4,7 @@ import "@/app/css/auth.css";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The form furniture the auth screens share.
@@ -36,7 +37,7 @@ export function FormGroup({
   return (
     <section className="border-t border-[var(--nf-panel-hair)] pt-5 first:border-t-0 first:pt-0 [&+section]:mt-7">
       <div className="mb-md flex items-baseline justify-between gap-3">
-        <h2 className="text-[0.9375rem] font-semibold text-[var(--nf-content-primary)]">
+        <h2 className="text-[length:var(--nf-text-row)] font-semibold text-[var(--nf-content-primary)]">
           {title}
         </h2>
         <span className="nf-numeric shrink-0 text-[length:var(--nf-text-label)] font-semibold uppercase tracking-[var(--nf-tracking-label)] text-[var(--nf-content-muted)]">
@@ -44,7 +45,7 @@ export function FormGroup({
         </span>
       </div>
       {note && (
-        <p className="mb-4 text-[0.75rem] leading-relaxed text-[var(--nf-content-muted)]">
+        <p className="mb-4 text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
           {note}
         </p>
       )}
@@ -76,19 +77,16 @@ function LabelRow({
       </label>
       {/* A plain word, not a chip: a chip at the tap floor read as a button. */}
       {optional && (
-        <span className="mb-xs text-[0.8125rem] text-[var(--nf-content-muted)]">{optional}</span>
+        <span className="mb-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{optional}</span>
       )}
     </span>
   );
 }
 
+/* The words go to the one banner; the field keeps its red edge and this
+   visually hidden note (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
 function FieldError({ id, error }: { id: string; error?: string }) {
-  if (!error) return null;
-  return (
-    <p id={id} role="alert" className="mt-xs text-[0.75rem] text-[var(--nf-state-error)]">
-      {error}
-    </p>
-  );
+  return <FieldProblem id={id} message={error} />;
 }
 
 export function Field({
@@ -317,7 +315,7 @@ export function PasswordField({
           onClick={() => setVisible((v) => !v)}
           aria-pressed={visible}
           aria-label={visible ? t.signUp.hidePassword : t.signUp.showPassword}
-          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-[var(--nf-radius-control)] text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-secondary)]"
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-control text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-secondary)]"
         >
           <EyeGlyph off={visible} />
         </button>

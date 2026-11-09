@@ -64,6 +64,7 @@ export const callsEn = {
     reconnecting: "Reconnecting",
     reconnectingBody: "The connection dropped. Hold on, the call is still open.",
     weak: "Weak connection",
+    switchToVoice: "Switch to voice only",
     theyLeft: "{name} lost connection",
     theyLeftBody: "Waiting for them to come back.",
     youMuted: "Your microphone is off",
@@ -75,6 +76,7 @@ export const callsEn = {
     moveSelfView: "Your camera preview. Use the arrow keys to move it to another corner.",
     cameraPaused: "Your camera paused while the app was in the background.",
     resumeCamera: "Turn camera back on",
+    encrypted: "A Vallo call",
   },
   confirmEnd: {
     title: "End the review call?",

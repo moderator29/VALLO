@@ -63,29 +63,6 @@ export async function nativeShare(input: {
   }
 }
 
-type HapticsPlugin = {
-  impact: (options: { style: "LIGHT" | "MEDIUM" | "HEAVY" }) => Promise<void>;
-  notification: (options: { type: "SUCCESS" | "WARNING" | "ERROR" }) => Promise<void>;
-};
-
-/**
- * A tap the hand can feel. On iOS `navigator.vibrate` does nothing, which is
- * why `Button`'s pulse was silent on the platform that needs it most.
- * Returns true when the native engine took it.
- */
-export async function nativeHaptic(kind: "tap" | "success" | "warning" = "tap"): Promise<boolean> {
-  const heldHaptics = await plugin<HapticsPlugin>("Haptics");
-  if (!heldHaptics) return false;
-  const haptics = heldHaptics.plugin;
-  try {
-    if (kind === "tap") await haptics.impact({ style: "LIGHT" });
-    else await haptics.notification({ type: kind === "success" ? "SUCCESS" : "WARNING" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 type CameraPlugin = {
   getPhoto: (options: {
     quality: number;

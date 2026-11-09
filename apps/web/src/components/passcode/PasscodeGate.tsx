@@ -62,6 +62,9 @@ export async function PasscodeGate({
 
   switch (view.kind) {
     case "open":
+    case "unset":
+      /* No passcode set: the page, untouched. The offer to set one is a
+         dismissible alert on the dashboard, never a gate. */
       return <>{children}</>;
     case "unlocked":
       return (
@@ -89,7 +92,10 @@ export async function PasscodeGate({
           name={name}
           avatarUrl={avatarUrl}
           overlay
-          offerBiometric={view.mode === "first" && !passkey}
+          /* The phone decides whether it holds a key (PasscodeSetup reads
+             lib/platform/device-keys.ts): an account key on another phone
+             must not hide the offer here. */
+          offerBiometric={view.mode === "first"}
           userId={userId ?? undefined}
         />
       );

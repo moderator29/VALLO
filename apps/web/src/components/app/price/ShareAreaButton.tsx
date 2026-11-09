@@ -5,6 +5,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { shareAreaPrices } from "@/lib/price-check/actions";
 import { createShareLink } from "@/lib/share/actions";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE BUTTON, AND WHY THERE WAS NOT ONE.
@@ -53,6 +54,9 @@ import { createShareLink } from "@/lib/share/actions";
  * The caller decides which of the two it is by passing `card` or not, and
  * the type makes it impossible to ask for a card without them.
  */
+
+/* The banner's words for a copied area link (founder, 7 November 2026). */
+const LINK_COPIED = "Link copied";
 
 export type ShareAreaCopy = {
   make: string;
@@ -151,11 +155,13 @@ function MintableShare({
      */
     if (card.seal === null) {
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     const result = await shareAreaPrices({ seal: card.seal });
     if (!result.ok) {
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     const door = await createShareLink({ kind: "price_area", targetId: result.data.id });
@@ -163,6 +169,7 @@ function MintableShare({
       /* No door, no link. The in-app address answers a stranger with a
          sign-in page, so offering it would be offering a dead card. */
       setState("failed");
+      banner.error(copy.failed);
       return;
     }
     setDoorPath(door.data.path);
@@ -175,6 +182,8 @@ function MintableShare({
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      /* The button keeps its tick; the banner says it (founder, 7 November 2026). */
+      banner(LINK_COPIED, { tone: "success" });
     } catch {
       /* A refused clipboard is not an error worth a sentence: the link is on
          the screen and selectable, which is the fallback every browser has. */
@@ -220,9 +229,6 @@ function MintableShare({
             <p className="nf-body-sm text-[var(--nf-content-muted)]">{copy.making}</p>
           )}
 
-          {state === "failed" && (
-            <p className="nf-body-sm text-[var(--nf-state-error)]">{copy.failed}</p>
-          )}
 
           {state === "made" && href !== null && (
             <div className="nf-pc-share__link">

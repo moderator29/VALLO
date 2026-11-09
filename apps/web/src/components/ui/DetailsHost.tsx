@@ -6,6 +6,7 @@ import { ConnectionLine } from "@/components/ui/ConnectionLine";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { FormKeys } from "@/components/ui/FormKeys";
 import { RefusalHost } from "@/components/ui/RefusalHost";
+import { KeyboardShortcuts } from "@/components/ui/KeyboardShortcuts";
 
 /**
  * The small things every screen shares, mounted once in the root layout:
@@ -24,6 +25,7 @@ export function DetailsHost() {
       <ToastHost />
       <FormKeys />
       <RefusalHost />
+      <KeyboardShortcuts />
     </>
   );
 }

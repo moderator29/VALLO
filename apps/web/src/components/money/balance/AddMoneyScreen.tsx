@@ -1,10 +1,12 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { confirmDepositPaid, prepareDeposit, type DepositStart } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
@@ -62,7 +64,6 @@ export function AddMoneyScreen({
   const [methodOpen, setMethodOpen] = useState(false);
   const [start, setStart] = useState<DepositStart | null>(null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const minor = amount ? Number(amount) * 100 : 0;
@@ -73,11 +74,10 @@ export function AddMoneyScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() => prepareDeposit({ clientKey, amount }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
     }
@@ -88,23 +88,27 @@ export function AddMoneyScreen({
   const paid = async () => {
     if (!start) return;
     setBusy(true);
-    setError(null);
     const r = await reach(() => confirmDepositPaid({ movementId: start.movement.id }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return;
     }
-    if (r.data.message) setError(r.data.message);
+    /* Said by the one banner at the top of the screen (Grade 1). */
+    if (r.data.message) banner.info(r.data.message);
     if (r.data.movement.status !== "awaiting_payment") {
       setMovement(r.data.movement);
       setStep("waiting");
     }
   };
 
-  return (
+  /* SW5 (round 3): the amount, the check and the payment stand in the
+     platform's STEP FRAME; the keypad stays in the content. The outcomes keep
+     the wallet's own top. Every gate, key and reach is unchanged. */
+  const framed = step === "amount" || step === "confirm" || step === "pay";
+  const body = (
     <div className="nf-balance nf-mw" data-screen="add" data-testid="wallet-add" data-step={step}>
-      <WalletHeader title={ACTION_LABEL.add} back={links.overview} />
+      {framed ? null : <WalletHeader title={ACTION_LABEL.add} back={links.overview} />}
 
       {step === "amount" ? (
         <div className="nf-mw-move">
@@ -119,9 +123,6 @@ export function AddMoneyScreen({
             testId="add-method"
           />
           <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full disabled={!amount} onClick={() => setStep("confirm")} data-testid="move-continue">
-              {MOVE_COPY.continue}
-            </Button>
             <Keypad value={amount} onChange={setAmount} />
           </div>
         </div>
@@ -130,7 +131,6 @@ export function AddMoneyScreen({
       {step === "confirm" ? (
         <div className="nf-mw-move">
           <div className="nf-mw-amount">
-            <span className="nf-mw-amount__label">{MOVE_COPY.review}</span>
             <MoneyFigure minor={minor} locale={locale} size="hero" kobo="auto" />
           </div>
           <Summary
@@ -140,19 +140,11 @@ export function AddMoneyScreen({
               { label: "Added", value: "Once your bank confirms" },
             ]}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
-          <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full loading={busy} onClick={begin} data-testid="move-confirm">
-              Continue to pay
-            </Button>
-            <Button variant="secondary" size="lg" full onClick={() => setStep("amount")}>
-              Change amount
-            </Button>
-          </div>
+          {/* The quiet way back to the amount, in the content: the frame's foot
+              holds only the one lit control at a phone's width. */}
+          <Button variant="quiet" size="md" full onClick={() => setStep("amount")}>
+            Change amount
+          </Button>
         </div>
       ) : null}
 
@@ -168,7 +160,7 @@ export function AddMoneyScreen({
               <p className="nf-body-sm text-center text-[var(--nf-content-secondary)]">
                 The payment page opens in a new tab. Come back here when you have paid; nothing is added until your bank confirms.
               </p>
-              <Button variant="primary" size="lg" full onClick={() => window.open(start.hosted.kind === "checkout_url" ? start.hosted.url : "", "_blank", "noopener")}>
+              <Button variant="secondary" size="lg" full onClick={() => window.open(start.hosted.kind === "checkout_url" ? start.hosted.url : "", "_blank", "noopener")}>
                 Open the payment page
               </Button>
             </>
@@ -185,15 +177,7 @@ export function AddMoneyScreen({
               </dl>
             </div>
           ) : null}
-          <Button variant="secondary" size="lg" full loading={busy} onClick={paid}>
-            I have paid
-          </Button>
           <p className="nf-caption text-center text-[var(--nf-content-muted)]">Reference {start.movement.reference}</p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
         </div>
       ) : null}
 
@@ -221,4 +205,35 @@ export function AddMoneyScreen({
       </Sheet>
     </div>
   );
+
+  if (!framed) return body;
+  const at = step === "amount" ? 1 : step === "confirm" ? 2 : 3;
+  return (
+    <StepFrame
+      testId="add-steps"
+      step={at}
+      total={3}
+      eyebrow={ACTION_LABEL.add}
+      title={step === "amount" ? ADD_STEP.amount : step === "confirm" ? MOVE_COPY.review : ADD_STEP.pay}
+      direction={step === "amount" ? "back" : "forward"}
+      {...(step === "confirm" ? { onBack: () => setStep("amount") } : {})}
+      closeHref={links.overview}
+      {...(step === "amount"
+        ? { primary: { label: MOVE_COPY.continue, onClick: () => setStep("confirm"), disabled: !amount, testId: "move-continue" } }
+        : step === "confirm"
+          ? {
+              primary: { label: "Continue to pay", onClick: begin, loading: busy, testId: "move-confirm" },
+            }
+          : step === "pay"
+            ? {
+                primary: { label: "I have paid", onClick: paid, loading: busy, testId: "move-paid" },
+              }
+            : {})}
+    >
+      {body}
+    </StepFrame>
+  );
 }
+
+/* The step titles adding money did not have words for. */
+const ADD_STEP = { amount: "How much to add", pay: "Pay from your bank" } as const;

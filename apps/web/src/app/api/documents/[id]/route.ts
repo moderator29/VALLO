@@ -63,7 +63,7 @@ function refuse(status: number, message: string): Response {
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   /* WHICH DESKS. The KYC desk (`kyc_review`) opens every identity and
@@ -85,7 +85,10 @@ export async function GET(
   if (!isDocumentId(id)) return refuse(404, "No such document.");
 
   const admin = createAdminClient();
-  const located = await locateDocument(admin, id);
+  /* Grade 1: `?side=back` is the back of a two-sided ID on the same row,
+     behind the same desk check and written to the same audit. */
+  const side = new URL(request.url).searchParams.get("side") === "back" ? "back" : "front";
+  const located = await locateDocument(admin, id, side);
   if (!located) return refuse(404, "No such document.");
   if (listingOnly) {
     const row =
@@ -113,6 +116,7 @@ export async function GET(
     action: "document.viewed",
     entityType: located.source === "agent" ? "agent_documents" : "business_documents",
     entityId: id,
+    ...(side === "back" ? { detail: { side: "back" } } : {}),
   });
 
   const body = await download.data.arrayBuffer();

@@ -19,6 +19,7 @@ import {
 import { parseNairaToKobo } from "@/lib/money/amount";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * D77: the risk settings, one form, and the incident switch apart from it, as
@@ -31,7 +32,6 @@ export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings;
   const [threshold, setThreshold] = useState(thresholdFieldText(settings.amountThresholdMinor));
   const [days, setDays] = useState(String(settings.recentChangeDays));
   const [checks, setChecks] = useState<SignalChecks>(settings.checks);
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
 
   const thresholdMinor = parseNairaToKobo(threshold);
   const daysNumber = /^\d{1,2}$/.test(days.trim()) ? Number(days.trim()) : null;
@@ -43,12 +43,13 @@ export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings;
   const offCount = SIGNALS.filter((s) => !checks[s.key]).length;
 
   function save() {
-    setMessage(null);
     start(async () => {
       try {
         const r = await saveRiskSettings({ thresholdNaira: threshold, recentChangeDays: daysNumber ?? -1, checks });
-        setMessage(r.ok ? { tone: "ok", text: "Saved. The next deal both parties agree is read against these settings." } : { tone: "error", text: r.error });
-        if (r.ok) router.refresh();
+        if (r.ok) {
+          banner.success("Saved. The next deal both parties agree is read against these settings.");
+          router.refresh();
+        } else banner.error(r.error, { retry: save });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -122,11 +123,6 @@ export function RiskSettingsForm({ settings, locale }: { settings: RiskSettings;
             </span>
           )}
         </div>
-        {message && (
-          <p role={message.tone === "error" ? "alert" : "status"} className={`nf-risk-settings__message nf-risk-settings__message--${message.tone}`}>
-            {message.text}
-          </p>
-        )}
       </section>
 
       <KillSwitch on={settings.killSwitchOn} note={settings.killSwitchNote} />
@@ -138,8 +134,23 @@ function KillSwitch({ on, note }: { on: boolean; note: string | null }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
   const [reason, setReason] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
   const next = !on;
+
+  function flip() {
+    start(async () => {
+      try {
+        const r = await setReviewKillSwitch({ on: next, reason });
+        if (r.ok) {
+          banner.success(next ? "Every deal now waits for review." : "Back to the signals.");
+          setReason("");
+          router.refresh();
+        } else banner.error(r.error, { retry: flip });
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <section
       className={`nf-panel nf-panel--card nf-admin-card nf-risk-settings__block nf-risk-kill${on ? " nf-risk-kill--on" : ""}`}
@@ -169,29 +180,11 @@ function KillSwitch({ on, note }: { on: boolean; note: string | null }) {
           variant={next ? "dangerQuiet" : "primary"}
           loading={pending}
           disabled={reason.trim().length < 10}
-          onClick={() =>
-            start(async () => {
-              try {
-                const r = await setReviewKillSwitch({ on: next, reason });
-                setMessage(r.ok ? (next ? "Every deal now waits for review." : "Back to the signals.") : r.error);
-                if (r.ok) {
-                  setReason("");
-                  router.refresh();
-                }
-              } catch (error) {
-                if (!tapFailedOffline(error)) throw error;
-              }
-            })
-          }
+          onClick={flip}
         >
           {next ? "Turn on: review every deal" : "Turn off"}
         </Button>
       </div>
-      {message && (
-        <p role="status" className="nf-risk-settings__message">
-          {message}
-        </p>
-      )}
     </section>
   );
 }

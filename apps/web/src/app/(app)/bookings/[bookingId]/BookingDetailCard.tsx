@@ -29,7 +29,7 @@ export function BookingDetailCard({ booking, locale }: { booking: BookingView; l
         <Link
           href={booking.stayHref}
           aria-label={booking.title}
-          className="relative block h-[5.75rem] w-[5.75rem] shrink-0 overflow-hidden rounded-[var(--nf-radius-md)] bg-[var(--nf-surface-secondary)] sm:h-24 sm:w-32"
+          className="relative block h-[5.75rem] w-[5.75rem] shrink-0 overflow-hidden rounded-md bg-[var(--nf-surface-secondary)] sm:h-24 sm:w-32"
         >
           {booking.photo && (
             <Image src={booking.photo} alt="" fill sizes="128px" className="object-cover" />

@@ -83,12 +83,18 @@ export function isDocumentId(raw: string): boolean {
 export async function locateDocument(
   admin: SupabaseClient<Database>,
   id: string,
+  /** Grade 1: the back of a two-sided ID, filed on the same row. */
+  side: "front" | "back" = "front",
 ): Promise<Located | null> {
   const agent = await admin
     .from("agent_documents")
-    .select("storage_path")
+    .select("storage_path, back_storage_path")
     .eq("id", id)
     .maybeSingle();
+  if (side === "back") {
+    const back = agent.data?.back_storage_path;
+    return back ? { source: "agent", bucket: BUCKETS.agent, path: back } : null;
+  }
   if (agent.data?.storage_path) {
     return { source: "agent", bucket: BUCKETS.agent, path: agent.data.storage_path };
   }

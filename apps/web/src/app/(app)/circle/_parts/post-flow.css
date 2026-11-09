@@ -1,0 +1,53 @@
+@layer components {
+  /* The compose type picker: four tiles, each with its 3D object. */
+  .nf-ctype {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-ctype__tile {
+    display: grid;
+    justify-items: start;
+    gap: var(--nf-space-2xs);
+    inline-size: 100%;
+    min-block-size: 44px;
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-primary);
+    text-align: start;
+    font: inherit;
+    cursor: pointer;
+    box-shadow: var(--nf-card-shadow);
+    transition: transform var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-ctype__tile:active {
+    transform: scale(0.97);
+  }
+  .nf-ctype__tile:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-ctype__title {
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+  }
+  .nf-ctype__sub {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    line-height: 1.4;
+  }
+  .nf-cposted {
+    display: grid;
+    justify-items: center;
+    gap: var(--nf-space-xl);
+    padding-block: var(--nf-space-xl) var(--nf-space-md);
+  }
+  .nf-cposted .nf-btn {
+    max-inline-size: 20rem;
+  }
+}

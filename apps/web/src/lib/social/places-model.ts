@@ -16,6 +16,7 @@
 
 import type { AreaStatus } from "./areas-model";
 import { countOf } from "@vallo/i18n/core";
+import { placesCopyEn, placesFailureEn } from "@vallo/i18n/en/places";
 
 /** One of the 774 rows in `public.local_governments`. */
 export type LgaNode = {
@@ -92,59 +93,20 @@ export const ENTER_SQLSTATE = {
   slugTaken: "23505",
 } as const;
 
-export const ENTER_FAILURE = {
-  noSuchLga:
-    "That local government is not one of the 774 on our list. Go back to the state and choose one of the ones shown.",
-  couldNotOpen:
-    "That door would not open. Another place already answers to the same web address, so tell us and we will sort it out by hand.",
-  down: "We could not open that place just now. Please try again in a moment.",
-} as const;
+/** SW11: static strings from `packages/i18n/src/locales/places.en.ts`. */
+const _pf = { copy: placesCopyEn, failure: placesFailureEn };
+
+export const ENTER_FAILURE = _pf.failure;
 
 /**
  * The words on the way in. One place for them, so the page, the empty state and
  * the test cannot drift apart.
  */
+const _pc = _pf.copy;
 export const PLACE_COPY = {
-  title: "Find your place",
-
-  lede: "Nigeria is 36 states and the Federal Capital Territory. Tap yours, then tap your local government, and you are standing in it.",
-
-  statesLabel: "States",
-
-  searchStates: "Search a state or a local government",
-
-  /** The search field once a state is chosen, filled with that state's name. */
+  ..._pc,
   searchInState: (state: string) => `Search ${state} local governments`,
-
-  backToStates: "All states",
-
-  /** The line under the local government chips. */
   lgaHint: (state: string, count: number) =>
     `${countOf(count, "localGovernments")} in ${state}. Tap one to go in.`,
-
-  nothingMatches: "Nothing matches that",
-
-  /** The tree came back empty on a configured platform, which is a hiccup. */
-  couldNotLoad: "The list of states did not arrive. Reload the page and it should be here.",
-
-
-  nothingMatchesBody:
-    "Try a shorter word, or part of the name. Every state and every local government in Nigeria is here.",
-
-  signedOutNew:
-    "Sign in to open this one. Nobody has been in it yet, and the first person through the door is the one who opens it.",
-
-  opening: "Opening",
-
-  /** Read out on an LGA that already has people in it. */
-  alreadyOpen: "Already open",
-
-  /** Read out on one nobody has been in. It is an invitation, not a warning. */
-  notOpenYet: "Nobody has been in this one yet.",
-
-  /** The heading on a local government's page, over the finer places inside it. */
   withinTitle: (name: string) => `Inside ${name}`,
-
-  withinBody:
-    "Smaller places people name in conversation. Each one is its own room, and you can be in as many as you like.",
 } as const;

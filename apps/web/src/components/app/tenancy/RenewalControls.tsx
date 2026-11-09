@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { NairaField } from "@/components/ui/NairaField";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -20,27 +21,27 @@ type Copy = Dictionary["afterTheGate"]["tenancy"];
  * renewing and, once the caution is settled, gives their account of the flat.
  * Every rule is the database door's; these forms collect and report.
  */
+/* What a step did is said by the one banner at the top of the screen (Grade 1). */
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
-  function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void) {
-    setError(null);
+  function run(work: () => Promise<{ ok: boolean; error?: string; data?: unknown }>, after?: (data: unknown) => void, successMsg?: string) {
     start(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? null);
+          banner.error(result.error ?? "That did not go through. Try again.");
           return;
         }
         if (after) after(result.data);
+        if (successMsg) banner.success(successMsg);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
   }
-  return { pending, error, run };
+  return { pending, run };
 }
 
 export function RenewalOfferForm({
@@ -54,7 +55,7 @@ export function RenewalOfferForm({
   serviceNaira: string;
   copy: Copy;
 }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [rent, setRent] = useState(rentNaira);
   const [service, setService] = useState(serviceNaira);
   const [fees, setFees] = useState("");
@@ -64,14 +65,14 @@ export function RenewalOfferForm({
       data-testid="renewal-offer"
       onSubmit={(event) => {
         event.preventDefault();
-        run(() => offerRenewal({ tenancyId, rentNaira: rent, serviceNaira: service, feesNaira: fees }));
+        run(() => offerRenewal({ tenancyId, rentNaira: rent, serviceNaira: service, feesNaira: fees }), undefined, "Renewal offer sent.");
       }}
     >
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.renewalOfferHelp}</p>
       {/* Details pass: naira grouped as it is typed ("1,500,000"). */}
       <NairaField label={copy.renewalRent} value={rent} onValueChange={setRent} allowKobo />
       <NairaField label={copy.renewalServiceField} value={service} onValueChange={setService} allowKobo />
-      <NairaField label={copy.renewalFeesField} value={fees} onValueChange={setFees} allowKobo error={error ?? undefined} />
+      <NairaField label={copy.renewalFeesField} value={fees} onValueChange={setFees} allowKobo />
       <Button type="submit" variant="primary" full loading={pending} disabled={pending || rent.trim() === ""}>
         {copy.renewalOfferSubmit}
       </Button>
@@ -80,30 +81,25 @@ export function RenewalOfferForm({
 }
 
 export function RenewalAnswer({ tenancyId, copy }: { tenancyId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   return (
     <div data-testid="renewal-answer">
       <p className="nf-body-sm font-semibold">{copy.renewalAsk}</p>
       <div className="mt-xs flex flex-wrap gap-sm">
-        <Button size="sm" variant="primary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "renewing" }))}>
+        <Button size="sm" variant="primary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "renewing" }), undefined, "Renewal accepted.")}>
           {copy.renewing}
         </Button>
-        <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "leaving" }))}>
+        <Button size="sm" variant="secondary" disabled={pending} onClick={() => run(() => answerRenewal({ tenancyId, answer: "leaving" }), undefined, "Decision saved.")}>
           {copy.leaving}
         </Button>
       </div>
-      {error && (
-        <p className="nf-caption mt-xs text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
 
 export function RelistButton({ tenancyId, successorId, copy }: { tenancyId: string; successorId: string | null; copy: Copy }) {
   const router = useRouter();
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   if (successorId) {
     return (
       <ButtonLink href={`/agent/list?id=${successorId}`} variant="secondary" full trailingIcon="arrow-right">
@@ -131,17 +127,12 @@ export function RelistButton({ tenancyId, successorId, copy }: { tenancyId: stri
       >
         {copy.relistSubmit}
       </Button>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
 
 export function ExitAccountForm({ tenancyId, copy }: { tenancyId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [light, setLight] = useState("");
   const [water, setWater] = useState("");
   const [flooding, setFlooding] = useState("");
@@ -175,11 +166,6 @@ export function ExitAccountForm({ tenancyId, copy }: { tenancyId: string; copy: 
       {pick(copy.exitLight, light, setLight, copy.exitLightOptions)}
       {pick(copy.exitWater, water, setWater, copy.exitWaterOptions)}
       {pick(copy.exitFlooding, flooding, setFlooding, copy.exitFloodingOptions)}
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
       <Button type="submit" variant="primary" full loading={pending} disabled={pending || !light || !water || !flooding}>
         {copy.exitSubmit}
       </Button>

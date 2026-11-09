@@ -36,8 +36,11 @@ function planner(opts: { slots: string; videoOn: boolean }) {
     import { mount } from "@/lib/testing/browser-root";
     import { getDictionary } from "@vallo/i18n";
     import { VisitPlanner } from "@/components/app/inspections/visit/VisitPlanner";
-    mount(<VisitPlanner listingId="l-1" locale="en" now={${NOW}} copy={getDictionary("en").visit}
-      slots={${opts.slots}} videoOn={${opts.videoOn}} initialSlot={null} roleNoun="owner" lister={null} />);
+    import { ToastHost } from "@/components/ui/ToastHost";
+    /* A send's refusal is said by the one banner (Grade 1), drawn by the host
+       the root layout mounts. */
+    mount(<><VisitPlanner listingId="l-1" locale="en" now={${NOW}} copy={getDictionary("en").visit}
+      slots={${opts.slots}} videoOn={${opts.videoOn}} initialSlot={null} roleNoun="owner" lister={null} /><ToastHost /></>);
   `;
 }
 

@@ -22,7 +22,6 @@ import { PayPanel } from "@/app/(app)/rent/pay/[inspectionId]/PayPanel";
 import { SavedBoard, type SavedBoardItem } from "@/app/(app)/saved/SavedBoard";
 import { ThreadView } from "@/app/(app)/post/[id]/ThreadView";
 import LoadingArea from "@/app/(app)/around/[slug]/loading";
-import LoadingAroundManage from "@/app/(app)/around/manage/loading";
 import LoadingProposeArea from "@/app/(app)/around/new/loading";
 import LoadingAroundSettings from "@/app/(app)/around/settings/loading";
 import LoadingBookings from "@/app/(app)/bookings/loading";
@@ -82,7 +81,7 @@ const ROUTES: Record<string, string> = {
 
 const LOADING: Record<string, { route: string; view: () => ReactNode }> = {
   "loading-place": { route: "/around/yaba", view: () => <LoadingArea /> },
-  "loading-manage": { route: "/around/manage", view: () => <LoadingAroundManage /> },
+  "loading-manage": { route: "/around/settings", view: () => <LoadingAroundSettings /> },
   "loading-place-new": { route: "/around/new", view: () => <LoadingProposeArea /> },
   "loading-places": { route: "/around/settings", view: () => <LoadingAroundSettings /> },
   "loading-bookings": { route: "/bookings", view: () => <LoadingBookings /> },
@@ -221,7 +220,7 @@ function View({ v, s }: { v: string; s?: string }) {
     case "kyc":
       return (
         <Frame title="Verification">
-          <KycFlowFixture copy={t.experienceAccount.kyc} />
+          <KycFlowFixture copy={t.experienceAccount.kyc} flowCopy={t.verifyFlow} />
         </Frame>
       );
     case "kyc-status":

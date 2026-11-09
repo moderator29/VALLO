@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { GateHandshake } from "@/components/app/inspections/GateHandshake";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,9 +31,8 @@ export default async function GatePage({ params }: { params: Promise<{ id: strin
   const locale = await getLocale();
   const t = getDictionary(locale);
   return (
-    <div className="mx-auto max-w-lg" data-testid="gate-page">
-      <PageHeader title={t.platform.gate.title} fallback="/bookings?kind=inspection&from=property" />
+    <PageFrame title={t.platform.gate.title} fallback="/bookings?kind=inspection&from=property" width="narrow" testId="gate-page">
       <GateHandshake inspectionId={id} locale={locale} copy={t.platform.gate} />
-    </div>
+    </PageFrame>
   );
 }

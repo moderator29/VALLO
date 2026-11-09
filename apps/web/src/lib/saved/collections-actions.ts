@@ -14,10 +14,12 @@ import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../a
 import { SAVED_PLACE_KINDS } from "./db";
 import { cleanCollectionName, COLLECTION_LIMIT } from "./collections";
 
+type EqChain = { eq(col: string, v: string): EqChain } & PromiseLike<{ error: { code?: string } | null }>;
 type Loose = {
   from(table: string): {
     insert(row: Record<string, unknown>): { select(cols: string): { single(): Promise<{ data: unknown; error: { code?: string } | null }> } } & PromiseLike<{ error: { code?: string } | null }>;
-    delete(): { eq(col: string, v: string): { eq(col: string, v: string): { eq(col: string, v: string): PromiseLike<{ error: unknown }> } & PromiseLike<{ error: unknown }> } & PromiseLike<{ error: unknown }> };
+    update(row: Record<string, unknown>): EqChain;
+    delete(): EqChain;
   };
 };
 
@@ -54,6 +56,52 @@ export async function deleteCollection(input: { id: string }): Promise<ActionRes
   if (!who.ok) return fail(who.error);
   const { error } = await who.db.from("saved_collections").delete().eq("id", parsed.data.id).eq("user_id", who.userId);
   if (error) return fail(DOWN);
+  revalidatePath("/saved");
+  return ok(null);
+}
+
+export async function renameCollection(input: { id: string; name: string }): Promise<ActionResult<null>> {
+  const parsed = validate(z.object({ id: z.uuid(), name: z.string().max(200) }), input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const name = cleanCollectionName(parsed.data.name);
+  if (!name) return fail("Give the list a name.");
+  const who = await member();
+  if (!who.ok) return fail(who.error);
+  const { error } = await who.db.from("saved_collections").update({ name }).eq("id", parsed.data.id).eq("user_id", who.userId);
+  if (error) {
+    if (error.code === "23505") return fail("You already have a list with that name.");
+    return fail(DOWN);
+  }
+  revalidatePath("/saved");
+  return ok(null);
+}
+
+export async function moveToCollection(input: {
+  fromCollectionId: string;
+  toCollectionId: string;
+  kind: string;
+  id: string;
+}): Promise<ActionResult<null>> {
+  const parsed = validate(
+    z.object({ fromCollectionId: z.uuid(), toCollectionId: z.uuid(), kind: z.enum(SAVED_PLACE_KINDS), id: z.uuid() }),
+    input,
+  );
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const who = await member();
+  if (!who.ok) return fail(who.error);
+  const { fromCollectionId, toCollectionId, kind, id } = parsed.data;
+  if (fromCollectionId === toCollectionId) return ok(null);
+  const { error: addError } = await who.db
+    .from("saved_collection_items")
+    .insert({ collection_id: toCollectionId, kind, target_id: id });
+  if (addError && addError.code !== "23505") return fail(DOWN);
+  const { error: removeError } = await who.db
+    .from("saved_collection_items")
+    .delete()
+    .eq("collection_id", fromCollectionId)
+    .eq("kind", kind)
+    .eq("target_id", id);
+  if (removeError) return fail(DOWN);
   revalidatePath("/saved");
   return ok(null);
 }

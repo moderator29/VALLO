@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -36,10 +36,29 @@ describe("Next stamps the nonce on a layout's own script", () => {
     const installed = (JSON.parse(readFileSync(join(nextRoot, "package.json"), "utf8")) as { version: string }).version;
     const [major, minor] = installed.split(".").map(Number);
     expect(major! > 16 || (major === 16 && minor! >= 3), installed).toBe(true);
-    const lock = JSON.parse(readFileSync(join(nextRoot, "..", "..", "package-lock.json"), "utf8")) as {
+    /* The lockfile is at the repo root, which is NOT a fixed two levels above
+       the installed `next`: in this workspace npm installs it under
+       `apps/web/node_modules` and hoists nothing, so walk up from there until
+       `package-lock.json` is found. */
+    let dir = nextRoot;
+    let lockPath = "";
+    for (let i = 0; i < 10; i += 1) {
+      const candidate = join(dir, "package-lock.json");
+      if (existsSync(candidate)) { lockPath = candidate; break; }
+      const parent = dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+    expect(lockPath, "package-lock.json above the installed next").not.toBe("");
+    const lock = JSON.parse(readFileSync(lockPath, "utf8")) as {
       packages: Record<string, { version?: string }>;
     };
-    expect(lock.packages["node_modules/next"]?.version).toBe(installed);
+    /* The key is the install path relative to the lockfile: `node_modules/next`
+       when hoisted, `apps/web/node_modules/next` under the workspace. */
+    const pinned = Object.entries(lock.packages).find(
+      ([key]) => key === "node_modules/next" || key.endsWith("/node_modules/next"),
+    );
+    expect(pinned?.[1].version, "the lockfile pins the installed next").toBe(installed);
   });
 
   it("the app asks for a Next with that fix", () => {

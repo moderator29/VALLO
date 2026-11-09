@@ -39,6 +39,7 @@ import { motionQuiet } from "@/lib/motion/gate";
 import "@/app/css/lister-live.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The agent's listings workspace.
@@ -164,12 +165,10 @@ function ConfirmSheet({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [unmet, setUnmet] = useState<string[]>([]);
   const copy = t.workspace.sheets[state.kind];
 
   function run() {
-    setError(null);
     setUnmet([]);
     startTransition(async () => {
       try {
@@ -178,7 +177,9 @@ function ConfirmSheet({
           state.kind === "submit" ? await submitListing(input) : await unpublishListing(input);
 
         if (!result.ok) {
-          setError(result.error);
+          /* The outcome goes to the banner; the requirements the gate names
+             stay in the sheet, beside the listing they belong to. */
+          banner.error(result.error, { retry: run });
           setUnmet(
             Object.entries(result.fieldErrors ?? {}).map(([field, message]) =>
               requirementText(t, field, message, state.listing.pricePeriod === "year"),
@@ -186,9 +187,8 @@ function ConfirmSheet({
           );
           return;
         }
+        banner.success(state.kind === "submit" ? "Sent for review" : "Taken down");
         onClose();
-        /* A listing sent for review lands back here with the moment named; the
-           page checks it is really in review before the sheet opens. */
         if (state.kind === "submit") {
           router.replace(withDone("/agent/listings", "listing-submitted", { listing: state.listing.id }), { scroll: false });
         } else {
@@ -235,18 +235,6 @@ function ConfirmSheet({
       </p>
       <p className="mt-sm truncate text-[length:var(--nf-text-caption)] font-semibold">{state.listing.title}</p>
 
-      {error && (
-        <p
-          className="mt-sm rounded-[var(--nf-container-radius)] p-sm text-[length:var(--nf-text-caption)] font-semibold"
-          style={{
-            background: "var(--nf-state-warning-surface)",
-            color: "var(--nf-state-warning)",
-          }}
-          role="alert"
-        >
-          {error}
-        </p>
-      )}
       {unmet.length > 0 && (
         <ul className="mt-xs space-y-xs">
           {unmet.map((message) => (
@@ -324,7 +312,6 @@ function ListingRow({
   reference,
   listing,
   locale,
-  error,
   onAction,
   onDelete,
   boardLabel,
@@ -365,8 +352,6 @@ function ListingRow({
   reference: Dictionary["listingReference"];
   listing: ListingSummary;
   locale: Locale;
-  /** A delete the server refused. The row is back and this says why. */
-  error?: string | undefined;
   onAction: (kind: SheetKind, listing: ListingSummary) => void;
   onDelete: (listing: ListingSummary) => void;
   /** V-48: why this listing was closed, when it was. */
@@ -404,7 +389,7 @@ function ListingRow({
           </label>
         ) : null}
         <span
-          className="relative block h-[5.25rem] w-[5.25rem] shrink-0 overflow-hidden rounded-[var(--nf-radius-md)]"
+          className="relative block h-[5.25rem] w-[5.25rem] shrink-0 overflow-hidden rounded-md"
           style={{ background: "var(--nf-surface-raised)" }}
         >
           {listing.coverUrl ? (
@@ -593,6 +578,12 @@ function ListingRow({
             {statusLabel}
           </ButtonLink>
         )}
+        {/* Vallo Roommates: the lister says the home suits people renting it together. */}
+        {!closedReason && (
+          <ButtonLink href={`/agent/listings/${listing.id}/sharing`} variant="quiet" size="sm" leadingIcon="users" data-testid="listing-sharing-link">
+            Good for sharing
+          </ButtonLink>
+        )}
         {/* J4: every listing the lister owns has a health page: what its
             record holds and what it is missing. An example listing's page
             says it is never measured, rather than this row guessing. */}
@@ -667,14 +658,6 @@ function ListingRow({
         )}
       </div>
       )}
-      {error && (
-        <p
-          role="alert"
-          className="border-t border-[var(--nf-border-subtle)] px-md py-sm text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      )}
     </li>
   );
 }
@@ -742,12 +725,11 @@ export function ListingsWorkspace({
   const [selected, setSelected] = useState<string[]>([]);
   const anchor = useRef<string | null>(null);
 
-  /* Drafts whose delete is scheduled but has not been sent, and the failure a
-     rejected delete came back with. A row in `pending` is off the screen and
-     still in the database. */
+  /* Drafts whose delete is scheduled but has not been sent. A row in
+     `pending` is off the screen and still in the database. */
   const [pending, setPending] = useState<string[]>([]);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
+  const undoWindow = useRef<UndoWindow | null>(null);
 
   /*
    * The timing lives in `createUndoWindow`, which owns one rule this component
@@ -760,11 +742,17 @@ export function ListingsWorkspace({
     (id: string) => {
       void deleteListing({ listingId: id }).then((result) => {
         if (!result.ok) {
-          /* Nothing was deleted, so the row comes back where it was and says
-             why. This is the only path that puts a listing back on screen
-             without the agent asking. */
+          /* Nothing was deleted, so the row comes back where it was and the
+             banner says why, with the delete one tap away again. This is the
+             only path that puts a listing back on screen without the agent
+             asking. */
           setPending((prev) => prev.filter((p) => p !== id));
-          setErrors((prev) => ({ ...prev, [id]: result.error }));
+          banner.error(result.error, {
+            retry: () => {
+              setPending((prev) => (prev.includes(id) ? prev : [...prev, id]));
+              undoWindow.current?.schedule(id);
+            },
+          });
           return;
         }
         router.refresh();
@@ -781,19 +769,12 @@ export function ListingsWorkspace({
     sendRef.current = send;
   }, [send]);
 
-  const undoWindow = useRef<UndoWindow | null>(null);
   undoWindow.current ??= createUndoWindow({
     windowMs: UNDO_WINDOW_MS,
     onCommit: (id) => sendRef.current(id),
   });
 
   const scheduleDelete = useCallback((listing: ListingSummary) => {
-    setErrors((prev) => {
-      if (!(listing.id in prev)) return prev;
-      const next = { ...prev };
-      delete next[listing.id];
-      return next;
-    });
     setPending((prev) => (prev.includes(listing.id) ? prev : [...prev, listing.id]));
     undoWindow.current?.schedule(listing.id);
   }, []);
@@ -925,7 +906,6 @@ export function ListingsWorkspace({
                     reference={reference}
                     listing={listing}
                     locale={locale}
-                    error={errors[listing.id]}
                     onAction={(kind, target) => setSheet({ kind, listing: target })}
                     onDelete={scheduleDelete}
                     boardLabel={boardLabel}
@@ -971,7 +951,6 @@ export function ListingsWorkspace({
                   reference={reference}
                   listing={listing}
                   locale={locale}
-                  error={errors[listing.id]}
                   onAction={(kind, target) => setSheet({ kind, listing: target })}
                   onDelete={scheduleDelete}
                   closedReason={closed[listing.id]}

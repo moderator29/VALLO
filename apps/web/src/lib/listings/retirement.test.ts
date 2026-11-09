@@ -61,8 +61,12 @@ describe("the example collection has a deletion date", () => {
    * `listings.demo_retire_after` was stamped by the migration named here.
    */
   it("is the same date the migration wrote onto the rows", () => {
+    /* The date was moved on 9 November 2026 (from 2026-11-07), so the write
+       that now holds the truth is the extension migration, not the original
+       applied one it supersedes (which stays immutable). The constant and the
+       migration must still agree. */
     const migration = readFileSync(
-      `${MIGRATIONS}/20260809084449_an_example_listing_carries_the_day_it_comes_down.sql`,
+      `${MIGRATIONS}/pending/example_collection_retirement_extended_to_2027-05-07.sql`,
       "utf8",
     );
     expect(migration).toContain(`date '${EXAMPLE_COLLECTION_RETIREMENT}'`);

@@ -181,6 +181,17 @@ const config: CapacitorConfig = {
      * NEEDS A NATIVE REBUILD to take effect; `cap sync` copies it.
      */
     limitsNavigationsToAppBoundDomains: true,
+    /*
+     * LINK PREVIEW OFF (build 1.0.2, Agent NATIVE job 2). A long press on any
+     * link in WKWebView opened Safari's preview card of the URL, the clearest
+     * "this is a website" tell there is. A long press in Vallo belongs to the
+     * page (a card's menu, a message's reactions). Capacitor reads this key
+     * into `WKWebView.allowsLinkPreview` (CAPInstanceDescriptor.swift).
+     * `platform.css` also turns the long-press callout off on links and
+     * images, which reaches the app at once, before this build.
+     * NEEDS A NATIVE REBUILD; `cap sync` copies it.
+     */
+    allowsLinkPreview: false,
   },
 
   plugins: {
@@ -216,6 +227,9 @@ const config: CapacitorConfig = {
        * screen is the same: the app's first frame, not a poster. The glass
        * tile stays what it is, the app icon.
        */
+      /* 7 November 2026, the founder's ruling: the opening is drawn by the
+         shell on both phones (`ValloShell.swift`, `LaunchMark.java`), over
+         this same bare navy, so the splash itself stays empty. */
       androidSplashResourceName: "splash_blank",
       showSpinner: false,
     },
@@ -256,7 +270,10 @@ const config: CapacitorConfig = {
        * in its own sheets.
        */
       resize: KeyboardResize.Native,
-      resizeOnFullScreen: true,
+      /* `resizeOnFullScreen` is left out on purpose (N3, N5, 7 November
+         2026). It was true, and Capacitor 8's SystemBars, which now owns the
+         Android edge to edge insets and the keyboard's inset, warns at launch
+         that any value here "can lead to unexpected behavior". */
     },
   },
 

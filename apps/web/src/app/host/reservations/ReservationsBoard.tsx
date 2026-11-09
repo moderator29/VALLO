@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { dateTimeLabel, dayLabel as naturalDay } from "@/lib/format/when";
 import { createContext, useActionState, useContext, useEffect, useId, useMemo, useState } from "react";
 import Link from "next/link";
@@ -135,6 +136,11 @@ export function Decision({
   const [asking, setAsking] = useState<"CONFIRMED" | "CANCELLED" | null>(null);
   const locale = useClientLocale();
   const w = { ...useHostPageCopy().tables, ...labels };
+  /* A refusal is said by the one banner at the top of the screen (Grade 1),
+     above the sheet; the answered card below stays the record. */
+  useEffect(() => {
+    if (state && !state.ok) banner.error(state.error);
+  }, [state]);
 
   if (state?.ok) {
     return (
@@ -185,7 +191,6 @@ export function Decision({
                 : [{ icon: "calendar-check", text: w.nextClosed }]
             }
             told={w.told.replace("{name}", first)}
-            error={state && !state.ok ? state.error : null}
             cancel={
               <Button variant="secondary" disabled={pending} onClick={() => setAsking(null)}>
                 {w.cancel}
@@ -210,11 +215,6 @@ export function Decision({
           />
         ) : null}
       </Sheet>
-      {state && !state.ok && asking === null && (
-        <p role="alert" className={`mt-row ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {state.error}
-        </p>
-      )}
     </>
   );
 }
@@ -229,15 +229,13 @@ function Outcome({ table }: { table: HostReservationView }) {
   const w = words.outcome;
   const [pending, start] = useSafeTransition();
   const [done, setDone] = useState<"COMPLETED" | "NO_SHOW" | "DISPUTED" | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const mark = (outcome: "COMPLETED" | "NO_SHOW") =>
     start(async () => {
       try {
-        setError(null);
         const result = await markReservationOutcome({ reservationId: table.id, outcome });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setDone(result.data.disputed ? "DISPUTED" : outcome);
@@ -265,11 +263,6 @@ function Outcome({ table }: { table: HostReservationView }) {
           {w.noShow}
         </Button>
       </div>
-      {error && (
-        <p role="alert" className={`mt-row ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -286,7 +279,6 @@ function SeatByCode() {
   const id = useId();
   const [code, setCode] = useState("");
   const [pending, start] = useSafeTransition();
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const router = useRouter();
   return (
     <section className="nf-panel nf-panel--card block p-card" data-testid="seat-by-code" aria-labelledby={`${id}-title`}>
@@ -300,14 +292,13 @@ function SeatByCode() {
           event.preventDefault();
           start(async () => {
             try {
-              setMessage(null);
               const result = await seatByCode(code);
               if (!result.ok) {
-                setMessage({ ok: false, text: result.error });
+                banner.error(result.error);
                 return;
               }
               setCode("");
-              setMessage({ ok: true, text: w.done });
+              banner.success(w.done);
               router.refresh();
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
@@ -334,14 +325,6 @@ function SeatByCode() {
         </Button>
       </form>
       <p className={`mt-inline ${TYPE.caption}`}>{w.hint}</p>
-      {message && (
-        <p
-          role={message.ok ? "status" : "alert"}
-          className={`mt-row ${TYPE.rowMeta} ${message.ok ? "" : "text-[var(--nf-state-error)]"}`}
-        >
-          {message.text}
-        </p>
-      )}
     </section>
   );
 }
@@ -358,7 +341,6 @@ function HostBill({ table }: { table: HostReservationView }) {
   const w = words.bill;
   const [amount, setAmount] = useState("");
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   if (!table.seating) return null;
   const bill = table.bill ?? null;
@@ -366,13 +348,13 @@ function HostBill({ table }: { table: HostReservationView }) {
   const act = (job: () => Promise<{ ok: boolean; error?: string }>) =>
     start(async () => {
       try {
-        setError(null);
         const result = await job();
         if (!result.ok) {
-          setError(result.error ?? w.failed);
+          banner.error(result.error ?? w.failed);
           return;
         }
         setAmount("");
+        banner.success("Done");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -417,11 +399,6 @@ function HostBill({ table }: { table: HostReservationView }) {
           {bill ? w.sendInstead : w.send}
         </Button>
       </span>
-      {error && (
-        <p role="alert" className={`${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-          {error}
-        </p>
-      )}
     </div>
   );
 }

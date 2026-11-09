@@ -91,6 +91,11 @@ export const publicMetaEn = {
     signUp: { title: "Create your account" },
     forgotPassword: { title: "Reset your password" },
     resetPassword: { title: "Choose a new password" },
+    community: {
+      title: "Community promise",
+      description:
+        "What Vallo promises to every person on the platform: honest listings, careful viewings, money through licensed providers, a respectful community, and what we ask of you in return.",
+    },
   },
 };
 

@@ -7,7 +7,7 @@ import { resolveSession } from "@/lib/actions/session";
 import { isCryptoReference } from "@/lib/payments/references";
 import { readCryptoPayment } from "@/lib/crypto/service";
 import { activeProvider } from "@/lib/crypto/providers";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ResultScreen } from "@/components/app/ResultSheet";
 import { CryptoPaymentStatus } from "@/components/app/payments/crypto/CryptoPaymentStatus";
 import { withNext } from "@/lib/auth/next-link";
@@ -105,9 +105,8 @@ async function chargeHrefFor(client: SupabaseClient, bookingId: string): Promise
 
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-2xl px-md">
-      <PageHeader title={title} fallback="/bookings" />
+    <PageFrame title={title} fallback="/bookings" width="narrow">
       {children}
-    </div>
+    </PageFrame>
   );
 }

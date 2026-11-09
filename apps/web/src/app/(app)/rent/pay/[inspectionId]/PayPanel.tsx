@@ -8,6 +8,7 @@ import { PaymentGate } from "@/components/app/agreements/PaymentGate";
 import { NO_CUSTODY_SENTENCE, RAIL_COPY } from "@/lib/money/copy";
 import { LIVE_RAIL } from "@/lib/money/rails";
 import { startRentPayment } from "@/lib/rent/actions";
+import { VERIFY_ACTION } from "@/lib/identity/listing-verification-rule";
 import type { RentPayView } from "@/lib/rent/queries";
 import { ResultSheet } from "@/components/app/ResultSheet";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
@@ -79,7 +80,7 @@ type Phase =
      "not charged" (docs/SUCCESS_MOMENTS.md). */
   | { kind: "applying"; reference: string }
   | { kind: "stalled"; method: "card" }
-  | { kind: "error"; message: string; phoneGate?: boolean };
+  | { kind: "error"; message: string; phoneGate?: boolean; verifyGate?: boolean };
 
 function Option({
   icon,
@@ -186,7 +187,7 @@ export function PayPanel({
     const opened = await startRentPayment({ inspectionId: view.inspectionId, moveIn: view.moveIn });
     if (!opened.ok) {
       clearTimers();
-      setPhase({ kind: "error", message: opened.error, phoneGate: opened.gate === "phone" });
+      setPhase({ kind: "error", message: opened.error, phoneGate: opened.gate === "phone", verifyGate: opened.gate === "verification" });
       return null;
     }
     return opened.data.bookingId;
@@ -201,7 +202,7 @@ export function PayPanel({
     const result = await chargeSavedCard(chosenCard);
     clearTimers();
     if (!result.ok) {
-      setPhase({ kind: "error", message: result.error, phoneGate: result.gate === "phone" });
+      setPhase({ kind: "error", message: result.error, phoneGate: result.gate === "phone", verifyGate: result.gate === "verification" });
       return;
     }
     if (result.data.kind === "needs_hosted_checkout") {
@@ -529,7 +530,13 @@ export function PayPanel({
         )}
         actions={
           /* The phone gate's refusal: confirm the number, then come back. */
-          phase.kind === "error" && phase.phoneGate && phoneGateAction
+          phase.kind === "error" && phase.verifyGate
+            ? [
+                /* The long rental's identity gate (founder, 7 November 2026). */
+                { label: VERIFY_ACTION, href: "/verification", tone: "primary" },
+                { label: c.getHelp, href: "/help", tone: "quiet" },
+              ]
+            : phase.kind === "error" && phase.phoneGate && phoneGateAction
             ? [
                 { label: phoneGateAction.label, href: phoneGateAction.href, tone: "primary" },
                 { label: c.getHelp, href: "/help", tone: "quiet" },

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -44,13 +45,11 @@ export function ArrivalCheckCard({
   const [reason, setReason] = useState<ArrivalReportReason | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [pending, start] = useSafeTransition();
   const input = useRef<HTMLInputElement | null>(null);
 
   const send = (answer: "as_listed" | ArrivalReportReason) => {
-    setError(null);
     start(async () => {
       try {
         const result = await answerArrivalCheck({
@@ -60,19 +59,19 @@ export function ArrivalCheckCard({
           photos: answer === "as_listed" ? [] : photos,
         });
         if (!result.ok) {
-          setError(result.error || copy.failed);
+          banner.error(result.error || copy.failed);
           return;
         }
+        banner.success("Check submitted.");
         router.refresh();
       } catch {
-        setError(copy.failed);
+        banner.error(copy.failed);
       }
     });
   };
 
   const add = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    setError(null);
     setUploading(true);
     const added: string[] = [];
     try {
@@ -83,7 +82,7 @@ export function ArrivalCheckCard({
         const path = arrivalPhotoPath(bookingId, file.name, crypto.randomUUID());
         const uploaded = await uploadToStorage({ supabase, bucket: "arrival-evidence", path, body: file, contentType: file.type });
         if (!uploaded.ok) {
-          setError(copy.uploadFailed);
+          banner.error(copy.uploadFailed);
           break;
         }
         added.push(path);
@@ -92,7 +91,7 @@ export function ArrivalCheckCard({
       /* The client could not load or the network dropped mid-upload: the
          same honest line as a refused upload, and the photos already sent
          stay counted. */
-      setError(copy.uploadFailed);
+      banner.error(copy.uploadFailed);
     } finally {
       setPhotos((now) => [...now, ...added].slice(0, MAX_ARRIVAL_PHOTOS));
       setUploading(false);
@@ -200,11 +199,6 @@ export function ArrivalCheckCard({
         </form>
       )}
 
-      {error && (
-        <p role="alert" className="nf-body-sm mt-sm font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

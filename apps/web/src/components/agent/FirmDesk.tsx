@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { State } from "@/components/ui/State";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,7 +24,6 @@ type Copy = Dictionary["frontDoor"]["firm"];
 function AssignRow({ listing, team, copy }: { listing: FirmListing; team: FirmMember[]; copy: Copy }) {
   const router = useRouter();
   const [value, setValue] = useState(listing.assignedAgentId ?? "");
-  const [note, setNote] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   return (
     <li className="flex flex-col gap-2xs border-t border-[var(--nf-border-subtle)] pt-row first:border-t-0 first:pt-0">
@@ -40,11 +40,12 @@ function AssignRow({ listing, team, copy }: { listing: FirmListing; team: FirmMe
           onChange={(e) => {
             const next = e.target.value;
             setValue(next);
-            setNote(copy.saving);
             start(async () => {
               try {
                 const result = await assignFirmListing({ listingId: listing.listingId, agentId: next === "" ? null : next });
-                setNote(result.ok ? copy.saved : result.error);
+                /* Said by the one banner at the top of the screen (Grade 1). */
+                if (result.ok) banner.success(copy.saved);
+                else banner.error(result.error);
                 if (result.ok) router.refresh();
                 else setValue(listing.assignedAgentId ?? "");
               } catch (error) {
@@ -61,7 +62,6 @@ function AssignRow({ listing, team, copy }: { listing: FirmListing; team: FirmMe
           ))}
         </select>
       </label>
-      {note && <p className="nf-caption text-[var(--nf-content-secondary)]" role="status">{note}</p>}
     </li>
   );
 }
@@ -87,7 +87,6 @@ export function FirmDesk({
   const [areaAgents, setAreaAgents] = useState<Record<string, string>>(routing?.areaAgents ?? {});
   const [officeStart, setOfficeStart] = useState(routing?.officeStart ?? "09:00");
   const [officeEnd, setOfficeEnd] = useState(routing?.officeEnd ?? "17:00");
-  const [note, setNote] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   if (listings === null || team === null) {
@@ -198,11 +197,12 @@ export function FirmDesk({
           variant="primary"
           loading={pending}
           onClick={() => {
-            setNote(null);
             start(async () => {
               try {
                 const result = await setFirmRouting({ firmId, mode, areaAgents, officeStart, officeEnd });
-                setNote(result.ok ? copy.saved : result.error);
+                /* Said by the one banner at the top of the screen (Grade 1). */
+                if (result.ok) banner.success(copy.saved);
+                else banner.error(result.error);
                 if (result.ok) router.refresh();
               } catch (error) {
                 if (!tapFailedOffline(error)) throw error;
@@ -212,7 +212,6 @@ export function FirmDesk({
         >
           {pending ? copy.saving : copy.saveRouting}
         </Button>
-        {note && <p className="nf-caption text-[var(--nf-content-secondary)]" role="status">{note}</p>}
           </>
         )}
       </section>

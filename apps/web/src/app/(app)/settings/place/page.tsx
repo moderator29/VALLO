@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import { forPickers } from "@/components/app/welcome/welcome-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import Link from "next/link";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { resolveSession } from "@/lib/actions/session";
 import { withNext } from "@/lib/auth/next-link";
 import { listStates, readLocalGovernment, readOccupation } from "@/lib/places/queries";
 import { PlaceForm } from "./PlaceForm";
-import { UiIcon } from "@/design-system/icons/UiIcon";
-import { IconPlate } from "@/components/ui/IconPlate";
+import { EmptyState } from "@/components/app/Screen";
+import { EmptyActions } from "@/components/app/EmptyActions";
 
 export async function generateMetadata(): Promise<Metadata> {
   // Static metadata cannot read the locale cookie, and this tab title is the
@@ -44,25 +43,16 @@ export default async function PlacePage() {
 
   if (session.state !== "signed-in") {
     return (
-      <div className="mx-auto max-w-lg">
-        <PageHeader title={copy.screenTitle} fallback="/settings" />
-        <div className="nf-panel nf-panel--card block p-lg text-center sm:p-xl">
-          <IconPlate size="lg" className="mx-auto">
-            <UiIcon name="user" size={24} />
-          </IconPlate>
-          <h2 className="nf-h3 mt-md">{copy.accountTitle}</h2>
-          <p className="mx-auto mt-xs max-w-[42ch] text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {session.state === "unconfigured"
-              ? copy.accountBodyUnconfigured
-              : copy.accountBodySignedOut}
-          </p>
-          {session.state === "signed-out" && (
-            <Link href={withNext("/sign-in", "/settings/place")} className="nf-btn nf-btn--primary mt-md w-full sm:w-auto">
-              {t.common.signIn}
-            </Link>
-          )}
-        </div>
-      </div>
+      <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow">
+        <EmptyState
+          icon="globe-pin"
+          title={copy.accountTitle}
+          body={session.state === "unconfigured" ? copy.accountBodyUnconfigured : copy.accountBodySignedOut}
+          {...(session.state === "signed-out"
+            ? { action: <EmptyActions primary={{ label: t.common.signIn, href: withNext("/sign-in", "/settings/place") }} /> }
+            : {})}
+        />
+      </PageFrame>
     );
   }
 
@@ -82,15 +72,9 @@ export default async function PlacePage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-lg">
-      <PageHeader
-        title={copy.screenTitle}
-        subtitle={copy.screenSubtitle}
-        fallback="/settings"
-      />
-
+    <PageFrame title={copy.screenTitle} subtitle={copy.screenSubtitle} fallback="/settings" width="narrow">
       {states.length === 0 && (
-        <p className="nf-panel nf-panel--card block mb-md p-md text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
+        <p className="nf-panel nf-panel--card block p-md text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-muted)]">
           {copy.statesUnavailable}
         </p>
       )}
@@ -104,6 +88,6 @@ export default async function PlacePage() {
           occupationName: occupation?.name ?? "",
         }}
       />
-    </div>
+    </PageFrame>
   );
 }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { assertPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
 import type { DeviceLock } from "@/lib/security/device-lock";
-import { beginPasskeyUnlock, finishPasskeyUnlock } from "@/lib/passcode/passkey-unlock";
+import { beginPasskeyUnlock, finishPasskeyUnlock, type PasskeyUnlockStart } from "@/lib/passcode/passkey-unlock";
+import { noteDeviceKeyFailed, rememberDeviceKey, type DeviceKeyState } from "@/lib/platform/device-keys";
 
 /**
  * "Unlock with Face ID or fingerprint" (C14). The device proves the person
@@ -34,7 +35,8 @@ export function PasskeyUnlockKey({
 }: {
   disabled?: boolean;
   onUnlocked: () => void;
-  onFailed: () => void;
+  /** With what this phone now knows about its own key (`lib/platform/device-keys.ts`). */
+  onFailed: (device: DeviceKeyState) => void;
   /** `passcode.passkeyUnlock`. */
   label: string;
   /** The lock this device has, so the glyph matches the words (`readDeviceLock`). */
@@ -42,30 +44,65 @@ export function PasskeyUnlockKey({
   variant?: "key" | "door";
 }) {
   const [busy, setBusy] = useState(false);
+  /*
+   * THE CHALLENGE IS FETCHED BEFORE THE TAP (the Face ID bug, 7 November
+   * 2026). WebKit, in Safari and in the app's WKWebView alike, runs a WebAuthn
+   * ceremony only inside the tap that asked for it, and a server round trip
+   * between the tap and `navigator.credentials.get` can spend that
+   * permission on a phone network: the sheet never rose and the person saw
+   * "that did not work". So the challenge (five minutes, single use, bound to
+   * this session) is asked for when the key is drawn, and the tap goes
+   * straight to the phone's own Face ID. A challenge older than four minutes
+   * is asked for again first.
+   */
+  const ready = useRef<{ start: Extract<PasskeyUnlockStart, { state: "ready" }>; at: number } | null>(null);
+  const prefetch = useCallback(async () => {
+    try {
+      const start = await beginPasskeyUnlock();
+      ready.current = start.state === "ready" ? { start, at: Date.now() } : null;
+    } catch {
+      ready.current = null;
+    }
+  }, []);
+  useEffect(() => {
+    void prefetch();
+  }, [prefetch]);
 
   const run = async () => {
     if (busy) return;
     setBusy(true);
     try {
-      if (!(await platformLockAvailable())) return onFailed();
-      const start = await beginPasskeyUnlock();
-      if (start.state !== "ready") return onFailed();
+      const held = ready.current && Date.now() - ready.current.at < 4 * 60_000 ? ready.current.start : null;
+      ready.current = null;
+      let start: PasskeyUnlockStart | null = held;
+      if (!start) {
+        if (!(await platformLockAvailable())) return onFailed(noteDeviceKeyFailed());
+        start = await beginPasskeyUnlock();
+      }
+      if (start.state !== "ready") return onFailed("unknown");
       const proof = await assertPlatformKey({
         challenge: start.challenge,
         rpId: start.rpId,
         allow: start.credentialIds,
+        /* The sheet rises in well under a second; a ceremony that never
+           started must still answer the tap. */
+        waitMs: 20_000,
       });
-      if (!proof) return onFailed();
+      if (!proof) return onFailed(noteDeviceKeyFailed());
       const result = await finishPasskeyUnlock({
         challenge: start.challenge,
         ...proof,
       });
-      if ("ok" in result) onUnlocked();
-      else onFailed();
+      if (result.ok) {
+        rememberDeviceKey(proof.credentialId);
+        onUnlocked();
+      } else onFailed("unknown");
     } catch {
-      onFailed();
+      onFailed("unknown");
     } finally {
       setBusy(false);
+      /* Ready for the next tap. */
+      void prefetch();
     }
   };
 
@@ -78,7 +115,8 @@ export function PasskeyUnlockKey({
         full
         className="nf-passcode__bio"
         onClick={() => void run()}
-        disabled={disabled || busy}
+        disabled={disabled}
+        loading={busy}
         data-testid="passcode-passkey"
       >
         <LockGlyph lock={lock} />

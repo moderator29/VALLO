@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { dojahCheckStatus, startDojahCheck, type DojahStatus } from "@/lib/identity/dojah-actions";
 import { feedback } from "@/lib/ui/feedback";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE SELFIE CHECK ON /verification (Dojah EasyOnboard).
@@ -40,7 +41,6 @@ export function DojahPanel({
   const [note, setNote] = useState<string | null>(initialNote);
   const [url, setUrl] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const pollUntil = useRef(0);
 
@@ -52,6 +52,7 @@ export function DojahPanel({
       setNote(result.data.note);
       if (result.data.status === "passed" || result.data.status === "approved" || result.data.status === "verified") {
         feedback("success");
+        banner.success(copy.passed);
         pollUntil.current = 0;
         setOpen(false);
         router.refresh();
@@ -71,12 +72,11 @@ export function DojahPanel({
   }, [open, poll]);
 
   function begin() {
-    setMessage(null);
     start(async () => {
       try {
         const result = await startDojahCheck();
         if (!result.ok) {
-          setMessage(result.error);
+          banner.error(result.error);
           return;
         }
         if ("url" in result.data) {
@@ -88,11 +88,13 @@ export function DojahPanel({
         const s = result.data.status;
         if (s === "verified") {
           setStatus("verified");
+          /* The panel keeps the record; the banner says it (founder, 7 November 2026). */
+          banner.success(copy.passed);
           router.refresh();
         } else if (s === "in_review") setStatus("review");
-        else setMessage(s === "limit" ? copy.limit : copy.closed);
+        else banner.error(s === "limit" ? copy.limit : copy.closed);
       } catch {
-        setMessage(copy.failed);
+        banner.error(copy.failed);
       }
     });
   }
@@ -133,11 +135,6 @@ export function DojahPanel({
           {pending ? copy.opening : status === "none" || status === "opened" ? copy.start : copy.again}
         </Button>
       )}
-      {message && (
-        <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-          {message}
-        </p>
-      )}
       <p className="nf-caption text-[var(--nf-content-muted)]">{copy.privacy}</p>
       <Sheet
         open={open}
@@ -158,7 +155,7 @@ export function DojahPanel({
             src={url}
             title={copy.frameTitle}
             allow="camera; geolocation"
-            className="block h-[min(80dvh,46rem)] w-full rounded-[var(--nf-radius-card)] border-0"
+            className="block h-[min(80dvh,46rem)] w-full rounded-card border-0"
             data-testid="dojah-frame"
           />
         ) : null}

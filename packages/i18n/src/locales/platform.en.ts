@@ -208,6 +208,8 @@ export const platformEn = {
     reply: "Reply",
     answer: "Open inspections",
     openBooking: "Open the booking",
+    message: "Message",
+    callBack: "Call back",
   },
 
   /* V-77: the shortlist on the phone. MB and dates only; no claim the phone

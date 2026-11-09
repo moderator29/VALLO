@@ -1,11 +1,12 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { publishStory } from "@/lib/social/stories-actions";
 import { uploadFailureText, uploadToStorage, withTimeout } from "@/lib/media/upload";
@@ -63,12 +64,12 @@ export function StoryComposer({
 
   const [preview, setPreview] = useState<string | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
+  const [blobMeta, setBlobMeta] = useState<{ contentType: string; extension: string }>({ contentType: "image/webp", extension: "webp" });
   const [size, setSize] = useState<{ width: number; height: number } | null>(null);
   const [headline, setHeadline] = useState("");
   const [standfirst, setStandfirst] = useState("");
   const [place, setPlace] = useState("");
   const [areaId, setAreaId] = useState(areas[0]?.id ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [held, setHeld] = useState(false);
   const [pending, startTransition] = useSafeTransition();
   /* 0 to 1 while the picture is on its way, so "Publishing" is never a
@@ -142,32 +143,29 @@ export function StoryComposer({
   }
 
   async function choose(file: File) {
-    setError(null);
     if (!ACCEPTED.includes(file.type)) {
-      setError(STORY_FAILURE.wrongType);
+      banner.error(STORY_FAILURE.wrongType);
       return;
     }
     if (file.size > STORY_IMAGE_MAX_BYTES) {
-      setError(STORY_FAILURE.tooBig);
+      banner.error(STORY_FAILURE.tooBig);
       return;
     }
-    const prepared = await reencodeToJpeg(file, { maxEdge: STORY_IMAGE_MAX_EDGE });
-    if (!prepared) {
-      /* Deliberately not falling back to the original file. */
-      setError(STORY_FAILURE.reencode);
+    const encoded = await reencodePhoto(file, { maxEdge: STORY_IMAGE_MAX_EDGE });
+    if (!encoded) {
+      banner.error(STORY_FAILURE.reencode);
       return;
     }
-    /* Measured after the re-encode, so the row records the pixels that were
-       actually stored rather than the ones the camera produced. */
     try {
-      const bitmap = await createImageBitmap(prepared);
+      const bitmap = await createImageBitmap(encoded.blob);
       setSize({ width: bitmap.width, height: bitmap.height });
       bitmap.close();
     } catch {
       setSize(null);
     }
-    setBlob(prepared);
-    setPreview(URL.createObjectURL(prepared));
+    setBlob(encoded.blob);
+    setBlobMeta({ contentType: encoded.contentType, extension: encoded.extension });
+    setPreview(URL.createObjectURL(encoded.blob));
   }
 
   /* The picture and the headline are the story. A standfirst is optional,
@@ -183,41 +181,40 @@ export function StoryComposer({
 
   const publish = () => {
     if (!blob || !userId) {
-      setError(STORY_COPY.needsImage);
+      banner.error(STORY_COPY.needsImage);
       return;
     }
-    setError(null);
 
     startTransition(async () => {
       try {
         /* A throw (a dropped connection, a server action that did not answer)
-           is said here in the composer, never handed to the error boundary with
-           the person's writing still in it. */
+           is said by the one banner (Grade 1), never handed to the error
+           boundary with the person's writing still in it. */
         let stage: "upload" | "publish" = "upload";
         try {
           let path = uploaded.current?.blob === blob ? uploaded.current.path : null;
           if (!path) {
             const supabase = await loadBrowserClient();
             if (!supabase) {
-              setError(STORY_FAILURE.upload);
+              banner.error(STORY_FAILURE.upload);
               return;
             }
             /* The post id is not known yet, so the object goes under a fresh uuid in
                the person's own folder. The bucket's insert policy only checks the
                first path segment; the read policy resolves the post id out of the
                second, which the server action fills in when it writes the media row. */
-            const fresh = `${userId}/${crypto.randomUUID()}.jpg`;
+            const fresh = `${userId}/${crypto.randomUUID()}.${blobMeta.extension}`;
             const upload = await uploadToStorage({
               supabase,
               bucket: "social-media",
               path: fresh,
               body: blob,
-              contentType: "image/jpeg",
+              contentType: blobMeta.contentType,
               onProgress: setSent,
             });
             if (!upload.ok) {
               setSent(null);
-              setError(uploadFailureText(upload.reason));
+              banner.error(uploadFailureText(upload.reason), { retry: publish });
               return;
             }
             uploaded.current = { blob, path: fresh };
@@ -239,17 +236,18 @@ export function StoryComposer({
           );
 
           if (!result.ok) {
-            setError(result.error);
+            banner.error(result.error, { retry: publish });
             return;
           }
           if (result.data.held) {
             setHeld(true);
             return;
           }
+          banner.success("Story published");
           router.replace(`/stories/${result.data.storyId}`);
         } catch {
           setSent(null);
-          setError(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down);
+          banner.error(stage === "upload" ? STORY_FAILURE.upload : STORY_FAILURE.down, { retry: publish });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -356,15 +354,6 @@ export function StoryComposer({
             ))}
           </select>
         </label>
-      ) : null}
-
-      {error ? (
-        <p
-          role="alert"
-          className="rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-primary)]"
-        >
-          {error}
-        </p>
       ) : null}
 
       <Button type="submit" variant="primary" className="nf-story-form__share" loading={pending} disabled={!canPublish}>

@@ -1,9 +1,9 @@
+import { EmptyActions } from "@/components/app/EmptyActions";
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/locale";
 import { readMyBalance } from "@/lib/money/member-wallet";
 import { BALANCE_LEDE, BALANCE_TITLE } from "@/lib/money/balance-copy";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { BalanceView } from "@/components/money/balance/BalanceView";
 import { WalletHeader } from "@/components/money/balance/WalletChrome";
@@ -37,11 +37,7 @@ export default async function WalletPage() {
             icon="bank-column"
             title="Sign in to open Wallet"
             body={BALANCE_LEDE}
-            action={
-              <ButtonLink href={withNext("/sign-in", "/wallet")} variant="primary" size="lg">
-                Sign in
-              </ButtonLink>
-            }
+            action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", "/wallet") }} />}
           />
         </div>
       ) : (

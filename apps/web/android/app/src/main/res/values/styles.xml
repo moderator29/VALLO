@@ -42,6 +42,13 @@
         draws `splash_blank` on its own navy (capacitor.config.ts), so every
         Android version hands the page the same empty navy frame.
     -->
+    <!--
+        7 NOVEMBER 2026, THE FOUNDER'S RULING: the opening is drawn, on Android
+        as on the iPhone. The system splash stays the bare navy above, and the
+        launch overlay (LaunchMark.java) draws the exact mark in over the same
+        navy the moment the window first draws: the ring, the towers, the
+        wordmark, the version line, then the page.
+    -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@color/splash_ground</item>
         <item name="windowSplashScreenBackground">@color/splash_ground</item>

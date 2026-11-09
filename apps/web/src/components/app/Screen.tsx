@@ -137,12 +137,17 @@ export const TYPE = {
  * with its label beside or beneath it.
  */
 export const ICON = {
-  /** Inline with a line of text. Was 16. */
-  inline: 20,
-  /** Leading a row in a list. Was 16 to 20. */
-  row: 24,
-  /** Beside a section heading, or the mark on a fact. Was 16 to 20. */
-  section: 28,
+  /**
+   * Inline with a line of text. One step down from 20 on the founder's call
+   * of 8 November 2026 ("make the black and white icons smaller platform-wide,
+   * apart from the side nav and the bottom nav"). The nav rails set their own
+   * sizes and do not read this map, so they keep their weight.
+   */
+  inline: 16,
+  /** Leading a row in a list. One step down from 24. */
+  row: 20,
+  /** Beside a section heading, or the mark on a fact. One step down from 28. */
+  section: 24,
 } as const;
 
 /**
@@ -246,10 +251,9 @@ export function Stack({ children, className }: { children: ReactNode; className?
  *      reader is actually in.
  *   3. ONE ACTION, at full strength, and a quiet text link at most beside it.
  *
- * The object is 112px, up from the 64/80/96 spread. It is the subject of the
- * surface, which `BrandIcon`'s own documentation names as the one case that
- * earns a tile, and it still does not take one: a plinth under an object that
- * is already alone on an empty page is decoration.
+ * GRADE 1 (SW7): one thin glyph. The default is the named object's line twin
+ * on the kind's plate (`State`), never a 3D object derived from `icon`; a
+ * caller that wants the founder's art for a record moment names it with `art`.
  */
 export function EmptyState({
   icon,
@@ -262,7 +266,7 @@ export function EmptyState({
   "data-testid": testId,
 }: {
   icon: BrandIconName;
-  /** The founder's 3D object; see `State`'s `art`. */
+  /** The founder's art, asked for by name (record moments); see `State`'s `art`. */
   art?: Icon3DName | false;
   title: string;
   /** One or two sentences, true of the state the reader is actually in. */
@@ -275,9 +279,9 @@ export function EmptyState({
   "data-testid"?: string;
 }) {
   /* V-97: the anatomy now lives in the one State kit, and this is a thin
-     wrapper over it while the call sites move. The 80px object, the balanced
-     title and the one-step-down body are the kit's, unchanged; the reasons
-     for each are recorded in `components/ui/State.tsx`. */
+     wrapper over it while the call sites move. The glyph, the balanced title
+     and the one-step-down body are the kit's; the reasons for each are
+     recorded in `components/ui/State.tsx`. */
   return (
     <State
       kind="empty"
@@ -427,7 +431,7 @@ export function Surface({
       data-testid={testId}
       className={`${
         tone === "glass"
-          ? "nf-glass nf-surface--glass rounded-[var(--nf-radius-xl)]"
+          ? "nf-glass nf-surface--glass rounded-xl"
           : panelClass({ variant: "card", className: "block" })
       } p-card sm:p-cell ${className ?? ""}`}
     >

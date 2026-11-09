@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { resolveSession } from "@/lib/actions/session";
 import { readAssistantState } from "@/lib/assistant/access";
 import { ConsentForm } from "./ConsentForm";
@@ -21,9 +21,8 @@ export default async function AiAssistantConsentPage() {
   if (state.enabled) redirect("/settings/ai-assistant");
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title="Turn on VALLO AI Assistant" subtitle="Read, then decide" fallback="/settings/ai-assistant" />
+    <PageFrame title="Turn on VALLO AI Assistant" subtitle="Read, then decide" fallback="/settings/ai-assistant" width="narrow">
       <ConsentForm />
-    </div>
+    </PageFrame>
   );
 }

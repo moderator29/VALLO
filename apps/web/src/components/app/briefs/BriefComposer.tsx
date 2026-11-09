@@ -9,6 +9,7 @@ import { koboToNaira, nairaToKobo } from "@/lib/listings/search-params";
 import { BRIEF_PROPERTY_TYPES, briefAreasFor, briefDraftFrom, type BriefDraft, type BriefPropertyType } from "@/lib/briefs/brief";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-95: POST A BRIEF. Facts only, chosen rather than typed: a state, one to
@@ -43,8 +44,6 @@ export function BriefComposer({
   const [savedSearchId, setSavedSearchId] = useState<string | null>(null);
   const [budget, setBudget] = useState(draft.maxMinor !== null ? String(koboToNaira(draft.maxMinor)) : "");
   const [moveFrom, setMoveFrom] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [pending, start] = useSafeTransition();
   const areas = briefAreasFor(draft.stateCode);
 
@@ -59,10 +58,9 @@ export function BriefComposer({
   }
 
   function submit() {
-    setError(null);
     const naira = budget.trim() === "" ? null : Number(budget.replace(/[,\s]/g, ""));
     if (naira !== null && (!Number.isInteger(naira) || naira <= 0)) {
-      setError(copy.problems.failed);
+      banner.error(copy.problems.failed);
       return;
     }
     start(async () => {
@@ -75,10 +73,11 @@ export function BriefComposer({
           savedSearchId,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
-        setDone(true);
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        banner.success(copy.posted);
         setOpen(false);
         router.refresh();
       } catch (error) {
@@ -90,12 +89,7 @@ export function BriefComposer({
   if (!open) {
     return (
       <div className="flex flex-col gap-row">
-        {done && (
-          <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="status">
-            {copy.posted}
-          </p>
-        )}
-        <Button variant="primary" onClick={() => { setOpen(true); setDone(false); }} data-testid="brief-open">
+        <Button variant="primary" onClick={() => setOpen(true)} data-testid="brief-open">
           {copy.post}
         </Button>
       </div>
@@ -194,11 +188,6 @@ export function BriefComposer({
       <Button variant="primary" loading={pending} disabled={draft.areas.length === 0} onClick={submit}>
         {pending ? copy.posting : copy.submit}
       </Button>
-      {error && (
-        <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

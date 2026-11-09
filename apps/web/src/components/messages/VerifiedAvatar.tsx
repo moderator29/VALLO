@@ -61,9 +61,9 @@ import { type BadgeTier } from "@/lib/trust/badge-tier";
 export type AvatarSize = "sm" | "md" | "lg";
 
 const SHELL: Record<AvatarSize, string> = {
-  sm: "h-9 w-9 text-[0.875rem]",
-  md: "h-11 w-11 text-[1rem]",
-  lg: "h-12 w-12 text-[1.0625rem]",
+  sm: "h-9 w-9 text-[length:var(--nf-text-body-sm)]",
+  md: "h-11 w-11 text-[length:var(--nf-text-body)]",
+  lg: "h-12 w-12 text-[length:var(--nf-text-body-lg)]",
 };
 
 /**

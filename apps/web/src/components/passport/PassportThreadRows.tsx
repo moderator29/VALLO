@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { IconPlate } from "@/components/ui/IconPlate";
 import { sendMessage } from "@/lib/messages/actions";
 import { shareBody } from "@/components/app/messages/share";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 /** The words for the two rows, from the page's `t.passportV2`. */
 export type PassportSheet = {
@@ -58,27 +58,27 @@ export function PassportThreadRows({
   onDone?: () => void;
 }) {
   const [pending, startTransition] = useSafeTransition();
-  const [note, setNote] = useState<string | null>(null);
   const words = passport.words;
 
   function show() {
     if (!meId) return;
-    setNote(null);
     startTransition(async () => {
       try {
         const result = await sendMessage({ conversationId, body: shareBody({ kind: "passport", id: meId }) });
         if (!result.ok) {
-          setNote(result.error || words.failed);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(result.error || words.failed, { retry: show });
           return;
         }
         onDone?.();
+        banner.success(words.sent);
         /* The thread draws a card from the server's render, and the open
            thread keeps its own list of bubbles, so the new message would show
            as its words and path until the next load. Reload this thread once,
            the way blocking does, and the card is there. */
         window.location.assign(`/messages/${conversationId}`);
       } catch {
-        setNote(words.failed);
+        banner.error(words.failed);
       }
     });
   }
@@ -114,11 +114,6 @@ export function PassportThreadRows({
           <UiIcon name="chevron-right" size={16} className="shrink-0 text-[var(--nf-content-muted)]" />
         </Link>
       )}
-      {note ? (
-        <p role="alert" className="mt-xs nf-caption text-[var(--nf-state-error)]">
-          {note}
-        </p>
-      ) : null}
       {counterpartId ? (
         <Link href={`/passport/${counterpartId}`} className="nf-share-row mt-md" data-testid="thread-passport-view">
           <IconPlate size="sm" className="shrink-0">

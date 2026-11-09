@@ -10,6 +10,7 @@ import { AccommodationPhotoManager } from "../AccommodationPhotoManager";
 import { FacilitiesPicker } from "../FacilitiesPicker";
 import { StaysNote, StaysPlate } from "./StaysParts";
 import type { StaysStepProps } from "./types";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /* A coordinate written into the field, six places (about 11cm), through the
    one number formatter. No grouping, so the field reads back as a number. */
@@ -196,11 +197,8 @@ export function FacilitiesStep({ draft, userId, pending, runAsync, setNotice, ad
             {w.facilities.savePin}
           </Button>
         </div>
-        {typedBadPin ? (
-          <p className="nf-stays-plate__note" role="alert">
-            {w.facilities.badPinHelp}
-          </p>
-        ) : null}
+        {/* The words go to the one banner (founder, 7 November 2026). */}
+        <FieldProblem id="stays-pin-problem" message={typedBadPin ? w.facilities.badPinHelp : null} />
       </StaysPlate>
 
       <Button

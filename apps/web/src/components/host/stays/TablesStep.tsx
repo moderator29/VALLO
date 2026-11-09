@@ -21,6 +21,7 @@ import {
 import { StaysCountRow, StaysNote, StaysPlate, StaysRow } from "./StaysParts";
 import type { StaysStepProps } from "./types";
 import { countOf, formatNumber } from "@vallo/i18n/core";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * TABLES AND HOURS. `GOVERNING-11` screen four.
@@ -220,11 +221,11 @@ export function TablesStep({ draft, pending, runAsync, setNotice, advance, local
         <p className="nf-stays-plate__note">
           {w.tables.hoursNote}
         </p>
-        {backwards.length > 0 ? (
-          <p className="nf-stays-plate__note text-[var(--nf-state-error)]" role="alert">
-            {w.tables.backwards.replace("{days}", backwards.map((day) => day.label).join(", "))}
-          </p>
-        ) : null}
+        {/* The words go to the one banner (founder, 7 November 2026). */}
+        <FieldProblem
+          id="stays-hours-problem"
+          message={backwards.length > 0 ? w.tables.backwards.replace("{days}", backwards.map((day) => day.label).join(", ")) : null}
+        />
       </StaysPlate>
 
       <StaysPlate label={hw.steps.tableInventory}>

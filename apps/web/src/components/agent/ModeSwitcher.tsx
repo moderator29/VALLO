@@ -45,7 +45,7 @@ export function ModeSwitcher({
         type="button"
         disabled={pending}
         onClick={() => choose(other)}
-        className="flex w-full items-center gap-sm rounded-[var(--nf-radius-md)] px-sm py-sm text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-secondary)] transition-colors hover:bg-[var(--nf-glass-fill)] hover:text-[var(--nf-content-primary)] disabled:opacity-60"
+        className="flex w-full items-center gap-sm rounded-md px-sm py-sm text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-secondary)] transition-colors hover:bg-[var(--nf-glass-fill)] hover:text-[var(--nf-content-primary)] disabled:opacity-60"
       >
         <UiIcon name={other === "working" ? "briefcase" : "user"} size={20} />
         <span className="flex-1 text-left leading-tight">

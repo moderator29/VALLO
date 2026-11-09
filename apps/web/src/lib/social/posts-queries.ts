@@ -13,15 +13,26 @@ import "server-only";
  * feed that is briefly short.
  */
 
-import { isSupabaseConfigured } from "../supabase/env";
+import { SUPABASE_URL, isSupabaseConfigured } from "../supabase/env";
 import { createClient } from "../supabase/server";
 import { resolveSession } from "../actions/session";
 import { formatMoney } from "@vallo/i18n/core";
-import type { PostListing, PostView } from "@/components/social/feed/PostCard";
+import type { PostListing, PostRoommateListing, PostView } from "@/components/social/feed/PostCard";
+import { getDictionary } from "@vallo/i18n";
+import { isNotLive } from "../features/degrade";
+import { ROOMMATES_ROUTES, roommatePhotoUrl } from "../features/roommates/model";
 import { EDIT_WINDOW_MINUTES } from "./posts-schema";
 import { listingPhotoUrl, readMediaFor, type SignedMedia } from "./posts-media";
 import { encodeFeedCursor, parseFeedCursor } from "./posts-cursor";
 import { DELETED_STATUS, conversationIsGone, pruneDeleted } from "./deleted-posts";
+import {
+  POST_LISTING_COLUMNS,
+  amenityLabels,
+  countOrNull,
+  firstPhotoPath,
+  statedPrice,
+  type PostListingRow,
+} from "../features/post-listing/model";
 
 const POST_COLUMNS = `
   id, area_id, root_id, parent_id, depth, author_id, author_kind, kind, body,
@@ -107,7 +118,77 @@ type Enrichment = {
   media: Map<string, SignedMedia[]>;
   /** The flat a post is about, by listing id. */
   listings: Map<string, PostListing>;
+  /** A roommate post shared to the feed (`posts.roommate_listing_id`), by post id. */
+  roommates: Map<string, PostRoommateListing>;
 };
+
+/**
+ * VALLO ROOMMATES ON THE FEED (8 November 2026). A roommate post shared to
+ * the feed is a GIST with `posts.roommate_listing_id` set. That column arrives
+ * with the roommate SQL, so it is read on its own here rather than added to
+ * `POST_COLUMNS`: before the SQL is pasted the read answers "no such column",
+ * this returns nothing, and every feed read stays exactly as it was. The
+ * room's summary goes through `roommate_listings`' own policy, so a post that
+ * was paused or removed since simply draws no card.
+ */
+async function readRoommateShares(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  postIds: string[],
+): Promise<Map<string, PostRoommateListing>> {
+  const out = new Map<string, PostRoommateListing>();
+  if (!postIds.length) return out;
+  try {
+    const db = supabase as unknown as import("@supabase/supabase-js").SupabaseClient;
+    const { data: links, error } = await db.from("posts").select("id, roommate_listing_id").in("id", postIds).not("roommate_listing_id", "is", null);
+    if (error || !links?.length) {
+      if (error && !isNotLive(error)) console.error("[feed] roommate shares read failed", error.code);
+      return out;
+    }
+    const byPost = links as { id: string; roommate_listing_id: string }[];
+    const ids = [...new Set(byPost.map((l) => l.roommate_listing_id))];
+    const { data: rooms } = await db
+      .from("roommate_listings")
+      .select("id, kind, status, title, city, area, rent_minor, rent_period, share_minor, photos, verified_at")
+      .in("id", ids)
+      .eq("status", "live");
+    const R = getDictionary("en").roommates;
+    const byId = new Map<string, PostRoommateListing>();
+    for (const r of (rooms ?? []) as {
+      id: string;
+      kind: "room_offer" | "roommate_wanted" | "together";
+      title: string;
+      city: string | null;
+      area: string | null;
+      rent_minor: number | null;
+      rent_period: "month" | "year";
+      share_minor: number | null;
+      photos: string[] | null;
+      verified_at: string | null;
+    }[]) {
+      const price = r.share_minor ?? r.rent_minor;
+      const photo = r.photos?.[0] ?? null;
+      byId.set(r.id, {
+        id: r.id,
+        href: ROOMMATES_ROUTES.listing(r.id),
+        title: r.title,
+        kindLabel: R.listingKinds[r.kind] ?? R.title,
+        place: [r.area, r.city].filter(Boolean).join(", "),
+        priceLabel: price !== null ? formatMoney(price, "en") : null,
+        periodLabel: price !== null ? (R.perPeriod[r.rent_period] ?? "") : "",
+        photoUrl: photo ? roommatePhotoUrl(SUPABASE_URL, photo) : null,
+        verified: Boolean(r.verified_at),
+        words: { kicker: R.entryX.feedKicker, view: R.entryX.feedView, verified: R.entryX.feedVerified },
+      });
+    }
+    for (const l of byPost) {
+      const room = byId.get(l.roommate_listing_id);
+      if (room) out.set(l.id, room);
+    }
+    return out;
+  } catch {
+    return out;
+  }
+}
 
 /**
  * The flats the posts on this page are about.
@@ -135,40 +216,37 @@ async function readPostListings(
   const out = new Map<string, PostListing>();
   if (listingIds.length === 0) return out;
   try {
+    /* The columns `listings` really has (Agent FEATURES, 7 November 2026):
+       the old select named `price_per_night_minor` and `price_period`, which
+       do not exist, so this read failed and no plate ever rendered. The
+       mapping is pure and tested in `lib/features/post-listing/model.ts`. */
     const { data, error } = await supabase
       .from("listings")
-      .select(
-        "id, title, area, city, price_per_night_minor, price_period, listing_photos ( storage_path, position )",
-      )
+      .select(POST_LISTING_COLUMNS)
       .in("id", listingIds)
       .eq("status", "PUBLISHED");
     if (error || !data) return out;
 
-    for (const row of data as unknown as {
-      id: string;
-      title: string;
-      area: string | null;
-      city: string | null;
-      price_per_night_minor: number | string | null;
-      price_period: string | null;
-      listing_photos: { storage_path: string; position: number }[] | null;
-    }[]) {
-      const first = [...(row.listing_photos ?? [])].sort((a, b) => a.position - b.position)[0];
-      const yearly = row.price_period === "year";
+    for (const row of data as unknown as PostListingRow[]) {
+      const price = statedPrice(row);
       out.set(row.id, {
         id: row.id,
         title: row.title,
         area: row.area ?? "",
         city: row.city ?? "",
-        priceLabel: formatMoney(Number(row.price_per_night_minor ?? 0), "en"),
-        periodLabel: yearly ? "a year" : "a night",
-        photoUrl: listingPhotoUrl(first?.storage_path),
+        priceLabel: price ? formatMoney(price.minor, "en") : "",
+        periodLabel: price?.period ?? "",
+        photoUrl: listingPhotoUrl(firstPhotoPath(row)),
         /* The verified mark is first-party inventory only, and a PUBLISHED row
            in `public.listings` is first-party by definition: it was reviewed by
            an admin before it could reach that status. `listings` carries no
            `verified` column, and the catalogue read reaches the same conclusion
            the same way. */
         verified: true,
+        kind: price?.kind ?? "property",
+        beds: countOrNull(row.bedrooms),
+        baths: countOrNull(row.bathrooms),
+        amenities: amenityLabels(row),
       });
     }
     return out;
@@ -199,7 +277,7 @@ async function enrich(
   ];
   const postIds = rows.map((r) => r.id);
 
-  const [profiles, areas, mods, reactions, reposts, listings] = await Promise.all([
+  const [profiles, areas, mods, reactions, reposts, listings, roommates] = await Promise.all([
     authorIds.length
       ? supabase
           .from("social_profiles")
@@ -232,6 +310,7 @@ async function enrich(
           .in("post_id", postIds)
       : Promise.resolve({ data: [] as never[] }),
     readPostListings(supabase, listingIds),
+    readRoommateShares(supabase, postIds),
   ]);
 
   const authors = new Map<string, ReturnType<() => Enrichment["authors"] extends Map<string, infer V> ? V : never>>();
@@ -278,7 +357,7 @@ async function enrich(
      trips. */
   const media = await readMediaFor(supabase, postIds);
 
-  return { authors, moderatorAreas, liked, saved, reposted, areas: areaMap, media, listings };
+  return { authors, moderatorAreas, liked, saved, reposted, areas: areaMap, media, listings, roommates };
 }
 
 /**
@@ -358,6 +437,7 @@ function toView(row: RawPost, e: Enrichment, viewerId: string | null): PostView 
     areaName: area?.name ?? null,
     areaSlug: area?.slug ?? null,
     listing: removed || !row.listing_id ? null : (e.listings.get(row.listing_id) ?? null),
+    roommateListing: removed ? null : (e.roommates.get(row.id) ?? null),
     /* The assistant's own note about where its answer came from. Written into
        `payload` by `summonBot` and, until it was, a field on every card that was
        hard-coded null beside a renderer that had always been ready for it. */
@@ -527,6 +607,10 @@ async function readFeedPage(
      an author their own removed rows, so the feed excludes them here, at the
      read, rather than drawing a tombstone in somebody's timeline. */
   let query = supabase.from("posts").select(POST_COLUMNS).neq("status", DELETED_STATUS);
+
+  /* Circle posts stay in Circle: a post written inside a community is read
+     by `lib/features/circle`, never by the Around feed. */
+  query = query.is("community_id", null);
 
   if (areaIds === null) {
     /* Everywhere. No area predicate at all; the policy is the filter. */

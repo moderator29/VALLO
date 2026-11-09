@@ -19,7 +19,10 @@ import { resolveSession } from "@/lib/actions/session";
 import { shelfFromListing } from "@/lib/offline/shelf";
 import { comparable, compareTable } from "@/lib/saved/compare";
 import { SavedCompare } from "./SavedCompare";
+import { SavedSort, type SavedSortKey } from "./SavedSort";
+import { ShareCollection } from "./ShareCollection";
 import { readSavedChanges } from "@/lib/saved/changes";
+import { SavedRoommates } from "@/components/roommates/SavedRoommates";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -58,8 +61,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * so the board is one shortlist in the order the person built it rather than
  * two piles with a heading between them.
  */
-export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string }> }) {
-  const { list } = await searchParams;
+export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string; sort?: string }> }) {
+  const { list, sort } = await searchParams;
   const locale = await getLocale();
   const t = getDictionary(locale);
 
@@ -144,7 +147,13 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
       lists: listsFor(entry.kind === "restaurant" ? "restaurant" : "accommodation", entry.row.entity_id),
     })),
   ].sort((a, b) => b.savedAt - a.savedAt);
-  const items = inCollection(allItems, activeList);
+
+  const sortKey: SavedSortKey = (["recent", "name", "price-low", "price-high"] as const).includes(sort as SavedSortKey)
+    ? (sort as SavedSortKey)
+    : "recent";
+
+  const sorted = sortSavedItems(allItems, sortKey, entries);
+  const items = inCollection(sorted, activeList);
 
   return (
     <PullToRefresh className="nf-cat-surface mx-auto max-w-3xl">
@@ -174,6 +183,12 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
       {owner && <ShelfSync owner={owner} items={shelf} copy={t.platform.shelf} locale={locale} />}
       {session.state === "signed-in" && allItems.length > 0 ? (
         <CollectionsBar collections={collections} active={activeList?.id ?? null} />
+      ) : null}
+      {allItems.length > 1 ? (
+        <div className="mb-heading flex items-center gap-xs">
+          <SavedSort active={sortKey} />
+          <ShareCollection collection={activeList} />
+        </div>
       ) : null}
       <SavedBoard
         items={items}
@@ -215,6 +230,11 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
           />
         }
       />
+      {/* Vallo Roommates: saved posts and people, on the same lists. */}
+      <SavedRoommates
+        onlyKeys={activeList?.keys ?? null}
+        listFor={(kind, id) => (session.state === "signed-in" ? <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} /> : undefined)}
+      />
     </PullToRefresh>
   );
 }
@@ -223,4 +243,38 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
 function shelfCopies(listings: Parameters<typeof shelfFromListing>[0][], short: Parameters<typeof shelfFromListing>[2]) {
   const readAt = Date.now();
   return listings.map((listing) => shelfFromListing(listing, readAt, short));
+}
+
+function sortSavedItems(
+  items: SavedBoardItem[],
+  key: SavedSortKey,
+  entries: { listing: { title: string; priceMinor?: number | null; moveInCostMinor?: number | null } }[],
+): SavedBoardItem[] {
+  if (key === "recent") return items;
+  const priceOf = (item: SavedBoardItem): number => {
+    for (const e of entries) {
+      if (e.listing.title && item.id) {
+        const l = e.listing as { id?: string; priceMinor?: number | null; moveInCostMinor?: number | null };
+        if (l.id === item.id) return l.moveInCostMinor ?? l.priceMinor ?? Infinity;
+      }
+    }
+    return Infinity;
+  };
+  const copy = [...items];
+  switch (key) {
+    case "name":
+      return copy.sort((a, b) => {
+        const aEntry = entries.find((e) => (e.listing as { id?: string }).id === a.id);
+        const bEntry = entries.find((e) => (e.listing as { id?: string }).id === b.id);
+        const aTitle = (aEntry?.listing.title ?? "").toLowerCase();
+        const bTitle = (bEntry?.listing.title ?? "").toLowerCase();
+        return aTitle.localeCompare(bTitle);
+      });
+    case "price-low":
+      return copy.sort((a, b) => priceOf(a) - priceOf(b));
+    case "price-high":
+      return copy.sort((a, b) => priceOf(b) - priceOf(a));
+    default:
+      return copy;
+  }
 }

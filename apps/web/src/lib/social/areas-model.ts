@@ -1,3 +1,7 @@
+import { socialAreaEn, socialAreaFailureEn, socialAreaKindHintEn, socialAreaKindLabelEn } from "@vallo/i18n/en/social";
+
+const _s = { area: socialAreaEn, areaFailure: socialAreaFailureEn, areaKindHint: socialAreaKindHintEn, areaKindLabel: socialAreaKindLabelEn };
+
 /**
  * Around: the shapes and the words for places.
  *
@@ -16,19 +20,9 @@ export const AREA_KINDS = ["CITY", "AREA", "ESTATE", "CAMPUS"] as const;
 
 export type AreaKind = (typeof AREA_KINDS)[number];
 
-export const AREA_KIND_LABEL: Record<AreaKind, string> = {
-  CITY: "City",
-  AREA: "Area",
-  ESTATE: "Estate",
-  CAMPUS: "Campus",
-};
-
-export const AREA_KIND_HINT: Record<AreaKind, string> = {
-  CITY: "A whole city, like Abuja.",
-  AREA: "A neighbourhood people name in conversation, like Yaba or Gwagwalada.",
-  ESTATE: "One gated estate, where the gate and the generator are shared.",
-  CAMPUS: "A university or polytechnic and the streets around it.",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+export const AREA_KIND_LABEL: Record<AreaKind, string> = _s.areaKindLabel as Record<AreaKind, string>;
+export const AREA_KIND_HINT: Record<AreaKind, string> = _s.areaKindHint as Record<AreaKind, string>;
 
 export const AREA_STATUSES = [
   "PROPOSED",
@@ -94,41 +88,8 @@ export const MODERATOR_REASON_MIN = 40;
 
 export const MODERATOR_REASON_MAX = 600;
 
-export const AREA_COPY = {
-  /** The one line that explains what Around is, to someone who has never seen it. */
-  what: "Places on Vallo, kept by the people who actually live around them.",
-
-  proposePending:
-    "Your place is with us. We look at every one by hand, usually within a day, and you will get a notification either way.",
-
-  proposeWhy:
-    "We approve places one at a time so every one has somebody watching it. A place nobody is watching becomes a place nobody trusts.",
-
-  joinedNone:
-    "You have not joined a place yet. Join the ones you live in, stayed in, or care about, and they show up here.",
-
-  noneOpenYet:
-    "No places are open here yet. If you know one worth opening, tell us and we will look at it.",
-
-  paused:
-    "This place is paused while we sort something out. Nothing has been deleted and it will be back.",
-
-  moderatorPending:
-    "Your application is with us. We read every one, and you will hear either way.",
-
-  slowMode:
-    "This place is new, so posting needs a confirmed phone number and a first post is read before it goes up. That lifts once the place finds its feet.",
-} as const;
-
-export const AREA_FAILURE = {
-  down: "We could not do that just now. Please try again in a moment.",
-  gone: "That place is no longer open.",
-  notMember: "Join this place first, then you can apply to look after it.",
-  duplicate: "Somebody has already suggested that place. We will look at it.",
-  alreadyApplied:
-    "You already have an application open for this place. We will come back to you on it.",
-  alreadyJoined: "You are already in this place.",
-} as const;
+export const AREA_COPY = _s.area;
+export const AREA_FAILURE = _s.areaFailure;
 
 /**
  * The rate limits, named once. The numbers are argued in

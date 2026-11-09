@@ -57,6 +57,9 @@ export const dropPostSchema = z.object({
    * feed that is not a single place's own.
    */
   areaId: z.string().uuid("Choose a place to post in.").optional(),
+  /** A live listing featured in the post (property-powered posts). The
+      database refuses one that is not PUBLISHED (`posts_genuine_listing`). */
+  listingId: z.string().uuid("That listing could not be found.").optional(),
   kind: z.enum(COMPOSABLE_KINDS),
   body: z
     .string()

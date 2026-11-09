@@ -8,6 +8,7 @@ import { addAccommodationDraft } from "@/lib/host/actions";
 import { StaysHero, StaysNote, StaysPlate, StaysRow, StaysStepper } from "./StaysParts";
 import type { StaysStepProps } from "./types";
 import { countOf } from "@vallo/i18n/core";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * YOUR HOTEL. `GOVERNING-10` screen one, and `GOVERNING-09` screen four.
@@ -124,13 +125,11 @@ export function HotelStep({
             value={draft.cacNumber}
             inputMode="text"
             aria-invalid={fieldErrors.cacNumber ? true : undefined}
+            aria-describedby={fieldErrors.cacNumber ? "stays-cac-problem" : undefined}
             onChange={(event) => set("cacNumber", event.target.value)}
           />
-          {fieldErrors.cacNumber ? (
-            <p className="nf-stays-plate__note" role="alert">
-              {fieldErrors.cacNumber}
-            </p>
-          ) : null}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="stays-cac-problem" message={fieldErrors.cacNumber} />
         </StaysPlate>
       )}
 

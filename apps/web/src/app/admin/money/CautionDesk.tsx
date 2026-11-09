@@ -6,6 +6,7 @@ import { ruleCautionDispute, ruleCautionReturn } from "@/lib/admin/caution-desk-
 import type { CautionDesk, CautionDispute, ContestedReturn } from "@/lib/admin/reads/caution-desk";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import type { RulingWords } from "../_components/rulings";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE CAUTION DESK. V-36.
@@ -37,17 +38,19 @@ const METHOD_LABEL: Record<string, string> = { bank_transfer: "bank transfer", c
  * that was refused.
  */
 function useRun() {
-  const [message, setMessage] = useState<string | null>(null);
   const run = async (fn: () => Promise<{ ok: boolean; error?: string }>, done: string): Promise<boolean> => {
     const result = await fn();
-    setMessage(result.ok ? done : (result.error ?? "That did not go through."));
+    /* The outcome goes to the banner. No retry on a refusal: a ruling moves
+       money, so trying again means sliding again. */
+    if (result.ok) banner.success(done);
+    else banner.error(result.error ?? "That did not go through.");
     return result.ok;
   };
-  return { message, run };
+  return { run };
 }
 
 function DisputeItem({ row, locale, words }: { row: CautionDispute; locale: Locale; words: RulingWords }) {
-  const { message, run } = useRun();
+  const { run } = useRun();
   const [allowed, setAllowed] = useState(String(row.amountMinor / 100));
   const [reason, setReason] = useState("");
   return (
@@ -65,12 +68,7 @@ function DisputeItem({ row, locale, words }: { row: CautionDispute; locale: Loca
         {row.photoUrl ? (
           // A signed, short-lived URL to a private object.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.photoUrl} alt="" className="mt-xs h-24 w-24 rounded-[var(--nf-radius-sm)] object-cover" />
-        ) : null}
-        {message ? (
-          <p role="status" className="mt-2xs text-[length:var(--nf-text-caption)]">
-            {message}
-          </p>
+          <img src={row.photoUrl} alt="" className="mt-xs h-24 w-24 rounded-sm object-cover" />
         ) : null}
       </div>
       <div className="nf-admin-queue-row__actions">
@@ -108,7 +106,7 @@ function DisputeItem({ row, locale, words }: { row: CautionDispute; locale: Loca
 }
 
 function ReturnItem({ row, locale, words }: { row: ContestedReturn; locale: Locale; words: RulingWords }) {
-  const { message, run } = useRun();
+  const { run } = useRun();
   const [reason, setReason] = useState("");
   const rule = (outcome: "received" | "not_received") =>
     run(() => ruleCautionReturn({ returnId: row.returnId, outcome, reason }), "Ruled. Both parties were told.");
@@ -126,11 +124,6 @@ function ReturnItem({ row, locale, words }: { row: ContestedReturn; locale: Loca
             Open the tenancy file
           </a>
         </p>
-        {message ? (
-          <p role="status" className="mt-2xs text-[length:var(--nf-text-caption)]">
-            {message}
-          </p>
-        ) : null}
       </div>
       <div className="nf-admin-queue-row__actions">
         <div className="grid gap-inline">

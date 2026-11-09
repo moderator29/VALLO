@@ -23,6 +23,8 @@ export type PushTarget = {
   auth: string | null;
   /** The safe handle. This is what goes in a log line or an alert. */
   deviceRef: string;
+  /** The native binary's version (`push_tokens.app_version`), when the shell sent it. */
+  appVersion?: string | null;
 };
 
 /** What a person sees on their lock screen. */
@@ -48,6 +50,16 @@ export type PushPayload = {
   call?: boolean;
   /** V-53: up to two buttons, each a destination on our origin. */
   actions?: import("./actions").PushAction[];
+  /**
+   * A1 to A3 (rich push): the family (lib/push/family.ts), which picks the
+   * Android channel and the iOS category; the header line drawn above the
+   * body; and the picture, an https address a phone can fetch with no
+   * session (lib/push/imagery.ts). All optional: a push without them is the
+   * push it always was.
+   */
+  category?: import("./family").PushFamily;
+  subtitle?: string;
+  image?: string;
 };
 
 /**

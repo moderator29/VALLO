@@ -166,7 +166,7 @@ export function Verifying({
         <ButtonLink href="/sign-up/verify" variant="primary" size="lg" className="mt-7">
           {a.enterCodeInstead}
         </ButtonLink>
-        <p className="mt-5 text-[0.8125rem] text-[var(--nf-content-muted)]">
+        <p className="mt-5 text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
           <Link
             href="/sign-in"
             className="nf-tap underline-offset-4 hover:text-[var(--nf-content-secondary)] hover:underline"

@@ -27,21 +27,11 @@ export type ContactPolicy = (typeof CONTACT_POLICIES)[number];
  * being able to message anyone by default is how a social layer becomes a
  * harassment surface.
  */
-export const CONTACT_POLICY_COPY: Record<ContactPolicy, { title: string; detail: string }> = {
-  REQUEST: {
-    title: "Ask me first",
-    detail: "Someone new has to send a request before they can message you.",
-  },
-  OPEN: {
-    title: "Anyone can message me",
-    detail: "People around you can open a chat without asking first.",
-  },
-};
-
-export const PIDGIN_COPY = {
-  title: "Pidgin is welcome",
-  detail: "Tells people, and the assistant, that they can reply to you in Pidgin.",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/social.en.ts`. */
+import { socialContactPolicyEn, socialPidginEn } from "@vallo/i18n/en/social";
+const _dict = { contactPolicy: socialContactPolicyEn, pidgin: socialPidginEn };
+export const CONTACT_POLICY_COPY = _dict.contactPolicy as Record<ContactPolicy, { title: string; detail: string }>;
+export const PIDGIN_COPY = _dict.pidgin;
 
 /* ------------------------------------------------------------------ fields */
 

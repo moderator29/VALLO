@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import type { RespondCopy } from "./agent-copy";
 import { Button } from "@/components/ui/Button";
@@ -31,7 +32,6 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
   const [identity, setIdentity] = useState<UploadState | null>(null);
   const [address, setAddress] = useState<UploadState | null>(null);
   const [registration, setRegistration] = useState<UploadState | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [acceptPay, setAcceptPay] = useState(false);
@@ -47,7 +47,6 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
   }
 
   function send() {
-    setError(null);
     /* Ruling 6: the resubmission records the Terms, the Privacy Policy and
        the pay-on-Vallo statement, as the first submission did. */
     if (!acceptTerms || !acceptPay) {
@@ -63,7 +62,7 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
       try {
         const result = await respondToReview({ answer, documents, acceptTerms, acceptPayOnVallo: acceptPay });
         if (result.ok) setSent(true);
-        else setError(result.error);
+        else banner.error(result.error);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -130,11 +129,6 @@ export function RespondToReview({ t, business = false }: { t: RespondCopy; busin
         showError={askedTicks}
       />
 
-      {error ? (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      ) : null}
 
       <Button variant="primary" size="lg" onClick={send} disabled={pending}>
         {pending ? copy.sending : copy.send}

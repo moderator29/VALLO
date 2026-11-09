@@ -1,5 +1,6 @@
 "use client";
 
+import { CONNECTION_BACK_EVENT } from "@/lib/offline/connection";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ClientCopy } from "@/lib/i18n/client-copy-of";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -243,6 +244,8 @@ export function OfflineTray() {
     /* After first paint, and then on every return of the connection. */
     const first = window.setTimeout(kick, 1_500);
     window.addEventListener("online", kick);
+    /* The signal came back without the browser saying so (connection manager). */
+    window.addEventListener(CONNECTION_BACK_EVENT, kick);
     /* While a payment is unresolved, ask again every minute. */
     const minute = window.setInterval(() => {
       if (listInflight().length > 0) kick();
@@ -251,6 +254,7 @@ export function OfflineTray() {
       window.clearTimeout(first);
       window.clearInterval(minute);
       window.removeEventListener("online", kick);
+      window.removeEventListener(CONNECTION_BACK_EVENT, kick);
     };
   }, [run]);
 

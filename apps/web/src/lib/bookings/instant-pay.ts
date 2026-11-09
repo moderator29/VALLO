@@ -14,6 +14,7 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../supabase/database.types";
+import { getDictionary } from "@vallo/i18n";
 
 /**
  * How long an unpaid instant booking is held before the sweep gives its
@@ -22,13 +23,11 @@ import type { Database } from "../supabase/database.types";
  */
 export const INSTANT_PAY_WINDOW_MINUTES = 30;
 
-/**
- * The room checkout's words with the switch on. English only for now, like the
- * rest of the stay panel; they move into @vallo/i18n with the stays restyle.
- */
+/** SW11: source of truth is now `packages/i18n/src/locales/inspections.en.ts`. */
+const _ir = getDictionary("en").inspections.instantRoom;
 export const INSTANT_ROOM_COPY = {
-  action: "Book and pay",
-  body: `This is the hotel's own price. Book now and pay by card on the next screen; the payment goes straight to the hotel. Your room is held for ${INSTANT_PAY_WINDOW_MINUTES} minutes while you pay.`,
+  action: _ir.action,
+  body: _ir.bodyTemplate.replace("{minutes}", String(INSTANT_PAY_WINDOW_MINUTES)),
 } as const;
 
 type AgreementFacts = {

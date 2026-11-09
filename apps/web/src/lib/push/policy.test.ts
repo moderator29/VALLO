@@ -359,3 +359,57 @@ describe("an incoming call's ring push (27 October 2026)", () => {
     expect(plain.payload.ttlSeconds).toBeUndefined();
   });
 });
+
+describe("a muted conversation", () => {
+  const id = "3f1c2b8e-1111-4222-8333-123456789abc";
+  it("reads the conversation from the link", async () => {
+    const { conversationOf } = await import("./policy");
+    expect(conversationOf(`/messages/${id}`)).toBe(id);
+    expect(conversationOf(`/messages/${id}?m=1`)).toBe(id);
+    expect(conversationOf("/messages")).toBeNull();
+    expect(conversationOf("/bookings/x")).toBeNull();
+    expect(conversationOf(null)).toBeNull();
+  });
+});
+
+describe("decide with a muted conversation", () => {
+  const id = "3f1c2b8e-1111-4222-8333-123456789abc";
+  const now = new Date("2026-11-07T12:00:00Z");
+  const base: QueuedNotification = {
+    queueId: "q",
+    userId: "u",
+    kind: "message" as QueuedNotification["kind"],
+    title: "New message",
+    body: "Hello",
+    href: `/messages/${id}`,
+    createdAt: now,
+    expiresAt: new Date(now.getTime() + 60 * 60 * 1000),
+  };
+  it("suppresses a push for a muted thread and sends the others", () => {
+    const muted = decide({ notification: base, settings: {}, now, mutedConversations: new Set([id]) });
+    expect(muted).toEqual({ action: "suppress", outcome: "suppressed_preference" });
+    const other = decide({ notification: base, settings: {}, now, mutedConversations: new Set(["00000000-0000-4000-8000-000000000000"]) });
+    expect(other.action).not.toBe("suppress");
+  });
+});
+
+describe("lock-screen words on the push path (8 November 2026)", () => {
+  it("uses the roommate helper's words for a request with no note", () => {
+    const decision = decide({
+      notification: {
+        queueId: "q-rm",
+        userId: "u1",
+        kind: "social" as QueuedNotification["kind"],
+        title: "Ada is interested in sharing a home",
+        body: null,
+        href: "/roommates/me?tab=requests",
+        createdAt: at("2026-03-02T11:59:00Z"),
+        expiresAt: at("2026-03-03T12:00:00Z"),
+      },
+      settings: {},
+      now: at("2026-03-02T12:00:00Z"),
+    });
+    expect(decision.action).toBe("send");
+    if (decision.action === "send") expect(decision.payload.body).toBe("Open Roommates to answer");
+  });
+});

@@ -1338,6 +1338,17 @@ const DEVICE_COLLAPSE_AT = 3;
  * is a branch a test can reach without a browser, which is the reason it is a
  * function rather than a block inside the listener.
  */
+/* An https picture for a notification, or null. */
+function pushImageFrom(value) {
+  if (typeof value !== "string" || value.length > 1024) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function notificationFromPayload(raw) {
   const payload = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
 
@@ -1350,6 +1361,11 @@ function notificationFromPayload(raw) {
     typeof payload.tag === "string" && payload.tag.trim().length > 0 ? payload.tag : "vallo";
   const urgent = payload.urgent === true;
   const actions = pushActionsFrom(payload.actions);
+  /* A3 (rich push, 7 November 2026): the place's photograph or the writer's
+     face, drawn large where the browser can (Chrome on Android, Windows).
+     Only an https address, as the server already insists (lib/push/imagery.ts),
+     checked again here because this file trusts nothing it is handed. */
+  const image = pushImageFrom(payload.image);
 
   return {
     title,
@@ -1358,6 +1374,7 @@ function notificationFromPayload(raw) {
     options: {
       body,
       icon: PUSH_ICON,
+      ...(image ? { image } : {}),
       /* The collapse key. A second notification with the same tag REPLACES
          the first rather than stacking, which is what keeps eleven messages
          in one conversation to one row in the shade. */

@@ -1,7 +1,7 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { askStillAvailable } from "@/lib/availability/actions";
@@ -31,7 +31,6 @@ export function StillAvailable({
   locale?: Locale;
 }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   if (recentlyLet) {
@@ -51,12 +50,12 @@ export function StillAvailable({
         loading={pending}
         leadingIcon="chat-bubble"
         onClick={() => {
-          setError(null);
           start(async () => {
             try {
               const result = await askStillAvailable({ listingId });
               if (!result.ok) {
-                setError(result.error);
+                /* Said by the one banner at the top of the screen (Grade 1). */
+                banner.error(result.error);
                 return;
               }
               router.push(`/messages/${result.data.conversationId}`);
@@ -69,11 +68,6 @@ export function StillAvailable({
         {pending ? copy.asking : copy.ask}
       </Button>
       <p className="mt-inline nf-caption text-[var(--nf-content-muted)]">{copy.askNote}</p>
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

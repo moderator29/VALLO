@@ -1,0 +1,237 @@
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/listings/supabase-repository", () => ({ photoUrl: (p: string) => (p.startsWith("/") ? p : `https://store.example/listing-photos/${p}`) }));
+vi.mock("@/lib/stays/photos", () => ({ accommodationPhotoUrl: (p: string) => `https://store.example/accommodation-photos/${p}` }));
+vi.mock("@/lib/site", () => ({ siteUrl: () => "https://www.vallospaces.com" }));
+
+import { ANDROID_CHANNELS, androidChannelFor, familyOf } from "./family";
+import { absoluteImage, imageTargetOf, resolvePushImages } from "./imagery";
+import { decide, type QueuedNotification } from "./policy";
+import type { PushClient } from "./schema";
+
+const THREAD = "11111111-2222-4333-8444-555555555555";
+const LISTING = "ed000000-0000-4000-8000-00000000003e";
+
+describe("A1 to A3: the family of a push", () => {
+  it("names the header line, the Android channel and the iOS category per kind", () => {
+    expect(familyOf({ kind: "message" })).toMatchObject({ family: "messages", label: "Messages", androidChannel: "vallo_messages", iosCategory: "VALLO_MESSAGES" });
+    expect(familyOf({ kind: "support" }).family).toBe("messages");
+    expect(familyOf({ kind: "booking" }).family).toBe("bookings");
+    expect(familyOf({ kind: "wallet" }).family).toBe("money");
+    expect(familyOf({ kind: "social" }).family).toBe("activity");
+    expect(familyOf({ kind: "listing", priceDrop: true }).family).toBe("offers");
+    expect(familyOf({ kind: "message", call: true }).family).toBe("calls");
+  });
+
+  it("keeps the call channels every phone already has, and the summary on the default", () => {
+    expect(androidChannelFor({ call: true, tag: "x", category: "calls" })).toBe("vallo_calls");
+    expect(androidChannelFor({ quiet: true, tag: "vallo-missed-call", category: "calls" })).toBe("vallo_missed");
+    expect(androidChannelFor({ tag: "vallo-summary" })).toBe("vallo_default");
+    expect(androidChannelFor({ tag: "vallo-message", category: "messages" })).toBe("vallo_messages");
+    /* Every channel a push can name is one the shell creates. */
+    const created = new Set(ANDROID_CHANNELS.map((c) => c.id));
+    for (const f of ["messages", "bookings", "money", "activity", "offers"] as const) {
+      expect(created.has(androidChannelFor({ tag: "t", category: f }))).toBe(true);
+    }
+  });
+
+  it("decide() carries the family on every push it sends", () => {
+    const now = new Date("2026-11-07T12:00:00Z");
+    const notification: QueuedNotification = {
+      queueId: "q",
+      userId: "u",
+      kind: "message",
+      title: "Amara replied",
+      body: "About the flat",
+      href: `/messages/${THREAD}`,
+      createdAt: now,
+      expiresAt: new Date(now.getTime() + 3_600_000),
+    };
+    const verdict = decide({ notification, settings: {}, now });
+    expect(verdict.action).toBe("send");
+    if (verdict.action === "send") expect(verdict.payload).toMatchObject({ category: "messages", subtitle: "Messages" });
+  });
+});
+
+describe("A1 to A3: the picture", () => {
+  it("knows which destinations are a picture of something", () => {
+    expect(imageTargetOf(`/listing/${LISTING}`)).toEqual({ kind: "listing", id: LISTING });
+    expect(imageTargetOf(`/stay/${LISTING}?from=push`)).toEqual({ kind: "stay", id: LISTING });
+    expect(imageTargetOf(`/messages/${THREAD}`)).toEqual({ kind: "thread", id: THREAD });
+    expect(imageTargetOf("/wallet")).toBeNull();
+    expect(imageTargetOf(null)).toBeNull();
+  });
+
+  it("only ever sends an https address a phone can fetch with no session", () => {
+    const site = "https://www.vallospaces.com";
+    expect(absoluteImage("/brand/photos/a.jpg", site)).toBe("https://www.vallospaces.com/brand/photos/a.jpg");
+    expect(absoluteImage("https://x.example/a.jpg", site)).toBe("https://x.example/a.jpg");
+    expect(absoluteImage("http://x.example/a.jpg", site)).toBeNull();
+    expect(absoluteImage("//evil.example/a.jpg", site)).toBeNull();
+    expect(absoluteImage("javascript:alert(1)", site)).toBeNull();
+    expect(absoluteImage(null, site)).toBeNull();
+  });
+
+  it("a listing gets its cover; a thread gets the OTHER person's face, or the place it is about", async () => {
+    const tables: Record<string, unknown[]> = {
+      conversations: [{ id: THREAD, guest_id: "me", agent_id: "them", listing_id: LISTING }],
+      listing_photos: [
+        { listing_id: LISTING, storage_path: "b.jpg", position: 1 },
+        { listing_id: LISTING, storage_path: "a.jpg", position: 0 },
+      ],
+      accommodation_photos: [],
+      profiles: [{ id: "them", avatar_url: null }],
+    };
+    const builder = (rows: unknown[]) => {
+      const q = { in: () => q, lte: () => q, then: (r: (v: { data: unknown[] }) => unknown) => Promise.resolve({ data: rows }).then(r) };
+      return { select: () => q };
+    };
+    const admin = { from: (t: string) => builder(tables[t] ?? []) } as unknown as PushClient;
+    const images = await resolvePushImages(admin, "me", [`/listing/${LISTING}`, `/messages/${THREAD}`, "/wallet"]);
+    expect(images.get(`/listing/${LISTING}`)).toBe("https://store.example/listing-photos/a.jpg");
+    /* No face on file: the place the conversation is about. */
+    expect(images.get(`/messages/${THREAD}`)).toBe("https://store.example/listing-photos/a.jpg");
+    expect(images.has("/wallet")).toBe(false);
+
+    tables.profiles = [{ id: "them", avatar_url: "https://faces.example/them.jpg" }];
+    const withFace = await resolvePushImages(admin, "me", [`/messages/${THREAD}`]);
+    expect(withFace.get(`/messages/${THREAD}`)).toBe("https://faces.example/them.jpg");
+  });
+
+  it("a failed read is a push without a picture, never an error", async () => {
+    const admin = { from: () => { throw new Error("down"); } } as unknown as PushClient;
+    expect((await resolvePushImages(admin, "me", [`/listing/${LISTING}`])).size).toBe(0);
+  });
+});
+
+describe("A1: the iOS Notification Service Extension source", () => {
+  it("downloads only an https image into an attachment and always shows the push", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const swift = readFileSync(`${root}ios/App/VALLONotificationService/NotificationService.swift`, "utf8");
+    const plist = readFileSync(`${root}ios/App/VALLONotificationService/Info.plist`, "utf8");
+    expect(swift).toContain('request.content.userInfo["image"]');
+    expect(swift).toContain('url.scheme == "https"');
+    expect(swift).toContain("UNNotificationAttachment(identifier:");
+    expect(swift).toContain("override func serviceExtensionTimeWillExpire()");
+    expect(plist).toContain("com.apple.usernotifications.service");
+    /* The server marks every push mutable, which is what wakes the extension. */
+    expect(readFileSync(`${root}src/lib/push/transport/apns.ts`, "utf8")).toContain('"mutable-content": 1');
+  });
+});
+
+describe("A10: Vallo's chime", () => {
+  it("is in both native projects, as a real PCM file, and the iOS file is in the app bundle", async () => {
+    const { readFileSync, existsSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const { CHIME_IOS, CHIME_ANDROID, CHIME_ANDROID_FILE } = await import("./family");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const caf = readFileSync(`${root}ios/App/App/${CHIME_IOS}`);
+    expect(caf.subarray(0, 4).toString("latin1")).toBe("caff");
+    expect(caf.includes(Buffer.from("lpcm"))).toBe(true);
+    const wav = readFileSync(`${root}android/app/src/main/res/raw/${CHIME_ANDROID_FILE}`);
+    expect(wav.subarray(0, 4).toString("latin1")).toBe("RIFF");
+    expect(CHIME_ANDROID_FILE.startsWith(CHIME_ANDROID)).toBe(true);
+    /* Under 30 seconds (iOS refuses longer) and small. */
+    expect(caf.length).toBeLessThan(200_000);
+    const pbx = readFileSync(`${root}ios/App/App.xcodeproj/project.pbxproj`, "utf8");
+    const resources = pbx.match(/isa = PBXResourcesBuildPhase;[\s\S]*?files = \(([\s\S]*?)\);/)?.[1] ?? "";
+    expect(resources).toContain(`${CHIME_IOS} in Resources`);
+    expect(existsSync(`${root}ios/App/App/${CHIME_IOS}`)).toBe(true);
+  });
+
+  it("is named in the payloads, never for an fyi, and the ring keeps the ring", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const apns = readFileSync(`${root}src/lib/push/transport/apns.ts`, "utf8");
+    const fcm = readFileSync(`${root}src/lib/push/transport/fcm.ts`, "utf8");
+    expect(apns).toContain('sound: payload.quiet ? undefined : payload.call ? "default" : CHIME_IOS');
+    expect(fcm).toContain("...(payload.quiet || payload.call ? {} : { sound: CHIME_ANDROID })");
+  });
+
+  it("the in-app chime keeps quiet unless it is on, on screen and not just played", async () => {
+    const { chimeAllowed, MIN_GAP_MS } = await import("@/lib/platform/chime");
+    expect(chimeAllowed({ on: true, visible: true, now: 10_000, last: 0 })).toBe(true);
+    expect(chimeAllowed({ on: false, visible: true, now: 10_000, last: 0 })).toBe(false);
+    expect(chimeAllowed({ on: true, visible: false, now: 10_000, last: 0 })).toBe(false);
+    expect(chimeAllowed({ on: true, visible: true, now: 10_000, last: 10_000 - MIN_GAP_MS + 1 })).toBe(false);
+  });
+});
+
+describe("A1 to A3: a booking's picture", () => {
+  const BOOKING = "22222222-3333-4444-8555-666666666666";
+  const STAY = "33333333-4444-4555-8666-777777777777";
+  const admin = (tables: Record<string, unknown[]>) => {
+    const builder = (rows: unknown[]) => {
+      const q = { in: () => q, lte: () => q, then: (r: (v: { data: unknown[] }) => unknown) => Promise.resolve({ data: rows }).then(r) };
+      return { select: () => q };
+    };
+    return { from: (t: string) => builder(tables[t] ?? []) } as unknown as PushClient;
+  };
+  const base = {
+    listing_photos: [{ listing_id: LISTING, storage_path: "a.jpg", position: 0 }],
+    accommodation_photos: [{ accommodation_id: STAY, storage_path: "s.jpg", position: 0 }],
+    profiles: [],
+    conversations: [],
+  };
+
+  it("is the place's cover for the guest and for the host, and nothing for anybody else", async () => {
+    expect(imageTargetOf(`/bookings/${BOOKING}`)).toEqual({ kind: "booking", id: BOOKING });
+    const guest = admin({ ...base, bookings: [{ id: BOOKING, guest_id: "me", listing_id: LISTING, accommodation_id: null }] });
+    expect((await resolvePushImages(guest, "me", [`/bookings/${BOOKING}`])).get(`/bookings/${BOOKING}`)).toBe("https://store.example/listing-photos/a.jpg");
+
+    const stayBooking = { id: BOOKING, guest_id: "someone", listing_id: null, accommodation_id: STAY };
+    const host = admin({ ...base, bookings: [stayBooking], accommodations: [{ id: STAY, businesses: { owner_id: "me" } }] });
+    expect((await resolvePushImages(host, "me", [`/bookings/${BOOKING}`])).get(`/bookings/${BOOKING}`)).toBe("https://store.example/accommodation-photos/s.jpg");
+
+    const stranger = admin({ ...base, bookings: [stayBooking], accommodations: [{ id: STAY, businesses: { owner_id: "not-me" } }] });
+    expect((await resolvePushImages(stranger, "me", [`/bookings/${BOOKING}`])).has(`/bookings/${BOOKING}`)).toBe(false);
+  });
+});
+
+describe("A2: the Android large icon (build 1.0.2)", () => {
+  it("is sent only to a shell that can draw it, with a picture, no buttons, never for a ring", async () => {
+    const { wantsRichAndroid, richAndroidData } = await import("./family");
+    const { versionAtLeast } = await import("@/lib/native/app-version");
+    expect(versionAtLeast("1.0.2", "1.0.2")).toBe(true);
+    expect(versionAtLeast("1.0.10", "1.0.2")).toBe(true);
+    expect(versionAtLeast("1.1", "1.0.2")).toBe(true);
+    expect(versionAtLeast("1.0.1", "1.0.2")).toBe(false);
+    expect(versionAtLeast(null, "1.0.2")).toBe(false);
+    expect(versionAtLeast("beta", "1.0.2")).toBe(false);
+    const p = { image: "https://x.example/a.jpg" };
+    expect(wantsRichAndroid("1.0.2", p)).toBe(true);
+    expect(wantsRichAndroid("1.0.1", p)).toBe(false);
+    expect(wantsRichAndroid(null, p)).toBe(false);
+    expect(wantsRichAndroid("1.0.2", {})).toBe(false);
+    expect(wantsRichAndroid("1.0.2", { ...p, call: true })).toBe(false);
+    expect(wantsRichAndroid("1.0.2", { ...p, actions: [{ id: "a" }] })).toBe(false);
+    const data = richAndroidData({ title: "Amara", body: "Hi", href: "/messages/x", tag: "vallo-message", urgent: false, category: "messages", subtitle: "Messages", image: p.image });
+    for (const v of Object.values(data)) expect(typeof v).toBe("string");
+    expect(data).toMatchObject({ vallo_rich: "1", channel: "vallo_messages", round: "1", quiet: "0" });
+  });
+
+  it("the shell's service extends the plugin's, replaces it in the manifest, and opens taps the plugin's way", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { fileURLToPath } = await import("node:url");
+    const root = fileURLToPath(new URL("../../../", import.meta.url));
+    const java = readFileSync(`${root}android/app/src/main/java/com/vallospaces/app/ValloMessagingService.java`, "utf8");
+    const manifest = readFileSync(`${root}android/app/src/main/AndroidManifest.xml`, "utf8");
+    const gradle = readFileSync(`${root}android/app/build.gradle`, "utf8");
+    expect(java).toContain("extends MessagingService");
+    expect(java).toContain("super.onMessageReceived(message);");
+    expect(java).toContain('"1".equals(data.get("vallo_rich"))');
+    expect(java).toContain('intent.putExtra("google.message_id"');
+    expect(java).toContain("setLargeIcon(");
+    expect(java).toContain('address.startsWith("https://")');
+    expect(manifest).toContain('xmlns:tools="http://schemas.android.com/tools"');
+    expect(manifest).toMatch(/android:name="com\.capacitorjs\.plugins\.pushnotifications\.MessagingService"\s+tools:node="remove"/);
+    expect(manifest).toMatch(/android:name="\.ValloMessagingService"[\s\S]*?com\.google\.firebase\.MESSAGING_EVENT/);
+    expect(gradle).toContain("com.google.firebase:firebase-messaging:");
+    const fcm = readFileSync(`${root}src/lib/push/transport/fcm.ts`, "utf8");
+    expect(fcm).toContain("wantsRichAndroid(target.appVersion, payload)");
+    expect(readFileSync(`${root}src/lib/push/drain.ts`, "utf8")).toContain("app_version");
+  });
+});

@@ -6,12 +6,13 @@ import { recordCredential } from "@/lib/trust/credentials-actions";
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-87: record a LASRERA or ESVARBON entry checked by hand on the public
  * register, with the name the register shows. Optional for the lister and
  * never a gate: this only dates a fact the desk checked. Every state is drawn:
- * choosing, recording, recorded, and the refusal.
+ * choosing and recording here, recorded and the refusal in the banner.
  *
  * NO CAC OPTION. The free CAC search shows a company, not its directors, so a
  * directorship cannot be checked by hand; the form says so instead of
@@ -24,15 +25,14 @@ export function CredentialForm({ subjectId, desk }: { subjectId: string; desk: D
   const [kind, setKind] = useState<"lasrera" | "esvarbon">("lasrera");
   const [number, setNumber] = useState("");
   const [registerName, setRegisterName] = useState("");
-  const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function submit() {
-    setNote(null);
     startTransition(async () => {
       try {
         const result = await recordCredential({ subjectId, kind, number, registerName });
-        setNote(result.ok ? { ok: true, text: desk.credentialRecorded } : { ok: false, text: result.error });
+        if (result.ok) banner.success(desk.credentialRecorded);
+        else banner.error(result.error, { retry: submit });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -72,14 +72,6 @@ export function CredentialForm({ subjectId, desk }: { subjectId: string; desk: D
       <Button variant="secondary" size="sm" type="button" onClick={submit} disabled={pending || !ready}>
         {pending ? desk.credentialRecording : desk.credentialSubmit}
       </Button>
-      {note && (
-        <p
-          role={note.ok ? "status" : "alert"}
-          className={`text-[length:var(--nf-text-body-sm)] ${note.ok ? "text-[var(--nf-content-primary)]" : "text-[var(--nf-state-error)]"}`}
-        >
-          {note.text}
-        </p>
-      )}
       <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{desk.credentialCac}</p>
     </div>
   );

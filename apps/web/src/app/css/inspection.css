@@ -129,6 +129,14 @@
   .nf-ix-fold > summary::-webkit-details-marker {
     display: none;
   }
+  .nf-ix-fold > summary {
+    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-ix-fold > summary:hover {
+      background-color: var(--nf-interactive-hover);
+    }
+  }
   .nf-ix-fold > summary:focus-visible {
     outline: 2px solid var(--nf-focus-ring, var(--nf-brand-primary));
     outline-offset: 2px;
@@ -345,6 +353,12 @@
     color: var(--nf-content-link);
     overflow-wrap: normal;
   }
+  @media (hover: hover) {
+    .nf-ix-fact__phone:hover {
+      text-decoration: underline;
+      text-underline-offset: 0.25em;
+    }
+  }
   .nf-ix-fact__phone:focus-visible {
     outline: 2px solid var(--nf-brand-primary);
     outline-offset: -12px;
@@ -555,6 +569,11 @@
     cursor: not-allowed;
     opacity: 0.7;
   }
+  @media (hover: hover) {
+    .nf-ix-room__check:hover:not(:disabled) {
+      box-shadow: 0 0 8px color-mix(in oklab, var(--nf-lit) 60%, transparent);
+    }
+  }
   .nf-ix-room__check:focus-visible {
     outline: 2px solid var(--nf-lit-cyan);
     outline-offset: 3px;
@@ -681,6 +700,12 @@
     border-color: var(--nf-selected-edge);
     background: var(--nf-selected-fill);
     box-shadow: var(--nf-selected-shadow-inline);
+  }
+  @media (hover: hover) {
+    .nf-ix-option:hover:not([aria-checked="true"]) {
+      border-color: var(--nf-border-strong);
+      background: color-mix(in oklab, var(--nf-lit) 15%, transparent);
+    }
   }
   .nf-ix-option:focus-visible {
     outline: 2px solid var(--nf-lit-cyan);
@@ -826,4 +851,10 @@
 
 .nf-ix-agreement {
   margin-top: var(--nf-space-block, 1rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-ix-fold > summary {
+    transition: none;
+  }
 }

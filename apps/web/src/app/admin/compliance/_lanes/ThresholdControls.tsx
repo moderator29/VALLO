@@ -8,34 +8,34 @@ import { Field } from "@/components/ui/Field";
 import { approveThresholdDecision, decideThresholdEvent } from "@/lib/compliance/threshold-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type Copy = Dictionary["complianceThreshold"];
 
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
-  const run = (work: () => Promise<{ ok: boolean; error?: string }>) => {
-    setError(null);
+  const run = (work: () => Promise<{ ok: boolean; error?: string }>): void => {
     start(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? null);
+          if (result.error) banner.error(result.error, { retry: () => run(work) });
           return;
         }
+        banner.success("Done");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
   };
-  return { pending, error, run };
+  return { pending, run };
 }
 
 /** SCUML item 7: the officer records the filing (reference and date) or why it is not reportable. */
 export function DecideThreshold({ eventId, today, copy }: { eventId: string; today: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [decision, setDecision] = useState<"reported" | "not_reportable">("reported");
   const [reference, setReference] = useState("");
   const [reportedOn, setReportedOn] = useState(today);
@@ -79,11 +79,6 @@ export function DecideThreshold({ eventId, today, copy }: { eventId: string; tod
           )}
         </Field>
       )}
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
       <Button type="submit" variant="primary" loading={pending} disabled={pending}>
         {copy.decide.record}
       </Button>
@@ -93,7 +88,7 @@ export function DecideThreshold({ eventId, today, copy }: { eventId: string; tod
 
 /** SCUML item 19: a second member of staff approves or rejects the recorded decision. */
 export function ApproveThreshold({ decisionId, copy }: { decisionId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [note, setNote] = useState("");
   return (
     <div className="grid gap-sm" data-testid="threshold-approve">
@@ -102,11 +97,6 @@ export function ApproveThreshold({ decisionId, copy }: { decisionId: string; cop
           <input {...control} className="nf-field" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} />
         )}
       </Field>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
       <div className="flex flex-wrap gap-sm">
         <Button
           variant="primary"

@@ -10,8 +10,8 @@ import { LoadingShell, PageHeaderSkeleton, CardRowsSkeleton } from "@/components
  */
 export default function LoadingDevices() {
   return (
-    <LoadingShell label="Loading where you are signed in" className="mx-auto w-full max-w-lg">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading where you are signed in" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <CardRowsSkeleton rows={3} height="4.5rem" />
     </LoadingShell>
   );

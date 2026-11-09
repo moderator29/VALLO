@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forDataCard } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { DataCard } from "@/components/app/account/SettingsGroups";
 import { loadSettingsState } from "@/lib/profile/queries";
@@ -25,8 +25,8 @@ export default async function DataSettingsPage() {
   const lede = t.experienceAccount.settings.lede;
   const account = await loadSettingsState();
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.settings.data.label} fallback="/settings/privacy" />
+    <PageFrame title={t.settings.data.label} fallback="/settings/privacy" width="narrow">
+      <div>
       <SettingsLede label={lede.what} what={lede.data.what} who={lede.data.who} />
       <div className="space-y-block">
         <section id="settings-data" className="scroll-mt-28">
@@ -36,6 +36,7 @@ export default async function DataSettingsPage() {
           <DataCard t={forDataCard(t)} />
         </section>
       </div>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

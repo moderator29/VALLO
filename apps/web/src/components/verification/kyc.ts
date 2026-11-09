@@ -101,7 +101,56 @@ export const DOCUMENT_SUBTYPES: Record<DocumentKind, readonly { value: string; l
 };
 
 export function isSubtypeOf(kind: DocumentKind, subtype: string | null | undefined): boolean {
+  if (kind === "identity" && subtype === "national_id") return true;
   return DOCUMENT_SUBTYPES[kind].some((option) => option.value === subtype);
+}
+
+/* ------------------------------------------- Grade 1: country and sides */
+
+/**
+ * WHICH COUNTRY ISSUED THE ID (Platform Grade 1, P0.3; reference R36). The
+ * answer decides which documents are offered: Nigeria's four, or the three
+ * every country has. Stored as `agent_documents.issuing_country` (ISO 3166-1
+ * alpha-2, migration 20261107143359).
+ */
+export const NIGERIA = "NG";
+export const POPULAR_COUNTRIES = ["NG"] as const;
+
+export type IdTypeOption = { value: string; label: string; detail: string; glyph: "id-card" | "globe" | "key" | "document" };
+
+export const NIGERIAN_ID_TYPES: readonly IdTypeOption[] = [
+  { value: "nin_card", label: "NIN slip or card", detail: "Your National Identity Number slip or the NIN card", glyph: "id-card" },
+  { value: "passport", label: "International passport", detail: "The photo page", glyph: "globe" },
+  { value: "drivers_licence", label: "Driver's licence", detail: "Front and back of the card", glyph: "key" },
+  { value: "voters_card", label: "Permanent voter's card", detail: "Front and back of the card", glyph: "document" },
+];
+
+export const INTERNATIONAL_ID_TYPES: readonly IdTypeOption[] = [
+  { value: "passport", label: "Passport", detail: "The photo page", glyph: "globe" },
+  { value: "national_id", label: "National ID card", detail: "Front and back of the card", glyph: "id-card" },
+  { value: "drivers_licence", label: "Driver's licence", detail: "Front and back of the card", glyph: "key" },
+];
+
+export function idTypesFor(country: string | null | undefined): readonly IdTypeOption[] {
+  return country === NIGERIA ? NIGERIAN_ID_TYPES : INTERNATIONAL_ID_TYPES;
+}
+
+/**
+ * Whether the back of this document is asked for. A passport's photo page is
+ * the whole document; a NIN slip is one sheet (its back is optional, for a
+ * card); every other card carries details on the back, which reviewers need.
+ */
+export type BackRule = "none" | "optional" | "required";
+
+export function backRuleFor(subtype: string | null | undefined): BackRule {
+  if (subtype === "passport") return "none";
+  if (subtype === "nin_card") return "optional";
+  if (subtype === "drivers_licence" || subtype === "voters_card" || subtype === "national_id") return "required";
+  return "none";
+}
+
+export function isCountryCode(value: unknown): value is string {
+  return typeof value === "string" && /^[A-Z]{2}$/.test(value);
 }
 
 /** How old a proof of address may be, the same three months the caution states. */
@@ -188,6 +237,9 @@ export function rejectFile(file: { type: string; size: number }): string | null 
 /* ------------------------------------------------------------------ steps */
 
 export type StepId =
+  /* Grade 1 (P0.3): which country issued it, then which document. */
+  | "id-country"
+  | "id-type"
   | "identity-document"
   | "selfie"
   | "address-document"
@@ -205,6 +257,16 @@ export type Step = {
 };
 
 const STEPS: Record<StepId, Step> = {
+  "id-country": {
+    id: "id-country",
+    title: "Which country issued your ID?",
+    hint: "This decides which documents we can accept.",
+  },
+  "id-type": {
+    id: "id-type",
+    title: "Which document will you use?",
+    hint: "Choose one you have with you now.",
+  },
   "identity-document": {
     id: "identity-document",
     title: "Your ID",
@@ -256,7 +318,7 @@ export function stepsFor(business: boolean | null, askBusiness = true): Step[] {
   /* The order the big platforms use: the ID, then the face that matches it,
      then everything else. The selfie is a plain photo of the face, taken
      live; nobody is asked to hold their ID up to the camera. */
-  const ids: StepId[] = ["identity-document", "selfie", "address-document"];
+  const ids: StepId[] = ["id-country", "id-type", "identity-document", "selfie", "address-document"];
   /* `askBusiness` is false when the answers could not be filed: the business
      details live on the application, and an application that is submitted,
      under review or decided cannot be edited by its applicant, so the eight
@@ -394,6 +456,13 @@ export type KycDocument = {
   subtype: string | null;
   /** The date printed on a proof of address. Null for an ID. */
   issuedOn: string | null;
+  /** Grade 1: the country that issued an ID (ISO alpha-2). Absent for an address. */
+  country?: string | null;
+  /** Grade 1: the back of a two-sided ID, uploaded beside the front. */
+  backPath?: string | null;
+  /** On this device only, never sent: a picture of the front and back for the review. */
+  previewUrl?: string | null;
+  backPreviewUrl?: string | null;
 };
 
 /** The selfie as the flow holds it: uploaded, so `path` is real. */
@@ -433,6 +502,8 @@ export type KycSubmitResult = { ok: true } | { ok: false; message: string };
  * server action answers in.
  */
 export type MissingItem =
+  | { kind: "country" }
+  | { kind: "back" }
   | { kind: "document"; document: DocumentKind }
   | { kind: "selfie" }
   | { kind: "which-id" }
@@ -446,7 +517,15 @@ export function missingItems(submission: KycSubmission, today: string = lagosTod
   const identity = submission.documents.identity;
   const address = submission.documents.address;
   if (!identity) missing.push({ kind: "document", document: "identity" });
-  else if (!isSubtypeOf("identity", identity.subtype)) missing.push({ kind: "which-id" });
+  else {
+    if (!isSubtypeOf("identity", identity.subtype)) missing.push({ kind: "which-id" });
+    /* Grade 1: the issuing country, and the back where the card has one.
+       `country` undefined is an older caller that never asked: not missing. */
+    if (identity.country !== undefined && !isCountryCode(identity.country)) missing.push({ kind: "country" });
+    if (identity.country !== undefined && backRuleFor(identity.subtype) === "required" && !identity.backPath) {
+      missing.push({ kind: "back" });
+    }
+  }
   if (!submission.selfie?.path) missing.push({ kind: "selfie" });
   if (!address) missing.push({ kind: "document", document: "address" });
   else {
@@ -479,6 +558,10 @@ export function missingFrom(submission: KycSubmission, today: string = lagosToda
         return DOCUMENT_SPECS[item.document].title;
       case "selfie":
         return SELFIE;
+      case "country":
+        return COUNTRY;
+      case "back":
+        return BACK;
       case "which-id":
         return WHICH_ID;
       case "which-address":
@@ -494,6 +577,8 @@ export function missingFrom(submission: KycSubmission, today: string = lagosToda
 }
 
 const SELFIE = "A selfie";
+const COUNTRY = "The country that issued your ID";
+const BACK = "A photo of the back of your ID";
 const WHICH_ID = "Which ID you uploaded";
 const WHICH_ADDRESS = "Which proof of address you uploaded";
 const ADDRESS_DATE = "The date on your proof of address, within the last three months";

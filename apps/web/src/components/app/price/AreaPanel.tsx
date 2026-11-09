@@ -154,7 +154,7 @@ export function AreaReport({
             everywhere, so the object settles in (the matte bars, the chart
             that is waiting for figures) and the reason is the true one. */}
         <DiscoveryEmpty
-          object={examplesOnly ? "info-disc" : "bars-chart"}
+          object={examplesOnly ? "map-pin" : "search"}
           title={examplesOnly ? copy.demoOnlyTitle : copy.emptyTitle}
           body={examplesOnly ? copy.demoOnlyBody : copy.emptyBody}
           data-testid={examplesOnly ? "nf-pc-area-demo-only" : "nf-pc-area-empty"}

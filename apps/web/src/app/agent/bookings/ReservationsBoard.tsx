@@ -11,6 +11,7 @@ import { countOf, type Locale } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { dateTimeLabel } from "@/lib/format/when";
 import { State } from "@/components/ui/State";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * Tonight's tables, and the requests still waiting on an answer.
@@ -52,6 +53,9 @@ function Decision({ reservationId }: { reservationId: string }) {
     respondToReservation,
     null,
   );
+  /* Answered or refused, said by the one banner at the top of the screen
+     (founder, 7 November 2026); the card keeps "Answered" as its record. */
+  useActionBanner(state, { ok: "Answered. The guest can see it." });
 
   if (state?.ok) {
     return (
@@ -81,11 +85,6 @@ function Decision({ reservationId }: { reservationId: string }) {
           </Button>
         </form>
       </div>
-      {state && !state.ok && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {state.error}
-        </p>
-      )}
     </>
   );
 }

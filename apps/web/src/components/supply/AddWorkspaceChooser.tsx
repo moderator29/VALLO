@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation";
 import type { ChooserCopy } from "./supply-copy";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { BrandIconName } from "@/design-system/icons/BrandIcon";
-import { Button } from "@/components/ui/Button";
+import { OptionCards } from "@/components/ui/OptionCards";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { TYPE } from "@/components/app/Screen";
 import { SUPPLY_DOOR_ORDER, STAYS_DOOR_ORDER } from "@/lib/supply/roles";
 import type { Side } from "@/lib/side.constants";
 import { hrefFor } from "./AddWorkspaceChooser.href";
-import { IconPlate } from "@/components/ui/IconPlate";
 import { Icon3D } from "@/components/ui/Icon3D";
 import type { Icon3DName } from "@/components/ui/icon-3d";
 import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
@@ -190,127 +190,69 @@ export function AddWorkspaceChooser({ t, side }: { t: ChooserCopy; side: Side })
       }))
     : [];
 
+  /* SW5 and SW6 (round 3): the chooser is the first screen of the flow the
+     three registrations finish, so it stands in the same STEP FRAME (back,
+     close, the 3px bar, the title, Continue in the sticky foot), and each
+     group of doors is the platform's OPTION CARDS: one choice, a thin glyph,
+     the name, one grey line, the radio that fills. */
+  const overview = step === "overview";
   return (
-    <div className="mx-auto max-w-2xl">
-      {/*
-        THE HEADER THE IMAGE DRAWS, AND IT IS NOT THE ONE THIS PAGE HAD.
-
-        `GOVERNING-02` puts a bare back control on its own row, then the
-        progress row, then the screen's name in DISPLAY type, then one
-        supporting line. The route used to hand that name to `PageHeader`,
-        which sets it small on the top row beside the back square, so the
-        loudest thing in the image was the quietest thing on the page, and the
-        overview step then carried a second, smaller heading underneath it.
-
-        So the chooser owns its whole top, exactly as `RegisterShell` owns the
-        top of the three forms this screen leads into, and for the same reason:
-        one anatomy across the four screens of one flow. ONE BACK CONTROL, and
-        it steps back to the doors from the overview and leaves the chooser
-        from the doors, which is what a person pressing it expects.
-      */}
-      {/* UX-28: ONE back control. The page mounts the shared BackButton to
-          the declared parent; the chooser drew a second arrow under it. The
-          step back from the overview to the doors is the "Choose again"
-          control beside Continue. */}
-
-      {/*
-        THE PROGRESS ROW: small filled rectangles, which is how every screen in
-        the governing set draws progress. Rectangles and not dots, because the
-        set draws rectangles, and `aria-hidden` because the heading below
-        already says where you are and a screen reader counting bars is noise.
-      */}
-      <div className="nf-steprow" aria-hidden="true">
-        <span className="nf-steprow__bar" data-on="true" />
-        <span className="nf-steprow__bar" data-on={step === "overview" || undefined} />
-        <span className="nf-steprow__bar" />
-      </div>
-
-      <h1 className={`mt-heading ${TYPE.display}`}>
-        {step === "overview" ? copy.overviewTitle : copy.title}
-      </h1>
-      <p className={`mt-inline-tight max-w-[52ch] ${TYPE.bodyLg}`}>
-        {step === "overview" ? copy.overviewSub : copy.sub}
-      </p>
-
-      {step === "choose" ? (
-        groups.map((group) => (
-          <section key={group.key} aria-labelledby={`doors-${group.key}`} className="mt-heading">
-            <h2 id={`doors-${group.key}`} className={TYPE.rowTitle}>
-              {group.title}
-            </h2>
-            <ul className="mt-inline grid gap-group">
-              {group.doors.map((id) => {
-                const door = doorCopy(id);
-                const selected = chosen === id;
-                const art = DOOR_ART[id];
-                return (
-                  <li key={id}>
-                    <button
-                      type="button"
-                      onClick={() => setChosen(id)}
-                      aria-pressed={selected}
-                      className="nf-door"
-                      data-on={selected || undefined}
-                    >
-                      {art ? (
-                        <span className="grid size-12 shrink-0 place-items-center" aria-hidden="true" data-art={art}>
-                          <Icon3D name={art} size={48} />
-                        </span>
-                      ) : (
-                        <IconPlate size="md" tone={selected ? "brand" : "neutral"} className="nf-door__mark">
-                          <UiIcon name={lineGlyphFor(DOOR_OBJECT[id] ?? "modern-house")} size={20} />
-                        </IconPlate>
-                      )}
-                      <span className="min-w-0 flex-1 text-left">
-                        <span className={`block ${TYPE.rowTitle}`}>{door.title}</span>
-                        <span className={`mt-inline-tight block ${TYPE.rowMeta}`}>{door.blurb}</span>
-                      </span>
-                      {/* The tick replaces the chevron on the chosen one, exactly
-                          as the render's second screen draws it. */}
-                      {/* The circular badge and not the shield, for the reason
-                          `ProfileSwitcher` gives: the shield means a checked
-                          listing in this product and a mark means one thing. */}
-                      <UiIcon
-                        name={selected ? "verified-badge" : "chevron-right"}
-                        size={selected ? "lg" : "sm"}
-                        className={
-                          selected
-                            ? "shrink-0 text-[var(--nf-brand-primary)]"
-                            : "shrink-0 text-[var(--nf-content-muted)]"
-                        }
-                        label={selected ? copy.selected : undefined}
-                      />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))
+    <StepFrame
+      overlay
+      testId="workspace-chooser"
+      step={overview ? 2 : 1}
+      total={3}
+      /* The founder's 3D object for the door (30 September: a picker is
+         where an object helps), now the step's own object above the title:
+         the chosen door's, or the first door's before a choice. */
+      art={<Icon3D name={DOOR_ART[chosen ?? groups[0]?.doors[0] ?? "owner"] ?? "home-verified"} size={56} priority />}
+      title={overview ? copy.overviewTitle : copy.title}
+      subtitle={overview ? copy.overviewSub : copy.sub}
+      direction={overview ? "forward" : "back"}
+      {...(overview ? { onBack: () => setStep("choose") } : {})}
+      closeHref="/profile"
+      primary={{ label: copy.continueLabel, onClick: onContinue, disabled: !chosen, testId: "workspace-continue" }}
+      {...(overview ? { secondary: { label: copy.chooseAgain, onClick: () => setStep("choose") } } : {})}
+    >
+      {!overview ? (
+        <div className="grid gap-block">
+          {groups.map((group) => (
+            <section key={group.key} aria-labelledby={`doors-${group.key}`} className="grid gap-inline">
+              <h2 id={`doors-${group.key}`} className={TYPE.rowTitle}>
+                {group.title}
+              </h2>
+              <OptionCards
+                label={group.title}
+                value={chosen && group.doors.includes(chosen) ? chosen : null}
+                onChange={setChosen}
+                testId={`doors-${group.key}`}
+                options={group.doors.map((id) => ({
+                  value: id,
+                  label: doorCopy(id).title,
+                  detail: doorCopy(id).blurb,
+                  icon: lineGlyphFor(DOOR_OBJECT[id] ?? "modern-house"),
+                }))}
+              />
+            </section>
+          ))}
+        </div>
       ) : (
-        <>
+        <div className="grid gap-block">
           {/* THE PATH AHEAD (reference 2, the learning path): every line this
               door will ask for, as a card with its 3D tile and its number,
               joined by the connector. Nothing is done yet, so every step is
               upcoming and none is a button. */}
-          <div className="mt-heading">
-            <ProgressPath
-              steps={overviewRows.map((row) => ({
-                id: row.label,
-                label: row.label,
-                tile: NEED_TILES[row.object],
-              }))}
-              at={-1}
-              copy={{ done: "", current: "", upcoming: "" }}
-            />
-          </div>
-
-          {/*
-            THE CALM EXPLANATORY PANEL with its small round glyph, which
-            appears on almost every screen in the governing set. It is the one
-            round thing on this surface and it is a GLYPH, not a control, so
-            the shape law does not reach it.
-          */}
+          <ProgressPath
+            steps={overviewRows.map((row) => ({
+              id: row.label,
+              label: row.label,
+              tile: NEED_TILES[row.object],
+            }))}
+            at={-1}
+            copy={{ done: "", current: "", upcoming: "" }}
+          />
+          {/* The calm explanatory panel with its small round glyph: a GLYPH,
+              not a control, so the shape law does not reach it. */}
           {chosen && (
             <div className="nf-calmpanel">
               <span className="nf-calmpanel__glyph" aria-hidden="true">
@@ -318,31 +260,12 @@ export function AddWorkspaceChooser({ t, side }: { t: ChooserCopy; side: Side })
               </span>
               <span className="min-w-0 flex-1">
                 <span className={`block ${TYPE.rowTitle}`}>{copy.howLongTitle}</span>
-                <span className={`mt-inline-tight block ${TYPE.rowMeta}`}>
-                  {doorCopy(chosen).howLong}
-                </span>
+                <span className={`mt-inline-tight block ${TYPE.rowMeta}`}>{doorCopy(chosen).howLong}</span>
               </span>
             </div>
           )}
-        </>
-      )}
-
-      {/* The primary appears only once a door is chosen, which is the render's
-          own second screen: three quiet cards, then one lit control. */}
-      {chosen && (
-        <div className="mt-heading flex flex-col gap-inline">
-          {/* The chevron the image draws on this control, and the same one the
-              three forms it leads into carry on theirs. */}
-          <Button onClick={onContinue} variant="primary" size="lg" full trailingIcon="arrow-right">
-            {copy.continueLabel}
-          </Button>
-          {step === "overview" && (
-            <Button onClick={() => setStep("choose")} variant="ghost" size="lg" full>
-              {copy.chooseAgain}
-            </Button>
-          )}
         </div>
       )}
-    </div>
+    </StepFrame>
   );
 }

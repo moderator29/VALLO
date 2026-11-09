@@ -1,7 +1,7 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
-import { useState } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { NearMeChip } from "./NearMeChip";
 import type { ShelfQuery } from "./shelf-query";
@@ -41,55 +41,50 @@ export function ShelfChipRow({
   };
   chips: SheetChip[];
 }) {
-  const [note, setNote] = useState<string | null>(null);
   const forYou = quick.find((chip) => chip.key === "forYou");
   const newListed = quick.find((chip) => chip.key === "newListed");
 
   return (
-    <>
-      <nav aria-label={label} className="nf-shelf-chips nf-scroll-x mt-sm">
-        {forYou && (
-          <Link
-            href={forYou.href}
-            prefetch={false}
-            aria-current={forYou.on ? "true" : undefined}
-            data-testid="quick-for-you"
-            className={`nf-shelf-chip nf-shelf-chip--quick ${forYou.on ? "nf-shelf-chip--on" : ""}`}
-          >
-            <UiIcon name="heart" size={16} />
-            {quickCopy.forYou}
-          </Link>
-        )}
-        <NearMeChip query={query} copy={quickCopy} onMessage={setNote} />
-        {newListed && (
-          <Link
-            href={newListed.href}
-            prefetch={false}
-            aria-current={newListed.on ? "true" : undefined}
-            data-testid="quick-new-listed"
-            className={`nf-shelf-chip nf-shelf-chip--quick ${newListed.on ? "nf-shelf-chip--on" : ""}`}
-          >
-            <UiIcon name="clock" size={16} />
-            {quickCopy.newListed}
-          </Link>
-        )}
-        {chips.map((chip) => (
-          <Link
-            key={chip.key}
-            href={chip.href}
-            prefetch={false}
-            data-testid={`shelf-chip-${chip.key}`}
-            className={`nf-shelf-chip ${chip.on ? "nf-shelf-chip--on" : ""}`}
-          >
-            <UiIcon name={chip.icon} size={16} />
-            {chip.label}
-            <UiIcon name="chevron-down" size={16} />
-          </Link>
-        ))}
-      </nav>
-      <p role="status" aria-live="polite" className={note ? "nf-quick-note" : "sr-only"} data-testid="quick-note">
-        {note ?? ""}
-      </p>
-    </>
+    <nav aria-label={label} className="nf-shelf-chips nf-scroll-x mt-sm">
+      {forYou && (
+        <Link
+          href={forYou.href}
+          prefetch={false}
+          aria-current={forYou.on ? "true" : undefined}
+          data-testid="quick-for-you"
+          className={`nf-shelf-chip nf-shelf-chip--quick ${forYou.on ? "nf-shelf-chip--on" : ""}`}
+        >
+          <UiIcon name="heart" size={16} />
+          {quickCopy.forYou}
+        </Link>
+      )}
+      {/* Why Near me could not find you is said by the one banner (Grade 1). */}
+      <NearMeChip query={query} copy={quickCopy} onMessage={(message) => message && banner.error(message, { "data-testid": "quick-note" })} />
+      {newListed && (
+        <Link
+          href={newListed.href}
+          prefetch={false}
+          aria-current={newListed.on ? "true" : undefined}
+          data-testid="quick-new-listed"
+          className={`nf-shelf-chip nf-shelf-chip--quick ${newListed.on ? "nf-shelf-chip--on" : ""}`}
+        >
+          <UiIcon name="clock" size={16} />
+          {quickCopy.newListed}
+        </Link>
+      )}
+      {chips.map((chip) => (
+        <Link
+          key={chip.key}
+          href={chip.href}
+          prefetch={false}
+          data-testid={`shelf-chip-${chip.key}`}
+          className={`nf-shelf-chip ${chip.on ? "nf-shelf-chip--on" : ""}`}
+        >
+          <UiIcon name={chip.icon} size={16} />
+          {chip.label}
+          <UiIcon name="chevron-down" size={16} />
+        </Link>
+      ))}
+    </nav>
   );
 }

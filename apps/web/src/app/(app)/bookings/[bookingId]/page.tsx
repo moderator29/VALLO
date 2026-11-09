@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getMyBookings } from "@/lib/bookings/queries";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { Reveal } from "@/components/site/Reveal";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
@@ -101,8 +101,9 @@ export default async function BookingDetailPage({
 
   const shell = (children: React.ReactNode) => (
     <div className="nf-cat-surface mx-auto max-w-2xl">
-      <PageHeader title={t.shape.plans.kinds.stay} fallback="/bookings?side=stays&from=stays" />
-      <Reveal>{children}</Reveal>
+      <PageFrame title={t.shape.plans.kinds.stay} fallback="/bookings?side=stays&from=stays" width="narrow">
+        <Reveal>{children}</Reveal>
+      </PageFrame>
     </div>
   );
 

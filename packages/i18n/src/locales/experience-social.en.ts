@@ -239,4 +239,9 @@ export const experienceSocialEn = {
     empty: "Nothing here yet",
     findPlaces: "Find places to join",
   },
+  /** The confirmation a person reads before they block somebody (SW11). */
+  blockConfirm:
+    "They will not be able to message you, see your profile or find your listings, and you will not see theirs. They are not told. You can undo this in Settings, Privacy.",
+  /** Said instead of Message, beside Follow (SW11). */
+  followToMessage: "Follow to message",
 };

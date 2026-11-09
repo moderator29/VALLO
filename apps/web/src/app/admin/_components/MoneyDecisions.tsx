@@ -9,6 +9,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The two decisions the money side of the console takes here (the escrow
@@ -26,17 +27,9 @@ import { useSafeTransition } from "@/lib/ui/use-safe-transition";
  * than from an optimistic guess about what happened.
  */
 
-function Refusal({ message }: { message: string | null }) {
-  if (!message) return null;
-  return (
-    <p
-      role="alert"
-      className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]"
-    >
-      {message}
-    </p>
-  );
-}
+/* A refusal is said by the one banner at the top of the screen (founder,
+   7 November 2026, "THE BANNER EVERYWHERE"); it used to be a red line
+   under the form. */
 
 /* ------------------------------------------------------------ KYC decision */
 
@@ -45,7 +38,6 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   const [reason, setReason] = useState("");
   const [nameOnId, setNameOnId] = useState("");
   const [showReason, setShowReason] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   /* An ID is approved with the name printed on it; the bank account name is
      matched against that name, so the reviewer types it, exactly. */
@@ -54,7 +46,6 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
   const nameReady = !isId || nameOnId.trim().length >= 2;
 
   function decide(approve: boolean) {
-    setError(null);
     start(async () => {
       try {
         const result = await reviewKycDocument(
@@ -63,7 +54,11 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
             : { documentId, approve: false, reason },
         );
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"] ?? result.error);
+          /* A word about a field stays under the decision; anything else is
+             the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"] ?? result.fieldErrors?.["nameOnId"];
+          if (about) banner.error(about);
+          else banner.error(result.error, { retry: () => decide(approve) });
           return;
         }
         setReason("");
@@ -151,14 +146,12 @@ export function DocumentDecision({ documentId, kind }: { documentId: string; kin
             disabled={pending}
             onClick={() => {
               setShowReason(false);
-              setError(null);
             }}
           >
             Cancel
           </Button>
         )}
       </div>
-      <Refusal message={error} />
     </div>
   );
 }
@@ -192,22 +185,18 @@ export function FeeRateForm({
   const [flatNaira, setFlatNaira] = useState(String(currentFlatMinor / 100));
   const [startsAt, setStartsAt] = useState("");
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
   function submit() {
-    setError(null);
-    setDone(false);
     const percentValue = Number(percent);
     const flatValue = Number(flatNaira);
     if (!Number.isFinite(percentValue) || percentValue < 0 || percentValue > 100) {
-      setError("Enter the rate as a percentage between 0 and 100.");
+      banner.error("Enter the rate as a percentage between 0 and 100.");
       return;
     }
     if (!Number.isFinite(flatValue) || flatValue < 0) {
-      setError("Enter the flat amount in naira, or zero.");
+      banner.error("Enter the flat amount in naira, or zero.");
       return;
     }
 
@@ -232,15 +221,19 @@ export function FeeRateForm({
           note,
         });
         if (!result.ok) {
+          /* A word about the note or the start date goes back to the form;
+             anything else is the outcome, and the banner says it. No retry:
+             a rate is recorded from the confirm step, so trying again means
+             confirming again. */
           setConfirming(false);
-          setError(
-            result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"] ?? result.error,
-          );
+          const about = result.fieldErrors?.["note"] ?? result.fieldErrors?.["effectiveFrom"];
+          if (about) banner.error(about);
+          else banner.error(result.error);
           return;
         }
         setNote("");
         setConfirming(false);
-        setDone(true);
+        banner.success("Recorded, with your name on it.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -249,7 +242,7 @@ export function FeeRateForm({
   }
 
   return (
-    <div className="mt-group rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-card">
+    <div className="mt-group rounded-md border border-[var(--nf-border-subtle)] p-card">
       <p className="nf-body font-semibold text-content">
         Change the rate
       </p>
@@ -312,7 +305,6 @@ export function FeeRateForm({
           {pending ? "Recording" : "Record this rate"}
         </Button>
       </div>
-      <Refusal message={error} />
       <Sheet
         open={confirming}
         onOpenChange={(next) => {
@@ -349,11 +341,6 @@ export function FeeRateForm({
           }
         />
       </Sheet>
-      {done && (
-        <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">
-          Recorded, with your name on it.
-        </p>
-      )}
     </div>
   );
 }

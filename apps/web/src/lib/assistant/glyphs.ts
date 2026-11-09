@@ -2,22 +2,22 @@ import type { AiPermission } from "./permissions";
 
 /** The founder's glyph pack, transparent PNGs drawn bare (no plate or circle behind them). */
 export const AI_GLYPH = {
-  assistant: "/brand/glyphs/ai-assistant.png",
-  account: "/brand/glyphs/ai-account.png",
-  privacy: "/brand/glyphs/ai-privacy.png",
-  payment: "/brand/glyphs/ai-payment.png",
-  security: "/brand/glyphs/ai-security.png",
-  permissions: "/brand/glyphs/ai-permissions.png",
-  protection: "/brand/glyphs/ai-protection.png",
-  compare: "/brand/glyphs/ai-compare.png",
-  photos: "/brand/glyphs/ai-photos.png",
-  schedule: "/brand/glyphs/ai-schedule.png",
-  balance: "/brand/glyphs/ai-balance.png",
-  reminder: "/brand/glyphs/ai-reminder.png",
-  saved: "/brand/glyphs/ai-saved.png",
-  share: "/brand/glyphs/ai-share.png",
-  humanHelp: "/brand/glyphs/ai-human-help.png",
-  toggle: "/brand/glyphs/ai-toggle.png",
+  assistant: "/brand/glyphs/ai-assistant.webp",
+  account: "/brand/glyphs/ai-account.webp",
+  privacy: "/brand/glyphs/ai-privacy.webp",
+  payment: "/brand/glyphs/ai-payment.webp",
+  security: "/brand/glyphs/ai-security.webp",
+  permissions: "/brand/glyphs/ai-permissions.webp",
+  protection: "/brand/glyphs/ai-protection.webp",
+  compare: "/brand/glyphs/ai-compare.webp",
+  photos: "/brand/glyphs/ai-photos.webp",
+  schedule: "/brand/glyphs/ai-schedule.webp",
+  balance: "/brand/glyphs/ai-balance.webp",
+  reminder: "/brand/glyphs/ai-reminder.webp",
+  saved: "/brand/glyphs/ai-saved.webp",
+  share: "/brand/glyphs/ai-share.webp",
+  humanHelp: "/brand/glyphs/ai-human-help.webp",
+  toggle: "/brand/glyphs/ai-toggle.webp",
 } as const;
 
 export const PERMISSION_GLYPH: Record<AiPermission, string> = {

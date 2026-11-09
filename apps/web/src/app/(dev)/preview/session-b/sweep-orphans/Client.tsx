@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { BookingView } from "@/lib/bookings/queries";
 import { CancelBookingSheet, type CancelBookingWords } from "@/components/app/bookings/CancelBookingSheet";
 import { KycFlow, type KycCopy } from "@/components/verification/KycFlow";
+import type { Dictionary } from "@vallo/i18n/core";
 import { DistrictChips, type DistrictChip } from "@/components/social/feed/DistrictHeader";
 
 /*
@@ -15,10 +16,11 @@ export function CancelSheetFixture({ booking, words }: { booking: BookingView; w
   return <CancelBookingSheet booking={booking} onClose={() => {}} words={words} />;
 }
 
-export function KycFlowFixture({ copy }: { copy: KycCopy }) {
+export function KycFlowFixture({ copy, flowCopy }: { copy: KycCopy; flowCopy: Dictionary["verifyFlow"] }) {
   return (
     <KycFlow
       copy={copy}
+      flowCopy={flowCopy}
       submit={async () => ({ ok: false, message: "This harness does not send anything." })}
     />
   );

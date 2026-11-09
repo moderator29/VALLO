@@ -407,9 +407,10 @@ run("inspection (viewing) booked", () => {
 });
 
 const DRAW = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { DrawUpAgreement } from "@/components/app/agreements/DrawUpAgreement";
-  mount(<DrawUpAgreement inspectionId="ix-1" minDate="2030-01-01" />);
+  mount(<><DrawUpAgreement inspectionId="ix-1" minDate="2030-01-01" /><ToastHost /></>);
 `;
 
 run("agreement drawn up", () => {
@@ -436,9 +437,10 @@ run("agreement drawn up", () => {
 });
 
 const CONFIRM = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { ConfirmTerms } from "@/components/app/agreements/AgreementControls";
-  mount(<ConfirmTerms agreementId="ag-1" version={2} />);
+  mount(<><ConfirmTerms agreementId="ag-1" version={2} /><ToastHost /></>);
 `;
 
 run("agreement confirmed", () => {
@@ -523,10 +525,11 @@ run("on arrival (agreement, listing and approval pages)", () => {
 });
 
 const REFUND = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { RefundRequestForm } from "@/components/app/after-gate/RefundRequestForm";
-  mount(<RefundRequestForm success={getDictionary("en").success} bookingId="bk-1" copy={getDictionary("en").afterTheGate.refund} reasons={[{ code: "guest_choice", label: "My plans changed" }]} />);
+  mount(<><RefundRequestForm success={getDictionary("en").success} bookingId="bk-1" copy={getDictionary("en").afterTheGate.refund} reasons={[{ code: "guest_choice", label: "My plans changed" }]} /><ToastHost /></>);
 `;
 
 run("refund requested", () => {
@@ -562,10 +565,11 @@ run("refund requested", () => {
 });
 
 const TABLE = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { ReserveTable } from "@/app/(app)/listing/[id]/ReserveTable";
-  mount(<ReserveTable listingId="l-1" success={getDictionary("en").success} copy={getDictionary("en").memberFlows} locale="en" />);
+  mount(<><ReserveTable listingId="l-1" success={getDictionary("en").success} copy={getDictionary("en").memberFlows} locale="en" /><ToastHost /></>);
 `;
 
 /* Today's seatings can all have passed (the form never offers a past time,
@@ -710,21 +714,27 @@ run("report submitted", () => {
 const HOST = `
   import { mount } from "@/lib/testing/browser-root";
   import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { showSuccess } from "@/lib/ui/success-moments";
   window.__show = showSuccess;
-  mount(<SuccessFlagHost />);
+  mount(<><SuccessFlagHost /><ToastHost /></>);
 `;
 
+/* GRADE 1 (P0.4, November 2026): the account moments are the top feedback
+   banner, not a sheet. The banner carries `data-testid="banner-account"`. */
+const BANNER = '[data-testid="banner-account"]';
+
 run("account created, password changed, email verified, passcode set (the root layout's host)", () => {
-  it("opens from the one-shot cookie the server set, asking the server for it", async () => {
+  it("shows the banner from the one-shot cookie the server set, asking the server for it", async () => {
     const { page, close } = await mountInBrowser({
       entry: HOST,
       init: `document.cookie = "nf_done_hint=1; path=/"`,
       actions: { consumeSuccess: `async () => "password-changed"` },
     });
     try {
-      await page.waitForSelector('[data-testid="success-sheet-account"]', { timeout: 15_000 });
-      expect(await page.getByRole("dialog", { name: "Password changed" }).count()).toBe(1);
+      await page.waitForSelector(BANNER, { timeout: 15_000 });
+      expect(await page.locator(BANNER).textContent()).toContain("Password changed");
+      expect(await page.locator('[role="dialog"]').count()).toBe(0);
     } finally {
       await close();
     }
@@ -739,7 +749,7 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await actionCalled(page, "consumeSuccess");
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
     } finally {
       await close();
     }
@@ -750,19 +760,19 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await page.waitForFunction(() => window.location.search === "?x=1", null, { timeout: 15_000 });
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
       expect(await page.evaluate(() => (window as unknown as { __calls?: unknown[] }).__calls ?? [])).toEqual([]);
     } finally {
       await close();
     }
   });
 
-  it("opens from showSuccess (the passcode screen's call)", async () => {
+  it("shows the banner from showSuccess (the passcode screen's call)", async () => {
     const { page, close } = await mountInBrowser({ entry: HOST });
     try {
       await page.evaluate(() => (window as unknown as { __show: (f: string) => void }).__show("passcode-set"));
-      await page.waitForSelector('[data-testid="success-sheet-account"]', { timeout: 15_000 });
-      expect(await page.getByRole("dialog", { name: "Passcode set" }).count()).toBe(1);
+      await page.waitForSelector(BANNER, { timeout: 15_000 });
+      expect(await page.locator(BANNER).textContent()).toContain("Passcode set");
     } finally {
       await close();
     }
@@ -773,7 +783,7 @@ run("account created, password changed, email verified, passcode set (the root l
     try {
       await page.evaluate(() => (window as unknown as { __show: (f: string) => void }).__show("listing-live"));
       await page.waitForTimeout(800);
-      expect(await page.locator('[data-testid="success-sheet-account"]').count()).toBe(0);
+      expect(await page.locator(BANNER).count()).toBe(0);
     } finally {
       await close();
     }
@@ -783,32 +793,28 @@ run("account created, password changed, email verified, passcode set (the root l
 /* ---------------------------------------- the moment's own promises, per flow */
 
 /*
- * Every account moment the host shows (passcode set and changed, account
- * ready, email confirmed, password changed): the right words, the right
- * object, and ONE primary pill that is a real 44px-or-taller target and
- * closes the moment. The account moments land wherever the person was going,
- * so their button is "Continue", which closes, rather than a link.
+ * Every account moment the host shows: the right words as a success banner
+ * with a tick, announced politely, and an X that takes it down.
  */
-run("the account moments' object and button, flow by flow", () => {
+run("the account moments' banner, flow by flow", () => {
   it.each([
-    ["passcode-set", "Passcode set", "passcode-lock"],
-    ["passcode-changed", "Passcode changed", "passcode-lock"],
-    ["account-created", "Welcome to Vallo", "celebrate"],
-    ["email-verified", "Email confirmed", "envelope"],
-    ["password-changed", "Password changed", "shield"],
-  ] as const)("%s: %s, with its object and a Continue pill that closes it", async (flag, title, object) => {
+    ["passcode-set", "Passcode set"],
+    ["passcode-changed", "Passcode changed"],
+    ["account-created", "Welcome to Vallo"],
+    ["signed-in", "Signed in. Welcome back."],
+    ["email-verified", "Email confirmed"],
+    ["password-changed", "Password changed"],
+  ] as const)("%s: %s, as a success banner with an X that closes it", async (flag, title) => {
     const { page, close } = await mountInBrowser({ entry: HOST });
     try {
       await page.evaluate((f) => (window as unknown as { __show: (f: string) => void }).__show(f), flag);
-      const dialog = page.getByRole("dialog", { name: title });
-      await dialog.waitFor({ timeout: 15_000 });
-      expect(await page.locator(".nf-success__mark").getAttribute("data-object")).toBe(object);
-      const primary = page.getByTestId("success-primary");
-      expect(await primary.textContent()).toBe("Continue");
-      expect(await primary.evaluate((el) => el.tagName)).toBe("BUTTON");
-      expect(await page.getByTestId("success-secondary").count()).toBe(0);
-      await primary.click();
-      await page.waitForFunction(() => document.querySelector('[data-testid="success-sheet-account"]') === null);
+      const shown = page.locator(BANNER);
+      await shown.waitFor({ timeout: 15_000 });
+      expect(await shown.getAttribute("data-tone")).toBe("success");
+      expect(await shown.getAttribute("role")).toBe("status");
+      expect(await shown.locator(".nf-toast__text").textContent()).toBe(title);
+      await page.getByTestId("banner-close").click();
+      await page.waitForFunction(() => document.querySelector('[data-testid="banner-account"]') === null);
     } finally {
       await close();
     }
@@ -818,10 +824,11 @@ run("the account moments' object and button, flow by flow", () => {
 /* ---------------------------------------------------------- invitations */
 
 const ADD_FLATMATE = `
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { AddFlatmate } from "@/components/app/tenancy/FlatmateControls";
-  mount(<AddFlatmate tenancyId="11111111-1111-4111-8111-111111111111" copy={getDictionary("en").afterTheGate.flatmates} success={getDictionary("en").success} />);
+  mount(<><AddFlatmate tenancyId="11111111-1111-4111-8111-111111111111" copy={getDictionary("en").afterTheGate.flatmates} success={getDictionary("en").success} /><ToastHost /></>);
 `;
 
 async function inviteFlatmate(page: Page): Promise<void> {
@@ -870,7 +877,8 @@ const INVITE_AGENTS = `
   import { mount } from "@/lib/testing/browser-root";
   import { getDictionary } from "@vallo/i18n";
   import { InviteForm } from "@/app/agent/portfolio/PortfolioControls";
-  mount(<InviteForm listingId="l-1" place="Flat 2, Yaba" copy={getDictionary("en").landlord.portfolio} />);
+  import { ToastHost } from "@/components/ui/ToastHost";
+  mount(<><InviteForm listingId="l-1" place="Flat 2, Yaba" copy={getDictionary("en").landlord.portfolio} /><ToastHost /></>);
 `;
 
 async function inviteAgents(page: Page): Promise<void> {
@@ -906,7 +914,8 @@ run("agents invited to pitch (owner's portfolio)", () => {
       try {
         await inviteAgents(page);
         await actionCalled(page, "inviteAgents");
-        await page.locator("form p[role]").waitFor();
+        /* The outcome is said by the one banner (Grade 1). */
+        await page.locator(".nf-toast").waitFor();
         expect((await routerCalls(page)).filter((c) => c[0] === "replace")).toHaveLength(0);
       } finally {
         await close();

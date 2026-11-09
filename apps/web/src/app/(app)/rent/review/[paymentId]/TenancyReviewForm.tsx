@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState } from "react";
@@ -41,7 +42,6 @@ export function TenancyReviewForm({
   const [again, setAgain] = useState<Tri | "">("");
   const [rating, setRating] = useState<"1" | "2" | "3" | "4" | "5" | "">("");
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [done, setDone] = useState(false);
   const [successClosed, setSuccessClosed] = useState(false);
@@ -80,7 +80,6 @@ export function TenancyReviewForm({
   }
 
   function send() {
-    setError(null);
     setPhoneGate(false);
     const naira = Number(extraNaira.replace(/[^\d]/g, ""));
     if (
@@ -91,7 +90,8 @@ export function TenancyReviewForm({
       rating === "" ||
       (paidExtra === "yes" && (!(naira > 0) || extraTo === ""))
     ) {
-      setError(copy.incomplete);
+      /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+      banner.error(copy.incomplete);
       return;
     }
     startTransition(async () => {
@@ -107,7 +107,8 @@ export function TenancyReviewForm({
           ...(body.trim() ? { body: body.trim() } : {}),
         });
         if (!result.ok) {
-          setError(result.error);
+          /* Said by the one banner (Grade 1); the phone step stays as its link. */
+          banner.error(result.error);
           setPhoneGate(isPhoneGate(result));
           return;
         }
@@ -139,6 +140,7 @@ export function TenancyReviewForm({
           <TextField
             label={copy.howMuch}
             inputMode="numeric"
+            enterKeyHint="done"
             value={extraNaira}
             onChange={(event) => setExtraNaira(event.target.value.replace(/[^\d,]/g, ""))}
           />
@@ -186,11 +188,6 @@ export function TenancyReviewForm({
         />
       </div>
       <TextField label={copy.body} value={body} maxLength={2000} onChange={(event) => setBody(event.target.value)} />
-      {error && (
-        <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
       <PhoneGateLink show={phoneGate} full />
       <Button type="button" variant="primary" full loading={pending} onClick={send}>
         {pending ? copy.sending : copy.submit}

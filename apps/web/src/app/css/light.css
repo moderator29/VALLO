@@ -262,6 +262,19 @@
     color: var(--nf-content-on-brand);
     box-shadow: 0 6px 14px -6px color-mix(in oklab, var(--nf-brand-primary) 70%, transparent);
   }
+  /* The Circle tab by day: the same solid blue disc (shell-m.css), its drop
+     a touch softer on white. */
+  :root[data-theme="light"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 28%, transparent),
+      0 6px 14px -8px color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
+  }
+  :root[data-theme="light"] .nf-tab-circle[aria-current="page"] .nf-tab-circle__plate:not(:where([data-theme="dark"] *)) {
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--nf-content-on-brand) 36%, transparent),
+      0 0 0 3px color-mix(in oklab, var(--nf-brand-primary) 20%, transparent),
+      0 8px 18px -8px color-mix(in oklab, var(--nf-brand-primary) 60%, transparent);
+  }
   /* The tray's glyph tiles: a whisper of brand on white, the glyph blue. */
   :root[data-theme="light"] .nf-dockmore__glyph:not(:where([data-theme="dark"] *)) {
     background: color-mix(in oklab, var(--nf-brand-primary) 7%, var(--nf-surface-primary));
@@ -388,6 +401,65 @@
   :root[data-theme="light"] .nf-side-switch__coin :is(.nf-brand-icon-ground, .nf-icon-tile) {
     background: none;
     box-shadow: none;
+  }
+
+  /* ------------------------------------------------------------------
+   * THE AURORA ON PAPER (light mode pass, 7 November 2026). Two 90px blurred
+   * blue blobs at 20 per cent are the night's atmosphere; on paper they are a
+   * lavender haze that greys the whole top of a content page, and /about,
+   * /help and every site page stacked two of them (the page's and the head's)
+   * with the crossing beams on top. On paper the aurora is a breath of the
+   * brand at the very top and the beams go.
+   * ---------------------------------------------------------------- */
+  :root[data-theme="light"] .nf-aurora:not(:where([data-theme="dark"] *))::before,
+  :root[data-theme="light"] .nf-aurora:not(:where([data-theme="dark"] *))::after {
+    opacity: 0.06;
+  }
+  :root[data-theme="light"] .nf-grid-veil:not(:where([data-theme="dark"] *)) {
+    display: none;
+  }
+
+  /* ------------------------------------------------------------------
+   * THE FIELD ON PAPER (light mode pass, 7 November 2026). The base field
+   * (`controls.css`) is the night's sunken well: an inset fill, an inner
+   * shadow and a gradient rim, which on paper read as a grey box pressed
+   * into the page. Here it is a white sheet with the brand edge and a hair
+   * of contact shadow, and focus deepens the edge to the brand and lays the
+   * soft halo outside it (the text-field ring in `base.css` still draws on
+   * top for keyboard focus). The auth fields take the same edge (`auth.css`, the light slate). Search
+   * fields keep their resting look on focus, as everywhere else.
+   * ---------------------------------------------------------------- */
+  :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-paper-field-edge), var(--nf-paper-field-edge)) border-box;
+    box-shadow: var(--nf-elevation-raised);
+  }
+  @media (hover: hover) {
+    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not(:focus):not(:disabled):hover:not(:where([data-theme="dark"] *)) {
+      background:
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(var(--nf-paper-field-edge-hover), var(--nf-paper-field-edge-hover)) border-box;
+    }
+  }
+  :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+    box-shadow: 0 0 0 3px var(--nf-paper-field-halo);
+  }
+  @media (pointer: coarse) {
+    :root[data-theme="light"] .nf-field:not(.nf-field--glass):not([type="search"]):focus:not(:where([data-theme="dark"] *)) {
+      background:
+        linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+        linear-gradient(color-mix(in oklab, var(--nf-brand-primary) 55%, transparent), color-mix(in oklab, var(--nf-brand-primary) 55%, transparent)) border-box;
+      box-shadow: none;
+    }
+  }
+  :root[data-theme="light"] .nf-field[aria-invalid="true"]:not(:where([data-theme="dark"] *)) {
+    background:
+      linear-gradient(var(--nf-paper-field-fill), var(--nf-paper-field-fill)) padding-box,
+      linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
   }
 }
 

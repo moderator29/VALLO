@@ -1,3 +1,4 @@
+import { badgeTierLabelEn, badgeTierMeaningEn } from "@vallo/i18n/en/badge";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -62,17 +63,11 @@ export function hasBadge(tier: BadgeTier): boolean {
  * in `verification.ts`: a person here looked at a government document. It does
  * not claim an inspection, a payout account or anything about a property.
  */
-export const BADGE_TIER_LABEL: Record<BadgeTier, string> = {
-  none: "",
-  gold: "Verified",
-  platinum: "Vallo",
-};
-
-export const BADGE_TIER_MEANING: Record<BadgeTier, string> = {
-  none: "",
-  gold: "Identity checked by a person at Vallo.",
-  platinum: "A Vallo administrator.",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/badge.en.ts`. */
+const _b = { tierLabel: badgeTierLabelEn, tierMeaning: badgeTierMeaningEn };
+/* `none` is the absence of a badge: nothing to say, so nothing in the dictionary. */
+export const BADGE_TIER_LABEL: Record<BadgeTier, string> = { none: "", ..._b.tierLabel };
+export const BADGE_TIER_MEANING: Record<BadgeTier, string> = { none: "", ..._b.tierMeaning };
 
 /**
  * The published badge for a set of people, in one read.

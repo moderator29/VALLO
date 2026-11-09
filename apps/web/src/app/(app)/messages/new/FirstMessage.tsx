@@ -12,6 +12,7 @@ import type { QuickReply } from "@/lib/enquiry/quick-replies";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * UX-P2-03: the first message, written before any thread exists. Sending it
@@ -46,20 +47,18 @@ export function FirstMessage({
 }) {
   const router = useRouter();
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, startTransition] = useSafeTransition();
 
   function send(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
     setPhoneGate(false);
     startTransition(async () => {
       try {
         const result = await startConversationWithMessage({ listingId, body });
         if (result.ok) router.replace(`/messages/${result.data.conversationId}${suffix}`);
         else {
-          setError(result.error);
+          banner.error(result.error);
           setPhoneGate(isPhoneGate(result));
         }
       } catch (error) {
@@ -107,11 +106,6 @@ export function FirstMessage({
         </div>
       )}
       {replyLine}
-      {error && (
-        <p role="alert" className="nf-caption">
-          {error}
-        </p>
-      )}
       <PhoneGateLink show={phoneGate} full />
       <Button type="submit" variant="primary" full disabled={pending || body.trim().length === 0}>
         {copy.send}

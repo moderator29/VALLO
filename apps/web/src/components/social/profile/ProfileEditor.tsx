@@ -1,7 +1,7 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useActionState, useEffect, useId, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -25,6 +25,7 @@ import {
 } from "@/lib/social/profiles-model";
 import { useDisplayHost } from "@/lib/ui/use-display-host";
 import "@/app/css/catalogue.css";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The profile editor, as a full page.
@@ -90,6 +91,20 @@ export function ProfileEditor({
     router.refresh();
   }, [saved, router]);
 
+  /* The outcome is said by the one banner at the top of the screen (Grade 1);
+     each field's own error stays under that field. */
+  useEffect(() => {
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error);
+      return;
+    }
+    const handle = state.data.handle;
+    banner.success(state.data.claimed ? `@${handle} is yours.` : "Your profile is saved.", {
+      action: { label: "View your profile", run: () => router.push(`/u/${handle}`) },
+    });
+  }, [state, router]);
+
   const fieldError = (key: string): string | undefined =>
     state && !state.ok ? state.fieldErrors?.[key] : undefined;
 
@@ -138,7 +153,7 @@ export function ProfileEditor({
             inputMode="text"
             required
             aria-invalid={fieldError("handle") ? true : undefined}
-            aria-describedby={`${handleId}-help`}
+            aria-describedby={fieldError("handle") ? `${handleId}-help ${handleId}-problem` : `${handleId}-help`}
             /* LEFT OFF THE SCALE ON PURPOSE. 1.9rem clears the "@" drawn inside
                the field, so it is a function of that glyph's advance width in
                this typeface, not a rhythm between two pieces of content. The
@@ -151,15 +166,11 @@ export function ProfileEditor({
           />
         </div>
         <p id={`${handleId}-help`} className="mt-xs text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-content-muted)]">
-          {fieldError("handle") ? (
-            <span className="text-[var(--nf-state-error)]">{fieldError("handle")}</span>
-          ) : (
-            <>
-              {HANDLE_HELP} People will find you at {host}/u/{handle || "yourname"}.
-              {!claiming && " A handle can be changed once every 30 days."}
-            </>
-          )}
+          {HANDLE_HELP} People will find you at {host}/u/{handle || "yourname"}.
+          {!claiming && " A handle can be changed once every 30 days."}
         </p>
+        {/* A field's problem keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+        <FieldProblem id={`${handleId}-problem`} message={fieldError("handle")} when={state} />
       </section>
 
       {/* --------------------------------------------------------------- bio */}
@@ -177,19 +188,19 @@ export function ProfileEditor({
           maxLength={BIO_MAX}
           rows={4}
           aria-invalid={fieldError("bio") ? true : undefined}
-          aria-describedby={`${bioId}-help`}
+          aria-describedby={fieldError("bio") ? `${bioId}-help ${bioId}-problem` : `${bioId}-help`}
           className="nf-field resize-y"
           placeholder="Where you are, what you know, what you are looking for."
         />
         <p id={`${bioId}-help`} className="mt-xs flex items-start justify-between gap-sm text-[length:var(--nf-text-overline)] leading-relaxed">
-          <span className={fieldError("bio") ? "text-[var(--nf-state-error)]" : "text-[var(--nf-content-muted)]"}>
-            {fieldError("bio") ??
-              "Never put a phone number or an account number here. Those are held for review."}
+          <span className="text-[var(--nf-content-muted)]">
+            Never put a phone number or an account number here. Those are held for review.
           </span>
           <span className="nf-numeric shrink-0 text-[var(--nf-content-muted)]">
             {bio.length}/{BIO_MAX}
           </span>
         </p>
+        <FieldProblem id={`${bioId}-problem`} message={fieldError("bio")} when={state} />
 
         <label htmlFor={pronounsId} className="nf-label mt-md">
           Pronouns
@@ -203,12 +214,11 @@ export function ProfileEditor({
           maxLength={PRONOUNS_MAX}
           autoComplete="off"
           aria-invalid={fieldError("pronouns") ? true : undefined}
+          aria-describedby={fieldError("pronouns") ? `${pronounsId}-problem` : undefined}
           className="nf-field"
           placeholder="she/her"
         />
-        {fieldError("pronouns") && (
-          <p className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">{fieldError("pronouns")}</p>
-        )}
+        <FieldProblem id={`${pronounsId}-problem`} message={fieldError("pronouns")} when={state} />
 
         <label htmlFor={linkId} className="nf-label mt-md">
           Link
@@ -225,14 +235,14 @@ export function ProfileEditor({
           spellCheck={false}
           inputMode="url"
           aria-invalid={fieldError("link") ? true : undefined}
+          aria-describedby={fieldError("link") ? `${linkId}-problem` : undefined}
           className="nf-field"
           placeholder="myshop.ng"
         />
         <p className="mt-xs text-[length:var(--nf-text-overline)] leading-relaxed">
-          <span className={fieldError("link") ? "text-[var(--nf-state-error)]" : "text-[var(--nf-content-muted)]"}>
-            {fieldError("link") ?? "One place people can find you. We add the https:// for you."}
-          </span>
+          <span className="text-[var(--nf-content-muted)]">One place people can find you. We add the https:// for you.</span>
         </p>
+        <FieldProblem id={`${linkId}-problem`} message={fieldError("link")} when={state} />
       </section>
 
       {/* -------------------------------------------------------- home area */}
@@ -248,6 +258,7 @@ export function ProfileEditor({
             value={homeAreaId}
             onChange={(e) => setHomeAreaId(e.target.value)}
             aria-invalid={fieldError("homeAreaId") ? true : undefined}
+            aria-describedby={fieldError("homeAreaId") ? `${areaId}-problem` : undefined}
             className="nf-field"
           >
             <option value="">Rather not say</option>
@@ -266,11 +277,7 @@ export function ProfileEditor({
             </p>
           </>
         )}
-        {fieldError("homeAreaId") && (
-          <p className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-            {fieldError("homeAreaId")}
-          </p>
-        )}
+        <FieldProblem id={`${areaId}-problem`} message={fieldError("homeAreaId")} when={state} />
       </section>
 
       {/* ------------------------------------------------------- who reaches */}
@@ -339,29 +346,6 @@ export function ProfileEditor({
           </span>
         </label>
       </section>
-
-      {/* ------------------------------------------------------------ result */}
-      {state && !state.ok && (
-        <p role="alert" className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]">
-          {state.error}
-        </p>
-      )}
-
-      {saved && (
-        <div role="status" className="nf-panel nf-panel--card p-md">
-          <p className="flex items-center gap-xs text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-state-success)]">
-            <UiIcon name="verified" size={15} className="shrink-0" />
-            {saved.claimed ? `@${saved.handle} is yours.` : "Your profile is saved."}
-          </p>
-          <Link
-            href={`/u/${saved.handle}`}
-            className="mt-xs inline-flex items-center gap-2xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-brand-secondary)]"
-          >
-            View your profile
-            <UiIcon name="arrow-right" size={14} />
-          </Link>
-        </div>
-      )}
 
       <div className="flex flex-col gap-xs pb-xs sm:flex-row-reverse">
         <Button type="submit" variant="primary" loading={pending} disabled={pending} className="w-full sm:w-auto">

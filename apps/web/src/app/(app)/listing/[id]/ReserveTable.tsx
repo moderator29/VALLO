@@ -1,9 +1,11 @@
 "use client";
 
+import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { PushPrompt } from "@/components/app/push/PushPrompt";
 import { isPhoneGate } from "@/lib/actions/envelope";
-import { useActionState, useId, useMemo, useState } from "react";
+import { useActionState, useEffect, useId, useMemo, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { reserveTable } from "@/lib/reservations/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
@@ -144,6 +146,7 @@ export function ReserveTable({
 }) {
   const w = copy.table;
   const heading = title === undefined ? w.title : title;
+  const isKept = useKeptCopy();
   const todayIso = lagosDayIso(0);
   const days = useMemo(() => Array.from({ length: 14 }, (_, i) => lagosDayIso(i)), []);
 
@@ -176,6 +179,11 @@ export function ReserveTable({
     ActionResult<{ reservationId: string; status: "PENDING"; deposit?: ReservedDeposit | null }> | null,
     FormData
   >(reserveTable, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1);
+     the phone step, when that is the reason, stays as its link. */
+  useEffect(() => {
+    if (state && !state.ok) banner.error(state.error);
+  }, [state]);
   /* What the restaurant's rule asks of this party at this time, on the
      screen, before anything is sent. The database quotes again once the
      request exists, and that is the figure the guest pays. */
@@ -342,7 +350,7 @@ export function ReserveTable({
             iconOnly
             onClick={() => setParty((n) => Math.max(1, n - 1))}
             aria-label={w.fewerGuests}
-            className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
+            className="grid h-11 w-11 rounded-sm place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party <= 1}
           >
             <UiIcon name="minus" size={16} aria-hidden />
@@ -359,7 +367,7 @@ export function ReserveTable({
               const next = Number(event.target.value);
               setParty(Number.isFinite(next) ? Math.min(MAX_PARTY, Math.max(1, next)) : 1);
             }}
-            className="h-11 w-16 nf-glass--well rounded-[var(--nf-radius-sm)] border px-xs py-0 text-center text-[length:var(--nf-text-body-sm)] tabular-nums text-[var(--nf-content-primary)]"
+            className="h-11 w-16 nf-glass--well rounded-sm border px-xs py-0 text-center text-[length:var(--nf-text-body-sm)] tabular-nums text-[var(--nf-content-primary)]"
           />
           <Button
             variant="glass"
@@ -367,7 +375,7 @@ export function ReserveTable({
             iconOnly
             onClick={() => setParty((n) => Math.min(MAX_PARTY, n + 1))}
             aria-label={w.moreGuests}
-            className="grid h-11 w-11 rounded-[var(--nf-radius-sm)] place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
+            className="grid h-11 w-11 rounded-sm place-items-center text-[var(--nf-content-secondary)] disabled:opacity-40"
             disabled={party >= MAX_PARTY}
           >
             <UiIcon name="plus" size={16} aria-hidden />
@@ -401,7 +409,7 @@ export function ReserveTable({
           rows={2}
           maxLength={500}
           placeholder={w.notePlaceholder}
-          className="mt-2xs w-full nf-glass--well rounded-[var(--nf-radius-control)] border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
+          className="mt-2xs w-full nf-glass--well rounded-control border px-sm py-xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-primary)] placeholder:text-[var(--nf-content-muted)]"
         />
       </div>
 
@@ -410,6 +418,8 @@ export function ReserveTable({
           venue that sets deposits at all. */}
       {deposit && slots.length > 0 ? (
         <div className="mt-md" aria-live="polite">
+          {/* Read off the phone's kept copy, the deposit says so (SW15). */}
+          <KeptPriceNote className="mb-row" />
           {preview ? (
             <DepositSummary
               amountMinor={preview.amountMinor}
@@ -428,14 +438,9 @@ export function ReserveTable({
         </div>
       ) : null}
 
-      {state && !state.ok && (
-        <p role="alert" className="mt-sm text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {state.error}
-        </p>
-      )}
       <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
 
-      <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0}>
+      <Button type="submit" variant="primary" full className="mt-md" disabled={pending || slots.length === 0 || isKept}>
         {pending ? w.sending : w.submit}
       </Button>
 

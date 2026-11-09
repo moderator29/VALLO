@@ -4,8 +4,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 /** The wait, on the tenancy review: a header and five question rows. */
 export default function LoadingTenancyReview() {
   return (
-    <LoadingShell label="Loading your tenancy review" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading your tenancy review" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <div className="nf-panel nf-panel--card grid gap-md p-card">
         {Array.from({ length: 5 }, (_, i) => (
           <div key={i}>

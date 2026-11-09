@@ -98,7 +98,7 @@ export function NotificationFullView({
       {/* ------------------------------------- the family's lead, under the hero */}
       {row.body ? (
         <p
-          className={`nf-nview__lead nf-body${family === "messages" ? " nf-nview__lead--quote" : ""}${family === "account" ? " nf-nview__lead--calm" : ""}`}
+          className={`nf-nview__lead nf-body${family === "messages" ? " nf-nview__lead--quote" : ""}${family === "activity" ? " nf-nview__lead--calm" : ""}`}
           style={stepStyle(1)}
         >
           {warmBody(row.body)}

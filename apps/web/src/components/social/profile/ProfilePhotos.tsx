@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { uploadToStorage, withTimeout } from "@/lib/media/upload";
 import { initial } from "@/lib/text/initial";
 import { useRef, useState } from "react";
@@ -11,7 +12,7 @@ import { COVER_MAX_BYTES, COVER_MAX_EDGE } from "@/lib/social/profiles-model";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button } from "@/components/ui/Button";
-import { reencodeToJpeg } from "./reencode";
+import { reencodePhoto } from "./reencode";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 
 /**
@@ -54,64 +55,59 @@ export function ProfilePhotos({
   const [cover, setCover] = useState(coverUrl);
   const [avatar, setAvatarUrl] = useState(avatarUrl);
   const [busy, setBusy] = useState<"cover" | "avatar" | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
 
   const monogram = initial(displayName || handle);
 
-  async function prepare(file: File, square: boolean): Promise<Blob | null> {
+  async function prepare(file: File, square: boolean) {
     if (!ACCEPTED.includes(file.type)) {
-      setError("Choose a JPG, PNG or WebP photo.");
+      banner.error("Choose a JPG, PNG or WebP photo.");
       return null;
     }
     if (file.size > COVER_MAX_BYTES) {
-      setError("That photo is over 10MB. Please choose a smaller one.");
+      banner.error("That photo is over 10MB. Please choose a smaller one.");
       return null;
     }
-    const blob = await reencodeToJpeg(file, {
+    const result = await reencodePhoto(file, {
       maxEdge: square ? AVATAR_MAX_EDGE : COVER_MAX_EDGE,
       square,
     });
-    if (!blob) {
-      /* Deliberately not falling back to the original file. */
-      setError(
+    if (!result) {
+      banner.error(
         "We could not prepare that photo safely, so it was not uploaded. Try a different one.",
       );
       return null;
     }
-    return blob;
+    return result;
   }
 
   async function onCover(file: File) {
-    setError(null);
-    setNote(null);
     setBusy("cover");
     try {
-      const blob = await prepare(file, false);
-      if (!blob) return;
+      const encoded = await prepare(file, false);
+      if (!encoded) return;
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError("That upload did not go through. Check your connection and try again.");
+        banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: blob, contentType: "image/jpeg" });
+      const path = `${userId}/${crypto.randomUUID()}.${encoded.extension}`;
+      const upload = await uploadToStorage({ supabase, bucket: "social-covers", path, body: encoded.blob, contentType: encoded.contentType });
       if (!upload.ok) {
-        setError("That upload did not go through. Check your connection and try again.");
+        banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
 
       const result = await withTimeout(setSocialCover({ storagePath: path }), 30_000);
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
-      setCover(URL.createObjectURL(blob));
-      setNote("Your cover is saved.");
+      setCover(URL.createObjectURL(encoded.blob));
+      banner.success("Your cover is saved.");
       router.refresh();
     } catch {
-      setError("We could not read that photo. Try a different one.");
+      banner.error("We could not read that photo. Try a different one.");
     } finally {
       setBusy(null);
       if (coverInput.current) coverInput.current.value = "";
@@ -119,35 +115,33 @@ export function ProfilePhotos({
   }
 
   async function onAvatar(file: File) {
-    setError(null);
-    setNote(null);
     setBusy("avatar");
     try {
-      const blob = await prepare(file, true);
-      if (!blob) return;
+      const encoded = await prepare(file, true);
+      if (!encoded) return;
 
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError("That upload did not go through. Check your connection and try again.");
+        banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
-      const path = `${userId}/${crypto.randomUUID()}.jpg`;
-      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: blob, contentType: "image/jpeg" });
+      const path = `${userId}/${crypto.randomUUID()}.${encoded.extension}`;
+      const upload = await uploadToStorage({ supabase, bucket: "avatars", path, body: encoded.blob, contentType: encoded.contentType });
       if (!upload.ok) {
-        setError("That upload did not go through. Check your connection and try again.");
+        banner.error("That upload did not go through. Check your connection and try again.");
         return;
       }
 
       const result = await withTimeout(setAvatar({ storagePath: path }), 30_000);
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
       setAvatarUrl(result.data.avatarUrl);
-      setNote("Your photo is saved, here and everywhere else on Vallo.");
+      banner.success("Your photo is saved, here and everywhere else on Vallo.");
       router.refresh();
     } catch {
-      setError("We could not read that photo. Try a different one.");
+      banner.error("We could not read that photo. Try a different one.");
     } finally {
       setBusy(null);
       if (avatarInput.current) avatarInput.current.value = "";
@@ -155,17 +149,15 @@ export function ProfilePhotos({
   }
 
   async function removeCover() {
-    setError(null);
-    setNote(null);
     setBusy("cover");
     try {
       const result = await setSocialCover({ storagePath: null });
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
       setCover("");
-      setNote("Your cover is back to the house one.");
+      banner.success("Your cover is back to the house one.");
       router.refresh();
     } finally {
       setBusy(null);
@@ -280,16 +272,6 @@ export function ProfilePhotos({
         writes never leaves it.
       </p>
 
-      {error && (
-        <p role="alert" className="px-md pb-md text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)] sm:px-lg">
-          {error}
-        </p>
-      )}
-      {note && !error && (
-        <p role="status" className="px-md pb-md text-[length:var(--nf-text-overline)] text-[var(--nf-state-success)] sm:px-lg">
-          {note}
-        </p>
-      )}
 
       <input
         ref={coverInput}

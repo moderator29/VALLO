@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Switch } from "@/components/ui/Switch";
@@ -24,6 +25,13 @@ export function PreferencesForm({
 }) {
   const [values, setValues] = useState(initial);
   const [state, action, pending] = useActionState<ActionResult | null, FormData>(saveEmailPreferences, null);
+  useEffect(() => {
+    if (!state) return;
+    if (state.ok) banner(copy.saved, { tone: "success", "data-testid": "prefs-saved" });
+    else banner.error(state.error === INVALID_PREFS_LINK ? `${copy.invalidTitle}. ${copy.invalidBody}` : copy.failed);
+    // Once per answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <form action={action} className="grid gap-md">
@@ -48,14 +56,7 @@ export function PreferencesForm({
       <Button type="submit" variant="primary" size="lg" full loading={pending} data-testid="prefs-save">
         {copy.save}
       </Button>
-      <div aria-live="polite">
-        {state?.ok && <p className="nf-body-sm text-[var(--nf-state-success)]">{copy.saved}</p>}
-        {state && !state.ok && (
-          <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-            {state.error === INVALID_PREFS_LINK ? `${copy.invalidTitle}. ${copy.invalidBody}` : copy.failed}
-          </p>
-        )}
-      </div>
+      {/* Saved or refused, said by the one banner at the top of the screen (founder, 7 November 2026). */}
     </form>
   );
 }

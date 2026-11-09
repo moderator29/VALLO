@@ -104,7 +104,7 @@ export function ProofStrip({
               type="button"
               onClick={() => setOpen(line)}
               aria-haspopup="dialog"
-              className="nf-tap flex min-h-[44px] w-full items-start gap-inline rounded-[var(--nf-radius-sm)] py-xs text-left"
+              className="nf-tap flex min-h-[44px] w-full items-start gap-inline rounded-sm py-xs text-left"
               data-testid={`proof-line-${line.kind}`}
             >
               <UiIcon

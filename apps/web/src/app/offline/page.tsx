@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { OfflineAutoRecover } from "@/components/app/offline/OfflineAutoRecover";
+import { OfflineRecent } from "@/components/app/offline/OfflineRecent";
 import { DEFAULT_LOCALE, getDictionary } from "@vallo/i18n";
 import { RetryButton } from "./RetryButton";
 import { OfflinePacks } from "./OfflinePacks";
@@ -56,6 +58,9 @@ export default function OfflinePage() {
       <OfflinePacks copy={t.platform.gate} locale={DEFAULT_LOCALE} />
       {/* V-77: the shortlist this phone holds, with a compare. */}
       <OfflineShelf copy={t.platform.shelf} locale={DEFAULT_LOCALE} />
+      {/* Recently viewed places this phone kept, and recovery on the first answer (Agent NATIVE, job 3). */}
+      <OfflineRecent />
+      <OfflineAutoRecover />
     </OfflineScreen>
   );
 }

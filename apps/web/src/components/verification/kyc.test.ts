@@ -6,8 +6,12 @@ import {
   CONSENTS,
   MAX_FILE_BYTES,
   addressDateProblem,
+  backRuleFor,
+  idTypesFor,
+  isSubtypeOf,
   lagosToday,
   missingFrom,
+  missingItems,
   progressLabel,
   rejectFile,
   stepsFor,
@@ -32,8 +36,10 @@ function submission(over: Partial<KycSubmission> = {}): KycSubmission {
 
 describe("stepsFor", () => {
   /* The branch is the only hard thing in this flow, so it is the thing tested. */
-  it("is six steps before the business question is answered: the ID, then the face, then the address", () => {
+  it("is eight steps before the business question is answered: the ID's country, its type and photos, then the face, then the address", () => {
     expect(stepsFor(null).map((s) => s.id)).toEqual([
+      "id-country",
+      "id-type",
       "identity-document",
       "selfie",
       "address-document",
@@ -43,14 +49,14 @@ describe("stepsFor", () => {
     ]);
   });
 
-  it("stays six when they say they do not run a business", () => {
-    expect(stepsFor(false)).toHaveLength(6);
+  it("stays eight when they say they do not run a business", () => {
+    expect(stepsFor(false)).toHaveLength(8);
   });
 
-  it("grows to seven, with business details in the middle, when they say yes", () => {
+  it("grows to nine, with business details in the middle, when they say yes", () => {
     const ids = stepsFor(true).map((s) => s.id);
-    expect(ids).toHaveLength(7);
-    expect(ids[4]).toBe("business-details");
+    expect(ids).toHaveLength(9);
+    expect(ids[6]).toBe("business-details");
   });
 
   it("never puts review anywhere but last", () => {
@@ -60,9 +66,11 @@ describe("stepsFor", () => {
     }
   });
 
-  it("is five steps, with no business question, when the answers could not be filed", () => {
+  it("is seven steps, with no business question, when the answers could not be filed", () => {
     for (const answer of [null, true, false] as const) {
       expect(stepsFor(answer, false).map((s) => s.id)).toEqual([
+        "id-country",
+        "id-type",
         "identity-document",
         "selfie",
         "address-document",
@@ -192,5 +200,29 @@ describe("the two answers about each document", () => {
   it("names the stale date as a gap", () => {
     const gaps = missingFrom(submission({ documents: { identity: ID, address: { ...BILL, issuedOn: "2026-01-01" } } }), "2026-09-28");
     expect(gaps).toEqual(["The date on your proof of address, within the last three months"]);
+  });
+});
+
+describe("Grade 1: the country and the sides of an ID", () => {
+  it("offers Nigeria's four documents, and three everywhere else", () => {
+    expect(idTypesFor("NG").map((t) => t.value)).toEqual(["nin_card", "passport", "drivers_licence", "voters_card"]);
+    expect(idTypesFor("GH").map((t) => t.value)).toEqual(["passport", "national_id", "drivers_licence"]);
+    expect(isSubtypeOf("identity", "national_id")).toBe(true);
+  });
+
+  it("asks for the back of a card, never of a passport, optionally of a NIN slip", () => {
+    expect(backRuleFor("passport")).toBe("none");
+    expect(backRuleFor("nin_card")).toBe("optional");
+    for (const card of ["drivers_licence", "voters_card", "national_id"]) expect(backRuleFor(card)).toBe("required");
+  });
+
+  it("names the missing back and the missing country, and leaves older callers alone", () => {
+    const base = { name: "id.jpg", size: 1, type: "image/jpeg", path: "u/kyc-1/identity-front-x.jpg", issuedOn: null };
+    const gaps = (identity: Record<string, unknown>) =>
+      missingItems({ documents: { identity: identity as never }, selfie: null, business: false, businessDetails: {}, consents: [] }).map((g) => g.kind);
+    expect(gaps({ ...base, subtype: "drivers_licence", country: "NG", backPath: null })).toContain("back");
+    expect(gaps({ ...base, subtype: "passport", country: "NG", backPath: null })).not.toContain("back");
+    expect(gaps({ ...base, subtype: "passport", country: null })).toContain("country");
+    expect(gaps({ ...base, subtype: "passport" })).not.toContain("country");
   });
 });

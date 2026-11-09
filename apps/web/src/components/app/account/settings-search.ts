@@ -20,13 +20,8 @@ import { LOCALES, getDictionary, type Dictionary } from "@vallo/i18n";
  * `/settings/help`, and a search result goes where the row goes.
  */
 
-export const SETTINGS_SEARCH_COPY = {
-  placeholder: "Search settings",
-  noMatchTitle: "Nothing in settings matches that",
-  noMatchBody:
-    "Try a shorter word, or part of it. Nothing has been changed by searching, and every setting is still here.",
-  clear: "Show every setting",
-} as const;
+/** SW11: source of truth is now `packages/i18n/src/locales/settings-search.en.ts`. */
+export const SETTINGS_SEARCH_COPY = getDictionary("en").settingsSearch;
 
 export type SettingsSection = {
   id: string;

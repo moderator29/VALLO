@@ -24,10 +24,11 @@ const entry = (on: boolean) => `
   import { getDictionary } from "@vallo/i18n";
   import { PassportThreadRows } from "@/components/passport/PassportThreadRows";
   import { mount } from "@/lib/testing/browser-root";
+  import { ToastHost } from "@/components/ui/ToastHost";
   const p = getDictionary("en").passportV2;
   const words = { show: p.showInChat, hint: p.showInChatHint, offTitle: p.showInChatOff, offHint: p.showInChatOffHint,
     sent: p.shownInChat, failed: p.sendFailed, viewTheirs: p.viewTheirs, viewTheirsHint: p.viewTheirsHint };
-  mount(<PassportThreadRows passport={{ on: ${on}, words }} conversationId="conv-1" meId="${ME}" counterpartId="${THEM}" counterpartName="Amaka" />);
+  mount(<><ToastHost /><PassportThreadRows passport={{ on: ${on}, words }} conversationId="conv-1" meId="${ME}" counterpartId="${THEM}" counterpartName="Amaka" /></>);
 `;
 
 describe.skipIf(!hasBrowser && !process.env.CI)("the passport rows in the options sheet", () => {
@@ -42,7 +43,8 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the passport rows in the option
       const calls = await page.evaluate(() => (window as unknown as { __calls: unknown[][] }).__calls);
       expect(calls).toEqual([["sendMessage", { conversationId: "conv-1", body: `Shared a passport\n/passport/${ME}` }]]);
       /* A refusal (a block, a pause) is said, not swallowed. */
-      expect(await page.getByRole("alert").innerText()).toBe("stay here");
+      /* Said by the one top banner (founder, 7 November 2026). */
+      expect(await page.getByRole("alert").innerText()).toContain("stay here");
     } finally {
       await close();
     }

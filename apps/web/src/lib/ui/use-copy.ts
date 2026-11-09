@@ -45,18 +45,22 @@ export function useCopy() {
 /**
  * Copy for a control that confirms in place ("Copy" becomes "Copied" with a
  * check): `copied` is true for a beat after the clipboard took it, and a
- * light tick is felt. No toast on success, because the button already said
- * it; a failure is still a toast that says what to do instead.
+ * light tick is felt. The banner says it too ("Link copied", "Code
+ * copied"): the founder's ruling of 7 November 2026 ("THE BANNER
+ * EVERYWHERE") puts every outcome at the top, copies included, and the
+ * button's own tick stays as the control's state. A failure is a toast
+ * that says what to do instead.
  */
 export function useCopyFlash(ms = 2000) {
   const words = detailsOf(useClientCopyOptional())?.copy;
   const [copied, flash] = useDoneFlash(ms);
   const copy = useCallback(
-    async (text: string): Promise<boolean> => {
+    async (text: string, kind: CopyKind = "text"): Promise<boolean> => {
       const done = await copyText(text);
       if (done) {
         feedback("select");
         flash();
+        if (words) toast(kind === "link" ? words.linkCopied : kind === "code" ? words.codeCopied : words.copied, { tone: "success" });
       } else if (words) {
         toast(words.failed, { tone: "error" });
       }

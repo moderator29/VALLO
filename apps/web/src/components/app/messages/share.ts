@@ -31,7 +31,11 @@
  * the founder hit. A third kind costs one branch in `resolveCard` and makes
  * the card real on both.
  */
-export type SharedKind = "listing" | "booking" | "stay";
+/**
+ * `roommate` is a Vallo Roommates post (`/roommates/r/<id>`), shared from its
+ * Share menu: a room on offer, a roommate wanted, or a find-together post.
+ */
+export type SharedKind = "listing" | "booking" | "stay" | "roommate";
 
 export type SharedRef = { kind: SharedKind; id: string };
 
@@ -53,6 +57,7 @@ export const SHARE_LEAD: Record<SharedKind | "passport", string> = {
   listing: "Shared a listing",
   booking: "Shared a booking",
   stay: "Shared a stay",
+  roommate: "Shared a room",
   passport: "Shared a passport",
 };
 
@@ -60,6 +65,7 @@ export const SHARE_LEAD: Record<SharedKind | "passport", string> = {
 export function shareHref(ref: ParsedShare): string {
   if (ref.kind === "listing") return `/listing/${ref.id}`;
   if (ref.kind === "stay") return `/stay/${ref.id}`;
+  if (ref.kind === "roommate") return `/roommates/r/${ref.id}`;
   /* The Vallo passport of the account `id`. A card draws only for the member
      who sent it (`cards.ts`), and the page it opens answers to the owner's
      switches and to blocks, so the path is safe to carry in a body. */
@@ -75,7 +81,7 @@ export function shareBody(ref: ParsedShare): string {
 /* Each segment is written exactly as `shareHref` writes it, so `bookings`
    plural and `stay` singular are both spelled out rather than inferred. */
 const SHARE_RE = new RegExp(
-  `^(?:Shared a (?:listing|booking|stay|passport)\\n)?/(listing|bookings|stay|passport)/(${UUID})$`,
+  `^(?:Shared a (?:listing|booking|stay|room|passport)\\n)?/(listing|bookings|stay|passport|roommates/r)/(${UUID})$`,
   "i",
 );
 
@@ -92,6 +98,7 @@ export function parseShare(body: string): ParsedShare | null {
   const segment = match[1]!.toLowerCase();
   const id = match[2]!.toLowerCase();
   if (segment === "passport") return { kind: "passport", id };
+  if (segment === "roommates/r") return { kind: "roommate", id };
   const kind: SharedKind = segment === "listing" ? "listing" : segment === "stay" ? "stay" : "booking";
   return { kind, id };
 }

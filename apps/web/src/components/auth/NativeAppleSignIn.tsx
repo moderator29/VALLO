@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { signInWithAppleIdToken } from "@/lib/auth/actions";
 import { useClientCopy } from "@/lib/i18n/client-copy";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * SIGN IN WITH APPLE INSIDE THE iOS SHELL (STORE-02).
@@ -88,13 +89,15 @@ export function NativeAppleSignIn({
   const router = useRouter();
   const available = useSyncExternalStore(noSubscribe, pluginAvailable, () => false);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  /* Said by the one banner at the top of the screen, with Try again
+     (founder, 7 November 2026); a second tap opens Apple's sheet afresh. */
+  const say = (text: string) =>
+    banner.error(text, { retry: () => void start(), "data-testid": "banner-auth" });
 
   if (!available) return null;
 
   const start = async () => {
     setBusy(true);
-    setMessage(null);
     try {
       const { Capacitor } = await import("@capacitor/core");
       const plugin = Capacitor.registerPlugin<ApplePlugin>("SignInWithApple");
@@ -110,12 +113,12 @@ export function NativeAppleSignIn({
       });
       const idToken = result.response?.identityToken;
       if (!idToken) {
-        setMessage(a.appleUnfinished);
+        say(a.appleUnfinished);
         return;
       }
       const outcome = await signInWithAppleIdToken({ idToken, nonce, next });
       if (!outcome.ok) {
-        setMessage(outcome.message);
+        say(outcome.message);
         return;
       }
       router.replace(outcome.next);
@@ -123,7 +126,7 @@ export function NativeAppleSignIn({
     } catch {
       /* A cancelled sheet rejects too; the person chose not to, and a quiet
          line is the right answer to that. */
-      setMessage(a.appleFailed);
+      say(a.appleFailed);
     } finally {
       setBusy(false);
     }
@@ -147,11 +150,6 @@ export function NativeAppleSignIn({
         <AppleMark />
         {round ? null : label}
       </button>
-      {message ? (
-        <p role="alert" className="nf-auth__notice mt-sm">
-          {message}
-        </p>
-      ) : null}
     </div>
   );
 }

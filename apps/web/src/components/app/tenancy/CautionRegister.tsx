@@ -94,7 +94,7 @@ export function CautionRegister({
                     {d.photoUrl ? (
                       // A signed, short-lived URL to a private object: the photograph the line was proposed against.
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={d.photoUrl} alt={words.photo.replace("{item}", item)} className="nf-exchange__photo" />
+                      <img src={d.photoUrl} alt={words.photo.replace("{item}", item)} className="nf-exchange__photo" loading="lazy" decoding="async" />
                     ) : null}
                     <Entries entries={thread.entries.map((e) => wordEntry(e, copy, words))} />
                   </li>

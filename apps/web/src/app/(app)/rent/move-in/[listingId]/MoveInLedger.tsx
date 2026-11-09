@@ -63,7 +63,7 @@ export function MoveInLedger({
     <div className="flex flex-col gap-md" data-testid="move-in-ledger">
       {/* ------------------------------------------------ the listing */}
       <Link href={`/listing/${listing.id}`} className="nf-ledger-card flex gap-sm">
-        <span className="relative block h-24 w-28 shrink-0 overflow-hidden rounded-[var(--nf-radius-md)]">
+        <span className="relative block h-24 w-28 shrink-0 overflow-hidden rounded-md">
           <MediaFrame hue={listing.hue} kind={listing.kind} drawn={isModestExample(listing)} sizes="112px" />
           {photo && <Image src={photo} alt="" fill sizes="112px" className="object-cover" />}
         </span>

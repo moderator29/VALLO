@@ -1,8 +1,7 @@
 "use client";
 
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
-import { NotifyBanner } from "./notify/NotifyBanner";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useOverlay } from "@/lib/ui/use-overlay";
 import { useSwipeToClose } from "@/lib/ui/use-swipe-to-close";
 import { WholePrefetchLink } from "@/components/app/WholePrefetchLink";
@@ -10,6 +9,7 @@ import { KeepWarm } from "@/components/app/KeepWarm";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AppRail } from "./AppRail";
 import { isFocusedRoute, isImmersiveRoute, showsTabBar } from "./MobileTabBar";
+import { CIRCLE_ROUTE } from "./circle-route";
 import { ShellDock } from "./ShellDock";
 import { openCreateSheet } from "./CreateDock";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -19,6 +19,18 @@ import { SideFlip } from "./flip/SideFlip";
 import { SideSync } from "./SideSync";
 import { isDetailPath } from "@/lib/side.constants";
 import type { ProfileSelection, Workspace } from "@/lib/supply/workspaces";
+
+const LazyNotifyBanner = lazy(() =>
+  new Promise<{ default: typeof import("./notify/NotifyBanner").NotifyBanner }>((resolve) => {
+    const load = () =>
+      import("./notify/NotifyBanner").then((m) => ({ default: m.NotifyBanner }));
+    if (typeof requestIdleCallback === "function") {
+      requestIdleCallback(() => void load().then(resolve), { timeout: 2000 });
+    } else {
+      setTimeout(() => void load().then(resolve), 2000);
+    }
+  }),
+);
 
 /**
  * The consumer shell, for both sides.
@@ -68,7 +80,13 @@ import type { ProfileSelection, Workspace } from "@/lib/supply/workspaces";
  * profile, a listing, settings or any feature page. Notifications stay one
  * tap away in the side navigation everywhere.
  */
-const BELL_PATHS: ReadonlySet<string> = new Set(["/home", "/stays", "/search", "/stays/search", "/around"]);
+const BELL_PATHS: ReadonlySet<string> = new Set(["/home", "/stays", "/search", "/stays/search", "/around", CIRCLE_ROUTE]);
+
+/** SW16: the bell on every dock root. With the social layer off, Agreements
+    holds the Feed slot, so it is a root then and carries the bell too. */
+function bellOn(pathname: string, socialOn: boolean): boolean {
+  return BELL_PATHS.has(pathname) || (!socialOn && pathname === "/agreements");
+}
 
 export function AppShell({
   t,
@@ -394,7 +412,7 @@ export function AppShell({
               </span>
             )}
             <SignedOutActions t={t} className="ms-auto" />
-            {signedIn && (BELL_PATHS.has(pathname ?? "") || (!immersive && showsTabBar(active))) && (
+            {signedIn && (bellOn(pathname ?? "", socialOn) || (!immersive && showsTabBar(active))) && (
               /* `ms-auto` on the group: on a signed-in header
                  `SignedOutActions` renders null, so this is the first item
                  after the brand and it is the one that has to push right. */
@@ -415,7 +433,7 @@ export function AppShell({
                     <UiIcon name="pencil" size={20} />
                   </button>
                 )}
-                {BELL_PATHS.has(pathname ?? "") && (
+                {bellOn(pathname ?? "", socialOn) && (
                   /* Fetched whole, so the bell opens the list with no skeleton:
                      about 11 KB on the wire, kept for five minutes. */
                   <WholePrefetchLink
@@ -447,8 +465,11 @@ export function AppShell({
         )}
       </main>
 
-      {/* A new notification drops down from the top while the app is open. */}
-      {signedIn && !preview ? <NotifyBanner /> : null}
+      {signedIn && !preview ? (
+        <Suspense>
+          <LazyNotifyBanner />
+        </Suspense>
+      ) : null}
 
       {!immersive && showsTabBar(active) && (
         <ShellDock

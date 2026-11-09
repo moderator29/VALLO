@@ -1,9 +1,9 @@
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { getLocale } from "@/lib/locale";
 import { readMyBalance } from "@/lib/money/member-wallet";
 import { BALANCE_LEDE } from "@/lib/money/balance-copy";
 import { isWalletFilter } from "@/lib/money/wallet-view";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { BalanceView, type WalletScreen } from "@/components/money/balance/BalanceView";
 import { WalletHeader } from "@/components/money/balance/WalletChrome";
@@ -30,11 +30,7 @@ export async function WalletRoute({ screen, path, title, filter }: { screen: Wal
             icon="bank-column"
             title="Sign in to continue"
             body={BALANCE_LEDE}
-            action={
-              <ButtonLink href={withNext("/sign-in", path)} variant="primary" size="lg">
-                Sign in
-              </ButtonLink>
-            }
+            action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", path) }} />}
           />
         </div>
       ) : (

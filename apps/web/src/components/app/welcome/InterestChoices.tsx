@@ -16,6 +16,7 @@ import { PROPERTY_TYPES, type PropertyType } from "@/lib/interests/model";
 import { forgetFirstInterest } from "./first-run-seen";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The one question worth asking at the door.
@@ -93,16 +94,20 @@ export function InterestChoices({
   const router = useRouter();
   const firstRun = mode === "welcome";
   const [chosen, setChosen] = useState<PropertyType[]>(initial);
-  const [saved, setSaved] = useState(false);
   const [skipping, startSkip] = useSafeTransition();
-  const [skipError, setSkipError] = useState("");
   const [state, formAction, saving] = useActionState<
     ActionResult<InterestsSaved> | null,
     FormData
   >(saveInterestsAction, null);
 
+  /* Outcomes go to the one banner at the top of the screen (Grade 1). */
+  const { savedNothing, savedSomething } = t.interests;
   useEffect(() => {
-    if (!state?.ok) return;
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error, { "data-testid": "welcome-error" });
+      return;
+    }
     /* Answered: the market a landing tile carried has done its job (V-18). */
     forgetFirstInterest();
     if (!firstRun) {
@@ -111,7 +116,10 @@ export function InterestChoices({
        * adjust a preference takes the screen away before they can see that it
        * worked, and takes away the chance to adjust it again.
        */
-      setSaved(true);
+      banner(state.data.interests.length === 0 ? savedNothing : savedSomething, {
+        tone: "success",
+        "data-testid": "interests-saved",
+      });
       router.refresh();
       return;
     }
@@ -127,23 +135,20 @@ export function InterestChoices({
      */
     router.replace("/home");
     router.refresh();
-  }, [state, router, firstRun, onFirstRunDone]);
+  }, [state, router, firstRun, onFirstRunDone, savedNothing, savedSomething]);
 
   const toggle = (value: PropertyType) => {
-    // Any change makes a previous confirmation stale, so it goes.
-    setSaved(false);
     setChosen((current) =>
       current.includes(value) ? current.filter((v) => v !== value) : [...current, value],
     );
   };
 
   const onSkip = () => {
-    setSkipError("");
     startSkip(async () => {
       try {
         const result = await skipInterests();
         if (!result.ok) {
-          setSkipError(result.error);
+          banner.error(result.error, { retry: onSkip, "data-testid": "welcome-skip-error" });
           return;
         }
         forgetFirstInterest();
@@ -228,38 +233,6 @@ export function InterestChoices({
       )}
 
       {firstRun && extra ? <div className="mt-md">{extra}</div> : null}
-
-      {state && !state.ok && (
-        <p
-          role="alert"
-          data-testid="welcome-error"
-          className="nf-panel nf-panel--card mt-md block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {state.error}
-        </p>
-      )}
-
-      {skipError && (
-        <p
-          role="alert"
-          data-testid="welcome-skip-error"
-          className="nf-panel nf-panel--card mt-md block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {skipError}
-        </p>
-      )}
-
-      {saved && !firstRun && (
-        <p
-          role="status"
-          data-testid="interests-saved"
-          className="nf-panel nf-panel--card mt-md block border-[color-mix(in_oklab,var(--nf-state-success)_55%,transparent)] px-md py-sm text-center text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-success)]"
-        >
-          {chosen.length === 0
-            ? t.interests.savedNothing
-            : t.interests.savedSomething}
-        </p>
-      )}
 
       {/*
         The primary is enabled with nothing chosen, and saving an empty list is

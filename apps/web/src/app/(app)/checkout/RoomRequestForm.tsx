@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState } from "react";
@@ -36,7 +37,6 @@ export function RoomRequestForm({
   copy: { roomsLabel: string; requestRoom: string; requestRoomBody: string; roomChoices: string[] };
 }) {
   const [rooms, setRooms] = useState(1);
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
@@ -48,13 +48,13 @@ export function RoomRequestForm({
       data-testid="room-request"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
         setPhoneGate(false);
         start(async () => {
           try {
             const result = await requestRoomStay({ stayId, roomTypeId, ratePlanId, checkIn, checkOut, guests, rooms });
             if (!result.ok) {
-              setError(result.error);
+              /* Said by the one banner (Grade 1); the phone step stays as its link. */
+              banner.error(result.error);
               setPhoneGate(isPhoneGate(result));
               return;
             }
@@ -90,11 +90,6 @@ export function RoomRequestForm({
       <Button type="submit" variant="primary" size="lg" loading={pending} disabled={pending}>
         {copy.requestRoom}
       </Button>
-      {error && (
-        <p className="nf-body text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
       <PhoneGateLink show={phoneGate} full />
     </form>
   );

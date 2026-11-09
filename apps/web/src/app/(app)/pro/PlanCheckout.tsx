@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
@@ -69,8 +70,8 @@ export function PlanCheckout({
   const [pending, start] = useSafeTransition();
   const [reviewing, setReviewing] = useState(false);
   const [opened, setOpened] = useState<Opened | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  /* Every outcome is said by the one banner at the top of the screen (Grade 1). */
+  const fail = (text: string) => banner.error(text, { "data-testid": "pro-buy-error" });
   const price = money(plan.priceMinor, locale);
   const days = trialDays != null ? String(trialDays) : "";
   const refusal = (reason: SubscriptionRefusal) => copy.errors[reason as keyof typeof copy.errors] ?? copy.errors.unavailable;
@@ -110,12 +111,18 @@ export function PlanCheckout({
   const startTrial = () =>
     start(async () => {
       try {
-        setError(null);
-        setNotice(null);
         const result = await startSubscriptionTrial(plan.key);
-        if (!result.ok) return setError(result.error);
-        if (!result.data.started) return setError(refusal(result.data.reason));
-        setNotice(fill(copy.offer.trialStarted, { plan: plan.name, date: longDate(result.data.trialEndsAt, locale) }));
+        if (!result.ok) {
+          fail(result.error);
+          return;
+        }
+        if (!result.data.started) {
+          fail(refusal(result.data.reason));
+          return;
+        }
+        banner.success(fill(copy.offer.trialStarted, { plan: plan.name, date: longDate(result.data.trialEndsAt, locale) }), {
+          "data-testid": "pro-buy-notice",
+        });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -125,15 +132,16 @@ export function PlanCheckout({
   const pay = () =>
     start(async () => {
       try {
-        setError(null);
         const result = await startSubscriptionCheckout(plan.key);
         if (!result.ok) {
           setReviewing(false);
-          return setError(result.error);
+          fail(result.error);
+          return;
         }
         if (!result.data.opened) {
           setReviewing(false);
-          return setError(refusal(result.data.reason));
+          fail(refusal(result.data.reason));
+          return;
         }
         const { reference, amountMinor, accessCode, authorizationUrl } = result.data;
         setReviewing(false);
@@ -166,10 +174,7 @@ export function PlanCheckout({
           variant={offer.trial ? "secondary" : "primary"}
           full
           className={offer.trial ? undefined : "nf-btn--reflect"}
-          onClick={() => {
-            setError(null);
-            setReviewing(true);
-          }}
+          onClick={() => setReviewing(true)}
           disabled={pending}
           data-testid="pro-subscribe"
         >
@@ -177,16 +182,6 @@ export function PlanCheckout({
         </Button>
       ) : null}
 
-      {notice ? (
-        <p className="nf-pro-buy__notice" role="status" data-testid="pro-buy-notice">
-          {notice}
-        </p>
-      ) : null}
-      {error ? (
-        <p className="nf-pro-buy__error" role="alert" data-testid="pro-buy-error">
-          {error}
-        </p>
-      ) : null}
 
       <Sheet
         open={reviewing}
@@ -236,7 +231,7 @@ export function PlanCheckout({
           onCancelled={() => setOpened(null)}
           onFailed={(message) => {
             setOpened(null);
-            setError(message);
+            fail(message);
           }}
         />
       ) : null}

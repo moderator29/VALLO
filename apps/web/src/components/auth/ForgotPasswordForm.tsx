@@ -9,6 +9,7 @@ import { requestPasswordReset } from "@/lib/auth/actions";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Field } from "./fields";
 import { AuthPillButton, AuthPillLink } from "./slate";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -30,6 +31,8 @@ const EMPTY: AuthFormState = { ok: false };
 export function ForgotPasswordForm({ t }: { t: Dictionary }) {
   const [state, formAction, pending] = useActionState(requestPasswordReset, EMPTY);
   const sent = state.ok;
+  /* Sent or refused, the sentence is said by the one banner (founder, 7 November 2026). */
+  useAuthBanner(state, sent ? "success" : "error");
 
   return (
     <div className="nf-auth__screen nf-slate-stagger">
@@ -38,9 +41,6 @@ export function ForgotPasswordForm({ t }: { t: Dictionary }) {
 
       {sent ? (
         <>
-          <p role="status" className="nf-auth__notice">
-            {state.message}
-          </p>
           {/* The email carries the code alone (29 October 2026), so typing
               it is the way on, and the button leads there. */}
           <p className="nf-auth__hint">{t.auth.resetHaveCode}</p>
@@ -64,14 +64,7 @@ export function ForgotPasswordForm({ t }: { t: Dictionary }) {
             error={state.fieldErrors?.email}
           />
 
-          {state.message && (
-            <p
-              role="alert"
-              className="rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-warning)_35%,transparent)] bg-[var(--nf-state-warning-surface)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-warning)]"
-            >
-              {state.message}
-            </p>
-          )}
+          {/* Said by the one banner at the top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
           <div className="nf-auth__actions">
             <AuthPillButton type="submit" loading={pending} className="nf-auth__cta">

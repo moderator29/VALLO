@@ -1,0 +1,1225 @@
+/*
+ * PLATFORM GRADE 1 (November 2026). The shared surfaces of the Grade 1
+ * language (docs/UX_SYSTEM.md): one file, tokens only, so the pieces every
+ * page now shares are read in one place. Imported after details.css and
+ * before motion-pref.css, so the motion setting ("off") still wins.
+ */
+
+@layer components {
+/* THE PASSCODE OFFER (P0.1). A slim alert on the home screen, never a gate. */
+.nf-pc-offer {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: var(--nf-space-sm);
+  margin-block: var(--nf-space-md) 0;
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-primary);
+  animation: nf-g1-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+.nf-pc-offer__tile {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--nf-radius-md);
+  background: var(--nf-brand-tint-1);
+  color: var(--nf-brand-primary);
+}
+.nf-pc-offer__text {
+  display: grid;
+  gap: var(--nf-space-3xs);
+  min-inline-size: 0;
+}
+.nf-pc-offer__title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.3;
+}
+.nf-pc-offer__body {
+  color: var(--nf-content-secondary);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.nf-pc-offer__action {
+  justify-self: start;
+  margin-block-start: var(--nf-space-xs);
+  color: var(--nf-content-link);
+  font-weight: 600;
+  font-size: 0.875rem;
+  min-block-size: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+}
+.nf-pc-offer__close {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin: calc(var(--nf-space-xs) * -1);
+  border-radius: var(--nf-radius-circle);
+  color: var(--nf-content-secondary);
+}
+.nf-pc-offer__close:hover {
+  background: var(--nf-border-subtle);
+}
+
+@keyframes nf-g1-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-pc-offer {
+    animation: none;
+  }
+}
+
+/*
+ * THE FEEDBACK BANNER (P0.4). `ToastHost` draws it; `lib/ui/toast.ts` is the
+ * store (`banner.success`, `.info`, `.warning`, `.error`, retry). A wide
+ * rounded rectangle at the TOP, under the status bar and the notch, on the
+ * Island material with a solid fallback. Written one class deeper
+ * (`.nf-toast-host .nf-toast`) and imported after overlays.css and
+ * details.css, so it wins over the old pill above the dock by position.
+ */
+.nf-toast-host {
+  top: calc(env(safe-area-inset-top, 0px) + var(--nf-space-sm));
+  bottom: auto;
+  padding-inline: var(--nf-space-md);
+}
+:root[data-docked] .nf-toast-host {
+  bottom: auto;
+}
+@media (min-width: 64rem) {
+  :root[data-docked] .nf-toast-host,
+  .nf-toast-host {
+    top: var(--nf-space-md);
+    bottom: auto;
+  }
+}
+/* COMPACT, NOT A SLAB (founder, 7 November 2026: "make it smaller ... it's
+   too wide", references R4, R58, R62). Sized to its words up to 24rem, one
+   line where it fits, a plain glyph rather than a tile, a small close
+   square, and the retry as a word beside the sentence. */
+.nf-toast-host .nf-toast {
+  inline-size: fit-content;
+  min-inline-size: min(15rem, 100%);
+  max-inline-size: min(24rem, 100%);
+  min-block-size: 0;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  padding: var(--nf-space-xs) var(--nf-space-2xs) var(--nf-space-xs) var(--nf-space-sm);
+  border-radius: var(--nf-radius-lg);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  background: var(--nf-surface-elevated);
+  color: var(--nf-content-primary);
+  box-shadow: var(--nf-elevation-floating);
+  animation: nf-banner-drop var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+/* Glass where the device can afford it; the solid surface above is the fallback. */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root:not([data-save-data="on"]) .nf-toast-host .nf-toast {
+    background: color-mix(in oklab, var(--nf-surface-elevated) 88%, transparent);
+    -webkit-backdrop-filter: blur(var(--nf-glass-blur));
+    backdrop-filter: blur(var(--nf-glass-blur));
+  }
+}
+.nf-toast-host .nf-toast:not(:has(.nf-toast__action)),
+.nf-toast-host .nf-toast:has(.nf-toast__action) {
+  padding-inline-end: var(--nf-space-2xs);
+}
+.nf-toast-host .nf-toast[data-leaving] {
+  opacity: 0;
+  transform: translate3d(0, -0.5rem, 0);
+}
+@keyframes nf-banner-drop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -0.75rem, 0) scale(0.98);
+  }
+}
+.nf-toast__body {
+  flex: 1;
+  min-inline-size: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--nf-space-xs);
+  row-gap: 0;
+}
+.nf-toast-host .nf-toast__text {
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+  line-height: 1.35;
+}
+/* The retry: a word, not a button row; its 44px target comes from padding. */
+.nf-toast-host .nf-toast__body .nf-toast__action {
+  min-block-size: 0;
+  margin-block: calc(var(--nf-space-xs) * -1);
+  margin-inline: calc(var(--nf-space-2xs) * -1);
+  padding: var(--nf-space-xs) var(--nf-space-2xs);
+  color: var(--nf-content-link);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--nf-radius-sm);
+}
+.nf-toast-host .nf-toast__action:active {
+  background: var(--nf-brand-tint-1);
+}
+/* A plain glyph in the tone's colour (R62), no tile behind it. */
+.nf-toast-host .nf-toast__mark {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: 0;
+  background: none;
+}
+.nf-toast-host .nf-toast[data-tone="success"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-success);
+}
+.nf-toast-host .nf-toast[data-tone="error"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-error);
+}
+.nf-toast-host .nf-toast[data-tone="warning"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-state-warning);
+}
+.nf-toast-host .nf-toast[data-tone="info"] .nf-toast__mark,
+.nf-toast-host .nf-toast[data-tone="neutral"] .nf-toast__mark {
+  background: none;
+  color: var(--nf-brand-primary);
+}
+/* 4.4: a person's face beside the message, for banners that name someone. */
+.nf-toast__avatar {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: var(--nf-radius-circle);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+/* The close: a small grey square (R4), with a full 44px touch area. */
+.nf-toast__close {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  margin-inline: var(--nf-space-2xs);
+  border-radius: var(--nf-radius-sm);
+  background: var(--nf-border-subtle);
+  color: var(--nf-content-secondary);
+}
+.nf-toast__close::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+.nf-toast__close svg {
+  inline-size: 0.875rem;
+  block-size: 0.875rem;
+}
+.nf-toast__close:active {
+  background: var(--nf-border-default);
+}
+.nf-toast__close:focus-visible {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-toast-host .nf-toast {
+    animation: none;
+  }
+}
+
+/*
+ * THE STEP FRAME (`components/ui/StepFrame.tsx`). One question per screen:
+ * a top bar, a thin progress bar, an eyebrow, a big title, the question, and
+ * a sticky bottom bar above the home indicator and the keyboard.
+ */
+.nf-g1step {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+  background: var(--nf-surface-canvas);
+  color: var(--nf-content-primary);
+}
+/* Full screen over the app (verification, the wizard): above the shell's
+   header and dock, scrolling on its own. */
+.nf-g1step--overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--nf-z-modal);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  outline: none;
+  animation: nf-g1-step-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+@keyframes nf-g1-step-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0);
+  }
+}
+.nf-g1step__art {
+  display: grid;
+  place-items: center;
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  margin-block-end: var(--nf-space-md);
+}
+.nf-g1step__top {
+  position: sticky;
+  top: 0;
+  z-index: var(--nf-z-sticky);
+  padding-block-start: env(safe-area-inset-top, 0px);
+  background: var(--nf-surface-canvas);
+}
+.nf-g1step__bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-xs) var(--nf-space-md);
+}
+.nf-g1step__round {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--nf-radius-circle);
+  border: var(--nf-border-width) solid var(--nf-border-subtle);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-primary);
+  transition: scale var(--nf-duration-press) var(--nf-ease-press);
+}
+.nf-g1step__round:active {
+  scale: var(--nf-press-scale);
+}
+.nf-g1step__round:focus-visible {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: 2px;
+}
+.nf-g1step__round--empty {
+  visibility: hidden;
+}
+.nf-g1step__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--nf-space-2xs);
+  min-block-size: 1.5rem;
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+}
+.nf-g1step__save[data-save="saved"],
+.nf-g1step__save[data-save="device"] {
+  color: var(--nf-state-success);
+}
+.nf-g1step__save[data-save="error"] {
+  color: var(--nf-state-warning);
+}
+.nf-g1step__save-mark {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-state-success-surface);
+}
+.nf-g1step__progress {
+  block-size: 3px;
+  margin-inline: var(--nf-space-md);
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-border-subtle);
+  overflow: hidden;
+}
+.nf-g1step__progress-fill {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--nf-brand-primary);
+  transform-origin: left center;
+  transition: transform var(--nf-duration-slow) var(--nf-ease-standard);
+}
+[dir="rtl"] .nf-g1step__progress-fill {
+  transform-origin: right center;
+}
+.nf-g1step__main {
+  flex: 1;
+  overflow-x: clip;
+}
+.nf-g1step__page {
+  max-inline-size: 36rem;
+  margin-inline: auto;
+  padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-2xl);
+  animation: nf-g1-step-in var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+.nf-g1step__page[data-direction="back"] {
+  animation-name: nf-g1-step-in-back;
+}
+@keyframes nf-g1-step-in {
+  from {
+    opacity: 0;
+    transform: translate3d(1.5rem, 0, 0);
+  }
+}
+@keyframes nf-g1-step-in-back {
+  from {
+    opacity: 0;
+    transform: translate3d(-1.5rem, 0, 0);
+  }
+}
+.nf-g1step__eyebrow {
+  margin-block-end: var(--nf-space-xs);
+  color: var(--nf-brand-primary);
+  font-size: var(--nf-text-overline);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nf-g1step__title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+.nf-g1step__subtitle {
+  margin-block-start: var(--nf-space-xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.5;
+}
+.nf-g1step__notice {
+  margin-block-start: var(--nf-space-lg);
+}
+.nf-g1step__content {
+  margin-block-start: var(--nf-space-lg);
+  display: grid;
+  gap: var(--nf-space-md);
+}
+.nf-g1step__foot {
+  position: sticky;
+  /* N3: the native keyboard shrinks the web view (`resize: "native"`,
+     chrome.css), so bottom 0 already sits on the keys. Lifting by
+     --nf-keyboard-inset as well floated Continue a keyboard above them. */
+  bottom: 0;
+  z-index: var(--nf-z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-md);
+  padding: var(--nf-space-sm) var(--nf-space-md) calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-sm));
+  border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  background: var(--nf-surface-canvas);
+}
+/* With the keyboard up the bottom of the view is the top of the keys, where
+   no home indicator lives: no safe-area padding wedged above them. */
+:root[data-keyboard="open"] .nf-g1step__foot {
+  padding-block-end: var(--nf-space-sm);
+}
+.nf-g1step__count {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  white-space: nowrap;
+}
+.nf-g1step__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  min-inline-size: 0;
+}
+.nf-g1step__actions > :last-child {
+  min-inline-size: 9.5rem;
+}
+/* The step's Continue while it is waiting for an answer (founder, 7 November
+   2026: the grey outlined box read as dead and not Vallo). Here, and only
+   here, a waiting primary stays a softened brand blue: plainly "not yet",
+   still the same button that lights up the moment the question is answered.
+   Everywhere else the calm grey disabled recipe in buttons.css stands. */
+.nf-g1step__foot .nf-btn--primary:disabled:not([data-loading="true"]) {
+  color: color-mix(in oklab, var(--nf-content-on-brand) 78%, transparent);
+  background: color-mix(in oklab, var(--nf-brand-primary) 38%, var(--nf-surface-canvas));
+  border-color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-g1step__page,
+  .nf-g1step--overlay {
+    animation: none;
+  }
+  .nf-g1step__progress-fill {
+    transition: none;
+  }
+}
+
+/*
+ * THE PAGE FRAME (`components/app/PageFrame.tsx`). The Grade 1 rhythm for an
+ * ordinary page: gutter, title-to-first-control gap, section gap, dock
+ * clearance.
+ */
+.nf-g1page {
+  margin-inline: auto;
+  max-inline-size: 48rem;
+  padding-block-end: calc(var(--nf-tabbar-clearance, 0px) + var(--nf-space-xl));
+}
+.nf-g1page[data-width="narrow"] {
+  max-inline-size: 36rem;
+}
+.nf-g1page[data-width="wide"] {
+  max-inline-size: 72rem;
+}
+.nf-g1page__tabs {
+  margin-block-start: var(--nf-space-md);
+}
+.nf-g1page__body {
+  display: grid;
+  gap: var(--nf-space-xl);
+  margin-block-start: var(--nf-space-lg);
+}
+
+/* THE SHEET'S ONE SENTENCE (`Sheet description`), under the title. */
+.nf-sheet__desc {
+  margin-block: calc(var(--nf-space-xs) * -1) var(--nf-space-md);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.5;
+}
+
+/* "1 THING TO FIX" (reference R27): the one blocker named before the tap. */
+.nf-g1-fix {
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid color-mix(in oklab, var(--nf-state-warning) 45%, transparent);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-state-warning-surface);
+}
+.nf-g1-fix__title {
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-fix__body {
+  margin-block-start: var(--nf-space-3xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+
+/* THE VERIFICATION INTRO (P0.3, reference R15 and the founder's brief): what
+   will happen, before the steps open full screen. */
+.nf-g1-intro {
+  padding: var(--nf-space-lg) var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-island);
+  background: var(--nf-surface-secondary);
+  animation: nf-g1-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+}
+.nf-g1-intro__art {
+  display: grid;
+  place-items: center;
+  inline-size: 4rem;
+  block-size: 4rem;
+  margin-block-end: var(--nf-space-md);
+}
+.nf-g1-intro__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.nf-g1-intro__body {
+  margin-block-start: var(--nf-space-xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.5;
+}
+.nf-g1-intro__need {
+  margin-block-start: var(--nf-space-lg);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-intro__list {
+  display: grid;
+  gap: var(--nf-space-sm);
+  margin-block-start: var(--nf-space-sm);
+}
+.nf-g1-intro__list li,
+.nf-g1-intro__note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--nf-space-sm);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-intro__list li > svg {
+  color: var(--nf-brand-primary);
+}
+.nf-g1-intro__note {
+  margin-block-start: var(--nf-space-md);
+  color: var(--nf-content-secondary);
+}
+/* THE REVIEW'S "CHANGE" (reference R27): a pale pill-free soft button. */
+.nf-g1-change {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  min-block-size: 2.75rem;
+  padding-inline: var(--nf-space-sm);
+  border-radius: var(--nf-act-radius-sm);
+  background: var(--nf-border-subtle);
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+}
+.nf-g1-change:active {
+  scale: var(--nf-press-scale);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-g1-intro {
+    animation: none;
+  }
+}
+
+/* OPTION CARDS (`components/ui/OptionCards.tsx`; references R18, R29). */
+.nf-g1-options {
+  display: grid;
+  gap: var(--nf-space-sm);
+}
+@media (min-width: 40rem) {
+  .nf-g1-options[data-columns="2"] {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.nf-g1-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "icon radio" "text text";
+  row-gap: var(--nf-space-xs);
+  padding: var(--nf-space-sm) var(--nf-space-md);
+  /* A control at rest carries the brand edge, never a grey hairline (the
+     founder's ruling, check-css-tokens rule "dull controls"). */
+  border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  cursor: pointer;
+  transition:
+    border-color var(--nf-duration-fast) var(--nf-ease-standard),
+    background-color var(--nf-duration-fast) var(--nf-ease-standard),
+    scale var(--nf-duration-press) var(--nf-ease-press);
+}
+.nf-g1-option:active {
+  scale: 0.99;
+}
+.nf-g1-option:has(:focus-visible) {
+  outline: 2px solid var(--nf-focus-ring);
+  outline-offset: 2px;
+}
+.nf-g1-option[data-on] {
+  border-color: var(--nf-brand-primary);
+  border-width: var(--nf-border-width-strong);
+  background: var(--nf-brand-tint-1);
+}
+.nf-g1-option__icon {
+  grid-area: icon;
+  color: var(--nf-content-primary);
+}
+.nf-g1-option[data-on] .nf-g1-option__icon {
+  color: var(--nf-brand-primary);
+}
+.nf-g1-option:not(:has(.nf-g1-option__icon)) {
+  grid-template-areas: "text radio";
+  align-items: center;
+}
+.nf-g1-option__text {
+  grid-area: text;
+  display: grid;
+  gap: var(--nf-space-3xs);
+}
+.nf-g1-option__label {
+  font-size: var(--nf-text-row);
+  font-weight: 600;
+}
+.nf-g1-option__detail {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-caption);
+  line-height: 1.4;
+}
+.nf-g1-option__radio {
+  grid-area: radio;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: var(--nf-border-width-strong) solid var(--nf-act-mark-edge);
+  border-radius: var(--nf-radius-circle);
+}
+.nf-g1-option[data-on] .nf-g1-option__radio {
+  border: 0.375rem solid var(--nf-brand-primary);
+  background: var(--nf-content-on-brand);
+}
+
+/* THE COUNTRY PICKER (reference R36). */
+/* A filled field with no outline at rest, the way a native search field
+   reads; the brand edge and a soft ring arrive with the cursor. */
+.nf-g1-search {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  min-block-size: 3rem;
+  padding-inline: var(--nf-space-sm) var(--nf-space-md);
+  border: var(--nf-border-width) solid transparent;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-secondary);
+  color: var(--nf-content-muted);
+  transition:
+    border-color var(--nf-duration-fast) var(--nf-ease-standard),
+    box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
+}
+.nf-g1-search:focus-within {
+  border-color: var(--nf-brand-primary);
+  box-shadow: 0 0 0 0.25rem var(--nf-brand-tint-1);
+  color: var(--nf-brand-primary);
+}
+.nf-g1-search input::placeholder {
+  color: var(--nf-content-muted);
+}
+.nf-g1-search input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.nf-g1-search input {
+  flex: 1;
+  min-inline-size: 0;
+  background: transparent;
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body);
+  outline: none;
+}
+.nf-g1-countries {
+  display: grid;
+  gap: var(--nf-space-sm);
+}
+/* The list is the page's own surface, not a box in a box: grouped rows on
+   one quiet card, an inset hairline between rows, no outer frame. */
+.nf-g1-countries__list {
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  padding-block: var(--nf-space-2xs) var(--nf-space-xs);
+  overflow: hidden;
+}
+.nf-g1-countries__list li + li .nf-g1-country::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: calc(var(--nf-space-md) + 2.5rem) 0;
+  border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-g1-countries__group {
+  padding: var(--nf-space-sm) var(--nf-space-md) var(--nf-space-2xs);
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-overline);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nf-g1-countries__none {
+  padding: var(--nf-space-md);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-country {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--nf-space-sm);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  padding-inline: var(--nf-space-md);
+  text-align: start;
+  transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+}
+.nf-g1-country:active {
+  background: var(--nf-brand-tint-1);
+}
+.nf-g1-country[aria-pressed="true"] {
+  background: var(--nf-brand-tint-1);
+}
+.nf-g1-country[aria-pressed="true"] .nf-g1-country__name {
+  color: var(--nf-brand-primary);
+  font-weight: 600;
+}
+/* The flag stands on its own (founder, 7 November 2026: no plate behind it),
+   in a fixed-width column so names line up whatever the flag's shape. */
+.nf-g1-country__flag {
+  display: grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  font-size: 1.375rem;
+  line-height: 1;
+}
+.nf-g1-country__name {
+  font-size: var(--nf-text-body);
+  color: var(--nf-content-primary);
+}
+.nf-g1-country__code {
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-caption);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+/* The choice: a filled brand disc with a white tick, the platform's "done". */
+.nf-g1-country__tick {
+  display: grid;
+  place-items: center;
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+}
+
+/* ONE SIDE OF AN ID (`IdCapture`; references R37, R39). */
+.nf-g1-capture {
+  display: grid;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+}
+.nf-g1-capture__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-sm);
+}
+.nf-g1-capture__side {
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-capture__zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-2xs);
+  min-block-size: 2.75rem;
+  color: var(--nf-content-link);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+}
+.nf-g1-capture__stage {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-inverse);
+}
+.nf-g1-capture__video {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+/* The card guide: the ID-1 ratio (85.6 by 54mm), rotated for a vertical card. */
+.nf-g1-capture__guide {
+  position: absolute;
+  inset-inline: 8%;
+  inset-block-start: 50%;
+  aspect-ratio: 85.6 / 54;
+  translate: 0 -50%;
+  border: 2px solid var(--nf-content-on-media);
+  border-radius: var(--nf-radius-md);
+  box-shadow: 0 0 0 100vmax var(--nf-media-silhouette);
+}
+.nf-g1-capture__stage[data-vertical] .nf-g1-capture__guide {
+  inset-inline: auto;
+  inset-block: 6%;
+  left: 50%;
+  translate: -50% 0;
+  aspect-ratio: 54 / 85.6;
+}
+.nf-g1-capture__tip {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: var(--nf-space-sm);
+  color: var(--nf-content-on-media);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+  text-align: center;
+}
+.nf-g1-capture__shot,
+.nf-g1-capture__empty,
+.nf-g1-capture__file {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--nf-radius-lg);
+  background: var(--nf-surface-inset);
+}
+.nf-g1-capture__shot img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+.nf-g1-capture__file {
+  gap: var(--nf-space-xs);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-capture__frame {
+  inline-size: 72%;
+  aspect-ratio: 85.6 / 54;
+  border: 2px dashed var(--nf-border-strong);
+  border-radius: var(--nf-radius-md);
+}
+.nf-g1-capture__check-title {
+  font-size: var(--nf-text-body);
+  font-weight: 600;
+}
+.nf-g1-capture__check-hint {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-capture__badge,
+.nf-g1-shot__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-2xs);
+  justify-self: start;
+  padding: var(--nf-space-3xs) var(--nf-space-xs);
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-state-success-surface);
+  color: var(--nf-state-success);
+  font-size: var(--nf-text-caption);
+  font-weight: 600;
+}
+.nf-g1-capture__actions {
+  /* Clear of the step frame's sticky foot when scrolled into view. */
+  scroll-margin-block-end: 7rem;
+  display: grid;
+  gap: var(--nf-space-xs);
+  justify-items: center;
+}
+.nf-g1-capture__actions > * {
+  inline-size: 100%;
+}
+.nf-g1-capture__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--nf-space-xs);
+}
+.nf-g1-capture__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--nf-space-xs);
+}
+.nf-g1-capture__shutter {
+  justify-self: center;
+  inline-size: 4rem !important;
+  block-size: 4rem;
+  border: 4px solid var(--nf-content-primary);
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+  box-shadow: inset 0 0 0 3px var(--nf-surface-secondary);
+}
+.nf-g1-capture__shutter:active {
+  scale: var(--nf-press-scale-sm);
+}
+.nf-g1-capture__shutter:disabled {
+  opacity: 0.5;
+}
+.nf-g1-capture__optional {
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-capture__error {
+  color: var(--nf-state-error);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-g1-capture__zoomed {
+  overflow: auto;
+  touch-action: pinch-zoom pan-x pan-y;
+}
+.nf-g1-capture__zoomed img {
+  inline-size: 200%;
+  max-inline-size: none;
+}
+
+/* THE REVIEW'S PHOTOS (references R41, R42) and the final-step notice. */
+.nf-g1-shot {
+  display: grid;
+  gap: var(--nf-space-xs);
+  padding: var(--nf-space-sm) var(--nf-space-md);
+}
+.nf-g1-shot__label {
+  color: var(--nf-content-muted);
+  font-size: var(--nf-text-caption);
+}
+.nf-g1-shot__img {
+  inline-size: 100%;
+  max-block-size: 14rem;
+  object-fit: contain;
+  border-radius: var(--nf-radius-md);
+  background: var(--nf-surface-inset);
+}
+.nf-g1-shot__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--nf-space-sm);
+}
+.nf-g1-shot__missing {
+  color: var(--nf-state-warning);
+  font-size: var(--nf-text-caption);
+}
+.nf-g1-final {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-md);
+  border: var(--nf-border-width-strong) solid var(--nf-border-strong);
+  border-radius: var(--nf-radius-xl);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+  line-height: 1.45;
+}
+.nf-g1-final__title {
+  display: block;
+  color: var(--nf-content-primary);
+  font-weight: 600;
+}
+.nf-g1-final__body {
+  display: block;
+}
+
+/*
+ * THE INBOX, GRADE 1 (references R56 to R61). Written with the list's class
+ * in front so it wins over threads.css (a member route sheet that loads
+ * after this file) without leaning on order.
+ */
+/* Calmer rows: more air, a quieter archive control. */
+.nf-inbox-list .nf-inbox-row {
+  min-block-size: 4.75rem;
+  padding-block: var(--nf-space-sm);
+}
+.nf-inbox-list [data-testid="inbox-archive"] {
+  color: var(--nf-content-muted);
+  opacity: 0.7;
+}
+@media (hover: hover) and (pointer: fine) {
+  .nf-inbox-list [data-testid="inbox-archive"] {
+    opacity: 0;
+  }
+  .nf-inbox-list li:hover [data-testid="inbox-archive"],
+  .nf-inbox-list [data-testid="inbox-archive"]:focus-visible {
+    opacity: 1;
+  }
+}
+/* Vallo Assistant, pinned first. */
+.nf-inbox-list .nf-inbox-pinned {
+  background: color-mix(in oklab, var(--nf-brand-primary) 6%, transparent);
+}
+.nf-inbox-pinned__tile {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-tint-2);
+  color: var(--nf-brand-primary);
+}
+/* The options sheet: one row per action, thin glyphs, 52px targets. */
+.nf-inbox-menu {
+  display: grid;
+}
+.nf-inbox-menu li + li {
+  border-block-start: var(--nf-border-width) solid var(--nf-divider);
+}
+.nf-inbox-menu button,
+.nf-inbox-menu a {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-md);
+  inline-size: 100%;
+  min-block-size: 3.25rem;
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body);
+  text-align: start;
+}
+.nf-inbox-menu svg {
+  color: var(--nf-content-secondary);
+}
+.nf-inbox-menu button:disabled {
+  opacity: 0.5;
+}
+
+/* A CARD IN A CHAT CAN BE TAKEN OUT (founder, 7 November 2026). */
+.nf-card-removable {
+  position: relative;
+}
+.nf-card-remove {
+  position: absolute;
+  inset-block-start: var(--nf-space-xs);
+  inset-inline-end: var(--nf-space-xs);
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-surface-elevated);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  color: var(--nf-content-secondary);
+}
+.nf-card-remove::before {
+  content: "";
+  position: absolute;
+  inset: -0.5rem;
+}
+.nf-card-remove:active {
+  scale: var(--nf-press-scale-sm);
+}
+
+/*
+ * THE CHAT BOX (reference R58). One rounded box: the words on top, the photo
+ * button bottom left, a round send bottom right. No hairline above it and
+ * none under the thread header: the founder asked for fewer lines. Written
+ * under `form.nf-composer` so it wins over threads.css by specificity.
+ */
+form.nf-composer {
+  display: block;
+  padding: var(--nf-space-xs) 0 max(var(--nf-space-xs), env(safe-area-inset-bottom));
+  border-block-start: 0;
+  background: transparent;
+}
+.nf-composer__box {
+  display: grid;
+  gap: var(--nf-space-2xs);
+  padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-secondary);
+  transition: border-color var(--nf-duration-fast) var(--nf-ease-standard);
+}
+.nf-composer__box:focus-within {
+  border-color: var(--nf-brand-edge-soft);
+}
+/* Beats brand-glass.css's night well (`:root:not([data-theme]) ... :not(:focus)`). */
+:root:root form.nf-composer .nf-composer__box .nf-composer__field {
+  min-height: 1.5rem;
+  max-height: 8.25rem;
+  padding: var(--nf-space-2xs) 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  resize: none;
+  line-height: 1.45;
+  font-size: var(--nf-text-body);
+}
+.nf-composer__field:focus-visible {
+  outline: none;
+}
+.nf-composer__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-inline-start: calc(var(--nf-space-xs) * -1);
+}
+.nf-composer__tool {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--nf-radius-circle);
+  color: var(--nf-content-secondary);
+}
+.nf-composer__tool:active {
+  background: var(--nf-border-subtle);
+}
+form.nf-composer .nf-composer__send {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border: 0;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-border-default);
+  color: var(--nf-content-muted);
+  box-shadow: none;
+  transition:
+    background-color var(--nf-duration-fast) var(--nf-ease-standard),
+    scale var(--nf-duration-press) var(--nf-ease-press);
+}
+form.nf-composer .nf-composer__send[data-ready] {
+  background: var(--nf-brand-primary);
+  color: var(--nf-content-on-brand);
+}
+form.nf-composer .nf-composer__send:active {
+  scale: var(--nf-press-scale-sm);
+}
+/* Beats brand-glass.css's luminous hairline under the thread header. */
+:root:root .nf-thread__head.nf-thread__head {
+  border-block-end-color: transparent;
+}
+
+/*
+ * THE BUTTON LADDER, REFINED PLATFORM-WIDE (founder, 7 November 2026: "fix
+ * our button size, they are too wide, they are too big ... texts too big").
+ * One step smaller everywhere: 40 / 44 / 50px painted (was 44 / 48 / 56),
+ * labels one step smaller, the same soft corners. The touch target never
+ * drops under 44px: the compact rung keeps its ::before hit area
+ * (buttons.css), and every other rung is 44 or more. Written after
+ * buttons.css, so it wins by position at the same specificity.
+ */
+.nf-btn--sm {
+  --nf-btn-h: 2.5rem;
+  padding: var(--nf-space-2xs) var(--nf-space-sm);
+  font-size: var(--nf-text-caption);
+}
+.nf-btn--md {
+  --nf-btn-h: 2.75rem;
+  padding: var(--nf-space-xs) var(--nf-space-md);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-btn--lg {
+  --nf-btn-h: 3.125rem;
+  padding: var(--nf-space-sm) var(--nf-space-lg);
+  font-size: var(--nf-text-body);
+}
+/*
+ * The compact ICON button keeps its full 44px tap target after the ladder
+ * above shrank the painted `sm` rung to 40px. A text rung is wide enough on
+ * its own, but an icon-only `sm` is square, so without this its `::before`
+ * hit area (buttons.css) is only 40px across. Widen that area, centred, so
+ * the drawn circle stays 40 and the finger still gets 44 (WCAG 2.5.8) - the
+ * same device as `.nf-icon-btn::before` (controls.css). Height is already
+ * floored to 2.75rem by the base `.nf-btn--sm::before`.
+ */
+.nf-btn--icon.nf-btn--sm::before {
+  left: 50%;
+  right: auto;
+  width: max(100%, 2.75rem);
+  transform: translate(-50%, -50%);
+}
+}
+

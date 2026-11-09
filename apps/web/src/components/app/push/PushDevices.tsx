@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { revokeAllPushDevices, revokePushDevice } from "@/lib/push/devices-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE LIST THAT MAKES THE PERMISSION REVERSIBLE.
@@ -61,19 +62,22 @@ export function PushDevices({
   readable: boolean;
 }) {
   const [armed, setArmed] = useState<string | null>(null);
-  const [outcome, setOutcome] = useState<Outcome>(null);
   const [pending, startTransition] = useSafeTransition();
 
+  /* The first tap arms; the second runs. What it did is said by the one
+     banner at the top of the screen (Grade 1). */
   const run = (key: string, work: () => Promise<Outcome>) => {
     if (armed !== key) {
       setArmed(key);
-      setOutcome(null);
       return;
     }
     setArmed(null);
     startTransition(async () => {
       try {
-        setOutcome(await work());
+        const outcome = await work();
+        if (!outcome) return;
+        if (outcome.tone === "problem") banner.error(outcome.message, { "data-testid": "push-devices-outcome" });
+        else banner.success(outcome.message, { "data-testid": "push-devices-outcome" });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -132,18 +136,6 @@ export function PushDevices({
         does not sign that device out. To sign a device out of your account, use Where you are
         signed in.
       </p>
-
-      {outcome && (
-        <p
-          role="status"
-          data-testid="push-devices-outcome"
-          className={`nf-panel nf-panel--card block p-card nf-body-sm ${
-            outcome.tone === "problem" ? "text-danger" : "text-content"
-          }`}
-        >
-          {outcome.message}
-        </p>
-      )}
 
       <ul className="space-y-row">
         {rows.map((row) => (

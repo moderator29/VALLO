@@ -80,7 +80,7 @@ export function EmailTakenNotice({
         <p
           role="status"
           data-testid="email-taken"
-          className="mt-2 rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-brand-primary)_35%,transparent)] bg-[color-mix(in_oklab,var(--nf-brand-primary)_10%,transparent)] px-md py-sm text-[0.8125rem] leading-relaxed text-[var(--nf-content-secondary)]"
+          className="mt-2 rounded-md border border-[color-mix(in_oklab,var(--nf-brand-primary)_35%,transparent)] bg-[color-mix(in_oklab,var(--nf-brand-primary)_10%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]"
         >
           {status === "google" ? (
             <>

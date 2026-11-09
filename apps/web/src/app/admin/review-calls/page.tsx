@@ -4,7 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { resolveSession } from "@/lib/actions/session";
 import { reviewCallsOn } from "@/lib/calls/flags";
 import { listStaffReviews } from "@/lib/calls/review-reads";
-import { CalmNote } from "../_components/panels";
+import { CalmNote, PageHead } from "../_components/panels";
 import { RequestReviewCall } from "@/components/calls/admin/RequestReviewCall";
 import { ReviewTable } from "@/components/calls/admin/ReviewTable";
 import "@/app/css/calls.css";
@@ -42,10 +42,7 @@ export default async function ReviewCallsPage() {
 
   return (
     <div className="nf-console grid gap-md" data-testid="review-calls-list">
-      <header className="grid gap-3xs">
-        <h1 className="nf-h1">{c.staff.title}</h1>
-        <p className="text-[var(--nf-content-secondary)]">{c.staff.lede}</p>
-      </header>
+      <PageHead title={c.staff.title} lede={c.staff.lede} />
       <p className="nf-review-call__disclaimer">{c.review.notVerificationStaff}</p>
       <RequestReviewCall copy={c} />
       <ReviewTable reviews={reviews ?? []} copy={c} />

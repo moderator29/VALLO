@@ -12,6 +12,13 @@ import { describe, expect, it } from "vitest";
  * `scripts/build-native-icons.mjs` writes every one of these files; this test
  * fails if any of them carries a single pixel that is not that navy, which is
  * what a regeneration with the old tile composition would do.
+ *
+ * 7 NOVEMBER 2026: THE FOUNDER'S RULING REPLACES D68c FOR THE OPENING. The
+ * mark now appears at app open, drawn by the shell on both phones (iOS
+ * `LaunchMark` in ValloShell.swift, Android `LaunchMark.java`, held by
+ * `launch-sequence.test.ts`). These bitmaps stay flat navy all the same:
+ * they are the frame before the shell draws anything, and a mark baked into
+ * them would sit in a different place from the drawn one.
  */
 
 const WEB = path.resolve(__dirname, "../../..");

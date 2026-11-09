@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import { withNext } from "@/lib/auth/next-link";
-import Link from "next/link";
 import { getDictionary, plural, type Dictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { loadSessions, type DeviceSession } from "@/lib/security/sessions";
 import { sessionWhen } from "@/lib/security/when";
 import { phrase } from "./when-words";
 import { groupSessions, type SessionGroup } from "@/lib/security/session-groups";
 import { DeviceList, type DeviceGroupRow, type DeviceRow } from "./DeviceList";
-import { UiIcon } from "@/design-system/icons/UiIcon";
-import { IconPlate } from "@/components/ui/IconPlate";
+import { EmptyState } from "@/components/app/Screen";
+import { EmptyActions } from "@/components/app/EmptyActions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -61,25 +60,16 @@ export default async function DevicesPage() {
 
   if (state.state !== "signed-in") {
     return (
-      <div className="mx-auto max-w-lg">
-        <PageHeader title={copy.screenTitle} fallback="/settings" />
-        <div className="nf-panel nf-panel--card block p-card text-center">
-          <IconPlate size="lg" className="mx-auto">
-            <UiIcon name="user" size={24} />
-          </IconPlate>
-          <h2 className="nf-h3 mt-heading">{copy.accountTitle}</h2>
-          <p className="mx-auto mt-block max-w-[42ch] text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {state.state === "unconfigured"
-              ? copy.accountBodyUnconfigured
-              : copy.accountBodySignedOut}
-          </p>
-          {state.state === "signed-out" && (
-            <Link href={withNext("/sign-in", "/settings/devices")} className="nf-btn nf-btn--primary mt-block w-full sm:w-auto">
-              {t.common.signIn}
-            </Link>
-          )}
-        </div>
-      </div>
+      <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow">
+        <EmptyState
+          icon="globe-pin"
+          title={copy.accountTitle}
+          body={state.state === "unconfigured" ? copy.accountBodyUnconfigured : copy.accountBodySignedOut}
+          {...(state.state === "signed-out"
+            ? { action: <EmptyActions primary={{ label: t.common.signIn, href: withNext("/sign-in", "/settings/devices") }} /> }
+            : {})}
+        />
+      </PageFrame>
     );
   }
 
@@ -95,8 +85,7 @@ export default async function DevicesPage() {
   const groupRows = groups.map((group) => toGroupRow(group, t, locale, state.readAt));
 
   return (
-    <div className="mx-auto max-w-lg" data-testid="devices-settings">
-      <PageHeader title={copy.screenTitle} fallback="/settings" />
+    <PageFrame title={copy.screenTitle} fallback="/settings" width="narrow" testId="devices-settings">
       <DeviceList
         current={currentRow}
         groups={groupRows}
@@ -133,7 +122,7 @@ export default async function DevicesPage() {
         notMeCopy={t.platform.notMe}
         locale={locale}
       />
-    </div>
+    </PageFrame>
   );
 }
 

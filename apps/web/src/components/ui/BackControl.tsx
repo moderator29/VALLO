@@ -45,7 +45,7 @@ export type BackSurface = "bare" | "round" | "plate" | "glass" | "media" | "pill
 const ROUND = "nf-icon-btn nf-icon-btn--round";
 
 const SURFACE: Record<BackSurface, string> = {
-  bare: "rounded-[var(--nf-radius-control)] text-[var(--nf-content-primary)] transition-colors hover:text-[var(--nf-brand-secondary)]",
+  bare: "rounded-control text-[var(--nf-content-primary)] transition-colors hover:text-[var(--nf-brand-secondary)]",
   round: ROUND,
   plate: ROUND,
   glass: ROUND,

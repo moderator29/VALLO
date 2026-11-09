@@ -12,6 +12,7 @@ import type { StayMarksRead } from "@/lib/host/tape-chart-read";
 import "./dashboard.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type Words = Dictionary["hostDash"]["desk"];
 
@@ -37,6 +38,9 @@ const GROUPS = [
   { key: "inHouse", title: "inHouse", empty: "emptyInHouse", kind: "checked_out" },
   { key: "leaving", title: "leaving", empty: "emptyLeaving", kind: "checked_out" },
 ] as const;
+
+/* What a mark did, said by the one banner (founder, 7 November 2026). */
+const FRONT_DESK_WORDS = { in: "Checked in", out: "Checked out" };
 
 export function FrontDeskPanel({
   desk,
@@ -76,21 +80,20 @@ export function FrontDeskPanel({
   const [pending, startTransition] = useSafeTransition();
   const [busy, setBusy] = useState<string | null>(null);
   const [done, setDone] = useState<Record<string, string>>({});
-  const [failed, setFailed] = useState<Record<string, string>>({});
 
   const live = marks === "ok";
 
   const mark = (id: string, kind: StayEventKind) => {
     setBusy(id);
-    setFailed((now) => {
-      const { [id]: _gone, ...rest } = now;
-      return rest;
-    });
     startTransition(async () => {
       try {
         const result = await markStay({ bookingId: id, kind });
-        if (result.ok) setDone((now) => ({ ...now, [`${id}:${kind}`]: result.at }));
-        else setFailed((now) => ({ ...now, [id]: words.errors[result.reason] }));
+        /* Said by the one banner at the top of the screen (founder, 7 November
+           2026); the row keeps its time as the record. */
+        if (result.ok) {
+          setDone((now) => ({ ...now, [`${id}:${kind}`]: result.at }));
+          banner.success(kind === "checked_in" ? FRONT_DESK_WORDS.in : FRONT_DESK_WORDS.out);
+        } else banner.error(words.errors[result.reason], { retry: () => mark(id, kind) });
         setBusy(null);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -184,11 +187,6 @@ export function FrontDeskPanel({
                               </Button>
                             )}
                           </span>
-                          {failed[stay.id] ? (
-                            <span className="nf-fd__error" role="alert">
-                              {failed[stay.id]}
-                            </span>
-                          ) : null}
                         </div>
                       </li>
                     );

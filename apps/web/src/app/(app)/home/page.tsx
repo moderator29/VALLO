@@ -3,6 +3,7 @@ import { PickedForYouStream } from "@/components/app/assistant/PickedForYouStrea
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { InviteStepNudge } from "@/components/app/referral/InviteStepNudge";
+import { PasscodeOffer } from "@/components/passcode/PasscodeOffer";
 import { isPropertyMarket, marketOf } from "@/lib/listings/market";
 import { redirect } from "next/navigation";
 import { getDictionary, type Locale } from "@vallo/i18n";
@@ -213,9 +214,15 @@ export default async function HomePage() {
     <PullToRefresh>
     <>
       {overview.signedIn ? (
-        <Suspense fallback={null}>
-          <InviteStepNudge back="/home" />
-        </Suspense>
+        <>
+          {/* P0.1: the passcode is offered here, never forced at the door. */}
+          <Suspense fallback={null}>
+            <PasscodeOffer />
+          </Suspense>
+          <Suspense fallback={null}>
+            <InviteStepNudge back="/home" />
+          </Suspense>
+        </>
       ) : null}
       <HomeScreen
       pickedForYou={

@@ -53,12 +53,21 @@ export type NotificationSettings = {
 export const NOTIFICATION_TOPICS = ["bookings", "messages", "wallet", "listings", "social", "marketing"] as const;
 export type NotificationTopic = (typeof NOTIFICATION_TOPICS)[number];
 
+export const VISIBILITY_LEVELS = ["everyone", "verified", "connections"] as const;
+export type VisibilityLevel = (typeof VISIBILITY_LEVELS)[number];
+
 export type PrivacySettings = {
   hideActivity: boolean;
   /** V-64: publish the occupation on the member's page. Off by default. */
   showOccupation: boolean;
   /** V-64: publish the home town (local government and state). Off by default. */
   showHomeTown: boolean;
+  /** TODO 2.4: who can see the full profile. Default: everyone. */
+  profileVisibility: VisibilityLevel;
+  /** TODO 2.4: who can start a conversation. Default: everyone. */
+  messagingAccess: VisibilityLevel;
+  /** TODO 2.4: let people find this account by phone or email. Default: true. */
+  contactDiscovery: boolean;
 };
 
 export type ProfileSettings = {
@@ -111,7 +120,14 @@ export const SETTINGS_DEFAULTS: ResolvedProfileSettings = {
   notifications: { bookings: true, messages: true, wallet: true, marketing: true, savedPriceDrops: true },
   /* V-64: occupation and home town are private until the member turns each
      one on. `public.profile_public_facts` reads these two keys. */
-  privacy: { hideActivity: false, showOccupation: false, showHomeTown: false },
+  privacy: {
+    hideActivity: false,
+    showOccupation: false,
+    showHomeTown: false,
+    profileVisibility: "everyone",
+    messagingAccess: "everyone",
+    contactDiscovery: true,
+  },
   locale: "en",
   dataSaver: false,
   interestsAsked: false,

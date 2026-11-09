@@ -176,6 +176,11 @@
     font-size: var(--nf-text-body-sm);
     color: var(--nf-content-muted);
   }
+  .nf-call__sparkline {
+    display: block;
+    margin: 0.25rem auto 0;
+    opacity: 0.6;
+  }
   .nf-call__error {
     margin: 0;
     max-width: 34ch;
@@ -331,6 +336,13 @@
     border-radius: var(--nf-radius-circle);
     background: var(--nf-spark);
   }
+  .nf-call__encrypted {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--nf-content-on-media-muted);
+    opacity: 0.7;
+  }
   .nf-call__quality {
     display: inline-flex;
     align-items: flex-end;
@@ -379,6 +391,25 @@
   }
   .nf-call__banner span {
     color: var(--nf-content-on-media-secondary);
+  }
+  .nf-call__switch-voice {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+    padding: 4px 10px;
+    border: none;
+    /* The shape law (DESIGN_DIRECTION 1, rule 4): a text control is a rounded
+       rectangle on the control radius, never a capsule. */
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-control-on-media);
+    color: var(--nf-content-on-media);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .nf-call__switch-voice:active {
+    opacity: 0.7;
   }
 
   /* The self view: small, rounded, in a corner, draggable between corners. */
@@ -441,17 +472,26 @@
     top: calc(env(safe-area-inset-top, 0px) + 9.5rem);
   }
 
+  /* -------------------------------------------- the frosted glass sheet */
   .nf-call__controls {
     position: absolute;
     inset-inline: 0;
     bottom: 0;
     z-index: 5;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: var(--nf-space-sm);
-    padding: var(--nf-space-xl) var(--nf-space-md) calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-lg));
-    background: var(--nf-scrim-media);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(3.75rem, 1fr));
+    justify-items: center;
+    gap: var(--nf-space-xs) var(--nf-space-2xs);
+    max-width: min(100%, 26rem);
+    margin-inline: auto;
+    padding: var(--nf-space-lg) var(--nf-space-md) calc(env(safe-area-inset-bottom, 0px) + var(--nf-space-lg));
+    border-radius: var(--nf-radius-card) var(--nf-radius-card) 0 0;
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    background: color-mix(in oklab, var(--nf-surface-artwork) 70%, transparent);
+    border-top: var(--nf-border-width) solid var(--nf-border-on-media);
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard),
+      transform var(--nf-duration-fast) var(--nf-ease-standard);
   }
   .nf-call__controls .nf-call-ctl {
     min-width: 3.75rem;
@@ -460,7 +500,6 @@
   .nf-call__controls .nf-call-btn {
     width: 3.5rem;
     height: 3.5rem;
-    /* Half the end button's extra 8px above and below, so every caption sits on one line. */
     margin-block: var(--nf-space-2xs);
   }
   .nf-call__controls .nf-call-btn--end {
@@ -471,7 +510,7 @@
   .nf-call-btn--media {
     box-shadow: none;
     border-color: var(--nf-border-on-media);
-    background: var(--nf-surface-control-on-media-strong);
+    background: color-mix(in oklab, var(--nf-content-on-media) 15%, transparent);
     color: var(--nf-content-on-media);
   }
   /* Off (mic muted, camera off): the control turns solid white, the glyph dark. */
@@ -479,6 +518,177 @@
     border-color: var(--nf-content-on-media);
     background: var(--nf-content-on-media);
     color: var(--nf-surface-artwork);
+  }
+
+  /* Auto-hide: video calls hide controls after a touch timeout. */
+  .nf-call__controls[data-hidden] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1rem);
+  }
+  .nf-call__bar[data-hidden] {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-1rem);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-call__controls[data-hidden],
+    .nf-call__bar[data-hidden] {
+      transition: none;
+      transform: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-call__controls[data-hidden],
+  :root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-call__bar[data-hidden] {
+    transition: none;
+    transform: none;
+  }
+
+  /* The "more" popover menu above the glass sheet. */
+  .nf-call__more-menu {
+    position: absolute;
+    bottom: calc(100% + var(--nf-space-xs));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 6;
+    display: grid;
+    min-width: 12rem;
+    padding: var(--nf-space-3xs);
+    gap: var(--nf-space-3xs);
+    border-radius: var(--nf-radius-card);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    background: color-mix(in oklab, var(--nf-surface-artwork) 80%, transparent);
+    border: var(--nf-border-width) solid var(--nf-border-on-media);
+    box-shadow: var(--nf-elev-3);
+  }
+  .nf-call__more-item {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-height: 2.75rem;
+    padding: 0 var(--nf-space-sm);
+    border: 0;
+    border-radius: var(--nf-radius-sm);
+    background: transparent;
+    color: var(--nf-content-on-media);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    text-align: left;
+    cursor: pointer;
+  }
+  .nf-call__more-item:hover,
+  .nf-call__more-item:focus-visible {
+    background: color-mix(in oklab, var(--nf-content-on-media) 12%, transparent);
+  }
+  .nf-call__more-item:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .nf-call__more-item span {
+    color: var(--nf-content-on-media-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  /* ----------------------------------------- in-app incoming call banner */
+  .nf-call-incoming-banner {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + var(--nf-space-sm));
+    inset-inline: var(--nf-space-md);
+    z-index: var(--nf-z-modal);
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    background: color-mix(in oklab, var(--nf-surface-elevated) 80%, transparent);
+    border: var(--nf-border-width) solid var(--nf-brand-edge);
+    box-shadow: var(--nf-glow-edge), var(--nf-elev-3);
+    cursor: pointer;
+    animation: nf-call-banner-in var(--nf-duration-fast) var(--nf-ease-standard);
+    -webkit-tap-highlight-color: transparent;
+  }
+  @keyframes nf-call-banner-in {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-call-incoming-banner {
+      animation: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-call-incoming-banner {
+    animation: none;
+  }
+  .nf-call-incoming-banner__photo {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    object-fit: cover;
+    flex: none;
+  }
+  .nf-call-incoming-banner__initial {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-btn-lit-fill);
+    color: var(--nf-content-on-brand);
+    font-weight: 700;
+    font-size: var(--nf-text-body);
+    flex: none;
+  }
+  .nf-call-incoming-banner__text {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: var(--nf-space-3xs);
+  }
+  .nf-call-incoming-banner__name {
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nf-call-incoming-banner__type {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-call-incoming-banner__actions {
+    display: flex;
+    gap: var(--nf-space-xs);
+    flex: none;
+  }
+  .nf-call-incoming-banner__btn {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nf-call-incoming-banner__btn--accept {
+    background: var(--nf-state-success);
+    color: var(--nf-content-on-brand);
+  }
+  .nf-call-incoming-banner__btn--decline {
+    background: color-mix(in oklab, var(--nf-state-error) 84%, black);
+    color: var(--nf-content-on-brand);
   }
 
   /* ------------------------------------------------------- recovery steps */
@@ -903,7 +1113,7 @@
   gap: var(--nf-space-3xs);
   border-radius: var(--nf-radius-md);
   background: var(--nf-surface-raised);
-  border: 1px solid var(--nf-border-subtle);
+  border: var(--nf-border-width) solid var(--nf-border-subtle);
   box-shadow: var(--nf-elevation-floating);
 }
 .nf-call-menu__item {

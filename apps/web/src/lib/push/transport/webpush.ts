@@ -381,6 +381,10 @@ export async function sendWebPush(target: PushTarget, payload: PushPayload): Pro
           /* V-53: the buttons, re-checked by the service worker. */
           actions: payload.actions ?? [],
           urgent: payload.urgent,
+          /* A1 to A3: the family's header line and the picture, both drawn by
+             the service worker where the browser supports them. */
+          ...(payload.subtitle ? { subtitle: payload.subtitle } : {}),
+          ...(payload.image ? { image: payload.image } : {}),
         }),
         "utf8",
       ),

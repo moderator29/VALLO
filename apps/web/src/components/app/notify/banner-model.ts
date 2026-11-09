@@ -20,12 +20,12 @@ export function bannerGlyph(n: { kind: string; title: string; href: string | nul
   switch (familyOf(n)) {
     case "money":
       return "empty-payments";
-    case "trust":
-      return "shield-check";
-    case "spaces":
+    case "bookings":
       return "house";
     case "messages":
       return "chat";
+    case "activity":
+      return /verif|badge|passport|sign-?in|device/i.test(n.title) ? "shield-check" : "empty-notifications";
     default:
       return "empty-notifications";
   }
@@ -52,4 +52,56 @@ export function shouldShowBanner(item: BannerItem, pathname: string): boolean {
 export function enqueue(queue: readonly BannerItem[], item: BannerItem): BannerItem[] {
   if (queue.some((q) => q.id === item.id)) return [...queue];
   return [...queue, item].slice(-BANNER_QUEUE_MAX);
+}
+
+/**
+ * THE HEADER LINE (FEATURE_BACKLOG A9, the founder's reference "New post from
+ * Vibecode"): the kind of thing that arrived, in the lock screen's own words
+ * (`lib/push/family.ts`), so the banner, the push and the Activity Centre tab
+ * all say the same: Messages, Calls, Bookings, Money, Activity, Offers.
+ */
+const HEADER: Record<ReturnType<typeof familyOf>, string> = {
+  messages: "Messages",
+  bookings: "Bookings",
+  money: "Money",
+  activity: "Activity",
+  offers: "Offers",
+};
+
+export function bannerHeader(n: { kind: string; title: string; href: string | null }): string {
+  return isCallRow(n) ? "Calls" : HEADER[familyOf(n)];
+}
+
+/**
+ * Whose face the banner can honestly show, read from the link alone: the other
+ * person in a conversation, or the profile a follow points at. Anything else
+ * draws the family glyph; a face is never guessed.
+ */
+export type FaceLookup = { by: "thread"; id: string } | { by: "handle"; handle: string } | { by: "user"; id: string } | null;
+
+const USER_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * The sender a link names outright: `?from=<user uuid>` (or `&from=`), which
+ * the database puts on every notification it writes about another member
+ * (Vallo Roommates first, 8 November 2026). It wins over the path, because it
+ * is the actor, not the page the link opens.
+ */
+function fromParam(href: string): string | null {
+  const query = href.split("#")[0]?.split("?")[1];
+  if (!query) return null;
+  const from = new URLSearchParams(query).get("from");
+  return from && USER_ID.test(from) ? from.toLowerCase() : null;
+}
+
+export function faceLookup(href: string | null): FaceLookup {
+  if (!href) return null;
+  const from = fromParam(href);
+  if (from) return { by: "user", id: from };
+  const path = pathOf(href);
+  const thread = /^\/(?:agent\/|host\/)?messages\/([0-9a-f-]{36})$/i.exec(path);
+  if (thread) return { by: "thread", id: thread[1]! };
+  const person = /^\/u\/([A-Za-z0-9_.]{1,40})$/.exec(path);
+  if (person) return { by: "handle", handle: person[1]! };
+  return null;
 }

@@ -251,7 +251,7 @@ export default async function StaysHomePage() {
         empty={
           <DiscoveryEmpty
               data-testid="stays-empty"
-              object="suitcase"
+              object="hotel"
               title={t.stays.shelfEmptyTitle}
               body={t.stays.shelfEmptyBody}
               primary={{ href: "/stays/search", label: t.stays.findStay }}

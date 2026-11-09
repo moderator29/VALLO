@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { releaseHeldPayment } from "@/lib/money/arrangement-actions";
@@ -23,7 +23,6 @@ export function ReleaseControl({
   label?: string;
 }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   return (
     <div className="grid gap-sm" data-testid="held-release">
       <DragToConfirm
@@ -32,23 +31,17 @@ export function ReleaseControl({
         armedLabel={RELEASE_ARMED_LABEL}
         confirmingLabel="Asking our licensed provider to release it"
         confirmedLabel="Release asked for"
-        errorLabel={error ?? "The release did not go through. The money stays held."}
+        errorLabel="The release did not go through. The money stays held."
         onConfirm={async () => {
-          setError(null);
           const result = await releaseHeldPayment({ agreementId, arrangementId, milestonePosition });
           if (!result.ok) {
-            setError(result.error);
+            banner.error(result.error);
             return false;
           }
           router.refresh();
           return true;
         }}
       />
-      {error && (
-        <p role="alert" className="nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

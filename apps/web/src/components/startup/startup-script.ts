@@ -80,6 +80,8 @@
  * or surface `nf_boot_trace` on a diagnostics row.
  */
 
+import { PLATFORM_SCRIPT } from "@/lib/platform/detect";
+
 /** The full opening: the first open of the day. */
 export const OPENING_FULL_MS = 600;
 
@@ -107,6 +109,10 @@ const MARK =
   "try{localStorage.setItem('" + BOOT_TRACE_KEY + "',b.join(' '))}catch(e){}}catch(e){}}";
 
 export const STARTUP_NATIVE_SCRIPT = [
+  /* Job 1 (platform layer): `data-platform` and `data-native` on <html>
+     before the first frame, so platform.css paints the right platform from
+     the start. Its own try, so nothing here can stop the splash's hide. */
+  PLATFORM_SCRIPT,
   "(function(){var W=window;" + MARK + "W.__nfMark=m;",
   /* Loud (console, marks, storage) only on the shell: the shell's user agent
      carries VALLO-NATIVE (capacitor.config.ts). The website stays silent. */
@@ -127,6 +133,14 @@ export const STARTUP_NATIVE_SCRIPT = [
   /* Belt and braces: iOS drops a hide that beats its launch view's own fade
      in. A hide after the splash is gone does nothing. */
   "function again(){setTimeout(function(){hide('t400')},400);setTimeout(function(){hide('t1200')},1200)}",
+  /* Build 1.0.2 (NATIVE_BUILD_QUEUE item 7): the shell's launch mark hands
+     over once this document has parsed and painted two frames, so the mark
+     leaves onto a drawn page, never onto navy. An older binary has no
+     ValloShell plugin; the refusal is traced and changes nothing. */
+  "function handoff(){try{var C=W.Capacitor;if(!C||!C.nativePromise||!(C.isNativePlatform&&C.isNativePlatform()))return;",
+  "var r=C.nativePromise('ValloShell','handoff',{});m('handoff:sent');if(r&&r.then)r.then(null,function(){m('handoff:refused')})}catch(e){}}",
+  "if(W.__nfLoud){var go=function(){requestAnimationFrame(function(){requestAnimationFrame(handoff)})};",
+  "if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go,{once:true});else go()}",
   "})();",
 ].join("");
 

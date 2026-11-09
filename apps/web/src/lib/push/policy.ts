@@ -7,6 +7,8 @@ import type { PushPayload } from "./types";
 import { actionsFor, recipientLocale } from "./actions";
 import { DEFAULT_LOCALE, localizePush, pushSummary, type Locale } from "@vallo/i18n";
 import { severityOf } from "@/lib/notify/severity";
+import { lockScreenWordsFor } from "@/lib/notify/lock-screen-words";
+import { familyOf } from "./family";
 
 /**
  * EVERY DECISION ABOUT ONE QUEUED PUSH, AS A PURE FUNCTION.
@@ -155,6 +157,8 @@ export function decide(input: {
   /** `profiles.settings`, as jsonb, in whatever shape it is in. */
   settings: unknown;
   now: Date;
+  /** Conversations this person has muted right now (`conversation_prefs`). */
+  mutedConversations?: ReadonlySet<string>;
 }): Decision {
   const { notification, settings, now } = input;
 
@@ -163,6 +167,13 @@ export function decide(input: {
   }
 
   if (!wantsPush(settings, notification.kind)) {
+    return { action: "suppress", outcome: "suppressed_preference" };
+  }
+
+  /* A muted conversation (inbox mute, 7 November 2026) stays silent on the
+     lock screen; the notification still reaches the Activity Centre. */
+  const thread = conversationOf(notification.href);
+  if (thread && input.mutedConversations?.has(thread)) {
     return { action: "suppress", outcome: "suppressed_preference" };
   }
 
@@ -188,13 +199,27 @@ export function decide(input: {
   /* A11: the database wrote this in English; the lock screen shows it in the
      recipient's language where the catalogue has it (machine drafts for ha,
      yo and ig, awaiting native review), and in English otherwise. */
-  const localised = localizePush({ title: notification.title, body: notification.body }, locale);
+  /* The lock-screen helpers (lib/notify/lock-screen-words.ts) for the rows
+     they know, in English; every other row keeps its own words. */
+  const helped = locale === "en" ? lockScreenWordsFor(notification) : null;
+  const localised = helped ? { title: helped.title, body: helped.body } : localizePush({ title: notification.title, body: notification.body }, locale);
   /* THE VOICE (3 November 2026): English lock screens say it the way the app
      does ("You have a new follower"), held to the 40-character title limit. */
   const text = locale === "en" ? { ...localised, title: warmTitle(localised.title, PUSH_TITLE_MAX), body: warmBody(localised.body) } : localised;
+  /* A1 to A3 (rich push, 7 November 2026): the family names the header line,
+     the Android channel and the iOS category (lib/push/family.ts). The
+     picture is added by the drain, which can read it (lib/push/imagery.ts). */
+  const family = familyOf({
+    kind: notification.kind,
+    call: isIncomingCallPath(safeHref(notification.href)),
+    missedCall: isMissedCallPath(safeHref(notification.href)),
+    priceDrop: isSavedPriceDrop(notification.href),
+  });
   return {
     action: "send",
     payload: {
+      category: family.family,
+      subtitle: family.label,
       /* Held to the lock-screen limits (lib/push/copy.ts): a title longer
          than a phone shows arrives cut at a word, not mid-letter. */
       /* And no account or phone number in full (`maskLongDigitRuns`). */
@@ -314,4 +339,10 @@ export function wantsSavedPriceDrops(settings: unknown): boolean {
   if (!notifications || typeof notifications !== "object") return true;
   const value = (notifications as Record<string, unknown>).savedPriceDrops;
   return value !== false;
+}
+
+/** The conversation id a notification's link opens, or null. */
+export function conversationOf(href: string | null | undefined): string | null {
+  const match = /^\/messages\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:[/?#]|$)/i.exec(href ?? "");
+  return match ? match[1]!.toLowerCase() : null;
 }

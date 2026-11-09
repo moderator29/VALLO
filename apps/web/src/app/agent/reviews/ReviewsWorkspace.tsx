@@ -76,10 +76,10 @@ function Summary({ summary, locale }: { summary: AgentReviewsSummary; locale: Lo
               </span>
               <span
                 aria-hidden="true"
-                className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-[var(--nf-radius-pill)] bg-[var(--nf-surface-secondary)]"
+                className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-pill bg-[var(--nf-surface-secondary)]"
               >
                 <span
-                  className="block h-full rounded-[var(--nf-radius-pill)] bg-[var(--nf-brand-primary)]"
+                  className="block h-full rounded-pill bg-[var(--nf-brand-primary)]"
                   style={{ width: `${Math.round((count / most) * 100)}%` }}
                 />
               </span>

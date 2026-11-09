@@ -1,0 +1,101 @@
+/*
+ * App Store-style rating summary.
+ *
+ * Left: the large number, "out of 5", stars and total count.
+ * Right: five horizontal bars (5 stars down to 1), each proportional to the
+ * highest bucket.
+ *
+ * Imported by RatingSummary.tsx; the component is used on listing detail,
+ * professional profiles and host reviews.
+ */
+
+.nf-rating-summary {
+  display: flex;
+  gap: var(--nf-space-lg);
+  align-items: flex-start;
+}
+
+/* --- Left column: score ------------------------------------------------- */
+
+.nf-rating-summary__score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--nf-space-3xs);
+  min-width: 5.5rem;
+  flex: none;
+}
+
+.nf-rating-summary__number {
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--nf-content-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.nf-rating-summary__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--nf-content-muted);
+}
+
+.nf-rating-summary__count {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--nf-content-muted);
+  margin-top: var(--nf-space-3xs);
+}
+
+/* --- Right column: bars ------------------------------------------------- */
+
+.nf-rating-summary__bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding-top: 0.375rem;
+}
+
+.nf-rating-summary__row {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+}
+
+.nf-rating-summary__star-label {
+  width: 0.625rem;
+  text-align: right;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--nf-content-muted);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.nf-rating-summary__track {
+  flex: 1;
+  height: 0.5rem;
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-surface-raised);
+  overflow: hidden;
+}
+
+/* The bar grows by scaleX (composited), never by animating width, which would
+   re-lay out the row every frame. The scale (0..1) comes from the component. */
+.nf-rating-summary__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: var(--nf-radius-pill);
+  background: var(--nf-rating);
+  transform-origin: left center;
+  transform: scaleX(var(--nf-rating-scale, 0));
+  transition: transform 600ms var(--nf-ease-entrance);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-rating-summary__fill {
+    transition: none;
+  }
+}

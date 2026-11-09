@@ -82,20 +82,20 @@ describe("enrolling a key on a staff account", () => {
   it("refuses the password alone for a staff account's first key", async () => {
     state.staff = true;
     const { beginEnrol } = await import("./money-step-up-actions");
-    expect(await beginEnrol({ password: "stolen" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ password: "stolen" })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("refuses the emailed code without the password when the account has one", async () => {
     state.staff = true;
     const { beginEnrol } = await import("./money-step-up-actions");
-    expect(await beginEnrol({ code: "123456" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ code: "123456" })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("takes the password AND the emailed code for the first key", async () => {
     state.staff = true;
     const { beginEnrol } = await import("./money-step-up-actions");
     const begun = await beginEnrol({ password: "right", code: "123456" });
-    expect("challenge" in begun).toBe(true);
+    expect(begun).toMatchObject({ ok: true, data: { challenge: expect.any(String) } });
     expect(state.reauthCalls).toEqual(["password", "code"]);
   });
 
@@ -103,14 +103,14 @@ describe("enrolling a key on a staff account", () => {
     state.staff = true;
     state.passwordOk = false;
     const { beginEnrol } = await import("./money-step-up-actions");
-    expect(await beginEnrol({ password: "wrong", code: "123456" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ password: "wrong", code: "123456" })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("with a key already enrolled, refuses the password and the code", async () => {
     state.staff = true;
     state.keys = ["k1"];
     const { beginEnrol } = await import("./money-step-up-actions");
-    expect(await beginEnrol({ password: "right", code: "123456" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ password: "right", code: "123456" })).toEqual({ ok: false, error: "rejected" });
     expect(state.reauthCalls).toEqual([]);
   });
 
@@ -120,9 +120,9 @@ describe("enrolling a key on a staff account", () => {
     state.revoked = ["lost-phone"];
     const { beginEnrol } = await import("./money-step-up-actions");
     const begun = await beginEnrol({ password: "right", code: "123456" });
-    expect("challenge" in begun).toBe(true);
+    expect(begun).toMatchObject({ ok: true, data: { challenge: expect.any(String) } });
     expect(state.reauthCalls).toEqual(["password", "code"]);
-    expect(await beginEnrol({ password: "stolen" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ password: "stolen" })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("C14: a key still usable for the console must vouch, even beside a revoked one", async () => {
@@ -130,7 +130,7 @@ describe("enrolling a key on a staff account", () => {
     state.keys = ["lost-phone", "laptop"];
     state.revoked = ["lost-phone"];
     const { beginEnrol } = await import("./money-step-up-actions");
-    expect(await beginEnrol({ password: "right", code: "123456" })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ password: "right", code: "123456" })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("with a key already enrolled, adds another only on a proof made with a key", async () => {
@@ -138,16 +138,16 @@ describe("enrolling a key on a staff account", () => {
     state.keys = ["k1"];
     const { beginEnrol } = await import("./money-step-up-actions");
     const begun = await beginEnrol({ stepUp: STEP });
-    expect("challenge" in begun).toBe(true);
+    expect(begun).toMatchObject({ ok: true, data: { challenge: expect.any(String) } });
     expect(state.consumed).toEqual([{ digest: "add_lock|", keyOnly: true }]);
     state.keyStepUpValid = false;
-    expect(await beginEnrol({ stepUp: STEP })).toEqual({ error: "rejected" });
+    expect(await beginEnrol({ stepUp: STEP })).toEqual({ ok: false, error: "rejected" });
   });
 
   it("leaves a member's enrolment on the password as before", async () => {
     const { beginEnrol } = await import("./money-step-up-actions");
     const begun = await beginEnrol({ password: "right" });
-    expect("challenge" in begun).toBe(true);
+    expect(begun).toMatchObject({ ok: true, data: { challenge: expect.any(String) } });
   });
 });
 
@@ -156,7 +156,7 @@ describe("removing a key", () => {
     state.staff = true;
     const { removeMoneyCredential } = await import("./money-step-up-actions");
     state.keyStepUpValid = false;
-    expect(await removeMoneyCredential({ id: KEY, stepUp: STEP })).toEqual({ error: "rejected" });
+    expect(await removeMoneyCredential({ id: KEY, stepUp: STEP })).toEqual({ ok: false, error: "rejected" });
     expect(state.consumed).toEqual([{ digest: `remove_lock|${KEY}`, keyOnly: true }]);
   });
 

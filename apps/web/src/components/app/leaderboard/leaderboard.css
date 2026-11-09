@@ -72,6 +72,13 @@
   -webkit-backdrop-filter: blur(var(--nf-smoked-glass-blur));
 }
 
+/* Round 3: the page's one large top (PageHeader variant="large") over the
+   stage, on the board's gutter and above its art, as the old top row was. */
+.nf-lb__head {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--lb-gutter);
+}
 .nf-lb__switches {
   display: grid;
   gap: var(--nf-space-sm);

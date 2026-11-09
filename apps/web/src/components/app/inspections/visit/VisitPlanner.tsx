@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import "@/app/css/visit.css";
 import { useMemo, useRef, useState, type ReactNode } from "react";
@@ -102,11 +103,9 @@ export function VisitPlanner({
   const [day, setDay] = useState<string | null>(firstDay);
   const [time, setTime] = useState<string | null>(startSlot?.slotAt ?? null);
   const [note, setNote] = useState("");
-  const [problem, setProblem] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [sending, setSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [kept, setKept] = useState(false);
 
@@ -121,7 +120,6 @@ export function VisitPlanner({
   function chooseDay(next: string) {
     setDay(next);
     setTime(null);
-    setProblem(null);
     const nextTimes = open ? slotsOn(slots ?? [], next) : askTimesOn(next, now);
     setPart(firstDayPart(groupByDayPart(nextTimes)));
   }
@@ -137,17 +135,16 @@ export function VisitPlanner({
   );
 
   function review() {
-    if (!day) return setProblem(copy.problems.pickDay);
-    if (!time) return setProblem(copy.problems.pickTime);
-    setProblem(null);
-    setSendError(null);
+    /* What is missing is said by the one banner at the top of the screen
+       (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+    if (!day) return void banner.error(copy.problems.pickDay, { "data-testid": "visit-problem" });
+    if (!time) return void banner.error(copy.problems.pickTime, { "data-testid": "visit-problem" });
     setReviewOpen(true);
   }
 
   async function send() {
     if (!time || sending) return;
     setSending(true);
-    setSendError(null);
     setPhoneGate(false);
     const choice: VisitChoice = { listingId, mode, kind: open ? "slot" : "ask", at: time, note };
     const outcome = await submitter.current(choice);
@@ -159,12 +156,19 @@ export function VisitPlanner({
       setSending(true);
       return;
     }
+    /* What the send did is said by the one banner at the top of the screen
+       (Grade 1). Kept on the phone, the page keeps its own line too: the
+       request is still waiting to go. */
     if (outcome.state === "kept") {
       setReviewOpen(false);
       setKept(true);
+      banner.info(copy.problems.kept);
       return;
     }
-    setSendError(outcome.state === "notKept" ? copy.problems.notKept : outcome.error || copy.problems.failed);
+    banner.error(outcome.state === "notKept" ? copy.problems.notKept : outcome.error || copy.problems.failed, {
+      retry: () => void send(),
+      "data-testid": "visit-send-error",
+    });
     setPhoneGate(outcome.state === "failed" && outcome.phoneGate === true);
   }
 
@@ -315,7 +319,6 @@ export function VisitPlanner({
                         className="nf-visit-time nf-tap"
                         onClick={() => {
                           setTime(option.slotAt);
-                          setProblem(null);
                         }}
                         data-testid="visit-time"
                       >
@@ -356,11 +359,6 @@ export function VisitPlanner({
         {kept ? (
           <p className="nf-visit__lead" role="status" data-testid="visit-kept">
             {copy.problems.kept}
-          </p>
-        ) : null}
-        {problem ? (
-          <p className="nf-visit__error" role="alert" data-testid="visit-problem">
-            {problem}
           </p>
         ) : null}
       </div>
@@ -422,11 +420,6 @@ export function VisitPlanner({
             </dl>
             <p className="nf-visit__lead">{open ? copy.review.bookLine : copy.review.askLine}</p>
             <p className="nf-visit__muted">{copy.review.free}</p>
-            {sendError ? (
-              <p className="nf-visit__error" role="alert" data-testid="visit-send-error">
-                {sendError}
-              </p>
-            ) : null}
             <PhoneGateLink show={phoneGate} full />
             <Button variant="primary" size="lg" full loading={sending} onClick={() => void send()} data-testid="visit-send">
               {sending ? copy.footer.sending : open ? copy.footer.book : copy.footer.send}

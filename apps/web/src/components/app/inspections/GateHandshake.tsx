@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { useCallback, useEffect, useState } from "react";
 import { formatDate, plural, type Dictionary, type Locale } from "@vallo/i18n/core";
@@ -418,6 +419,7 @@ function CheckCode({ pack, copy }: { pack: InspectionPack; copy: Copy }) {
         label={copy.codeLabel}
         id={`gate-${pack.inspectionId}`}
         inputMode="numeric"
+        enterKeyHint="go"
         autoComplete="one-time-code"
         maxLength={7}
         value={typed}
@@ -467,34 +469,35 @@ function DelegateForm({
   onChanged: () => Promise<void>;
 }) {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<{ tone: "done" | "problem"; text: string } | null>(null);
+  /* A refused address is the field's own error, under the field. Every other
+     outcome is said by the one banner at the top of the screen (Grade 1). */
+  const [invalid, setInvalid] = useState(false);
   const [pending, startTransition] = useSafeTransition();
 
   const submit = (value: string) =>
     startTransition(async () => {
       try {
+        setInvalid(false);
         const answer = await nameDelegate({ inspectionId, email: value });
         if (answer.state === "asked") {
-          setMessage({ tone: "done", text: copy.delegateNamed });
+          banner.success(copy.delegateNamed);
           setEmail("");
           await onChanged();
         } else if (answer.state === "cleared" || answer.state === "cleared_rotated") {
-          setMessage({ tone: "done", text: answer.state === "cleared_rotated" ? copy.delegateClearedRotated : copy.delegateCleared });
+          banner.success(answer.state === "cleared_rotated" ? copy.delegateClearedRotated : copy.delegateCleared);
           await onChanged();
+        } else if (answer.state === "invalid") {
+          setInvalid(true);
         } else {
-          setMessage({
-            tone: "problem",
-            text:
-              answer.state === "invalid"
-                ? copy.delegateInvalid
-                : answer.state === "closed"
-                  ? copy.delegateClosed
-                  : answer.state === "too_late"
-                    ? copy.delegateTooLate
-                    : answer.state === "rate_limited"
-                      ? copy.delegateRateLimited
-                      : copy.delegateFailed,
-          });
+          banner.error(
+            answer.state === "closed"
+              ? copy.delegateClosed
+              : answer.state === "too_late"
+                ? copy.delegateTooLate
+                : answer.state === "rate_limited"
+                  ? copy.delegateRateLimited
+                  : copy.delegateFailed,
+          );
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -510,18 +513,12 @@ function DelegateForm({
         label={copy.delegateLabel}
         id={`delegate-${inspectionId}`}
         type="email"
+        enterKeyHint="send"
         autoComplete="off"
         value={email}
         onChange={(event) => setEmail(event.target.value)}
+        {...(invalid ? { error: copy.delegateInvalid } : {})}
       />
-      {message && (
-        <p
-          role="status"
-          className={`nf-body-sm mt-row ${message.tone === "problem" ? "text-danger" : "text-content"}`}
-        >
-          {message.text}
-        </p>
-      )}
       <Button
         variant="secondary"
         size="sm"

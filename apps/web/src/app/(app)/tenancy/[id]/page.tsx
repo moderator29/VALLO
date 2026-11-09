@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getTenancyFile, type TenancyFile } from "@/lib/tenancy/queries";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState, FactGrid, Section, Stack, TYPE } from "@/components/app/Screen";
 import { EmptyActions } from "@/components/app/EmptyActions";
@@ -80,10 +80,9 @@ export default async function TenancyPage({
   const read = await getTenancyFile(id, locale);
 
   const shell = (children: React.ReactNode, subtitle?: string) => (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.title} subtitle={subtitle} fallback="/bookings" />
+    <PageFrame title={copy.title} subtitle={subtitle} fallback="/bookings" width="narrow">
       {children}
-    </div>
+    </PageFrame>
   );
 
   if (read.state === "unavailable") {

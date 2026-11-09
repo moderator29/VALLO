@@ -73,12 +73,22 @@ export const serverFirstRunStore: FirstRunStore = {
  *
  *   await gateFirstRun("host", "/host", searchParams);
  */
+/** Every feature intro is off (founder, 7 November 2026). */
+export const FEATURE_INTROS_OFF = true;
+
 export async function gateFirstRun(
   feature: MountedFirstRun,
   here: string,
   searchParams?: Record<string, string | string[] | undefined>,
   store: FirstRunStore = serverFirstRunStore,
+  /** Tests switch the dormant intros back on to keep the machinery honest. */
+  introsOff: boolean = FEATURE_INTROS_OFF,
 ): Promise<void> {
+  /* THE FOUNDER, 7 November 2026: the feature intro slides are removed
+     from the whole platform ("remove those welcome banner stuff"). A
+     feature opens straight onto itself; the panels, their words and
+     /first-run stay in the code, unused, so nothing that links there breaks. */
+  if (introsOff) return;
   let show = false;
   try {
     const passed = searchParams?.[FEATURE_RUN_PASSED_PARAM] !== undefined;

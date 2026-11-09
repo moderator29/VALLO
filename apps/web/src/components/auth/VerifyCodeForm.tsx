@@ -15,6 +15,7 @@ import { ArrivalMoment } from "./ArrivalMoment";
 import { CodeInput } from "./CodeInput";
 import { withNext } from "@/lib/auth/next-link";
 import { mailAppFor, resendLabel, RESEND_WAIT_SECONDS } from "@/lib/auth/mail-app";
+import { useAuthBanner } from "./use-auth-banner";
 import {
   CONFIRMATION_CODE_LENGTH,
   CONFIRMATION_CODE_PLACEHOLDER,
@@ -66,6 +67,8 @@ export function VerifyCodeForm({
   const a = t.authFlow;
   const [state, verifyAction, verifying] = useActionState(verify, EMPTY);
   const [resendState, resendAction, resending] = useActionState(resend, EMPTY);
+  useAuthBanner(state);
+  useAuthBanner(resendState, resendState.ok ? "success" : "error");
   const [address, setAddress] = useState(email);
   const [code, setCode] = useState("");
   /* Set when somebody hands us more digits than a code has. Ours to say, not
@@ -238,11 +241,7 @@ export function VerifyCodeForm({
           cellsLabel={a.codeCells.replace("{count}", codeLengthWord())}
         />
 
-        {state.message && (
-          <p role="alert" className="nf-auth__alert">
-            {state.message}
-          </p>
-        )}
+        {/* Said by the one banner at the top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
         {/* The navy pill every other auth screen submits with (E2E audit
             L-7), not the bright-blue primary this one alone was drawing. */}
@@ -266,11 +265,7 @@ export function VerifyCodeForm({
         >
           {wait > 0 ? resendLabel(a.resendIn, wait) : a.sendAnother}
         </Button>
-        {resendState.message && (
-          <p role="status" className="nf-verify__status">
-            {resendState.message}
-          </p>
-        )}
+        {/* "A new code is on its way" (or the refusal) is said by the one banner. */}
       </form>
 
       {/* Where the code might be, and one tap to the inbox when we can tell

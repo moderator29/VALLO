@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { addToSupport, removeFromSupport } from "@/lib/admin/staff-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE SUPPORT TEAM, on the team console. Who answers members, what else
@@ -72,32 +73,34 @@ export function SupportTeam({ members }: { members: SupportMember[] }) {
 function AddToSupport() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function add() {
+    start(async () => {
+      try {
+        const r = await addToSupport({ email });
+        if (!r.ok) banner.error(r.error, { retry: add });
+        else {
+          banner.success(
+            r.data.scopes.join(",") === "support"
+              ? "Added as a Support Agent. They have been told by email and in the app."
+              : "Support added to their access. They have been told.",
+          );
+          setEmail("");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <form
       className="flex flex-wrap items-end gap-xs"
       onSubmit={(e) => {
         e.preventDefault();
-        start(async () => {
-          try {
-            const r = await addToSupport({ email });
-            if (!r.ok) setMessage({ ok: false, text: r.error });
-            else {
-              setMessage({
-                ok: true,
-                text:
-                  r.data.scopes.join(",") === "support"
-                    ? "Added as a Support Agent. They have been told by email and in the app."
-                    : "Support added to their access. They have been told.",
-              });
-              setEmail("");
-              router.refresh();
-            }
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        add();
       }}
     >
       {/* basis-64: the field keeps 16rem before the button wraps under it; at
@@ -120,11 +123,6 @@ function AddToSupport() {
         Somebody new becomes a Support Agent: the support desk and nothing else. Somebody who already has access keeps it
         and gains support.
       </p>
-      {message ? (
-        <p role={message.ok ? "status" : "alert"} className="basis-full nf-body-sm">
-          {message.text}
-        </p>
-      ) : null}
     </form>
   );
 }
@@ -133,8 +131,20 @@ function RemoveFromSupport({ userId, ends }: { userId: string; ends: boolean }) 
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function remove() {
+    start(async () => {
+      try {
+        const r = await removeFromSupport({ userId, reason });
+        if (!r.ok) banner.error(r.error, { retry: remove });
+        else router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   if (!open) {
     return (
       <div className="mt-2xs">
@@ -149,15 +159,7 @@ function RemoveFromSupport({ userId, ends }: { userId: string; ends: boolean }) 
       className="mt-xs flex flex-wrap items-end gap-xs"
       onSubmit={(e) => {
         e.preventDefault();
-        start(async () => {
-          try {
-            const r = await removeFromSupport({ userId, reason });
-            if (!r.ok) setError(r.error);
-            else router.refresh();
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        remove();
       }}
     >
       <label className="grid min-w-0 flex-1 gap-2xs">
@@ -170,11 +172,6 @@ function RemoveFromSupport({ userId, ends }: { userId: string; ends: boolean }) 
       <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(false)}>
         Keep them
       </Button>
-      {error ? (
-        <p role="alert" className="basis-full nf-caption text-[var(--nf-state-warning)]">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

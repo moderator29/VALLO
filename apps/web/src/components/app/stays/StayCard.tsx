@@ -97,16 +97,7 @@ export function StayCard({
         ) : null
       }
       heart={
-        showSave ? (
-          <>
-            <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} />
-            {save.note && (
-              <p role="status" className="nf-pcard__note">
-                {save.note.text}
-              </p>
-            )}
-          </>
-        ) : null
+        showSave ? <SaveButton saved={save.saved} pending={save.pending} onToggle={save.toggle} title={stay.title} /> : null
       }
       price={
         stay.nightlyMinor !== null

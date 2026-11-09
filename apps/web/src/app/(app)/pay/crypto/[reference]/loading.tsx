@@ -1,5 +1,5 @@
 import { getDictionary } from "@vallo/i18n";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { Line, MoneyWait } from "@/components/app/money-history/MoneyWait";
 import { Panel } from "@/components/ui/Panel";
 import { activeProvider } from "@/lib/crypto/providers";
@@ -20,8 +20,9 @@ export default async function LoadingCryptoPayment() {
   const t = getDictionary(await getLocale()).cryptoPay;
   const provider = activeProvider()?.displayName ?? "the provider";
   return (
-    <MoneyWait label="Loading this payment" className="mx-auto max-w-2xl px-md">
-      <PageHeader title={t.pageTitle} fallback="/bookings" />
+    <MoneyWait label="Loading this payment" className="mx-auto max-w-xl px-md">
+      <PageFrame title={t.pageTitle} fallback="/bookings" width="narrow">
+      <div>
       <div className="grid gap-block">
         <div>
           <p className="nf-h3">
@@ -52,6 +53,8 @@ export default async function LoadingCryptoPayment() {
       <p className="mt-lg text-center">
         <span className="nf-body-sm font-semibold text-[var(--nf-brand-primary)] underline">{t.backToCharge}</span>
       </p>
+      </div>
+    </PageFrame>
     </MoneyWait>
   );
 }

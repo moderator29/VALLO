@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate } from "@/lib/actions/envelope";
 import { useState } from "react";
@@ -27,7 +28,6 @@ export function PayDepositButton({
   size?: "sm" | "md" | "lg";
   full?: boolean;
 }) {
-  const [error, setError] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
   const [pending, start] = useSafeTransition();
   /* Stays set once the checkout address is on its way, so a second tap cannot open a second checkout. */
@@ -45,11 +45,11 @@ export function PayDepositButton({
         onClick={() =>
           start(async () => {
             try {
-              setError(null);
               setPhoneGate(false);
               const result = await payReservationDeposit(reservationId);
               if (!result.ok) {
-                setError(result.error);
+                /* Said by the one banner (Grade 1); the phone step stays as its link. */
+                banner.error(result.error);
                 setPhoneGate(isPhoneGate(result));
                 return;
               }
@@ -63,11 +63,6 @@ export function PayDepositButton({
       >
         {pending || redirecting ? (pendingLabel ?? label) : label}
       </Button>
-      {error && (
-        <span role="alert" className="nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </span>
-      )}
       <PhoneGateLink show={phoneGate} full />
     </span>
   );

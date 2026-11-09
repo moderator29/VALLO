@@ -263,8 +263,22 @@
       0 0 0 3px var(--nf-glow-2),
       0 0 26px -6px var(--nf-glow-4);
   }
+  @media (pointer: coarse) {
+    .nf-field:not([type="search"]):focus {
+      background:
+        linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+        linear-gradient(var(--nf-brand-primary), var(--nf-brand-primary)) border-box;
+      box-shadow: inset 0 2px 6px var(--nf-shade-2);
+    }
+  }
   .nf-field[aria-invalid="true"] {
     border-color: var(--nf-state-error);
+    /* THE RED EDGE IS NOW THE FIELD'S WHOLE SIGNAL (founder, 7 November
+       2026: the words go to the banner). The border colour alone is painted
+       over by the gradient's border-box layer, so the edge is that layer. */
+    background:
+      linear-gradient(var(--nf-surface-inset), var(--nf-surface-inset)) padding-box,
+      linear-gradient(var(--nf-state-error), var(--nf-state-error)) border-box;
   }
   /*
    * THE FORM ERROR, FOR EVERY FORM (MOTION_SYSTEM "Form error", north star
@@ -901,6 +915,11 @@
       inset 0 1px 0 var(--nf-glass-rim-thin),
       0 0 0 3px var(--nf-glow-2),
       0 0 22px -6px var(--nf-glow-4);
+  }
+  @media (pointer: coarse) {
+    .nf-field--glass:not([type="search"]):focus {
+      box-shadow: inset 0 1px 0 var(--nf-glass-rim-thin);
+    }
   }
   /*
    * `.nf-field--pill` STOOD HERE AND IS DELETED, and this is the decision

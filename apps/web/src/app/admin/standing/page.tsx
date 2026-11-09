@@ -117,7 +117,7 @@ export default async function AdminStandingPage({
             {read.holderSearchCapped && (
               <p
                 role="status"
-                className="nf-body-sm mb-block rounded-[var(--nf-radius-lg)] border border-[color-mix(in_oklab,var(--nf-status-pending)_45%,transparent)] bg-[var(--nf-status-pending-surface)] p-row leading-relaxed text-[var(--nf-content-secondary)]"
+                className="nf-body-sm mb-block rounded-lg border border-[color-mix(in_oklab,var(--nf-status-pending)_45%,transparent)] bg-[var(--nf-status-pending-surface)] p-row leading-relaxed text-[var(--nf-content-secondary)]"
               >
                 That name matches more people than this search reads, so grants held by
                 some of them are not below. Paging forward will not reach them. Narrow

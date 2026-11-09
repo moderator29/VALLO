@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { chooseBack, parentOf } from "@/lib/nav/resolve";
 
@@ -47,8 +47,11 @@ describe("profile setup: one back control to the declared parent", () => {
       expect(page).not.toContain("<BackButton");
       expect(page).toContain(`<${form} `);
       const shell = readFileSync(join(SRC, "components/supply/RegisterShell.tsx"), "utf8");
-      expect(shell.match(/<BackControl /g)?.length).toBe(1);
-      expect(shell).toMatch(/<BackControl onBack=\{onBack\} label=\{backLabel\}(?: surface="round")? \/>/);
+      /* Round 3 (SW5): the shell is the platform's StepFrame, whose ONE back
+         control is the form's `onBack`; no second arrow is drawn. */
+      expect(shell).not.toContain("<BackControl");
+      expect(shell.match(/<StepFrame\b/g)?.length).toBe(1);
+      expect(shell).toMatch(/onBack=\{onBack\}\s+backLabel=\{backLabel\}/);
       const source = readFileSync(join(SRC, `components/supply/${form}.tsx`), "utf8");
       /* The first screen leaves through the shared back (history to the
          chooser when that is where the person came from, else the declared
@@ -76,8 +79,11 @@ describe("profile setup: one back control to the declared parent", () => {
 
 describe("the firm door is closed until approval can make a firm (SUP-10)", () => {
   it("sends /profile/setup/firm to the agent form and draws nothing of its own", () => {
-    const source = readFileSync(join(SETUP, "firm/page.tsx"), "utf8");
-    expect(source).toContain('redirect("/profile/setup/agent")');
-    expect(source).not.toContain("<FirmRegisterForm");
+    /* The redirect-only page was consolidated into next.config (SW13), so the
+       door is now a config redirect rather than a page.tsx that calls
+       `redirect()`; it still lands on the agent form and renders nothing. */
+    const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf8");
+    expect(config).toMatch(/source:\s*"\/profile\/setup\/firm",\s*destination:\s*"\/profile\/setup\/agent"/);
+    expect(existsSync(join(SETUP, "firm/page.tsx"))).toBe(false);
   });
 });

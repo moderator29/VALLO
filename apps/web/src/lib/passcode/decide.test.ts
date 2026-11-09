@@ -22,9 +22,9 @@ describe("decideGate", () => {
     expect(decideGate({ ...base, signedIn: false })).toEqual({ kind: "open" });
   });
 
-  it("asks a member with no passcode to set one, whatever else is true", () => {
-    expect(decideGate({ ...base, status: { state: "unset" } })).toEqual({ kind: "setup", mode: "first" });
-    expect(decideGate({ ...base, status: { state: "unset" }, unlockCookieValid: true })).toEqual({ kind: "setup", mode: "first" });
+  it("lets a member with no passcode straight in: the passcode is optional (6 November 2026)", () => {
+    expect(decideGate({ ...base, status: { state: "unset" } })).toEqual({ kind: "unset" });
+    expect(decideGate({ ...base, status: { state: "unset" }, unlockCookieValid: true })).toEqual({ kind: "unset" });
   });
 
   it("locks a set passcode with no unlock", () => {
@@ -64,6 +64,7 @@ describe("moneyAllowed", () => {
   it("allows money only when unlocked, or before any passcode exists", () => {
     expect(moneyAllowed({ kind: "unlocked", mint: false, length: 6 })).toBe(true);
     expect(moneyAllowed({ kind: "setup", mode: "first" })).toBe(true);
+    expect(moneyAllowed({ kind: "unset" })).toBe(true);
     expect(moneyAllowed({ kind: "setup", mode: "reset" })).toBe(false);
     expect(moneyAllowed({ kind: "locked", mode: "code", length: 6, failedCount: 0, lockedUntil: null })).toBe(false);
     expect(moneyAllowed({ kind: "locked", mode: "unavailable", length: 6, failedCount: 0, lockedUntil: null })).toBe(false);

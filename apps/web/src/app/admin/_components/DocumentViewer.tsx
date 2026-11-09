@@ -94,7 +94,7 @@ function DocumentCanvas({
             any shape and the box below is ours, not a stylesheet another
             worker owns, so there is no reason to promise a ratio we do not
             know. */}
-        <div className="relative h-[62vh] w-full overflow-hidden rounded-[var(--nf-radius-control)] bg-[var(--nf-surface-sunken)]">
+        <div className="relative h-[62vh] w-full overflow-hidden rounded-control bg-[var(--nf-surface-sunken)]">
           <Image
             src={source}
             alt={title}

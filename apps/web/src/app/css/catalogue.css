@@ -111,6 +111,13 @@
     transition: none;
     transform: none;
   }
+  :root[data-motion-lite="on"] .nf-pcard {
+    transition: none;
+  }
+  :root[data-motion-lite="on"] .nf-pcard__photo {
+    transition: none;
+    transform: none;
+  }
   /*
    * THE BODY'S SCALE IS THE RENDER'S, and the old one was half again too
    * big. Two cards across a 390px screen leaves about 165px of card and 141

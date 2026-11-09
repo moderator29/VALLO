@@ -104,3 +104,59 @@ resolve. Video calls for doubtful cases use Vallo's own call system.
 - A staff-only "check this NIN" button for doubtful cases only (one paid lookup).
 - Dojah's full selfie + NIN/BVN check when there is budget: one flag and five
   environment variables (`docs/identity/DOJAH.md`, section 5).
+
+## Platform Grade 1 (November 2026): the flow and the gate
+
+**The flow.** `/verification` now opens on an intro card ("Verify your
+identity": what you will need, that documents are private, about five
+minutes, one working day for a decision) with one Start button. Start opens
+the same steps as before (ID, live selfie, address, business, agreements,
+review) as full-screen pages on the shared `StepFrame`
+(`components/ui/StepFrame.tsx`, `overlay`): a section eyebrow, the step's
+object, the title and hint, Back, Close (which keeps every answer and returns
+to the intro), a progress bar and "Step N of M" with Continue. The review
+step has a Change button on each row that jumps back to that step. Nothing
+about what is uploaded, filed or reviewed changed.
+
+**The gate (verified before a deal).** `submitListing`
+(`lib/agent/listings-actions.ts`) refuses a lister whose identity is not on
+file with `gate: "verification"` and a button to `/verification`
+(`components/app/VerifyGateLink.tsx`). The rule
+(`lib/identity/listing-verification-rule.ts`): verification tier 1 or more, or
+an identity document that is pending or approved, passes; nothing on file or
+only refused documents is refused; QA accounts are never asked; a failed read
+refuses with a try-again sentence. The listing still publishes only on
+approval. The wizard's last step shows "1 thing to fix" before Send when the
+gate would refuse (`verifyFirst`, read in `app/agent/list/page.tsx`).
+
+**The switch.** `feature_flags.listing_verification` set to false turns the
+gate off with no deploy (flags fail open: no row means on).
+
+## Grade 1, part 2 (7 November 2026): country, document, front and back
+
+The ID part of the flow is now three screens instead of one:
+
+1. **Which country issued your ID?** (`CountryPicker`): search, Popular
+   (Nigeria, Ghana), every country with its flag. Stored as
+   `agent_documents.issuing_country` (ISO alpha-2).
+2. **Which document will you use?** (`OptionCards`): Nigeria offers NIN slip or
+   card, international passport, driver's licence, permanent voter's card;
+   every other country offers passport, national ID card (`national_id`, a new
+   `document_subtype` value), driver's licence.
+3. **Photograph your ID** (`IdCapture`, once per side): a live rear camera with
+   a card guide and a rotate control, or Upload instead; then Check your
+   capture (Zoom in, Retake, Use photo). The back is required for a driver's
+   licence, a voter's card and a national ID card, optional for a NIN card,
+   never asked for a passport. Stored as `agent_documents.back_storage_path`
+   on the same row; the database refuses a back outside the uploader's folder.
+
+The review shows each photo with a Captured badge and Retake, the document and
+the country with Change, and a "Final step: nothing is sent yet" notice.
+
+**Reviewers.** "Identity at a glance" shows the back beside the front and the
+selfie, and the issuing country in the ID's caption. The back is streamed by
+the same staff-only route (`/api/documents/<id>?side=back`) and every view is
+written to the audit with `side: back`. The checklist names the back.
+
+**Migration.** `20261107143359_grade1_verification_country_and_back_of_id`
+(applied; additive and nullable).

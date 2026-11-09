@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 import { AppShell } from "@/components/app/AppShell";
-import { BackButton } from "@/components/site/BackButton";
 import { CreateBloom } from "@/components/social/bloom/CreateBloom";
 import { ComposeButton } from "@/components/social/feed/ComposeButton";
 import { Feed } from "@/components/social/feed/Feed";
-import { FeedTabs, isFeedTab, liveTab } from "@/components/social/feed/FeedMasthead";
+import { FeedHead, FeedTabs, isFeedTab, liveTab } from "@/components/social/feed/FeedMasthead";
+import { isFeedCategory } from "@/components/social/feed/categories";
+import LoadingAround from "@/app/(app)/around/loading";
 import { LocationChip } from "@/components/social/feed/LocationChip";
 import { StoryRing } from "@/components/social/feed/StoryRing";
 import { PeopleRail, WhoToFollow } from "@/components/social/follow/WhoToFollow";
@@ -14,7 +14,6 @@ import { PeopleSections } from "@/components/social/find/PeopleSections";
 import { sheetWordsOf } from "@/components/social/sheet-words";
 import { StoryComposer } from "@/components/social/story/StoryComposer";
 import { PageHeader } from "@/components/app/PageHeader";
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { directoryRow, mostFollowedRow, visibleRows } from "@/lib/social/people-discovery-model";
 import { FEED_PLACES, FEED_STORIES, FOLLOW_SAMPLE, YOU } from "../f4/fixtures";
 import {
@@ -30,13 +29,15 @@ import {
  * `/preview/feed-v2`: the feed, a post, the composers and the people page on
  * the REAL components with FIXTURE PROPS (rule R-G), inside the real shell.
  *
- *   ?view=feed           For you (default); add &tab=friends for Friends
+ *   ?view=feed           For you (default); add &tab=friends for Friends, or
+ *                        &cat=properties, stays or restaurants for a category
  *   ?view=friends-empty  Friends with nobody followed
  *   ?view=composer       the post composer, open
  *   ?view=story          the story composer
  *   ?view=people         the people page, sections and list
  *   ?view=search         the people page with a search typed
  *   ?view=people-empty   the people page with no data (every row hidden)
+ *   ?view=loading        the feed's skeleton, in the feed's own shape
  *
  * The live routes are the Around page, its people page and the new-story page
  * under `app/(app)`. Nothing here ships and every proof taken from it is
@@ -45,9 +46,10 @@ import {
 export default async function FeedV2Harness({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; tab?: string }>;
+  searchParams: Promise<{ view?: string; tab?: string; cat?: string }>;
 }) {
-  const { view = "feed", tab: rawTab } = await searchParams;
+  const { view = "feed", tab: rawTab, cat } = await searchParams;
+  const category = isFeedCategory(cat) ? cat : null;
   const t = getDictionary("en");
   const words = t.feedV2.feed;
   const w = t.feedV2.people;
@@ -104,6 +106,8 @@ export default async function FeedV2Harness({
             />
           </PeopleFinder>
         </div>
+      ) : view === "loading" ? (
+        <LoadingAround />
       ) : view === "story" ? (
         <div className="mx-auto w-full max-w-2xl pb-4xl pt-md">
           <PageHeader title={t.experienceSocial.newStory.title} subtitle={t.experienceSocial.newStory.lede} fallback="/around" />
@@ -115,40 +119,47 @@ export default async function FeedV2Harness({
           />
         </div>
       ) : (
-        <div className="nf-fv2-page pt-sm" style={{ paddingBottom: "var(--nf-tabbar-clearance)" }} data-testid="around-feed">
-          <h1 className="sr-only">{t.nav.around}</h1>
+        <div className="nf-fv2-page" style={{ paddingBottom: "var(--nf-tabbar-clearance)" }} data-testid="around-feed">
           <div className="nf-fv2-grid">
             <div className="nf-fv2-main">
-              <div className="nf-fv2-bar">
-                <BackButton fallback="/home" />
-                <LocationChip
-                  place="Lekki, Lagos"
-                  places={FEED_PLACES}
-                  currentSlug={null}
-                  signedIn
-                  copy={{
-                    label: t.social.locationLabel,
-                    allPlaces: t.social.allPlaces,
-                    changePlace: t.social.changePlace,
-                    pickPlaces: t.social.pickPlaces,
-                    signIn: t.common.signIn,
-                  }}
-                />
-                <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople}>
-                  <UiIcon name="search" size={20} />
-                </Link>
-                <ComposeButton label={words.writePost} />
-              </div>
+              <FeedHead
+                t={t}
+                place={
+                  <LocationChip
+                    place="Lekki, Lagos"
+                    places={FEED_PLACES}
+                    currentSlug={null}
+                    signedIn
+                    copy={{
+                      label: t.social.locationLabel,
+                      allPlaces: t.social.allPlaces,
+                      changePlace: t.social.changePlace,
+                      pickPlaces: t.social.pickPlaces,
+                      signIn: t.common.signIn,
+                    }}
+                  />
+                }
+              />
+              <div className="nf-lens-track">
+              <div className="nf-lens-pane" data-lens="around">
               <StoryRing
                 stories={FEED_STORIES}
                 yourStoryLabel={words.yourStory}
                 storiesLabel={words.storiesLabel}
                 addStoryLabel={words.addStory}
               />
-              <FeedTabs active={tab} t={t} />
+              <FeedTabs active={tab} category={category} t={t} />
+              <ComposeButton
+                label={words.writePost}
+                prompt={words.composePrompt}
+                you={YOU}
+                actions={{ photo: words.composePhoto, send: words.composeSend }}
+              />
               <section>
                 <Feed
                   initial={view === "friends-empty" ? [] : friends ? POSTS.slice(0, 3) : POSTS}
+                  category={category}
+                  categoryEmpty={{ title: words.emptyCatTitle.replace("{category}", words.catRestaurants), body: words.emptyCatBody, action: { href: "/preview/feed-v2", label: words.emptyCatAction } }}
                   locale="en"
                   sheet={sheetWordsOf(t)}
                   signedIn
@@ -160,6 +171,8 @@ export default async function FeedV2Harness({
                   emptyAction={{ href: "/around/people", label: words.emptyFriendsAction }}
                 />
               </section>
+              </div>
+              </div>
             </div>
             <aside className="nf-fv2-rail" aria-label={words.railTitle}>
               <PeopleRail people={FOLLOW_SAMPLE} signedIn title={words.railTitle} seeAll={words.railSeeAll} />

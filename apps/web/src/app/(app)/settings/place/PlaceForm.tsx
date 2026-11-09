@@ -5,7 +5,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PlaceFields, type PlaceValues } from "@/components/app/place/PlaceFields";
 import type { PickersCopy } from "@/components/app/welcome/welcome-copy";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { banner } from "@/lib/ui/toast";
 import { updatePlaceAction, type PlaceSaved } from "@/lib/places/actions";
 import type { StateOption } from "@/lib/places/reference";
 import type { ActionResult } from "@/lib/actions/envelope";
@@ -37,23 +37,26 @@ export function PlaceForm({
 }) {
   const router = useRouter();
   const [values, setValues] = useState<PlaceValues>(initial);
-  const [saved, setSaved] = useState(false);
   const [state, formAction, pending] = useActionState<ActionResult<PlaceSaved> | null, FormData>(
     updatePlaceAction,
     null,
   );
 
+  /* The outcome goes to the one banner (Grade 1); a field's own error stays
+     under that field, in PlaceFields. */
   useEffect(() => {
-    if (!state?.ok) return;
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error, { "data-testid": "place-error" });
+      return;
+    }
     setValues({
       stateCode: state.data.stateCode,
       lgaCode: state.data.lgaCode,
       occupationCode: state.data.occupationCode,
     });
-    setSaved(true);
+    banner.success("Saved. Home now opens on this city.", { "data-testid": "place-saved" });
     router.refresh();
-    const timer = window.setTimeout(() => setSaved(false), 4000);
-    return () => window.clearTimeout(timer);
   }, [state, router]);
 
   const fieldErrors = state && !state.ok ? state.fieldErrors : undefined;
@@ -68,27 +71,6 @@ export function PlaceForm({
         fieldErrors={fieldErrors}
         initialLabels={initialLabels}
       />
-
-      {state && !state.ok && (
-        <p
-          role="alert"
-          data-testid="place-error"
-          className="mt-md nf-panel nf-panel--card block border-[color-mix(in_oklab,var(--nf-state-error)_55%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {state.error}
-        </p>
-      )}
-
-      {saved && (
-        <p
-          role="status"
-          data-testid="place-saved"
-          className="nf-rise mt-md flex items-center gap-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-success)]"
-        >
-          <UiIcon name="verified" size={16} className="shrink-0" />
-          Saved. Home now opens on this city.
-        </p>
-      )}
 
       <Button type="submit" variant="primary" full disabled={pending} className="mt-md">
         {pending ? "Saving..." : "Save"}

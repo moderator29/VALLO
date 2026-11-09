@@ -17,10 +17,11 @@ import {
 import { POST_COPY, PROFILE_REPORT_REASONS } from "@/lib/social/posts-model";
 import { displayHost } from "@/lib/brand-domain";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { Toast, useToast } from "@/components/ui/Toast";
+import { banner } from "@/lib/ui/toast";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import "./social-profile.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { withNext } from "@/lib/auth/next-link";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
@@ -71,13 +72,17 @@ export function ProfileMenu({
   reportWords: ReportWords;
 }) {
   const signInHref = useSignInHref();
+  /* VIEW-ONLY PUBLIC PROFILE (founder, 9 November 2026). A signed-out visitor
+     who taps mute or report on an anon-viewable profile goes to sign UP
+     carrying this page, not the app's shared sign-in door. Signed in, this is
+     never read. */
+  const guestHref = signedIn ? signInHref : withNext("/sign-up", `/u/${handle}`);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(initialMuted);
   const [confirmBlock, setConfirmBlock] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [reporting, setReporting] = useState(false);
-  const { toast, show } = useToast(5000);
   const [pending, startTransition] = useSafeTransition();
   const menuRef = useRef<HTMLDivElement>(null);
   const openerRef = useRef<HTMLButtonElement>(null);
@@ -175,15 +180,15 @@ export function ProfileMenu({
     const url = `${window.location.origin}/u/${handle}`;
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       void navigator.clipboard.writeText(url);
-      show(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
-    show(`The address is ${displayHost()}/u/${handle}`);
+    banner.info(`The address is ${displayHost()}/u/${handle}`);
   };
 
   const requireSignIn = () => {
     if (signedIn) return false;
-    router.push(signInHref);
+    router.push(guestHref);
     return true;
   };
 
@@ -197,11 +202,11 @@ export function ProfileMenu({
           ? await muteTarget({ targetKind: "USER", targetId: userId })
           : await unmuteTarget({ targetKind: "USER", targetId: userId });
         if (!result.ok) {
-          show(result.error, "error");
+          banner.error(result.error);
           return;
         }
         setMuted(next);
-        show(
+        banner.success(
           next
             ? POST_COPY.mutedDone
             : `Unmuted. ${who} will show up in your feeds again.`,
@@ -222,7 +227,7 @@ export function ProfileMenu({
           /* The sheet's own return aims at the Block row, which left with the
              menu; the `…` is where the keyboard belongs. */
           openerRef.current?.focus();
-          show(result.error, "error");
+          banner.error(result.error);
           return;
         }
         setConfirmBlock(false);
@@ -238,7 +243,7 @@ export function ProfileMenu({
       try {
         const result = await unblockUser({ userId });
         if (!result.ok) {
-          show(result.error, "error");
+          banner.error(result.error);
           return;
         }
         setBlocked(false);
@@ -284,12 +289,6 @@ export function ProfileMenu({
               {pending ? "Undoing" : "Undo the block"}
             </Button>
           </div>
-
-          {/* The toast outranks this sheet on z-index, which is the whole
-              reason the material was raised past the overlays. So the message
-              a failed undo produces is the same object here as everywhere
-              else, rather than a fifth inline shape. */}
-          {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
         </div>
       </div>
     );
@@ -382,8 +381,6 @@ export function ProfileMenu({
           </>
         ) : null}
       </div>
-
-      {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
 
       {/* ------------------------------------------------ before the block */}
       <Sheet

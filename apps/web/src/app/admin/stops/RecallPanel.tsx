@@ -7,6 +7,7 @@ import { recallReason, reportRef, willTell, type RecallPreview } from "@/lib/adm
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-60 ON THE STOPS DESK: recall a standing stop for fraud.
@@ -30,16 +31,14 @@ function day(iso: string): string {
 
 export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk: Desk }) {
   const [preview, setPreview] = useState<RecallPreview | null>(null);
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function count() {
-    setMessage(null);
     startTransition(async () => {
       try {
         const result = await previewRecall({ suspensionId });
         if (result.ok) setPreview(result.data);
-        else setMessage({ ok: false, text: result.error });
+        else banner.error(result.error, { retry: count });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -47,7 +46,6 @@ export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk
   }
 
   function send() {
-    setMessage(null);
     startTransition(async () => {
       try {
         /* The report the desk was shown: the database sends only on it. */
@@ -56,16 +54,14 @@ export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk
         const result = await sendRecall({ suspensionId, reportId });
         if (result.ok) {
           const today = day(new Date().toISOString());
-          setMessage({
-            ok: true,
-            text:
-              result.data.recipients === 1
-                ? desk.recallSentOne.replace("{date}", today)
-                : desk.recallSent.replace("{count}", String(result.data.recipients)).replace("{date}", today),
-          });
+          banner.success(
+            result.data.recipients === 1
+              ? desk.recallSentOne.replace("{date}", today)
+              : desk.recallSent.replace("{count}", String(result.data.recipients)).replace("{date}", today),
+          );
           setPreview(null);
         } else {
-          setMessage({ ok: false, text: result.error });
+          banner.error(result.error, { retry: send });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -126,14 +122,6 @@ export function RecallPanel({ suspensionId, desk }: { suspensionId: string; desk
         </div>
       )}
 
-      {message && (
-        <p
-          role={message.ok ? "status" : "alert"}
-          className={`mt-inline nf-body-sm ${message.ok ? "text-[var(--nf-content-primary)]" : "text-[var(--nf-state-error)]"}`}
-        >
-          {message.text}
-        </p>
-      )}
     </section>
   );
 }

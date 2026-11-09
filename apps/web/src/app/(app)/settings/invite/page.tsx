@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { siteUrl } from "@/lib/site";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { RowLink, RowValue, SettingsGroup } from "@/components/app/account/rows";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
@@ -120,8 +120,8 @@ export default async function InviteSettingsPage({
 
   if (paused) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={t.experienceShell.navInvite} subtitle={door.rowSub} fallback="/home" />
+      <PageFrame title={t.experienceShell.navInvite} subtitle={door.rowSub} fallback="/home" width="narrow">
+        <div>
         <SettingsLede label={lede.what} what={lede.invite.what} who={lede.invite.who} />
         <div className="space-y-block">
           <RewardsPauseNotice
@@ -150,7 +150,8 @@ export default async function InviteSettingsPage({
             />
           </SettingsGroup>
         </div>
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
@@ -159,8 +160,9 @@ export default async function InviteSettingsPage({
   const seen = code ? (await cookies()).get(INVITE_SEEN_COOKIE)?.value === code : true;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.experienceShell.navInvite} subtitle={door.rowSub} fallback="/home" />
+    <PageFrame title={t.experienceShell.navInvite} subtitle={door.rowSub} fallback="/home" width="narrow">
+      {/* One child: the lede keeps its 16px foot above the ticket. */}
+      <div>
       <SettingsLede label={lede.what} what={lede.invite.what} who={lede.invite.who} />
 
       {code && url ? (
@@ -209,6 +211,7 @@ export default async function InviteSettingsPage({
       ) : (
         <EmptyState icon="gift" title={door.rowTitle} body={door.unavailable} data-testid="invite-unavailable" />
       )}
-    </div>
+      </div>
+    </PageFrame>
   );
 }

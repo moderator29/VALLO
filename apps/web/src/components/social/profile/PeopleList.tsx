@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { initial as initialOf } from "@/lib/text/initial";
 import { useState } from "react";
 import Link from "next/link";
@@ -72,17 +73,15 @@ export function PeopleList({
 }) {
   const [people, setPeople] = useState(initial);
   const [cursor, setCursor] = useState(initialCursor);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const loadMore = () => {
     if (!cursor) return;
-    setError(null);
     startTransition(async () => {
       try {
         const result = await moreFollows({ handle, direction, before: cursor });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: loadMore });
           return;
         }
         /* Appended rather than replaced, and de-duplicated on the way in, so a
@@ -237,15 +236,6 @@ export function PeopleList({
           );
         })}
       </ul>
-
-      {error ? (
-        <p
-          role="alert"
-          className="mt-md text-center text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
 
       {cursor ? (
         <div className="mt-md text-center">

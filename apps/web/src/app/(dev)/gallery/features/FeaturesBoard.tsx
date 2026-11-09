@@ -85,7 +85,7 @@ export function FeaturesBoard({
       </Section>
 
       <Section title="Pro switch and unlock" note="In the product the switch is absent unless the server says the member holds a plan. Here it is drawn on the night header ground to check it.">
-        <div data-theme="dark" className="flex items-center gap-md rounded-[var(--nf-radius-card)] bg-[var(--nf-surface-canvas)] p-md">
+        <div data-theme="dark" className="flex items-center gap-md rounded-card bg-[var(--nf-surface-canvas)] p-md">
           <ProToggle initialOn={false} label={f.pro.label} switchLabel={f.pro.switchLabel} />
           <ProToggle initialOn label={f.pro.label} switchLabel={f.pro.switchLabel} />
         </div>

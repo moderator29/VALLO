@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { TYPE } from "@/components/app/Screen";
 import { HeroFigureWait, MoneyWait, PayoutCardWait } from "@/components/app/money-history/MoneyWait";
 import {
@@ -24,7 +24,8 @@ import {
 export default function LoadingPayouts() {
   return (
     <MoneyWait label="Loading your payouts" className="nf-page nf-md nf-history">
-      <PageHeader title={PAYOUTS_TITLE} fallback="/home" />
+      <PageFrame title={PAYOUTS_TITLE} fallback="/home">
+      <div>
       <div className="mt-inline space-y-block">
         <HeroFigureWait caption={EARNINGS_TOTAL_LABEL} sub={`${EARNINGS_SETTLEMENT} ${HISTORY_NOT_A_BALANCE}`} />
         <p className={TYPE.body}>{PAYOUTS_LEDE}</p>
@@ -37,6 +38,8 @@ export default function LoadingPayouts() {
           </ol>
         </div>
       </div>
+      </div>
+    </PageFrame>
     </MoneyWait>
   );
 }

@@ -12,8 +12,8 @@ import { getLocale } from "@/lib/locale";
 export default async function LoadingCheckout() {
   const c = getDictionary(await getLocale()).checkout;
   return (
-    <LoadingShell label={c.loading} className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label={c.loading} className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className={panelClass({ variant: "card" })}>
         <Skeleton width="40%" height="0.8125rem" radius="sm" />
         <Skeleton className="mt-sm" height="2.25rem" radius="sm" />

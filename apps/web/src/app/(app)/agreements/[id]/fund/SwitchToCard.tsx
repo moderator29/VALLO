@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { switchEscrowToCard } from "@/lib/money/fund-fallback-actions";
@@ -17,7 +17,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 export function SwitchToCard({ agreementId }: { agreementId: string }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [message, setMessage] = useState<string | null>(null);
   return (
     <div className="grid gap-xs" data-testid="fund-switch-to-card">
       <p className="nf-caption">{SWITCH_TO_CARD_LEAD}</p>
@@ -26,15 +25,15 @@ export function SwitchToCard({ agreementId }: { agreementId: string }) {
         full
         disabled={pending}
         onClick={() => {
-          setMessage(null);
           startTransition(async () => {
             try {
               const result = await switchEscrowToCard({ agreementId });
+              /* Said by the one banner at the top of the screen (Grade 1). */
               if (!result.ok) {
-                setMessage(result.error);
+                banner.error(result.error, { "data-testid": "fund-switch-to-card-message" });
                 return;
               }
-              if (result.data.review) setMessage(PAY_CHOICE_CARD_REVIEW);
+              if (result.data.review) banner.info(PAY_CHOICE_CARD_REVIEW, { "data-testid": "fund-switch-to-card-message" });
               router.push(result.data.next);
             } catch (error) {
               if (!tapFailedOffline(error)) throw error;
@@ -44,11 +43,6 @@ export function SwitchToCard({ agreementId }: { agreementId: string }) {
       >
         {SWITCH_TO_CARD_LABEL}
       </Button>
-      {message ? (
-        <p role="status" className="nf-caption" data-testid="fund-switch-to-card-message">
-          {message}
-        </p>
-      ) : null}
     </div>
   );
 }

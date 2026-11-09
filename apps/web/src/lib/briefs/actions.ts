@@ -1,5 +1,6 @@
 "use server";
 
+import { memberWriteLimit } from "../security/member-write-limit";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getDictionary } from "@vallo/i18n";
@@ -38,6 +39,9 @@ export async function postBrief(input: unknown): Promise<ActionResult<{ id: stri
   if (session.state !== "signed-in") return fail(SIGNED_OUT_MESSAGE);
   const rpc = session.supabase.rpc.bind(session.supabase) as unknown as Rpc;
   const v = parsed.data;
+  /* B-03: a ceiling on briefs, so listers are not buried in one person's. */
+  const tooMany = await memberWriteLimit("brief_post", session.user.id);
+  if (tooMany) return fail(tooMany.error);
   const { data, error } = await rpc("post_brief", {
     p_state_code: v.stateCode,
     p_areas: v.areas,

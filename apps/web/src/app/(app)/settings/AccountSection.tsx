@@ -3,7 +3,6 @@
 import type { AccountCopy } from "@/components/app/account/settings-copy";
 import { withNext } from "@/lib/auth/next-link";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RowLink, RowValue, RowButton, SettingsGroup } from "@/components/app/account/rows";
 import { clearPacks } from "@/lib/offline/pack-store";
@@ -21,6 +20,7 @@ import type { Blocker } from "@/lib/account-deletion/preconditions";
 import type { Locale } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The account block: who you are signed in as, sign out, and deletion.
@@ -64,10 +64,8 @@ export function AccountSection({
   const router = useRouter();
   const copy = t.settings.account;
   const [signingOut, startSignOut] = useSafeTransition();
-  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   const leave = () => {
-    setSignOutError(null);
     startSignOut(async () => {
       try {
         /* V-98: the widget stops reading this account before the session ends. */
@@ -75,7 +73,7 @@ export function AccountSection({
         /* The push row for THIS device is retired with the session. */
         const result = await signOut(readLocalDevice()?.deviceRef);
         if (!result.ok) {
-          setSignOutError(result.error);
+          banner.error(result.error);
           return;
         }
         /* V-35, V-77: a shared phone keeps neither somebody else's gate code
@@ -104,13 +102,7 @@ export function AccountSection({
     <SettingsGroup
       label={copy.label}
       note={
-        signOutError ? (
-          <span role="alert" className="text-[var(--nf-state-error)]">
-            {signOutError}
-          </span>
-        ) : state === "unconfigured" ? (
-          copy.unconfiguredNote
-        ) : undefined
+        state === "unconfigured" ? copy.unconfiguredNote : undefined
       }
     >
       {/* Payment methods: the cards you pay with and the accounts you are

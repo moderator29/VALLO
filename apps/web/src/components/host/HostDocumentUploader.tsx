@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useId, useRef, useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { uploadHostDocumentPath } from "@/lib/host/actions";
@@ -45,38 +46,36 @@ export function HostDocumentUploader({
   const inputId = useId();
   const input = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [filedName, setFiledName] = useState<string | null>(null);
 
   async function pick(chosen: File | undefined) {
     if (!chosen) return;
     const refusal = rejectFile(chosen);
     if (refusal) {
-      setError(refusal);
+      banner.error(refusal);
       return;
     }
     if (!businessId) {
-      setError("Save the business step first, so there is an application to file this against.");
+      banner.error("Save the business step first, so there is an application to file this against.");
       return;
     }
-    setError(null);
     setBusy(true);
     try {
       const ext = chosen.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
       const path = `${userId}/${crypto.randomUUID()}/${kind}.${ext}`;
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError("The upload did not finish. Check your connection and choose the file again.");
+        banner.error("The upload did not finish. Check your connection and choose the file again.");
         return;
       }
       const uploaded = await uploadToStorage({ supabase, bucket: "host-documents", path, body: chosen, contentType: chosen.type });
       if (!uploaded.ok) {
-        setError("The upload did not finish. Check your connection and choose the file again.");
+        banner.error("The upload did not finish. Check your connection and choose the file again.");
         return;
       }
       const result = await uploadHostDocumentPath({ businessId, kind, storagePath: path });
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
       setFiledName(chosen.name);
@@ -117,11 +116,6 @@ export function HostDocumentUploader({
           </span>
         </span>
       </label>
-      {error && (
-        <p role="alert" className="mt-xs nf-caption text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

@@ -9,8 +9,8 @@ import { LoadingShell, PageHeaderSkeleton, SettingsGroupSkeleton } from "@/compo
  */
 export default function LoadingPasscodeSettings() {
   return (
-    <LoadingShell label="Loading your passcode" className="mx-auto w-full max-w-lg">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading your passcode" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <div aria-hidden="true" className="mb-block flex flex-col items-center">
         <Skeleton circle width="4rem" />
         <Skeleton className="mt-sm" width="60%" height="0.9375rem" radius="sm" />

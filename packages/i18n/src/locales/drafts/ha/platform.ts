@@ -161,6 +161,8 @@ export const platformHa = {
     reply: "Amsa",
     answer: "Buɗe duba gidaje",
     openBooking: "Buɗe ajiyar",
+    message: "Saƙo",
+    callBack: "Sake kira",
   },
 
   shelf: {

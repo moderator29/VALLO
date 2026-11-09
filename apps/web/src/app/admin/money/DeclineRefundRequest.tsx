@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { declineRefundRequest } from "@/lib/after-gate/refund-decision-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * V-24. Declining a guest's refund request, with the reason the guest reads.
@@ -21,8 +22,23 @@ export function DeclineRefundRequest({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
+
+  function submit() {
+    start(async () => {
+      try {
+        const result = await declineRefundRequest({ requestId, reason });
+        if (!result.ok) {
+          banner.error(result.error, { retry: submit });
+          return;
+        }
+        banner.success("Refund declined");
+        router.refresh();
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
 
   if (!open) {
     return (
@@ -36,19 +52,7 @@ export function DeclineRefundRequest({
       className="grid w-full gap-xs"
       onSubmit={(event) => {
         event.preventDefault();
-        setError(null);
-        start(async () => {
-          try {
-            const result = await declineRefundRequest({ requestId, reason });
-            if (!result.ok) {
-              setError(result.error);
-              return;
-            }
-            router.refresh();
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        submit();
       }}
     >
       <label className="nf-label" htmlFor={`decline-${requestId}`}>
@@ -64,11 +68,6 @@ export function DeclineRefundRequest({
       <Button type="submit" size="sm" variant="secondary" loading={pending} disabled={pending || reason.trim().length < 3}>
         {copy.declineSubmit}
       </Button>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </form>
   );
 }

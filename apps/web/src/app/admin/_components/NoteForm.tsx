@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { addMemberNote } from "@/lib/admin/notes-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 export function NoteForm({
   subjectId,
@@ -19,9 +20,26 @@ export function NoteForm({
 }) {
   const [body, setBody] = useState("");
   const [scope, setScope] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
+
+  function save() {
+    start(async () => {
+      try {
+        const result = await addMemberNote({ subjectId, body, scope: scope || null, path });
+        if (!result.ok) banner.error(result.error, { retry: save });
+        else {
+          setBody("");
+          setScope("");
+          banner.success("Note saved");
+          router.refresh();
+        }
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  }
+
   return (
     <form
       /* One column that may shrink below its content: in the support desk's
@@ -30,20 +48,7 @@ export function NoteForm({
       className="mt-xs grid grid-cols-[minmax(0,1fr)] gap-2xs"
       onSubmit={(e) => {
         e.preventDefault();
-        setError(null);
-        start(async () => {
-          try {
-            const result = await addMemberNote({ subjectId, body, scope: scope || null, path });
-            if (!result.ok) setError(result.error);
-            else {
-              setBody("");
-              setScope("");
-              router.refresh();
-            }
-          } catch (error) {
-            if (!tapFailedOffline(error)) throw error;
-          }
-        });
+        save();
       }}
     >
       <label className="nf-label" htmlFor={`note-${subjectId}`}>
@@ -70,11 +75,6 @@ export function NoteForm({
           Save note
         </Button>
       </div>
-      {error ? (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      ) : null}
     </form>
   );
 }

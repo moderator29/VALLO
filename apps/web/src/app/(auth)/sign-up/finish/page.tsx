@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { forFinishSetupForm } from "@/lib/i18n/slice";
 import { finishSocialSetup } from "@/lib/auth/actions";
 import { finishSetupView } from "@/lib/auth/finish-setup-server";
 import { FINISH_SETUP_PATH, finishSetupHref } from "@/lib/auth/finish-setup";
@@ -48,7 +49,7 @@ export default async function FinishSetupPage({
   const t = getDictionary(await getLocale());
   return (
     <FinishSetupForm
-      t={t}
+      t={forFinishSetupForm(t)}
       action={finishSocialSetup}
       next={next}
       initialFirstName={view.firstName}

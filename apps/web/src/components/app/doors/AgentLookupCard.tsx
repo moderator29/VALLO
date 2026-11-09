@@ -1,11 +1,13 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useId, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { setCheckableNumber } from "@/lib/doors/agent-check-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 type CardCopy = Dictionary["trustDoors"]["agentCard"];
 
@@ -41,10 +43,16 @@ export function AgentLookupCard({
         if (result.ok) {
           setHint(result.data.hint);
           setValue("");
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.success(result.data.hint ? copy.registered.replace("{hint}", result.data.hint) : copy.none);
           return;
         }
+        /* A number that is taken or not a number is the field's own error;
+           anything else is the banner's. */
         const reason = result.fieldErrors?.phone ?? result.error;
-        setError(reason === "taken" ? copy.taken : reason === "invalid" ? copy.invalid : copy.failed);
+        if (reason === "taken") setError(copy.taken);
+        else if (reason === "invalid") setError(copy.invalid);
+        else banner.error(copy.failed, { retry: () => save(phone) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -99,12 +107,10 @@ export function AgentLookupCard({
             maxLength={20}
             className="nf-field"
             aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${fieldId}-problem` : undefined}
           />
-          {error && (
-            <p role="alert" className="text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
+          {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+          <FieldProblem id={`${fieldId}-problem`} message={error} />
           <div className="flex flex-wrap gap-xs">
             <Button type="submit" variant="primary" size="md" loading={pending} disabled={!value.trim()}>
               {copy.save}

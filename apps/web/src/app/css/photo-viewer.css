@@ -207,6 +207,11 @@
     -webkit-tap-highlight-color: transparent;
     transition: transform var(--nf-duration-fast) var(--nf-ease-standard);
   }
+  @media (hover: hover) {
+    .nf-media-viewer__btn:hover:not(:disabled) {
+      background: color-mix(in oklab, var(--nf-btn-glass-fill) 80%, var(--nf-content-on-media) 20%);
+    }
+  }
   .nf-media-viewer__btn:active {
     transform: scale(0.92);
   }

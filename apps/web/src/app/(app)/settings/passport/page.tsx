@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { PassportSettings } from "@/components/passport/PassportSettings";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { resolveSession } from "@/lib/actions/session";
@@ -37,24 +37,20 @@ export default async function PassportSettingsPage({
   const t = getDictionary(locale);
   const copy = t.passportV2;
   const session = await resolveSession();
-  const header = <PageHeader title={copy.title} subtitle={copy.subtitle} fallback="/settings" />;
+  /* One frame for every state the screen draws, so the title never moves. */
+  const frame = { title: copy.title, subtitle: copy.subtitle, fallback: "/settings", width: "narrow" } as const;
 
   if (session.state !== "signed-in") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame {...frame}>
         <EmptyState
           icon="user-verified"
           art="id-check"
           title={copy.signedOut}
           body={copy.lede}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/settings/passport")} variant="primary" size="lg">
-              {copy.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: copy.signIn, href: withNext("/sign-in", "/settings/passport") }} />}
         />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -65,19 +61,17 @@ export default async function PassportSettingsPage({
   const mine = await readMyPassport();
   if (!mine) {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame {...frame}>
         <p role="status" className={TYPE.body}>
           {copy.readFailed}
         </p>
-      </div>
+      </PageFrame>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl" data-testid="passport-page">
-      {header}
-      <p className={`${TYPE.body} mb-block text-[var(--nf-content-secondary)]`}>{copy.lede}</p>
+    <PageFrame {...frame} testId="passport-page">
+      <p className={`${TYPE.body} text-[var(--nf-content-secondary)]`}>{copy.lede}</p>
       <PassportSettings
         facts={mine.facts}
         initial={mine.settings}
@@ -85,6 +79,6 @@ export default async function PassportSettingsPage({
         roleCopy={t.socialProfile.roleLine}
         locale={locale}
       />
-    </div>
+    </PageFrame>
   );
 }

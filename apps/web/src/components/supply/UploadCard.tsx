@@ -14,6 +14,7 @@ import {
   rejectFileIssue,
 } from "@/components/verification/kyc";
 import { uploadToStorage } from "@/lib/media/upload";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * ONE OF THE BIG UPLOAD CARDS ON `GOVERNING-04` SCREEN TWO AND `GOVERNING-05`
@@ -202,11 +203,8 @@ export function UploadCard({
         {state ? `${state}${value ? `: ${value.fileName}` : ""}` : `${copy.addFile}. ${limit}`}
       </p>
 
-      {failure || error ? (
-        <p role="alert" className="nf-arrive mt-xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]">
-          {failure ?? error}
-        </p>
-      ) : null}
+      {/* The card keeps its words for a screen reader; the banner says them (founder, 7 November 2026). */}
+      <FieldProblem id={`${inputId}-problem`} message={failure ?? error} />
     </div>
   );
 }

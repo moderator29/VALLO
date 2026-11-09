@@ -10,6 +10,7 @@ import { requestReviewCall } from "@/lib/calls/review-actions";
 import { lagosInputToIso, requestFormErrors, type FormErrors } from "@/lib/calls/screen";
 import { REVIEW_CASE_KINDS, type CallKind, type ReviewCaseKind } from "@/lib/calls/types";
 import type { CallsCopy } from "../views";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * "REQUEST A REVIEW CALL", on a case the staff member already has open.
@@ -46,7 +47,6 @@ export function RequestReviewCall({
   const [when, setWhen] = useState<"now" | "schedule">("now");
   const [at, setAt] = useState("");
   const [errors, setErrors] = useState<FormErrors<"purpose" | "at" | "caseId">>({});
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const s = copy.staff;
 
@@ -65,7 +65,6 @@ export function RequestReviewCall({
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     setBusy(true);
-    setError(null);
     const scheduledFor = when === "schedule" ? lagosInputToIso(at) : null;
     const answer = await requestReviewCall({
       caseKind: caseKind ?? kindOfCase,
@@ -76,13 +75,15 @@ export function RequestReviewCall({
     }).catch(() => null);
     setBusy(false);
     if (!answer) {
-      setError(copy.connecting.body);
+      banner.error(copy.connecting.body);
       return;
     }
     if (!answer.ok) {
-      setError(answer.error);
+      banner.error(answer.error);
       return;
     }
+    /* Said by the one banner, which stays up across the move (founder, 7 November 2026). */
+    banner.success(when === "schedule" ? "Review call scheduled" : "Review call requested");
     router.push(`/admin/review-calls/${answer.data.id}`);
   };
 
@@ -159,11 +160,6 @@ export function RequestReviewCall({
           error={errors.at}
           data-testid="review-call-at"
         />
-      ) : null}
-      {error ? (
-        <p className="nf-call__error" role="alert">
-          {error}
-        </p>
       ) : null}
       <div className="flex flex-wrap gap-xs">
         <Button type="submit" variant="primary" size="md" loading={busy} data-testid="review-call-send">

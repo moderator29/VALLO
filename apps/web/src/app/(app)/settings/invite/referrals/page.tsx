@@ -11,6 +11,9 @@ export const dynamic = "force-dynamic";
  * that says where each person stands (signed up, waiting for email
  * confirmation, finishing sign-up, in review until a date, earned, not
  * eligible). Two copies of the list would drift; one does not.
+ *
+ * Kept as a declared route (not a next.config redirect) because the invite
+ * hub links this address and the honesty guard holds it to handing on here.
  */
 export default function InviteReferralsPage(): never {
   redirect("/rewards/referrals");

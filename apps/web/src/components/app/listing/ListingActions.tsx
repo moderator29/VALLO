@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { banner, type ToastTone } from "@/lib/ui/toast";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { toggleSave } from "@/lib/saved/actions";
@@ -69,8 +70,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * row on it, so the control is never a dead end either way.
  */
 
-const TOAST_MS = 2600;
-
 /** Copy without the clipboard permission, for browsers that refuse it. */
 function copyByExecCommand(text: string): boolean {
   try {
@@ -137,8 +136,6 @@ export function ListingActions({
   const onDevice = useDeviceSaved(listingId);
   const saved = override ?? (initialSaved || onDevice);
   const setSaved = setOverride;
-  const [message, setMessage] = useState<string | null>(null);
-  const [signInPrompt, setSignInPrompt] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const t = useClientCopy();
   /*
@@ -178,30 +175,25 @@ export function ListingActions({
     return door.current ?? Promise.resolve(null);
   }, [listingId, doorKind]);
   const [pending, startTransition] = useSafeTransition();
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
-  const say = useCallback((text: string, prompt = false) => {
-    setMessage(text);
-    setSignInPrompt(prompt);
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      setMessage(null);
-      setSignInPrompt(false);
-    }, TOAST_MS);
-  }, []);
+  /* What a tap did, said by the one banner at the top of the screen
+     (founder, 7 November 2026, "THE BANNER EVERYWHERE"), with Sign in as
+     its action when that is the way on. It was a chip beside the actions. */
+  const router = useRouter();
+  const say = useCallback(
+    (text: string, prompt = false, tone: ToastTone = "success") => {
+      banner(text, {
+        tone,
+        "data-testid": "listing-action-message",
+        ...(prompt ? { action: { label: "Sign in", run: () => router.push(signInHref) } } : {}),
+      });
+    },
+    [router, signInHref],
+  );
 
   function toggle() {
     if (pending) return;
     const next = !saved;
     setSaved(next);
-    setMessage(null);
-    setSignInPrompt(false);
 
     startTransition(async () => {
       try {
@@ -222,7 +214,7 @@ export function ListingActions({
                 : await unsaveRestaurant({ restaurantId: place.id });
           if (!result.ok) {
             setSaved(!next);
-            say(result.error, result.error.startsWith("Sign in"));
+            say(result.error, result.error.startsWith("Sign in"), "error");
             return;
           }
           say(next ? "Saved to your shortlist" : "Removed from saved");
@@ -233,7 +225,7 @@ export function ListingActions({
         if (!result.ok) {
           // Nothing changed anywhere, so the heart goes back exactly as it was.
           setSaved(!next);
-          say(result.error, result.error.startsWith("Sign in"));
+          say(result.error, result.error.startsWith("Sign in"), "error");
           return;
         }
         if (result.data.mode === "local") {
@@ -273,7 +265,7 @@ export function ListingActions({
       if (minted === null) {
         /* No door, no share. The listing's own address would unfurl as a
            sign-in page, which is the failure this replaces. */
-        say(t.frontDoor.share.failed);
+        say(t.frontDoor.share.failed, false, "error");
         return;
       }
       url = minted;
@@ -313,6 +305,8 @@ export function ListingActions({
         : doorable
           ? `${t.frontDoor.share.copyFallback}: ${url}`
           : "Copy the link from your browser's address bar",
+      false,
+      copied ? "success" : "info",
     );
   }
 
@@ -380,20 +374,6 @@ export function ListingActions({
         </AuthGate>
       </div>
 
-      {message && (
-        <p
-          role="status"
-          data-testid="listing-action-message"
-          className="max-w-[15rem] rounded-[var(--nf-radius-xs)] nf-media-chip px-sm py-xs text-right font-semibold leading-snug"
-        >
-          {message}
-          {signInPrompt && (
-            <Link href={signInHref} className="ml-2xs font-semibold underline underline-offset-2">
-              Sign in
-            </Link>
-          )}
-        </p>
-      )}
 
       {/* The way into somebody's DMs, and the way out to everywhere else. */}
       <ShareSheet

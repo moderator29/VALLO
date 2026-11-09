@@ -21,13 +21,14 @@ const entry = `
   import { PassportSettings } from "@/components/passport/PassportSettings";
   import { factsFrom, settingsFrom } from "@/lib/passport/model";
   import { mount } from "@/lib/testing/browser-root";
+  import { ToastHost } from "@/components/ui/ToastHost";
   const t = getDictionary("en");
   const facts = factsFrom({
     subject_id: "7c1e9a52-3b84-4d6f-9a21-5e0d8f4b6c13", handle: "amaka", display_name: "Amaka Nwosu",
     photo: "https://example.test/amaka.jpg", roles: ["landlord"], joined_at: "2026-08-07T08:00:00Z",
     verification: "gold", rentals: 14, stays: null, review_count: 41, review_average: 4.8, reply_band: "hour", pidgin_ok: true,
   });
-  mount(<PassportSettings facts={facts} initial={settingsFrom(null)} copy={t.passportV2} roleCopy={t.socialProfile.roleLine} locale="en" />);
+  mount(<><ToastHost /><PassportSettings facts={facts} initial={settingsFrom(null)} copy={t.passportV2} roleCopy={t.socialProfile.roleLine} locale="en" /></>);
 `;
 
 const OK = 'async (input) => ({ ok: true, data: { enabled: input.enabled, hidden: input.hidden } })';
@@ -89,8 +90,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the owner's passport page", () 
     });
     try {
       await page.getByTestId("passport-switch-photo").click();
+      /* Said by the one top banner (founder, 7 November 2026), with Try again. */
       await page.getByRole("alert").waitFor();
-      expect(await page.getByRole("alert").innerText()).toBe("That change was not saved. Try again.");
+      expect(await page.getByRole("alert").innerText()).toContain("That change was not saved. Try again.");
+      expect(await page.getByRole("alert").getByRole("button", { name: "Try again" }).count()).toBe(1);
       expect(await page.getByTestId("passport-switch-photo").getAttribute("aria-checked")).toBe("true");
       expect(await page.getByTestId("passport-photo").locator("img").count()).toBe(1);
     } finally {

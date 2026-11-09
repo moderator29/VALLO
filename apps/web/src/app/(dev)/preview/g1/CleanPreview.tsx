@@ -233,7 +233,7 @@ export function CleanPreview() {
         <section
           aria-label="Night"
           data-theme="dark"
-          className="min-w-0 rounded-[var(--nf-radius-xl)] bg-[var(--nf-surface-canvas)] p-md"
+          className="min-w-0 rounded-xl bg-[var(--nf-surface-canvas)] p-md"
         >
           <p className="nf-section-label mb-sm">Night</p>
           <Sheet id="night" />

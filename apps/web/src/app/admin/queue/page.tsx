@@ -33,6 +33,7 @@ import {
 } from "@/lib/admin/queue-desk";
 import { loadDesk } from "@/lib/admin/reads/queue-desk";
 import { BulkSubmit, QueueSelection } from "../_components/QueueSelection";
+import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
 import { bulkAct, deleteView, releaseRow, saveView, takeRow } from "@/lib/admin/queue-desk-actions";
 import { Button } from "@/components/ui/Button";
 
@@ -517,11 +518,14 @@ export default async function AdminQueuePage({
               })()
           : view === "saved" ? desk.viewSaved
           : null;
-        return line ? (
-          <p role="status" className="nf-body-sm mt-inline text-[var(--nf-content-secondary)]">
-            {line}
-          </p>
-        ) : null;
+        /* Said by the one banner at the top of the screen (Grade 1). */
+        const bulkFailed = bulk && /^\d+-\d+-\d+$/.test(bulk) && bulk.split("-")[2] !== "0";
+        const tone =
+          claim === "failed" ? "error"
+          : claim === "held" || bulkFailed ? "warning"
+          : bulk === "none" ? "info"
+          : "success";
+        return line ? <BannerOnArrival message={line} tone={tone} /> : null;
       })()}
 
       {/* V-89: decide the selected rows. The boxes on each row belong to this form. */}

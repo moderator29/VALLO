@@ -8,8 +8,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingPayments() {
   return (
-    <LoadingShell label="Loading payment methods" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading payment methods" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <Skeleton width="88%" height="1rem" radius="sm" />
       <div className="mt-block space-y-block">
         {Array.from({ length: 2 }, (_, group) => (

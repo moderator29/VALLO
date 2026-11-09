@@ -68,17 +68,22 @@
   }
   :root[data-theme="light"],
   :root[data-theme="light"] [data-theme="light"] {
+    /* Calmer by day (light mode pass, 7 November 2026): the blue foot inside
+       the glass and its 40 per cent blue drop read as a blue-grey wash on
+       every field and tile. Paper glass is now a white sheet with the faintest
+       cool foot, the brand edge every paper control wears, and the shared
+       raised elevation, so a field on the sign-in card and a field on a form
+       are one object. */
     --nf-door-glass-fill: linear-gradient(
       180deg,
       var(--nf-surface-primary) 0%,
-      var(--nf-surface-primary) 45%,
-      color-mix(in oklab, var(--nf-brand-primary) 5%, var(--nf-surface-primary)) 100%
+      var(--nf-surface-primary) 70%,
+      color-mix(in oklab, var(--nf-brand-primary) 2%, var(--nf-surface-primary)) 100%
     );
-    --nf-door-glass-rim: color-mix(in oklab, var(--nf-brand-primary) 24%, transparent);
+    --nf-door-glass-rim: var(--nf-paper-field-edge);
     --nf-door-glass-depth:
       inset 0 1px 0 var(--nf-surface-primary),
-      inset 0 -8px 16px -12px color-mix(in oklab, var(--nf-brand-primary) 32%, transparent),
-      0 10px 22px -14px color-mix(in oklab, var(--nf-brand-primary) 40%, transparent);
+      var(--nf-elevation-raised);
   }
   /* Get started's "What are you here for?" tiles wear the door glass, so
      the question reads as the same family as sign in and the passcode.

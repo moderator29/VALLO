@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { uploadToStorage } from "@/lib/media/upload";
 import { useId, useRef, useState, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -91,7 +92,6 @@ export function PhotoManager({
   const inputId = useId();
   const input = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [removing, startRemoving] = useSafeTransition();
 
   const full = photos.length >= MAX_BUSINESS_PHOTOS;
@@ -110,16 +110,16 @@ export function PhotoManager({
     const toIndex = Math.max(0, Math.min(ids.length - 1, to));
     const next = moveId(ids, photoId, toIndex);
     if (next === ids) return;
-    setError(null);
     setOrder(next);
     startRemoving(async () => {
       try {
         const result = await reorder(next);
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           setOrder(null);
           return;
         }
+        banner.success("Reordered");
         router.refresh();
         setOrder(null);
       } catch (error) {
@@ -132,10 +132,9 @@ export function PhotoManager({
     if (!chosen) return;
     const refusal = rejectPhoto(chosen, w);
     if (refusal) {
-      setError(refusal);
+      banner.error(refusal);
       return;
     }
-    setError(null);
     setBusy(true);
     try {
       const ext = chosen.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
@@ -146,7 +145,7 @@ export function PhotoManager({
       const path = `${userId}/${subjectId}/${crypto.randomUUID()}.${ext}`;
       const supabase = await loadBrowserClient();
       if (!supabase) {
-        setError(w.uploadFailed);
+        banner.error(w.uploadFailed);
         return;
       }
       const uploaded = await uploadToStorage({
@@ -157,14 +156,15 @@ export function PhotoManager({
         contentType: chosen.type,
       });
       if (!uploaded.ok) {
-        setError(w.uploadFailed);
+        banner.error(w.uploadFailed);
         return;
       }
       const result = await add({ storagePath: path });
       if (!result.ok) {
-        setError(result.error);
+        banner.error(result.error);
         return;
       }
+      banner.success("Photo added");
       router.refresh();
     } finally {
       setBusy(false);
@@ -173,14 +173,14 @@ export function PhotoManager({
   }
 
   function takeDown(photoId: string) {
-    setError(null);
     startRemoving(async () => {
       try {
         const result = await removeAction({ photoId });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
+        banner.success("Photo removed");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -231,7 +231,7 @@ export function PhotoManager({
                 width={400}
                 height={300}
                 sizes="(min-width: 640px) 200px, 45vw"
-                className="h-32 w-full rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] object-cover"
+                className="h-32 w-full rounded-md border border-[var(--nf-border-subtle)] object-cover"
               />
               {/* STACKED, NOT A ROW. At 390 two of these sit side by side and
                   a label beside a control has about 80px to live in: the
@@ -313,11 +313,6 @@ export function PhotoManager({
         </label>
       )}
 
-      {error && (
-        <p role="alert" className="nf-caption mt-row text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n";
@@ -26,21 +27,21 @@ type Copy = Dictionary["afterTheGate"]["flatmates"];
  * straight to the landlord or agent. Every rule is the database door's;
  * these forms collect and report.
  */
+/* What a step did is said by the one banner at the top of the screen (Grade 1). */
 function useRun() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   /* `onOk` takes over the refresh: a success moment refreshes the page when
      it closes, so the list does not jump underneath it. */
   function run(work: () => Promise<{ ok: boolean; error?: string }>, onOk?: () => void) {
-    setError(null);
     start(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? null);
+          banner.error(result.error ?? "That did not go through. Try again.");
           return;
         }
+        banner.success("Done");
         if (onOk) onOk();
         else router.refresh();
       } catch (error) {
@@ -48,7 +49,7 @@ function useRun() {
       }
     });
   }
-  return { pending, error, run };
+  return { pending, run };
 }
 
 export function AddFlatmate({
@@ -62,7 +63,7 @@ export function AddFlatmate({
   success?: SuccessWords;
 }) {
   const router = useRouter();
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [email, setEmail] = useState("");
   const [share, setShare] = useState("");
   /* Opens only once the database door took the invitation. */
@@ -102,7 +103,7 @@ export function AddFlatmate({
             />
           )}
         </Field>
-        <Field label={copy.share} error={error ?? undefined}>
+        <Field label={copy.share}>
           {(control) => (
             <input
               {...control}
@@ -152,7 +153,7 @@ export function RemoveFlatmate({
   contributorId: string;
   copy: Copy;
 }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   return (
     <>
       <Button
@@ -165,11 +166,6 @@ export function RemoveFlatmate({
       >
         {copy.remove}
       </Button>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </>
   );
 }
@@ -192,7 +188,6 @@ export function PayShare({
   help?: string;
 }) {
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [key] = useState(() => crypto.randomUUID());
   return (
     <div className="grid gap-xs">
@@ -203,12 +198,11 @@ export function PayShare({
         loading={pending}
         disabled={pending}
         onClick={() => {
-          setError(null);
           start(async () => {
             try {
               const result = await startShareCheckout({ tenancyId, contributorId: contributorId ?? null, idempotencyKey: key });
               if (!result.ok || !result.data) {
-                setError(result.ok ? null : (result.error ?? null));
+                if (!result.ok) banner.error(result.error ?? "That did not go through. Try again.");
                 return;
               }
               window.location.assign(result.data.authorizationUrl);
@@ -220,11 +214,6 @@ export function PayShare({
       >
         {label}
       </Button>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }
@@ -250,14 +239,13 @@ export function SettleShareOnReturn({
   success?: SuccessWords;
 }) {
   const router = useRouter();
-  const [message, setMessage] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<{ moment: "sharePaid" | "moveInPaid"; amountMinor: number | null } | null>(null);
   const started = useRef(false);
   useEffect(() => {
     if (started.current) return;
     started.current = true;
     void settleShareReturn({ reference, tenancyId }).then((result) => {
-      setMessage(result.ok ? null : (result.error ?? null));
+      if (!result.ok) banner.error(result.error ?? "That did not go through. Try again.");
       if (result.ok && result.data && result.data.state !== "already") {
         setReceipt({
           moment: result.data.state === "settled" ? "moveInPaid" : "sharePaid",
@@ -278,11 +266,6 @@ export function SettleShareOnReturn({
 
   return (
     <>
-      {message ? (
-        <p className="nf-body-sm text-[var(--nf-state-error)]" role="alert">
-          {message}
-        </p>
-      ) : null}
       {receipt && words && s ? (
         <SuccessSheet
           open
@@ -305,7 +288,7 @@ export function SettleShareOnReturn({
 
 /** The lead cancels the group's move-in before it is fully paid; paid shares go back to their cards. */
 export function CancelSplit({ tenancyId, copy }: { tenancyId: string; copy: Copy }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   const [note, setNote] = useState("");
   const [open, setOpen] = useState(false);
   if (!open) {
@@ -325,7 +308,7 @@ export function CancelSplit({ tenancyId, copy }: { tenancyId: string; copy: Copy
       }}
     >
       <p className="nf-body-sm text-[var(--nf-content-secondary)]">{copy.cancelHelp}</p>
-      <Field label={copy.cancelNote} error={error ?? undefined}>
+      <Field label={copy.cancelNote}>
         {(control) => <input {...control} className="nf-field" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />}
       </Field>
       <Button type="submit" variant="secondary" full loading={pending} disabled={pending}>
@@ -342,7 +325,7 @@ export function ShareAnswer({
   contributorId: string;
   copy: Copy;
 }) {
-  const { pending, error, run } = useRun();
+  const { pending, run } = useRun();
   return (
     <div className="grid gap-xs" data-testid="share-answer">
       <div className="flex flex-wrap gap-sm">
@@ -365,11 +348,6 @@ export function ShareAnswer({
           {copy.decline}
         </Button>
       </div>
-      {error && (
-        <p className="nf-caption text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
     </div>
   );
 }

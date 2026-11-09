@@ -11,7 +11,7 @@ import {
   readInspectionsForLister,
   readInspectionsForRequester,
 } from "@/lib/inspections/queries";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { PageScene } from "@/components/app/PageScene";
 import { Reveal } from "@/components/site/Reveal";
 import { EmptyActions } from "@/components/app/EmptyActions";
@@ -171,9 +171,13 @@ export default async function PlansPage({
   return (
     <PullToRefresh className="nf-cat-surface mx-auto max-w-2xl">
       <div className="relative">
-        <PageScene art="calendar-check" />
-        <PageHeader variant="large" title={copy.title} subtitle={copy.lede} />
-      </div>
+        {/* The scene sits behind the title band only, as it did when it
+            framed the bare header. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[9rem]">
+          <PageScene art="calendar-check" />
+        </div>
+        <PageFrame title={copy.title} subtitle={copy.lede}>
+        <div>
 
       <FilterLinks filter={inspectionsOnly ? "property" : filter} copy={copy} />
       {billReturn && <BillReturnCheck reference={billReturn} />}
@@ -262,6 +266,9 @@ export default async function PlansPage({
       )}
 
       {showStays && <HowItWorks locale={locale} />}
+        </div>
+        </PageFrame>
+      </div>
     </PullToRefresh>
   );
 }

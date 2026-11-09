@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { BackControl } from "@/components/ui/BackControl";
+import { PageHeader } from "@/components/app/PageHeader";
 import { ButtonLink } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
 import { Switch } from "@/components/ui/Switch";
@@ -50,7 +50,7 @@ import { Beams, Podium, RankRows, ScopeToggle } from "./parts";
 import "./leaderboard.css";
 import "./leaderboard-motion.css";
 
-export type SetHidden = (hidden: boolean, businessId?: string) => Promise<{ ok: boolean }>;
+export type SetHidden = (hidden: boolean, businessId?: string) => Promise<{ ok: boolean; data?: unknown; error?: string }>;
 
 /**
  * /leaderboard (D76). The founder's reference, built to the Plasma level:
@@ -182,16 +182,22 @@ export function LeaderboardScreen({
       data-settled={settled ? "" : undefined}
       aria-busy={pending}
     >
-      <header className="nf-lb__top">
-        <BackControl fallback="/rewards" surface="glass" />
-        <div className="nf-lb__title">
-          <h1>{LEADERBOARD_TITLE}</h1>
-          <p data-testid="lb-subtitle">{subtitle}</p>
-        </div>
-        <button type="button" className="nf-lb__circle" onClick={() => setExplainer(true)} aria-label="How to climb" data-testid="lb-explain">
-          <UiIcon name="trending-up" size={18} />
-        </button>
-      </header>
+      {/* Round 3: the page's one top (`PageHeader variant="large"`, what
+          PageFrame draws): the round back, the large title, the board's line
+          under it, "How to climb" as the round action. */}
+      <div className="nf-lb__head" data-testid="lb-subtitle">
+        <PageHeader
+          variant="large"
+          title={LEADERBOARD_TITLE}
+          subtitle={subtitle}
+          fallback="/rewards"
+          actions={
+            <button type="button" className="nf-tap nf-icon-btn nf-icon-btn--round" onClick={() => setExplainer(true)} aria-label="How to climb" data-testid="lb-explain">
+              <UiIcon name="trending-up" size={20} />
+            </button>
+          }
+        />
+      </div>
 
       <div className="nf-lb__switches">
         <Segmented<BoardGroup>

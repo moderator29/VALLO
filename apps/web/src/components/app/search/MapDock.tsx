@@ -67,7 +67,6 @@ export function MapDock({
   copy,
   saved,
   saveBusy,
-  saveMessage,
   onSave,
   onDismiss,
 }: {
@@ -76,7 +75,6 @@ export function MapDock({
   copy: MapCopy;
   saved: boolean;
   saveBusy: boolean;
-  saveMessage: string | null;
   onSave: () => void;
   onDismiss: () => void;
 }) {
@@ -237,11 +235,6 @@ export function MapDock({
           <UiIcon name="chevron-down" size={20} />
         </button>
 
-        {saveMessage && (
-          <p role="status" className="nf-map-dock__note nf-body-sm text-[var(--nf-state-error)]">
-            {saveMessage}
-          </p>
-        )}
       </div>
     </div>
   );

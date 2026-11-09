@@ -57,7 +57,7 @@ export function DirectoryScreen({ side, read }: { side: Side; read: DirectoryRea
 
   return (
     <div className="nf-dir" data-testid="directory" data-side={side}>
-      <PageHeader title={copy.title} subtitle={copy.lede} fallback={side === "stays" ? "/stays" : "/home"} />
+      <PageHeader variant="large" title={copy.title} subtitle={copy.lede} fallback={side === "stays" ? "/stays" : "/home"} />
 
       <div className="nf-dir__tools">
         <label className="nf-dir__search">

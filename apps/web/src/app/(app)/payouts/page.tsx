@@ -3,9 +3,9 @@ import { getLocale } from "@/lib/locale";
 import { readMyEarnings } from "@/lib/money/history";
 import { parseBefore } from "@/lib/money/history-model";
 import { PAYOUTS_LEDE, PAYOUTS_TITLE } from "@/lib/money/copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState } from "@/components/app/Screen";
-import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { HistoryUnavailable } from "@/components/app/money-history/HistoryStates";
 import { PayoutsView } from "@/components/money/PayoutsView";
@@ -38,7 +38,8 @@ export default async function PayoutsPage({
 
   return (
     <main className="nf-page nf-md nf-history">
-      <PageHeader title={PAYOUTS_TITLE} fallback="/home" />
+      <PageFrame title={PAYOUTS_TITLE} fallback="/home">
+      <div>
       {/* Chargebacks: the payout rule, said calmly, only when it applies. */}
       <ChargebackHoldNotice hold={hold} copy={getDictionary(locale).chargebacks.hold} locale={locale} />
       {read.state === "signed-out" ? (
@@ -46,11 +47,7 @@ export default async function PayoutsPage({
           icon="bank-column"
           title="Sign in to see your payouts"
           body={PAYOUTS_LEDE}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/payouts")} variant="primary" size="lg">
-              Sign in
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: "Sign in", href: withNext("/sign-in", "/payouts") }} />}
         />
       ) : read.state === "error" ? (
         <div className="mt-block">
@@ -59,6 +56,8 @@ export default async function PayoutsPage({
       ) : (
         <PayoutsView summary={read.summary} entries={read.entries} nextBefore={read.nextBefore} before={before} locale={locale} now={new Date().getTime()} />
       )}
+      </div>
+    </PageFrame>
     </main>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
+import { KeptPriceNote, useKeptCopy } from "@/components/app/offline/KeptPriceNote";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { isPhoneGate, isSignedOutRefusal } from "@/lib/actions/envelope";
-import { useActionState, useId, useState, useMemo } from "react";
-import Link from "next/link";
+import { useActionState, useEffect, useId, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { withNext } from "@/lib/auth/next-link";
 import { plural, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { useClientCopy } from "@/lib/i18n/client-copy";
@@ -17,11 +20,63 @@ import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { Switch } from "@/components/ui/Switch";
 import { addDaysIso, useStayDates } from "@/components/app/listing/StayDates";
-import { PhoneField } from "@/components/app/PhoneField";
+import dynamic from "next/dynamic";
+import type { PhoneFieldProps } from "@/components/app/PhoneField";
 import { Chip, ChipRow } from "@/components/ui/Chip";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { DoorTotal, type DoorTotalCopy } from "@/components/stays/DoorTotal";
 import type { DoorCharge } from "@/lib/stays/door-total";
+
+/*
+ * THE PHONE FIELD LOADS ONLY WHEN IT IS NEEDED (performance audit, 7
+ * November 2026). It carries Google's number rules (libphonenumber, 39 KB
+ * gzipped), and it is drawn only when the booking is for someone else, a
+ * switch most guests never touch. Statically imported, those rules were in
+ * the first load of every listing and stay page on a budget phone. Now they
+ * arrive with the switch; the space the field will take is held meanwhile so
+ * nothing jumps.
+ *
+ * A chunk that cannot be fetched (the signal dropped as the switch was
+ * pressed, a deploy that moved it) draws a plain number box that posts the
+ * same `guestPhone`, which the server normalises as it always has, instead of
+ * throwing the whole panel into the route's error screen.
+ */
+const PhoneField = dynamic(
+  () =>
+    import("@/components/app/PhoneField")
+      .then((m) => m.PhoneField)
+      .catch(() => PlainGuestPhone),
+  { loading: () => <div aria-hidden="true" className="min-h-[5.5rem]" /> },
+);
+
+function PlainGuestPhone({ id, name, label, value, onChange, error, hint, autoComplete }: PhoneFieldProps) {
+  const fieldId = id ?? `${name}-plain`;
+  return (
+    <div>
+      <label htmlFor={fieldId} className="nf-label">
+        {label}
+      </label>
+      <input
+        id={fieldId}
+        name={name}
+        type="tel"
+        inputMode="tel"
+        autoComplete={autoComplete ?? "tel"}
+        maxLength={20}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={hint ? `${fieldId}-hint` : undefined}
+        className="nf-field"
+      />
+      {hint ? (
+        <p id={`${fieldId}-hint`} className="mt-row nf-caption leading-relaxed text-[var(--nf-content-muted)]">
+          {hint}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * The next fourteen days, as ISO dates.
@@ -139,7 +194,7 @@ function Stepper({
           aria-label={moreLabel}
           disabled={value >= max}
           onClick={() => onChange(Math.min(max, value + 1))}
-          className="h-9 w-9 rounded-[var(--nf-radius-sm)] disabled:opacity-40"
+          className="h-11 w-11 rounded-sm disabled:opacity-40"
         >
           <span aria-hidden="true" className="text-[length:var(--nf-text-body)] leading-none">
             +
@@ -184,6 +239,7 @@ export function ReservePanel({
   // The panel renders twice on one page (inline on phones, sticky aside from
   // lg up), so input ids must be instance-unique.
   const uid = useId();
+  const isKept = useKeptCopy();
 
   /* The counted phrases on this panel used to be written as
      `nights === 1 ? "night" : "nights"`, which is two defects in one
@@ -199,6 +255,18 @@ export function ReservePanel({
     ActionResult<ReserveReceipt> | null,
     FormData
   >(reserve, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1),
+     with Sign in as its action when that is the reason; a field's own error
+     stays under the field, and the phone step stays as its link. */
+  const router = useRouter();
+  useEffect(() => {
+    if (!state || state.ok) return;
+    const signIn = withNext("/sign-in", `/listing/${encodeURIComponent(listingId)}`);
+    banner.error(
+      state.error,
+      isSignedOutRefusal(state.error) ? { action: { label: w.signIn, run: () => router.push(signIn) } } : undefined,
+    );
+  }, [state, listingId, router, w.signIn]);
   /* The success sheet over the "Booking requested" panel, once per reserve. */
   const [successClosed, setSuccessClosed] = useState(false);
 
@@ -501,6 +569,7 @@ export function ReservePanel({
               value={checkIn}
               onChange={(e) => setCheckIn(e.target.value)}
               aria-invalid={hint || fieldError("checkIn") ? true : undefined}
+              aria-describedby={hint || fieldError("checkIn") ? `${uid}-dates-problem` : undefined}
               className="nf-field"
             />
           </div>
@@ -516,15 +585,13 @@ export function ReservePanel({
               value={checkOut}
               onChange={(e) => setCheckOut(e.target.value)}
               aria-invalid={hint || fieldError("checkOut") ? true : undefined}
+              aria-describedby={hint || fieldError("checkOut") ? `${uid}-dates-problem` : undefined}
               className="nf-field"
             />
           </div>
         </div>
-        {(hint || fieldError("checkIn") || fieldError("checkOut")) && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-            {hint ?? fieldError("checkIn") ?? fieldError("checkOut")}
-          </p>
-        )}
+        {/* The dates keep their red edge; the words go to the one banner (founder, 7 November 2026). */}
+        <FieldProblem id={`${uid}-dates-problem`} message={hint ?? fieldError("checkIn") ?? fieldError("checkOut")} when={state} />
 
         {/* ------------------------------------------------------ guests */}
         {/* The host's declared capacity is the ceiling, split live between the
@@ -598,18 +665,10 @@ export function ReservePanel({
                 onChange={(e) => setGuestName(e.target.value)}
                 placeholder={w.theirNamePlaceholder}
                 aria-invalid={fieldError("guestName") ? true : undefined}
+                aria-describedby={fieldError("guestName") ? `${uid}-guest-name-problem` : undefined}
                 className="nf-field"
               />
-              {fieldError("guestName") && (
-                /* A FIELD ERROR IS AN ERROR. `--nf-state-warning` resolves to
-                  `--nf-cyan-400`, the same token `--nf-status-pending` is
-                  defined as, so a refused input was drawn in the colour that
-                  means "still going through". `Field.tsx` already gets this
-                  right; these hand-rolled messages did not. */
-                <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-                  {fieldError("guestName")}
-                </p>
-              )}
+              <FieldProblem id={`${uid}-guest-name-problem`} message={fieldError("guestName")} when={state} />
             </div>
             {/* The one field on this form where a wrong character is not
                 caught until somebody is standing at a gate. It states its
@@ -638,7 +697,7 @@ export function ReservePanel({
                 value={guestEmail}
                 onChange={(e) => setGuestEmail(e.target.value)}
                 placeholder={w.optional}
-                aria-describedby={`${uid}-guest-email-hint`}
+                aria-describedby={fieldError("guestEmail") ? `${uid}-guest-email-hint ${uid}-guest-email-problem` : `${uid}-guest-email-hint`}
                 aria-invalid={fieldError("guestEmail") ? true : undefined}
                 className="nf-field"
               />
@@ -648,11 +707,7 @@ export function ReservePanel({
               >
                 {w.theirEmailHint}
               </p>
-              {fieldError("guestEmail") && (
-                <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-error)]">
-                  {fieldError("guestEmail")}
-                </p>
-              )}
+              <FieldProblem id={`${uid}-guest-email-problem`} message={fieldError("guestEmail")} when={state} />
             </div>
           </div>
         )}
@@ -671,6 +726,8 @@ export function ReservePanel({
             all. */}
         {ready && (
           <div className="nf-hairline mt-block pt-block">
+            {/* Read off the phone's kept copy, the figures say so (SW15). */}
+            <KeptPriceNote className="mb-row" />
             <div className="flex items-baseline justify-between gap-row">
               {/* The `Amount` primitive, not a hand-assembled figure: the
                   tabular digits, the locale-built currency symbol and the
@@ -757,26 +814,10 @@ export function ReservePanel({
         )}
 
         {/* ---------------------------------------------------- failures */}
-        {state && !state.ok && (
-          <div
-            role="alert"
-            className="mt-block rounded-[var(--nf-container-radius)] border border-[var(--nf-panel-hair)] bg-[color-mix(in_oklab,var(--nf-state-warning)_12%,transparent)] p-card-sm nf-body-sm leading-relaxed text-[var(--nf-content-secondary)]"
-          >
-            {state.error}
-            {isSignedOutRefusal(state.error) && (
-              <Link
-                href={withNext("/sign-in", `/listing/${encodeURIComponent(listingId)}`)}
-                className="mt-row inline-flex min-h-11 items-center font-semibold text-[var(--nf-content-link)] underline-offset-4 hover:underline"
-              >
-                {w.signIn}
-              </Link>
-            )}
-            <PhoneGateLink show={isPhoneGate(state)} full className="mt-sm" />
-          </div>
-        )}
+        <PhoneGateLink show={isPhoneGate(state)} full className="mt-block" />
 
         <div className="mt-block grid gap-row">
-          <Button type="submit" variant="primary" full disabled={!ready} loading={pending}>
+          <Button type="submit" variant="primary" full disabled={!ready || isKept} loading={pending}>
             {w.reserve}
           </Button>
           {/* The second action under the blue Reserve is the warm spark (D81). */}

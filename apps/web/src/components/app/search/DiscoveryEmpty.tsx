@@ -1,16 +1,5 @@
 import type { ReactNode } from "react";
-import { BrandIcon, type BrandIconProp } from "@/design-system/icons/BrandIcon";
 import { glyphSrc, type GlyphName } from "@/design-system/icons/glyphs";
-
-/** The founder's glyph for each object these empties name; anything else keeps its render. */
-const DEMPTY_GLYPH: Partial<Record<string, GlyphName>> = {
-  "search-pin": "empty-search",
-  "apartment-block": "apartment",
-  "cup-saucer": "empty-tables",
-  "doc-search": "listing-in-review",
-  "house-heart": "empty-saved",
-  suitcase: "hotel",
-};
 import { ButtonLink } from "@/components/ui/Button";
 import "./discovery.css";
 
@@ -23,11 +12,12 @@ import "./discovery.css";
  * screen in its own right rather than a fallback, with three parts and an
  * order that does not change:
  *
- *   1. THE OBJECT, settling in. A tiered asset (D29: a real place when the
- *      shelf is about places, a matte symbol when it is about an idea), drawn
- *      on a radius-14 ground in light so it never floats on white (14.7). It
- *      drops 12px onto the ground and settles on `drift` at 520ms (motion 21),
- *      which says "this is where things will arrive" rather than decorating.
+ *   1. THE OBJECT, settling in. A glyph from the founder's set (deep royal
+ *      blue clay with one warm orange accent, no plate, no tile, no ring),
+ *      drawn at 96px on a radius-14 ground in light so it never floats on
+ *      white (14.7). It drops 12px onto the ground and settles on `drift` at
+ *      520ms (motion 21), which says "this is where things will arrive"
+ *      rather than decorating.
  *   2. THE HONEST REASON, which fades in only after the object has landed, so
  *      the eye reads the object first and the sentence second. One title, one
  *      sentence, true of the state the reader is in.
@@ -52,8 +42,8 @@ export function DiscoveryEmpty({
   className,
   "data-testid": testId,
 }: {
-  /** A tiered object name (`object-assets.ts`) or a glass name it maps from. */
-  object: BrandIconProp;
+  /** A glyph name from the founder's set (`design-system/icons/glyphs.ts`). */
+  object: GlyphName;
   title: string;
   /** One sentence: why it is empty, true of the state the reader is in. */
   body: string;
@@ -74,12 +64,8 @@ export function DiscoveryEmpty({
     >
       <span className="nf-dempty__ground" aria-hidden="true">
         <span className="nf-dempty__object">
-          {DEMPTY_GLYPH[String(object)] ? (
-            // eslint-disable-next-line @next/next/no-img-element -- a transparent glyph at 96px
-            <img src={glyphSrc(DEMPTY_GLYPH[String(object)]!)} alt="" width={96} height={96} decoding="async" className="size-24 object-contain" />
-          ) : (
-            <BrandIcon name={object} size={96} />
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element -- a transparent glyph at 96px */}
+          <img src={glyphSrc(object)} alt="" width={96} height={96} decoding="async" className="size-24 object-contain" />
         </span>
       </span>
       <div className="nf-dempty__words">

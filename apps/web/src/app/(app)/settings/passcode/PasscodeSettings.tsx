@@ -34,7 +34,6 @@ export function PasscodeSettings({
   const router = useRouter();
   const [choice, setChoice] = useState<PasscodeLength>(length);
   const [changing, setChanging] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
   const [leaving, startLeaving] = useTransition();
 
   if (state === "signed-out") return null;
@@ -51,9 +50,10 @@ export function PasscodeSettings({
         askCurrent={state === "set" && askCurrent}
         currentLength={length}
         initialLength={choice}
-        onDone={(event) => {
+        onDone={() => {
+          /* PasscodeSetup has already said it through the one banner
+             (`showSuccess`, the passcode-set and passcode-changed flags). */
           setChanging(false);
-          setDone(event === "set" ? copy.saved : copy.changed);
           router.refresh();
         }}
       />
@@ -81,18 +81,10 @@ export function PasscodeSettings({
       </fieldset>
       <p className="nf-passcode-settings__note">{copy.lockNote}</p>
       {state === "unavailable" ? <p className="nf-passcode-settings__note">{copy.unavailable}</p> : null}
-      {done ? (
-        <p className="nf-passcode-settings__done" role="status">
-          {done}
-        </p>
-      ) : null}
       <button
         type="button"
         className="nf-btn nf-btn--primary w-full"
-        onClick={() => {
-          setDone(null);
-          setChanging(true);
-        }}
+        onClick={() => setChanging(true)}
         data-testid="passcode-change"
       >
         {copy.change}

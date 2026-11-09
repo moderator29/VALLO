@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -55,7 +56,6 @@ export function ViewingDayKit({
   const [clock] = useState(() => now ?? Date.now());
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
 
   if (!viewingAhead(slotAt, clock)) return null;
   const today = dayOfViewing(slotAt, clock);
@@ -82,22 +82,23 @@ export function ViewingDayKit({
     window.setTimeout(() => URL.revokeObjectURL(url), 10_000);
   }
 
+  /* What a message did is said by the one banner at the top of the screen
+     (Grade 1): sent, kept on the phone for later, or not sent. */
   async function send(body: string) {
     if (!conversationId) {
-      setNote(copy.noThread);
+      banner.info(copy.noThread);
       return;
     }
     setBusy(true);
-    setNote(null);
     try {
       const done = await sendOrKeep("send_message", { conversationId, body }, (tapKey) =>
         sendMessage({ conversationId, body, tapKey }),
       );
-      if (done.state === "kept") setNote(copy.kept);
-      else if (done.state === "sent" && done.result.ok) setNote(copy.sent);
-      else setNote(copy.failed);
+      if (done.state === "kept") banner.info(copy.kept);
+      else if (done.state === "sent" && done.result.ok) banner.success(copy.sent);
+      else banner.error(copy.failed, { retry: () => void send(body) });
     } catch {
-      setNote(copy.failed);
+      banner.error(copy.failed, { retry: () => void send(body) });
     } finally {
       setBusy(false);
       setAsking(false);
@@ -165,9 +166,6 @@ export function ViewingDayKit({
           </div>
         </>
       )}
-      <p role="status" className="nf-day-kit__note">
-        {note}
-      </p>
     </section>
   );
 }

@@ -32,6 +32,7 @@ import { panelClass } from "@/components/ui/Panel";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * PAYMENT METHODS, to the block at the foot of the settings render
@@ -111,7 +112,6 @@ export function PaymentMethodsPanel({
   const setupRefusal = useRef<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [addingCard, setAddingCard] = useState(false);
   /* The transaction the in-app checkout is resuming, once the server has
      minted it. Null until then, which is also what closes the popup. */
@@ -125,19 +125,29 @@ export function PaymentMethodsPanel({
      second attempt takes a fresh key and is allowed through. */
   const [setupKey, setSetupKey] = useState(() => newIdempotencyKey());
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>, then?: () => void) {
-    setError(null);
+  /* What the action did, said by the one banner (founder, 7 November 2026). */
+  const METHOD_WORDS = {
+    cardRemoved: "Card removed",
+    cardDefault: "Default card updated",
+    accountRemoved: "Account removed",
+    accountDefault: "Default payout account updated",
+  } as const;
+
+  /* A refusal is said by the one banner at the top of the screen (Grade 1),
+     which sits above these sheets, with Try again. */
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, then?: () => void, successWord?: string) {
     startTransition(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setError(result.error ?? copy.readFailed);
+          banner.error(result.error ?? copy.readFailed, { retry: () => run(work, then, successWord) });
           return;
         }
+        if (successWord) banner.success(successWord);
         then?.();
         router.refresh();
       } catch {
-        setError(copy.readFailed);
+        banner.error(copy.readFailed, { retry: () => run(work, then, successWord) });
       }
     });
   }
@@ -153,7 +163,6 @@ export function PaymentMethodsPanel({
    * after.
    */
   const addCard = () => {
-    setError(null);
     setAddingCard(true);
     setChooser(false);
     startTransition(async () => {
@@ -161,7 +170,7 @@ export function PaymentMethodsPanel({
         const result = await startCardSetup({ idempotencyKey: setupKey });
         if (!result.ok) {
           setAddingCard(false);
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setSetup({
@@ -246,13 +255,9 @@ export function PaymentMethodsPanel({
           <p className={`nf-pay-head__sub ${TYPE.rowMeta}`}>{copy.blockSub}</p>
         </div>
 
-        {(error || addingCard) && (
-          <p
-            role={error ? "alert" : "status"}
-            aria-live={error ? undefined : "polite"}
-            className={`px-card-sm pb-row ${TYPE.rowMeta} ${error ? "text-[var(--nf-state-error)]" : ""}`}
-          >
-            {error ?? copy.adding}
+        {addingCard && (
+          <p role="status" aria-live="polite" className={`px-card-sm pb-row ${TYPE.rowMeta}`}>
+            {copy.adding}
           </p>
         )}
 
@@ -393,7 +398,7 @@ export function PaymentMethodsPanel({
                 <RowButton
                   icon="verified"
                   label={copy.makeDefault}
-                  onClick={() => run(() => setDefaultPaymentMethod(openCard.id), close)}
+                  onClick={() => run(() => setDefaultPaymentMethod(openCard.id), close, METHOD_WORDS.cardDefault)}
                   disabled={pending}
                   chevron={false}
                 />
@@ -415,7 +420,7 @@ export function PaymentMethodsPanel({
                       variant="danger"
                       full
                       loading={pending}
-                      onClick={() => run(() => removePaymentMethod(openCard.id), close)}
+                      onClick={() => run(() => removePaymentMethod(openCard.id), close, METHOD_WORDS.cardRemoved)}
                     >
                       {copy.removeCardConfirm}
                     </Button>
@@ -426,11 +431,6 @@ export function PaymentMethodsPanel({
                 </div>
               )}
             </div>
-            {error && (
-              <p role="alert" className={`mt-row px-2xs ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-                {error}
-              </p>
-            )}
           </div>
         )}
       </Sheet>
@@ -458,7 +458,7 @@ export function PaymentMethodsPanel({
                         setDefaultBankAccount(openAccount.id, stepUp),
                       );
                       return result ?? { ok: false, error: lockWords.notConfirmed };
-                    }, close)
+                    }, close, METHOD_WORDS.accountDefault)
                   }
                   disabled={pending}
                   chevron={false}
@@ -489,7 +489,7 @@ export function PaymentMethodsPanel({
                             removeBankAccount(openAccount.id, stepUp),
                           );
                           return result ?? { ok: false, error: lockWords.notConfirmed };
-                        }, close)
+                        }, close, METHOD_WORDS.accountRemoved)
                       }
                     >
                       {copy.removeAccountConfirm}
@@ -501,11 +501,6 @@ export function PaymentMethodsPanel({
                 </div>
               )}
             </div>
-            {error && (
-              <p role="alert" className={`mt-row px-2xs ${TYPE.rowMeta} text-[var(--nf-state-error)]`}>
-                {error}
-              </p>
-            )}
           </div>
         )}
       </Sheet>
@@ -527,7 +522,7 @@ export function PaymentMethodsPanel({
           onFailed={(message) => {
             const said = setupRefusal.current ?? message;
             closeSetup();
-            setError(said);
+            banner.error(said);
           }}
         />
       )}

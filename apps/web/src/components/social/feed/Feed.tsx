@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
@@ -25,6 +26,7 @@ import { PostEditor } from "./PostEditor";
 import { LEAD_SETTLE_MS, leadIndexes, leadPropsFor } from "./lead";
 import { feedback } from "@/lib/ui/feedback";
 import { ViewportPost } from "./ViewportPost";
+import { inCategory, type FeedCategory } from "./categories";
 import { FreshArrival } from "./FreshArrival";
 import {
   blockUser,
@@ -80,6 +82,7 @@ export function Feed({
   locale = DEFAULT_LOCALE,
   sheet,
   signedIn,
+  signedOutHref,
   areaName,
   emptyMessage,
   emptyTitle,
@@ -89,7 +92,14 @@ export function Feed({
   pageCursor = null,
   loadMore,
   aside,
+  category = null,
+  categoryEmpty,
 }: {
+  /** A category chip (`categories.ts`): only the posts that feature that
+      kind of listing are drawn, from this page and every later one. */
+  category?: FeedCategory | null;
+  /** The empty state when a category holds nothing on the pages read. */
+  categoryEmpty?: { title: string; body: string; action: { href: string; label: string } };
   /**
    * Something the surface sets between posts, once: the feed's "worth
    * following" block, after the third post (or after the last, on a shorter
@@ -111,6 +121,14 @@ export function Feed({
   /** The action sheet's two lines, from the server (`sheetWordsOf`), so the browser never loads a dictionary for them. */
   sheet: SheetWords;
   signedIn: boolean;
+  /**
+   * The auth door a SIGNED-OUT visitor is sent to when they tap an action on a
+   * PUBLIC, anon-viewable page (a profile opened to strangers). The founder's
+   * rule there is sign UP carrying this page, so the page passes
+   * `/sign-up?next=<page>`. Absent everywhere else, where the signed-in app
+   * keeps its shared `useSignInHref` (`/sign-in?next=`) convention untouched.
+   */
+  signedOutHref?: string;
   /**
    * Whether this timeline is one somebody can write into.
    *
@@ -171,9 +189,11 @@ export function Feed({
   };
 }) {
   const signInHref = useSignInHref();
+  /* On a public anon-viewable page the guest goes to sign up (the page passes
+     it); everywhere else this is the app's usual sign-in door. */
+  const guestHref = signedOutHref ?? signInHref;
   const router = useRouter();
   const [posts, setPosts] = useState(initial);
-  const [notice, setNotice] = useState<string | null>(null);
   /* The post a report sheet is open for. A report used to fire on the first tap
      with reason OTHER and no way back, which is both an untriageable queue and
      a control people learn not to touch. */
@@ -297,12 +317,6 @@ export function Feed({
     return () => observer.disconnect();
   }, [loadMore, cursor, readMore]);
 
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
-
   const patch = (id: string, next: Partial<PostView>) =>
     setPosts((all) => all.map((p) => (p.id === id ? { ...p, ...next } : p)));
 
@@ -317,7 +331,7 @@ export function Feed({
    */
   const onRepost = (post: PostView) => {
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     const reposted = !post.reposted;
@@ -329,7 +343,7 @@ export function Feed({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { reposted: post.reposted, repostCount: post.repostCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -340,7 +354,7 @@ export function Feed({
 
   const onLike = (post: PostView) => {
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     const liked = !post.liked;
@@ -357,7 +371,7 @@ export function Feed({
         const result = sent.state === "sent" ? sent.result : null;
         if (!result || !result.ok) {
           patch(post.id, { liked: post.liked, likeCount: post.likeCount });
-          setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+          banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           return;
         }
       } catch (error) {
@@ -379,12 +393,12 @@ export function Feed({
         return;
       }
       void navigator.clipboard?.writeText(url);
-      setNotice(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     if (action === "copy") {
       void navigator.clipboard?.writeText(`${window.location.origin}/post/${post.id}`);
-      setNotice(POST_COPY.copied);
+      banner.success(POST_COPY.copied);
       return;
     }
     /*
@@ -398,14 +412,14 @@ export function Feed({
      */
     if (action === "contact") {
       if (!post.listing) {
-        setNotice("There is no flat on this post to ask about.");
+        banner.error("There is no flat on this post to ask about.");
         return;
       }
       router.push(`/messages/new?listing=${post.listing.id}`);
       return;
     }
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     /* The one row this sheet offers that already had a handler and no way to
@@ -442,7 +456,7 @@ export function Feed({
           const result = sent.state === "sent" ? sent.result : null;
           if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
-            setNotice(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+            banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
           }
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
@@ -461,18 +475,16 @@ export function Feed({
         // labelled "Not interested". One key now, named for what it does.
         if (action === "mute" || action === "block") {
           const target = post.author?.id;
-          if (!target) return setNotice("There is nobody to do that to on this post.");
+          if (!target) {
+            banner.error("There is nobody to do that to on this post.");
+            return;
+          }
           const result =
             action === "block"
               ? await blockUser({ userId: target })
               : await muteTarget({ targetKind: "USER", targetId: target });
-          setNotice(
-            result.ok
-              ? action === "block"
-                ? POST_COPY.blockedDone
-                : POST_COPY.mutedDone
-              : result.error,
-          );
+          if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
+          else banner.error(result.error);
           /* Their posts leave the list now. The refresh re-reads only the first
              page, so anything of theirs on a page read further down stayed on
              screen after the block said it was done. */
@@ -493,12 +505,13 @@ export function Feed({
    * are their own objects and arrive from their own reads on the server, which
    * is why neither of them is filtered out of `posts` here.
    */
-  const shown =
+  const shown = (
     chip === "apartments"
       ? posts.filter((post) => Boolean(post.listing))
       : chip === "updates"
         ? posts.filter((post) => !post.listing && post.authorKind === "USER")
-        : posts;
+        : posts
+  ).filter((post) => inCategory(post, category));
 
   const counts: Partial<Record<DistrictChip, number>> = district
     ? {
@@ -587,25 +600,20 @@ export function Feed({
         already do rather than being the one thing with a permanent form.
       */}
 
-      {notice ? (
-        <p
-          role="status"
-          className="nf-panel nf-panel--card px-md py-sm text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]"
-        >
-          {notice}
-        </p>
-      ) : null}
-
       {chip !== "stories" && chip !== "reviews" && shown.length === 0 ? (
         /* One empty-state anatomy across `/around` and `/u`. See `emptyTitle`
            above: this was a bordered paragraph with no mark, no heading and
            nothing to do, one tap from a screen that had all three. */
-        <EmptyPanel
-          icon={emptyIcon}
-          title={emptyTitle ?? DEFAULT_EMPTY_TITLE}
-          body={emptyMessage}
-          {...(emptyAction ? { action: emptyAction } : {})}
-        />
+        category && categoryEmpty && posts.length > 0 ? (
+          <EmptyPanel icon="home-search" title={categoryEmpty.title} body={categoryEmpty.body} action={categoryEmpty.action} />
+        ) : (
+          <EmptyPanel
+            icon={emptyIcon}
+            title={emptyTitle ?? DEFAULT_EMPTY_TITLE}
+            body={emptyMessage}
+            {...(emptyAction ? { action: emptyAction } : {})}
+          />
+        )
       ) : null}
 
       {(chip === "stories" || chip === "reviews" ? [] : shown).map((post, index, list) => {
@@ -623,7 +631,7 @@ export function Feed({
               locale={locale}
               onLike={() => onLike(post)}
               onRepost={() => onRepost(post)}
-              onReply={() => router.push(`/post/${post.id}?reply=1`)}
+              onReply={() => router.push(signedIn ? `/post/${post.id}?reply=1` : guestHref)}
               onShare={() => onMenuAction(post, "share")}
               onSave={() => onMenuAction(post, "save")}
               onMenu={() => setSheetFor(post)}
@@ -635,7 +643,8 @@ export function Feed({
                     onDone={() => setEditing(null)}
                     onSaved={(body, held) => {
                       patch(post.id, { body, rawBody: body, edited: true });
-                      setNotice(held ? POST_COPY.editHeld : POST_COPY.editedDone);
+                      if (held) banner.info(POST_COPY.editHeld);
+                      else banner.success(POST_COPY.editedDone);
                       router.refresh();
                     }}
                   />
@@ -730,10 +739,11 @@ export function Feed({
           if (!target) return false;
           const result = await removePost({ postId: target.id });
           if (!result.ok) {
-            setNotice(result.error);
+            banner.error(result.error);
             return false;
           }
           setPosts((all) => all.filter((p) => p.id !== target.id));
+          banner.success("Post deleted");
           router.refresh();
           return true;
         }}

@@ -1,7 +1,9 @@
 "use client";
 
 import { initial } from "@/lib/text/initial";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { aimPhotoMorph } from "@/lib/motion/photo-morph";
+import { storyMorphId } from "./StoryRingItem";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -32,7 +34,7 @@ import { blockUser, muteTarget, reportProfile } from "@/lib/social/posts-actions
 import { POST_COPY, PROFILE_REPORT_REASONS } from "@/lib/social/posts-model";
 import { STORY_COPY } from "@/lib/social/stories-model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { Toast, useToast } from "@/components/ui/Toast";
+import { banner } from "@/lib/ui/toast";
 import { countOf, formatNumber } from "@vallo/i18n/core";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
@@ -88,7 +90,6 @@ export function StoryViewer({
   const [menuOpen, setMenuOpen] = useState(false);
   const [reporting, setReporting] = useState(false);
   const [commenting, setCommenting] = useState(false);
-  const { toast, show } = useToast();
   const [, startTransition] = useSafeTransition();
   const counted = useRef(false);
 
@@ -134,6 +135,15 @@ export function StoryViewer({
     markStorySeen(story.id, viewerId);
   }, [story.id, viewerId]);
 
+  /* The far end of the ring's photo morph: the full-bleed picture is named
+     in the commit, before the browser captures the new page, and only when a
+     ring really started the flight (`aimPhotoMorph` refuses otherwise). */
+  const stage = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const picture = stage.current?.querySelector<HTMLElement>(".nf-story__image");
+    if (picture) aimPhotoMorph(picture, storyMorphId(story.id));
+  }, [story.id]);
+
   const who = story.author.label;
   /* B16: this story and the recent run, as the sequence reads them. */
   const current = useMemo(
@@ -170,7 +180,7 @@ export function StoryViewer({
             setSaved(!on);
             setSaveCount((n) => n + (on ? -1 : 1));
           }
-          show(result.error, "error");
+          banner.error(result.error);
           return;
         }
         router.refresh();
@@ -189,7 +199,7 @@ export function StoryViewer({
       return;
     }
     void navigator.clipboard?.writeText(url);
-    show(POST_COPY.copied);
+    banner.success(POST_COPY.copied);
   };
 
   const onPerson = (action: "mute" | "block") => {
@@ -197,7 +207,7 @@ export function StoryViewer({
     if (requireSignIn()) return;
     const target = story.author.id;
     if (!target) {
-      show("There is nobody to do that to on this story.", "error");
+      banner.error("There is nobody to do that to on this story.");
       return;
     }
     startTransition(async () => {
@@ -207,7 +217,7 @@ export function StoryViewer({
             ? await blockUser({ userId: target })
             : await muteTarget({ targetKind: "USER", targetId: target });
         if (!result.ok) {
-          show(result.error, "error");
+          banner.error(result.error);
           return;
         }
         if (action === "block") {
@@ -218,7 +228,7 @@ export function StoryViewer({
           router.replace("/around");
           return;
         }
-        show(POST_COPY.mutedDone);
+        banner.success(POST_COPY.mutedDone);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -236,9 +246,10 @@ export function StoryViewer({
   const takeDownConfirmed = async (): Promise<boolean> => {
     const result = await removeStory({ storyId: story.id });
     if (!result.ok) {
-      show(result.error, "error");
+      banner.error(result.error);
       return false;
     }
+    banner.success("Story deleted");
     router.replace("/around");
     return true;
   };
@@ -266,7 +277,7 @@ export function StoryViewer({
 
   return (
     <div className="nf-story nf-story--seq">
-      <article className="nf-story__stage">
+      <article className="nf-story__stage" ref={stage}>
         {story.imageUrl ? (
           /* The picture IS the page, so it is the one image here that is
              worth a full-width fetch and a priority hint. */
@@ -278,10 +289,10 @@ export function StoryViewer({
             sizes="100vw"
             priority
             quality={90}
-            className="nf-story__image"
+            className="nf-story__image nf-vt-morph"
           />
         ) : (
-          <div className="nf-story__image nf-story__image--none" aria-hidden="true" />
+          <div className="nf-story__image nf-story__image--none nf-vt-morph" aria-hidden="true" />
         )}
         <div className="nf-story__wash" aria-hidden="true" />
         {/* B16: progress, tap zones, hold to pause, the next one ready. */}
@@ -506,8 +517,6 @@ export function StoryViewer({
       </article>
 
       <StoryRail stories={more} currentId={story.id} />
-
-      {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
 
       {commenting ? (
         <CommentsSheet

@@ -275,3 +275,69 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a voice note", () => {
     }
   });
 });
+
+/* GRADE 1: the speed control, and (job 9) a refreshed link that never restarts a note that is playing. */
+describe.skipIf(!hasBrowser && !process.env.CI)("a voice note's speed and its refreshed link", () => {
+  const swapEntry = `
+    import { useState } from "react";
+    import { getDictionary } from "@vallo/i18n";
+    import { VoiceNote } from "@/components/app/messages/VoiceNote";
+    import { mount } from "@/lib/testing/browser-root";
+    const copy = getDictionary("en").experienceInbox.thread.voice;
+    const FIRST = ${JSON.stringify(TONE)};
+    const SECOND = FIRST.replace("data:audio/wav;base64,", "data:audio/x-wav;base64,");
+    function Host() {
+      const [url, setUrl] = useState(FIRST);
+      window.__swap = () => setUrl(SECOND);
+      window.__second = SECOND;
+      return <div style={{ maxWidth: 360, padding: 16 }}><VoiceNote note={{ url, durationMs: 2000, peaks: [0.2, 0.6, 1, 0.4] }} mine={false} copy={copy} /></div>;
+    }
+    mount(<Host />);
+  `;
+  type W = { __swap: () => void; __second: string };
+  const audio = (page: Page) =>
+    page.getByTestId("voice-audio").evaluate((el) => {
+      const a = el as HTMLAudioElement;
+      return { src: a.getAttribute("src") ?? "", paused: a.paused, time: a.currentTime, rate: a.playbackRate };
+    });
+
+  it("cycles 1x, 1.5x and 2x while it plays", async () => {
+    const { page, close } = await mountInBrowser({ entry: swapEntry, css: CSS });
+    try {
+      await page.getByRole("button", { name: "Play voice note" }).click();
+      await page.getByTestId("voice-rate").waitFor();
+      expect(await page.getByTestId("voice-rate").textContent()).toBe("1x");
+      await page.getByTestId("voice-rate").click();
+      expect(await page.getByTestId("voice-rate").textContent()).toBe("1.5x");
+      expect((await audio(page)).rate).toBe(1.5);
+      await page.getByTestId("voice-rate").click();
+      expect((await audio(page)).rate).toBe(2);
+    } finally {
+      await close();
+    }
+  });
+
+  it("keeps playing from the old link and takes the new one on pause, where it was", async () => {
+    const { page, close } = await mountInBrowser({ entry: swapEntry, css: CSS });
+    try {
+      await page.getByRole("button", { name: "Play voice note" }).click();
+      await expect.poll(async () => (await audio(page)).time).toBeGreaterThan(0.3);
+      const before = await audio(page);
+      await page.evaluate(() => (window as unknown as W).__swap());
+      await page.waitForTimeout(250);
+      const during = await audio(page);
+      /* Still the first link, still playing, still moving forward. */
+      expect(during.src).toBe(before.src);
+      expect(during.paused).toBe(false);
+      expect(during.time).toBeGreaterThan(before.time);
+
+      await page.getByRole("button", { name: "Pause voice note" }).click();
+      const second = await page.evaluate(() => (window as unknown as W).__second);
+      await expect.poll(async () => (await audio(page)).src).toBe(second);
+      /* Put back where it was paused, not at the start. */
+      await expect.poll(async () => (await audio(page)).time).toBeGreaterThan(0.3);
+    } finally {
+      await close();
+    }
+  });
+});

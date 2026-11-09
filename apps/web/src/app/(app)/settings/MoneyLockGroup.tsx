@@ -11,10 +11,15 @@ import { TextField } from "@/components/ui/Field";
 import { useMoneyStepUp } from "@/components/app/money/MoneyStepUp";
 import { beginEnrol, finishEnrol, removeMoneyCredential, sendFallbackCode } from "@/lib/security/money-step-up-actions";
 import { createPlatformKey, platformLockAvailable } from "@/lib/security/webauthn-client";
+import { rememberDeviceKey } from "@/lib/platform/device-keys";
+
+/** English, like the other words added before a native speaker has read them. */
+const ARMED_WORDS = "Your password is right. Now tap below and look at your phone, or touch the sensor.";
 import type { MoneyCredentialList } from "@/lib/security/money-step-up";
 import { MONEY_LOCK_BODY, MONEY_LOCK_DONE, MONEY_LOCK_REMOVED } from "@/lib/money/copy";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * LOCK MONEY WITH THIS PHONE. V-81.
@@ -41,8 +46,11 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const [codeSent, setCodeSent] = useState(false);
   /* A password changed in the last day is refused; the emailed code takes over. */
   const [forceCode, setForceCode] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  /* Every outcome, the enrol sheet's refusals included, goes to the one
+     banner (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */
+  /* The proof was accepted; the phone's own lock waits for its own tap. */
+  const [armed, setArmed] = useState<{ challenge: string; userId: string; email: string; rpId: string } | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [pending, start] = useSafeTransition();
 
   useEffect(() => {
@@ -63,10 +71,12 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   const staffHasKey = staff && list.state === "ok" && list.rows.length > 0;
   const staffNeedsPassword = staff && list.state === "ok" && list.fallback === "password";
 
+  /* Inside the sheet or not, a refusal is said by the one banner. */
+  const fail = (text: string) => banner.error(text);
+
   const enrol = () =>
     start(async () => {
       try {
-        setError(null);
         let proof: { code?: string; password?: string; stepUp?: string };
         if (staffHasKey) {
           const stepUp = await lock.prove({ kind: "add_lock" });
@@ -77,10 +87,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         } else {
           proof = byCode ? { code: password.trim() } : { password };
         }
-        const begun = await beginEnrol(proof).catch(() => ({ error: "failed" as const }));
-        if ("error" in begun) {
+        const begun = await beginEnrol(proof).catch(() => ({ ok: false as const, error: "failed" }));
+        if (!begun.ok) {
           const refused = staffHasKey ? copy.staffAnotherKey : copy.rejected;
-          setError(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
+          fail(begun.error === "rejected" ? refused : begun.error === "password_recent" ? copy.passwordRecent : copy.failed);
           if (begun.error === "password_recent") {
             setForceCode(true);
             setCodeSent(false);
@@ -88,34 +98,61 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           }
           return;
         }
-        const made = await createPlatformKey({
-          challenge: begun.challenge,
-          userId: begun.userId,
-          email: begun.email,
-          rpId: begun.rpId,
-          rpName: "Vallo",
-          exclude: [],
-        });
-        if (!made) {
-          setError(copy.rejected);
-          return;
-        }
-        const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
-          error: "failed" as const,
-        }));
-        if ("error" in done) {
-          setError(done.error === "rejected" ? copy.rejected : copy.failed);
-          return;
-        }
-        setEnrolling(false);
-        setPassword("");
-        setCode("");
-        setNote(MONEY_LOCK_DONE);
-        router.refresh();
+        /*
+         * TWO TAPS, ON PURPOSE (the Face ID bug, 7 November 2026). WebKit, in
+         * Safari and in the iPhone app alike, makes a passkey only inside the
+         * tap that asked for it, and the password check above is a server
+         * round trip that can spend that permission on a phone network: the
+         * Face ID sheet never rose. So the proof is checked here, and the
+         * next tap, on its own button, goes straight to the phone.
+         */
+        setArmed(begun.data);
+        setEnrolling(true);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
+
+  /* The second tap: the phone makes its key at once, inside the tap. */
+  const confirmKey = async () => {
+    const begun = armed;
+    if (!begun || confirming) return;
+    setConfirming(true);
+    try {
+      const made = await createPlatformKey({
+        challenge: begun.challenge,
+        userId: begun.userId,
+        email: begun.email,
+        rpId: begun.rpId,
+        rpName: "Vallo",
+        exclude: [],
+      });
+      if (!made) {
+        banner.error(copy.rejected);
+        return;
+      }
+      const done = await finishEnrol({ challenge: begun.challenge, ...made, label: null }).catch(() => ({
+        ok: false as const,
+        error: "failed",
+      }));
+      if (!done.ok) {
+        banner.error(done.error === "rejected" ? copy.rejected : copy.failed);
+        return;
+      }
+      /* This phone now holds a key (lib/platform/device-keys.ts). */
+      rememberDeviceKey(made.credentialId);
+      setArmed(null);
+      setEnrolling(false);
+      setPassword("");
+      setCode("");
+      banner.success(MONEY_LOCK_DONE);
+      router.refresh();
+    } catch (error) {
+      if (!tapFailedOffline(error)) throw error;
+    } finally {
+      setConfirming(false);
+    }
+  };
 
   const remove = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -125,12 +162,12 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         /* Removing a phone asks for a proof for exactly that. */
         const stepUp = await lock.prove({ kind: "remove_lock", target: id });
         if (stepUp === null) return;
-        const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ error: "failed" as const }));
-        if ("error" in done) {
-          setError(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
+        const done = await removeMoneyCredential({ id, stepUp }).catch(() => ({ ok: false as const, error: "failed" }));
+        if (!done.ok) {
+          banner.error(done.error === "rejected" ? (staff ? copy.staffKeyOnly : copy.rejected) : copy.failed);
           return;
         }
-        setNote(MONEY_LOCK_REMOVED);
+        banner.success(MONEY_LOCK_REMOVED);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -139,10 +176,10 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
   };
 
   const rows = list.state === "ok" ? list.rows : [];
-  const groupNote = note ?? error ?? (list.state === "unreadable" ? copy.settingsUnknown : MONEY_LOCK_BODY);
+  const groupNote = list.state === "unreadable" ? copy.settingsUnknown : MONEY_LOCK_BODY;
 
   return (
-    <SettingsGroup label={copy.settingsTitle} note={<span role={error ? "alert" : undefined}>{groupNote}</span>}>
+    <SettingsGroup label={copy.settingsTitle} note={<span>{groupNote}</span>}>
       {rows.length > 0 && (
         <RowValue icon="key" label={copy.settingsTitle} value={copy.settingsEnrolled.replace("{count}", plural(rows.length, copy.phones, locale))} testId="money-lock-count" />
       )}
@@ -164,8 +201,6 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
           sub={supported === false ? copy.settingsUnsupported : copy.settingsPasswordFirst}
           disabled={supported !== true || pending}
           onClick={() => {
-            setError(null);
-            setNote(null);
             if (staffHasKey) enrol();
             else setEnrolling(true);
           }}
@@ -173,10 +208,25 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
         />
       )}
       {lock.sheet}
-      <Sheet open={enrolling} onOpenChange={(open) => !pending && setEnrolling(open)} title={copy.settingsTitle} detents={[0.6]}>
+      <Sheet
+        open={enrolling}
+        onOpenChange={(open) => {
+          if (pending || confirming) return;
+          setEnrolling(open);
+          if (!open) setArmed(null);
+        }} title={copy.settingsTitle} detents={[0.6]}>
         <div className="space-y-row">
-          <p className="nf-body text-[var(--nf-content-secondary)]">{staff ? copy.staffFirstKey : copy.settingsPasswordFirst}</p>
-          {staff ? (
+          {armed ? (
+            <>
+              <p className="nf-body text-[var(--nf-content-secondary)]">{ARMED_WORDS}</p>
+              <Button type="button" variant="primary" full loading={confirming} disabled={confirming} onClick={() => void confirmKey()} data-testid="money-lock-confirm-key">
+                {copy.settingsEnrol}
+              </Button>
+            </>
+          ) : (
+            <p className="nf-body text-[var(--nf-content-secondary)]">{staff ? copy.staffFirstKey : copy.settingsPasswordFirst}</p>
+          )}
+          {armed ? null : staff ? (
             <>
               {staffNeedsPassword && (
                 <TextField
@@ -217,8 +267,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
                   onClick={() =>
                     start(async () => {
                       try {
-                        const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                        if ("error" in sent) setError(copy.failed);
+                        const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+                        if (!sent.ok) banner.error(copy.failed);
                         else setCodeSent(true);
                       } catch (error) {
                         if (!tapFailedOffline(error)) throw error;
@@ -240,8 +290,8 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
               onClick={() =>
                 start(async () => {
                   try {
-                    const sent = await sendFallbackCode().catch(() => ({ error: "failed" as const }));
-                    if ("error" in sent) setError(copy.failed);
+                    const sent = await sendFallbackCode().catch(() => ({ ok: false as const, error: "failed" }));
+                    if (!sent.ok) banner.error(copy.failed);
                     else setCodeSent(true);
                   } catch (error) {
                     if (!tapFailedOffline(error)) throw error;
@@ -266,14 +316,18 @@ export function MoneyLockGroup({ list, locale }: { list: MoneyCredentialList; lo
               </Button>
             </>
           )}
-          <Button type="button" variant="ghost" full disabled={pending} onClick={() => setEnrolling(false)}>
+          <Button
+            type="button"
+            variant="ghost"
+            full
+            disabled={pending || confirming}
+            onClick={() => {
+              setArmed(null);
+              setEnrolling(false);
+            }}
+          >
             {copy.cancel}
           </Button>
-          {error && (
-            <p role="alert" className="nf-body-sm text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
         </div>
       </Sheet>
     </SettingsGroup>

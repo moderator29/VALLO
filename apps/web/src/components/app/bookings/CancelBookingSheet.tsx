@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
 import { useRouter } from "next/navigation";
 import { cancel } from "@/lib/bookings/actions";
 import type { ActionResult } from "@/lib/actions/envelope";
 import type { BookingView } from "@/lib/bookings/queries";
-import { UiIcon } from "@/design-system/icons/UiIcon";
+import { banner } from "@/lib/ui/toast";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
@@ -28,8 +28,8 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
  *
  * `<Sheet>` owns the portal, the drag handle, the detents, the focus trap,
  * focus restoration, Escape, the backdrop and the body scroll lock. What is
- * left here is the decision: the server action, the refusal, and the success
- * state. On success the router refreshes and the server-rendered list becomes
+ * left here is the decision: the server action and its outcome, said by the
+ * banner. On success the router refreshes and the server-rendered list becomes
  * the single source of truth, never optimistic guesswork.
  */
 /** The sheet's words (`memberFlows.cancelBooking`). */
@@ -50,11 +50,24 @@ export function CancelBookingSheet({
     null,
   );
 
+  /* The outcome is said by the one banner at the top of the screen (Grade 1),
+     and the booking page behind it, refreshed, is the record. */
+  const cancelledLine = w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange);
+  /* Held in a ref so a parent re-render (a new `onClose`) never says it twice. */
+  const close = useRef(onClose);
   useEffect(() => {
-    if (state?.ok) router.refresh();
-  }, [state, router]);
-
-  const cancelled = Boolean(state?.ok);
+    close.current = onClose;
+  }, [onClose]);
+  useEffect(() => {
+    if (!state) return;
+    if (!state.ok) {
+      banner.error(state.error, { "data-testid": "cancel-booking-error" });
+      return;
+    }
+    banner.success(cancelledLine, { "data-testid": "cancel-booking-done" });
+    router.refresh();
+    close.current();
+  }, [state, router, cancelledLine]);
 
   return (
     <Sheet
@@ -63,58 +76,37 @@ export function CancelBookingSheet({
         if (!next) onClose();
       }}
       title={w.title}
-      /* The success state speaks for itself and the confirm panel carries its
-         own title; the title stays on as the sheet's accessible name. */
+      /* The confirm panel carries its own title; the title stays on as the
+         sheet's accessible name. The panel (plan item 22) carries its own
+         foot, with the same form, the same hidden field and the same `cancel`
+         action as before. */
       hideTitle
-      /* Cancelled: one Done under the result. Still asking: the confirm panel
-         (plan item 22) carries its own foot, with the same form, the same
-         hidden field and the same `cancel` action as before. */
-      footer={
-        cancelled ? (
-          <Button variant="primary" full onClick={onClose}>
-            {w.done}
-          </Button>
-        ) : undefined
-      }
     >
-      {cancelled ? (
-        <div className="text-center">
-          <p className="flex items-center justify-center gap-xs text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
-            <UiIcon name="verified" size={20} className="text-[var(--nf-state-success)]" />
-            {w.cancelledTitle}
-          </p>
-          <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
-            {w.cancelledBody.replace("{title}", booking.title).replace("{dates}", booking.dateRange)}
-          </p>
-        </div>
-      ) : (
-        <ConfirmPanel
-          icon="calendar-booking"
-          tone="error"
-          title={w.title}
-          context={w.context}
-          summary={[
-            { label: w.stay, value: booking.title },
-            { label: w.dates, value: booking.dateRange },
-            { label: w.total, value: booking.totalDisplay },
-          ]}
-          next={[{ icon: "calendar-check", text: w.released }]}
-          error={state && !state.ok ? state.error : null}
-          cancel={
-            <Button variant="secondary" onClick={onClose}>
-              {w.keep}
+      <ConfirmPanel
+        icon="calendar-booking"
+        tone="error"
+        title={w.title}
+        context={w.context}
+        summary={[
+          { label: w.stay, value: booking.title },
+          { label: w.dates, value: booking.dateRange },
+          { label: w.total, value: booking.totalDisplay },
+        ]}
+        next={[{ icon: "calendar-check", text: w.released }]}
+        cancel={
+          <Button variant="secondary" onClick={onClose}>
+            {w.keep}
+          </Button>
+        }
+        primary={
+          <form action={formAction}>
+            <input type="hidden" name="bookingId" value={booking.id} />
+            <Button type="submit" variant="primary" loading={pending}>
+              {w.confirm}
             </Button>
-          }
-          primary={
-            <form action={formAction}>
-              <input type="hidden" name="bookingId" value={booking.id} />
-              <Button type="submit" variant="primary" loading={pending}>
-                {w.confirm}
-              </Button>
-            </form>
-          }
-        />
-      )}
+          </form>
+        }
+      />
     </Sheet>
   );
 }

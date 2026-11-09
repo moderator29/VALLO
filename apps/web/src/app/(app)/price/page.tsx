@@ -5,7 +5,7 @@ import { areaPaid } from "@/lib/after-gate/paid-queries";
 import { PaidPanel } from "@/components/app/price/PaidPanel";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { resolveSession } from "@/lib/actions/session";
 import { listLocalGovernments, listStates } from "@/lib/places/queries";
@@ -191,8 +191,8 @@ export default async function PriceCheckPage({
   return (
     // A form page reads at a measure on a wide screen, as Settings and Saved do,
     // instead of stretching its fields across 1100px (pixel polish).
-    <div className="mx-auto max-w-3xl">
-      <PageHeader variant="large" title={t.priceCheck.title} subtitle={t.priceCheck.lead} fallback="/home" />
+    <PageFrame title={t.priceCheck.title} subtitle={t.priceCheck.lead} fallback="/home" width="default">
+      <div>
       {/* The founder's 3D price tag (30 September) beside the intro. */}
       <div className="flex items-center gap-md">
         <p className="nf-body min-w-0 flex-1 text-[var(--nf-content-secondary)]">{t.priceCheck.intro}</p>
@@ -246,6 +246,7 @@ export default async function PriceCheckPage({
           />
         </div>
       )}
-    </div>
+      </div>
+    </PageFrame>
   );
 }

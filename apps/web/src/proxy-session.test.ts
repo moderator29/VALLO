@@ -114,7 +114,9 @@ const PRODUCT = [
   "/price",
   "/price/area/anything",
   "/u",
-  "/u/somebody",
+  /* `/u/somebody` moved to PUBLIC on 9 November 2026 (the bare profile page);
+     its sub-routes stay here. */
+  "/u/somebody/edit",
   "/post/anything",
   "/saved",
   "/messages",
@@ -189,6 +191,11 @@ const PUBLIC = [
   "/welcome",
   "/robots.txt",
   "/sitemap.xml",
+  /* The two pages the founder opened on 9 November 2026 so a forwarded link
+     unfurls as its own card (SHARE_AND_CONTROLS.md 1.2): the bare profile page
+     and the bare Circle post page. Each reads public data only. */
+  "/u/somebody",
+  "/circle/p/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b",
 ];
 
 /*

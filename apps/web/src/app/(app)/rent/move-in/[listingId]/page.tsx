@@ -6,7 +6,7 @@ import { getLocale } from "@/lib/locale";
 import { getListingRepository } from "@/lib/listings/repository";
 import { readOpenInspectionFor } from "@/lib/inspections/queries";
 import { inspectionAccepted } from "@/lib/rent/queries";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { MoveInLedger } from "./MoveInLedger";
 import { areaComparison, isTenancy, ledgerLines } from "./ledger-model";
 import { unexplainedRemainder } from "@/lib/rent/ledger";
@@ -42,8 +42,7 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
 
   if (!isTenancy(listing)) {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={copy.title} fallback={`/listing/${listing.id}`} />
+      <PageFrame title={copy.title} fallback={`/listing/${listing.id}`} width="narrow">
         <EmptyState
           icon="ledger-book"
           art="boxes"
@@ -55,7 +54,7 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
             </ButtonLink>
           }
         />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -94,14 +93,14 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
       : null;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={copy.title}
-        subtitle={copy.lede}
-        fallback={`/listing/${listing.id}`}
-        actions={listing.verified ? <span className="nf-detail-verified">{copy.verified}</span> : undefined}
-      />
-
+    <PageFrame
+      title={copy.title}
+      subtitle={copy.lede}
+      fallback={`/listing/${listing.id}`}
+      width="narrow"
+      actions={listing.verified ? <span className="nf-detail-verified">{copy.verified}</span> : undefined}
+    >
+      <div>
       <MoveInLedger
         listing={listing}
         lines={lines}
@@ -142,6 +141,7 @@ export default async function MoveInPage({ params }: { params: Promise<{ listing
         {" · "}
         {plural(lines.length, t.units.lines, locale)}
       </p>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

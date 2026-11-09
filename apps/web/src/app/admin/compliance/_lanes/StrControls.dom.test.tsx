@@ -8,8 +8,8 @@
  *   - it says "confirming" until the server answers and "confirmed" only after
  *     the action resolved true, printing the server's own sentence;
  *   - a REFUSAL resolves false: the track springs back to rest, says the lane's
- *     refusal words on it and prints the refusal's own sentence beneath, as an
- *     alert, and nothing is claimed as done;
+ *     refusal words on it and says the refusal's own sentence in the banner, as
+ *     an alert, and nothing is claimed as done;
  *   - it is not marked `money` (and so it is the kind that may reset itself, but
  *     this one is given no delay, so a confirmed approval stays confirmed);
  *   - the keyboard path is the handle; Reject stays a button (sending a decision
@@ -47,6 +47,7 @@ function entry(state: "open" | "awaiting_approval" | "to_file" | "not_filed" | "
     import { getDictionary } from "@vallo/i18n";
     import { StrCaseControls } from "@/app/admin/compliance/_lanes/StrControls";
     import { mount } from "@/lib/testing/browser-root";
+    import { ToastHost } from "@/components/ui/ToastHost";
     const t = getDictionary("en");
     const words = {
       slideApprove: t.experienceAdmin.compliance.slideApprove,
@@ -61,6 +62,7 @@ function entry(state: "open" | "awaiting_approval" | "to_file" | "not_filed" | "
     window.__release = (value) => window.__answer(value);
     mount(
       <div style={{ width: 380, padding: 16 }}>
+        <ToastHost />
         <StrCaseControls
           copy={t.complianceStr}
           words={words}
@@ -184,7 +186,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the STR lane's second-person ap
       await inState(page, "confirming");
       await release(page, { ok: true, data: { text: "Approved, slot." } });
       await inState(page, "confirmed");
-      /* The refusal from the first try is gone once the second is accepted. */
+      /* The refusal from the first try gives way to the approval once the
+         second is accepted (the banner holds an error for its short minimum
+         before a calmer message replaces it). */
+      await page.getByRole("status").filter({ hasText: "Approved, slot." }).waitFor();
       expect(await page.getByRole("alert").count()).toBe(0);
       expect((await calls(page)).length).toBe(2);
     } finally {

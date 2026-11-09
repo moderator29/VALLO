@@ -81,6 +81,7 @@ export type UiIconName =
   | "settings-gear"
   | "heart"
   | "grid"
+  | "stack"
   | "key"
   | "sliders"
   /* The search bar's order control: lines shortening downward [arrow-down-wide-narrow]. */
@@ -166,6 +167,8 @@ export type UiIconName =
   | "camera"
   | "pencil"
   | "users"
+  | "circle-people"
+  | "pin"
   | "lock"
   | "calendar-check"
   | "calendar-clock"
@@ -223,7 +226,9 @@ export type UiIconName =
   | "phone-incoming"
   | "phone-outgoing"
   | "switch-camera"
-  | "volume";
+  | "volume"
+  /* The numpad backspace: a pointed rectangle with an X through it [delete]. */
+  | "backspace";
 
 /*
  * THE OUTLINES. Lucide names in brackets where the drawing is Lucide's, so the
@@ -384,10 +389,14 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
     </>
   ),
   // [search]
+  /* The magnifier, on the App Store tab bar's proportions (the founder,
+     9 November 2026: our search should read exactly like that one): a slightly
+     smaller glass set high and left, with a longer 45-degree handle reaching
+     into the lower-right corner. */
   search: (
     <>
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.34-4.34" />
+      <circle cx="10.5" cy="10.5" r="6.75" />
+      <path d="m20.25 20.25-4.9-4.9" />
     </>
   ),
   /* The dock's Search (B1 second ruling, references 44 and 45): a magnifier
@@ -765,6 +774,16 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <rect width="7" height="7" x="3" y="14" rx="1.5" />
     </>
   ),
+  /* A stack of rounded cards, the App Store "Apps" tab's shape (the founder,
+     9 November 2026: use that layered-box look across the platform). Two cards
+     offset behind a lifted front one; it reads as a collection, a library, a
+     set of things. */
+  stack: (
+    <>
+      <rect width="12" height="12" x="3" y="9" rx="2.5" />
+      <path d="M7 9V7.5A2.5 2.5 0 0 1 9.5 5H17a2.5 2.5 0 0 1 2.5 2.5V15a2.5 2.5 0 0 1-2 2.45" />
+    </>
+  ),
   // [zap]
   bolt: (
     <path d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z" />
@@ -777,12 +796,18 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <rect x="3" y="13.5" width="18" height="7.5" rx="2" />
     </>
   ),
-  // [key]
+  /* The Vallo house key (the founder, 8 November 2026: replace the generic
+     key everywhere with something of our own). The bow is a house, roof and
+     walls on the family's radius, with a round window that doubles as the
+     key ring; the blade drops from the door with two teeth. It reads as
+     "your home" at 12px, where a plain key read as a password. */
   key: (
     <>
-      <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
-      <path d="m21 2-9.6 9.6" />
-      <circle cx="7.5" cy="15.5" r="5.5" />
+      <path d="M11.4 2.45a1 1 0 0 1 1.2 0l4.6 3.45a2 2 0 0 1 .8 1.6V11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7.5a2 2 0 0 1 .8-1.6z" />
+      <circle cx="12" cy="8.25" r="1.5" />
+      <path d="M12 13v8.5" />
+      <path d="M12 16.5h3" />
+      <path d="M12 19.5h2" />
     </>
   ),
   // [x]: never the typographic multiplication sign.
@@ -1128,6 +1153,26 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3" />
     </>
   ),
+  // [circle-people] Vallo Circle: three people, the one in front a step
+  // taller, the two behind leaning in (the dock's Circle tab).
+  "circle-people": (
+    <>
+      <circle cx="12" cy="8" r="3.25" />
+      <path d="M6.5 20a5.5 5.5 0 0 1 11 0" />
+      <circle cx="5.25" cy="10" r="2.25" />
+      <path d="M1.75 18.5a3.75 3.75 0 0 1 4.1-3.7" />
+      <circle cx="18.75" cy="10" r="2.25" />
+      <path d="M22.25 18.5a3.75 3.75 0 0 0-4.1-3.7" />
+    </>
+  ),
+  // [pin] A push pin, for pinned rows (round 1 follow-up; the inbox pin
+  // borrowed the bookmark).
+  pin: (
+    <>
+      <path d="M12 17v5" />
+      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+    </>
+  ),
   // [lock]
   lock: (
     <>
@@ -1389,6 +1434,13 @@ const PATHS: Record<UiIconName, React.ReactNode> = {
       <line x1="14" x2="14" y1="15" y2="9" />
     </>
   ),
+  // [delete] The numpad backspace.
+  backspace: (
+    <>
+      <path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7z" />
+      <path d="m12.5 9.5 5 5M17.5 9.5l-5 5" />
+    </>
+  ),
 };
 
 /*
@@ -1417,6 +1469,25 @@ const HOUSE_BODY =
   "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
 
 const FILLED: Partial<Record<UiIconName, FilledTwin>> = {
+  /* The Circle tab's active state: the three people solid. */
+  "circle-people": {
+    body: (
+      <>
+        <circle cx="12" cy="8" r="3.25" />
+        <path d="M6.5 20a5.5 5.5 0 0 1 11 0z" />
+        <circle cx="5.25" cy="10" r="2.25" />
+        <path d="M1.75 18.5a3.75 3.75 0 0 1 4.1-3.7A6.9 6.9 0 0 0 5.1 18.5z" />
+        <circle cx="18.75" cy="10" r="2.25" />
+        <path d="M22.25 18.5a3.75 3.75 0 0 0-4.1-3.7 6.9 6.9 0 0 1 .75 3.7z" />
+      </>
+    ),
+  },
+  pin: {
+    body: (
+      <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+    ),
+    keep: <path d="M12 17v5" />,
+  },
   /* VC1: the call controls' solid twins. A slash is cut a little below
      and right of the line it keeps, so the solid body shows a clean gap. */
   video: {
@@ -1578,12 +1649,13 @@ const FILLED: Partial<Record<UiIconName, FilledTwin>> = {
     ),
   },
   key: {
-    body: <circle cx="7.5" cy="15.5" r="5.5" />,
-    cut: <circle cx="7.5" cy="15.5" r="1.5" fill="black" stroke="none" />,
+    body: <path d="M11.4 2.45a1 1 0 0 1 1.2 0l4.6 3.45a2 2 0 0 1 .8 1.6V11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7.5a2 2 0 0 1 .8-1.6z" />,
+    cut: <circle cx="12" cy="8.25" r="1.6" fill="black" stroke="none" />,
     keep: (
       <>
-        <path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4" />
-        <path d="m21 2-9.6 9.6" />
+        <path d="M12 13v8.5" />
+        <path d="M12 16.5h3" />
+        <path d="M12 19.5h2" />
       </>
     ),
   },

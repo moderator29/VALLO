@@ -12,6 +12,7 @@ import { ArrivalCheckRecord } from "@/components/app/arrival-check/ArrivalCheckR
 import { ActingFor } from "../../_components/ActingFor";
 import { CaseHistory } from "../../_components/CaseHistory";
 import { PaperLedger, PaperLedgerRow, PaperStatus } from "../../_components/paper";
+import { PageHead } from "../../_components/panels";
 import { DocHead, DocRow, DocRows, DocSection, DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { BookingChargebacks } from "../../chargebacks/BookingChargebacks";
 
@@ -90,8 +91,11 @@ export default async function AdminBookingPage({
     <div className="nf-console">
       {backLink}
 
-      <header className="mb-md">
-        <div className="flex flex-wrap items-center gap-xs">
+      <PageHead
+        title={stay.listingTitle}
+        lede={`${place.length > 0 ? `${place} · ` : ""}${fill(copy.bookedWhen, { when: ui.when(stay.createdAt) })}`}
+        lead={
+        <div className="mb-xs flex flex-wrap items-center gap-xs">
           <ui.StatusChip status={stay.status} />
           {stay.paidMinor > 0 ? (
             <ui.StatusChip
@@ -108,14 +112,8 @@ export default async function AdminBookingPage({
             />
           )}
         </div>
-        {/* `.nf-h1` alone, same as the console dashboard: the class was here and
-            two literals were cancelling the clamp it exists for. */}
-        <h1 className="nf-h1 mt-xs">{stay.listingTitle}</h1>
-        <p className="mt-2xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
-          {place.length > 0 ? `${place} · ` : ""}
-          {fill(copy.bookedWhen, { when: ui.when(stay.createdAt) })}
-        </p>
-      </header>
+        }
+      />
 
       {/* V-91: what the guest answered on arrival, with the photos. */}
       <ArrivalCheckRecord bookingId={stay.id} locale={locale} />

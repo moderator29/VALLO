@@ -2,6 +2,7 @@
 
 import { toast } from "@/lib/ui/toast";
 import { isNetworkError } from "./use-offline";
+import { noteNetworkFailure } from "./connection";
 
 /**
  * A TAP THAT FAILED ON A WEAK SIGNAL STAYS ON ITS SCREEN (3 November 2026).
@@ -26,6 +27,8 @@ let lastShownAt = 0;
 export function tapFailedOffline(error: unknown): boolean {
   const offline = typeof navigator !== "undefined" && navigator.onLine === false;
   if (!offline && !isNetworkError(error)) return false;
+  /* The shared connection state hears it (three in a minute is "unstable"). */
+  if (!offline) noteNetworkFailure();
   /* One line for a burst of failures, not a stack of them. */
   const now = Date.now();
   if (now - lastShownAt > 1_500) {

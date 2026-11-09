@@ -32,6 +32,11 @@ import "./discovery.css";
 import "./search-v2.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
+
+/* What a save on the map did, said by the one banner (founder, 7 November 2026);
+   the same words the cards use (components/app/SaveControl.tsx). */
+const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on this device", removed: "Removed from your saved list" };
 
 /**
  * The discovery map.
@@ -149,7 +154,6 @@ export function MapCanvas({
   const [locate, setLocate] = useState<Locate>({ phase: "idle" });
 
   const [savedIds, setSavedIds] = useState<ReadonlySet<string>>(() => new Set<string>());
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [savePending, startSave] = useSafeTransition();
 
   /*
@@ -258,6 +262,9 @@ export function MapCanvas({
     const layer = leaflet.tileLayer(tiles.url, {
       maxZoom: tiles.maxZoom,
       minZoom: 4,
+      detectRetina: true,
+      updateWhenZooming: false,
+      updateWhenIdle: true,
     });
     layer.on("tileload", () => {
       tilesLoaded.current += 1;
@@ -430,7 +437,6 @@ export function MapCanvas({
    */
   const choose = useCallback(
     (listing: MapListing) => {
-      setSaveMessage(null);
       setSelectedId(listing.id);
       mapRef.current?.panTo([listing.lat, listing.lng], { animate: true });
     },
@@ -534,7 +540,6 @@ export function MapCanvas({
     (listing: MapListing) => {
       const wasSaved = savedIds.has(listing.id);
       const onDevice = !UUID_RE.test(listing.id);
-      setSaveMessage(null);
       setSavedIds((previous) => {
         const next = new Set(previous);
         if (wasSaved) next.delete(listing.id);
@@ -559,6 +564,9 @@ export function MapCanvas({
                 else next.delete(listing.id);
                 return next;
               });
+              banner(truth ? MAP_SAVE_WORDS.saved : MAP_SAVE_WORDS.removed, { tone: "success", "data-testid": "save-banner" });
+            } else {
+              banner(wasSaved ? MAP_SAVE_WORDS.removed : MAP_SAVE_WORDS.savedOnDevice, { tone: "success", "data-testid": "save-banner" });
             }
             return;
           }
@@ -572,7 +580,8 @@ export function MapCanvas({
             else next.delete(listing.id);
             return next;
           });
-          setSaveMessage(result.error);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(result.error, { retry: () => save(listing) });
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
         }
@@ -710,7 +719,7 @@ export function MapCanvas({
                chooses is not a decision. 6px on 17.12 is 0.35 with 5px of
                straight edge down each side, and it does not move when the
                padding does. Same fix as `.nf-notif__count` in `home.css`. */
-            className="nf-numeric nf-map-cluster-drop nf-tap pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-[var(--nf-radius-xs)] border border-[var(--nf-selected-edge)] px-sm py-xs text-[length:var(--nf-text-caption)] font-bold text-[var(--nf-content-on-brand)] transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--nf-focus-ring)] active:scale-95 motion-reduce:transition-none"
+            className="nf-numeric nf-map-cluster-drop nf-tap pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-xs border border-[var(--nf-selected-edge)] px-sm py-xs text-[length:var(--nf-text-caption)] font-bold text-[var(--nf-content-on-brand)] transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--nf-focus-ring)] active:scale-95 motion-reduce:transition-none"
           >
             <span className="nf-map-pin-breathe inline-block">{group.items.length}</span>
             <span className="sr-only"> places grouped here, open them</span>
@@ -901,7 +910,7 @@ export function MapCanvas({
               role="status"
               aria-live="polite"
               data-testid="map-locate-message"
-              className="nf-btn--glass pointer-events-auto mr-auto max-w-[62%] rounded-[var(--nf-radius-control)] px-sm py-xs text-[length:var(--nf-text-overline)] leading-snug text-[var(--nf-content-secondary)]"
+              className="nf-btn--glass pointer-events-auto mr-auto max-w-[62%] rounded-control px-sm py-xs text-[length:var(--nf-text-overline)] leading-snug text-[var(--nf-content-secondary)]"
             >
               {locateMessage}
             </p>
@@ -1031,7 +1040,6 @@ export function MapCanvas({
             copy={copy}
             saved={savedIds.has(selected.id)}
             saveBusy={savePending}
-            saveMessage={saveMessage}
             onSave={() => save(selected)}
             onDismiss={() => setSelectedId(null)}
           />

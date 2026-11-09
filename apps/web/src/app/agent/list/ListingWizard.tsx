@@ -1,7 +1,8 @@
 "use client";
 
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { VerifyGateLink } from "@/components/app/VerifyGateLink";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { countOf, formatDate, formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { ShotList } from "@/components/agent/ShotList";
@@ -147,6 +148,8 @@ import "@/app/css/catalogue.css";
 import "@/app/css/lister-publish.css";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The List Apartment wizard: eight steps, canon reference 03.
@@ -509,6 +512,7 @@ function Field({
   fromMessage?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const problemId = useId();
   return (
     <label className="block">
       <span className="nf-label">
@@ -516,13 +520,10 @@ function Field({
         {fromMessage}
       </span>
       {children}
-      {error ? (
-        <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </span>
-      ) : hint ? (
-        <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">{hint}</span>
-      ) : null}
+      {hint ? <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">{hint}</span> : null}
+      {/* A field's problem is said by the one banner; the note stays for a
+          screen reader (founder, 7 November 2026, "THE BANNER EVERYWHERE"). */}
+      <FieldProblem id={problemId} message={error} />
     </label>
   );
 }
@@ -1052,6 +1053,7 @@ export function ListingWizard({
   amenities,
   initial,
   canPersist,
+  verifyFirst = false,
   startAt = 0,
   broadcastCopy,
   guideCopy,
@@ -1145,6 +1147,12 @@ export function ListingWizard({
   initial: WizardDraft | null;
   canPersist: boolean;
   /**
+   * GRADE 1 (P0.3): the lister's identity check is not sent yet, so the last
+   * step names it as the one thing to fix, with the way to /verification,
+   * before Send is pressed (reference R27). The server refuses either way.
+   */
+  verifyFirst?: boolean;
+  /**
    * The step to open on, zero based and clamped.
    *
    * The preview harness passes it so every one of the eight steps can be
@@ -1230,8 +1238,12 @@ export function ListingWizard({
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [phoneGate, setPhoneGate] = useState(false);
+  /* Grade 1 (P0.3): the identity gate on submit. */
+  const [verifyGate, setVerifyGate] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [photoNotice, setPhotoNotice] = useState<string | null>(null);
+  useEffect(() => { if (notice) banner.error(notice); }, [notice]);
+  useEffect(() => { if (photoNotice) banner.error(photoNotice); }, [photoNotice]);
   /** One line per file the last pick refused, naming the file. */
   const [photoProblems, setPhotoProblems] = useState<string[]>([]);
   /** The files the last pick could not upload for a reason a second try can fix. */
@@ -1972,7 +1984,7 @@ export function ListingWizard({
    * is refused rather than uploaded, because publishing a geotagged photo is
    * worse than asking for another one.
    */
-  async function stripMetadata(file: File): Promise<Blob | null> {
+  async function stripMetadata(file: File): Promise<{ blob: Blob; contentType: string; extension: string } | null> {
     const MAX_EDGE = 2560;
     /*
      * The decoded image, by either door. `createImageBitmap` is missing or
@@ -2018,9 +2030,15 @@ export function ListingWizard({
       context.imageSmoothingQuality = "high";
       context.drawImage(decoded.source, 0, 0, width, height);
 
-      return await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.92);
+      const useWebp = (() => {
+        try { const c = document.createElement("canvas"); c.width = 1; c.height = 1; return c.toDataURL("image/webp").startsWith("data:image/webp"); } catch { return false; }
+      })();
+      const mime = useWebp ? "image/webp" : "image/jpeg";
+      const ext = useWebp ? "webp" : "jpg";
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((b) => resolve(b), mime, 0.88);
       });
+      return blob ? { blob, contentType: mime, extension: ext } : null;
     } catch {
       return null;
     } finally {
@@ -2123,8 +2141,7 @@ export function ListingWizard({
           continue;
         }
 
-        // Strip location metadata before the photo leaves the device. The
-        // re-encode always produces a JPEG, so the stored extension follows.
+        // Strip location metadata before the photo leaves the device.
         const clean = await stripMetadata(file);
         if (!clean) {
           refuse(file, isHeic(file) ? copy.photos.heicUndecodable : copy.photos.notPrepared);
@@ -2143,7 +2160,7 @@ export function ListingWizard({
          * size says nothing about it.
          */
         const tooBig = rejectUpload(
-          { type: "image/jpeg", size: clean.size },
+          { type: clean.contentType, size: clean.blob.size },
           PHOTO_MIME_TYPES,
           MAX_PHOTO_BYTES,
         );
@@ -2152,7 +2169,7 @@ export function ListingWizard({
           continue;
         }
 
-        const path = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
+        const path = `${userId}/${id}/${crypto.randomUUID()}.${clean.extension}`;
 
         let uploadError: { message?: string; statusCode?: string | number } | null = null;
         try {
@@ -2160,8 +2177,8 @@ export function ListingWizard({
             supabase,
             bucket: "listing-photos",
             path,
-            body: clean,
-            contentType: "image/jpeg",
+            body: clean.blob,
+            contentType: clean.contentType,
           });
           if (!upload.ok) {
             uploadError = {
@@ -2302,9 +2319,9 @@ export function ListingWizard({
     /* The still is a nicety: without it the video still plays. */
     let posterPath: string | undefined;
     if (poster) {
-      const stillPath = `${userId}/${id}/${crypto.randomUUID()}.jpg`;
+      const stillPath = `${userId}/${id}/${crypto.randomUUID()}.${poster.extension}`;
       try {
-        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster, contentType: "image/jpeg" });
+        const upload = await uploadToStorage({ supabase, bucket: "listing-photos", path: stillPath, body: poster.blob, contentType: poster.contentType });
         if (upload.ok) posterPath = stillPath;
       } catch {
         /* no still */
@@ -2439,6 +2456,7 @@ export function ListingWizard({
 
   function send() {
     setPhoneGate(false);
+    setVerifyGate(false);
     startTransition(async () => {
       try {
         /* Saved first, always: the draft and its unconfirmed set (V-09) must be
@@ -2481,6 +2499,7 @@ export function ListingWizard({
           const reasons = Object.entries(result.fieldErrors ?? {}).map(([field, message]) => gateText(field, message));
           setNotice([result.error, ...new Set(reasons)].join(" "));
           setPhoneGate(result.gate === "phone");
+          setVerifyGate(result.gate === "verification");
           setFieldErrors(result.fieldErrors ?? {});
           feedback("error");
           return;
@@ -2777,15 +2796,7 @@ export function ListingWizard({
         </div>
       )}
 
-      {/* On the last step a refusal is said beside Send for review, where the
-          lister's thumb is, rather than at the top of a long step. */}
-      {notice && step !== STEP_KEYS.length - 1 && (
-        <div className="mt-group">
-          <Note glyph="flag" role="status">
-            {notice}
-          </Note>
-        </div>
-      )}
+      {/* Notices are said by the banner at the top of the screen (Grade 1). */}
 
       {/* A listing sent back by review reopens with the reviewer's sentence in
           front of the lister. It used to appear only on the workspace row, so
@@ -3022,11 +3033,7 @@ export function ListingWizard({
                     }
                     placeholder="150"
                   />
-                  {fieldErrors.sizeSqm && (
-                    <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.sizeSqm}
-                    </span>
-                  )}
+                  <FieldProblem id="wizard-sizeSqm-problem" message={fieldErrors.sizeSqm} />
                 </FactRow>
 
                 {asks("furnishing") && (
@@ -3077,11 +3084,7 @@ export function ListingWizard({
                       placeholder="5"
                     />
                   </div>
-                  {(fieldErrors.floor || fieldErrors.totalFloors) && (
-                    <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.floor ?? fieldErrors.totalFloors}
-                    </span>
-                  )}
+                  <FieldProblem id="wizard-floor-problem" message={fieldErrors.floor ?? fieldErrors.totalFloors} />
                 </FactRow>
                 )}
               </div>
@@ -3147,7 +3150,7 @@ export function ListingWizard({
               onChange={(e) => void onFiles(e.target.files)}
             />
 
-            {photoNotice && <Note glyph="flag" role="status">{photoNotice}</Note>}
+            {/* photoNotice is said by the banner (Grade 1). */}
             {photoProblems.length > 0 && (
               <Note glyph="flag" role="status">
                 {/* Spans, not a list: the note's body is a paragraph. */}
@@ -3431,11 +3434,7 @@ export function ListingWizard({
         {step === 3 && asks("amenities") && (
           <div>
             <Note>{copy.amenities.intro}</Note>
-            {fieldErrors.amenities && (
-              <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-                {fieldErrors.amenities}
-              </p>
-            )}
+            <FieldProblem id="wizard-amenities-problem" message={fieldErrors.amenities} />
             {/* Three across, a glyph over one word, a round tick on the ones
                 that are on. They were wrapping chips, which put the same list
                 on the screen with none of the render's grid, none of its
@@ -3556,15 +3555,10 @@ export function ListingWizard({
                   moreLabel={counterAria("more", copy.drawn.supply.backupHours)}
                   onChange={(v) => set("powerBackupHours", String(v))}
                 />
-                {fieldErrors.powerBackupHours ? (
-                  <span className="nf-body-sm mt-inline-tight block font-semibold text-[var(--nf-state-error)]">
-                    {fieldErrors.powerBackupHours}
-                  </span>
-                ) : (
-                  <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">
-                    &quot;Generator&quot; on its own tells a guest nothing; the hours are the answer.
-                  </span>
-                )}
+                <FieldProblem id="wizard-powerBackupHours-problem" message={fieldErrors.powerBackupHours} />
+                <span className="nf-body-sm mt-inline-tight block text-[var(--nf-content-muted)]">
+                  &quot;Generator&quot; on its own tells a guest nothing; the hours are the answer.
+                </span>
               </div>
             )}
 
@@ -3927,11 +3921,7 @@ export function ListingWizard({
                     {TENURE_CHOICES.find((c) => c.value === values.tenure)?.blurb ??
                       "A buyer will ask before anything else. Answering here saves both of you a journey."}
                   </p>
-                  {fieldErrors.tenure && (
-                    <p className="nf-body-sm mt-inline-tight font-semibold text-[var(--nf-state-error)]">
-                      {fieldErrors.tenure}
-                    </p>
-                  )}
+                  <FieldProblem id="wizard-tenure-problem" message={fieldErrors.tenure} />
                 </fieldset>
 
                 <fieldset>
@@ -4649,14 +4639,17 @@ export function ListingWizard({
                     />
                   </div>
                 )}
-                {notice && (
-                  <div className="mt-heading" data-testid="send-refused">
-                    <Note glyph="flag" role="status">
-                      {notice}
-                    </Note>
+                {verifyFirst && !verifyGate ? (
+                  <div className="mt-heading nf-g1-fix" data-testid="verify-first" role="status">
+                    <p className="nf-g1-fix__title">1 thing to fix</p>
+                    <p className="nf-g1-fix__body">
+                      Verify your identity before you send this listing for review. Your draft stays here while you do.
+                    </p>
+                    <VerifyGateLink show full className="mt-sm" />
                   </div>
-                )}
+                ) : null}
                 <PhoneGateLink show={phoneGate && notice !== null} full className="mt-sm" />
+                <VerifyGateLink show={verifyGate && notice !== null} full className="mt-sm" />
                 <Button
                   variant="primary"
                   full

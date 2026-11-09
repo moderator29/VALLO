@@ -337,7 +337,7 @@ export function ListingGallery({
         framed
           ? "nf-gallery nf-gallery--framed nf-vt-morph relative"
           : `nf-gallery nf-vt-morph relative -mx-gutter -mt-xl sm:-mt-2xl${
-              desktopInset ? " lg:mx-0 lg:mt-0 lg:overflow-hidden lg:rounded-[var(--nf-radius-xl)]" : ""
+              desktopInset ? " lg:mx-0 lg:mt-0 lg:overflow-hidden lg:rounded-xl" : ""
             }`
       }
     >
@@ -544,7 +544,7 @@ export function ListingGallery({
              Nothing else sits at the centre (the arrows are at the sides from
              `sm`, the dots are hidden for stand-in plates), and it lets a tap
              through to the lightbox under it. */
-          className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-[var(--nf-radius-xs)] nf-media-chip nf-media-chip--muted px-sm py-2xs font-semibold"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-xs nf-media-chip nf-media-chip--muted px-sm py-2xs font-semibold"
         >
           {t.catalogue.card.noPhotos}
         </p>
@@ -556,7 +556,7 @@ export function ListingGallery({
           data-testid="gallery-counter"
           /* `--nf-radius-sm`, the same 28px-plate ratio as the stand-in chip
              above it. See the note there. */
-          className={`nf-numeric absolute z-10 rounded-[var(--nf-radius-xs)] nf-media-chip px-sm py-2xs font-semibold ${counterAt}`}
+          className={`nf-numeric absolute z-10 rounded-xs nf-media-chip px-sm py-2xs font-semibold ${counterAt}`}
         >
           <UiIcon name="picture" size={16} className="mr-2xs inline-block align-[-2px]" />
           <span className="sr-only">{mixed ? "Slide " : "Photo "}</span>

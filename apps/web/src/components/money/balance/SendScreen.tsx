@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { TextField } from "@/components/ui/Field";
 import { Sheet } from "@/components/ui/Sheet";
+import { StepFrame } from "@/components/ui/StepFrame";
 import { cancelBalanceMovement, confirmBalanceMovement, findBalanceRecipient, prepareSend, type Quote } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
 import { ACTION_LABEL, MOVE_COPY } from "@/lib/money/balance-copy";
@@ -60,8 +62,8 @@ export function SendScreen({
   const [otp, setOtp] = useState("");
   const [quote, setQuote] = useState<Quote | null>(initial?.quote ?? null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
-  const [error, setError] = useState<string | null>(null);
-  const [whoError, setWhoError] = useState<string | null>(null);
+  /* The code step's own instruction (where the code went). Every outcome is
+     said by the one banner at the top of the screen (Grade 1). */
   const [busy, setBusy] = useState(false);
 
   const chips: QuickAmount[] = availableMinor !== null ? shareChips(availableMinor) : [];
@@ -70,15 +72,14 @@ export function SendScreen({
 
   const find = async () => {
     if (!connected) {
-      setWhoError(MOVE_COPY.notAvailableSend);
+      banner.warning(MOVE_COPY.notAvailableSend);
       return;
     }
     setBusy(true);
-    setWhoError(null);
     const r = await reach(() => findBalanceRecipient({ phone }));
     setBusy(false);
     if (r.ok) setFound(r.data.name);
-    else setWhoError(r.error);
+    else banner.error(r.error);
   };
 
   const prepare = async () => {
@@ -87,11 +88,10 @@ export function SendScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() => prepareSend({ clientKey, phone: recipient.phone, amount, ...(note ? { note: note.slice(0, 100) } : {}) }));
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
     }
@@ -101,15 +101,15 @@ export function SendScreen({
 
   const submit = async (code?: string): Promise<boolean> => {
     if (!quote) return false;
-    setError(null);
     const r = await reach(() => confirmBalanceMovement({ movementId: quote.movementId, ...(code ? { otp: code } : {}) }));
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return false;
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setError(r.data.message);
+      /* "We sent you a code": said by the one banner (founder, 7 November 2026). */
+      if (r.data.message) banner.info(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -125,9 +125,17 @@ export function SendScreen({
     setStep("amount");
   };
 
-  return (
+  /* SW5 (round 3): the three questions of a send (how much and to whom, the
+     quote, the code) stand in the platform's STEP FRAME. The keypad and the
+     slide stay in the content, exactly the controls they were: the slide is
+     the review's only confirm, so that step lights no button in the foot.
+     The two outcomes (not available, the waiting room) keep the wallet's own
+     top, because they are results, not steps. Every gate, key and reach is
+     unchanged. */
+  const framed = step === "amount" || step === "review" || step === "otp";
+  const body = (
     <div className="nf-balance nf-mw" data-screen="send" data-testid="wallet-send" data-step={step}>
-      <WalletHeader title={ACTION_LABEL.send} back={links.overview} />
+      {framed ? null : <WalletHeader title={ACTION_LABEL.send} back={links.overview} />}
 
       {step === "amount" ? (
         <div className="nf-mw-move">
@@ -142,7 +150,6 @@ export function SendScreen({
             onOpen={() => {
               setWhoOpen(true);
               setFound(null);
-              setWhoError(null);
             }}
             testId="send-recipient"
           />
@@ -157,17 +164,9 @@ export function SendScreen({
                 </button>
               ))}
             </div>
-            {reason === "Other" ? <TextField label={MOVE_COPY.otherReason} value={other} maxLength={100} showCount onChange={(e) => setOther(e.target.value)} /> : null}
+            {reason === "Other" ? <TextField label={MOVE_COPY.otherReason} value={other} maxLength={100} showCount enterKeyHint="done" onChange={(e) => setOther(e.target.value)} /> : null}
           </div>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full loading={busy} disabled={!ready} onClick={prepare} data-testid="move-continue">
-              {MOVE_COPY.continue}
-            </Button>
             <Keypad value={amount} onChange={setAmount} />
           </div>
         </div>
@@ -175,7 +174,6 @@ export function SendScreen({
 
       {step === "review" && quote ? (
         <div className="nf-mw-move" data-testid="send-review">
-          <p className="nf-mw-label text-center">{MOVE_COPY.review}</p>
           <Breakdown breakdown={quote.breakdown} locale={locale} destination={{ label: "To", title: quote.destination.title, detail: quote.destination.detail }} receivedLabel="They receive" />
           {note ? (
             <p className="nf-caption text-[var(--nf-content-secondary)]">
@@ -183,11 +181,6 @@ export function SendScreen({
             </p>
           ) : null}
           <p className="nf-caption text-[var(--nf-content-muted)]">A send cannot be taken back once it is confirmed. Reference {quote.reference}.</p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <DragToConfirm
               money
@@ -211,31 +204,13 @@ export function SendScreen({
           <TextField
             label="Code"
             inputMode="numeric"
+            enterKeyHint="go"
             autoComplete="one-time-code"
             maxLength={8}
             inputClassName="nf-balance__otp"
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
-          <Button
-            variant="primary"
-            size="lg"
-            full
-            loading={busy}
-            disabled={otp.length < 4}
-            onClick={async () => {
-              setBusy(true);
-              await submit(otp);
-              setBusy(false);
-            }}
-          >
-            Confirm send
-          </Button>
         </div>
       ) : null}
 
@@ -254,6 +229,7 @@ export function SendScreen({
             label="Their phone number"
             type="tel"
             inputMode="tel"
+            enterKeyHint="done"
             autoComplete="off"
             value={phone}
             onChange={(e) => {
@@ -285,13 +261,45 @@ export function SendScreen({
               Find member
             </Button>
           )}
-          {whoError ? (
-            <p role="alert" className="nf-mw-error">
-              {whoError}
-            </p>
-          ) : null}
         </div>
       </Sheet>
     </div>
   );
+
+  if (!framed) return body;
+  const at = step === "amount" ? 1 : step === "review" ? 2 : 3;
+  return (
+    <StepFrame
+      testId="send-steps"
+      step={at}
+      total={3}
+      eyebrow={ACTION_LABEL.send}
+      title={step === "amount" ? SEND_STEP.amount : step === "review" ? MOVE_COPY.review : SEND_STEP.code}
+      direction={step === "amount" ? "back" : "forward"}
+      {...(step === "review" ? { onBack: backFromReview } : {})}
+      closeHref={links.overview}
+      {...(step === "amount"
+        ? { primary: { label: MOVE_COPY.continue, onClick: prepare, loading: busy, disabled: !ready, testId: "move-continue" } }
+        : step === "otp"
+          ? {
+              primary: {
+                label: "Confirm send",
+                loading: busy,
+                disabled: otp.length < 4,
+                onClick: async () => {
+                  setBusy(true);
+                  await submit(otp);
+                  setBusy(false);
+                },
+              },
+            }
+          : {})}
+    >
+      {body}
+    </StepFrame>
+  );
 }
+
+/* The step titles a send did not have words for (English, like the rest of
+   this screen's copy). */
+const SEND_STEP = { amount: "How much, and to whom", code: "Enter the code" } as const;

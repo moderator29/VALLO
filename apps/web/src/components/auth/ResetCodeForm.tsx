@@ -16,6 +16,7 @@ import {
   readCode,
   surplusMessage,
 } from "@/lib/auth/confirmation-code";
+import { useAuthBanner } from "./use-auth-banner";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -46,6 +47,7 @@ export function ResetCodeForm({
   initialState?: AuthFormState;
 }) {
   const [state, formAction, pending] = useActionState(verify, initialState);
+  useAuthBanner(state);
   const [address, setAddress] = useState(initialEmail);
   const [code, setCode] = useState("");
   const [surplus, setSurplus] = useState<string | null>(null);
@@ -99,11 +101,7 @@ export function ResetCodeForm({
           cellsLabel={t.authFlow.codeCells.replace("{count}", codeLengthWord())}
         />
 
-        {state.message && (
-          <p role="alert" className="nf-auth__alert">
-            {state.message}
-          </p>
-        )}
+        {/* Said by the one banner at the top of the screen (`useAuthBanner`, founder, 7 November 2026). */}
 
         <div className="nf-auth__actions">
           <AuthPillButton type="submit" loading={pending} className="nf-auth__cta">

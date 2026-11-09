@@ -195,6 +195,9 @@ export function SiteFooter({ t }: { t: Dictionary }) {
             <Link href="/delete-account" className="nf-site-footer-link">
               {f.deleteAccount}
             </Link>
+            <Link href="/community" className="nf-site-footer-link">
+              {f.community}
+            </Link>
           </p>
         </div>
       </div>

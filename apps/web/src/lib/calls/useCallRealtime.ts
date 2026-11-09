@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { isSupabaseConfigured } from "../supabase/env";
 import { loadBrowserClient, type BrowserClient } from "../supabase/load-client";
 import type { CallState } from "./types";
+import { ownChannelName } from "../supabase/channel-name";
 
 /**
  * REALTIME FOR CALLS, the two subscriptions the call screens need. The
@@ -73,7 +74,10 @@ export function useCallUpdates(callId: string | null, onNudge: (nudge: CallNudge
     if (!callId || !isSupabaseConfigured()) return;
     return openChannel((supabase) =>
       supabase
-        .channel(`call-${callId}`)
+        /* A database-listening channel takes its own name (the bell crash,
+           lib/supabase/channel-name.ts): two call screens sharing `call-<id>`
+           made the second subscribe throw. */
+        .channel(ownChannelName(`call-${callId}`))
         .on(
           "postgres_changes",
           { event: "UPDATE", schema: "public", table: "calls", filter: `id=eq.${callId}` },
@@ -132,7 +136,7 @@ export function useIncomingCalls(userId: string | null, onNudge: (nudge: CallNud
           }
           if (closed) return;
           const channel = supabase
-            .channel(`call-invites-${userId}-${Date.now()}`)
+            .channel(ownChannelName(`call-invites-${userId}`))
             .on(
               "postgres_changes",
               { event: "*", schema: "public", table: "call_participants", filter: `user_id=eq.${userId}` },

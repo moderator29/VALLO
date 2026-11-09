@@ -7,8 +7,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingPassport() {
   return (
-    <LoadingShell label="Loading your Vallo passport" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading your Vallo passport" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <Skeleton height="3rem" radius="lg" className="mb-md" />
       <Skeleton height="26rem" radius="xl" />
       <Skeleton height="3.5rem" radius="lg" className="mt-block" />

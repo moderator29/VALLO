@@ -24,6 +24,7 @@
  * on the charge, and is never taken from the client.
  */
 
+import { rentalVerificationGate } from "../identity/rental-verification-gate";
 import { revalidatePath } from "next/cache";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../actions/session";
@@ -77,6 +78,11 @@ export async function startRentPayment(input: {
      flag on; a payment fails closed on a failed read (`phone-otp/core.ts`). */
   const phoneGate = await phoneGateFor(session.supabase, session.user.id, "payment");
   if (phoneGate) return phoneGate;
+
+  /* Founder, 7 November 2026: a rental of 5 months or more asks for an
+     identity check (pending or approved) before its first payment. */
+  const identityGate = await rentalVerificationGate(session.supabase, session.user.id, parsed.data.inspectionId);
+  if (identityGate) return identityGate;
 
   const moveIn = parsed.data.moveIn ?? lagosToday();
   const problem = whyNotMoveIn(moveIn);

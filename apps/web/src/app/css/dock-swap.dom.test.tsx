@@ -1,15 +1,14 @@
 /**
- * THE DOCK SWAP (the founder, 13 October 2026): the grid menu is the capsule's
- * centre slot and the "+" is the round brand-blue button at the right end.
+ * THE DOCK (the founder, 13 October 2026, then 7 November 2026): the
+ * capsule's centre slot is Vallo Circle (it was the grid menu) and the "+" is
+ * the round brand-blue button at the right end.
  *
  * The real `MobileTabBar` on the product's compiled cascade at 390px, in both
- * themes: the order of the capsule's slots, the accessible names ("More",
- * "Create"), the 44px targets, the menu in line with the other four (same
- * vertical centre), the "+" outside the capsule at the far end and filled with
- * the brand, and the tray opening centred above the capsule, inside the
- * screen, never over the capsule and closing on Escape (the same path the
- * Android back button dispatches, `lib/native/back-button.ts`).
- */
+ * themes: the order of the capsule's slots, the accessible names ("Circle",
+ * "Create"), the 44px targets, Circle in line with the other four (same
+ * vertical centre) and on the capsule's centre, the "+" outside the capsule
+ * at the far end and filled with the brand, and Circle marked as the page on
+ * /circle. */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Page } from "playwright-core";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";
@@ -24,7 +23,7 @@ const IMPORTS = `
   import { shellDictionary } from "@/lib/i18n/shell-dictionary";`;
 
 const dock = (side: "property" | "stays") => `
-  <MobileTabBar t={shellDictionary(t)} side="${side}" active="/home" signedIn unreadConversationsPreview={3} />`;
+  <MobileTabBar t={shellDictionary(t)} side="${side}" active="/home" signedIn />`;
 
 const boxes = (page: Page) =>
   page.evaluate(() => {
@@ -36,44 +35,53 @@ const boxes = (page: Page) =>
     const capsule = document.querySelector(".nf-tabbar");
     const slots = [...document.querySelectorAll(".nf-tabbar > li.nf-tab")].map((li) => ({
       label: li.querySelector("[aria-label]")?.getAttribute("aria-label") ?? null,
-      menu: li.querySelector(".nf-dockmore__button") !== null,
+      circle: li.querySelector('[data-testid="dock-circle"]') !== null,
     }));
-    const menu = document.querySelector<HTMLElement>(".nf-dockmore__button");
+    const circle = document.querySelector<HTMLAnchorElement>('[data-testid="dock-circle"]');
     const create = document.querySelector<HTMLElement>("[data-dock-create]");
     return {
       slots,
       capsule: box(capsule),
-      menu: box(menu),
-      menuLabel: menu?.getAttribute("aria-label") ?? null,
-      menuText: menu?.innerText.trim() ?? null,
-      menuInCapsule: capsule?.contains(menu) ?? false,
+      circle: box(circle),
+      circleHref: circle?.getAttribute("href") ?? null,
+      circleLabel: circle?.getAttribute("aria-label") ?? null,
+      circleText: circle?.innerText.trim() ?? null,
+      circleCurrent: circle?.getAttribute("aria-current") ?? null,
+      circleInCapsule: capsule?.contains(circle) ?? false,
       create: box(create),
       createLabel: create?.getAttribute("aria-label") ?? null,
       createInCapsule: capsule?.contains(create) ?? false,
       plusFill: create ? getComputedStyle(create.querySelector(".nf-dock-plus")!).backgroundImage : "",
-      tray: box(document.querySelector(".nf-dockmore__tray:not([hidden])")),
-      viewport: window.innerWidth,
+      menu: document.querySelector(".nf-dockmore__button") !== null,
     };
   });
 
-describe.skipIf(!hasBrowser && !process.env.CI)("the dock swap (menu in the capsule, + at the right end)", () => {
+/*
+ * THE DOCK'S CENTRE IS VALLO CIRCLE (founder, 7 November 2026). It was the
+ * grid menu (`DockMore`) and its tray; the tray's destinations are all in the
+ * side menu now (`nav-model.test.ts` checks every one), so there is no tray
+ * to open and the centre is a destination like the four beside it.
+ */
+describe.skipIf(!hasBrowser && !process.env.CI)("the dock (Circle in the centre, + at the right end)", () => {
   for (const side of ["property", "stays"] as const) {
     for (const theme of ["dark", "light"] as const) {
-      it(`${side} side, ${theme}: slots, names, targets and the tray`, async () => {
+      it(`${side} side, ${theme}: slots, names, targets and the Circle tab`, async () => {
         const { page, close } = await fitMount({ locale: "en", imports: IMPORTS, body: dock(side), css: await appCss(), bleed: true });
         try {
           await page.evaluate((value) => document.documentElement.setAttribute("data-theme", value), theme);
           await page.waitForTimeout(400);
           const at = await boxes(page);
 
-          /* Four destinations and the menu between the second and the third. */
+          /* Four destinations and Circle between the second and the third. */
           expect(at.slots).toHaveLength(5);
-          expect(at.slots[2]!.menu, "the centre slot holds the menu").toBe(true);
-          expect(at.slots.filter((slot) => slot.menu)).toHaveLength(1);
-          expect(at.menuInCapsule).toBe(true);
-          expect(at.menuLabel, "the menu keeps its name, and says what is waiting").toMatch(/^More/);
-          expect(at.menuLabel).toContain("3");
-          expect(at.menuText, "icon only, the unread count aside").toMatch(/^3?$/);
+          expect(at.slots[2]!.circle, "the centre slot is Circle").toBe(true);
+          expect(at.slots.filter((slot) => slot.circle)).toHaveLength(1);
+          expect(at.menu, "the grid menu is gone from the dock").toBe(false);
+          expect(at.circleInCapsule).toBe(true);
+          expect(at.circleHref).toBe("/circle");
+          expect(at.circleLabel).toBe("Circle");
+          expect(at.circleText, "icon only, the name is its label").toBe("");
+          expect(at.circleCurrent, "not the page here (/home)").toBeNull();
 
           /* The "+" is outside the capsule, beyond its right edge, and named Create. */
           expect(at.createInCapsule).toBe(false);
@@ -81,32 +89,14 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock swap (menu in the caps
           expect(at.create!.x).toBeGreaterThanOrEqual(at.capsule!.r);
           expect(at.plusFill, "the + is filled with the brand gradient").toContain("gradient");
 
-          /* 44px targets, and the menu sits on the capsule's own centre line. */
-          expect(at.menu!.w).toBeGreaterThanOrEqual(44);
-          expect(at.menu!.h).toBeGreaterThanOrEqual(44);
+          /* 44px targets, and Circle sits on the capsule's own centre line. */
+          expect(at.circle!.w).toBeGreaterThanOrEqual(44);
+          expect(at.circle!.h).toBeGreaterThanOrEqual(44);
           expect(at.create!.w).toBeGreaterThanOrEqual(44);
           expect(at.create!.h).toBeGreaterThanOrEqual(44);
-          expect(Math.abs(at.menu!.cy - at.capsule!.cy)).toBeLessThanOrEqual(1);
-          expect(Math.abs(at.menu!.cx - at.capsule!.cx), "the menu is the capsule's centre").toBeLessThanOrEqual(1);
+          expect(Math.abs(at.circle!.cy - at.capsule!.cy)).toBeLessThanOrEqual(1);
+          expect(Math.abs(at.circle!.cx - at.capsule!.cx), "Circle is the capsule's centre").toBeLessThanOrEqual(1);
           expect(Math.abs(at.create!.cy - at.capsule!.cy)).toBeLessThanOrEqual(1);
-
-          /* The tray opens centred on the capsule, on screen, above it. */
-          await page.getByRole("button", { name: /^More/ }).click();
-          await page.locator(".nf-dockmore__tray").waitFor({ state: "visible" });
-          await page.waitForTimeout(700);
-          const open = await boxes(page);
-          const tray = open.tray!;
-          expect(tray.x).toBeGreaterThanOrEqual(0);
-          expect(tray.r).toBeLessThanOrEqual(open.viewport);
-          expect(tray.b, "above the capsule").toBeLessThanOrEqual(open.capsule!.y);
-          expect(tray.w).toBeLessThanOrEqual(24 * 16 + 1);
-          /* Centred on the capsule unless the row's edge clamps it. */
-          const row = open.create!.r - open.capsule!.x;
-          if (tray.w < row - 4) expect(Math.abs(tray.cx - open.capsule!.cx)).toBeLessThanOrEqual(1);
-
-          /* Escape, which the Android back button dispatches, closes it. */
-          await page.keyboard.press("Escape");
-          await page.locator(".nf-dockmore__tray").waitFor({ state: "hidden" });
         } finally {
           await close();
         }
@@ -114,19 +104,12 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the dock swap (menu in the caps
     }
   }
 
-  it("on a tablet the tray is 24rem wide and exactly centred on the capsule, not the screen", async () => {
-    const { page, close } = await fitMount({ locale: "en", imports: IMPORTS, body: dock("property"), css: await appCss(), bleed: true });
+  it("on /circle the Circle tab is the page", async () => {
+    const body = `<MobileTabBar t={shellDictionary(t)} side="property" active="/circle" signedIn />`;
+    const { page, close } = await fitMount({ locale: "en", imports: IMPORTS, body, css: await appCss(), bleed: true });
     try {
-      await page.setViewportSize({ width: 700, height: 844 });
-      await page.waitForTimeout(300);
-      await page.getByRole("button", { name: /^More/ }).click();
-      await page.locator(".nf-dockmore__tray").waitFor({ state: "visible" });
-      await page.waitForTimeout(700);
-      const open = await boxes(page);
-      expect(open.tray!.w).toBeGreaterThan(24 * 16 - 4);
-      expect(open.tray!.w).toBeLessThanOrEqual(24 * 16 + 1);
-      expect(Math.abs(open.tray!.cx - open.capsule!.cx)).toBeLessThanOrEqual(1);
-      expect(open.tray!.b).toBeLessThanOrEqual(open.capsule!.y);
+      const at = await boxes(page);
+      expect(at.circleCurrent).toBe("page");
     } finally {
       await close();
     }

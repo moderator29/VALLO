@@ -7,6 +7,7 @@ import { CONSENT_SENTENCE } from "@/lib/landlord/consent";
 import { recordPrincipalConsent } from "@/lib/landlord/admin-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 type AdminCopy = Dictionary["landlord"]["admin"];
 
@@ -49,7 +50,6 @@ export function MandateConsent({
   stoppedLine?: string | null;
 }) {
   const [status, setStatus] = useState(initial);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
   const [note, setNote] = useState("");
 
@@ -62,19 +62,16 @@ export function MandateConsent({
   }
 
   function run(answer: "given" | "withdrawn") {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await recordPrincipalConsent({ mandateId, answer, note: answer === "given" ? note : null });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => run(answer) });
           return;
         }
-        setStatus(
-          answer === "given"
-            ? { state: "given", line: copy.consentRecordedNow }
-            : { state: "withdrawn", line: copy.consentWithdrawnNow },
-        );
+        const line = answer === "given" ? copy.consentRecordedNow : copy.consentWithdrawnNow;
+        setStatus(answer === "given" ? { state: "given", line } : { state: "withdrawn", line });
+        banner.success(line);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -135,11 +132,6 @@ export function MandateConsent({
           </Button>
         )}
       </div>
-      {error && (
-        <p role="alert" className="nf-rv-msg" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
       <p className="nf-rv-panel__note">{lineOpen ? copy.lineOn : copy.lineOff}</p>
     </div>
   );

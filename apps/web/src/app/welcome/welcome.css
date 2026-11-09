@@ -1198,6 +1198,73 @@
     }
   }
 
+  /* ------------------------------------------------ GLASS SHIMMER (9.3)
+     A diagonal highlight sweeps across the hero glass objects every few
+     seconds. The shimmer lives in a pseudo-element so the image is
+     untouched; transform translateX only for composited 60fps. */
+  .nf-gs-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      color-mix(in oklab, var(--nf-content-on-brand) 14%, transparent) 45%,
+      color-mix(in oklab, var(--nf-content-on-brand) 22%, transparent) 50%,
+      color-mix(in oklab, var(--nf-content-on-brand) 14%, transparent) 55%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    animation: nf-gs-shimmer 4.8s var(--nf-ease-standard) 1.2s 3;
+  }
+  @keyframes nf-gs-shimmer {
+    0%, 75% { transform: translateX(-120%); }
+    100% { transform: translateX(120%); }
+  }
+
+  /* --------------------------------------------------- CTA GLOW (9.2)
+     The "Get started" button pulses a soft brand glow, drawing the eye
+     to the action. box-shadow only, no layout shift. */
+  .nf-gs-cta {
+    animation: nf-gs-cta-glow 3s var(--nf-ease-standard) 3 alternate;
+  }
+  @keyframes nf-gs-cta-glow {
+    from {
+      box-shadow: 0 0 0 0 transparent, var(--nf-act-shadow, none);
+    }
+    to {
+      box-shadow: 0 0 20px 4px color-mix(in oklab, var(--nf-brand-primary) 35%, transparent), var(--nf-act-shadow, none);
+    }
+  }
+
+  /* --------------------------------------------- FLOATING DUST (9.6)
+     Three tiny particles drifting slowly across the sky, adding depth.
+     Transform only, no layout. Each particle has a different speed and
+     path via --nf-gs-dust-i. */
+  .nf-gs-dust {
+    position: absolute;
+    z-index: 2;
+    width: 3px;
+    height: 3px;
+    border-radius: var(--nf-radius-circle);
+    background: color-mix(in oklab, var(--nf-content-on-brand) 50%, transparent);
+    pointer-events: none;
+    animation: nf-gs-drift calc(22s + var(--nf-gs-dust-i, 0) * 6s) linear 3;
+    opacity: 0;
+  }
+  .nf-gs-dust:nth-of-type(1) { --nf-gs-dust-i: 0; top: 18%; left: 10%; }
+  .nf-gs-dust:nth-of-type(2) { --nf-gs-dust-i: 1; top: 30%; left: 55%; width: 2px; height: 2px; }
+  .nf-gs-dust:nth-of-type(3) { --nf-gs-dust-i: 2; top: 12%; left: 80%; }
+  @keyframes nf-gs-drift {
+    0% { transform: translate3d(0, 0, 0); opacity: 0; }
+    10% { opacity: 0.7; }
+    50% { transform: translate3d(calc(-30px - var(--nf-gs-dust-i, 0) * 20px), calc(-14px + var(--nf-gs-dust-i, 0) * 8px), 0); opacity: 0.5; }
+    90% { opacity: 0.7; }
+    100% { transform: translate3d(calc(-60px - var(--nf-gs-dust-i, 0) * 40px), calc(-28px + var(--nf-gs-dust-i, 0) * 16px), 0); opacity: 0; }
+  }
+
   /* ------------------------------------------------------------ motion */
 
   /* Nothing floats or rises when the reader asked for less: the steps
@@ -1213,8 +1280,16 @@
     .nf-gs-asks__saved,
     .nf-gs-hero__float,
     .nf-gs-sat__float,
-    .nf-gs-orb {
+    .nf-gs-orb,
+    .nf-gs-cta {
       animation: none;
+    }
+    .nf-gs-hero::after {
+      animation: none;
+      display: none;
+    }
+    .nf-gs-dust {
+      display: none;
     }
     .nf-gs-coin__spin {
       animation: none;
@@ -1236,8 +1311,15 @@
     animation-duration: var(--nf-duration-base);
     animation-delay: 0ms;
   }
-  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-gs-hero__float, .nf-gs-sat__float, .nf-gs-orb, .nf-gs-question .nf-interest__burst) {
+  :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-gs-hero__float, .nf-gs-sat__float, .nf-gs-orb, .nf-gs-question .nf-interest__burst, .nf-gs-cta) {
     animation: none;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-gs-hero::after {
+    animation: none;
+    display: none;
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-gs-dust {
+    display: none;
   }
   :root:is([data-motion="calm"], [data-motion="off"]) :is(.nf-gs-next, .nf-gs-cta) svg {
     transform: none;

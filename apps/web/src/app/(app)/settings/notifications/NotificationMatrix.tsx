@@ -14,6 +14,7 @@ import type {
 import type { Dictionary } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * NOTIFICATION SETTINGS AS A REAL MATRIX (R3-14): event by channel, and quiet
@@ -110,27 +111,22 @@ export function NotificationMatrix({
       timezone: "Africa/Lagos",
     }
   );
-  const [note, setNote] = useState<{
-    tone: "ok" | "error";
-    text: string;
-  } | null>(null);
   const [pending, start] = useSafeTransition();
 
   const save = (
     patch: Parameters<typeof updateSettings>[0],
     revert: () => void
   ) => {
-    setNote(null);
     start(async () => {
       try {
         const result = await updateSettings(patch);
         if (result.ok) {
           setFlags(result.data.notifications);
-          setNote({ tone: "ok", text: copy.saved });
+          banner.success(copy.saved);
           return;
         }
         revert();
-        setNote({ tone: "error", text: result.error });
+        banner.error(result.error);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -328,19 +324,6 @@ export function NotificationMatrix({
           </div>
         </div>
       </section>
-
-      {note ? (
-        <p
-          role={note.tone === "error" ? "alert" : "status"}
-          className={`nf-body-sm ${
-            note.tone === "error"
-              ? "text-[var(--nf-state-error)]"
-              : "text-[var(--nf-state-success)]"
-          }`}
-        >
-          {note.text}
-        </p>
-      ) : null}
     </div>
   );
 }

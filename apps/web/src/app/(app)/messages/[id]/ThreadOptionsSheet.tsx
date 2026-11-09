@@ -14,6 +14,7 @@ import { PassportThreadRows, type PassportSheet } from "@/components/passport/Pa
 import { IconPlate } from "@/components/ui/IconPlate";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The conversation's options sheet, behind the kebab in the header.
@@ -45,6 +46,16 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * `BLOCK_CONFIRM_COPY` and it lives beside the action so the two cannot drift.
  */
 
+/* Grade 1 (job 8): English only for now. */
+const PREF_WORDS = {
+  pin: "Pin this chat",
+  unpin: "Unpin this chat",
+  pinBody: "Keeps it at the top of your messages. Only you see this.",
+  mute: "Mute notifications",
+  unmute: "Unmute notifications",
+  muteBody: "New messages still arrive here; you are not notified.",
+};
+
 export type SheetListing = {
   id: string;
   title: string;
@@ -57,6 +68,9 @@ export type SheetListing = {
 
 /** The words the options sheet draws, handed down from the thread page. */
 export type ThreadSheetCopy = Pick<Dictionary["trustVisible"], "unsafe">;
+
+/* What blocking did, said by the one banner (founder, 7 November 2026). */
+const BLOCKED_WORDS = "{name} is blocked";
 
 export function ThreadOptionsSheet({
   open,
@@ -77,7 +91,13 @@ export function ThreadOptionsSheet({
   unsafeAsLister = false,
   sheetCopy,
   words,
+  chatPrefs = null,
 }: {
+  /**
+   * Grade 1 (job 8): pin this chat to the top of the inbox, mute its
+   * notifications. Absent where the database has no pins and mutes yet.
+   */
+  chatPrefs?: { pinned: boolean; muted: boolean; onPin: () => void; onMute: () => void } | null;
   /** The sheet's own words (`experienceInbox.thread.view`), from the thread. */
   words: Dictionary["experienceInbox"]["thread"]["view"];
   open: boolean;
@@ -114,7 +134,6 @@ export function ThreadOptionsSheet({
   sheetCopy: ThreadSheetCopy;
 }) {
   const [confirmingBlock, setConfirmingBlock] = useState(false);
-  const [blockNote, setBlockNote] = useState<string | null>(null);
   const [blocking, startBlocking] = useSafeTransition();
 
   /* Every close resets the block confirmation, so reopening the sheet never
@@ -122,7 +141,6 @@ export function ThreadOptionsSheet({
      of a moment ago. */
   function closeEverything() {
     setConfirmingBlock(false);
-    setBlockNote(null);
     onClose();
   }
 
@@ -132,9 +150,11 @@ export function ThreadOptionsSheet({
       try {
         const result = await blockUserSafely({ userId: counterpartId });
         if (!result.ok) {
-          setBlockNote(result.error);
+          banner.error(result.error, { retry: doBlock });
           return;
         }
+        /* Said by the one banner, which stays up across the move (founder, 7 November 2026). */
+        banner.success(BLOCKED_WORDS.replace("{name}", counterpartName));
         /* The thread is gone for both of them now, so the sheet does not stay
            open over a conversation that no longer exists. */
         setConfirmingBlock(false);
@@ -237,6 +257,34 @@ export function ThreadOptionsSheet({
         </Link>
       )}
 
+      {/* ------------------------------------------- pin and mute (job 8) */}
+      {chatPrefs ? (
+        <>
+          <button type="button" onClick={chatPrefs.onPin} className="nf-share-row mt-md w-full text-left" data-testid="thread-pin">
+            <IconPlate size="sm" className="shrink-0">
+              <UiIcon name="bookmark" size={20} filled={chatPrefs.pinned} />
+            </IconPlate>
+            <span className="min-w-0 flex-1">
+              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
+                {chatPrefs.pinned ? PREF_WORDS.unpin : PREF_WORDS.pin}
+              </span>
+              <span className="block nf-caption text-[var(--nf-content-muted)]">{PREF_WORDS.pinBody}</span>
+            </span>
+          </button>
+          <button type="button" onClick={chatPrefs.onMute} className="nf-share-row mt-md w-full text-left" data-testid="thread-mute">
+            <IconPlate size="sm" className="shrink-0">
+              <UiIcon name={chatPrefs.muted ? "bell" : "mute"} size={20} />
+            </IconPlate>
+            <span className="min-w-0 flex-1">
+              <span className="block nf-body font-semibold text-[var(--nf-content-primary)]">
+                {chatPrefs.muted ? PREF_WORDS.unmute : PREF_WORDS.mute}
+              </span>
+              <span className="block nf-caption text-[var(--nf-content-muted)]">{PREF_WORDS.muteBody}</span>
+            </span>
+          </button>
+        </>
+      ) : null}
+
       {/* ------------------------------------------------- the Vallo passport */}
       {canShare && passport && (
         <PassportThreadRows
@@ -288,14 +336,6 @@ export function ThreadOptionsSheet({
               <p className="mt-2xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
                 {words.blockConfirm}
               </p>
-              {blockNote && (
-                <p
-                  role="alert"
-                  className="mt-xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]"
-                >
-                  {blockNote}
-                </p>
-              )}
               <div className="mt-sm grid gap-xs">
                 <Button variant="danger" full onClick={doBlock} loading={blocking}>
                   {words.block.replace("{name}", counterpartName)}
@@ -305,7 +345,6 @@ export function ThreadOptionsSheet({
                   full
                   onClick={() => {
                     setConfirmingBlock(false);
-                    setBlockNote(null);
                   }}
                 >
                   {words.keepOpen}

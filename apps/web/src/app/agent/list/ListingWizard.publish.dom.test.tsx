@@ -12,7 +12,7 @@
  *     anywhere, so no pop), the status word
  *     crossfades (240ms), the chain rises 60ms apart; the chain says the
  *     server's status words and the date the server wrote;
- *   - a refusal is immediate: said beside Send, one error pattern, no chain;
+ *   - a refusal is immediate: said by the one top banner, one error pattern, no chain;
  *   - reduced motion tells the same story in 160ms fades.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -161,17 +161,17 @@ describe.runIf(hasBrowser)("Send for review becomes the card in review, in place
     }
   });
 
-  it("says a refusal beside Send at once, with one error pattern, and sends nothing on", async () => {
+  it("says a refusal through the one banner, with one error pattern, and sends nothing on", async () => {
     const refused = `async () => ({ ok: false, error: "Some details need finishing before this can be reviewed. Each one is listed below.", fieldErrors: { photos: "Add at least 5 photos." } })`;
     const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS, actions: { ...SAVES, submitListing: refused }, init: BUZZ });
     try {
       await page.locator('[data-testid="listing-send"]').click();
-      await page.waitForSelector('[data-testid="send-refused"]');
-      expect(await page.locator('[data-testid="send-refused"]').innerText()).toContain("Each one is listed below.");
+      /* The refusal is said by the one top banner now, not an inline note
+         beside Send (ListingWizard banner conversion, 7 November 2026). */
+      await page.getByText("Each one is listed below.").waitFor();
       expect(await page.evaluate(() => (window as unknown as { __buzz: unknown[] }).__buzz)).toEqual([[40, 60, 40, 60, 40]]);
       expect(await page.locator('[data-testid="listing-chain"]').count()).toBe(0);
       expect(await status(page)).toBe("Draft");
-      expect(await motionsOf(page, '[data-testid="send-refused"], [data-testid="send-refused"] *')).toEqual([]);
     } finally {
       await close();
     }

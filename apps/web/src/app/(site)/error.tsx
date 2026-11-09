@@ -35,7 +35,7 @@ export default function SiteError({
     <section className="nf-shell py-section">
       <div className="mx-auto max-w-[34rem] text-center">
         <h1 className="nf-h1">This page did not load</h1>
-        <p className="mt-group text-[1rem] leading-relaxed text-[var(--nf-content-secondary)]">
+        <p className="mt-group text-[length:var(--nf-text-body)] leading-relaxed text-[var(--nf-content-secondary)]">
           Something on our side stopped part way through. The rest of the site is
           working, and trying again usually settles it.
         </p>

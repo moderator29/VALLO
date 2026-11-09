@@ -138,6 +138,8 @@ export const PG_CRON_JOBS: readonly PgCronJob[] = [
   { name: "vallo_remind_renewals", cron: "20 7 * * *", when: "daily 08:20", what: "tells tenants and listers a tenancy ends in 90, 60 or 30 days" },
   { name: "vallo_sweep_rent_splits", cron: "25 7 * * *", when: "daily 08:25", what: "refunds the paid shares of a flatmate split still short on move-in day, or cancelled" },
   { name: "vallo_threshold_reminders", cron: "5 * * * *", when: "hourly at :05", what: "tells staff three days and one day before a threshold report to the NFIU is due (SCUML item 7)" },
+  { name: "vallo_send_feature_notices", cron: "10 17 * * *", when: "daily 18:10", what: "sends the daily feature notices to members who opted in, one topic at a time (A5)" },
+  { name: "vallo_send_gentle_nudges", cron: "20 10 * * *", when: "daily 11:20", what: "sends the gentle nudges to members who opted in, never more than the opt-in allows (A6)" },
 ];
 
 /** A readable name for a job: "hold-sweep" becomes "Hold sweep". */

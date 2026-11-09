@@ -75,7 +75,7 @@ export function OnThisPage({ sections }: { sections: { id: string; heading: stri
         onClick={() => setOpen((was) => !was)}
         aria-expanded={open}
         aria-controls={panelId}
-        className="nf-tap flex min-h-11 w-full items-center justify-between gap-row rounded-[var(--nf-radius-control)] border border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] shadow-[var(--nf-rim-lit)] px-group py-inline text-left xl:hidden"
+        className="nf-tap flex min-h-11 w-full items-center justify-between gap-row rounded-control border border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] shadow-[var(--nf-rim-lit)] px-group py-inline text-left xl:hidden"
       >
         <span className="flex items-center gap-inline">
           <UiIcon name="document" size={16} className="text-[var(--nf-content-muted)]" />

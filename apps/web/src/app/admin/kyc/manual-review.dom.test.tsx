@@ -31,6 +31,8 @@ function doc(over: Partial<KycSubjectView["documents"][number]>): KycSubjectView
     reviewedAt: null,
     reviewedByName: null,
     media: "image",
+    backMedia: null,
+    issuingCountry: null,
     isResubmission: false,
     tooOld: false,
     nameOnDocument: null,

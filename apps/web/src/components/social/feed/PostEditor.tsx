@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { Button } from "@/components/ui/Button";
 import { useState } from "react";
 import { editPost } from "@/lib/social/posts-actions";
@@ -39,7 +40,6 @@ export function PostEditor({
   onSaved: (body: string, held: boolean) => void;
 }) {
   const [body, setBody] = useState(initialBody);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   const trimmed = body.trim();
@@ -47,12 +47,12 @@ export function PostEditor({
   const changed = trimmed.length > 0 && trimmed !== initialBody.trim();
 
   const save = () => {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await editPost({ postId, body: trimmed });
         if (!result.ok) {
-          setError(result.error);
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error, { retry: save });
           return;
         }
         onSaved(trimmed, result.data.held);
@@ -84,15 +84,6 @@ export function PostEditor({
         It will say edited afterwards, and anything you add is checked the same
         way a new post is.
       </p>
-
-      {error ? (
-        <p
-          role="alert"
-          className="mt-xs rounded-[var(--nf-radius-md)] border border-[var(--nf-state-error)] bg-[var(--nf-state-error-surface)] px-sm py-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-primary)]"
-        >
-          {error}
-        </p>
-      ) : null}
 
       <div className="mt-sm flex flex-wrap items-center justify-end gap-sm">
         {left < 240 ? (

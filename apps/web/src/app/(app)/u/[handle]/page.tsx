@@ -4,6 +4,7 @@ import { sheetWordsOf } from "@/components/social/sheet-words";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { PageHeader } from "@/components/app/PageHeader";
+import { PromoBanner } from "@/components/app/PromoBanner";
 import { ButtonLink } from "@/components/ui/Button";
 import { FollowButton } from "@/components/social/profile/FollowButton";
 import { ProfileHeader } from "@/components/social/profile/ProfileHeader";
@@ -33,6 +34,7 @@ import {
 } from "@/lib/social/posts-queries";
 import {
   getAgentProperties,
+  getAgentRatingAggregate,
   getAgentReviews,
   getProfileMediaGrid,
 } from "@/lib/social/profile-tabs-queries";
@@ -47,10 +49,11 @@ import { isSocialEnabled } from "@/lib/social/flag";
 import { readPublicRoleWords } from "@/lib/profile/role-facts";
 import { roleLine } from "@/lib/profile/role-line";
 import { passportIsOpen } from "@/lib/passport/passport-read";
-import { FOLLOW_TO_MESSAGE, messageDoor } from "@/lib/social/message-door";
+import { messageDoor } from "@/lib/social/message-door";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { ownershipSeenFor } from "@/lib/trust/ownership-seen";
 import { OwnershipSeenMark } from "@/components/trust/OwnershipSeenMark";
+import { RatingSummary } from "@/components/ui/RatingSummary";
 
 /**
  * `/u/[handle]`: a person's page.
@@ -190,7 +193,7 @@ export default async function SocialProfilePage({
     });
 
     const supabase = await createClient();
-    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen] =
+    const [posts, replies, media, activity, properties, reviews, stories, record, badges, roleWords, passportOpen, ratingAgg] =
       await Promise.all([
         isAgentPage ? Promise.resolve([]) : getProfileFeed(userId),
         isAgentPage ? Promise.resolve([]) : getProfileReplies(userId),
@@ -212,6 +215,7 @@ export default async function SocialProfilePage({
            it would open (on, and no block either way). Signed out: no button,
            and no read. */
         view.signedIn && !view.isOwner ? passportIsOpen(userId) : Promise.resolve(false),
+        isAgentPage ? getAgentRatingAggregate(agentId) : Promise.resolve(null),
       ]);
     const passportAction = view.isOwner ? (
       <ButtonLink href="/settings/passport" size="sm" variant="secondary" leadingIcon="id-card" data-testid="profile-your-passport">
@@ -276,8 +280,12 @@ export default async function SocialProfilePage({
              and when they ask first, the button only for a viewer who follows
              them, and "Follow to message" for everybody else. Signed out, the
              link leads to a sign-in that returns here. */
+          /* VIEW-ONLY SIGNED OUT (founder, 9 November 2026). A visitor with no
+             account reads the profile but takes no action from it: the message
+             control is not drawn for them at all, and the Join banner below is
+             their one way on. Follow is already a link to sign up. */
           message={
-            door === "message" ? (
+            !view.signedIn ? undefined : door === "message" ? (
               <ButtonLink href={`/u/${view.profile.handle}/message`} size="sm" variant="secondary" leadingIcon="messages" className="shrink-0">
                 {t.socialProfile.message}
               </ButtonLink>
@@ -287,7 +295,7 @@ export default async function SocialProfilePage({
                 data-testid="profile-follow-to-message"
               >
                 <UiIcon name="messages" size={16} />
-                {FOLLOW_TO_MESSAGE}
+                {t.experienceSocial.followToMessage}
               </span>
             ) : undefined
           }
@@ -295,6 +303,12 @@ export default async function SocialProfilePage({
             <ProfileShare
               handle={view.profile.handle}
               displayLabel={view.profile.displayLabel}
+              avatarUrl={view.profile.avatarUrl || undefined}
+              followers={view.profile.followerCount}
+              posts={view.profile.postCount}
+              copy={{ title: t.shareCard.title, share: t.shareCard.share, background: t.shareCard.background, stats: t.shareCard.stats, name: t.shareCard.name, copied: t.shareCard.copied }}
+              statWords={{ followers: t.shareCard.profileStats.followers, posts: t.shareCard.profileStats.posts }}
+              leadWords={{ profile: t.shareCard.leads.profile, stats: t.shareCard.leads.stats }}
             />
           }
           menu={
@@ -310,10 +324,35 @@ export default async function SocialProfilePage({
           }
         />
 
+        {!view.signedIn ? (
+          <div className="px-gutter pb-row">
+            <PromoBanner
+              eyebrow={t.shareCard.joinPrompt.title}
+              title={t.shareCard.joinPrompt.title}
+              body={t.shareCard.joinPrompt.profile}
+              href={withNext("/sign-up", `/u/${view.profile.handle}`)}
+              cta={t.shareCard.joinPrompt.action}
+              art="team"
+              testId="join-vallo-profile"
+            />
+          </div>
+        ) : null}
+
         {ownershipSeen ? (
           <p className="px-gutter pb-row">
             <OwnershipSeenMark seenAt={ownershipSeen} label={t.supply.register.owner.proof.seenMark} />
           </p>
+        ) : null}
+
+        {ratingAgg && ratingAgg.count > 0 ? (
+          <section className="px-gutter pb-row" data-testid="profile-rating-summary">
+            <RatingSummary
+              rating={ratingAgg.average}
+              count={ratingAgg.count}
+              breakdown={ratingAgg.breakdown}
+              locale={locale}
+            />
+          </section>
         ) : null}
 
         <ProfileTabs

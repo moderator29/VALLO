@@ -571,6 +571,11 @@
     width: calc(var(--nf-passcode-key) * 0.34);
     height: auto;
   }
+  @media (hover: hover) {
+    .nf-passcode__key:hover:not(:disabled)::before {
+      opacity: calc(var(--nf-passcode-sphere-light-rest) * 1.4);
+    }
+  }
   .nf-passcode__key:active:not(:disabled) {
     transform: scale(0.92);
     transition-duration: var(--nf-duration-press);

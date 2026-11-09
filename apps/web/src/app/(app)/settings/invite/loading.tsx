@@ -8,8 +8,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingInviteSettings() {
   return (
-    <LoadingShell label="Loading your invite" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton subtitle />
+    <LoadingShell label="Loading your invite" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" subtitle />
       <Skeleton height="4.5rem" radius="lg" className="mb-md" />
       <Skeleton circle width="6rem" className="mx-auto mb-md" />
       <div aria-hidden="true" className="nf-panel nf-panel--card mx-auto block max-w-[28rem] p-lg">

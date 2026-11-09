@@ -6,6 +6,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import type { KycSelfie } from "./kyc";
 import type { KycCopy } from "./KycFlow";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * THE SELFIE STEP (2 November 2026).
@@ -63,7 +64,6 @@ export function SelfieCapture({
   const [phase, setPhase] = useState<Phase>(selfie ? "saved" : "idle");
   const [shot, setShot] = useState<{ blob: Blob; url: string } | null>(null);
   const [savedUrl, setSavedUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   function stop() {
     stream.current?.getTracks().forEach((track) => track.stop());
@@ -85,9 +85,8 @@ export function SelfieCapture({
   );
 
   async function start() {
-    setError(null);
     if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
-      setError(s.unavailable);
+      banner.error(s.unavailable);
       return;
     }
     setPhase("starting");
@@ -109,7 +108,7 @@ export function SelfieCapture({
       stop();
       setPhase(selfie ? "saved" : "idle");
       const name = cause && typeof cause === "object" && "name" in cause ? String((cause as { name: unknown }).name) : "";
-      setError(name === "NotAllowedError" || name === "SecurityError" ? s.denied : s.unavailable);
+      banner.error(name === "NotAllowedError" || name === "SecurityError" ? s.denied : s.unavailable);
     }
   }
 
@@ -126,7 +125,7 @@ export function SelfieCapture({
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          setError(s.failed);
+          banner.error(s.failed);
           return;
         }
         stop();
@@ -139,7 +138,6 @@ export function SelfieCapture({
   }
 
   async function save(blob: Blob, type: string) {
-    setError(null);
     setPhase("saving");
     try {
       const supabase = await loadBrowserClient();
@@ -148,7 +146,7 @@ export function SelfieCapture({
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) {
-        setError(copy.signInFirst);
+        banner.error(copy.signInFirst);
         setPhase(selfie ? "saved" : "idle");
         return;
       }
@@ -162,7 +160,7 @@ export function SelfieCapture({
       onChange({ path, size: blob.size, type });
       setPhase("saved");
     } catch {
-      setError(s.failed);
+      banner.error(s.failed);
       setPhase(shot ? "captured" : selfie ? "saved" : "idle");
     }
   }
@@ -170,11 +168,11 @@ export function SelfieCapture({
   function fromFile(file: File | undefined) {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      setError(copy.fileType.replace("{formats}", "JPG, PNG or HEIC"));
+      banner.error(copy.fileType.replace("{formats}", "JPG, PNG or HEIC"));
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
-      setError(copy.fileSize.replace("{size}", "8MB"));
+      banner.error(copy.fileSize.replace("{size}", "8MB"));
       return;
     }
     void save(file, file.type);
@@ -196,7 +194,7 @@ export function SelfieCapture({
       {/* The stage: the live camera, the photo just taken, or the saved one. */}
       {(phase === "live" || phase === "starting" || phase === "captured" || phase === "saving" || (phase === "saved" && savedUrl)) && (
         <div
-          className="relative mx-auto mt-md aspect-[3/4] w-full max-w-xs overflow-hidden rounded-[var(--nf-radius-card)] bg-[var(--nf-surface-inverse)]"
+          className="relative mx-auto mt-md aspect-[3/4] w-full max-w-xs overflow-hidden rounded-card bg-[var(--nf-surface-inverse)]"
           data-testid="selfie-stage"
         >
           {(phase === "live" || phase === "starting") && (
@@ -220,7 +218,7 @@ export function SelfieCapture({
           {(phase === "live" || phase === "starting") && (
             <span
               aria-hidden="true"
-              className="pointer-events-none absolute left-1/2 top-[46%] h-[70%] w-[64%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border-2 border-[var(--nf-content-on-media)] shadow-[0_0_0_100vmax_var(--nf-media-silhouette)]"
+              className="pointer-events-none absolute left-1/2 top-[46%] h-[70%] w-[64%] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--nf-content-on-media)] shadow-[0_0_0_100vmax_var(--nf-media-silhouette)]"
             />
           )}
         </div>
@@ -291,11 +289,6 @@ export function SelfieCapture({
 
       <p className="mt-sm text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">{s.privacy}</p>
 
-      {error && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
     </section>
   );
 }

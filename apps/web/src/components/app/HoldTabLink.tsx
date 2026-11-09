@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ComponentProps } from "react";
 import { HOLD_MAX_MS, shouldHold, waitForArrival } from "@/lib/nav/tab-warm";
+import { feedback } from "@/lib/ui/feedback";
 
 /**
  * A DOCK TAB THAT KEEPS THE CURRENT SCREEN UP UNTIL THE NEXT ONE IS READY (13
@@ -60,6 +61,10 @@ export function HoldTabLink(props: ComponentProps<typeof Link>) {
             event.preventDefault();
           },
         });
+        /* N7: a light tick when the tab changes (never on the tab already
+           open), the feel of a native tab bar. `feedback` stays silent on the
+           web where nothing can vibrate, and under reduced motion. */
+        if (!prevented && href && href !== pathname) feedback("select");
         if (prevented || !href || process.env.NODE_ENV !== "production") return;
         /* A second tap on a tab already held: go now. */
         if (current?.href === href) {

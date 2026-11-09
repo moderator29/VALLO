@@ -58,6 +58,7 @@ import { ReservePanel } from "./ReservePanel";
 import { readDeclaration } from "@/lib/stays/arrival-queries";
 import { toDoorCharges } from "@/lib/stays/door-total";
 import { RentalPanel } from "./RentalPanel";
+import { RoommatesForHome } from "./RoommatesForHome";
 import { ReserveTable } from "./ReserveTable";
 import { ListingAbout } from "@/components/app/listing/ListingAbout";
 import { ListingAmenities } from "@/components/app/listing/ListingAmenities";
@@ -413,6 +414,8 @@ export default async function ListingDetailPage({
     doorDeclared,
     listerCard,
     ownershipSeen,
+    payeeRecords,
+    headersStore,
   ] = await Promise.all([
     // Written reviews for this listing. Public by policy for a PUBLISHED
     // listing, so this read works for a signed-out visitor too.
@@ -472,6 +475,9 @@ export default async function ListingDetailPage({
        Only an owner's own listing can carry it; never an example. Read with
        the rest rather than after them. */
     listing.isDemo ? Promise.resolve(null) : ownershipSeenForListing(listing.id),
+    /* B-05: hoist from inline JSX so it runs with the rest. */
+    isRental && !isSale ? readPayeeRecords(listing.id) : Promise.resolve(undefined),
+    headers(),
   ]);
   /* V-59: "Moved in for the Vallo price", the one public number from the
      tenancy reviews. Null (and no line) on every example listing. */
@@ -998,7 +1004,7 @@ export default async function ListingDetailPage({
   );
 
   const structuredData = listingStructuredData(listing, siteUrl());
-  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
+  const nonce = headersStore.get(NONCE_HEADER) ?? undefined;
 
   const body = (
     <PhotoViewerProvider
@@ -1348,7 +1354,7 @@ export default async function ListingDetailPage({
                       listing={listing}
                       locale={locale}
                       t={t}
-                      records={await readPayeeRecords(listing.id)}
+                      records={payeeRecords}
                       actions={{
                         ledgerHref: `/rent/move-in/${listing.id}`,
                         messageHref,
@@ -1441,6 +1447,14 @@ export default async function ListingDetailPage({
                       listingCopy={t.landlord.listing}
                       locale={locale}
                     />
+                  </Suspense>
+                )}
+
+                {/* Vallo Roommates: find roommates for this home, the lister's
+                    "good for sharing" line, and the rooms shared here. */}
+                {isRental && !isSale && (
+                  <Suspense fallback={null}>
+                    <RoommatesForHome listingId={listing.id} isDemo={listing.isDemo} copy={t.roommates} locale={locale} />
                   </Suspense>
                 )}
 

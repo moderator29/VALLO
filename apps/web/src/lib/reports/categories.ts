@@ -29,41 +29,10 @@ export const REPORT_CATEGORIES = [
 
 export type ReportCategory = (typeof REPORT_CATEGORIES)[number];
 
-/** The label and the line under it, in the order a person should read them. */
-export const REPORT_CATEGORY_COPY: Record<ReportCategory, { label: string; hint: string }> = {
-  off_platform_payment: {
-    label: "Asked me to pay outside Vallo",
-    hint: "An account number, a transfer, or anything that skips the platform.",
-  },
-  scam: {
-    label: "This looks like a scam",
-    hint: "The place, the price or the person does not add up.",
-  },
-  unsafe: {
-    label: "Unsafe or threatening",
-    hint: "Anything that made you feel unsafe, in the property or in the messages.",
-  },
-  not_as_described: {
-    label: "Not as described",
-    hint: "The photos, the size, the address or the amenities are wrong.",
-  },
-  unavailable: {
-    label: "Not actually available",
-    hint: "Already let, no longer on the market, or the dates are never free.",
-  },
-  offensive: {
-    label: "Offensive content",
-    hint: "Wording or images that should not be on the platform.",
-  },
-  duplicate: {
-    label: "Duplicate listing",
-    hint: "The same property is listed more than once.",
-  },
-  other: {
-    label: "Something else",
-    hint: "Tell us in your own words below.",
-  },
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/safety.en.ts`. */
+import { safetyReportTargetNounEn, safetyReportsEn } from "@vallo/i18n/en/safety";
+const _safety = { reports: safetyReportsEn, reportTargetNoun: safetyReportTargetNounEn };
+export const REPORT_CATEGORY_COPY = _safety.reports as Record<ReportCategory, { label: string; hint: string }>;
 
 /** The order the categories are offered in. Serious first, tidy last. */
 export const REPORT_CATEGORY_ORDER: ReportCategory[] = [
@@ -100,6 +69,9 @@ export const REPORT_TARGETS = [
   "review",
   "business",
   "event",
+  /* Vallo Roommates (8 November 2026): a roommate post and a roommate profile. */
+  "roommate_listing",
+  "roommate_profile",
 ] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
@@ -109,13 +81,6 @@ export type ReportTarget = (typeof REPORT_TARGETS)[number];
  * The sheet used to say "Report this listing" in three places with the word
  * baked in, which is how a generic sheet ends up lying about a conversation.
  */
-export const REPORT_TARGET_NOUN: Record<ReportTarget, string> = {
-  listing: "listing",
-  conversation: "conversation",
-  message: "message",
-  review: "review",
-  business: "place",
-  event: "event",
-};
+export const REPORT_TARGET_NOUN = _safety.reportTargetNoun as Record<ReportTarget, string>;
 
 export const DETAILS_MAX = 1200;

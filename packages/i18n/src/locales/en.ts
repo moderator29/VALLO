@@ -32,6 +32,9 @@ import { complianceRiskEn } from "./compliance-risk.en";
 import { complianceBeneficialOwnershipEn } from "./compliance-17.en";
 /* The passcode lock (docs/PASSCODE.md), in its own module like the rest. */
 import { passcodeEn } from "./passcode.en";
+import { protectEn } from "./protect.en";
+import { verifyFlowEn } from "./verify-flow.en";
+import { inboxPlusEn } from "./inbox-plus.en";
 import { experienceLandingEn } from "./experience-landing.en";
 import { experienceDiscoverEn } from "./experience-discover.en";
 import { experienceDetailEn } from "./experience-detail.en";
@@ -73,6 +76,62 @@ import { adminCoverageEn } from "./admin-coverage.en";
 import { referralDeskEn } from "./referral-desk.en";
 /* The chargebacks desk and the lister's hold notice (13 October 2026). */
 import { chargebacksEn } from "./chargebacks.en";
+/* Circle (SW11): the community feature's words. */
+import { circleEn } from "./circle.en";
+/* Vallo Roommates: roommate discovery and shared homes. */
+import { roommatesEn } from "./roommates.en";
+import { shareCardEn } from "./share.en";
+import { interestsHintsEn, interestsMarketsEn } from "./interests.en";
+/* The social layer (SW11): posts, stories, areas, the bot, profiles. */
+import {
+  socialPostEn,
+  socialPostFailureEn,
+  socialStoryEn,
+  socialStoryFailureEn,
+  socialAreaEn,
+  socialAreaFailureEn,
+  socialBotEn,
+  socialPidginEn,
+  socialFollowFirstEn,
+  socialContactPolicyEn,
+  socialPostKindLabelEn,
+  socialPostKindHintEn,
+  socialPostKindPlaceholderEn,
+  socialAreaKindLabelEn,
+  socialAreaKindHintEn,
+} from "./social.en";
+/* The reminders screen's words, moved from lib/features/notices/copy.ts (SW11). */
+import { remindersEn } from "./reminders.en";
+/* The /pro page's words (SW11), moved from app/(app)/pro/pro-copy.ts. */
+import { proEn } from "./pro.en";
+/* Safety, reporting and blocking copy (SW11). */
+import { safetyBlocksEn, safetyReportsEn, safetyReportTargetNounEn, safetyEducationEn } from "./safety.en";
+/* Referral requirement copy (SW11). */
+import { referralRequirementsEn, referralStepsEn } from "./referral.en";
+/* Directory copy (SW11): find an agent / find a host. */
+import { directoryCopyEn, directoryKindPluralEn, directoryKindOneEn } from "./directory.en";
+/* Workspace standing copy (SW11): draft, pending, refused, suspended. */
+import { workspaceStandingEn } from "./workspace.en";
+/* Wallet/money copy (SW11): move, onboarding, phone taken, waiting. */
+import { walletMoveEn, walletOnboardingEn, walletPhoneTakenEn, walletWaitingEn, walletHistoryKindLabelEn, walletStatusEn } from "./wallet.en";
+/* Settings search copy (SW11). */
+import { settingsSearchEn } from "./settings-search.en";
+/* Inspection report copy (SW11). */
+import { roomCopyEn, instantRoomCopyEn } from "./inspections.en";
+/* Supply roles copy (SW11). */
+import { proofPendingEn, noDocumentLabelEn, listingRoleFilterLabelEn, listingRoleFilterHeadingEn } from "./supply-roles.en";
+/* Places copy (SW11). */
+import { placesCopyEn, placesFailureEn } from "./places.en";
+/* Leaderboard copy (SW11). */
+import { leaderboardEn } from "./leaderboard.en";
+/* Listings labels (SW11): period suffix, rent period, tenure, sale status, water supply. */
+import { periodSuffixEn, rentPeriodLabelEn, tenureLabelEn, saleStatusLabelEn, waterLabelEn } from "./listings-labels.en";
+/* Badge tier copy (SW11). */
+import { badgeTierLabelEn, badgeTierMeaningEn } from "./badge.en";
+/* Booking lifecycle copy (SW11). */
+import { noShowMessagesEn } from "./bookings-lifecycle.en";
+/* Social kill-switch copy (SW11). */
+import { socialFlagEn } from "./social-flag.en";
 /* Get Started as four cards (reference 3, 7 October). */
 
 /**
@@ -136,11 +195,16 @@ export const en = {
    * share every sentence that does not name what is being paid for.
    */
   checkout: {
+    /** Announced while the room checkout loads (its skeleton). */
+    loadingRoom: "Loading the room",
     /* ROOM BOOKINGS 1: asking for a hotel room. */
     roomsLabel: "Rooms",
     requestRoom: "Request this room",
     requestRoomBody:
       "The hotel confirms your request first. Nothing is charged now: once they accept and the stay agreement is approved, you pay here by card, and the payment goes straight to the hotel.",
+    /* D73 Part A: instant pay, when the hotel's own price is booked and paid in one flow (SW11). */
+    instantRoomAction: "Book and pay",
+    instantRoomBody: "This is the hotel's own price. Book now and pay by card on the next screen; the payment goes straight to the hotel. Your room is held for 30 minutes while you pay.",
     signInToRequestRoom: "Sign in to request this room",
     dates: "Dates",
     guests: "Guests",
@@ -658,6 +722,8 @@ export const en = {
     saved: "Saved",
     around: "Around",
     feed: "Feed",
+    /* The dock's centre tab (founder, 7 November 2026). */
+    circle: "Circle",
     map: "Map",
     primaryLabel: "Primary",
     accountLabel: "Account",
@@ -749,6 +815,22 @@ export const en = {
       "Nothing has been said in your places yet. What you write will be the first thing anybody arriving reads.",
     emptyAnywhere:
       "Nothing has been said in any open place yet. Nothing is hidden and nothing is missing: Around is this new.",
+    /* SW11: model words moved from lib/social/ into the dictionary. */
+    post: socialPostEn,
+    postFailure: socialPostFailureEn,
+    story: socialStoryEn,
+    storyFailure: socialStoryFailureEn,
+    area: socialAreaEn,
+    areaFailure: socialAreaFailureEn,
+    bot: socialBotEn,
+    pidgin: socialPidginEn,
+    followFirst: socialFollowFirstEn,
+    contactPolicy: socialContactPolicyEn,
+    postKindLabel: socialPostKindLabelEn,
+    postKindHint: socialPostKindHintEn,
+    postKindPlaceholder: socialPostKindPlaceholderEn,
+    areaKindLabel: socialAreaKindLabelEn,
+    areaKindHint: socialAreaKindHintEn,
   },
 
   /**
@@ -1289,6 +1371,7 @@ export const en = {
          it beside Privacy and Terms rather than hunting for it. `/delete-account`
          has been live and unlinked; this is the line that makes it findable. */
       deleteAccount: "Delete account",
+      community: "Community promise",
       docs: "Docs",
       /*
        * THE ONLY DOOR INTO THE SUPPLY SIDE ON THIS PAGE, AND IT WAS MARKED
@@ -1322,15 +1405,19 @@ export const en = {
       "I agree to the Terms, the Privacy Policy and the Community Rules, and I understand that abusive content gets an account removed.",
     acceptRead: "Read them:",
     acceptRequired: "Please tick the box to continue. It is how we record what you agreed to.",
-    /* STORE-19: the Terms require 18 or over, so sign-up asks, and the
-       server refuses an account without the answer. */
+    marketingLabel: "Send me news and updates from Vallo by email. You can switch this off any time.",
     ageLabel: "I am 18 or older.",
     ageRequired: "Vallo is for adults. Tick the box to confirm you are 18 or older.",
     termsLink: "Terms",
     privacyLink: "Privacy policy",
     rulesLink: "Community rules",
+    communityLink: "Community promise",
     helpLink: "Help",
     docsLink: "Docs",
+    blocks: safetyBlocksEn,
+    reports: safetyReportsEn,
+    reportTargetNoun: safetyReportTargetNounEn,
+    education: safetyEducationEn,
   },
 
   auth: {
@@ -1578,18 +1665,7 @@ export const en = {
    * claiming a save that never happened.
    */
   interests: {
-    markets: {
-      apartment: "Apartments",
-      hotel: "Hotels",
-      home: "Homes",
-      villa: "Villas",
-      shortlet: "Shortlets",
-      rental: "Rentals",
-      shop: "Shops",
-      office: "Offices",
-      land: "Land",
-      restaurant: "Restaurants",
-    },
+    markets: interestsMarketsEn,
     tune: {
       open: "Change what comes first",
       title: "What should come first?",
@@ -1608,18 +1684,7 @@ export const en = {
     /* The line under each market name on the nine cards. It exists because
        "rental" and "shortlet" are not the same thing to somebody arriving for
        the first time, and neither is "apartment" versus "home". */
-    hints: {
-      apartment: "Nightly stays in a flat",
-      hotel: "Rooms, booked by the night",
-      home: "A whole house for your stay",
-      villa: "Larger private places",
-      shortlet: "A few nights to a few weeks",
-      rental: "Somewhere to live, by the year",
-      shop: "Retail space, by the year",
-      office: "Workspace, by the year",
-      land: "Plots to buy or lease",
-      restaurant: "Tables at places to eat",
-    },
+    hints: interestsHintsEn,
     /* The screen the cards live on, at the door and in settings. */
     question: "What are you here for?",
     save: "Save what I am here for",
@@ -2014,6 +2079,15 @@ export const en = {
       },
       hideActivity: "Hide my activity",
       hideActivitySub: "Keep your reviews and recent stays off your public profile.",
+      profileVisibility: "Who can see my profile",
+      profileVisibilitySub: "Choose who can view your full profile, including your photo and bio.",
+      messagingAccess: "Who can message me",
+      messagingAccessSub: "Choose who can start a conversation with you.",
+      contactDiscovery: "Let people find me",
+      contactDiscoverySub: "People who have your phone number or email can find your account.",
+      visibilityEveryone: "Everyone",
+      visibilityVerified: "Verified people",
+      visibilityConnections: "Connections only",
       dataSaver: "Data saver",
       dataSaverSub: "Load lighter photos on mobile data. Kinder to a small bundle.",
     },
@@ -2136,6 +2210,7 @@ export const en = {
       terms: "Terms",
       privacy: "Privacy policy",
       disclaimer: "Disclaimer",
+      community: "Community promise",
       version: "Version",
       licences: "Open source licences",
     },
@@ -6032,6 +6107,9 @@ export const en = {
   complianceBeneficialOwnership: complianceBeneficialOwnershipEn,
 
   passcode: passcodeEn,
+  protect: protectEn,
+  verifyFlow: verifyFlowEn,
+  inboxPlus: inboxPlusEn,
 
   /* Session 3, the experience upgrade: one module per owner (docs/sessions/SESSION-3-RESPONSE.md). */
   experienceLanding: experienceLandingEn,
@@ -6255,6 +6333,7 @@ export const en = {
         body: "It is saved, and your earnings can be paid into it.",
       },
       accountCreated: { title: "Welcome to Vallo", body: "Your account is ready." },
+      signedIn: { title: "Signed in. Welcome back.", body: "You are signed in on this device." },
       emailVerified: { title: "Email confirmed", body: "Your email address is confirmed on this account." },
       passwordChanged: {
         title: "Password changed",
@@ -6837,6 +6916,14 @@ export const en = {
   feedV2: {
     card: {
       commentPill: "Drop a comment",
+      /* The featured listing card and the photo mosaic (7 November 2026). */
+      comment: "Comment",
+      featuredListing: "Featured listing",
+      newListing: "New listing",
+      viewProperty: "View property",
+      moreMedia: "{count} more",
+      bedsShort: "{count} bd",
+      bathsShort: "{count} ba",
       readMore: "Read more",
       readLess: "Show less",
       roleLandlord: "Landlord",
@@ -6890,6 +6977,27 @@ export const en = {
       emptyFriendsAction: "Find people",
       railTitle: "People to follow",
       railSeeAll: "See all",
+      lensLabel: "Ways to see the feed",
+      lensAround: "Around",
+      lensCircle: "Circle",
+      lensCircleClosed: "Not open yet",
+      composePrompt: "Share something with your area",
+      composePromptIn: "Share something with {place}",
+      /* The feed's head and category chips (founder, 7 November 2026). */
+      title: "Feed",
+      subtitle: "Homes, stays and places to eat, from people near you.",
+      categoriesLabel: "What the feed shows",
+      catProperties: "Properties",
+      catStays: "Stays",
+      catRestaurants: "Restaurants",
+      emptyCatTitle: "Nothing in {category} here yet",
+      emptyCatBody: "Posts that feature a listing of this kind show up here. Try For you for everything.",
+      emptyCatAction: "Back to For you",
+      circleDoor: "Circle",
+      circleDoorLabel: "Open Vallo Circle, the community",
+      composePhoto: "Add a photo to a post",
+      composeListing: "Feature a listing in a post",
+      composeSend: "Write a post",
     },
     people: {
       navPeople: "People",
@@ -7278,6 +7386,80 @@ export const en = {
    * `chargebacks.en.ts` carries the words and the reasons.
    */
   chargebacks: chargebacksEn,
+  /* The reminders screen (SW11), moved from lib/features/notices/copy.ts. */
+  reminders: remindersEn,
+
+  /* Circle (SW11): the community feature. */
+  circleCopy: circleEn,
+  /* Vallo Roommates. */
+  roommates: roommatesEn,
+  /* The share composer card (9 November 2026). */
+  shareCard: shareCardEn,
+  /* The /pro page (SW11). */
+  pro: proEn,
+
+  /* Referral requirement and step copy (SW11). */
+  referral: {
+    requirements: referralRequirementsEn,
+    steps: referralStepsEn,
+  },
+  /* Directory copy (SW11). */
+  directory: {
+    copy: directoryCopyEn,
+    kindPlural: directoryKindPluralEn,
+    kindOne: directoryKindOneEn,
+  },
+  /* Workspace standing copy (SW11). */
+  workspaceStanding: workspaceStandingEn,
+  /* Wallet/money copy (SW11). */
+  walletCopy: {
+    move: walletMoveEn,
+    onboarding: walletOnboardingEn,
+    phoneTaken: walletPhoneTakenEn,
+    waiting: walletWaitingEn,
+    status: walletStatusEn,
+    historyKindLabel: walletHistoryKindLabelEn,
+  },
+  /* Settings search copy (SW11). */
+  settingsSearch: settingsSearchEn,
+  /* Inspection report copy (SW11). */
+  inspections: {
+    rooms: roomCopyEn,
+    instantRoom: instantRoomCopyEn,
+  },
+  /* Supply roles copy (SW11). */
+  supplyRoles: {
+    proofPending: proofPendingEn,
+    noDocumentLabel: noDocumentLabelEn,
+    roleFilterLabel: listingRoleFilterLabelEn,
+    roleFilterHeading: listingRoleFilterHeadingEn,
+  },
+  /* Places copy (SW11). */
+  places: {
+    copy: placesCopyEn,
+    failure: placesFailureEn,
+  },
+  /* Leaderboard copy (SW11). */
+  leaderboard: leaderboardEn,
+  /* Listings labels (SW11). */
+  listingsLabels: {
+    periodSuffix: periodSuffixEn,
+    rentPeriodLabel: rentPeriodLabelEn,
+    tenureLabel: tenureLabelEn,
+    saleStatusLabel: saleStatusLabelEn,
+    waterLabel: waterLabelEn,
+  },
+  /* Badge tier copy (SW11). */
+  badgeCopy: {
+    tierLabel: badgeTierLabelEn,
+    tierMeaning: badgeTierMeaningEn,
+  },
+  /* Booking lifecycle copy (SW11). */
+  bookingsLifecycle: {
+    noShowMessages: noShowMessagesEn,
+  },
+  /* Social kill-switch copy (SW11). */
+  socialFlag: socialFlagEn,
 
 };
 

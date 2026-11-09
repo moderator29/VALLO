@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { joinArea, leaveArea } from "@/lib/social/areas-actions";
@@ -41,7 +42,6 @@ export function JoinButton({
   const search = useSearchParams();
   const [pending, startTransition] = useSafeTransition();
   const [isJoined, setIsJoined] = useState(joined);
-  const [error, setError] = useState<string | null>(null);
 
   const label = isJoined ? "Joined" : "Join";
 
@@ -54,7 +54,6 @@ export function JoinButton({
     }
     const next = !isJoined;
     setIsJoined(next);
-    setError(null);
 
     startTransition(async () => {
       try {
@@ -63,9 +62,11 @@ export function JoinButton({
           : await leaveArea({ areaId });
         if (!result.ok) {
           setIsJoined(!next);
-          setError(result.error);
+          banner.error(result.error, { retry: toggle });
           return;
         }
+        /* Said by the one banner at the top of the screen (Grade 1). */
+        banner.success(next ? "You joined this area. Its posts are in your feed now." : "You left this area.");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -87,11 +88,6 @@ export function JoinButton({
       >
         {label}
       </Button>
-      {error ? (
-        <span role="alert" className="max-w-[14rem] text-right text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {error}
-        </span>
-      ) : null}
     </div>
   );
 }

@@ -37,7 +37,7 @@ const SETUP = `
 
 const IMPORTS = `
   import { FIXTURE_PAYOUTS } from "@/app/(dev)/preview/money/fixtures";
-  import { PageHeader } from "@/components/app/PageHeader";
+  import { PageFrame } from "@/components/app/PageFrame";
   import { TYPE } from "@/components/app/Screen";
   import { HistoryHero } from "@/components/app/money-history/HistoryHero";
   import { HistoryList } from "@/components/app/money-history/HistoryList";
@@ -53,29 +53,31 @@ const SCREENS = {
   payouts: {
     wait: `<PayoutsWait />`,
     page: `<main className="nf-page nf-md nf-history">
-      <PageHeader title={M.PAYOUTS_TITLE} fallback="/home" />
+      <PageFrame title={M.PAYOUTS_TITLE} fallback="/home"><div>
       <div className="mt-inline space-y-block">
         <HistoryHero id="t" label={M.EARNINGS_TOTAL_LABEL} totalMinor={345600000} locale="en" note={M.EARNINGS_SETTLEMENT + " " + M.HISTORY_NOT_A_BALANCE} facts={[]} />
         <p className={TYPE.body}>{M.PAYOUTS_LEDE}</p>
         <PayoutList entries={PAYOUTS} locale="en" />
       </div>
+      </div></PageFrame>
     </main>`,
   },
   receipts: {
     wait: `<ReceiptsWait />`,
     page: `<main className="nf-page nf-md">
-      <PageHeader title={M.RECEIPTS_TITLE} fallback="/payments" />
+      <PageFrame title={M.RECEIPTS_TITLE} fallback="/payments"><div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{M.RECEIPTS_LEDE}</p>
         <ReceiptVault entries={PAYMENTS} scanned={3} kind="all" query="" basePath="/receipts" locale="en" />
         <p className={TYPE.rowMeta}>{M.PARTNERS_SHORT}</p>
       </div>
+      </div></PageFrame>
     </main>`,
   },
   refunds: {
     wait: `<RefundsWait />`,
     page: `<main className="nf-page nf-md nf-history">
-      <PageHeader title={M.REFUNDS_TITLE} fallback="/payments" />
+      <PageFrame title={M.REFUNDS_TITLE} fallback="/payments"><div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{M.REFUNDS_LEDE}</p>
         <p className={TYPE.rowMeta}>{M.REFUNDS_SCOPE}</p>
@@ -86,6 +88,7 @@ const SCREENS = {
           <p className="nf-body-sm mt-inline text-[var(--nf-content-secondary)]">{M.REFUND_ROUTE}</p>
         </section>
       </div>
+      </div></PageFrame>
     </main>`,
   },
 } as const;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forNotificationsCard } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { NotificationsCard } from "@/components/app/account/SettingsGroups";
 import { loadSettingsState } from "@/lib/profile/queries";
 import { PushDevices, type PushDeviceView } from "@/components/app/push/PushDevices";
@@ -11,6 +11,16 @@ import { deviceName, loadPushDevices, whenPhrase } from "@/lib/push/devices";
 import { NotificationMatrix } from "./NotificationMatrix";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
+import { RowLink, SettingsGroup } from "@/components/app/account/rows";
+import { ChimeSetting } from "@/components/app/notify/ChimeSetting";
+
+
+/* English until the key lands in the dictionary, like the other words this
+   screen states once. */
+const REMINDERS_ROW = {
+  label: "Reminders",
+  sub: "Places near you, people you follow, gentle nudges",
+} as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: getDictionary(await getLocale()).settings.notifications.label };
@@ -75,12 +85,14 @@ export default async function NotificationsSettingsPage() {
       : [];
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.notifications.label}
-        subtitle={t.settings.hub.notificationsSub}
-        fallback="/settings"
-      />
+    <PageFrame
+      title={t.settings.notifications.label}
+      subtitle={t.settings.hub.notificationsSub}
+      fallback="/settings"
+      width="narrow"
+    >
+      {/* One child: the lede and the inner nav keep their 16px foot. */}
+      <div>
       <SettingsLede label={copy.lede.what} what={copy.lede.notifications.what} who={copy.lede.notifications.who} />
       {push.state === "signed-in" && (
         <SettingsInnerNav
@@ -89,6 +101,7 @@ export default async function NotificationsSettingsPage() {
           currentLabel={t.settings.notifications.label}
           sections={[
             { id: "settings-notifications", label: copy.notificationsNav.navChannels, icon: "bell" },
+            { id: "settings-reminders", label: REMINDERS_ROW.label, icon: "clock" },
             { id: "settings-push", label: copy.notificationsNav.navPhone, icon: "phone" },
           ]}
         />
@@ -103,6 +116,25 @@ export default async function NotificationsSettingsPage() {
         )}
       </section>
 
+      {/* The reminders Vallo may send on its own (Agent FEATURES' screen),
+          one tap down from the channels. */}
+      <section id="settings-reminders" className="mt-block scroll-mt-28">
+        <SettingsGroup label={REMINDERS_ROW.label}>
+          <RowLink
+            href="/settings/notifications/reminders"
+            icon="bell"
+            label={REMINDERS_ROW.label}
+            sub={REMINDERS_ROW.sub}
+            testId="settings-reminders-row"
+          />
+        </SettingsGroup>
+      </section>
+
+      {/* The live banner's chime (A9), kept on this device. */}
+      <section id="settings-chime" className="mt-block scroll-mt-28">
+        <ChimeSetting />
+      </section>
+
       {push.state === "signed-in" && (
         <section id="settings-push" className="mt-block scroll-mt-28 space-y-block">
           <h2 className="nf-title-sm text-content">{copy.notificationsNav.navPhone}</h2>
@@ -113,6 +145,7 @@ export default async function NotificationsSettingsPage() {
           <PushDevices rows={rows} readable={push.readable} />
         </section>
       )}
-    </div>
+      </div>
+    </PageFrame>
   );
 }

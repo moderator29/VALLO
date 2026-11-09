@@ -3,6 +3,9 @@ import type { ListingReview } from "@/lib/reviews/queries";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { EmptyState, ICON, TYPE } from "@/components/app/Screen";
 import { ReportSheet } from "@/components/app/ReportSheet";
+import { RatingStars } from "@/components/ui/RatingStars";
+import { RatingSummary, type RatingBreakdown } from "@/components/ui/RatingSummary";
+import { RATING_MIN } from "@/lib/reviews/model";
 
 /**
  * Reviews.
@@ -27,23 +30,6 @@ import { ReportSheet } from "@/components/app/ReportSheet";
  * for the review list. It is a section on the ground now, and the reviews are a
  * hairline-divided list rather than a box inside a box.
  */
-function Stars({ rating }: { rating: number }) {
-  return (
-    <span className="flex items-center gap-3xs" aria-hidden="true">
-      {Array.from({ length: 5 }, (_, i) => (
-        <UiIcon
-          key={i}
-          name="star"
-          size={ICON.inline}
-          filled={i < rating}
-          className={
-            i < rating ? "text-[var(--nf-rating)]" : "text-[var(--nf-content-muted)] opacity-40"
-          }
-        />
-      ))}
-    </span>
-  );
-}
 
 export function ListingReviews({
   rating,
@@ -84,27 +70,46 @@ export function ListingReviews({
     );
   }
 
+  const breakdown: RatingBreakdown | undefined =
+    reviews.length >= 3
+      ? reviews.reduce<RatingBreakdown>(
+          (acc, r) => {
+            const idx = Math.max(0, Math.min(4, Math.round(r.rating) - RATING_MIN));
+            acc[idx as 0 | 1 | 2 | 3 | 4]++;
+            return acc;
+          },
+          [0, 0, 0, 0, 0],
+        )
+      : undefined;
+
   return (
     <div>
-      <p className="flex items-baseline gap-inline">
-        <span className="nf-numeric text-[1.75rem] font-bold tracking-tight text-[var(--nf-content-primary)]">
-          {formatRating(rating, locale)}
-        </span>
-        {/* Suppressed at zero: a rating with no reviews behind it states the
-            rating alone rather than advertising an absence. */}
-        {reviewCount > 0 && (
-          <span className={TYPE.bodyLg}>
-            {formatNumber(reviewCount, locale)} {t.common.reviews}
+      {reviews.length >= 3 ? (
+        <RatingSummary
+          rating={rating}
+          count={reviewCount}
+          breakdown={breakdown}
+          locale={locale}
+        />
+      ) : (
+        <p className="flex items-baseline gap-inline">
+          <span className="nf-numeric text-[1.75rem] font-bold tracking-tight text-[var(--nf-content-primary)]">
+            {formatRating(rating, locale)}
           </span>
-        )}
-      </p>
+          {reviewCount > 0 && (
+            <span className={TYPE.bodyLg}>
+              {formatNumber(reviewCount, locale)} {t.common.reviews}
+            </span>
+          )}
+        </p>
+      )}
 
       {reviews.length > 0 ? (
         <ul className="mt-block divide-y divide-[var(--nf-panel-hair)]">
           {reviews.map((review) => (
             <li key={review.id} className="py-md first:pt-0">
               <p className="flex flex-wrap items-center gap-x-inline gap-y-inline-tight">
-                <Stars rating={review.rating} />
+                <RatingStars rating={review.rating} />
                 <span className="sr-only">{review.rating} out of 5.</span>
                 <span className={TYPE.rowTitle}>{review.author}</span>
                 <span className={TYPE.caption}>{review.when}</span>

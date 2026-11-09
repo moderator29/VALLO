@@ -40,11 +40,15 @@ const STUB_CLIPBOARD = `
 const INVITE_ENTRY = `
   import { getDictionary } from "@vallo/i18n";
   import { InviteLinkCard } from "@/components/app/referral/InviteLinkCard";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { mount } from "@/lib/testing/browser-root";
   const t = getDictionary("en");
+  /* What a tap did is said by the one banner (Grade 1), drawn by the host the
+     root layout mounts. */
   mount(
     <div style={{ maxWidth: 420, margin: "0 auto", padding: 16 }}>
       <InviteLinkCard url="https://vallospaces.com/join/K7M2QX" code="K7M2QX" copy={t.experienceRewards.invite} dismissLabel={t.experienceUi.notNow} />
+      <ToastHost />
     </div>,
   );
 `;
@@ -95,7 +99,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the invite link card", () => {
       /* No share API here, so "More ways" copies, and says exactly that. */
       await page.getByTestId("rewards-invite-share").click();
       await page.getByRole("button", { name: /More ways to share/ }).click();
-      await page.waitForFunction(() => document.querySelector('[data-testid="rewards-invite-status"]')?.textContent !== "");
+      await page.waitForFunction(() => (document.querySelector('[data-testid="rewards-invite-status"]')?.textContent ?? "") !== "");
       expect(await page.getByTestId("rewards-invite-status").textContent()).toBe(
         "There is no share sheet on this device, so the link was copied instead.",
       );

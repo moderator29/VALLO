@@ -3,6 +3,7 @@
 import { dateTimeLabel } from "@/lib/format/when";
 import Link from "next/link";
 import { useActionState, useState } from "react";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 import {
   liftAgentStop,
   stopAgentTrading,
@@ -363,6 +364,13 @@ export function StopsDesk({
     ActionResult<LiftReceipt> | null,
     FormData
   >(liftAgentStop, null);
+  /* A refusal is said by the one banner at the top of the screen (Grade 1);
+     the banner also says what was done (founder, 7 November 2026), and the
+     agent's card keeps the counts as its record. */
+  useActionBanner(liftState, { ok: liftState?.ok ? `${liftState.data.displayName} is trading again` : undefined });
+  useActionBanner(stopState && !stopState.ok && stopState.fieldErrors?.reason ? null : stopState, {
+    ok: stopState?.ok ? `${stopState.data.displayName} has been stopped and told why` : undefined,
+  });
 
   return (
     <div className="space-y-section-tight">
@@ -416,11 +424,6 @@ export function StopsDesk({
           </ul>
         )}
 
-        {liftState && !liftState.ok && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-warning)]">
-            {liftState.error}
-          </p>
-        )}
       </section>
 
       <section aria-label="Trading">
@@ -466,11 +469,6 @@ export function StopsDesk({
           </ul>
         )}
 
-        {stopState && !stopState.ok && !stopState.fieldErrors?.reason && (
-          <p role="alert" className="mt-row nf-body-sm text-[var(--nf-state-warning)]">
-            {stopState.error}
-          </p>
-        )}
       </section>
     </div>
   );

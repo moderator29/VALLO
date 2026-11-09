@@ -20,7 +20,7 @@ import { POST_COPY } from "@/lib/social/posts-model";
  */
 export function Tombstone({ replyCount = 0 }: { replyCount?: number }) {
   return (
-    <div className="rounded-[var(--nf-radius-lg)] border border-dashed border-[var(--nf-border-default)] px-md py-sm">
+    <div className="rounded-lg border border-dashed border-[var(--nf-border-default)] px-md py-sm">
       <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
         <span className="font-semibold text-[var(--nf-content-secondary)]">
           {POST_COPY.removed}

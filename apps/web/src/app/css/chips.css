@@ -153,6 +153,10 @@
       transform: translateY(-1px);
     }
   }
+  .nf-chip:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
   @media (prefers-reduced-motion: reduce) {
     .nf-chip:hover {
       transform: none;

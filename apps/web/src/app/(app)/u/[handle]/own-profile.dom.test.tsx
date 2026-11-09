@@ -80,7 +80,15 @@ describe("every surface that links to a person goes through /u/<handle>", () => 
       .filter((file) => readFileSync(file, "utf8").includes("loadPublicProfile("))
       .map((file) => file.slice(SRC.length + 1).replaceAll("\\", "/"))
       .sort();
-    expect(readers).toEqual(["app/(app)/stories/[id]/page.tsx", "app/(app)/u/[handle]/page.tsx"]);
+    /* The two profile PAGES, plus the profile's share-card image. The image
+       route reads the same public fields but is not a door: it returns a JPEG
+       for an unfurler, never a navigable profile, so the owner redirect does
+       not apply to it (an owner sharing their own card is expected). */
+    expect(readers).toEqual([
+      "app/(app)/stories/[id]/page.tsx",
+      "app/(app)/u/[handle]/opengraph-image.tsx",
+      "app/(app)/u/[handle]/page.tsx",
+    ]);
   });
 
   it("the redirect target is the profile page, and the page uses the shared constant", () => {

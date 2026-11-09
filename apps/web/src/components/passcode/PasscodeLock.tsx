@@ -17,6 +17,11 @@ import { catchUpWithServer } from "@/lib/passcode/server-catch-up";
 import { Button } from "@/components/ui/Button";
 import { Keypad, PasscodeDots } from "./Keypad";
 import { PasskeyUnlockKey } from "./PasskeyUnlockKey";
+import { banner } from "@/lib/ui/toast";
+import { deviceKeyState, type DeviceKeyState } from "@/lib/platform/device-keys";
+
+/** English, like the other words added before a native speaker has read them. */
+const NO_KEY_HERE = "Face ID is not set up on this phone yet. Use your passcode, then turn it on in Settings, Passcode.";
 import { readDeviceLock, type DeviceLock } from "@/lib/security/device-lock";
 import { platformLockAvailable } from "@/lib/security/webauthn-client";
 import { PasscodeFrame } from "./PasscodeFrame";
@@ -129,9 +134,17 @@ export function PasscodeLock({
   const [door, setDoor] = useState<"biometric" | "keypad">(passkeyKept ? "biometric" : "keypad");
   const [deviceCanAsk, setDeviceCanAsk] = useState(true);
   const [deviceLock, setDeviceLock] = useState<DeviceLock>("this-device");
+  /* The account has a key, but does THIS phone (lib/platform/device-keys.ts)?
+     A phone that tried and found none is offered the keypad and the set-up,
+     never a Face ID button that can only fail. */
+  const [deviceHasNone, setDeviceHasNone] = useState(false);
   useEffect(() => {
     if (!passkeyKept) return;
     setDeviceLock(readDeviceLock());
+    if (deviceKeyState() === "none") {
+      setDeviceHasNone(true);
+      setDoor("keypad");
+    }
     let live = true;
     void platformLockAvailable().then((ok) => {
       if (!live) return;
@@ -142,7 +155,7 @@ export function PasscodeLock({
       live = false;
     };
   }, [passkeyKept]);
-  const passkey = passkeyKept && deviceCanAsk;
+  const passkey = passkeyKept && deviceCanAsk && !deviceHasNone;
   const passkeyLabel = copy.passkeyUnlockBy[deviceLock];
   const [code, setCode] = useState("");
   const [message, setMessage] = useState<string | null>(mode === "unavailable" ? copy.unavailable : null);
@@ -426,9 +439,14 @@ export function PasscodeLock({
   const status = cooling ? fill(copy.cooldown, { seconds: secondsLeft }) : message;
 
   const biometricFirst = passkey && door === "biometric" && !cooling;
-  const onPasskeyFailed = () => {
+  const onPasskeyFailed = (device: DeviceKeyState) => {
     if (door === "biometric") toKeypad("key");
-    setMessage(copy.passkeyFailed);
+    /* A tap always answers (the founder: "nothing moved and nothing
+       changed"): the words under the keypad and the one banner at the top. */
+    const words = device === "none" ? NO_KEY_HERE : copy.passkeyFailed;
+    if (device === "none") setDeviceHasNone(true);
+    setMessage(words);
+    banner.error(words);
   };
 
   /* Typing on the biometric door: the keypad's own keyboard listener is not

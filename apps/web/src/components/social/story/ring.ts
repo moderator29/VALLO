@@ -4,8 +4,8 @@
  * A ring draws one segment per live story the person has, up to six, and each
  * segment is lit until this reader has opened that story. Pure and tokens-only
  * so it can be tested without a browser and so no raw colour ever reaches a
- * stylesheet: the colours are `--nf-ring-lit`, `--nf-ring-lit-end` and
- * `--nf-ring-seen`, declared on `.nf-story-ring` in `feed-m.css`.
+ * stylesheet: the colours are `--nf-ring-lit`, `--nf-ring-lit-mid`,
+ * `--nf-ring-lit-end` and `--nf-ring-seen`, declared on `.nf-story-ring` in `feed-m.css`.
  *
  * ONE STORY IS A FULL CIRCLE, with no gap, because a single segment with a
  * notch cut out of it would look broken rather than counted.
@@ -39,22 +39,32 @@ export function allSeen(seen: readonly boolean[]): boolean {
  * The conic gradient for a ring. `seen` is oldest first so the ring reads
  * clockwise in the order the stories were told; segment i is quiet when
  * `seen[i]` is true.
+ *
+ * BLUE LED, ONE SPARK (light mode pass, 7 November 2026). The ring used to mix
+ * the info blue into the orange spark across every segment, and a mix of blue
+ * and orange is a grey brown in any straight colour space: on paper the ring
+ * read brown. Now the lit segments sweep between two blues (`--nf-ring-lit`
+ * into `--nf-ring-lit-mid`) and only the NEWEST segment carries the spark
+ * (`--nf-ring-lit-end`), so the orange marks the latest story and never has
+ * to pass through a muddy middle. One story is the same sweep as a circle:
+ * blue most of the way round, the spark at the tip, a short way back.
  */
 export function ringGradient(seen: readonly boolean[]): string {
   const windowed = ringWindow(seen);
   const n = ringSegments(windowed.length || 1);
   const flags = Array.from({ length: n }, (_, i) => Boolean(windowed[i]));
   const lit = (i: number) => {
-    const p = n === 1 ? 0 : Math.round((i / (n - 1)) * 100);
+    if (i === n - 1) return "var(--nf-ring-lit-end)";
+    const p = n <= 2 ? 0 : Math.round((i / (n - 2)) * 100);
     return p === 0
       ? "var(--nf-ring-lit)"
-      : `color-mix(in oklab, var(--nf-ring-lit) ${100 - p}%, var(--nf-ring-lit-end))`;
+      : `color-mix(in oklab, var(--nf-ring-lit) ${100 - p}%, var(--nf-ring-lit-mid))`;
   };
 
   if (n === 1) {
     return flags[0]
       ? "conic-gradient(var(--nf-ring-seen) 0deg 360deg)"
-      : "conic-gradient(var(--nf-ring-lit), var(--nf-ring-lit-end), var(--nf-ring-lit))";
+      : "conic-gradient(var(--nf-ring-lit) 0deg, var(--nf-ring-lit-mid) 220deg, var(--nf-ring-lit-end) 316deg, var(--nf-ring-lit-end) 342deg, var(--nf-ring-lit) 360deg)";
   }
 
   const arc = 360 / n;

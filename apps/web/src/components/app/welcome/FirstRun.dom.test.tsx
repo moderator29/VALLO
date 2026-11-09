@@ -58,7 +58,7 @@ function guest(next: string | null = null): string {
       create: t.welcomeCards.firstRun.choice.create,
       signIn: t.welcomeCards.firstRun.choice.signIn,
     };
-    mount(<FirstRun t={t} interests={[]} showCards asked viewer="guest" next={next} arrival={arrivalOf(next)} />);
+    mount(<FirstRun introSlides t={t} interests={[]} showCards asked viewer="guest" next={next} arrival={arrivalOf(next)} />);
   `;
 }
 
@@ -69,7 +69,7 @@ function member(): string {
     import { mount } from "@/lib/testing/browser-root";
     const t = getDictionary("en");
     window.__facts = { cont: t.welcomeCards.firstRun.member.continue, question: t.interests.question };
-    mount(<FirstRun t={t} interests={[]} showCards asked={false} viewer="member" next={null} />);
+    mount(<FirstRun introSlides t={t} interests={[]} showCards asked={false} viewer="member" next={null} />);
   `;
 }
 
@@ -145,7 +145,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("Get started", () => {
       expect(await step(page)).toBe(2);
       expect(await counter(page)).toBe("2 of 4");
       expect(await title(page)).toBe(named(f.slides.know));
-      expect(await page.locator("[aria-live='polite']").textContent()).toContain("2 of 4");
+      /* The card's own counter region (a <p>), scoped so it never catches the
+         toast host's polite lane (a <div>) that the harness also mounts. */
+      expect(await page.locator("p[aria-live='polite']").textContent()).toContain("2 of 4");
       await page.keyboard.press("ArrowRight");
       expect(await step(page)).toBe(3);
       expect(await counter(page)).toBe("3 of 4");

@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { formatDate, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
+import { EmptyActions } from "@/components/app/EmptyActions";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { panelClass } from "@/components/ui/Panel";
@@ -37,23 +38,19 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
   const copy = t.trustVisible.phone;
   const session = await resolveSession();
 
-  const header = <PageHeader title={copy.title} subtitle={copy.subtitle} fallback="/settings" />;
+  /* One frame for every state the screen draws, so the title never moves. */
+  const frame = { title: copy.title, subtitle: copy.subtitle, fallback: "/settings", width: "narrow" } as const;
 
   if (session.state !== "signed-in") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame {...frame}>
         <EmptyState
           icon="user-verified"
           title={copy.signedOutTitle}
           body={copy.signedOutBody}
-          action={
-            <ButtonLink href={withNext("/sign-in", "/settings/phone")} variant="primary" size="lg">
-              {copy.signIn}
-            </ButtonLink>
-          }
+          action={<EmptyActions primary={{ label: copy.signIn, href: withNext("/sign-in", "/settings/phone") }} />}
         />
-      </div>
+      </PageFrame>
     );
   }
 
@@ -61,8 +58,7 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
      session's own user id. */
   if (await isQaTester(session.user.id)) {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame {...frame}>
         <div data-testid="phone-qa">
           <EmptyState
             icon="user-verified"
@@ -77,7 +73,7 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
             }
           />
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
@@ -87,12 +83,11 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
     const { data: profile } = await session.supabase.from("profiles").select("phone").eq("id", session.user.id).maybeSingle();
     const onFile = (profile as { phone?: string | null } | null)?.phone?.trim() || null;
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame {...frame}>
         <div data-testid="phone-closed">
           <ProfilePhoneForm copy={copy} currentLast={onFile ? onFile.slice(-4) : null} next={next} />
         </div>
-      </div>
+      </PageFrame>
     );
   }
 
@@ -111,8 +106,7 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
     .maybeSingle();
 
   return (
-    <div className="mx-auto max-w-2xl">
-      {header}
+    <PageFrame {...frame}>
       <div className="space-y-block">
         <p className={TYPE.body}>{copy.why}</p>
         {error ? (
@@ -145,6 +139,6 @@ export default async function PhoneSettingsPage({ searchParams }: { searchParams
           </>
         )}
       </div>
-    </div>
+    </PageFrame>
   );
 }

@@ -6,7 +6,7 @@ import { getLocale } from "@/lib/locale";
 import { readMyApplication } from "@/lib/agent/application-status";
 import { SuccessFromFlag } from "@/components/ui/SuccessFromFlag";
 import { applicationArrival } from "@/lib/ui/arrival-moments";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, Row, RowList, Section, Stack, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
@@ -79,8 +79,8 @@ export default async function ProfileApplicationPage() {
     }[result.state];
 
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={s.status} fallback="/profile" />
+      <PageFrame title={s.status} fallback="/profile" width="narrow">
+        <div>
         <EmptyState
           icon={empty.icon}
           title={empty.title}
@@ -93,7 +93,8 @@ export default async function ProfileApplicationPage() {
             ) : undefined
           }
         />
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
@@ -164,7 +165,7 @@ export default async function ProfileApplicationPage() {
   const approval = applicationArrival(application, requestNow());
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <PageFrame title={s.status} subtitle={statusLine[application.status]} fallback="/profile" width="narrow">
       <SuccessFromFlag
         copy={t.success}
         show={approval !== null}
@@ -172,8 +173,6 @@ export default async function ProfileApplicationPage() {
         seenKey={approval?.seenKey ?? "agent-approved:none"}
         haptic={false}
       />
-      <PageHeader title={s.status} subtitle={statusLine[application.status]} fallback="/profile" />
-
       <Stack>
         {/* ONE SURFACE, three parts, the label outside it. */}
         <Section title={s.applicationId}>
@@ -225,6 +224,6 @@ export default async function ProfileApplicationPage() {
           </div>
         )}
       </Stack>
-    </div>
+    </PageFrame>
   );
 }

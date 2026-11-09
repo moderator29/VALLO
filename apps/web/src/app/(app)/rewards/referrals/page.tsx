@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { ReferralList } from "@/components/app/referral/ReferralList";
@@ -29,22 +29,19 @@ export default async function RewardsReferralsPage() {
   const locale = await getLocale();
   const copy = getDictionary(locale).experienceRewards;
   const screen = await rewardsScreen();
-  const header = <PageHeader title={copy.referrals.title} subtitle={copy.referrals.lede} fallback="/rewards" />;
 
   if (screen.kind === "state") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame title={copy.referrals.title} subtitle={copy.referrals.lede} fallback="/rewards" width="narrow">
         <RewardsState read={screen.read} copy={copy.states} signInHref={signInHref("/rewards/referrals")} inviteHref={INVITE_HREF} />
-      </div>
+      </PageFrame>
     );
   }
 
   const paused = pausedProgramme({ state: "ready", snapshot: screen.snapshot });
 
   return (
-    <div className="mx-auto max-w-2xl space-y-block">
-      {header}
+    <PageFrame title={copy.referrals.title} subtitle={copy.referrals.lede} fallback="/rewards" width="narrow">
       {paused ? (
         <RewardsPauseNotice programme={paused} copy={copy.pause} earned={REWARDS_PAUSED_EARNED_LINE} locale={locale} inviteOff />
       ) : null}
@@ -66,6 +63,6 @@ export default async function RewardsReferralsPage() {
       ) : (
         <ReferralList rows={screen.snapshot.referrals} copy={copy.referrals} locale={locale} />
       )}
-    </div>
+    </PageFrame>
   );
 }

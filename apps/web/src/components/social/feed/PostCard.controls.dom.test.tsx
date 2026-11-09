@@ -167,9 +167,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("a post's controls on a phone", 
           return { bare, border: style.borderTopWidth, height: pill.getBoundingClientRect().height };
         }),
       );
-      /* The heart, the repost, the share and the save. The comment is the
-         rounded pill, which has its own fill by design. */
-      expect(looks).toHaveLength(4);
+      /* The heart, the comment, the repost, the share and the save: one row
+         of bare glyphs since 7 November 2026 (the comment was a filled pill). */
+      expect(looks).toHaveLength(5);
       for (const look of looks) {
         expect(look.bare).toBe(true);
         expect(look.border).toBe("0px");

@@ -71,6 +71,17 @@ export const STAFF_SCOPES = [
   "finance",
   "compliance",
   "operations",
+  /* Added 8 November with Trust and Safety (the case engine,
+     `supabase/migrations/pending/roommates_7_trust_safety.sql`): every case
+     and restriction, verification documents, appeals. */
+  "trust_safety",
+  /* Vallo Roommates moderation: its cases, profiles, posts and groups. No
+     verification documents (those stay with kyc_review and trust_safety). */
+  "roommates",
+  /* Vallo Circle and the feed: communities, posts and their cases. */
+  "circle",
+  /* The numbers only: overview figures, never case content. */
+  "analyst",
 ] as const;
 export type StaffScope = (typeof STAFF_SCOPES)[number];
 
@@ -84,6 +95,10 @@ export const STAFF_SCOPE_LABEL: Record<StaffScope, string> = {
   finance: "Finance",
   compliance: "Compliance",
   operations: "Operations",
+  trust_safety: "Trust and Safety",
+  roommates: "Roommates moderation",
+  circle: "Circle moderation",
+  analyst: "Read-only analyst",
 };
 
 export type StaffAccess = {

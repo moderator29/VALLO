@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { PhoneField } from "@/components/app/PhoneField";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -44,13 +45,11 @@ export function MandateForm({
   );
   const [signedOn, setSignedOn] = useState(initial?.signedOn ?? "");
   const [expiresOn, setExpiresOn] = useState(initial?.expiresOn ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useSafeTransition();
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
-    setError(null);
     startTransition(async () => {
       try {
         const result = await fileListingMandate({
@@ -58,10 +57,12 @@ export function MandateForm({
           form: { kind, principalName: name, principalPhone: phone, relationship, exclusive, signedOn, expiresOn },
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setSent(true);
+        /* The line keeps the record; the banner says it (founder, 7 November 2026). */
+        banner.success(copy.sent);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -153,11 +154,6 @@ export function MandateForm({
         {copy.expiresOn}
       </label>
       <input id="mandate-expires" className="nf-field" type="date" min={today ?? undefined} value={expiresOn} onChange={(e) => setExpiresOn(e.target.value)} />
-      {error && (
-        <p role="alert" className="nf-body-sm" style={{ color: "var(--nf-state-error)" }}>
-          {error}
-        </p>
-      )}
       <Button type="submit" variant="primary" loading={pending} data-testid="mandate-send">
         {initial ? copy.update : renewing ? copy.renew : copy.send}
       </Button>

@@ -11,6 +11,7 @@ import type { MyReports as MyReportsList } from "@/lib/reports/my-reports";
 import { withdrawMyReport } from "@/lib/reports/withdraw-action";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * YOUR REPORTS. V-89, and A1-035 (the reporter could not see the outcome).
@@ -33,7 +34,6 @@ export function MyReports({ list, locale }: { list: MyReportsList; locale: Local
   const copy = useScopedCopy("myReports");
   const router = useRouter();
   const [armed, setArmed] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   if (list.state === "signed-out") return null;
@@ -44,21 +44,31 @@ export function MyReports({ list, locale }: { list: MyReportsList; locale: Local
       return;
     }
     setArmed(null);
+    send(id);
+  };
+
+  const send = (id: string) =>
     start(async () => {
       try {
         const result = await withdrawMyReport({ id });
-        setMessage(result.state === "ok" ? copy.withdrawn : result.state === "closed" ? copy.withdrawClosed : copy.withdrawFailed);
-        if (result.state === "ok") router.refresh();
+        /* The outcome goes to the one banner (Grade 1). */
+        if (!result.ok) {
+          banner.error(copy.withdrawFailed, { retry: () => send(id) });
+        } else if (result.data.state === "ok") {
+          banner.success(copy.withdrawn);
+          router.refresh();
+        } else {
+          banner.info(copy.withdrawClosed);
+        }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
     });
-  };
 
-  const note = message ?? (list.state === "unreadable" ? copy.failed : list.rows.length === 0 ? copy.empty : copy.lede);
+  const note = list.state === "unreadable" ? copy.failed : list.rows.length === 0 ? copy.empty : copy.lede;
 
   return (
-    <SettingsGroup label={copy.title} note={<span role={message ? "status" : undefined}>{note}</span>}>
+    <SettingsGroup label={copy.title} note={<span>{note}</span>}>
       {list.state === "ok" &&
         list.rows.map((report) => {
           const open = report.status === "open" || report.status === "reviewing";

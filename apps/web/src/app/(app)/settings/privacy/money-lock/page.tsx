@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { loadMoneyCredentials } from "@/lib/security/money-step-up";
 import { MoneyLockGroup } from "../../MoneyLockGroup";
@@ -24,10 +24,11 @@ export default async function MoneyLockPage() {
   const lede = t.experienceAccount.settings.lede;
   const list = await loadMoneyCredentials().catch(() => ({ state: "unreadable" as const }));
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={t.platform.moneyLock.settingsTitle} fallback="/settings/privacy" />
-      <SettingsLede label={lede.what} what={MONEY_LOCK_WHAT} who={lede.moneyLock.who} />
-      <MoneyLockGroup list={list} locale={locale} />
-    </div>
+    <PageFrame title={t.platform.moneyLock.settingsTitle} fallback="/settings/privacy" width="narrow">
+      <div>
+        <SettingsLede label={lede.what} what={MONEY_LOCK_WHAT} who={lede.moneyLock.who} />
+        <MoneyLockGroup list={list} locale={locale} />
+      </div>
+    </PageFrame>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -28,7 +29,6 @@ export function DuplicateListing({
   const [count, setCount] = useState(1);
   const [made, setMade] = useState<string[] | null>(null);
   const [asked, setAsked] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   return (
@@ -40,7 +40,6 @@ export function DuplicateListing({
         onClick={() => {
           setOpen(true);
           setMade(null);
-          setError(null);
         }}
         data-testid="listing-duplicate"
       >
@@ -80,14 +79,14 @@ export function DuplicateListing({
               full
               loading={pending}
               onClick={() => {
-                setError(null);
                 start(async () => {
                   try {
                     const result = await duplicateListing({ listingId, copies: count });
                     if (!result.ok) {
-                      setError(result.error);
+                      banner.error(result.error);
                       return;
                     }
+                    banner.success("Listings created");
                     setMade(result.data.ids);
                     setAsked(result.data.asked);
                     router.refresh();
@@ -102,11 +101,6 @@ export function DuplicateListing({
             <Button variant="ghost" full onClick={() => setOpen(false)}>
               {copy.cancel}
             </Button>
-            {error && (
-              <p className="nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-                {error}
-              </p>
-            )}
           </div>
         )}
       </Sheet>

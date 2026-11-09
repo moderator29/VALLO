@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -8,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="false">
+        android:usesCleartextTraffic="false"
+        android:enableOnBackInvokedCallback="true">
         <!--
             `allowBackup` was `true`, which is the template default and the wrong
             answer for this application. Android Auto Backup copies an
@@ -37,6 +39,20 @@
             All three have to agree or the weakest one wins.
         -->
 
+        <!--
+            Platform Grade 1 (N4; NATIVE_BUILD_QUEUE.md item 1), for build
+            1.0.2. `enableOnBackInvokedCallback` opts in to predictive back:
+            the system's back-to-home preview on the root screen, while the
+            App plugin's back handler (`lib/native/back-button.ts`) still
+            decides every in-app back.
+
+            NO `windowSoftInputMode` ON PURPOSE (N3). Capacitor 8's SystemBars
+            (in @capacitor/android) pads the web view by the keyboard's own
+            inset on every Android version; `adjustResize` on top of it would
+            shrink the window as well on Android 14 and below, and the gap
+            above the keys would be counted twice. Built, not tested on a
+            device.
+        -->
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -203,6 +219,21 @@
                 <data android:pathPrefix="/u/" />
                 <data android:pathPrefix="/post/" />
                 <data android:pathPrefix="/stories/" />
+                <!-- N6 (7 November 2026): a member's own thread, notification
+                     and booking links, from their emails, open in the app
+                     where they are signed in. /bookings/ needs the id after
+                     the slash, so the bare list stays in the browser. -->
+                <data android:pathPrefix="/messages/" />
+                <data android:pathPrefix="/notifications/" />
+                <data android:pathPrefix="/bookings/" />
+                <!-- Vallo Circle (7 November 2026, coming): the Circle and
+                     anything under it open in the app. -->
+                <data android:path="/circle" />
+                <data android:pathPrefix="/circle/" />
+                <!-- Vallo Roommates (8 November 2026): a shared room, a
+                     profile, a group invite or a school page open in the app. -->
+                <data android:path="/roommates" />
+                <data android:pathPrefix="/roommates/" />
                 <!-- An invite link (D85): /join/<code> keeps the code in the
                      web view's cookie jar and hands over to sign-up there, so
                      a sign-up made in the app is attributed to the inviter. -->
@@ -262,6 +293,22 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/vallo_notification" />
+        <!--
+            A2 (rich push, build 1.0.2): Vallo's own messaging service, which
+            extends the push plugin's and also draws the rich notification
+            (the photo beside the text). The plugin's own service is removed
+            from the merged manifest so exactly one service hears each push.
+        -->
+        <service
+            android:name="com.capacitorjs.plugins.pushnotifications.MessagingService"
+            tools:node="remove" />
+        <service
+            android:name=".ValloMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
     <!--
@@ -287,6 +334,16 @@
         offline card in `native-shell`.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--
+        THE WEB VIEW'S OWN SENSE OF THE NETWORK (Agent NATIVE job 8, the
+        Capacitor audit). Android's web view learns that the connection went
+        or came back through the system's connectivity service, which it may
+        read only with this permission. Without it `navigator.onLine` can stay
+        true and the page's `offline` and `online` events never fire, so the
+        connection line, the outbox and the offline screen (lib/offline)
+        would wait for the probe alone. A normal permission: no prompt.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
         Location. COARSE is what the product needs, and the FINE line below it
@@ -446,13 +503,17 @@
         from those devices. Such a device gets voice calls, or a clear
         "no camera found" on the call screen.
 
-        Background ringing, ConnectionService and a lock-screen call UI are
-        NOT built: no FOREGROUND_SERVICE, no MANAGE_OWN_CALLS, no
-        USE_FULL_SCREEN_INTENT. See docs/video-calling/VIDEO-CALLING-MOBILE-COMPATIBILITY.md.
+        ValloCallKit (November 2026): FOREGROUND_SERVICE and
+        USE_FULL_SCREEN_INTENT are now declared for the incoming-call
+        notification that wakes the screen when the phone is locked.
+        MANAGE_OWN_CALLS is not needed: we use notifications, not
+        ConnectionService. See native/README.md.
     -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-feature android:name="android.hardware.microphone" android:required="false" />

@@ -84,7 +84,7 @@ function SwatchRow({
     <li className="flex items-center gap-group border-b border-[var(--nf-border-subtle)] py-row last:border-b-0">
       <span
         aria-hidden="true"
-        className="h-11 w-11 shrink-0 rounded-[var(--nf-radius-md)] border border-[var(--nf-border-default)]"
+        className="h-11 w-11 shrink-0 rounded-md border border-[var(--nf-border-default)]"
         style={
           kind === "surface"
             ? { background: `var(${name})` }
@@ -282,7 +282,7 @@ export default function StyleguidePage() {
           <div>
             <p className="nf-overline mb-inline">Shapes</p>
             <div className="flex items-center gap-row">
-              <Skeleton className="h-11 w-11 rounded-[var(--nf-radius-pill)]" />
+              <Skeleton className="h-11 w-11 rounded-pill" />
               <Skeleton className="h-11 w-40" />
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function StyleguidePage() {
           {ICONS.map((name) => (
             <li
               key={name}
-              className="flex flex-col items-center gap-inline rounded-[var(--nf-radius-md)] bg-[var(--nf-surface-secondary)] px-inline py-row text-center"
+              className="flex flex-col items-center gap-inline rounded-md bg-[var(--nf-surface-secondary)] px-inline py-row text-center"
             >
               <UiIcon name={name} size={20} />
               <code className="text-[0.75rem] leading-tight text-[var(--nf-content-muted)]">
@@ -318,7 +318,7 @@ export default function StyleguidePage() {
         title="Glass"
         blurb="One treatment, used for chrome that floats over content: the header, the filter opener, a drawer footer. It is a backdrop filter, which makes any element carrying it the containing block for fixed descendants, so a full-screen overlay inside one must be portalled to the body or it will be trapped and clipped."
       >
-        <div className="relative overflow-hidden rounded-[var(--nf-radius-lg)]">
+        <div className="relative overflow-hidden rounded-lg">
           <div
             aria-hidden="true"
             className="h-40 w-full"
@@ -327,7 +327,7 @@ export default function StyleguidePage() {
                 "linear-gradient(120deg, var(--nf-brand-primary), var(--nf-surface-canvas) 70%)",
             }}
           />
-          <div className="nf-glass absolute inset-x-4 bottom-4 rounded-[var(--nf-radius-md)] px-group py-row">
+          <div className="nf-glass absolute inset-x-4 bottom-4 rounded-md px-group py-row">
             <p className="text-[0.875rem] font-semibold text-[var(--nf-content-primary)]">
               nf-glass
             </p>
@@ -343,7 +343,7 @@ export default function StyleguidePage() {
         blurb="Every interactive element is at least 44px in both directions. A control may be painted smaller than that, and several are, but the target it accepts a press on never is: the extra area comes from a pseudo-element rather than from inflating the box, so a 36px chip still catches a thumb."
       >
         <div className="nf-panel nf-panel--card flex flex-row flex-wrap items-center gap-group p-card-sm">
-          <span className="grid h-11 w-11 place-items-center rounded-[var(--nf-radius-md)] border border-dashed border-[var(--nf-border-strong)] text-[0.75rem] text-[var(--nf-content-muted)]">
+          <span className="grid h-11 w-11 place-items-center rounded-md border border-dashed border-[var(--nf-border-strong)] text-[0.75rem] text-[var(--nf-content-muted)]">
             44
           </span>
           <p className="max-w-[46ch] text-[0.875rem] leading-relaxed text-[var(--nf-content-secondary)]">

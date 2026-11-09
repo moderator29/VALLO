@@ -15,6 +15,7 @@ import type { BusinessDecision } from "@/lib/admin/business-decision";
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * The three hands this desk offers, and nothing else.
@@ -32,15 +33,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 
 const NOTE_MIN = 12;
-
-function Refusal({ message }: { message: string | null }) {
-  if (!message) return null;
-  return (
-    <p role="alert" className="nf-caption mt-row text-[var(--nf-state-error)]">
-      {message}
-    </p>
-  );
-}
 
 /**
  * Approve, ask for a change, or refuse.
@@ -67,11 +59,9 @@ export function BusinessReviewDecision({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
-  const run = (decision: "approve" | "more_info" | "reject") => {
-    setError(null);
+  const run = (decision: "approve" | "more_info" | "reject"): void => {
     startTransition(async () => {
       try {
         const result =
@@ -81,10 +71,11 @@ export function BusinessReviewDecision({
               ? await requestMoreInfo({ businessId, note: note.trim() })
               : await rejectBusiness({ businessId, note: note.trim() });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => run(decision) });
           return;
         }
         setNote("");
+        banner.success(decision === "approve" ? "Approved" : decision === "more_info" ? "Info requested" : "Declined");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -147,7 +138,6 @@ export function BusinessReviewDecision({
             : "Already approved. Sending it back or refusing needs a sentence the host can answer, and they are shown it exactly as it is typed."}
         </p>
       )}
-      <Refusal message={error} />
     </div>
   );
 }
@@ -170,10 +160,8 @@ export function PublishControl({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
 
-  const run = () => {
-    setError(null);
+  const run = (): void => {
     startTransition(async () => {
       try {
         const result =
@@ -181,9 +169,10 @@ export function PublishControl({
             ? await publishRestaurant({ businessId: target.businessId })
             : await publishAccommodation({ accommodationId: target.accommodationId });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: run });
           return;
         }
+        banner.success("Published");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -196,7 +185,6 @@ export function PublishControl({
       <Button variant="primary" size="sm" disabled={pending} onClick={run}>
         {pending ? "Working" : `Put ${label} on the shelf`}
       </Button>
-      <Refusal message={error} />
     </div>
   );
 }
@@ -231,11 +219,9 @@ export function RungDecision({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
-  const run = (status: "passed" | "failed") => {
-    setError(null);
+  const run = (status: "passed" | "failed"): void => {
     startTransition(async () => {
       try {
         const result = await recordBusinessRung({
@@ -245,10 +231,11 @@ export function RungDecision({
           ...(note.trim().length > 0 ? { note: note.trim() } : {}),
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error, { retry: () => run(status) });
           return;
         }
         setNote("");
+        banner.success(status === "passed" ? "Passed" : "Failed");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -294,7 +281,6 @@ export function RungDecision({
         </Button>
       </div>
       {!evidenced && missingEvidence && <p className="nf-caption mt-row">{missingEvidence}</p>}
-      <Refusal message={error} />
     </div>
   );
 }

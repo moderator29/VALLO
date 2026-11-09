@@ -9,6 +9,7 @@ import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { Row, RowList } from "@/components/app/Screen";
 import { withNext } from "@/lib/auth/next-link";
 import { useRootFlag } from "@/lib/ui/root-flag";
+import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 
 /**
  * THE DOCK'S "+" AT THE RIGHT END, AND THE SHEET IT OPENS.
@@ -116,6 +117,11 @@ export function CreateDock({
     stays
       ? { id: "book-stay", href: "/stays/search", title: copy.bookStay, icon: "calendar-booking" }
       : { id: "viewing", href: "/search", title: copy.viewing, sub: copy.viewingSub, icon: "calendar-booking" },
+    /* Vallo Roommates (8 November 2026): one more quiet row on the property
+       side, after booking; a guest goes through the sign-up door. */
+    ...(stays || !t.roommatesEntry
+      ? []
+      : [{ id: "roommate", href: door(ROOMMATES_ROUTES.create), title: t.roommatesEntry.createDock, sub: t.roommatesEntry.createDockSub, icon: "house-duplex" as const }]),
   ];
   const items = [...top.map((item) => ({ ...item, quiet: false })), ...below.map((item) => ({ ...item, quiet: true }))];
 
@@ -147,8 +153,8 @@ export function CreateDock({
         open={open}
         onOpenChange={setOpen}
         title={copy.title}
-        /* Four rows with a short line each and a title: one detent that holds them. */
-        detents={[0.62]}
+        /* Up to five rows with a short line each and a title: one detent that holds them. */
+        detents={[0.72]}
         closeLabel={t.pickers.close}
       >
         <RowList inset={false} className="nf-create-sheet" data-testid="create-options">

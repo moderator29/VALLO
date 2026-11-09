@@ -70,7 +70,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("assistant blocks", () => {
       entry: `
         import { mount } from "@/lib/testing/browser-root";
         import { AssistantBlocks } from "@/components/app/assistant/AssistantBlocks";
-        mount(<AssistantBlocks onAsk={() => {}} blocks={[{ type: "cards", items: [${CARD}] }]} />);
+        import { ToastHost } from "@/components/ui/ToastHost";
+        /* What the confirm did is said by the one banner (Grade 1). */
+        mount(<><AssistantBlocks onAsk={() => {}} blocks={[{ type: "cards", items: [${CARD}] }]} /><ToastHost /></>);
       `,
     });
     try {
@@ -126,7 +128,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("assistant blocks", () => {
       entry: `
         import { mount } from "@/lib/testing/browser-root";
         import { AssistantBlocks } from "@/components/app/assistant/AssistantBlocks";
-        mount(<AssistantBlocks onAsk={() => {}} blocks={[{ type: "payment_review", proposalId: "p9", payloadHash: "${HASH}", service: "Stay booking: Two bed", recipient: "r", amount: "N1", fees: [], total: "N1", expiresAt: "" }]} />);
+        import { ToastHost } from "@/components/ui/ToastHost";
+        /* A refusal and a cancel are said by the one banner (Grade 1). */
+        mount(<><AssistantBlocks onAsk={() => {}} blocks={[{ type: "payment_review", proposalId: "p9", payloadHash: "${HASH}", service: "Stay booking: Two bed", recipient: "r", amount: "N1", fees: [], total: "N1", expiresAt: "" }]} /><ToastHost /></>);
       `,
     });
     try {

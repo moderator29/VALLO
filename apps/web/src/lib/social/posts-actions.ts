@@ -69,6 +69,8 @@ function messageForPostError(code: string | undefined, fallback: string): string
       return POST_FAILURE.tooDeep;
     case "RM013":
       return "You can only showcase a listing of your own that is live.";
+    case "RM027":
+      return "That listing is paused or not published, so it cannot be featured.";
     case "42501":
       return POST_FAILURE.notInArea;
     case "23514":
@@ -92,6 +94,8 @@ export async function dropPost(input: {
   areaId?: string;
   kind: "GIST" | "ASK";
   body: string;
+  /** A real listing to feature on the post (checked live by the insert). */
+  listingId?: string;
   /** V-40: the UUID minted when this was tapped; a replay answers with the first post. */
   tapKey?: string;
 }): Promise<ActionResult<{ postId: string; held: boolean }>> {
@@ -126,6 +130,7 @@ async function dropPostWork(
       author_kind: "USER",
       kind: parsed.data.kind,
       body: parsed.data.body,
+      listing_id: parsed.data.listingId ?? null,
     })
     // status comes back so the composer can tell the truth about what happened
     // rather than saying "posted" for something the scanner has just held.

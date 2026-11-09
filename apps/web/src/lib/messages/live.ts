@@ -25,6 +25,8 @@ import { readPersonBadges, type BadgeTier } from "@/lib/trust/badge-tier";
 import { readViewerFollowing } from "../social/follows-queries";
 import { loadUnreadCounts } from "./unread";
 import { isRequestThread } from "./request-rule";
+import { reactionMapFrom, type ReactionMap } from "./reactions";
+import { cleanDuration, cleanPeaks } from "./voice-note";
 
 type Db = SupabaseClient<Database>;
 
@@ -96,7 +98,92 @@ export type LiveThreadMessage = {
   imageSize?: { width: number; height: number } | null;
   /** The row's own timestamp. V-04's account card reads it for its one-minute "checking" window. */
   createdAt?: string;
+  /** The message this one answers (`messages.reply_to_id`). */
+  replyToId?: string | null;
+  /** Forwarded from another conversation. */
+  forwarded?: boolean;
+  /** Deleted for everyone: the words and the attachment are gone for both sides. */
+  deleted?: boolean;
+  /**
+   * GRADE 1 (P1.3): a voice note, when the attachment is `kind = 'audio'`: a
+   * signed URL, its stored length and its stored bars. Null otherwise, and
+   * always null on a database without the voice-note migration.
+   */
+  audio?: { url: string; durationMs: number | null; peaks: number[] | null } | null;
 };
+
+/** One attachment as the thread draws it, whichever columns the database has. */
+type ThreadAttachment = {
+  storage_path: string;
+  width: number | null;
+  height: number | null;
+  kind: string;
+  duration_ms: number | null;
+  peaks: unknown;
+};
+
+type ThreadMessageRow = {
+  id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+  reply_to_id: string | null;
+  forwarded: boolean;
+  deleted_for_everyone_at: string | null;
+  message_attachments: ThreadAttachment[];
+};
+
+/**
+ * The thread's messages with their attachments. The voice-note columns
+ * (`kind`, `duration_ms`, `peaks`) are asked for first; a database the
+ * pending migration has not reached refuses that select, and the read falls
+ * back to the columns every database has, every attachment then a photo, as
+ * it always was. Either way the thread opens.
+ */
+async function readThreadMessages(supabase: Db, conversationId: string): Promise<ThreadMessageRow[]> {
+  const voiced = await supabase
+    .from("messages")
+    .select(
+      "id, sender_id, body, created_at, reply_to_id, forwarded, deleted_for_everyone_at, message_attachments(storage_path, width, height, kind, duration_ms, peaks)",
+    )
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  if (!voiced.error) return (voiced.data ?? []) as ThreadMessageRow[];
+  const plain = await supabase
+    .from("messages")
+    .select(
+      "id, sender_id, body, created_at, reply_to_id, forwarded, deleted_for_everyone_at, message_attachments(storage_path, width, height)",
+    )
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true })
+    .limit(200);
+  return (plain.data ?? []).map((m) => ({
+    ...m,
+    message_attachments: m.message_attachments.map((a) => ({ ...a, kind: "image", duration_ms: null, peaks: null })),
+  }));
+}
+
+/**
+ * Every reaction in one thread, by message, under the reader's own RLS (members
+ * only, by the table's policy). NULL when the read fails, which is what a
+ * database without the `message_reactions` table answers: the thread then
+ * draws no reactions and offers none, rather than offering a control that
+ * cannot work.
+ */
+export async function loadThreadReactions(supabase: Db, conversationId: string): Promise<ReactionMap | null> {
+  try {
+    const { data, error } = await supabase
+      .from("message_reactions")
+      .select("message_id, user_id, emoji")
+      .eq("conversation_id", conversationId)
+      .limit(2000);
+    if (error) return null;
+    return reactionMapFrom(data ?? []);
+  } catch {
+    return null;
+  }
+}
 
 export type LiveThreadData = {
   conversationId: string;
@@ -581,15 +668,8 @@ export async function loadThread(
   if (!conversation) return null;
   if (conversation.guest_id !== user.id && conversation.agent_id !== user.id) return null;
 
-  const [{ data: messagesRaw }, { data: myInspection }, { data: myHidden }] = await Promise.all([
-    supabase
-      .from("messages")
-      .select(
-        "id, sender_id, body, created_at, reply_to_id, forwarded, deleted_for_everyone_at, message_attachments(storage_path, width, height)",
-      )
-      .eq("conversation_id", conversationId)
-      .order("created_at", { ascending: true })
-      .limit(200),
+  const [messagesRaw, { data: myInspection }, { data: myHidden }] = await Promise.all([
+    readThreadMessages(supabase, conversationId),
     supabase
       .from("inspection_confirmations")
       .select("id")
@@ -668,14 +748,20 @@ export async function loadThread(
       const attachment = m.message_attachments[0];
       const path = attachment?.storage_path;
       const deleted = m.deleted_for_everyone_at !== null;
+      const voice = attachment?.kind === "audio";
+      const url = !deleted && path ? (urlByPath.get(path) ?? null) : null;
       return {
         id: m.id,
         mine: m.sender_id === user.id,
         body: m.body,
         timeLabel: lagosTimeLabel(m.created_at),
-        imageUrl: deleted ? null : path ? (urlByPath.get(path) ?? null) : null,
+        imageUrl: voice ? null : url,
         imageSize:
-          attachment?.width && attachment?.height ? { width: attachment.width, height: attachment.height } : null,
+          !voice && attachment?.width && attachment?.height ? { width: attachment.width, height: attachment.height } : null,
+        audio:
+          voice && url
+            ? { url, durationMs: cleanDuration(attachment.duration_ms), peaks: cleanPeaks(attachment.peaks) }
+            : null,
         createdAt: m.created_at,
         replyToId: m.reply_to_id ?? null,
         forwarded: m.forwarded === true,
@@ -689,7 +775,7 @@ export async function loadThread(
 export async function loadNotifications(supabase: Db): Promise<NotificationRow[]> {
   const { data } = await supabase
     .from("notifications")
-    .select("id, user_id, kind, title, body, href, read_at, created_at")
+    .select("id, user_id, kind, title, body, href, read_at, archived_at, created_at")
     .order("created_at", { ascending: false })
     .limit(100);
   return data ?? [];

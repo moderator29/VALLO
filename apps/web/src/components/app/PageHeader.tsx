@@ -143,7 +143,7 @@ export function PageHeader({
 
   if (layout === "stacked") {
     return (
-      <div className={`mb-heading ${tone === "verified" ? "nf-page-header--verified rounded-[var(--nf-radius-lg)]" : ""}`}>
+      <div className={`mb-heading ${tone === "verified" ? "nf-page-header--verified rounded-lg" : ""}`}>
         <div className="flex items-center justify-between gap-md">
           {backButton}
           {actions ? <div className="nf-ph-actions flex shrink-0 items-center gap-inline">{actions}</div> : null}
@@ -187,7 +187,7 @@ export function PageHeader({
          block dropped it below a one-line title whenever the subtitle ran to
          two or three lines (Restaurants, Price Check; integration QA,
          30 September). Without one, centring is the same thing. */
-      className={`mb-heading flex flex-wrap ${subtitle ? "items-start" : "items-center"} gap-x-md gap-y-inline rounded-[var(--nf-radius-lg)] ${
+      className={`mb-heading flex flex-wrap ${subtitle ? "items-start" : "items-center"} gap-x-md gap-y-inline rounded-lg ${
         tone === "verified" ? "nf-page-header--verified" : ""
       }`}
     >

@@ -1,5 +1,6 @@
 "use client";
 
+import { deviceKeyState } from "@/lib/platform/device-keys";
 import { useCallback, useId, useRef, useState } from "react";
 import { forgetLocalPasscode, rememberPasscode } from "@/lib/passcode/local-verifier";
 import { useRouter } from "next/navigation";
@@ -135,7 +136,9 @@ export function PasscodeSetup({
             overlay &&
             offerBiometric &&
             result.event === "set" &&
-            shouldOfferBiometric({ enrolled: false, supported: await platformLockAvailable(), seen: readBioOfferSeen() })
+            /* Enrolled means THIS phone holds a key (lib/platform/device-keys.ts):
+               an account whose key lives on another phone is still offered it here. */
+            shouldOfferBiometric({ enrolled: deviceKeyState() === "has", supported: await platformLockAvailable(), seen: readBioOfferSeen() })
           ) {
             /* Saved and unlocked already; the offer only waits for a choice. */
             markBioOfferSeen();

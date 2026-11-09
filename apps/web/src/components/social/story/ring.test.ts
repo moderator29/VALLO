@@ -47,6 +47,17 @@ describe("the story ring", () => {
     }
   });
 
+  it("is blue led: only the newest lit segment carries the spark, nothing mixes into it", () => {
+    for (const flags of [[false, false], [false, false, false], Array(6).fill(false)]) {
+      const g = ringGradient(flags);
+      expect(g.match(/--nf-ring-lit-end/g)).toHaveLength(1);
+      expect(g).not.toMatch(/color-mix\([^)]*--nf-ring-lit-end/);
+      expect(g.lastIndexOf("--nf-ring-lit-end")).toBeGreaterThan(g.lastIndexOf("--nf-ring-lit)"));
+    }
+    /* The newest opened: the spark goes with it, the rest stay blue. */
+    expect(ringGradient([false, false, true])).not.toContain("--nf-ring-lit-end");
+  });
+
   it("is all seen only when there is something and all of it is opened", () => {
     expect(allSeen([])).toBe(false);
     expect(allSeen([true, false])).toBe(false);

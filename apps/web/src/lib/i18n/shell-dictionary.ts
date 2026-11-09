@@ -37,6 +37,10 @@ export type ShellDictionary = Pick<Dictionary, "a11y" | "common" | "nav" | "side
   homeV2: Pick<Dictionary["homeV2"], (typeof CREATE_KEYS)[number]>;
   /** The People row's label, beside Feed: the page's own word, so the two cannot drift. */
   feedV2: { people: Pick<Dictionary["feedV2"]["people"], "navPeople"> };
+  /** Vallo Roommates' side-nav row and its Create sheet option (8 November 2026). */
+  /* Optional: a fixture that hands the shell a whole Dictionary has no such
+     key, and the shell then simply draws no Roommates row. */
+  roommatesEntry?: Pick<Dictionary["roommates"]["entryX"], "nav" | "createDock" | "createDockSub">;
   /** "Report a problem", the support home's own words, for the More menu on every screen. */
   experienceInbox: { support: { home: Pick<Dictionary["experienceInbox"]["support"]["home"], "reportProblem"> } };
 };
@@ -100,6 +104,9 @@ export function shellDictionary(t: Dictionary): ShellDictionary {
     passportV2: { navLabel: t.passportV2.navLabel },
     experienceRewards: { title: t.experienceRewards.title },
     experienceInbox: { support: { home: { reportProblem: t.experienceInbox.support.home.reportProblem } } },
+    /* Under its own key, not `roommates`, so the shell's import graph never
+       reads (and the agent nav's slice never carries) the whole namespace. */
+    roommatesEntry: { nav: t.roommates.entryX.nav, createDock: t.roommates.entryX.createDock, createDockSub: t.roommates.entryX.createDockSub },
     homeV2: Object.fromEntries(CREATE_KEYS.map((key) => [key, t.homeV2[key]])) as ShellDictionary["homeV2"],
   };
   cache.set(t, shell);

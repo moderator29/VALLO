@@ -62,6 +62,9 @@ async function evaluated(): Promise<Record<string, string>> {
   const compound = await import("../listings/compound");
   const service = await import("../listings/service");
   const unit = await import("../listings/unit-shape");
+  /* The public listing-card columns the Circle post composer and the shortlist
+     read through one shared constant (`POST_LISTING_COLUMNS`). */
+  const postListing = await import("../features/post-listing/model");
   return {
     "lib/agent/listings-queries.ts:LISTING_PUBLIC_SELECT": agentQueries.LISTING_PUBLIC_SELECT,
     "lib/ops/catalogue-canary.ts:CANARY_CARD_SELECT": canary.CANARY_CARD_SELECT,
@@ -71,6 +74,8 @@ async function evaluated(): Promise<Record<string, string>> {
     "lib/listings/supabase-repository.ts:COMPOUND_BY_ID_COLUMNS": compound.COMPOUND_BY_ID_COLUMNS,
     "lib/listings/supabase-repository.ts:SERVICE_BY_ID_COLUMNS": service.SERVICE_BY_ID_COLUMNS,
     "lib/listings/supabase-repository.ts:UNIT_BY_ID_COLUMNS": unit.UNIT_BY_ID_COLUMNS,
+    "lib/features/post-listing/actions.ts:POST_LISTING_COLUMNS": postListing.POST_LISTING_COLUMNS,
+    "lib/social/posts-queries.ts:POST_LISTING_COLUMNS": postListing.POST_LISTING_COLUMNS,
   };
 }
 

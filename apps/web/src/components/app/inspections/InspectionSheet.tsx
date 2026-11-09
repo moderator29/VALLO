@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import "@/app/css/inspection.css";
 import { UnsafeSheet } from "@/components/app/safety/UnsafeSheet";
 import { useRef, useState } from "react";
@@ -16,7 +17,6 @@ import { panelClass } from "@/components/ui/Panel";
 import { SuccessSheet } from "@/components/ui/SuccessSheet";
 import { successCopy, type SuccessWords } from "@/lib/ui/success-moments";
 import { MediaFrame } from "@/components/app/MediaFrame";
-import { formatPhone } from "@/lib/phone";
 import { BackControl } from "@/components/ui/BackControl";
 import type { ListingKind } from "@/lib/listings/types";
 import {
@@ -28,7 +28,7 @@ import {
   saveInspectionReport,
 } from "@/lib/inspections/actions";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
-import { reencodeToJpeg } from "@/components/social/profile/reencode";
+import { reencodePhoto } from "@/components/social/profile/reencode";
 import {
   EMPTY_REPORT,
   ROOM_COPY,
@@ -227,7 +227,6 @@ export function InspectionSheet({
   const w = flowCopy;
   const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
-  const [error, setError] = useState<string | null>(null);
   /* The one sheet open over the card, if any: a time to offer, or a final
      move asked before it is made. */
   const [sheet, setSheet] = useState<
@@ -275,19 +274,20 @@ export function InspectionSheet({
   const submittable = canSubmit(reportLive, inspection.state, saved, outcome, photoNeed) && timeCome;
   const photosMissing = photosShort(saved, photoNeed);
 
-  function run(work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void) {
+  function run(work: () => Promise<{ ok: boolean; error?: string }>, after?: () => void, successMsg?: string) {
     if (inFlight.current) return;
     inFlight.current = true;
-    setError(null);
     startTransition(async () => {
       try {
         try {
           const result = await work();
           if (!result.ok) {
-            setError(result.error ?? w.failed);
+            /* Said by the one banner at the top of the screen (Grade 1). */
+            banner.error(result.error ?? w.failed);
             return;
           }
           after?.();
+          if (successMsg) banner.success(successMsg);
           router.refresh();
         } finally {
           inFlight.current = false;
@@ -301,7 +301,10 @@ export function InspectionSheet({
   /* A move made from a sheet: the sheet draws the refusal itself, and on
      success the card re-reads. */
   function settle(result: StepResult): StepResult {
-    if (result.ok) startTransition(() => router.refresh());
+    if (result.ok) {
+      banner.success("Updated");
+      startTransition(() => router.refresh());
+    }
     return result;
   }
   const answerWith = (state: "PROPOSED" | "DECLINED", when: string | null, note: string) =>
@@ -320,7 +323,6 @@ export function InspectionSheet({
    * what was typed.
    */
   function saveReport(body: { items?: { item: RoomItem; checked: boolean }[]; submit?: boolean }) {
-    setError(null);
     startTransition(async () => {
       try {
         const result = await saveInspectionReport({
@@ -330,7 +332,7 @@ export function InspectionSheet({
           submit: body.submit ?? false,
         });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setSaved((now) => fromSaved(result.data, now.photoCount));
@@ -349,7 +351,6 @@ export function InspectionSheet({
    * The count moves only when that row came back.
    */
   async function addPhoto(picked: File) {
-    setError(null);
     setUploading(true);
     try {
       /*
@@ -365,23 +366,23 @@ export function InspectionSheet({
       let extension = "pdf";
       let contentType = "application/pdf";
       if (!isPdf) {
-        const clean = await reencodeToJpeg(picked, { maxEdge: 2560, quality: 0.9 });
-        if (!clean) {
-          setError("That photo could not be read on this device. Try a JPEG or a screenshot.");
+        const encoded = await reencodePhoto(picked, { maxEdge: 2560, quality: 0.9 });
+        if (!encoded) {
+          banner.error("That photo could not be read on this device. Try a JPEG or a screenshot.");
           return;
         }
-        file = clean;
-        extension = "jpg";
-        contentType = "image/jpeg";
+        file = encoded.blob;
+        extension = encoded.extension;
+        contentType = encoded.contentType;
       }
       const target = await createInspectionPhotoUpload({ inspectionId: inspection.id, extension });
       if (!target.ok) {
-        setError(target.error);
+        banner.error(target.error);
         return;
       }
       const client = await loadBrowserClient();
       if (!client) {
-        setError(w.photoFailed);
+        banner.error(w.photoFailed);
         return;
       }
       const upload = await uploadToStorage({
@@ -393,12 +394,12 @@ export function InspectionSheet({
         signedToken: target.data.token,
       });
       if (!upload.ok) {
-        setError(w.photoFailed);
+        banner.error(w.photoFailed);
         return;
       }
       const added = await addReportPhoto({ inspectionId: inspection.id, storagePath: target.data.path });
       if (!added.ok) {
-        setError(added.error);
+        banner.error(added.error);
         return;
       }
       setSaved((now) => ({ ...now, photoCount: now.photoCount + 1 }));
@@ -528,10 +529,10 @@ export function InspectionSheet({
                     className="nf-ix-fact__phone nf-numeric"
                     aria-label={w.call
                       .replace("{name}", inspection.counterpartName ?? w.them)
-                      .replace("{phone}", formatPhone(inspection.counterpartPhone))}
+                      .replace("{phone}", inspection.counterpartPhoneFormatted ?? inspection.counterpartPhone)}
                     data-testid="inspection-call"
                   >
-                    {formatPhone(inspection.counterpartPhone)}
+                    {inspection.counterpartPhoneFormatted ?? inspection.counterpartPhone}
                   </a>
                 </p>
               )}
@@ -765,12 +766,6 @@ export function InspectionSheet({
           </section>
         )}
 
-        {error && (
-          <p role="alert" className="nf-ix-error">
-            {error}
-          </p>
-        )}
-
         {/* ---------------------------------------------------------- actions */}
         <div className="nf-ix-actions">
           {/* Decline and Withdraw have no way back in the database, so each
@@ -781,7 +776,7 @@ export function InspectionSheet({
               <Button
                 variant="primary"
                 disabled={pending}
-                onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }))}
+                onClick={() => run(() => answerInspection({ id: inspection.id, state: "CONFIRMED" }), undefined, "Viewing confirmed.")}
                 data-testid="inspection-confirm"
               >
                 {VIEWING_WORDS.confirm}
@@ -799,7 +794,7 @@ export function InspectionSheet({
               <Button
                 variant="primary"
                 disabled={pending}
-                onClick={() => run(() => acceptProposedTime({ id: inspection.id }))}
+                onClick={() => run(() => acceptProposedTime({ id: inspection.id }), undefined, "Time accepted.")}
                 data-testid="inspection-accept-time"
               >
                 {VIEWING_WORDS.acceptTime}

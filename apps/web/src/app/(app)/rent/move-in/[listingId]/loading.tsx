@@ -5,7 +5,7 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
 export default function LoadingMoveIn() {
   return (
     <LoadingShell label="Loading the move-in cost">
-      <PageHeaderSkeleton />
+      <PageHeaderSkeleton layout="large" />
       <SkeletonCard />
       <div className="mt-md space-y-sm">
         <Skeleton height="3rem" radius="md" />

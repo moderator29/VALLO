@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { Sparkline } from "@/components/agent/charts/Sparkline";
-import { CalmNote } from "../_components/panels";
+import { CalmNote, PageHead } from "../_components/panels";
 import { donutArcs, pagerPages, share } from "./metrics";
 
 /**
@@ -34,14 +34,8 @@ export function DeskHead({
   lead?: ReactNode;
   trail?: ReactNode;
 }) {
-  return (
-    <header className="nf-rv-head">
-      {lead}
-      <h1 className="nf-rv-head__title">{title}</h1>
-      {trail}
-      {sub ? <p className="nf-rv-head__sub">{sub}</p> : null}
-    </header>
-  );
+  /* The console's one header (`PageHead`, AD-01), kept under this name for the review desks. */
+  return <PageHead title={title} lede={sub} lead={lead} trail={trail} />;
 }
 
 /* ---------------------------------------------------------- section list */

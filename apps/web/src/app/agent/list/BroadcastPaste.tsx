@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { formatMoney, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -37,23 +38,21 @@ export function BroadcastPaste({
 }) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ filled: BroadcastKey[]; parse: BroadcastParse } | null>(null);
   const [pending, start] = useSafeTransition();
 
   function read() {
-    setError(null);
     start(async () => {
       try {
         const answer = await draftFromBroadcast({ text });
         if (!answer.ok) {
-          setError(answer.error);
+          banner.error(answer.error);
           return;
         }
         const filled = onApply(answer.data);
         setResult({ filled, parse: answer.data });
       } catch {
-        setError(copy.failed);
+        banner.error(copy.failed);
       }
     });
   }
@@ -96,11 +95,6 @@ export function BroadcastPaste({
           data-testid="broadcast-text"
         />
       </label>
-      {error && (
-        <p className="mt-inline nf-body-sm font-semibold text-[var(--nf-state-error)]" role="alert">
-          {error}
-        </p>
-      )}
       <div className="mt-row flex flex-wrap gap-row">
         <Button variant="primary" onClick={read} loading={pending} disabled={text.trim().length < 10}>
           {pending ? copy.reading : copy.read}

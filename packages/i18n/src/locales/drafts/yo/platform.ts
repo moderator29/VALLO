@@ -161,6 +161,8 @@ export const platformYo = {
     reply: "Fèsì",
     answer: "Ṣí àwọn àyẹ̀wò ilé",
     openBooking: "Ṣí ìfipamọ́ náà",
+    message: "Firanṣẹ",
+    callBack: "Pe padà",
   },
 
   shelf: {

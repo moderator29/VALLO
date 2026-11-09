@@ -12,10 +12,15 @@ import { ThemeSync } from "@/components/site/ThemeControl";
 import { ServiceWorkerRegistrar } from "@/components/app/ServiceWorkerRegistrar";
 import { VIEWER_HEADER, viewerMeta } from "@/lib/offline/viewer-stamp";
 import { NativeRuntime } from "@/components/app/NativeRuntime";
+import { CrashListener } from "@/components/app/CrashListener";
 import { STARTUP_GATE_SCRIPT, STARTUP_NATIVE_SCRIPT } from "@/components/startup/startup-script";
 import { ThresholdStage } from "@/components/motion/ThresholdStage";
 import { MOTION_COOKIE, motionAttributes, parseMotion } from "@/lib/motion/motion-pref";
 import "./globals.css";
+import "./css/launch.css";
+import "./css/input-bar.css";
+import { launchScript } from "@/components/motion/launch-script";
+import packageJson from "../../package.json";
 import "@/components/startup/startup.css";
 import { siteUrl } from "@/lib/site";
 import { CHROME_COLOUR } from "@/lib/theme/chrome";
@@ -485,6 +490,10 @@ export default async function RootLayout({
             __html: STARTUP_GATE_SCRIPT,
           }}
         />
+        {/* The app open logo on the website (founder ruling (a)): decided before
+            the first frame, never on the native shell, once per session on the
+            front doors; components/motion/launch-script.ts. */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: launchScript(packageJson.version) }} />
         {/*
           WITHOUT JAVASCRIPT, EVERYTHING BELOW THE FOLD WAS INVISIBLE.
 
@@ -527,6 +536,7 @@ export default async function RootLayout({
           down was simply never in the page.
         */}
         <NativeRuntime />
+        <CrashListener />
         <a href="#main" className="nf-skip-link">
           {t.common.skipToContent}
         </a>

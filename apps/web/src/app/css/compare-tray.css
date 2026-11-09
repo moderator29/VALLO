@@ -53,10 +53,28 @@
     border: 0;
     color: var(--nf-content-secondary);
   }
+  .nf-compare-tray__open,
+  .nf-compare-tray__clear {
+    transition: opacity var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-compare-tray__open:hover {
+      opacity: 0.85;
+    }
+    .nf-compare-tray__clear:hover {
+      color: var(--nf-content-primary);
+    }
+  }
   .nf-compare-tray__open:focus-visible,
   .nf-compare-tray__clear:focus-visible {
     outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
     outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-compare-tray__open,
+    .nf-compare-tray__clear {
+      transition: none;
+    }
   }
   @media (min-width: 64rem) {
     .nf-compare-tray {

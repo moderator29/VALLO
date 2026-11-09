@@ -15,7 +15,7 @@ import {
   type MediaErrorKind,
 } from "@/lib/calls/screen";
 import type { CallKind, CallSnapshot } from "@/lib/calls/types";
-import { confirmResume, dismissCall, markLocallyOver, mergeSnapshot, type ActiveCall } from "./call-store";
+import { confirmResume, dismissCall, markLocallyOver, mergeSnapshot, pushQualitySample, type ActiveCall } from "./call-store";
 import { useCallPulse, useServerClock } from "./use-call-pulse";
 import { ConfirmEnd, InCallView, OutgoingView, PermissionView, type CallBanner, type CallsCopy } from "./views";
 import { Button } from "@/components/ui/Button";
@@ -296,6 +296,14 @@ export default function CallStage({ active, copy }: { active: ActiveCall; copy: 
     const preview = localTracksRef.current.find((t) => t.kind === "video");
     if (el && preview) preview.attach(el);
   }, []);
+
+  /* Collect a quality sample every 5 s while connected, for the ended sparkline. */
+  useEffect(() => {
+    if (media.connection !== "connected") return;
+    pushQualitySample(media.quality);
+    const id = setInterval(() => pushQualitySample(media.quality), 5_000);
+    return () => clearInterval(id);
+  }, [media.connection, media.quality]);
 
   /* --------------------------------------------------------------- draw */
 

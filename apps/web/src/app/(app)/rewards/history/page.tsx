@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { RewardsHistory } from "@/components/app/referral/RewardsHistory";
 import { RewardsState } from "@/components/app/referral/RewardsState";
@@ -26,22 +26,19 @@ export default async function RewardsHistoryPage() {
   const locale = await getLocale();
   const copy = getDictionary(locale).experienceRewards;
   const screen = await rewardsScreen();
-  const header = <PageHeader title={copy.history.title} subtitle={copy.history.lede} fallback="/rewards" />;
 
   if (screen.kind === "state") {
     return (
-      <div className="mx-auto max-w-2xl">
-        {header}
+      <PageFrame title={copy.history.title} subtitle={copy.history.lede} fallback="/rewards" width="narrow">
         <RewardsState read={screen.read} copy={copy.states} signInHref={signInHref("/rewards/history")} inviteHref={INVITE_HREF} />
-      </div>
+      </PageFrame>
     );
   }
 
   const paused = pausedProgramme({ state: "ready", snapshot: screen.snapshot });
 
   return (
-    <div className="mx-auto max-w-2xl space-y-block">
-      {header}
+    <PageFrame title={copy.history.title} subtitle={copy.history.lede} fallback="/rewards" width="narrow">
       {paused ? <RewardsPauseNotice programme={paused} copy={copy.pause} earned={REWARDS_PAUSED_EARNED_LINE} locale={locale} /> : null}
       {screen.snapshot.history.length === 0 ? (
         <EmptyState
@@ -54,6 +51,6 @@ export default async function RewardsHistoryPage() {
       ) : (
         <RewardsHistory entries={screen.snapshot.history} copy={copy.history} locale={locale} />
       )}
-    </div>
+    </PageFrame>
   );
 }

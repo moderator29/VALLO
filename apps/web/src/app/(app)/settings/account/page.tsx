@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { forAccount, forSearchCard } from "@/components/app/account/settings-copy";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SearchCard } from "@/components/app/account/SettingsGroups";
 import { SettingsLede } from "@/components/app/account/SettingsLede";
 import { SettingsInnerNav } from "@/components/app/account/SettingsInnerNav";
@@ -39,12 +39,15 @@ export default async function AccountSettingsPage() {
   const copy = t.experienceAccount.settings;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader
-        title={t.settings.hub.accountInfo}
-        subtitle={t.settings.hub.accountInfoSub}
-        fallback="/settings"
-      />
+    <PageFrame
+      title={t.settings.hub.accountInfo}
+      subtitle={t.settings.hub.accountInfoSub}
+      fallback="/settings"
+      width="narrow"
+    >
+      {/* One child keeps the lede, the inner nav and the sections on their
+          own rhythm (the lede and nav carry their 16px foot). */}
+      <div>
       <SettingsLede label={copy.lede.what} what={copy.lede.account.what} who={copy.lede.account.who} />
       <SettingsInnerNav
         label={copy.nav.label}
@@ -92,6 +95,7 @@ export default async function AccountSettingsPage() {
           <SearchCard t={forSearchCard(t)} />
         </section>
       </div>
-    </div>
+      </div>
+    </PageFrame>
   );
 }

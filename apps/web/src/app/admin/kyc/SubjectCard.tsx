@@ -80,7 +80,7 @@ export function SubjectCard({
           {subject.rungs.map((rung) => (
             <li
               key={rung.kind}
-              className="rounded-[var(--nf-radius-sm)] border border-[var(--nf-border-subtle)] px-xs py-2xs"
+              className="rounded-sm border border-[var(--nf-border-subtle)] px-xs py-2xs"
             >
               <span className="text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-primary)]">
                 {RUNG_LABEL[rung.kind] ?? rung.kind}
@@ -152,7 +152,7 @@ export function SubjectCard({
         {subject.documents.map((doc) => (
           <li
             key={doc.id}
-            className="rounded-[var(--nf-radius-md)] border border-[var(--nf-border-subtle)] p-sm"
+            className="rounded-md border border-[var(--nf-border-subtle)] p-sm"
           >
             <div className="flex flex-wrap items-center gap-xs">
               <span className="text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">

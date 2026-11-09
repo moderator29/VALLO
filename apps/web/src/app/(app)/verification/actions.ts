@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  isCountryCode,
   CONSENTS,
   addressDateProblem,
   isSubtypeOf,
@@ -12,6 +13,7 @@ import {
   type KycSubmitResult,
 } from "@/components/verification/kyc";
 import { resolveSession } from "@/lib/actions/session";
+import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
 import { documentToSupersede, type FiledDocument } from "@/lib/agent/supersedes";
 import { ACCEPT_PAY_REQUIRED, ACCEPT_TERMS_REQUIRED, withWorkspaceAcceptance } from "@/lib/legal/workspace-acceptance";
 
@@ -115,6 +117,16 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
     }
     if (!isSubtypeOf(kind, doc.subtype)) return { ok: false, message: FAILED };
   }
+  /* GRADE 1 (P0.3): the back of the ID, when there is one, under the same
+     rule as the front (the database checks the folder too, migration
+     20261107143359), and the issuing country as an ISO code or nothing. */
+  const identityDoc = submission.documents.identity;
+  const backPath = identityDoc?.backPath ?? null;
+  if (backPath !== null && (typeof backPath !== "string" || !backPath.startsWith(prefix) || backPath.includes(".."))) {
+    return { ok: false, message: NOT_YOURS };
+  }
+  const issuingCountry = identityDoc?.country ?? null;
+  if (issuingCountry !== null && !isCountryCode(issuingCountry)) return { ok: false, message: FAILED };
   /* The live selfie, under the same rule: the caller's own folder, a photo. */
   const selfie = submission.selfie;
   if (
@@ -214,6 +226,7 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
       issued_on: kind === "address" ? doc.issuedOn : null,
       storage_path: doc.path,
       supersedes_id: latestOf(kind),
+      ...(kind === "identity" ? { issuing_country: issuingCountry, back_storage_path: backPath } : {}),
     };
   });
   const selfieRow = {
@@ -268,10 +281,10 @@ export async function submitVerification(submission: KycSubmission): Promise<Kyc
 export async function answerVerificationRequest(input: {
   requestId: string;
   path: string;
-}): Promise<{ ok: true } | { ok: false; message: string }> {
+}): Promise<ActionResult> {
   const session = await resolveSession();
   if (session.state !== "signed-in") {
-    return { ok: false, message: "Sign in again to send your photo. Nothing was lost." };
+    return fail("Sign in again to send your photo. Nothing was lost.");
   }
   if (
     typeof input?.requestId !== "string" ||
@@ -279,18 +292,18 @@ export async function answerVerificationRequest(input: {
     typeof input.path !== "string" ||
     !input.path.startsWith(`${session.user.id}/`)
   ) {
-    return { ok: false, message: NOT_YOURS };
+    return fail(NOT_YOURS);
   }
   const { data, error } = await (session.supabase as unknown as {
     rpc(fn: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: unknown }>;
   }).rpc("answer_verification_request", { p_request: input.requestId, p_path: input.path });
   const status = data && typeof data === "object" ? String((data as { status?: unknown }).status ?? "") : "";
-  if (error) return { ok: false, message: FAILED };
+  if (error) return fail(FAILED);
   if (status === "ok") {
     revalidatePath("/verification");
-    return { ok: true };
+    return ok(null);
   }
-  if (status === "closed") return { ok: false, message: "This request is already answered. Thank you." };
-  if (status === "not_yours") return { ok: false, message: NOT_YOURS };
-  return { ok: false, message: FAILED };
+  if (status === "closed") return fail("This request is already answered. Thank you.");
+  if (status === "not_yours") return fail(NOT_YOURS);
+  return fail(FAILED);
 }

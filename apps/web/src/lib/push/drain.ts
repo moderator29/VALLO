@@ -11,6 +11,7 @@ import type { PushClient, PushPlatform, PushQueueOutcome } from "./schema";
 import { sendApns } from "./transport/apns";
 import { apnsIsOpen, gatePlatforms } from "./apns-flag";
 import { sendFcm } from "./transport/fcm";
+import { resolvePushImages } from "./imagery";
 import { sendWebPush } from "./transport/webpush";
 import { isConfigurationFailure, isRetryable, type ProviderReply, type PushPayload, type PushTarget } from "./types";
 
@@ -200,7 +201,9 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
   /* Everything the decision needs, read in two queries rather than in two
      hundred. */
   const notifications = await readNotifications(admin, claimed.map((row) => row.notification_id));
-  const settingsByUser = await readSettings(admin, [...new Set(claimed.map((row) => row.user_id))]);
+  const userIds = [...new Set(claimed.map((row) => row.user_id))];
+  const settingsByUser = await readSettings(admin, userIds);
+  const mutedByUser = await readMutes(admin, userIds);
   const now = new Date();
 
   /* Per person, because collapsing is a decision about a person's whole
@@ -228,7 +231,12 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
       expiresAt: new Date(row.expires_at),
     };
 
-    const decision = decide({ notification: queued, settings: settingsByUser.get(row.user_id), now });
+    const decision = decide({
+      notification: queued,
+      settings: settingsByUser.get(row.user_id),
+      now,
+      mutedConversations: mutedByUser.get(row.user_id),
+    });
 
     if (decision.action === "suppress") {
       await settle(admin, row.id, "done", decision.outcome);
@@ -287,8 +295,18 @@ export async function pushDrain(admin: PushClient): Promise<JobVerdict> {
       continue;
     }
 
+    /* A1 to A3: the picture for each push (a place's cover, the writer's
+       face), read in one batch per person; a call's ring carries none. */
+    const images = await resolvePushImages(
+      admin,
+      userId,
+      plan.send.filter((item) => !item.payload.call).map((item) => item.payload.href),
+    );
+
     for (const item of plan.send) {
-      const outcome = await deliverOne(admin, item.queueId, targets, item.payload, counts, notes);
+      const image = item.payload.call ? undefined : images.get(item.payload.href);
+      const payload = image ? { ...item.payload, image } : item.payload;
+      const outcome = await deliverOne(admin, item.queueId, targets, payload, counts, notes);
       if (outcome === "delivered") {
         await settle(admin, item.queueId, "done", "delivered");
         counts.sent += 1;
@@ -580,6 +598,37 @@ async function readSettings(admin: PushClient, userIds: string[]): Promise<Map<s
   return out;
 }
 
+/**
+ * Muted conversations per person (`conversation_prefs.muted_until` in the
+ * future). Best effort: until the table exists, or on a failed read, nobody
+ * is muted and pushes go as before.
+ */
+async function readMutes(admin: PushClient, userIds: string[]): Promise<Map<string, Set<string>>> {
+  const out = new Map<string, Set<string>>();
+  if (userIds.length === 0) return out;
+  try {
+    const { data, error } = await (admin.from("conversation_prefs" as never) as unknown as {
+      select: (columns: string) => {
+        in: (column: string, values: string[]) => {
+          gt: (column: string, value: string) => PromiseLike<{ data: { user_id: string; conversation_id: string }[] | null; error: unknown }>;
+        };
+      };
+    })
+      .select("user_id, conversation_id")
+      .in("user_id", userIds)
+      .gt("muted_until", new Date().toISOString());
+    if (error) return out;
+    for (const row of data ?? []) {
+      const set = out.get(row.user_id) ?? new Set<string>();
+      set.add(String(row.conversation_id).toLowerCase());
+      out.set(row.user_id, set);
+    }
+  } catch {
+    /* Nobody muted. */
+  }
+  return out;
+}
+
 /** A person's live devices, on platforms this deployment can actually reach. */
 async function readTargets(
   admin: PushClient,
@@ -588,7 +637,7 @@ async function readTargets(
 ): Promise<PushTarget[]> {
   const { data } = await admin
     .from("push_tokens")
-    .select("id, platform, token, p256dh, auth, device_ref")
+    .select("id, platform, token, p256dh, auth, device_ref, app_version")
     .eq("user_id", userId)
     .is("revoked_at", null)
     .in("platform", platforms);
@@ -599,6 +648,7 @@ async function readTargets(
     p256dh: row.p256dh,
     auth: row.auth,
     deviceRef: row.device_ref,
+    appVersion: row.app_version,
   }));
 }
 

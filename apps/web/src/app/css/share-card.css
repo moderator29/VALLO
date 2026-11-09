@@ -98,9 +98,22 @@
   cursor: pointer;
 }
 
+.nf-share-card__info {
+  transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
+}
+@media (hover: hover) {
+  .nf-share-card__info:hover {
+    background-color: var(--nf-interactive-hover);
+  }
+}
 .nf-share-card__info:focus-visible {
   outline: 2px solid var(--nf-brand-primary);
   outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nf-share-card__info {
+    transition: none;
+  }
 }
 
 /* ------------------------------------------------------------- the well */

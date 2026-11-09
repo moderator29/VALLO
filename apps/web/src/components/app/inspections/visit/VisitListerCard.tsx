@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import Link from "next/link";
 import { useState } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -41,17 +42,16 @@ export function VisitListerCard({
   call: ListerCall;
   copy: Dictionary["visit"]["lister"];
 }) {
-  const [note, setNote] = useState<string | null>(null);
   const [calling, setCalling] = useState(false);
   const name = lister.name ?? copy.fallbackName;
 
   async function callInApp(conversationId: string) {
     if (calling) return;
     setCalling(true);
-    setNote(null);
     try {
+      /* A call that could not be placed is said by the one banner (Grade 1). */
       const placed = await placeCall({ conversationId, kind: "AUDIO", context: { line: null } });
-      if (!placed.ok) setNote(placed.error);
+      if (!placed.ok) banner.error(placed.error, { retry: () => void callInApp(conversationId) });
     } finally {
       setCalling(false);
     }
@@ -105,11 +105,6 @@ export function VisitListerCard({
           ) : null}
         </div>
       </div>
-      {note ? (
-        <p className="nf-visit-lister__note" role="status">
-          {note}
-        </p>
-      ) : null}
     </section>
   );
 }

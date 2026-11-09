@@ -9,9 +9,11 @@ import { getLocale } from "@/lib/locale";
 import { PageHeader } from "@/components/app/PageHeader";
 import { resolveSession } from "@/lib/actions/session";
 import { isFeatureEnabled } from "@/lib/flags";
-import { getThreadContext, loadThread, type ThreadContext } from "@/lib/messages/live";
+import { getThreadContext, loadThread, loadThreadReactions, type ThreadContext } from "@/lib/messages/live";
+import { loadConversationPrefs } from "@/lib/messages/conversation-prefs-read";
 import { readOpenInspectionForConversation } from "@/lib/inspections/queries";
 import { ThreadView, type ThreadBubble } from "./ThreadView";
+import { RoommateMatch } from "./RoommateMatch";
 import { resolveCards } from "./cards";
 import { readAvailabilityForConversation } from "@/lib/availability/queries";
 import { AvailabilityCard } from "@/components/app/messages/AvailabilityCard";
@@ -173,7 +175,7 @@ export default async function ConversationPage({
     if (!UUID_RE.test(id)) notFound();
     const locale = await getLocale();
     const t = getDictionary(locale);
-    const [thread, contextRead, role, read, unread, callsOn, threadCalls] = await Promise.all([
+    const [thread, contextRead, role, read, unread, callsOn, threadCalls, reactions, prefs] = await Promise.all([
       loadThread(session.supabase, session.user, id),
       getThreadContext(id),
       viewerRole(session.supabase, session.user.id, id),
@@ -182,6 +184,11 @@ export default async function ConversationPage({
       /* VC1: whether to draw the call buttons, and which rows are calls. */
       videoCallsOn(),
       readThreadCalls(session.supabase, id),
+      /* GRADE 1 (P1.3): the thread's reactions. Null when the table is not
+         there yet (the pending migration), and the thread then offers none. */
+      loadThreadReactions(session.supabase, id),
+      /* Job 8: this reader's pin and mute; none offered without the table. */
+      loadConversationPrefs(session.supabase, session.user.id),
     ]);
     if (!thread) notFound();
     /*
@@ -197,7 +204,7 @@ export default async function ConversationPage({
        under the lister's own client for the quick replies' figures. */
     const desk = listingThread && role === "host";
     /* Saved replies, for the lister only: the answers they give all day. */
-    const savedReplies = role === "host" ? templatesAsReplies(await readMyReplyTemplates()) : [];
+    const savedRepliesP = role === "host" ? readMyReplyTemplates() : Promise.resolve([]);
     /* B6: the renter's question chips, on a listing thread nobody has written
        in yet. The listing is read for the same reason as the desk's: to leave
        out what it already answers. */
@@ -222,6 +229,7 @@ export default async function ConversationPage({
       accountMoment,
       showMe,
       chatHintGaps,
+      savedRepliesRaw,
     ] = await Promise.all([
       /* The shared listings and bookings, expanded into cards for this reader. */
       resolveCards(
@@ -287,7 +295,9 @@ export default async function ConversationPage({
         role,
         listingId: thread.listing?.id ?? null,
       }),
+      savedRepliesP,
     ]);
+    const savedReplies = templatesAsReplies(savedRepliesRaw);
     /* "On Vallo since" is drawn once, small, under the line that keeps chats
        and payments inside Vallo (founder, 11 October 2026): taken out of the
        person line, and the Record's copy of it is not drawn either. No row,
@@ -361,14 +371,17 @@ export default async function ConversationPage({
         }
         inspected={thread.inspected}
         availabilitySlot={
-          availability ? (
-            <AvailabilityCard
-              check={availability}
-              copy={t.frontDoor.available}
-              locale={locale}
-              today={lagosToday}
-            />
-          ) : null
+          <>
+            <RoommateMatch conversationId={thread.conversationId} meId={thread.meId} otherId={thread.counterpartId ?? null} copy={t.roommates.entryX} />
+            {availability ? (
+              <AvailabilityCard
+                check={availability}
+                copy={t.frontDoor.available}
+                locale={locale}
+                today={lagosToday}
+              />
+            ) : null}
+          </>
         }
         stageSlot={
           stage ? (
@@ -448,6 +461,8 @@ export default async function ConversationPage({
         dayKitCopy={t.memberKit.dayKit}
         calls={{ copy: t.calls, enabled: callsOn, words: t.chatPolish.calls }}
         viewerCopy={t.chatPolish.viewer}
+        reactions={reactions}
+        chatPrefs={prefs.open ? (prefs.byId[id] ?? { pinnedAt: null, mutedUntil: null }) : null}
         messages={thread.messages.map((m): ThreadBubble => {
           const card = cards.get(m.id);
           const callId = threadCalls.markers.get(m.id);
@@ -463,6 +478,12 @@ export default async function ConversationPage({
             imageUrl: m.imageUrl,
             imageSize: m.imageSize ?? null,
             read: read.has(m.id),
+            /* The row's own reply, forward and delete state, and (GRADE 1)
+               its voice note, so the player draws after a reload too. */
+            ...(m.replyToId ? { replyToId: m.replyToId } : {}),
+            ...(m.forwarded ? { forwarded: true } : {}),
+            ...(m.deleted ? { deleted: true } : {}),
+            ...(m.audio ? { audio: m.audio } : {}),
             ...(m.createdAt ? { createdAt: m.createdAt } : {}),
             ...(card ? { card } : {}),
           };

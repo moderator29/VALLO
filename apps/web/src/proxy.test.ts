@@ -323,6 +323,8 @@ const EXPECTED_PUBLIC = new Set([
   "/host-agreement",
   "/privacy",
   "/safety",
+  /* Vallo Roommates (8 November 2026): the schools directory, a shared address. */
+  "/roommates/campus",
   "/standards",
   "/terms",
   /* Compliance. */
@@ -337,13 +339,9 @@ const EXPECTED_PUBLIC = new Set([
   "/sign-up",
   "/sign-up/email",
   "/sign-up/verify",
-  "/sign-up/phone",
   /* B-2: "Finish setting up". Public like every door so it can never loop;
      the page itself sends somebody signed out to sign in. */
   "/sign-up/finish",
-  /* The phone step of signing up: a door like the others, the page sends
-     somebody signed out to sign in and somebody with nothing owed on. */
-  "/sign-up/phone",
   "/start",
   "/welcome",
   /* The share door (V-07): one card, area only, one button into sign in. */
@@ -502,7 +500,11 @@ describe("who may see the platform with no session", () => {
       "/rent",
       "/price",
       "/post/anything",
-      "/u/somebody",
+      /* `/u/somebody` is no longer here: the bare profile page opened to a
+         signed-out reader on 9 November 2026 (SHARE_AND_CONTROLS.md 1.2). Its
+         sub-routes, below, stay shut. */
+      "/u/somebody/edit",
+      "/u/somebody/followers",
       "/escrow",
       "/verification",
       "/crypto",
@@ -694,5 +696,73 @@ describe("STORE-17: the preview harness in production", () => {
     expect(isHarnessPath("/gallery/x")).toBe(true);
     expect(isHarnessPath("/previews")).toBe(false);
     expect(isHarnessPath("/listing/preview")).toBe(false);
+  });
+});
+
+describe("Vallo Roommates' shared pages (8 November 2026)", () => {
+  it("opens a shared room and a school's page to a reader with no account", () => {
+    for (const path of ["/roommates/r/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b", "/roommates/campus", "/roommates/campus/unilag"]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  it("keeps everything else under /roommates signed in", () => {
+    for (const path of [
+      "/roommates",
+      "/roommates/me",
+      "/roommates/discover",
+      "/roommates/p/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b",
+      "/roommates/r/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b/edit",
+      "/roommates/r/not-an-id",
+      "/roommates/groups/6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b",
+      "/roommates/verify",
+      "/roommates/campus/UNILAG/extra",
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+    }
+  });
+});
+
+describe("the forwarded link's card (SHARE_AND_CONTROLS.md section 1.2)", () => {
+  const id = "6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b";
+  /* Next gives a generated metadata route a content hash in its own path, and
+     that hashed address is the one it writes into the page's og:image, so the
+     unfurler fetches the hashed form. Both the bare and the hashed path must
+     open, for each of the three cards. */
+  it("opens the opengraph-image route, bare and content-hashed", () => {
+    for (const path of [
+      "/u/adaeze/opengraph-image",
+      "/u/adaeze/opengraph-image-14v420",
+      `/roommates/r/${id}/opengraph-image`,
+      `/roommates/r/${id}/opengraph-image-13m5mx`,
+      `/circle/p/${id}/opengraph-image`,
+      `/circle/p/${id}/opengraph-image-1n8374`,
+    ]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  /* The founder opened the two pages themselves on 9 November 2026, so an
+     unfurler can read each page's og:image. A shared room already opened this
+     way; the profile and the Circle post now join it. The pages read public
+     data only (ANON_PROFILE_COLUMNS; posts_select -> LIVE post in a live public
+     community), so there is nothing private behind the open door. */
+  it("opens the bare page an unfurler reads the og:image from", () => {
+    for (const path of ["/u/adaeze", `/roommates/r/${id}`, `/circle/p/${id}`]) {
+      expect(isPublicPath(path), path).toBe(true);
+    }
+  });
+
+  it("keeps the sub-routes shut, open or closed, signed in", () => {
+    for (const path of [
+      "/u/adaeze/edit",
+      "/u/adaeze/followers",
+      "/u/adaeze/message",
+      "/u/adaeze/followers/opengraph-image",
+      `/circle/p/${id}/replies/opengraph-image`,
+      "/u",
+    ]) {
+      expect(isPublicPath(path), path).toBe(false);
+    }
   });
 });

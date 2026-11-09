@@ -8,6 +8,7 @@ import type { ExampleListingView } from "@/lib/admin/examples-queries";
 import { countOf } from "@vallo/i18n/core";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Taking the example properties off the catalogue.
@@ -31,8 +32,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
 export function RetireExamples({ live }: { live: ExampleListingView[] }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<number | null>(null);
   const [pending, start] = useSafeTransition();
 
   const cities = new Set(
@@ -40,18 +39,22 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
   );
 
   function run() {
-    setError(null);
     start(async () => {
       try {
         const result = await retireExampleListings({
           listingIds: live.map((listing) => listing.id),
         });
         if (!result.ok) {
-          setError(result.fieldErrors?.["listingIds"] ?? result.error);
+          banner.error(result.fieldErrors?.["listingIds"] ?? result.error, { retry: run });
           return;
         }
         setConfirming(false);
-        setDone(result.data.retired);
+        const done = result.data.retired;
+        banner.success(
+          done === 0
+            ? "Nothing changed. They were already off the catalogue."
+            : `${countOf(done, "examplesAre")} off the catalogue, with your name on the record.`,
+        );
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -87,10 +90,7 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => {
-              setDone(null);
-              setConfirming(true);
-            }}
+            onClick={() => setConfirming(true)}
           >
             {/* One string, not a text node and an expression. `.nf-btn` is a
                 flex row with a gap, so two children put the gap AND the
@@ -110,7 +110,7 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
         catalogue, and the button inside it is already `danger`.
       */}
       {confirming && (
-        <div className="mt-group rounded-[var(--nf-radius-md)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm">
+        <div className="mt-group rounded-md border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] p-card-sm">
           <p className="nf-body font-semibold text-content">
             This will take {countOf(live.length, "exampleProperties")}
             {cities.size > 0 &&
@@ -155,18 +155,6 @@ export function RetireExamples({ live }: { live: ExampleListingView[] }) {
         </div>
       )}
 
-      {error && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
-      {done !== null && (
-        <p className="nf-body-sm mt-row font-semibold text-[var(--nf-state-success)]">
-          {done === 0
-            ? "Nothing changed. They were already off the catalogue."
-            : `${countOf(done, "examplesAre")} off the catalogue, with your name on the record.`}
-        </p>
-      )}
     </div>
   );
 }

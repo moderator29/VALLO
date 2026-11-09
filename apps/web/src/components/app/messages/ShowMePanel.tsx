@@ -212,7 +212,7 @@ export function ShowMePanel({
                       </Button>
                     ) : (
                       <SafeVideo
-                        className="mt-xs w-full rounded-[var(--nf-radius-md)]"
+                        className="mt-xs w-full rounded-md"
                         controls
                         /* The tap that loaded it also plays it (review). */
                         autoPlay={saver}

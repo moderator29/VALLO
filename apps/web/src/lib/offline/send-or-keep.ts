@@ -1,5 +1,6 @@
 import type { ActionResult } from "../actions/envelope";
 import { withTimeout } from "../media/upload";
+import { noteNetworkFailure } from "./connection";
 import { enqueue, entryKey, makeCreateEntry, makeEntry, type CreateKind, type StateKind } from "./outbox";
 
 /**
@@ -37,6 +38,7 @@ export async function sendOrKeep<T>(
     return { state: "sent", result: await withTimeout(send(tapKey ?? ""), SEND_DEADLINE_MS) };
   } catch {
     /* The request never came back: the network dropped or stalled under it. */
+    noteNetworkFailure();
     return keep();
   }
 }
@@ -67,6 +69,7 @@ export async function setOrKeep<T>(
   try {
     return { state: "sent", result: await withTimeout(send(), STATE_DEADLINE_MS) };
   } catch {
+    noteNetworkFailure();
     return keep();
   }
 }

@@ -6,6 +6,7 @@ import { unblockUserSafely } from "@/lib/safety/blocks-actions";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /** Nobody blocked yet: what the list is for, and where Block lives. */
 export function BlockedEmpty({ title, body }: { title: string; body: string }) {
@@ -41,14 +42,15 @@ type Copy = {
  * leaves because the server says it is gone, not because this component
  * guessed. Until then it is hidden optimistically and comes back on failure.
  */
+/* What the unblock did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { unblocked: "{name} is unblocked" };
+
 export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) {
   const [armed, setArmed] = useState<string | null>(null);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
-  const [failed, setFailed] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function press(row: BlockedRow) {
-    setFailed(null);
     if (armed !== row.userId) {
       setArmed(row.userId);
       return;
@@ -58,10 +60,12 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
         const result = await unblockUserSafely({ userId: row.userId });
         if (result.ok) {
           setGone((prev) => new Set(prev).add(row.userId));
+          banner.success(WORDS.unblocked.replace("{name}", row.name));
           /* Only clear the arm if it is still this row's. */
           setArmed((a) => (a === row.userId ? null : a));
         } else {
-          setFailed(row.userId);
+          /* The row stays armed, so Try again is the second tap again. */
+          banner.error(copy.unblockFailed, { retry: () => press(row) });
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -97,11 +101,6 @@ export function BlockedList({ rows, copy }: { rows: BlockedRow[]; copy: Copy }) 
             {isArmed && !pending && (
               <p className="nf-body-sm mt-row text-content-2" role="status">
                 {copy.unblockConfirm.replace("{name}", row.name)}
-              </p>
-            )}
-            {failed === row.userId && (
-              <p className="nf-body-sm mt-row text-danger" role="alert">
-                {copy.unblockFailed}
               </p>
             )}
           </li>

@@ -29,7 +29,7 @@ export type NotificationPage =
   | { state: "ok"; rows: NotificationRow[]; more: boolean }
   | { state: "error" };
 
-const COLUMNS = "id, user_id, kind, title, body, href, read_at, created_at";
+const COLUMNS = "id, user_id, kind, title, body, href, read_at, archived_at, created_at";
 
 /** The PostgREST filter for "older than this row", in (created_at, id) order. */
 export function olderThan(cursor: NotificationCursor): string {
@@ -47,6 +47,7 @@ export async function loadNotificationPage(
     let query = supabase
       .from("notifications")
       .select(COLUMNS)
+      .is("archived_at", null)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false });
     if (cursor) query = query.or(olderThan(cursor));

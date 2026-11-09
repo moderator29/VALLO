@@ -16,6 +16,7 @@ import {
 import { buildPassportView, type PassportCopy } from "@/lib/passport/view";
 import { PassportBook } from "./PassportBook";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { banner } from "@/lib/ui/toast";
 
 const LINE_ICON = {
   photo: "user",
@@ -38,6 +39,9 @@ const LINE_ICON = {
  * switch and the preview at once and is saved as one write of the whole state;
  * a refusal puts both back and says why.
  */
+/* What a change did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { saved: "Your passport is updated" };
+
 export function PassportSettings({
   facts,
   initial,
@@ -52,26 +56,27 @@ export function PassportSettings({
   locale: Locale;
 }) {
   const [settings, setSettings] = useState<Settings>(initial);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
   const confirmed = useRef<Settings>(initial);
   const recorded = new Set(recordedLines(facts));
 
   function commit(next: Settings) {
-    setError(null);
     setSettings(next);
     startTransition(async () => {
       try {
         const result = await savePassportSettings(next);
+        /* Saved or refused, said by the one banner at the top of the screen
+           (founder, 7 November 2026); a refusal puts the switch back. */
         if (result.ok) {
           confirmed.current = { enabled: result.data.enabled, hidden: result.data.hidden };
+          banner.success(WORDS.saved);
         } else {
           setSettings(confirmed.current);
-          setError(result.error);
+          banner.error(result.error, { retry: () => commit(next) });
         }
       } catch {
         setSettings(confirmed.current);
-        setError(copy.saveFailed);
+        banner.error(copy.saveFailed, { retry: () => commit(next) });
       }
     });
   }
@@ -95,15 +100,7 @@ export function PassportSettings({
         ) : null}
       </section>
 
-      <SettingsGroup
-        note={
-          error ? (
-            <span role="alert" className="text-[var(--nf-state-error)]">
-              {error}
-            </span>
-          ) : undefined
-        }
-      >
+      <SettingsGroup>
         <RowSwitch
           icon="id-card"
           label={copy.wholeLabel}

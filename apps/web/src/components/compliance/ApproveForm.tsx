@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useDoneFlash } from "@/lib/ui/use-done-flash";
 import type { ActionResult } from "@/lib/actions/envelope";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 
 /**
  * SCUML item 19: one button that a SECOND member of staff presses. The
@@ -28,6 +29,8 @@ export function ApproveForm({
   ownLine: string;
 }) {
   const [state, run, pending] = useActionState<ActionResult<null> | null, FormData>(action, null);
+  /* Saved or refused, said by the one banner at the top of the screen (founder, 7 November 2026). */
+  useActionBanner(state, { ok: doneLabel });
   /* The tick is held for a beat only once the server has said yes. */
   const [done, flash] = useDoneFlash();
   const accepted = state?.ok === true;
@@ -41,16 +44,6 @@ export function ApproveForm({
       <Button type="submit" variant="primary" morph loading={pending} done={done} disabled={accepted}>
         {label}
       </Button>
-      {state?.ok ? (
-        <span role="status" className="nf-caption text-[var(--nf-content-secondary)]">
-          {doneLabel}
-        </span>
-      ) : null}
-      {state && !state.ok ? (
-        <span role="alert" className="nf-caption text-[var(--nf-state-warning)]">
-          {state.error}
-        </span>
-      ) : null}
     </form>
   );
 }

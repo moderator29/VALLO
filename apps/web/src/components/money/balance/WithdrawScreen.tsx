@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { DragToConfirm } from "@/components/ui/DragToConfirm";
 import { SelectField, TextField } from "@/components/ui/Field";
 import { Sheet } from "@/components/ui/Sheet";
+import { StepFrame } from "@/components/ui/StepFrame";
 import {
   cancelBalanceMovement,
   checkBalanceBankAccount,
@@ -16,8 +18,8 @@ import {
   type Quote,
 } from "@/lib/money/member-wallet-actions";
 import type { MovementView } from "@/lib/money/member-wallet";
-import { ACTION_LABEL, MOVE_COPY, REFUSAL } from "@/lib/money/balance-copy";
-import { lastFour } from "@/lib/money/funds";
+import { ACTION_LABEL, MOVE_COPY } from "@/lib/money/balance-copy";
+import { lastFour } from "@/lib/money/funds-light";
 import { shareChips } from "../AmountPad";
 import { Breakdown, Watching } from "./balance-ui";
 import { reach } from "./reach";
@@ -64,8 +66,8 @@ export function WithdrawScreen({
   const [quote, setQuote] = useState<Quote | null>(initial?.quote ?? null);
   const [movement, setMovement] = useState<MovementView | null>(initial?.movement ?? null);
   const [otp, setOtp] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [toError, setToError] = useState<string | null>(null);
+  /* The code step's own instruction (where the code went). Every outcome is
+     said by the one banner at the top of the screen (Grade 1). */
   const [busy, setBusy] = useState(false);
 
   const bankName = banks?.find((b) => b.code === bankCode)?.name ?? "";
@@ -78,7 +80,7 @@ export function WithdrawScreen({
     void reach(() => listBalanceBanks()).then((r) => {
       if (!live) return;
       if (r.ok) setBanks(r.data.banks);
-      else setToError(r.error);
+      else banner.error(r.error);
     });
     return () => {
       live = false;
@@ -87,11 +89,10 @@ export function WithdrawScreen({
 
   const check = async () => {
     setBusy(true);
-    setToError(null);
     const r = await reach(() => checkBalanceBankAccount({ bankCode, bankName, accountNumber }));
     setBusy(false);
     if (r.ok) setNamed(r.data.accountName);
-    else setToError(r.error);
+    else banner.error(r.error, { retry: () => void check() });
   };
 
   const prepare = async () => {
@@ -100,7 +101,6 @@ export function WithdrawScreen({
       return;
     }
     setBusy(true);
-    setError(null);
     const r = await reach(() =>
       prepareWithdrawal({
         clientKey,
@@ -113,7 +113,7 @@ export function WithdrawScreen({
     );
     setBusy(false);
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       /* A fresh key for a fresh attempt; the refused one moved nothing. */
       if (!r.unreached) setClientKey(crypto.randomUUID());
       return;
@@ -124,15 +124,15 @@ export function WithdrawScreen({
 
   const submit = async (code?: string): Promise<boolean> => {
     if (!quote) return false;
-    setError(null);
     const r = await reach(() => confirmBalanceMovement({ movementId: quote.movementId, ...(code ? { otp: code } : {}) }));
     if (!r.ok) {
-      setError(r.error);
+      banner.error(r.error);
       return false;
     }
     if (r.data.needsOtp) {
       setStep("otp");
-      setError(r.data.message);
+      /* "We sent you a code": said by the one banner (founder, 7 November 2026). */
+      if (r.data.message) banner.info(r.data.message);
       return false;
     }
     setMovement(r.data.movement);
@@ -147,9 +147,14 @@ export function WithdrawScreen({
     setStep("amount");
   };
 
-  return (
+  /* SW5 (round 3): the amount, the quote and the code stand in the
+     platform's STEP FRAME; the keypad and the slide stay in the content, the
+     slide the review's only confirm. The outcomes keep the wallet's own top.
+     Every gate, key and reach is unchanged (see SendScreen). */
+  const framed = step === "amount" || step === "review" || step === "otp";
+  const body = (
     <div className="nf-balance nf-mw" data-screen="withdraw" data-testid="wallet-withdraw" data-step={step}>
-      <WalletHeader title={ACTION_LABEL.withdraw} back={links.overview} />
+      {framed ? null : <WalletHeader title={ACTION_LABEL.withdraw} back={links.overview} />}
 
       {step === "amount" ? (
         <div className="nf-mw-move">
@@ -164,19 +169,11 @@ export function WithdrawScreen({
             onOpen={() => {
               setToOpen(true);
               setNamed(null);
-              setToError(connected ? null : MOVE_COPY.notAvailableWithdraw);
+              if (!connected) banner.warning(MOVE_COPY.notAvailableWithdraw);
             }}
             testId="withdraw-account"
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
-            <Button variant="primary" size="lg" full loading={busy} disabled={!ready} onClick={prepare} data-testid="move-continue">
-              {MOVE_COPY.continue}
-            </Button>
             <Keypad value={amount} onChange={setAmount} />
           </div>
         </div>
@@ -184,16 +181,10 @@ export function WithdrawScreen({
 
       {step === "review" && quote ? (
         <div className="nf-mw-move" data-testid="withdraw-review">
-          <p className="nf-mw-label text-center">{MOVE_COPY.review}</p>
           <Breakdown breakdown={quote.breakdown} locale={locale} destination={{ label: "To", title: quote.destination.title, detail: quote.destination.detail }} receivedLabel="You'll receive" />
           <p className="nf-caption text-[var(--nf-content-muted)]">
             The processing fee is set by our licensed provider for this withdrawal and is what you will be charged. Reference {quote.reference}.
           </p>
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error === REFUSAL.otpNeeded ? REFUSAL.otpNeeded : error}
-            </p>
-          ) : null}
           <div className="nf-mw-foot">
             <DragToConfirm
               money
@@ -217,31 +208,13 @@ export function WithdrawScreen({
           <TextField
             label="Code"
             inputMode="numeric"
+            enterKeyHint="go"
             autoComplete="one-time-code"
             maxLength={8}
             inputClassName="nf-balance__otp"
             value={otp}
             onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
           />
-          {error ? (
-            <p role="alert" className="nf-mw-error">
-              {error}
-            </p>
-          ) : null}
-          <Button
-            variant="primary"
-            size="lg"
-            full
-            loading={busy}
-            disabled={otp.length < 4}
-            onClick={async () => {
-              setBusy(true);
-              await submit(otp);
-              setBusy(false);
-            }}
-          >
-            Confirm withdrawal
-          </Button>
         </div>
       ) : null}
 
@@ -275,6 +248,7 @@ export function WithdrawScreen({
           <TextField
             label="Account number"
             inputMode="numeric"
+            enterKeyHint="done"
             autoComplete="off"
             maxLength={10}
             value={accountNumber}
@@ -310,13 +284,44 @@ export function WithdrawScreen({
               Check account
             </Button>
           )}
-          {toError ? (
-            <p role="alert" className="nf-mw-error">
-              {toError}
-            </p>
-          ) : null}
         </div>
       </Sheet>
     </div>
   );
+
+  if (!framed) return body;
+  const at = step === "amount" ? 1 : step === "review" ? 2 : 3;
+  return (
+    <StepFrame
+      testId="withdraw-steps"
+      step={at}
+      total={3}
+      eyebrow={ACTION_LABEL.withdraw}
+      title={step === "amount" ? WITHDRAW_STEP.amount : step === "review" ? MOVE_COPY.review : WITHDRAW_STEP.code}
+      direction={step === "amount" ? "back" : "forward"}
+      {...(step === "review" ? { onBack: backFromReview } : {})}
+      closeHref={links.overview}
+      {...(step === "amount"
+        ? { primary: { label: MOVE_COPY.continue, onClick: prepare, loading: busy, disabled: !ready, testId: "move-continue" } }
+        : step === "otp"
+          ? {
+              primary: {
+                label: "Confirm withdrawal",
+                loading: busy,
+                disabled: otp.length < 4,
+                onClick: async () => {
+                  setBusy(true);
+                  await submit(otp);
+                  setBusy(false);
+                },
+              },
+            }
+          : {})}
+    >
+      {body}
+    </StepFrame>
+  );
 }
+
+/* The step titles a withdrawal did not have words for. */
+const WITHDRAW_STEP = { amount: "How much, and to which account", code: "Enter the code" } as const;

@@ -19,7 +19,7 @@ import { reportError } from "@/lib/observability/report";
  * general page such as /settings) has no timeline, and says so. When the table
  * gains an object id (request W5-2) this becomes an equality on that column.
  */
-const COLUMNS = "id, user_id, kind, title, body, href, read_at, created_at";
+const COLUMNS = "id, user_id, kind, title, body, href, read_at, archived_at, created_at";
 export const TIMELINE_LIMIT = 30;
 
 export type NotificationView =

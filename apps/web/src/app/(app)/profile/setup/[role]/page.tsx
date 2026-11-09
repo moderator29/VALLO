@@ -6,7 +6,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { ApplyWizard, type SetupRole } from "@/components/agent/ApplyWizard";
 import { ROLE_COPY } from "@/components/roles/roles";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { OpenApplicationNotice } from "@/components/supply/OpenApplicationNotice";
 import { readMyApplication } from "@/lib/agent/application-status";
 import { isOpenApplication } from "@/lib/agent/open-application";
@@ -104,13 +104,16 @@ export default async function ProfileSetupPage({
           Nobody set out to file an application; they set out to start selling
           or to start working as an agent, and the screen should say the thing
           they were doing. */}
-      <PageHeader title={copy.setup.title} fallback="/profile" />
+      <PageFrame title={copy.setup.title} fallback="/profile">
+      <div>
 
       <p className="nf-lede max-w-[52ch]">{copy.setup.involves}</p>
 
       <div className="mt-lg">
-        <ApplyWizard t={forApply(t)} role={role} />
+        <ApplyWizard t={forApply(t)} role={role} intro={copy.setup.involves} closeHref="/profile/setup" />
       </div>
+      </div>
+    </PageFrame>
     </div>
   );
 }

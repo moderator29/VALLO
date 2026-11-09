@@ -261,6 +261,10 @@ jobs:
           app=$(ls -d "$RUNNER_TEMP"/Vallo.xcarchive/Products/Applications/*.app | head -n 1)
           cp apps/web/ios/App/App/App.entitlements "$RUNNER_TEMP/App.entitlements"
           /usr/libexec/PlistBuddy -c "Set :aps-environment production" "$RUNNER_TEMP/App.entitlements"
+          # The Notification Service Extension (rich push photos, 7 November
+          # 2026) is embedded unsigned like the app; sign it first, or codesign
+          # refuses the app. The export step re-signs both for distribution.
+          for ext in "$app"/PlugIns/*.appex; do [ -d "$ext" ] && codesign --force --sign - --timestamp=none "$ext"; done
           codesign --force --sign - --timestamp=none --entitlements "$RUNNER_TEMP/App.entitlements" "$app"
           codesign -d --entitlements :- "$app" 2>/dev/null | grep -o "<key>[a-zA-Z.\-]*</key>" | sort -u
 
@@ -320,6 +324,12 @@ jobs:
             exit 1
           fi
           grep -A1 "aps-environment" "$RUNNER_TEMP/ents.xml" | grep -o "<string>[a-z]*</string>"
+          # Face ID unlock (a passkey in the web view) needs webcredentials
+          # (7 November 2026: builds without it could never offer Face ID).
+          if ! grep -q "webcredentials:www.vallospaces.com" "$RUNNER_TEMP/ents.xml"; then
+            echo "::error::The signed IPA has no webcredentials:www.vallospaces.com, so Face ID unlock cannot work. Nothing was uploaded."
+            exit 1
+          fi
 
       - name: Upload to App Store Connect
         if: ${{ success() && inputs.upload }}

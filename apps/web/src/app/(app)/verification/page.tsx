@@ -363,6 +363,7 @@ export default async function VerificationPage({
           submit={submitVerification}
           success={getDictionary(locale).success}
           copy={t.experienceAccount.kyc}
+          flowCopy={t.verifyFlow}
           askBusiness={askBusiness}
           acceptCopy={t.payChoice}
           payoutHref={context.state === "agent" ? "/agent/earnings" : undefined}
@@ -412,6 +413,7 @@ export default async function VerificationPage({
             submit={submitVerification}
             success={getDictionary(locale).success}
             copy={t.experienceAccount.kyc}
+            flowCopy={t.verifyFlow}
             askBusiness={askBusiness}
             payoutHref={context.state === "agent" ? "/agent/earnings" : undefined}
           />

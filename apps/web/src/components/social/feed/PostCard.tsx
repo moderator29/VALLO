@@ -15,6 +15,7 @@ import { ActionPill } from "./ActionPill";
 import { PostPicture } from "./PostPicture";
 import { MediaRail } from "./MediaRail";
 import { RemoteImage } from "@/components/ui/RemoteImage";
+import { SaveButton, useSaveControl } from "@/components/app/SaveControl";
 import { TierBadge } from "@/components/trust/TierBadge";
 import type { BadgeTier } from "@/lib/trust/badge-tier";
 import { countOf } from "@vallo/i18n/core";
@@ -61,6 +62,20 @@ export type PostAuthor = {
   tier?: BadgeTier;
 };
 
+/** A roommate post a feed post shares (Vallo Roommates, 8 November 2026). Words come with it from the read. */
+export type PostRoommateListing = {
+  id: string;
+  href: string;
+  title: string;
+  kindLabel: string;
+  place: string;
+  priceLabel: string | null;
+  periodLabel: string;
+  photoUrl: string | null;
+  verified: boolean;
+  words: { kicker: string; view: string; verified: string };
+};
+
 export type PostListing = {
   id: string;
   title: string;
@@ -70,6 +85,15 @@ export type PostListing = {
   periodLabel: string;
   photoUrl: string | null;
   verified: boolean;
+  /** What the listing is, when the read says (Agent FEATURES' post model).
+      Absent, the feed's categories fall back to the price period. */
+  kind?: "property" | "stay" | "restaurant";
+  /** Facts for the embedded card, drawn only when the read supplies them:
+      never filled in or guessed. */
+  beds?: number | null;
+  baths?: number | null;
+  /** Up to three short amenity words, from the listing itself. */
+  amenities?: readonly string[];
 };
 
 export type PostMedia = {
@@ -90,6 +114,8 @@ export type PostView = {
   areaName: string | null;
   areaSlug: string | null;
   listing: PostListing | null;
+  /** A Vallo Roommates post shared to the feed, when there is one (optional: older reads leave it out). */
+  roommateListing?: PostRoommateListing | null;
   /** The bot's own note about where its answer came from. */
   sourceNote: string | null;
   /** The listings the assistant cited, resolved through the same policy as any
@@ -253,12 +279,18 @@ function PostText({
 
 /**
  * THE ACTION ROWS (founder, 13 October reference: "a rounded Drop a comment
- * pill with a comment icon and a heart on the right").
+ * pill with a comment icon and a heart on the right"; re-set 7 November 2026
+ * for the new feed).
  *
- *   row one   the comment pill, which opens the post's own page with the reply
- *             box focused (the existing reply flow), and the heart.
- *   row two   the quieter things you do with a post: repost, send it to
- *             somebody, and save it to your own shelf at the far edge.
+ *   row one   what you do TO a post, as bare glyphs with their counts: the
+ *             heart, the repost and send-to-somebody at the left, and save to
+ *             your own shelf at the far edge. The counts roll when a tap
+ *             changes them (`ActionPill`), so the number feels touched.
+ *   row two   "Drop a comment": one calm sunken line, the reply count at its
+ *             far end, that opens the post's own page with the reply box
+ *             focused (the existing reply flow). It reads as the place you
+ *             write, which is what it is, and it is a soft rectangle like
+ *             every control that carries words.
  *
  * Reply, repost, like and save all write a row against an account, so a guest
  * tapping one is sent to sign up carrying this screen and the verb. Share
@@ -288,30 +320,18 @@ function ActionRows({
 }) {
   const likes = compact(post.likeCount, locale);
   const reposts = compact(post.repostCount, locale);
+  const replies = compact(post.replyCount, locale);
+  /*
+   * ONE QUIET ROW (founder, 7 November 2026: "comment, repost and bookmark
+   * icons smaller and refined", "cleaner, less stuff"). Like, comment and
+   * repost with their counts, share, and the bookmark alone at the far end.
+   * The comment used to be a wide "Drop a comment" pill on a second row; it
+   * is the same reply door now, a glyph and its count in the row, still 44px
+   * to the touch.
+   */
   return (
     <div className="nf-pc__actions">
-      <div className="nf-pc__reply-row">
-        <AuthGate action="post">
-          <button
-            type="button"
-            className="nf-pc__comment nf-post__act--reply"
-            aria-label={`${words.commentPill}, ${countOf(post.replyCount, "replies", locale)}`}
-            onClick={onReply}
-            data-testid="post-comment-pill"
-          >
-            <UiIcon name="chat-bubble" size={18} />
-            <span className="nf-pc__comment-text">{words.commentPill}</span>
-            {/* A word break the flex row does not draw, so the visible words
-                read "Drop a comment 56" and sit inside the name. */}
-            {" "}
-            {post.replyCount > 0 ? (
-              <span className="nf-pc__comment-count nf-numeric" aria-hidden="true">
-                {compact(post.replyCount, locale)}
-              </span>
-            ) : null}
-          </button>
-        </AuthGate>
-
+      <div className="nf-pc__more-row">
         <AuthGate action="react">
           <ActionPill
             icon="heart"
@@ -324,9 +344,19 @@ function ActionRows({
             onClick={onLike}
           />
         </AuthGate>
-      </div>
 
-      <div className="nf-pc__more-row">
+        <AuthGate action="post">
+          <ActionPill
+            icon="chat-bubble"
+            tone="reply"
+            className="nf-pc__comment nf-post__act--reply"
+            count={post.replyCount > 0 ? replies : undefined}
+            label={`${words.comment}, ${countOf(post.replyCount, "replies", locale)}`}
+            onClick={onReply}
+            data-testid="post-comment-pill"
+          />
+        </AuthGate>
+
         <AuthGate action="react">
           <ActionPill
             icon="repost-loop"
@@ -500,19 +530,24 @@ export function PostCard({
   );
 
   /*
-   * THE PLACE, AS A LABEL ON THE FRAME. This is a network about homes, stays
-   * and neighbourhoods, so where a post was written is part of what it says.
-   * It sits in the frame's lower right on a dark scrim, as the reference sets
-   * its label, and takes you to the place. The link is the 44px target; the
-   * chip is drawn inside it.
+   * THE PLACE, ON THE AUTHOR'S QUIET LINE. This is a network about homes,
+   * stays and neighbourhoods, so where a post was written is part of what it
+   * says: it sits between the handle and the time, a pin and the place's
+   * name, and takes you to the place. It used to be a chip laid over the
+   * photograph, which put a label on somebody's picture and made a text post
+   * grow a second line for it. The link's name is the whole sentence
+   * ("Around Lekki Phase 1"), which starts with nothing the eye does not read
+   * and contains everything it does (WCAG 2.5.3).
    */
   const place =
     post.areaName && post.areaSlug && !isSystem ? (
-      <Link href={`/around/${post.areaSlug}`} className="nf-post__place nf-pc__place">
-        <span className="nf-post__place-chip">
-          <UiIcon name="location" size={12} filled />
-          <span className="truncate">{aroundLine.replace("{area}", post.areaName)}</span>
-        </span>
+      <Link
+        href={`/around/${post.areaSlug}`}
+        className="nf-pc__place"
+        aria-label={aroundLine.replace("{area}", post.areaName)}
+      >
+        <UiIcon name="location" size={12} filled />
+        <span className="nf-pc__place-name">{post.areaName}</span>
       </Link>
     ) : null;
 
@@ -522,6 +557,129 @@ export function PostCard({
         ? words.roleLandlord
         : words.roleAgent
       : null;
+
+  /*
+   * THE FEATURED LISTING, FULL BLEED (founder, 7 November 2026, the feed
+   * reference). A post that features a real listing and carries no pictures
+   * of its own is drawn as an editorial card: the listing's own photograph to
+   * the card's edges, a soft scrim at its foot, and on it the author, the
+   * listing's title and its line, the counts and View property. The tag says
+   * what is true: Vallo's own note of a newly published listing is "New
+   * listing"; a member who chose to feature one is "Featured listing". The
+   * listing is the one `posts-queries` read through `listings_select_published`,
+   * so a taken-down flat never reaches this card.
+   */
+  const featured = post.listing && post.listing.photoUrl && !hasMedia && !isBot && !editor ? post.listing : null;
+  if (featured) {
+    const tag = isSystem || post.kind === "SHOWCASE" ? words.newListing : words.featuredListing;
+    return (
+      <article
+        className="nf-post nf-post--pressable nf-pc nf-pc--feature"
+        aria-label={describe(post, words)}
+        onClick={openPost}
+        onAuxClick={openPost}
+        data-testid="post-card"
+        data-variant="feature"
+      >
+        <div
+          ref={mediaRef}
+          className="nf-pcf__media"
+          style={arriving ? { viewTransitionName: `post-photo-${post.id}` } : undefined}
+        >
+          <PostPicture src={featured.photoUrl as string} alt={featured.title} width={1200} height={1500} sizes="(max-width: 640px) 100vw, 600px" />
+          <span className="nf-pcf__scrim" aria-hidden="true" />
+        </div>
+
+        <div className="nf-pcf__top" data-theme="dark">
+          <span className="nf-pcf__tag">{tag}</span>
+          <span className="nf-pcf__top-actions">
+            {onSave ? (
+              <AuthGate action="react">
+                <ActionPill
+                  icon="bookmark"
+                  tone="save"
+                  round
+                  className="nf-post__act--save nf-pcf__glass"
+                  pressed={post.saved}
+                  label={post.saved ? words.savedRemove : words.save}
+                  onClick={onSave}
+                />
+              </AuthGate>
+            ) : null}
+            <button
+              type="button"
+              className="nf-post__act nf-post__kebab nf-pc__kebab nf-pcf__glass"
+              aria-label={words.moreActions}
+              aria-haspopup="dialog"
+              onClick={onMenu}
+            >
+              <UiIcon name="more" size={20} />
+            </button>
+          </span>
+        </div>
+
+        <div className="nf-pcf__foot" data-theme="dark">
+          <div className="nf-pcf__by">
+            {isSystem ? (
+              <span className="nf-pc__avatar" aria-hidden="true">
+                <span className="nf-pc__monogram">V</span>
+              </span>
+            ) : (
+              <Avatar author={post.author} />
+            )}
+            <span className="nf-pcf__who">
+              <span className="nf-pc__nameline">
+                {isSystem ? (
+                  <span className="nf-pc__name">Vallo</span>
+                ) : (
+                  <Link
+                    href={post.author?.handle ? `/u/${post.author.handle}` : "#"}
+                    className="nf-pc__name"
+                    data-testid="post-author"
+                  >
+                    <span className="nf-pc__name-text">
+                      {post.author?.displayLabel ?? `@${post.author?.handle ?? words.someone}`}
+                    </span>
+                  </Link>
+                )}
+                {!isSystem && post.author?.tier && post.author.tier !== "none" ? (
+                  <span className="nf-pc__tick">
+                    <TierBadge tier={post.author.tier} size={14} />
+                  </span>
+                ) : null}
+              </span>
+              <span className="nf-pc__meta">{when}</span>
+            </span>
+          </div>
+
+          <h3 className="nf-pcf__title">{featured.title}</h3>
+          <p className="nf-pcf__line">
+            <span>{[featured.area, featured.city].filter(Boolean).join(", ")}</span>
+            <span className="nf-pcf__price nf-numeric">
+              {featured.priceLabel} <span className="nf-pcf__period">{featured.periodLabel}</span>
+            </span>
+          </p>
+          {hasWords ? <p className="nf-pcf__caption">{post.body}</p> : null}
+
+          <div className="nf-pcf__row">
+            <ActionRows
+              post={post}
+              locale={locale}
+              words={words}
+              onLike={onLike}
+              onReply={onReply}
+              onRepost={onRepost}
+              onShare={onShare}
+            />
+            <Link href={`/listing/${featured.id}`} className="nf-btn nf-btn--primary nf-btn--sm nf-pcf__view" data-testid="post-view-property">
+              <span>{words.viewProperty}</span>
+              <UiIcon name="arrow-right" size={16} />
+            </Link>
+          </div>
+        </div>
+      </article>
+    );
+  }
 
   const body = (
     <>
@@ -551,23 +709,20 @@ export function PostCard({
         )}
 
         <div className="nf-pc__who">
-          {isSystem ? (
-            /* Vallo's own notes carry the platinum mark, the administrator's
-               tier, a size up from a member's tick so it reads as the house. */
-            <span className="nf-pc__nameline">
-              <span className="nf-pc__name">Vallo</span>
-              <span className="nf-pc__tick nf-pc__tick--house">
-                <TierBadge tier="platinum" size={20} />
-              </span>
-            </span>
-          ) : isBot ? (
-            <>
+          <span className="nf-pc__nameline">
+            {isSystem ? (
+              /* Vallo's own notes carry the platinum mark, the administrator's
+                 tier, a size up from a member's tick so it reads as the house. */
+              <>
+                <span className="nf-pc__name">Vallo</span>
+                <span className="nf-pc__tick nf-pc__tick--house">
+                  <TierBadge tier="platinum" size={18} />
+                </span>
+              </>
+            ) : isBot ? (
               <span className="nf-pc__name">Vallo AI</span>
-              <span className="nf-pc__handle">{words.assistant}</span>
-            </>
-          ) : (
-            <>
-              <span className="nf-pc__nameline">
+            ) : (
+              <>
                 <Link
                   href={post.author?.handle ? `/u/${post.author.handle}` : "#"}
                   className="nf-pc__name"
@@ -582,27 +737,40 @@ export function PostCard({
                     <TierBadge tier={post.author.tier} size={14} />
                   </span>
                 ) : null}
+              </>
+            )}
+            {roleWord || post.author?.moderatorOf ? (
+              <span className="nf-pc__marks">
+                {roleWord ? <span className="nf-pc__mark">{roleWord}</span> : null}
+                {post.author?.moderatorOf ? (
+                  <span
+                    className="nf-pc__mark nf-pc__mark--mod"
+                    aria-label={words.looksAfter.replace("{place}", post.author.moderatorOf)}
+                  >
+                    <span aria-hidden="true">{words.mod}</span>
+                  </span>
+                ) : null}
               </span>
-              {post.author?.handle ? <span className="nf-pc__handle">@{post.author.handle}</span> : null}
-            </>
-          )}
-        </div>
+            ) : null}
+          </span>
 
-        <div className="nf-pc__side">
-          {roleWord || post.author?.moderatorOf ? (
-            <span className="nf-pc__marks">
-              {roleWord ? <span className="nf-pc__mark">{roleWord}</span> : null}
-              {post.author?.moderatorOf ? (
-                <span
-                  className="nf-pc__mark nf-pc__mark--mod"
-                  aria-label={words.looksAfter.replace("{place}", post.author.moderatorOf)}
-                >
-                  <span aria-hidden="true">{words.mod}</span>
-                </span>
-              ) : null}
-            </span>
-          ) : null}
-          {when}
+          {/* THE QUIET LINE: where (the place) and when (the time), one line
+              in the muted ink. A post written in no place shows the author's
+              @handle where the place would be, so the line is never just a
+              time; with a place, the name above already says who, and a third
+              part only truncated all three on a phone. The time never gives
+              way, because it is the post's own link. */}
+          <span className="nf-pc__meta">
+            {place ? (
+              place
+            ) : isBot ? (
+              <span className="nf-pc__handle">{words.assistant}</span>
+            ) : !isSystem && post.author?.handle ? (
+              <span className="nf-pc__handle">@{post.author.handle}</span>
+            ) : null}
+            {place || isBot || (!isSystem && post.author?.handle) ? <span className="nf-pc__sep" aria-hidden="true" /> : null}
+            {when}
+          </span>
         </div>
 
         {/* The header carries the name, the time and this. Nothing else: the
@@ -652,13 +820,15 @@ export function PostCard({
 
           <div
             ref={mediaRef}
-            className={`nf-pc__frame nf-pc__media ${post.media.length > 1 ? "nf-pc__media--rail" : "nf-pc__media--one"}`}
+            className={`nf-pc__frame nf-pc__media ${post.media.length > 1 ? (detail ? "nf-pc__media--rail" : "nf-pc__media--mosaic") : "nf-pc__media--one"}`}
             style={{
               ...(post.media.length === 1 ? { aspectRatio: frameRatio(post.media[0]!) } : {}),
               ...(arriving ? { viewTransitionName: `post-photo-${post.id}` } : {}),
             }}
           >
-            {post.media.length > 1 ? (
+            {post.media.length > 1 && !detail ? (
+              <MediaMosaic media={post.media} alt={words.pictureAlt} moreLabel={words.moreMedia} />
+            ) : post.media.length > 1 ? (
               <MediaRail media={post.media.slice(0, 4)} />
             ) : (
               <PostPicture
@@ -669,7 +839,6 @@ export function PostCard({
                 sizes="(max-width: 640px) 100vw, 600px"
               />
             )}
-            {place ? <div className="nf-pc__chips">{place}</div> : null}
           </div>
         </>
       ) : textFrame ? (
@@ -682,10 +851,7 @@ export function PostCard({
           ) : (
             <PostText text={post.body as string} mode="frame" detail={detail} words={words} system={isSystem} />
           )}
-          {place ? <div className="nf-pc__plainplace">{place}</div> : null}
         </div>
-      ) : place ? (
-        <div className="nf-pc__plainplace">{place}</div>
       ) : null}
 
       {post.cited.length > 0 ? (
@@ -703,7 +869,19 @@ export function PostCard({
 
       {post.sourceNote ? <p className="nf-pc__note">{post.sourceNote}</p> : null}
 
-      {post.listing ? <ListingAttachment listing={post.listing} verifiedLabel={copy.common.verified} /> : null}
+      {post.roommateListing ? <EmbeddedRoommateListing room={post.roommateListing} /> : null}
+
+      {post.listing ? (
+        <EmbeddedListing
+          listing={post.listing}
+          words={{
+            verified: copy.common.verified,
+            view: words.viewProperty,
+            beds: words.bedsShort,
+            baths: words.bathsShort,
+          }}
+        />
+      ) : null}
 
       {detail ? (
         /* On the post's own page: when it was written and how many have
@@ -772,29 +950,156 @@ export function PostCard({
  * tabular on the right, and a chevron. The whole row is the link, so the way
  * in is the attachment itself, as on every product people already know.
  */
-function ListingAttachment({ listing, verifiedLabel }: { listing: PostListing; verifiedLabel: string }) {
+export function EmbeddedListing({
+  listing,
+  words,
+}: {
+  listing: PostListing;
+  words: { verified: string; view: string; beds: string; baths: string };
+}) {
+  /* Only what the listing itself says: beds, baths and amenities are drawn
+     when the read carried them and never filled in; "verified" only where
+     the listing truly is (a published, reviewed row). */
+  const facts = [
+    typeof listing.beds === "number" && listing.beds > 0 ? words.beds.replace("{count}", String(listing.beds)) : null,
+    typeof listing.baths === "number" && listing.baths > 0 ? words.baths.replace("{count}", String(listing.baths)) : null,
+    ...(listing.amenities ?? []).slice(0, 3),
+  ].filter((fact): fact is string => Boolean(fact));
   return (
-    <Link href={`/listing/${listing.id}`} className="nf-post__attach">
-      <span className="nf-post__attach-thumb" aria-hidden="true">
-        {listing.photoUrl ? (
-          <PostPicture src={listing.photoUrl} alt="" width={160} height={160} sizes="64px" />
-        ) : (
-          <UiIcon name="home" size={20} />
-        )}
-      </span>
-      <span className="nf-post__attach-text">
-        <span className="nf-post__attach-title">{listing.title}</span>
-        <span className="nf-post__attach-place">
-          {listing.area}, {listing.city}
-          {listing.verified ? <span className="nf-post__attach-verified"> &middot; {verifiedLabel}</span> : null}
+    <div className="nf-plc" data-testid="post-listing">
+      <Link href={`/listing/${listing.id}`} className="nf-plc__link" aria-label={`${listing.title}, ${words.view}`}>
+        <span className="nf-plc__photo" aria-hidden="true">
+          {listing.photoUrl ? (
+            <PostPicture src={listing.photoUrl} alt="" width={640} height={480} sizes="(max-width: 640px) 40vw, 240px" />
+          ) : (
+            <UiIcon name="home" size={24} />
+          )}
         </span>
-      </span>
-      <span className="nf-post__attach-price nf-numeric">
-        {listing.priceLabel}
-        <span className="nf-post__attach-period">{listing.periodLabel}</span>
-      </span>
-      <UiIcon name="chevron-right" size={16} className="nf-post__attach-chevron" />
-    </Link>
+        <span className="nf-plc__body">
+          <span className="nf-plc__title">{listing.title}</span>
+          <span className="nf-plc__place">
+            <UiIcon name="location" size={12} filled />
+            <span>{[listing.area, listing.city].filter(Boolean).join(", ")}</span>
+            {listing.verified ? <span className="nf-plc__verified">{words.verified}</span> : null}
+          </span>
+          {facts.length > 0 ? (
+            <span className="nf-plc__facts">
+              {facts.map((fact) => (
+                <span key={fact} className="nf-plc__fact">
+                  {fact}
+                </span>
+              ))}
+            </span>
+          ) : null}
+          <span className="nf-plc__foot">
+            <span className="nf-plc__price nf-numeric">
+              {listing.priceLabel} <span className="nf-plc__period">{listing.periodLabel}</span>
+            </span>
+            <span className="nf-plc__view">
+              {words.view}
+              <UiIcon name="arrow-right" size={14} />
+            </span>
+          </span>
+        </span>
+      </Link>
+      <EmbeddedListingSave listingId={listing.id} title={listing.title} />
+    </div>
+  );
+}
+
+/**
+ * A ROOMMATE POST ON THE FEED (Vallo Roommates, 8 November 2026). The same
+ * plate as a featured flat, so the feed keeps one card grammar: the room's
+ * photograph, what kind of post it is, the title, the place, the person's
+ * share or the rent with its period, and "View details" into the room. Only
+ * what the post itself says; "Checked by Vallo" only where staff checked it.
+ */
+export function EmbeddedRoommateListing({ room }: { room: PostRoommateListing }) {
+  return (
+    <div className="nf-plc" data-testid="post-roommate-listing">
+      <Link href={room.href} className="nf-plc__link" aria-label={`${room.title}, ${room.words.view}`}>
+        <span className="nf-plc__photo" aria-hidden="true">
+          {room.photoUrl ? (
+            <PostPicture src={room.photoUrl} alt="" width={640} height={480} sizes="(max-width: 640px) 40vw, 240px" />
+          ) : (
+            <UiIcon name="house-duplex" size={24} />
+          )}
+        </span>
+        <span className="nf-plc__body">
+          <span className="nf-plc__facts">
+            <span className="nf-plc__fact">{room.words.kicker}</span>
+            <span className="nf-plc__fact">{room.kindLabel}</span>
+          </span>
+          <span className="nf-plc__title">{room.title}</span>
+          {room.place || room.verified ? (
+            <span className="nf-plc__place">
+              {room.place ? <UiIcon name="location" size={12} filled /> : null}
+              {room.place ? <span>{room.place}</span> : null}
+              {room.verified ? <span className="nf-plc__verified">{room.words.verified}</span> : null}
+            </span>
+          ) : null}
+          <span className="nf-plc__foot">
+            {room.priceLabel ? (
+              <span className="nf-plc__price nf-numeric">
+                {room.priceLabel} <span className="nf-plc__period">{room.periodLabel}</span>
+              </span>
+            ) : (
+              <span />
+            )}
+            <span className="nf-plc__view">
+              {room.words.view}
+              <UiIcon name="arrow-right" size={14} />
+            </span>
+          </span>
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+/**
+ * SAVE, ON THE LISTING A POST FEATURES (the brief, part 2.2). The same heart
+ * every listing card carries, through the one `useSaveControl` loop (the
+ * optimistic flip, the device fallback when signed out, the outbox when the
+ * signal drops, the one banner). It sits beside the row's link, never inside
+ * it, so a tap on the heart saves and never opens the listing; the card's
+ * own open-the-post handler skips it because it is a button.
+ */
+function EmbeddedListingSave({ listingId, title }: { listingId: string; title: string }) {
+  const save = useSaveControl(listingId);
+  return (
+    <SaveButton
+      saved={save.saved}
+      pending={save.pending}
+      onToggle={save.toggle}
+      title={title}
+      className="nf-plc__save"
+    />
+  );
+}
+
+/**
+ * THE PHOTO MOSAIC (the feed reference): two pictures side by side, three or
+ * more as one tall picture and two stacked beside it, with "+N" on the last
+ * when there are more. Every frame holds its shape before a byte arrives. A
+ * tap opens the post, where the full rail and the viewer are.
+ */
+function MediaMosaic({ media, alt, moreLabel }: { media: PostMedia[]; alt: string; moreLabel: string }) {
+  const shown = media.slice(0, 3);
+  const more = media.length - shown.length;
+  return (
+    <div className="nf-mosaic" data-count={shown.length}>
+      {shown.map((item, index) => (
+        <span key={item.url} className="nf-mosaic__cell">
+          <PostPicture src={item.url} alt={index === 0 ? alt : ""} width={item.width || 900} height={item.height || 900} sizes="(max-width: 640px) 60vw, 360px" />
+          {index === shown.length - 1 && more > 0 ? (
+            <span className="nf-mosaic__more" aria-label={moreLabel.replace("{count}", String(more))}>
+              +{more}
+            </span>
+          ) : null}
+        </span>
+      ))}
+    </div>
   );
 }
 

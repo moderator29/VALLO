@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { TYPE } from "@/components/app/Screen";
 import { Line, MoneyWait } from "@/components/app/money-history/MoneyWait";
 import { Button } from "@/components/ui/Button";
@@ -31,7 +31,8 @@ import {
 export default function LoadingReceipts() {
   return (
     <MoneyWait label="Loading your receipts" className="nf-page nf-md">
-      <PageHeader title={RECEIPTS_TITLE} fallback="/payments" />
+      <PageFrame title={RECEIPTS_TITLE} fallback="/payments">
+      <div>
       <div className="mt-inline space-y-block">
         <p className={TYPE.body}>{RECEIPTS_LEDE}</p>
         <div className="space-y-block">
@@ -89,6 +90,8 @@ export default function LoadingReceipts() {
         </div>
         <p className={TYPE.rowMeta}>{PARTNERS_SHORT}</p>
       </div>
+      </div>
+    </PageFrame>
     </MoneyWait>
   );
 }

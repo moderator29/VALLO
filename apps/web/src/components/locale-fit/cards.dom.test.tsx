@@ -51,31 +51,11 @@ describe.skipIf(!hasBrowser && !process.env.CI)("locale fit: the dock and the ca
     KNOWN,
   );
 
+  /* The grid tray (DockMore) left the dock on 7 November 2026: the centre
+     slot is Vallo Circle, a destination, so the dock with Circle chosen is
+     the case that replaces the open tray. */
   fitCases(
-    {
-      name: "DockMore tray open (a member's eight destinations)",
-      imports: DOCK_IMPORTS,
-      body: dock("/home", "property", true),
-      before: async (page) => {
-        await page.locator(".nf-dockmore__button").click();
-        await page.locator(".nf-dockmore__tray").waitFor({ state: "visible" });
-      },
-      css: CSS,
-    },
-    KNOWN,
-  );
-
-  fitCases(
-    {
-      name: "DockMore tray open (a guest's three destinations)",
-      imports: DOCK_IMPORTS,
-      body: dock("/home", "property", false),
-      before: async (page) => {
-        await page.locator(".nf-dockmore__button").click();
-        await page.locator(".nf-dockmore__tray").waitFor({ state: "visible" });
-      },
-      css: CSS,
-    },
+    { name: "Dock with /circle chosen (property side, signed in)", imports: DOCK_IMPORTS, body: dock("/circle", "property", true), css: CSS },
     KNOWN,
   );
 

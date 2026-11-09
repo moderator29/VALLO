@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { PassportBook } from "@/components/passport/PassportBook";
@@ -41,8 +41,8 @@ export default async function MemberPassportPage({ params }: { params: Promise<{
 
   if (found.state === "signed-out") {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={copy.title} fallback="/around" />
+      <PageFrame title={copy.title} fallback="/around" width="narrow">
+        <div>
         <EmptyState
           icon="user-verified"
           art="id-check"
@@ -55,14 +55,15 @@ export default async function MemberPassportPage({ params }: { params: Promise<{
           }
           data-testid="passport-members-only"
         />
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
   if (found.state === "unavailable") {
     return (
-      <div className="mx-auto max-w-2xl">
-        <PageHeader title={copy.title} fallback="/around" />
+      <PageFrame title={copy.title} fallback="/around" width="narrow">
+        <div>
         <EmptyState
           icon="user-verified"
           art="id-check"
@@ -70,15 +71,17 @@ export default async function MemberPassportPage({ params }: { params: Promise<{
           body={copy.unavailableBody}
           data-testid="passport-unavailable"
         />
-      </div>
+        </div>
+      </PageFrame>
     );
   }
 
   const view = buildPassportView(found.facts, copy, t.socialProfile.roleLine, locale);
   return (
-    <div className="mx-auto max-w-2xl pb-4xl" data-testid="member-passport">
-      <PageHeader title={copy.viewTitle.replace("{name}", view.name)} subtitle={copy.viewLede} fallback="/around" />
+    <PageFrame title={copy.viewTitle.replace("{name}", view.name)} subtitle={copy.viewLede} fallback="/around" width="narrow" testId="member-passport">
+      <div className="pb-4xl">
       <PassportBook view={view} copy={copy} />
-    </div>
+      </div>
+    </PageFrame>
   );
 }

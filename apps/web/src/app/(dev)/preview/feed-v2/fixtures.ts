@@ -142,6 +142,32 @@ export const POSTS: PostView[] = [
       periodLabel: "/yr",
       photoUrl: bedroom,
       verified: false,
+      beds: 2,
+      baths: 2,
+      amenities: ["Parking", "Generator", "Water"],
+    },
+  }),
+  /* A member featuring a listing with no pictures of their own: the
+     full-bleed editorial card (founder, 7 November 2026). */
+  post({
+    id: "00000000-0000-4000-8000-0000000fd006",
+    author: person(6, "vallo_homes", "Lekki Homes", { isAgent: true, supplyRole: "agent", tier: "gold" }),
+    body: "Modern living, five minutes from the beach road.",
+    createdLabel: "2h ago",
+    likeCount: 842,
+    replyCount: 124,
+    repostCount: 31,
+    listing: {
+      id: "00000000-0000-4000-8000-0000000fd0a2",
+      title: "Four-bedroom duplex, Lekki Phase 1",
+      area: "Lekki Phase 1",
+      city: "Lagos",
+      priceLabel: "N9,500,000",
+      periodLabel: "a year",
+      photoUrl: house,
+      verified: true,
+      beds: 4,
+      baths: 5,
     },
   }),
 ];

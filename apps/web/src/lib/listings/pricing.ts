@@ -21,6 +21,8 @@
  * Money is integer kobo throughout. Nothing in this file divides.
  */
 
+import { periodSuffixEn, rentPeriodLabelEn, saleStatusLabelEn, tenureLabelEn, waterLabelEn } from "@vallo/i18n/en/listings-labels";
+
 export type ListingIntent = "rent" | "sale";
 export type RentPeriod = "month" | "quarter" | "year";
 export type RatePeriod = "night" | "guest";
@@ -146,14 +148,9 @@ export function headlinePeriod(headline: Headline): PricePeriod | "sale" {
  * (typed `PeriodWords` below). `pricing.test.ts` pins the two together, so
  * the English cannot drift apart.
  */
-export const PERIOD_SUFFIX: PeriodWords = {
-  month: "per month",
-  quarter: "per quarter",
-  year: "per year",
-  night: "per night",
-  guest: "per head",
-  sale: "asking price",
-};
+/** SW11: source of truth is now `packages/i18n/src/locales/listings-labels.en.ts`. */
+const _ll = { periodSuffix: periodSuffixEn, rentPeriodLabel: rentPeriodLabelEn, tenureLabel: tenureLabelEn, saleStatusLabel: saleStatusLabelEn, waterLabel: waterLabelEn };
+export const PERIOD_SUFFIX: PeriodWords = _ll.periodSuffix as PeriodWords;
 
 /**
  * The words after a figure, one per period plus "sale", from the reader's
@@ -191,26 +188,11 @@ export const PERIOD_NOUN: Record<RentPeriod, string> = {
   year: "year",
 };
 
-export const RENT_PERIOD_LABEL: Record<RentPeriod, string> = {
-  month: "Monthly",
-  quarter: "Quarterly",
-  year: "Yearly",
-};
+export const RENT_PERIOD_LABEL: Record<RentPeriod, string> = _ll.rentPeriodLabel as Record<RentPeriod, string>;
 
-export const TENURE_LABEL: Record<LandTenure, string> = {
-  certificate_of_occupancy: "Certificate of Occupancy",
-  governors_consent: "Governor's Consent",
-  deed_of_assignment: "Deed of Assignment",
-  gazette: "Gazette",
-  freehold: "Freehold",
-  leasehold: "Leasehold",
-};
+export const TENURE_LABEL: Record<LandTenure, string> = _ll.tenureLabel as Record<LandTenure, string>;
 
-export const SALE_STATUS_LABEL: Record<SaleStatus, string> = {
-  available: "Available",
-  under_offer: "Under offer",
-  sold: "Sold",
-};
+export const SALE_STATUS_LABEL: Record<SaleStatus, string> = _ll.saleStatusLabel as Record<SaleStatus, string>;
 
 /** `listings.furnished` and `listings.build_condition` as words: `t.experienceLabels.furnishing` and `.condition`. */
 export type FurnishingWords = Record<Furnishing, string>;

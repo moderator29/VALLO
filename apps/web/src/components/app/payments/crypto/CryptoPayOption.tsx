@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Locale } from "@vallo/i18n/core";
@@ -133,17 +134,15 @@ function CryptoSheet({
   const pair = offer.pairs.find((p) => p.asset === asset && p.network === network) ?? networks[0] ?? null;
   const [picker, setPicker] = useState<null | "asset" | "network">(null);
   const [step, setStep] = useState<Step>({ kind: "pick" });
-  const [error, setError] = useState<string | null>(null);
   const [refund, setRefund] = useState("");
   const [refundError, setRefundError] = useState<string | null>(null);
 
   const quote = async () => {
     if (!pair) return;
-    setError(null);
     setStep({ kind: "quoting" });
     const result = await getCryptoQuote({ bookingId, asset: pair.asset, network: pair.network });
     if (!result.ok) {
-      setError(result.error);
+      banner.error(result.error);
       setStep({ kind: "pick" });
       return;
     }
@@ -151,7 +150,6 @@ function CryptoSheet({
   };
 
   const start = async (view: CryptoPaymentView) => {
-    setError(null);
     if (!refundAddressLooksValid(view.network, refund)) {
       setRefundError(fill(t.refundInvalid, { network: view.networkName }));
       return;
@@ -160,7 +158,7 @@ function CryptoSheet({
     setStep({ kind: "starting", view });
     const result = await startCryptoPayment({ paymentId: view.id, refundAddress: refund.trim() });
     if (!result.ok) {
-      setError(result.error);
+      banner.error(result.error);
       setStep({ kind: "quote", view });
       return;
     }
@@ -172,7 +170,7 @@ function CryptoSheet({
       <Sheet open onOpenChange={(next) => (next ? undefined : onClose())} title={t.sheetTitle} closeLabel={t.done} detents={[0.92]}>
         <div className="grid gap-block pb-lg">
           {/* The dark hero over light content (reference 05): the one figure that matters. */}
-          <div className="rounded-[var(--nf-radius-xl)] bg-[var(--nf-surface-inverse)] px-lg py-lg text-[var(--nf-content-on-inverse)]">
+          <div className="rounded-xl bg-[var(--nf-surface-inverse)] px-lg py-lg text-[var(--nf-content-on-inverse)]">
             <p className="nf-caption opacity-80">{step.kind === "pick" || step.kind === "quoting" ? t.chargeLabel : t.sendExactly}</p>
             {step.kind === "pick" || step.kind === "quoting" ? (
               <Amount
@@ -197,11 +195,6 @@ function CryptoSheet({
             )}
           </div>
 
-          {error && (
-            <p role="alert" className="nf-body-sm rounded-[var(--nf-radius-md)] bg-[var(--nf-state-error-surface)] px-md py-sm text-[var(--nf-state-error)]">
-              {error}
-            </p>
-          )}
 
           {(step.kind === "pick" || step.kind === "quoting") && (
             <>
@@ -302,7 +295,7 @@ function ChoiceList({ items, value, onChoose }: { items: { id: string; label: st
             <button
               type="button"
               onClick={() => onChoose(item.id)}
-              className={`flex min-h-[3.25rem] w-full items-center justify-between rounded-[var(--nf-radius-md)] px-md text-left ${
+              className={`flex min-h-[3.25rem] w-full items-center justify-between rounded-md px-md text-left ${
                 selected ? "bg-[var(--nf-surface-inset)]" : ""
               }`}
             >
@@ -377,6 +370,7 @@ function QuoteCard({
             onChange={(event) => onRefund(event.target.value)}
             error={refundError ?? undefined}
             autoComplete="off"
+            enterKeyHint="done"
             spellCheck={false}
             inputMode="text"
           />

@@ -6,6 +6,8 @@ import type { ChatCardData, ThreadCardData } from "@/components/app/messages/Cha
 import { cardRefFor, type ParsedShare, type SharedRef } from "@/components/app/messages/share";
 import { getListingRepository } from "@/lib/listings/repository";
 import { getStayDetail } from "@/lib/stays/queries";
+import { roommatePhotoUrl } from "@/lib/features/roommates/model";
+import { SUPABASE_URL } from "@/lib/supabase/env";
 import { readPassportCard } from "@/lib/passport/passport-read";
 import { buildPassportView } from "@/lib/passport/view";
 import { accommodationPhotoUrl } from "@/lib/stays/photos";
@@ -166,6 +168,59 @@ async function stayCard(id: string, locale: Locale): Promise<ChatCardData | null
 }
 
 /**
+ * A Vallo Roommates post. Read through the member's own client, so the
+ * database's rules decide whether this reader may see it (a paused or removed
+ * post, or one between two people who blocked each other, resolves to
+ * nothing). Defensive on purpose: until the roommate SQL is applied the table
+ * is absent, and an absent table is no card, never an error in the thread.
+ */
+async function roommateCard(db: Db, id: string, locale: Locale): Promise<ChatCardData | null> {
+  const { data, error } = await (db as unknown as SupabaseClient)
+    .from("roommate_listings")
+    .select("id, kind, status, title, area, city, rent_minor, share_minor, rent_period, room_type, bedrooms, photos, verified_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error || !data) return null;
+  const row = data as {
+    id: string;
+    kind: "room_offer" | "roommate_wanted" | "together";
+    status: string;
+    title: string;
+    area: string | null;
+    city: string | null;
+    rent_minor: number | null;
+    share_minor: number | null;
+    rent_period: "month" | "year" | null;
+    room_type: "private" | "shared" | "ensuite" | null;
+    bedrooms: number | null;
+    photos: string[] | null;
+    verified_at: string | null;
+  };
+  if (row.status !== "live" && row.status !== "filled") return null;
+  const words = getDictionary(locale).roommates;
+  const minor = row.share_minor ?? row.rent_minor;
+  const period = row.rent_period ?? "year";
+  const facts: string[] = [];
+  if (row.room_type) facts.push(words.roomTypes[row.room_type]);
+  if (row.bedrooms !== null && row.bedrooms > 0) facts.push(countOf(row.bedrooms, "bedrooms", locale));
+  if (row.status === "filled") facts.push(words.listingStatus.filled);
+  const cover = (row.photos ?? [])[0];
+  return {
+    kind: "roommate",
+    id: row.id,
+    title: row.title,
+    area: row.area ?? "",
+    city: row.city ?? "",
+    photo: cover ? roommatePhotoUrl(SUPABASE_URL, cover) : null,
+    kindLabel: words.listingKinds[row.kind] ?? "",
+    verified: Boolean(row.verified_at),
+    priceLabel: minor === null ? "" : formatMoney(minor, locale),
+    periodLabel: minor === null ? "" : words.perPeriod[period],
+    facts,
+  };
+}
+
+/**
  * A member's passport as a card. The read is the same one the passport page
  * makes, so it answers to the owner's switches, to blocks and to being signed
  * in: a passport that is off, or between two people who blocked each other,
@@ -196,6 +251,7 @@ export async function resolveCard(
       return listing ? listingCard(listing, locale) : null;
     }
     if (ref.kind === "stay") return await stayCard(ref.id, locale);
+    if (ref.kind === "roommate") return await roommateCard(db, ref.id, locale);
     return await bookingCard(db, ref.id, locale);
   } catch {
     return null;

@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
+import { banner } from "@/lib/ui/toast";
 
 import {
   controlState,
@@ -138,8 +138,6 @@ function subscribe(): () => void {
  * Every failed attempt settles the phase and says one plain sentence
  * (`failureMessage`); no failure may leave the screen silent.
  */
-type Note = { text: string; signIn: boolean; tone: "done" | "problem" };
-
 export function PushSetting({
   registeredRefs,
   registeredDevices: _legacyCount,
@@ -157,7 +155,6 @@ export function PushSetting({
   const [settled, setSettled] = useState<Phase | null>(null);
   const phase = settled ?? observed;
   const [busy, setBusy] = useState(false);
-  const [note, setNote] = useState<Note | null>(null);
 
   /* The server's word on THIS device, checked after mount because the local
      record and the subscription exist only in the browser. `null` while the
@@ -196,16 +193,20 @@ export function PushSetting({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, refsKey]);
 
+  /* What a tap did is said by the one banner at the top of the screen
+     (Grade 1). Signed out, the banner's action is the way to sign in. */
   const fail = useCallback((outcome: EnrolOutcome & { ok: false }) => {
     const reference = failureReference(outcome);
-    setNote({
-      text:
-        failureMessage(outcome.reason, { iosHomeScreenApp: onIosHomeScreenApp(), where: "settings", reference }) +
-        (reference ? ` (Reference: ${reference}.)` : ""),
-      signIn: outcome.reason === "signed_out",
-      tone: "problem",
-    });
-  }, []);
+    const text =
+      failureMessage(outcome.reason, { iosHomeScreenApp: onIosHomeScreenApp(), where: "settings", reference }) +
+      (reference ? ` (Reference: ${reference}.)` : "");
+    banner.error(
+      text,
+      outcome.reason === "signed_out"
+        ? { action: { label: "Open sign in", run: () => router.push("/sign-in?next=%2Fsettings%2Fnotifications") } }
+        : undefined,
+    );
+  }, [router]);
 
   /* NOT AWAITED BEFORE THE CALL. `enrol` requests the permission on its first
      line precisely so the user activation from this click is still live when
@@ -213,7 +214,6 @@ export function PushSetting({
      system prompt never appears. */
   const turnOn = useCallback(() => {
     setBusy(true);
-    setNote(null);
     void enrol().then((outcome) => {
       writeMemory(rememberSystemAsked(readMemory()));
       setBusy(false);
@@ -222,7 +222,7 @@ export function PushSetting({
            the row. */
         setSettled("granted");
         setConfirmed({ ref: outcome.deviceRef, list: registeredRefs });
-        setNote({ text: "This device is registered. It is on the list below.", signIn: false, tone: "done" });
+        banner.success("This device is registered. It is on the list below.");
         /* The list is server-rendered from the database, so it is refreshed
            rather than patched. */
         router.refresh();
@@ -315,26 +315,6 @@ export function PushSetting({
               ? "You have allowed notifications on this device, but it is not registered, so nothing will reach it. Turn it on below."
               : "Get told when a host answers, when somebody writes back, and when money moves. Nothing at night unless it is about your money."}
       </p>
-      {/* A "done" note is shown only while the control reads on: once the
-          refreshed list has had its say, a success sentence under an off
-          control would be the blind light again in words. */}
-      {note && (note.tone === "problem" || registered) && (
-        <p
-          role={note.tone === "problem" ? "alert" : "status"}
-          className="nf-body-sm text-content"
-          data-push-note={note.tone}
-        >
-          {note.text}
-          {note.signIn ? (
-            <>
-              {" "}
-              <Link href="/sign-in?next=%2Fsettings%2Fnotifications" className="underline">
-                Open sign in
-              </Link>
-            </>
-          ) : null}
-        </p>
-      )}
       <Button variant="secondary" size="sm" full onClick={turnOn} disabled={busy} data-testid="push-turn-on">
         {busy ? "Just a moment" : registered ? "Register this device again" : "Turn on for this device"}
       </Button>

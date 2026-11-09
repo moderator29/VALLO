@@ -43,6 +43,7 @@ import {
 } from "./blocks";
 import {
   attachImageSchema,
+  attachVoiceSchema,
   confirmInspectionSchema,
   markThreadReadSchema,
   sendMessageSchema,
@@ -54,6 +55,7 @@ import { dbLimitRefusal } from "../security/db-limit";
 import { phoneGateFor } from "../phone-otp/gate";
 import { pathInOwnFolder } from "../security/own-folder";
 import { attributeConversation } from "../share/attribution";
+import { VOICE_BODY } from "./voice-note";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -688,6 +690,120 @@ export async function attachImage(input: {
   }
 
   return ok({ messageId, attachmentId: attachment.id });
+}
+
+/*
+ * VOICE NOTES (GRADE 1, P1.3). Said to the member in these words; the
+ * pending migration `grade1_voice_notes_and_message_reactions` is what makes
+ * them work, and until it is applied the first refusal below is the honest one.
+ */
+const VOICE_NOT_READY_MESSAGE = "Voice notes aren't switched on yet. Write a message instead.";
+const VOICE_FAILED_MESSAGE = "Your voice note did not send. Tap Try again to send it.";
+
+/** Postgres and PostgREST codes for a column or table the database does not have yet. */
+function missingSchema(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  return (
+    error.code === "42703" ||
+    error.code === "42P01" ||
+    error.code === "PGRST204" ||
+    error.code === "PGRST205" ||
+    /column .* does not exist|could not find the .* column/i.test(error.message ?? "")
+  );
+}
+
+/**
+ * Record a voice note after the client has uploaded it to the private
+ * message-attachments bucket, exactly as `attachImage` records a photo: the
+ * path must sit in this conversation's folder, the same guards run (a block
+ * either way, membership, the phone gate on a first message), and the note
+ * gets its own message so it lands in the thread and notifies like any other.
+ *
+ * Two things differ, both so a half-written note never shows. The audio
+ * columns are asked for BEFORE the message is written, so a database without
+ * the migration refuses in words and leaves no "Voice note" line with nothing
+ * behind it. And if the attachment row is still refused after the message
+ * went in, that message is taken back out.
+ */
+export async function attachVoice(input: {
+  conversationId: string;
+  storagePath: string;
+  durationMs: number;
+  peaks?: number[] | null;
+  replyToId?: string | null;
+}): Promise<ActionResult<{ messageId: string; attachmentId: string; createdAt: string }>> {
+  const session = await resolveSession();
+  if (session.state === "unconfigured") return fail(NOT_CONFIGURED_MESSAGE);
+  if (session.state === "signed-out") return fail(SIGNED_OUT_MESSAGE);
+
+  if (!(await isFeatureEnabled("messaging"))) return fail(PAUSED_MESSAGE);
+
+  const parsed = validate(attachVoiceSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const data = parsed.data;
+
+  if (!pathInOwnFolder(data.conversationId, data.storagePath)) {
+    return fail("This voice note does not belong to this conversation. Record it again.");
+  }
+
+  const guard = await guardConversation(session.supabase, session.user.id, data.conversationId);
+  if (!guard.ok) {
+    if (guard.reason === "blocked") return fail(BLOCKED_MESSAGE);
+    if (guard.reason === "not_yours") return fail(NOT_YOUR_CONVERSATION_MESSAGE);
+    return fail(VOICE_FAILED_MESSAGE);
+  }
+
+  const phoneGate = await phoneGateFor(session.supabase, session.user.id, "message", {
+    conversationId: data.conversationId,
+  });
+  if (phoneGate) return phoneGate;
+
+  /* Does the database know what a voice note is yet? A read of the three
+     columns returns no rows and costs one round trip. */
+  const probe = await session.supabase.from("message_attachments").select("kind, duration_ms, peaks").limit(0);
+  if (probe.error) return fail(missingSchema(probe.error) ? VOICE_NOT_READY_MESSAGE : VOICE_FAILED_MESSAGE);
+
+  const { data: message, error: messageError } = await session.supabase
+    .from("messages")
+    .insert({
+      conversation_id: data.conversationId,
+      sender_id: session.user.id,
+      body: VOICE_BODY,
+      reply_to_id: data.replyToId ?? null,
+    })
+    .select("id, created_at")
+    .single();
+  if (messageError || !message) {
+    if (messageError?.code === "42501") return fail(NOT_YOUR_CONVERSATION_MESSAGE);
+    const limited = dbLimitRefusal(messageError);
+    if (limited) return fail(limited);
+    return fail(VOICE_FAILED_MESSAGE);
+  }
+
+  const { data: attachment, error: attachError } = await session.supabase
+    .from("message_attachments")
+    .insert({
+      message_id: message.id,
+      storage_path: data.storagePath,
+      kind: "audio",
+      duration_ms: data.durationMs,
+      peaks: data.peaks && data.peaks.length > 0 ? data.peaks : null,
+    })
+    .select("id")
+    .single();
+
+  if (attachError || !attachment) {
+    /* Participants hold no delete policy on messages, so the service role
+       takes back the row this call itself just wrote, by its id and sender. */
+    try {
+      await createAdminClient().from("messages").delete().eq("id", message.id).eq("sender_id", session.user.id);
+    } catch {
+      /* No service key: the line stays, and reads as a voice note with no player. */
+    }
+    return fail(missingSchema(attachError) ? VOICE_NOT_READY_MESSAGE : VOICE_FAILED_MESSAGE);
+  }
+
+  return ok({ messageId: message.id, attachmentId: attachment.id, createdAt: message.created_at });
 }
 
 /**

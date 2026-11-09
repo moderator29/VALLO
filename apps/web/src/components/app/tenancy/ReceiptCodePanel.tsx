@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -29,21 +30,20 @@ export function ReceiptCodePanel({
 }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const [note, setNote] = useState<string | null>(null);
   // The code as minted, held only in this page: it is shown once.
   const [fresh, setFresh] = useState<string | null>(null);
   const link = fresh ? `${typeof window === "undefined" ? "" : window.location.origin}/r/${formatReceiptCode(fresh)}` : "";
 
+  /* What each tap did is said by the one banner at the top of the screen (Grade 1). */
   function run(work: () => Promise<{ ok: boolean; error?: string }>, done?: string) {
-    setNote(null);
     start(async () => {
       try {
         const result = await work();
         if (!result.ok) {
-          setNote(result.error ?? copy.failed);
+          banner.error(result.error ?? copy.failed, { retry: () => run(work, done) });
           return;
         }
-        if (done) setNote(done);
+        if (done) banner.success(done);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -78,9 +78,9 @@ export function ReceiptCodePanel({
                 }
                 try {
                   await navigator.clipboard.writeText(link);
-                  setNote(copy.copied);
+                  banner.success(copy.copied);
                 } catch {
-                  setNote(copy.failed);
+                  banner.error(copy.failed);
                 }
               }}
             >
@@ -92,9 +92,9 @@ export function ReceiptCodePanel({
               onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(link);
-                  setNote(copy.copied);
+                  banner.success(copy.copied);
                 } catch {
-                  setNote(copy.failed);
+                  banner.error(copy.failed);
                 }
               }}
             >
@@ -121,12 +121,11 @@ export function ReceiptCodePanel({
             full
             disabled={pending}
             onClick={() => {
-              setNote(null);
               start(async () => {
                 try {
                   const result = await createReceiptCode({ tenancyId });
                   if (!result.ok) {
-                    setNote(result.error ?? copy.failed);
+                    banner.error(result.error ?? copy.failed);
                     return;
                   }
                   setFresh(result.data.code);
@@ -150,11 +149,6 @@ export function ReceiptCodePanel({
             </Button>
           )}
         </div>
-      )}
-      {note && (
-        <p className="nf-caption mt-sm" role="status">
-          {note}
-        </p>
       )}
     </div>
   );

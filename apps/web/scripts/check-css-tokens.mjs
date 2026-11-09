@@ -708,6 +708,15 @@ const DULL_ALLOWED = new Set([
   "src/app/css/controls.css  .nf-switch",
   "src/app/settings-rows.css  .nf-switch",
   /*
+   * The media pill (the founder's pump.fun share control, 9 November 2026):
+   * a neutral capsule that leads with a round piece of media and names what it
+   * picks. Its resting edge is the plain hairline, not the blue control edge,
+   * because a blue outline would read as "selected" on a control whose whole
+   * job is to sit quietly and show the current choice (background, account,
+   * area) inside itself. The pressed and selected states DO take the blue ring.
+   */
+  "src/app/css/share.css  .nf-media-pill",
+  /*
    * A THIRD SWITCH ENTRY LIVED HERE AND IS GONE WITH THE RULE IT EXCUSED. It
    * named `controls.css  :root[data-theme="light"] .nf-switch`, the same track
    * as the two entries above reached through its paper twin. Light mode was
@@ -981,6 +990,17 @@ const PILL_ALLOWED = new Set([
    * row." A glyph and a number, never a word, on the segment role's token.
    */
   "src/app/social-feed.css  .nf-act-pill",
+  /*
+   * PERMANENT, by founder directive of 9 November 2026 from the pump.fun share
+   * surface: the share composer's controls are capsules. The media pill (the
+   * "Background" button: a round piece of media, a label, room for a chevron
+   * or a toggle) is one he asked for "in many places", so it is a named
+   * control family, not a one-off. The capsule tells a person it is a picker,
+   * the same signal the chip and the segment give. Every other control keeps
+   * the rectangle.
+   */
+  "src/app/css/share.css  .nf-media-pill",
+  "src/app/css/share.css  .nf-share-card__handle",
   /*
    * PERMANENT, and it is the SAME OBJECT as the one `PILL_ALLOWED_TSX` already
    * excuses below: `components/ui/Switch.tsx` is a switch track drawn as a

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { TERMS_VERSION } from "@/lib/legal/versions";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * The tick that turns a notice into an acceptance.
@@ -87,15 +88,8 @@ export function AcceptTerms({
           {t.safety.ageLabel}
         </span>
       </label>
-      {showAdultError && (
-        <p
-          id="age-confirmed-error"
-          role="alert"
-          className="-mt-2xs mb-sm pl-xl text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {t.safety.ageRequired}
-        </p>
-      )}
+      {/* The box keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id="age-confirmed-error" message={showAdultError ? t.safety.ageRequired : null} />
       <label className="nf-tap flex cursor-pointer items-start gap-sm">
         <input
           type="checkbox"
@@ -128,10 +122,14 @@ export function AcceptTerms({
         <Link href="/eula" className="nf-tap underline underline-offset-4">
           {t.safety.rulesLink}
         </Link>
+        {", "}
+        <Link href="/community" className="nf-tap underline underline-offset-4">
+          {t.safety.communityLink}
+        </Link>
       </p>
 
-      {/* NEWS AND UPDATES, TICKED BY DEFAULT (the founder, 4 November 2026).
-          Uncontrolled on purpose: it starts ticked and the person can untick
+      {/* NEWS AND UPDATES, UNTICKED BY DEFAULT (NDPR, 8 November 2026).
+          Uncontrolled on purpose: it starts unticked and the person can tick
           it. The hidden `marketingAsked` marks that this form showed the box,
           so the server can tell "unticked" (a no) from "a request that never
           carried the box" (no answer, the default stands). */}
@@ -141,12 +139,11 @@ export function AcceptTerms({
           type="checkbox"
           name="marketingEmail"
           value="yes"
-          defaultChecked
           data-testid="marketing-email"
           className="mt-3xs h-5 w-5 shrink-0 accent-[var(--nf-brand-primary)]"
         />
         <span className="text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
-          Send me news and updates from Vallo by email. You can switch this off any time.
+          {t.safety.marketingLabel}
         </span>
       </label>
 
@@ -154,15 +151,7 @@ export function AcceptTerms({
           accepted rather than only that something was. */}
       {accepted && <input type="hidden" name="termsVersion" value={TERMS_VERSION} />}
 
-      {showError && (
-        <p
-          id="accept-terms-error"
-          role="alert"
-          className="mt-2xs pl-xl text-[length:var(--nf-text-overline)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {t.safety.acceptRequired}
-        </p>
-      )}
+      <FieldProblem id="accept-terms-error" message={showError ? t.safety.acceptRequired : null} />
     </div>
   );
 }

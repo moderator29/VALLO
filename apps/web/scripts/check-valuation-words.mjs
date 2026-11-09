@@ -110,6 +110,11 @@ const ALLOWED_PHRASE = /estate\s+surveyors?\s+and\s+valuers?/gi;
 const ALLOWED_FILES = {
   "apps/web/src/lib/price-check/disclaimer.ts": 3,
   "apps/web/src/lib/legal/terms.tsx": 2,
+  /* The Circle professional kind `valuer` is a stored enum value naming a
+     regulated profession (shown as "Estate surveyor and valuer", the
+     allowed phrase), not a claim that Vallo values anything: the key in the
+     kinds list and the key of the label map, nothing else. */
+  "apps/web/src/lib/features/circle/model.ts": 2,
 };
 
 /* The rule's own files. The words are their subject, not their copy. */

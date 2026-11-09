@@ -13,36 +13,42 @@ import type { Icon3DName } from "@/components/ui/icon-3d";
  * row really has, in this order: the link (the strongest statement of what
  * the row is about), then the words the trigger wrote, then the kind.
  *
- * The six filter chips of the north star (16.4) are the families. The social
- * events of section 16.2 (a follow, a reply, a mention) join Messages, because
- * they are people reaching you, which is what that chip is for.
+ * THE FAMILIES ARE THE LOCK SCREEN'S (founder, 7 November 2026, with Agent
+ * NATIVE's `lib/push/family.ts`): Messages, Bookings, Money, Activity,
+ * Offers, and Calls inside Messages. A push says "Bookings" in bold above
+ * its title; the tab it lands under here says the same word, so the phone
+ * and the app never disagree about what kind of thing arrived. A follow, a
+ * like, a listing's review, a verification and a sign-in are Activity, as
+ * they are on the lock screen; only people writing to you are Messages.
  *
  * Pure: no React, no reads, so the whole table is tested.
  */
 
-export type NotificationFamily = "money" | "trust" | "spaces" | "messages" | "account";
+export type NotificationFamily = "messages" | "bookings" | "money" | "activity" | "offers";
 
-export const FAMILY_ORDER: readonly NotificationFamily[] = ["money", "trust", "spaces", "messages", "account"];
+export const FAMILY_ORDER: readonly NotificationFamily[] = ["messages", "bookings", "money", "activity", "offers"];
 
 type Facts = { kind: string; title: string; href: string | null };
 
 /** Link prefixes that settle the family on their own. Longest and most specific first. */
 const HREF_FAMILY: readonly { prefix: RegExp; family: NotificationFamily }[] = [
   { prefix: /^\/(?:agent\/|host\/)?messages(?:[/?#]|$)/, family: "messages" },
-  { prefix: /^\/(?:around|post|stories|u)(?:[/?#]|$)/, family: "messages" },
+  { prefix: /^\/support\/messages(?:[/?#]|$)/, family: "messages" },
   { prefix: /^\/(?:payments|checkout|rent|wallet|pay|record|earnings)(?:[/?#]|$)/, family: "money" },
   { prefix: /^\/(?:host|agent)\/earnings(?:[/?#]|$)/, family: "money" },
   { prefix: /^\/settings\/payments(?:[/?#]|$)/, family: "money" },
-  { prefix: /^\/(?:verification|verify|passport)(?:[/?#]|$)/, family: "trust" },
-  { prefix: /^\/settings\/passport(?:[/?#]|$)/, family: "trust" },
-  { prefix: /^\/settings\/(?:devices|passcode|phone|account|privacy)(?:[/?#]|$)/, family: "account" },
-  { prefix: /^\/(?:support|help)(?:[/?#]|$)/, family: "account" },
+  { prefix: /^\/(?:bookings|trips|inspections|visits|reservations)(?:[/?#]|$)/, family: "bookings" },
 ];
 
 /** What the trigger wrote, when the link did not decide. Case-insensitive. */
 const MONEY_WORDS = /\b(rent|payment|paid|pay|refund|deposit|caution|withdraw\w*|wallet|escrow|share|payout|receipt|statement|charge\w*|invoice|balance|fee|plan renew\w*)\b|₦/i;
-const TRUST_WORDS = /\b(verif\w*|badge|passport|mandate|identity|document|streak|record)\b/i;
-const ACCOUNT_WORDS = /\b(sign-?in|device|passcode|password|e-?mail|phone number|security|support ticket|ticket|data export|deletion)\b/i;
+/* A price drop on a saved place and a saved place back on the market are the
+   lock screen's Offers (`priceDrop` in lib/push/family.ts). */
+const OFFER_WORDS = /\b(price drop\w*|dropped|lower price|price (?:fell|is down)|back on the market|offer|promo\w*|discount)\b/i;
+const FOLLOW_WORDS = /\b(follow\w*)\b/i;
+const LIKE_WORDS = /\b(lik\w+|react\w*|lov\w+)\b/i;
+const TRUST_WORDS = /\b(verif\w*|badge|passport|mandate|identity|document|streak)\b/i;
+const ACCOUNT_WORDS = /\b(sign-?in|signed in|device|passcode|password|e-?mail|phone number|security)\b/i;
 
 /** A ring or a missed call, written by the call triggers as "Incoming video call" or "Missed voice call from Ada". */
 const CALL_TITLE = /^(?:incoming|missed) (?:voice|video) call\b/i;
@@ -51,16 +57,30 @@ export function isCallRow(n: { title: string }): boolean {
   return CALL_TITLE.test(n.title.trim());
 }
 
-/** The row's glyph: a call is a handset, never a chat bubble. */
+/**
+ * The row's glyph, as specific as the row's own facts allow: a call is a
+ * handset, a follow a person with a tick, a sign-in a lock, a verification
+ * the verified mark, a listing a house, a booking a calendar. Never a chat
+ * bubble on something nobody wrote to you.
+ */
 export function glyphOf(n: Facts): UiIconName {
-  return isCallRow(n) ? "phone" : FAMILY_GLYPH[familyOf(n)];
+  if (isCallRow(n)) return /^missed/i.test(n.title.trim()) ? "phone-missed" : "phone";
+  const family = familyOf(n);
+  if (family !== "activity") return FAMILY_GLYPH[family];
+  const words = `${n.title} ${n.href ?? ""}`;
+  if (n.kind === "social" && FOLLOW_WORDS.test(n.title)) return "user-check";
+  if (n.kind === "social" && LIKE_WORDS.test(n.title)) return "heart";
+  if (n.kind === "social") return "feed";
+  if (ACCOUNT_WORDS.test(n.title) || /^\/settings\/(?:devices|passcode|phone|account|privacy)/.test(n.href ?? "")) return "shield-lock";
+  if (TRUST_WORDS.test(words)) return "verified";
+  if (n.kind === "listing" || /^\/(?:listing|stay|restaurant|host|agent)(?:[/?#]|$)/.test(n.href ?? "")) return "house";
+  return FAMILY_GLYPH.activity;
 }
 
 export function familyOf(n: Facts): NotificationFamily {
-  /* The kinds that mean one thing wherever they point. */
-  if (n.kind === "message") return "messages";
+  /* The kinds that mean one thing wherever they point, as the push decides. */
+  if (n.kind === "message" || n.kind === "support") return "messages";
   if (n.kind === "wallet") return "money";
-  if (n.kind === "support") return "account";
 
   const href = n.href ?? "";
   for (const rule of HREF_FAMILY) {
@@ -68,43 +88,41 @@ export function familyOf(n: Facts): NotificationFamily {
   }
 
   const words = n.title;
-  if (n.kind === "social") return TRUST_WORDS.test(words) && /earned/i.test(words) ? "trust" : "messages";
-  /* A listing's own events (submitted, approved, needs more information) are
-     supply, so they stay Spaces even when the word "verified" is in them. */
-  if (n.kind === "listing") return "spaces";
+  if (OFFER_WORDS.test(words)) return "offers";
+  /* People reaching you without writing (a follow, a like, a mention) and a
+     listing's own events are Activity, the lock screen's word for them. */
+  if (n.kind === "social" || n.kind === "listing") return "activity";
   if (MONEY_WORDS.test(words)) return "money";
-  if (TRUST_WORDS.test(words)) return "trust";
-  if (n.kind === "system") return "account";
-  if (ACCOUNT_WORDS.test(words)) return "account";
-  /* booking, agent and anything new: a space, a stay or a tenancy. */
-  return "spaces";
+  if (n.kind === "booking") return "bookings";
+  /* system, agent and anything new. */
+  return "activity";
 }
 
 /** The line glyph on the round plate of a row, per family. */
 export const FAMILY_GLYPH: Record<NotificationFamily, UiIconName> = {
-  money: "wallet",
-  trust: "verified",
-  spaces: "house",
   messages: "chat-bubble",
-  account: "user",
+  bookings: "calendar-check",
+  money: "wallet",
+  activity: "bell",
+  offers: "price-tag",
 };
 
 /** The plate tint. The glyph and the word say what it is; the tint only sorts. */
 export const FAMILY_TONE: Record<NotificationFamily, IconPlateTone> = {
-  money: "success",
-  trust: "brand",
-  spaces: "brand",
   messages: "info",
-  account: "neutral",
+  bookings: "brand",
+  money: "success",
+  activity: "neutral",
+  offers: "brand",
 };
 
 /** The one clay object of the full view, per family (tier B symbols). */
 export const FAMILY_OBJECT: Record<NotificationFamily, Icon3DName> = {
-  money: "pay",
-  trust: "shield",
-  spaces: "home-small",
   messages: "envelope",
-  account: "passcode-lock",
+  bookings: "calendar-booked",
+  money: "pay",
+  activity: "bell",
+  offers: "price-tag",
 };
 
 /* ------------------------------------------------------------------ figure */

@@ -16,14 +16,19 @@ const ENTRY = `
   import { getDictionary } from "@vallo/i18n";
   import { mount } from "@/lib/testing/browser-root";
   import { RequestedPhotoPanel } from "@/components/verification/RequestedPhotoPanel";
+  import { ToastHost } from "@/components/ui/ToastHost";
   import { answerVerificationRequest } from "@/app/(app)/verification/actions";
+  /* Outcomes are said by the one top banner (founder, 7 November 2026). */
   mount(
+    <>
+    <ToastHost />
     <RequestedPhotoPanel
       copy={getDictionary("en").experienceAccount.kyc}
       requestId="11111111-2222-4333-8444-555555555555"
       message=${JSON.stringify(MESSAGE)}
       submit={answerVerificationRequest}
-    />,
+    />
+    </>,
   );
 `;
 
@@ -75,7 +80,7 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the requested photo", () => {
     const { page, close } = await mountInBrowser({
       entry: ENTRY,
       init: INIT,
-      actions: { answerVerificationRequest: `async () => ({ ok: false, message: "This request is already answered. Thank you." })` },
+      actions: { answerVerificationRequest: `async () => ({ ok: false, error: "This request is already answered. Thank you." })` },
     });
     try {
       await page.getByTestId("selfie-file").setInputFiles({ name: "me-with-id.jpg", mimeType: "image/jpeg", buffer: JPEG });

@@ -241,6 +241,49 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
       "the member's own signal: the safety share records only that they tapped I'm done and when (trust-doors safetyShare.pageDone); Vallo asserts nothing about anybody's safety",
   },
 
+  /* Vallo Roommates (8 November 2026). Every badge names one check and is
+     written only by the server: a school email is confirmed by a six digit
+     code sent to that address (lib/features/roommates/actions.ts
+     startSchoolEmailCheck / confirmSchoolEmail, service role, hashed code,
+     five tries, fifteen minutes); a student ID, NYSC letter or work letter is
+     decided by a person on the verification desk (admin_roommate_decide_verification,
+     kyc_review or trust_safety only); a room post is "checked by Vallo" only
+     when staff set roommate_listings.verified_at (admin_roommate_act verify),
+     and an edit to its price, place or authority clears it again. */
+  {
+    phrase: /\b(?:student id|corps member|workplace|school email) checked\b/i,
+    mechanism: "roommate_verifications rows set to verified only by the verification desk or the emailed code (service role)",
+    onlyIn: "packages/i18n/src/locales/roommates.en.ts",
+  },
+  {
+    phrase: /\b(?:listing )?checked by vallo\b/i,
+    mechanism: "roommate_listings.verified_at, written only by staff through admin_roommate_act, cleared by any later edit of price, place or authority",
+    onlyIn: "packages/i18n/src/locales/roommates.en.ts",
+  },
+  {
+    phrase: /\b(?:badges? says? what was checked|others see that it was checked)\b/i,
+    mechanism: "each roommate badge is one named roommate_verifications kind; the badge copy names that kind",
+    onlyIn: "packages/i18n/src/locales/roommates.en.ts",
+  },
+  /* Vallo Circle: an opportunity is held for a person to release
+     (posts_circle trigger: circle_type opportunity sets status HELD,
+     20261107210200_features_circle_1_core.sql); a professional's mark is the
+     agent verification badge. */
+  {
+    phrase: /\bevery one is checked before it shows\b/i,
+    mechanism: "Circle opportunity posts are inserted HELD by the posts_circle trigger and shown only after a moderator releases them",
+    onlyIn: "packages/i18n/src/locales/circle.en.ts",
+  },
+  { phrase: /^checked by vallo$/i, mechanism: AGENT_KYC, onlyIn: "packages/i18n/src/locales/circle.en.ts" },
+  /* An audience choice in privacy settings, not a promise about anybody. */
+  { phrase: /^verified people$/i, mechanism: AGENT_KYC, onlyIn: "packages/i18n/src/locales/en.ts" },
+  /* A hotel front desk's own marks on a reservation, not a check of anyone. */
+  {
+    phrase: /^checked (?:in|out)$/i,
+    mechanism: "the host's front desk mark on the reservation (FrontDeskPanel), a status, not a verification",
+    onlyIn: "apps/web/src/components/host/dashboard/FrontDeskPanel.tsx",
+  },
+
   /* Sentences deleted on the release branch by another change. */
   { phrase: /^secure and fast$/i, mechanism: "none", pendingRemoval: "STORE-06, fix/a4 b36e00e2 (already integrated)" },
 ];

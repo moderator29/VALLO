@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale } from "@/lib/locale";
 import { getDictionary } from "@vallo/i18n";
-import { BackButton } from "@/components/site/BackButton";
+import { PageFrame } from "@/components/app/PageFrame";
 import { RowLink, SettingsGroup } from "@/components/app/account/rows";
 import { MessagesGroup } from "@/components/support/MessagesRow";
 import { SupportHero } from "@/components/support/SupportHero";
@@ -63,10 +63,10 @@ export default async function SupportPage() {
   const popular = popularArticles(FAQS, POPULAR_QUESTIONS);
 
   return (
-    <div className="mx-auto max-w-2xl pb-[env(safe-area-inset-bottom)]">
-      <BackButton fallback="/home" surface="round" />
-
-      <div className="mt-row space-y-block">
+    /* E2 (round 3): Back lives in the page's own header, beside the title,
+       never alone at the screen edge above the hero. */
+    <div className="pb-[env(safe-area-inset-bottom)]">
+      <PageFrame title={getDictionary(locale).settings.hub.help} fallback="/home" width="narrow">
         <SupportHero
           greeting={name ? home.greetingNamed.replace("{name}", name) : home.greeting}
           promise={promise}
@@ -99,7 +99,7 @@ export default async function SupportPage() {
           <RowLink href="/privacy" icon="eye-off" label={home.privacy} />
           <RowLink href="/delete-account" icon="trash" label={home.deleteAccount} sub={home.deleteAccountSub} />
         </SettingsGroup>
-      </div>
+      </PageFrame>
     </div>
   );
 }

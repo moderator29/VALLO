@@ -60,8 +60,10 @@ function sameAct(prev: BundleInput, next: BundleInput): boolean {
 function joins(run: BundleInput[], next: BundleInput): boolean {
   const prev = run[run.length - 1]!;
   if (!sameAct(prev, next)) return false;
-  /* VC1: a call marker is its own row, never a photo's caption. */
+  /* VC1: a call marker is its own row, never a photo's caption. Nor is a
+     voice note or a file (Grade 1): each is its own bubble with its player. */
   if ((next as { call?: unknown }).call) return false;
+  if ((next as { audio?: unknown }).audio || (next as { file?: unknown }).file) return false;
   if (!isPhotoOnly(prev)) return false;
   return isPhotoOnly(next) || isCaption(next);
 }

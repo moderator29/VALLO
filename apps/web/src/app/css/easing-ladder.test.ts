@@ -45,6 +45,7 @@ const LINEAR: Record<string, [number, string]> = {
   "app/css/site.css": [1, "the edge lap's light turns at constant speed (two laps)"],
   "app/css/symbols.css": [1, "the opt-in symbol loop turns at constant speed (three turns)"],
   "app/css/member-kit.css": [1, "the story progress fill tracks the real duration (MOTION_SYSTEM: story progress is linear)"],
+  "app/welcome/welcome.css": [1, "the dust motes drift across at a constant speed (three passes, then gone), like the edge light's runners"],
 };
 
 const DISCRETE = /^(visibility|content-visibility|display|white-space|overlay|--[a-z0-9-]+)\b/;

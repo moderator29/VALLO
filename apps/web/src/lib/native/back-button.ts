@@ -4,6 +4,7 @@ import { App } from "@capacitor/app";
 import { isAppRoot } from "@/lib/nav/resolve";
 import { isInPageStep } from "@/lib/nav/in-page-step";
 import { overlayIsOpen } from "@/lib/ui/overlay-registry";
+import { NATIVE_BACK_EVENT } from "./native-back-event";
 
 /**
  * Android's hardware back button, given the same meaning it has in every other
@@ -79,6 +80,18 @@ import { overlayIsOpen } from "@/lib/ui/overlay-registry";
  * rot. Stacked overlays close one per press, innermost first, which is the
  * behaviour people expect and the reason this does not try to close them all.
  */
+/**
+ * Android Back, offered to the page first (N4). A listener that handles it
+ * calls `preventDefault()` on the event; nothing else then happens. Only a
+ * screen whose Back means something smaller than "close" listens: today the
+ * StepFrame overlay, whose Back is the previous step.
+ */
+function backClaimed(): boolean {
+  const event = new Event(NATIVE_BACK_EVENT, { cancelable: true });
+  document.dispatchEvent(event);
+  return event.defaultPrevented;
+}
+
 function dismissTopOverlay(): void {
   document.dispatchEvent(
     new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
@@ -87,6 +100,9 @@ function dismissTopOverlay(): void {
 
 export async function startBackButton(goBack: () => void): Promise<() => void> {
   const handle = await App.addListener("backButton", () => {
+    /* A screen with its own idea of Back claims it first (N4): a step flow
+       goes back one step rather than closing the whole flow. */
+    if (backClaimed()) return;
     if (overlayIsOpen()) {
       dismissTopOverlay();
       return;

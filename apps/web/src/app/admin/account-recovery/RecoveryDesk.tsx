@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, type ReactNode } from "react";
+import { useActionBanner } from "@/components/ui/use-action-banner";
 import {
   cancelEmailRecovery,
   completeEmailRecovery,
@@ -40,17 +41,10 @@ const when = (iso: string | null) =>
 /** The 7-day money hold starts at the move (admin_finish_email_recovery). */
 const holdEnd = (iso: string) => new Date(new Date(iso).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-function Result({ state }: { state: { ok: boolean; error?: string } | null }) {
-  if (!state) return null;
-  return (
-    <p role="status" className="mt-xs text-[length:var(--nf-text-caption)]">
-      {state.ok ? "Done." : state.error}
-    </p>
-  );
-}
-
 function OpenForm() {
   const [state, action, pending] = useActionState(openEmailRecovery, null);
+  /* Each outcome is said by the one banner at the top of the screen (Grade 1). */
+  useActionBanner(state, { ok: "Request opened. The old address is told, and the account can move once the wait is over." });
   return (
     <form action={action} className="nf-panel nf-panel--card mt-md grid gap-sm p-card">
       <h2 className="nf-overline">Open a request</h2>
@@ -73,7 +67,6 @@ function OpenForm() {
       <Button variant="primary" type="submit" disabled={pending}>
         Open request
       </Button>
-      <Result state={state ? (state.ok ? { ok: true } : { ok: false, error: state.error }) : null} />
     </form>
   );
 }
@@ -82,6 +75,9 @@ function RowActions({ row, isSuperAdmin }: { row: RecoveryRow; isSuperAdmin: boo
   const [completed, complete, completing] = useActionState(completeEmailRecovery, null);
   const [cancelled, cancel, cancelling] = useActionState(cancelEmailRecovery, null);
   const [resent, resend, resending] = useActionState(resendRecoveryNotice, null);
+  useActionBanner(completed, { ok: "Account moved to the new address. Payout details are locked for 7 days." });
+  useActionBanner(cancelled, { ok: "Request cancelled. The account stays on its old address." });
+  useActionBanner(resent, { ok: "Notice sent to the old address again." });
   if (row.status !== "cooling_off") return null;
   return (
     <div className="mt-xs flex flex-wrap items-end gap-sm">
@@ -90,7 +86,6 @@ function RowActions({ row, isSuperAdmin }: { row: RecoveryRow; isSuperAdmin: boo
         <Button variant="secondary" size="sm" type="submit" disabled={resending}>
           Send the notice again
         </Button>
-        <Result state={resent ? (resent.ok ? { ok: true } : { ok: false, error: resent.error }) : null} />
       </form>
       {isSuperAdmin && (
         <form action={complete}>
@@ -98,7 +93,6 @@ function RowActions({ row, isSuperAdmin }: { row: RecoveryRow; isSuperAdmin: boo
           <Button variant="primary" size="sm" type="submit" disabled={completing}>
             Move the account (a second super admin, 72 hours after the notice)
           </Button>
-          <Result state={completed ? (completed.ok ? { ok: true } : { ok: false, error: completed.error }) : null} />
         </form>
       )}
       <form action={cancel} className="flex items-end gap-xs">
@@ -107,7 +101,6 @@ function RowActions({ row, isSuperAdmin }: { row: RecoveryRow; isSuperAdmin: boo
         <Button variant="secondary" size="sm" type="submit" disabled={cancelling}>
           Cancel
         </Button>
-        <Result state={cancelled ? (cancelled.ok ? { ok: true } : { ok: false, error: cancelled.error }) : null} />
       </form>
     </div>
   );

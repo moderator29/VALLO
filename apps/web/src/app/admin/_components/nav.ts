@@ -161,6 +161,14 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     label: "Moderation",
     children: [
       { key: "social", href: "/admin/social", icon: ui("compass"), label: "Around" },
+      /* Vallo Roommates (8 November 2026): posts, profiles, checks, schools, matching. */
+      /* Trust and Safety (8 November): one case per thing reported, from
+         every module; the overview, appeals and the Circle desk beside it. */
+      { key: "cases", href: "/admin/cases", icon: ui("flag"), label: "Cases" },
+      { key: "trust", href: "/admin/trust", icon: ui("trending-up"), label: "Trust overview" },
+      { key: "appeals", href: "/admin/appeals", icon: ui("scale"), label: "Appeals" },
+      { key: "roommates", href: "/admin/roommates", icon: ui("users"), label: "Roommates" },
+      { key: "circle-desk", href: "/admin/circle", icon: ui("circle-people"), label: "Circle" },
       { key: "standing", href: "/admin/standing", icon: ui("star"), label: "Standing" },
       /* AR-11: the words the safety scan acts on. */
       { key: "blocked-terms", href: "/admin/blocked-terms", icon: ui("block"), label: "Blocked terms" },
@@ -191,6 +199,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     countLabel: "alerts open, waiting on a person",
     children: [
       { key: "alerts", href: "/admin/alerts", icon: ui("bell"), label: "Alerts", countKeys: ["alerts"], countLabel: "alerts open, waiting on a person" },
+      /* Vallo's own crash log: iPhone, Android, website and server (7 November 2026). */
+      { key: "crashes", href: "/admin/crashes", icon: ui("alert-triangle"), label: "Crash log" },
       { key: "audit", href: "/admin/audit", icon: ui("history"), label: "Audit log" },
       { key: "oversight", href: "/admin/oversight", icon: ui("user"), label: "Team oversight" },
       /* Read-only checks of each provider key (Payluk, LiveKit, Apple push, Termii, MapTiler). */

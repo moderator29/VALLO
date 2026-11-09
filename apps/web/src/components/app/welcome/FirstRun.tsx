@@ -38,6 +38,7 @@ import {
 } from "./onboarding-flow";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 /**
  * Get started IN MOTION (30 September), to the founder's onboarding video
@@ -126,6 +127,10 @@ type Slide = {
    vertical scroll. */
 const DRAG_SLOP_PX = 8;
 
+/** The welcome slides at sign up and sign in STAY (founder, 7 November 2026:
+    only the intro slides inside features are removed). */
+const WELCOME_SLIDES_OFF = false;
+
 export function FirstRun({
   t,
   interests,
@@ -138,8 +143,11 @@ export function FirstRun({
   fromSignUpForm = false,
   catalogueOpen = false,
   asks = null,
+  introSlides = !WELCOME_SLIDES_OFF,
 }: {
   t: Dictionary;
+  /** Tests switch the dormant intro slides back on (founder: off, 7 Nov 2026). */
+  introSlides?: boolean;
   interests: ComponentProps<typeof InterestChoices>["initial"];
   /* False for a member who has already been shown the steps, on this
      device or another: they go straight to the question. */
@@ -225,20 +233,22 @@ export function FirstRun({
   const lastIndex = total - 1;
   /* Every arrival starts on slide one; only a returning device going
      nowhere (the app reopened signed out) opens on the choice alone. */
-  const choiceOnly = guest && atChoice;
+  /* The welcome slides stay (founder, 7 November 2026, correcting his
+     first word: only the intro slides inside features go). The switch
+     remains so they can be turned off in one place if he asks. */
+  const choiceOnly = guest && (atChoice || !introSlides);
   const initialIndex = choiceOnly ? lastIndex : 0;
 
   /* `notify` is the last beat (the founder, 7 Nov 2026): the notifications
      offer, after the account exists and the question is behind them. */
   const [beat, setBeat] = useState<"slides" | "question" | "notify">(
-    !guest && !showCards ? "question" : "slides",
+    !guest && (!showCards || !introSlides) ? "question" : "slides",
   );
   const [index, setIndex] = useState(initialIndex);
   /* Bumped on every arrival, so the move-in figure counts again each time. */
   const [visit, setVisit] = useState(0);
   const [announce, setAnnounce] = useState("");
   const [pending, start] = useSafeTransition();
-  const [error, setError] = useState("");
   /* Whether the device memory really stuck, so an exit can carry the flag
      instead when a browser refuses the cookie. */
   const stuck = useRef<boolean | null>(null);
@@ -492,7 +502,6 @@ export function FirstRun({
 
   /* A member finishing the steps. */
   const onDone = () => {
-    setError("");
     start(async () => {
       try {
         remember();
@@ -511,7 +520,6 @@ export function FirstRun({
   };
 
   const skip = () => {
-    setError("");
     const plan = skipPlan({ guest, next });
     if (plan.kind === "go") {
       router.push(onward(plan.to));
@@ -527,7 +535,8 @@ export function FirstRun({
         remember();
         const [, skipped] = await Promise.all([markWelcomeSeen(), skipInterests()]);
         if (!skipped.ok) {
-          setError(skipped.error);
+          /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+          banner.error(skipped.error, { retry: skip });
           return;
         }
         forgetFirstInterest();
@@ -785,6 +794,9 @@ export function FirstRun({
             data-testid={`welcome-dot-${i + 1}`}
           />
         ))}
+        <div className="nf-om-bar" aria-hidden="true">
+          <div className="nf-om-bar__fill" style={{ "--nf-om-progress": `${((index + 1) / total) * 100}%` } as CSSProperties} />
+        </div>
       </div>
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">
@@ -864,11 +876,6 @@ export function FirstRun({
           </Button>
         )}
 
-        {error && (
-          <p role="alert" className="nf-gs-error">
-            {error}
-          </p>
-        )}
       </div>
     </section>
   );

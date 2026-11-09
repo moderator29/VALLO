@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { banner } from "@/lib/ui/toast";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -53,11 +54,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * thing, and not one tap, which is how a search somebody spent ten minutes
  * building disappears under a thumb on a bus.
  */
-
-/** How long a line of feedback stays. Matches the heart's note. */
-const NOTE_MS = 2600;
-
-type Note = { text: string; tone: "ok" | "error" } | null;
 
 /** The board's own words, from the dictionary through the page (`experienceDiscover.saved.board`). */
 export type SavedSearchBoardCopy = Dictionary["experienceDiscover"]["saved"]["board"];
@@ -119,30 +115,21 @@ function SavedSearchRow({
   onDrop: (id: string) => void;
 }) {
   const [pending, startTransition] = useSafeTransition();
-  const [note, setNote] = useState<Note>(null);
   const [renaming, setRenaming] = useState(false);
   const [draft, setDraft] = useState(row.label);
   const [confirming, setConfirming] = useState(false);
   /* The switch's optimistic position. `null` means nobody has touched it on
      this screen, so the stored column is what is drawn. */
   const [alertOverride, setAlertOverride] = useState<boolean | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const alertOn = alertOverride ?? row.alertEnabled;
   const chips = summariseSearch(row.params, locale, chipCopy);
 
-  /* The timer is cleared on unmount, because a row that has just been removed
-     is unmounted while its note is still counting down. */
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, []);
-
+  /* What a tap did is said by the one banner at the top of the screen
+     (Grade 1), never a line that pushes the rows below it down. */
   const say = useCallback((text: string, tone: "ok" | "error" = "ok") => {
-    setNote({ text, tone });
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => setNote(null), NOTE_MS);
+    if (tone === "error") banner.error(text);
+    else banner.success(text);
   }, []);
 
   const toggleAlert = useCallback(() => {
@@ -204,6 +191,7 @@ function SavedSearchRow({
           say(result.error, "error");
           return;
         }
+        say("Search removed");
         onDrop(row.id);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -324,21 +312,6 @@ function SavedSearchRow({
         </div>
       </div>
 
-      {/* The space for the note is not reserved, because this row is in a
-          vertical list and a line appearing below a row pushes rows down
-          rather than sideways under a thumb aiming at a control. */}
-      {note && (
-        <p
-          role="status"
-          className={
-            note.tone === "error"
-              ? "nf-body-sm text-[var(--nf-state-error)]"
-              : "nf-body-sm text-[var(--nf-content-muted)]"
-          }
-        >
-          {note.text}
-        </p>
-      )}
     </li>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { consumeSuccess } from "@/lib/ui/success-actions";
+import { banner } from "@/lib/ui/toast";
+import { feedback } from "@/lib/ui/feedback";
 import {
   DONE_FLAGS,
   DONE_PARAM,
@@ -37,21 +38,29 @@ import {
  * and nothing opens.
  */
 /*
- * THE SHEET LOADS WHEN THERE IS A MOMENT TO SHOW (speed, 6 October 2026).
- * This host is in the root layout, so a static import put the whole sheet
- * (SuccessSheet, SuccessScreen, the clay object through `Icon3D` and with it
- * `next/image`'s client runtime) in the JavaScript every route loads first,
- * for a moment most page loads never have. It is fetched the moment one is
- * known to be coming: the hint cookie is present (in parallel with asking
- * the server for the flag), or a client screen announces one.
+ * GRADE 1: NO SHEET HERE ANY MORE (P0.4, November 2026). Every account moment
+ * is now the top banner (`lib/ui/toast.ts`), so this host no longer lazy-loads
+ * `SuccessSheet` (speed, 6 October 2026, explained why it was lazy: it sits
+ * in the root layout). Record moments on pages keep their sheets.
  */
-const loadSheet = () => import("@/components/ui/SuccessSheet").then((m) => m.SuccessSheet);
-const SuccessSheet = dynamic(loadSheet, { ssr: false });
-
 export function SuccessFlagHost() {
   const copy = useClientCopy().success;
   const pathname = usePathname();
-  const [flag, setFlag] = useState<GlobalDoneFlag | null>(null);
+  /* GRADE 1: THE ACCOUNT MOMENTS ARE BANNERS (P0.4, November 2026). The
+     founder's brief lists "Account created", "Login successful", "Password
+     changed" and "Welcome to Vallo" as top-banner moments, the way reference
+     R4 confirms a sign-in, so they no longer cover the page with a sheet. The
+     copy is read through a ref so the listeners below never go stale. */
+  const copyRef = useRef(copy);
+  useEffect(() => {
+    copyRef.current = copy;
+  }, [copy]);
+  function announce(flag: GlobalDoneFlag): void {
+    /* The moment's own feel (`momentFeel`): heavy only for a payoff. */
+    const { title, haptic } = successCopy(copyRef.current, DONE_FLAGS[flag]);
+    banner.success(title, { "data-testid": "banner-account" });
+    feedback(haptic);
+  }
 
   useEffect(() => {
     /* A stale or forged account flag in the address goes, silently. The
@@ -64,14 +73,12 @@ export function SuccessFlagHost() {
     }
 
     if (!document.cookie.split("; ").some((part) => part === `${SUCCESS_HINT_COOKIE}=1`)) return;
-    /* Fetch the sheet while the server is asked, so the two arrive together. */
-    void loadSheet().catch(() => undefined);
     /* Not cancelled on a further navigation: the server has already deleted
        the cookie by the time it answers, so dropping the answer would lose
        the moment for good. */
     void consumeSuccess().then(
       (taken) => {
-        if (taken) setFlag(taken);
+        if (taken) announce(taken);
       },
       () => undefined,
     );
@@ -80,27 +87,11 @@ export function SuccessFlagHost() {
   useEffect(() => {
     const onSuccess = (event: Event) => {
       const asked = (event as CustomEvent<SuccessEventDetail>).detail?.flag;
-      if (isGlobalDoneFlag(asked)) setFlag(asked);
+      if (isGlobalDoneFlag(asked)) announce(asked);
     };
     window.addEventListener(SUCCESS_EVENT, onSuccess);
     return () => window.removeEventListener(SUCCESS_EVENT, onSuccess);
   }, []);
 
-  if (!flag) return null;
-  const words = successCopy(copy, DONE_FLAGS[flag]);
-  return (
-    <SuccessSheet
-      open
-      onOpenChange={(open) => {
-        if (!open) setFlag(null);
-      }}
-      variant={words.variant}
-      haptic={words.haptic}
-      object={words.object}
-      title={words.title}
-      body={words.body}
-      primary={{ label: copy.continue }}
-      testId="success-sheet-account"
-    />
-  );
+  return null;
 }

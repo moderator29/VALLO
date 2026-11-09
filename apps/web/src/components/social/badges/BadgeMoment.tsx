@@ -7,7 +7,7 @@ import { BrandIcon } from "@/design-system/icons/BrandIcon";
 import { BadgeMedal } from "./BadgeMedal";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
-import { Toast, useToast } from "@/components/ui/Toast";
+import { banner } from "@/lib/ui/toast";
 import { motionQuiet } from "@/lib/motion/gate";
 import { copyText, shareOrCopy } from "@/lib/ui/clipboard";
 import { feedback } from "@/lib/ui/feedback";
@@ -73,7 +73,6 @@ export function BadgeMoment({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { toast, show } = useToast();
   /* Bumping the key restarts every beat. Allowed once. */
   const [play, setPlay] = useState(0);
   const [replayed, setReplayed] = useState(false);
@@ -108,9 +107,9 @@ export function BadgeMoment({
         : "failed";
     if (outcome === "copied") {
       feedback("select");
-      show(copy.copied, "success");
+      banner.success(copy.copied);
     } else if (outcome === "failed") {
-      show(copy.copyFailed, "error");
+      banner.error(copy.copyFailed);
     }
   };
 
@@ -180,7 +179,6 @@ export function BadgeMoment({
           </Button>
         </div>
       </div>
-      {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
     </Sheet>
   );
 }

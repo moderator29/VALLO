@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ import {
 import type { DeskDeposits, DeskWindow } from "@/lib/reservations/deposit-settings";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE RESTAURANT'S TABLE DEPOSIT SETTINGS (track/restaurant-deposits), on the
@@ -102,7 +104,6 @@ export function DepositSettingsCard({
   );
   const [draft, setDraft] = useState<DepositSettings>(venue?.settings ?? deposits.venues[0]!.settings);
   const [amount, setAmount] = useState(String(Math.round((venue?.settings.amountMinor ?? 0) / 100)));
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useSafeTransition();
   const router = useRouter();
 
@@ -114,7 +115,6 @@ export function DepositSettingsCard({
   const problem = depositSettingsProblem(current, windows.map((w) => w.id));
   if (!venue) return null;
   const set = (patch: Partial<DepositSettings>) => {
-    setMessage(null);
     setDraft((d) => ({ ...d, ...patch }));
   };
   const pickVenue = (id: string) => {
@@ -124,20 +124,19 @@ export function DepositSettingsCard({
     setVenueId(id);
     setDraft(s);
     setAmount(String(Math.round(s.amountMinor / 100)));
-    setMessage(null);
   };
   const save = () =>
     start(async () => {
       try {
-        setMessage(null);
         const result = await saveDepositSettings({ businessId: venue.businessId, settings: current });
         if (!result.ok) {
-          setMessage({ ok: false, text: result.error });
+          /* Said by the one banner at the top of the screen (Grade 1). */
+          banner.error(result.error, { retry: save });
           return;
         }
         setSaved((all) => ({ ...all, [venue.businessId]: result.data.settings }));
         setDraft(result.data.settings);
-        setMessage({ ok: true, text: words.saved });
+        banner.success(words.saved);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -206,7 +205,6 @@ export function DepositSettingsCard({
                 hint={words.amountHint}
                 value={amount}
                 onValueChange={(v) => {
-                  setMessage(null);
                   setAmount(v);
                 }}
                 data-testid="deposit-amount"
@@ -242,7 +240,7 @@ export function DepositSettingsCard({
                     aria-label={words.fewer}
                     disabled={draft.minPartySize <= PARTY_MIN}
                     onClick={() => set({ minPartySize: Math.max(PARTY_MIN, (draft.minPartySize ?? 2) - 1) })}
-                    className="grid h-11 w-11 place-items-center rounded-[var(--nf-radius-sm)]"
+                    className="grid h-11 w-11 place-items-center rounded-sm"
                   >
                     <UiIcon name="minus" size={16} aria-hidden />
                   </Button>
@@ -256,7 +254,7 @@ export function DepositSettingsCard({
                     aria-label={words.more}
                     disabled={draft.minPartySize >= PARTY_MAX}
                     onClick={() => set({ minPartySize: Math.min(PARTY_MAX, (draft.minPartySize ?? 2) + 1) })}
-                    className="grid h-11 w-11 place-items-center rounded-[var(--nf-radius-sm)]"
+                    className="grid h-11 w-11 place-items-center rounded-sm"
                   >
                     <UiIcon name="plus" size={16} aria-hidden />
                   </Button>
@@ -336,19 +334,19 @@ export function DepositSettingsCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-inline">
-          <Button variant="primary" disabled={pending || problem !== null} loading={pending} onClick={save} data-testid="deposit-save">
+          <Button
+            variant="primary"
+            disabled={pending || problem !== null}
+            loading={pending}
+            onClick={save}
+            data-testid="deposit-save"
+            aria-describedby={problem && draft.on ? "deposit-problem" : undefined}
+          >
             {pending ? words.saving : words.save}
           </Button>
-          {problem && draft.on ? <p className={TYPE.rowMeta}>{words.problems[problem]}</p> : null}
+          {/* Why Save waits is said by the one banner (founder, 7 November 2026). */}
+          <FieldProblem id="deposit-problem" message={problem && draft.on ? words.problems[problem] : null} />
         </div>
-        {message && (
-          <p
-            role={message.ok ? "status" : "alert"}
-            className={`${TYPE.rowMeta} ${message.ok ? "" : "text-[var(--nf-state-error)]"}`}
-          >
-            {message.text}
-          </p>
-        )}
       </div>
     </section>
   );

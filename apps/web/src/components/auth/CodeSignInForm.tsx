@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { CodeInput } from "./CodeInput";
 import { Field } from "./fields";
 import { AuthPillButton } from "./slate";
+import { banner } from "@/lib/ui/toast";
 
 /* An email code comes from the same GoTrue setting as the sign-up
    confirmation code, so it has the same length (`confirmation-code.ts`); a
@@ -82,6 +83,16 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
       ? copy.verifyLimited
       : ((copy as Record<string, string>)[state.error] ?? copy.failed);
 
+  /* A refusal that is not about the address or the code (too many, could
+     not send) is said by the one banner at the top of the screen; those two
+     are said by their own fields (founder, 7 November 2026). */
+  const fieldOwns = state.error === "badTarget" || state.error === "badCode" || state.error === "wrongCode";
+  useEffect(() => {
+    if (message && !fieldOwns) banner.error(message, { "data-testid": "banner-auth" });
+    // Once per answer: `state` is a new object for each one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
+
   useEffect(() => {
     if (!onCode || wait <= 0) return;
     const timer = window.setTimeout(() => setWait((n) => n - 1), 1000);
@@ -129,11 +140,6 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
               error={state.error === "badTarget" ? t.publicDoors.phone.badPhone : undefined}
             />
           )}
-          {message && state.error !== "badTarget" && (
-            <p role="alert" className="nf-auth__notice">
-              {message}
-            </p>
-          )}
           <div className="nf-auth__actions">
             <AuthPillButton type="submit" loading={sending} className="nf-auth__cta" data-testid={`code-send-${mode}`}>
               {copy.send}
@@ -156,11 +162,6 @@ export function CodeSignInForm({ mode, t, next }: { mode: Mode; t: Dictionary; n
             placeholder="123456"
             cellsLabel={t.authFlow.codeCells.replace("{count}", lengthWord)}
           />
-          {state.error && state.error !== "badCode" && state.error !== "wrongCode" && message && (
-            <p role="alert" className="nf-auth__notice">
-              {message}
-            </p>
-          )}
           <div className="nf-auth__actions">
             <AuthPillButton type="submit" loading={verifying} className="nf-auth__cta" data-testid={`code-verify-${mode}`}>
               {copy.verify}

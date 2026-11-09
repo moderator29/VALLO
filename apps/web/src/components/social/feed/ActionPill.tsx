@@ -48,6 +48,10 @@ export function ActionPill({
   "data-testid"?: string;
 }) {
   const [popped, setPopped] = useState(false);
+  /* Set by the first tap and never by a render: a count that changes because
+     of this person's own tap rolls into place (feed-m.css), and a count that
+     arrives with the page, or changes on a refresh, simply is. */
+  const [touched, setTouched] = useState(false);
   const filled = Boolean(pressed) && (icon === "heart" || icon === "bookmark");
   return (
     <button
@@ -66,12 +70,17 @@ export function ActionPill({
       data-testid={testId}
       onClick={() => {
         if (payoff && !pressed) setPopped(true);
+        setTouched(true);
         onClick();
       }}
     >
-      <UiIcon name={icon} size={20} filled={filled} className="nf-act-pill__glyph" />
+      {/* 18, a step under the 20 it was (founder, 7 November 2026: the
+          card's icons smaller and refined); the stroke is unchanged. */}
+      <UiIcon name={icon} size={18} filled={filled} className="nf-act-pill__glyph" />
       {count !== undefined && !round ? (
-        <span className="nf-act-pill__count nf-numeric" aria-hidden="true">
+        /* Keyed on the figure, so a new figure is a new element and the roll
+           plays once for it; `data-roll` only after this person tapped. */
+        <span key={count} className="nf-act-pill__count nf-numeric" aria-hidden="true" data-roll={touched ? "" : undefined}>
           {count}
         </span>
       ) : null}

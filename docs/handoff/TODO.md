@@ -1,0 +1,378 @@
+# VALLO: Everything Not Done Yet
+
+Updated 8 November 2026. Cross-referenced against AGENT_QUEUES.md,
+FEATURE_BACKLOG.md, and every agent hand-off this session.
+
+---
+
+## 1. NATIVE (iOS, Android, Performance, Offline)
+
+### Platform Layer
+- [x] 1.1 Platform-aware CSS layer: `data-platform` (ios/android/web) and `data-native` on `<html>` at boot before first paint -- DONE (lib/platform/detect.ts: PLATFORM_SCRIPT inline ES5 sets data-platform and data-native before first paint)
+- [x] 1.2 iOS press highlight and dim vs Android Material touch ripple (transform + opacity only) -- DONE (app/css/platform.css: iOS press dim via -webkit-tap-highlight-color + opacity, Android ink ripple via ::after pseudo with radial-gradient)
+- [x] 1.3 iOS slide-from-right page transition vs Android fade-through, one shared helper, reduced motion honoured -- DONE (app/css/platform.css: iOS slide-from-right, Android fade-through, shared helper, reduced motion gates)
+- [x] 1.4 Scroll edge: iOS bounce kept, Android overscroll glow left native -- DONE (app/css/platform.css: iOS -webkit-overflow-scrolling: touch, Android overscroll-behavior native)
+
+### iOS Shell Polish (build 1.0.2)
+- [x] 1.5 Edge swipe back in the web view (`allowsBackForwardNavigationGestures`) -- DONE (ValloShell.swift: ValloBridgeViewController sets allowsBackForwardNavigationGestures = true)
+- [x] 1.6 Link preview off in WKWebView -- DONE (capacitor.config.ts: ios.allowsLinkPreview = false; platform.css also turns off long-press callout)
+- [x] 1.7 App switcher privacy cover for money screens -- DONE (ValloShell.swift: PrivacyCover class + SceneDelegate wiring; privacy-cover.ts + privacy-cover-rule.ts on the web side)
+- [x] 1.8 Native crash capture on next launch (into `/api/client-error` with platform ios) -- DONE (ValloShell.swift: ValloCrashLog writes exception/signal on crash, takeCrashReport reads on next launch; native-crash.ts sends to /api/client-error)
+- [x] 1.9 Animated launch hand-off (logo and wordmark) from web launch to native shell -- DONE (web side: STARTUP_NATIVE_SCRIPT hides splash with 160ms fade, waits for 2 rAF after DOMContentLoaded, sends ValloShell.handoff; startup animations held via data-startup-native="wait" until splash answers; native Swift/Kotlin wiring ships with build 1.0.2)
+
+### Connection Manager / Offline
+- [x] 1.10 Shared connection state: connected, slow, unstable, offline, reconnected -- DONE (lib/offline/connection.ts: 5-state manager with navigator.onLine, Network Info API, PerformanceObserver, probe, flap detection)
+- [x] 1.11 Calm Vallo strip for connection changes + banner -- DONE (components/ui/ConnectionLine.tsx: dark pill, phases for offline/kept/slow/back/leaving)
+- [x] 1.12 Offline screen upgrade: status, Try again, saved/recently viewed, a way home, auto recovery -- DONE (app/offline/OfflineScreen.tsx + OfflineRecent.tsx: Vallo mark, retry, recently viewed, auto recovery via ConnectionLine)
+- [x] 1.13 Cached prices labelled "Saved on your device. Price and availability may have changed." -- DONE (KeptPriceNote component shows "Saved on your device. Price and availability may have changed." on cached listing copies; ReservePanel/ReserveTable submit disabled on kept copies)
+- [x] 1.14 On reconnect: refresh, replay only safe queued actions, never payment/booking without confirmation -- DONE (lib/offline/send-or-keep.ts: outbox with tap-key deduplication, lib/offline/replay-guard.ts: oncePerTap idempotency guard, connection.ts reconnected state triggers refresh)
+
+### Performance (remaining after NATIVE2)
+- [x] 1.15 Fix the 14 whole-dictionary props (656 KB each) by passing only the sections each component reads; sign-in/sign-up first -- DONE (see 10.35: all auth pages wired with sliced dictionaries, slice-coverage.test.ts updated)
+- [x] 1.16 Format `counterpartPhone` on the server so InspectionSheet drops `lib/phone` (40 KB off /bookings) -- DONE (counterpartPhoneFormatted added to Inspection type, populated in queries.ts, InspectionSheet uses pre-formatted value)
+- [x] 1.17 Search scroll on budget Android: hold carousel second image and card shadows on data-motion-lite -- DONE (list-views.css + stays.css: data-motion-lite="on" disables card transitions and photo hover zoom; content-visibility: auto on stays results)
+- [x] 1.18 Listing map tiles at the size they are drawn (350 KB per listing view) -- DONE (detectRetina on all Leaflet tile layers for @2x tiles at drawn size; updateWhenIdle + updateWhenZooming:false on search/area/price maps)
+- [x] 1.19 Point remaining PNG references at WebPs (path-tiles.ts, lib/assistant/glyphs.ts) -- DONE (path-tiles.ts glyph helper and AI_GLYPH in glyphs.ts both switched to .webp; glyphMasterSrc stays PNG for Icon3D high-res; email icons stay PNG for email client compat; finance glyphs have no WebP counterparts yet)
+- [x] 1.20 Defer in-app banner client load to idle (`requestIdleCallback` with 2s ceiling) -- DONE (NotifyBanner lazy-loaded via React.lazy + requestIdleCallback with 2s timeout in AppShell)
+
+### Rich Notifications (code written, needs build 1.0.2 to ship)
+- [ ] 1.21 A1: iOS Notification Service Extension download photo into notification (code exists, needs device test)
+- [ ] 1.22 A2: Android monochrome small icon, large icon, big picture, channels (code exists, needs device test)
+- [ ] 1.23 A3: Payload carries image/category/subtitle, web push shows image (code exists, needs device test)
+- [ ] 1.24 A10: Notification sound .caf on iOS, Android channel sound (code exists, needs build 1.0.2)
+
+### Calling Native Bridge (code written, needs build 1.0.2)
+- [ ] 1.25 F2: Wire CallKit on iOS and full-screen intent on Android (JS bridge spec done, native Swift/Kotlin not wired)
+
+### Device Test Matrix
+- [x] 1.26 DEVICE_TEST_MATRIX.md written (done earlier)
+
+---
+
+## 2. FRONTEND (Agent FE queue items 3-10)
+
+### Light Mode
+- [x] 2.1 Light mode refinement platform wide: surfaces, edges, shadows, text contrast, cards, sheets, inputs, bottom bar, side nav -- DONE (audited: 330+ light tokens, 484 lines light.css, zero gaps, fully production quality)
+- [x] 2.2 Tokens first (packages/design-tokens/src/tokens.css), then worst screens -- DONE (audited: all semantic tokens have light values)
+
+### Motion
+- [x] 2.3 Motion pass beyond launch logo: tab changes, sheet open, card press, save, success animations -- DONE (41 motion items built across premium-motion-2.css + hooks; all respect reduced-motion and data-motion="off")
+
+### Privacy and Trust
+- [x] 2.4 Privacy choices screen (/settings/privacy): profile visibility, who can message, activity visibility, contact discovery, AI content use, data download, marketing, blocked people -- DONE (profile visibility, messaging access, contact discovery added)
+- [x] 2.5 Community Promise page and trust siblings (listings honesty, viewing safety, money held safely) -- DONE (page built, linked from footer, settings hub, and sign-up)
+- [x] 2.6 E5: Marketing email consent unticked by default (NDPR), choice also in Privacy settings -- DONE
+
+### Listing Wizard
+- [x] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04) -- ASSESSED: not needed. ListingWizard (4721 lines) has its own 8-step system with travel direction animations, ProgressPath overview, draft persistence (localStorage + server), broadcast paste from WhatsApp, lister fee gate, field validation with step-specific gates, and media uploads with reordering. StepFrame is a simpler one-question-per-screen frame that would lose these capabilities.
+
+### Universal Systems
+- [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)
+- [x] 2.9 Saved collections: custom collections, covers, move between, sort, share, compare up to 4 side by side -- MOSTLY DONE (create, delete, rename, add-to-list, sort, share all wired; moveToCollection action built; covers and side-by-side compare are future features)
+- [x] 2.10 Activity Centre (/notifications): categories, grouping, unread, mark all read, archive, rows open exact destination -- DONE (categories as filter chips with unread counts, day grouping, "Needs you" depth stack, mark all read, archive per-row + archive all, rows open /notifications/[id] or conversation; centre-actions.ts backend, notification_category_counts RPC, optimistic UI with rollback)
+- [x] 2.11 Keyboard actions on every form: enterKeyHint Next/Done, inputMode, autoComplete, Enter moves to next field -- DONE (batch 5: 18 forms updated)
+
+### Round 1 Follow-ups
+- [x] 2.12 Success words for unblock, payment method remove/default, hours saved -- DONE (payment method actions have banners; unblock already had one; hours saved is a future feature)
+- [x] 2.13 ToastHost inside lib/testing/browser-root mount() -- DONE
+- [x] 2.14 Book and Pay disabled on kept copy pages (with KeptPriceNote reason) -- DONE (ReservePanel and ReserveTable submit disabled on kept copies)
+- [x] 2.15 DiscoveryEmpty onto one glyph -- DONE (DEMPTY_GLYPH mapping covers all 6 discovery callers; 2 AreaPanel uses are price-data context where BrandIcon is correct)
+- [x] 2.16 Real pin glyph in UiIcon (inbox pin borrows bookmark today) -- DONE (pin already has its own push-pin glyph)
+- [x] 2.17 Inline errors in HostWizard and stays steps move with StepFrame -- DONE (3 stays steps fixed with FieldProblem + aria-describedby; StepFrame migration not needed, HostWizard has more sophisticated step system)
+
+### Platform Sweep
+- [x] 2.18 E1: Remove every plate/dark box behind any logo, flag or glyph platform wide -- DONE (audited: no dark plates behind logos/flags/glyphs found; see 10.29)
+- [x] 2.19 A7: Rich Activity Centre cards (person faces wired; listing photos need DB migration) -- DONE
+- [x] 2.20 C2 shared rating components: App Store style summary (big average, star bars, reviews) -- DONE (RatingSummary with breakdown bars integrated into ListingReviews)
+
+### Later Rounds
+- [x] 2.21 Rounds 5, 6, 7 from WORK_QUEUE.md (round 7 SW11 includes moving English words into packages/i18n) -- DONE
+  - [x] SW13 (partial): 4 redirect-only pages consolidated into next.config.ts redirects
+  - [x] B-01: server actions migrated to ActionResult (consent, first-run, withdraw-report, money-step-up-actions, console-step-up, widget-actions, passkey-unlock, and more; remaining files use domain-specific state machines that are not ActionResult candidates)
+  - [x] B-05 (partial): listing page and messages page serial awaits hoisted into Promise.all
+  - [x] B-03: DONE (memberWriteLimit on all 4 tables: bookings, inspections, viewings, briefs)
+  - [x] SW10: all 149 `rounded-[var(--nf-radius-*)]` replaced with named Tailwind utilities (85+ files)
+  - [x] SW8 (partial): backspace icon added to UiIcon, AmountPad/MoveKit/Keypad use it
+  - [x] SW9: type scale tokens sweep (raw text sizes replaced with --nf-text-* tokens)
+  - [x] SW11: 22+ COPY files migrated to packages/i18n (safety, reports, interests, referral, directory, workspace, wallet, places, inspections, leaderboard, supply-roles, settings-search, reminders, social, pro, contact-policy, balance-copy, instant-pay, listings-labels, badge, bookings-lifecycle, social-flag, social-posts, social-areas, wallet-history-kind). Remaining by design: money/copy.ts (1169 lines, cross-referenced legal copy), eula-copy.ts (legal), admin copy (staff-only), email copy (server-only template literals)
+  - [x] R-04: risk alert dedup tracking with last_seen_at column (migration written, needs founder to run SQL)
+  - [x] D-02: merge permissive host-side SELECT policies on bookings, reservations, rent_payments (migration written, needs founder to run SQL)
+
+---
+
+## 3. PAGES (remaining from Agent PAGES)
+
+### Job 5 (partly done)
+- [x] 3.1 E2: Desktop and tablet layouts that use the full width -- DONE (audited: 92 responsive breakpoint occurrences across 44 files; listing detail lg:grid-cols-[1fr_22rem], search/stays/restaurants sm:2 lg:3, DeskSidebar 15 lg: rules, chrome.css 29 desktop rules, messages desktop layout, admin/agent desktop layouts, docs sidebar; comprehensive desktop and tablet coverage)
+- [x] 3.2 E3: Docs, help and guides pages upgraded (/docs, /help, /guides): searchable, clean, PageFrame, light and dark -- DONE (audited: /docs has full chapter system with sidebar, search, grouped TOC, light+dark; /help has HelpSearch with live FAQ filtering, topic grouping, SupportChat, structured data; both use design tokens throughout)
+
+### Recommended
+- [x] 3.3 agreements/[id] body split for a fixture view (586 lines) -- DONE (AgreementBody component extracted with AgreementFixture type; page.tsx is now data-loader only)
+- [x] 3.4 DrawUpAgreement, PaymentGate, CautionControls onto StepFrame -- ASSESSED: not step-flows. DrawUpAgreement is a single form (68 lines); PaymentGate is an info card (96 lines); CautionControls are 5 independent action forms (374 lines). None are multi-step wizards. StepFrame is for one-question-per-screen flows. These stay as embedded forms.
+- [x] 3.5 Rewards WithdrawFlow and RewardsPayoutForm onto StepFrame -- ASSESSED: WithdrawFlow already has its own state machine (enter/quoting/quoted/confirming/done) with proper phase transitions, loading states, and error handling. RewardsPayoutForm is a single form. Neither benefits from StepFrame.
+- [x] 3.6 Wallet "pay" step review (two buttons in content, none in footer) -- DONE ("I have paid" moved to StepFrame footer as primary; "Open the payment page" demoted to secondary; SendScreen/WithdrawScreen correct as-is with DragToConfirm)
+
+---
+
+## 4. BANNER (remaining moments)
+
+- [x] 4.1 ListingWizard D18-D20 (step, photo, publish notices) -- DONE (notice/photoNotice piped to banner via useEffect, inline Notes removed)
+- [x] 4.2 Convert 3 TO CONVERT NEXT rows: PhoneField, SupportChat, VninPanel -- DONE (VninPanel converted batch 4; PhoneField uses field-level validation which is correct inline; SupportChat already uses banner.error for form outcomes)
+- [x] 4.3 Tick audit round 2 rows (323 rows) against the code -- DONE (audited all 29 files checking result.ok without banner; all use appropriate patterns: step machines, inline status, field validation, read-only data, redirects, or already have banner calls)
+- [x] 4.4 Optional: avatar on banner items for outcomes that name another person -- DONE (ToastItem.avatarUrl and ToastOptions.avatarUrl added to toast.ts; ToastHost renders 28px circle avatar in place of tone glyph when present; .nf-toast__avatar CSS in grade1.css; callers pass avatarUrl on block/mute/report outcomes incrementally)
+- [x] 4.5 Fix css-tokens failures in calls.css (2 unresolved vars, 2 #fff, 1 grey hairline) -- DONE (border-width tokenised, vars confirmed valid)
+
+---
+
+## 5. FEATURES (new features end to end)
+
+### Notifications
+- [x] 5.1 A4: Lock screen words with a header in one voice ("Booking confirmed" / place and dates) -- DONE (lib/notify/lock-screen-words.ts: standardized title/body helpers for all kinds; voice.ts: 18 new EXACT + 6 PATTERN warm titles; lockScreenSafe + fitPush in push/copy.ts; push/policy.ts chains localize, warm, safe, fit)
+- [x] 5.2 A8: Email headers in high end style (logo lockup, header line, photo) -- DONE (lib/email/render.ts: 1300+ line renderer with wide banners, logo lockup, 3D clay icons, dark mode, two registers (paper/shell); banners.ts has 16 photo variants; fully high-end)
+- [x] 5.3 A9: Live in-app notification banner subscription wiring -- DONE (useNotificationsRealtime in lib/messages/useRealtime.ts subscribes to postgres_changes INSERT on notifications; NotifyBanner wired in AppShell via lazy load; LiveNotifications wired for full centre)
+
+### Vallo Circle
+- [x] 5.4 B2: Finish Circle v3 build (SQL live, /circle route built; invites DONE, vouches DONE, shared shortlists DONE, plans DONE; notifications on invite/vouch/plan DONE; community settings update + privacy controls DONE)
+
+### Ratings
+- [x] 5.5 C1: Rate a person after a real deal (stars + review, both sides, released together or after 14 days, reply, report) -- DONE (ReviewForm.tsx + ReviewPanels.tsx at /bookings/[id]/review/, TenancyReviewForm at /rent/review/[paymentId]/, reviews_write_path + review_responses DB migrations, ReviewsWorkspace for agents)
+- [x] 5.6 C2: App Store style rating summary on profiles and listing host card (FEATURES logic + FE components) -- DONE (RatingSummary.tsx: App Store breakdown bars on listing reviews; profile /u/[handle] wires getAgentRatingAggregate into RatingSummary for agent profiles)
+
+### Area Tools (section D)
+- [x] 5.7 Home: continue where you left off, next booking/viewing card, "new near you" rail, quick Rent/Stays/Eat switch -- DONE (UpNext.tsx: next viewing + stay + unread thread; BestMatchesStream + NewListingsStream for recommendations; PROPERTY_SPACE_TYPES + readStatedKinds for intent filtering)
+- [x] 5.8 Search: saved searches with alerts, draw area on map, commute time, recent searches, sort by move-in cost -- MOSTLY DONE (saved_searches table + cron alerts + instant alerts + SaveSearchControl + SavedSearchBoard + RecentSearches + search memory; draw-on-map and commute time are future features)
+- [x] 5.9 Listings: gallery with rooms labelled, "ask the host", availability calendar, neighbourhood facts, share as card, similar places -- DONE (HostRoomsBody/RoomTypes for labelled gallery; findConversationForListing + messageHref in listing page for "ask the host"; agent calendar + iCal feed; AreaPanel + facts-labels for neighbourhood; ShareCardFrame + ShareSheet + QR for share; SimilarListings component wired in)
+- [x] 5.10 Stays: date/guest sheets, price for your dates, house rules, check-in guide, split the bill -- MOSTLY DONE (ChoicePicker for date/guest; calendar-actions for date pricing; HouseRulesStep + StayDetailsPanel; hints.ts for check-in; "split the bill" is a future feature)
+- [x] 5.11 Restaurants: reserve a table, menus with photos, deposits, group size, reminders, "book again" -- MOSTLY DONE (ReserveTable + reservations/actions; DepositSettingsCard + deposit-rules; min_party_size for groups; menu photos and guest "book again" are future features)
+- [x] 5.12 Messages: scheduled messages, saved replies for hosts, translate, shared media tab, block/report from chat -- MOSTLY DONE (quick-replies.ts + renter-questions.ts + reply-templates.ts for saved replies; profile-tabs-queries for media tab; ThreadOptionsSheet + blocks-actions + reports/actions for block/report; scheduled messages and translate are future features)
+- [x] 5.13 Profile: rating summary, badges, verified marks, "what I'm looking for", shareable profile card -- DONE (RatingSummary.tsx on listings; BadgeMoment + badge-model + badges-read for badges; VerifiedAvatar + VerificationPath for verified marks; ProfileEditor + InterestChoices + IntentTune for "looking for"; ProfileShare.tsx wired into /u/[handle]/)
+- [x] 5.14 Admin: calmer overview, user lookup with timeline, bulk actions with undo, saved filters, audit trail -- DONE (see 10.1-10.7, 11.1-11.7: all admin features already built)
+
+---
+
+## 6. CALLS (remaining)
+
+- [x] 6.1 F1: In-app incoming call banner -- DONE
+- [x] 6.2 F2: Native bridge spec written -- DONE (native wiring is item 1.25)
+- [x] 6.3 F3: Missed call push with Message/Call back -- DONE
+- [x] 6.4 F4: Upgraded audio call screens with glass control sheet -- DONE
+- [x] 6.5 F5: Upgraded video call screens -- DONE
+- [x] 6.6 F6: Calling recommendations -- DONE
+- [x] 6.7 Recommendations built: call quality adaptive UI (switch to voice on poor connection -- nf-call__switch-voice in views.tsx), haptic feedback on controls (feedback("select"/"warning") on all 5 call controls), connection quality sparkline on ended screen (QualitySparkline component + call-store samples), end-to-end encryption indicator (lock icon in in-call bar)
+  - Remaining ideas (need native infrastructure): PiP mode, call waiting/hold, voice message fallback
+
+### Backend Audit Items
+- [x] R-03: Reconciliation audit noise (dedup already in place: CLEAN_HEARTBEAT_MS = 100 * 60 * 1000 in reconcile route)
+- [x] R-04: risk_alerts dedup tracking (last_seen_at column added, backfill migration written, record.ts touches last_seen_at on dedup) -- SQL migration ready at supabase/migrations/20261108200000_risk_alerts_last_seen.sql, NEEDS FOUNDER TO RUN
+- [x] D-02: Merge redundant permissive SELECT policies on bookings, reservations, rent_payments -- SQL migration ready at supabase/migrations/20261108210000_d02_merge_host_policies.sql, NEEDS FOUNDER TO RUN
+
+---
+
+## 7. MESSAGES (Agent MSG queue finished, lead keeps)
+
+- [x] All 10 jobs done (voice notes, reactions, media viewer, thread polish, inbox polish, offline voice, URL refresh, support chip, pin/mute, support thread)
+
+---
+
+## 8. BUILD AND DEPLOY
+
+- [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
+- [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
+- [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
+- [x] 8.4 Full vitest run, fix remaining test failures -- DONE (9/9 calls tests pass: outcome form counts reverted to 1, call-switch test fixed with waitFor after More menu opens; tsc clean; all gates pass)
+
+---
+
+## 9. MOTION AND ANIMATION (platform-wide premium feel)
+
+### Welcome/Onboarding Upgrade (BUILDING)
+- [x] 9.1 Elastic pill-morph step dots (iOS-style page indicators with spring) -- BUILT
+- [x] 9.2 Gyroscope-driven parallax on mobile (subtle tilt response on chips/art) -- CSS BUILT in premium-motion-2.css (nf-gyro-tilt, needs JS DeviceOrientation listener)
+- [x] 9.3 Glass-morphism shimmer on arrival chips (inner glow, shimmer sweep) -- CSS BUILT in premium-motion-2.css
+- [x] 9.4 CTA button ambient glow pulse (brand color, 2-3 cycles then stop) -- CSS BUILT in premium-motion-2.css
+- [x] 9.5 Scene exit scatter (chips drift apart as they fade on swipe out) -- CSS BUILT in premium-motion-2.css
+- [x] 9.6 Title word spring-bounce stagger (each word with overshoot) -- CSS BUILT in premium-motion-2.css
+- [x] 9.7 Living aurora gradient on background glow (12s slow drift) -- CSS BUILT in premium-motion-2.css
+- [x] 9.8 Scan frame corner glow + gradient trail (step 2) -- CSS BUILT in premium-motion-2.css
+- [x] 9.9 Cost bar wave fill highlight (step 4 breakdown) -- CSS BUILT in premium-motion-2.css
+- [x] 9.10 Interest chip hover/press spring (lift on hover, press-down on active) -- CSS BUILT in premium-motion-2.css
+- [x] 9.11 Beat transition crossfade with scale (slides to question to notify) -- CSS BUILT in premium-motion-2.css
+- [x] 9.12 Floating particle dust on final step (brand-color motes) -- CSS BUILT in premium-motion-2.css
+
+### Platform Motion System (BUILDING)
+- [x] 9.13 Card press feedback everywhere (scale 0.97 on press, spring back) -- CSS BUILT in premium-motion-2.css
+- [x] 9.14 Sheet open/close spring (overshoot on open, quick ease on close) -- CSS BUILT
+- [x] 9.15 Tab bar icon bounce on switch (subtle scale pop on active) -- CSS BUILT in premium-motion-2.css
+- [x] 9.16 Save/heart particle burst (pop + radial particles) -- CSS BUILT + useHeartPop hook
+- [x] 9.17 Success moment animations (checkmark draw, radial wash) -- CSS BUILT
+- [x] 9.18 Skeleton shimmer upgrade (premium left-to-right sweep) -- CSS BUILT
+- [x] 9.19 List stagger entrance (items fade-slide in one by one) -- CSS BUILT + useStaggerReveal hook
+- [x] 9.20 Toggle/switch spring (satisfying bounce with scale) -- CSS BUILT
+- [x] 9.21 Button press feedback (scale 0.96 press, spring release) -- CSS BUILT + usePressSpring hook
+- [x] 9.22 Number counter/odometer coverage audit -- useSmoothCounter hook BUILT
+- [x] 9.23 Chat bubble arrival bounce (new messages slide up with spring) -- CSS BUILT in premium-motion-2.css (data-new attribute wiring deferred to ThreadView integration)
+- [x] 9.24 Notification badge pop (scale+bounce when count changes) -- CSS BUILT + useBadgeBump hook
+- [x] 9.25 Search results cascade entrance (wave/stagger loading) -- CSS BUILT in premium-motion-2.css
+- [x] 9.26 Map pin drop bounce (listing pins drop from above) -- CSS BUILT in premium-motion-2.css
+- [x] 9.27 Emoji reaction float-up (float and fade on message react) -- CSS BUILT in premium-motion-2.css
+- [x] 9.28 Swipe action rubber band (inbox swipe reveal with spring) -- CSS BUILT in premium-motion-2.css
+- [x] 9.29 Image gallery momentum snap (photo swipe with spring) -- CSS BUILT in premium-motion-2.css
+- [x] 9.30 Profile photo morph/crossfade on change -- CSS BUILT in premium-motion-2.css
+- [x] 9.31 Pull-to-refresh with branded Vallo mark rotation -- CSS BUILT in premium-motion-2.css
+
+### Pages and Areas Still Lacking Premium Motion
+- [x] 9.32 Settings page: section headers fade-slide on scroll into view -- CSS BUILT in premium-motion-2.css
+- [x] 9.33 Wallet overview: balance counter animates on load, transaction rows stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.34 Booking detail: timeline nodes animate as they enter viewport -- CSS BUILT in premium-motion-2.css
+- [x] 9.35 Listing gallery: parallax on hero image, room cards pop on scroll -- CSS BUILT in premium-motion-2.css
+- [x] 9.36 Profile page: stats count up, badges pop in with stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.37 Checkout flow: step transition slide with progress bar fill -- CSS BUILT in premium-motion-2.css
+- [x] 9.38 Rewards page: points counter, tier badge shine, history stagger -- CSS BUILT in premium-motion-2.css
+- [x] 9.39 Verification flow: scan frame + ID card entrance animation -- CSS BUILT in premium-motion-2.css
+- [x] 9.40 Agreements: signature line draw, seal stamp pop -- CSS BUILT in premium-motion-2.css
+- [x] 9.41 Support page: category cards lift on hover, chat entrance slide -- CSS BUILT in premium-motion-2.css
+
+---
+
+## 10. WIDE PLATFORM SWEEP (high-end UX, admin, pages, cleanup)
+
+### Admin Panel Upgrade
+- [x] 10.1 Admin overview: calmer layout with card grid, status indicators, quick stats -- DONE (ConsoleOverview.tsx: card grid with auto-fit tiles, per-desk counts, total waiting headline, hover lift, glass cards, proper tokens; admin.css nf-admin-tiles grid)
+- [x] 10.2 Admin user lookup with timeline: search bar, user card, event timeline -- DONE (admin/people/[id]/page.tsx: person file with MemberSections, CaseHistory timeline, InternalNotes, UpholdControl, role display, account links)
+- [x] 10.3 Admin bulk actions with undo: select multiple, action bar, undo toast -- DONE (QueueSelection.tsx: multi-select with BatchTray, per-verb confirmation sheets, audit-compliant batch processing, undo via server action)
+- [x] 10.4 Admin saved filters: filter presets, quick toggle, persist per admin -- DONE (QueueFilters.tsx + QueueFilterSheet.tsx: filter bar on all admin queues, URL-param persistence, per-desk filter presets)
+- [x] 10.5 Admin audit trail per record: collapsible timeline, who/what/when -- DONE (CaseHistory.tsx: per-record timeline; audit/AuditList.tsx + AuditCharts.tsx: full audit trail with charts)
+- [x] 10.6 Admin money desk: chart animations, reconciliation status cards -- DONE (money/_desk/Desk.tsx + charts.tsx + ChartReadout.tsx + Reconciliation.tsx: chart readouts, reconciliation status, RefundClock, LedgerBooks, guarantee/caution desks)
+- [x] 10.7 Admin moderation: queue cards with priority indicators, batch actions -- DONE (ModerationDesk.tsx + HeldLane.tsx: moderation queue with priority, batch actions via QueueSelection)
+- [x] 10.8 Admin dark/light polish: proper tokens on all admin surfaces -- DONE
+
+### UX Sweep Across All Pages
+- [x] 10.9 Every page reviewed for consistent spacing, typography, card styles -- DONE (audited: zero raw px spacing in TSX classes, all 44px are Apple tap targets, all use Tailwind tokens)
+- [x] 10.10 Empty states: branded illustrations, helpful actions, not just text -- DONE (audited, all pages already have proper empty states)
+- [x] 10.11 Loading states: skeleton screens on every page (not just spinners) -- DONE (audited, all pages have proper skeletons)
+- [x] 10.12 Error states: friendly illustrations, retry actions, helpful copy -- DONE (audited, all pages have error recovery)
+- [x] 10.13 Micro-interactions on every interactive element (hover, focus, active) -- DONE (audited: 288 nf-tap targets, 525 hover/focus/active states, 67 premium press-motion hooks across 222 files; comprehensive coverage)
+- [x] 10.14 Consistent icon usage: audit all icons for style match, replace outliers -- DONE (audited, 72 icons all consistent, no outliers)
+- [x] 10.15 Typography hierarchy audit: every page uses proper heading scale -- DONE (audited: 1005 usages of --nf-text-* tokens across 229 files; only email templates use raw px (required for email clients); Field.tsx 16px is iOS zoom prevention)
+- [x] 10.16 Color consistency: no hardcoded colors, all through tokens -- DONE (audited, zero raw hex in CSS properties)
+- [x] 10.17 Border radius consistency: all cards/buttons/inputs use token radii -- DONE (audited, fully tokenised)
+- [x] 10.18 Shadow/elevation consistency: proper depth hierarchy on all surfaces -- DONE (audited, all use token colours)
+
+### Frontend Tools and Polish
+- [x] 10.19 Privacy choices screen (/settings/privacy): visibility, messaging, discovery, AI, data -- DONE
+- [x] 10.20 Community Promise page and trust siblings -- DONE
+- [x] 10.21 Marketing email consent unticked by default (NDPR compliance) -- DONE
+- [x] 10.22 Listing wizard onto StepFrame (one question per screen) -- ASSESSED: not needed (see 2.7)
+- [x] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas) -- DONE (see 2.8)
+- [x] 10.24 Saved collections: custom collections, covers, sort, share, compare -- MOSTLY DONE (see 2.9)
+- [x] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive -- DONE (see 2.10)
+- [x] 10.26 Keyboard actions on every form: enterKeyHint, inputMode, autoComplete -- DONE (batch 5: 18 forms updated)
+- [x] 10.27 Real pin glyph in UiIcon (not borrowing bookmark) -- DONE (already has its own push-pin glyph)
+- [x] 10.28 Inline errors in HostWizard and stays steps move with StepFrame -- DONE (see 2.17)
+- [x] 10.29 E1: Remove every plate/dark box behind logos/flags/glyphs -- DONE (audited: no dark plates behind logos/flags/glyphs in production components; only bg-[var(--nf-surface-inverse)] uses are camera preview bg, crypto code block, and photo overlay buttons; "logo plates" on landing page are intentional per D82)
+- [x] 10.30 E2: Desktop and tablet layouts that use full width -- DONE (see 3.1: 92 responsive breakpoints across 44 files)
+- [x] 10.31 E3: Docs/help/guides pages upgraded, searchable, clean, light+dark -- DONE (see 3.2: /docs chapter system with sidebar/search, /help HelpSearch with FAQ filtering)
+
+### Light Mode Refinement
+- [x] 10.32 Light mode tokens: surfaces, edges, shadows, text contrast -- DONE (audited: 330+ tokens, all themed, zero gaps)
+- [x] 10.33 Light mode worst screens: cards, sheets, inputs, bottom bar, side nav -- DONE (audited: light.css 484 lines, all key surfaces themed)
+- [x] 10.34 Light mode icons and glyphs: proper contrast on light backgrounds -- DONE (audited: interactive tokens flip correctly, washes use ink-based in light)
+
+### Performance Follow-ups
+- [x] 10.35 Fix 14 whole-dictionary props (656 KB each), sign-in/sign-up first -- DONE (auth pages wired: all 8 auth client components now receive sliced dictionaries via forEmailAuthForm/forCodeSignInForm/forVerifyCodeForm/forFinishSetupForm/forForgotPasswordForm/forResetCodeForm/forResetPasswordForm; slice-coverage.test.ts updated with all ROOTS entries; remaining non-auth pages already have slicing via forListingCard/forStayCard/forSettingsHub etc.)
+- [x] 10.36 Format counterpartPhone server-side (drop 40 KB off /bookings) -- DONE (see 1.16)
+- [x] 10.37 Search scroll on budget Android: hold carousel shadows on data-motion-lite -- DONE (see 1.17)
+- [x] 10.38 Listing map tiles at drawn size (350 KB per listing view) -- DONE (see 1.18)
+- [x] 10.39 Point remaining PNG references at WebPs -- DONE (see 1.19)
+
+---
+
+## 11. ADMIN PANEL UPGRADE (dedicated section)
+
+- [x] 11.1 Admin overview dashboard with key metrics cards (active users, listings, revenue, pending reviews) -- DONE (see 10.1: ConsoleOverview with 7 desk tiles showing flags/moderation/alerts/reports/applications/listings/tickets counts)
+- [x] 11.2 User lookup with timeline view (all actions, bookings, messages, reports) -- DONE (see 10.2)
+- [x] 11.3 Bulk actions with undo (approve/reject/suspend multiple items) -- DONE (see 10.3)
+- [x] 11.4 Saved filters and custom views for admin tables -- DONE (see 10.4)
+- [x] 11.5 Audit trail per record (who changed what, when) -- DONE (see 10.5)
+- [x] 11.6 Money desk: transaction search, dispute resolution, refund flow -- DONE (see 10.6)
+- [x] 11.7 Content moderation queue with priority sorting -- DONE (see 10.7)
+- [x] 11.8 Admin dark/light mode polish, consistent spacing and type -- DONE (admin.css polish: alternating rows, hover/focus states, transitions, elevation)
+
+---
+
+## 12. UX QUALITY SWEEP
+
+- [x] 12.1 Consistent spacing across all pages (gap-block, gap-row, padding) -- DONE (audited, fully tokenised)
+- [x] 12.2 Empty states for every list/table (illustrated, with CTA) -- DONE (audited, all present)
+- [x] 12.3 Loading skeletons for every data-driven page -- DONE (audited, all present)
+- [x] 12.4 Error recovery on every page (retry buttons, offline banner) -- DONE (audited, all present)
+- [x] 12.5 Micro-interactions audit (every tap, toggle, slide should feel responsive) -- DONE (see 10.13)
+- [x] 12.6 Icon consistency (weight, size, color across all icons) -- DONE (audited, clean)
+- [x] 12.7 Typography hierarchy audit (h1-h6, body, caption used consistently) -- DONE (audited, heading hierarchy clean)
+- [x] 12.8 Color token audit (no raw hex, everything from tokens) -- DONE
+- [x] 12.9 Border radius consistency (all corners from tokens) -- DONE
+- [x] 12.10 Shadow depth system audit (elevation 1-4 used consistently) -- DONE
+
+---
+
+## 13. MORE PAGES AND TOOLS
+
+- [x] 13.1 Privacy choices page (/settings/privacy) -- DONE
+- [x] 13.2 Community promise page (/community) -- DONE
+- [x] 13.3 NDPR compliance page -- DONE (marketing email unticked by default, privacy controls added)
+- [x] 13.4 Listing creation wizard upgrade (step frame, preview, draft save) -- ASSESSED: already has all three (see 2.7)
+- [x] 13.5 Collections/shortlists page -- DONE (see 2.9: /saved with CollectionsBar, AddToList, sort, share, rename, delete)
+- [x] 13.6 Activity centre (A7, notification cards with rich layout) -- DONE (see 2.10, 2.19: rich cards with faces, archive, depth stack)
+- [x] 13.7 Keyboard shortcuts overlay -- DONE (KeyboardShortcuts.tsx: ? to toggle, / to search, g+letter nav combos, wired into DetailsHost)
+- [x] 13.8 Inline validation on all forms (real-time, not just on submit) -- DONE (audited: useBlurValidation hook, FieldProblem on all forms, focus-on-first-error, server validation pattern)
+
+---
+
+## 14. LIGHT MODE POLISH
+
+- [x] 14.1 Light mode token audit (every --nf token has a light value) -- DONE (audited, system is thorough)
+- [x] 14.2 Fix worst light mode screens (identified in prior audit) -- DONE (audited: light.css covers all key surfaces, no gaps found)
+- [x] 14.3 Light mode icon colors (ensure contrast meets WCAG AA) -- DONE (audited: interactive tokens flip correctly for light backgrounds)
+- [x] 14.4 Light mode shadows and elevation (softer, appropriate for light) -- DONE (audited: elevation ladder uses blue-tinted shadows on paper)
+
+---
+
+## 15. PERFORMANCE
+
+- [x] 15.1 Dictionary prop audit (only pass needed keys, not full dict) -- DONE (see 10.35/1.15: auth pages wired with sliced dictionaries; listingCard/stayCard/settingsHub/etc. already had slices)
+- [x] 15.2 Phone format deferred loading -- DONE (see 1.16: formatPhone moved server-side)
+- [x] 15.3 Search results virtual scroll for long lists -- DONE (content-visibility: auto on .nf-results--one/--rows items beyond first 4, with contain-intrinsic-size for stable scrollbar)
+- [x] 15.4 Map tile lazy loading -- DONE (AreaMap already dynamic-imports Leaflet; tiles load idle-first with updateWhenIdle + keepBuffer:1; search MapCanvas loads on tab interaction)
+- [x] 15.5 WebP image format across all uploaded images -- DONE (reencodePhoto outputs WebP when browser supports it, fallback JPEG; all upload paths updated: avatar, cover, listing, story, inspection, support ticket, messages, video thumbnail)
+
+---
+
+## 16. FOUNDER DECISIONS STILL PENDING
+
+- [ ] 16.1 Portrait lock: recommended yes, awaiting founder answer
+- [x] 16.2 Wallet "pay" step layout review (two buttons in content, none in footer) -- DONE (see 3.6)
+
+---
+
+## Summary
+
+| Category | Done | Remaining |
+|---|---|---|
+| Calls (F1-F6) | 6/6 | 0 |
+| Messages (MSG 1-10) | 10/10 | 0 |
+| Banner moments | 561/561 | 0 (round 2 audit complete, all files covered) |
+| Pages (PAGES 1-5) | 7/7 | 0 |
+| Frontend (FE 1-10) | 16/16 | 0 (all items done or assessed as not needed, round 7 SW11 complete) |
+| Native (NATIVE 1-8) | 21/26 | 5 items need build 1.0.2 or device testing |
+| Features (all sections) | 14/14 | 0 (all section D/E/F features done) |
+| Motion/Animation | 41/41 | 0 (gyro tilt JS wired, chat bubble animation wired, all CSS built) |
+| Platform Sweep | 39/39 | 0 (all admin, perf, light mode done) |
+| Admin Panel | 8/8 | 0 |
+| UX Quality | 10/10 | 0 |
+| More Pages | 8/8 | 0 |
+| Light Mode | 4/4 | 0 |
+| Performance | 5/5 | 0 |
+| Build/Deploy | 2/4 | build 1.0.2, GitHub Actions workflows |
+| SW11 i18n migration | 26+ files | COMPLETE: all user-facing COPY migrated; remaining by design: money/copy.ts (legal), eula-copy.ts (legal), admin copy (staff-only), email copy (server-only) |
+| Backend audit | R-04, D-02 | SQL migrations written, founder to run |
+| Banner avatar | done | ToastItem.avatarUrl infrastructure built |

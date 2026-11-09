@@ -58,6 +58,16 @@ export const OG_INK_MUTED = "#8E9CC4";
 // eslint-disable-next-line nf/no-raw-colour -- Satori resolves no custom property. Held to tokens.css by og-palette.test.ts.
 export const OG_BRAND = "#0069FE";
 
+/**
+ * The avatar initials tones for the unfurl card (`og-centred-card.tsx`) when a
+ * subject has no photo: a fixed, closed decorative set (the same spread the
+ * in-app tinted-initials tile reads), so one subject keeps one colour. These
+ * are a decorative palette, not semantic theme tokens, so they are not held in
+ * `OG_PALETTE_SOURCES`; the first is the brand so it stays token-backed.
+ */
+// eslint-disable-next-line nf/no-raw-colour -- Satori resolves no custom property; a fixed decorative initials set, not a theme colour.
+export const OG_AVATAR_TONES: readonly string[] = [OG_BRAND, "#5C9FFF", "#10B981", "#00C8FF"];
+
 /*
  * THE SHARE CARD FRAME'S EXTRA INKS (spec section 10), for
  * `components/share/og-share-card.tsx`: the card on the canvas, the round

@@ -3,6 +3,7 @@
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { CHROME_COLOUR, CHROME_COLOUR_LIGHT } from "@/lib/theme/chrome";
 import { THEME_EVENT, readAppliedTheme } from "@/lib/theme/theme-client";
+import { STATUS_BAR_HOLD_EVENT, heldGlyphs } from "./status-bar-hold";
 
 /**
  * Keep the system status bar in step with the page.
@@ -42,7 +43,10 @@ import { THEME_EVENT, readAppliedTheme } from "@/lib/theme/theme-client";
  */
 
 async function paint(): Promise<void> {
-  const light = readAppliedTheme() === "light";
+  /* A screen holding its own glyphs (`status-bar-hold.ts`, N2) wins over the
+     theme while it is open: "light" glyphs read as the dark theme's bar. */
+  const held = heldGlyphs();
+  const light = held ? held === "dark" : readAppliedTheme() === "light";
   try {
     /* Style.Light is DARK glyphs, for the white light theme. See the naming
        trap above. */
@@ -65,5 +69,9 @@ export function startStatusBar(): () => void {
   void paint();
   const repaint = () => void paint();
   window.addEventListener(THEME_EVENT, repaint);
-  return () => window.removeEventListener(THEME_EVENT, repaint);
+  window.addEventListener(STATUS_BAR_HOLD_EVENT, repaint);
+  return () => {
+    window.removeEventListener(THEME_EVENT, repaint);
+    window.removeEventListener(STATUS_BAR_HOLD_EVENT, repaint);
+  };
 }

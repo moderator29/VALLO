@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -26,6 +27,9 @@ const REASONS: CloseReason[] = ["let_through_vallo", "let_elsewhere", "owner_wit
  * A let takes down every listing of the same property, which the sheet says
  * before the tap rather than after.
  */
+/* What closing did, said by the one banner (founder, 7 November 2026). */
+const WORDS = { closed: "Listing closed. It is no longer shown to renters." };
+
 export function CloseListingSheet({
   listingId,
   title,
@@ -39,22 +43,24 @@ export function CloseListingSheet({
 }) {
   const router = useRouter();
   const [reason, setReason] = useState<CloseReason | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useSafeTransition();
 
   function run() {
     if (!reason) {
-      setError(copy.choose);
+      banner.error(copy.choose);
       return;
     }
-    setError(null);
     startTransition(async () => {
       try {
         const result = await closeListingWithReason({ listingId, reason });
         if (!result.ok) {
-          setError(result.fieldErrors?.reason === "no-rent" ? copy.noRent : copy.failed);
+          /* A reason that does not fit stays on the choice; a refusal is said
+             by the one banner (Grade 1), above this sheet. */
+          if (result.fieldErrors?.reason === "no-rent") banner.error(copy.noRent);
+          else banner.error(copy.failed, { retry: run });
           return;
         }
+        banner.success(WORDS.closed);
         onClose();
         router.refresh();
       } catch (error) {
@@ -89,7 +95,7 @@ export function CloseListingSheet({
           <label
             key={value}
             data-on={reason === value || undefined}
-            className="flex min-h-[48px] cursor-pointer items-center gap-sm rounded-[var(--nf-radius-control)] border border-[var(--nf-border-subtle)] px-md text-[length:var(--nf-text-body-sm)] data-[on]:border-[var(--nf-brand-secondary)]"
+            className="flex min-h-[48px] cursor-pointer items-center gap-sm rounded-control border border-[var(--nf-border-subtle)] px-md text-[length:var(--nf-text-body-sm)] data-[on]:border-[var(--nf-brand-secondary)]"
           >
             <input
               type="radio"
@@ -103,15 +109,6 @@ export function CloseListingSheet({
           </label>
         ))}
       </fieldset>
-      {error && (
-        <p
-          role="alert"
-          className="mt-sm rounded-[var(--nf-container-radius)] p-sm text-[length:var(--nf-text-caption)] font-semibold"
-          style={{ background: "var(--nf-state-warning-surface)", color: "var(--nf-state-warning)" }}
-        >
-          {error}
-        </p>
-      )}
     </Sheet>
   );
 }

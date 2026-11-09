@@ -10,6 +10,7 @@ import type {
 } from "react";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { counterFor } from "@/lib/ui/small-rules";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * Form fields.
@@ -147,28 +148,16 @@ export function Field({
           {hint}
         </p>
       ) : null}
-      {error ? (
-        /*
-         * `role="alert"` so a message that appears after a failed submit is
-         * announced without the user having to go looking for it. The text also
-         * carries the error colour, so the state is stated three ways: colour,
-         * copy, and the field's own ring. Colour alone would fail anyone who
-         * cannot see it.
-         *
-         * `nf-arrive` is the fourth way, and it is the one a sighted reader
-         * notices first. The message rises the six pixels from under the field
-         * it belongs to rather than simply being there on the next paint, so
-         * the eye is carried to the control that refused rather than left to
-         * find a new line of red somewhere on the form.
-         */
-        <p
-          id={errorId}
-          role="alert"
-          className="nf-arrive mt-xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-state-error)]"
-        >
-          {error}
-        </p>
-      ) : null}
+      {/*
+       * THE WORDS GO TO THE BANNER (founder, 7 November 2026, "THE BANNER
+       * EVERYWHERE"). The field keeps its red ring (`aria-invalid`, above);
+       * the message is said once at the top of the screen and stays here,
+       * visually hidden, as the note `aria-describedby` names, so a screen
+       * reader still hears it on the control. It used to be a red caption
+       * under the field with `role="alert"`.
+       */}
+      <FieldProblem id={errorId} message={error} />
+
     </div>
   );
 }
@@ -318,6 +307,14 @@ export type TextFieldProps = Omit<
   "size" | "className" | "id"
 > &
   Omit<FieldProps, "children"> & {
+    /**
+     * Tells the mobile keyboard what the enter key should say.
+     *
+     * Already part of `InputHTMLAttributes`, surfaced here so callers see it
+     * beside `inputMode` and `autoComplete` without digging into the HTML
+     * attribute spread. Passed straight through to the `<input>`.
+     */
+    enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
     leadingIcon?: UiIconName;
     /**
      * A leading glyph that is not a `UiIcon`: a glass `BrandIcon` in the well,
@@ -458,7 +455,7 @@ export function TextField({
               aria-label={clearable}
               /* 44pt of hit area on a 20px glyph, the same overlay trick the
                  chips use: the icon stays small, the target does not. */
-              className={`${SLOT} right-1 pointer-events-auto grid size-11 place-items-center rounded-[var(--nf-radius-control)] hover:text-[var(--nf-content-primary)]`}
+              className={`${SLOT} right-1 pointer-events-auto grid size-11 place-items-center rounded-control hover:text-[var(--nf-content-primary)]`}
             >
               <UiIcon name="close" size={16} />
             </button>
@@ -478,6 +475,14 @@ export type SelectFieldProps = Omit<
   "size" | "className" | "id"
 > &
   Omit<FieldProps, "children"> & {
+    /**
+     * Tells the mobile keyboard what the enter key should say.
+     *
+     * Not part of `SelectHTMLAttributes` (the spec ties it to text inputs),
+     * but mobile browsers respect it on a `<select>` when a soft keyboard is
+     * open beside a picker. Passed straight through to the `<select>`.
+     */
+    enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
     leadingIcon?: UiIconName;
     /** See `TextFieldProps.glyph`. */
     glyph?: ReactNode;
@@ -495,6 +500,7 @@ export function SelectField({
   optionalText,
   hideLabel,
   className,
+  enterKeyHint,
   leadingIcon,
   glyph,
   material,
@@ -533,6 +539,7 @@ export function SelectField({
           <select
             {...rest}
             {...control}
+            enterKeyHint={enterKeyHint}
             /*
              * `appearance-none` is not cosmetic here. The native control paints
              * its own arrow at its own size in its own colour, differently in

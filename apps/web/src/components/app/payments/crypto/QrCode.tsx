@@ -30,7 +30,7 @@ export function QrCode({ value, label, size = 208 }: { value: string; label: str
       height={size}
       viewBox={`0 0 ${drawn.units} ${drawn.units}`}
       shapeRendering="crispEdges"
-      className="rounded-[var(--nf-radius-md)] bg-[var(--nf-surface-on-paper)]"
+      className="rounded-md bg-[var(--nf-surface-on-paper)]"
     >
       <path d={drawn.path} fill="var(--nf-content-on-paper)" />
     </svg>

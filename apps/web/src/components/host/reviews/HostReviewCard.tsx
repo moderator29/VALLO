@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
@@ -27,22 +28,21 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const [pending, start] = useSafeTransition();
   const [writing, setWriting] = useState(false);
   const [reply, setReply] = useState(review.reply?.body ?? "");
-  const [error, setError] = useState<string | null>(null);
   const [contesting, setContesting] = useState(false);
   const [criterion, setCriterion] = useState<ContestCriterion | null>(null);
   const [note, setNote] = useState("");
-  const [contestError, setContestError] = useState<string | null>(null);
 
   const saveReply = () =>
     start(async () => {
       try {
-        setError(null);
         const result = await answerHotelReview({ reviewId: review.id, body: reply });
         if (!result.ok) {
-          setError(result.error);
+          banner.error(result.error);
           return;
         }
         setWriting(false);
+        /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+        banner.success("Your answer is posted");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -52,11 +52,11 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const withdraw = () =>
     start(async () => {
       try {
-        setError(null);
         const result = await withdrawHotelReviewAnswer({ reviewId: review.id });
-        if (!result.ok) setError(result.error);
+        if (!result.ok) banner.error(result.error);
         else {
           setReply("");
+          banner.success("Your answer is removed");
           router.refresh();
         }
       } catch (error) {
@@ -67,13 +67,14 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
   const sendContest = () =>
     start(async () => {
       try {
-        setContestError(null);
         const result = await contestHotelReview({ reviewId: review.id, criterion, note: note.trim() || undefined });
+        /* Said by the one banner above the sheet (founder, 7 November 2026). */
         if (!result.ok) {
-          setContestError(result.error);
+          banner.error(result.error, { retry: sendContest });
           return;
         }
         setContesting(false);
+        banner.success("Sent to Vallo for review");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -172,11 +173,6 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
           ) : null}
         </>
       )}
-      {error ? (
-        <p className="nf-rcal-panel__error" role="alert">
-          {error}
-        </p>
-      ) : null}
 
       <Sheet
         open={contesting}
@@ -223,11 +219,6 @@ export function HostReviewCard({ review, when }: { review: HostReview; when: str
             onChange={(event) => setNote(event.target.value)}
             hint={w.noteHint}
           />
-          {contestError ? (
-            <p className="nf-rcal-panel__error" role="alert">
-              {contestError}
-            </p>
-          ) : null}
         </div>
       </Sheet>
     </article>

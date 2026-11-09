@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { forLanguage } from "@/components/app/account/settings-copy";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { LanguageRow } from "@/components/app/account/SettingsGroups";
 import { RowValue, SettingsGroup } from "@/components/app/account/rows";
 import { formatMoneyDate } from "@/lib/money/dates";
@@ -30,9 +30,8 @@ export default async function RegionSettingsPage() {
   const today = formatMoneyDate(new Date(), locale) ?? "";
   const copy = t.experienceSettings.region;
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title={copy.title} subtitle={copy.sub} fallback="/settings" />
-      <section id="settings-language" className="mb-block scroll-mt-28">
+    <PageFrame title={copy.title} subtitle={copy.sub} fallback="/settings" width="narrow">
+      <section id="settings-language" className="scroll-mt-28">
         <SettingsGroup label={copy.language}>
           <LanguageRow t={forLanguage(t)} current={locale} />
         </SettingsGroup>
@@ -44,6 +43,6 @@ export default async function RegionSettingsPage() {
           <RowValue icon="coins" label={copy.numbers} sub={copy.numbersSub} />
         </SettingsGroup>
       </section>
-    </div>
+    </PageFrame>
   );
 }

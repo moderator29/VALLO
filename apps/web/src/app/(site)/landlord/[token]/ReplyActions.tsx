@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useEffect, useId, useState } from "react";
+import { banner } from "@/lib/ui/toast";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { ResultScreen } from "@/components/app/ResultSheet";
@@ -45,6 +46,15 @@ export function ReplyActions({
   const [disputing, setDisputing] = useState(false);
   const noteId = useId();
 
+  /* A refusal is said by the one banner at the top of the screen (founder,
+     7 November 2026); a settled answer becomes its own result screen. */
+  const refused = (answerState && !answerState.ok ? answerState : null) ?? (stopState && !stopState.ok ? stopState : null);
+  useEffect(() => {
+    if (refused) banner.error(copy.failed);
+    // Once per answer.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refused]);
+
   const settled = (stopState?.ok ? stopState.data : null) ?? (answerState?.ok ? answerState.data : null);
   if (settled) {
     if ("done" in settled) {
@@ -62,7 +72,6 @@ export function ReplyActions({
     return <ResultScreen state={settled.state === "expired" ? "expired" : "pending"} verdict={quiet.title} consequence={quiet.body} />;
   }
 
-  const failed = (answerState && !answerState.ok) || (stopState && !stopState.ok);
   const busy = answering || stopping;
 
   const choice = (value: string, label: string, variant: "primary" | "secondary" | "dangerQuiet", testId: string) => (
@@ -77,14 +86,6 @@ export function ReplyActions({
 
   return (
     <div className="mt-block">
-      {failed && (
-        <p
-          role="alert"
-          className="mb-sm rounded-[var(--nf-container-radius)] border border-[color-mix(in_oklab,var(--nf-state-error)_45%,transparent)] px-md py-sm text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-state-error)]"
-        >
-          {copy.failed}
-        </p>
-      )}
 
       {purpose === "vacancy" ? (
         <div className="grid gap-sm">

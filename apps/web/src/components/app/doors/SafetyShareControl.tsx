@@ -1,5 +1,6 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { useState } from "react";
 import { formatDate, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -49,7 +50,6 @@ export function SafetyShareControl({
   const [phase, setPhase] = useState<Phase>(
     initial === "done" ? { kind: "done" } : initial === "shared" ? { kind: "shared" } : { kind: "idle" },
   );
-  const [error, setError] = useState<string | null>(null);
   const [pending, start] = useSafeTransition();
 
   const when = formatDate(new Date(slotAt), locale, {
@@ -60,12 +60,11 @@ export function SafetyShareControl({
   });
 
   const make = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await createSafetyShare({ inspectionId });
         if (!result.ok) {
-          setError(copy.failed);
+          banner.error(copy.failed, { retry: make });
           return;
         }
         const url = new URL(`/${SAFE_DOOR}/${result.data.token}`, window.location.origin).toString();
@@ -97,15 +96,15 @@ export function SafetyShareControl({
   };
 
   const done = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await markSafetyDone({ inspectionId });
         if (!result.ok) {
-          setError(copy.failed);
+          banner.error(copy.failed, { retry: done });
           return;
         }
         setPhase({ kind: "done" });
+        banner.success(copy.doneThanks);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -113,15 +112,15 @@ export function SafetyShareControl({
   };
 
   const stop = () => {
-    setError(null);
     start(async () => {
       try {
         const result = await stopSafetyShare({ inspectionId });
         if (!result.ok) {
-          setError(copy.failed);
+          banner.error(copy.failed, { retry: stop });
           return;
         }
         setPhase({ kind: "stopped" });
+        banner.success(copy.stopped);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }
@@ -158,9 +157,6 @@ export function SafetyShareControl({
           <p className="mt-2xs select-all break-all text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
             {phase.url}
           </p>
-          <p className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]" aria-live="polite">
-            {phase.copied ? copy.copied : ""}
-          </p>
           <div className="mt-sm grid gap-xs">
             <Button
               type="button"
@@ -170,7 +166,11 @@ export function SafetyShareControl({
               onClick={() => {
                 void navigator.clipboard
                   ?.writeText(`${phase.text} ${phase.url}`)
-                  .then(() => setPhase({ ...phase, copied: true }))
+                  .then(() => {
+                    setPhase({ ...phase, copied: true });
+                    /* Said by the one banner at the top of the screen (founder, 7 November 2026). */
+                    banner.success(copy.copied);
+                  })
                   .catch(() => undefined);
               }}
             >
@@ -216,12 +216,6 @@ export function SafetyShareControl({
               expires; the renter can take it down now. */}
           {stopButton}
         </div>
-      )}
-
-      {error && (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-caption)] text-[var(--nf-state-error)]">
-          {error}
-        </p>
       )}
     </div>
   );

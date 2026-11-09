@@ -28,9 +28,24 @@
     border-color: var(--nf-selected-edges);
     box-shadow: var(--nf-selected-shadow-inline);
   }
+  .nf-panel.nf-orph-choice {
+    transition: border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      background-color var(--nf-duration-fast) var(--nf-ease-standard);
+  }
+  @media (hover: hover) {
+    .nf-panel.nf-orph-choice:hover:not([aria-pressed="true"]) {
+      border-color: var(--nf-border-strong);
+      background-color: var(--nf-interactive-hover);
+    }
+  }
   .nf-panel.nf-orph-choice:focus-visible {
     outline: 2px solid var(--nf-brand-accent);
     outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-panel.nf-orph-choice {
+      transition: none;
+    }
   }
 
   .nf-panel.nf-orph-fieldgroup {

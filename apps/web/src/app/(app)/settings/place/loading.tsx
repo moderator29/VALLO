@@ -8,8 +8,8 @@ import { LoadingShell, PageHeaderSkeleton } from "@/components/app/ScreenSkeleto
  */
 export default function LoadingPlaceSettings() {
   return (
-    <LoadingShell label="Loading your place" className="mx-auto w-full max-w-2xl">
-      <PageHeaderSkeleton />
+    <LoadingShell label="Loading your place" className="mx-auto w-full max-w-xl">
+      <PageHeaderSkeleton layout="large" />
       <div className="space-y-sm">
         {Array.from({ length: 3 }, (_, i) => (
           <div key={i} className="nf-panel nf-panel--card block p-md">

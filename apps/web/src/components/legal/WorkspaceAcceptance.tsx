@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Checkbox } from "@/components/ui/Check";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * THE TWO TICKS BEFORE A WORKSPACE APPLICATION OR SETUP IS SENT (founder
@@ -81,11 +82,8 @@ export function WorkspaceAcceptance({
           {a.payInside}
         </Checkbox>
       </div>
-      {missing ? (
-        <p role="alert" className="mt-xs text-[length:var(--nf-text-overline)] text-[var(--nf-state-error)]">
-          {a.required}
-        </p>
-      ) : null}
+      {/* The boxes keep their red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id="workspace-acceptance-problem" message={missing ? a.required : null} />
     </section>
   );
 }

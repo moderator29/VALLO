@@ -66,3 +66,33 @@ describe("Needs you", () => {
     expect(threadOf("/messages/new")).toBeNull();
   });
 });
+
+describe("Roommates, Trust and Safety and Circle rows (8 November 2026)", () => {
+  const from = "?from=6f1e2d3c-4b5a-4987-8a6b-5c4d3e2f1a0b";
+  it("puts a roommate request, a viewing request, a group invite and a join request in Needs you, with their verb", () => {
+    expect(severityOf({ kind: "social", title: "Ada is interested in sharing a home", href: `/roommates/me?tab=requests${from}` })).toEqual({ severity: "action", verb: "viewRequest" });
+    expect(severityOf({ kind: "social", title: "Ada asked to view your room", href: `/roommates/me?tab=viewings${from}` })).toEqual({ severity: "action", verb: "review" });
+    expect(severityOf({ kind: "social", title: "Ada invited you to Yaba three", href: `/roommates/me?tab=groups${from}` })).toEqual({ severity: "action", verb: "openGroup" });
+    expect(severityOf({ kind: "social", title: "Ada asked to join Yaba three", href: `/roommates/groups/g1${from}` })).toEqual({ severity: "action", verb: "review" });
+  });
+  it("reads a connection, a group post and a viewing change as updates, not the feed's fyi", () => {
+    expect(severityOf({ kind: "social", title: "Ada accepted. You are connected", href: `/roommates/p/u1${from}` }).severity).toBe("update");
+    expect(severityOf({ kind: "social", title: "Ada posted in Yaba three", href: `/roommates/groups/g1${from}` }).severity).toBe("update");
+  });
+  it("asks for a Trust and Safety message to be read, and offers See outcome on reports, appeals and restrictions", () => {
+    expect(severityOf({ kind: "support", title: "A message from Vallo Trust and Safety", href: "/settings/standing?case=12" })).toEqual({ severity: "action", verb: "open" });
+    expect(severityOf({ kind: "support", title: "We looked into your report", href: "/settings/standing" })).toEqual({ severity: "update", verb: "seeOutcome" });
+    expect(severityOf({ kind: "system", title: "Your appeal was accepted", href: "/settings/standing" })).toEqual({ severity: "update", verb: "seeOutcome" });
+    expect(severityOf({ kind: "system", title: "A restriction on your account was lifted", href: "/settings/standing" })).toEqual({ severity: "update", verb: "seeOutcome" });
+  });
+  it("reads Circle rows by the titles the SQL writes", () => {
+    expect(severityOf({ kind: "social", title: "New reply", href: "/circle/p/p1#a-r1" })).toEqual({ severity: "action", verb: "reply" });
+    expect(severityOf({ kind: "social", title: "New answer", href: "/circle/p/p1#a-r1" })).toEqual({ severity: "action", verb: "reply" });
+    expect(severityOf({ kind: "social", title: "You were mentioned", href: "/circle/p/p1" })).toEqual({ severity: "action", verb: "reply" });
+    expect(severityOf({ kind: "social", title: "Join request: Lekki renters", href: "/circle/c/lekki-renters/manage" })).toEqual({ severity: "action", verb: "review" });
+    expect(severityOf({ kind: "social", title: "Welcome to Lekki renters", href: "/circle/c/lekki-renters" }).severity).toBe("update");
+    expect(severityOf({ kind: "social", title: "Answer accepted", href: "/circle/p/p1#a-r1" }).severity).toBe("update");
+    expect(severityOf({ kind: "social", title: "Your post was removed", href: "/post/p1" }).severity).toBe("update");
+    expect(severityOf({ kind: "social", title: "Your post is being checked", href: "/post/p1" }).severity).toBe("fyi");
+  });
+});

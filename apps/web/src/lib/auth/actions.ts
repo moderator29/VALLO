@@ -125,10 +125,6 @@ function validateCredentials(
   return errors;
 }
 
-/** A new account's next stop: the phone step, which passes straight on to `next` when it has nothing to ask. */
-function phoneStepThen(next: string): string {
-  return `/sign-up/phone?next=${encodeURIComponent(next)}`;
-}
 
 /** The sign-up form's number, in the form `profiles.phone` keeps, or null. */
 function signUpPhone(formData: FormData): string | null {
@@ -202,10 +198,11 @@ function validateSignUp(formData: FormData, w: Refusals): Partial<Record<AuthFie
   const refusal = termsRefusal(field(formData, "termsVersion"));
   if (refusal) errors.acceptTerms = refusal;
 
-  /* Every account has a mobile number (the founder, 2 November 2026), from any
-     country, Nigeria first. */
-  if (!field(formData, "phone").trim()) errors.phone = "Enter your mobile number.";
-  else if (signUpPhone(formData) === null) {
+  /* NO NUMBER AT SIGN-UP (the founder, 6 November 2026, replacing the
+     2 November rule): the form no longer asks. The number is confirmed at
+     the first deal by the moments gate (the phone gate module). An old
+     form that still posts one is checked so a bad value is not stored. */
+  if (field(formData, "phone").trim() && signUpPhone(formData) === null) {
     errors.phone = "That does not look like a mobile number. Check the digits and the country beside them.";
   }
   const underAge = ageRefusal(field(formData, "ageConfirmed"));
@@ -432,6 +429,8 @@ export async function signInWithEmail(
   // The session cookies are set. Drop every cached render so the shell picks
   // up the real identity instead of the signed out view.
   (await cookies()).delete(CHOOSER_EMAIL_COOKIE);
+  /* Grade 1: "Signed in" as the top banner on arrival (reference R4). */
+  await rememberSuccess("signed-in");
   revalidatePath("/", "layout");
   redirect(landing);
 }
@@ -756,10 +755,9 @@ export async function verifySignUpCode(
      than a first name, and nothing when the metadata holds none. */
   const given = data.user?.user_metadata?.first_name;
   const name = typeof given === "string" && given.trim() ? given.trim().slice(0, 40) : undefined;
-  /* Form, email code, then the phone code. `/sign-up/phone` decides whether a
-     code can be sent to this account's number and goes straight on when not
-     (the sign-up phone step module), so nothing about phones is asked here. */
-  return { ok: true, verified: phoneStepThen(landingAfterAuth(formData)), ...(name ? { name } : {}) };
+  /* Form, then the email code, then straight in. The phone is asked at the
+     first deal, not here (6 November 2026). */
+  return { ok: true, verified: landingAfterAuth(formData), ...(name ? { name } : {}) };
 }
 
 /**
@@ -948,13 +946,25 @@ export async function completeEmailVerification(input: {
      by the one-shot cookie; a magic-link sign-in and a recovery earn none. */
   const moment = doneFlagForLinkType(input.type);
   if (isGlobalDoneFlag(moment)) await rememberSuccess(moment);
+  /* A RETURNING SIGN-IN BY LINK OR PROVIDER is greeted like a password
+     sign-in: "Signed in. Welcome back." (founder, 7 November 2026, "THE
+     BANNER EVERYWHERE"; it was silent). The link type cannot tell a new
+     account from a returning one (`link-moment.ts`), so the account's own
+     age decides: only one made more than ten minutes ago is "back". A
+     recovery link goes on to choose a password, which has its own moment. */
+  else if (input.type !== "recovery" && input.type !== "invite" && confirmed.user && isReturningAccount(confirmed.user.created_at)) {
+    await rememberSuccess("signed-in");
+  }
   // The session cookies are set. Drop every cached render so the shell picks
   // the signed-in tree rather than the anonymous one behind this screen.
   revalidatePath("/", "layout");
-  /* A new account confirmed by the link goes through the same phone step as one
-     confirmed by the code. */
-  if (moment === "account-created" && confirmed.user) return { ok: true, next: phoneStepThen(next) };
   return { ok: true, next };
+}
+
+/** An account made more than ten minutes ago: a sign-in, not a sign-up. */
+function isReturningAccount(createdAt: string | undefined): boolean {
+  const made = createdAt ? Date.parse(createdAt) : Number.NaN;
+  return Number.isFinite(made) && Date.now() - made > 10 * 60 * 1000;
 }
 
 async function refuseSwitchedOffProvider(
@@ -1142,6 +1152,8 @@ export async function signInWithAppleIdToken(input: {
   if (data.user && (await setupStillOwed(supabase, data.user))) {
     return { ok: true, next: finishSetupHref(landingFromPath(input.next)) };
   }
+  /* Grade 1: "Signed in" as the top banner on arrival (reference R4). */
+  await rememberSuccess("signed-in");
   return { ok: true, next: landingFromPath(input.next) };
 }
 

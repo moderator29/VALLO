@@ -4,7 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getReviewView, type ReviewRead } from "@/lib/reviews/queries";
 import { withNext } from "@/lib/auth/next-link";
 import { ResultScreen } from "@/components/app/ResultSheet";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { PageScene } from "@/components/app/PageScene";
 import { Reveal } from "@/components/site/Reveal";
 import { ReviewForm } from "./ReviewForm";
@@ -177,12 +177,14 @@ function Shell({
   title: string;
 }) {
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="relative">
+    <div className="relative mx-auto max-w-2xl">
+      {/* The scene sits behind the title band only. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[9rem]">
         <PageScene art="calendar-check" />
-        <PageHeader title={title} subtitle={subtitle} fallback="/bookings?side=stays&from=stays" />
       </div>
-      {children}
+      <PageFrame title={title} subtitle={subtitle} fallback="/bookings?side=stays&from=stays" width="narrow">
+        {children}
+      </PageFrame>
     </div>
   );
 }

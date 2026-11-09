@@ -525,6 +525,8 @@ export type Database = {
       agent_documents: {
         Row: {
           application_id: string | null
+          back_storage_path: string | null
+          issuing_country: string | null
           id: string
           issued_on: string | null
           kind: string
@@ -541,6 +543,8 @@ export type Database = {
         }
         Insert: {
           application_id?: string | null
+          back_storage_path?: string | null
+          issuing_country?: string | null
           id?: string
           issued_on?: string | null
           kind: string
@@ -557,6 +561,8 @@ export type Database = {
         }
         Update: {
           application_id?: string | null
+          back_storage_path?: string | null
+          issuing_country?: string | null
           id?: string
           issued_on?: string | null
           kind?: string
@@ -3779,6 +3785,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "conversation_archives_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversation_prefs: {
+        Row: {
+          conversation_id: string
+          muted_until: string | null
+          pinned_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          muted_until?: string | null
+          pinned_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          muted_until?: string | null
+          pinned_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_prefs_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
@@ -8218,25 +8256,34 @@ export type Database = {
       message_attachments: {
         Row: {
           created_at: string
+          duration_ms: number | null
           height: number | null
           id: string
+          kind: string
           message_id: string
+          peaks: Json | null
           storage_path: string
           width: number | null
         }
         Insert: {
           created_at?: string
+          duration_ms?: number | null
           height?: number | null
           id?: string
+          kind?: string
           message_id: string
+          peaks?: Json | null
           storage_path: string
           width?: number | null
         }
         Update: {
           created_at?: string
+          duration_ms?: number | null
           height?: number | null
           id?: string
+          kind?: string
           message_id?: string
+          peaks?: Json | null
           storage_path?: string
           width?: number | null
         }
@@ -8307,6 +8354,45 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "message_hidden_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reactions: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          emoji: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id?: string
+          created_at?: string
+          emoji: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          emoji?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
             columns: ["message_id"]
             isOneToOne: false
             referencedRelation: "messages"
@@ -8762,6 +8848,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          archived_at: string | null
           body: string | null
           created_at: string
           href: string | null
@@ -8773,6 +8860,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           body?: string | null
           created_at?: string
           href?: string | null
@@ -8784,6 +8872,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           body?: string | null
           created_at?: string
           href?: string | null
@@ -12248,6 +12337,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string | null
           id: string
+          last_seen_at: string
           resolved_at: string | null
           resolved_by: string | null
           severity: Database["public"]["Enums"]["alert_severity"]
@@ -12262,6 +12352,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          last_seen_at?: string
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -12276,6 +12367,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          last_seen_at?: string
           resolved_at?: string | null
           resolved_by?: string | null
           severity?: Database["public"]["Enums"]["alert_severity"]
@@ -17082,6 +17174,14 @@ export type Database = {
         Args: { p_token: string; p_viewer: string }
         Returns: undefined
       }
+      notification_category_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          kind: Database["public"]["Enums"]["notification_kind"]
+          total: number
+          unread: number
+        }[]
+      }
       notification_severity: {
         Args: {
           n_href: string
@@ -18479,6 +18579,7 @@ export type Database = {
         | "drivers_licence"
         | "nin_card"
         | "voters_card"
+        | "national_id"
         | "utility_bill"
         | "bank_statement"
         | "tenancy_agreement"
@@ -18854,6 +18955,7 @@ export const Constants = {
         "drivers_licence",
         "nin_card",
         "voters_card",
+        "national_id",
         "utility_bill",
         "bank_statement",
         "tenancy_agreement",

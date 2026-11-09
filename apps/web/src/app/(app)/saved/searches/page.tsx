@@ -95,7 +95,7 @@ export default async function SavedSearchesPage({
            are offered, the second as a quiet link. */
         <DiscoveryEmpty
           data-testid="saved-searches-signed-out"
-          object="search-pin"
+          object="empty-search"
           title={sv.searchesSignedOutTitle}
           body={sv.searchesSignedOutBody}
           primary={{ label: sv.searchesSignIn, href: withNext("/sign-in", "/saved/searches") }}
@@ -111,7 +111,7 @@ export default async function SavedSearchesPage({
            you need, sits in its own section below. */
         <DiscoveryEmpty
           data-testid="saved-searches-empty"
-          object="search-pin"
+          object="empty-search"
           title={sv.searchesEmptyTitle}
           body={sv.searchesEmptyBody}
           primary={{ label: sv.searchesStart, href: "/search" }}

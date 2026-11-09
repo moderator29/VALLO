@@ -1,7 +1,8 @@
 "use client";
 
+import { banner } from "@/lib/ui/toast";
 import { initial } from "@/lib/text/initial";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReportSheet } from "@/components/social/ReportSheet";
@@ -115,7 +116,6 @@ export function CommentsSheet({
   const [firstRows] = useState(() => new Set(comments.map((comment) => comment.id)));
   const [draft, setDraft] = useState<Draft>(null);
   const [body, setBody] = useState("");
-  const [notice, setNotice] = useState<string | null>(null);
   const [menuFor, setMenuFor] = useState<string | null>(null);
   /* Whether the open menu rises above its button. See `.nf-comment__menu--up`. */
   const [menuUp, setMenuUp] = useState(false);
@@ -151,12 +151,6 @@ export function CommentsSheet({
      All of that, plus drag and flick to close and Back, is the platform's
      `Sheet` now; this component only says where first focus goes. */
 
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(null), 4000);
-    return () => window.clearTimeout(timer);
-  }, [notice]);
-
   /*
    * Which rows need a connector drawn into them.
    *
@@ -190,7 +184,7 @@ export function CommentsSheet({
         const result = await onLike(comment.id);
         if (!result.ok) {
           patch(comment.id, { liked: comment.liked, likeCount: comment.likeCount });
-          setNotice(result.error);
+          banner.error(result.error);
         }
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -206,12 +200,13 @@ export function CommentsSheet({
       try {
         const result = await onSend({ parentId: draft?.parentId ?? null, body: text });
         if (!result.ok) {
-          setNotice(result.error);
+          banner.error(result.error);
           return;
         }
         setBody("");
         setDraft(null);
-        setNotice(result.data.held ? POST_COPY.held : null);
+        /* Said by the one banner at the top of the screen (Grade 1). */
+        if (result.data.held) banner.info(POST_COPY.held);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -237,20 +232,15 @@ export function CommentsSheet({
       try {
         const target = comment.authorId;
         if (!target) {
-          setNotice("There is nobody to do that to on this comment.");
+          banner.error("There is nobody to do that to on this comment.");
           return;
         }
         const result =
           action === "block"
             ? await blockUser({ userId: target })
             : await muteTarget({ targetKind: "USER", targetId: target });
-        setNotice(
-          result.ok
-            ? action === "block"
-              ? POST_COPY.blockedDone
-              : POST_COPY.mutedDone
-            : result.error,
-        );
+        if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
+        else banner.error(result.error);
         /* Their comments leave this sheet now. The rows are held here, and the
            refresh below re-reads the page behind the sheet, so without this the
            person just blocked kept talking in the open sheet until it closed.
@@ -271,7 +261,7 @@ export function CommentsSheet({
     if (!comment || !onDelete) return false;
     const result = await onDelete(comment.id);
     if (!result.ok) {
-      setNotice(result.error);
+      banner.error(result.error);
       return false;
     }
     /* Gone, unless somebody's comment still answers it: then, and only
@@ -283,6 +273,7 @@ export function CommentsSheet({
         (row) => ({ id: row.id, parentId: row.parentId, deleted: row.removed }),
       ),
     );
+    banner.success("Comment deleted");
     router.refresh();
     return true;
   };
@@ -366,12 +357,6 @@ export function CommentsSheet({
           </p>
           <Button variant="icon" round leadingIcon="close" aria-label="Close" onClick={onClose} />
         </header>
-
-        {notice ? (
-          <p role="status" className="nf-comments__notice">
-            {notice}
-          </p>
-        ) : null}
 
         <div className="nf-comments__scroll">
           {rows.length === 0 ? (

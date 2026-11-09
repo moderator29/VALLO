@@ -124,7 +124,7 @@ export function ListingPhotoGrid({
                       ? `Play video ${i + 1} of ${items.length} full screen`
                       : `View photo ${i + 1} of ${items.length} full screen`
                 }
-                className="relative block aspect-[4/3] w-full overflow-hidden rounded-[var(--nf-radius-md)] transition-transform active:scale-[0.97] motion-reduce:transition-none"
+                className="relative block aspect-[4/3] w-full overflow-hidden rounded-md transition-transform active:scale-[0.97] motion-reduce:transition-none"
               >
                 {/* The "+N" cap stands for the rest of the set, so a video
                     badge under it would be a second mark on one tile. */}
@@ -198,7 +198,7 @@ function Tile({
       {item.kind === "video" && badge && (
         /* The play badge: a video among the photos, which opens playing. */
         <span
-          className="absolute bottom-2 left-2 z-[1] inline-flex items-center gap-3xs rounded-[var(--nf-radius-xs)] nf-media-chip px-2xs py-3xs font-semibold"
+          className="absolute bottom-2 left-2 z-[1] inline-flex items-center gap-3xs rounded-xs nf-media-chip px-2xs py-3xs font-semibold"
           data-testid="grid-video-badge"
           /* A chip on a photograph keeps the night material in both themes:
              on paper it painted a white box with a white glyph in it. */

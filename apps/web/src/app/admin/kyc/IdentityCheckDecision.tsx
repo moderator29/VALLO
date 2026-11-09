@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { decideIdentityCheck } from "@/lib/admin/identity-check-actions";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 
 /**
  * Approve or refuse one Dojah check, the same shape as `DocumentDecision`:
@@ -15,6 +17,7 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
   const [reason, setReason] = useState("");
   const [showReason, setShowReason] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const problemId = useId();
   const [pending, start] = useTransition();
 
   function decide(approve: boolean) {
@@ -23,11 +26,16 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
       try {
         const result = await decideIdentityCheck(approve ? { checkId, approve: true } : { checkId, approve: false, reason });
         if (!result.ok) {
-          setError(result.fieldErrors?.["reason"] ?? result.error);
+          /* A word about the reason stays under the reason; anything else
+             is the outcome, and the banner says it. */
+          const about = result.fieldErrors?.["reason"];
+          if (about) setError(about);
+          else banner.error(result.error, { retry: () => decide(approve) });
           return;
         }
         setReason("");
         setShowReason(false);
+        banner.success(approve ? "Identity check approved" : "Identity check sent back with your reason");
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -42,6 +50,8 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
           <span className="nf-label">What is wrong with it</span>
           <textarea
             className="nf-field min-h-[64px] resize-y"
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? problemId : undefined}
             value={reason}
             maxLength={500}
             onChange={(e) => setReason(e.target.value)}
@@ -82,11 +92,8 @@ export function IdentityCheckDecision({ checkId, canApprove }: { checkId: string
           </Button>
         )}
       </div>
-      {error && (
-        <p role="alert" className="nf-body-sm mt-row font-semibold text-[var(--nf-state-error)]">
-          {error}
-        </p>
-      )}
+      {/* The field keeps its red edge; the words go to the one banner (founder, 7 November 2026). */}
+      <FieldProblem id={problemId} message={error} />
     </div>
   );
 }

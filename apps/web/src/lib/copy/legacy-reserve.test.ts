@@ -15,7 +15,10 @@ import { stringLiterals } from "./source-scan";
  * only when the frozen rate is above zero (D51).
  */
 const PAGE = "app/(app)/agreements/[id]/page.tsx";
+/* The page's body moved into the shared agreement view; the line is drawn there, and the rate is still decided in the page. */
+const BODY = "components/app/agreements/AgreementBody.tsx";
 const page = () => readFileSync(join(process.cwd(), "src", PAGE), "utf8");
+const body = () => readFileSync(join(process.cwd(), "src", BODY), "utf8");
 
 describe("legacyReserveSentence", () => {
   it("says the sentence the page said, word for word", () => {
@@ -26,16 +29,16 @@ describe("legacyReserveSentence", () => {
   });
 
   it("is no longer written in the agreement page", () => {
-    const inline = stringLiterals(page()).filter(({ text }) => /set aside|Guarantee reserve/i.test(text));
+    const inline = [...stringLiterals(page()), ...stringLiterals(body())].filter(({ text }) => /set aside|Guarantee reserve/i.test(text));
     expect(inline).toEqual([]);
   });
 
   it("is drawn for the lister only while a contribution was frozen into the terms", () => {
-    const source = page();
+    const source = body();
     const at = source.indexOf("legacyReserveSentence(");
     expect(at).toBeGreaterThan(-1);
     const guard = source.slice(source.lastIndexOf("{a.role", at), at);
     expect(guard).toContain('a.role === "owner" && legacyContribution');
-    expect(source).toMatch(/const legacyContribution = guaranteeBps !== null && guaranteeBps > 0;/);
+    expect(page()).toMatch(/const legacyContribution = guaranteeBps !== null && guaranteeBps > 0;/);
   });
 });

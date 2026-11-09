@@ -1,6 +1,6 @@
+import { PromoBanner } from "@/components/app/PromoBanner";
+import { DismissiblePromo } from "@/components/social/feed/DismissiblePromo";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { sheetWordsOf } from "@/components/social/sheet-words";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
@@ -20,7 +20,8 @@ import { AROUND_UNCONFIGURED } from "./copy";
 import { loadMoreAround } from "./feed-actions";
 import type { FeedMode } from "@/lib/social/posts-actions";
 import { Feed } from "@/components/social/feed/Feed";
-import { FeedTabs, isFeedTab, liveTab, type FeedTab } from "@/components/social/feed/FeedMasthead";
+import { FeedHead, FeedTabs, isFeedTab, liveTab, type FeedTab } from "@/components/social/feed/FeedMasthead";
+import { isFeedCategory, type FeedCategory } from "@/components/social/feed/categories";
 import { LocationChip } from "@/components/social/feed/LocationChip";
 import { StoryRing } from "@/components/social/feed/StoryRing";
 import { AroundFab } from "@/components/social/AroundFab";
@@ -28,7 +29,6 @@ import { ComposeButton } from "@/components/social/feed/ComposeButton";
 import { PeopleRail, WhoToFollow } from "@/components/social/follow/WhoToFollow";
 import { readFollowSuggestions } from "@/lib/social/follow-suggestions";
 import { SocialPaused } from "@/components/social/SocialPaused";
-import { BackButton } from "@/components/site/BackButton";
 import { isSocialEnabled } from "@/lib/social/flag";
 
 export const metadata: Metadata = { title: "Around" };
@@ -38,9 +38,10 @@ export const dynamic = "force-dynamic";
 /**
  * Around: the feed, to `GOVERNING-feed-plus-bloom.png`.
  *
- * Top to bottom: the location chip (the person's own place, the chevron
- * opening the real choices), the story rings, the For you / Following capsule,
- * the cards, and the plus that blooms. The app's own header sits above all of
+ * Top to bottom: the masthead (back, the Around and Circle lenses, the
+ * people search), the story tiles, the one-line way to post, the row that
+ * chooses what Around shows (For you or Friends, and the place chip whose
+ * chevron opens the real choices), the cards, and the plus that blooms. The app's own header sits above all of
  * it and the dock below; both are the shell's.
  *
  * Three timelines, and each one is honest about what it is:
@@ -65,7 +66,7 @@ export const dynamic = "force-dynamic";
 export default async function AroundPage({
   searchParams,
 }: {
-  searchParams: Promise<{ place?: string | string[]; tab?: string | string[]; compose?: string | string[] }>;
+  searchParams: Promise<{ place?: string | string[]; tab?: string | string[]; cat?: string | string[]; compose?: string | string[] }>;
 }) {
   if (!(await isSocialEnabled())) return <SocialPaused />;
 
@@ -93,6 +94,10 @@ export default async function AroundPage({
 
   const rawTab = Array.isArray(params.tab) ? params.tab[0] : params.tab;
   const tab: FeedTab = isFeedTab(rawTab) ? rawTab : "for-you";
+  /* A category chip (Properties, Stays, Restaurants) filters the For you
+     read to the posts that feature that kind of listing (`categories.ts`). */
+  const rawCat = Array.isArray(params.cat) ? params.cat[0] : params.cat;
+  const category: FeedCategory | null = isFeedCategory(rawCat) ? rawCat : null;
   const joined = viewerId !== null && mine.length > 0;
 
   /* Friends: the people you follow. An address from before the control said
@@ -194,60 +199,51 @@ export default async function AroundPage({
       /* `nf-fv2-page`: a column on a phone with the image's 16px gutter, and
          on a desktop the 600px feed beside a rail of people to follow
          (feed-v2.css). */
-      className="nf-fv2-page pt-sm"
+      className="nf-fv2-page"
       /* The dock floats over the bottom of the screen on a phone. Padding
          rather than a fixed value so the clearance tracks the dock's real
          height and the home indicator's inset together. */
       style={{ paddingBottom: "var(--nf-tabbar-clearance)" }}
       data-testid="around-feed"
     >
-      {/* The screen's name for a screen reader; the chip is the visual head. */}
-      <h1 className="sr-only">{t.nav.around}</h1>
-
       <div className="nf-fv2-grid">
         <div className="nf-fv2-main">
           {/*
-            THE WAY BACK, BESIDE THE PLACE.
-
-            `/around` declares `/home` above it and drew nothing. The paused
-            branch above renders `SocialPaused`, which DOES carry a
-            `PageHeader`, and that is exactly the trap: a static read of this
-            file found a back control in the import graph and the running feed
-            had none, because the only screen that drew one was the kill-switch
-            notice nobody sees.
-
-            It sits on the chip's row rather than above it because the chip IS
-            this screen's head. A `PageHeader` here would put the word "Around"
-            over a screen whose first object already says where you are.
+            THE HEAD (the founder's feed reference, 7 November 2026): the
+            large title "Feed", one quiet line with the place chip on it, and
+            at the right the way into Circle and the people search. The bell
+            is the shell header's, right above. `/around` declares `/home`
+            above it; the shell's Back answers that, so the head carries no
+            second Back.
           */}
-          <div className="nf-fv2-bar">
-            <BackButton fallback="/" surface="round" />
-            <LocationChip
-              place={placeLabel || t.social.locationEverywhere}
-              places={activePlaces}
-              currentSlug={selected?.slug ?? null}
-              signedIn={signedIn}
-              copy={{
-                label: t.social.locationLabel,
-                allPlaces: t.social.allPlaces,
-                changePlace: t.social.changePlace,
-                pickPlaces: t.social.pickPlaces,
-                signIn: t.common.signIn,
-              }}
-            />
-            {/* The search: the people page (`/around/people`), a round glyph at
-                the head's right as the feed reference draws it. */}
-            <Link href="/around/people" className="nf-feed-find" aria-label={words.findPeople} data-testid="feed-find-people">
-              <UiIcon name="search" size={20} />
-            </Link>
-            {/* THE FEED'S OWN PLUS: opens the post composer, one tap. The dock's
-                plus is the platform's create sheet, a different thing. Without
-                keys there is no composer to open, so no plus. */}
-            {unconfigured ? null : <ComposeButton label={words.writePost} />}
-          </div>
+          <FeedHead
+            t={t}
+            place={
+              <LocationChip
+                place={placeLabel || t.social.locationEverywhere}
+                places={activePlaces}
+                currentSlug={selected?.slug ?? null}
+                signedIn={signedIn}
+                copy={{
+                  label: t.social.locationLabel,
+                  allPlaces: t.social.allPlaces,
+                  changePlace: t.social.changePlace,
+                  pickPlaces: t.social.pickPlaces,
+                  signIn: t.common.signIn,
+                }}
+              />
+            }
+          />
 
-          {/* No tiles without keys: an empty row would claim nobody has a
-              story, and nothing was read. */}
+          {/*
+            THE LENS TRACK. One pane, the feed. Circle has its own tab and
+            page now (`/circle`); the track keeps the shape a second pane can
+            slide into beside this one if the two ever share a screen.
+          */}
+          <div className="nf-lens-track">
+          <div className="nf-lens-pane" data-lens="around">
+          {/* The stories stay at the top (the founder). No tiles without
+              keys: an empty row would claim nobody has a story. */}
           {unconfigured ? null : (
             <StoryRing
               stories={stories}
@@ -259,7 +255,36 @@ export default async function AroundPage({
             />
           )}
 
-          <FeedTabs active={tab} t={t} />
+          {/* What the feed shows: For you, Friends and the categories. */}
+          <FeedTabs active={tab} category={category} t={t} />
+
+          {/* Vallo Roommates, once, on For you: the feed's door to it (Circle
+              and Roommates already have theirs). The reader can put it away. */}
+          {tab === "for-you" && !category ? (
+            <DismissiblePromo storageKey="vallo.promo.roommates.feed" closeLabel={t.roommates.entryX.feedPromoClose}>
+              <PromoBanner
+                eyebrow={t.roommates.entryX.feedPromoEyebrow}
+                title={t.roommates.entryX.feedPromoTitle}
+                body={t.roommates.entryX.feedPromoBody}
+                cta={t.roommates.entryX.feedPromoCta}
+                href="/roommates"
+                art="home-small"
+                testId="feed-roommates-promo"
+              />
+            </DismissiblePromo>
+          ) : null}
+
+          {/* THE FEED'S OWN WAY TO POST: your face, the invitation, and the
+              photo, listing and post doors, every one a tap into the same
+              composer (`CreateBloom`). Without keys there is no composer. */}
+          {unconfigured ? null : (
+            <ComposeButton
+              label={words.writePost}
+              prompt={selected ? words.composePromptIn.replace("{place}", selected.name) : words.composePrompt}
+              you={you}
+              actions={{ photo: words.composePhoto, send: words.composeSend }}
+            />
+          )}
 
           <section>
             <Feed
@@ -284,6 +309,19 @@ export default async function AroundPage({
                   />
                 ) : null
               }
+              category={category}
+              categoryEmpty={
+                category
+                  ? {
+                      title: words.emptyCatTitle.replace(
+                        "{category}",
+                        category === "properties" ? words.catProperties : category === "stays" ? words.catStays : words.catRestaurants,
+                      ),
+                      body: words.emptyCatBody,
+                      action: { href: "/around", label: words.emptyCatAction },
+                    }
+                  : undefined
+              }
               emptyMessage={emptyMessage}
               {...(unconfigured
                 ? { emptyTitle: AROUND_UNCONFIGURED.feedTitle, emptyIcon: "home-search" as const }
@@ -299,6 +337,8 @@ export default async function AroundPage({
                     })}
             />
           </section>
+          </div>
+          </div>
         </div>
 
         {/* The desktop's right rail: the people worth following, drawn only
