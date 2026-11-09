@@ -41,7 +41,7 @@ const entry = `
           { id: "p", icon: "hourglass", cells: { state: { state: "Pending", tone: "pending" }, means: "The payment is clearing at the processor and nothing can move yet.", out: { yes: false } } },
           { id: "a", cells: { state: { state: "Paid", tone: "success" }, means: "In your bank account.", out: { yes: true } } },
         ]} />
-      <DocCallout tone="not-live" title="Not live yet">Protected payment is built and switched off.</DocCallout>
+      <DocCallout tone="not-live" title="Not open yet">Protected payment is built and switched off.</DocCallout>
       <DocToc sections={[{ id: "one", title: "First" }, { id: "two", title: "Second" }]} />
       <DocSection id="one" number={1} title="First"><p style={{ height: 1400 }}>One.</p></DocSection>
       <DocSection id="two" number={2} title="Second"><p style={{ height: 1400 }}>Two.</p></DocSection>

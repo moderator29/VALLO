@@ -53,7 +53,7 @@ export default function DocsKitPreview() {
         />
       </DocSection>
       <DocSection id="protected" number={2} title="Protected payment">
-        <DocCallout tone="not-live" title="Not live yet">
+        <DocCallout tone="not-live" title="Not open yet">
           Protected payment through a licensed bank is built and switched off. Today every payment is by card.
         </DocCallout>
       </DocSection>

@@ -136,13 +136,16 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
     }
   });
 
-  it("TEMP typing keeps focus", async () => {
+  it("keeps the field being typed in focused from one keystroke to the next", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS });
     try {
       const input = page.locator('input[placeholder="Lagos"]');
       await input.click();
       await page.keyboard.type("ab");
-      expect(await input.inputValue() + "|" + (await page.evaluate(() => `${document.activeElement?.tagName}.${document.activeElement?.className}`))).toBe("x");
+      /* Every letter lands: the frame re-renders on each one and must not
+         take the focus with it (see steps/FocusKeeper.tsx). */
+      expect(await input.inputValue()).toBe("Lagosab");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("placeholder"))).toBe("Lagos");
     } finally {
       await close();
     }
@@ -179,11 +182,9 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
           })),
           focused: document.activeElement === field.querySelector("input"),
           still: document.querySelector(".nf-g1step__title")?.textContent,
-          active: `${document.activeElement?.tagName}.${document.activeElement?.className}#${document.activeElement?.id}`,
         };
       });
       expect(shake.motions).toEqual([{ name: "nf-lw-shake", duration: 160, easing: "cubic-bezier(0.7, 0, 0.2, 1)" }]);
-      console.log("ACTIVE", shake.active);
       expect(shake.focused).toBe(true);
       expect(shake.still).toBe("Describe the property");
     } finally {

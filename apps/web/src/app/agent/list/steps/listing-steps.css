@@ -11,6 +11,15 @@
 @layer theme, base, components, utilities;
 
 @layer components {
+  /* The step's body is a grid item of the frame's content grid, whose track
+     would otherwise grow to the widest thing inside it (a 960px card photo
+     before its width rule lands): never a horizontal scroll at phone width. */
+  .nf-g1step__content > .nf-lw-wizard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nf-space-md);
+    min-inline-size: 0;
+  }
   /* A short lead over a secondary way in (the WhatsApp paste on the first step). */
   .nf-lw2-aside {
     display: grid;

@@ -189,7 +189,9 @@ export function ListingWizard({
   shotsCopy,
   viewerCopy = null,
   demandCopy,
-  pathCopy,
+  /* Kept for the callers that pass it: the progress path it drew is the
+     StepFrame's bar and the check page's Change pills now. */
+  pathCopy: _pathCopy,
   listerCopy,
   sentFrom = null,
   arrival,
@@ -203,7 +205,7 @@ export function ListingWizard({
    * chain it became when it was sent, settled, rather than a lock screen.
    */
   sentFrom?: { status: ListingStatus; submittedAt: string | null } | null;
-  /** The autosave words (reference 7110): "Saved on this device" is said only when true. */
+  /** The old progress path's words (reference 7110). Accepted and unused: the frame says the save state now. */
   pathCopy?: Dictionary["experienceFeatures"]["wizard"];
   /** The page's `t.success`, for "Your listing is in review" over the chain. */
   success?: SuccessWords;
@@ -1946,7 +1948,7 @@ export function ListingWizard({
       saveWords={{
         saved: savedAt ? `${WW.frame.saved} ${savedAt}` : WW.frame.saved,
         saving: WW.frame.saving,
-        device: pathCopy ? WW.frame.device : WW.frame.device,
+        device: WW.frame.device,
         error: WW.frame.error,
       }}
       primary={primary}
