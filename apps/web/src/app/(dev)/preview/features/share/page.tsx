@@ -30,12 +30,16 @@ export default async function PreviewShare({ searchParams }: { searchParams: Pro
           url: "/roommates/r/demo",
         }
       : {
+          initial: "Adaeze N.",
           handle: "@adaeze",
           headline: "Adaeze N.",
           stats: [
-            { label: "looking in", value: "Akoka" },
-            { label: "budget", value: "N900k" },
-            { label: "match", value: "92%" },
+            { label: "followers", value: "1,204" },
+            { label: "posts", value: "86" },
+          ],
+          leads: [
+            { id: "profile", label: "Profile", headline: "Adaeze N." },
+            { id: "stats", label: "Stats", headline: "1,204", sub: "followers" },
           ],
           url: "/u/adaeze",
         };
