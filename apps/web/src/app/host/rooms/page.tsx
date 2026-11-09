@@ -74,7 +74,9 @@ export default async function HostRoomsPage({
   const rooms = accommodation ? await getMyRoomTypes(accommodation.id) : [];
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
       <HostInnerNav active="rooms" {...hostInnerNavCopy(t)} />
       <HostRoomsBody
         copy={t.hostWorkspace}

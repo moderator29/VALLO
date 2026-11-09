@@ -1,11 +1,12 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { HostHeadSkeleton, HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
- * The wait, on the table desk: the wide host body, the `nf-agent-head` title
- * with its line and the search field, Today's heading and its four figure
+ * The wait, on the table desk: the wide host body, the page frame's large
+ * title with Back and its line, the search field, Today's heading and its four figure
  * tiles (two by two on a phone, a row of four from 1024px), then a section of
  * table cards (time and status, the guest and party line, the two answer
  * buttons), one column on a phone and two from 1024px, like the desk.
@@ -13,7 +14,8 @@ import { HostHeadSkeleton, HostScreenSkeleton } from "@/components/host/HostScre
 export default async function LoadingHostReservations() {
   return (
     <HostScreenSkeleton label={getDictionary(await getLocale()).hostWorkspace.loadingScreens.tables} wide>
-      <HostHeadSkeleton />
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
       <Skeleton width="100%" height="2.75rem" radius="md" className="lg:max-w-[20rem]" />
       <section className="mt-block" aria-hidden="true">
         <Skeleton width="6rem" height="1.5rem" radius="sm" />
@@ -39,6 +41,7 @@ export default async function LoadingHostReservations() {
           ))}
         </ul>
       </section>
+      </div>
     </HostScreenSkeleton>
   );
 }

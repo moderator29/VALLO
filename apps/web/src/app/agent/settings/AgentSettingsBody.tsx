@@ -5,6 +5,7 @@ import type { PayoutAccount } from "@/lib/agent/payout-queries";
 import type { ResolvedProfileSettings } from "@/lib/profile/model";
 import { groupNuban } from "@/lib/agent/payout-model";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { PageFrame } from "@/components/app/PageFrame";
 import { AccountNotificationsCard } from "../../(app)/settings/AccountToggles";
 import { forAccountToggles } from "@/lib/i18n/slice";
 import { AgentLookupCard } from "@/components/app/doors/AgentLookupCard";
@@ -43,15 +44,13 @@ export function AgentSettingsBody({
   const preferred = accounts.find((a) => a.isDefault) ?? accounts[0] ?? null;
 
   return (
-    <>
-      <div className="mb-lg">
-        <h1 className="nf-h1">{t.agent.nav.settings}</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">
-          What reaches you, where your money lands, and the name guests see.
-        </p>
-      </div>
-
-      <div className="mx-auto max-w-2xl space-y-md">
+    /* The Grade 1 page frame: the large title with Back and its line. */
+    <PageFrame
+      title={t.agent.nav.settings}
+      subtitle="What reaches you, where your money lands, and the name guests see."
+      fallback="/agent/dashboard"
+    >
+      <div className="max-w-2xl space-y-md">
         {/* ------------------------------------------------ notifications */}
         {notifications ? (
           <AccountNotificationsCard t={forAccountToggles(t)} initial={notifications} variant="host" />
@@ -158,6 +157,6 @@ export function AgentSettingsBody({
           </Link>
         </div>
       </div>
-    </>
+    </PageFrame>
   );
 }

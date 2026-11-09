@@ -5,6 +5,7 @@ import { getAgentContext, agentProfileFrom } from "@/lib/agent/listings-queries"
 import { readMyListingMandate } from "@/lib/compliance/beneficial-ownership-queries";
 import { MANDATE_GRACE_ENDS } from "@/lib/compliance/beneficial-ownership";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/app/Screen";
 import { ListingPitch } from "../../../list/ListingPitch";
@@ -85,13 +86,11 @@ export default async function ListingMandatePage({ params }: { params: Promise<{
   const pending = m && m.status === "pending" ? m : null;
   const graceOpen = requestNow() < Date.parse(`${MANDATE_GRACE_ENDS}T00:00:00+01:00`);
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-      <div className="mx-auto flex max-w-md flex-col gap-group py-lg" data-testid="listing-mandate-page">
-        <div>
-          <h1 className="nf-h2">{copy.title}</h1>
-          <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{copy.lede}</p>
-          <p className="mt-inline nf-body-sm">{copy.whyLive}</p>
-        </div>
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+      {/* The frame's header carries the one way back (Grade 1 page frame). */}
+      <PageFrame title={copy.title} subtitle={copy.lede} fallback="/agent/listings" width="narrow">
+      <div className="flex max-w-md flex-col gap-group" data-testid="listing-mandate-page">
+        <p className="nf-body-sm">{copy.whyLive}</p>
         {read.needsMandateSince ? (
           <p className="nf-body-sm" role="status" data-testid="mandate-taken-down">
             {copy.takenDown}
@@ -142,6 +141,7 @@ export default async function ListingMandatePage({ params }: { params: Promise<{
           </>
         )}
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

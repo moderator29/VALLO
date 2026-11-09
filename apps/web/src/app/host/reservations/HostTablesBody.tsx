@@ -1,5 +1,6 @@
 import { countOf, getDictionary, type Dictionary, type Locale } from "@vallo/i18n";
 import { EmptyState } from "@/components/app/Screen";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostReservationsBoard } from "./ReservationsBoard";
 import { longDayLabel } from "./desk";
@@ -49,18 +50,22 @@ export function HostTablesBody({
   /** Whether a bill can be taken through Vallo yet. Off until Paystack is configured. */
   billsOn?: boolean;
 }) {
+  /* Every state sits under the Grade 1 page frame: the large title with
+     Back, so the desk always has its heading and its one way back. */
   if (unavailable || board === null) {
     return (
-      <EmptyState
-        icon="concierge-bell"
-        title={copy.reservations.failedTitle}
-        body={copy.reservations.failedBody}
-        action={
-          <ButtonLink href="/host/reservations" variant="primary" size="lg">
-            {words.tryAgain}
-          </ButtonLink>
-        }
-      />
+      <PageFrame title={words.screens.tables} fallback="/host" width="wide">
+        <EmptyState
+          icon="concierge-bell"
+          title={copy.reservations.failedTitle}
+          body={copy.reservations.failedBody}
+          action={
+            <ButtonLink href="/host/reservations" variant="primary" size="lg">
+              {words.tryAgain}
+            </ButtonLink>
+          }
+        />
+      </PageFrame>
     );
   }
 
@@ -73,10 +78,8 @@ export function HostTablesBody({
       venue itself says yes.
     */
     return (
-      <>
-        <div className="nf-agent-head">
-          <h1 className="nf-agent-head__title">{words.screens.tables}</h1>
-        </div>
+      <PageFrame title={words.screens.tables} fallback="/host" width="wide">
+      <div>
         <EmptyState
           icon="concierge-bell"
           title={copy.reservations.emptyTitle}
@@ -92,7 +95,8 @@ export function HostTablesBody({
             <DepositSettingsCard deposits={deposits} words={depositWords} locale={locale} />
           </div>
         ) : null}
-      </>
+      </div>
+      </PageFrame>
     );
   }
 
@@ -100,8 +104,10 @@ export function HostTablesBody({
     board.requests.length === 0 ? words.tablesNothingWaiting : countOf(board.requests.length, "requestsWaiting", locale);
 
   return (
-    <>
+    <PageFrame title={words.screens.tables} subtitle={waiting} fallback="/host" width="wide">
+      <div>
       <HostReservationsBoard
+        framed
         board={board}
         words={desk}
         locale={locale}
@@ -115,6 +121,7 @@ export function HostTablesBody({
           <DepositSettingsCard deposits={deposits} words={depositWords} locale={locale} />
         </div>
       ) : null}
-    </>
+      </div>
+    </PageFrame>
   );
 }

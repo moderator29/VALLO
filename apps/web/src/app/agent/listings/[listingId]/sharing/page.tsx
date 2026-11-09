@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { resolveSessionClaims } from "@/lib/actions/session";
@@ -37,7 +38,14 @@ export default async function SharingPage({ params }: { params: Promise<{ listin
   const notOpen = Boolean(row?.error && isNotLive(row.error));
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={null}>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active="/agent/listings"
+      profile={null}
+      /* Where the page frame draws, its header carries the one way back. */
+      chromeBack={!listing || notOpen}
+    >
       {!listing || notOpen ? (
         <EmptyState
           icon="home-search"
@@ -50,11 +58,8 @@ export default async function SharingPage({ params }: { params: Promise<{ listin
           }
         />
       ) : (
-        <div className="mx-auto flex max-w-md flex-col gap-group py-lg" data-testid="listing-sharing">
-          <div>
-            <h1 className="nf-h2">{words.title}</h1>
-            <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{words.lede}</p>
-          </div>
+        <PageFrame title={words.title} subtitle={words.lede} fallback="/agent/listings" width="narrow">
+        <div className="flex max-w-md flex-col gap-group" data-testid="listing-sharing">
           <SharingForm
             listingId={listing.id}
             listingTitle={listing.title}
@@ -64,6 +69,7 @@ export default async function SharingPage({ params }: { params: Promise<{ listin
             words={words}
           />
         </div>
+        </PageFrame>
       )}
     </AgentShell>
   );

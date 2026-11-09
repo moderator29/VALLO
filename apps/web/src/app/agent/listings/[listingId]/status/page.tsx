@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/app/Screen";
 import { readStatusKit } from "@/lib/share/status-queries";
@@ -71,12 +72,10 @@ export default async function StatusPage({ params }: { params: Promise<{ listing
   const imagePath = `/s/${read.token}/status`;
   const stats = read.stats;
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={null}>
-      <div className="mx-auto flex max-w-md flex-col gap-group py-lg" data-testid="status-kit">
-        <div>
-          <h1 className="nf-h2">{copy.title}</h1>
-          <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{copy.lede}</p>
-        </div>
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={null} chromeBack={false}>
+      {/* The frame's header carries the one way back (Grade 1 page frame). */}
+      <PageFrame title={copy.title} subtitle={copy.lede} fallback="/agent/listings" width="narrow">
+      <div className="flex max-w-md flex-col gap-group" data-testid="status-kit">
         {/* The picture itself, at phone scale. A plain img: it is a PNG the
             server draws, and the optimiser would only re-encode it. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -100,6 +99,7 @@ export default async function StatusPage({ params }: { params: Promise<{ listing
         {/* V-07 carry-over: close this door; the next load mints a new one. */}
         <RevokeDoor token={read.token} copy={copy} />
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on incoming bookings.
@@ -14,7 +15,9 @@ import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/Agen
 export default function LoadingAgentBookings() {
   return (
     <AgentScreenSkeleton label="Loading your bookings">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and lede. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
 
       <Skeleton className="mb-md" width="18rem" height="2.75rem" radius="pill" />
 
@@ -39,6 +42,7 @@ export default function LoadingAgentBookings() {
           </li>
         ))}
       </ul>
+      </div>
     </AgentScreenSkeleton>
   );
 }

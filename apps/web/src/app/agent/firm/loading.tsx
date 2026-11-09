@@ -1,11 +1,14 @@
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 /** The wait, on the firm desk: listings, team and the enquiry record, at their sizes. */
 export default function LoadingFirmDesk() {
   return (
     <AgentScreenSkeleton label="Loading the firm desk">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and lede. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className="space-y-lg">
         {[5, 3, 4].map((rows, i) => (
           <div key={i} className="nf-panel nf-panel--card block p-md sm:p-panel">
@@ -17,6 +20,7 @@ export default function LoadingFirmDesk() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

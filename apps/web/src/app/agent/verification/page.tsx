@@ -4,6 +4,7 @@ import { requestNow } from "@/lib/format/when";
 import { getLocale } from "@/lib/locale";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { getOwnLadder } from "@/lib/agent/verification-queries";
 import { ListingPitch } from "../list/ListingPitch";
@@ -92,14 +93,16 @@ export default async function Page({
       locale={locale}
       active="/agent/verification"
       profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
     >
-      <div className="mb-lg">
-        <h1 className="nf-h1">{t.agent.nav.verification}</h1>
-        <p className="mt-2xs max-w-[60ch] text-[var(--nf-content-secondary)]">
-          Four checks, in order. Each one you pass is shown to guests on every
-          listing you have, and none of them is a fee.
-        </p>
-      </div>
+      <PageFrame
+        title={t.agent.nav.verification}
+        subtitle="Four checks, in order. Each one you pass is shown to guests on every listing you have, and none of them is a fee."
+        fallback="/agent/dashboard"
+        width="wide"
+      >
+      <div>
 
       {read.state === "unavailable" ? (
         /* An honest absence rather than an empty ladder. Drawing four "not
@@ -153,6 +156,8 @@ export default async function Page({
           </div>
         </>
       )}
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

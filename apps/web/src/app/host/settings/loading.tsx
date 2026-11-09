@@ -1,18 +1,21 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { HostHeadSkeleton, HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
- * The wait, on host settings: the head, the businesses list (each a name,
+ * The wait, on host settings: the page frame's large title with Back and its
+ * line, the businesses list (each a name,
  * a kind and tier line, a state and its row of doors), the notification
  * card, the assistant door and the "everything else" card.
  */
 export default async function LoadingHostSettings() {
   return (
     <HostScreenSkeleton label={getDictionary(await getLocale()).experienceHost.loadingScreens.settings}>
-      <HostHeadSkeleton />
-      <div className="mt-block grid gap-block" aria-hidden="true">
+      <div className="nf-g1page">
+      <PageHeaderSkeleton layout="large" subtitle />
+      <div className="grid gap-block" aria-hidden="true">
         <div>
           <Skeleton width="9rem" height="1.25rem" radius="sm" />
           <div className="nf-panel nf-panel--card mt-sm block p-md">
@@ -31,6 +34,7 @@ export default async function LoadingHostSettings() {
         <Skeleton height="12rem" radius="lg" />
         <Skeleton height="4.5rem" radius="lg" />
         <Skeleton height="8rem" radius="lg" />
+      </div>
       </div>
     </HostScreenSkeleton>
   );

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { formatNumber, type Dictionary, type Locale } from "@vallo/i18n/core";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { Figure } from "@/components/ui/Amount";
 import { Bars } from "@/components/ui/charts/Bars";
@@ -115,15 +115,18 @@ export default async function MetricPage({
   }
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/analytics" profile={agentProfileFrom(context.agent)}>
-      <div className="mx-auto max-w-3xl">
-        <Link href="/agent/analytics" className="nf-caption font-semibold text-[var(--nf-content-muted)]">
-          {a.back}
-        </Link>
-        <h1 className="nf-h1 mt-xs">{title}</h1>
-        <p className="mt-2xs max-w-[62ch] text-[var(--nf-content-secondary)]">{blurb}</p>
-        <div className="mt-lg">{content}</div>
-      </div>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active="/agent/analytics"
+      profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back, to Analytics (its
+         declared parent), where the text link above the title used to. */
+      chromeBack={false}
+    >
+      <PageFrame title={title} subtitle={blurb} fallback="/agent/analytics">
+        <div>{content}</div>
+      </PageFrame>
     </AgentShell>
   );
 }

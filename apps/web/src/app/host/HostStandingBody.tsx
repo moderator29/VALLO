@@ -28,7 +28,10 @@ export function HostStandingBody({
   figure,
   dashboard,
   t = getDictionary(locale),
+  bandHeading,
 }: {
+  /** The band's title level, handed to `HostTodayView` (see there). */
+  bandHeading?: "h1" | "h2";
   businesses: MyBusiness[];
   locale?: Locale;
   /** The application still in progress, or null when there is none. */
@@ -50,6 +53,7 @@ export function HostStandingBody({
   return (
     <>
       <HostTodayView
+        {...(bandHeading ? { bandHeading } : {})}
         today={today}
         t={t}
         locale={locale}

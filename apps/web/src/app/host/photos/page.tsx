@@ -96,7 +96,9 @@ export default async function HostPhotosPage({
     : [];
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
       <HostPhotosBody
         copy={t.hostWorkspace}
         words={t.experienceHost}

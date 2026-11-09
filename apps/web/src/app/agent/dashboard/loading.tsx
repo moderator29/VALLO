@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
 import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on the agent dashboard.
@@ -50,6 +51,10 @@ function GroupSkeleton({ rows }: { rows: number }) {
 export default function LoadingAgentDashboard() {
   return (
     <AgentScreenSkeleton label="Loading your dashboard">
+      {/* The page frame (wide) with its large title and no Back (the
+          workspace root), then the band's own head under it. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" back={false} />
       <AgentTitleSkeleton />
 
       {/* `space-y-section-tight` is `SECTION_GAP`, the one interval the real
@@ -57,6 +62,7 @@ export default function LoadingAgentDashboard() {
       <div className="space-y-section-tight">
         <GroupSkeleton rows={5} />
         <GroupSkeleton rows={4} />
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

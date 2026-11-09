@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { formatDate, formatMoney, getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { ListingPitch } from "../list/ListingPitch";
 import { groupByPlace } from "@/lib/landlord/portfolio";
@@ -72,7 +73,14 @@ export default async function PortfolioPage({
   const invited = portfolioInviteArrival(units ?? [], readDone(query.done), listingParam);
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/portfolio" profile={agentProfileFrom(context.agent)}>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active="/agent/portfolio"
+      profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
+    >
       {/* Rendered unconditionally, `show` deciding: it latches what it says
           when it opens, so stripping the flag cannot take it away. */}
       <SuccessFromFlag
@@ -82,12 +90,8 @@ export default async function PortfolioPage({
         values={invited?.values}
         strip={["listing"]}
       />
-      <div className="mb-lg">
-        <h1 className="nf-h1">{copy.title}</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">{copy.lede}</p>
-      </div>
-
-      <div className="mx-auto max-w-2xl space-y-lg">
+      <PageFrame title={copy.title} subtitle={copy.lede} fallback="/agent/dashboard">
+      <div className="max-w-2xl space-y-lg">
         {units === null && briefs === null && (
           <p role="status" className="text-[var(--nf-content-secondary)]">
             {copy.readFailed}
@@ -246,6 +250,7 @@ export default async function PortfolioPage({
           </section>
         )}
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

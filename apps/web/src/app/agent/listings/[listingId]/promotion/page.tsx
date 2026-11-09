@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { PromotionPurchase } from "@/components/promotion/PromotionPurchase";
 import { PromotionResults } from "@/components/promotion/PromotionResults";
@@ -79,12 +80,16 @@ export default async function PromotionResultsPage({
   const blocked = read.state === "missing" ? p.measure.missing : read.state === "example" ? p.measure.example : read.state === "unavailable" ? p.measure.unavailable : null;
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={agentProfileFrom(context.agent)}>
-      <div className="mx-auto flex max-w-2xl flex-col gap-group py-lg" data-testid="promotion-page">
-        <div>
-          <h1 className="nf-h2">{p.measure.title}</h1>
-          <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{p.measure.lede}</p>
-        </div>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active="/agent/listings"
+      profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
+    >
+      <PageFrame title={p.measure.title} subtitle={p.measure.lede} fallback="/agent/listings">
+      <div className="flex flex-col gap-group" data-testid="promotion-page">
         {blocked ? (
           <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="status">
             {blocked}
@@ -105,6 +110,7 @@ export default async function PromotionResultsPage({
           </ButtonLink>
         </div>
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

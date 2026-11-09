@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { readHostBookings, type HostBookingBoard } from "@/lib/agent/bookings-queries";
 import { ListingPitch } from "../list/ListingPitch";
@@ -86,12 +87,11 @@ export default async function Page() {
       locale={locale}
       active="/agent/bookings"
       profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
     >
-      <div className="mb-lg">
-        <h1 className="nf-h1">{t.agentBookings.title}</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">{t.agentBookings.lede}</p>
-      </div>
-
+      <PageFrame title={t.agentBookings.title} subtitle={t.agentBookings.lede} fallback="/agent/dashboard" width="wide">
+      <div>
       <BookingsWorkspace t={t.agentBookings} board={board ?? EMPTY_BOARD} locale={locale} />
 
       {/* V-47: the lister's way into the tenancy files. Nothing when there are none. */}
@@ -100,6 +100,8 @@ export default async function Page() {
       {/* Renders nothing at all for an agent with no restaurant, rather than
           three empty headings explaining a product they do not sell. */}
       <ReservationsBoard board={tables} />
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

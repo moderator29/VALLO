@@ -65,7 +65,9 @@ export default async function TransferBusinessPage() {
   const screen = await readTransferScreen();
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome}>
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} chromeBack={false} nav>
       <TransferWorkspace
         businesses={screen.businesses}
         outgoing={screen.outgoing}

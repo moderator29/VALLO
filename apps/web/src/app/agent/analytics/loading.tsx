@@ -1,4 +1,5 @@
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { FigureCardSkeleton } from "@/components/agent/intel/IntelSkeletons";
 
@@ -18,7 +19,9 @@ import { FigureCardSkeleton } from "@/components/agent/intel/IntelSkeletons";
 export default function LoadingAgentAnalytics() {
   return (
     <AgentScreenSkeleton label="Loading your analytics">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and lede. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
 
       <div className="space-y-lg">
         {/* J3: the Space Analytics card first, as the page draws it: the
@@ -56,6 +59,7 @@ export default function LoadingAgentAnalytics() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

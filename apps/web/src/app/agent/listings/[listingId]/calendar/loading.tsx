@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on a listing's calendar.
@@ -12,7 +13,9 @@ import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/Agen
 export default function LoadingCalendar() {
   return (
     <AgentScreenSkeleton label="Loading the calendar">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and line. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className="nf-panel nf-panel--card block p-md">
         <div className="mb-sm flex items-center justify-between">
           <Skeleton width="9rem" height="1.25rem" radius="sm" />
@@ -23,6 +26,7 @@ export default function LoadingCalendar() {
             <Skeleton key={i} height="2.75rem" radius="md" />
           ))}
         </div>
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

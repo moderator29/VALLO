@@ -5,6 +5,7 @@ import { getLocale } from "@/lib/locale";
 import { getAgentContext, agentProfileFrom } from "@/lib/agent/listings-queries";
 import { getListingCalendar } from "@/lib/agent/calendar-queries";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ListingPitch } from "../../../list/ListingPitch";
 import { CalendarEditor } from "./CalendarEditor";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -83,22 +84,19 @@ export default async function Page({
   const profile = context.state === "agent" ? agentProfileFrom(context.agent) : null;
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-      <div className="mb-lg">
-        <Link
-          href="/agent/listings"
-          className="text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-muted)] underline-offset-4 hover:text-[var(--nf-content-secondary)] hover:underline"
-        >
-          My listings
-        </Link>
-        <h1 className="nf-h1 mt-2xs">Calendar</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">
-          {read.subject.title}. Close nights you cannot host, and reopen them
-          whenever you like.
-        </p>
-      </div>
-
-      <CalendarEditor subject={read.subject} nights={read.nights} />
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+      {/* The frame's header carries the one way back, to My listings, where
+          the text link above the title used to. */}
+      <PageFrame
+        title="Calendar"
+        subtitle={`${read.subject.title}. Close nights you cannot host, and reopen them whenever you like.`}
+        fallback="/agent/listings"
+        width="wide"
+      >
+        <div>
+          <CalendarEditor subject={read.subject} nights={read.nights} />
+        </div>
+      </PageFrame>
     </AgentShell>
   );
 }

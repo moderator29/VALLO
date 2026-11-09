@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on earnings.
@@ -13,7 +14,9 @@ import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/Agen
 export default function LoadingAgentEarnings() {
   return (
     <AgentScreenSkeleton label="Loading your earnings">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and lede. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
 
       <div className="space-y-lg">
         <div className="grid grid-cols-2 gap-md lg:grid-cols-4">
@@ -37,6 +40,7 @@ export default function LoadingAgentEarnings() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

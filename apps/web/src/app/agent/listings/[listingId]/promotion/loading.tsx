@@ -1,9 +1,10 @@
 import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 /**
- * The wait, on a listing's promotion results: the title and its two-line
- * lede, the notice card, the section label, then the ten figure rows at a
+ * The wait, on a listing's promotion results: the page frame's large title
+ * with Back and its lede, the notice card, the section label, then the ten figure rows at a
  * one-line row's height (44px, as `.nf-promo-results__row` draws them), the
  * split note, and the four tiers of the purchase section. Without
  * this file the wait borrowed `/agent/listings`'s own skeleton, a filter rail
@@ -12,11 +13,9 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export default function LoadingPromotionResults() {
   return (
     <AgentScreenSkeleton label="Loading this listing's promotion results">
-      <div className="mx-auto flex max-w-2xl flex-col gap-group py-lg">
-        <div>
-          <Skeleton width="12rem" height="1.75rem" radius="sm" />
-          <Skeleton className="mt-inline" width="18rem" height="2.5rem" radius="sm" />
-        </div>
+      <div className="nf-g1page">
+      <PageHeaderSkeleton layout="large" subtitle />
+      <div className="flex flex-col gap-group">
         <Skeleton height="9rem" radius="lg" />
         <div>
           <Skeleton width="8rem" height="1rem" radius="sm" />
@@ -35,6 +34,7 @@ export default function LoadingPromotionResults() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </AgentScreenSkeleton>
   );

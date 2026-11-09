@@ -78,7 +78,14 @@ export default async function Page() {
   const accounts = payout.state === "ready" ? payout.accounts : [];
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/settings" profile={agentProfileFrom(agent)}>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active="/agent/settings"
+      profile={agentProfileFrom(agent)}
+      /* The body's page frame carries the one way back. */
+      chromeBack={false}
+    >
       <AgentSettingsBody
         t={t}
         agent={agentProfileFrom(agent)}

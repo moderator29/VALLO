@@ -84,7 +84,14 @@ export function RealDashboard({
   figure,
   workspace,
   now,
+  bandHeading = "h1",
 }: {
+  /**
+   * The band's title level. `h1` where the band IS the page's heading (the
+   * previews); `h2` under the page frame's large title on the dashboard, so
+   * the page still has exactly one h1.
+   */
+  bandHeading?: "h1" | "h2";
   t: Dictionary;
   locale: Locale;
   displayName: string;
@@ -167,7 +174,7 @@ export function RealDashboard({
         lap
         label={dateLine}
         title={t.desk.today.title}
-        titleAs="h1"
+        titleAs={bandHeading}
         sub={fill(d.standing, { name: displayName })}
         action={
           <ButtonLink href="/agent/list" variant="primary">

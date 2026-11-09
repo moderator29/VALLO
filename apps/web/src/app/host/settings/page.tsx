@@ -58,7 +58,9 @@ export default async function HostSettingsPage() {
   const ladders = await Promise.all(businesses.map((business) => getMyBusinessLadder(business.id)));
 
   return (
-    <HostShell fallback="/host">
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell fallback="/host" chromeBack={false} nav>
       <HostSettingsBody
         t={t}
         businesses={businesses}

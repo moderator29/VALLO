@@ -1,5 +1,6 @@
 import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
-import { FigureCardSkeleton, InnerHeadSkeleton } from "@/components/agent/intel/IntelSkeletons";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
+import { FigureCardSkeleton } from "@/components/agent/intel/IntelSkeletons";
 
 /**
  * The wait, on one figure's own page: its head, then the figure card at its
@@ -9,8 +10,8 @@ import { FigureCardSkeleton, InnerHeadSkeleton } from "@/components/agent/intel/
 export default function LoadingMetric() {
   return (
     <AgentScreenSkeleton label="Loading this figure">
-      <div className="mx-auto max-w-3xl">
-        <InnerHeadSkeleton />
+      <div className="nf-g1page">
+        <PageHeaderSkeleton layout="large" subtitle />
         <FigureCardSkeleton rows={3} />
       </div>
     </AgentScreenSkeleton>
