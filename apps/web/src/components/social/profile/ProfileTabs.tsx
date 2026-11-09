@@ -3,6 +3,7 @@
 import type { SheetWords } from "@/components/social/sheet-words";
 import { useCallback, useRef, useState } from "react";
 import { Feed } from "@/components/social/feed/Feed";
+import { withNext } from "@/lib/auth/next-link";
 import type { PostView } from "@/components/social/feed/PostCard";
 import type { ActivityEntry } from "@/lib/social/posts-queries";
 import type { MediaTile, PropertyCard, ReviewCard } from "@/lib/social/profile-tabs-queries";
@@ -282,6 +283,10 @@ function Panel({
         initial={posts}
         sheet={sheet}
         signedIn={signedIn}
+        /* VIEW-ONLY PUBLIC PROFILE (founder, 9 November 2026). A signed-out
+           visitor who taps like, reply, repost or save goes to sign UP carrying
+           this page, not the app's shared sign-in door. */
+        signedOutHref={signedIn ? undefined : withNext("/sign-up", `/u/${handle}`)}
         emptyMessage={
           isOwner
             ? "Everything you write around a place sits here."

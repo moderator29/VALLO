@@ -21,6 +21,7 @@ import { banner } from "@/lib/ui/toast";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import "./social-profile.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
+import { withNext } from "@/lib/auth/next-link";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
@@ -71,6 +72,11 @@ export function ProfileMenu({
   reportWords: ReportWords;
 }) {
   const signInHref = useSignInHref();
+  /* VIEW-ONLY PUBLIC PROFILE (founder, 9 November 2026). A signed-out visitor
+     who taps mute or report on an anon-viewable profile goes to sign UP
+     carrying this page, not the app's shared sign-in door. Signed in, this is
+     never read. */
+  const guestHref = signedIn ? signInHref : withNext("/sign-up", `/u/${handle}`);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [muted, setMuted] = useState(initialMuted);
@@ -182,7 +188,7 @@ export function ProfileMenu({
 
   const requireSignIn = () => {
     if (signedIn) return false;
-    router.push(signInHref);
+    router.push(guestHref);
     return true;
   };
 

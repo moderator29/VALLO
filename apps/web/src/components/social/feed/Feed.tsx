@@ -82,6 +82,7 @@ export function Feed({
   locale = DEFAULT_LOCALE,
   sheet,
   signedIn,
+  signedOutHref,
   areaName,
   emptyMessage,
   emptyTitle,
@@ -120,6 +121,14 @@ export function Feed({
   /** The action sheet's two lines, from the server (`sheetWordsOf`), so the browser never loads a dictionary for them. */
   sheet: SheetWords;
   signedIn: boolean;
+  /**
+   * The auth door a SIGNED-OUT visitor is sent to when they tap an action on a
+   * PUBLIC, anon-viewable page (a profile opened to strangers). The founder's
+   * rule there is sign UP carrying this page, so the page passes
+   * `/sign-up?next=<page>`. Absent everywhere else, where the signed-in app
+   * keeps its shared `useSignInHref` (`/sign-in?next=`) convention untouched.
+   */
+  signedOutHref?: string;
   /**
    * Whether this timeline is one somebody can write into.
    *
@@ -180,6 +189,9 @@ export function Feed({
   };
 }) {
   const signInHref = useSignInHref();
+  /* On a public anon-viewable page the guest goes to sign up (the page passes
+     it); everywhere else this is the app's usual sign-in door. */
+  const guestHref = signedOutHref ?? signInHref;
   const router = useRouter();
   const [posts, setPosts] = useState(initial);
   /* The post a report sheet is open for. A report used to fire on the first tap
@@ -319,7 +331,7 @@ export function Feed({
    */
   const onRepost = (post: PostView) => {
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     const reposted = !post.reposted;
@@ -342,7 +354,7 @@ export function Feed({
 
   const onLike = (post: PostView) => {
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     const liked = !post.liked;
@@ -407,7 +419,7 @@ export function Feed({
       return;
     }
     if (!signedIn) {
-      router.push(signInHref);
+      router.push(guestHref);
       return;
     }
     /* The one row this sheet offers that already had a handler and no way to
@@ -619,7 +631,7 @@ export function Feed({
               locale={locale}
               onLike={() => onLike(post)}
               onRepost={() => onRepost(post)}
-              onReply={() => router.push(`/post/${post.id}?reply=1`)}
+              onReply={() => router.push(signedIn ? `/post/${post.id}?reply=1` : guestHref)}
               onShare={() => onMenuAction(post, "share")}
               onSave={() => onMenuAction(post, "save")}
               onMenu={() => setSheetFor(post)}
