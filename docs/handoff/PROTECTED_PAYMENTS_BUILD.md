@@ -28,6 +28,23 @@ statement from the provider naming our use case.
 
 ---
 
+## 0A. THE TWO SPECIFICATIONS, READ THEM LINE BY LINE
+
+`docs/handoff/PROTECTED_PAYMENTS_SPECS.md` holds the founder's two
+commissioned specifications in full: the engineering migration spec and the
+product and design spec. **Read both line by line before writing anything.**
+The design spec in particular is the screen-by-screen bible: every state,
+every piece of copy, every motion timing, every screen nobody thinks to ask
+for. Do not paraphrase it from memory. Open it.
+
+**This document overrides it** wherever they differ. The three corrections in
+section 0B are the known differences.
+
+**Two agents maximum** (you plus one), and **study every reference image the
+founder sends** before you design or build a screen.
+
+---
+
 ## 0B. THREE CORRECTIONS THE FOUNDER HAS RULED ON (9 NOVEMBER 2026)
 
 An earlier draft of this work, written outside the repository, got three
