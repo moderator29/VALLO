@@ -24,6 +24,7 @@ import { Celebration } from "@/components/roommates/Celebrate";
 import { FirstRunCard } from "@/components/roommates/FirstRunCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { EMPTY_LISTING, EMPTY_PROFILE } from "@/lib/features/roommates/model";
+import { FEATURE_ART } from "@/lib/features/art";
 
 import { GROUP, HOME, HOME_NEW, HUB, NOW, PEOPLE, PROFILE, ROOMS, ROOM_DETAIL, UNILAG } from "./fixtures";
 
