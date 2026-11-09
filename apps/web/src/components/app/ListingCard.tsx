@@ -591,26 +591,16 @@ export function ListingCard({
           ) : null
         }
         heart={
-          <>
-            <SaveButton
-              saved={save.saved}
-              pending={save.pending}
-              onToggle={() => {
-                setHeartPop(true);
-                save.toggle();
-              }}
-              title={listing.title}
-              className={heartPop ? "nf-heart-pop" : undefined}
-            />
-            {save.note && (
-              <p
-                role="status"
-                className={`nf-pcard__note ${save.note.tone === "error" ? "text-[var(--nf-state-error)]" : ""}`}
-              >
-                {save.note.text}
-              </p>
-            )}
-          </>
+          <SaveButton
+            saved={save.saved}
+            pending={save.pending}
+            onToggle={() => {
+              setHeartPop(true);
+              save.toggle();
+            }}
+            title={listing.title}
+            className={heartPop ? "nf-heart-pop" : undefined}
+          />
         }
         tools={intent !== undefined && tunableKind ? <IntentTune type={tunableKind} t={t} interests={intent} /> : null}
         price={{
@@ -759,17 +749,6 @@ export function ListingCard({
           </button>
         </div>
       )}
-      {save.note && (
-        <p
-          role="status"
-          className={`nf-pcard__note ${
-            save.note.tone === "error" ? "text-[var(--nf-state-error)]" : ""
-          }`}
-        >
-          {save.note.text}
-        </p>
-      )}
-
       <Link
         href={href}
         prefetch={warmed ? true : undefined}
