@@ -1,5 +1,5 @@
 import { MotionScene } from "@/components/ui/MotionScene";
-import { FEATURE_ART } from "@/lib/features/art";
+import { FEATURE_ART, type ArtSlot } from "@/lib/features/art";
 
 import "./roommates-kit.css";
 
@@ -9,15 +9,16 @@ import "./roommates-kit.css";
  * objects floating over it, the title and the honest line overlaid. It says
  * what a badge is, and nothing more: a badge records what was checked.
  */
+/* The shield 3D object stands as the scene's subject (a transparent webp), the
+   room plate drifts behind it, and the id-card floats beside it. */
+const SHIELD: ArtSlot = { src: "/brand/3d/shield.webp", fit: "contain", focus: "50% 50%" };
+
 export function VerificationBanner({ title, line }: { title: string; line: string }) {
   return (
     <MotionScene
-      art={FEATURE_ART.backdrop}
-      anchor="center"
-      objects={[
-        { name: "shield", at: "tr", size: 72 },
-        { name: "id-check", at: "bl", size: 52 },
-      ]}
+      art={SHIELD}
+      backdrop={FEATURE_ART.backdrop}
+      objects={[{ name: "id-check", at: "bl", size: 52 }]}
       className="nf-rmvb"
       testId="roommates-verify-banner"
     >
