@@ -27,8 +27,9 @@ export const publicMetaIg = {
     },
     terms: {
       title: "Usoro ọrụ",
+      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
       description:
-        "Iwu maka iji Vallo: akaụntụ, ịkwụ ụgwọ, nkwụghachi, ihe akara nkwado pụtara, idepụta ụlọ, nkwekọrịta na nnabata, Nkwa Vallo na iji ya n'ụzọ kwesịrị ekwesị.",
+        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, and acceptable use.",
     },
     privacy: {
       title: "Iwu nzuzo",

@@ -15,7 +15,7 @@ export const subscriptionsEn = {
     /** `{days}` is the trial length. */
     trial: "{days} days free, no card needed. When the trial ends, your account goes back to Free unless you subscribe.",
     /** `{price}` is the plan's monthly price. */
-    price: "{price} a month, paid by card through Paystack.",
+    price: "{price} a month, paid by card.",
     renews: "Renews every month until you cancel.",
     cancel: "Cancel any time on this page. You keep the plan until the end of the month you paid for, and nothing more is charged.",
     inTrial: "Subscribing during your free trial ends the trial and starts your first paid month today.",
@@ -87,18 +87,18 @@ export const subscriptionsEn = {
   confirm: {
     metaTitle: "Confirming your plan",
     title: "Confirming your payment",
-    body: "We are waiting for Paystack to confirm the charge. This page updates on its own; you do not need to pay again.",
+    body: "We are waiting for our payment processor to confirm the charge. This page updates on its own; you do not need to pay again.",
     /** `{plan}` is the plan's name. */
     activeTitle: "You are on {plan}",
     activeBody: "Your plan is active.",
     failedTitle: "This payment did not turn on a plan",
-    failedBody: "What Paystack reported did not match the plan, so nothing was turned on. Vallo staff have been alerted to look at it.",
+    failedBody: "What our payment processor reported did not match the plan, so nothing was turned on. Vallo staff have been alerted to look at it.",
     declinedTitle: "The payment did not go through",
-    declinedBody: "Paystack says the charge failed, so nothing was taken for a plan. You can try again from the Vallo Pro page.",
+    declinedBody: "Our payment processor says the charge failed, so nothing was taken for a plan. You can try again from the Vallo Pro page.",
     missingTitle: "We could not find this payment",
     missingBody: "This link does not match a plan checkout on your account. Your plan, if you hold one, is shown on the Vallo Pro page.",
     slowTitle: "Still confirming",
-    slowBody: "Paystack has not confirmed this charge yet. If you paid, your plan turns on as soon as it does. You do not need to pay again.",
+    slowBody: "Our payment processor has not confirmed this charge yet. If you paid, your plan turns on as soon as it does. You do not need to pay again.",
     back: "Back to Vallo Pro",
   },
 
@@ -151,6 +151,6 @@ export const subscriptionsEn = {
     outcome_unknown: "We could not tell whether the payment opened. Nothing is charged unless you pay. Try again in a moment.",
     no_email: "Paying by card needs an email address on your account. Add one in Settings and try again.",
     not_cancellable: "This plan cannot be cancelled here.",
-    cancel_failed: "We could not cancel with Paystack just now. Nothing has changed. Try again in a moment.",
+    cancel_failed: "We could not cancel with our payment processor just now. Nothing has changed. Try again in a moment.",
   },
 };

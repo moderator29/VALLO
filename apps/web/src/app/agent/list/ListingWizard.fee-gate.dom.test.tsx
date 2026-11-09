@@ -152,7 +152,9 @@ describe("the listing wizard reaches the fee screen before Send for review (D60)
     expect(html).toContain('data-testid="fee-gate"');
     expect(html).toContain('data-mode="preview"');
     expect(html.indexOf('data-testid="fee-gate"')).toBeLessThan(html.indexOf('data-testid="listing-send"'));
-    expect(html).toMatch(/nf-feegate__headline">₦1,728,000</);
+    /* The protected rail is off (no `escrowShown`), so the escrow row is not
+       drawn and the headline is the card rail's figure (sweep items 7 to 9). */
+    expect(html).toMatch(/nf-feegate__headline">₦1,764,000</);
   });
 
   it("with the flag off, does not block: Send for review is enabled with nothing accepted, and no accept is offered", () => {

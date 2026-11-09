@@ -48,7 +48,6 @@ export const landingRoomsYo = {
       },
       { key: "pay", q: "Báwo ni ìsanwó ṣe ń ṣiṣẹ́?" },
       { key: "inspection", q: "Ṣé màá san owó láti wo ilé?" },
-      { key: "guarantee", q: "Kí ni Ìdánilójú Vallo?" },
       {
         key: "lister",
         q: "Báwo ni màá ṣe mọ ẹni tí ó wà lẹ́yìn àkọsílẹ̀ kan?",

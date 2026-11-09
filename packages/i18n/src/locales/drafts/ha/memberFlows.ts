@@ -293,7 +293,8 @@ export const memberFlowsHa = {
     longer: "Haya mafi tsawo",
     rentFor: "Haya na {term}",
     rentOnly: "Haya kawai, kafin kuɗin ajiyar tsaro, na wakili da na lauya. Wakilin ne zai amince da sharuɗɗan ƙarshe tare da kai.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
     keepInside:
-      "Don lafiyarka, ka ajiye kowace hira da kowane biya a cikin Vallo. Ba mu kare yarjejeniyar da aka yi a wajen dandalin ba. Ka biya sai bayan ka duba gidan.",
+      "For your safety, keep every chat inside Vallo. Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong. Pay only after you have inspected the property.",
   },
 } satisfies NonNullable<Translation["memberFlows"]>;

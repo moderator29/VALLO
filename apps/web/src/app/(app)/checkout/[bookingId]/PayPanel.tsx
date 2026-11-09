@@ -680,7 +680,7 @@ export function PayPanel({
   };
 
   /* TRACK A: no button the database would refuse. Payment opens on an approved agreement. */
-  if (view.agreement?.status !== "approved") return <PaymentGate agreement={view.agreement} />;
+  if (view.agreement?.status !== "approved") return <PaymentGate agreement={view.agreement} kind="stay" />;
 
   return (
     <>

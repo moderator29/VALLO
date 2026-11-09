@@ -48,7 +48,6 @@ export const landingRoomsHa = {
       },
       { key: "pay", q: "Yaya biyan kuɗi ke aiki?" },
       { key: "inspection", q: "Shin zan biya don duba gida?" },
-      { key: "guarantee", q: "Menene Garantin Vallo?" },
       {
         key: "lister",
         q: "Ta yaya zan san wanda ke bayan jeri?",

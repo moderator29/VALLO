@@ -107,7 +107,11 @@ export const TOTALS_NOTE = "Completed movements";
 export const PROTECTED_TITLE = "Who holds your money";
 export const PROTECTED_SUB_NOT_CONNECTED = "See how payments work on Vallo";
 
-/** From the left-hand phone, only this (D81). Rent paid from Wallet is held until the move-in (FUND_STEPS). */
+/**
+ * From the left-hand phone, only this (D81). Rent paid from Wallet is held
+ * until the move-in (FUND_STEPS), which is the protected rail: drawn only once
+ * Wallet is connected (sweep item 25, 9 November 2026).
+ */
 export const SPACE_BANNER = {
   title: "Pay for your space with Vallo Wallet",
   body: "Pay agreed rent from Wallet. It is released only when you confirm the move-in.",

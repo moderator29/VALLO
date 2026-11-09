@@ -603,7 +603,7 @@ export const experienceHostEn = {
     colCommission: "Commission",
     colGuarantee: "Guarantee",
     colShare: "Your share",
-    colReference: "Paystack reference",
+    colReference: "Payment reference",
     refundReversal: "Refund reversal",
     none: "None",
     total: "Total",

@@ -1,19 +1,19 @@
 import Link from "next/link";
-import { LISTING_SALE_ABOUT, NO_INSPECTION_FEE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import {
+  LISTER_AGREE_TERMS,
+  LISTING_SALE_ABOUT,
+  NO_INSPECTION_FEE,
+  PRIVATE_FEE_NOTE,
+  RENT_PAYMENT_NOT_OPEN,
+  SALE_NEVER_PAID_ON_VALLO,
+  SALE_PAYMENT_NOT_OPEN,
+} from "@/lib/money/copy";
 import { SUPPLY_DOORS, SUPPLY_DOOR_HREF, doorsSentence } from "@/lib/supply/roles";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { MAX_BLOCK_NIGHTS } from "@/lib/agent/calendar-model";
 import type { DocChapter } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
-import {
-  CARD_MEANS,
-  ESCROW_MEANS,
-  ESCROW_OR_CARD,
-  HOTEL_ROOM_BY_CARD,
-  PAY_INSIDE_VALLO,
-  PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
-} from "./facts";
+import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "./facts";
 
 /**
  * THE CHAPTERS FOR EACH KIND OF PERSON (the docs track, 13 October 2026):
@@ -23,7 +23,7 @@ import {
  *
  * The same rules as `chapters.tsx`: one topic each, task-first headings,
  * short sentences, nothing that is not built, money sentences from
- * `facts.ts` or `lib/money/copy.ts`, and no provider named.
+ * `lib/money/copy.ts` (some through `facts.ts`), and no provider named.
  */
 
 const A = "font-semibold text-[var(--nf-content-link)] hover:underline";
@@ -542,7 +542,7 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
   number: 0,
   title: "From viewing to keys",
   summary:
-    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, paying with Escrow or by card, and moving in.",
+    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, and moving in.",
   icon: "contract-sign",
   sections: [
     {
@@ -621,14 +621,10 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
       body: (
         <>
           <p>
-            <strong>For rent:</strong> {ESCROW_OR_CARD}
+            <strong>For rent:</strong> {RENT_PAYMENT_NOT_OPEN}
           </p>
-          <ul role="list">
-            <li>{ESCROW_MEANS}</li>
-            <li>{CARD_MEANS}</li>
-          </ul>
           <p>
-            <strong>For a sale:</strong> {SALE_IS_ESCROW} {LISTING_SALE_ABOUT}
+            <strong>For a sale:</strong> {SALE_PAYMENT_NOT_OPEN} {SALE_NEVER_PAID_ON_VALLO} {LISTING_SALE_ABOUT}
           </p>
           <p>
             {PAY_INSIDE_VALLO} See{" "}
@@ -695,7 +691,7 @@ export const BOOKING_A_STAY: DocChapter = {
             the host accepts or declines first, and you are told which.
           </p>
           <p>
-            <strong>Paying.</strong> {ESCROW_OR_CARD} See{" "}
+            <strong>Paying.</strong> {STAYS_PAID_BY_CARD} See{" "}
             <Link href="/docs/paying-on-vallo" className={A}>
               How paying works
             </Link>
@@ -971,9 +967,8 @@ export const FOR_OWNERS: DocChapter = {
       heading: "Agree terms and get paid",
       body: (
         <p>
-          After the viewing and the inspection report, you and the renter confirm the same agreement. The
-          renter then pays inside Vallo, with Escrow or by card, and your share comes to the bank account
-          on your payout details. See{" "}
+          After the viewing and the inspection report, you and the renter confirm the same agreement.{" "}
+          {LISTER_AGREE_TERMS} See{" "}
           <Link href="/docs/paying-on-vallo#for-listers" className={A}>
             Get paid
           </Link>

@@ -27,8 +27,9 @@ export const publicMetaHa = {
     },
     terms: {
       title: "Sharuɗɗan sabis",
+      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
       description:
-        "Dokokin amfani da Vallo: asusu, biyan kuɗi, mayar da kuɗi, ma'anar alamar tabbatarwa, sanya gida, yarjejeniyoyi da amincewa, Garantin Vallo da amfani mai kyau.",
+        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, and acceptable use.",
     },
     privacy: {
       title: "Manufar sirri",

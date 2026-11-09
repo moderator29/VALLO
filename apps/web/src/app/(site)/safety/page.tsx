@@ -12,6 +12,7 @@ import {
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
   PAYMENT_GATE_SENTENCE,
+  PAY_ONLY_THROUGH_VALLO,
   RAIL_COPY,
   REFUND_NO_BALANCE,
   REFUND_ROUTE,
@@ -96,11 +97,11 @@ const INSPECTION_STEPS: { title: string; body: string }[] = [
   },
   {
     title: "Both of you confirm the agreement",
-    body: `From the report an agreement is drawn up with the figures from the listing. You and the owner or agent each confirm the same version. ${PAYMENT_GATE_SENTENCE} Both of you are told by email and in the app.`,
+    body: `From the report an agreement is drawn up with the figures from the listing. You and the owner or agent each confirm the same version. ${PAYMENT_GATE_SENTENCE}`,
   },
   {
-    title: "Only then, pay on Vallo",
-    body: `Rent is message, inspect, agree, then pay. There is no reserve button on a rental for exactly that reason. Never hand over cash at an inspection. ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE}`,
+    title: "Never pay anybody outside Vallo",
+    body: `Rent is message, inspect, then agree. There is no reserve button on a rental for exactly that reason. Never hand over cash at an inspection. ${NO_INSPECTION_FEE} ${PAY_ONLY_THROUGH_VALLO} ${OFF_PLATFORM_SENTENCE}`,
   },
 ];
 

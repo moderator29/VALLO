@@ -293,7 +293,8 @@ export const memberFlowsIg = {
     longer: "Mgbazinye dị ogologo",
     rentFor: "Ụgwọ ụlọ maka {term}",
     rentOnly: "Ụgwọ ụlọ naanị, tupu ego nchekwa, ego onye nnọchite na ego ọkàiwu. Onye nnọchite ahụ ga-ekwekọrịta usoro ikpeazụ na gị.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
     keepInside:
-      "Maka nchekwa gị, debe mkparịta ụka na ịkwụ ụgwọ niile n'ime Vallo. Anyị anaghị echekwa nkwekọrịta e mere na mpụga ikpo okwu a. Kwụọ ụgwọ naanị mgbe ị lechara ụlọ ahụ.",
+      "For your safety, keep every chat inside Vallo. Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong. Pay only after you have inspected the property.",
   },
 } satisfies NonNullable<Translation["memberFlows"]>;

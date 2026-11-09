@@ -1,10 +1,27 @@
 /**
  * THE SENTENCES THAT DESCRIBE HOW MONEY MOVES ON VALLO.
  *
- * The governing sentence (D50, the founder's own, 6 October 2026):
+ * The governing sentence (D50, the founder's own, 6 October 2026; "and
+ * protect" dropped on 9 November 2026, because nothing on Vallo protects a
+ * payment today):
  *
- *   Vallo uses regulated financial infrastructure partners to process and
- *   protect eligible transactions. Vallo does not hold customer funds.
+ *   Vallo uses regulated financial infrastructure partners to process
+ *   eligible transactions. Vallo does not hold customer funds.
+ *
+ * THE MONEY COPY RULES OF 9 NOVEMBER 2026 (docs/handoff/FOUNDER_DECISIONS.md,
+ * the money copy sweep in docs/handoff/MONEY_COPY_SWEEP.md). Vallo never holds
+ * money. Stays, hotel rooms and restaurants are paid by card and split at the
+ * moment of payment by the payment processor. Payment for rentals and sales is
+ * not open on Vallo, and Vallo does not take payment for a property purchase
+ * at any stage. The protected rail is built and switched off, and no sentence
+ * a member reads describes it in the present tense. The Vallo Guarantee is
+ * retired. Every replacement sentence lives here and nowhere else: a screen
+ * imports it, and `money-copy-sweep.test.ts` fails when one is typed again
+ * elsewhere or when a retired phrase comes back. The processor is named only
+ * on five surfaces (the card receipt, the Terms, the Privacy Policy, the help
+ * page on how paying works, and one quiet line on the payment step itself);
+ * `paystack-naming.test.ts` holds that, and the constants allowed to name it
+ * are listed in `PAYSTACK_NAMED`.
  *
  * Every surface that explains money reads its words from here, so the Terms,
  * the help centre, the emails and the screens cannot drift apart. The rules
@@ -36,42 +53,42 @@
 /* THE GOVERNING SENTENCE                                                     */
 /* -------------------------------------------------------------------------- */
 
-/** The founder's sentence, verbatim. The Terms, the help centre and the footer of every money screen. */
+/**
+ * The founder's sentence, with "and protect" dropped (9 November 2026). The
+ * processor is not named here: this is not one of the five surfaces.
+ */
 export const GOVERNING_SENTENCE =
-  "Vallo uses regulated financial infrastructure partners to process and protect eligible transactions. Vallo does not hold customer funds.";
+  "Vallo uses regulated financial infrastructure partners to process eligible transactions. Vallo does not hold customer funds.";
 
 /** The same sentence, shortened for a screen. */
 export const PARTNERS_SHORT = "Payments are processed through Vallo's financial infrastructure partners.";
 
-/**
- * The promise, true on both ways to pay (DECISIONS 13 October, rows 21 and 22:
- * rent and shortlets let the payer pick escrow or card, a sale is escrow, a
- * hotel room is card). It used to describe the card rail alone ("goes straight
- * to their bank account ... in the same transaction"), which is untrue of a
- * payment a licensed partner holds in escrow.
- */
-export const NO_CUSTODY_SENTENCE =
-  "Vallo never holds your money. If you pay by card, the owner's or agent's share goes straight to their bank account in the same payment. If you choose to have a licensed partner hold it, it stays with the partner until the deal is confirmed.";
-
-/** How money moves on the card (direct) rail alone, for a surface that knows it is on that rail. */
+/** How money moves on the card (direct) rail, the only way to pay on Vallo today. */
 export const CARD_RAIL_MOVES =
   "Vallo never holds your money. When you pay by card, the owner's or agent's share goes straight to their bank account through our payment processor, in the same transaction.";
+
+/**
+ * The promise (sweep item 2). It used to offer a licensed partner holding the
+ * money "until the deal is confirmed", which is the protected rail, switched
+ * off. The card rail is the only way to pay, so the promise is its sentence.
+ * The Terms and the Disclaimer print this by reference.
+ */
+export const NO_CUSTODY_SENTENCE = CARD_RAIL_MOVES;
 
 /** Where a refund goes. */
 export const REFUND_ROUTE =
   "A refund goes back to the card or bank account you paid with, through our payment processor. Banks usually show it within 5 to 10 working days.";
 
-/** For a lister: how and when they are paid, on either way to pay. No provider is named. */
-export const PAYOUT_ANSWER =
-  "Vallo never holds your share. When the renter or guest pays by card, it goes straight to the bank account on your payout details in the same payment. When they pay into escrow, a licensed partner holds it until the deal is confirmed, then releases it to you. The payment partner pays money into your bank on its normal settlement schedule.";
-
 /**
- * The supply page's last step for a host (/for-hosts): how a stay is paid out,
- * with no screen to point at. A hotel room is paid by card; a shortlet guest
- * may pay into escrow instead.
+ * For a lister: how and when they are paid (sweep item 3). The first sentence
+ * stands alone on the room request answer. No provider is named.
  */
+export const PAYOUT_ANSWER =
+  "Vallo never holds your share. When a card payment is made to you, our payment processor splits it and your share goes to the bank account on your payout details in the same transaction. The processor pays it into your bank on its normal settlement schedule.";
+
+/** The supply page's last step for a host (/for-hosts), sweep item 4. */
 export const HOST_PAYOUT_STEP =
-  "When a guest pays by card, your share goes straight to the bank account on your payout details. If a shortlet guest pays into escrow, a licensed partner holds it until the stay is confirmed, then releases it to you.";
+  "When a guest pays by card, our payment processor splits the payment and your share goes straight to the bank account on your payout details.";
 
 /* -------------------------------------------------------------------------- */
 /* WHAT STANDS BEHIND A PAYMENT, PER RAIL (what replaced the Guarantee)       */
@@ -179,9 +196,36 @@ export const LISTING_RENT_QUOTED = "The rent is quoted for a full year and agree
 export const LISTING_STAY_PAY_AFTER =
   "Reserve online, then arrange an inspection with the agent from your Inbox. Pay only after you have inspected the property.";
 
-/** What has to happen before payment is available. */
-export const PAYMENT_GATE_SENTENCE =
-  "Payment opens as soon as the inspection report is submitted and both of you confirm the agreement. An escrow payment opens straight away; a direct payment waits for a person at Vallo only when something about the deal needs a second look.";
+/** Rent: everything but the payment step (the founder's approved rent line). */
+export const RENT_NOT_OPEN_SHORT = "Payment for rentals is not open on Vallo yet.";
+export const RENT_PAYMENT_NOT_OPEN = `${RENT_NOT_OPEN_SHORT} You can view, inspect and agree terms now.`;
+
+/** A sale, rule (c) of 9 November 2026: never, at any stage. */
+export const SALE_NEVER_PAID_ON_VALLO = "Vallo does not take payment for a property purchase at any stage.";
+
+/** A purchase's payment step and refusals (sweep items 19, 21 and 24). */
+export const SALE_PAYMENT_NOT_OPEN = "Payment for a purchase is not open on Vallo.";
+
+/** Have the title checked before money changes hands, on every sale surface. */
+export const SALE_TITLE_CHECK = "Have your own solicitor verify the title before any money changes hands.";
+
+/**
+ * What a rental or sale agreement leads to today (sweep item 5): the deal is
+ * agreed on Vallo, and the payment is not taken on Vallo. Every surface about
+ * an agreement for rent or a sale reads this, the Terms by reference.
+ */
+export const PAYMENT_GATE_SENTENCE = `${RENT_PAYMENT_NOT_OPEN} ${SALE_NEVER_PAID_ON_VALLO}`;
+
+/**
+ * The gate on an agreement a card payment does follow (a stay's agreement):
+ * the sweep's first wording for item 5, true where the payment is by card.
+ */
+export const CARD_REVIEW_SOMETIMES =
+  "A card payment waits for a person at Vallo only when something about the deal needs a second look.";
+export const AGREEMENT_PAYMENT_OPENS = `Payment opens as soon as both of you confirm the agreement. ${CARD_REVIEW_SOMETIMES}`;
+
+/** The confirm sheet's next step on a stay's agreement (sweep item 48). */
+export const CONFIRM_PAYMENT_OPENS_BY_CARD = "Payment opens then, by card.";
 
 /* The agreement page's money lines (/agreements/[id]), moved out of the page
    (Round 3 sweep, C3). The words are the page's own, unchanged. */
@@ -194,14 +238,9 @@ export const AGREEMENT_IN_REVIEW =
   "Both of you confirmed. Because this payment goes straight to the lister, a person at Vallo is checking the deal first. You will get an email and a notification the moment it is decided.";
 /** The section an approved agreement opens. */
 export const AGREEMENT_PAYMENT_OPEN_TITLE = "Payment is open";
-/**
- * When the lister's share reaches them, on either way to pay. A card payment
- * settles in the same payment; an escrow payment waits for the deal to be
- * confirmed. Said where "settles straight to your bank account from the same
- * payment" used to be, which was true of the card rail alone.
- */
+/** When the lister's share reaches them (sweep item 6). Card is the only way to pay. */
 export const OWNER_PAID_WHEN =
-  "Your share goes to the bank account on your payout details: at once if they pay by card, or when the deal is confirmed if they pay into escrow.";
+  "When they pay by card, our payment processor splits the payment and your share goes to the bank account on your payout details in the same transaction.";
 
 /** The lister's line once the agreement is approved. */
 export function agreementOwnerApproved(kind: "rent" | "stay"): string {
@@ -275,7 +314,7 @@ export const LISTER_FIGURE_LABEL: Record<ListerFigureKind, string> = {
  * lister reads on the fee screen and this changes with it, so a record can
  * always say which words were accepted.
  */
-export const LISTER_FEE_TERMS_VERSION = "lister-fee-2026-10-06.2";
+export const LISTER_FEE_TERMS_VERSION = "lister-fee-2026-11-09.1";
 
 /**
  * D61. The rail is not knowable when the lister accepts, so the fee is a
@@ -292,20 +331,25 @@ export function valloFeeLabel(percentText: string, capped: boolean): string {
   return capped ? `Vallo, ${percentText}%, capped` : `Vallo, ${percentText}%`;
 }
 
-/** "Escrow protection, 2%": the escrow partner's fee, never called Vallo's. */
+/**
+ * "Escrow protection, 2%": the escrow partner's fee, never called Vallo's.
+ * Drawn ONLY while the protected rail is live (sweep items 7 to 9): the fee
+ * screen hides the row otherwise (`listerFeeShown` in `lister-fee.ts`).
+ */
 export function escrowProtectionLabel(percentText: string): string {
   return `Escrow protection, ${percentText}%`;
 }
 export const ESCROW_PROTECTION_WHEN = "when a buyer pays into escrow";
 
 /**
- * The payment processor's fee, which the lister bears on a direct payment
- * (the split's bearer). Worded as the payout record words it
+ * The payment processor's fee, which the lister bears on a card payment (the
+ * split's bearer). Worded as the payout record words it
  * (`PAYOUT_PROCESSING_LABEL`), so the line the lister accepted is the line
- * they later find on their payout.
+ * they later find on their payout. Not named: the fee screen is not one of
+ * the five surfaces that name the processor.
  */
-export const PROCESSOR_FEE_LABEL = "Payment processing, by Paystack";
-export const PROCESSOR_FEE_WHEN = "when a buyer pays directly";
+export const PROCESSOR_FEE_LABEL = "Payment processing";
+export const PROCESSOR_FEE_WHEN = "on a card payment";
 export function upToText(amountText: string): string {
   return `up to ${amountText}`;
 }
@@ -341,7 +385,7 @@ export function listerBearsFeesSentence(escrow: boolean, processor: boolean): st
   if (escrow && processor)
     return "You pay escrow protection when a buyer pays into escrow, and payment processing when a buyer pays directly. The buyer pays neither.";
   if (escrow) return "You pay escrow protection when a buyer pays into escrow. The buyer never pays it.";
-  if (processor) return "You pay payment processing when a buyer pays directly. The buyer never pays it.";
+  if (processor) return "You pay payment processing when a renter or guest pays by card. They never pay it.";
   return null;
 }
 
@@ -399,7 +443,7 @@ export const HISTORY_NOT_A_BALANCE =
 
 /** For a lister, under their earnings total. */
 export const EARNINGS_SETTLEMENT =
-  "Your share of a card payment went to the bank account on your payout details in the same payment; an escrow payment is released to you when the deal is confirmed.";
+  "Your share of each card payment went to the bank account on your payout details in the same transaction, split by our payment processor.";
 
 /** The payer's total card. */
 export const PAYMENTS_TOTAL_LABEL = "Paid through Vallo";
@@ -419,11 +463,11 @@ export const PAYMENTS_EMPTY_BODY =
 /** A lister's empty history. */
 export const EARNINGS_EMPTY_TITLE = "Nothing has been paid to you yet";
 export const EARNINGS_EMPTY_BODY =
-  "When a renter or guest pays for one of your listings, your share appears here. Vallo never holds it: a card payment goes straight to your bank account, and escrow releases it when the deal is confirmed.";
+  "When a renter or guest pays for one of your listings, your share appears here. Vallo never holds it: our payment processor splits each card payment and your share goes straight to your bank account.";
 
 /** A host's empty history: how a host is paid, in the kit's 180 characters. */
 export const HOST_EARNINGS_EMPTY_BODY =
-  "When a guest pays for a stay, your share appears here. It goes to the bank account on your payout details: at once by card, or from escrow when the stay is confirmed.";
+  "When a guest pays for a stay, your share appears here. Our payment processor sends it to the bank account on your payout details in the same card payment.";
 
 /** A read that failed. Said plainly, and never drawn as an empty list. */
 export const HISTORY_UNAVAILABLE_TITLE = "Your history could not be loaded";
@@ -527,7 +571,7 @@ export const REWARDS_FEE_SHOWN_FIRST =
 
 /** Where a reward withdrawal is paid from. */
 export const REWARDS_PAID_FROM =
-  "Rewards are paid from Vallo's own funds to the bank account you choose, through Paystack.";
+  "Rewards are paid from Vallo's own funds to the bank account you choose, through our payment processor.";
 
 /** The scheme question, answered plainly. */
 export const REWARDS_NOT_INVESTMENT =
@@ -778,7 +822,7 @@ export const PAYOUTS_ROW_SUB = "For listers: what renters and guests paid for yo
 export const PAYOUTS_SAME_FIGURES =
   "Each payout shows the lines a lister sees before publishing, for the way that buyer paid: what was paid, the platform fee, payment processing where it applies, and what you received.";
 /** The processor's own fee on a direct-rail payout, borne by the lister and named. */
-export const PAYOUT_PROCESSING_LABEL = "Payment processing, by Paystack";
+export const PAYOUT_PROCESSING_LABEL = "Payment processing";
 
 /* -------------------------------------------------------------------------- */
 /* /payments, THE PAYER'S OWN MONEY SCREEN (R3-04)                             */
@@ -899,9 +943,9 @@ export const CANCEL_TABLE =
 export const SAFETY_NO_ACCOUNT_NUMBER =
   "We add nothing to the price you are shown, and every payment happens inside the platform. So there is no honest reason for anyone to send you an account number, and if somebody does, they are not doing platform business. Report them and stop replying.";
 
-/** /safety, how paying works: after NO_CUSTODY_SENTENCE, the processor, escrow and both sides. */
+/** /safety, how paying works: after NO_CUSTODY_SENTENCE, the processor and both sides (sweep item 13). */
 export const SAFETY_PAY_THROUGH_VALLO =
-  "Every payment on Vallo goes through the checkout screen with a licensed Nigerian payment partner, using a card or a bank transfer raised by the partner. For rent and shortlets you can choose Escrow instead, where a licensed partner holds the payment until the deal is confirmed, and a sale is always paid through escrow. On both sides there is no step where somebody sends you an account number.";
+  "Every payment on Vallo goes through the checkout screen with our licensed payment processor, using a card or a bank transfer the processor raises. On both sides there is no step where somebody sends you an account number.";
 
 /** /safety, how paying works: the price is whole, and whose fees are whose. */
 export const SAFETY_PRICE_IS_WHOLE =
@@ -1044,8 +1088,12 @@ export const RELEASE_ARMED_LABEL = "Press again to release";
 /* STEP 7, FUND (D77): the renter pays the agreed rent into escrow             */
 /* -------------------------------------------------------------------------- */
 
-/** The renter's headline before paying. */
-export const FUND_TITLE = "Pay it into escrow";
+/**
+ * The page's title and the renter's headline (sweep item 14). The route itself
+ * redirects to the agreement while the protected rail is off, so neither is
+ * drawn today.
+ */
+export const FUND_TITLE = "Pay for this deal";
 /** Under the figure: who will hold it, and until when. */
 export const FUND_BY_LINE = "Our licensed provider holds it until you confirm the move-in. Vallo never holds it.";
 /** The renter pays exactly the agreed rent; the escrow fee is the lister's (VALLO_PRICING section 6). */
@@ -1067,12 +1115,13 @@ export const FUND_TOP_UP = "Add money to Wallet";
 export const FUND_OPEN_BALANCE = "Open Wallet";
 /** Why the screen cannot take a payment yet, each in one sentence. */
 export const FUND_CLOSED = {
-  not_renter: "Only the renter pays into escrow. You will see it here the moment it is held for you.",
-  not_rent: "This booking is paid by card, not into escrow.",
-  direct: "This deal is paid by card through Paystack, not into escrow.",
+  not_renter: "Only the renter pays. You will see it on the agreement when they do.",
+  not_rent: "This booking is paid by card.",
+  direct: "This deal is paid by card.",
   not_approved: "Payment opens once both of you have confirmed the agreement.",
   review_required: "A person at Vallo is looking at this deal before payment opens. Nothing has been taken.",
-  not_live: "Escrow is paused right now. Nothing has been taken.",
+  /* Rule (b) of 9 November 2026: never "paused". The route redirects first. */
+  not_live: "You pay by card through Paystack. Nothing has been charged yet.",
   balance_unreadable: "Wallet could not be read just now. Nothing has been taken; refresh to try again.",
 } as const;
 /** The server's refusals, as the renter reads them. */
@@ -1110,45 +1159,70 @@ export const FUND_STEPS_STAY: readonly { title: string; body: string }[] = [
  * `@vallo/i18n`; the sentences about where the money goes are here.
  */
 
-/** The one calm line where people decide: the listing, a chat about money, the agreement before payment. */
-export const PAY_ONLY_THROUGH_VALLO = "Pay only through Vallo. Payments made outside Vallo are not covered.";
+/**
+ * The one calm line where people decide: the listing, a chat about money, the
+ * agreement before payment. Rule (a) of 9 November 2026, the founder's words
+ * exactly: "not covered" implied a cover inside Vallo, and there is none.
+ */
+export const PAY_ONLY_THROUGH_VALLO =
+  "Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong.";
 
-/** Under "Escrow" on the payment step: who holds it, and until when. */
+/** The safety rule in Messages, on a rental's page and on the safety card (sweep item 54). */
+export const KEEP_IT_INSIDE_VALLO = `For your safety, keep every chat inside Vallo. ${PAY_ONLY_THROUGH_VALLO} Pay only after you have inspected the property.`;
+
+/**
+ * Under "Escrow" on the payment step: who holds it, and until when. Drawn ONLY
+ * in the two-option choice, which the server offers only while the protected
+ * rail is live (`readPayChoice(data, protectedRailLive())`); never today.
+ * Aligned with the founder's approved line for when the rail opens (the sweep,
+ * class B): a licensed bank, never "a licensed partner holds".
+ */
 export const PAY_CHOICE_ESCROW_REASON =
-  "A licensed partner holds your money until you confirm the deal, then pays the lister. Vallo never holds it.";
+  "Your payment is held by a licensed bank until you confirm the deal, then paid to the lister. Vallo never holds your money.";
 
 /** Under "Pay by card" on the payment step: where it goes, and when. */
 export const PAY_CHOICE_CARD_REASON =
   "Your card is charged now, and the lister's share goes straight to their bank account in the same payment.";
 
-/** A purchase: escrow is the only way, said rather than asked. */
-export const PAY_CHOICE_SALE_ONLY =
-  "A purchase is always paid into escrow, so the money moves only when the deal is confirmed.";
+/** The payment step's title on a purchase (sweep item 19; the dictionary's `payChoice.escrowOnlyTitle`). */
+export const PAY_CHOICE_SALE_TITLE = "Paying for a purchase";
+
+/** A purchase, said rather than asked (sweep item 19 with rule (c)). */
+export const PAY_CHOICE_SALE_ONLY = `${SALE_PAYMENT_NOT_OPEN} Nothing has been charged. ${SALE_TITLE_CHECK} ${SALE_NEVER_PAID_ON_VALLO}`;
 
 /** A hotel room: card at the price shown, said rather than asked. */
 export const PAY_CHOICE_ROOM_ONLY = "A hotel room is paid by card at the price shown, with nothing added.";
 
 /**
- * Escrow cannot be used right now (the server reads `protectedRailLive()` as
- * false: the partner is switched off or unreachable). A rent or shortlet
- * payer is offered card instead; nothing is charged until they pay.
+ * The protected rail is off (the server reads `protectedRailLive()` as false),
+ * which is today: the payer pays by card. Rule (b) of 9 November 2026, the
+ * founder's words exactly. Never "paused", "coming back" or "temporarily": it
+ * never ran. This is the payment step's one quiet line naming the processor.
  */
-export const PAY_CHOICE_ESCROW_PAUSED =
-  "Escrow is paused right now, so you can pay by card instead. Nothing has been charged.";
+export const PAY_CHOICE_ESCROW_PAUSED = "You pay by card through Paystack. Nothing has been charged yet.";
 
-/** The same moment on a purchase, where escrow is the only way. */
-export const PAY_CHOICE_ESCROW_PAUSED_SALE =
-  "Escrow is paused right now, and a purchase is only paid into escrow. Nothing has been charged. Try again later.";
+/*
+ * The same moment on a purchase (sweep item 21 with rule (c)) is said by the
+ * purchase's own reason, PAY_CHOICE_SALE_ONLY, which already carries "Nothing
+ * has been charged" and that Vallo takes no payment for a purchase. The note
+ * that repeated it ("escrow is paused ... Try again later") is gone.
+ */
 
-/** The payer moved a system-approved deal to card and a risk check asks a person first (pov04). */
-export const PAY_CHOICE_CARD_REVIEW =
-  "A person at Vallo looks at this deal before a card payment opens. Nothing has been charged. You can switch back to escrow and pay now.";
+/** The payer moved a system-approved deal to card and a risk check asks a person first (pov04, sweep item 22). */
+export const TOLD_WHEN_IT_OPENS = "You are told by email and in the app when it opens.";
+export const PAY_CHOICE_CARD_REVIEW = `A person at Vallo looks at this deal before a card payment opens. Nothing has been charged. ${TOLD_WHEN_IT_OPENS}`;
+
+/** The payment step's refusals that carried escrow (sweep item 24; `payChoice.refused` in the dictionary). */
+export const PAY_REFUSED_SALE = `${SALE_PAYMENT_NOT_OPEN} ${SALE_NEVER_PAID_ON_VALLO}`;
+export const PAY_REFUSED_NOT_OPEN = "This payment is not open on Vallo.";
+export const PAY_REFUSED_CARD_REVIEW =
+  "Paying by card on this deal needs a person at Vallo to check it first. Nothing has been charged.";
 
 /* The calm fallback from the escrow step to card (founder instruction,
    13 October 2026: nobody is stranded). */
 export const SWITCH_TO_CARD_LABEL = "Pay by card instead";
 export const SWITCH_TO_CARD_LEAD =
-  "If escrow is not working for you, you can pay this by card. The lister's share goes straight to their bank account.";
+  "You can pay this by card. Our payment processor sends the lister's share straight to their bank account.";
 export const SWITCH_TO_CARD_REFUSED: Record<string, string> = {
   card_not_allowed: "This payment can only go through escrow. Nothing has been charged.",
   held: "Your money is already with the payment partner, so this is paid. Open the payment to see where it is.",
@@ -1166,3 +1240,157 @@ export const SWITCH_TO_CARD_REFUSED: Record<string, string> = {
 export function hotelRoomFeeSentence(percentText: string): string {
   return `When a guest pays for a room, Vallo's fee is ${percentText} of the charge, taken from your share. The guest pays the price you set, with nothing added, and there is no fee on a booking that is not paid.`;
 }
+
+/* -------------------------------------------------------------------------- */
+/* THE DOCS' AND THE HELP CENTRE'S MONEY RULES (9 November 2026)              */
+/* -------------------------------------------------------------------------- */
+/*
+ * Moved here from `app/(site)/docs/facts.ts`, which re-exports them, so the
+ * docs, the help centre, the guides and the support chat read the one module.
+ * The escrow sentences they replaced ("Escrow, which is selected for you",
+ * "a licensed payment partner holds your payment", "a sale is always paid
+ * through escrow", "if escrow is paused") are retired with the protected rail
+ * (sweep items 26 to 31).
+ */
+
+/** Rule 1: every payment for a deal is made inside Vallo (sweep item 26, with rule (a)). */
+export const PAY_INSIDE_VALLO = `Every payment for a deal happens inside Vallo. ${PAY_ONLY_THROUGH_VALLO}`;
+
+/** Rule 2: who holds money (sweep item 27). The processor is not named here. */
+export const VALLO_NEVER_HOLDS =
+  "Vallo never holds customer money. Card payments are processed by our payment processor, which splits each payment to the owner, agent or host.";
+
+/** Stays and hotel rooms: card, the only way to pay on Vallo today. */
+export const STAYS_PAID_BY_CARD = "Shortlets and hotel rooms are paid by card, through our payment processor.";
+
+/** Rule 3: how each kind of deal is paid (sweep item 28, which replaced the escrow-or-card choice). */
+export const HOW_EACH_DEAL_IS_PAID = `${STAYS_PAID_BY_CARD} ${RENT_PAYMENT_NOT_OPEN}`;
+
+/** Where an answer needs to say it (sweep item 29). */
+export const ESCROW_NOT_OFFERED = "Vallo does not offer escrow.";
+
+/** What paying by card does. */
+export const CARD_MEANS =
+  "When you pay by card, your payment goes to the owner, agent or host through our payment processor as soon as it clears.";
+
+/** Rule 4: a sale (sweep item 30, with rule (c)). */
+export const SALE_NOT_PAID = `${SALE_PAYMENT_NOT_OPEN} ${SALE_TITLE_CHECK} ${SALE_NEVER_PAID_ON_VALLO}`;
+
+/** The docs' troubleshooting line where "if escrow is paused" was (sweep item 31). */
+export const RENT_AND_SALE_NOT_OPEN = PAYMENT_GATE_SENTENCE;
+
+/** A lister on a rental: terms agreed now, the payment not open (sweep item 40). */
+export const LISTER_AGREE_TERMS =
+  "You agree terms with the renter on Vallo. Payment for rentals is not open yet; for stays, our payment processor sends your share to the bank account on your payout details.";
+
+/**
+ * THE HELP PAGE ON HOW PAYING WORKS names the processor (one of the five
+ * surfaces, 9 November 2026): card details go to Paystack, never to Vallo.
+ * Read only by the /docs/paying-on-vallo chapter.
+ */
+export const HOW_PAYING_PROCESSOR_NAMED =
+  "Card payments on Vallo are processed by Paystack, a licensed payment processor. You enter your card details in Paystack's own payment window, and Vallo never sees your full card number.";
+
+/** A lister's share on a card payment, in the docs and the help centre (sweep items 35 and 45). */
+export const CARD_SHARE_WHEN_CLEARS = "When a guest pays by card, your share goes to your bank account when the payment clears.";
+
+/** The help centre's "What payment methods can I use?" (sweep item 44, the processor not named). */
+export const PAYMENT_METHODS_ANSWER =
+  "You pay in naira, inside Vallo, in our payment processor's own payment window, with a Nigerian card or a bank transfer the processor raises. Vallo never sees your full card number.";
+
+/** A refund route the docs can state without the escrow leg (sweep item 36). */
+export const REFUND_TO_CARD_BY_DAY_FIVE =
+  "A refund due to you goes back to the card or account you paid with, through our payment processor. Vallo starts it by the end of the fifth Nigerian business day after you ask.";
+
+/** The newsletter's "Buying and selling, done carefully" (sweep item 53, with rule (c)). */
+export const NEWSLETTER_SALE_LINE = `Property for sale with the title stated up front, and an agreement both sides confirm before any money moves. ${SALE_NEVER_PAID_ON_VALLO}`;
+
+/** The assistant's payment review card: a caution deposit is not held by anybody on Vallo (sweep item 56). */
+export const CAUTION_DEPOSIT_LABEL = "Caution deposit (returnable under your agreement)";
+
+/* -------------------------------------------------------------------------- */
+/* THE ASSISTANT AND SUPPORT PROMPTS (sweep item 57, rule (i))                */
+/* -------------------------------------------------------------------------- */
+
+/** Added to both prompts so the model never offers what is switched off. */
+export const PROMPT_NO_ESCROW = "Escrow and protected payment are not offered on Vallo. Never offer them.";
+
+/* -------------------------------------------------------------------------- */
+/* MONEY SENTENCES KEPT AS DICTIONARY KEYS (rule (d), 9 November 2026)        */
+/* -------------------------------------------------------------------------- */
+/*
+ * These sentences are read through `@vallo/i18n` (so a screen keeps its
+ * locale plumbing), but the English value must equal the constant here:
+ * `money-copy-sweep.test.ts` maps each dictionary path to its constant. The
+ * Yoruba, Hausa and Igbo values are this English until a native reader
+ * translates them; nobody here invents a translation.
+ */
+
+/** `platform.devices.notMeConfirm` and `.notMeWorking` (sweep item 49): Vallo never holds a member's money. */
+export const NOT_ME_CONFIRM = "Tap again to pause payments";
+export const NOT_ME_WORKING = "Pausing payments";
+
+/** `chargebacks.hold.means` and the lost and re-owed notices (sweep items 50 to 52, no Guarantee, no escrow). */
+export const CHARGEBACK_HOLD_MEANS =
+  "While it is owed, Vallo pauses withdrawals from your Rewards Balance. Card payments still reach your payout account at the moment of payment. Nothing else on your account changes.";
+export const CHARGEBACK_LOST_BODY =
+  "The payer's bank reversed {amount}. It is owed back. Until it is settled, Vallo pauses withdrawals from your Rewards Balance.";
+export const CHARGEBACK_REOWED_BODY =
+  "The reversed {amount} is owed again. Until it is settled, Vallo pauses withdrawals from your Rewards Balance.";
+
+/** `afterTheGate` caution escalation, worded by the lead (9 November 2026): Vallo looks into it, nothing is guaranteed. */
+export const CAUTION_ESCALATED = "With Vallo staff";
+export const CAUTION_ESCALATE_HELP =
+  "It was due back by {date}. {amount} is still owed and not in dispute. Vallo can look into it, using the inspection report and your messages as the record.";
+export const CAUTION_ESCALATE_SUBMIT = "Ask Vallo to look into it";
+export const CAUTION_ESCALATE_OPEN = "Vallo staff are looking into the caution that is still owed.";
+
+/** `afterTheGate.refund`: where a stay's refund is, without naming the processor (rule (e)). */
+export const REFUND_LANDED = "Refunded to your card {date}. Our payment processor confirmed it went through.";
+export const REFUND_INITIATED =
+  "Our payment processor started the refund to your card on {date}. Banks usually show it within a few business days.";
+export const REFUND_INITIATED_LATE =
+  "Our payment processor started the refund to your card on {date}, after the latest date promised, {due}.";
+export const REFUND_SENDING =
+  "The refund is decided and is being sent to our payment processor, back to the card or account you paid with.";
+
+/** `bookingsPage.step2Body` (the "How booking works" steps): card, never named there. */
+export const BOOKING_STEP_PAY = "Payment in naira, by card. You are never charged early.";
+
+/** `platform.inflight.pendingVerdict`: a payment that lost its connection. */
+export const INFLIGHT_PENDING_VERDICT = "Our payment processor has not told us yet";
+
+/** `subscriptions.terms.price`: the plan page, above the buttons (the pay sheet names the processor once). */
+export const PLAN_PRICE_LINE = "{price} a month, paid by card.";
+
+/** `subscriptions.confirm` and `subscriptions.errors.cancel_failed`: after the pay step, never named. */
+export const PLAN_CONFIRM_BODY =
+  "We are waiting for our payment processor to confirm the charge. This page updates on its own; you do not need to pay again.";
+export const PLAN_CONFIRM_FAILED_BODY =
+  "What our payment processor reported did not match the plan, so nothing was turned on. Vallo staff have been alerted to look at it.";
+export const PLAN_CONFIRM_DECLINED_BODY =
+  "Our payment processor says the charge failed, so nothing was taken for a plan. You can try again from the Vallo Pro page.";
+export const PLAN_CONFIRM_SLOW_BODY =
+  "Our payment processor has not confirmed this charge yet. If you paid, your plan turns on as soon as it does. You do not need to pay again.";
+export const PLAN_CANCEL_FAILED = "We could not cancel with our payment processor just now. Nothing has changed. Try again in a moment.";
+
+/* -------------------------------------------------------------------------- */
+/* WHERE THE PROCESSOR IS NAMED (rule (e), 9 November 2026)                   */
+/* -------------------------------------------------------------------------- */
+
+/** The five surfaces, plus staff screens, which are not member copy. */
+export type PaystackSurface = "receipt" | "terms" | "privacy" | "help-paying" | "pay-step" | "staff";
+
+/**
+ * The only constants in this module that may say "Paystack", each with the
+ * one surface it is drawn on. `paystack-naming.test.ts` fails when any other
+ * constant names the processor, and when one of these is imported by a file
+ * outside its surface.
+ */
+export const PAYSTACK_NAMED: Readonly<Record<string, PaystackSurface>> = {
+  PAY_CHOICE_ESCROW_PAUSED: "pay-step",
+  FUND_CLOSED: "pay-step",
+  FUND_REFUSED: "pay-step",
+  HOW_PAYING_PROCESSOR_NAMED: "help-paying",
+  ADMIN_HISTORY_NOTE: "staff",
+};

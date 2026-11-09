@@ -48,7 +48,6 @@ export const landingRoomsIg = {
       },
       { key: "pay", q: "Kedu ka ịkwụ ụgwọ si arụ ọrụ?" },
       { key: "inspection", q: "M ga-akwụ ụgwọ iji leta ụlọ?" },
-      { key: "guarantee", q: "Gịnị bụ Nkwa Vallo?" },
       {
         key: "lister",
         q: "Kedu ka m ga-esi mara onye nọ n'azụ ndepụta?",

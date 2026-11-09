@@ -116,6 +116,7 @@ export function buildNav({
   isAdmin,
   isHost = false,
   signedIn,
+  walletLive = false,
 }: {
   t: ShellDictionary;
   /**
@@ -134,6 +135,13 @@ export function buildNav({
   /** Holds a Stays host business: one row into `/host`, on either side. */
   isHost?: boolean;
   signedIn: boolean;
+  /**
+   * True only once the member's Wallet is connected on the new rail. Until
+   * then the Wallet row is not drawn (the founder, 9 November 2026, sweep item
+   * 25): the rail behind it is switched off. The route itself keeps working
+   * for anybody with a link. No caller passes it yet, so it is hidden.
+   */
+  walletLive?: boolean;
 }): NavSection[] {
   const stays = side === "stays";
   const sections: NavSection[] = [
@@ -283,7 +291,7 @@ export function buildNav({
     sections.push({
       heading: t.experienceShell.navMoneyLabel,
       items: [
-        { href: "/wallet", label: t.experienceShell.navBalance, icon: "wallet" },
+        ...(walletLive ? [{ href: "/wallet", label: t.experienceShell.navBalance, icon: "wallet" } as NavLeaf] : []),
         /* "Rewards" is the Rewards page's own title. Whether a reward is
            running is said by the page itself, from the rewards read
            (`lib/referral/rewards-read.ts`); the row never shows a figure. */

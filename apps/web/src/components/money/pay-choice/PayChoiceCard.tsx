@@ -9,7 +9,6 @@ import {
   PAY_CHOICE_CARD_REASON,
   PAY_CHOICE_CARD_REVIEW,
   PAY_CHOICE_ESCROW_PAUSED,
-  PAY_CHOICE_ESCROW_PAUSED_SALE,
   PAY_CHOICE_ESCROW_REASON,
   PAY_CHOICE_ROOM_ONLY,
   PAY_CHOICE_SALE_ONLY,
@@ -28,6 +27,11 @@ type Choose = (input: { agreementId: string; choice: PayRail }) => Promise<Actio
 
 /**
  * THE PAYMENT STEP'S CHOICE (founder ruling 2, 13 October 2026).
+ *
+ * 9 November 2026: the protected rail is switched off, so today the step
+ * draws card (`card_escrow_paused`) on a rent or a shortlet, and on a
+ * purchase the fact that Vallo takes no payment for it (`escrow_paused`).
+ * The two-option choice below is drawn only while the rail is live.
  *
  * Two options on a rent or a shortlet, Escrow preselected and marked
  * recommended, Pay by card beside it, each with one short reason; a sale draws
@@ -158,14 +162,12 @@ export function PayChoiceCard({
       </fieldset>
       {!fixed && !choice.payer ? <p className="nf-paychoice__note">{copy.notPayerNote}</p> : null}
       {!fixed && choice.payer && choice.locked ? <p className="nf-paychoice__note">{copy.lockedNote}</p> : null}
+      {/* The payment step's one quiet line naming the processor (9 November
+          2026, rules (b) and (e)). A purchase draws no such line: its reason,
+          PAY_CHOICE_SALE_ONLY, already says Vallo takes no payment for it. */}
       {view.mode === "card_escrow_paused" ? (
         <p className="nf-paychoice__note" data-testid="pay-choice-escrow-paused">
           {PAY_CHOICE_ESCROW_PAUSED}
-        </p>
-      ) : null}
-      {view.mode === "escrow_paused" ? (
-        <p className="nf-paychoice__note" data-testid="pay-choice-escrow-paused">
-          {PAY_CHOICE_ESCROW_PAUSED_SALE}
         </p>
       ) : null}
       {review || (choice.payer && choice.chosen === "card" && agreementStatus === "in_review") ? (

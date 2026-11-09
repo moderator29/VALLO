@@ -22,8 +22,10 @@ export const platformIg = {
     notMeBody:
       "Nke a na-ewepụ ngwaọrụ ọ bụla ọzọ, na-akwụsị ịkwụ ụgwọ na mgbanwe na nkọwa nnata ego gị ruo awa 24, ma kpọga gị ka ị gbanwee okwuntughe gị.",
     notMe: "Ọ bụghị m",
-    notMeConfirm: "Pịa ọzọ ka ị jide ego gị",
-    notMeWorking: "Na-ejide ego gị",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    notMeConfirm: "Tap again to pause payments",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    notMeWorking: "Pausing payments",
   },
 
   alert: {
@@ -248,7 +250,8 @@ export const platformIg = {
     paidBody: "Ịkwụ ụgwọ nke tụfuru njikọ ya rutere anyị. Ntụaka {reference}.",
     failedVerdict: "Ịkwụ ụgwọ gị agaghị",
     failedBody: "E wereghị ihe ọ bụla maka ntụaka {reference}. Ị nwere ike ịkwụ ọzọ.",
-    pendingVerdict: "Paystack agwabeghị anyị",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    pendingVerdict: "Our payment processor has not told us yet",
     pendingBody: "Anyị na-elele ntụaka {reference} kwa nkeji. Akwụla ọzọ ruo mgbe nke a gbanwere.",
     offline: "Ị nọghị n'ịntanetị. Ịkwụ ụgwọ chọrọ njikọ. Ọ dịghị ihe a nara.",
     returnedVerdict: "E weghachiri ịkwụ ụgwọ gị",

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { readMyPayments } from "@/lib/money/history";
 import type { HistoryEntry } from "@/lib/money/history-model";
 import { readMyBalance } from "@/lib/money/member-wallet";
+import { CAUTION_DEPOSIT_LABEL } from "@/lib/money/copy";
 import { createProposal } from "../proposals";
 import { callerOf, naira, NOT_SIGNED_IN, periodBounds, PERIODS, when, type Period } from "./private-common";
 import { defineTool } from "./types";
@@ -212,7 +213,7 @@ export async function readPayable(supabase: unknown, userId: string, kind: "book
     const fees: { label: string; value: string }[] = [];
     if (rent) {
       fees.push({ label: "Rent", value: money(rent.rent_minor) });
-      if (Number(rent.caution_minor) > 0) fees.push({ label: "Caution deposit (held, not spent)", value: money(rent.caution_minor) });
+      if (Number(rent.caution_minor) > 0) fees.push({ label: CAUTION_DEPOSIT_LABEL, value: money(rent.caution_minor) });
       if (Number(rent.service_minor) > 0) fees.push({ label: "Service charge", value: money(rent.service_minor) });
       if (Number(rent.agency_minor) > 0) fees.push({ label: "Agency fee", value: money(rent.agency_minor) });
       if (Number(rent.legal_minor) > 0) fees.push({ label: "Legal fee", value: money(rent.legal_minor) });

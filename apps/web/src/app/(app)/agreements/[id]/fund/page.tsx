@@ -11,13 +11,20 @@ import { withNext } from "@/lib/auth/next-link";
 import { FundControl } from "./FundControl";
 import { SwitchToCard } from "./SwitchToCard";
 import { readAgreementPayChoice } from "@/lib/payments/rail-choice-read";
+import { protectedRailLive } from "@/lib/money/rail-live";
+import { FUND_TITLE } from "@/lib/money/copy";
 
 /**
- * STEP 7, FUND (D77): the renter pays the agreed rent into escrow, from their
- * Vallo balance, with one deliberate swipe. Hands off to
+ * STEP 7, FUND (D77): the renter pays the agreed rent on the protected rail,
+ * from their Vallo balance, with one deliberate swipe. Hands off to
  * /agreements/[id]/held the moment the money is on its way.
+ *
+ * THE PROTECTED RAIL IS SWITCHED OFF (9 November 2026, sweep item 14): while
+ * `escrowRailLive()` is false (read through `protectedRailLive()`, which fails
+ * closed) this route sends the member to the agreement itself, before reading
+ * anything, so no member is shown an escrow screen over a closed sentence.
  */
-export const metadata: Metadata = { title: "Pay into escrow" };
+export const metadata: Metadata = { title: FUND_TITLE };
 export const dynamic = "force-dynamic";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,6 +32,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export default async function FundPaymentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
+  if (!(await protectedRailLive())) redirect(`/agreements/${id}`);
   const [locale, read, payChoice] = await Promise.all([getLocale(), readFundPayment(id), readAgreementPayChoice(id)]);
   /* The way out to card, where the rules allow it (a purchase is escrow only;
      a closed or finished agreement has nothing to switch). */
@@ -39,7 +47,7 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
 
   if (read.state === "signed-out") {
     return (
-      <PageFrame title="Pay into escrow" fallback="/agreements" width="narrow">
+      <PageFrame title={FUND_TITLE} fallback="/agreements" width="narrow">
         <div className="px-md">
         <ButtonLink href={withNext("/sign-in", `/agreements/${id}/fund`)} variant="primary" full>
           Sign in to pay
@@ -50,7 +58,7 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
   }
   if (read.state === "unavailable") {
     return (
-      <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
+      <PageFrame title={FUND_TITLE} fallback={`/agreements/${id}`} width="narrow">
         <div className="px-md">
         <p className="nf-body">This could not be read just now. Nothing has been taken; refresh to try again.</p>
         </div>
@@ -63,7 +71,7 @@ export default async function FundPaymentPage({ params }: { params: Promise<{ id
   if (model.kind === "go_held") redirect(`/agreements/${id}/held`);
 
   return (
-    <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
+    <PageFrame title={FUND_TITLE} fallback={`/agreements/${id}`} width="narrow">
       <div className="px-md pb-2xl">
       <FundScreen
         facts={read.facts}

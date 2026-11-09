@@ -10,8 +10,13 @@ afterAll(closeAxe);
    protection 2 percent). `policy` bears no processor fee, which is the shape
    D61's table draws; `bearer` is the split as built today, the lister bearing
    the processor's fee up to the 2,000 naira cap VALLO_PRICING.md names. */
-const policy: ListerFeePolicy = { rateVersion: "v-test", valloBps: 200, escrowProtectionBps: 200, directProcessorFeeCapMinor: 0, capMinor: null };
+/* `escrowShown` is the server's protectedRailLive() answer: D61's range is
+   drawn only while the protected rail is live (sweep items 7 to 9). */
+const policy: ListerFeePolicy = { rateVersion: "v-test", valloBps: 200, escrowProtectionBps: 200, directProcessorFeeCapMinor: 0, capMinor: null, escrowShown: true };
 const bearer: ListerFeePolicy = { ...policy, directProcessorFeeCapMinor: 2_000_00 };
+/* The same rows as the server reads them today, with the protected rail off. */
+const off: ListerFeePolicy = { ...policy, escrowShown: false };
+const offBearer: ListerFeePolicy = { ...bearer, escrowShown: false };
 const noop = () => undefined;
 
 function gate(over: Partial<Parameters<typeof ListerFeeGate>[0]> = {}): string {
@@ -23,7 +28,41 @@ function gate(over: Partial<Parameters<typeof ListerFeeGate>[0]> = {}): string {
 /** The visible words, tags stripped. */
 const words = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/&#x27;|&#39;/g, "'").replace(/\s+/g, " ");
 
-describe("the lister's fee screen (D61)", () => {
+describe("the lister's fee screen while the protected rail is off (sweep items 7 to 9)", () => {
+  it("draws no escrow row and no range: Vallo's fee, and one figure the lister receives on a card payment", () => {
+    for (const p of [off, { ...policy, escrowShown: undefined }]) {
+      const html = gate({ policy: p });
+      const text = words(html);
+      expect(html).not.toContain("fee-gate-escrow");
+      expect(text).not.toMatch(/escrow/i);
+      expect(text).toContain("Platform fee ₦36,000");
+      expect(text).not.toContain("₦36,000 to ₦72,000");
+      expect(html).toMatch(/class="nf-feegate__headline">₦1,764,000</);
+      expect(html).not.toContain("nf-feegate__upper");
+      expect(html).not.toContain("fee-gate-range-note");
+    }
+  });
+
+  it("takes the processor's fee, at its cap, off the one figure, and says who bears it", () => {
+    const text = words(gate({ policy: offBearer }));
+    expect(text).toContain("Payment processing on a card payment up to ₦2,000");
+    expect(text).toContain("You receive ₦1,762,000");
+    expect(text).toContain("You pay payment processing when a renter or guest pays by card. They never pay it.");
+    expect(text).not.toContain("Paystack");
+  });
+
+  it("still records every rate in force, so lister_fee_accept re-derives the same figures, and never records more than is shown", () => {
+    const figures = listerFeeFigures(1_800_000_00, offBearer)!;
+    const accepted = acceptanceOf(figures, offBearer);
+    expect(accepted.escrowProtectionBps).toBe(200);
+    expect(accepted.escrowProtectionMinor).toBe(36_000_00);
+    expect(accepted.receiveLowMinor).toBeLessThanOrEqual(1_762_000_00);
+    expect(gate({ policy: offBearer, blocking: true, accepted })).toContain('data-state="accepted"');
+    expect(gate({ policy: offBearer, blocking: true, accepted, priceMinor: 1_900_000_00 })).toContain('data-state="open"');
+  });
+});
+
+describe("the lister's fee screen (D61, protected rail live)", () => {
   it("draws D61's range for 1,800,000, in naira, with the worst case as the headline", () => {
     const html = gate();
     const text = words(html);
@@ -38,7 +77,8 @@ describe("the lister's fee screen (D61)", () => {
 
   it("draws the processor's fee as its own line and takes it off the top when the lister bears it", () => {
     const text = words(gate({ policy: bearer }));
-    expect(text).toContain("Payment processing, by Paystack when a buyer pays directly up to ₦2,000");
+    expect(text).toContain("Payment processing on a card payment up to ₦2,000");
+    expect(text).not.toContain("Paystack");
     expect(text).toContain("You receive ₦1,728,000 to ₦1,762,000");
     expect(text).toContain("Count on the lower figure");
   });

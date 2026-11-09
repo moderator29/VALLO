@@ -62,7 +62,7 @@ export const experienceAdminEn = {
     stops: "Stop or restore a lister, with the reason on record.",
     kyc: "Identity documents waiting on a reviewer.",
     compliance: "Sanctions, politically exposed people, thresholds and reports.",
-    money: "The Guarantee reserve, cautions, refunds and reconciliation.",
+    money: "Cautions, refunds and reconciliation.",
     payments: "Every charge and what it settled to, with lookup.",
     fees: "The commission and listing fee in force, and their history.",
     referrals: "Rewards owed, the monthly budget, and referrals and payouts waiting on a decision.",
@@ -130,7 +130,7 @@ export const experienceAdminEn = {
     toggle: "Open the sections of this desk",
     jumpTo: "Jump to a section",
     moneyTitle: "Money desk sections",
-    guarantee: "The Guarantee",
+    guarantee: "Guarantee claims (retired)",
     cautions: "Cautions",
     refunds: "Refunds",
     reconciliation: "Reconciliation",
@@ -146,7 +146,7 @@ export const experienceAdminEn = {
       sentence is never written here. */
   money: {
     statementOverline: "Statement",
-    reserveTitle: "The Vallo Guarantee reserve",
+    reserveTitle: "The Vallo Guarantee reserve (retired 9 November 2026)",
     refundsOverline: "Refund record",
     refundsTitle: "Refunds to the card",
     cautionsOverline: "Rulings",

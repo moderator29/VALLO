@@ -56,6 +56,15 @@ export type ListerFeePolicy = {
   directProcessorFeeCapMinor: number;
   /** An absolute cap on Vallo's commission in kobo, for the sale and land rows (D51), or null. */
   capMinor: number | null;
+  /**
+   * Whether the escrow protection row may be DRAWN: the server's
+   * `protectedRailLive()` answer, set by `readListerFeePolicy`. Absent or
+   * false, the fee screen shows the card rail only (sweep items 7 to 9, 9
+   * November 2026). It never changes the figures recorded: `lister_fee_accept`
+   * re-derives every figure from the rates in force, the escrow rate among
+   * them, so `acceptanceOf` and `acceptanceMatches` keep using every rate.
+   */
+  escrowShown?: boolean;
 };
 
 export type ListerFeeFigures = {
@@ -129,6 +138,52 @@ export function listerFeeFigures(priceMinor: number | null, policy: ListerFeePol
     receiveLowMinor: priceMinor - Math.max(escrowTotal, directTotal),
     receiveHighMinor: priceMinor - Math.min(escrowTotal, directTotal),
     escrowIsLowest: escrowTotal >= directTotal,
+  };
+}
+
+/**
+ * WHAT THE FEE SCREEN DRAWS, which is not always what it records.
+ *
+ * While the protected rail is off (`policy.escrowShown` not true) escrow is not
+ * offered, so its row is not drawn and the figures drawn are the card rail's
+ * alone: the platform fee is Vallo's, and "You receive" is one figure, the
+ * least the lister receives on a card payment (the processor's fee at its
+ * cap taken off). With the rail live it is D61's range, exactly as before.
+ *
+ * The acceptance is NOT derived from this. `lister_fee_accept` (D77 migration)
+ * refuses any figure that differs from its own derivation, which always
+ * includes the escrow rate in force, so the record is `acceptanceOf(figures,
+ * policy)` in both cases. Its worst case is never above the figure drawn here,
+ * so the lister is never recorded as accepting more than they were shown.
+ */
+export type ListerFeeShown = {
+  showEscrow: boolean;
+  platformFeeLowMinor: number;
+  platformFeeHighMinor: number;
+  receiveLowMinor: number;
+  receiveHighMinor: number;
+  escrowIsLowest: boolean;
+};
+
+export function listerFeeShown(figures: ListerFeeFigures, policy: ListerFeePolicy): ListerFeeShown {
+  if (policy.escrowShown === true) {
+    return {
+      showEscrow: figures.escrowProtectionMinor > 0,
+      platformFeeLowMinor: figures.platformFeeLowMinor,
+      platformFeeHighMinor: figures.platformFeeHighMinor,
+      receiveLowMinor: figures.receiveLowMinor,
+      receiveHighMinor: figures.receiveHighMinor,
+      escrowIsLowest: figures.escrowIsLowest,
+    };
+  }
+  const cardReceive = figures.priceMinor - figures.valloMinor - figures.processorUpToMinor;
+  return {
+    showEscrow: false,
+    platformFeeLowMinor: figures.valloMinor,
+    platformFeeHighMinor: figures.valloMinor,
+    receiveLowMinor: cardReceive,
+    receiveHighMinor: cardReceive,
+    escrowIsLowest: false,
   };
 }
 

@@ -4,6 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { axe, closeAxe, hasBrowser } from "@/lib/a11y/axe";
 import {
   PAY_CHOICE_CARD_REASON,
+  PAY_CHOICE_ESCROW_PAUSED,
   PAY_CHOICE_ESCROW_REASON,
   PAY_CHOICE_ROOM_ONLY,
   PAY_CHOICE_SALE_ONLY,
@@ -75,6 +76,27 @@ describe("the payment step's choice (ruling 2)", () => {
     const out = html({ ...both, payer: false });
     expect(out).not.toContain("pay-choice-continue");
     expect(words(out)).toContain(copy.notPayerNote);
+  });
+
+  it("with the protected rail off, a rent or shortlet payer is shown card and the one quiet line naming the processor", () => {
+    const out = html({ ...both, options: ["card"], defaultRail: "card", escrowPaused: true });
+    const text = words(out);
+    expect(out).toContain('data-mode="card_escrow_paused"');
+    expect(out).not.toContain("pay-choice-escrow\"");
+    expect(text).toContain(PAY_CHOICE_ESCROW_PAUSED);
+    expect(PAY_CHOICE_ESCROW_PAUSED).toBe("You pay by card through Paystack. Nothing has been charged yet.");
+    expect(text).not.toMatch(/paused|coming back|temporarily/i);
+    expect(text.match(/Paystack/g)?.length).toBe(1);
+  });
+
+  it("with the protected rail off, a purchase says Vallo takes no payment for it, and offers no Continue", () => {
+    const out = html({ ...both, options: [], defaultRail: null, escrowPaused: true });
+    const text = words(out);
+    expect(out).toContain('data-mode="escrow_paused"');
+    expect(text).toContain(copy.escrowOnlyTitle);
+    expect(text).toContain("Vallo does not take payment for a property purchase at any stage.");
+    expect(text).not.toMatch(/escrow|paused|Paystack/i);
+    expect(out).not.toContain("pay-choice-continue");
   });
 
   it("draws nothing when no rail resolves", () => {

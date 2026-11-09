@@ -1,7 +1,18 @@
 import type { BrandIconName } from "@/design-system/icons/BrandIcon";
 import { SUPPORT_SENTENCE } from "@/lib/support-email";
 import { doorsSentence } from "@/lib/supply/roles";
-import { NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, REFUND_ROUTE, WHO_PAYS_SENTENCE } from "@/lib/money/copy";
+import {
+  CARD_SHARE_WHEN_CLEARS,
+  HOW_EACH_DEAL_IS_PAID,
+  NO_INSPECTION_FEE,
+  OFF_PLATFORM_SENTENCE,
+  PAYMENT_METHODS_ANSWER,
+  PAY_ONLY_THROUGH_VALLO,
+  REFUND_ROUTE,
+  RENT_PAYMENT_NOT_OPEN,
+  SALE_NEVER_PAID_ON_VALLO,
+  WHO_PAYS_SENTENCE,
+} from "@/lib/money/copy";
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
 import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
 import { DELETE_CONFIRM_PHRASE, GRACE_WINDOW_DAYS } from "@/lib/account-deletion/constants";
@@ -10,13 +21,10 @@ import { COMPANY_FORMAL_NAME, COMPANY_REGISTERED_OFFICE } from "@/lib/legal/comp
 import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
-  ESCROW_MEANS,
-  ESCROW_OR_CARD,
   HOTEL_COMMISSION_SENTENCE,
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
   SEATED_TABLE_FEE,
   VALLO_NEVER_HOLDS,
 } from "@/app/(site)/docs/facts";
@@ -30,8 +38,8 @@ import {
  * this one list, so an answer corrected here is corrected on both.
  *
  * Rewritten by the docs track on 13 October 2026 to the founder's money rules
- * (every payment inside Vallo; Escrow, the default, or card for rent and
- * shortlets; a sale always escrow; a hotel room by card; Vallo never holds
+ * (every payment inside Vallo; card for stays and hotel rooms; payment for
+ * rentals not open and none taken for a purchase, 9 November 2026; Vallo never holds
  * the money), which are written once in `app/(site)/docs/facts.ts`. Short
  * answers; the long versions are the /docs chapters. No provider is named.
  */
@@ -83,12 +91,12 @@ export const FAQS: Faq[] = [
   {
     category: "Property and Stays",
     q: "How is paying for a stay different from paying for a tenancy?",
-    a: `A hotel room is paid by card when you book. A shortlet is paid once the host accepts it. A tenancy comes after a viewing: you submit the inspection report, you and the lister confirm the agreement, and then you pay. ${ESCROW_OR_CARD} ${PAY_INSIDE_VALLO}`,
+    a: `A hotel room is paid by card when you book. A shortlet is paid once the host accepts it. A tenancy comes after a viewing: you submit the inspection report and you and the lister confirm the agreement. ${RENT_PAYMENT_NOT_OPEN} ${PAY_INSIDE_VALLO}`,
   },
   {
     category: "Property and Stays",
     q: "Does Vallo hold my money?",
-    a: `No. ${VALLO_NEVER_HOLDS} ${ESCROW_MEANS} ${CARD_MEANS}`,
+    a: `No. ${VALLO_NEVER_HOLDS} ${CARD_MEANS}`,
   },
   {
     category: "Property and Stays",
@@ -136,8 +144,8 @@ export const FAQS: Faq[] = [
   // ------------------------------------------------------------ payments
   {
     category: "Payments and refunds",
-    q: "Should I pay with Escrow or by card?",
-    a: `${ESCROW_OR_CARD} ${ESCROW_MEANS} ${CARD_MEANS} ${SALE_IS_ESCROW}`,
+    q: "How do I pay?",
+    a: `${HOW_EACH_DEAL_IS_PAID} ${SALE_NEVER_PAID_ON_VALLO} ${CARD_MEANS}`,
   },
   {
     category: "Payments and refunds",
@@ -162,7 +170,7 @@ export const FAQS: Faq[] = [
   {
     category: "Payments and refunds",
     q: "What payment methods can I use?",
-    a: "You pay in naira, inside Vallo. With Escrow, a licensed payment partner holds your payment until the deal is confirmed. With Pay by card, you pay on the payment partner's own page with a Nigerian card or a bank transfer it raises. Vallo never sees your full card number.",
+    a: PAYMENT_METHODS_ANSWER,
   },
   {
     category: "Payments and refunds",
@@ -238,7 +246,7 @@ export const FAQS: Faq[] = [
   {
     category: "Listing your property",
     q: "When do owners, agents and hosts get paid?",
-    a: "Add a Nigerian bank account in your own name to your payout details first. With Pay by card, your share goes to that account when the payment clears. With Escrow, it is released when the deal is confirmed. Vallo's commission comes out of your share, and every payment shows on your earnings.",
+    a: `Add a Nigerian bank account in your own name to your payout details first. ${CARD_SHARE_WHEN_CLEARS} Vallo's commission comes out of your share, and every payment shows on your earnings.`,
   },
   {
     category: "Listing your property",
@@ -325,7 +333,7 @@ export const FAQS: Faq[] = [
   {
     category: "Verification and trust",
     q: "What if I have already sent money outside the platform?",
-    a: "Call your bank first and ask them to raise a dispute on the transfer; a fast report can let them hold the money in the receiving account. Then report it to Vallo with the listing link, the account details and the messages. Payments made outside Vallo are not covered and Vallo cannot recover them, but it can remove the account and stop the same person reaching anybody else.",
+    a: `Call your bank first and ask them to raise a dispute on the transfer; a fast report can let them hold the money in the receiving account. Then report it to Vallo with the listing link, the account details and the messages. ${PAY_ONLY_THROUGH_VALLO} Vallo cannot recover money paid outside it, but it can remove the account and stop the same person reaching anybody else.`,
   },
 
   // ------------------------------------------------------------- around

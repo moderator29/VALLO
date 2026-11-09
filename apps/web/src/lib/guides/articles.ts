@@ -1,7 +1,7 @@
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
 import { FEE_RULES } from "@/lib/trust/fee-rules";
 import { NO_INSPECTION_FEE, PAYMENT_GATE_SENTENCE, REFUND_ROUTE } from "@/lib/money/copy";
-import { ESCROW_OR_CARD, HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE } from "@/app/(site)/docs/facts";
+import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "@/app/(site)/docs/facts";
 import { bpsLabel } from "@/lib/site/move-in-calculator";
 import type { GuideSlug } from "./slugs";
 
@@ -381,7 +381,7 @@ export const GUIDES: readonly Guide[] = [
         id: "booking",
         title: "Booking and paying",
         blocks: [
-          `You choose your dates and see the full price before you book. ${PRICE_IS_THE_PRICE} ${HOTEL_ROOM_BY_CARD} A shortlet host may accept each request themselves. ${ESCROW_OR_CARD} Either way you pay on Vallo, never by transfer to a host's own account.`,
+          `You choose your dates and see the full price before you book. ${PRICE_IS_THE_PRICE} ${HOTEL_ROOM_BY_CARD} A shortlet host may accept each request themselves. ${STAYS_PAID_BY_CARD} You pay on Vallo, never by transfer to a host's own account.`,
           { quote: "Either way you pay on Vallo, never by transfer to a host's own account." },
           "A restaurant table is a request, not a payment: you ask for a date, a time and a party size, the restaurant answers, and you pay the restaurant when you eat.",
         ],

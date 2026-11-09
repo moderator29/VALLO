@@ -122,7 +122,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Agreements",
         short_name: "Agreements",
-        description: "Your agreements, payments and Guarantee claims",
+        description: "Your agreements and payments",
         url: "/agreements",
         icons: [{ src: "/pwa/shortcut-wallet.png", sizes: "96x96", type: "image/png" }],
       },

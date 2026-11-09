@@ -6,14 +6,18 @@ import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
 import { MAX_MOVE_KOBO, MIN_MOVE_KOBO } from "@/lib/money/amount";
 import {
+  CARD_SHARE_WHEN_CLEARS,
   HELD_MONEY_NOT_US,
+  HOW_PAYING_PROCESSOR_NAMED,
   NO_INSPECTION_FEE,
   NO_PAYMENT_BALANCE,
   OFF_PLATFORM_SENTENCE,
-  RAIL_COPY,
+  PAY_ONLY_THROUGH_VALLO,
+  RENT_PAYMENT_NOT_OPEN,
   REFUND_NO_BALANCE,
   REFUND_ROUTE,
   REWARDS_BALANCE_SEPARATE,
+  TOLD_WHEN_IT_OPENS,
 } from "@/lib/money/copy";
 import { REPORT_CATEGORY_COPY, REPORT_CATEGORY_ORDER } from "@/lib/reports/schema";
 import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
@@ -41,17 +45,16 @@ import {
 import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
-  ESCROW_MEANS,
-  ESCROW_PAUSED,
-  ESCROW_OR_CARD,
+  ESCROW_NOT_OFFERED,
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
+  RENT_AND_SALE_NOT_OPEN,
+  SALE_NOT_PAID,
+  STAYS_PAID_BY_CARD,
   VALLO_NEVER_HOLDS,
   VIEWINGS_AND_LISTING_FREE,
 } from "./facts";
-import { DocsFlow } from "./DocsFlow";
 import { DOC_GROUPS, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
 
 /* The navigation lives in `docs-groups.ts` so the client rail can import it
@@ -289,9 +292,12 @@ const WHAT_VALLO_IS: DocChapter = {
  * HOW PAYING WORKS (replaces "Money and agreements", whose slug named the
  * retired Vallo Guarantee; `/docs/money-and-the-guarantee` and the older
  * `/docs/your-wallet` redirect here). The founder's rules of 13 October 2026:
- * every payment inside Vallo; Escrow (the default) or card for rent and
- * shortlets; a sale always escrow; a hotel room by card at once; Vallo never
- * holds the money. The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
+ * every payment inside Vallo and Vallo never holds the money. Rewritten on 9
+ * November 2026 (MONEY_COPY_SWEEP.md items 32 to 36): stays and hotel rooms are
+ * paid by card, payment for rentals is not open, Vallo takes no payment for a
+ * purchase, and escrow is not offered. This is the help page on how paying
+ * works, one of the five surfaces that name the processor
+ * (`HOW_PAYING_PROCESSOR_NAMED`). The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
  * `for-listers`, `references` and `off-platform` are kept from the old
  * chapter so its links still land on the right heading.
  */
@@ -300,7 +306,7 @@ const PAYING_ON_VALLO: DocChapter = {
   number: 0,
   title: "How paying works",
   summary:
-    "Every payment happens inside Vallo. Escrow or card for rent and shortlets, escrow for a sale, card for a hotel room, and Vallo never holds the money.",
+    "Every payment happens inside Vallo. Card for stays and hotel rooms, and Vallo never holds the money.",
   icon: "shield-lock",
   sections: [
     {
@@ -332,14 +338,13 @@ const PAYING_ON_VALLO: DocChapter = {
       body: (
         <ul role="list">
           <li>
-            <strong>Rent.</strong> Escrow, selected for you, or Pay by card.
+            <strong>Rent.</strong> {RENT_PAYMENT_NOT_OPEN}
           </li>
           <li>
-            <strong>Shortlets and serviced apartments.</strong> Escrow, selected for you, or Pay by
-            card.
+            <strong>Shortlets and serviced apartments.</strong> {STAYS_PAID_BY_CARD}
           </li>
           <li>
-            <strong>A sale.</strong> Escrow only.
+            <strong>A sale.</strong> {SALE_NOT_PAID}
           </li>
           <li>
             <strong>A hotel room.</strong> By card, when you book, at the price shown.
@@ -353,39 +358,18 @@ const PAYING_ON_VALLO: DocChapter = {
         </ul>
       ),
     },
-    {
-      id: "escrow",
-      heading: "Pay with Escrow",
-      body: (
-        <>
-          <DocsFlow
-            label="How an escrow payment moves"
-            steps={[
-              { object: "payment-sent", label: "You pay" },
-              { object: "doc-lock", label: "A licensed partner holds it" },
-              { object: "keys-handover", label: "The deal is confirmed" },
-              { object: "bank-column", label: "Released to them" },
-            ]}
-          />
-          <p>{ESCROW_OR_CARD}</p>
-          <p>{ESCROW_MEANS}</p>
-          <p>{RAIL_COPY.protected.refund}</p>
-          <p>{SALE_IS_ESCROW}</p>
-          <p>{ESCROW_PAUSED}</p>
-        </>
-      ),
-    },
+    /* "Pay with Escrow" (id `escrow`) is removed (sweep item 34): escrow is not
+       offered. Its anchor is kept on the card section below so old links land. */
     {
       id: "card",
       heading: "Pay by card",
       body: (
         <>
+          <span id="escrow" aria-hidden="true" />
           <p>{CARD_MEANS}</p>
-          <p>
-            You enter your card on the payment partner&rsquo;s own page, never on Vallo. Vallo never
-            sees your full card number.
-          </p>
+          <p>{HOW_PAYING_PROCESSOR_NAMED}</p>
           <p>{HOTEL_ROOM_BY_CARD}</p>
+          <p>{ESCROW_NOT_OFFERED}</p>
           <p>
             Tap Pay twice on a bad connection and you are charged once. A repeated attempt picks up the
             first one.
@@ -417,7 +401,7 @@ const PAYING_ON_VALLO: DocChapter = {
           </ul>
           <p>
             A card payment for an unusually large deal, or one where something changed recently, may wait
-            for a person at Vallo to look first. You are told by email and in the app when it opens.
+            for a person at Vallo to look first. {TOLD_WHEN_IT_OPENS}
           </p>
         </>
       ),
@@ -477,8 +461,7 @@ const PAYING_ON_VALLO: DocChapter = {
         <ul role="list">
           <li>Add a Nigerian bank account in your own name before anybody can pay you.</li>
           <li>Before you publish, Vallo shows you what you will receive after its commission.</li>
-          <li>With Pay by card, your share goes to your bank account when the payment clears.</li>
-          <li>With Escrow, your share is released when the deal is confirmed.</li>
+          <li>{CARD_SHARE_WHEN_CLEARS}</li>
           <li>Every payment and every refund appears on your earnings, line by line.</li>
         </ul>
       ),
@@ -499,7 +482,7 @@ const PAYING_ON_VALLO: DocChapter = {
       body: (
         <>
           <p>
-            {OFF_PLATFORM_SENTENCE} Payments made outside Vallo are not covered.
+            {OFF_PLATFORM_SENTENCE} {PAY_ONLY_THROUGH_VALLO}
           </p>
           <p>
             Say no, and report it. If you have already paid, read{" "}
@@ -616,11 +599,6 @@ const REFUNDS: DocChapter = {
           </p>
         </>
       ),
-    },
-    {
-      id: "escrow-refunds",
-      heading: "Get back a payment held in escrow",
-      body: <p>{RAIL_COPY.protected.refund}</p>,
     },
     {
       id: "tables-and-viewings",
@@ -1003,10 +981,9 @@ const TROUBLESHOOTING: DocChapter = {
       heading: "Payment will not open",
       body: (
         <ul role="list">
-          <li>For rent or a sale, both of you must confirm the agreement first.</li>
+          <li>{RENT_AND_SALE_NOT_OPEN}</li>
           <li>For a shortlet that is a request, the host must accept first.</li>
           <li>The lister may not have added a payout account yet. Message them.</li>
-          <li>{ESCROW_PAUSED}</li>
         </ul>
       ),
     },

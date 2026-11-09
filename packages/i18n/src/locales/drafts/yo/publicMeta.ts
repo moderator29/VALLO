@@ -27,8 +27,9 @@ export const publicMetaYo = {
     },
     terms: {
       title: "Àwọn òfin iṣẹ́",
+      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
       description:
-        "Àwọn òfin fún lílo Vallo: àkọọ́lẹ̀, ìsanwó, dídá owó padà, ìtumọ̀ àmì ìfọwọ́sí, kíkéde ilé, àdéhùn àti ìfọwọ́sí, Ìdánilójú Vallo àti lílò tí ó tọ́.",
+        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, and acceptable use.",
     },
     privacy: {
       title: "Ìlànà àṣírí",

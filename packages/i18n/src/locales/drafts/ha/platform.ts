@@ -22,8 +22,10 @@ export const platformHa = {
     notMeBody:
       "Wannan yana fitar da kowace sauran na'ura, yana dakatar da biyan kuɗi da canje-canje ga bayanan karɓar kuɗinka na awa 24, kuma yana kai ka don canza kalmar sirrinka.",
     notMe: "Ba ni ba ne",
-    notMeConfirm: "Sake taɓawa don riƙe kuɗinka",
-    notMeWorking: "Ana riƙe kuɗinka",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    notMeConfirm: "Tap again to pause payments",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    notMeWorking: "Pausing payments",
   },
 
   alert: {
@@ -248,7 +250,8 @@ export const platformHa = {
     paidBody: "Biyan kuɗin da ya rasa haɗinsa ya iso gare mu. Lambar shaida {reference}.",
     failedVerdict: "Biyan kuɗinka bai wuce ba",
     failedBody: "Ba a ɗauki komai ba don lambar shaida {reference}. Za ka iya sake biya.",
-    pendingVerdict: "Paystack bai gaya mana ba tukuna",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    pendingVerdict: "Our payment processor has not told us yet",
     pendingBody: "Muna duba lambar shaida {reference} kowane minti. Kada ka sake biya har sai wannan ya canza.",
     offline: "Ba ka kan layi. Biya yana buƙatar haɗi. Ba a caji komai ba.",
     returnedVerdict: "An mayar da biyan kuɗinka",

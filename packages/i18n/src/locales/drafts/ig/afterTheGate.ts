@@ -43,10 +43,14 @@ export const afterTheGateIg = {
   },
   refund: {
     heading: "Nkwụghachi gị",
-    landed: "Akwụghachila ya na kaadị gị na {date}. Paystack kwadoro na ọ gafere.",
-    initiated: "Paystack malitere nkwụghachi na kaadị gị na {date}. Ụlọ akụ na-egosikarị ya n'ime ụbọchị ọrụ ole na ole.",
-    initiatedLate: "Paystack malitere nkwụghachi na kaadị gị na {date}, mgbe ụbọchị ikpeazụ e kwere na nkwa gachara, {due}.",
-    sending: "Ekpebiela nkwụghachi ahụ, a na-ezigakwa ya na Paystack, laghachi na kaadị ma ọ bụ akaụntụ i ji kwụọ ụgwọ.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    landed: "Refunded to your card {date}. Our payment processor confirmed it went through.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    initiated: "Our payment processor started the refund to your card on {date}. Banks usually show it within a few business days.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    initiatedLate: "Our payment processor started the refund to your card on {date}, after the latest date promised, {due}.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    sending: "The refund is decided and is being sent to our payment processor, back to the card or account you paid with.",
     nothingOwed: "Ọ dịghị ihe kwesịrị ịlọghachi n'okpuru usoro e ji kwụọ ụgwọ ebe obibi a.",
     amount: "{amount} ga-alọghachi",
     retained: "E jidere {amount} n'okpuru usoro ahụ",
@@ -100,7 +104,8 @@ export const afterTheGateIg = {
       agreed: "E kwekọrịtara na mbelata",
       disputed: "Otu mbelata nọ n'aka ndị ọrụ Vallo",
       returned: "Edozila",
-      escalated: "Ọ nọ n'aka Nkwa Vallo",
+      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+      escalated: "With Vallo staff",
     },
     cautionCovered: "Akwụghachila {returned}, e belatara {deducted}, a ka ji {outstanding}.",
     cautionGuaranteed: "A kwụrụ onye mgbazinye {amount} site na Nkwa Vallo.",
@@ -145,9 +150,12 @@ export const afterTheGateIg = {
     contestNote: "Ihe mere",
     contestSubmit: "Gwa Vallo",
     escalateHeading: "Akwụghachighị ego nchekwa ahụ",
-    escalateHelp: "Ọ kwesịrị ịlọghachi tupu {date}. A ka ji {amount}, ọ dịghịkwa arụmụka banyere ya. Vallo nwere ike inyocha ya dịka arịrịọ Nkwa Vallo.",
-    escalateSubmit: "Rịọ ya site na Nkwa Vallo",
-    escalateOpen: "Arịrịọ gị na Nkwa Vallo nọ n'aka ndị ọrụ Vallo.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    escalateHelp: "It was due back by {date}. {amount} is still owed and not in dispute. Vallo can look into it, using the inspection report and your messages as the record.",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    escalateSubmit: "Ask Vallo to look into it",
+    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
+    escalateOpen: "Vallo staff are looking into the caution that is still owed.",
     promiseHeading: "Ihe e kwere gị na nkwa",
     promiseLede: "Ndepụta ahụ dịka ọ dị mgbe a kwụrụ mkpokọta ego ịbanye na {date}. Mgbanwe e mere na ndepụta ahụ kemgbe ahụ anaghị agbanwe nke a.",
     promiseNone: "A na-edekọ nkwa ndepụta ahụ mgbe ịkwụ ụgwọ ịbanye zuru ezu.",

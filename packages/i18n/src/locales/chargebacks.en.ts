@@ -285,7 +285,7 @@ export const chargebacksEn = {
     body: "The payer's bank reversed a card payment you received. The payment partner took it back from Vallo, so {amount} is owed back from your account.",
     bodyNoAmount: "The payer's bank reversed a card payment you received. The payment partner took it back from Vallo, so the amount is owed back from your account.",
     meansTitle: "What it means",
-    means: "While it is owed, Vallo pauses the release of payments our licensed provider holds for you, withdrawals from your Rewards Balance, and Vallo Guarantee claim payouts to you. Card payments still reach your payout account at the moment of payment. Nothing else on your account changes.",
+    means: "While it is owed, Vallo pauses withdrawals from your Rewards Balance. Card payments still reach your payout account at the moment of payment. Nothing else on your account changes.",
     nextTitle: "What happens next",
     next: "Vallo's finance team will contact you to settle it. Once it is settled or closed, this notice goes away by itself.",
     help: "Ask support about it",
@@ -310,7 +310,7 @@ export const chargebacksEn = {
     },
     lost: {
       title: "A disputed payment was reversed",
-      body: "The payer's bank reversed {amount}. It is owed back. Until it is settled, Vallo pauses the release of payments our licensed provider holds for you, withdrawals from your Rewards Balance, and Vallo Guarantee claim payouts.",
+      body: "The payer's bank reversed {amount}. It is owed back. Until it is settled, Vallo pauses withdrawals from your Rewards Balance.",
     },
     lostRecovered: {
       title: "A disputed payment was reversed",
@@ -322,7 +322,7 @@ export const chargebacksEn = {
     },
     reowed: {
       title: "A reversed payment is owed again",
-      body: "The reversed {amount} is owed again. Until it is settled, Vallo pauses the release of payments our licensed provider holds for you, withdrawals from your Rewards Balance, and Vallo Guarantee claim payouts.",
+      body: "The reversed {amount} is owed again. Until it is settled, Vallo pauses withdrawals from your Rewards Balance.",
     },
     payerDecided: {
       title: "Your card dispute is closed",
