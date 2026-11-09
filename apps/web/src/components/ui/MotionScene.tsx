@@ -42,6 +42,7 @@ export function MotionScene({
   objects = [],
   particles = true,
   anchor = "end",
+  theme = "dark",
   className,
   stageClassName,
   children,
@@ -54,6 +55,12 @@ export function MotionScene({
   particles?: boolean;
   /** Where a `contain` cut-out stands. */
   anchor?: "end" | "center";
+  /**
+   * The scene is a night island by default (its ground is the night artwork,
+   * so its light-on-dark words read in both themes). Pass `null` for a scene
+   * that should follow the reader's theme.
+   */
+  theme?: "dark" | null;
   className?: string;
   stageClassName?: string;
   children?: ReactNode;
@@ -120,7 +127,7 @@ export function MotionScene({
   }, [ambient]);
 
   return (
-    <div ref={rootRef} className={["nf-scene", className ?? ""].filter(Boolean).join(" ")} data-anchor={anchor} data-quiet={quiet || undefined} data-testid={testId}>
+    <div ref={rootRef} className={["nf-scene", className ?? ""].filter(Boolean).join(" ")} {...(theme ? { "data-theme": theme } : {})} data-anchor={anchor} data-quiet={quiet || undefined} data-testid={testId}>
       <div className={["nf-scene__stage", stageClassName ?? ""].filter(Boolean).join(" ")} aria-hidden="true">
         <span className="nf-scene__bed" />
         {backdrop ? (
