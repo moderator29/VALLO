@@ -33,6 +33,7 @@ export default async function ReviewCallsPage() {
   if (!(await reviewCallsOn())) {
     return (
       <div className="nf-console" data-testid="review-calls-off">
+        <PageHead title={c.staff.title} />
         <CalmNote title={c.notAvailable.reviewTitle} fills={c.notAvailable.reviewBody} />
       </div>
     );

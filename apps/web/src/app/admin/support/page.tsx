@@ -4,7 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { requireAdmin } from "@/lib/admin/guard";
 import { getSupportQueue, getSupportTicketDetail } from "@/lib/admin/support-queue";
 import { isSupportTab } from "@/lib/admin/support-workspace";
-import { CalmNote } from "../_components/panels";
+import { CalmNote, PageHead } from "../_components/panels";
 import { SupportDesk, type SupportDeskProps } from "./SupportDesk";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -54,6 +54,7 @@ export default async function AdminSupportPage({
   } else if (!ticketId) {
     return (
       <div className="nf-console" data-testid="support-desk-refused">
+        <PageHead title="Support" />
         <CalmNote
           title="Support is not one of your desks"
           fills="Your access covers other desks. If a ticket was handed to your desk, open it from the notification that told you."

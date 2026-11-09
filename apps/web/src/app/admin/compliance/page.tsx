@@ -1,6 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { fill } from "../_components/copy";
 import { QueueTabs } from "../_components/QueueTable";
 import type { ComplianceLane } from "./_lanes/lane";
@@ -48,7 +49,7 @@ export default async function CompliancePage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={c.title} lede={c.lede} />
+      <PageHead title={c.title} lede={c.lede} />
       {lane ? (
         <>
           <QueueTabs

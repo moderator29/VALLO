@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin/guard";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { RecoveryDesk, type RecoveryRow } from "./RecoveryDesk";
 
 export const metadata: Metadata = {
@@ -41,7 +42,7 @@ export default async function AccountRecoveryPage() {
         same facts in the same words, is a numbered list in a Card beside the
         form it governs.
       */}
-      <ui.QueueHeader
+      <PageHead
         title="Account recovery"
         lede="For a person who has lost the mailbox on their account. Every step is in the audit log."
       />

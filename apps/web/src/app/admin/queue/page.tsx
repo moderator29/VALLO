@@ -11,6 +11,7 @@ import {
   getSupportTickets,
 } from "@/lib/admin/queries";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { requireConsole, type StaffScope } from "@/lib/admin/guard";
 import { ReportsLane } from "../_lanes/ReportsLane";
 import { FlagsLane } from "../_lanes/FlagsLane";
@@ -222,7 +223,7 @@ export default async function AdminQueuePage({
   if (counts.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={o.queueTitle} lede={o.queueLede} />
+        <PageHead title={o.queueTitle} lede={o.queueLede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -471,9 +472,10 @@ export default async function AdminQueuePage({
   return (
     <div className="nf-console">
       {/* The one console heading that could not show a count now can: it is
-          the same `QueueHeader` the other eighteen desks already use, and the
-          total is a real sum of real reads rather than a number typed in. */}
-      <ui.QueueHeader title={o.queueTitle} lede={o.queueLede} count={total} />
+          the console's one header (`PageHead`, AD-01) with the waiting badge
+          beside the title, and the total is a real sum of real reads rather
+          than a number typed in. */}
+      <PageHead title={o.queueTitle} lede={o.queueLede} trail={<ui.WaitingBadge count={total} />} />
 
       <QueueTabs
         label="Queues"

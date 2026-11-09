@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { getStandingDesk } from "@/lib/admin/standing-queries";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import {
   QueueFilters,
   QueuePager,
@@ -69,7 +70,7 @@ export default async function AdminStandingPage({
   if (read.state !== "ready") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={t.admin.nav.standing.label} lede={LEDE} />
+        <PageHead title={t.admin.nav.standing.label} lede={LEDE} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -83,7 +84,7 @@ export default async function AdminStandingPage({
       {/* No count beside the title: the queue header's count reads "waiting",
           and a badge somebody holds is not waiting on anybody. The record below
           is the count. */}
-      <ui.QueueHeader title={t.admin.nav.standing.label} lede={LEDE} />
+      <PageHead title={t.admin.nav.standing.label} lede={LEDE} />
 
       {/*
         THE GRANT FORM IS ALWAYS DRAWN. This used to short-circuit to the empty

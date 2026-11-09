@@ -6,6 +6,7 @@ import { AreaDecision, ModeratorDecision, PauseToggle } from "./SocialDecisions"
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import {
   QueueFilters,
   queueNarrowed,
@@ -71,11 +72,13 @@ export default async function AdminSocialPage({
   const access = await requireAdmin();
   if (access.state !== "admin") {
     return (
-      <div className="nf-panel nf-panel--card nf-admin-card p-lg">
-        <h1 className="text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">Around</h1>
-        <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
-          {adminRefusal(access)}
-        </p>
+      <div className="nf-console flex flex-col gap-xl">
+        <PageHead title="Around" />
+        <div className="nf-panel nf-panel--card nf-admin-card p-lg">
+          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
+            {adminRefusal(access)}
+          </p>
+        </div>
       </div>
     );
   }
@@ -108,10 +111,10 @@ export default async function AdminSocialPage({
   */
   return (
     <div className="nf-console flex flex-col gap-xl">
-      <ui.QueueHeader
+      <PageHead
         title="Around"
         lede="Places people asked for, and people who asked to look after one."
-        count={queue.proposed.length + queue.applications.length}
+        trail={<ui.WaitingBadge count={queue.proposed.length + queue.applications.length} />}
       />
 
       <QueueFilters

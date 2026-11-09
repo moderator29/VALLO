@@ -267,7 +267,20 @@ export function adminUi(t: Dictionary, locale: Locale) {
     );
   }
 
-  /** The heading every queue page opens with. */
+  /**
+   * The waiting count as a brand badge, "3 waiting". A queue page hands it to
+   * the console's one header (`PageHead`, AD-01) as its `trail`, beside the
+   * title. Draws nothing at zero: an empty queue says so in its own panel.
+   */
+  function WaitingBadge({ count }: { count: number }) {
+    if (count <= 0) return null;
+    return <span className="nf-badge nf-badge--brand nf-numeric">{fill(c.waiting, { count })}</span>;
+  }
+
+  /**
+   * The heading the queue pages opened with before they moved onto `PageHead`
+   * (AD-01). Kept for the desks still on it (fees, restaurant fees).
+   */
   function QueueHeader({
     title,
     lede,
@@ -284,11 +297,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
       <header className="nf-admin-head">
         <div className="flex flex-wrap items-center gap-inline">
           <h1 className="nf-admin-head__title">{title}</h1>
-          {typeof count === "number" && count > 0 && (
-            <span className="nf-badge nf-badge--brand nf-numeric">
-              {fill(c.waiting, { count })}
-            </span>
-          )}
+          {typeof count === "number" && <WaitingBadge count={count} />}
         </div>
         <p className="nf-admin-head__sub">{lede}</p>
       </header>
@@ -586,6 +595,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
     statusLabel,
     columnLabel,
     StatusChip,
+    WaitingBadge,
     QueueHeader,
     Section,
     Stat,

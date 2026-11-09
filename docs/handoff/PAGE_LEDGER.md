@@ -14,59 +14,59 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/admin` | FE |  |  |  |  |  |
-| `/admin/account-recovery` | FE |  |  |  |  |  |
-| `/admin/agents` | FE |  |  |  |  |  |
-| `/admin/agreements` | FE |  |  |  |  |  |
-| `/admin/agreements/settings` | FE |  |  |  |  |  |
-| `/admin/alerts` | FE |  |  |  |  |  |
-| `/admin/analytics` | FE |  |  |  |  |  |
-| `/admin/audit` | FE |  |  |  |  |  |
-| `/admin/blocked-terms` | FE |  |  |  |  |  |
+| `/admin` | FE | PageHead |  |  |  | PageHead (AD-01): was a screen-reader-only h1; staff front page on it too. Not seen: needs a staff session |
+| `/admin/account-recovery` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/agents` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/agreements` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/agreements/settings` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/alerts` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/analytics` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/audit` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/blocked-terms` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/bookings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/bookings/[bookingId]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/bookings/reservations` | FE |  |  |  |  |  |
-| `/admin/bookings/visits` | FE |  |  |  |  |  |
-| `/admin/businesses` | FE |  |  |  |  |  |
-| `/admin/call-usage` | FE |  |  |  |  |  |
+| `/admin/bookings/reservations` | FE | PageHead |  |  |  | PageHead (AD-01), back chip as lead, waiting count as trail. Not seen: needs a staff session |
+| `/admin/bookings/visits` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/businesses` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/call-usage` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/chargebacks` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/chargebacks/[chargebackId]` | FE |  |  |  |  |  |
-| `/admin/compliance` | FE |  |  |  |  |  |
+| `/admin/compliance` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/crashes` | Lead |  |  |  |  |  |
-| `/admin/examples` | FE |  |  |  |  |  |
+| `/admin/examples` | FE | PageHead |  |  |  | PageHead (AD-01), overdue count as trail. Not seen: needs a staff session |
 | `/admin/fees` | FE |  |  |  |  |  |
-| `/admin/field-speed` | FE |  |  |  |  |  |
-| `/admin/front-door` | FE |  |  |  |  |  |
-| `/admin/handbook` | FE |  |  |  |  |  |
-| `/admin/handbook/position` | FE |  |  |  |  |  |
+| `/admin/field-speed` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/front-door` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/handbook` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/handbook/position` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/listings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/listings/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/lookup` | FE |  |  |  |  |  |
+| `/admin/lookup` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/money` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/operations` | FE |  |  |  |  |  |
-| `/admin/operations/providers` | FE |  |  |  |  |  |
-| `/admin/oversight` | FE |  |  |  |  |  |
+| `/admin/operations` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/operations/providers` | FE | PageHead |  |  |  | PageHead (AD-01): was a raw h1; own loading added. Not seen: needs a staff session |
+| `/admin/oversight` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/payments` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/people` | FE |  |  |  |  |  |
-| `/admin/people/[id]` | FE |  |  |  |  |  |
-| `/admin/queue` | FE |  |  |  |  |  |
-| `/admin/reference` | FE |  |  |  |  |  |
-| `/admin/referrals` | FE |  |  |  |  |  |
+| `/admin/people` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/people/[id]` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/queue` | FE | PageHead |  |  |  | PageHead (AD-01), total as trail; the lanes too. Not seen: needs a staff session |
+| `/admin/reference` | FE | PageHead |  |  |  | PageHead (AD-01), refusal state too. Not seen: needs a staff session |
+| `/admin/referrals` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/restaurant-fees` | FE |  |  |  |  |  |
-| `/admin/retention` | FE |  |  |  |  |  |
+| `/admin/retention` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/review-calls` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/review-calls/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/settings` | FE |  |  |  |  |  |
-| `/admin/social` | FE |  |  |  |  |  |
-| `/admin/staff` | FE |  |  |  |  |  |
-| `/admin/standing` | FE |  |  |  |  |  |
-| `/admin/stops` | FE |  |  |  |  |  |
+| `/admin/settings` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/social` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail, refusal state too. Not seen: needs a staff session |
+| `/admin/staff` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/standing` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/stops` | FE | PageHead |  |  |  | PageHead (AD-01), count as trail. Not seen: needs a staff session |
 | `/admin/supply` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/support` | FE |  |  |  |  |  |
-| `/admin/switches` | FE |  |  |  |  |  |
-| `/admin/weight-withheld` | FE |  |  |  |  |  |
+| `/admin/support` | FE | PageHead |  |  |  | PageHead (AD-01), keys help as action, refusal state too. Not seen: needs a staff session |
+| `/admin/switches` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/weight-withheld` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 
 ## Agent workspace
 

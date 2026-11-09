@@ -9,6 +9,7 @@ import { ApplicationDecision, VerificationRungDecision } from "../_components/Ad
 import { ReviewCallAction } from "@/components/calls/admin/ReviewCallAction";
 import { fill, type AdminCommon, type AdminCopy } from "../_components/copy";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QueueTable, type QueueRowData } from "../_components/QueueTable";
 import { DocumentViewer } from "../_components/DocumentViewer";
 import {
@@ -421,7 +422,7 @@ export default async function AdminAgentsPage({
   if (applications.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} lede={copy.lede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -445,7 +446,7 @@ export default async function AdminAgentsPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={copy.title} lede={copy.lede} count={onUs} />
+      <PageHead title={copy.title} lede={copy.lede} trail={<ui.WaitingBadge count={onUs} />} />
 
       <QueueFilters
         base="/admin/agents"

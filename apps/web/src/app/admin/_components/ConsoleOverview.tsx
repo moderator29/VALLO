@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Dictionary, Locale } from "@vallo/i18n/core";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { adminUi } from "./ui";
+import { PageHead } from "./panels";
 
 /**
  * THE CONSOLE'S FRONT DOOR, DRAWN FROM COUNTS IT IS HANDED.
@@ -83,7 +84,7 @@ export function ConsoleOverview({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={o.title} lede={o.lede} count={waiting} />
+      <PageHead title={o.title} lede={o.lede} trail={<ui.WaitingBadge count={waiting} />} />
 
       <ui.Section title={o.deskTitle} hint={o.deskLede}>
         <ul className="nf-admin-tiles">

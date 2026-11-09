@@ -5,6 +5,7 @@ import { getMessageFlags, type FlagView, type PartyRole } from "@/lib/admin/quer
 import { FlagDecision } from "../_components/AdminActions";
 import { fill, type AdminCommon } from "../_components/copy";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QueueTable, shortRef, type QueueRowData } from "../_components/QueueTable";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import {
@@ -204,7 +205,7 @@ export async function FlagsLane({
   if (flags.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} lede={copy.lede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -223,7 +224,7 @@ export async function FlagsLane({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={copy.title} lede={copy.lede} count={open.length} />
+      <PageHead title={copy.title} lede={copy.lede} trail={<ui.WaitingBadge count={open.length} />} />
 
       <QueueFilters
         base={BASE}

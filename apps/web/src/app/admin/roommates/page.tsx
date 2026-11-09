@@ -20,6 +20,7 @@ import { getLocale } from "@/lib/locale";
 import { reportReadFault } from "@/lib/observability/read-error";
 
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { AddInstitutionForm, InstitutionControls, TargetActions, VerificationDecision, WeightsForm } from "./RoommateControls";
 
 export const metadata: Metadata = {
@@ -66,11 +67,13 @@ export default async function AdminRoommatesPage({ searchParams }: { searchParam
   const ui = adminUi(getDictionary(locale), locale);
   if (access.state !== "console") {
     return (
-      <div className="nf-panel nf-panel--card nf-admin-card p-lg">
-        <h1 className="text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">Roommates</h1>
-        <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
-          {access.state === "step-up" ? "Confirm your security key to use the console." : access.state === "signed-out" ? "Sign in with your operations account to continue." : "This desk is for Vallo staff."}
-        </p>
+      <div className="nf-console flex flex-col gap-xl">
+        <PageHead title="Roommates" />
+        <div className="nf-panel nf-panel--card nf-admin-card p-lg">
+          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
+            {access.state === "step-up" ? "Confirm your security key to use the console." : access.state === "signed-out" ? "Sign in with your operations account to continue." : "This desk is for Vallo staff."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -81,7 +84,7 @@ export default async function AdminRoommatesPage({ searchParams }: { searchParam
 
   return (
     <div className="nf-console flex flex-col gap-xl">
-      <ui.QueueHeader title="Roommates" lede="Roommate profiles, posts and groups, checks waiting for a decision, schools and how matching is weighed. Reports are decided as cases." />
+      <PageHead title="Roommates" lede="Roommate profiles, posts and groups, checks waiting for a decision, schools and how matching is weighed. Reports are decided as cases." />
       <div className="flex flex-wrap gap-xs">
         <ButtonLink href="/admin/cases?module=roommates" variant="secondary" size="sm" leadingIcon="clipboard-list">
           Roommates cases

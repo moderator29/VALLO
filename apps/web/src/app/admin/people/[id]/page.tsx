@@ -7,6 +7,7 @@ import { readMemberExtras } from "@/lib/admin/member-queries";
 import { MemberSections } from "./MemberSections";
 import { MemberStanding } from "./MemberStanding";
 import { adminUi } from "../../_components/ui";
+import { PageHead } from "../../_components/panels";
 import { UpholdControl } from "./UpholdControl";
 import { ConsiderStr } from "../../_components/ConsiderStr";
 import { InternalNotes } from "../../_components/InternalNotes";
@@ -63,7 +64,7 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
   if (file.state !== "ready") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title="Person file" lede={LEDE} />
+        <PageHead title="Person file" lede={LEDE} />
         {file.state === "failed" ? (
           <ui.QueueUnavailable />
         ) : (
@@ -80,7 +81,7 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
   const extras = await readMemberExtras(person.userId);
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={person.name ?? "A person"} lede={LEDE} />
+      <PageHead title={person.name ?? "A person"} lede={LEDE} />
       <p className="mb-row nf-caption">
         <Link href="/admin/people" className="inline-flex min-h-11 items-center underline underline-offset-2">
           Find another person

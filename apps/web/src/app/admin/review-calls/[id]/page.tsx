@@ -31,6 +31,7 @@ export default async function ReviewCallPage({ params }: { params: Promise<{ id:
   if (!(await reviewCallsOn())) {
     return (
       <div className="nf-console" data-testid="review-calls-off">
+        <PageHead title={c.staff.title} />
         <CalmNote title={c.notAvailable.reviewTitle} fills={c.notAvailable.reviewBody} />
       </div>
     );
@@ -41,6 +42,7 @@ export default async function ReviewCallPage({ params }: { params: Promise<{ id:
   if (!read) {
     return (
       <div className="nf-console" data-testid="review-call-missing">
+        <PageHead title={c.staff.title} />
         <CalmNote
           title={c.staff.missingTitle}
           fills={c.staff.missingBody}

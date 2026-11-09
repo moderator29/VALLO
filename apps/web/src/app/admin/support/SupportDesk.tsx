@@ -21,7 +21,7 @@ import {
 } from "@/lib/admin/support-workspace";
 import { TicketStatusControl } from "../_components/AdminActions";
 import { NoteForm } from "../_components/NoteForm";
-import { CalmNote, Panel } from "../_components/panels";
+import { CalmNote, PageHead, Panel } from "../_components/panels";
 import type { AdminCopy } from "../_components/copy";
 import { TicketClaim } from "./TicketClaim";
 import { ReviewCallAction } from "@/components/calls/admin/ReviewCallAction";
@@ -535,25 +535,24 @@ export function SupportDesk({ now, tab, q, queue, selected, missing, copy }: Sup
 
   return (
     <div className="nf-console" data-testid="support-desk">
-      <header className="nf-admin-head">
-        <div className="flex flex-wrap items-center gap-inline">
-          <h1 className="nf-admin-head__title">Support</h1>
-          {waiting > 0 ? <span className="nf-badge nf-badge--brand nf-numeric">{waiting} waiting on us</span> : null}
-          {queue.state === "ok" ? (
-            <span className="ml-auto">
+      {/* The console's one header (`PageHead`, AD-01): the waiting count
+          beside the title, the keyboard help at the end of the line. */}
+      <PageHead
+        title="Support"
+        lede="Questions and complaints from members. Four hours for safety and money, one day for the rest, counted from the member's oldest unanswered message."
+        trail={waiting > 0 ? <span className="nf-badge nf-badge--brand nf-numeric">{waiting} waiting on us</span> : undefined}
+        action={
+          queue.state === "ok" ? (
+            <span className="shrink-0">
               <SupportKeys
                 rows={shown.map((r) => ({ id: r.id, claimed: r.claim !== null, lane: r.lane }))}
                 current={selectedId}
                 hrefFor={hrefFor}
               />
             </span>
-          ) : null}
-        </div>
-        <p className="nf-admin-head__sub">
-          Questions and complaints from members. Four hours for safety and money, one day for the rest, counted from
-          the member&apos;s oldest unanswered message.
-        </p>
-      </header>
+          ) : undefined
+        }
+      />
 
       {queue.state === "ok" ? (
         /* On a phone an open ticket gets the screen; the tiles, search and

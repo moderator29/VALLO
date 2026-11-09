@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { getFeatureFlags } from "@/lib/admin/queries";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { SwitchRow } from "./SwitchRow";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,7 +25,7 @@ export default async function AdminSwitchesPage() {
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={copy.title} lede={copy.lede} />
+      <PageHead title={copy.title} lede={copy.lede} />
 
       <p className="nf-panel nf-panel--card nf-admin-card mb-md flex gap-xs p-md text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
         {/*
