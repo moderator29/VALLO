@@ -2016,16 +2016,16 @@
     justify-content: center;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.1;
+    opacity: 0.22;
     transition: opacity var(--nf-duration-slow) var(--nf-ease-exit);
   }
   .nf-chat-watermark[data-hidden] {
     opacity: 0;
   }
   .nf-chat-watermark img {
-    width: min(44%, 200px);
+    width: min(26%, 108px);
     height: auto;
-    transform: translateY(-6%);
+    transform: translateY(-4%);
   }
   /* The conversation and its empty state sit above the mark. */
   :is(.nf-thread__scroll, .nf-support-thread, .nf-ai__thread) > :not(.nf-chat-watermark) {
