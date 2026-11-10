@@ -11,7 +11,6 @@ import {
   manualNeighbours,
   type ManualSlug,
 } from "@/lib/admin/manual/chapters";
-import "@/components/site/guides/docs-type.css";
 import { MANUAL_BODIES } from "./index";
 
 /**
@@ -95,10 +94,10 @@ export function ManualChapterView({ slug }: { slug: ManualSlug }) {
         </DocHeader>
         <DocSummary items={body.glance} />
         <DocToc sections={body.sections.map((s) => ({ id: s.id, title: s.title }))} />
-        <div className="nf-doc-sections grid gap-xl">
+        <div className="grid gap-xl">
           {body.sections.map((section, index) => (
             <DocSection key={section.id} id={section.id} number={index + 1} title={section.title}>
-              <div className="nf-doc-prose">{section.body}</div>
+              {section.body}
             </DocSection>
           ))}
         </div>

@@ -60,4 +60,27 @@ export const PREVIEW_DEALS: Record<string, ProtectedDeal> = {
   refunded: at("refunded", { stamps: { ...funded, refundConfirmedAt: "2026-11-13T09:00:00Z" } }),
   review: at("requires_review", { stamps: funded }),
   failed: at("failed", { funding: null }),
+  /* The screens nobody asks for (10 November 2026), each a recorded state. */
+  "partner-unavailable": at("protected", {
+    stamps: funded,
+    issue: { kind: "partner_unavailable", lastConfirmedAt: "2026-11-10T09:41:00Z" },
+  }),
+  "wrong-amount": at("requires_review", { issue: { kind: "amount_mismatch", receivedMinor: 170_000_00 } }),
+  "late-transfer": at("requires_review", { issue: { kind: "late_transfer" } }),
+  "duplicate-transfer": at("requires_review", { stamps: funded, issue: { kind: "duplicate_transfer" } }),
+  "release-delayed": at("release_requested", {
+    stamps: { ...funded, releaseRequestedAt: "2026-11-07T13:10:00Z" },
+    issue: { kind: "release_delayed", askedAt: "2026-11-07T13:10:00Z" },
+  }),
+  "refund-delayed": at("refund_requested", {
+    stamps: funded,
+    issue: { kind: "refund_delayed", askedAt: "2026-11-07T09:00:00Z" },
+    receipt: { providerReference: null, agreementVersion: 3, refundRequestedAt: "2026-11-07T09:00:00Z" },
+  }),
+  "lister-payout": at("protected", { stamps: funded, listerPayoutMissing: true }),
+  "lister-review": at("requires_review", { issue: { kind: "amount_mismatch", receivedMinor: 170_000_00 } }),
+  receipt: at("released", {
+    stamps: { ...funded, releaseRequestedAt: "2026-11-12T13:10:00Z", releaseConfirmedAt: "2026-11-12T13:40:00Z" },
+    receipt: { providerReference: "EXAMPLE-REF-0001", agreementVersion: 3, refundRequestedAt: null },
+  }),
 };

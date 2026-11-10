@@ -4,105 +4,19 @@
  * THE TYPE OF THE DOCUMENTS (Session 3, stage 9, W1b; north star 10 J: "real
  * typographic hierarchy in guides and docs").
  *
- * Two things live here, both for the public reading surfaces (docs, help,
- * guides, the policy pages' links):
+ * One thing lives here now, for the public reading surfaces:
  *
- *   THE INDEX   `.nf-index`: reference 7086's rows. A round glyph plate, a
- *               title in the display face, one line, a trailing fact. One
- *               Card holds them, a row's only treatment is the Plate's wash.
  *   THE STATEMENT `.nf-lead-statement`: a page's one stated sentence.
  *
  * The chapter prose that was the second thing here moved to the docs kit on
  * 10 November 2026 (app/css/docs-kit.css, THE PROSE).
  *
- * Tokens only; the sizes are the type scale's own. Nothing here animates
- * beyond the Plate wash: the arrival is the shared reveal's.
+ * Tokens only; the sizes are the type scale's own. Nothing here animates.
  */
 @layer components {
-  /* ------------------------------------------------------- the index */
-  .nf-index-card {
-    padding: var(--nf-space-xs);
-  }
-  @media (min-width: 64rem) {
-    .nf-index-card {
-      padding: var(--nf-space-sm);
-    }
-  }
-  .nf-index {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  @media (min-width: 48rem) {
-    .nf-index {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: var(--nf-space-xs);
-    }
-  }
-  .nf-index > li {
-    display: grid;
-    min-width: 0;
-  }
-  .nf-index__row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--nf-space-sm);
-    min-height: 2.75rem;
-    padding: var(--nf-space-sm);
-    border-radius: var(--nf-tier-plate-radius);
-    color: var(--nf-content-primary);
-    text-decoration: none;
-    transition: background-color var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  @media (hover: hover) {
-    .nf-index__row:hover {
-      background: var(--nf-tier-plate-hover);
-    }
-  }
-  .nf-index__row:active {
-    background: var(--nf-tier-plate-press);
-  }
-  .nf-index__row:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: -2px;
-  }
-  .nf-index__plate {
-    flex: none;
-  }
-  .nf-index__text {
-    display: grid;
-    flex: 1;
-    gap: var(--nf-space-3xs);
-    min-width: 0;
-  }
-  .nf-index__title {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-body);
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.005em;
-    color: var(--nf-content-primary);
-    text-wrap: balance;
-  }
-  .nf-index__line {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    overflow: hidden;
-    font-size: var(--nf-text-body-sm);
-    line-height: 1.5;
-    color: var(--nf-content-secondary);
-  }
-  .nf-index__meta {
-    flex: none;
-    padding-top: var(--nf-space-3xs);
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-muted);
-    white-space: nowrap;
-  }
+  /* The index rows (`.nf-index`, reference 7086's rows) lived here until 10
+     November 2026; the help centre and the docs home draw the kit's DocCard
+     now, and IndexRows was removed with them. */
 
   /* The chapter prose and the guide's section heads lived here until 10
      November 2026; the docs kit's section body styles them now
