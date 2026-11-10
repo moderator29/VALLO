@@ -543,3 +543,23 @@
     outline-offset: 2px;
   }
 }
+/* "Verify your identity to publish" at the top of the listings workspace. */
+.nf-agent-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-sm);
+  margin-block-end: var(--nf-space-md);
+  padding: var(--nf-space-sm) var(--nf-space-md);
+  border: var(--nf-border-width) solid var(--nf-panel-edge);
+  border-radius: var(--nf-radius-xl);
+  background: var(--nf-surface-raised);
+}
+.nf-agent-identity > div {
+  flex: 1;
+  min-inline-size: 0;
+}
+@media (max-width: 520px) {
+  .nf-agent-identity {
+    flex-wrap: wrap;
+  }
+}

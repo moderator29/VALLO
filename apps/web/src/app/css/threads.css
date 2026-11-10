@@ -1015,17 +1015,17 @@
 
   /* ------------------------------------------------------------- inbox */
 
-  /* THE INBOX ON THE ROW SPEC (plan item 19, spec 5): one card holds the
-     conversations, rows sit inside it with hairlines inset to the text
-     column (16 + 44 + 12), none above the first. */
+  /* THE INBOX, FLAT (founder, 10 November 2026: "remove that container,
+     a mature clean industry standard message preview"). No card around the
+     list: rows sit on the page, edge to edge, with hairlines inset to the
+     text column (16 + 44 + 12), none above the first. */
   .nf-inbox-list {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--nf-tier-card-edge);
-    border-radius: var(--nf-radius-card);
-    background: var(--nf-surface-primary);
-    box-shadow: var(--nf-card-shadow);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
   .nf-inbox-list > li {
     position: relative;

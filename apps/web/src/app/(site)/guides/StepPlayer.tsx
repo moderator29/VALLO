@@ -39,7 +39,7 @@ export function StepPlayer({ steps, icon, label }: { steps: PlayerStep[]; icon: 
         </p>
       </div>
       <div className="nf-doc-player__bar" aria-hidden="true">
-        <span style={{ inlineSize: `${((at + 1) / steps.length) * 100}%` }} />
+        <span style={{ transform: `scaleX(${(at + 1) / steps.length})` }} />
       </div>
       <div key={step.id} className="nf-doc-player__stage">
         <div className="nf-doc-player__shot">

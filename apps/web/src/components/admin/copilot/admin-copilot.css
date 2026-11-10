@@ -70,7 +70,7 @@
     padding: var(--nf-space-xs) var(--nf-space-sm);
     border: var(--nf-border-width) solid var(--nf-border-subtle);
     border-radius: var(--nf-radius-control);
-    background: var(--nf-surface-inset);
+    background: var(--nf-surface-secondary);
     color: var(--nf-content-primary);
     font-size: var(--nf-text-body-sm);
     text-align: start;
@@ -171,7 +171,7 @@
     height: 8px;
     border-radius: var(--nf-radius-circle);
     background: var(--nf-brand-primary);
-    animation: nf-copilot-pulse 1.2s ease-in-out infinite;
+    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) 10;
   }
 
   @keyframes nf-copilot-pulse {

@@ -568,7 +568,7 @@
     width: 88px;
     height: 88px;
     box-shadow: 0 0 0 8px var(--nf-brand-tint-1);
-    animation: nf-pp-settle 600ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    animation: nf-pp-settle 600ms var(--nf-ease-entrance) both;
   }
 
   .nf-pp-orbit {
@@ -581,7 +581,7 @@
     border-radius: var(--nf-radius-circle);
     border: 2px solid transparent;
     border-top-color: var(--nf-brand-primary);
-    animation: nf-pp-orbit 2.4s linear infinite;
+    animation: nf-pp-orbit 2.4s linear 6;
   }
 
   @keyframes nf-pp-settle {
