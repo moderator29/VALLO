@@ -14,9 +14,16 @@
      ?screen=protected                         screens 5 and 6, a stay
      ?screen=protected-rent                    screens 5 and 6, keys for a rental
      ?screen=releasing  released  dispute  refunding  refunded  review-state  failed
-     ?screen=lister                            screen 10, the lister's side */
+     ?screen=lister                            screen 10, the lister's side
+   The screens nobody asks for and the rest of the second batch (10 November):
+     ?screen=partner-unavailable  wrong-amount  late-transfer  duplicate-transfer
+     ?screen=release-delayed  refund-delayed   the bank has not confirmed yet
+     ?screen=lister-payout  lister-review      the lister's side of a problem
+     ?screen=receipt                           the protected receipt, with help
+     ?screen=problem                           raising a problem (the sheet) */
 import { getLocale } from "@/lib/locale";
 import { ListerProtectedView } from "@/components/money/protected-rail/ListerProtectedView";
+import { ProtectedReceipt } from "@/components/money/protected-rail/ProtectedReceipt";
 import { PREVIEW_DEALS, PREVIEW_NOW } from "./fixtures";
 import { PreviewProtected } from "./PreviewProtected";
 
@@ -37,6 +44,16 @@ const SCREENS = [
   "review-state",
   "failed",
   "lister",
+  "partner-unavailable",
+  "wrong-amount",
+  "late-transfer",
+  "duplicate-transfer",
+  "release-delayed",
+  "refund-delayed",
+  "lister-payout",
+  "lister-review",
+  "receipt",
+  "problem",
 ] as const;
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ screen?: string; offer?: string }> }) {
@@ -59,8 +76,15 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
           </a>
         ))}
       </nav>
-      {screen === "lister" ? (
-        <ListerProtectedView deal={PREVIEW_DEALS.protected!} now={PREVIEW_NOW} locale={locale} />
+      {screen === "lister" || screen === "lister-payout" || screen === "lister-review" ? (
+        <ListerProtectedView deal={screen === "lister" ? PREVIEW_DEALS.protected! : PREVIEW_DEALS[screen]!} now={PREVIEW_NOW} locale={locale} />
+      ) : screen === "receipt" ? (
+        <div className="grid gap-lg">
+          <PreviewProtected screen="journey" deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} />
+          <ProtectedReceipt deal={PREVIEW_DEALS.receipt!} now={now} locale={locale} paymentHref="/preview/protected?screen=receipt" />
+        </div>
+      ) : screen === "problem" ? (
+        <PreviewProtected screen="problem" deal={PREVIEW_DEALS.protected!} now={now} locale={locale} />
       ) : (
         <PreviewProtected
           screen={screen === "choose" ? "choose" : screen === "review" ? "review" : "journey"}

@@ -8,6 +8,7 @@ import { ReviewProtection } from "@/components/money/protected-rail/ReviewProtec
 import { ProtectedPayment } from "@/components/money/protected-rail/ProtectedPayment";
 import { protectedQuote } from "@/lib/money/protected-fees";
 import type { ProtectedDeal } from "@/components/money/protected-rail/types";
+import { ProblemSheet } from "@/components/money/protected-rail/ProtectedPaymentLive";
 
 /** The real screens with recorded answers: every action says, in the banner, that the preview called nothing. */
 export function PreviewProtected({
@@ -17,13 +18,14 @@ export function PreviewProtected({
   locale,
   offer,
 }: {
-  screen: "choose" | "review" | "journey";
+  screen: "choose" | "review" | "journey" | "problem";
   deal: ProtectedDeal;
   now: number;
   locale: Locale;
   offer?: ProtectedOffer["state"];
 }) {
   const [pending, setPending] = useState(false);
+  const [problem, setProblem] = useState(screen === "problem");
   const quote = protectedQuote(deal.amountMinor);
   const said = (what: string) => () => {
     setPending(true);
@@ -35,6 +37,19 @@ export function PreviewProtected({
   if (screen === "choose") {
     const state: ProtectedOffer = offer && offer !== "offered" ? ({ state: offer } as ProtectedOffer) : quote ? { state: "offered", quote } : { state: "fee_failed" };
     return <ChooseHowToPay deal={deal} offer={state} cardAllowed locale={locale} onContinue={(rail) => said(`continue with ${rail}`)()} />;
+  }
+  if (screen === "problem") {
+    return (
+      <>
+        <ProtectedPayment
+          deal={deal}
+          now={now}
+          locale={locale}
+          actions={{ refresh: said("status read again"), reportTransfer: said("transfer reported"), confirmMilestone: said("milestone confirmed"), raiseProblem: () => setProblem(true), newDetails: said("new details") }}
+        />
+        <ProblemSheet open={problem} onOpenChange={setProblem} arrangementId="preview" pending={pending} onSubmit={(_r, _s, sent) => { sent(); said("problem reported")(); }} />
+      </>
+    );
   }
   if (screen === "review" && quote) {
     return <ReviewProtection deal={deal} quote={quote} agreementVersion={3} locale={locale} pending={pending} onAgree={(v) => said(`agreed to version ${v}`)()} />;
