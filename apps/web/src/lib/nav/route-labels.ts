@@ -66,6 +66,8 @@ const NAMES: Readonly<Record<string, string>> = {
   "/roommates/groups/new": "a new group",
   "/roommates/groups/[id]": "the group",
   "/roommates/split": "the cost splitter",
+  "/roommates/tools/checklist": "the move-in checklist",
+  "/roommates/tools/agreement": "the house agreement",
   "/roommates/verify": "verification",
   "/saved/searches": "saved searches",
   "/record/[code]": "the record",

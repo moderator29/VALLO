@@ -380,7 +380,12 @@ async function call<T>(db: Db, fn: string, args: Record<string, unknown>): Promi
 
 const interestSchema = z.object({ toId: uuid, listingId: uuid.nullable(), note: z.string().trim().max(LIMITS.noteMax).catch("") });
 
-export async function expressInterest(input: { toId: string; listingId?: string | null; note?: string }): Promise<ActionResult<{ id: string }>> {
+/**
+ * Say yes to a person (or to their post). The answer says whether it CONNECTED:
+ * when they had already said yes to you, the database accepts both at once
+ * and the screen goes straight to "You're connected".
+ */
+export async function expressInterest(input: { toId: string; listingId?: string | null; note?: string }): Promise<ActionResult<{ id: string; connected: boolean }>> {
   const who = await member();
   if ("error" in who) return fail(who.error);
   const parsed = validate(interestSchema, { toId: input.toId, listingId: input.listingId ?? null, note: input.note ?? "" });
@@ -398,7 +403,10 @@ export async function expressInterest(input: { toId: string; listingId?: string 
   refresh(ROOMMATES_ROUTES.person(input.toId), ROOMMATES_ROUTES.hub);
   if (input.listingId) refresh(ROOMMATES_ROUTES.listing(input.listingId));
   void recordRoommatesStep("roommates_interest_sent");
-  return ok({ id: res.data });
+  const { data: row } = await who.db.from("roommate_interests").select("status").eq("id", res.data).maybeSingle();
+  const connected = (row as { status?: string } | null)?.status === "accepted";
+  if (connected) void recordRoommatesStep("roommates_interest_accepted");
+  return ok({ id: res.data, connected });
 }
 
 export async function answerInterest(input: { id: string; accept: boolean }): Promise<ActionResult<{ status: string }>> {

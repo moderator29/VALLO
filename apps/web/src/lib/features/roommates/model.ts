@@ -698,6 +698,8 @@ export const ROOMMATES_ROUTES = {
   group: (id: string) => `/roommates/groups/${id}`,
   newGroup: "/roommates/groups/new",
   split: "/roommates/split",
+  checklist: "/roommates/tools/checklist",
+  agreement: "/roommates/tools/agreement",
   safety: "/roommates/safety",
   verify: "/roommates/verify",
   campus: (slug: string) => `/roommates/campus/${slug}`,

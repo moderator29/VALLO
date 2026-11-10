@@ -61,8 +61,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * so the board is one shortlist in the order the person built it rather than
  * two piles with a heading between them.
  */
-export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string; sort?: string }> }) {
-  const { list, sort } = await searchParams;
+export default async function SavedPage({ searchParams }: { searchParams: Promise<{ list?: string; sort?: string; rm?: string }> }) {
+  const { list, sort, rm } = await searchParams;
   const locale = await getLocale();
   const t = getDictionary(locale);
 
@@ -232,6 +232,8 @@ export default async function SavedPage({ searchParams }: { searchParams: Promis
       />
       {/* Vallo Roommates: saved posts and people, on the same lists. */}
       <SavedRoommates
+        tab={rm === "people" ? "people" : "rooms"}
+        keep={{ list, sort }}
         onlyKeys={activeList?.keys ?? null}
         listFor={(kind, id) => (session.state === "signed-in" ? <AddToList collections={collections} itemKey={collectionKey(kind, id)} kind={kind} id={id} /> : undefined)}
       />

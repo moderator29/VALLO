@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getDictionary } from "@vallo/i18n";
@@ -30,7 +31,13 @@ const LIMIT = 24;
 export async function SavedRoommates({
   listFor,
   onlyKeys,
+  tab = "rooms",
+  keep: carry = {},
 }: {
+  /** Which shelf is open: the posts or the people. */
+  tab?: "rooms" | "people";
+  /** The page's own query (list, sort), kept when the tab changes. */
+  keep?: Record<string, string | undefined>;
   listFor?: (kind: "roommate_listing" | "roommate_profile", id: string) => ReactNode;
   onlyKeys?: SavedCollection["keys"] | null;
 }) {
@@ -62,7 +69,19 @@ export async function SavedRoommates({
   return (
     <section className="nf-rm-section mt-section" aria-labelledby="saved-roommates" data-testid="saved-roommates">
       <SectionHead id="saved-roommates" title={copy.title} more="/roommates" moreLabel={copy.ui.seeAll} />
-      {roomCards.length ? (
+      <nav className="nf-rmsv__tabs" aria-label={copy.title} data-testid="saved-roommates-tabs">
+        {(["rooms", "people"] as const).map((k) => {
+          const q = new URLSearchParams(Object.entries(carry).filter((e): e is [string, string] => Boolean(e[1])));
+          q.set("rm", k);
+          return (
+            <Link key={k} href={`/saved?${q.toString()}`} scroll={false} className="nf-rmsv__tab" aria-current={tab === k ? "page" : undefined}>
+              {k === "rooms" ? copy.discover.rooms : copy.discover.people}
+              {` (${k === "rooms" ? roomCards.length : personCards.length})`}
+            </Link>
+          );
+        })}
+      </nav>
+      {tab === "rooms" && roomCards.length ? (
         <CardGrid kind="rooms" testId="saved-roommate-rooms">
           {roomCards.map((r) => (
             <li key={r.id}>
@@ -71,7 +90,7 @@ export async function SavedRoommates({
           ))}
         </CardGrid>
       ) : null}
-      {personCards.length ? (
+      {tab === "people" && personCards.length ? (
         <CardGrid testId="saved-roommate-people">
           {personCards.map((p) => (
             <li key={p.userId}>
@@ -80,6 +99,7 @@ export async function SavedRoommates({
           ))}
         </CardGrid>
       ) : null}
+      {(tab === "rooms" ? roomCards.length : personCards.length) === 0 ? <p className="nf-rm-panel__sub">{copy.feed.savedEmpty}</p> : null}
     </section>
   );
 }

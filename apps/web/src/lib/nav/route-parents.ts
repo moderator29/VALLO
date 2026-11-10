@@ -291,6 +291,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/roommates/groups/new": "/roommates/groups",
   "/roommates/groups/[id]": "/roommates/groups",
   "/roommates/split": "/roommates",
+  "/roommates/tools/checklist": "/roommates",
+  "/roommates/tools/agreement": "/roommates",
   "/roommates/verify": "/roommates/me",
   /* The compare tray's table (29 October 2026): places set aside from the
      catalogue, so back is the home screen like Saved. */

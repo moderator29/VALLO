@@ -4,6 +4,7 @@ import { RoommatesDashboard } from "./Dashboard";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { RoommatesFeed } from "@/components/roommates/RoommatesFeed";
+import { ToolsSheet } from "@/components/roommates/ToolsSheet";
 import { RoommatesFirstRun } from "@/components/roommates/RoommatesFirstRun";
 import { RoommatesWelcome } from "@/components/roommates/Welcome";
 import type { FeedFilters, FeedTab } from "@/lib/features/roommates/feed";
@@ -189,7 +190,10 @@ export function RoommatesHomeView({ home, t: copy, now, feed }: { home: Roommate
           <>
             <RoommatesFeed initial={feed.initial} tab={feed.tab} filters={feed.filters} signedIn={home.signedIn} now={now} />
             <ButtonLink href={postHref} variant="primary" size="lg" iconOnly round leadingIcon="plus" aria-label={copy.welcome.create} className="nf-rmfd__fab" data-testid="roommates-fab" />
-            <h2 className="nf-rmfd__title">{copy.feed.toolsTitle}</h2>
+            <div className="nf-rmfd__head">
+              <h2 className="nf-rmfd__title">{copy.feed.toolsTitle}</h2>
+              <ToolsSheet />
+            </div>
           </>
         ) : null}
         <RoommatesDashboard home={home} t={copy} />

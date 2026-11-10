@@ -11,7 +11,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
 import { expressInterest, withdrawInterest } from "@/lib/features/roommates/actions";
 import { listSavedPlaces, savePlace, unsavePlace } from "@/lib/saved/places-actions";
-import { LIMITS } from "@/lib/features/roommates/model";
+import { LIMITS, ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { blockUserSafely } from "@/lib/safety/blocks-actions";
 import { shareOrCopy } from "@/lib/ui/clipboard";
@@ -243,7 +243,7 @@ export function InterestSheet({
   listingId?: string | null;
   title?: string;
   body?: string;
-  onSent: (interestId: string) => void;
+  onSent: (interestId: string, connected: boolean) => void;
   /** Called after Undo withdrew the interest, so the parent shows the open state again. */
   onUndone?: () => void;
 }) {
@@ -262,6 +262,14 @@ export function InterestSheet({
         }
         feedback("confirm");
         const sentId = result.data.id;
+        if (result.data.connected) {
+          banner.success(copy.ui.profile.accepted);
+          setNote("");
+          onOpenChange(false);
+          onSent(sentId, true);
+          router.push(ROOMMATES_ROUTES.connected(sentId));
+          return;
+        }
         banner.success(copy.ui.profile.sentBanner, {
           action: {
             label: copy.area.undo,
@@ -278,7 +286,7 @@ export function InterestSheet({
         });
         setNote("");
         onOpenChange(false);
-        onSent(result.data.id);
+        onSent(result.data.id, false);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

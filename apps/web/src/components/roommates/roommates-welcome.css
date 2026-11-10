@@ -807,3 +807,128 @@
     animation: none;
   }
 }
+
+@layer components {
+  /* ------------------------------------------------------------ tools, saved tabs, trusted accent */
+  .nf-rmtl {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-rmtl__tile {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-block-size: 3.5rem;
+    padding: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  .nf-rmtl__words {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .nf-rmtl__title {
+    font-weight: 700;
+  }
+  .nf-rmtl__body {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-rmtp {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-rmtp__progress {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+  .nf-rmtp__group {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-secondary);
+  }
+  .nf-rmtp__head {
+    margin: 0;
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+  }
+  .nf-rmtp__list {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-rmtp__actions,
+  .nf-rmtp__add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    align-items: end;
+  }
+  .nf-rmtp__out {
+    margin: 0;
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-rm-ink-wash);
+    font: inherit;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .nf-rmsv {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+  .nf-rmsv__tabs {
+    display: flex;
+    gap: var(--nf-space-xs);
+  }
+  .nf-rmsv__tab {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.5rem;
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-pill);
+    color: var(--nf-content-primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .nf-rmsv__tab[aria-current="page"] {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+  }
+  /* The trusted accent: a thin gold ring on the face and a gold tick, only for a member
+     with a confirmed identity plus at least one more confirmed check. */
+  .nf-rmv-head[data-trusted] .nf-rm-face {
+    box-shadow: 0 0 0 2px var(--nf-badge-gold-top);
+  }
+  .nf-rmv-head[data-trusted] .nf-rm-card__tick {
+    color: var(--nf-badge-gold-top);
+  }
+  .nf-rmv-head__trusted {
+    justify-self: start;
+    margin: 0;
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-badge-gold-top);
+    border-radius: var(--nf-radius-badge);
+    color: var(--nf-badge-gold-top);
+    font-size: var(--nf-text-caption);
+    font-weight: 700;
+  }
+}
