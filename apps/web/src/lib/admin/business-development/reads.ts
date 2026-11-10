@@ -98,6 +98,27 @@ export async function listPipeline(): Promise<BdRead<BdProspect[]>> {
   }
 }
 
+const ACTIVITY_LIMIT = 2000;
+
+/** Every activity row across the whole pipeline, newest first, for the KPI
+ * and weekly-summary counts. Capped like every other console total; the
+ * cap is generous against the role's own 60-a-month follow-up target. */
+export async function listAllActivity(): Promise<BdRead<BdActivity[]>> {
+  const db = await adminDb();
+  if (!db) return { state: "unavailable" };
+  try {
+    const { data, error } = await (db as Loose)
+      .from("bd_prospect_activity")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(ACTIVITY_LIMIT);
+    if (error) return isNotLive(error) ? { state: "not_set_up" } : { state: "unavailable" };
+    return { state: "ok", data: ((data ?? []) as Record<string, unknown>[]).map(toActivity) };
+  } catch {
+    return { state: "unavailable" };
+  }
+}
+
 /** One prospect's own activity log, newest first. */
 export async function listActivity(prospectId: string): Promise<BdRead<BdActivity[]>> {
   const db = await adminDb();
