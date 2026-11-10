@@ -38,6 +38,8 @@ export const COVERAGE: readonly CoverageGroup[] = [
       "/legal/terms", "/privacy", "/terms", "/standards", "/safety", "/host-agreement", "/docs", "/docs/[slug]", "/guides",
       "/guides/[slug]", "/help", "/ai/permissions", "/ai/privacy", "/ai/security", "/ai/terms", "/delete-account", "/support",
       "/settings/help",
+      /* The other session's documents, which arrived with the merge of 10 November 2026. */
+      "/legal", "/legal/cookies", "/cookies", "/docs/how-protection-works", "/admin/manual", "/admin/manual/[chapter]",
     ],
   },
   {
@@ -98,6 +100,8 @@ export const COVERAGE: readonly CoverageGroup[] = [
     "/roommates", "/roommates/campus", "/roommates/campus/[slug]", "/roommates/discover", "/roommates/groups", "/roommates/groups/[id]",
     "/roommates/groups/new", "/roommates/me", "/roommates/new", "/roommates/nysc", "/roommates/p/[userId]", "/roommates/profile",
     "/roommates/r/[id]", "/roommates/r/[id]/edit", "/roommates/safety", "/roommates/split", "/roommates/verify",
+    /* From the other session's Roommates work, merged 10 November 2026. */
+    "/roommates/connected/[interestId]", "/roommates/tools/agreement", "/roommates/tools/checklist",
   ] },
   /* ----------------------------------------------------------- supply, hosts */
   { doc: D("for-agents"), routes: ["/for-agents"] },
@@ -118,15 +122,15 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { gap: "Crypto payment pages exist for notification deep links; no member flow in the docs offers it. Not documented until the founder says whether it is offered.", routes: ["/pay/crypto/[reference]"] },
   { gap: "Review call invitations for the person a case is about; needs a short section in Trust and safety.", routes: ["/calls/reviews", "/calls/reviews/[id]"] },
   /* ------------------------------------------------------------ staff manual */
-  { doc: M("desks-and-access"), routes: ["/admin", "/admin/handbook", "/admin/handbook/position", "/admin/handbook/manual", "/admin/handbook/manual/[slug]", "/admin/lookup", "/admin/staff", "/admin/audit", "/admin/oversight", "/admin/queue"] },
+  { doc: M("desks-and-access"), routes: ["/admin", "/admin/handbook", "/admin/handbook/position", "/admin/handbook/manual", "/admin/handbook/manual/[slug]", "/admin/lookup", "/admin/staff", "/admin/audit", "/admin/oversight", "/admin/queue", "/admin/overview", "/admin/my-desk", "/admin/my-desk/announcements", "/admin/my-desk/tasks", "/admin/my-desk/weekly", "/admin/reports/weekly", "/admin/business-development", "/admin/marketing", "/admin/social-media", "/admin/content", "/admin/technical"] },
   { doc: M("identity-and-applications"), routes: ["/admin/kyc", "/admin/kyc/guide", "/admin/agents", "/admin/businesses", "/admin/review-calls", "/admin/review-calls/[id]", "/admin/account-recovery"] },
   { doc: M("listings-and-supply"), routes: ["/admin/listings", "/admin/listings/[id]", "/admin/examples", "/admin/supply", "/admin/people", "/admin/people/[id]", "/admin/stops", "/admin/reference"] },
   { doc: M("agreements-and-bookings"), routes: ["/admin/agreements", "/admin/agreements/settings", "/admin/bookings", "/admin/bookings/[bookingId]", "/admin/bookings/reservations", "/admin/bookings/visits"] },
-  { doc: M("money-and-fees"), routes: ["/admin/money", "/admin/payments", "/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/restaurant-fees", "/admin/referrals"] },
-  { doc: M("cases-and-safety"), routes: ["/admin/trust", "/admin/cases", "/admin/cases/[id]", "/admin/alerts", "/admin/appeals", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates"] },
-  { doc: M("support-desk"), routes: ["/admin/support"] },
+  { doc: M("money-and-fees"), routes: ["/admin/money", "/admin/payments", "/admin/chargebacks", "/admin/chargebacks/[chargebackId]", "/admin/fees", "/admin/restaurant-fees", "/admin/referrals", "/admin/arrangements"] },
+  { doc: M("cases-and-safety"), routes: ["/admin/trust", "/admin/cases", "/admin/cases/[id]", "/admin/alerts", "/admin/appeals", "/admin/standing", "/admin/weight-withheld", "/admin/blocked-terms", "/admin/circle", "/admin/social", "/admin/roommates", "/admin/account-deletions"] },
+  { doc: M("support-desk"), routes: ["/admin/support", "/admin/support-lead", "/admin/doc-feedback"] },
   { doc: M("offers-and-deals-desk"), routes: ["/admin/offers", "/admin/offers/[id]"] },
-  { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings"] },
+  { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings", "/admin/copilot"] },
 ];
 
 /**

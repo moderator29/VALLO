@@ -357,7 +357,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
         label: "Trust and Safety",
         items: pick("social", "cases", "appeals", "roommates", "circle-desk", "standing", "blocked-terms", "weight-withheld"),
       },
-      { key: "finance", label: "Finance", items: pick("money", "payments", "chargebacks", "arrangements", "fees", "referrals") },
+      { key: "finance", label: "Finance", items: pick("money", "payments", "chargebacks", "arrangements", "offers", "fees", "referrals") },
       { key: "compliance", label: "Compliance", items: pick("compliance") },
     ],
   },

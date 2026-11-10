@@ -45,6 +45,30 @@ import {
   UNDERSTANDING_A_LISTING,
 } from "./chapters-people";
 import {
+  COUNTEROFFERS,
+  DEAL_ROOM,
+  HOW_OFFERS_WORK,
+  MAKING_AN_OFFER,
+  OFFER_DOCUMENTS,
+  OFFER_FEES,
+  OFFER_INSPECTIONS,
+  RECEIVING_OFFERS,
+} from "./chapters-offers";
+import {
+  AGENT_WORKSPACE,
+  CIRCLE,
+  HOST_WORKSPACE,
+  NOTIFICATIONS,
+  PROFILES,
+  REWARDS,
+  ROOMMATES,
+  SAVED_AND_COMPARE,
+  SETTINGS,
+  TENANCY,
+  TOOLS,
+  WALLET,
+} from "./chapters-platform";
+import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
   ESCROW_NOT_OFFERED,
@@ -1132,11 +1156,31 @@ const ORDER: readonly { group: DocGroupId; chapters: DocChapter[] }[] = [
   { group: "listing", chapters: [LISTING_ON_VALLO, FOR_OWNERS, FOR_AGENTS, HOSTING] },
   { group: "tools", chapters: [MESSAGES, AI_ASSISTANT, AROUND] },
   { group: "trust", chapters: [BADGES_AND_VERIFICATION, REVIEWS, TRUST_AND_SAFETY, YOUR_DATA, TROUBLESHOOTING] },
+  /*
+   * The offers and platform chapters, written by the second session and
+   * brought in with the merge of 10 November 2026. They were orphaned: the
+   * files existed and nothing registered them, so every link between them
+   * pointed at a chapter the register did not have. No slug collides with the
+   * twenty above.
+   */
+  {
+    group: "offers",
+    chapters: [HOW_OFFERS_WORK, MAKING_AN_OFFER, RECEIVING_OFFERS, COUNTEROFFERS, DEAL_ROOM, OFFER_INSPECTIONS, OFFER_DOCUMENTS, OFFER_FEES],
+  },
 ];
 
-export const CHAPTERS: DocChapter[] = ORDER.flatMap(({ group, chapters }) =>
-  chapters.map((chapter) => ({ ...chapter, group })),
-).map((chapter, index) => ({ ...chapter, number: index + 1 }));
+/* The platform chapters join the groups their subject already belongs to. */
+const PLATFORM_ORDER: readonly { group: DocGroupId; chapters: DocChapter[] }[] = [
+  { group: "renting", chapters: [TENANCY] },
+  { group: "money", chapters: [WALLET, REWARDS] },
+  { group: "listing", chapters: [HOST_WORKSPACE, AGENT_WORKSPACE] },
+  { group: "tools", chapters: [CIRCLE, ROOMMATES, SAVED_AND_COMPARE, NOTIFICATIONS, TOOLS] },
+  { group: "trust", chapters: [PROFILES, SETTINGS] },
+];
+
+export const CHAPTERS: DocChapter[] = [...ORDER, ...PLATFORM_ORDER]
+  .flatMap(({ group, chapters }) => chapters.map((chapter) => ({ ...chapter, group })))
+  .map((chapter, index) => ({ ...chapter, number: index + 1 }));
 
 /* ------------------------------------------------------------------ index */
 

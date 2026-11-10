@@ -926,7 +926,7 @@ icon: "report-stats",
         <ul>
           <li>A listing is not available: check Health. A missing mandate or verification step is named there.</li>
           <li>An approved agent sees numbers; anyone else sees none. That is by design.</li>
-          <li>Never take a deposit outside Vallo. A payment outside Vallo is not covered.</li>
+          <li>Never take a deposit outside Vallo. A payment made outside the platform leaves no record, so we cannot help if something goes wrong.</li>
         </ul>
       ),
     },
