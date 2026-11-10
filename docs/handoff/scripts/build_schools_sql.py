@@ -72,5 +72,7 @@ def main():
     open(out + "/_logo_values.sql", "w").write(vals)
     open(out + "/_alias_values.sql", "w").write(avals)
     print(len(more), "new rows;", len(logos), "logos;", len(aliases), "alias rows")
+    return more, logos, aliases
 
-main()
+if __name__ == '__main__':
+    main()

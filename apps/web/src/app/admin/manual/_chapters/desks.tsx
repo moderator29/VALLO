@@ -57,7 +57,7 @@ const REVIEW: Desk[] = [
 const MONEY: Desk[] = [
   { href: "/admin/money", name: "Money", icon: "coins", what: "Cautions, refunds to the card, the refund clock, the reconciliation job, and the record of the retired Vallo Guarantee.", who: "Finance (rulings on cautions and old claims: Guarantee claims)" },
   { href: "/admin/payments", name: "Payments", icon: "wallet", what: "Every payment attempt and how it ended. The health panel and the saved card lookup are admins only.", who: "Finance" },
-  { href: "/admin/arrangements", name: "Protected payments", icon: "shield-check", what: "Every protected payment with the provider's state beside Vallo's. Read only. The protected rail is switched off, so expect it to be empty.", who: "Finance" },
+  { href: "/admin/arrangements", name: "Arrangements", icon: "shield-check", what: "Every payment on the bank-held rail, with the provider's state beside Vallo's. Read only. That rail is switched off, so expect it to be empty.", who: "Finance" },
   { href: "/admin/chargebacks", name: "Chargebacks", icon: "credit-card", what: "Disputes a payer raised with their bank: open, move through their states, add notes.", who: "Finance" },
   { href: "/admin/fees", name: "Fees", icon: "receipt", what: "The fee rates in force. Lowering a rate is any admin; raising one is a super admin.", who: "Finance to read; admins to change" },
   { href: "/admin/referrals", name: "Referrals", icon: "hand-coins", what: "Referral rewards owed, the monthly budget, and the referrals and payouts a person decides.", who: "Admins" },

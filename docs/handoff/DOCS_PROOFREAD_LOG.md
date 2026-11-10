@@ -63,8 +63,8 @@ their share. Both now say the renter or guest pays none. References:
 - `/around/manage` (a permanent redirect, `next.config.ts:288`) became
   `/around/settings` in the Around chapter.
 - Staff manual Desks chapter claimed to list every desk on the rail but left out
-  four: added Business development, Protected payments (noting the rail is
-  switched off), Social media and Pages that fail, with their access areas
+  four: added Business development, Arrangements (the desk the rail screens call Protected payments; the
+  claims gate does not allow the bare word; the rail is switched off), Social media and Pages that fail, with their access areas
   read from each page's `requireAdmin`.
 - Staff manual My desk: added the Undo banner on a task status change,
   a reassignment, and a pin (new this month), and the Weekly report tab.

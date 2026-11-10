@@ -121,7 +121,7 @@ export function TermsGlance() {
 
 export const PRIVACY_SHORT: ShortVersionItem[] = [
   { icon: "eye-off", text: "There is no advertising tracking and no analytics in Vallo. We keep a few counts of our own, described in section 2." },
-  { icon: "wallet", text: "We never hold your money, so there is no balance in your name. Card numbers are handled by Paystack and we never see or store your full card number." },
+  { icon: "wallet", text: "We never hold your money, so there is no balance in your name. Card numbers are handled by our payment processor and we never see or store your full card number." },
   { icon: "location", text: "Your location is read only when you ask for it. We do not track it in the background." },
   { icon: "user-check", text: "A person decides on verification. No decision about your identity is made by a machine alone." },
   { icon: "trash", text: `You can delete your account yourself. Nothing is destroyed for ${GRACE_WINDOW_DAYS} days and you can restore it in that time. Records the law makes us keep stay, with you removed from them.` },
@@ -172,7 +172,7 @@ const DATA_ROWS: DocTableRow[] = [
     cells: {
       what: "Payment references, amounts, how a payment was split, refunds, a card token and payout bank account if you save them",
       why: "To take payments, pay the lister and make refunds",
-      who: "Paystack, our payment processor, and our staff",
+      who: "Our payment processor and our staff",
       keep: "Five years after the transaction, as the law requires. Your name, email and phone are removed from the record.",
     },
   },
