@@ -64,7 +64,7 @@ as $function$
     when 'cfo' then 'Chief Financial Officer'
     when 'coo' then 'Chief Operating Officer'
     when 'ceo' then 'Chief Executive Officer'
-    when 'business_development_executive' then 'Business Development Executive'
+    when 'business_development_executive' then 'Business Development Director'
     when 'social_media_manager' then 'Social Media Manager'
   end;
 $function$;
@@ -127,7 +127,7 @@ revoke all on function private.staff_scope_words(public.staff_scope[]) from publ
 -- Self-checks.
 do $check$
 begin
-  if private.staff_position_title('business_development_executive') is distinct from 'Business Development Executive' then
+  if private.staff_position_title('business_development_executive') is distinct from 'Business Development Director' then
     raise exception 'staff_business_dev_social_media: business_development_executive title wrong';
   end if;
   if private.staff_position_scopes('business_development_executive') is distinct from

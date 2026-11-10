@@ -37,7 +37,7 @@ const AREA_OPENS: Record<StaffScope, string> = {
   circle: "The Circle desk, and Circle and feed cases.",
   analyst: "Trust overview: the numbers only, never what a case says.",
   business_development:
-    "The Business Development desk: partnerships, the pipeline, and listing review (through the listing_approval scope every Business Development Executive also holds).",
+    "The Business Development desk: partnerships, the pipeline, and listing review (through the listing_approval scope every Business Development Director also holds).",
   social_media: "The Social Media desk: the content calendar, drafts, campaigns, the media library and approvals. No listing, moderation or member data.",
 };
 

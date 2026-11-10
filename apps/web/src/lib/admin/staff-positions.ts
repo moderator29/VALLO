@@ -302,7 +302,7 @@ export const JOB_DESCRIPTIONS: Record<StaffPosition, JobDescription> = {
     escalate: ["Anything affecting the company's licence or its members' safety: the board."],
   },
   business_development_executive: {
-    title: "Business Development Executive",
+    title: "Business Development Director",
     summary:
       "Brings in the landlords, agents, hotels and restaurants Vallo lists, and reviews their listings before they go live.",
     reportsTo: "COO",
