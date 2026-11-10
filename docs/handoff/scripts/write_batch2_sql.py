@@ -9,6 +9,25 @@ WEB = "/home/user/VALLO/apps/web/public/schools"
 BASE = "https://www.vallospaces.com/schools/"
 q = lambda s: "'" + s.replace("'", "''") + "'"
 kept = sorted((r for r in man if r["decision"] == "kept" and os.path.exists(f"{WEB}/{r['slug']}.webp")), key=lambda r: r["slug"])
+# logo_source must be https (a column check): an http page is used only if its https form answers 200 with a verified certificate
+import urllib.request
+def https_ok(u):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "ValloSchoolLogoBot/1.0 (project VALLO; contact via repo)"}), timeout=10) as r:
+            return r.status == 200
+    except Exception:
+        return False
+fixed = []
+for r in kept:
+    if not r["page"].startswith("https://"):
+        u = "https://" + r["page"][len("http://"):]
+        if not https_ok(u):
+            r["decision"] = "rejected: the school page is http only, and logo_source must be https"
+            os.remove(f"{WEB}/{r['slug']}.webp")
+            continue
+        r["page"] = u
+    fixed.append(r)
+kept = fixed
 assert all(r["slug"] in schools for r in kept)
 doms = sorted((r for r in em if r["domain"] and re.fullmatch(r"[a-z0-9-]+(\.[a-z0-9-]+)*\.(edu\.ng|edu)", r["domain"])), key=lambda r: r["slug"])
 doms = [r for r in doms if not schools[r["slug"]].get("email_domains")]

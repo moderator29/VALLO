@@ -4,7 +4,7 @@
 -- aliases columns; already live) and on the school rows from roommates_5, the full list and
 -- roommates_schools_more. Not run against live or a local copy. Additive and safe to run twice.
 --
--- 1. 222 logos. Each was taken from the school's OWN website (the logo image in the page
+-- 1. 221 logos. Each was taken from the school's OWN website (the logo image in the page
 --    header, else a clearly logo-named og:image, else its apple-touch-icon or favicon), only
 --    from a page whose title or text names the school, then reviewed by eye on contact sheets
 --    (photographs, generic site icons, another body's mark and illegible marks were dropped;
@@ -199,7 +199,6 @@ update public.institutions i
   ('osun-state-college-of-technology-esa-oke', 'https://www.vallospaces.com/schools/osun-state-college-of-technology-esa-oke.webp', 'https://oscotechesaoke.edu.ng/home/index.html'),
   ('osun-state-university-osogbo', 'https://www.vallospaces.com/schools/osun-state-university-osogbo.webp', 'https://uniosun.edu.ng'),
   ('our-saviour-institute-of-science-and-technology-enugu', 'https://www.vallospaces.com/schools/our-saviour-institute-of-science-and-technology-enugu.webp', 'https://osisat.edu.ng/poly/'),
-  ('pamo-university-of-medical-sciences-port-harcourt', 'https://www.vallospaces.com/schools/pamo-university-of-medical-sciences-port-harcourt.webp', 'http://new.pums.edu.ng/'),
   ('pan-atlantic-university', 'https://www.vallospaces.com/schools/pan-atlantic-university.webp', 'https://pau.edu.ng'),
   ('paramount-polytechnic-ejigbo', 'https://www.vallospaces.com/schools/paramount-polytechnic-ejigbo.webp', 'https://paramountpolytechnic.edu.ng'),
   ('paul-university-awka', 'https://www.vallospaces.com/schools/paul-university-awka.webp', 'https://pauluniversity.edu.ng'),
@@ -242,7 +241,7 @@ update public.institutions i
   ('university-of-lagos', 'https://www.vallospaces.com/schools/university-of-lagos.webp', 'https://unilag.edu.ng'),
   ('university-of-maiduguri', 'https://www.vallospaces.com/schools/university-of-maiduguri.webp', 'https://unimaid.edu.ng'),
   ('university-of-nigeria-nsukka', 'https://www.vallospaces.com/schools/university-of-nigeria-nsukka.webp', 'https://www.unn.edu.ng/'),
-  ('university-of-port-harcourt', 'https://www.vallospaces.com/schools/university-of-port-harcourt.webp', 'http://www.uniport.edu.ng/'),
+  ('university-of-port-harcourt', 'https://www.vallospaces.com/schools/university-of-port-harcourt.webp', 'https://www.uniport.edu.ng/'),
   ('usmanu-danfodiyo-university', 'https://www.vallospaces.com/schools/usmanu-danfodiyo-university.webp', 'https://www.udusok.edu.ng/'),
   ('veritas-university', 'https://www.vallospaces.com/schools/veritas-university.webp', 'https://www.veritas.edu.ng/'),
   ('waziri-umaru-federal-polytechnic-birnin-kebbi', 'https://www.vallospaces.com/schools/waziri-umaru-federal-polytechnic-birnin-kebbi.webp', 'https://wufpbk.edu.ng/index/'),
@@ -302,8 +301,8 @@ begin
     raise exception 'email check on without a domain: % rows', bad;
   end if;
   select count(*) into bad from public.institutions where logo_url like 'https://www.vallospaces.com/schools/%';
-  if bad < 199 then
-    raise exception 'batch 2 logos missing: only % rows carry a hosted logo, expected about 222', bad;
+  if bad < 198 then
+    raise exception 'batch 2 logos missing: only % rows carry a hosted logo, expected about 221', bad;
   end if;
 end
 $check$;

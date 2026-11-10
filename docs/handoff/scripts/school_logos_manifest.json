@@ -3840,7 +3840,7 @@
    "image_url": "http://new.pums.edu.ng/wp-content/uploads/2021/08/PUMS-LOGO-02.png",
    "bytes": 5152,
    "how": "header img",
-   "decision": "kept"
+   "decision": "rejected: the school page is http only, and logo_source must be https"
   },
   {
    "slug": "pan-atlantic-university",
@@ -4406,7 +4406,7 @@
    "slug": "university-of-port-harcourt",
    "kind": "university",
    "name": "University of Port Harcourt",
-   "source_page": "http://www.uniport.edu.ng/",
+   "source_page": "https://www.uniport.edu.ng/",
    "image_url": "http://www.uniport.edu.ng/wp-content/themes/unipix/assets/images/logo/uniport_logo1.png",
    "bytes": 5900,
    "how": "header img",
