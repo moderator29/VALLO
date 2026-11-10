@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { countOf } from "@vallo/i18n/core";
 
 import { CopyButton } from "@/components/docs/CopyButton";
 import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
@@ -331,7 +330,7 @@ function Feed({ feed }: { feed: FeedModeration }) {
           <li key={label}>{label}: {n === null ? "Not available" : n}</li>
         ))}
       </ul>
-      <Source>{countOf(rows.filter(([, n]) => n === null).length, "figures")} could not be read. You see counts only. The decisions, the posts and the people stay with moderation: raise anything unusual with the Head of Trust and Safety.</Source>
+      <Source>{rows.some(([, n]) => n === null) ? "A figure marked Not available could not be read just now. " : ""}You see counts only. The decisions, the posts and the people stay with moderation: raise anything unusual with the Head of Trust and Safety.</Source>
     </Panel>
   );
 }

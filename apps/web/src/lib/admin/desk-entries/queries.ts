@@ -60,7 +60,11 @@ export async function readNames(db: SupabaseClient, ids: readonly (string | null
   const wanted = [...new Set(ids.filter((v): v is string => !!v))];
   const out = new Map<string, string>();
   if (wanted.length === 0) return out;
-  const { data } = await db.from("profiles").select("id, display_name, first_name").in("id", wanted);
+  const { data, error } = await db.from("profiles").select("id, display_name, first_name").in("id", wanted);
+  if (error) {
+    await reportReadFault("read.admin.desk-entries.names", ...faults(error));
+    return out;
+  }
   for (const p of (data ?? []) as { id: string; display_name: string | null; first_name: string | null }[]) {
     const name = (p.display_name ?? p.first_name ?? "").trim();
     if (name) out.set(p.id, name);
@@ -71,7 +75,10 @@ export async function readNames(db: SupabaseClient, ids: readonly (string | null
 /** Everyone with a live support grant: the people a coaching note can be about. */
 export async function readSupportAgents(db: SupabaseClient): Promise<Person[]> {
   const { data, error } = await db.from("staff_grants").select("user_id").is("revoked_at", null).contains("scopes", ["support"]).limit(200);
-  if (error || !data) return [];
+  if (error || !data) {
+    if (error) await reportReadFault("read.admin.desk-entries.agents", ...faults(error));
+    return [];
+  }
   const ids = (data as { user_id: string }[]).map((r) => r.user_id);
   const names = await readNames(db, ids);
   return ids.map((id) => ({ id, name: names.get(id) ?? "A colleague" })).sort((a, b) => a.name.localeCompare(b.name));

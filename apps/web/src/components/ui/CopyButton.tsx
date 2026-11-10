@@ -7,6 +7,7 @@ import { copyText } from "@/lib/ui/clipboard";
 import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
 import { useDoneFlash } from "@/lib/ui/use-done-flash";
+import "./copy-button.css";
 
 /**
  * THE ONE COPY CONTROL (founder, 10 November 2026: "easy copy click-board
@@ -72,7 +73,7 @@ export function CopyButton({
       data-testid={testId ?? "copy-button"}
       className={`nf-icon-btn nf-icon-btn--round nf-copy ${className ?? ""}`.trim()}
     >
-      <UiIcon name={copied ? "check" : "copy"} size={16} />
+      <UiIcon name={copied ? "check" : kind === "link" ? "link" : "clipboard-list"} size={16} />
     </button>
   );
 }
