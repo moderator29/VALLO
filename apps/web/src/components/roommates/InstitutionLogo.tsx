@@ -13,6 +13,12 @@ export function usableLogoUrl(url: string | null | undefined): string | null {
   return u.startsWith("https://") ? u : null;
 }
 
+/** The address to draw, or null for the fallback: no usable address, or this very address already failed. */
+export function logoToShow(logoUrl: string | null | undefined, failedUrl: string | null): string | null {
+  const url = usableLogoUrl(logoUrl);
+  return url !== null && url !== failedUrl ? url : null;
+}
+
 /**
  * A school's logo in a rounded plate. The picture is decorative (the school's
  * name sits beside it), so alt is empty. When there is no logo, or the image
@@ -21,10 +27,9 @@ export function usableLogoUrl(url: string | null | undefined): string | null {
  */
 export function InstitutionLogo({ name, logoUrl, size = 40 }: { name: string; logoUrl: string | null | undefined; size?: number }) {
   const [failed, setFailed] = useState<string | null>(null);
-  const url = usableLogoUrl(logoUrl);
-  const showImage = url !== null && failed !== url;
+  const url = logoToShow(logoUrl, failed);
   const px = `${size / 16}rem`;
-  if (!showImage) {
+  if (url === null) {
     return (
       <span className="nf-rm-plate" aria-hidden="true" data-school={name} style={{ inlineSize: px, blockSize: px }}>
         <UiIcon name="id-card" size={Math.round(size * 0.45)} />
