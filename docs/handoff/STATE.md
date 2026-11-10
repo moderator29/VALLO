@@ -78,6 +78,18 @@ tiles), the payment rail design pass.
   in public-doors.css) is now unused and is next for the sweep.
 - Running: staff manual (new agent, app/admin/manual); docs tools (fee
   calculator from real config, copy control, was this helpful, step player).
+- Protected payment screens 1 to 11 built, switched off (5e9845e15,
+  0700141e1): components/money/protected, the journey model, copy with a
+  scoped claims entry, a preview at /preview/protected, tests with axe. No
+  live page mounts them. Part 2 (wiring behind the switch, trust page,
+  receipts, payments list, failure screens, staff desk) is with an agent.
+- Staff manual committed (064a2def8). For the founder to settle: who holds
+  each position and how to reach them, out of hours on-call, whether business
+  developers and social media managers get an access area; and three places
+  the docs and the code disagree (property case restrictions, the name a
+  member sees on a support reply, listing approve and publish in one step).
+- The end-of-batch SQL is supabase/migrations/pending/END_OF_BATCH_2026-11-10.sql
+  (sent to the founder; not applied yet).
 - Both agents (map, docs) stopped on the account's weekly limit on 9 Nov at
   about 17:30 UTC and were resumed on 10 Nov at 02:00 UTC with their work
   intact.
