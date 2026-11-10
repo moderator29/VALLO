@@ -13,6 +13,23 @@
  *          kept, so it would replay on every load).
  *   leave  the 320ms crossfade into the page.
  *
+ * ON THE NATIVE SHELL (founder, 10 November 2026: the centred logo, slower).
+ * The opening plays there too, but it must NOT begin while the Capacitor
+ * splash is still covering the screen. This script runs before the first
+ * paint; the splash is taken down by the React layer, which on a cold start
+ * over a slow connection is seconds later. The earlier attempt waited on a
+ * `window.__nfHide` that nothing ever produced, so the animation ran its full
+ * length beneath a navy splash and only its last frame was ever seen.
+ *
+ * So on the shell the screen is held hidden (`data-open` unset, and open.css
+ * keeps `[data-native]` hidden until it is "on") until `splash.ts` says the
+ * splash is down, by the flag `__nfSplashDown` for a late listener or the
+ * `nf:splash-down` event for one already waiting. `OPEN_NATIVE_WAIT_MS` is the
+ * ceiling: if the signal never comes the opening plays anyway rather than
+ * being lost. Because the mark is `display:none` until "on", its CSS animation
+ * begins when the attribute is set, so the clock and the picture start
+ * together.
+ *
  * WHEN IT LEAVES, FROM THE FIRST FRAME OF THE ANIMATION (`animationstart`; the
  * next frame after the DOM is parsed where animation is off):
  *   not before OPEN_MIN_MS (OPEN_MIN_STILL_MS under reduced motion, Calm or Off),
@@ -27,19 +44,22 @@
  */
 
 /** Shortest time the mark is seen once its animation has begun. */
-export const OPEN_MIN_MS = 1100;
+export const OPEN_MIN_MS = 3500;
 
 /** The same, where nothing moves (reduced motion, Calm, Off): the still mark. */
 export const OPEN_MIN_STILL_MS = 900;
 
 /** Longest, from the first frame, before the crossfade starts whatever is not ready. */
-export const OPEN_CAP_MS = 2200;
+export const OPEN_CAP_MS = 4200;
 
 /** The crossfade (matches open.css). */
 export const OPEN_FADE_MS = 320;
 
 /** The stylesheet's own backstop when no script runs: it starts lifting at this time. */
-export const OPEN_CSS_CAP_MS = 2200;
+export const OPEN_CSS_CAP_MS = 4200;
+
+/** Longest the shell waits for the splash to come down before playing anyway. */
+export const OPEN_NATIVE_WAIT_MS = 6000;
 
 /** sessionStorage key marking this session's opening as shown. */
 export const OPEN_SESSION_KEY = "nf_open";
@@ -47,10 +67,13 @@ export const OPEN_SESSION_KEY = "nf_open";
 export const OPEN_SCRIPT =
   "(function(){var W=window,D=document,r=D.documentElement;try{" +
   "var sa=false;try{sa=!!(W.matchMedia&&W.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){}" +
-  "if(!sa||r.hasAttribute('data-native')||/VALLO-NATIVE/.test(navigator.userAgent)||(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())){r.setAttribute('data-open','off');return}" +
+  "var nat=false;try{nat=r.hasAttribute('data-native')||/VALLO-NATIVE/.test(navigator.userAgent)||!!(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())}catch(e){}" +
+  "if(!sa&&!nat){r.setAttribute('data-open','off');return}" +
   "var warm=true;try{warm=!!sessionStorage.getItem('" + OPEN_SESSION_KEY + "');if(!warm)sessionStorage.setItem('" + OPEN_SESSION_KEY + "','1')}catch(e){}" +
   "if(warm){r.setAttribute('data-open','off');return}" +
-  "r.setAttribute('data-open','on');" +
+  "var lit=0;function light(){if(lit)return;lit=1;r.setAttribute('data-open','on')}" +
+  /* The shell waits for the splash to be down; the website lights up at once. */
+  "if(nat){if(W.__nfSplashDown)light();else{try{W.addEventListener('nf:splash-down',light,{once:true})}catch(e){}setTimeout(light," + OPEN_NATIVE_WAIT_MS + ")}}else light();" +
   "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +
   "var mo=r.getAttribute('data-motion');if(mo==='calm'||mo==='off')still=true;" +
   "var min=still?" + OPEN_MIN_STILL_MS + ":" + OPEN_MIN_MS + ",cap=" + OPEN_CAP_MS + ",t0=0,gone=0;" +

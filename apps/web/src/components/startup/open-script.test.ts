@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
+import { OPEN_CAP_MS, OPEN_CSS_CAP_MS, OPEN_FADE_MS, OPEN_MIN_MS, OPEN_MIN_STILL_MS, OPEN_NATIVE_WAIT_MS, OPEN_SCRIPT, OPEN_SESSION_KEY } from "./open-script";
 
 /**
  * THE OPENING SCREEN'S CONTROLLER (10 November 2026). The script is run here
@@ -96,12 +96,27 @@ describe("the opening screen's decision", () => {
     expect(run().attrs["data-open"]).toBe("on");
     expect(run({ standalone: false, navStandalone: true }).attrs["data-open"]).toBe("on");
   });
-  it("stays off in a browser tab, on the native shell, on a warm open and where storage refuses", () => {
+  it("stays off in a browser tab, on a warm open and where storage refuses", () => {
     expect(run({ standalone: false }).attrs["data-open"]).toBe("off");
-    expect(run({ native: true }).attrs["data-open"]).toBe("off");
-    expect(run({ ua: "Mozilla/5.0 VALLO-NATIVE" }).attrs["data-open"]).toBe("off");
     expect(run({ warm: true }).attrs["data-open"]).toBe("off");
     expect(run({ storageThrows: true }).attrs["data-open"]).toBe("off");
+  });
+  /*
+   * The shell plays the opening too (founder, 10 November 2026), but not while
+   * the Capacitor splash still covers it. Before this it was simply "off" on
+   * native; now it is unlit until the splash says it is down, which is the
+   * whole point: lighting it early is what lost the animation underneath the
+   * splash and left a single frame.
+   */
+  it("on the native shell, waits for the splash before it lights", () => {
+    for (const env of [{ native: true }, { ua: "Mozilla/5.0 VALLO-NATIVE" }]) {
+      const r = run(env);
+      expect(r.attrs["data-open"]).toBeUndefined();
+      r.advance(OPEN_NATIVE_WAIT_MS - 100);
+      expect(r.attrs["data-open"]).toBeUndefined();
+      r.advance(OPEN_NATIVE_WAIT_MS + 100);
+      expect(r.attrs["data-open"]).toBe("on");
+    }
   });
 });
 
@@ -169,15 +184,17 @@ describe("the opening screen's timing", () => {
 });
 
 describe("the opening screen's budget", () => {
-  it("is visible between about 900 and 1,400ms once ready, and capped near 2,500ms in all", () => {
-    expect(OPEN_MIN_MS).toBeGreaterThanOrEqual(900);
-    expect(OPEN_MIN_MS).toBeLessThanOrEqual(1400);
+  /* The founder asked for it slower on 10 November 2026: about 3.5 seconds. */
+  it("is visible for about 3.5 seconds once ready, and capped near 4,500ms in all", () => {
+    expect(OPEN_MIN_MS).toBeGreaterThanOrEqual(3000);
+    expect(OPEN_MIN_MS).toBeLessThanOrEqual(3800);
     expect(OPEN_MIN_STILL_MS).toBeGreaterThanOrEqual(900);
-    expect(OPEN_CAP_MS + OPEN_FADE_MS).toBeLessThanOrEqual(2600);
+    expect(OPEN_CAP_MS).toBeGreaterThan(OPEN_MIN_MS);
+    expect(OPEN_CAP_MS + OPEN_FADE_MS).toBeLessThanOrEqual(4600);
   });
   it("has a stylesheet backstop that starts lifting at the same cap", () => {
     const css = readFileSync(join(__dirname, "open.css"), "utf8");
     expect(css).toMatch(new RegExp(`nf-open-cap 300ms [^;]* ${OPEN_CSS_CAP_MS}ms forwards`));
-    expect(OPEN_CSS_CAP_MS + 300).toBeLessThanOrEqual(2500);
+    expect(OPEN_CSS_CAP_MS + 300).toBeLessThanOrEqual(4500);
   });
 });

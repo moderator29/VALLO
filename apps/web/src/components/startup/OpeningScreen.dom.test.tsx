@@ -75,7 +75,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
   });
   it("crossfades away once ready, within the cap", async () => {
     const { page, close } = await installed({ hydrate: 50 });
-    await page.waitForFunction(() => document.documentElement.dataset.open === "leave", null, { timeout: 3000 });
+    /* Timed from the constants, not a number typed here, so the next time the
+       founder asks for it slower this test follows instead of failing. */
+    await page.waitForFunction(() => document.documentElement.dataset.open === "leave", null, { timeout: OPEN_CAP_MS + 1000 });
     await page.waitForFunction(() => getComputedStyle(document.getElementById("nf-open")!).display === "none", null, { timeout: 2000 });
     await close();
   });

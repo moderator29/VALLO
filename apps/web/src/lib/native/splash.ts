@@ -59,6 +59,31 @@ export const FAILSAFE_MS = 2_000;
  * being torn down, the one state that must not survive is the one that covers
  * the whole screen.
  */
+/**
+ * THE MISSING HALF (10 November 2026). The opening screen must not start while
+ * the native splash is still covering it: before this, the opening's inline
+ * before-paint script began its clock at first parse, the splash came down two
+ * to four seconds later on a cold start, and the whole animation had already
+ * played underneath it. All anyone saw was the last frame.
+ *
+ * So the splash says when it is actually gone: a flag for a listener that
+ * arrives late, and an event for one already waiting. Fired after the fade
+ * rather than when the hide is sent, because the fade is 220ms of splash still
+ * on screen. `open-script.ts` is the only consumer.
+ */
+const SPLASH_DOWN_EVENT = "nf:splash-down";
+const FADE_MS = 220;
+
+function markSplashDown(): void {
+  try {
+    (window as unknown as { __nfSplashDown?: boolean }).__nfSplashDown = true;
+    window.dispatchEvent(new Event(SPLASH_DOWN_EVENT));
+  } catch {
+    /* A runtime without events still gets the flag, or nothing. Either way the
+       opening has its own ceiling and is never held up by this. */
+  }
+}
+
 export function startSplash(): () => void {
   let hidden = false;
 
@@ -71,7 +96,8 @@ export function startSplash(): () => void {
        reads as one continuous surface. Failure is swallowed on purpose. If the
        plugin refuses, there is nothing useful to say and nothing to retry. */
     bootMark("splash:failsafe-or-teardown-hide");
-    void SplashScreen.hide({ fadeOutDuration: 220 }).catch(() => {});
+    void SplashScreen.hide({ fadeOutDuration: FADE_MS }).catch(() => {});
+    window.setTimeout(markSplashDown, FADE_MS + 20);
   };
 
   const timer = window.setTimeout(hide, FAILSAFE_MS);
@@ -79,11 +105,12 @@ export function startSplash(): () => void {
   /* Straight away: no `load`, no frame. See the note above. */
   bootMark("splash:hide-sent");
   try {
-    void SplashScreen.hide({ fadeOutDuration: 220 }).then(
+    void SplashScreen.hide({ fadeOutDuration: FADE_MS }).then(
       () => {
         hidden = true;
         bootMark("splash:hide-answered");
         window.clearTimeout(timer);
+        window.setTimeout(markSplashDown, FADE_MS + 20);
       },
       () => bootMark("splash:hide-refused"),
     );

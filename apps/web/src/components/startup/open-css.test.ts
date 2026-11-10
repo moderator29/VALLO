@@ -17,11 +17,13 @@ describe("open.css", () => {
   it("shows the screen by itself in an installed app, with no script", () => {
     expect(css).toMatch(/@media \(display-mode: standalone\)\s*\{\s*\.nf-open\s*\{\s*display: block/);
   });
-  it("is hidden on the native shell and when the controller says off", () => {
-    expect(css).toMatch(/:root\[data-open="off"\] \.nf-open,\s*:root\[data-native\] \.nf-open\s*\{\s*display: none/);
+  it("is hidden when the controller says off, and on the shell until it says on", () => {
+    expect(css).toMatch(/:root\[data-open="off"\] \.nf-open\s*\{\s*display: none/);
+    /* The shell shows it, but only once the splash is down and "on" is set. */
+    expect(css).toMatch(/:root\[data-native\]:not\(\[data-open="on"\]\):not\(\[data-open="leave"\]\) \.nf-open\s*\{\s*display: none/);
   });
-  it("lifts itself by 2,500ms with no script at all", () => {
-    expect(css).toMatch(/animation: nf-open-cap 300ms [^;]* 2200ms forwards/);
+  it("lifts itself by 4,500ms with no script at all", () => {
+    expect(css).toMatch(/animation: nf-open-cap 300ms [^;]* 4200ms forwards/);
     expect(css).toMatch(/@keyframes nf-open-cap\s*\{\s*to\s*\{\s*opacity: 0;\s*visibility: hidden/);
   });
   it("crossfades rather than cutting", () => {

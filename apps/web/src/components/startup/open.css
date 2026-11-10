@@ -21,7 +21,7 @@
  *
  * WHEN IT GOES. The script lifts it after its minimum time and once the page
  * (and the passcode guard) have decided what to show, a crossfade of 320ms.
- * With no script at all, the animation `nf-open-cap` lifts it by 2,500ms. The
+ * With no script at all, the animation `nf-open-cap` lifts it by 4,500ms. The
  * same ground and mark size and position are drawn into the iOS launch images
  * (scripts/build-brand-launch.mjs), so iOS's own snapshot hands over to this
  * screen without a visible move.
@@ -39,7 +39,7 @@
       color-mix(in srgb, var(--nf-brand-primary) 24%, var(--nf-surface-artwork)) 0%,
       var(--nf-surface-artwork) 100%
     );
-    animation: nf-open-cap 300ms var(--nf-ease-exit) 2200ms forwards;
+    animation: nf-open-cap 300ms var(--nf-ease-exit) 4200ms forwards;
   }
   @media (display-mode: standalone) {
     .nf-open {
@@ -50,8 +50,14 @@
   :root[data-open="leave"] .nf-open {
     display: block;
   }
-  :root[data-open="off"] .nf-open,
-  :root[data-native] .nf-open {
+  :root[data-open="off"] .nf-open {
+    display: none;
+  }
+  /* The shell shows the opening too (founder, 10 November 2026), but never
+     before `open-script` has been told the Capacitor splash is down: until it
+     sets "on", the layer stays hidden, so the animation cannot run underneath
+     the splash and lose itself. */
+  :root[data-native]:not([data-open="on"]):not([data-open="leave"]) .nf-open {
     display: none;
   }
   :root[data-open="leave"] .nf-open {
@@ -71,7 +77,7 @@
     inline-size: var(--nf-open-w);
     animation:
       nf-open-in 520ms var(--nf-ease-entrance) both,
-      nf-open-drift 2400ms var(--nf-ease-standard) 520ms forwards;
+      nf-open-drift 3000ms var(--nf-ease-standard) 520ms forwards;
   }
   .nf-open__mark svg {
     display: block;
