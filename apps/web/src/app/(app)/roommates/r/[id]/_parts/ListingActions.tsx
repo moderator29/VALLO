@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { InterestSheet } from "@/components/roommates/Actions";
+import { ShareToCircleSheet } from "@/components/roommates/ShareToCircle";
 import { dayText, fill, naira } from "@/components/roommates/format";
 import { ShareComposer } from "@/components/share/ShareComposer";
 import { type ShareCopy } from "@/components/share/ShareSheet";
@@ -420,6 +421,7 @@ export function ListingShareMenu({
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState(false);
   const [card, setCard] = useState(false);
+  const [circle, setCircle] = useState(false);
   const [line, setLine] = useState("");
   const [pending, start] = useSafeTransition();
 
@@ -557,6 +559,26 @@ export function ListingShareMenu({
                   className="nf-rmv-pick"
                   onClick={() => {
                     feedback("select");
+                    setOpen(false);
+                    setCircle(true);
+                  }}
+                  data-testid="listing-share-circle"
+                >
+                  <span className="nf-rm-plate" aria-hidden="true">
+                    <UiIcon name="circle-people" size={20} />
+                  </span>
+                  <span className="nf-rmv-pick__name">{copy.circleShare.action}</span>
+                  <UiIcon name="chevron-right" size={18} />
+                </button>
+              </li>
+            ) : null}
+            {signedIn ? (
+              <li>
+                <button
+                  type="button"
+                  className="nf-rmv-pick"
+                  onClick={() => {
+                    feedback("select");
                     setFeed(true);
                   }}
                   data-testid="listing-share-feed"
@@ -572,6 +594,7 @@ export function ListingShareMenu({
           </ul>
         )}
       </Sheet>
+      {signedIn ? <ShareToCircleSheet open={circle} onOpenChange={setCircle} target={{ kind: "room", id }} /> : null}
     </>
   );
 }

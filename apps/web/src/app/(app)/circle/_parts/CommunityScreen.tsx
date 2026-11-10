@@ -147,9 +147,16 @@ export function CommunityScreen({
           <section className="nf-circle-card" data-testid="community-roommates-door" aria-label={getDictionary("en").roommates.area.connect.circleCardTitle}>
             <h2 className="nf-circle-card__title">{getDictionary("en").roommates.area.connect.circleCardTitle}</h2>
             <p>{getDictionary("en").roommates.area.connect.circleCardLine}</p>
-            <ButtonLink href={community.category === "student_housing" ? ROOMMATES_ROUTES.campuses : ROOMMATES_ROUTES.home} variant="primary" size="sm" arrow>
-              {community.category === "student_housing" ? getDictionary("en").roommates.area.connect.nearCta : getDictionary("en").roommates.entryX.circleOpen}
-            </ButtonLink>
+            <span className="nf-ccom__actions">
+              <ButtonLink href={community.category === "student_housing" ? ROOMMATES_ROUTES.campuses : ROOMMATES_ROUTES.home} variant="primary" size="sm" arrow>
+                {community.category === "student_housing" ? getDictionary("en").roommates.area.connect.nearCta : getDictionary("en").roommates.entryX.circleOpen}
+              </ButtonLink>
+              {isMember ? (
+                <ButtonLink href={ROOMMATES_ROUTES.rooms} variant="secondary" size="sm" data-testid="community-roommates-share">
+                  {getDictionary("en").roommates.circleShare.browse}
+                </ButtonLink>
+              ) : null}
+            </span>
           </section>
         ) : null}
 

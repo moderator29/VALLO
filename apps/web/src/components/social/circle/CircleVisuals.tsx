@@ -13,6 +13,7 @@ import type { CirclePostView, HomeStats } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 import { initial } from "@/lib/text/initial";
 import { CircleComposeFab as ComposeFab, TabIntoView } from "./CircleClient";
+import { RoommateCircleCard } from "./RoommateCircleCard";
 import "./circle-visuals.css";
 
 /**
@@ -318,6 +319,7 @@ export function CircleDiscussionCard({ post, now }: { post: CirclePostView; now:
       <Byline post={post} now={now} />
       <h3 className="nf-ccard__title">{post.title}</h3>
       {post.body && post.body !== post.title ? <p className="nf-ccard__body">{post.body}</p> : null}
+      {post.roommate ? <RoommateCircleCard card={post.roommate} link={false} /> : null}
       <span className="nf-ccard__counts">
         <span className="nf-ccard__count">
           <UiIcon name="chat-bubble" size={16} />

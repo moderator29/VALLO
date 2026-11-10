@@ -6,14 +6,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isNotLive } from "@/lib/features/degrade";
 
 import { writeAudit } from "./audit";
-import {
-  ADMIN_FORBIDDEN_MESSAGE,
-  ADMIN_SIGNED_OUT_MESSAGE,
-  ADMIN_STEP_UP_MESSAGE,
-  ADMIN_UNCONFIGURED_MESSAGE,
-  requireAdmin,
-  type StaffScope,
-} from "./guard";
+import { requireAdmin, type StaffScope } from "./guard";
 import { requireCoo } from "./overview/guard";
 
 /**
@@ -70,16 +63,11 @@ export async function deskDoor(scope: StaffScope, options: { approverMayEnter?: 
       };
     }
   }
-  return { state: access.state === "admin" ? "not-admin" : access.state };
+  return { state: access.state };
 }
 
 /** The sentence a refused caller reads, on the page and from an action. */
-export function deskRefusal(state: Exclude<DeskDoor["state"], "ok">): string {
-  if (state === "unconfigured") return ADMIN_UNCONFIGURED_MESSAGE;
-  if (state === "signed-out") return ADMIN_SIGNED_OUT_MESSAGE;
-  if (state === "step-up") return ADMIN_STEP_UP_MESSAGE;
-  return ADMIN_FORBIDDEN_MESSAGE;
-}
+export { deskRefusal } from "./desk-refusal";
 
 export const DESK_FAILED = "That did not go through. Try again.";
 

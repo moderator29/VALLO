@@ -664,4 +664,61 @@
       transform var(--nf-duration-base) var(--nf-ease-entrance),
       opacity var(--nf-duration-base) var(--nf-ease-entrance);
   }
+
+  /* ----------------------------------------------- a Roommates card in a post */
+  .nf-crmc {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-inline-size: 0;
+    padding: var(--nf-space-sm);
+    border-radius: var(--nf-radius-lg);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-secondary);
+    text-decoration: none;
+  }
+  .nf-crmc:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-crmc--plain {
+    pointer-events: none;
+  }
+  .nf-crmc__glyph {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+  .nf-crmc__words {
+    display: grid;
+    flex: 1;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-crmc__kicker {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+  .nf-crmc__title {
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+  .nf-crmc__place,
+  .nf-crmc__summary {
+    font-size: var(--nf-text-body-sm);
+    overflow-wrap: anywhere;
+  }
+  .nf-crmc__cta {
+    color: var(--nf-content-link);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 700;
+  }
 }

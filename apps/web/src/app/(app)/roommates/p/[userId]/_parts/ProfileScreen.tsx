@@ -2,6 +2,7 @@ import { getDictionary } from "@vallo/i18n";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { SafetyRows, SaveButton, ShareButton } from "@/components/roommates/Actions";
+import { ShareToCircleButton } from "@/components/roommates/ShareToCircle";
 import {
   BadgesRow,
   CardGrid,
@@ -86,6 +87,7 @@ export function RoommateProfileScreen({
         p.isSelf ? null : (
           <span className="nf-rmv-headacts">
             <SaveButton kind="person" id={p.userId} />
+            <ShareToCircleButton target={{ kind: "person", id: p.userId }} />
             <ShareButton
               path={ROOMMATES_ROUTES.person(p.userId)}
               title={p.name}
