@@ -3,7 +3,6 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getListingSubmissions, type ListingReviewView } from "@/lib/admin/queries";
 import { getListingReviewExtras } from "@/lib/admin/reads/listings";
-import { tileProvider } from "@/lib/maps/tiles";
 import { adminUi } from "../../_components/ui";
 import { readQueueQuery } from "../../_components/QueueFilters";
 import { queueHrefFrom } from "../tabs";
@@ -47,11 +46,6 @@ export async function loadListingReview(
   ]);
   const closedReason = closedReasons[found.id] ?? null;
   const decidable = found.status !== "PUBLISHED" && found.status !== "REJECTED" && closedReason === null;
-  /* The Location panel's mosaic needs raster tiles. OpenFreeMap serves vector
-     tiles only, so the template is empty, the mosaic has no images and no
-     credit is owed for imagery that is not drawn (the panel shows its pin on
-     its own ground until it draws the still area map, `AreaMapTile`). */
-  const dark = tileProvider("dark");
   return {
     ...base,
     found,
@@ -61,9 +55,6 @@ export async function loadListingReview(
     closedReason,
     decidable,
     nextId: extra?.nextId ?? null,
-    tiles: dark.url
-      ? { dark: dark.url, credit: dark.credits.map((credit) => credit.label).join(", ") }
-      : { dark: "", credit: "" },
   };
 }
 

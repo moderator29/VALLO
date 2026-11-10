@@ -12,7 +12,7 @@ import { compoundFacts } from "@/lib/listings/compound";
 import type { AdminCopy } from "../../_components/copy";
 import { Avatar, Badge, DeskHead, Panel, RoleTag, Tabs, type SectionLink } from "../../_review/parts";
 import type { ListingReviewExtras } from "../../_review/contracts";
-import { tileMosaic } from "../../_review/map-tiles";
+import { AreaMapTile } from "@/components/app/maps/AreaMapTile";
 import {
   CHECK_KEYS,
   CONDITION_LABEL,
@@ -50,8 +50,6 @@ export type ListingReviewProps = {
    * filtered queue through history. Kept so callers need not change.
    */
   backHref?: string;
-  /** Map tile template and credit, from the product's own provider (dark only). */
-  tiles: { dark: string; credit: string };
   /** The action bar, or the closed notice for a decided listing. */
   actions: ReactNode;
   /**
@@ -118,7 +116,6 @@ export function ListingReview(props: ListingReviewProps) {
     locale,
     sqm,
     statusLabel,
-    tiles,
     actions,
     keepers,
     exampleNote,
@@ -318,7 +315,6 @@ export function ListingReview(props: ListingReviewProps) {
             place={placeLine(listing) || copy.locationMissing}
             latitude={extras?.latitude ?? null}
             longitude={extras?.longitude ?? null}
-            tiles={tiles}
           />
           {listing.address ? (
             <p className="nf-rv-msg" style={{ marginTop: "var(--nf-space-xs)" }}>
@@ -556,38 +552,20 @@ function LocationMap({
   place,
   latitude,
   longitude,
-  tiles,
 }: {
   place: string;
   latitude: number | null;
   longitude: number | null;
-  tiles: { dark: string; credit: string };
 }) {
-  const dark = latitude !== null && longitude !== null ? tileMosaic(latitude, longitude, tiles.dark) : null;
-
+  /* The still vector map (OpenFreeMap, 10 November 2026), the same one a
+     listing's map tab draws, with its own pin and the credits its licence
+     asks for. A listing with no point keeps the faint pin on the panel's
+     own ground. */
+  const located = latitude !== null && longitude !== null && Number.isFinite(latitude) && Number.isFinite(longitude);
   return (
     <div className="nf-rv-map">
-      {dark ? (
-        <>
-          {[{ mosaic: dark, cls: "nf-rv-map__tiles" }].map(({ mosaic, cls }) => (
-            <div
-              key={cls}
-              className={cls}
-              aria-hidden="true"
-              style={{ left: `calc(50% - ${mosaic.pointX}px)`, top: `calc(50% - ${mosaic.pointY}px)` }}
-            >
-              {/* Backgrounds, not images: a tile the provider cannot serve
-                  leaves the panel's own ground rather than a broken-image mark. */}
-              {mosaic.urls.map((url) => (
-                <span key={url} style={{ backgroundImage: `url(${url})` }} />
-              ))}
-            </div>
-          ))}
-          <span className="nf-rv-map__pin" aria-hidden="true">
-            <UiIcon name="location" size={28} filled />
-          </span>
-          <span className="nf-rv-map__credit">{tiles.credit}</span>
-        </>
+      {located ? (
+        <AreaMapTile lat={latitude} lng={longitude} zoom={15} label={`Map of ${place}`} credits className="nf-rv-map__sheet" />
       ) : (
         <span className="nf-rv-map__pin" aria-hidden="true" style={{ opacity: 0.5 }}>
           <UiIcon name="location" size={28} />

@@ -14,7 +14,7 @@ describe("the map's provider", () => {
       const p = tileProvider(theme);
       expect(p.id).toBe("openfreemap");
       expect(p.kind).toBe("vector");
-      expect(p.url).toBe("");
+      expect(p).not.toHaveProperty("url");
       expect(p.style).toMatch(/^https:\/\/tiles\.openfreemap\.org\/styles\//);
       expect(p.tileJson).toMatch(/^https:\/\/tiles\.openfreemap\.org\//);
       expect(JSON.stringify(p)).not.toMatch(/key=|maptiler|cartocdn/i);

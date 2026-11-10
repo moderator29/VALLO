@@ -34,6 +34,7 @@ const PROCESSORS: Array<[RegExp, string]> = [
   [/api\.anthropic\.com/, "Anthropic"],
   [/api\.maptiler\.com/, "MapTiler"],
   [/basemaps\.cartocdn\.com/, "CARTO"],
+  [/tiles\.openfreemap\.org/, "OpenFreeMap"],
   [/fcm\.googleapis\.com/, "Firebase Cloud Messaging"],
   [/api\.push\.apple\.com/, "Apple Push Notification service"],
   [/SENTRY_DSN/, "Sentry"],

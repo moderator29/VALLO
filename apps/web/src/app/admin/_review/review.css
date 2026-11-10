@@ -1099,17 +1099,10 @@
     background: color-mix(in oklab, var(--nf-brand-primary) 10%, var(--nf-surface-primary));
   }
 
-  .nf-rv-map__tiles {
+  /* The still vector map fills the panel; its own pin and credits sit on it. */
+  .nf-rv-map__sheet {
     position: absolute;
-    display: grid;
-    grid-template-columns: repeat(3, 256px);
-  }
-
-  .nf-rv-map__tiles span {
-    width: 256px;
-    height: 256px;
-    display: block;
-    background-size: cover;
+    inset: 0;
   }
 
   .nf-rv-map__pin {
@@ -1121,24 +1114,16 @@
     filter: drop-shadow(0 0 8px color-mix(in oklab, var(--nf-brand-primary) 80%, transparent));
   }
 
+  /* At the top, so the map's credits keep the foot to themselves. */
   .nf-rv-map__place {
     position: absolute;
     left: var(--nf-space-sm);
-    bottom: var(--nf-space-xs);
+    top: var(--nf-space-xs);
     margin: 0;
     font-size: var(--nf-text-body-sm);
     font-weight: 600;
     color: var(--nf-content-primary);
     text-shadow: 0 1px 6px var(--nf-surface-canvas);
-  }
-
-  .nf-rv-map__credit {
-    position: absolute;
-    right: var(--nf-space-2xs);
-    bottom: var(--nf-space-3xs);
-    /* The 12px floor holds for an attribution too (it drew 10px; C1 sweep). */
-    font-size: var(--nf-text-overline);
-    color: var(--nf-content-muted);
   }
 
   /* ------------------------------------------------------------ person row */

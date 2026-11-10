@@ -310,9 +310,10 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
                 the support chat, if you agree to it (section 12).
               </li>
               <li>
-                MapTiler (Switzerland) and CARTO (United States, Spain): map tiles. When a
-                map is shown they receive your IP address and the part of the map you are
-                looking at.
+                OpenFreeMap (Hungary), which may deliver through Cloudflare (United
+                States): map tiles. When a map is shown they receive your IP address and
+                the part of the map you are looking at. OpenFreeMap keeps no IP address in
+                its access logs.
               </li>
               <li>
                 Google Firebase Cloud Messaging (United States) and Apple Push

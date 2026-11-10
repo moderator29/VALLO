@@ -56,14 +56,6 @@ export type TileProvider = {
    * are listed in. There is no `<img>` anywhere.
    */
   kind: "vector";
-  /**
-   * A raster tile template. ALWAYS EMPTY: OpenFreeMap serves no raster tiles
-   * at street zoom. Kept as an empty string (rather than removed) for the
-   * staff review panel's mosaic (`app/admin/_review/map-tiles.ts`), which
-   * lays out nothing for an empty template, until that panel draws the still
-   * area map instead.
-   */
-  url: string;
   /** The MapLibre style. */
   style: string;
   /** The TileJSON that names the current vector tile URLs. */
@@ -112,7 +104,6 @@ const OPENFREEMAP_TILEJSON = `${OPENFREEMAP_ORIGIN}/planet`;
 const OPENFREEMAP: TileProvider = {
   id: "openfreemap",
   kind: "vector",
-  url: "",
   /* One style for both themes; the theme is applied as paint overrides. */
   style: OPENFREEMAP_STYLE,
   tileJson: OPENFREEMAP_TILEJSON,

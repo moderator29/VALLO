@@ -66,7 +66,7 @@ export default async function ListingUnderReviewPage({
     );
   }
 
-  const { closedReason, decidable, nextId, provenance, feeAcceptance, tiles, payeeCtx } = data;
+  const { closedReason, decidable, nextId, provenance, feeAcceptance, payeeCtx } = data;
   const { offset: _offset, ...carried } = query;
   const hubHref = listingHubHref(found.id, raw);
   const tabParam = typeof raw.tab === "string" ? raw.tab : "";
@@ -84,7 +84,6 @@ export default async function ListingUnderReviewPage({
         sqm={t.catalogue.card.sqm}
         statusLabel={(status) => listingStatusWord(status, ui.statusLabel)}
         backHref={queueHref}
-        tiles={tiles}
         keepers={{
           moveIn: t.moveIn,
           purchase: t.purchase,

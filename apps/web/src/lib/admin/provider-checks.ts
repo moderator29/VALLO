@@ -5,11 +5,12 @@ import { getCallProvider, callProviderConfigured } from "@/lib/calls/provider";
 import { apnsProviderToken } from "@/lib/push/transport/apns";
 import { TERMII_DEFAULT_BASE } from "@/lib/phone-otp/termii";
 import { readSenderIdPage, senderIdVerdict, type SenderIdRow } from "./termii-sender-ids";
+import { OPENFREEMAP_ORIGIN } from "@/lib/maps/tiles";
 
 /**
  * PROVIDER CHECKS (the founder, 8 October 2026: "trigger deployment and test
  * Payluk and livekit"). The sandbox that builds Vallo cannot reach Payluk,
- * LiveKit Cloud, Termii or MapTiler, so the checks run here, on the live
+ * LiveKit Cloud or Termii, so the checks run here, on the live
  * server, behind the operations scope.
  *
  * EVERY CHECK IS READ-ONLY OR SELF-CLEANING. No money moves, no message is
@@ -21,7 +22,7 @@ import { readSenderIdPage, senderIdVerdict, type SenderIdRow } from "./termii-se
  *   - Apple push: sign the provider token with the .p8 (no network).
  *   - Termii: GET /api/get-balance (reads the account, sends nothing), and
  *     GET /api/sender-id (the sender IDs on the account, with their status).
- *   - MapTiler: fetch the style with the public key and the site's referer.
+ *   - OpenFreeMap: fetch the map style (no key).
  * No key, secret or token is ever returned: only names, outcomes and codes.
  */
 
@@ -142,20 +143,17 @@ export async function termiiSenderIdsCheck(
   return { name, ok: verdict.ok, detail: verdict.line, senders: rows };
 }
 
-async function mapTilerCheck(): Promise<CheckOutcome> {
-  const name = "MapTiler (maps)";
-  const key = (process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "").trim();
-  if (!key) return { name, ok: false, detail: "NEXT_PUBLIC_MAPTILER_KEY not set." };
+/* The map tiles need no key (OpenFreeMap, 10 November 2026), so the check is
+   only whether the style the maps open answers. */
+async function mapTilesCheck(): Promise<CheckOutcome> {
+  const name = "OpenFreeMap (maps)";
   try {
-    const res = await fetch(`https://api.maptiler.com/maps/streets-v2/style.json?key=${encodeURIComponent(key)}`, {
-      headers: { Referer: "https://www.vallospaces.com/", Origin: "https://www.vallospaces.com" },
-      signal: AbortSignal.timeout(TIMEOUT),
-    });
+    const res = await fetch(`${OPENFREEMAP_ORIGIN}/styles/positron`, { signal: AbortSignal.timeout(TIMEOUT) });
     return res.status === 200
-      ? { name, ok: true, detail: "Key accepted for www.vallospaces.com." }
-      : { name, ok: false, detail: `MapTiler answered HTTP ${res.status} (an invalid key or a blocked origin).` };
+      ? { name, ok: true, detail: "The map style answered. No key is needed." }
+      : { name, ok: false, detail: `OpenFreeMap answered HTTP ${res.status}. The maps fall back to the pin card until it answers.` };
   } catch {
-    return { name, ok: false, detail: "No answer from MapTiler (network or timeout)." };
+    return { name, ok: false, detail: "No answer from OpenFreeMap (network or timeout)." };
   }
 }
 
@@ -167,6 +165,6 @@ export async function runProviderChecks(): Promise<CheckOutcome[]> {
     Promise.resolve(apnsCheck()),
     termiiCheck(),
     termiiSenderIdsCheck(),
-    mapTilerCheck(),
+    mapTilesCheck(),
   ]);
 }
