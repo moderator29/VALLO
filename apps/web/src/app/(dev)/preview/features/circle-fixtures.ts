@@ -61,6 +61,7 @@ const post = (id: string, title: string, type: CirclePostView["type"], author: C
   community: { slug: COMMUNITY.slug, name: COMMUNITY.name },
   listingId: null,
   answered,
+  roommate: null,
 });
 
 export const POSTS: CirclePostView[] = [
