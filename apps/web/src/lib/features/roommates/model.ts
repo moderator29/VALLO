@@ -693,6 +693,7 @@ export const ROOMMATES_ROUTES = {
   create: "/roommates/new",
   profile: "/roommates/profile",
   hub: "/roommates/me",
+  connected: (interestId: string) => `/roommates/connected/${interestId}`,
   groups: "/roommates/groups",
   group: (id: string) => `/roommates/groups/${id}`,
   newGroup: "/roommates/groups/new",

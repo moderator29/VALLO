@@ -286,6 +286,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/roommates/nysc": "/roommates",
   "/roommates/safety": "/roommates",
   "/roommates/me": "/roommates",
+  "/roommates/connected/[interestId]": "/roommates/me",
   "/roommates/groups": "/roommates",
   "/roommates/groups/new": "/roommates/groups",
   "/roommates/groups/[id]": "/roommates/groups",

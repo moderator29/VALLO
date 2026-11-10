@@ -461,7 +461,7 @@ export const roommatesEn = {
       noteLabel: "Add a short note",
       notePlaceholder: "Hi, I am looking in the same area and my move-in date is close to yours.",
       send: "Send interest",
-      sentBanner: "Interest sent. We will tell you when they answer.",
+      sentBanner: "Roommate request sent. We will tell you when they answer.",
       withdrawn: "Interest withdrawn",
       accepted: "You are connected",
       declinedBanner: "Declined. They are not told why.",

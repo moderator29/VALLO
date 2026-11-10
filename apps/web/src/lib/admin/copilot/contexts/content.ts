@@ -23,7 +23,7 @@ export function contentContext(input: ContentContextInput | null): string {
     `${input.dueThisWeek} planned for this week and ${input.overdue} past their planned date`,
     input.stuckInReview > 0 ? `${input.stuckInReview} in review for more than a week` : null,
     `${countOf(input.publishedThisMonth, "contentItems")} published this month`,
-    input.openRequests > 0 ? `${input.openRequests} open requests from other departments` : null,
+    input.openRequests > 0 ? `${countOf(input.openRequests, "requests")} open from other departments` : null,
     input.openReports !== null ? `${countOf(input.openReports, "reports")} open on the feed moderation queue` : null,
   ]);
 }

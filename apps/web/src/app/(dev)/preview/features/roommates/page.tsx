@@ -19,6 +19,12 @@ import { GroupDashboardView } from "@/app/(app)/roommates/groups/[id]/_parts/Gro
 import { SplitCalculator } from "@/app/(app)/roommates/split/SplitCalculator";
 import { ProfileFlowScreen } from "@/app/(app)/roommates/profile/_parts/ProfileFlowScreen";
 import { PostFlowScreen } from "@/app/(app)/roommates/new/_parts/PostFlowScreen";
+import { ConnectedScreen } from "@/components/roommates/ConnectedScreen";
+import { KeyDoorArt } from "@/components/roommates/RoommatesArt";
+import { ListingReviewPanel } from "@/components/roommates/ListingReviewPanel";
+import { RoommatesFeed } from "@/components/roommates/RoommatesFeed";
+import { RoommatesFirstRun } from "@/components/roommates/RoommatesFirstRun";
+import { EMPTY_FEED_FILTERS } from "@/lib/features/roommates/feed";
 import { VerificationBanner } from "@/components/roommates/VerificationBanner";
 import { PageFrame } from "@/components/app/PageFrame";
 import { Celebration } from "@/components/roommates/Celebrate";
@@ -162,8 +168,52 @@ export default async function PreviewRoommates({ searchParams }: { searchParams:
     case "nysc":
       body = <NyscView t={t} />;
       break;
+    case "connected":
+      body = <ConnectedScreen interestId="i1" userId={PROFILE.userId} name="Tolu Adebayo" />;
+      break;
+    case "welcome":
+      body = <RoommatesFirstRun startHref="/roommates" />;
+      break;
+    case "review-submitted":
+      body = <ListingReviewPanel id="r1" kind="room_offer" status="in_review" now={NOW} />;
+      break;
+    case "review-changes":
+      body = <ListingReviewPanel id="r1" kind="room_offer" status="changes_requested" now={NOW} review={{ id: "r1", status: "changes_requested", note: "Add a clear photo of the front of the building and one of the room.", submittedAt: "2026-11-08T10:00:00Z", reviewedAt: "2026-11-09T10:00:00Z", approved: false }} />;
+      break;
+    case "review-live":
+      body = <ListingReviewPanel id="r1" kind="room_offer" status="live" now={NOW} review={{ id: "r1", status: "live", note: null, submittedAt: "2026-11-08T10:00:00Z", reviewedAt: "2026-11-08T18:00:00Z", approved: true }} />;
+      break;
+    case "submitted":
+      body = (
+        <section className="nf-rmcn" data-theme="dark">
+          <KeyDoorArt className="nf-rmcn__art" />
+          <h1 className="nf-rmcn__title">{t.review.done.title}</h1>
+          <p className="nf-rmcn__body">{t.review.done.body}</p>
+          <ol className="nf-rmcn__list">
+            {t.review.done.next.map((l, n) => (
+              <li key={l}>
+                <span aria-hidden="true">{n + 1}.</span>
+                {l}
+              </li>
+            ))}
+          </ol>
+          <div className="nf-rmcn__actions">
+            <ButtonLink href="/roommates" variant="primary" size="lg" full>
+              {t.review.done.view}
+            </ButtonLink>
+          </div>
+        </section>
+      );
+      break;
     default:
-      body = <RoommatesHomeView home={HOME} t={t} now={NOW} />;
+      body = (
+        <RoommatesHomeView
+          home={HOME}
+          t={t}
+          now={NOW}
+          feed={{ tab: "all", filters: EMPTY_FEED_FILTERS, initial: { items: [...ROOMS.map((room) => ({ type: "room" as const, room })), ...PEOPLE.slice(0, 1).map((person) => ({ type: "person" as const, person }))], next: null, peopleNote: null } }}
+        />
+      );
   }
 
   return (

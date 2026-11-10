@@ -135,7 +135,7 @@ export { ConfirmSheet, InviteCard };
 
 export function RequestActions({ id, person, note }: { id: string; person: PersonRef; note: string | null }) {
   const X = useScopedCopy("roommates").hubX.requests;
-  const { pending, run } = useRun();
+  const { pending, run, router } = useRun();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -166,7 +166,10 @@ export function RequestActions({ id, person, note }: { id: string; person: Perso
         onAccept={() =>
           run(() => answerInterest({ id, accept: true }), {
             success: fill(X.accepted, { name: person.name }),
-            onOk: () => setOpen(false),
+            onOk: () => {
+              setOpen(false);
+              router.push(ROOMMATES_ROUTES.connected(id));
+            },
           })
         }
       />

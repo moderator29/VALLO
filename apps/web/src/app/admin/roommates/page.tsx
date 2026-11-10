@@ -44,7 +44,7 @@ const TABS = [
   ["weights", "Matching"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
-const LISTING_STATUSES = ["live", "paused", "draft", "filled", "expired", "removed"] as const;
+const LISTING_STATUSES = ["live", "submitted", "in_review", "changes_requested", "rejected", "paused", "draft", "filled", "expired", "removed"] as const;
 const PROFILE_STATUSES = ["active", "paused", "held", "draft"] as const;
 const GROUP_STAGES = ["forming", "searching", "decided", "living", "closed"] as const;
 const CHECK_STATUSES = ["review", "verified", "rejected", "pending", "expired"] as const;

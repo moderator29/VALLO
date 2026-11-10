@@ -41,7 +41,7 @@ export function ProfileActions({
   const copy = useScopedCopy("roommates");
   const router = useRouter();
   const [state, setState] = useState<ConnectionState>(connection);
-  const [celebrate, setCelebrate] = useState(false);
+  const [celebrate] = useState(false);
   const [interestOpen, setInterestOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pending, start] = useSafeTransition();
@@ -192,8 +192,7 @@ export function ProfileActions({
                   feedback("confirm");
                   banner.success(copy.ui.profile.accepted);
                   setState({ state: "connected", interestId: state.interestId, conversationId: null });
-                  setCelebrate(true);
-                  router.refresh();
+                  router.push(ROOMMATES_ROUTES.connected(state.interestId));
                   return { ok: true };
                 })
               }
