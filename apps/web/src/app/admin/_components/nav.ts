@@ -78,6 +78,9 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "applications", href: "/admin/agents", icon: ui("user"), label: "Applications", countKeys: ["applications"], countLabel: "applications waiting on a decision" },
       { key: "businesses", href: "/admin/businesses", icon: ui("building-hotel"), label: "Businesses" },
       { key: "stops", href: "/admin/stops", icon: ui("shield-stop"), label: "Stops" },
+      /* Business development: landlords, agents, hotels, shortlet hosts and
+         restaurants brought onto Vallo, and the pipeline that tracks them. */
+      { key: "business-development", href: "/admin/business-development", icon: ui("hand-coins"), label: "Business development" },
     ],
   },
   {

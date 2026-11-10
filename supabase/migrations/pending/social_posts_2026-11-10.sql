@@ -69,8 +69,8 @@ create table if not exists public.social_posts (
   constraint social_posts_live_url_len check (live_url is null or char_length(live_url) <= 2000),
   constraint social_posts_rejection_reason_len check (rejection_reason is null or char_length(rejection_reason) <= 1000),
   constraint social_posts_media_urls_len check (cardinality(media_urls) <= 20),
-  -- A post carries an approver and a decision time together, or neither.
-  constraint social_posts_approved_pair check ((approved_by is null) = (approved_at is null)),
+  -- An approver always comes with a decision time. The approver may later be null (their account was deleted), so the reverse is not required.
+  constraint social_posts_approved_pair check (approved_by is null or approved_at is not null),
   -- Only an approved post may be marked posted.
   constraint social_posts_posted_needs_approval check (status <> 'posted' or approved_at is not null),
   constraint social_posts_rejection_needs_reason check (status <> 'draft' or rejection_reason is null or char_length(btrim(rejection_reason)) > 0)
