@@ -931,4 +931,27 @@
     font-size: var(--nf-text-caption);
     font-weight: 700;
   }
+  .nf-rmg {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nf-space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-rmg__item {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-rm-ink-wash);
+  }
+  .nf-rmg__item:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .nf-rmg__item img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
 }

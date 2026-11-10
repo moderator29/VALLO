@@ -33,6 +33,7 @@ import {
   ROOM_PREFS,
   ROOM_TYPES,
   REVIEW_MIN_PHOTOS,
+  cleanGallery,
   canPublishProfile,
   listingProblems,
   type ListingDraft,
@@ -1053,4 +1054,31 @@ export async function loadRoommatesFeed(input: z.input<typeof feedSchema>): Prom
   };
   const peopleNote = people && (people.state === "need-profile" || people.state === "signed-out") ? people.state : null;
   return ok({ items: weave(roomItems, peopleItems), next: hasMore(next) ? next : null, peopleNote });
+}
+
+
+/* ------------------------------------------------------------------ the profile gallery */
+
+const gallerySchema = z.array(z.string().min(3).max(300)).max(LIMITS.galleryMax, "Six photos at most.");
+
+/**
+ * Save the member's profile gallery (up to six photos of their room, space or
+ * how they live). The whole list is the answer, so add, remove and Undo are one
+ * write. Only photos in the member's own folder are accepted; the database
+ * repeats the rule. It needs a roommate profile to exist.
+ */
+export async function setRoommateGallery(paths: string[]): Promise<ActionResult<{ gallery: string[] }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(gallerySchema, paths);
+  if (!parsed.ok) return fail("Six photos at most.");
+  const clean = cleanGallery(who.userId, parsed.data);
+  if (!clean) return fail("One of the photos could not be used. Upload it again.");
+  const slow = await limited("gallery", who.userId, 60, 60 * 60);
+  if (slow) return fail(slow);
+  const { data, error } = await who.db.from("roommate_profiles").update({ gallery: clean }).eq("user_id", who.userId).select("user_id");
+  if (error) return fail(wordsFor(error));
+  if (!data || data.length === 0) return fail("Make your roommate profile first, then add photos.");
+  refresh(ROOMMATES_ROUTES.person(who.userId), ROOMMATES_ROUTES.profile);
+  return ok({ gallery: clean });
 }

@@ -14,6 +14,7 @@ import { SelectField, TextArea, TextField } from "@/components/ui/Field";
 import { NairaField } from "@/components/ui/NairaField";
 import { OptionCards } from "@/components/ui/OptionCards";
 import { Segmented } from "@/components/ui/Segmented";
+import { GalleryEditor } from "@/components/roommates/GalleryEditor";
 import { StepFrame, type StepSaveState } from "@/components/ui/StepFrame";
 import { Switch } from "@/components/ui/Switch";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
@@ -71,12 +72,15 @@ export function ProfileFlow({
   exists,
   hasPhoto,
   schools,
+  gallery = [],
 }: {
   initial: Draft;
   status: MyRoommateProfile["status"];
   exists: boolean;
   hasPhoto: boolean;
   schools: InstitutionRef[];
+  /** The saved gallery photos (storage paths as URLs are read on the page; the editor keeps paths). */
+  gallery?: { path: string; url: string }[];
 }) {
   const copy = useScopedCopy("roommates");
   const O = copy.ui.onboarding;
@@ -440,6 +444,7 @@ export function ProfileFlow({
           t={copy}
         />
         <ReviewRow title={O.liveTitle} value={life.join(" · ")} onEdit={edit(5)} t={copy} />
+        {exists ? <GalleryEditor initial={gallery} /> : null}
         <ReviewRow
           title={O.prefsTitle}
           value={[p.roomPref ? copy.roomPref[p.roomPref] : null, p.furnishedPref ? copy.furnishedPref[p.furnishedPref] : null, p.householdSize ? fill(copy.ui.profile.household, { n: p.householdSize }) : null, copy.genderPref[p.genderPref]].filter(Boolean).join(" · ")}

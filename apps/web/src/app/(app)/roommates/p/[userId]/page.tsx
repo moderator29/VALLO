@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 
-import { readMyActiveGroups, readRoommateProfile } from "@/lib/features/roommates/queries";
+import { readMyActiveGroups, readProfileGallery, readRoommateProfile } from "@/lib/features/roommates/queries";
 import { requestNow } from "@/lib/format/when";
 
 import { RoommateProfileScreen } from "./_parts/ProfileScreen";
@@ -20,6 +20,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 /** A roommate profile: the read, the viewer's groups for an invite, then the screen. */
 export default async function RoommateProfilePage({ params }: Props) {
   const { userId } = await params;
-  const [read, groups] = await Promise.all([readRoommateProfile(userId), readMyActiveGroups()]);
-  return <RoommateProfileScreen read={read} groups={groups} t={copy} now={requestNow()} userId={userId} />;
+  const [read, groups, gallery] = await Promise.all([readRoommateProfile(userId), readMyActiveGroups(), readProfileGallery(userId)]);
+  return <RoommateProfileScreen read={read} groups={groups} t={copy} now={requestNow()} userId={userId} gallery={gallery.map((g) => g.url)} />;
 }

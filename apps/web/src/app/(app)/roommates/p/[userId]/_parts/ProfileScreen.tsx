@@ -41,6 +41,7 @@ export function RoommateProfileScreen({
   t: copy,
   now,
   userId,
+  gallery = [],
 }: {
   read: ProfileRead;
   /** The viewer's active groups, for "Invite to a group". */
@@ -49,6 +50,8 @@ export function RoommateProfileScreen({
   now: number;
   /** The profile asked for, for the sign-in return. */
   userId: string;
+  /** Their gallery photos (URLs), when the database lets this viewer see them. */
+  gallery?: string[];
 }) {
   if (read.state !== "ok") {
     const here = ROOMMATES_ROUTES.person(userId);
@@ -113,6 +116,19 @@ export function RoommateProfileScreen({
             </section>
           ) : null}
           <Facts p={p} t={copy} />
+          {gallery.length ? (
+            <section className="nf-rm-section" aria-labelledby="rmv-gallery" data-testid="profile-gallery">
+              <SectionHead id="rmv-gallery" title={copy.gallery.title} />
+              <ul className="nf-rmg">
+                {gallery.map((u, i) => (
+                  <li key={u} className="nf-rmg__item">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- a member's own upload from the public bucket */}
+                    <img src={u} alt={fill(copy.gallery.alt, { name: p.name.split(" ")[0] ?? p.name, n: i + 1 })} loading="lazy" />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           {Object.values(p.lifestyle).some((v) => v !== null) ? (
             <section className="nf-rm-section" aria-labelledby="rmv-life">
               <SectionHead id="rmv-life" title={copy.profile.lifestyle} />

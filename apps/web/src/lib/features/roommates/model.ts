@@ -386,6 +386,7 @@ export const LIMITS = {
   noteMax: 300,
   areasMax: 6,
   photosMax: 12,
+  galleryMax: 6,
   rulesMax: 10,
   ruleMax: 120,
   groupNameMin: 3,
@@ -394,6 +395,20 @@ export const LIMITS = {
   postMax: 1000,
   pageSize: 20,
 } as const;
+
+/**
+ * The profile gallery's paths, cleaned: only photos in the member's own
+ * folder, no repeats, no climbing out of it, at most six. Null when a path is
+ * not theirs (the action then refuses, the database repeats the rule).
+ */
+export function cleanGallery(userId: string, paths: readonly string[]): string[] | null {
+  const out: string[] = [];
+  for (const p of paths) {
+    if (!p.startsWith(`${userId}/`) || p.includes("..") || p.length > 300) return null;
+    if (!out.includes(p)) out.push(p);
+  }
+  return out.length > LIMITS.galleryMax ? null : out;
+}
 
 /* ------------------------------------------------------------------ money */
 

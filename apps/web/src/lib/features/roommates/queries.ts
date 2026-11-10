@@ -684,3 +684,15 @@ export async function readMyIdentityState(): Promise<ListerIdentityStatus | null
     return null;
   }
 }
+
+/**
+ * A person's gallery photos as URLs. The database decides who may see them
+ * (the owner and staff always; others only while the profile is active and
+ * not blocked), so an empty list is also the answer while the SQL is absent.
+ */
+export async function readProfileGallery(userId: string): Promise<{ path: string; url: string }[]> {
+  const v = await viewer();
+  if (!v?.id) return [];
+  const res = await rpc<string[]>(v.db, "roommate_profile_gallery", { p_user: userId }, "read.roommates.gallery");
+  return (res.data ?? []).map((path) => ({ path, url: photo(path) }));
+}
