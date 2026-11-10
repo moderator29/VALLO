@@ -13,6 +13,7 @@ import "@/app/css/map.css";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { toggleSave } from "@/lib/saved/actions";
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 import { addLocalSave, readLocalSaves, removeLocalSave } from "@/lib/saved/local";
 import Image from "next/image";
 import { MapDock } from "./MapDock";
@@ -38,7 +39,6 @@ import { banner } from "@/lib/ui/toast";
 
 /* What a save on the map did, said by the one banner (founder, 7 November 2026);
    the same words the cards use (components/app/SaveControl.tsx). */
-const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on this device", removed: "Removed from your saved list" };
 
 /**
  * The discovery map.
@@ -589,9 +589,38 @@ export function MapCanvas({
                 else next.delete(listing.id);
                 return next;
               });
-              banner(truth ? MAP_SAVE_WORDS.saved : MAP_SAVE_WORDS.removed, { tone: "success", "data-testid": "save-banner" });
+              saveDoneBanner({
+                saved: truth,
+                undo: async () => {
+                  const back = await toggleSave({ listingId: listing.id, want: !truth });
+                  return back.ok ? { ok: true } : { ok: false, error: back.error };
+                },
+                onUndone: () =>
+                  setSavedIds((previous) => {
+                    const next = new Set(previous);
+                    if (truth) next.delete(listing.id);
+                    else next.add(listing.id);
+                    return next;
+                  }),
+              });
             } else {
-              banner(wasSaved ? MAP_SAVE_WORDS.removed : MAP_SAVE_WORDS.savedOnDevice, { tone: "success", "data-testid": "save-banner" });
+              const nowSaved = !wasSaved;
+              saveDoneBanner({
+                saved: nowSaved,
+                device: true,
+                undo: async () => {
+                  if (nowSaved) removeLocalSave(listing.id);
+                  else addLocalSave(listing.id);
+                  return { ok: true };
+                },
+                onUndone: () =>
+                  setSavedIds((previous) => {
+                    const next = new Set(previous);
+                    if (nowSaved) next.delete(listing.id);
+                    else next.add(listing.id);
+                    return next;
+                  }),
+              });
             }
             return;
           }

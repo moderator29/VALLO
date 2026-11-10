@@ -11,8 +11,8 @@ Founder directive, 25 September 2026 (Track A). This page is the current truth. 
 >   by card at once; the commission comes from the host's or lister's share.
 >   Whether escrow is open is now read on the server, never a constant:
 >   `protectedRailLive()` (`lib/money/rail-live.ts`) is true only when the
->   partner key for this deployment is set, `PAYMENTS_KILL_PAYLUK` is not on
->   and `payments_payluk_on` is on (the one switch the database also reads,
+>   partner key for this deployment is set, `PAYMENTS_KILL_PROTECTED_PAY` is not on
+>   and `payments_protected_pay_on` is on (the one switch the database also reads,
 >   through `private.rentals_protected_pay_on`, since D77). While it reads false the payer is offered
 >   card where the rules allow it, a sale says escrow is paused, and nothing is
 >   taken. Release steps: `docs/payments/RELEASE_RUNBOOK.md`.
@@ -28,7 +28,7 @@ Founder directive, 25 September 2026 (Track A). This page is the current truth. 
 > - **Switches live**: `stays_instant_pay` and `room_bookings` are ON;
 >   `restaurant_deposits`, `wallet`, `held_payments_payouts`,
 >   `rentals_protected_pay`, `crypto_payments` and `agreement_staff_review`
->   are off; `payments_payluk_on` is on but no escrow adapter is registered.
+>   are off; `payments_protected_pay_on` is on but no escrow adapter is registered.
 > - **Applied**: `d68d_the_rail_decides_the_gate` (`20261007154216`) and
 >   `d77_founder_rulings_on_the_gate` (`20261007154344`), with
 >   `d77x_risk_settings_read_by_staff` (`20261007164415`).
@@ -71,7 +71,7 @@ Payment opens only after an agreement is approved. The database enforces this wi
    A hotel room is a stay too (ROOM BOOKINGS 1; `room_bookings` is ON live, 13 October 2026): the agreement names the accommodation, the owner is the hotel's business owner, and a host who is not an agent is paid through their default bank account's Paystack subaccount. See [ROOM_CHECKOUT.md](ROOM_CHECKOUT.md).
 3. **Both parties confirm the same version** with `agreement_confirm_as`. An agent confirming for an owner must hold a live mandate for the listing. Any amendment (`agreement_amend_as`) moves the version, and both confirmations lapse.
    **The rail decides the gate (D68d, applied live as `20261007154216_d68d_the_rail_decides_the_gate`).** When both have confirmed, `private.agreement_review_required` resolves from the rail plus risk signals. Escrow: approved by the system at once, and Vallo watches the hold with the power to pause a release. Direct: approved by the system unless a signal fires (no paid deal yet, amount over `agreement_risk_settings.amount_threshold_minor`, price or facts changed in the last few days, payout name mismatch, fraud radar), in which case it goes to `in_review` for step 4. The payment gate asks `private.agreement_payable` instead of demanding `approved` unconditionally, and the kill switch `agreement_review_all` (off) makes every deal need a person. The admin desk opens with a watch list over live deals, riskiest first.
-   **The founder's rulings (D77, applied live as `20261007154344_d77_founder_rulings_on_the_gate`, after d68d).** First deal is a signal only when the business behind the deal is not verified (`businesses.verified` with a `cac_number`) or the amount is over the threshold. The threshold is 500,000 naira (`agreement_risk_settings.amount_threshold_minor = 50000000`), still configuration. A sale never routes to direct: `private.rail_for_booking`, `private.rail_for_agreement` and the app router (`saleNeverDirect`) answer no rail rather than direct for a sale, and a nightly sale listing never takes the stay rule. Staff change the threshold, the change window, each signal and the incident switch at `/admin/agreements/settings` (`admin_update_risk_settings`, `admin_set_review_kill_switch`: `agreements` scope, validated, audited). Opening and funding a protected payment now ask the same gate (trigger `provider_arrangements_00_payable_gate`), so the incident switch stops escrow too; what Payluk reports afterwards is always recorded.
+   **The founder's rulings (D77, applied live as `20261007154344_d77_founder_rulings_on_the_gate`, after d68d).** First deal is a signal only when the business behind the deal is not verified (`businesses.verified` with a `cac_number`) or the amount is over the threshold. The threshold is 500,000 naira (`agreement_risk_settings.amount_threshold_minor = 50000000`), still configuration. A sale never routes to direct: `private.rail_for_booking`, `private.rail_for_agreement` and the app router (`saleNeverDirect`) answer no rail rather than direct for a sale, and a nightly sale listing never takes the stay rule. Staff change the threshold, the change window, each signal and the incident switch at `/admin/agreements/settings` (`admin_update_risk_settings`, `admin_set_review_kill_switch`: `agreements` scope, validated, audited). Opening and funding a protected payment now ask the same gate (trigger `provider_arrangements_00_payable_gate`), so the incident switch stops escrow too; what the retired provider reports afterwards is always recorded.
 4. **An admin, or staff holding the `agreements` scope, approves or rejects** with `admin_decide_agreement`. A rejection needs a reason. Nobody decides an agreement they are a party to. The decision is written to `deal_agreement_events` (append-only) and to `audit_log`. Both parties are told in the app and by email: `agreement.approved` and `agreement.rejected`.
 5. **Payment opens.** `payment_split_for_booking` returns the split, and the app opens a split attempt (`lib/payments/split-attempt.ts`). Without `PAYSTACK_GUARANTEE_SUBACCOUNT`, or without a lister subaccount, nothing opens.
 6. **Settlement.** `settle_booking_charge` records:

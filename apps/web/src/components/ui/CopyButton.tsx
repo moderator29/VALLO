@@ -42,8 +42,8 @@ export function CopyButton({
   className,
   testId,
 }: {
-  /** What goes on the clipboard. */
-  value: string;
+  /** What goes on the clipboard (a function is read at the tap, for an address built from the browser's origin). */
+  value: string | (() => string);
   kind?: CopyKind;
   /** The accessible name, e.g. "Copy booking reference". Defaults to "Copy". */
   label?: string;
@@ -54,7 +54,7 @@ export function CopyButton({
 }) {
   const [copied, flash] = useDoneFlash(1800);
   const onCopy = useCallback(async () => {
-    const done = await copyText(value);
+    const done = await copyText(typeof value === "function" ? value() : value);
     if (done) {
       feedback("select");
       flash();
@@ -99,5 +99,19 @@ export function CopyValue({
       <span className="nf-copy-value__text">{value}</span>
       <CopyButton value={value} kind={kind} {...(label ? { label } : {})} {...(message ? { message } : {})} />
     </span>
+  );
+}
+
+/** Copy a page of ours by its path: the address is built from the browser's own origin at the tap. */
+export function CopyLink({ path, label, message, className, testId }: { path: string; label?: string; message?: string; className?: string; testId?: string }) {
+  return (
+    <CopyButton
+      kind="link"
+      value={() => `${window.location.origin}${path}`}
+      {...(label ? { label } : {})}
+      {...(message ? { message } : {})}
+      {...(className ? { className } : {})}
+      {...(testId ? { testId } : {})}
+    />
   );
 }

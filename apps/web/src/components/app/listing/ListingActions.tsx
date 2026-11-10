@@ -6,6 +6,7 @@ import { banner, type ToastTone } from "@/lib/ui/toast";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AuthGate } from "@/components/auth/AuthGate";
 import { toggleSave } from "@/lib/saved/actions";
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 import {
   saveRestaurant,
   saveStay,
@@ -190,6 +191,33 @@ export function ListingActions({
     [router, signInHref],
   );
 
+  /* The banner for a settled save or removal, with Undo as the real inverse. */
+  function done(nowSaved: boolean, device = false) {
+    saveDoneBanner({
+      saved: nowSaved,
+      device,
+      undo: async () => {
+        if (device) {
+          if (nowSaved) removeLocalSave(listingId);
+          else addLocalSave(listingId);
+          deviceSavesChanged();
+          return { ok: true };
+        }
+        const back = place
+          ? place.kind === "accommodation"
+            ? nowSaved
+              ? await unsaveStay({ accommodationId: place.id })
+              : await saveStay({ accommodationId: place.id })
+            : nowSaved
+              ? await unsaveRestaurant({ restaurantId: place.id })
+              : await saveRestaurant({ restaurantId: place.id })
+          : await toggleSave({ listingId, want: !nowSaved });
+        return back.ok ? { ok: true } : { ok: false, error: back.error };
+      },
+      onUndone: () => setSaved(!nowSaved),
+    });
+  }
+
   function toggle() {
     if (pending) return;
     const next = !saved;
@@ -217,7 +245,7 @@ export function ListingActions({
             say(result.error, result.error.startsWith("Sign in"), "error");
             return;
           }
-          say(next ? "Saved to your shortlist" : "Removed from saved");
+          done(next);
           return;
         }
 
@@ -236,7 +264,7 @@ export function ListingActions({
           /* And the store is told, so every other heart for this listing on the
              page behind this one moves with it rather than waiting for a reload. */
           deviceSavesChanged();
-          say(next ? "Saved to your shortlist" : "Removed from saved");
+          done(next, true);
           return;
         }
         setSaved(result.data.saved);
@@ -244,7 +272,7 @@ export function ListingActions({
            is: the light beat (CRAFT_DOCTRINE 6: light for a toggle). "success"
            is kept for payoffs, so a heart never feels like a settled payment. */
         if (result.data.saved) feedback("select");
-        say(result.data.saved ? "Saved to your shortlist" : "Removed from saved");
+        done(result.data.saved);
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

@@ -44,7 +44,7 @@ designing or building a screen.
 Act as Vallo's principal fintech architect, senior full-stack engineer,
 payment-integration specialist, security engineer and product designer, inside
 the existing production-stage monorepo. Migrate the protected-payment
-infrastructure from the unfinished Payluk integration to the chosen provider's
+infrastructure from the unfinished the retired provider integration to the chosen provider's
 official Business API.
 
 This is an implementation and migration project, NOT a platform rebuild.

@@ -83,3 +83,30 @@ payment.
 EULA (`lib/legal/eula.tsx`), Disclaimer, Host Agreement and AI terms were not
 given the preface. Cookies and Safety pages were not found as separate legal
 routes. A browser visual check at 360px was not run in this pass.
+
+## 10 November 2026: Payluk removal (founder instruction; for counsel)
+
+The founder said: "Remove Payluk. What is this Payluk naming? We are not using
+them in our platform no more." This is a legal-text change he instructed.
+`PRIVACY_VERSION` was NOT bumped (still `2026-11-09`); counsel decides whether
+removing a named processor warrants a new version and a re-prompt. A
+comment-only note was added in `lib/legal/versions.ts`.
+
+| Where | Old | New |
+|---|---|---|
+| Privacy, section 5 (service providers) | "Payluk (Nigeria): the provider behind the protected payment rail, which is built but switched off, so nothing is sent to it today. Vallo has no wallet. If the rail is ever switched on, Payluk (Nigeria) would receive your name, email address and phone number for that payment." | (bullet removed) |
+| `privacy-truth.test.ts`, processor table | `[/api\.payluk\.ng/, "Payluk"]` required the notice to name Payluk while its host was in the code | row removed; the host is no longer in the code, and a new test (`lib/copy/provider-name.test.ts`) fails if the name returns anywhere in the source |
+
+Decisions flagged for counsel:
+1. The replacement protected-pay provider (EscrowPay) is switched off, sends
+   nothing and is NOT named in the notice, as for any switched-off processor.
+   When it is switched on, it must be added to section 5 in the same change
+   (name, country, what it receives: name, email, phone, payment reference),
+   and the processor table in `privacy-truth.test.ts` gets its host row.
+2. The deleted bullet also carried the sentence "Vallo has no wallet." That
+   statement is still made in Terms sections 4 and 5 and Privacy section 2,
+   which were not touched.
+3. Whether to bump `PRIVACY_VERSION` (re-prompts acceptance for every member).
+4. The older entries in this file that name the provider are the historical
+   record of earlier changes and were left as written.
+

@@ -39,6 +39,10 @@ export const roommatesEn = {
   },
   listingStatus: {
     draft: "Draft",
+    submitted: "Submitted for review",
+    in_review: "In review",
+    changes_requested: "Changes needed",
+    rejected: "Not approved",
     live: "Live",
     paused: "Paused",
     filled: "Filled",

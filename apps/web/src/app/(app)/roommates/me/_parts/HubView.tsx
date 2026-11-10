@@ -242,7 +242,8 @@ function statusTone(s: ListingStatus): "good" | "quiet" | "warn" | "bad" | "bran
   if (s === "live") return "good";
   if (s === "removed") return "bad";
   if (s === "paused" || s === "draft") return "quiet";
-  if (s === "expired") return "warn";
+  if (s === "expired" || s === "changes_requested") return "warn";
+  if (s === "rejected") return "bad";
   return "brand";
 }
 

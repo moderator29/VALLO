@@ -3,6 +3,11 @@ import Link from "next/link";
 import { RoommatesDashboard } from "./Dashboard";
 
 import { PageFrame } from "@/components/app/PageFrame";
+import { RoommatesFeed } from "@/components/roommates/RoommatesFeed";
+import { RoommatesFirstRun } from "@/components/roommates/RoommatesFirstRun";
+import { RoommatesWelcome } from "@/components/roommates/Welcome";
+import type { FeedFilters, FeedTab } from "@/lib/features/roommates/feed";
+import type { FeedPage } from "@/lib/features/roommates/actions";
 import {
   CardRail,
   HowItWorks,
@@ -10,7 +15,6 @@ import {
   RoomCardView,
   RoommateCardView,
   RoommatesEmpty,
-  RoommatesHero,
   SectionHead,
   StatTiles,
   TrustTiles,
@@ -38,13 +42,12 @@ const signInTo = (next: string) => `/sign-in?next=${encodeURIComponent(next)}`;
  * real read; an empty one says so with its next step, and a server without
  * the SQL says that once, plainly.
  */
-export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome; t: RoommatesCopy; now: number }) {
+export function RoommatesHomeView({ home, t: copy, now, feed }: { home: RoommatesHome; t: RoommatesCopy; now: number; feed?: { tab: FeedTab; filters: FeedFilters; initial: FeedPage | null } }) {
   const today = lagosDay(now);
   const postHref = home.signedIn ? ROOMMATES_ROUTES.create : signInTo(ROOMMATES_ROUTES.create);
-  const faces = home.recommended.filter((p) => p.avatarUrl).slice(0, 3);
   const greeting = home.signedIn && home.viewerName ? fill(copy.home.welcome, { name: home.viewerName.split(" ")[0] ?? home.viewerName }) : null;
 
-  const hero = <RoommatesHero t={copy} findHref={ROOMMATES_ROUTES.discover} postHref={postHref} faces={faces} greeting={greeting} peopleCount={home.stats?.people ?? null} />;
+  const hero = <RoommatesWelcome t={copy} createHref={postHref} exploreHref="#rmfd-title" counts={home.stats ? { people: home.stats.people, rooms: home.stats.rooms } : null} greeting={greeting} />;
 
   if (!home.live) {
     return (
@@ -181,6 +184,14 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
       <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-home">
         {hero}
+        <RoommatesFirstRun startHref="#rmfd-title" />
+        {feed ? (
+          <>
+            <RoommatesFeed initial={feed.initial} tab={feed.tab} filters={feed.filters} signedIn={home.signedIn} now={now} />
+            <ButtonLink href={postHref} variant="primary" size="lg" iconOnly round leadingIcon="plus" aria-label={copy.welcome.create} className="nf-rmfd__fab" data-testid="roommates-fab" />
+            <h2 className="nf-rmfd__title">{copy.feed.toolsTitle}</h2>
+          </>
+        ) : null}
         <RoommatesDashboard home={home} t={copy} />
         {home.myStatus === "none" ? (
           <FirstRunCard href={home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile)} />

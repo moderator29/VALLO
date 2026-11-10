@@ -22,6 +22,7 @@ import {
   WATER_LABEL,
 } from "../ListingCard";
 import { placeLine, priceLine } from "../rows";
+import { CopyValue } from "@/components/ui/CopyButton";
 import { mergeMedia } from "@/lib/listings/media-order";
 import { SafeVideo } from "@/components/app/media/SafeVideo";
 
@@ -400,7 +401,7 @@ export function ListingReview(props: ListingReviewProps) {
       />
 
       <div className="nf-rv-lead">
-        <p className="nf-rv-idline">{reference}</p>
+        <p className="nf-rv-idline"><CopyValue value={reference} label="Copy listing reference" message="Reference copied" /></p>
         <p className="nf-rv-summary">{summary}</p>
         <p className="nf-rv-panel__note">{listing.title}</p>
       </div>

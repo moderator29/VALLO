@@ -192,7 +192,7 @@ export function RoommatesFeed({
         </div>
         <div className="nf-rmfd__filter">
           <Button variant="secondary" size="md" iconOnly round aria-label={f.filters} onClick={() => setOpen(true)} data-testid="feed-filters">
-            <UiIcon name="filter" size={18} />
+            <UiIcon name="sliders" size={18} />
           </Button>
           {active > 0 ? (
             <span className="nf-rmfd__badge" aria-label={counted(active, f.active)}>

@@ -859,7 +859,7 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    the prompt you already have: the documents, the help centre, the legal
    pages, the guides with real screenshots of our own platform, the admin
    manual, where members reach all of it from, and deleting the old stuff we
-   no longer use (Payluk and the rest). It is for YOU, this same session, on
+   no longer use (the retired provider and the rest). It is for YOU, this same session, on
    this same branch. I am sending more Hauslet screenshots of those exact
    screens: study every one.
 7. READ the two payments documents, in this order, because the protected

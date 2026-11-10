@@ -11,7 +11,7 @@ Vallo never takes custody of customer money. That is permanent and it is the
 reason this file exists rather than a loosening of it.
 
 Escrow, a spendable balance, deposits and withdrawals are all part of the
-product. **Payluk holds the funds.** Payluk is the licensed escrow provider.
+product. **the retired provider holds the funds.** the retired provider is the licensed escrow provider.
 Vallo creates the arrangement, watches it, records it, settles its own fee out
 of it and shows every party where their money is. At no point does money rest
 in an account Vallo controls on a customer's behalf.
@@ -77,7 +77,7 @@ not cover it. That reasoning is untouched: Vallo still does not do the regulated
 thing.
 
 What changed is that the product needs the protection escrow gives a renter in
-Lagos sending a deposit to someone they met online, and Payluk supplies that
+Lagos sending a deposit to someone they met online, and the retired provider supplies that
 protection under its own licence. ADR 0002 solved the legal problem by deleting
 the feature. ADR 0003 keeps the legal position and buys the feature from
 somebody allowed to sell it.
@@ -96,7 +96,7 @@ work. This file resolves it.
 - `scripts/db-probes` gains probes asserting that the mirror carries a provider
   reference and an observation time on every row, and that no Vallo table claims
   an authoritative customer balance.
-- The commission sweep and the Payluk merchant client already on main are
+- The commission sweep and the the retired provider merchant client already on main are
   consistent with this decision and need no change.
 
 ## The numbering, settled 8 October 2026

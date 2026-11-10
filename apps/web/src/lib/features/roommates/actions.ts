@@ -347,10 +347,10 @@ export async function saveRoommateListing(input: ListingDraft, options: { publis
  * only ever a resume of an approved post: the database refuses any other
  * route to `live` for a room offer (RM203).
  */
-export async function setRoommateListingStatus(input: { id: string; status: "live" | "paused" | "filled" | "draft" }): Promise<ActionResult<{ status: string }>> {
+export async function setRoommateListingStatus(input: { id: string; status: "live" | "paused" | "filled" | "draft" | "submitted" }): Promise<ActionResult<{ status: string }>> {
   const who = await member();
   if ("error" in who) return fail(who.error);
-  if (!uuid.safeParse(input.id).success || !["live", "paused", "filled", "draft"].includes(input.status)) return fail(FAILED);
+  if (!uuid.safeParse(input.id).success || !["live", "paused", "filled", "draft", "submitted"].includes(input.status)) return fail(FAILED);
   const { error } = await who.db.from("roommate_listings").update({ status: input.status }).eq("id", input.id).eq("owner_id", who.userId);
   if (error) return fail(wordsFor(error));
   refresh(ROOMMATES_ROUTES.listing(input.id), ROOMMATES_ROUTES.hub);

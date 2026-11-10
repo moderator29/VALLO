@@ -38,7 +38,7 @@ Task 2 audit and Session 1's own verification.
 
 Escrow already protects the renter: the money is held until conditions are met.
 Charging 1 to 2 percent more for the same promise, out of the lister's share, on
-top of Payluk's 2 percent, meant **4 percent on a platform with no listers to
+top of the retired provider's 2 percent, meant **4 percent on a platform with no listers to
 lose**. It also had the shape of insurance, which this repository already refuses
 elsewhere as NAICOM-regulated, and nobody had decided what happens to money nobody
 claims.
@@ -76,12 +76,12 @@ because it is remitted to FIRS and was never Vallo's money.
 
 | | |
 |---|---|
-| Payluk | **2% of the escrow amount** (2.5% for escrows created in Payluk's own app) |
+| the retired provider | **2% of the escrow amount** (2.5% for escrows created in the retired provider's own app) |
 | Vallo | **2%** |
 | **Total** | **4%**, borne by the lister |
 
-Payluk's `whoPays` field takes `buyer`, `seller` or `both`. **It is `seller`**, set
-in Payluk's merchant dashboard, and section 6 gives the reasoning.
+the retired provider's `whoPays` field takes `buyer`, `seller` or `both`. **It is `seller`**, set
+in the retired provider's merchant dashboard, and section 6 gives the reasoning.
 
 > **Corrected on 6 October.** This passage used to say the founder had not yet chosen
 > and that the rail could not open until he did, which **contradicted section 6 of this
@@ -138,10 +138,10 @@ naira, so every withdrawal in the first months sits in the 50 naira band.
 
 ### The operational constraint that governs all of it
 
-**Payluk does not publish its withdrawal fee and it is not fixed.** Its own
-documentation: *"Payluk sets the `fee` on the returned intent; you do not send it.
+**the retired provider does not publish its withdrawal fee and it is not fixed.** Its own
+documentation: *"the retired provider sets the `fee` on the returned intent; you do not send it.
 The customer is debited `amount + fee` ... The fee depends on the amount and on
-which provider Payluk currently settles payouts through, and it may include VAT.
+which provider the retired provider currently settles payouts through, and it may include VAT.
 It is fixed on the intent when the intent is created."*
 
 So: **create the intent, read back the provider fee, add Vallo's band, and show
@@ -199,7 +199,7 @@ threshold is stated before anybody starts earning.
 | **Vallo revenue** | Vallo's | Commission, withdrawal fees, promotion |
 | **Marketing float** | Vallo's | Funds referral payouts through Paystack transfers |
 
-Separated **in the schema**, not merely in a report. Payluk cannot do a three-way
+Separated **in the schema**, not merely in a report. the retired provider cannot do a three-way
 split, so on the escrow rail Vallo's commission is a separate recorded movement,
 which makes this a ledger requirement rather than bookkeeping taste.
 
@@ -291,15 +291,15 @@ collect. Note that at `guarantee_bps = 0` the reserve leg is skipped entirely
 (`if (split.guaranteeMinor > 0)`), which is the evidence that the
 `PAYSTACK_GUARANTEE_SUBACCOUNT` blocker should lift. **Session 2 verifies it.**
 
-**Payluk rail: not automatic, and this needs a job.** Payluk's own documentation:
+**the retired provider rail: not automatic, and this needs a job.** the retired provider's own documentation:
 *"plus your own commission, if you set one in your merchant settings ... credited
 to your merchant wallet as a `commission` transaction"*, and *"Commission is
 charged once, as on a completion."*
 
-So Vallo's 2 percent on escrow is **a setting in Payluk's merchant dashboard**, not
-a value passed per transaction, and it **accrues inside Vallo's Payluk merchant
+So Vallo's 2 percent on escrow is **a setting in the retired provider's merchant dashboard**, not
+a value passed per transaction, and it **accrues inside Vallo's the retired provider merchant
 wallet** until somebody withdraws it. That difference is a real operational risk:
-Paystack revenue arrives on its own, Payluk revenue piles up somewhere nobody is
+Paystack revenue arrives on its own, the retired provider revenue piles up somewhere nobody is
 watching.
 
 **Required:** a scheduled sweep that reads the merchant balance
@@ -326,7 +326,7 @@ pays nothing.** There is no competitor in this market offering that, and it is a
 sentence that fits on a billboard.
 
 **Two things to keep in view as volume grows.** On the escrow rail Vallo pays
-Payluk 2 percent and keeps 2 percent, so **half of the fee is infrastructure cost**,
+the retired provider 2 percent and keeps 2 percent, so **half of the fee is infrastructure cost**,
 which is worth renegotiating once there is volume to negotiate with. And **raising
 a price later is far harder than setting it now**: the direct rail, where no
 provider takes a percentage and Paystack's fee caps at 2,000 naira, is the better

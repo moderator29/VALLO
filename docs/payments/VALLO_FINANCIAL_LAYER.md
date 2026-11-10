@@ -1,7 +1,7 @@
 # The Vallo financial layer: Vallo presents, the provider holds
 
 **Founder brief, 6 October 2026, translated into this repository's reality.**
-Session 1. Read with `docs/payments/payluk-source/` open, and with ADR-0002.
+Session 1. Read with `docs/payments/retired-provider-source/` open, and with ADR-0002.
 
 ---
 
@@ -17,7 +17,7 @@ and which Session 1 got wrong as recently as this morning.
 parties is regulated by the CBN and the objects clause does not cover it.** It did
 not, and could not, ban a licensed third party from holding them. Under the
 Paystack-only world there was no holder at all, so "no balance anywhere" was the
-right reading. **Under the Payluk rail there is a holder, and it is Payluk.**
+right reading. **Under the the retired provider rail there is a holder, and it is the retired provider.**
 
 So a balance surface is legitimate **when, and only when, every one of these is
 true**:
@@ -37,12 +37,12 @@ who actually holds the money.
 
 ---
 
-## 1. What Payluk actually provides, endpoint by endpoint
+## 1. What the retired provider actually provides, endpoint by endpoint
 
-Checked against `docs/payments/payluk-source/index.txt`. **Every surface the
+Checked against `docs/payments/retired-provider-source/index.txt`. **Every surface the
 founder's brief asks for has a real endpoint behind it.** This is not aspiration.
 
-| Founder's section | Payluk capability |
+| Founder's section | the retired provider capability |
 |---|---|
 | §10 Money centre, §11 Available vs Protected | `GET /v1/wallet` returns a customer's **main balance** and **escrow balance**. Two numbers, exactly the distinction asked for |
 | §12 Withdrawal | Create payment intent with `withdrawalDetails.bankCode`; `GET` bank list |
@@ -54,10 +54,10 @@ founder's brief asks for has a real endpoint behind it.** This is not aspiration
 | §17 Blockchain | cNGN as BEP-20 on BSC to a master wallet address. **Deposits only, and the founder has already ruled Vallo does not build a crypto wallet** |
 | §24 KYC | Merchant-customer create carries `bvn` and phone with their own verification state |
 
-**What Payluk does not give you, and the brief must not assume:**
+**What the retired provider does not give you, and the brief must not assume:**
 
 - **No three-way split.** Paystack splits lister, Guarantee and Vallo in one
-  transaction. Payluk does not. On the escrow rail the Guarantee contribution and
+  transaction. the retired provider does not. On the escrow rail the Guarantee contribution and
   Vallo's commission have to be arranged as separate, recorded movements, and
   §48's revenue separation is therefore not optional bookkeeping, it is the only
   thing keeping customer money and Vallo money apart on that rail.
@@ -68,7 +68,7 @@ founder's brief asks for has a real endpoint behind it.** This is not aspiration
 - **Ten requests per minute, per key, across all routes.** §19's smart routing,
   §20's failover health checks, §37's transaction search and any reconciliation
   sweep are all bounded by this. A per-listing or per-render call is already broken.
-- **2 percent of the escrow amount**, 2.5 percent in Payluk's own app, with
+- **2 percent of the escrow amount**, 2.5 percent in the retired provider's own app, with
   `whoPays` choosing buyer, seller or both. **This is new money leaving the
   transaction and §44's True Cost must show it.** The escrow rail costs 2 percent
   more than the direct rail, and the founder has not yet said who absorbs it.
@@ -80,7 +80,7 @@ founder's brief asks for has a real endpoint behind it.** This is not aspiration
 The founder's principle is right and this repository should adopt it in full:
 **Vallo is the product, the provider is infrastructure.** The frontend consumes
 Vallo concepts (`Payment`, `Protected`, `Withdrawal`, `Receipt`), never
-`PaylukEscrow` or `PaystackCheckout`, and provider vocabulary stays inside the
+`retired_providerEscrow` or `PaystackCheckout`, and provider vocabulary stays inside the
 adapter.
 
 **And the founder drew the line himself, which is why this is sound rather than
@@ -130,9 +130,9 @@ dispute centre as a *member* surface (§29), the receipt vault (§57), the activ
 centre (§35), the financial security centre (§36), payment health for landlords
 (§56), the transaction passport (§54).
 
-**Founder-only, and nothing above ships without it:** the Payluk merchant account,
+**Founder-only, and nothing above ships without it:** the the retired provider merchant account,
 through sign-up, KYC, business upgrade and approval; counsel on ADR-0003; and the
-decision on who absorbs Payluk's 2 percent.
+decision on who absorbs the retired provider's 2 percent.
 
 ---
 
@@ -166,29 +166,29 @@ Recorded because the founder asked specifically what was missed.
 
 ## 5. Protected rental payments (D73 Part B, phases 11 and 12): built, off
 
-The founder's ruling D73: rentals and other negotiated deals pay through escrow, held by Payluk; fixed-price bookings pay by card directly (see `docs/ROOM_CHECKOUT.md`).
+The founder's ruling D73: rentals and other negotiated deals pay through escrow, held by the retired provider; fixed-price bookings pay by card directly (see `docs/ROOM_CHECKOUT.md`).
 
-**One key, one switch (D77).** The escrow rail is ready when a Payluk key is set and `payments_payluk_on` is on, nothing else. The key is ONE environment variable: `PAYLUK_TEST_SECRET_KEY` (an `sk_test_` key, Payluk staging) or `PAYLUK_SECRET_KEY` (an `sk_live_` key, production); the host is chosen from the key's own prefix. `PAYLUK_ESCROW_FLOWS_BUILT` is now true (the flows are tested end to end against fixtures written from the documented contract, `lib/payments/providers/payluk-fixtures.ts` and `lib/money/provider-arrangements-lifecycle.test.ts`); it stays as the code's own stop should a staging check fail. The database's `private.rentals_protected_pay_on()` reads `payments_payluk_on` (d77, which seeds the flag off); `rentals_protected_pay` is superseded and read by nothing. `PAYMENTS_KILL_PAYLUK=1` remains the outage stop. With the switch off, `escrow.*` webhooks are stored and parked as `escrow_flows_not_built`, exactly as before.
+**One key, one switch (D77).** The escrow rail is ready when a the retired provider key is set and `payments_protected_pay_on` is on, nothing else. The key is ONE environment variable: `PROVIDER_TEST_SECRET_KEY` (an `sk_test_` key, the retired provider staging) or `PROVIDER_SECRET_KEY` (an `sk_live_` key, production); the host is chosen from the key's own prefix. `retired_provider_ESCROW_FLOWS_BUILT` is now true (the flows are tested end to end against fixtures written from the documented contract, `lib/payments/providers/retired_provider-fixtures.ts` and `lib/money/provider-arrangements-lifecycle.test.ts`); it stays as the code's own stop should a staging check fail. The database's `private.rentals_protected_pay_on()` reads `payments_protected_pay_on` (d77, which seeds the flag off); `rentals_protected_pay` is superseded and read by nothing. `PAYMENTS_KILL_PROTECTED_PAY=1` remains the outage stop. With the switch off, `escrow.*` webhooks are stored and parked as `escrow_flows_not_built`, exactly as before.
 
-**Screens (D77).** The renter pays at `/agreements/[id]/fund` (the agreement page links there for an approved rental on the escrow rail): the agreed rent, the Vallo balance it comes from and how much of the rent it covers, and one money swipe that opens the escrow at Payluk if needed and funds it (`lib/money/fund-actions.ts`), handing off to `/agreements/[id]/held`. Recorded states at `/preview/fund`.
+**Screens (D77).** The renter pays at `/agreements/[id]/fund` (the agreement page links there for an approved rental on the escrow rail): the agreed rent, the Vallo balance it comes from and how much of the rent it covers, and one money swipe that opens the escrow at the retired provider if needed and funds it (`lib/money/fund-actions.ts`), handing off to `/agreements/[id]/held`. Recorded states at `/preview/fund`.
 
-**Untested until the `sk_test_` key arrives** (nothing here has met Payluk itself): the real staging answers to every call above; that create-escrow accepts our multipart body and echoes `description`; the escrow list's page and limit parameter names; the fee rounding for `whoPays: both` (not used: the lister pays); the OTP-required error shape on funding; the webhook signature with Payluk's real secret and the real `environment` values. The first staging run is the lifecycle test's sequence against the live sandbox, correcting `payluk-fixtures.ts` first wherever a field differs.
+**Untested until the `sk_test_` key arrives** (nothing here has met the retired provider itself): the real staging answers to every call above; that create-escrow accepts our multipart body and echoes `description`; the escrow list's page and limit parameter names; the fee rounding for `whoPays: both` (not used: the lister pays); the OTP-required error shape on funding; the webhook signature with the retired provider's real secret and the real `environment` values. The first staging run is the lifecycle test's sequence against the live sandbox, correcting `retired_provider-fixtures.ts` first wherever a field differs.
 
 **The record.** `provider_arrangements` (one live per approved rent agreement), `provider_arrangement_milestones`, and the append only `provider_arrangement_events`. Vallo's state and the provider's `state`/`status` are stored apart (founder section 54). Only `provider_arrangement_observe` (service role) moves the state, forward only; it refuses a provider id or an amount that contradicts the record and raises a critical alert.
 
-**The flow** (`lib/money/provider-arrangements.ts`, client `lib/payments/providers/payluk-arrangements.ts`, routes from `payluk-source/concepts_how-it-works.txt`):
+**The flow** (`lib/money/provider-arrangements.ts`, client `lib/payments/providers/retired_provider-arrangements.ts`, routes from `retired-provider-source/concepts_how-it-works.txt`):
 
-| Step | Payluk | Vallo state |
+| Step | the retired provider | Vallo state |
 |---|---|---|
 | Open | `POST /v1/escrow/create` (standard, multipart) or `POST /v1/escrow/milestone/create` (JSON), as the lister | `preparing`, then `awaiting_payment`, or `unknown` when unanswered |
 | Pay | `POST /v1/payment/escrow`, `gateway: wallet`, as the renter, reference `<arrangement reference>-pay` | `payment_processing`; `escrow.ongoing` makes it `protected` |
 | Release | `POST /v1/escrow/confirm-payment/{id}` (standard) or `/v1/escrow/milestone/confirm/{id}/{milestoneId}`, as the renter, on the renter's own confirmation | `release_requested`; `escrow.completed` makes it `released` |
 | Otherwise | `escrow.claimed`, `escrow.disputed`/`investigating`, `escrow.refunded`, `escrow.split` | `released`, `disputed`, `refunded`, `split` |
 
-Payluk's 2 percent fee is borne by the lister (`whoPays: seller`, `VALLO_PRICING.md` section 6), so the renter pays exactly the agreed amount; the database holds every arrangement to it. Amounts are naira at the boundary and kobo everywhere else. The delivery window Payluk is told is the days to move-in plus the 3 day claim window, because one day after it the lister may claim the money without the renter.
+the retired provider's 2 percent fee is borne by the lister (`whoPays: seller`, `VALLO_PRICING.md` section 6), so the renter pays exactly the agreed amount; the database holds every arrangement to it. Amounts are naira at the boundary and kobo everywhere else. The delivery window the retired provider is told is the days to move-in plus the 3 day claim window, because one day after it the lister may claim the money without the renter.
 
-**No reference on create.** Payluk's create-escrow takes no reference of ours, so Vallo writes `Vallo reference <reference>` into the escrow's `description`. An unanswered create is `unknown` and is found again by listing the lister's escrows (`GET /v1/escrow/transactions?type=sales`) and matching the reference and amount; it is never created a second time.
+**No reference on create.** the retired provider's create-escrow takes no reference of ours, so Vallo writes `Vallo reference <reference>` into the escrow's `description`. An unanswered create is `unknown` and is found again by listing the lister's escrows (`GET /v1/escrow/transactions?type=sales`) and matching the reference and amount; it is never created a second time.
 
-**Not built here:** the conditions engine and inspection evidence before release (phase 13), disputes and refunds (phase 14: Payluk refunds only through a dispute), milestone funding from the screen (it opens standard escrow only), marking the agreement paid or opening tenancy records from a protected payment.
+**Not built here:** the conditions engine and inspection evidence before release (phase 13), disputes and refunds (phase 14: the retired provider refunds only through a dispute), milestone funding from the screen (it opens standard escrow only), marking the agreement paid or opening tenancy records from a protected payment.
 
 **Unverified against live docs** (each marked in the code): whether create-escrow echoes `description`; the page and limit parameter names on the escrow list; how half of an odd-kobo fee is rounded when `whoPays` is `both` (Vallo refuses rather than guess).

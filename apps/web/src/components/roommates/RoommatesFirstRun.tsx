@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -24,6 +25,7 @@ export function RoommatesFirstRun({ startHref }: { startHref: string }) {
   const [open, setOpen] = useState(false);
   const [i, setI] = useState(0);
   const go = useRef<HTMLButtonElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -94,7 +96,7 @@ export function RoommatesFirstRun({ startHref }: { startHref: string }) {
             onClick={() => {
               feedback("select");
               close();
-              window.location.assign(startHref);
+              router.push(startHref);
             }}
           >
             {copy.welcome.findRoommates}

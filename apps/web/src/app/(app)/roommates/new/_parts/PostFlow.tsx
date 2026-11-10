@@ -185,7 +185,7 @@ export function PostFlow({
       }
     });
 
-  const publishing = status === null || status === "draft" || status === "expired";
+  const publishing = status === null || status === "draft" || status === "expired" || status === "changes_requested";
 
   const publish = () =>
     start(async () => {

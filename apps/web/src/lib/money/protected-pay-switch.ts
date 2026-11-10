@@ -10,7 +10,7 @@ import { createClient } from "../supabase/server";
  * failed read or a kill switch all mean off.
  *
  * Compatibility, until the next deploy settings change and the pending SQL
- * `provider_removal_2026-11-10.sql` has run: the flag is read under its new
+ * in supabase/migrations/pending (the provider-removal file) has run: the flag is read under its new
  * key first and, only when the new row does not exist, under the old key the
  * live database still holds. The environment stop likewise accepts the new
  * name and the old one. The two lines marked `legacy-name` are the ONLY places the retired

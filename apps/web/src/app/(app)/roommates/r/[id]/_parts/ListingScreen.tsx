@@ -27,7 +27,8 @@ import { Money } from "@/components/ui/Money";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { ROOMMATES_ROUTES, type RoomDetail } from "@/lib/features/roommates/model";
-import type { ListingRead } from "@/lib/features/roommates/queries";
+import type { ListingRead, ListingReview } from "@/lib/features/roommates/queries";
+import { ListingReviewPanel } from "@/components/roommates/ListingReviewPanel";
 
 import { Gallery } from "./Gallery";
 import { ListingActions, ListingShareMenu, RecordView } from "./ListingActions";
@@ -46,6 +47,7 @@ export function RoomListingScreen({
   t: copy,
   now,
   openViewing = false,
+  review,
 }: {
   read: ListingRead;
   groups: { id: string; name: string }[];
@@ -53,6 +55,8 @@ export function RoomListingScreen({
   now: number;
   /** Open the viewing request on arrival (`?viewing=1`). */
   openViewing?: boolean;
+  /** The owner's review record for this post (empty for anyone else). */
+  review?: ListingReview;
 }) {
   if (read.state !== "ok") {
     return (
@@ -95,6 +99,7 @@ export function RoomListingScreen({
     >
       <RecordView id={l.id} />
       <div className="nf-rmv" data-testid="room-listing">
+        {l.isOwner ? <ListingReviewPanel id={l.id} kind={l.kind} status={l.status} review={review} now={now} /> : null}
         <div className="nf-rmv__main">
           <Gallery
             urls={l.photoUrls}

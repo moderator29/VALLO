@@ -76,6 +76,7 @@ import { ListingMoveInBlock } from "@/components/app/listing/ListingMoveInBlock"
 import { AffordabilityLine } from "@/components/app/listing/AffordabilityLine";
 import { OwnerAvailabilityLine, PropertyOffers } from "@/components/app/listing/LandlordFacts";
 import { ExactPlace } from "@/components/app/listing/ExactPlace";
+import { CopyLink } from "@/components/ui/CopyButton";
 import { ShareToFeedButton } from "@/components/social/share/ShareToFeedButton";
 import { ListingCodeRow } from "@/components/app/listing/ListingCode";
 import { ListingMoveIn } from "@/components/app/listing/ListingMoveIn";
@@ -1567,7 +1568,10 @@ export default async function ListingDetailPage({
                 {!isExample && (
                   <Reveal>
                     <Section divided>
-                      <ShareToFeedButton listingId={listing.id} />
+                      <div className="flex flex-wrap items-center gap-xs">
+                        <ShareToFeedButton listingId={listing.id} />
+                        <CopyLink path={`/listing/${listing.id}`} label="Copy link to this listing" />
+                      </div>
                     </Section>
                   </Reveal>
                 )}

@@ -93,7 +93,7 @@ tiles), the payment rail design pass.
 - The founder APPLIED END_OF_BATCH_2026-11-10.sql (verified live, 10 Nov).
 - Protected rail server steps (9a1613f0b): lib/money/protected-rail.ts, the
   EscrowPay webhook route (refuses all until the signature is documented),
-  reconcile by provider (Payluk's scoped to Payluk rows), pending SQL
+  reconcile by provider (the previous provider's rows scoped to it), pending SQL
   protected_rail_server_2026-11-10.sql (not applied; two dry runs waited on
   the founder's approval in the Supabase connection).
 - Docs deeper pass and tools committed (8a295d67c). Pending SQL
@@ -123,3 +123,17 @@ tiles), the payment rail design pass.
 - Nothing blocking right now. The next app build (1.0.2) is planned for when
   GitHub Actions minutes are back; nothing is on main until he says "push to
   main".
+
+## 10 November 2026: Payluk removed (founder's word)
+- Payluk is gone from the platform. Audit and what changed: docs/handoff/PAYLUK_REMOVAL.md.
+  Old rail code, webhook, merchant client, fund/release flows and their tests
+  are deleted. The EscrowPay rail (switched off) is the only protected-pay rail.
+- Nothing live depended on it. The member Wallet (/wallet) had Payluk as its
+  only provider; it now reads "not configured" until the founder chooses a
+  new one.
+- Pending SQL, NOT APPLIED and DESTRUCTIVE: supabase/migrations/pending/payluk_removal_2026-11-10.sql
+  (new flag key payments_protected_pay_on, drops one table and two functions).
+  The app reads the new flag first and falls back to the old key until it runs.
+- Privacy notice no longer names the provider. PRIVACY_VERSION NOT bumped:
+  counsel decides (docs/handoff/LEGAL_PAGES_CHANGES.md, "Payluk removal").
+

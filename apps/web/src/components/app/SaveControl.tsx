@@ -3,6 +3,7 @@
 import { useCallback, useId, useState, useSyncExternalStore } from "react";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toggleSave } from "@/lib/saved/actions";
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
 import {
@@ -68,8 +69,6 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  */
 
 /** The banner's words for a save (Grade 1: specific, never a bare "Saved"). */
-const SAVED_WORDS = "Saved to your list";
-const REMOVED_WORDS = "Removed from your saved list";
 
 export type SaveNote = { text: string; tone: "ok" | "error" } | null;
 
@@ -209,6 +208,36 @@ export function useSaveControl(
     banner(text, { tone: tone === "kept" ? "info" : tone === "ok" ? "success" : "error", "data-testid": "save-banner" });
   }, []);
 
+  /* The banner for a settled save or removal, with Undo as the real inverse. */
+  const done = useCallback(
+    (nowSaved: boolean, device = false) => {
+      saveDoneBanner({
+        saved: nowSaved,
+        device,
+        undo: async () => {
+          if (device) {
+            if (nowSaved) removeLocalSave(listingId);
+            else addLocalSave(listingId);
+            deviceChanged();
+            return { ok: true };
+          }
+          const back = place
+            ? place.kind === "accommodation"
+              ? nowSaved
+                ? await unsaveStay({ accommodationId: place.id })
+                : await saveStay({ accommodationId: place.id })
+              : nowSaved
+                ? await unsaveRestaurant({ restaurantId: place.id })
+                : await saveRestaurant({ restaurantId: place.id })
+            : await toggleSave({ listingId, want: !nowSaved });
+          return back.ok ? { ok: true } : { ok: false, error: back.error };
+        },
+        onUndone: () => setOverride(!nowSaved),
+      });
+    },
+    [listingId, place],
+  );
+
   const toggle = useCallback(() => {
     if (pending) return;
     const next = !saved;
@@ -264,7 +293,7 @@ export function useSaveControl(
           return;
         }
         if (next) feedback("select");
-        say(next ? SAVED_WORDS : REMOVED_WORDS);
+        done(next);
         return;
       }
 
@@ -281,7 +310,7 @@ export function useSaveControl(
         else removeLocalSave(listingId);
         deviceChanged();
         if (next) feedback("select");
-        say(next ? "Saved on this device" : REMOVED_WORDS);
+        done(next, true);
         return;
       }
 
@@ -298,9 +327,9 @@ export function useSaveControl(
          toggle it is: the light beat (CRAFT_DOCTRINE 6). A medium beat is
          for a primary action committing, and a heart is not one. */
       if (settled) feedback("select");
-      say(settled ? SAVED_WORDS : REMOVED_WORDS);
+      done(settled);
     }
-  }, [listingId, pending, place, saved, say, OUTBOX_COPY]);
+  }, [listingId, pending, place, saved, say, done, OUTBOX_COPY]);
 
   return { saved, note, pending, toggle };
 }
