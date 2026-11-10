@@ -9,7 +9,7 @@ import type { DocFeedbackRead } from "./read";
 export function DocFeedbackView({ read, days }: { read: DocFeedbackRead; days: number }) {
   const DAYS = days;
   return (
-    <div className="nf-console grid gap-md" data-testid="doc-feedback-desk">
+    <div className="nf-console grid grid-cols-[minmax(0,1fr)] gap-md [overflow-wrap:anywhere]" data-testid="doc-feedback-desk">
       <PageHead
         title="Pages that fail"
         lede={`What members answered to "Was this helpful?" on the help centre, the guides and the docs, over the last ${DAYS} days. The pages with the most "no" come first.`}

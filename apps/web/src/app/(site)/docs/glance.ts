@@ -25,9 +25,13 @@ function plainText(node: ReactNode): string {
 }
 const MAX_CHARS = 200;
 
+/** JSX spacing leaves " ." where a link or a bold name ends a sentence; read it as written. */
+function tidy(text: string): string {
+  return text.replace(/\s+/g, " ").replace(/ ([.,;:!?])/g, "$1");
+}
+
 function sentences(text: string): string[] {
-  return text
-    .replace(/\s+/g, " ")
+  return tidy(text)
     .trim()
     .split(/(?<=[.!?])\s+(?=[A-Z])/)
     .map((s) => s.trim());
@@ -51,5 +55,6 @@ export function chapterText(chapter: DocChapter): string {
   return chapter.sections
     .map((section) => plainText(section.body))
     .join(" ")
-    .replace(/\s+/g, " ");
+    .replace(/\s+/g, " ")
+    .replace(/ ([.,;:!?])/g, "$1");
 }

@@ -15,6 +15,7 @@ import { SCHEDULE_PROMISES, firstBannedPhrase } from "@/lib/copy/banned-phrases"
  * what protection does not cover and on the dispute process.
  */
 vi.mock("next/navigation", () => ({ usePathname: () => "/docs/how-protection-works", useRouter: () => ({ push: () => undefined }) }));
+vi.mock("@/components/site/JsonLd", () => ({ JsonLd: () => null }));
 afterAll(closeAxe);
 
 const { default: Page } = await import("./page");
@@ -26,7 +27,9 @@ describe("how protection works", () => {
   it("says plainly that protected payment is not open, and names no date", () => {
     expect(text).toContain(PROTECTED_NOT_OPEN);
     expect(firstBannedPhrase(text, SCHEDULE_PROMISES)).toBeNull();
-    expect(text).not.toMatch(/\b(January|February|March|April|May|June|July|August|September|October|November|December) 20\d\d\b/);
+    /* The only date on the page is when it was last read against the product. */
+    const body = text.replace(/Last updated \d{1,2} \w+ 20\d\d/, "");
+    expect(body).not.toMatch(/\b(January|February|March|April|May|June|July|August|September|October|November|December)( \d{1,2})?,? 20\d\d\b/);
   });
 
   it("names the custodian in the provider's full words and the partner by name, and never says Vallo holds money", () => {
