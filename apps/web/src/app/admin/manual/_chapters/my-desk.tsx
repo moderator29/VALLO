@@ -46,7 +46,7 @@ export const MY_DESK: ManualBody = {
               <Link href="/admin/my-desk" className={A}>
                 My desk
               </Link>
-              . Three tabs sit under the title: My desk, Tasks and Announcements.
+              . Four tabs sit under the title: My desk, Tasks, Announcements and Weekly report. The weekly report has its own chapter.
             </li>
           </ol>
         </>
@@ -115,6 +115,7 @@ export const MY_DESK: ManualBody = {
           <ol role="list">
             <li>Find the task in Assigned to me.</li>
             <li>Change the Status: To do, In progress, Blocked or Done.</li>
+            <li>A banner at the top says what changed, with Undo for a few seconds if you picked the wrong status.</li>
             <li>
               Choosing Done stamps the finish time and counts the task in Completed this week. You can move a finished
               task back if it was closed by mistake.
@@ -136,7 +137,7 @@ export const MY_DESK: ManualBody = {
           <p>
             The Assign to list appears only if you hold the COO position, the operations access area or an admin role.
             Choose the person and create the task as above. The person must be a member of staff. You can move an
-            unfinished task to someone else with Reassign. Tasks you hand on appear under Handed to others.
+            unfinished task to someone else with Reassign, and Undo on the banner hands it back. Tasks you hand on appear under Handed to others.
           </p>
           <DocCallout tone="note" title="If you do not see Assign to">
             It is not a fault. Ask your COO or an admin to create the task for the person, or to give you the access area.

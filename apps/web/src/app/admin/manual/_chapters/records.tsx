@@ -45,7 +45,7 @@ export const RECORDS: ManualBody = {
   ),
   glance: [
     "Every decision is written to the audit log with your name, the time, the record and what changed.",
-    "Nobody can edit or delete the audit log, admins and the founder included.",
+    "Nobody can edit or delete the audit log, admins and the founder included. The only change it accepts is removing a person's name from their own rows when they delete their account.",
     "Your lead sees each queue's backlog and every staff member's decisions over the last 30 days.",
     "A member reads your reasons word for word, and the first name on a support reply. They never read internal notes.",
   ],

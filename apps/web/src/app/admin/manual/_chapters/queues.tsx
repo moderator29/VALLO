@@ -238,8 +238,8 @@ export const QUEUES: ManualBody = {
             </li>
           </ol>
           <p>
-            A ticket the member filed under safety, or one handed to Money or Safety, runs on 4 hours. A verification
-            ticket runs on 3 days. Everything else runs on 1 day. Compliance is never a hand-off target: if you suspect a
+            A ticket the member filed under safety, or one handed to Money or Safety, runs on a 4 hour clock. A verification
+            ticket runs on a 3 day clock. Everything else runs on a 1 day clock. Compliance is never a hand-off target: if you suspect a
             compliance matter, hand it to Safety and say why.
           </p>
           <p>Keys: j and k move between tickets, n opens the next one nobody holds, r replies, m opens saved replies, ? lists them all.</p>

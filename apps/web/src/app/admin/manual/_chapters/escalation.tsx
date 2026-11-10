@@ -49,7 +49,7 @@ export const ESCALATION: ManualBody = {
             <strong>From a support ticket:</strong> hand it to Money (a payment that has not arrived, a refund that has not
             come back, a charge the member does not recognise), Safety (somebody asked to pay outside Vallo, a threat, a
             scam, a person who says they are unsafe) or Verification (a stuck or refused check, a document to look at),
-            with a reason. The ticket then runs on 4 hours while it is with Money or Safety.
+            with a reason. The ticket then runs on a 4 hour clock while it is with Money or Safety.
           </li>
           <li>
             <strong>From a case:</strong> Escalate, with a reason. The case moves to the Trust and Safety team, rises to at

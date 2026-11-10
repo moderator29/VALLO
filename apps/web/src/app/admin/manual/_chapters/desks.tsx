@@ -50,12 +50,14 @@ const REVIEW: Desk[] = [
   { href: "/admin/supply", name: "Supply", icon: "building-apartment", what: "Who supplies the platform: owners, agents, firms and hosts. It reads and decides nothing.", who: "Admins" },
   { href: "/admin/businesses", name: "Businesses", icon: "building-hotel", what: "Hotels and restaurants: the verification rungs and publishing.", who: "Admins" },
   { href: "/admin/stops", name: "Stops", icon: "shield-stop", what: "Stopping an agent from trading, and lifting a stop.", who: "Admins" },
+  { href: "/admin/business-development", name: "Business development", icon: "hand-coins", what: "The landlords, agents, hotels and restaurants being brought onto Vallo, and the pipeline that tracks them.", who: "Business development" },
   { href: "/admin/compliance", name: "Compliance", icon: "shield-lock", what: "Sanctions screening, reports to the NFIU, threshold reports and politically exposed persons. Staff only: nothing here reaches the member.", who: "Compliance" },
 ];
 
 const MONEY: Desk[] = [
   { href: "/admin/money", name: "Money", icon: "coins", what: "Cautions, refunds to the card, the refund clock, the reconciliation job, and the record of the retired Vallo Guarantee.", who: "Finance (rulings on cautions and old claims: Guarantee claims)" },
   { href: "/admin/payments", name: "Payments", icon: "wallet", what: "Every payment attempt and how it ended. The health panel and the saved card lookup are admins only.", who: "Finance" },
+  { href: "/admin/arrangements", name: "Protected payments", icon: "shield-check", what: "Every protected payment with the provider's state beside Vallo's. Read only. The protected rail is switched off, so expect it to be empty.", who: "Finance" },
   { href: "/admin/chargebacks", name: "Chargebacks", icon: "credit-card", what: "Disputes a payer raised with their bank: open, move through their states, add notes.", who: "Finance" },
   { href: "/admin/fees", name: "Fees", icon: "receipt", what: "The fee rates in force. Lowering a rate is any admin; raising one is a super admin.", who: "Finance to read; admins to change" },
   { href: "/admin/referrals", name: "Referrals", icon: "hand-coins", what: "Referral rewards owed, the monthly budget, and the referrals and payouts a person decides.", who: "Admins" },
@@ -77,6 +79,7 @@ const SAFETY: Desk[] = [
   { href: "/admin/appeals", name: "Appeals", icon: "scale", what: "A member's appeal against a restriction, decided by somebody other than whoever made the decision.", who: "Trust and Safety" },
   { href: "/admin/roommates", name: "Roommates", icon: "users", what: "Room posts, profiles, groups and their verification.", who: "Roommates moderation, Trust and Safety" },
   { href: "/admin/circle", name: "Circle", icon: "circle-people", what: "Communities: pause, remove or restore.", who: "Circle moderation, Reports and moderation, Trust and Safety" },
+  { href: "/admin/social-media", name: "Social media", icon: "camera", what: "Vallo's own social media: the content calendar, drafts, campaigns, the media library and approvals. It never posts to a platform.", who: "Social media" },
   { href: "/admin/blocked-terms", name: "Blocked terms", icon: "block", what: "The words the safety scan acts on.", who: "Reports and moderation" },
   { href: "/admin/social", name: "Around", icon: "compass", what: "Proposed neighbourhood areas and area moderator applications: open or refuse them, pause or resume an area.", who: "Admins" },
   { href: "/admin/standing", name: "Standing", icon: "star", what: "Badges granted and revoked by hand, each with a reason.", who: "Admins" },
@@ -90,6 +93,7 @@ const SUPPORT: Desk[] = [
 ];
 
 const OPERATIONS: Desk[] = [
+  { href: "/admin/doc-feedback", name: "Pages that fail", icon: "file-search", what: "Which help pages members say did not help. Read only.", who: "Support" },
   { href: "/admin/operations", name: "Operations", icon: "settings-gear", what: "Scheduled jobs, notifications and the platform's health.", who: "Operations" },
   { href: "/admin/alerts", name: "Alerts", icon: "bell", what: "Risk and system alerts waiting on a person. Resolving one is an admin decision.", who: "Operations to read" },
   { href: "/admin/crashes", name: "Crash log", icon: "alert-triangle", what: "Vallo's own crash log across the apps, the website and the server.", who: "Operations" },
@@ -151,8 +155,8 @@ export const DESKS: ManualBody = {
         <>
           <DeskTable caption="Money desks" desks={MONEY} />
           <DocCallout tone="note" title="What is true about money today">
-            Vallo never holds customer money. Stays, hotel rooms and restaurants pay by card through Paystack, and the
-            lister&apos;s share goes to their bank in the same transaction. Payment for rentals is not open on Vallo.
+            Vallo never holds customer money. Stays and hotel rooms pay by card through Paystack, and the
+            lister&apos;s share goes to their bank in the same transaction. A restaurant table is free to book. Payment for rentals is not open on Vallo.
             Sales are never paid on Vallo. A refund goes back to the card or account that paid. Never describe a wallet,
             a balance or escrow to anybody.
           </DocCallout>
