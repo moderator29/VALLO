@@ -82,7 +82,7 @@ const CREDIT_ENTRY = `
   mount(
     <div style={{ position: "relative", width: 360, height: 300 }}>
       <MapCredit
-        credits={[{ label: "MapTiler", href: "https://www.maptiler.com/copyright/" }, { label: "OpenStreetMap contributors", href: "https://www.openstreetmap.org/copyright" }]}
+        credits={[{ label: "© OpenMapTiles", href: "https://www.openmaptiles.org/" }, { label: "© OpenStreetMap contributors", href: "https://www.openstreetmap.org/copyright" }, { label: "OpenFreeMap", href: "https://openfreemap.org" }]}
         join=" and "
         label="About this map"
         heading="Map data"
@@ -103,13 +103,13 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the map's credit control", () =
       expect(await toggle.getAttribute("aria-expanded")).toBe("false");
       expect(await panel.isVisible()).toBe(false);
       /* The credit is in the page the whole time, one tap away. */
-      expect(await panel.locator("a").count()).toBe(2);
+      expect(await panel.locator("a").count()).toBe(3);
 
       await toggle.click();
       expect(await toggle.getAttribute("aria-expanded")).toBe("true");
       expect(await panel.isVisible()).toBe(true);
-      expect(await panel.innerText()).toContain("MapTiler and OpenStreetMap contributors");
-      expect(await panel.locator("a").first().getAttribute("href")).toBe("https://www.maptiler.com/copyright/");
+      expect(await panel.innerText()).toContain("© OpenMapTiles, © OpenStreetMap contributors and OpenFreeMap");
+      expect(await panel.locator("a").first().getAttribute("href")).toBe("https://www.openmaptiles.org/");
 
       await page.keyboard.press("Escape");
       expect(await toggle.getAttribute("aria-expanded")).toBe("false");

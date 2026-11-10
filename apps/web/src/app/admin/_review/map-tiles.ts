@@ -11,8 +11,9 @@
  * provider the product draws on (9 November 2026), serves vector tiles only,
  * so there is no image URL to lay out: an empty template gives a mosaic with
  * the point's position and no tiles, and the panel shows its pin on its own
- * ground. The CARTO raster tiles this used to draw were non-commercial only.
- * With a MapTiler key set, the mosaic is MapTiler's raster tiles as before.
+ * ground. The CARTO raster tiles this used to draw were non-commercial only,
+ * and the MapTiler path was removed with them. The panel's imagery returns
+ * when it draws `AreaMapTile` (the still vector map) in place of this mosaic.
  */
 
 export type TileMosaic = {

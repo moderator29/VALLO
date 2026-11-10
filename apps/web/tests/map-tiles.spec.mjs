@@ -10,11 +10,11 @@
  * CARTO's public basemaps were free and non-commercial use only, and a
  * marketplace taking a booking fee is a commercial use. Since 9 November 2026
  * the map draws on OpenFreeMap, which is free, needs no key and allows
- * commercial use, and the platform can still move to MapTiler with one
- * environment variable. Whichever provider is drawing, the credit line has to
- * move with it, because each requires attribution and they require different
- * attribution. A provider swap that silently kept the old credit replaces one
- * licence breach with another.
+ * commercial use. The MapTiler switch (`NEXT_PUBLIC_MAPTILER_KEY`, the paid
+ * path the founder declined) was removed the same day, and this guard holds
+ * that: setting the old variable must change nothing. The credit line has to
+ * travel with the provider, because a swap that silently kept the old credit
+ * replaces one licence breach with another.
  *
  * Node strips the TypeScript itself (22.6+).
  */
@@ -35,7 +35,7 @@ function check(name, condition, detail) {
   }
 }
 
-/* --------------------------------- with no key: OpenFreeMap, commercial use OK */
+/* -------------------------------------- OpenFreeMap, commercial use allowed */
 
 delete process.env.NEXT_PUBLIC_MAPTILER_KEY;
 const free = await import(`${MODULE}?free`);
@@ -64,32 +64,23 @@ for (const theme of ["light", "dark"]) {
     p.credits.every((c) => /^https:\/\//.test(c.href)),
   );
 }
-check("with no key, hasCommercialTiles() is true: the pre-launch check reads clean", free.hasCommercialTiles() === true);
+check("hasCommercialTiles() is true: the pre-launch check reads clean", free.hasCommercialTiles() === true);
 
-/* ------------------------------------------ with a key: MapTiler, credited right */
+/* ---------------- the old MapTiler variable, still set in production, does nothing */
 
 process.env.NEXT_PUBLIC_MAPTILER_KEY = "test-key-not-a-real-one";
-const paid = await import(`${MODULE}?paid`);
+const keyed = await import(`${MODULE}?keyed`);
 
 for (const theme of ["light", "dark"]) {
-  const p = paid.tileProvider(theme);
-  check(`${theme}: a key moves the map to MapTiler`, p.id === "maptiler" && p.kind === "raster", p.url);
-  check(`${theme}: the URL is a real tile template`, /\{z\}\/\{x\}\/\{y\}/.test(p.url), p.url);
-  check(`${theme}: the key reaches the URL`, p.url.includes("test-key-not-a-real-one"));
-  check(`${theme}: it is no longer flagged non-commercial`, p.nonCommercial === false);
-  check(
-    `${theme}: the credit moves to MapTiler, with OpenStreetMap kept`,
-    p.credits[0].label.includes("MapTiler") && p.credits.some((c) => c.label.includes("OpenStreetMap")),
-    JSON.stringify(p.credits.map((c) => c.label)),
-  );
-  check(`${theme}: OpenFreeMap's credit does not linger`, !p.credits.some((c) => /OpenFreeMap|OpenMapTiles/.test(c.label)));
-  check(`${theme}: no CARTO host is left in the URL`, !p.url.includes("cartocdn"));
+  const p = keyed.tileProvider(theme);
+  check(`${theme}: a MapTiler key does not move the map off OpenFreeMap`, p.id === "openfreemap" && p.kind === "vector", p.id);
+  check(`${theme}: the key reaches no URL`, !JSON.stringify(p).includes("test-key-not-a-real-one"));
+  check(`${theme}: MapTiler is not credited or fetched`, !/maptiler/i.test(JSON.stringify(p)));
 }
-check("with a key, hasCommercialTiles() is still true", paid.hasCommercialTiles() === true);
-check(
-  "the light and dark MapTiler styles differ",
-  paid.tileProvider("light").url !== paid.tileProvider("dark").url,
-);
+check("with the old key set, hasCommercialTiles() is still true", keyed.hasCommercialTiles() === true);
+const tilesSource = (await import("node:fs")).readFileSync(new URL(MODULE), "utf8");
+check("tiles.ts reads no provider key from the environment", !/process\.env/.test(tilesSource));
+delete process.env.NEXT_PUBLIC_MAPTILER_KEY;
 
 /* --------------------------------------------------------- the component is wired */
 

@@ -125,14 +125,21 @@
     text-align: end;
     padding: var(--nf-space-3xs) var(--nf-space-2xs);
     border-radius: var(--nf-radius-xs);
-    color: var(--nf-content-on-media-muted);
-    font-size: var(--nf-text-caption);
+    /* The theme's own secondary ink on the theme's own glass. The on-media
+       white it used to read was invisible on the light theme's white glass,
+       which hid a credit the map data's licence requires. */
+    color: var(--nf-content-secondary);
+    /* The overline size every other map credit uses: three marks at caption
+       size took three lines and a third of a 360px phone's map. */
+    font-size: var(--nf-text-overline);
+    line-height: 1.35;
     border: var(--nf-border-width) solid var(--nf-btn-glass-edge);
     background: var(--nf-btn-glass-fill);
     box-shadow: var(--nf-btn-glass-shadow);
   }
   .nf-pc-map__credit a {
     white-space: nowrap;
+    color: inherit;
   }
 
   /* When the tile engine cannot be reached. The pin still works, because the

@@ -28,7 +28,13 @@ let workerConfigured = false;
 function configureWorker(): void {
   if (workerConfigured) return;
   workerConfigured = true;
-  setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
+  /* `import. meta` with a space is the same expression to every parser and
+     bundler; it is written so because the dictionary slice check
+     (`lib/i18n/reachable-namespaces.ts`) reads any `.name` in this import
+     graph as a dictionary read, and would take this one for the `meta`
+     namespace. */
+  // prettier-ignore
+  setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import. meta.url).href);
 }
 
 export type GlLayer = { layer: Leaflet.Layer; gl: () => GlMap | null };

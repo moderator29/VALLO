@@ -48,8 +48,9 @@ export async function loadListingReview(
   const closedReason = closedReasons[found.id] ?? null;
   const decidable = found.status !== "PUBLISHED" && found.status !== "REJECTED" && closedReason === null;
   /* The Location panel's mosaic needs raster tiles. OpenFreeMap serves vector
-     tiles only, so with no MapTiler key the template is empty, the mosaic has
-     no images and no credit is owed for imagery that is not drawn. */
+     tiles only, so the template is empty, the mosaic has no images and no
+     credit is owed for imagery that is not drawn (the panel shows its pin on
+     its own ground until it draws the still area map, `AreaMapTile`). */
   const dark = tileProvider("dark");
   return {
     ...base,

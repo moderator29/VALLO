@@ -32,15 +32,17 @@
  * still maps and the lightweight fallback paint the same vector tiles on a 2D
  * canvas (`lib/maps/still.ts`, `lib/maps/lite-layer.ts`).
  *
- * THE MAPTILER PATH IS KEPT, UNCHANGED IN BEHAVIOUR. Set
- * `NEXT_PUBLIC_MAPTILER_KEY` and every map goes back to MapTiler's raster
- * `dataviz` tiles with MapTiler's credit, exactly as before. Nobody needs to
- * set it: it is there so a future paid decision is one variable, not a port.
+ * THERE IS NO PAID PATH. MapTiler was wired in September as the paid way
+ * out, read from `NEXT_PUBLIC_MAPTILER_KEY`, and that key is set in the
+ * production environment. Kept, it would have put production straight back
+ * on MapTiler, the spend the founder declined, the moment this shipped. So the switch was
+ * removed with CARTO on 9 November 2026: no variable can move the map onto a
+ * provider the founder did not approve, and the policy names one map host.
  *
- * ATTRIBUTION IS NOT DECORATION. Both providers require it in their terms, and
- * it differs between them, so it travels WITH the provider here rather than
- * being hard-coded beside the map. A provider swap that silently kept the
- * wrong credit would replace one licence breach with another.
+ * ATTRIBUTION IS NOT DECORATION. The provider's terms require it, so it
+ * travels WITH the provider here rather than being hard-coded beside the
+ * map. A future provider swap that silently kept the old credit would
+ * replace one licence breach with another.
  */
 
 export type MapTheme = "light" | "dark";
@@ -48,33 +50,32 @@ export type MapTheme = "light" | "dark";
 export type MapCreditLink = { label: string; href: string };
 
 export type TileProvider = {
-  /** `maptiler` once a key is present, `openfreemap` otherwise. */
-  id: "maptiler" | "openfreemap";
+  id: "openfreemap";
   /**
-   * How the provider's imagery is drawn. `vector`: a MapLibre style plus the
-   * TileJSON its tiles are listed in, no `<img>` anywhere. `raster`: a
-   * Leaflet URL template, `{z}/{x}/{y}` with `{r}` for retina.
+   * How the imagery is drawn: a MapLibre style plus the TileJSON its tiles
+   * are listed in. There is no `<img>` anywhere.
    */
-  kind: "vector" | "raster";
+  kind: "vector";
   /**
-   * The raster template, for a `raster` provider. EMPTY for a vector one:
-   * there is no image URL to give, and an empty string (rather than null)
-   * keeps every caller that lays out raster tiles honest without a type
-   * change: it simply has nothing to lay out.
+   * A raster tile template. ALWAYS EMPTY: OpenFreeMap serves no raster tiles
+   * at street zoom. Kept as an empty string (rather than removed) for the
+   * staff review panel's mosaic (`app/admin/_review/map-tiles.ts`), which
+   * lays out nothing for an empty template, until that panel draws the still
+   * area map instead.
    */
   url: string;
-  /** The MapLibre style, for a `vector` provider; null for a raster one. */
-  style: string | null;
-  /** The TileJSON that names the current vector tile URLs; null for raster. */
-  tileJson: string | null;
+  /** The MapLibre style. */
+  style: string;
+  /** The TileJSON that names the current vector tile URLs. */
+  tileJson: string;
   /** Everyone who must be credited, in the order their terms ask for. */
   credits: MapCreditLink[];
   /** Deepest zoom the map may be taken to (vector tiles overzoom past 14). */
   maxZoom: number;
   /**
-   * True while the map is on imagery that may not be used commercially. False
-   * for both providers now; kept so a pre-launch check reads one boolean
-   * instead of a URL, and so a future swap has to say what it is standing on.
+   * True while the map is on imagery that may not be used commercially.
+   * False: kept so a pre-launch check reads one boolean instead of a URL, and
+   * so a future swap has to say what it is standing on.
    */
   nonCommercial: boolean;
 };
@@ -108,44 +109,26 @@ export const OPENFREEMAP_ORIGIN = "https://tiles.openfreemap.org";
 const OPENFREEMAP_STYLE = `${OPENFREEMAP_ORIGIN}/styles/positron`;
 const OPENFREEMAP_TILEJSON = `${OPENFREEMAP_ORIGIN}/planet`;
 
-/**
- * MapTiler's `dataviz` styles: muted land, no shouting labels, a genuine dark
- * variant rather than an inverted light one.
- */
-const MAPTILER_STYLE: Record<MapTheme, string> = {
-  light: "dataviz-light",
-  dark: "dataviz-dark",
+const OPENFREEMAP: TileProvider = {
+  id: "openfreemap",
+  kind: "vector",
+  url: "",
+  /* One style for both themes; the theme is applied as paint overrides. */
+  style: OPENFREEMAP_STYLE,
+  tileJson: OPENFREEMAP_TILEJSON,
+  credits: OPENFREEMAP_CREDITS,
+  maxZoom: 19,
+  nonCommercial: false,
 };
 
-/** Read once. A key that appears mid-session is not a case worth handling. */
-const MAPTILER_KEY = (process.env.NEXT_PUBLIC_MAPTILER_KEY ?? "").trim();
-
-export function tileProvider(theme: MapTheme): TileProvider {
-  if (MAPTILER_KEY.length > 0) {
-    return {
-      id: "maptiler",
-      kind: "raster",
-      url: `https://api.maptiler.com/maps/${MAPTILER_STYLE[theme]}/{z}/{x}/{y}{r}.png?key=${MAPTILER_KEY}`,
-      style: null,
-      tileJson: null,
-      /* MapTiler's terms require both marks, theirs first. */
-      credits: [{ label: "© MapTiler", href: "https://www.maptiler.com/copyright/" }, OSM],
-      maxZoom: 20,
-      nonCommercial: false,
-    };
-  }
-
-  return {
-    id: "openfreemap",
-    kind: "vector",
-    url: "",
-    /* One style for both themes; the theme is applied as paint overrides. */
-    style: OPENFREEMAP_STYLE,
-    tileJson: OPENFREEMAP_TILEJSON,
-    credits: OPENFREEMAP_CREDITS,
-    maxZoom: 19,
-    nonCommercial: false,
-  };
+/**
+ * The provider for a theme. One provider and one style serve both themes
+ * (`style.ts` repaints it), so the theme does not change the answer; it is
+ * taken so callers say which map they are drawing, and so a provider with
+ * per-theme styles could be added without touching them.
+ */
+export function tileProvider(_theme?: MapTheme): TileProvider {
+  return OPENFREEMAP;
 }
 
 /** True while every provider this build can pick allows commercial use. */
@@ -155,8 +138,8 @@ export function hasCommercialTiles(): boolean {
 
 /**
  * Say it once, where somebody running the build will see it, IF the map is
- * ever moved back onto imagery that may not be used commercially. Silent for
- * both current providers. Not a thrown error: a map that renders and says
+ * ever moved back onto imagery that may not be used commercially. Silent on
+ * OpenFreeMap. Not a thrown error: a map that renders and says
  * what it stands on beats one that refuses to render.
  */
 let warned = false;

@@ -207,17 +207,16 @@ describe("contentSecurityPolicy", () => {
      * internet carrying whatever the URL was built from, and it needs no
      * script to fire.
      *
-     * Both halves are asserted. The wildcard must be gone, and the map must
-     * still be reachable: tightening this directive and forgetting the
-     * basemap host turns the map into a grey box, and that is exactly the
-     * mistake this test exists to catch.
+     * The wildcard must be gone. The map is not an image host any more: its
+     * data is fetched, and the next test holds `connect-src` to that.
      */
     const value = directive(policy(), "img-src") ?? "";
     expect(/(^|\s)https:(\s|$)/.test(value)).toBe(false);
-    /* MapTiler's raster tiles are images, for the day its key is set. CARTO
-       is gone: its tiles were non-commercial only (9 November 2026). */
-    expect(value).toContain("https://api.maptiler.com");
+    /* No map host is an image host any more: CARTO's tiles were
+       non-commercial only and MapTiler was the paid path the founder
+       declined (9 November 2026). OpenFreeMap is fetched, under connect-src. */
     expect(value).not.toContain("cartocdn");
+    expect(value).not.toContain("maptiler");
     // A chosen photo is previewed from a blob before it is ever uploaded.
     expect(value).toContain("blob:");
     expect(value).toContain("data:");
@@ -236,6 +235,9 @@ describe("contentSecurityPolicy", () => {
     expect(connect).not.toMatch(/\*\.openfreemap/);
     expect(directive(value, "img-src") ?? "").not.toContain("openfreemap");
     expect(value).not.toContain("cartocdn");
+    expect(value).not.toContain("maptiler");
+    /* The one map host, and only in connect-src. */
+    expect(value.match(/openfreemap/g)?.length).toBe(1);
     /* MapLibre's worker: same origin, or a blob if the assets ever move. */
     expect(directive(value, "worker-src")).toContain("'self'");
     expect(directive(value, "worker-src")).toContain("blob:");

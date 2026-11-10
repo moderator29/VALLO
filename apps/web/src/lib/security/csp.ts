@@ -50,7 +50,7 @@ import { SUPABASE_URL } from "../supabase/env";
  *  - The only cross-origin subresources are Unsplash stock, Google avatars
  *    and Supabase storage, all of them images, and the map's vector tiles,
  *    style, fonts and sprite from OpenFreeMap, which are fetched and so sit
- *    in `connect-src` (MapTiler's raster tiles are images, if its key is set).
+ *    in `connect-src`.
  *  - The only cross-origin NAVIGATION a form can reach is Paystack checkout.
  *    The Google and Apple sign-in rows that used to post to a server action
  *    ending in a redirect to Supabase authorize are gone from `AuthChoices`,
@@ -141,12 +141,10 @@ const IMAGE_HOSTS: readonly string[] = [
   // The avatar a Google account already has. Google picks the shard, lh3
   // through lh6, so the wildcard is on the subdomain and nothing wider.
   "https://*.googleusercontent.com",
-  // MapTiler's raster tiles, drawn as plain images, and only while
-  // NEXT_PUBLIC_MAPTILER_KEY is set (the paid path; see lib/maps/tiles). The
-  // default provider, OpenFreeMap, is fetched rather than drawn as an <img>,
-  // so its host is in MAP_DATA_ORIGINS below and not here. CARTO's host was
-  // removed on 9 November 2026 with the move off its non-commercial tiles.
-  "https://api.maptiler.com",
+  // No map host. The map's provider, OpenFreeMap, is fetched rather than
+  // drawn as an <img>, so its host is in MAP_DATA_ORIGINS below. CARTO's
+  // host (non-commercial tiles) and MapTiler's (the paid path the founder
+  // declined) were both removed on 9 November 2026 (see lib/maps/tiles).
 ];
 
 /**
@@ -386,9 +384,8 @@ export function contentSecurityPolicy(nonce: string): string {
      * There are no partner photos any more. Every image on this platform now
      * comes from a host we can name, so the wildcard is closed and the list is
      * the real one. It is the same set `next.config.ts` allows `next/image` to
-     * optimise, plus MapTiler, whose raster tiles (only with its key set) are
-     * plain `<img>` elements and are therefore governed by this directive
-     * rather than by `connect-src`.
+     * optimise. The map draws no `<img>` from a third party: its data is
+     * fetched, under `connect-src`.
      *
      * A photo that fails to load is a grey tile. A wildcard that stays open
      * because nobody revisited it is an exfiltration channel: an injected

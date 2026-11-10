@@ -284,13 +284,26 @@
     left: 0;
     top: 0;
   }
+
+  /* The area map's credit (`AreaMap`): OpenFreeMap's terms name three marks,
+     too long for one row on a 360px phone. As inline text, only as wide as it
+     needs, it wraps between names and never inside one, so "© OpenMapTiles"
+     is never split from its sign. Two classes, so it outranks the single
+     class rule in `area-map.css` whatever order the sheets load in. */
+  .nf-areamap .nf-areamap__credit {
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: calc(100% - 2 * var(--nf-space-2xs));
+    text-align: end;
+  }
+  .nf-areamap .nf-areamap__credit a {
+    white-space: nowrap;
+  }
 }
 
 /* ======================================================= THE STILL AREA MAP
    `AreaMapTile`: one canvas painted from OpenFreeMap's vector tiles in the
-   live map's palette (or, on the paid MapTiler path, four raster tiles laid
-   so the area's centroid sits at the centre), one pin, and (on a large tile)
-   the credit. The quiet ground under the imagery is what shows on a
+   live map's palette, one pin, and (on a large tile) the credit. The quiet ground under the imagery is what shows on a
    data-saver connection or when a tile fails, so the frame is never a hole. */
 @layer components {
   .nf-area-tile {
@@ -302,26 +315,6 @@
       linear-gradient(var(--nf-divider), var(--nf-divider)) 0 50% / 100% 1px no-repeat,
       var(--nf-surface-raised);
     isolation: isolate;
-  }
-  .nf-area-tile__sheet {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 512px;
-    height: 512px;
-    pointer-events: none;
-  }
-  .nf-area-tile__img {
-    position: absolute;
-    width: 256px;
-    height: 256px;
-    max-width: none;
-    opacity: 0;
-    user-select: none;
-    transition: opacity var(--nf-duration-base) var(--nf-ease-standard);
-  }
-  .nf-area-tile__img[data-loaded] {
-    opacity: 1;
   }
   .nf-area-tile__canvas {
     position: absolute;
@@ -359,13 +352,17 @@
     padding: var(--nf-space-3xs) var(--nf-space-2xs);
     border-top-left-radius: var(--nf-radius-xs);
     background: var(--nf-smoked-glass-fill);
+    max-inline-size: 100%;
+    text-align: end;
     font-size: var(--nf-text-overline);
     color: var(--nf-content-on-media);
   }
-  :root[data-save-data="on"] :is(.nf-area-tile__sheet, .nf-area-tile__canvas, .nf-area-tile__credits) {
+  :root[data-save-data="on"] :is(.nf-area-tile__canvas, .nf-area-tile__credits) {
     display: none;
   }
+  /* Three marks wrap between names, never inside one. */
   .nf-area-tile__credits a {
+    white-space: nowrap;
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -374,7 +371,6 @@
 
 @layer components {
   @media (prefers-reduced-motion: reduce) {
-    .nf-area-tile__img,
     .nf-area-tile__canvas {
       transition: none;
     }

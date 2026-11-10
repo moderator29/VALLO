@@ -8,8 +8,8 @@ import "./search-v2.css";
  * THE MAP'S CREDIT, BEHIND A ROUND "i" (search-map track, 13 October 2026).
  *
  * The map data's terms (OpenMapTiles and OpenStreetMap, served by
- * OpenFreeMap; MapTiler's too, if its key is ever set) require their credit on
- * the map, and they allow it to be compact: MapLibre's own `compact` attribution is a round
+ * OpenFreeMap) require their credit on the map, and they allow it to be
+ * compact: MapLibre's own `compact` attribution is a round
  * "i" that opens the credit on a tap. The founder wanted the line of text off
  * the map, so this is that pattern: the credit is always one tap away, it is
  * a real disclosure (`aria-expanded`, `aria-controls`), Escape and a second

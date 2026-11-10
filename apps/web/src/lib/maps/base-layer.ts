@@ -8,7 +8,7 @@ import { tileProvider, warnIfNonCommercialTiles, type MapTheme } from "./tiles";
  * THE GROUND UNDER EVERY LIVE MAP, CHOSEN ONCE PER MAP.
  *
  * Every Leaflet map in the product (search, a stay's area, the price check
- * pin) asks this module for its basemap and gets one of three:
+ * pin) asks this module for its basemap and gets one of two:
  *
  *   gl     OpenFreeMap's vector tiles drawn by MapLibre GL through the
  *          official Leaflet bridge, in Vallo's colours (`style.ts`). The
@@ -21,8 +21,6 @@ import { tileProvider, warnIfNonCommercialTiles, type MapTheme } from "./tiles";
  *          the root layout for two cores or two gigabytes or less), on a data
  *          saver connection (`data-save-data`), and whenever MapLibre fails to
  *          load or to start. No engine download, no worker, no WebGL.
- *   raster MapTiler's raster tiles, only while `NEXT_PUBLIC_MAPTILER_KEY` is
- *          set: the paid path, kept exactly as it was (`tiles.ts`).
  *
  * The caller hears `onLoad` when imagery has painted and `onError` when a
  * tile could not be had, the same two signals a Leaflet tile layer gave, so
@@ -32,7 +30,7 @@ import { tileProvider, warnIfNonCommercialTiles, type MapTheme } from "./tiles";
 
 type LeafletModule = typeof import("leaflet");
 
-export type BaseLayerKind = "gl" | "lite" | "raster";
+export type BaseLayerKind = "gl" | "lite";
 
 export type BaseLayer = {
   kind(): BaseLayerKind;
@@ -44,8 +42,6 @@ export type BaseLayerOptions = {
   onLoad?: () => void;
   onError?: () => void;
   minZoom?: number;
-  /** Extra options for the raster path's tile layer (MapTiler only). */
-  raster?: Leaflet.TileLayerOptions;
 };
 
 let webgl2: boolean | null = null;
@@ -74,6 +70,9 @@ export function liteMapWanted(): boolean {
 /** How long MapLibre may take to show a first frame before the lite map takes over. */
 const GL_START_TIMEOUT = 12_000;
 
+/** How long a lost WebGL context may stay lost before the lite map takes over. */
+const GL_RESTORE_TIMEOUT = 4_000;
+
 export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: MapTheme, options: BaseLayerOptions = {}): BaseLayer {
   warnIfNonCommercialTiles();
   let theme = initialTheme;
@@ -82,8 +81,7 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
   let disposed = false;
   let glStyleFor: ((next: MapTheme) => void) | null = null;
   let startTimer: number | null = null;
-
-  const provider = tileProvider(theme);
+  let dropLostTimer: (() => void) | null = null;
 
   const clearTimer = () => {
     if (startTimer !== null) window.clearTimeout(startTimer);
@@ -92,6 +90,8 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
 
   const detach = () => {
     clearTimer();
+    dropLostTimer?.();
+    dropLostTimer = null;
     const layer = current;
     current = null;
     glStyleFor = null;
@@ -115,28 +115,11 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     layer.on("tileerror", () => options.onError?.());
   };
 
-  const startRaster = () => {
-    kind = "raster";
-    const tiles = tileProvider(theme);
-    if (!tiles.url) return;
-    const layer = L.tileLayer(tiles.url, {
-      maxZoom: tiles.maxZoom,
-      minZoom: options.minZoom ?? 0,
-      detectRetina: true,
-      updateWhenIdle: true,
-      ...options.raster,
-    });
-    watchTiles(layer);
-    layer.addTo(map);
-    current = layer;
-  };
-
   const startLite = () => {
     if (disposed) return;
     detach();
     kind = "lite";
     const tiles = tileProvider(theme);
-    if (!tiles.tileJson) return;
     const layer: LiteLayer = createLiteLayer(L, { tileJson: tiles.tileJson, theme, maxZoom: tiles.maxZoom, minZoom: options.minZoom });
     watchTiles(layer);
     layer.addTo(map);
@@ -145,7 +128,6 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
 
   const startGl = async () => {
     const tiles = tileProvider(theme);
-    if (!tiles.style) return startLite();
     /* Said while MapLibre is still arriving, so a caller can wait for it. */
     kind = "gl";
     try {
@@ -167,6 +149,21 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
       glMap.on("error", () => {
         if (loaded) options.onError?.();
       });
+      /* A budget phone drops a WebGL context under memory pressure. MapLibre
+         rebuilds it when the browser gives it back; if the browser has not
+         within a few seconds, the lite layer takes over the same view. */
+      let lostTimer: number | null = null;
+      glMap.on("webglcontextlost", () => {
+        if (lostTimer === null) lostTimer = window.setTimeout(() => startLite(), GL_RESTORE_TIMEOUT);
+      });
+      glMap.on("webglcontextrestored", () => {
+        if (lostTimer !== null) window.clearTimeout(lostTimer);
+        lostTimer = null;
+      });
+      dropLostTimer = () => {
+        if (lostTimer !== null) window.clearTimeout(lostTimer);
+        lostTimer = null;
+      };
       /* A context lost for good, or a style that never finishes: hand the
          map to the lite layer rather than leave the reader on a blank ground. */
       startTimer = window.setTimeout(() => {
@@ -177,8 +174,7 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
     }
   };
 
-  if (provider.kind === "raster") startRaster();
-  else if (liteMapWanted()) startLite();
+  if (liteMapWanted()) startLite();
   else void startGl();
 
   return {
@@ -188,10 +184,6 @@ export function addBaseLayer(L: LeafletModule, map: Leaflet.Map, initialTheme: M
       theme = next;
       if (kind === "gl" && glStyleFor) glStyleFor(next);
       else if (kind === "lite" && current) (current as LiteLayer).setTheme(next);
-      else if (kind === "raster") {
-        detach();
-        startRaster();
-      }
     },
     remove() {
       disposed = true;

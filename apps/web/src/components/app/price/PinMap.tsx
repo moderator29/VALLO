@@ -189,7 +189,7 @@ export function PinMap({
   const recentre = useCallback(() => {
     const map = mapRef.current;
     if (!map || !centreOn) return;
-    map.setView([centreOn.lat, centreOn.lng], 13);
+    map.setView([centreOn.lat, centreOn.lng], 13, { animate: !prefersCalm() });
   }, [centreOn]);
 
   useEffect(() => {

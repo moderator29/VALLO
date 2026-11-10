@@ -61,8 +61,8 @@ const MAP_SAVE_WORDS = { saved: "Saved to your list", savedOnDevice: "Saved on t
  * The tile URLs used to be two constants here, on CARTO's free basemaps, which
  * are NON-COMMERCIAL USE ONLY - and a marketplace taking a booking fee is a
  * commercial use. `lib/maps/tiles.ts` owns the provider now (OpenFreeMap's
- * free, commercial-use vector tiles, or MapTiler if a key is ever set) and the
- * attribution its terms require; `lib/maps/base-layer.ts` decides how the
+ * free, commercial-use vector tiles, no key) and the attribution its terms
+ * require; `lib/maps/base-layer.ts` decides how the
  * ground is drawn: MapLibre GL through the Leaflet bridge on a capable
  * device, OpenFreeMap's tiles painted on plain canvases on a budget one or
  * when WebGL or MapLibre cannot be had. Either way Leaflet still owns the
@@ -144,14 +144,12 @@ export function MapCanvas({
   const [tick, setTick] = useState(0);
   const [engineReady, setEngineReady] = useState(false);
   const [imagery, setImagery] = useState<"loading" | "ready" | "offline">("loading");
-  /* THE MAP FOLLOWS THE PAGE'S THEME, live: dark cartography at night,
-     light cartography on the light theme (reintroduced 25 September 2026).
-     The effect below already rebuilds the tile layer when this changes. */
+  /* THE MAP FOLLOWS THE PAGE'S THEME, live: Vallo's navy at night, paper on
+     the light theme (reintroduced 25 September 2026). The effect below
+     repaints the ground in place when this changes. */
   const theme = useAppliedTheme();
-  /* The credit line belongs to whichever provider is actually serving tiles.
-     Both providers credit the same names whatever the style, so the theme here
-     only picks a variant; it is passed for completeness rather than because the
-     answer changes with it. */
+  /* The credit line belongs to the provider actually serving the map data
+     (`lib/maps/tiles.ts`); the same names whatever the theme. */
   const credits = tileProvider(theme).credits;
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -282,7 +280,6 @@ export function MapCanvas({
     }
     baseRef.current = ground.addBaseLayer(leaflet, map, theme, {
       minZoom: 4,
-      raster: { updateWhenZooming: false, updateWhenIdle: true },
       onLoad: () => {
         tilesLoaded.current += 1;
         setImagery("ready");
@@ -328,20 +325,22 @@ export function MapCanvas({
     const leaflet = leafletRef.current;
     if (!map || !leaflet) return;
     const first = listings[0];
+    /* Under reduced motion the view arrives; it never glides to the results. */
+    const animate = !prefersCalm();
     if (!first) {
       const focus = active
         ? cities.find((city) => city.city.toLowerCase() === active.trim().toLowerCase())
         : undefined;
-      map.setView(focus ? [focus.lat, focus.lng] : [9.05, 7.5], focus ? 12 : 5);
+      map.setView(focus ? [focus.lat, focus.lng] : [9.05, 7.5], focus ? 12 : 5, { animate });
       return;
     }
     if (listings.length === 1) {
-      map.setView([first.lat, first.lng], 13);
+      map.setView([first.lat, first.lng], 13, { animate });
       return;
     }
     map.fitBounds(
       leaflet.latLngBounds(listings.map((l) => [l.lat, l.lng] as [number, number])),
-      { paddingTopLeft: [48, 56], paddingBottomRight: [48, DOCK_ROOM + 40] },
+      { paddingTopLeft: [48, 56], paddingBottomRight: [48, DOCK_ROOM + 40], animate },
     );
   }, [listings, cities, active]);
 
@@ -363,7 +362,7 @@ export function MapCanvas({
       openedFromUrl.current = true;
       const asked = readViewport(window.location.search);
       if (asked) {
-        mapRef.current?.setView([asked.lat, asked.lng], asked.zoom);
+        mapRef.current?.setView([asked.lat, asked.lng], asked.zoom, { animate: false });
         return;
       }
     }
@@ -542,7 +541,7 @@ export function MapCanvas({
         if (locateTimer.current !== null) window.clearTimeout(locateTimer.current);
         const at = { lat: position.coords.latitude, lng: position.coords.longitude };
         setLocate({ phase: "located", at });
-        mapRef.current?.setView([at.lat, at.lng], 13);
+        mapRef.current?.setView([at.lat, at.lng], 13, { animate: !prefersCalm() });
       },
       (error) => {
         if (locateTimer.current !== null) window.clearTimeout(locateTimer.current);

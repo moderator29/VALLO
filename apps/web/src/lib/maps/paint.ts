@@ -7,9 +7,11 @@ import type { MapPalette } from "./palette";
  * The lightweight map: no WebGL, no worker, no 300 KB engine. Land, parks,
  * water, roads in four weights and (close in) buildings, in the same palette
  * the MapLibre map is repainted with, so a budget phone and a flagship show
- * the same calm ground at the same place. Labels are drawn only by the still
- * tiles (`still.ts`), which see the whole frame at once; a label cut in half
- * at a tile edge is worse than no label.
+ * the same calm ground at the same place. Place names are drawn separately
+ * (`drawLabels`), only where a whole name fits its frame: the still tiles
+ * (`still.ts`) see their whole frame at once, and the lite map draws a name
+ * only inside the one tile that holds all of it. A label cut in half at a
+ * tile edge is worse than no label.
  *
  * Every group of shapes is ONE path and ONE fill or stroke call, so a dense
  * city tile is a few dozen canvas calls rather than thousands.

@@ -1,6 +1,6 @@
 import type * as Leaflet from "leaflet";
 import { MAP_PALETTE } from "./palette";
-import { paintVectorTile } from "./paint";
+import { drawLabels, paintVectorTile, placeLabels } from "./paint";
 import type { MapTheme } from "./tiles";
 import { loadVectorTile } from "./vector-source";
 
@@ -18,6 +18,10 @@ import { loadVectorTile } from "./vector-source";
  * reading only the eight layers it draws, and painted in one pass. No WebGL,
  * no worker, no MapLibre download.
  *
+ * Place names are drawn per tile, only where a whole name fits inside its
+ * tile; street names are left to the WebGL map, which places labels across
+ * the whole view.
+ *
  * Leaflet's tile events are kept (`tileload`, `tileerror`), so a map treats
  * this layer exactly as it treated a raster tile layer.
  */
@@ -31,6 +35,20 @@ function tileRatio(): number {
   const root = typeof document === "undefined" ? undefined : document.documentElement;
   if (root?.dataset.motionLite === "on" || root?.dataset.saveData === "on") return 1;
   return Math.min(2, Math.max(1, Math.round(globalThis.devicePixelRatio || 1)));
+}
+
+let font: string | null = null;
+
+/** The page's own face for the names, read once. */
+function labelFont(): string {
+  if (font === null) {
+    try {
+      font = getComputedStyle(document.body).fontFamily || "system-ui, sans-serif";
+    } catch {
+      font = "system-ui, sans-serif";
+    }
+  }
+  return font;
 }
 
 export function createLiteLayer(
@@ -61,7 +79,12 @@ export function createLiteLayer(
       /* A 512 px Leaflet tile at zoom z is exactly the standard tile at z - 1. */
       loadVectorTile(options.tileJson, coords.z - 1, coords.x, coords.y)
         .then(({ tile, at }) => {
-          paintVectorTile({ ctx, size: size.x * at.scale, ox: -at.col * size.x, oy: -at.row * size.y, zoom: coords.z }, tile, palette);
+          const target = { ctx, size: size.x * at.scale, ox: -at.col * size.x, oy: -at.row * size.y, zoom: coords.z };
+          paintVectorTile(target, tile, palette);
+          /* Place names, only those whose whole label fits inside this tile:
+             a name is never cut at a seam, and a place is in exactly one
+             tile, so none is drawn twice. A few per tile keeps it calm. */
+          drawLabels(ctx, placeLabels(target, tile), palette, { w: size.x, h: size.y }, labelFont(), 3);
           done(undefined, canvas);
         })
         .catch((error: unknown) => done(error instanceof Error ? error : new Error("tile"), canvas));

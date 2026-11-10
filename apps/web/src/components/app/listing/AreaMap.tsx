@@ -82,7 +82,6 @@ export function AreaMap({
       } as import("leaflet").MapOptions);
       let painted = false;
       baseRef.current = ground.addBaseLayer(leaflet, map, themeRef.current, {
-        raster: { keepBuffer: 1 },
         onLoad: () => {
           painted = true;
         },
@@ -110,13 +109,18 @@ export function AreaMap({
     );
   }
   return (
-    <div className="nf-areamap" role="img" aria-label={label}>
-      <div ref={frameRef} className="nf-areamap__canvas" />
+    <div className="nf-areamap">
+      {/* The picture is named; the credit beside it stays a set of links a
+          screen reader can reach (inside a role="img" they would be hidden). */}
+      <div ref={frameRef} className="nf-areamap__canvas" role="img" aria-label={label} />
       <p className="nf-areamap__credit">
-        {credits.map((credit) => (
-          <a key={credit.label} href={credit.href} rel="noreferrer noopener" target="_blank">
-            {credit.label}
-          </a>
+        {credits.map((credit, index) => (
+          <span key={credit.label}>
+            {index > 0 ? " · " : null}
+            <a href={credit.href} rel="noreferrer noopener" target="_blank">
+              {credit.label}
+            </a>
+          </span>
         ))}
       </p>
     </div>
