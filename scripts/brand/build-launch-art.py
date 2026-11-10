@@ -44,9 +44,9 @@ def css(lockup):
 @keyframes rise{{to{{transform:none}}}}
 '''
     if lockup:
-        c+=f'''.mv{{transform:translateX({SHIFT:.1f}px);animation:mv 540ms {EASE} 760ms forwards}}
-.l{{opacity:0;transform:translateX(-{WW*0.32:.0f}px);animation:out 520ms {EASE} forwards}}
-.l0{{animation-delay:980ms}}.l1{{animation-delay:1050ms}}.l2{{animation-delay:1120ms}}.l3{{animation-delay:1190ms}}.l4{{animation-delay:1260ms}}
+        c+=f'''.mv{{transform:translateX({SHIFT:.1f}px);animation:mv 640ms {EASE} 760ms forwards}}
+.l{{opacity:0;transform:translateX(-{WW*0.32:.0f}px);animation:out 680ms {EASE} forwards}}
+.l0{{animation-delay:980ms}}.l1{{animation-delay:1100ms}}.l2{{animation-delay:1220ms}}.l3{{animation-delay:1340ms}}.l4{{animation-delay:1460ms}}
 @keyframes mv{{to{{transform:none}}}}
 @keyframes out{{to{{opacity:1;transform:none}}}}
 '''
