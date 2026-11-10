@@ -615,41 +615,7 @@
   }
 
   /* ------------------------------------------------------- A14 guides */
-  .nf-guides {
-    display: grid;
-    gap: var(--nf-space-md);
-    padding-top: var(--nf-space-xl);
-  }
-  @media (min-width: 48rem) {
-    .nf-guides {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-  .nf-guide-card {
-    align-content: start;
-    text-decoration: none;
-    transition: box-shadow var(--nf-duration-fast) var(--nf-ease-standard);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .nf-guide-card:hover {
-      box-shadow: var(--nf-card-shadow-hover, var(--nf-card-shadow));
-    }
-  }
-  .nf-guide-card:focus-visible {
-    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
-    outline-offset: 2px;
-  }
-  .nf-guide-card__title {
-    font-family: var(--nf-font-display);
-    font-size: var(--nf-text-h4);
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--nf-content-primary);
-  }
-  .nf-guide-card__meta {
-    font-size: var(--nf-text-caption);
-    color: var(--nf-content-muted);
-  }
+  /* The index is the document kit's DocCards (components/docs). */
   /* One guide (GuideArticle.tsx): the article on a ~68ch reading measure,
      and from 64rem a sticky contents column beside it. */
   .nf-guide {

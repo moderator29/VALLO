@@ -116,6 +116,7 @@ export function documentOf(raw: J): DealDocument {
     category: (CATEGORIES as readonly unknown[]).includes(raw.category) ? (raw.category as DocumentCategory) : "other",
     state: (DOC_STATES as readonly unknown[]).includes(raw.state) ? (raw.state as DocumentState) : "requested",
     uploadedByName: s(raw.uploaded_by_name),
+    uploadedBy: raw.uploaded_by_side === "buyer" || raw.uploaded_by_side === "seller" ? (raw.uploaded_by_side as Side) : null,
     uploadedAt: s(raw.uploaded_at),
     version: n(raw.version),
     reviewedByName: s(raw.reviewed_by_name),
@@ -204,6 +205,8 @@ export function dealRoomOf(raw: J, fmtBase?: never): DealRoom {
     conversationId: s(raw.conversation_id),
     inspectionId: s(raw.inspection_id),
     buyerEligible: b(raw.buyer_eligible),
+    disputed: b(offerRaw.disputed),
+    openQuestion: b(offerRaw.open_question),
     next: nextActionOf(offer, documents),
   };
 }

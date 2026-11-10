@@ -114,6 +114,22 @@ describe("documentation coverage", () => {
     expect(missing, "links in the docs to pages that do not exist").toEqual([]);
   });
 
+  it("references only screenshots the capture plan produces, and lists only captures that exist on disk", () => {
+    const plan = (JSON.parse(readFileSync(join(SRC, "lib", "docs", "capture-plan.json"), "utf8")) as { key: string }[]).map((p) => p.key);
+    const source = ["chapters-offers.tsx", "chapters-platform.tsx", "chapters-people.tsx", "chapters-guide.tsx", "chapters-more.tsx", "chapters.tsx"]
+      .map((f) => readFileSync(join(APP, "(site)", "docs", f), "utf8"))
+      .join("\n");
+    const used = [...source.matchAll(/shot: \{ key: "([^"]+)"/g)].map((m) => m[1] as string);
+    for (const key of used) expect(plan, `${key} is used by a guide but is not in capture-plan.json`).toContain(key);
+    const captured = JSON.parse(readFileSync(join(SRC, "lib", "docs", "shots.json"), "utf8")) as string[];
+    for (const key of captured) {
+      for (const theme of ["dark", "light"]) {
+        expect(statSync(join(process.cwd(), "public", "docs", `${key}-${theme}.webp`)).size, `${key}-${theme}.webp`).toBeGreaterThan(1000);
+      }
+      expect(plan, `${key} is captured but no longer in the plan`).toContain(key);
+    }
+  });
+
   it("detects a page that is added without documentation (the fixture)", () => {
     expect(findUncovered([...ROUTES, "/fake-feature"])).toEqual(["/fake-feature"]);
     expect(findStale([...ROUTES.filter((r) => r !== "/about")])).toEqual(["/about"]);

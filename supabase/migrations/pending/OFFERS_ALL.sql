@@ -1426,7 +1426,10 @@ begin
       'payment_preference', ag.terms ->> 'payment_preference', 'target_closing', ag.terms ->> 'target_closing',
       'submitted_at', ag.submitted_at, 'updated_at', ag.updated_at, 'expires_at', ag.expires_at,
       'version', ag.terms_version, 'agreed_version', ag.agreed_version, 'decided_at', ag.decided_at,
-      'decision_reason', ag.decision_reason, 'disputed', ag.disputed_at is not null),
+      'decision_reason', ag.decision_reason, 'disputed', ag.disputed_at is not null,
+      'open_question', coalesce((select e.action = 'info_requested' from public.deal_agreement_events e
+                                  where e.agreement_id = ag.id and e.action in ('info_requested', 'info_provided')
+                                  order by e.created_at desc, e.id desc limit 1), false)),
     'versions', coalesce((
       select jsonb_agg(jsonb_build_object(
         'version', v.terms_version, 'amount_minor', v.amount_minor, 'terms', v.terms, 'at', v.created_at,
@@ -1447,6 +1450,7 @@ begin
         'id', d.id, 'category', d.category, 'label', d.label, 'state', d.state, 'version', d.version,
         'uploaded_by_name', case when d.uploaded_by is null then null else private.sale_display_name(d.uploaded_by) end,
         'uploaded_at', d.uploaded_at, 'file_name', d.file_name,
+        'uploaded_by_side', case when d.uploaded_by is null then null when d.uploaded_by = ag.renter_id then 'buyer' else 'seller' end,
         'reviewed_by_name', case when d.reviewer_id is null then null else private.sale_display_name(d.reviewer_id) end,
         'reviewer_kind', d.reviewer_kind, 'reviewed_at', d.reviewed_at, 'note', d.note,
         'is_mine', d.uploaded_by = p_actor) order by d.created_at)
@@ -1562,8 +1566,13 @@ begin
       'listing_title', (select l.title from public.listings l where l.id = ag.listing_id),
       'buyer_name', private.sale_display_name(ag.renter_id), 'seller_name', private.sale_display_name(ag.owner_id),
       'amount_minor', ag.amount_minor, 'status', ag.status, 'stage', ag.sale_stage, 'version', ag.terms_version,
+      'asking_minor', coalesce((ag.terms ->> 'asking_minor')::bigint, 0),
+      'payment_preference', ag.terms ->> 'payment_preference',
+      'submitted_at', ag.submitted_at, 'updated_at', ag.updated_at,
       'agreed_version', ag.agreed_version, 'expires_at', ag.expires_at, 'disputed', ag.disputed_at is not null,
-      'mandate', private.sale_mandate_line(ag.listing_id)),
+      'mandate', private.sale_mandate_line(ag.listing_id),
+      'mandate_live', private.sale_live_mandate(ag.listing_id) is not null),
+    'buyer_eligible', (private.sale_eligibility(ag.renter_id, ag.listing_id) ->> 'eligible')::boolean,
     'versions', coalesce((select jsonb_agg(jsonb_build_object('version', v.terms_version, 'amount_minor', v.amount_minor,
       'terms', v.terms, 'at', v.created_at) order by v.terms_version)
       from public.deal_agreement_versions v where v.agreement_id = ag.id), '[]'::jsonb),

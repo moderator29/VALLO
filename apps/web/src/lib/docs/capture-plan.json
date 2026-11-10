@@ -1,0 +1,7 @@
+[
+  { "key": "making-an-offer/01-requirements", "path": "/preview/offers/flow?step=1&gate=blocked", "note": "Offer screen with requirements not met" },
+  { "key": "making-an-offer/02-amount", "path": "/preview/offers/flow?step=1", "note": "Offer screen, eligible, amount and closing date" },
+  { "key": "making-an-offer/03-payment", "path": "/preview/offers/flow?step=2", "note": "How you plan to pay" },
+  { "key": "making-an-offer/04-review", "path": "/preview/offers/flow?step=3", "note": "Review your offer" },
+  { "key": "making-an-offer/05-confirmation", "path": "/preview/offers/room?room=buyer_waiting&sent=1", "note": "Confirmation after sending" }
+]

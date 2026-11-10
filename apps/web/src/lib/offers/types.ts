@@ -126,6 +126,8 @@ export type DealDocument = {
   category: DocumentCategory;
   state: DocumentState;
   uploadedByName: string | null;
+  /** Which side uploaded it, so the OTHER side is the one offered Review. Null when nothing is uploaded. */
+  uploadedBy?: Side | null;
   uploadedAt: string | null;
   version: number;
   reviewedByName: string | null;
@@ -177,6 +179,10 @@ export type DealRoom = {
   inspectionId: string | null;
   /** Buyer's eligibility OUTCOME only. Never an id number, image or date of birth. */
   buyerEligible: boolean;
+  /** A concern is open on this deal (it went through the reports desk). */
+  disputed?: boolean;
+  /** The seller asked a question the buyer has not answered yet. */
+  openQuestion?: boolean;
   /** The next action as one obvious button, or null when nothing is waiting on the viewer. */
   next: NextAction | null;
 };

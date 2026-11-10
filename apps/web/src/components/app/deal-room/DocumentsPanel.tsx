@@ -128,7 +128,7 @@ function DocumentRow({ doc, room, live, onReview }: { doc: DealDocument; room: D
           <Button size="sm" variant="secondary" loading={busy} onClick={() => input.current?.click()} data-testid="doc-upload">
             {has ? "Upload a new version" : "Upload"}
           </Button>
-          {has ? (
+          {has && doc.uploadedBy !== room.viewerSide ? (
             <Button size="sm" variant="quiet" onClick={onReview} data-testid="doc-review">
               Review
             </Button>
