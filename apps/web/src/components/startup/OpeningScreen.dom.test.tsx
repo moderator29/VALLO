@@ -12,7 +12,7 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 
 const WEB = join(__dirname, "..", "..", "..");
 const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
-const CSS = transformSync([read("..", "..", "packages", "design-tokens", "src", "tokens.css"), read("src", "components", "startup", "open.css"), "body{margin:0;background:#fff}"].join("\n"), { loader: "css", minify: true }).code;
+const CSS = transformSync([read("..", "..", "packages", "design-tokens", "src", "tokens.css"), read("src", "components", "startup", "open.css"), "body{margin:0;background:white}"].join("\n"), { loader: "css", minify: true }).code;
 
 describe("the opening screen's markup", () => {
   const html = renderToStaticMarkup(<OpeningScreen />);

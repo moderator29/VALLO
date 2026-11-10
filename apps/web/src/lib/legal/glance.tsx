@@ -121,7 +121,7 @@ export function TermsGlance() {
 
 export const PRIVACY_SHORT: ShortVersionItem[] = [
   { icon: "eye-off", text: "There is no advertising tracking and no analytics in Vallo. We keep a few counts of our own, described in section 2." },
-  { icon: "wallet", text: "We never hold your money, so there is no wallet or balance. Card numbers are handled by Paystack and we never see or store your full card number." },
+  { icon: "wallet", text: "We never hold your money, so there is no balance in your name. Card numbers are handled by Paystack and we never see or store your full card number." },
   { icon: "location", text: "Your location is read only when you ask for it. We do not track it in the background." },
   { icon: "user-check", text: "A person decides on verification. No decision about your identity is made by a machine alone." },
   { icon: "trash", text: `You can delete your account yourself. Nothing is destroyed for ${GRACE_WINDOW_DAYS} days and you can restore it in that time. Records the law makes us keep stay, with you removed from them.` },

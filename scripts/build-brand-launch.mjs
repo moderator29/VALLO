@@ -6,7 +6,7 @@
  * blank snapshot between the tap and the first page, which is the long empty
  * navy screen the founder filmed. These images put the bright mark on the brand
  * ground there instead, drawn to match the opening screen the page paints from
- * its first frame (components/startup/open-mark.ts: the same ground, the mark at
+ * its first frame (components/startup/OpeningScreen.tsx: the same ground, the mark at
  * 36 per cent of the width, centred at 46 per cent of the height), so the hand
  * from iOS's snapshot to the page does not move.
  *
