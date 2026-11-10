@@ -7,6 +7,7 @@ import { EmailAuthForm } from "@/components/auth/EmailAuthForm";
 import { resolveProviderStates } from "@/lib/auth/providers";
 import { requestSurface } from "@/lib/auth/surface";
 import { emailFromQuery } from "@/components/auth/auth-intent";
+import { inviteCodeFromCookie, inviteDoor } from "@/lib/referral/server";
 import { FunnelBeacon } from "@/components/site/FunnelBeacon";
 
 export const metadata: Metadata = {
@@ -33,6 +34,12 @@ export default async function SignUpEmailPage({
   const providers = await resolveProviderStates(surface);
   const ready = (id: "google" | "apple") => providers.some((p) => p.id === id && p.configured);
 
+  /* An invite link that was opened first left its code in a cookie: show who
+     it names, so the person sees the link was read. */
+  const keptCode = await inviteCodeFromCookie();
+  const door = keptCode ? await inviteDoor(keptCode) : null;
+  const invite = keptCode && door?.found ? { code: keptCode, firstName: door.firstName } : null;
+
   return (
     <>
       {/* A6: the funnel's "sign-up opened" step; draws nothing. */}
@@ -46,6 +53,7 @@ export default async function SignUpEmailPage({
         googleReady={ready("google")}
         appleReady={ready("apple")}
         surface={surface}
+        invite={invite}
       />
     </>
   );

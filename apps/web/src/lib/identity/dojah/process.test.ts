@@ -49,6 +49,15 @@ describe("processDojahResult", () => {
     expect(JSON.stringify({ ...recorded[0], p_nin_hmac: null })).not.toContain("70123456789");
     expect(copied).toEqual([`user-1/${CHECK}/selfie.jpg`]);
   });
+  it("never machine-passes a date of birth that makes the person under 18, and does not rewrite it", async () => {
+    const young = payload();
+    (young.data.government_data.data.nin.entity as Record<string, string>).date_of_birth = "2999-01-01";
+    const { deps, recorded } = fakes();
+    const outcome = await processDojahResult(deps, young);
+    expect(outcome).toMatchObject({ kind: "recorded", status: "review" });
+    expect(String((recorded[0]!.p_reasons as string[])[0])).toMatch(/under 18/);
+    expect(recorded[0]!.p_date_of_birth).toBe("2999-01-01");
+  });
   it("ignores a result for a check it does not know or one already decided", async () => {
     expect(await processDojahResult(fakes().deps, payload({ metadata: { vallo_ref: "nope" } }))).toEqual({ kind: "ignored", reason: "no_reference" });
     const decided = fakes({ loadCheck: async (id) => ({ id, subject_id: "u", status: "approved" }) });

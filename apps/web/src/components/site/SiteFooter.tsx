@@ -1,3 +1,4 @@
+import { CookieSettingsButton } from "@/components/consent/CookieSettingsButton";
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Logo } from "@/design-system/brand/Logo";
@@ -189,6 +190,10 @@ export function SiteFooter({ t }: { t: Dictionary }) {
             <Link href="/privacy" className="nf-site-footer-link">
               {f.privacy}
             </Link>
+            <Link href="/cookies" className="nf-site-footer-link">
+              {t.cookies.footerPolicy}
+            </Link>
+            <CookieSettingsButton className="nf-site-footer-link">{t.cookies.footerLink}</CookieSettingsButton>
             <Link href="/disclaimer" className="nf-site-footer-link">
               {f.disclaimer}
             </Link>

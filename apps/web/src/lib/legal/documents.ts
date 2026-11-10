@@ -1,5 +1,5 @@
 import type { UiIconName } from "@/design-system/icons/UiIcon";
-import { DISCLAIMER_UPDATED_ISO, PRIVACY_UPDATED_ISO, TERMS_UPDATED_ISO } from "./versions";
+import { COOKIES_UPDATED_ISO, DISCLAIMER_UPDATED_ISO, PRIVACY_UPDATED_ISO, TERMS_UPDATED_ISO } from "./versions";
 
 /**
  * EVERY LEGAL AND POLICY DOCUMENT, IN ONE LIST (DOCS_AND_PRESENCE_UPGRADE.md
@@ -31,6 +31,13 @@ export const LEGAL_DOCUMENTS: LegalDocumentEntry[] = [
     title: "Privacy policy",
     description: "What we collect, why, who processes it, and how to download or delete it.",
     updated: PRIVACY_UPDATED_ISO,
+  },
+  {
+    href: "/cookies",
+    icon: "sliders",
+    title: "Cookies and device storage",
+    description: "Every cookie and piece of device storage Vallo uses, what it is for, and how to change your choice.",
+    updated: COOKIES_UPDATED_ISO,
   },
   {
     href: "/disclaimer",

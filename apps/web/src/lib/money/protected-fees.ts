@@ -13,6 +13,8 @@
  * added.
  */
 
+import { RENT_PARTNER_FEE_BPS } from "./fee-schedule";
+
 /** ₦1 in kobo. */
 const NAIRA = 100;
 
@@ -22,7 +24,7 @@ export const MONEY_IN_BAND_ONE_MAX_MINOR = 250_000 * NAIRA;
 export const MONEY_IN_BAND_TWO_MAX_MINOR = 50_000_000 * NAIRA;
 
 export const MONEY_IN_FIXED_MINOR = 150 * NAIRA;
-export const MONEY_IN_BAND_ONE_BPS = 150;
+export const MONEY_IN_BAND_ONE_BPS = RENT_PARTNER_FEE_BPS;
 export const MONEY_IN_BAND_ONE_CAP_MINOR = 3_000 * NAIRA;
 export const MONEY_IN_BAND_TWO_BPS = 125;
 

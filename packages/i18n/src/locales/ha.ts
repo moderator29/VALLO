@@ -340,6 +340,7 @@ export const ha: Dictionary = withFallback({
       coverPhoto: "Hoton bango",
       coverPhotoSub: "Hoton da ke saman shafinka",
       memberSince: "Memba tun",
+      addPhoto: "Ƙara hotonka",
       claimHandle: "Karɓi sunanka na musamman",
       claimHandleNote:
         "Suna na musamman adireshinka ne a Vallo. Karɓi ɗaya, shafin nan zai sami hoton bango, shafin jama'a da wurin da abin da ka rubuta zai zauna.",

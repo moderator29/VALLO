@@ -166,6 +166,8 @@ const PUBLIC_SEGMENTS = new Set([
   // `/ai/permissions`, `/ai/security`): read before the assistant is turned on.
   "ai",
   "cancellations",
+  // Cookies and device storage (10 November 2026): a legal page like the others.
+  "cookies",
   // The disclaimer is a legal page like the other four and was gated by
   // omission: a stranger following a footer link got a sign-in wall.
   "disclaimer",
@@ -369,6 +371,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/calendar/feed",
   "/api/build",
   "/api/client-error",
+  /* The cookie sheet's words, opened from the footer by a visitor with no account. */
+  "/api/cookie-copy",
   "/api/calls/webhook",
   "/api/cron/account-purge",
   "/api/cron/calls-sweep",

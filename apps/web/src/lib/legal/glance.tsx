@@ -1,3 +1,4 @@
+import { FEE_PERCENT } from "@/lib/money/fee-schedule";
 import type { ShortVersionItem } from "@/components/legal/LegalPreface";
 import { DocFlow, type DocFlowStep } from "@/components/docs/DocFlow";
 import { DocTable, type DocTableColumn, type DocTableRow } from "@/components/docs/DocTable";
@@ -94,7 +95,8 @@ const FEE_COLUMNS: DocTableColumn[] = [
 const FEE_ROWS: DocTableRow[] = [
   { id: "renter", icon: "user", cells: { item: "Fee to look, to book or to pay", who: "Nobody. Renters and guests pay nothing to Vallo.", when: "Never" } },
   { id: "listing", icon: "document", cells: { item: "Listing a property", who: "Nobody. Listing is free.", when: "Never" } },
-  { id: "platform", icon: "price-tag", cells: { item: "Platform fee", who: "The lister, out of their share", when: "When a payment is made through the platform. The rate is shown in naira before the lister agrees." } },
+  { id: "platform-rent", icon: "price-tag", cells: { item: `Rent payment, about ${FEE_PERCENT.rentTotal}% in total`, who: "The lister, out of their share", when: `Vallo's service fee ${FEE_PERCENT.vallo}% plus the payment partner's fee, about ${FEE_PERCENT.rentPartner}%. Rent payment is not open yet. The amount is shown in naira before the lister agrees.` } },
+  { id: "platform", icon: "price-tag", cells: { item: `Every other payment, about ${FEE_PERCENT.otherTotal}% in total`, who: "The lister, out of their share", when: `Vallo's service fee ${FEE_PERCENT.vallo}% plus the payment processor's fee, about ${FEE_PERCENT.otherProcessor}%. The amount is shown in naira before the lister agrees.` } },
   { id: "processing", icon: "credit-card", cells: { item: PROCESSOR_FEE_LABEL, who: "The lister, on the payout record", when: PROCESSOR_FEE_WHEN } },
   { id: "table", icon: "utensils", cells: { item: "Restaurant table", who: "The restaurant, a fixed fee for each seated table", when: "When a table is seated. The diner pays nothing extra." } },
   { id: "inspection", icon: "key", cells: { item: "Inspection", who: "Nobody", when: NO_INSPECTION_FEE } },

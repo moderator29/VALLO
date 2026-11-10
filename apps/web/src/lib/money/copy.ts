@@ -49,6 +49,8 @@
  * Client-safe: constants and pure functions only.
  */
 
+import { FEE_PERCENT } from "./fee-schedule";
+
 /* -------------------------------------------------------------------------- */
 /* THE GOVERNING SENTENCE                                                     */
 /* -------------------------------------------------------------------------- */
@@ -254,21 +256,77 @@ export function agreementOwnerApproved(kind: "rent" | "stay"): string {
 /* -------------------------------------------------------------------------- */
 
 /**
- * The whole fee story in one sentence, for the help centre, the supply pages
- * and the assistant. Rate-free, so it is true whatever the policy row says.
- * NOT for a renter's checkout or a listing's price: there the price is the
- * price, and nothing is said about fees at all.
- */
-export const WHO_PAYS_SENTENCE =
-  "Renters and guests pay exactly the price on the listing, with nothing added. Listing is free; when a payment is made, Vallo's platform fee comes out of the lister's share and is shown to the lister in naira.";
-
-/**
  * Vallo's charges, said to anybody: the renter side first, because that is
  * the promise. Replaces the line that called the commission zero and offered
  * the Guarantee contribution (lib/trust/standards.ts reads this).
  */
 export const NO_RENTER_FEES_LINE =
   "Vallo charges renters and guests nothing: no fee to look, to book or to pay, and nothing added to the price on the listing. Listing is free. When a payment is made, Vallo's platform fee comes out of the lister's share.";
+
+/* -------------------------------------------------------------------------- */
+/* WHAT A PAYMENT COSTS (founder, 10 November 2026; figures in fee-schedule.ts) */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The fee statement, built from the one schedule (`lib/money/fee-schedule.ts`).
+ * Rates ARE typed into these sentences now, but only through the schedule, so
+ * a change is one edit. The lister bears the fee; a renter or guest pays the
+ * listed price. The partner and the processor charge what they charge: those
+ * parts are theirs, not Vallo's. The partner and processor are not named here
+ * (naming rules in `protected-wording.ts` and `paystack-naming.test.ts`); the
+ * Terms name the processor where they are allowed to.
+ */
+export const FEE_RENT_LINE = `A rent payment costs about ${FEE_PERCENT.rentTotal}% in total: Vallo's service fee of ${FEE_PERCENT.vallo}% and the payment partner's fee of about ${FEE_PERCENT.rentPartner}%.`;
+export const FEE_OTHER_LINE = `Every other payment made on Vallo costs about ${FEE_PERCENT.otherTotal}% in total: Vallo's service fee of ${FEE_PERCENT.vallo}% and the payment processor's fee of about ${FEE_PERCENT.otherProcessor}%.`;
+export const FEE_PROVIDER_CHARGES =
+  "The payment partner's and the payment processor's fees are their charges, set by them. Vallo does not keep them and does not add to them.";
+export const FEE_WHO_PAYS =
+  "The fee comes out of the lister's share and is shown to the lister in naira before they agree. Renters and guests pay exactly the listed price.";
+export const FEE_ROUND_NOTE =
+  "The percentages are round figures. The exact amount for your payment is always shown in naira before you agree to it.";
+
+/** The whole statement, for the help centre, the docs, the assistant and the copilot. */
+export const FEE_STATEMENT = `${FEE_RENT_LINE} ${FEE_OTHER_LINE} ${FEE_WHO_PAYS} ${FEE_PROVIDER_CHARGES} ${FEE_ROUND_NOTE}`;
+
+/**
+ * The whole fee story, for the help centre, the supply pages and the
+ * assistant: who pays, then what a rent payment and any other payment cost
+ * (the schedule's figures). NOT for a renter's checkout or a listing's price:
+ * there the price is the price, and nothing is said about fees at all.
+ */
+export const WHO_PAYS_SENTENCE =
+  `Renters and guests pay exactly the price on the listing, with nothing added. Listing is free; when a payment is made, Vallo's platform fee comes out of the lister's share and is shown to the lister in naira. ${FEE_RENT_LINE} ${FEE_OTHER_LINE}`;
+
+/* -------------------------------------------------------------------------- */
+/* THE TERMS' WORDING FOR A RENT PAYMENT HELD BY A LICENSED BANK (not open yet) */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * PROPOSED WORDING, FOR COUNSEL (docs/handoff/COUNSEL_BRIEF.md section 2.7;
+ * written by the founder's instruction of 10 November 2026). Section 4A of the
+ * Terms and the trust page read these, so the contract and the screens say
+ * the same thing. Honest by construction: the rail is switched off
+ * (`payments_escrowpay_on`, `lib/rent/payment-open.ts`), so every sentence
+ * either says "when it opens" or describes the arrangement without saying
+ * any money is held today. Vallo holds nothing (NO_CUSTODY rule): the bank
+ * holds, Vallo instructs under the agreement. No outcome is guaranteed and no
+ * timing is promised. The partner and the bank are not named here (naming is
+ * `protected-wording.ts`'s, after the provider agrees the words).
+ */
+export const TERMS_HELD_NOT_OPEN =
+  "Payment held by a licensed bank is not open on Vallo yet. No rent has been paid this way, and until it opens rent cannot be paid on Vallo. When it opens we will say so, and these Terms will be updated with a new version and date.";
+export const TERMS_HELD_WHAT =
+  "A protected payment is a bank transfer that a licensed bank holds under your agreement until the handover you agreed has happened. You make it in naira, from your own Nigerian bank account, to a designated account at that bank.";
+export const TERMS_HELD_WHO =
+  "The money is held by a licensed bank, arranged through Vallo's licensed payment partner. It is not held by Vallo. Vallo cannot spend, lend or keep it, and Vallo can only ask the bank to release or return it under your agreement.";
+export const TERMS_HELD_RELEASE =
+  "The money is released to the lister when you confirm the handover your agreement names (the keys for a rental, check-in for a stay), when another release condition in your agreement is met, or through the dispute process below. A release is final only when the bank confirms it.";
+export const TERMS_HELD_DISPUTE =
+  "If something is wrong, tell us on the payment before you confirm the handover. Release pauses while the problem is reviewed, where the partner's arrangement allows. The lister sees what was reported and can answer. A person at Vallo reads both sides and records the decision and the reason on the payment. The decision follows your agreement and the evidence, it is not a court judgment, and it does not stop either of you going to court or to arbitration under these Terms.";
+export const TERMS_HELD_REFUND =
+  "A refund goes back to the bank account the money came from, once the bank confirms it. We do not promise how long a review or a refund takes; each step shows on the payment when it is confirmed.";
+export const TERMS_HELD_LIMITS =
+  "It does not judge the property, it is not insurance, and it does not cover money sent any other way: cash, a transfer to a personal account, or a payment arranged outside Vallo.";
 
 /**
  * A payment made BEFORE the Guarantee was retired carried a contribution, and
@@ -325,14 +383,14 @@ export function valloFeeLabel(percentText: string, capped: boolean): string {
 }
 
 /**
- * "Escrow protection, 2%": the escrow partner's fee, never called Vallo's.
+ * "Payment partner, 1.5%": the payment partner's fee, never called Vallo's.
  * Drawn ONLY while the protected rail is live (sweep items 7 to 9): the fee
  * screen hides the row otherwise (`listerFeeShown` in `lister-fee.ts`).
  */
 export function escrowProtectionLabel(percentText: string): string {
-  return `Escrow protection, ${percentText}%`;
+  return `Payment partner, ${percentText}%`;
 }
-export const ESCROW_PROTECTION_WHEN = "when a buyer pays into escrow";
+export const ESCROW_PROTECTION_WHEN = "on a rent payment";
 
 /**
  * The payment processor's fee, which the lister bears on a card payment (the
@@ -363,7 +421,7 @@ export const FEE_GATE_TITLE = "What you receive";
 /** Under the range: which figure to count on. The lower one, always. */
 export function receiveRangeNote(escrowIsLowest: boolean): string {
   return escrowIsLowest
-    ? "Count on the lower figure: it is what you receive when a buyer pays into escrow. When a buyer pays directly, you receive more."
+    ? "Count on the lower figure: it is what you receive on a rent payment, which carries the payment partner's fee. On other payments you receive more."
     : "Count on the lower figure: it is the least you receive, however the buyer pays.";
 }
 
@@ -376,8 +434,8 @@ export function receiveRangeNote(escrowIsLowest: boolean): string {
  */
 export function listerBearsFeesSentence(escrow: boolean, processor: boolean): string | null {
   if (escrow && processor)
-    return "You pay escrow protection when a buyer pays into escrow, and payment processing when a buyer pays directly. The buyer pays neither.";
-  if (escrow) return "You pay escrow protection when a buyer pays into escrow. The buyer never pays it.";
+    return "You pay the payment partner's fee on a rent payment, and payment processing on a card payment. The renter or guest pays neither.";
+  if (escrow) return "You pay the payment partner's fee on a rent payment. The renter never pays it.";
   if (processor) return "You pay payment processing when a renter or guest pays by card. They never pay it.";
   return null;
 }

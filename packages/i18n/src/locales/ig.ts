@@ -341,6 +341,7 @@ export const ig: Dictionary = withFallback({
       coverPhoto: "Foto mkpuchi",
       coverPhotoSub: "Foto dị n'elu peeji gị",
       memberSince: "Onye otu kemgbe",
+      addPhoto: "Tinye foto gị",
       claimHandle: "Nweta aha njirimara gị",
       claimHandleNote:
         "Aha njirimara bụ adreesị gị na Vallo. Nweta otu, peeji a ga-enwe foto mkpuchi, peeji ọha na ebe ihe i dere ga-ebi.",

@@ -60,5 +60,8 @@ export const PRICE_IS_THE_PRICE =
 export const COMMISSION_FROM_SHARE =
   "Vallo's commission comes out of the host's or lister's share. It is never added to your price.";
 
+/** The fee statement, from the one schedule (lib/money/fee-schedule.ts). */
+export { FEE_RENT_LINE, FEE_OTHER_LINE, FEE_PROVIDER_CHARGES, FEE_WHO_PAYS, FEE_ROUND_NOTE } from "@/lib/money/copy";
+
 /** Rule 8: viewings and listing. */
 export const VIEWINGS_AND_LISTING_FREE = "Viewings never take money, and listing is free.";

@@ -1,5 +1,6 @@
 "use client";
 
+import { consentAllows } from "@/lib/consent/consent";
 import { useEffect } from "react";
 import { doorFromChapter, VISIT_COOKIE, type FunnelStep } from "@/lib/funnel/steps";
 
@@ -14,6 +15,8 @@ import { doorFromChapter, VISIT_COOKIE, type FunnelStep } from "@/lib/funnel/ste
  */
 export function FunnelBeacon({ step, watchStart = false }: { step?: FunnelStep; watchStart?: boolean }) {
   useEffect(() => {
+    /* Counting is analytics: no visit number, no beacon, until the person agrees. */
+    if (!consentAllows("analytics")) return;
     let visit = document.cookie.split("; ").find((c) => c.startsWith(`${VISIT_COOKIE}=`))?.slice(VISIT_COOKIE.length + 1);
     if (!visit && typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
       visit = crypto.randomUUID();

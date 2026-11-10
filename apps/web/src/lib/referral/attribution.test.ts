@@ -44,7 +44,7 @@ describe("the invite link", () => {
 
 describe("the sign-up records it", () => {
   it("writes the kept code into the email sign-up's metadata", () => {
-    expect(read("src", "lib", "auth", "actions.ts")).toMatch(/referral_code:\s*field\(formData, "referralCode"\)\.trim\(\) \|\| \(await inviteCodeFromCookie\(\)\)/);
+    expect(read("src", "lib", "auth", "actions.ts")).toMatch(/referral_code:\s*parseInviteInput\(field\(formData, "referralCode"\)\) \|\| \(await inviteCodeFromCookie\(\)\)/);
   });
 
   it("claims it after every sign-in that can make a new account", () => {

@@ -137,12 +137,24 @@ import { TERMS_UPDATED_ISO, longDate } from "./versions";
 /** "Last updated" for the Terms, from their version. */
 export const TERMS_UPDATED = longDate(TERMS_UPDATED_ISO);
 import {
+  FEE_OTHER_LINE,
+  FEE_PROVIDER_CHARGES,
+  FEE_RENT_LINE,
+  FEE_ROUND_NOTE,
+  FEE_WHO_PAYS,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
   PAYMENT_GATE_SENTENCE,
   PRIVATE_FEE_NOTE,
   REFUND_ROUTE,
+  TERMS_HELD_DISPUTE,
+  TERMS_HELD_LIMITS,
+  TERMS_HELD_NOT_OPEN,
+  TERMS_HELD_REFUND,
+  TERMS_HELD_RELEASE,
+  TERMS_HELD_WHAT,
+  TERMS_HELD_WHO,
 } from "@/lib/money/copy";
 import Link from "next/link";
 
@@ -233,7 +245,13 @@ export const TERMS_SECTIONS: { id: string; title: string; body: React.ReactNode 
     title: "3. Accounts and eligibility",
     body: (
       <ul>
-        <li>You must be at least 18 years old to use {COMPANY_TRADING_NAME}.</li>
+        <li>
+          <strong>{COMPANY_TRADING_NAME} is for people aged 18 and over.</strong> You must be
+          at least 18 years old to create an account or use the platform. If we find that
+          an account belongs to someone under 18, we close it and delete their personal
+          data, except for anything the law requires us to keep. Tell us if you believe an
+          account belongs to a younger person.
+        </li>
         <li>
           The information on your account must be accurate and kept up to date, and you
           may hold only one personal account.
@@ -293,6 +311,42 @@ export const TERMS_SECTIONS: { id: string; title: string; body: React.ReactNode 
     ),
   },
   {
+    id: "held-payment",
+    title: "4A. Rent paid as a protected payment (not open yet)",
+    body: (
+      <ul>
+        <li>
+          <strong>{TERMS_HELD_NOT_OPEN}</strong>
+        </li>
+        <li>
+          <strong>What it is.</strong> {TERMS_HELD_WHAT}
+        </li>
+        <li>
+          <strong>Who holds the money.</strong> {TERMS_HELD_WHO}
+        </li>
+        <li>
+          <strong>When it is released.</strong> {TERMS_HELD_RELEASE}
+        </li>
+        <li>
+          <strong>Disputes.</strong> {TERMS_HELD_DISPUTE}
+        </li>
+        <li>
+          <strong>Refunds.</strong> {TERMS_HELD_REFUND}
+        </li>
+        <li>
+          <strong>Fees.</strong> {FEE_RENT_LINE} {FEE_WHO_PAYS} {FEE_PROVIDER_CHARGES}
+        </li>
+        <li>
+          <strong>What it does not do.</strong> {TERMS_HELD_LIMITS} See{" "}
+          <Link href="/docs/how-protection-works" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            how it will work
+          </Link>
+          .
+        </li>
+      </ul>
+    ),
+  },
+  {
     id: "cancellations",
     title: "5. Cancellations and refunds",
     body: (
@@ -341,6 +395,10 @@ export const TERMS_SECTIONS: { id: string; title: string; body: React.ReactNode 
           is made through the platform, the platform fee comes out of your share as the
           lister, and it is shown to you in naira before you agree. A restaurant pays a
           fixed fee for each table that is seated; the diner pays nothing extra to book.
+        </li>
+        <li>
+          <strong>What the fee is.</strong> {FEE_RENT_LINE} {FEE_OTHER_LINE} {FEE_WHO_PAYS}{" "}
+          {FEE_PROVIDER_CHARGES} {FEE_ROUND_NOTE}
         </li>
         <li>
           If that ever changes, the rate will be shown before the action that incurs it,

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import { FEE_PROVIDER_CHARGES, FEE_ROUND_NOTE, FEE_WHO_PAYS, NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import { FEE_PERCENT } from "@/lib/money/fee-schedule";
 import { SUPPLY_DOOR_HREF } from "@/lib/supply/roles";
 import { MAX_DAYS_AHEAD, MAX_PARTY } from "@/lib/reservations/limits";
 import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
@@ -236,6 +237,30 @@ export const WHAT_VALLO_COSTS: DocChapter = {
               { id: "restaurant", icon: "utensils", cells: { who: "A restaurant", what: <Link href="#restaurants" className={A}>The fee for each table seated</Link>, pays: { yes: true, note: "Billed monthly" } } },
             ]}
           />
+        </>
+      ),
+    },
+    {
+      id: "payment-fees",
+      heading: "The fee on a payment",
+      body: (
+        <>
+          <p>{FEE_WHO_PAYS}</p>
+          <DocTable
+            caption="What a payment costs, and what each part is"
+            columns={[
+              { key: "payment", label: "Payment" },
+              { key: "vallo", label: "Vallo's service fee" },
+              { key: "provider", label: "The provider's fee" },
+              { key: "total", label: "Total" },
+            ]}
+            rows={[
+              { id: "rent", icon: "key", cells: { payment: "Rent, through the payment partner (not open yet)", vallo: `${FEE_PERCENT.vallo}%`, provider: `About ${FEE_PERCENT.rentPartner}%, the payment partner's`, total: `About ${FEE_PERCENT.rentTotal}%` } },
+              { id: "other", icon: "credit-card", cells: { payment: "Every other payment, by card", vallo: `${FEE_PERCENT.vallo}%`, provider: `About ${FEE_PERCENT.otherProcessor}%, the payment processor's`, total: `About ${FEE_PERCENT.otherTotal}%` } },
+            ]}
+          />
+          <p>{FEE_PROVIDER_CHARGES}</p>
+          <p>{FEE_ROUND_NOTE}</p>
         </>
       ),
     },

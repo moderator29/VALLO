@@ -74,6 +74,8 @@ import { visitOpsEn } from "./visit-ops.en";
 import { adminCoverageEn } from "./admin-coverage.en";
 /* The referral desk: the console's /admin/referrals (13 October). */
 import { referralDeskEn } from "./referral-desk.en";
+import { cookiesEn } from "./cookies.en";
+import { profileSetupEn } from "./profile-setup.en";
 /* The chargebacks desk and the lister's hold notice (13 October 2026). */
 import { chargebacksEn } from "./chargebacks.en";
 /* Circle (SW11): the community feature's words. */
@@ -898,6 +900,7 @@ export const en = {
       coverPhoto: "Cover photo",
       coverPhotoSub: "The picture across the top of your page",
       memberSince: "Member since",
+      addPhoto: "Add your photo",
       claimHandle: "Claim your handle",
       claimHandleNote:
         "A handle is your address on Vallo. Claim one and this page gets a cover, a public page and somewhere for what you write to live.",
@@ -1582,6 +1585,14 @@ export const en = {
     },
     referralLabel: "Referral code",
     referralPlaceholder: "Enter your code",
+    referralInviteLabel: "Referral code or invite link",
+    referralInviteHint: "Optional. Paste the code or the link a friend sent you.",
+    referralInvitePlaceholder: "Code or link",
+    referralFound: "Referred by {name}",
+    referralFoundNoName: "Referral code accepted",
+    referralUnknown: "We could not find that code. You can still create your account.",
+    referralUnreadable: "That is not a Vallo referral code or invite link.",
+    referralBusy: "We could not look that up just now. It is looked up again when you create your account.",
     /* The form in two steps on one page (the Slate pass). Step one is the
        account (name, email, password), step two is everything else. The
        server still checks every field; these are only the early answers the
@@ -6185,6 +6196,10 @@ export const en = {
 
   referralDesk: referralDeskEn,
 
+  /* The cookie notice and choice sheet (10 November 2026). */
+  cookies: cookiesEn,
+  profileSetup: profileSetupEn,
+
 
   /*
    * THE SUCCESS SHEET (components/ui/SuccessSheet.tsx, docs/SUCCESS_MOMENTS.md).
@@ -6364,6 +6379,10 @@ export const en = {
       },
       accountCreated: { title: "Welcome to Vallo", body: "Your account is ready." },
       signedIn: { title: "Signed in. Welcome back.", body: "You are signed in on this device." },
+      signedOut: { title: "You are signed out", body: "You are signed out on this device." },
+      profileConfirmed: { title: "Thanks, your profile is confirmed.", body: "Your name is saved on your account." },
+      photoAdded: { title: "Your photo is added", body: "It shows on your profile and beside your name." },
+      checkEmail: { title: "Check your email", body: "We sent a code to confirm your address." },
       emailVerified: { title: "Email confirmed", body: "Your email address is confirmed on this account." },
       passwordChanged: {
         title: "Password changed",

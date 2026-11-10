@@ -39,6 +39,8 @@ import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
 import { DetailsHost } from "@/components/ui/DetailsHost";
 import { ImageFallbackGuard } from "@/components/app/ImageFallbackGuard";
 import { DeployWatch } from "@/components/app/DeployWatch";
+import { CookieGate } from "@/components/consent/CookieGate";
+import { CONSENT_COOKIE, parseConsent } from "@/lib/consent/consent";
 
 /*
  * The fonts are declared in `css/fonts.css` and served from `public/fonts`,
@@ -336,6 +338,8 @@ export default async function RootLayout({
   /* Track M: the motion preference, painted on the root by the server so the
      first frame (and the splash decision below) already honours it. */
   const motion = motionAttributes(parseMotion((await cookies()).get(MOTION_COOKIE)?.value));
+  /* The cookie notice is shipped only to a visitor with no current choice. */
+  const needsCookieChoice = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value) === null;
 
   return (
     <html
@@ -571,6 +575,8 @@ export default async function RootLayout({
           <ImageFallbackGuard />
           {/* A phone still running an older deploy reloads itself once (lib/deploy/watch.ts). */}
           <DeployWatch />
+          {/* The cookie choice, first visit only and loaded lazily (components/consent). */}
+          {needsCookieChoice ? <CookieGate copy={t.cookies} /> : null}
         </ClientCopyProvider>
         <ThresholdStage welcome={t.authFlow.welcomeThrough} />
       </body>

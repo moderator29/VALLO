@@ -1,3 +1,4 @@
+import { isUnderMinimumAge } from "@/lib/age/adult";
 import type { DojahAmlRecord, DojahResult } from "./client";
 import { decideVerification, readVerification, type DojahVerdict, type ReadVerification } from "./result";
 
@@ -54,6 +55,14 @@ export async function processDojahResult(deps: ProcessDeps, body: unknown): Prom
 
   let verdict = decideVerification(read, await deps.expectedName(check.subject_id));
   const reasons = "reasons" in verdict ? [...verdict.reasons] : [];
+
+  /* NOBODY UNDER 18: a date of birth on the government record that makes the
+     person younger than 18 is never a machine pass. A person looks, with the
+     reason in front of them. The stored record is not rewritten. */
+  if (verdict.kind === "passed" && isUnderMinimumAge(read.governmentDob)) {
+    reasons.unshift("The date of birth on the ID shows the person is under 18, so a person should look.");
+    verdict = { kind: "review", reasons };
+  }
 
   let aml: Record<string, unknown> | null = null;
   if ((verdict.kind === "passed" || verdict.kind === "review") && deps.aml && read.governmentName) {

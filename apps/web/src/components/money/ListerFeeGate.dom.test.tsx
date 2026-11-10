@@ -69,7 +69,7 @@ describe("the lister's fee screen (D61, protected rail live)", () => {
     expect(text).toContain("Rent you set ₦1,800,000");
     expect(text).toContain("Platform fee ₦36,000 to ₦72,000");
     expect(text).toContain("Vallo, 2% ₦36,000");
-    expect(text).toContain("Escrow protection, 2% when a buyer pays into escrow ₦36,000");
+    expect(text).toContain("Payment partner, 2% on a rent payment ₦36,000");
     expect(text).toContain("You receive ₦1,728,000 to ₦1,764,000");
     expect(html).toMatch(/class="nf-feegate__headline">₦1,728,000</);
     expect(html).toMatch(/class="nf-feegate__upper"> to ₦1,764,000</);
@@ -85,9 +85,9 @@ describe("the lister's fee screen (D61, protected rail live)", () => {
 
   it("says plainly that the lister pays the second fee on both rails, never the buyer", () => {
     /* VALLO_PRICING, corrected on 6 October: whoPays is seller, always. */
-    expect(words(gate())).toContain("You pay escrow protection when a buyer pays into escrow. The buyer never pays it.");
+    expect(words(gate())).toContain("You pay the payment partner's fee on a rent payment. The renter never pays it.");
     expect(words(gate({ policy: bearer }))).toContain(
-      "You pay escrow protection when a buyer pays into escrow, and payment processing when a buyer pays directly. The buyer pays neither.",
+      "You pay the payment partner's fee on a rent payment, and payment processing on a card payment. The renter or guest pays neither.",
     );
     const none = gate({ policy: { ...policy, escrowProtectionBps: 0 } });
     expect(none).not.toContain("fee-gate-bearer");

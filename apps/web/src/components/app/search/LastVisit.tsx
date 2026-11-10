@@ -1,5 +1,6 @@
 "use client";
 
+import { consentAllows } from "@/lib/consent/consent";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 /**
@@ -31,7 +32,7 @@ export function LastVisitProvider({ children }: { children: ReactNode }) {
       const raw = window.localStorage.getItem(LAST_VISIT_KEY);
       const parsed = raw === null ? Number.NaN : Number(raw);
       before = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-      window.localStorage.setItem(LAST_VISIT_KEY, String(Date.now()));
+      if (consentAllows("preferences")) window.localStorage.setItem(LAST_VISIT_KEY, String(Date.now()));
     } catch {
       before = null;
     }

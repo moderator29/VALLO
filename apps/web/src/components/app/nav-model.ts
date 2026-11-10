@@ -1,3 +1,4 @@
+import { WALLET_OPEN } from "@/lib/money/wallet-open";
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
@@ -116,7 +117,7 @@ export function buildNav({
   isAdmin,
   isHost = false,
   signedIn,
-  walletLive = false,
+  walletLive = WALLET_OPEN,
 }: {
   t: ShellDictionary;
   /**

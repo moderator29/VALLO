@@ -1,5 +1,6 @@
 "use client";
 
+import { consentAllows } from "@/lib/consent/consent";
 import { KeptPriceNote } from "@/components/app/offline/KeptPriceNote";
 import { banner } from "@/lib/ui/toast";
 import { useRouter } from "next/navigation";
@@ -152,7 +153,7 @@ export function SavedBoard({
       const raw = window.localStorage.getItem(SAVED_VISIT_KEY);
       const parsed = raw === null ? Number.NaN : Number(raw);
       before = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-      window.localStorage.setItem(SAVED_VISIT_KEY, String(Date.now()));
+      if (consentAllows("preferences")) window.localStorage.setItem(SAVED_VISIT_KEY, String(Date.now()));
     } catch {
       before = null;
     }

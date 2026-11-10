@@ -343,6 +343,7 @@ export const yo: Dictionary = withFallback({
       coverPhoto: "Àwòrán ìbòrí",
       coverPhotoSub: "Àwòrán tó wà lókè ojú-ìwé rẹ",
       memberSince: "Ọmọ ẹgbẹ́ láti",
+      addPhoto: "Fi fọ́tò rẹ kún",
       claimHandle: "Gba orúkọ ìdánimọ̀ rẹ",
       claimHandleNote:
         "Orúkọ ìdánimọ̀ ni àdírẹ́sì rẹ lórí Vallo. Gba ọ̀kan, ojú-ìwé yìí yóò ní àwòrán ìbòrí, ojú-ìwé gbangba àti ibi tí ohun tí o kọ yóò máa gbé.",

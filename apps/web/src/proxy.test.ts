@@ -316,6 +316,7 @@ const EXPECTED_PUBLIC = new Set([
   "/r/[code]",
   /* Legal and policy. */
   "/cancellations",
+  "/cookies",
   "/disclaimer",
   "/eula",
   "/ai/terms",
@@ -389,6 +390,7 @@ const EXPECTED_PUBLIC = new Set([
      the site can reload itself (lib/deploy/watch.ts). */
   "/api/build",
   "/api/client-error",
+  "/api/cookie-copy",
   /* A12: RFC 8058 one-click unsubscribe, by signed token. A6: the
      first-party funnel beacon, rate limited, recording no person. */
   "/api/email/unsubscribe",

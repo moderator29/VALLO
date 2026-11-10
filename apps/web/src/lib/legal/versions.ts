@@ -98,8 +98,21 @@ export type LegalDocument = (typeof ACCEPTED_AT_SIGNUP)[number]["document"];
  * November 2026: Terms and Privacy both said 25 September after two changes).
  * The Disclaimer forms part of the Terms and moves with them.
  */
-export const TERMS_UPDATED_ISO = TERMS_VERSION;
-export const PRIVACY_UPDATED_ISO = PRIVACY_VERSION;
+/*
+ * 10 NOVEMBER 2026 (founder rulings, flagged for counsel): the fee statement,
+ * rent payment held by a licensed bank (section 4A, not open yet), the
+ * under-18 closure, the retention table and the Cookies page changed the text.
+ * The DISPLAYED date moves so a page never shows a date older than its text;
+ * `TERMS_VERSION` and `PRIVACY_VERSION` (what a person accepted) are NOT bumped,
+ * because a bump re-shows the "We have updated our Terms" sheet, whose words
+ * are about the retired Guarantee (`TermsUpdateNotice`). Bumping both, and
+ * rewriting that sheet, is the founder's call once counsel has read
+ * docs/handoff/COUNSEL_BRIEF.md.
+ */
+export const LEGAL_TEXT_UPDATED_ISO = "2026-11-10";
+export const TERMS_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+export const PRIVACY_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+export const COOKIES_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
 export const DISCLAIMER_UPDATED_ISO = TERMS_VERSION;
 
 const LONG_DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Lagos" });

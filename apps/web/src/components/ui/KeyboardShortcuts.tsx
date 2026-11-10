@@ -1,5 +1,6 @@
 "use client";
 
+import { WALLET_OPEN } from "@/lib/money/wallet-open";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sheet } from "@/components/ui/Sheet";
@@ -30,7 +31,7 @@ const SHORTCUTS: { section: string; items: Shortcut[] }[] = [
       { keys: "g b", label: "Go to Plans", href: "/bookings" },
       { keys: "g v", label: "Go to Saved", href: "/saved" },
       /* The money screen by its own route label (D78), never a hand-typed name. */
-      { keys: "g w", label: ["Go to", screenName(MONEY_SCREEN) ?? ""].join(" ").trim(), href: MONEY_SCREEN },
+      ...(WALLET_OPEN ? [{ keys: "g w", label: ["Go to", screenName(MONEY_SCREEN) ?? ""].join(" ").trim(), href: MONEY_SCREEN }] : []),
       { keys: "g t", label: "Go to Settings", href: "/settings" },
     ],
   },
@@ -96,7 +97,7 @@ export function KeyboardShortcuts() {
           n: "/notifications",
           b: "/bookings",
           v: "/saved",
-          w: "/wallet",
+          ...(WALLET_OPEN ? { w: "/wallet" } : {}),
           t: "/settings",
         };
         const href = map[key];

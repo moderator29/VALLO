@@ -13,6 +13,7 @@
  * places is not a legal text.
  */
 
+import { RetentionTable } from "@/components/legal/RetentionTable";
 import Link from "next/link";
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { PRIVACY_UPDATED_ISO, longDate } from "./versions";
@@ -424,8 +425,9 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
           <strong>Kept, with you removed from it.</strong> Vallo is registered with the
           Special Control Unit against Money Laundering and is subject to Nigeria&rsquo;s
           Money Laundering (Prevention and Prohibition) Act, which requires a business
-          that moves money to retain its transaction records for at least five years after
-          the transaction. So your bookings, reservations, agreements, payments, Guarantee claims,
+          that moves money to retain its transaction records for years after the
+          transaction, and tax and company law ask for similar records. We keep payment and
+          financial records, agreements and receipts for six years. So your bookings, reservations, agreements, payments, Guarantee claims,
           platform revenue lines, payout records, inspection requests and reviews are kept
           for that period. Your name, email address and telephone number are removed from
           every one of them, and what remains is an amount, a date and a reference that no
@@ -451,6 +453,10 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
           approved, none of this is kept: the documents and the numbers are destroyed with
           the rest of your account.
         </p>
+        <h3 className="nf-h4" id="retention-table">
+          How long we keep each kind of data
+        </h3>
+        <RetentionTable />
         <p>
           The full list of what is destroyed and what is kept, and the form that stops a
           deletion already running, are at{" "}
@@ -519,38 +525,59 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
     body: (
       <>
         <p>
-          We use only cookies and device storage that the product needs to work, and one
-          first-party cookie for the sign-up step counts in <Link href="/privacy#data-we-collect" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 2</Link>. There is no analytics
-          from a third party, and no advertising or tracking cookie in Vallo.
+          Vallo stores small pieces of information on your device, as cookies and as device
+          storage. Everything is set by Vallo itself, apart from the sign-in cookie, which our
+          sign-in provider, Supabase, sets to keep you signed in. There is no analytics from a
+          third party, and no advertising or tracking cookie in Vallo.
         </p>
         <ul>
-          <li>Your sign-in session (set by our sign-in provider, Supabase).</li>
           <li>
-            Your choices: language, theme, which side of Vallo you last used, how you like
-            search results shown, and whether you have seen the welcome cards.
-          </li>
-          <li>That you agreed to how the AI assistant works (<Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>).</li>
-          <li>
-            A random visit number for the sign-up step counts, deleted when you close your
-            browser.
+            <strong>Necessary.</strong> Your sign-in session, your language and theme, places you
+            saved, drafts you were typing, your agreement to how the AI assistant works (
+            <Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>
+            ) and the record of your cookie choice. These are always on.
           </li>
           <li>
-            On your device only: places you saved before signing in, your support chat,
-            whether notifications are on for this device, and your data-saver choice.
+            <strong>Preferences.</strong> Conveniences Vallo would remember on its own, such as
+            recent searches. Off until you agree.
+          </li>
+          <li>
+            <strong>Usage counts.</strong> A random visit number for the first-party sign-up step
+            counts in{" "}
+            <Link href="/privacy#data-we-collect" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 2</Link>
+            , and the shared link you opened first. Off until you agree.
           </li>
         </ul>
+        <p>
+          When you first visit, Vallo asks for your choice. Accept all, Only necessary and Choose
+          carry equal weight, and you can change your mind at any time from Settings, under
+          Privacy and security, or from Cookie settings at the foot of the site. The complete list,
+          with the name, purpose, type and lifetime of every item, is on the{" "}
+          <Link href="/cookies" className="font-semibold text-[var(--nf-content-link)] hover:underline">Cookies page</Link>.
+        </p>
       </>
     ),
   },
   {
     id: "children",
-    title: "10. Children",
+    title: "10. People under 18",
     body: (
-      <p>
-        {COMPANY_TRADING_NAME} is for adults. You must be at least 18 years old to create
-        an account, book a stay or list a property. We do not knowingly collect personal
-        data from children, and we delete any such data we discover.
-      </p>
+      <>
+        <p>
+          {COMPANY_TRADING_NAME} is for people aged 18 and over. You must be at least 18
+          years old to create an account, book a stay or list a property. We do not
+          knowingly collect personal data from anyone under 18.
+        </p>
+        <p>
+          <strong>If we find that someone under 18 has an account,</strong> we close the
+          account and delete their personal data, except for anything the law requires us
+          to keep. If you think a younger person is using Vallo, tell us through{" "}
+          <a href={SUPPORT_HREF} className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            {SUPPORT_LABEL}
+          </a>{" "}
+          and we will act on it.
+        </p>
+      </>
     ),
   },
   {

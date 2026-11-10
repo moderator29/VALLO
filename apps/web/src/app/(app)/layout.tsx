@@ -31,6 +31,7 @@ import { getSide } from "@/lib/side";
 import { shellDictionary } from "@/lib/i18n/shell-dictionary";
 import { AppShell } from "@/components/app/AppShell";
 import { TermsUpdateMount } from "@/components/app/legal/TermsUpdateMount";
+import { ProfileSetupMount } from "@/components/app/first-run/ProfileSetupMount";
 import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/PasscodeGate";
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
@@ -161,6 +162,13 @@ export default async function AppLayout({
       {signedIn ? (
         <Suspense fallback={null}>
           <TermsUpdateMount />
+        </Suspense>
+      ) : null}
+      {/* After sign-up: confirm your name, then add a photo; each skippable,
+          never more than once a session nor within days of a skip. */}
+      {signedIn ? (
+        <Suspense fallback={null}>
+          <ProfileSetupMount />
         </Suspense>
       ) : null}
       {/* 9.2: gyroscope-driven parallax on mobile. */}

@@ -14,7 +14,7 @@ import { COVER_MAX_BYTES, COVER_MAX_EDGE } from "@/lib/social/profiles-model";
 import { loadBrowserClient } from "@/lib/supabase/load-client";
 import { reencodePhoto } from "@/components/social/profile/reencode";
 import { RemoteImage } from "@/components/ui/RemoteImage";
-import { ButtonLink } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import type { BadgeTier } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { IdentityHeader } from "@/components/app/identity/IdentityHeader";
@@ -294,6 +294,20 @@ export function AccountHero({
       }
     >
       {!identity ? <p className="nf-pf-claim__note">{COPY.claimHandleNote}</p> : null}
+      {/* No photo yet: say so where the person looks, and open the same picker
+          the face opens (the first-run photo sheet is the other way in). */}
+      {!avatar ? (
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => avatarInput.current?.click()}
+          disabled={busy !== null}
+          data-testid="profile-add-photo"
+        >
+          {COPY.addPhoto}
+        </Button>
+      ) : null}
       {credentials}
       {/* The cover's picker opens from the "Cover photo" row under the
           belongings (`COVER_INPUT_ID`), not from a third control here. */}
