@@ -237,7 +237,7 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "audit", href: "/admin/audit", icon: ui("history"), label: "Audit log" },
       { key: "oversight", href: "/admin/oversight", icon: ui("user"), label: "Team oversight" },
       /* The Technical Administrator's read-only health panel and incident log. */
-      { key: "technical", href: "/admin/technical", icon: ui("pulse"), label: "Technical" },
+      { key: "technical", href: "/admin/technical", icon: ui("sliders"), label: "Technical" },
       /* Read-only checks of each provider key (Payluk, LiveKit, Apple push, Termii) and the map tiles. */
       { key: "providers", href: "/admin/operations/providers", icon: ui("key"), label: "Provider checks" },
       /* Video and audio calls: volume, connect rate, minutes. */

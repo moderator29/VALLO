@@ -17,7 +17,7 @@ const community = (id: string, name: string, category: CommunityView["category"]
 });
 const post = (id: string, title: string, type: CirclePostView["type"], answers: number, helpful: number, hoursAgo: number, answered = false): CirclePostView => ({
   id, title, body: "We were asked for a year of caution on top of the rent. Is that normal around here, and can it be negotiated?", type, createdAt: new Date(NOW - hoursAgo * 3_600_000).toISOString(), editedAt: null, answers, likes: 4, helpful,
-  author: { id: "a", handle: "kemi", label: "Kemi A.", avatar: null, isAgent: false, verified: false }, community: { slug: "lekki-renters", name: "Lekki renters" }, listingId: null, answered,
+  author: { id: "a", handle: "kemi", label: "Kemi A.", avatar: null, isAgent: false, verified: false }, community: { slug: "lekki-renters", name: "Lekki renters" }, listingId: null, answered, roommate: null,
 });
 
 export default async function PreviewCircle({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {

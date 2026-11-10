@@ -72,6 +72,10 @@ const NAVY_LIFT = "#0B1C5C";
 const BRIGHT_TOP = "#FFFFFF";
 const BRIGHT_BOTTOM = "#DCEBFF";
 const SKIP_NATIVE = process.env.BRAND_SKIP_NATIVE === "1";
+/* BRAND_ONLY_NATIVE=1 rewrites ONLY the native project files (apps/web/assets, android/, ios/) and
+   leaves every web file alone, so the store icons can be regenerated without touching the web set. */
+const ONLY_NATIVE = process.env.BRAND_ONLY_NATIVE === "1";
+const isNativePath = (file) => [NATIVE, path.join(WEB, "android"), path.join(WEB, "ios")].some((dir) => file.startsWith(dir + path.sep));
 
 const svg = {
   markNight: markSvg(),
@@ -91,6 +95,7 @@ async function raster(source, width) {
 
 const written = [];
 async function out(file, buffer) {
+  if (ONLY_NATIVE && !isNativePath(file)) return;
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, buffer);
   const { size } = await stat(file);
@@ -393,24 +398,29 @@ await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.7
 await out(path.join(PWA, "icon-maskable-512.png"), await iconOn(512, { scale: 0.56, dy: 0.02, bright: true }));
 
 /* ---------- native (BRAND_SKIP_NATIVE=1 leaves the store binaries' icons alone) ---------- */
+/* THE STORE ICONS ARE THE BRIGHT SET TOO (10 November 2026): the full-colour mark on the
+   near-white tile, the same as the web icons, so the home screen, the app switcher and the
+   store listing all show one icon. The iOS marketing icon is a square with no alpha channel
+   and no rounded corners (Apple rounds it); the Android adaptive foreground is the mark alone
+   on transparency inside the safe zone, over a full-bleed bright background layer. */
 if (!SKIP_NATIVE) {
-await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7 }));
+await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7, bright: true }));
 /* The adaptive foreground: the mark alone, on transparency. Capacitor wraps
    it in a 16.7 per cent inset, so it is drawn in the inner 72 of 108 units
    and must fit the guaranteed 66-unit circle: 0.62 of the file's width keeps
    the mark's half-diagonal at 29 units. */
 await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.62, transparent: true, dy: 0.02 }));
-await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0 }));
+await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0, bright: true }));
 for (const dir of await readdir(ANDROID_RES)) {
   if (!dir.startsWith("mipmap-") || dir.includes("anydpi")) continue;
   const base = path.join(ANDROID_RES, dir);
   const { width: size } = await sharp(path.join(base, "ic_launcher.png")).metadata();
-  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded" }));
-  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02 }));
+  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded", bright: true }));
+  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02, bright: true }));
   await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.62, transparent: true, dy: 0.02 }));
-  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0 }));
+  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0, bright: true }));
 }
-await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7 })).flatten({ background: NAVY }).png().toBuffer());
+await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7, bright: true })).flatten({ background: BRIGHT_TOP }).removeAlpha().png().toBuffer());
 }
 
 console.log(written.join("\n"));

@@ -160,7 +160,7 @@ export async function readAcquisition(db: SupabaseClient, now: number = Date.now
   const timestamps = async (
     read: () => PromiseLike<{ data: Record<string, string | null>[] | null; error: unknown }>,
     column: string,
-    kind: string,
+    kind: `read.${string}`,
   ): Promise<number[] | null> => {
     const { data, error } = await read();
     if (error || !data) {
