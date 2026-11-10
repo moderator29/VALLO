@@ -90,6 +90,18 @@ tiles), the payment rail design pass.
   member sees on a support reply, listing approve and publish in one step).
 - The end-of-batch SQL is supabase/migrations/pending/END_OF_BATCH_2026-11-10.sql
   (sent to the founder; not applied yet).
+- The founder APPLIED END_OF_BATCH_2026-11-10.sql (verified live, 10 Nov).
+- Protected rail server steps (9a1613f0b): lib/money/protected-rail.ts, the
+  EscrowPay webhook route (refuses all until the signature is documented),
+  reconcile by provider (Payluk's scoped to Payluk rows), pending SQL
+  protected_rail_server_2026-11-10.sql (not applied; two dry runs waited on
+  the founder's approval in the Supabase connection).
+- Docs deeper pass and tools committed (8a295d67c). Pending SQL
+  docs_page_feedback_2026-11-10.sql (not applied) switches on "Was this
+  helpful?".
+- Running: protected payments part 2 (wiring, trust page, receipts, list,
+  issue screens, staff desk); docs round three (legal cross-links, the
+  feedback desk, remaining chapter tables, icon sweep).
 - Both agents (map, docs) stopped on the account's weekly limit on 9 Nov at
   about 17:30 UTC and were resumed on 10 Nov at 02:00 UTC with their work
   intact.
