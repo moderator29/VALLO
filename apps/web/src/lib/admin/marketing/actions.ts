@@ -8,6 +8,7 @@ import { auditDesk, deskDoor, deskRefusal, deskWords, type DeskDoor } from "@/li
 import { isIsoDate, isUuid, koboFromNairaInput, reasonProblem, trimmed } from "@/lib/admin/desk-rules";
 
 import {
+  buildUtmLink,
   canMoveStatus,
   isEditable,
   isMetric,
@@ -280,6 +281,38 @@ export async function unvoidResult(id: string): Promise<Done> {
   if (error) return fail(deskWords(error, NOT_OPEN));
   if (!data || data.length === 0) return fail("That entry is not removed any more.");
   const note = await auditDesk(g.ctx.user.id, "marketing_result", "marketing.result.unvoid", id);
+  revalidatePath(PATH);
+  return ok({ note });
+}
+
+export type UtmSave = { base: string; source: string; medium: string; campaign: string; content: string; term: string };
+
+/** Saves the tracked-link tags on a campaign. The link is validated by the same pure builder the screen uses. */
+export async function saveCampaignUtm(id: string, input: UtmSave): Promise<Done> {
+  const g = await maker();
+  if ("error" in g) return fail(g.error);
+  if (!isUuid(id)) return fail("That campaign could not be found.");
+  const built = buildUtmLink(input);
+  if (!built.ok) return fail(built.error, { [built.field]: built.error });
+  const loaded = await load(g.ctx.db, id);
+  if ("error" in loaded) return fail(loaded.error);
+  if (!mayChange(g.ctx, loaded.row)) return fail(NOT_YOURS);
+  if (!isEditable(loaded.row.status as CampaignStatus)) return fail("An ended or cancelled campaign can no longer be edited.");
+  const { data, error } = await g.ctx.db
+    .from("marketing_campaigns")
+    .update({
+      utm_base: trimmed(input.base, 300),
+      utm_source: built.tags.utm_source ?? null,
+      utm_medium: built.tags.utm_medium ?? null,
+      utm_campaign: built.tags.utm_campaign ?? null,
+      utm_content: built.tags.utm_content ?? null,
+      utm_term: built.tags.utm_term ?? null,
+    })
+    .eq("id", id)
+    .select("id");
+  if (error) return fail(deskWords(error, NOT_OPEN));
+  if (!data || data.length === 0) return fail("That campaign could not be found.");
+  const note = await auditDesk(g.ctx.user.id, ENTITY, "marketing.campaign.utm", id);
   revalidatePath(PATH);
   return ok({ note });
 }
