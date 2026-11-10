@@ -31,6 +31,8 @@ export const STAFF_POSITIONS = [
   "cfo",
   "coo",
   "ceo",
+  "business_development_executive",
+  "social_media_manager",
 ] as const;
 export type StaffPosition = (typeof STAFF_POSITIONS)[number];
 
@@ -298,6 +300,53 @@ export const JOB_DESCRIPTIONS: Record<StaffPosition, JobDescription> = {
       ...ALWAYS_EXPECTED,
     ],
     escalate: ["Anything affecting the company's licence or its members' safety: the board."],
+  },
+  business_development_executive: {
+    title: "Business Development Executive",
+    summary:
+      "Brings in the landlords, agents, hotels and restaurants Vallo lists, and reviews their listings before they go live.",
+    reportsTo: "COO",
+    scopes: ["business_development", "listing_approval"],
+    responsibilities: [
+      "Find and approach property owners, agents, hotels, shortlet hosts and restaurants, and bring them onto Vallo.",
+      "Keep every prospect and partnership in one place: who they are, what stage they are at, what was last said, and the next follow-up date.",
+      "Review submitted listings in your pipeline: photographs, description, price, fees and the mandate or ownership evidence behind them.",
+      "Approve, publish, send back for changes, or reject a listing, always with a reason the lister will read.",
+      "Where the evidence supports it, restrict a member on a property case; write the reason and attach the evidence, because this decision is read back later.",
+      "Report on your pipeline weekly: who you are talking to, what is close, and what is stuck.",
+    ],
+    expectations: [
+      "A partnership earns its place on Vallo the same way a listing does: it would hold up to a member's own family using it.",
+      "Never review a listing from someone you brought on yourself without a second person's eyes on it first, and never review your own listing or one from someone you know personally.",
+      "Keep what a prospect tells you in the pipeline record, not in a personal notebook or a chat outside Vallo.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: [
+      "A listing you believe is a scam: reject it, report it to moderation, and tell your lead the same day.",
+      "A restriction decision you are not sure of, or a partner who pushes back hard on one: the COO.",
+    ],
+  },
+  social_media_manager: {
+    title: "Social Media Manager",
+    summary:
+      "Plans and prepares Vallo's social content and campaigns: the calendar, the drafts and the media library, posted by hand on each platform.",
+    reportsTo: "Marketing lead, or the COO where there is none",
+    scopes: ["social_media"],
+    responsibilities: [
+      "Keep the content calendar: what is going out, on which platform, and when.",
+      "Write and prepare posts and campaigns in the console, with their images, video and captions, ready to copy onto each platform.",
+      "Keep the media library organised, so a photo or video is easy to find and reuse.",
+      "Send a draft for approval before it is due, and post it yourself on the real platform once it is approved.",
+      "Record what was actually posted and when, so the calendar stays the true record of what went out.",
+      "Report on what was posted and how it did, from whatever each platform's own dashboard shows you.",
+    ],
+    expectations: [
+      "Nothing about a member, a payment, a legal matter or an internal decision goes out without the approval this role asks for.",
+      "Vallo's posts never promise a payment is safe, protected or guaranteed; where in doubt, ask rather than post.",
+      "This role has no access to listings, support, moderation or any member's data. If a post needs a real figure or a real quote, ask the desk that owns it.",
+      ...ALWAYS_EXPECTED,
+    ],
+    escalate: ["Anything that could be read as a company statement on a legal, safety or financial matter: the COO before it is posted."],
   },
 };
 

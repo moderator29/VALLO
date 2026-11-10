@@ -28,6 +28,8 @@ export const STAFF_DESK: Record<StaffScope, string> = {
   roommates: "/admin/roommates",
   circle: "/admin/circle",
   analyst: "/admin/trust",
+  business_development: "/admin/business-development",
+  social_media: "/admin/social-media",
 };
 
 /** The other desks a scope opens, beyond its front door. */

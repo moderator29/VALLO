@@ -116,4 +116,6 @@ export const MANUAL_AREA_LABEL: Record<StaffScope, string> = {
   roommates: "Roommates moderation",
   circle: "Circle moderation",
   analyst: "Read-only analyst",
+  business_development: "Business development",
+  social_media: "Social media",
 };

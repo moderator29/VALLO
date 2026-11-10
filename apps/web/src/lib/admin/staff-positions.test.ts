@@ -7,11 +7,15 @@ import { staffAccessGranted } from "../email/staff-messages";
 /**
  * The position list and each position's default scopes live twice: in SQL
  * (`private.staff_position_title`, `private.staff_position_scopes`) and here.
- * This reads the migration so the two cannot drift.
+ * This reads the newest definition so the two cannot drift. Since 10
+ * November 2026 that is the applied-by-hand pending file that added
+ * Business Development Executive and Social Media Manager (kept in
+ * `pending/` as the record, per the project's convention for a migration
+ * applied outside the normal supabase/migrations flow).
  */
 const MIGRATION = fileURLToPath(
   new URL(
-    "../../../../../supabase/migrations/20260929094459_named_staff_positions_with_default_scope_bundles.sql",
+    "../../../../../supabase/migrations/pending/staff_business_dev_social_media_2026-11-10.sql",
     import.meta.url,
   ),
 );
