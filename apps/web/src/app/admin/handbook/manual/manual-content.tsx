@@ -144,7 +144,7 @@ const DESKS_AND_ACCESS: ManualPage = {
           </ul>
           <DocCallout kind="warning" title="Never move money, never ask for it">
             <p>
-              Vallo never holds customer money: licensed payment partners hold payments and escrow. Never ask for, accept
+              Vallo never holds customer money: licensed payment partners process payments and hold escrow where it is switched on. Never ask for, accept
               or pass on money from anyone, and never move a conversation or a payment off the platform.
             </p>
           </DocCallout>
