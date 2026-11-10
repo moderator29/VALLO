@@ -646,7 +646,7 @@ export function readRoomFilters(p: Params): RoomFilters {
     institutionId: inst && uuidShape.test(inst) ? inst : null,
     kind: pick(one(p.kind), LISTING_KINDS),
     maxMinor: amount(one(p.max)),
-    minMinor: amount(one(p.min)),
+    ...(amount(one(p.min)) !== null ? { minMinor: amount(one(p.min)) } : {}),
     period: pick(one(p.per), PERIODS) ?? "year",
     moveBy: move && dateShape.test(move) ? move : null,
     roomType: pick(one(p.room), ROOM_TYPES),
