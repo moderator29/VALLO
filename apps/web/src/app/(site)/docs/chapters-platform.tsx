@@ -256,7 +256,7 @@ icon: "house-sparkle",
       body: (
         <>
           <p>
-            Under <Link href="/roommates/verify" className={A}>Get verified</Link> you can complete the checks as they
+            Under <Link href="/roommates/verify" className={A}>Add a check</Link> you can complete the checks as they
             stand: a code sent to an address on your school&apos;s own domain, or a document check (a student ID, an NYSC
             call-up letter or similar). A badge names the check it stands for. It does not mean Vallo knows the person
             well, and it does not replace meeting in a public place first.
@@ -282,7 +282,7 @@ icon: "house-sparkle",
     },
     {
       id: "safety",
-      heading: "Staying safe",
+      heading: "Staying careful",
       body: (
         <>
           <p>

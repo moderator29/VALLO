@@ -1,3 +1,4 @@
+import { plural } from "@vallo/i18n/core";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { Panel } from "@/components/ui/Panel";
 import { State } from "@/components/ui/State";
@@ -23,7 +24,7 @@ import { latestVersion } from "./model";
 
 /** The panels of the room that only present: no state, no actions. */
 
-export function OverviewPanel({ room, nowMs, action }: { room: DealRoom; nowMs: number; action: React.ReactNode }) {
+export function OverviewPanel({ room, action }: { room: DealRoom; nowMs: number; action: React.ReactNode }) {
   const v = latestVersion(room);
   const { offer } = room;
   const mandate = mandateLine(room.mandate.held, room.mandate.reviewedOn, room.mandate.expiresOn, formatDay);
@@ -166,7 +167,7 @@ export function InspectionPanel({ room }: { room: DealRoom }) {
         <SectionHead icon="clipboard-list" title="Inspection report" hint="Eight items, dated, with photographs" />
         {room.inspectionReport ? (
           <>
-            <p className="nf-body text-[var(--nf-content-secondary)]">The eight-item report from the joined inspection, dated {formatWhen(room.inspectionReport.submittedAt)}, with {room.inspectionReport.photoCount} photograph{room.inspectionReport.photoCount === 1 ? "" : "s"}. It records what was seen. It is not a check of title.</p>
+            <p className="nf-body text-[var(--nf-content-secondary)]">The eight-item report from the joined inspection, dated {formatWhen(room.inspectionReport.submittedAt)}, with {plural(room.inspectionReport.photoCount, { one: "{count} photograph", other: "{count} photographs" })}. It records what was seen. It is not a check of title.</p>
             <ul className="nf-insp" data-testid="inspection-items">
               {room.inspectionReport.items.map((i) => (
                 <li key={i.item} className="nf-insp__item">

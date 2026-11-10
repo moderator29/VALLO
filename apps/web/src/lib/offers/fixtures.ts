@@ -169,7 +169,7 @@ function version(n: number, amountMinor: number, by: Side, at: string, changes: 
   return {
     version: n,
     amountMinor,
-    terms: { paymentPreference: pay, proposedBy: by, atAskingPrice: amountMinor === ASKING, targetClosing: "2026-12-15", note: n === 1 ? "I have viewed the property twice and would like to move quickly." : null },
+    terms: { paymentPreference: pay, proposedBy: by, atAskingPrice: amountMinor === ASKING, targetClosing: "2026-12-15", note: noteFor(n) },
     proposedBy: by,
     at,
     changes,
@@ -228,7 +228,10 @@ export const ROOM_SELLER_RESPOND = room(asSeller(ROW_OPEN_WITH_SELLER, "Ngozi Ez
   next: { kind: "respond", label: "Respond to this offer", detail: "Accept, decline, counter or ask a question." },
 });
 
+const REPORT_ITEMS = ["roof and ceilings", "walls and damp", "plumbing", "electrics", "doors and windows", "boundary and gate", "water source", "access road"].map((item, i) => ({ item, checked: i !== 6, note: i === 2 ? "Slow drain in the second bathroom." : null }));
+
 export const ROOM_AGREED_BUYER = room(ROW_AGREED, {
+  inspectionReport: { submittedAt: "2026-11-09T15:00:00.000Z", items: REPORT_ITEMS, photoCount: 24 },
   versions: VERSIONS_3,
   events: EVENTS,
   documents: FIXTURE_DOCUMENTS,
@@ -258,3 +261,16 @@ export const ROOMS_BY_STATE: Record<OfferState, DealRoom> = {
 };
 
 export const STAGES_IN_ORDER: readonly DealStage[] = ["offer", "negotiating", "agreed", "due_diligence", "documentation", "closing", "completed"];
+
+export const FIXTURE_THREAD = [
+  { id: "m1", mine: true, body: "Good morning. I would like to inspect the property before we go further.", at: "2026-11-08T08:50:00.000Z" },
+  { id: "m2", mine: false, body: "Of course. Saturday morning works for me.", at: "2026-11-08T09:10:00.000Z" },
+  { id: "m3", mine: true, body: "Saturday at 10 is good. Is the survey plan available?", at: "2026-11-09T11:00:00.000Z" },
+  { id: "m4", mine: false, body: "Yes, I will upload it in the Documents tab today.", at: "2026-11-09T11:20:00.000Z" },
+];
+
+/** The note a first version carries; later versions carry none. */
+function noteFor(version: number): string | null {
+  if (version !== 1) return null;
+  return "I have viewed the property twice and would like to move quickly.";
+}

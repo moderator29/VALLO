@@ -1,7 +1,7 @@
 import { Panel } from "@/components/ui/Panel";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { Facts, OfferFigures } from "./OfferParts";
+import { OfferFigures, Receipt, SectionHead } from "./OfferParts";
 import { formatWhen, proposedDate } from "@/lib/offers/format";
 import { NOTHING_CHARGED, NO_MONEY_TAKEN, PAYMENT_LABEL, WHAT_HAPPENS_NEXT_BUYER, holderLine, offerChip } from "@/lib/offers/words";
 import { dealRoomHref } from "@/lib/offers/routes";
@@ -21,17 +21,18 @@ export function OfferConfirmation({ room }: { room: DealRoom }) {
   return (
     <div className="grid gap-lg" data-testid="offer-confirmation">
       <header className="grid gap-xs">
-        <span aria-hidden="true" className="text-[var(--nf-state-success)]">
+        <span aria-hidden="true" className="nf-ofr-popin text-[var(--nf-state-success)]">
           <UiIcon name="circle-check" size={40} />
         </span>
         <h2 className="nf-h2 text-[var(--nf-content-primary)]">Sent to the seller</h2>
         <p className="nf-lede text-[var(--nf-content-secondary)]">The seller has your offer. Nothing is agreed yet.</p>
       </header>
       <Panel variant="card" className="p-card">
+        <SectionHead icon="receipt" title="Receipt" hint="A record of what you sent. Not a payment." />
         <OfferFigures amountMinor={first?.amountMinor ?? offer.amountMinor} askingMinor={offer.askingMinor} label="Your offer" atAskingPrice={first?.terms.atAskingPrice ?? false} />
         <div className="mt-md">
-          <Facts
-            items={[
+          <Receipt
+            rows={[
               { label: "Reference", value: offer.reference },
               { label: "Property", value: offer.listingTitle },
               { label: "Payment", value: PAYMENT_LABEL[first?.terms.paymentPreference ?? offer.paymentPreference] },

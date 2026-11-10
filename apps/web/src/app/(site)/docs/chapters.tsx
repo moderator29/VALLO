@@ -328,7 +328,7 @@ const WHAT_VALLO_IS: DocChapter = {
  * retired Vallo Guarantee; `/docs/money-and-the-guarantee` and the older
  * `/docs/your-wallet` redirect here). The founder's rules of 13 October 2026:
   * every payment inside Vallo; a hotel room by card at once; Vallo never
- * holds the money. CORRECTED 11 NOVEMBER 2026 (Agent DOCS): protected payment
+ * holds the money. CORRECTED 11 NOVEMBER 2026 (Agent DOCS): held payment
  * is not available, and a purchase takes no money through Vallo, so neither is
  * described as available. The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
  * `for-listers`, `references` and `off-platform` are kept from the old
@@ -339,7 +339,7 @@ const PAYING_ON_VALLO: DocChapter = {
   number: 0,
   title: "How paying works",
   summary:
-    "Every payment happens inside Vallo. Today rent, shortlets and hotel rooms are paid by card. Protected payment is not available yet. Vallo takes no money for a purchase, and never holds yours.",
+    "Every payment happens inside Vallo. Today rent, shortlets and hotel rooms are paid by card. Held payment is not available yet. Vallo takes no money for a purchase, and never holds yours.",
   icon: "shield-lock",
   sections: [
     {
@@ -371,7 +371,7 @@ const PAYING_ON_VALLO: DocChapter = {
       body: (
         <ul role="list">
           <li>
-            <strong>Rent.</strong> By card, through our licensed payment partner. Protected payment is not available yet.
+            <strong>Rent.</strong> By card, through our licensed payment partner. Held payment is not available yet.
           </li>
           <li>
             <strong>Shortlets and serviced apartments.</strong> By card, through our licensed payment partner.
@@ -393,17 +393,17 @@ const PAYING_ON_VALLO: DocChapter = {
     },
     {
       id: "escrow",
-      heading: "Protected payment (not available yet)",
+      heading: "Held payment (not available yet)",
       body: (
         <>
-          <DocCallout kind="not-live" title="Protected payment is not available yet">
+          <DocCallout kind="not-live" title="Held payment is not available yet">
             <p>
-              Nothing on this page describes a payment you can make today as protected. What follows is how protected
+              Nothing on this page describes a payment you can make today as held for you. What follows is how held
               payment is designed to work, so you know what to expect when it opens. These pages will say so when it does.
             </p>
           </DocCallout>
           <DocsFlow
-            label="How a protected payment is designed to move (not available yet)"
+            label="How a held payment is designed to move (not available yet)"
             steps={[
               { object: "payment-sent", label: "You pay" },
               { object: "doc-lock", label: "A licensed partner holds it" },
@@ -522,7 +522,7 @@ const PAYING_ON_VALLO: DocChapter = {
           <li>Add a Nigerian bank account in your own name before anybody can pay you.</li>
           <li>Before you publish, Vallo shows you what you will receive after its commission.</li>
           <li>With Pay by card, your share goes to your bank account when the payment clears.</li>
-          <li>When protected payment is live, your share will be released when the deal is confirmed.</li>
+          <li>When held payment is live, your share will be released when the deal is confirmed.</li>
           <li>Every payment and every refund appears on your earnings, line by line.</li>
         </ul>
       ),
@@ -663,8 +663,8 @@ const REFUNDS: DocChapter = {
     },
     {
       id: "escrow-refunds",
-      heading: "Protected payment refunds (not available yet)",
-      body: <p>When protected payment is live, this is how a refund will work. {RAIL_COPY.protected.refund}</p>,
+      heading: "Held payment refunds (not available yet)",
+      body: <p>When held payment is live, this is how a refund will work. {RAIL_COPY.protected.refund}</p>,
     },
     {
       id: "tables-and-viewings",

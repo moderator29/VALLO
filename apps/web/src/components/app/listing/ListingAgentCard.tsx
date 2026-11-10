@@ -1,3 +1,4 @@
+import "@/components/app/offers/offers.css";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Dictionary } from "@vallo/i18n/core";
@@ -180,8 +181,9 @@ export function ListingAgentCard({
           {verified ? copy.verifiedBeforeLive : copy.managesListing}
         </p>
         {mandate ? (
-          <p className="nf-caption mt-3xs text-[var(--nf-content-muted)]" data-testid="lister-mandate">
-            {mandate}
+          <p className="nf-ofr-mandate mt-xs" data-testid="lister-mandate">
+            <UiIcon name="shield-check" size={16} />
+            <span>{mandate}</span>
           </p>
         ) : null}
       </div>
@@ -256,8 +258,9 @@ function ListedByCard({
           </span>
         )}
         {mandate && (
-          <span className="nf-lister__role" data-testid="lister-mandate">
-            {mandate}
+          <span className="nf-ofr-mandate" data-testid="lister-mandate">
+            <UiIcon name="shield-check" size={16} />
+            <span>{mandate}</span>
           </span>
         )}
       </span>

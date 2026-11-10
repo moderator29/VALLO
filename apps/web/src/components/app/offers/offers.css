@@ -233,7 +233,7 @@
 .nf-room__four dd {
   margin: 0;
   color: var(--nf-content-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 @media (min-width: 40rem) {
   .nf-room__four {
@@ -283,7 +283,7 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .nf-ver[data-new] {
-    animation: nf-ofr-join 260ms var(--nf-ease-out, ease-out) both;
+    animation: nf-ofr-join 260ms var(--nf-ease-entrance) both;
   }
 }
 @keyframes nf-ofr-join {
@@ -401,7 +401,7 @@
   block-size: 1.125rem;
   margin-inline-start: -1px;
   background: var(--nf-content-secondary);
-  border-radius: 1px;
+  border-radius: var(--nf-radius-xs);
 }
 .nf-ofr-gapbar__offer {
   position: absolute;
@@ -499,7 +499,7 @@
 .nf-ofr-receipt dd {
   margin: 0;
   color: var(--nf-content-primary);
-  font-weight: 500;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .nf-ofr-receipt__row--total {
@@ -681,7 +681,7 @@
 .nf-dt__arrow {
   display: inline-block;
   opacity: 0.35;
-  transition: transform var(--nf-duration-base) var(--nf-ease-spring), opacity var(--nf-duration-fast) linear;
+  transition: transform var(--nf-duration-base) var(--nf-ease-spring), opacity var(--nf-duration-fast) var(--nf-ease-standard);
 }
 .nf-dt__sort[data-dir="ascending"] .nf-dt__arrow {
   opacity: 1;
@@ -715,7 +715,7 @@
 .nf-dt__open {
   opacity: 0;
   transform: translateX(-4px);
-  transition: opacity var(--nf-duration-fast) linear, transform var(--nf-duration-fast) var(--nf-ease-standard);
+  transition: opacity var(--nf-duration-fast) var(--nf-ease-standard), transform var(--nf-duration-fast) var(--nf-ease-standard);
   color: var(--nf-brand-primary);
   font-weight: 600;
   white-space: nowrap;
@@ -757,7 +757,7 @@
 }
 .nf-strip__value {
   color: var(--nf-content-primary);
-  font-weight: 500;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .nf-strip__item[data-hot] {
@@ -845,7 +845,7 @@
   inset-inline-start: 0.8125rem;
   inset-block: 1.125rem;
   inline-size: 2px;
-  border-radius: 1px;
+  border-radius: var(--nf-radius-xs);
 }
 .nf-rail__line {
   background: var(--nf-border-default);
@@ -995,7 +995,7 @@
   block-size: 2px;
   inline-size: 1px;
   background: var(--nf-brand-primary);
-  border-radius: 1px;
+  border-radius: var(--nf-radius-xs);
   transform-origin: left center;
   transition: transform var(--nf-duration-base) var(--nf-ease-standard);
   pointer-events: none;
@@ -1045,14 +1045,14 @@
 }
 
 /* Messages: bubbles with tails, day separators, a composer that grows. */
-.nf-msgs {
+.nf-dmsgs {
   display: grid;
   gap: var(--nf-space-2xs);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.nf-msgs__day {
+.nf-dmsgs__day {
   justify-self: center;
   margin-block: var(--nf-space-sm) var(--nf-space-2xs);
   padding: var(--nf-space-3xs) var(--nf-space-sm);
@@ -1061,7 +1061,7 @@
   font-size: var(--nf-text-caption);
   color: var(--nf-content-muted);
 }
-.nf-msg {
+.nf-dmsg {
   position: relative;
   max-inline-size: 85%;
   padding: var(--nf-space-xs) var(--nf-space-sm);
@@ -1072,7 +1072,7 @@
   justify-self: start;
   border-end-start-radius: var(--nf-radius-xs);
 }
-.nf-msg[data-mine] {
+.nf-dmsg[data-mine] {
   justify-self: end;
   background: var(--nf-brand-primary);
   color: var(--nf-content-on-brand);
@@ -1080,14 +1080,14 @@
   border-end-start-radius: var(--nf-radius-lg);
   border-end-end-radius: var(--nf-radius-xs);
 }
-.nf-msg__time {
+.nf-dmsg__time {
   display: block;
   margin-block-start: var(--nf-space-3xs);
   font-size: var(--nf-text-caption);
   opacity: 0.7;
 }
 @media (prefers-reduced-motion: no-preference) {
-  :root:not([data-motion="calm"]):not([data-motion="off"]) .nf-msg {
+  :root:not([data-motion="calm"]):not([data-motion="off"]) .nf-dmsg {
     animation: nf-ofr-join 260ms var(--nf-ease-entrance) both;
   }
 }
@@ -1219,4 +1219,132 @@
   gap: var(--nf-space-sm);
   padding: var(--nf-space-xl) var(--nf-space-md);
   text-align: center;
+}
+
+.nf-ofr-popin {
+  display: inline-grid;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="calm"]):not([data-motion="off"]) .nf-ofr-popin {
+    animation: nf-ofr-pop 520ms var(--nf-ease-spring) 120ms both;
+  }
+}
+.nf-ofr-skeleton-table {
+  display: none;
+}
+@media (min-width: 64rem) {
+  .nf-ofr-skeleton-table {
+    display: block;
+  }
+  .nf-ofr-skeleton-cards {
+    display: none;
+  }
+}
+
+/* On a phone the four answers sit two by two so the terms stay above the fold. */
+@media (max-width: 63.99rem) {
+  .nf-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .nf-strip__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border-block-start: 0;
+    border-inline-start: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-block-end: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-strip__item:nth-child(odd) {
+    border-inline-start: 0;
+  }
+  .nf-strip__item:nth-last-child(-n + 2) {
+    border-block-end: 0;
+  }
+  .nf-strip__item > span {
+    display: none;
+  }
+  .nf-strip__value {
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.35;
+  }
+}
+
+.nf-ofr-gapbar {
+  block-size: auto;
+  padding-block-end: 0;
+}
+.nf-ofr-gapbar__track {
+  position: relative;
+  display: block;
+  inset-inline: auto;
+  top: auto;
+  margin-block: 0.5rem 0;
+}
+.nf-ofr-gapbar {
+  display: block;
+  position: relative;
+  min-block-size: 3rem;
+}
+.nf-ofr-gapbar__track {
+  position: absolute;
+  top: 0.5rem;
+  inset-inline: 0;
+  margin: 0;
+}
+.nf-ofr-gapbar__legend {
+  position: absolute;
+  top: 1.5rem;
+  inset-inline-start: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+}
+.nf-ofr-gapbar__legend-dot {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+}
+.nf-ofr-gapbar__legend-tick {
+  inline-size: 2px;
+  block-size: 0.75rem;
+  margin-inline-start: var(--nf-space-sm);
+  background: var(--nf-content-secondary);
+}
+
+.nf-ofr-ws {
+  grid-template-columns: minmax(0, 1fr);
+}
+.nf-ofr-ws > * {
+  min-width: 0;
+}
+.nf-ofr-table-wrap {
+  min-width: 0;
+  max-width: 100%;
+}
+.nf-dt tbody td {
+  min-inline-size: 6rem;
+}
+.nf-dt thead th,
+.nf-dt tbody td {
+  padding-inline: var(--nf-space-sm);
+}
+.nf-dt__cell-title {
+  min-inline-size: 11rem;
+}
+
+/* Contact agent and Schedule inspection share the foot's quiet slot. */
+.nf-detail-foot__pair {
+  grid-area: secondary;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+}
+.nf-ofr-mandate > svg,
+.nf-ofr-mandate > span:first-child {
+  flex: none;
+  margin-block-start: 0.125rem;
 }

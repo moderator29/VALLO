@@ -431,7 +431,7 @@ export const RECEIVING_OFFERS: DocChapter = {
       heading: "More than one offer",
       body: (
         <p>
-          A home can have several offers. Each has its own Deal Room and its own versions. Accepting one version is safe
+          A home can have several offers. Each has its own Deal Room and its own versions. Accepting one version works
           even if two people try at once: only one acceptance can stand, and a version that has been replaced or has
           expired cannot be accepted.
         </p>
@@ -688,7 +688,7 @@ export const OFFER_INSPECTIONS: DocChapter = {
           <p>
             Open the Inspection section. If none has been scheduled you will see <strong>Schedule an inspection</strong>;
             if one exists, <strong>Open the inspection</strong>. It uses the same inspection process as any viewing on Vallo.
-            Read <Link href="/docs/viewings" className={A}>Viewings</Link> for how it works and how to stay safe.
+            Read <Link href="/docs/viewings" className={A}>Viewings</Link> for how it works and what to watch for.
           </p>
         </>
       ),
@@ -913,7 +913,7 @@ export const OFFER_FEES: DocChapter = {
       body: (
         <p>
           Nobody on Vallo needs money from you to make or hold an offer. If someone asks you to pay a deposit, a booking
-          fee or a fee to secure a property, say no, use <strong>Raise a concern</strong> in the Deal Room and write to{" "}
+          fee or a fee to reserve a property, say no, use <strong>Raise a concern</strong> in the Deal Room and write to{" "}
           <a href={`mailto:${CONTACT_EMAIL}`} className={A}>{CONTACT_EMAIL}</a>.
         </p>
       ),

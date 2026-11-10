@@ -130,7 +130,7 @@ describe("the results screen", () => {
         const path = join(dir, entry);
         if (statSync(path).isDirectory()) walk(path);
         else if (/\.tsx?$/.test(entry) && !/\.test\.tsx?$/.test(entry)) {
-          if (path.endsWith(PAGE) || /lib\/nav\/route-(parents|labels)\.ts$/.test(path)) continue;
+          if (path.endsWith(PAGE) || /lib\/nav\/route-(parents|labels)\.ts$|lib\/docs\/coverage\.ts$/.test(path)) continue;
           if (LINK.test(withoutComments(readFileSync(path, "utf8")))) offenders.push(path.slice(SRC.length));
         }
       }

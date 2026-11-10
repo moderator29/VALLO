@@ -49,24 +49,22 @@ export function DealMessages({ conversationId, messages, counterpartyName, live 
     el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
   };
 
-  let lastDay = "";
   return (
     <div className="grid gap-md" data-testid="panel-messages">
       {messages.length === 0 ? (
         <State kind="empty" compact icon="chat-duo" title="No messages yet" body={`Say hello to ${counterpartyName}. Messages here are the same conversation as in your Messages.`} />
       ) : (
         <Panel variant="card" className="p-card">
-          <ol className="nf-msgs" aria-label="Messages about this offer">
-            {messages.map((m) => {
+          <ol className="nf-dmsgs" aria-label="Messages about this offer">
+            {messages.map((m, i) => {
               const day = formatDay(m.at);
-              const sep = day !== lastDay;
-              lastDay = day;
+              const sep = i === 0 || formatDay(messages[i - 1]!.at) !== day;
               return (
                 <Fragment key={m.id}>
-                  {sep ? <li className="nf-msgs__day">{day}</li> : null}
-                  <li className="nf-msg" data-mine={m.mine ? "" : undefined}>
+                  {sep ? <li className="nf-dmsgs__day">{day}</li> : null}
+                  <li className="nf-dmsg" data-mine={m.mine ? "" : undefined}>
                     <p className="nf-body whitespace-pre-wrap [overflow-wrap:anywhere]">{m.body}</p>
-                    <time className="nf-msg__time" dateTime={m.at}>
+                    <time className="nf-dmsg__time" dateTime={m.at}>
                       {m.mine ? "You" : counterpartyName} · {formatWhen(m.at)}
                     </time>
                   </li>

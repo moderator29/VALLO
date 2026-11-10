@@ -34,7 +34,7 @@ export default async function RoomPreview({ searchParams }: { searchParams: Prom
   return (
     <main className="nf-shell nf-page nf-md">
       <PageFrame title="Deal Room" fallback="/offers" width="wide">
-        <DealRoomView room={room} nowMs={F.FIXTURE_NOW_MS} initialTab={parseTab(q.tab)} />
+        <DealRoomView room={room} nowMs={F.FIXTURE_NOW_MS} initialTab={parseTab(q.tab)} thread={F.FIXTURE_THREAD} />
       </PageFrame>
     </main>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { plural } from "@vallo/i18n/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { StepFrame } from "@/components/ui/StepFrame";
@@ -25,7 +26,7 @@ import {
   mandateLine,
 } from "@/lib/offers/words";
 import type { Eligibility, MandateLine, PaymentPreference, PriceBlock } from "@/lib/offers/types";
-import { BlockedNotice, EligibilityCard, Facts, OfferFigures, PriceBlockView } from "./OfferParts";
+import { BlockedNotice, EligibilityCard, OfferFigures, PriceBlockView, Receipt, SectionHead } from "./OfferParts";
 import "./offers.css";
 
 /**
@@ -112,6 +113,7 @@ export function OfferFlow(props: OfferFlowProps) {
   const [restored, setRestored] = useState(false);
   const [saved, setSaved] = useState(false);
   const [sending, setSending] = useState(false);
+  const [dir, setDir] = useState<"forward" | "back">("forward");
   const [amountError, setAmountError] = useState<string | undefined>();
   /* Made once per mount: a double tap or a retry reuses it, so it cannot create two offers. */
   const [idempotencyKey] = useState(() => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Date.now())));
@@ -143,7 +145,7 @@ export function OfferFlow(props: OfferFlowProps) {
   const blocked = !eligibility.eligible || !canOffer;
   const unmet = eligibility.requirements.filter((r) => r.state !== "met").length;
   const blockedWhy = !eligibility.eligible
-    ? `${unmet} ${unmet === 1 ? "requirement is" : "requirements are"} not met yet. Finish ${unmet === 1 ? "it" : "them"} to send your offer.`
+    ? `${plural(unmet, { one: "{count} requirement is", other: "{count} requirements are" })} not met yet. Finish ${plural(unmet, { one: "it", other: "them" })} to send your offer.`
     : (reason ?? "You cannot send an offer on this property right now.");
 
   const goNext = () => {
@@ -153,8 +155,12 @@ export function OfferFlow(props: OfferFlowProps) {
         return;
       }
       setAmountError(undefined);
+      setDir("forward");
       update({ step: 2 });
-    } else if (draft.step === 2) update({ step: 3 });
+    } else if (draft.step === 2) {
+      setDir("forward");
+      update({ step: 3 });
+    }
   };
 
   const send = async () => {
@@ -195,6 +201,7 @@ export function OfferFlow(props: OfferFlowProps) {
     saveWords: { device: "Kept on this device" },
     eyebrow: "Make an offer",
     testId: "offer-flow",
+    direction: dir,
   };
 
   if (draft.step === 1) {
@@ -210,9 +217,10 @@ export function OfferFlow(props: OfferFlowProps) {
           {restored ? <BlockedNotice tone="info">Your offer is where you left it.</BlockedNotice> : null}
 
           <section aria-labelledby="req-h" className="grid gap-sm">
-            <h2 id="req-h" className="nf-section-label">
+            <h2 id="req-h" className="sr-only">
               Before you offer
             </h2>
+            <SectionHead icon="shield-check" title="Before you offer" hint="Each one is confirmed again when you send" />
             {!eligibility.eligible ? <BlockedNotice>{blockedWhy}</BlockedNotice> : null}
             <Panel variant="card" className="p-card">
               <EligibilityCard eligibility={eligibility} />
@@ -220,9 +228,10 @@ export function OfferFlow(props: OfferFlowProps) {
           </section>
 
           <section aria-labelledby="amt-h" className="grid gap-sm">
-            <h2 id="amt-h" className="nf-section-label">
+            <h2 id="amt-h" className="sr-only">
               Amount
             </h2>
+            <SectionHead icon="banknote" title="Amount" hint="Leave it blank to offer the asking price" />
             <NairaField
               label="Your offer"
               value={draft.amount}
@@ -244,9 +253,10 @@ export function OfferFlow(props: OfferFlowProps) {
           </section>
 
           <section aria-labelledby="date-h" className="grid gap-sm">
-            <h2 id="date-h" className="nf-section-label">
+            <h2 id="date-h" className="sr-only">
               Timing and a note
             </h2>
+            <SectionHead icon="calendar-clock" title="Timing and a note" />
             <TextField
               label="Proposed closing date"
               optionalText="Optional"
@@ -284,7 +294,10 @@ export function OfferFlow(props: OfferFlowProps) {
         step={2}
         title="How you plan to pay"
         subtitle="This is what you tell the seller. Vallo does not check it and takes no payment."
-        onBack={() => update({ step: 1 })}
+        onBack={() => {
+          setDir("back");
+          update({ step: 1 });
+        }}
         primary={{ label: "Review your offer", onClick: goNext, testId: "offer-continue" }}
       >
         <div className="grid gap-lg">
@@ -295,23 +308,27 @@ export function OfferFlow(props: OfferFlowProps) {
             options={(["cash", "mortgage", "instalment"] as const).map((key) => ({ value: key, label: PAYMENT_LABEL[key], detail: PAYMENT_DETAIL[key] }))}
             testId="offer-pref"
           />
-          {draft.pref !== "cash" ? (
-            <div className="grid gap-sm">
-              <NairaField
-                label={draft.pref === "mortgage" ? "Part you would pay yourself" : "Deposit you propose to the seller"}
-                value={draft.deposit}
-                onValueChange={(value) => update({ deposit: value })}
-                hint="Optional. A figure you propose to the seller, not a payment to Vallo."
-                data-testid="offer-deposit"
-              />
-              {draft.pref === "instalment" ? (
-                <div className="grid gap-xs">
-                  <p className="nf-section-label">Over how long</p>
-                  <Segmented label="Instalment period" semantics="radio" options={MONTHS} value={draft.months} onChange={(value) => update({ months: value })} full />
+          <div className="nf-reveal" data-open={draft.pref !== "cash" ? "" : undefined} inert={draft.pref === "cash"} data-testid="offer-reveal">
+            <div>
+              <div className="grid gap-sm pt-xs">
+                <NairaField
+                  label={draft.pref === "mortgage" ? "Part you would pay yourself" : "Deposit you propose to the seller"}
+                  value={draft.deposit}
+                  onValueChange={(value) => update({ deposit: value })}
+                  hint="Optional. A figure you propose to the seller, not a payment to Vallo."
+                  data-testid="offer-deposit"
+                />
+                <div className="nf-reveal" data-open={draft.pref === "instalment" ? "" : undefined} inert={draft.pref !== "instalment"}>
+                  <div>
+                    <div className="grid gap-xs pt-xs">
+                      <p className="nf-section-label">Over how long</p>
+                      <Segmented label="Instalment period" semantics="radio" options={MONTHS} value={draft.months} onChange={(value) => update({ months: value })} full />
+                    </div>
+                  </div>
                 </div>
-              ) : null}
+              </div>
             </div>
-          ) : null}
+          </div>
           <p className="nf-body-sm text-[var(--nf-content-muted)]">{PAYMENT_CAVEAT[draft.pref]}</p>
         </div>
       </StepFrame>
@@ -325,7 +342,10 @@ export function OfferFlow(props: OfferFlowProps) {
       step={3}
       title="Review your offer"
       subtitle="Look it over once. You can withdraw an open offer later."
-      onBack={() => update({ step: 2 })}
+      onBack={() => {
+        setDir("back");
+        update({ step: 2 });
+      }}
       primary={{ label: "Send offer", onClick: () => void send(), disabled: blocked || !resolved.ok, loading: sending, testId: "offer-send" }}
     >
       <div className="grid gap-lg">
@@ -335,20 +355,21 @@ export function OfferFlow(props: OfferFlowProps) {
             {!eligibility.eligible ? <EligibilityCard eligibility={eligibility} /> : null}
           </BlockedNotice>
         ) : null}
-        <Panel variant="card" className="p-card">
+        <Panel variant="card" className="p-card" data-testid="offer-receipt">
+          <SectionHead icon="receipt" title="Your offer" hint="Nothing is sent until you press Send" />
           <OfferFigures amountMinor={amountMinor} askingMinor={price.askingMinor} atAskingPrice={draft.amount.trim() === ""} />
-        </Panel>
-        <Panel variant="card" className="p-card">
-          <Facts
-            items={[
-              { label: "Property", value: listingTitle },
-              { label: "Payment", value: PAYMENT_LABEL[draft.pref] },
-              ...(draft.pref !== "cash" && draft.deposit ? [{ label: draft.pref === "mortgage" ? "You pay yourself" : "Deposit", value: nairaFull(Number(draft.deposit.replace(/,/g, "")) * 100) }] : []),
-              ...(draft.pref === "instalment" ? [{ label: "Period", value: `${draft.months} months` }] : []),
-              { label: "Closing date", value: draft.closing ? `Proposed ${formatDay(draft.closing)}` : "No date proposed" },
-              ...(draft.note.trim() ? [{ label: "Note", value: draft.note.trim() }] : []),
-            ]}
-          />
+          <div className="mt-md">
+            <Receipt
+              rows={[
+                { label: "Property", value: listingTitle },
+                { label: "Payment", value: PAYMENT_LABEL[draft.pref] },
+                ...(draft.pref !== "cash" && draft.deposit ? [{ label: draft.pref === "mortgage" ? "You pay yourself" : "Deposit", value: nairaFull(Number(draft.deposit.replace(/,/g, "")) * 100) }] : []),
+                ...(draft.pref === "instalment" ? [{ label: "Period", value: `${draft.months} months` }] : []),
+                { label: "Closing date", value: draft.closing ? `Proposed ${formatDay(draft.closing)}` : "No date proposed" },
+                ...(draft.note.trim() ? [{ label: "Note", value: draft.note.trim() }] : []),
+              ]}
+            />
+          </div>
         </Panel>
         <PriceBlockView price={price} title="Asking price and costs" />
         {mandateText ? <p className="nf-body-sm text-[var(--nf-content-secondary)]">{mandateText}</p> : null}

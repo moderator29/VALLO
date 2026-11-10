@@ -1,3 +1,4 @@
+import { CANNOT_OFFER_FALLBACK } from "@/lib/offers/words";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { resolveSession } from "@/lib/actions/session";
@@ -30,7 +31,7 @@ export default async function MakeOfferPage({ params }: { params: Promise<{ id: 
      off, the member's own listing) the page ends here with one plain sentence.
      An unmet requirement keeps the form visible but unsubmittable instead. */
   if (!gate.canOpenForm) {
-    return <CannotOffer listingHref={here} reason={gate.reason ?? "You cannot make an offer on this property right now."} />;
+    return <CannotOffer listingHref={here} reason={gate.reason ?? CANNOT_OFFER_FALLBACK} />;
   }
 
   return (

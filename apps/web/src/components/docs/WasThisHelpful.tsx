@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { FieldProblem } from "@/components/ui/FieldProblem";
 import { reportPageNotHelpful } from "@/lib/docs/helpful-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { CopyControl } from "./CopyControl";
@@ -61,7 +62,7 @@ export function WasThisHelpful({ path, title }: { path: string; title: string })
             onChange={(event) => setNote(event.target.value)}
             placeholder="A sentence is enough."
           />
-          {stage === "failed" && <p role="alert">{message}</p>}
+          {stage === "failed" && <FieldProblem id="helpful-problem" message={message} />}
           <div className="nf-dk-helpful__row">
             <Button variant="primary" size="sm" loading={pending} onClick={send}>
               Send to the support desk

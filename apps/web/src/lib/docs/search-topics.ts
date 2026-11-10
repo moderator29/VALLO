@@ -15,7 +15,7 @@ export const POPULAR_TOPICS: readonly { label: string; href: string }[] = [
   { label: "List my property", href: "/docs/listing-on-vallo" },
   { label: "Make an offer", href: "/docs/making-an-offer" },
   { label: "Viewings", href: "/docs/viewings" },
-  { label: "Stay safe", href: "/safety" },
+  { label: "Avoid scams", href: "/safety" },
   { label: "Talk to a person", href: "/contact" },
 ];
 

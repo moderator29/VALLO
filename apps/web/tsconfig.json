@@ -88,7 +88,9 @@
     ".next-pages/types/**/*.ts",
     ".next-pages/dev/types/**/*.ts",
     ".next-features/types/**/*.ts",
-    ".next-features/dev/types/**/*.ts"
+    ".next-features/dev/types/**/*.ts",
+    ".next-ui/types/**/*.ts",
+    ".next-ui/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

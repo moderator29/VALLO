@@ -576,7 +576,7 @@
     background: var(--nf-brand-primary);
     color: var(--nf-content-on-brand);
     font-variant-numeric: tabular-nums;
-    font-weight: 800;
+    font-weight: 700;
   }
   .nf-dk-step__title {
     margin: 0 0 var(--nf-space-2xs);
@@ -732,7 +732,7 @@
   .nf-dk-hit mark {
     background: var(--nf-brand-tint-3);
     color: var(--nf-content-primary);
-    font-weight: 800;
+    font-weight: 700;
     border-radius: var(--nf-radius-xs);
   }
 
@@ -846,7 +846,7 @@
   .nf-dk-calc__line[data-strong="true"] {
     border-bottom: 0;
     color: var(--nf-content-primary);
-    font-weight: 800;
+    font-weight: 700;
   }
 
   /* ------------------------------------------------------ the page layout */

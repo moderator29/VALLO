@@ -1776,6 +1776,7 @@ export default async function ListingDetailPage({
           perLabel={perLabel}
           action={stickyAction}
           secondary={stickySecondary}
+          sheen={Boolean(offerAction)}
           inspect={offerAction ? { label: t.catalogue.detail.scheduleVisit, href: visitHref } : null}
           secondaryIcon={isRental ? "document" : undefined}
           fallbackLabel={listing.title}

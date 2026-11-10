@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Chip } from "@/components/ui/Chip";
-import { Table, TBody, TD, TH, THead, TR, type SortDirection } from "@/components/ui/Table";
+import { UiIcon } from "@/design-system/icons/UiIcon";
 import { TextField } from "@/components/ui/Field";
 import { State } from "@/components/ui/State";
 import { StatusChip } from "@/components/ui/StatusChip";
@@ -16,6 +16,7 @@ import type { AdminOfferRow } from "./model";
 import "@/components/app/offers/offers.css";
 
 type SortKey = "submitted" | "activity" | "amount";
+type Dir = "ascending" | "descending";
 
 const STATES: readonly (OfferState | "all")[] = ["all", "open", "agreed", "declined", "withdrawn", "expired", "cancelled"];
 
@@ -44,7 +45,8 @@ export function OffersTable({ rows, nowMs }: { rows: AdminOfferRow[]; nowMs: num
   const [onlyDisputed, setOnlyDisputed] = useState(false);
   const [noMandate, setNoMandate] = useState(false);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<{ key: SortKey; dir: SortDirection }>({ key: "activity", dir: "descending" });
+  const [active, setActive] = useState(-1);
+  const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "activity", dir: "descending" });
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -72,11 +74,17 @@ export function OffersTable({ rows, nowMs }: { rows: AdminOfferRow[]; nowMs: num
   }, [rows, state, onlyDisputed, noMandate, query, sort]);
 
   const toggle = (key: SortKey) => setSort((s) => (s.key === key ? { key, dir: s.dir === "descending" ? "ascending" : "descending" } : { key, dir: "descending" }));
-  const dirOf = (key: SortKey): SortDirection => (sort.key === key ? sort.dir : "none");
+  const onKey = (event: React.KeyboardEvent) => {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+    event.preventDefault();
+    const next = Math.min(shown.length - 1, Math.max(0, active + (event.key === "ArrowDown" ? 1 : -1)));
+    setActive(next);
+    document.querySelectorAll<HTMLElement>('[data-testid="offers-desk-table"] a[data-offer-link]')[next]?.focus();
+  };
 
   return (
     <div className="grid gap-md" data-testid="offers-desk-table">
-      <div className="nf-ofr-filters">
+      <div className="nf-dt-bar">
         <div className="min-w-[14rem] flex-1">
           <TextField
             label="Search"
@@ -110,72 +118,98 @@ export function OffersTable({ rows, nowMs }: { rows: AdminOfferRow[]; nowMs: num
       {shown.length === 0 ? (
         <State kind="empty" compact title="No deals match" body="Change a filter or clear the search to see more." />
       ) : (
-        <div className="nf-ofr-scroll">
-          <Table caption="Offers and deals" density="compact">
-            <THead>
-              <TR>
-                <TH>Reference</TH>
-                <TH>Property</TH>
-                <TH>Buyer</TH>
-                <TH>Seller</TH>
-                <TH align="end" sortable sort={dirOf("amount")} onSortChange={() => toggle("amount")}>
-                  Offer
-                </TH>
-                <TH>Against asking</TH>
-                <TH>Payment</TH>
-                <TH>State</TH>
-                <TH>Stage</TH>
-                <TH align="end" sortable sort={dirOf("submitted")} onSortChange={() => toggle("submitted")}>
-                  Submitted
-                </TH>
-                <TH align="end" sortable sort={dirOf("activity")} onSortChange={() => toggle("activity")}>
-                  Last activity
-                </TH>
-              </TR>
-            </THead>
-            <TBody>
-              {shown.map((r) => {
+        <div className="nf-ofr-scroll" onKeyDown={onKey}>
+          <table className="nf-dt">
+            <caption className="sr-only">Offers and deals</caption>
+            <thead>
+              <tr>
+                <th scope="col">Deal</th>
+                <th scope="col">Buyer</th>
+                <th scope="col">Seller</th>
+                <SortTh label="Offer" k="amount" sort={sort} onSort={toggle} end />
+                <th scope="col">Against asking</th>
+                <th scope="col">Payment</th>
+                <th scope="col">State</th>
+                <th scope="col">Stage</th>
+                <SortTh label="Submitted" k="submitted" sort={sort} onSort={toggle} end />
+                <SortTh label="Last activity" k="activity" sort={sort} onSort={toggle} end />
+                <th scope="col">
+                  <span className="sr-only">Open</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {shown.map((r, i) => {
                 const diff = differenceOf(r.amountMinor, r.askingMinor);
                 const chip = chipFor(r);
                 return (
-                  <TR key={r.id}>
-                    <TD>
-                      <Link href={adminDealHref(r.id)} className="font-semibold" data-testid="deal-link">
-                        {r.reference}
-                      </Link>
-                    </TD>
-                    <TD>
-                      {r.listingTitle}
-                      {!r.mandateHeld ? <div className="nf-ofr-define">No signed sale mandate on record</div> : null}
-                    </TD>
-                    <TD>{r.buyerName}</TD>
-                    <TD>
+                  <tr key={r.id} data-active={active === i ? "" : undefined} onFocus={() => setActive(i)}>
+                    <td>
+                      <div className="nf-dt__cell-title">
+                        <span className="nf-ofr-thumb" aria-hidden="true">
+                          <UiIcon name="house" size={20} />
+                        </span>
+                        <div className="min-w-0">
+                          <Link href={adminDealHref(r.id)} className="nf-dt__title" data-testid="deal-link" data-offer-link>
+                            {r.listingTitle}
+                          </Link>
+                          <div className="nf-dt__ref">
+                            {r.reference}
+                            {!r.mandateHeld ? " · No signed sale mandate on record" : ""}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{r.buyerName}</td>
+                    <td>
                       {r.sellerName}
-                      {r.agentName ? <div className="nf-ofr-define">Agent: {r.agentName}</div> : null}
-                    </TD>
-                    <TD align="end">
-                      <Naira minor={r.amountMinor} />
-                    </TD>
-                    <TD>
-                      {diff.word}
-                      {diff.direction !== "at" ? ` ${formatPct(diff.pct)}` : ""}
-                    </TD>
-                    <TD>{PAYMENT_LABEL[r.paymentPreference]}</TD>
-                    <TD>
+                      {r.agentName ? <div className="nf-dt__ref">Agent: {r.agentName}</div> : null}
+                    </td>
+                    <td data-end="">
+                      <Naira minor={r.amountMinor} className="font-semibold text-[var(--nf-content-primary)]" />
+                    </td>
+                    <td>
+                      <span className="nf-ofr-diff" data-dir={diff.direction}>
+                        {diff.direction !== "at" ? <UiIcon name={diff.direction === "above" ? "arrow-up" : "arrow-down"} size={12} /> : <UiIcon name="check" size={12} />}
+                        {diff.word}
+                        {diff.direction !== "at" ? ` ${formatPct(diff.pct)}` : ""}
+                      </span>
+                    </td>
+                    <td>{PAYMENT_LABEL[r.paymentPreference]}</td>
+                    <td>
                       <StatusChip state={chip.state} size="xs">
                         {chip.word}
                       </StatusChip>
-                    </TD>
-                    <TD>{STAGE_LABEL[r.stage]}</TD>
-                    <TD align="end">{formatWhen(r.submittedAt)}</TD>
-                    <TD align="end">{r.state === "open" ? `${waitingFor(r.lastActivityAt, nowMs)} ago` : formatWhen(r.lastActivityAt)}</TD>
-                  </TR>
+                    </td>
+                    <td>{STAGE_LABEL[r.stage]}</td>
+                    <td data-end="">{formatWhen(r.submittedAt)}</td>
+                    <td data-end="">{r.state === "open" ? `${waitingFor(r.lastActivityAt, nowMs)} ago` : formatWhen(r.lastActivityAt)}</td>
+                    <td>
+                      <span className="nf-dt__open">
+                        Open <UiIcon name="arrow-right" size={14} />
+                      </span>
+                    </td>
+                  </tr>
                 );
               })}
-            </TBody>
-          </Table>
+            </tbody>
+          </table>
         </div>
       )}
     </div>
+  );
+}
+
+function SortTh({ label, k, sort, onSort, end }: { label: string; k: SortKey; sort: { key: SortKey; dir: Dir }; onSort: (k: SortKey) => void; end?: boolean }) {
+  const on = sort.key === k;
+  return (
+    <th scope="col" aria-sort={on ? sort.dir : "none"} {...(end ? { "data-end": "" } : {})}>
+      <button type="button" className="nf-dt__sort" data-dir={on ? sort.dir : "none"} onClick={() => onSort(k)}>
+        {label}
+        <span className="nf-dt__arrow" aria-hidden="true">
+          <UiIcon name="arrow-down" size={12} />
+        </span>
+      </button>
+    </th>
   );
 }

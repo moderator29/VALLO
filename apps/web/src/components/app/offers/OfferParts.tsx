@@ -47,8 +47,12 @@ export function GapBar({ amountMinor, askingMinor }: { amountMinor: number; aski
       {width > 0 ? <span className="nf-ofr-gapbar__fill" style={{ left: `${left}%`, width: `${width}%`, transformOrigin: offerAt < askAt ? "left center" : "right center" }} /> : null}
       <span className="nf-ofr-gapbar__ask" style={{ left: `${askAt}%` }} />
       <span className="nf-ofr-gapbar__offer" style={{ left: `${offerAt}%` }} />
-      <span className="nf-ofr-gapbar__key nf-ofr-gapbar__key--ask" style={{ left: `${askAt}%` }}>Asking</span>
-      <span className="nf-ofr-gapbar__key nf-ofr-gapbar__key--offer" style={{ left: `${offerAt}%` }}>Offer</span>
+      <span className="nf-ofr-gapbar__legend">
+        <span className="nf-ofr-gapbar__legend-dot" />
+        Offer
+        <span className="nf-ofr-gapbar__legend-tick" />
+        Asking
+      </span>
     </div>
   );
 }
@@ -166,9 +170,9 @@ export function PriceBlockView({ price, title = "Price" }: { price: PriceBlock; 
   return (
     <div data-testid="price-block">
       <p className="nf-ofr-figures__label">{title}</p>
-      <p className="nf-ofr-figures__hero nf-ofr-money" data-testid="price-asking">
-        {nairaFull(price.askingMinor)}
-      </p>
+      <div data-testid="price-asking">
+        <HeroMoney minor={price.askingMinor} />
+      </div>
       <p className="nf-ofr-figures__label">Asking price</p>
       {total !== null ? (
         <p className="nf-body mt-sm" data-testid="price-total">

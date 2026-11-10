@@ -28,6 +28,8 @@ import type {
 
 /* ------------------------------------------------------- standing sentences */
 
+export const CANNOT_OFFER_FALLBACK = "You cannot make an offer on this property right now.";
+export const LOADING_OFFER_FORM = "Loading the offer form";
 export const NOTHING_CHARGED = "Nothing is charged. The seller reviews it and responds.";
 export const NO_MONEY_TAKEN = "Vallo takes no money for a purchase at any stage: no deposit, no commitment fee and no payment to secure a property.";
 export const AGREED_IS_NOT_SALE =

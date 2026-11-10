@@ -1,3 +1,4 @@
+import { plural } from "@vallo/i18n/core";
 import { formatMoney } from "@vallo/i18n/core";
 
 /**
@@ -115,7 +116,7 @@ export function waitingFor(sinceIso: string, nowMs: number): string {
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 48) return `${hours} ${hours === 1 ? "hour" : "hours"}`;
+  if (hours < 48) return plural(hours, { one: "{count} hour", other: "{count} hours" });
   const days = Math.floor(hours / 24);
   return `${days} days`;
 }
