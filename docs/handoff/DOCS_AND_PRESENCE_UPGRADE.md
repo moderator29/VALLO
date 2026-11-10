@@ -369,6 +369,52 @@ redesigned.
 
 ---
 
+## 8B. EVERY DOCUMENT CARRIES BUTTONS INTO THE PRODUCT
+
+The founder's instruction, 10 November 2026: a member reading a document must
+be able to go straight to the thing it describes.
+
+So every guide, help article and policy page carries real controls, not only
+prose. A guide about making an offer carries "Make an offer" and "Open my
+offers". A verification guide carries "Start verification". A payout page
+carries "Open payouts". A Deal Room guide carries "Open my deals".
+
+The rules:
+- The control sits where the reader needs it, usually at the end of the step
+  it describes, and again at the foot of the page.
+- It is a real action, styled like every other primary action in the platform,
+  not a blue word in a paragraph.
+- It knows the reader's state: signed out, it goes to sign in and then on to
+  the destination; signed in and already verified, a "Start verification"
+  control says so instead of pretending there is work to do.
+- It never leads to a dead end. A control pointing at a feature the reader
+  cannot use explains why rather than failing.
+
+## 8C. THE PLATFORM-WIDE DOCUMENTATION SWEEP
+
+Also his instruction, and it gets its own agent: go wide across the whole
+platform, find everything that exists but is not documented, and document it,
+with how it works and how the flow goes. Member side, staff side, admin desks,
+everything.
+
+1. **Inventory** every feature a member or a staff member can meet, walking
+   `PAGE_LEDGER.md`, the route table and the admin desks.
+2. **Compare** it against the documentation that exists.
+3. **Write the gap list** to `docs/handoff/DOCS_COVERAGE.md`: each feature,
+   whether it is documented, where, and whether what is written is still true.
+4. **Write the missing pages** in the document kit, both themes, each with
+   what it is, who it is for, how to reach it, the flow step by step with
+   captured screenshots, what can go wrong, and the buttons from 8B.
+5. **Correct what is stale.** Where a document and the code disagree, the code
+   is right. Record what changed.
+6. **Leave a check behind**: a test that fails when a route exists in the
+   ledger with no documentation entry, so this never rots again.
+
+Split by path before launching this agent, so it never writes into the same
+files as whoever is building features.
+
+---
+
 ## 9. CONTACT
 
 One address everywhere: **`hello@vallospaces.com`**. Put it in one constant and

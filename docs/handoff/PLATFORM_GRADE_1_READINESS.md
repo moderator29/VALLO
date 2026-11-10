@@ -862,7 +862,11 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    no longer use (Payluk and the rest). It is for YOU, this same session, on
    this same branch. I am sending more Hauslet screenshots of those exact
    screens: study every one.
-7. READ the two payments documents, in this order, because the protected
+7. READ docs/handoff/OFFERS_AND_DEAL_ROOM.md. Sales on Vallo stop at
+   "contact the agent" today: there is no offer, no negotiation and no deal
+   room. That document is the whole system, all of it, not phased, with what
+   already exists to build on and what must never be said about a sale.
+8. READ the two payments documents, in this order, because the protected
    payment rail is part of YOUR job now:
      docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
      docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
@@ -871,10 +875,10 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
                                                  terms in the appendix)
    Build that rail to ready, flagged OFF, in this same branch. Do not switch
    it on: the agreement is not signed yet.
-8. Load the Supabase MCP tools and confirm you can query the project.
-9. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
-   for platform-grade-1-readiness.
-10. Check supabase/migrations/pending/ and its README. Anything waiting there
+9. Load the Supabase MCP tools and confirm you can query the project.
+10. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+    for platform-grade-1-readiness.
+11. Check supabase/migrations/pending/ and its README. Anything waiting there
    is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
