@@ -5,7 +5,8 @@
  * Vallo's state is kept apart from the provider's (founder section 54): the
  * provider's `state` and `status` words are stored as they were said, and this
  * file maps them onto Vallo's. The step table is the twin of
- * `private.provider_arrangement_step_ok` in migration d73b_provider_arrangements;
+ * `private.provider_arrangement_step_ok`, newest in
+ * supabase/migrations/pending/protected_rail_prep_2026-11-10.sql;
  * `arrangement-states.test.ts` holds them to the same rows.
  */
 
@@ -22,6 +23,11 @@ export const ARRANGEMENT_STATUSES = [
   "refunded",
   "split",
   "cancelled",
+  /* 10 November 2026, the new provider (pending protected_rail_prep): Vallo
+     has told the provider to refund and waits for its word; and a fact that
+     needs a person (a wrong amount, a late transfer, an unexpected state). */
+  "refund_requested",
+  "requires_review",
 ] as const;
 
 export type ArrangementStatus = (typeof ARRANGEMENT_STATUSES)[number];
@@ -29,12 +35,16 @@ export type ArrangementStatus = (typeof ARRANGEMENT_STATUSES)[number];
 /** Where each state may go. Nothing leaves a final state. */
 export const ARRANGEMENT_STEPS: Readonly<Record<ArrangementStatus, readonly ArrangementStatus[]>> = {
   preparing: ["unknown", "failed", "awaiting_payment"],
-  unknown: ["failed", "awaiting_payment", "payment_processing", "protected", "disputed", "released", "refunded", "split", "cancelled"],
-  awaiting_payment: ["payment_processing", "protected", "disputed", "released", "refunded", "split", "cancelled"],
-  payment_processing: ["awaiting_payment", "protected", "disputed", "released", "refunded", "split"],
-  protected: ["release_requested", "disputed", "released", "refunded", "split"],
-  release_requested: ["protected", "disputed", "released", "refunded", "split"],
-  disputed: ["released", "refunded", "split"],
+  unknown: ["failed", "awaiting_payment", "payment_processing", "protected", "disputed", "released", "refunded", "split", "cancelled", "requires_review"],
+  awaiting_payment: ["payment_processing", "protected", "disputed", "released", "refunded", "split", "cancelled", "requires_review"],
+  payment_processing: ["awaiting_payment", "protected", "disputed", "released", "refunded", "split", "requires_review"],
+  protected: ["release_requested", "disputed", "released", "refunded", "split", "refund_requested", "requires_review"],
+  release_requested: ["protected", "disputed", "released", "refunded", "split", "requires_review"],
+  disputed: ["released", "refunded", "split", "refund_requested", "requires_review"],
+  /* Back to protected only when the provider refused the refund instruction. */
+  refund_requested: ["protected", "disputed", "refunded", "requires_review"],
+  /* A person resolves a review; money still moves only on the provider's word. */
+  requires_review: ["protected", "release_requested", "refund_requested", "disputed", "released", "refunded", "failed", "cancelled"],
   released: [],
   refunded: [],
   split: [],

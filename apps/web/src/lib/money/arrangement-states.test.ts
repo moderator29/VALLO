@@ -3,8 +3,12 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { ARRANGEMENT_STATUSES, ARRANGEMENT_STEPS, deliveryWindowDays, stepAllowed, valloStateFor } from "./arrangement-states";
 
+/* The newest definition of private.provider_arrangement_step_ok. Since 10
+   November 2026 that is the rail preparation in the pending folder (two new
+   states, refund_requested and requires_review); when the founder applies it
+   and it moves into supabase/migrations, point this at the applied file. */
 const MIGRATION = readFileSync(
-  fileURLToPath(new URL("../../../../../supabase/migrations/20261007151000_d73b_provider_arrangements.sql", import.meta.url)),
+  fileURLToPath(new URL("../../../../../supabase/migrations/pending/protected_rail_prep_2026-11-10.sql", import.meta.url)),
   "utf8",
 );
 
@@ -12,7 +16,7 @@ const MIGRATION = readFileSync(
 function sqlSteps(): Record<string, string[]> {
   const body = MIGRATION.slice(MIGRATION.indexOf("provider_arrangement_step_ok(p_from text"));
   const steps: Record<string, string[]> = {};
-  for (const m of body.slice(0, body.indexOf("end\n$$")).matchAll(/when '([a-z_]+)' then p_to in \(([^)]*)\)/g)) {
+  for (const m of body.slice(0, body.indexOf("end\n$function$")).matchAll(/when '([a-z_]+)' then p_to in \(([^)]*)\)/g)) {
     steps[m[1]!] = [...m[2]!.matchAll(/'([a-z_]+)'/g)].map((x) => x[1]!);
   }
   return steps;
