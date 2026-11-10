@@ -1903,7 +1903,7 @@ export const PROTECTED_HOW = {
   related: {
     paying: "Paying on Vallo",
     refunds: "Refunds and cancellations",
-    terms: "Terms of use",
+    terms: "Terms of service",
   },
 } as const;
 
