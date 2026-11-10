@@ -14,8 +14,9 @@ Everything else stays blank.
 """
 import json, re, sys, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
-src = open(__file__.rsplit("/", 1)[0] + "/harvest_school_logos.py").read().replace("\nmain()\n", "\n")
-h = type(sys)("h"); exec(compile(src, "harvest", "exec"), h.__dict__)
+path = __file__.rsplit("/", 1)[0] + "/harvest_school_logos.py"
+src = open(path).read().replace("\nmain()\n", "\n")
+h = type(sys)("h"); h.__dict__["__file__"] = path; exec(compile(src, path, "exec"), h.__dict__)
 from bs4 import BeautifulSoup
 
 def registrable(host):

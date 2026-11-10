@@ -9,8 +9,13 @@ import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "@/li
 import { createAdminClient } from "@/lib/supabase/admin";
 import { writeInAppNotice } from "@/lib/notify/in-app";
 
+import { getDictionary } from "@vallo/i18n";
+
 import { isNotLive } from "../degrade";
+import { readRoomListing, readRoommateProfile } from "../roommates/queries";
 import { CIRCLE_CATEGORIES, LIMITS, readCreateOutcome, slugFrom } from "./model";
+import { buildPersonCard, buildRoomCard, postTitleFor, readCard } from "./roommate-card";
+import { postingRefusal, shareableCircles, type ShareableCircle } from "./share-rules";
 
 /**
  * VALLO CIRCLE, THE WRITES. Every one goes through the member's own client:
@@ -223,6 +228,124 @@ export async function createCirclePost(input: z.input<typeof postSchema>): Promi
   if (error || !data) return fail(wordsFor(error));
   revalidatePath("/circle");
   return ok({ id: (data as { id: string }).id, held: (data as { status: string }).status === "HELD" });
+}
+
+/* ------------------------------------------- a Roommates page, shared in */
+
+const NOTE_MAX = 280;
+
+const shareSchema = z.object({
+  communityId: uuid,
+  target: z.object({ kind: z.enum(["room", "person"]), id: uuid }),
+  note: z.string().trim().max(NOTE_MAX, "Keep the note to 280 characters.").optional(),
+});
+
+/**
+ * The Circles this person is an active member of AND can post in, for the
+ * Share to a Circle sheet. `memberOf` lets the sheet tell "you are in none"
+ * from "none of yours take posts right now".
+ */
+export async function listShareableCircles(): Promise<ActionResult<{ circles: ShareableCircle[]; memberOf: number }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const { data, error } = await who.db
+    .from("circle_memberships")
+    .select("status, role, circle_communities ( id, slug, name, category, visibility, status )")
+    .eq("user_id", who.userId)
+    .eq("status", "active")
+    .limit(100);
+  if (error) return fail(isNotLive(error) ? getDictionary("en").roommates.circleShare.notOpen : getDictionary("en").roommates.circleShare.loadFailed);
+  type Row = { status: string; role: string; circle_communities: (ShareableCircle & { status: string }) | (ShareableCircle & { status: string })[] | null };
+  const rows = ((data ?? []) as Row[]).map((r) => ({
+    status: r.status,
+    role: r.role,
+    community: (Array.isArray(r.circle_communities) ? r.circle_communities[0] : r.circle_communities) ?? null,
+  }));
+  return ok(shareableCircles(rows));
+}
+
+/**
+ * SHARE A ROOMMATES PAGE INTO A CIRCLE. Posts an ordinary Circle discussion in
+ * the person's own name that carries a Roommates card, so the scanner, the
+ * rate limits, holds, reports and the author's own delete all apply as for any
+ * Circle post. The card is built HERE, on the server, from the page the
+ * person is allowed to see; the browser sends an id and an optional note and
+ * nothing else, so no field of the card can be chosen by the caller.
+ */
+export async function shareRoommateToCircle(
+  input: z.input<typeof shareSchema>,
+): Promise<ActionResult<{ id: string; held: boolean; slug: string; name: string }>> {
+  const who = await member();
+  if ("error" in who) return fail(who.error);
+  const parsed = validate(shareSchema, input);
+  if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
+  const d = parsed.data;
+  const t = getDictionary("en").roommates;
+  const words = t.circleShare;
+
+  /* Posting rules first: a live community and an active membership. */
+  const [community, membership] = await Promise.all([
+    who.db.from("circle_communities").select("id, slug, name, status").eq("id", d.communityId).maybeSingle(),
+    who.db.from("circle_memberships").select("status, role").eq("community_id", d.communityId).eq("user_id", who.userId).maybeSingle(),
+  ]);
+  const failedRead = community.error ?? membership.error;
+  if (failedRead) return fail(isNotLive(failedRead) ? words.notOpen : FAILED);
+  const c = community.data as { id: string; slug: string; name: string; status: string } | null;
+  const refusal = postingRefusal(membership.data as { status: string; role: string } | null, c);
+  if (refusal === "not_live") return fail(words.notLive);
+  if (refusal === "not_member" || !c) return fail(words.notMember);
+
+  /* The page, read as this person: what they cannot see cannot be shared. */
+  let card;
+  if (d.target.kind === "room") {
+    const read = await readRoomListing(d.target.id);
+    if (read.state !== "ok" || read.listing.status !== "live") return fail(words.gone);
+    card = buildRoomCard(read.listing, t);
+  } else {
+    if (d.target.id === who.userId) return fail(words.ownProfile);
+    const read = await readRoommateProfile(d.target.id);
+    if (read.state !== "ok") return fail(words.gone);
+    card = buildPersonCard(read.profile, t);
+  }
+  /* A title with a phone number or an email in it is not shared as a card. */
+  if (!readCard(card)) return fail(words.gone);
+
+  /* One share of the same page into the same Circle a week. */
+  const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const again = await who.db
+    .from("posts")
+    .select("id")
+    .eq("author_id", who.userId)
+    .eq("community_id", d.communityId)
+    .eq("roommate_card->>ref", card.ref)
+    .neq("status", "REMOVED")
+    .gte("created_at", since)
+    .limit(1);
+  if (again.error) return fail(isNotLive(again.error) ? words.notOpen : FAILED);
+  if ((again.data ?? []).length > 0) return fail(words.already);
+
+  const title = postTitleFor(card, t);
+  const note = d.note ?? "";
+  const { data, error } = await who.db
+    .from("posts")
+    .insert({
+      author_id: who.userId,
+      author_kind: "USER",
+      kind: "GIST",
+      body: note.length > 0 ? note : title,
+      title,
+      community_id: d.communityId,
+      circle_type: "discussion",
+      roommate_card: card,
+      ...(card.kind === "room" ? { roommate_listing_id: card.ref } : {}),
+      status: "LIVE",
+    })
+    .select("id, status")
+    .single();
+  if (error || !data) return fail(isNotLive(error) ? words.notOpen : wordsFor(error));
+  revalidatePath("/circle");
+  revalidatePath(`/circle/c/${c.slug}`);
+  return ok({ id: (data as { id: string }).id, held: (data as { status: string }).status === "HELD", slug: c.slug, name: c.name });
 }
 
 const replySchema = z.object({
