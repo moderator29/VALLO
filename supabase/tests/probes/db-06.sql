@@ -63,6 +63,17 @@
 -- roommate_interests idu, roommate_viewings idu, and the insert and delete
 -- halves of roommate_groups, roommate_match_weights and
 -- roommate_verifications.
+-- 10 November 2026: the staff desks' tables (staff_tasks i/u, staff_task_comments i,
+-- staff_announcements iu, staff_announcement_reads iu, social_posts iu,
+-- bd_prospects iu, bd_prospect_activity i, coo_escalations iu,
+-- staff_access_recommendations iu, staff_weekly_reports iu), from
+-- END_OF_BATCH_3_2026-11-10.sql, applied live the same day. Each write
+-- grant has a permissive policy for the same command behind it, `to
+-- authenticated`, admin or super_admin only (private.has_role), checked
+-- against pg_policies on the live database before being written down. No
+-- delete grant on any of them by design. Staff reach them through the service
+-- client, so these policies only serve an admin on their own session.
+--
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -102,6 +113,8 @@ begin
       ('availability', 'idu'),
       ('badges', 'idu'),
       ('bank_accounts', 'u'),
+      ('bd_prospect_activity', 'i'),
+      ('bd_prospects', 'iu'),
       ('blocks', 'id'),
       ('bookings', 'i'),
       ('bot_settings', 'idu'),
@@ -122,6 +135,7 @@ begin
       ('conversation_archives', 'idu'),
       ('conversation_prefs', 'idu'),
       ('conversations', 'i'),
+      ('coo_escalations', 'iu'),
       ('event_attendees', 'idu'),
       ('events', 'idu'),
       ('feature_flags', 'idu'),
@@ -195,7 +209,14 @@ begin
       ('saved_places', 'id'),
       ('saved_searches', 'idu'),
       ('service_windows', 'idu'),
+      ('social_posts', 'iu'),
       ('social_profiles', 'idu'),
+      ('staff_access_recommendations', 'iu'),
+      ('staff_announcement_reads', 'iu'),
+      ('staff_announcements', 'iu'),
+      ('staff_task_comments', 'i'),
+      ('staff_tasks', 'iu'),
+      ('staff_weekly_reports', 'iu'),
       ('stories', 'idu'),
       ('story_comment_reactions', 'id'),
       ('story_comments', 'idu'),

@@ -30,6 +30,10 @@ export const STAFF_DESK: Record<StaffScope, string> = {
   analyst: "/admin/trust",
   business_development: "/admin/business-development",
   social_media: "/admin/social-media",
+  marketing: "/admin/marketing",
+  content: "/admin/content",
+  technical: "/admin/technical",
+  support_lead: "/admin/support-lead",
 };
 
 /** The other desks a scope opens, beyond its front door. */

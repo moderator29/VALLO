@@ -91,6 +91,16 @@ export const STAFF_SCOPES = [
      moderation or financial access at all. */
   "business_development",
   "social_media",
+  /* Added 10 November 2026 with the Marketing Manager, Content Manager,
+     Technical Administrator and Customer Support Lead positions. Each opens
+     its own desk and nothing else: `marketing` (campaigns), `content`
+     (editorial items), `technical` (read-only health and the incident log,
+     never a secret or a credential) and `support_lead` (team workload, QA and
+     policy notes; the Customer Support Lead also holds `support`). */
+  "marketing",
+  "content",
+  "technical",
+  "support_lead",
 ] as const;
 export type StaffScope = (typeof STAFF_SCOPES)[number];
 
@@ -110,6 +120,10 @@ export const STAFF_SCOPE_LABEL: Record<StaffScope, string> = {
   analyst: "Read-only analyst",
   business_development: "Business development",
   social_media: "Social media",
+  marketing: "Marketing",
+  content: "Content",
+  technical: "Technical",
+  support_lead: "Support lead",
 };
 
 export type StaffAccess = {

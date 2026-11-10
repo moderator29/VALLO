@@ -132,4 +132,8 @@ export const MANUAL_AREA_LABEL: Record<StaffScope, string> = {
   analyst: "Read-only analyst",
   business_development: "Business development",
   social_media: "Social media",
+  marketing: "Marketing",
+  content: "Content",
+  technical: "Technical",
+  support_lead: "Support lead",
 };

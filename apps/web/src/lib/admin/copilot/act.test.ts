@@ -5,7 +5,7 @@ vi.mock("@/lib/admin/my-desk/actions", () => ({ addTaskComment: vi.fn(), createT
 vi.mock("@/lib/admin/overview/actions", () => ({ raiseEscalation: vi.fn(), recommendStaffAccess: vi.fn() }));
 vi.mock("@/lib/admin/social-media/actions", () => ({ createDraft: vi.fn() }));
 
-import { confirmProposal, resetUsedProposals } from "./act";
+import { claimNonce, confirmProposal, isMissingRelation, resetUsedProposals } from "./act";
 import { openProposal, proposalKey, sealProposal } from "./proposals";
 import { finalizeProposal } from "./tools/registry";
 import type { CopilotViewer, ProposalAction } from "./tools/types";
@@ -107,5 +107,108 @@ describe("propose, confirm, act", () => {
     expect(openProposal(proposalKey()!, signed.token, "u1", NOW).ok).toBe(true);
     const draft = finalizeProposal("draft_ticket_reply", { ...card, mode: "draft", action: null }, ctx)!;
     expect(draft.token).toBeUndefined();
+  });
+});
+
+describe("strict single use: the database claim", () => {
+  const meta = { userId: "u1", tool: "create_my_task", action: "create_my_task", expiresAt: NOW + 900_000, now: NOW };
+  /** A stand-in for the service client whose upsert behaves like insert ... on conflict do nothing returning. */
+  const fakeClient = (rows = new Set<string>(), fail?: { code?: string; message?: string }) => {
+    const calls: Record<string, unknown>[] = [];
+    const client = {
+      from: (table: string) => {
+        expect(table).toBe("copilot_proposals");
+        return {
+          upsert: (row: Record<string, unknown>, opts: { onConflict: string; ignoreDuplicates: boolean }) => {
+            expect(opts).toEqual({ onConflict: "nonce", ignoreDuplicates: true });
+            calls.push(row);
+            return {
+              select: async () => {
+                if (fail) return { data: null, error: fail };
+                const n = String(row.nonce);
+                if (rows.has(n)) return { data: [], error: null };
+                rows.add(n);
+                return { data: [{ nonce: n }], error: null };
+              },
+            };
+          },
+        };
+      },
+    };
+    return { client, calls };
+  };
+
+  it("claims once and refuses the same nonce afterwards, recording only tool and action kind", async () => {
+    const { client, calls } = fakeClient();
+    expect(await claimNonce("nonce-aaaa-1", meta, { client })).toBe("claimed");
+    resetUsedProposals();
+    expect(await claimNonce("nonce-aaaa-1", meta, { client })).toBe("used");
+    expect(calls[0]).toMatchObject({ nonce: "nonce-aaaa-1", user_id: "u1", tool: "create_my_task", action: "create_my_task" });
+    expect(Object.keys(calls[0]!).sort()).toEqual(["action", "created_at", "expires_at", "nonce", "tool", "used_at", "user_id"]);
+  });
+
+  it("refuses a replay of a confirmed proposal end to end and runs the action once", async () => {
+    const { client } = fakeClient();
+    const dbClaim = (n: string, m: typeof meta) => claimNonce(n, m, { client });
+    const token = seal();
+    const go = () => confirmProposal({ token, viewer, now: NOW + 60_000 }, { key, claim: dbClaim, execute, audit });
+    expect((await go()).status).toBe(200);
+    resetUsedProposals();
+    const again = await go();
+    expect(again.status).toBe(409);
+    expect(again.body.code).toBe("used");
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets only one of two simultaneous confirms win", async () => {
+    const { client } = fakeClient();
+    const dbClaim = (n: string, m: typeof meta) => claimNonce(n, m, { client });
+    const token = seal();
+    resetUsedProposals();
+    const results = await Promise.all([1, 2, 3].map(() => confirmProposal({ token, viewer, now: NOW + 60_000 }, { key, claim: dbClaim, execute, audit })));
+    expect(results.filter((r) => r.status === 200)).toHaveLength(1);
+    expect(results.filter((r) => r.status === 409)).toHaveLength(2);
+    expect(execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed when the claim cannot be recorded: the action does not run", async () => {
+    const { client } = fakeClient(new Set(), { code: "08006", message: "connection failure" });
+    const dbClaim = (n: string, m: typeof meta) => claimNonce(n, m, { client });
+    const out = await confirmProposal({ token: seal(), viewer, now: NOW + 60_000 }, { key, claim: dbClaim, execute, audit });
+    expect(out.status).toBe(503);
+    expect(out.body).toMatchObject({ ok: false, code: "unavailable" });
+    expect(out.body.message).toMatch(/single-use record could not be written/);
+    expect(execute).not.toHaveBeenCalled();
+    expect(audit).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when the claim itself throws", async () => {
+    const out = await confirmProposal({ token: seal(), viewer, now: NOW + 60_000 }, { key, claim: async () => { throw new Error("boom"); }, execute, audit });
+    expect(out.status).toBe(503);
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the older guard, and logs it, only when the table does not exist yet", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const legacy = vi.fn(async () => true);
+    for (const error of [{ code: "42P01", message: "x" }, { code: "PGRST205", message: "Could not find the table 'public.copilot_proposals' in the schema cache" }, { message: 'relation "public.copilot_proposals" does not exist' }]) {
+      resetUsedProposals();
+      const { client } = fakeClient(new Set(), error);
+      expect(await claimNonce("nonce-bbbb-2", meta, { client, legacy })).toBe("claimed");
+    }
+    expect(legacy).toHaveBeenCalledTimes(3);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("table is missing"));
+    resetUsedProposals();
+    const { client } = fakeClient(new Set(), { code: "42501", message: "permission denied" });
+    await expect(claimNonce("nonce-cccc-3", meta, { client, legacy })).rejects.toThrow();
+    expect(legacy).toHaveBeenCalledTimes(3);
+    expect(await claimNonce("nonce-dddd-4", meta, { client: fakeClient(new Set(), { code: "42P01" }).client, legacy: async () => false })).toBe("used");
+    warn.mockRestore();
+  });
+
+  it("recognises a missing relation only", () => {
+    expect(isMissingRelation({ code: "42P01" })).toBe(true);
+    expect(isMissingRelation({ code: "23505" })).toBe(false);
+    expect(isMissingRelation(null)).toBe(false);
   });
 });

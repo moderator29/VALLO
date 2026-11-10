@@ -59,6 +59,10 @@ export const DESK_SCOPES: readonly StaffScope[] = [
   "analyst",
   "business_development",
   "social_media",
+  "marketing",
+  "content",
+  "technical",
+  "support_lead",
 ];
 export function isDeskScope(value: unknown): value is StaffScope {
   return typeof value === "string" && (DESK_SCOPES as readonly string[]).includes(value);
@@ -235,6 +239,10 @@ export const DEPARTMENT_OF_SCOPE: Record<StaffScope, string> = {
   analyst: "Intelligence",
   business_development: "Business Development",
   social_media: "Social Media",
+  marketing: "Marketing",
+  content: "Content",
+  technical: "Technical",
+  support_lead: "Support",
 };
 
 export function departmentFor(who: Pick<DeskIdentity, "isAdmin" | "isSuperAdmin" | "scopes">): string {

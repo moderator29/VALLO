@@ -39,6 +39,10 @@ const AREA_OPENS: Record<StaffScope, string> = {
   business_development:
     "The Business Development desk: partnerships, the pipeline, and listing review (through the listing_approval scope every Business Development Director also holds).",
   social_media: "The Social Media desk: the content calendar, drafts, campaigns, the media library and approvals. No listing, moderation or member data.",
+  marketing: "The Marketing desk: campaigns, UTM links, results you log, acquisition figures and approvals. No listing, moderation or member data.",
+  content: "The Content desk: the editorial calendar, drafts, approvals and the brand library, with counts from the moderation queue. No access to the queue itself.",
+  technical: "The Technical desk: read-only health, error counts and the incident log. No secret, credential or infrastructure control.",
+  support_lead: "The Support Lead desk: team workload, assignment, escalations, quality reviews, support figures and policy notes. Opens beside the Support area.",
 };
 
 const AREA_ROWS: DocTableRow[] = (Object.keys(AREA_OPENS) as StaffScope[]).map((scope) => ({

@@ -101,14 +101,33 @@ export function resetUsedProposals(): void {
   usedHere.clear();
 }
 
+export type ClaimMeta = { userId: string; tool: string; action: string; expiresAt: number; now: number };
+export type ClaimResult = "claimed" | "used";
+
+/** The slice of the service client the claim needs, so a test can stand in for it. */
+type ClaimClient = {
+  from: (table: string) => {
+    upsert: (
+      row: Record<string, unknown>,
+      opts: { onConflict: string; ignoreDuplicates: boolean },
+    ) => { select: (cols: string) => PromiseLike<{ data: unknown[] | null; error: { code?: string; message?: string } | null }> };
+  };
+};
+
+/** True when the error says the table is not there yet (Postgres 42P01 or PostgREST PGRST205). */
+export function isMissingRelation(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false;
+  if (error.code === "42P01" || error.code === "PGRST205" || error.code === "PGRST200") return true;
+  return /relation .* does not exist|could not find the table/i.test(error.message ?? "");
+}
+
 /**
- * Claim a proposal id so it can run once. Three locks: this process's memory,
- * the durable rate-limit counter (one use per id), and the audit trail (a
- * row for this id means it already ran). No dedicated table exists yet; the
- * counter fails open when its store is unreachable, and the audit lookup
- * then closes most of that gap.
+ * The older guard, used only while `copilot_proposals` has not been created:
+ * this process's memory, the durable rate-limit counter (one use per id) and
+ * the audit trail (a row for this id means it already ran). The counter fails
+ * open when its store is unreachable, which is why the table replaces it.
  */
-async function claimNonce(nonce: string): Promise<boolean> {
+async function legacyClaim(nonce: string): Promise<boolean> {
   if (usedHere.has(nonce)) return false;
   usedHere.add(nonce);
   const verdict = await consume({ bucket: "admin_copilot_proposal", subject: `proposal:${nonce}`, limit: 1, windowSeconds: 3600 });
@@ -122,9 +141,53 @@ async function claimNonce(nonce: string): Promise<boolean> {
   return true;
 }
 
+/**
+ * Claim a proposal's nonce so it can run once. One atomic statement
+ * (`insert ... on conflict do nothing returning`) through the service client:
+ * a row back means this call won, none means someone already used it. A claim
+ * that cannot be recorded THROWS, and the caller refuses (fails closed). Only
+ * a missing table falls back to the older guard, and says so in the log.
+ */
+export async function claimNonce(
+  nonce: string,
+  meta: ClaimMeta,
+  deps: { client?: ClaimClient; legacy?: (nonce: string) => Promise<boolean> } = {},
+): Promise<ClaimResult> {
+  if (usedHere.has(nonce)) return "used";
+  const client = deps.client ?? (createAdminClient() as unknown as ClaimClient);
+  const { data, error } = await client
+    .from("copilot_proposals")
+    .upsert(
+      {
+        nonce,
+        user_id: meta.userId,
+        tool: meta.tool,
+        action: meta.action,
+        created_at: new Date(meta.now).toISOString(),
+        expires_at: new Date(meta.expiresAt).toISOString(),
+        used_at: new Date(meta.now).toISOString(),
+      },
+      { onConflict: "nonce", ignoreDuplicates: true },
+    )
+    .select("nonce");
+  if (error) {
+    if (isMissingRelation(error)) {
+      console.warn("[copilot] copilot_proposals table is missing; using the older single-use guard until the SQL is applied");
+      return (await (deps.legacy ?? legacyClaim)(nonce)) ? "claimed" : "used";
+    }
+    throw new Error(`copilot claim could not be recorded: ${error.code ?? "unknown"}`);
+  }
+  if (!data || data.length === 0) {
+    usedHere.add(nonce);
+    return "used";
+  }
+  usedHere.add(nonce);
+  return "claimed";
+}
+
 export type ActDeps = {
   key?: Buffer | null;
-  claim?: (nonce: string) => Promise<boolean>;
+  claim?: (nonce: string, meta: ClaimMeta) => Promise<ClaimResult | boolean>;
   execute?: (action: ProposalAction) => Promise<Done>;
   audit?: (entry: { actorId: string; tool: string; kind: string; nonce: string; ok: boolean; summary: string }) => Promise<boolean>;
 };
@@ -162,8 +225,14 @@ export async function confirmProposal(input: { token: unknown; viewer: CopilotVi
   if (!kind || !(kind in ACTION_SCHEMAS) || !ACTION_SCHEMAS[kind].safeParse(body.a.input).success) {
     return { status: 400, body: { ok: false, code: "invalid", message: "That suggestion could not be checked. Ask me again." } };
   }
-  const claim = deps.claim ?? claimNonce;
-  if (!(await claim(body.n))) return { status: 409, body: { ok: false, code: "used", message: "That suggestion has already been used." } };
+  // The claim comes BEFORE the action. If it cannot be recorded the action does not run.
+  let claimed: ClaimResult | boolean;
+  try {
+    claimed = await (deps.claim ?? claimNonce)(body.n, { userId: input.viewer.userId, tool: body.t, action: kind, expiresAt: body.exp, now: input.now });
+  } catch {
+    return { status: 503, body: { ok: false, code: "unavailable", message: "That change was not made, because the single-use record could not be written. Try again in a moment, or make the change on the desk." } };
+  }
+  if (claimed !== true && claimed !== "claimed") return { status: 409, body: { ok: false, code: "used", message: "That suggestion has already been used." } };
 
   const outcome = await (deps.execute ?? executeAction)(body.a);
   const audited = await (deps.audit ?? auditRow)({ actorId: input.viewer.userId, tool: body.t, kind, nonce: body.n, ok: outcome.ok, summary: body.summary });
