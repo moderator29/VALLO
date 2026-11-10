@@ -1178,7 +1178,6 @@ export const roommatesEn = {
     viewPerson: "View the profile",
     personTitle: "{name} on Vallo Roommates",
     browse: "Find a post to share",
-    members: "Members",
   },
   lister: {
     title: "Good for sharing",

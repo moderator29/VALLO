@@ -545,6 +545,11 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/appeals": "/admin",
   "/admin/circle": "/admin",
   "/admin/social-media": "/admin",
+  /* The staff roles of 10 November 2026: four desks, each one level under the console. */
+  "/admin/marketing": "/admin",
+  "/admin/content": "/admin",
+  "/admin/technical": "/admin",
+  "/admin/support-lead": "/admin",
   "/admin/standing": "/admin",
   "/admin/stops": "/admin",
   "/admin/people/[id]": "/admin/people",

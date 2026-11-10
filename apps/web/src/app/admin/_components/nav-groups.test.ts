@@ -59,7 +59,7 @@ describe("the rail's groups", () => {
   it("map the departments onto desks that exist", () => {
     const departments = ADMIN_GROUPS.find((g) => g.label === "Departments")!;
     expect(departments.sections.map((s) => s.label)).toEqual([
-      "Business Development", "Social Media", "Support", "Listing verification", "Trust and Safety", "Finance", "Compliance",
+      "Business Development", "Social Media", "Marketing", "Content", "Technical", "Support", "Listing verification", "Trust and Safety", "Finance", "Compliance",
     ]);
   });
 
@@ -68,6 +68,10 @@ describe("the rail's groups", () => {
     expect(activeGroupKey("/admin/my-desk/tasks")).toBe("g-my-desk");
     expect(activeItemKey("/admin/agreements/settings")).toBe("agreement-settings");
     expect(activeGroupKey("/admin/social-media")).toBe("g-departments");
+    for (const desk of ["marketing", "content", "technical", "support-lead"]) {
+      expect(activeGroupKey(`/admin/${desk}`), desk).toBe("g-departments");
+      expect(activeItemKey(`/admin/${desk}`), desk).toBe(desk);
+    }
     expect(activeItemKey("/admin")).toBe("overview");
   });
 });

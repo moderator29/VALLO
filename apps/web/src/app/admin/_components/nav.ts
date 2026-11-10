@@ -194,6 +194,10 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       /* The Social Media Manager position (10 November 2026): the content
          calendar, drafts, the media library and approvals. No platform API. */
       { key: "social-media", href: "/admin/social-media", icon: ui("camera"), label: "Social media" },
+      /* The staff roles of 10 November 2026: Marketing (campaigns), Content
+         (the editorial calendar and approvals). Each is its own desk and scope. */
+      { key: "marketing", href: "/admin/marketing", icon: ui("price-tag"), label: "Marketing" },
+      { key: "content", href: "/admin/content", icon: ui("file-text"), label: "Content" },
       { key: "standing", href: "/admin/standing", icon: ui("star"), label: "Standing" },
       /* AR-11: the words the safety scan acts on. */
       { key: "blocked-terms", href: "/admin/blocked-terms", icon: ui("block"), label: "Blocked terms" },
@@ -215,6 +219,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "account-recovery", href: "/admin/account-recovery", icon: ui("key"), label: "Account recovery", countKeys: ["recovery"], countLabel: "email recoveries opened and not yet finished" },
       /* The docs upgrade: which help pages members say did not help. */
       { key: "doc-feedback", href: "/admin/doc-feedback", icon: ui("file-search"), label: "Pages that fail" },
+      /* The Customer Support Lead: team workload, QA, support figures and policy notes. */
+      { key: "support-lead", href: "/admin/support-lead", icon: ui("headset"), label: "Support lead" },
     ],
   },
   {
@@ -230,6 +236,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "crashes", href: "/admin/crashes", icon: ui("alert-triangle"), label: "Crash log" },
       { key: "audit", href: "/admin/audit", icon: ui("history"), label: "Audit log" },
       { key: "oversight", href: "/admin/oversight", icon: ui("user"), label: "Team oversight" },
+      /* The Technical Administrator's read-only health panel and incident log. */
+      { key: "technical", href: "/admin/technical", icon: ui("pulse"), label: "Technical" },
       /* Read-only checks of each provider key (Payluk, LiveKit, Apple push, Termii) and the map tiles. */
       { key: "providers", href: "/admin/operations/providers", icon: ui("key"), label: "Provider checks" },
       /* Video and audio calls: volume, connect rate, minutes. */
@@ -333,7 +341,10 @@ export const ADMIN_GROUPS: AdminGroup[] = [
     sections: [
       { key: "business-development", label: "Business Development", items: pick("business-development") },
       { key: "social-media", label: "Social Media", items: pick("social-media") },
-      { key: "support", label: "Support", items: pick("tickets", "people", "account-recovery") },
+      { key: "marketing", label: "Marketing", items: pick("marketing") },
+      { key: "content", label: "Content", items: pick("content") },
+      { key: "technical", label: "Technical", items: pick("technical") },
+      { key: "support", label: "Support", items: pick("tickets", "people", "account-recovery", "support-lead") },
       { key: "listing-verification", label: "Listing verification", items: pick("listings", "kyc", "review-calls") },
       {
         key: "trust-safety",
