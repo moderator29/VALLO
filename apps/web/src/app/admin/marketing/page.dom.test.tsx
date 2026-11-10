@@ -12,8 +12,9 @@ vi.mock("@/lib/admin/desk-door", () => ({ deskDoor: async () => door.value }));
 vi.mock("@/lib/admin/copilot/contexts/DeskCopilot", () => ({ DeskCopilot: ({ context }: { context: string | null }) => <div data-testid="copilot">{context ?? "no-context"}</div> }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh() {} }) }));
 
-const reads = vi.hoisted(() => ({ campaigns: vi.fn(), results: vi.fn(), acquisition: vi.fn() }));
-vi.mock("@/lib/admin/marketing/queries", () => ({ readCampaigns: reads.campaigns, readResults: reads.results, readAcquisition: reads.acquisition }));
+const reads = vi.hoisted(() => ({ campaigns: vi.fn(), results: vi.fn(), acquisition: vi.fn(), referrals: vi.fn(), entries: vi.fn() }));
+vi.mock("@/lib/admin/marketing/queries", () => ({ readCampaigns: reads.campaigns, readResults: reads.results, readAcquisition: reads.acquisition, readReferralPerformance: reads.referrals }));
+vi.mock("@/lib/admin/desk-entries/queries", () => ({ readEntries: reads.entries, readNames: async () => new Map() }));
 
 const { default: Page } = await import("./page");
 
@@ -29,6 +30,9 @@ beforeEach(() => {
   reads.campaigns.mockReset();
   reads.results.mockReset();
   reads.acquisition.mockReset();
+  reads.referrals.mockReset();
+  reads.entries.mockReset();
+  reads.entries.mockResolvedValue({ state: "ok", data: [] });
 });
 
 describe("the door", () => {
@@ -84,5 +88,44 @@ describe("the desk", () => {
     const out = text((await Page({ searchParams: Promise.resolve({ tab: "acquisition" }) })) as React.ReactElement);
     expect(out).toMatch(/Not available/);
     expect(out).toMatch(/Could not be read just now/i);
+  });
+});
+
+describe("the added tools", () => {
+  it("draws the campaign calendar and warns about two campaigns on one channel", async () => {
+    reads.campaigns.mockResolvedValue({ state: "ok", data: [campaign({ id: "a", name: "Push A", startsOn: "2026-11-02", endsOn: "2026-11-20" }), campaign({ id: "b", name: "Push B", startsOn: "2026-11-10", endsOn: "2026-11-25" })] });
+    reads.results.mockResolvedValue({ state: "ok", data: [] });
+    const out = text((await Page({ searchParams: Promise.resolve({ tab: "calendar", month: "2026-11" }) })) as React.ReactElement);
+    expect(out).toMatch(/Campaign calendar, 2026-11/);
+    expect(out).toMatch(/Push A and Push B both use Social media/);
+  });
+
+  it("says referral figures could not be read instead of drawing zero, and never shows a reward amount", async () => {
+    reads.campaigns.mockResolvedValue({ state: "ok", data: [] });
+    reads.results.mockResolvedValue({ state: "ok", data: [] });
+    reads.referrals.mockResolvedValue(null);
+    expect(text((await Page({ searchParams: Promise.resolve({ tab: "referrals" }) })) as React.ReactElement)).toMatch(/could not be read/);
+    reads.referrals.mockResolvedValue({ weeks: ["2026-11-02"], attributed: [4], buckets: { pending: 2, earned: 1, reversed: 0 }, campaigns: [{ title: "Invite and earn", status: "active", startsAt: "2026-10-01T00:00:00Z", endsAt: null }] });
+    const out = text((await Page({ searchParams: Promise.resolve({ tab: "referrals" }) })) as React.ReactElement);
+    expect(out).toMatch(/Invite and earn/);
+    expect(out).toMatch(/Reward amounts and the Rewards Balance belong to Finance/);
+  });
+
+  it("offers the report builder with a draft, and the notes tools with their forms", async () => {
+    reads.campaigns.mockResolvedValue({ state: "ok", data: [campaign()] });
+    reads.results.mockResolvedValue({ state: "ok", data: [] });
+    reads.acquisition.mockResolvedValue({ weeks: ["2026-11-02"], signups: [5], listingsCreated: null, referrals: null });
+    const report = text((await Page({ searchParams: Promise.resolve({ tab: "report", month: "2026-11" }) })) as React.ReactElement);
+    expect(report).toMatch(/Save as draft report/);
+    const briefs = text((await Page({ searchParams: Promise.resolve({ tab: "briefs" }) })) as React.ReactElement);
+    expect(briefs).toMatch(/No creative briefs yet/);
+    expect(briefs).toMatch(/No a\/b test log yet|A\/B test/i);
+  });
+
+  it("says the notes tables are not set up when only they are missing", async () => {
+    reads.campaigns.mockResolvedValue({ state: "ok", data: [] });
+    reads.results.mockResolvedValue({ state: "ok", data: [] });
+    reads.entries.mockResolvedValue({ state: "not-open" });
+    expect(text((await Page({ searchParams: Promise.resolve({}) })) as React.ReactElement)).toMatch(/notes, briefs and reports tables are not on this database yet/);
   });
 });
