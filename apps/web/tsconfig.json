@@ -92,7 +92,7 @@
     ".next-mapbase/types/**/*.ts",
     ".next-mapbase/dev/types/**/*.ts",
     ".next-weight/types/**/*.ts",
-    ".next-weight/dev/types/**/*.ts"
+    ".next-weight/dev/types/**/*.ts",
     ".next-ui/types/**/*.ts",
     ".next-ui/dev/types/**/*.ts"
   ],

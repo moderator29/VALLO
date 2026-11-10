@@ -17,7 +17,13 @@ import "@/app/css/docs-kit.css";
  * Server-safe and data-free: it draws exactly the rows it is handed.
  */
 
-export type DocTableTone = "neutral" | "pending" | "active" | "success" | "danger" | "info";
+export type DocTableTone = "neutral" | "pending" | "active" | "success" | "warning" | "danger" | "info";
+
+/** The name the offers chapters use for the same thing. */
+export type DocTone = DocTableTone;
+
+/** The name the offers and manual chapters use for a row. */
+export type DocRow = DocTableRow;
 
 export type DocTableColumn = {
   key: string;
@@ -31,9 +37,15 @@ export type DocTableColumn = {
 export type DocTableCell =
   | ReactNode
   | { state: string; tone: DocTableTone }
-  | { yes: boolean; note?: string };
+  | { yes: boolean; note?: string; word?: string };
 
-export type DocTableRow = { id: string; icon?: UiIconName; cells: Record<string, DocTableCell> };
+/**
+ * A row. `head` is the row's own name, drawn as a row header (`th scope="row"`)
+ * rather than a cell, which is what a table of states or stages wants: the
+ * state is the subject of the row, not one of its values. `id` is optional
+ * because a row with a `head` already identifies itself.
+ */
+export type DocTableRow = { id?: string; head?: ReactNode; icon?: UiIconName; cells: Record<string, DocTableCell> };
 
 function isState(v: DocTableCell): v is { state: string; tone: DocTableTone } {
   return typeof v === "object" && v !== null && "state" in (v as object) && "tone" in (v as object);
@@ -67,7 +79,10 @@ export function DocTable({
   columns,
   rows,
   captionHidden = false,
+  headLabel,
 }: {
+  /** The first column's label where the rows carry their own `head`. */
+  headLabel?: string;
   /** What the table is about. Read first by a screen reader. */
   caption: string;
   columns: DocTableColumn[];
@@ -81,38 +96,62 @@ export function DocTable({
         <caption className={captionHidden ? "sr-only" : "nf-doc-table__caption"}>{caption}</caption>
         <thead role="rowgroup">
           <tr role="row">
-            {columns.map((c) => (
+            {columns.map((c, i) => (
               <th key={c.key} scope="col" role="columnheader" data-numeric={c.numeric ? "true" : undefined}>
-                {c.label}
+                {i === 0 && headLabel ? headLabel : c.label}
               </th>
             ))}
           </tr>
         </thead>
         <tbody role="rowgroup">
-          {rows.map((row) => (
-            <tr key={row.id} role="row">
-              {columns.map((c, i) => (
-                <td
-                  key={c.key}
-                  role="cell"
-                  data-label={c.label}
-                  data-numeric={c.numeric ? "true" : undefined}
-                  data-lead={i === 0 ? "true" : undefined}
-                >
-                  {i === 0 && row.icon ? (
-                    <span className="nf-doc-table__lead">
-                      <span className="nf-doc-table__icon" aria-hidden="true">
-                        <UiIcon name={row.icon} size={16} />
+          {rows.map((row, r) => {
+            /* A row with its own name draws that name as a row header and
+               spends its cells on the remaining columns, so a reader on a
+               phone hears "Pending: what it means" rather than a bare value. */
+            const lead = row.head !== undefined;
+            const body = lead ? columns.slice(1) : columns;
+            return (
+              <tr key={row.id ?? `r${r}`} role="row">
+                {lead ? (
+                  <th scope="row" role="rowheader" data-label={columns[0]?.label} data-lead="true">
+                    {row.icon ? (
+                      <span className="nf-doc-table__lead">
+                        <span className="nf-doc-table__icon" aria-hidden="true">
+                          <UiIcon name={row.icon} size={16} />
+                        </span>
+                        {row.head}
                       </span>
-                      <Cell column={c} value={row.cells[c.key]} />
-                    </span>
-                  ) : (
-                    <Cell column={c} value={row.cells[c.key]} />
-                  )}
-                </td>
-              ))}
-            </tr>
-          ))}
+                    ) : (
+                      row.head
+                    )}
+                  </th>
+                ) : null}
+                {body.map((c, j) => {
+                  const i = lead ? j + 1 : j;
+                  return (
+                    <td
+                      key={c.key}
+                      role="cell"
+                      data-label={c.label}
+                      data-numeric={c.numeric ? "true" : undefined}
+                      data-lead={i === 0 ? "true" : undefined}
+                    >
+                      {i === 0 && row.icon ? (
+                        <span className="nf-doc-table__lead">
+                          <span className="nf-doc-table__icon" aria-hidden="true">
+                            <UiIcon name={row.icon} size={16} />
+                          </span>
+                          <Cell column={c} value={row.cells[c.key]} />
+                        </span>
+                      ) : (
+                        <Cell column={c} value={row.cells[c.key]} />
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

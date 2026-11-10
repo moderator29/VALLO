@@ -19,13 +19,22 @@ export type DocSectionName = "Help centre" | "Guides" | "Legal" | "Documentation
 export function DocShell({
   section,
   sectionHref,
+  home,
+  search = true,
+  crumbs,
   back,
   children,
   wide = false,
 }: {
-  section: DocSectionName;
+  /** Where the section name leads, as the staff manual names it. */
+  home?: string;
+  /** The staff manual draws no search control. */
+  search?: boolean;
+  /** A trail into the section, drawn in place of the default Back. */
+  crumbs?: { label: string; href?: string }[];
+  section: DocSectionName | (string & {});
   /** Where the section name leads: its own index. */
-  sectionHref: string;
+  sectionHref?: string;
   /**
    * The way back into the product, labelled. Defaults to home. `false` where
    * the surrounding frame already draws Back (the public site's back bar), so
@@ -36,20 +45,24 @@ export function DocShell({
   /** A wider column for an index of cards or a manual with a rail. */
   wide?: boolean;
 }) {
-  const home = back === false ? null : (back ?? { href: "/", label: "Back to Vallo" });
+  /* `home` names the section index where the staff manual calls it that. */
+  const indexHref = sectionHref ?? home ?? "/docs";
+  const first = crumbs && crumbs.length > 0 ? crumbs[0] : undefined;
+  const fallback = first ? { href: first.href ?? indexHref, label: first.label } : { href: "/", label: "Back to Vallo" };
+  const upward = back === false ? null : (back ?? fallback);
   return (
     <div className="nf-doc-shell" data-width={wide ? "wide" : undefined}>
       <div className="nf-doc-shell__bar">
-        {home ? (
-          <Link href={home.href} className="nf-doc-shell__back nf-tap" aria-label={home.label}>
+        {upward ? (
+          <Link href={upward.href} className="nf-doc-shell__back nf-tap" aria-label={upward.label}>
             <UiIcon name="arrow-left" size={20} />
           </Link>
         ) : null}
-        <Link href={sectionHref} className="nf-doc-shell__section">
+        <Link href={indexHref} className="nf-doc-shell__section">
           <LogoMark size={26} className="nf-doc-shell__mark" />
           <span>{section}</span>
         </Link>
-        <DocSearchSheet />
+        {search ? <DocSearchSheet /> : null}
       </div>
       <div className="nf-doc-shell__body">{children}</div>
     </div>

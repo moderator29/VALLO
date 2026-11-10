@@ -122,6 +122,14 @@ export type DocChapter = {
    * sentence of each of the first sections is lifted (`glance.ts`).
    */
   glance?: string[];
+  /**
+   * Controls that take the reader into the product from the chapter itself
+   * (the founder, 10 November 2026: a document should be one tap from doing
+   * the thing it describes). Drawn at the foot of the chapter.
+   */
+  actions?: string[];
+  /** Sibling pages a reader may want instead, each a link. */
+  related?: { href: string; label: string }[];
   sections: DocSection[];
 };
 

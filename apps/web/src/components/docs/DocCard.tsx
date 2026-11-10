@@ -52,3 +52,28 @@ export function DocCardGrid({ children, label }: { children: ReactNode; label?: 
     </ul>
   );
 }
+
+
+/**
+ * The grid, taking its cards as data rather than children, which is how the
+ * offers, platform and staff-manual chapters build theirs.
+ */
+export function DocCards({
+  label,
+  items,
+  children,
+}: {
+  label?: string;
+  items?: { href: string; title: string; line?: string; description?: string; icon: UiIconName }[];
+  children?: ReactNode;
+}) {
+  return (
+    <DocCardGrid label={label}>
+      {items
+        ? items.map((i) => (
+            <DocCard key={i.href} href={i.href} icon={i.icon} title={i.title} description={i.line ?? i.description ?? ""} />
+          ))
+        : children}
+    </DocCardGrid>
+  );
+}

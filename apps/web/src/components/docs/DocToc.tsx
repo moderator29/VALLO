@@ -14,12 +14,22 @@ import "@/app/css/docs-kit.css";
  * fill only, so nothing reflows; under reduced motion it changes without a
  * fade.
  */
-export function DocToc({ sections, title = "Contents" }: { sections: { id: string; title: string }[]; title?: string }) {
+export function DocToc({
+  sections,
+  items,
+  title = "Contents",
+}: {
+  sections?: { id: string; title: string }[];
+  /** The same list as the manual and offers chapters name it. */
+  items?: { id: string; heading: string }[];
+  title?: string;
+}) {
+  const list = sections ?? (items ?? []).map((i) => ({ id: i.id, title: i.heading }));
   const [active, setActive] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
-    const targets = sections
+    const targets = list
       .map((s) => document.getElementById(s.id))
       .filter((el): el is HTMLElement => el !== null);
     if (targets.length === 0) return;
@@ -31,7 +41,7 @@ export function DocToc({ sections, title = "Contents" }: { sections: { id: strin
     );
     for (const t of targets) io.observe(t);
     return () => io.disconnect();
-  }, [sections]);
+  }, [list]);
 
   return (
     <nav className="nf-doc-toc" aria-label={title}>
@@ -40,7 +50,7 @@ export function DocToc({ sections, title = "Contents" }: { sections: { id: strin
         {title}
       </p>
       <ol className="nf-doc-toc__list">
-        {sections.map((s, i) => (
+        {list.map((s, i) => (
           <li key={s.id}>
             <a href={`#${s.id}`} className="nf-doc-toc__row nf-tap" aria-current={active === s.id ? "location" : undefined}>
               <span className="nf-doc-toc__num" aria-hidden="true">
