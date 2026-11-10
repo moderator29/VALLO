@@ -80,6 +80,11 @@ export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name
         <nav aria-label="Your desks" className="mt-inline">
           <ul className="flex flex-wrap gap-xs">
             <li>
+              <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/admin/my-desk">
+                My desk
+              </Link>
+            </li>
+            <li>
               <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/admin">
                 Console
               </Link>
@@ -156,6 +161,11 @@ export function StaffHome({ staff }: { staff: StaffAccess }) {
         </p>
         {staff.handbookAcknowledged ? (
           <ul className="mt-block grid gap-xs">
+            <li>
+              <Link href="/admin/my-desk" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+                Open My desk
+              </Link>
+            </li>
             {staff.scopes.map((scope) => (
               <li key={scope}>
                 <Link href={STAFF_DESK[scope]} className="font-semibold text-[var(--nf-content-link)] hover:underline">

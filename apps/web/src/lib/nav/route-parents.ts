@@ -480,6 +480,10 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/front-door": "/admin/analytics",
   "/admin/audit": "/admin",
   "/admin/lookup": "/admin",
+  /* My Desk (10 November 2026): the personal workspace, its tasks and its announcements. */
+  "/admin/my-desk": "/admin",
+  "/admin/my-desk/tasks": "/admin/my-desk",
+  "/admin/my-desk/announcements": "/admin/my-desk",
   "/admin/oversight": "/admin",
   "/admin/bookings": "/admin",
   "/admin/bookings/[bookingId]": "/admin/bookings",

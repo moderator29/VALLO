@@ -238,6 +238,25 @@
   .nf-admin-nav__more[open] .nf-admin-nav__more-chev {
     transform: rotate(180deg);
   }
+  /* The rail's expandable groups (My Desk brief, 10 November 2026). */
+  .nf-admin-nav__group > summary {
+    cursor: pointer;
+    list-style: none;
+  }
+  .nf-admin-nav__group > summary::-webkit-details-marker {
+    display: none;
+  }
+  .nf-admin-nav__group[open] > summary .nf-admin-nav__more-chev {
+    transform: rotate(180deg);
+  }
+  .nf-admin-nav__section {
+    margin: var(--nf-space-2xs) 0 0;
+    padding: 0 var(--nf-space-xs);
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: var(--nf-tracking-tight);
+    color: var(--nf-content-secondary);
+  }
 
   /* Settings over the operator, pinned to the rail's foot. */
   .nf-admin-rail__foot {
