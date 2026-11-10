@@ -4,6 +4,9 @@ import { SiteHead } from "@/components/site/SiteHead";
 import Link from "next/link";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { PRIVACY_SECTIONS as sections, PRIVACY_UPDATED } from "@/lib/legal/privacy";
+import { PRIVACY_VERSION } from "@/lib/legal/versions";
+import { LegalContents, LegalGlance, LegalShortVersion } from "@/components/legal/LegalPreface";
+import { PRIVACY_SHORT, PrivacyGlance } from "@/lib/legal/glance";
 import "@/app/css/site.css";
 
 /* A10: the title and description in the page's own language, with its
@@ -42,6 +45,11 @@ export default function PrivacyPage() {
            legal text exactly as it was. */}
         <DocumentSheet kind="document" printable className="mt-block nf-legal-sheet">
           <div className="space-y-block">
+            <LegalShortVersion items={PRIVACY_SHORT} version={PRIVACY_VERSION} updated={PRIVACY_UPDATED} />
+            <LegalContents sections={sections} />
+            <LegalGlance>
+              <PrivacyGlance />
+            </LegalGlance>
             {sections.map((s) => (
               <section key={s.title} id={s.id}>
                 <h2 className="nf-h3">{s.title}</h2>

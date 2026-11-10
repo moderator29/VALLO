@@ -4,6 +4,9 @@ import { SiteHead } from "@/components/site/SiteHead";
 import Link from "next/link";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
 import { TERMS_SECTIONS as sections, TERMS_UPDATED } from "@/lib/legal/terms";
+import { TERMS_VERSION } from "@/lib/legal/versions";
+import { LegalContents, LegalGlance, LegalShortVersion } from "@/components/legal/LegalPreface";
+import { TERMS_SHORT, TermsGlance } from "@/lib/legal/glance";
 import "@/app/css/site.css";
 
 /* A10: the title and description in the page's own language, with its
@@ -46,6 +49,11 @@ export default function TermsPage() {
            legal text exactly as it was. */}
         <DocumentSheet kind="document" printable className="mt-block nf-legal-sheet">
           <div className="space-y-block">
+            <LegalShortVersion items={TERMS_SHORT} version={TERMS_VERSION} updated={TERMS_UPDATED} />
+            <LegalContents sections={sections} />
+            <LegalGlance>
+              <TermsGlance />
+            </LegalGlance>
             {sections.map((s) => (
               <section key={s.title} id={s.id} className="scroll-mt-28">
                 <h2 className="nf-h3">{s.title}</h2>

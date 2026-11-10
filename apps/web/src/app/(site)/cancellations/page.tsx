@@ -20,6 +20,10 @@ import {
   REFUND_NO_BALANCE,
   REFUND_ROUTE,
 } from "@/lib/money/copy";
+import { LegalGlance, LegalShortVersion } from "@/components/legal/LegalPreface";
+import { REFUNDS_SHORT, RefundsGlance } from "@/lib/legal/glance";
+import { TERMS_UPDATED } from "@/lib/legal/terms";
+import { TERMS_VERSION } from "@/lib/legal/versions";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
 import "@/components/site/guides/policy-sheet.css";
 
@@ -64,6 +68,10 @@ export default function CancellationPolicyPage() {
             reader's theme, sections separated by a hairline, the cards the parts
             used to be now rows (policy-sheet.css). Every word is as it was. */}
         <DocumentSheet kind="document" printable className="nf-policy mt-block">
+        <LegalShortVersion title="Refunds in short" items={REFUNDS_SHORT} version={TERMS_VERSION} updated={TERMS_UPDATED} />
+        <LegalGlance title="Refunds at a glance">
+          <RefundsGlance />
+        </LegalGlance>
         {/* ------------------------------------------------- the timeline */}
         <section aria-labelledby="the-schedule">
           <h2 id="the-schedule" className="sr-only">
