@@ -58,7 +58,7 @@ function toProspect(row: Record<string, unknown>): BdProspect {
     stage: asStage(row.stage),
     notes: (row.notes as string | null) ?? null,
     assignedTo: (row.assigned_to as string | null) ?? null,
-    createdBy: String(row.created_by ?? ""),
+    createdBy: (row.created_by as string | null) ?? null,
     listingId: (row.listing_id as string | null) ?? null,
     onboardedAt: (row.onboarded_at as string | null) ?? null,
     nextFollowUpAt: (row.next_follow_up_at as string | null) ?? null,
@@ -74,7 +74,7 @@ function toActivity(row: Record<string, unknown>): BdActivity {
     kind: (row.kind as BdActivityKind) ?? "note",
     body: String(row.body ?? ""),
     outcome: (row.outcome as string | null) ?? null,
-    actorId: String(row.actor_id ?? ""),
+    actorId: (row.actor_id as string | null) ?? null,
     createdAt: String(row.created_at ?? ""),
   };
 }

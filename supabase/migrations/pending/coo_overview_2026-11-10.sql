@@ -43,7 +43,11 @@
 
 create table if not exists public.coo_escalations (
   id              uuid primary key default gen_random_uuid(),
-  raised_by       uuid not null references auth.users (id) on delete set null,
+  -- Nullable, not "not null": ON DELETE SET NULL would otherwise violate a
+  -- NOT NULL constraint the moment the raiser's account is deleted, which
+  -- would block the member deletion itself. The escalation and its history
+  -- stay; only who raised it is forgotten. (Lead review, 10 Nov 2026.)
+  raised_by       uuid references auth.users (id) on delete set null,
   source_desk     text not null,
   subject         text not null,
   detail          text not null,
@@ -59,9 +63,16 @@ create table if not exists public.coo_escalations (
   constraint coo_escalations_subject_len check (char_length(btrim(subject)) between 1 and 200),
   constraint coo_escalations_detail_len check (char_length(btrim(detail)) between 1 and 4000),
   constraint coo_escalations_resolution_note_len check (resolution_note is null or char_length(resolution_note) <= 2000),
-  -- A resolved escalation carries who resolved it and when, together.
+  -- A resolved escalation carries WHEN it was resolved; who resolved it
+  -- (`resolved_by`) is informative only and is not required, because that
+  -- account can later be deleted (ON DELETE SET NULL) without the row
+  -- becoming invalid. An unresolved escalation carries neither.
+  -- (Lead review, 10 Nov 2026: the earlier version required resolved_by
+  -- not null when resolved, which ON DELETE SET NULL would violate the
+  -- moment the resolver's account was deleted.)
   constraint coo_escalations_resolved_pair check (
-    (status = 'resolved') = (resolved_by is not null and resolved_at is not null)
+    (status = 'resolved') = (resolved_at is not null)
+    and (status = 'resolved' or (resolved_by is null and resolved_at is null))
   )
 );
 
@@ -73,7 +84,10 @@ create index if not exists coo_escalations_raised_by_idx on public.coo_escalatio
 
 create table if not exists public.staff_access_recommendations (
   id                           uuid primary key default gen_random_uuid(),
-  recommended_by               uuid not null references auth.users (id) on delete set null,
+  -- Nullable for the same reason as coo_escalations.raised_by above: a NOT
+  -- NULL column paired with ON DELETE SET NULL would block deleting the
+  -- recommender's account.
+  recommended_by               uuid references auth.users (id) on delete set null,
   about_name                   text not null,
   recommended_position_or_scope text not null,
   reason                       text not null,

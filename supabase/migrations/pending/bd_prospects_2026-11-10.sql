@@ -77,7 +77,11 @@ create table if not exists public.bd_prospects (
   stage           text not null default 'new',
   notes           text,
   assigned_to     uuid references auth.users (id) on delete set null,
-  created_by      uuid not null references auth.users (id) on delete set null,
+  -- Nullable, not "not null": ON DELETE SET NULL would otherwise violate a
+  -- NOT NULL constraint the moment the creator's account is deleted, which
+  -- would block the member deletion itself. The row and its history stay;
+  -- only who created it is forgotten. (Lead review, 10 Nov 2026.)
+  created_by      uuid references auth.users (id) on delete set null,
   -- The listing this partnership produced, once the Director knows which
   -- one it is. Deliberately NOT set automatically: onboarding a business
   -- and that business's listing being submitted and approved are two
@@ -134,7 +138,10 @@ create table if not exists public.bd_prospect_activity (
   -- Director's own words ("interested, wants a call next week",
   -- "not interested, no fit"). Null for every other kind.
   outcome      text,
-  actor_id     uuid not null references auth.users (id) on delete set null,
+  -- Nullable for the same reason as bd_prospects.created_by above: a NOT
+  -- NULL column paired with ON DELETE SET NULL would block deleting the
+  -- actor's account.
+  actor_id     uuid references auth.users (id) on delete set null,
   created_at   timestamptz not null default now(),
   constraint bd_prospect_activity_kind_chk check (kind in ('contact', 'follow_up', 'note', 'stage_change')),
   constraint bd_prospect_activity_body_len check (char_length(btrim(body)) between 1 and 2000),

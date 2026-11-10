@@ -58,7 +58,7 @@ export type BdProspect = {
   stage: BdStage;
   notes: string | null;
   assignedTo: string | null;
-  createdBy: string;
+  createdBy: string | null;
   listingId: string | null;
   onboardedAt: string | null;
   nextFollowUpAt: string | null;
@@ -72,7 +72,7 @@ export type BdActivity = {
   kind: BdActivityKind;
   body: string;
   outcome: string | null;
-  actorId: string;
+  actorId: string | null;
   createdAt: string;
 };
 

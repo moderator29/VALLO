@@ -135,6 +135,8 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/kyc/guide": "the reviewer guide",
   "/admin/listings": "Listings",
   "/admin/listings/[id]": "the listing",
+  "/admin/business-development": "Business development",
+  "/admin/overview": "Overview",
   "/admin/operations": "Operations",
   "/admin/operations/providers": "Provider checks",
   "/admin/people": "People",

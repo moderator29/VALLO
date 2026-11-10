@@ -13,9 +13,12 @@ import { requireCoo } from "./guard";
  * THE COO DESK'S CROSS-DESK BACKLOG, READ FROM EACH DESK'S OWN FUNCTION.
  *
  * Every count and every row below comes from the same read the desk itself
- * already uses (`lib/admin/reads/listings.ts` and `queries.ts` for
- * listings and alerts, `reads/moderation.ts`, `support-queue.ts`,
- * `reads/agreements.ts`). Nothing here queries a table a second time.
+ * already uses: `lib/admin/queries.ts` (`getListingSubmissions`,
+ * `getRiskAlerts`) for listings and operations alerts,
+ * `lib/admin/reads/moderation.ts` for moderation,
+ * `lib/admin/support-queue.ts` for support, and
+ * `lib/admin/reads/agreements.ts` for agreements. Nothing here queries a
+ * table a second time.
  *
  * ROWS ARE THE REAL OLDEST FEW, NOT A GUESS. Agreements and support already
  * read their waiting bucket oldest-first; listings and alerts read newest
@@ -134,7 +137,7 @@ export async function readCooBacklog(db: SupabaseClient): Promise<CooBacklog> {
 
 export type CooEscalation = {
   id: string;
-  raisedBy: string;
+  raisedBy: string | null;
   sourceDesk: string;
   subject: string;
   detail: string;
@@ -150,7 +153,7 @@ export type CooRead<T> = { state: "ok"; data: T } | { state: "unavailable" } | {
 function toEscalation(row: Record<string, unknown>): CooEscalation {
   return {
     id: String(row.id),
-    raisedBy: String(row.raised_by ?? ""),
+    raisedBy: (row.raised_by as string | null) ?? null,
     sourceDesk: String(row.source_desk ?? "other"),
     subject: String(row.subject ?? ""),
     detail: String(row.detail ?? ""),
@@ -185,7 +188,7 @@ export async function listEscalations(): Promise<CooRead<CooEscalation[]>> {
 
 export type StaffAccessRecommendation = {
   id: string;
-  recommendedBy: string;
+  recommendedBy: string | null;
   aboutName: string;
   recommendedPositionOrScope: string;
   reason: string;
@@ -196,7 +199,7 @@ export type StaffAccessRecommendation = {
 function toRecommendation(row: Record<string, unknown>): StaffAccessRecommendation {
   return {
     id: String(row.id),
-    recommendedBy: String(row.recommended_by ?? ""),
+    recommendedBy: (row.recommended_by as string | null) ?? null,
     aboutName: String(row.about_name ?? ""),
     recommendedPositionOrScope: String(row.recommended_position_or_scope ?? ""),
     reason: String(row.reason ?? ""),

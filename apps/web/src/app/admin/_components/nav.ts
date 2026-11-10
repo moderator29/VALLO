@@ -59,6 +59,12 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       },
       /* W8: the lookup box answered Control K and nothing else; it is a desk. */
       { key: "lookup", href: "/admin/lookup", icon: ui("search"), label: "Lookup" },
+      /* The COO desk: escalations, staff access recommendations, and the
+         real backlog across listings, moderation, support, agreements and
+         operations. Open only to a super admin or a staff member holding
+         every one of the COO's scopes (`requireCoo`), not a single scope,
+         so it is not badged by any one desk's own count. */
+      { key: "coo-overview", href: "/admin/overview", icon: ui("trending-up"), label: "COO overview" },
     ],
   },
   {

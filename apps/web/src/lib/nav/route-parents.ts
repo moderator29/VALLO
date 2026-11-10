@@ -507,6 +507,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/compliance": "/admin/kyc",
   "/admin/listings": "/admin",
   "/admin/listings/[id]": "/admin/listings",
+  "/admin/business-development": "/admin",
+  "/admin/overview": "/admin",
   "/admin/money": "/admin",
   "/admin/operations": "/admin",
   /* V-80: field speed, one panel read from real phones. */
