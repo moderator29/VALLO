@@ -1,6 +1,9 @@
 import Image from "next/image";
 
 import { PageFrame } from "@/components/app/PageFrame";
+import type { CSSProperties } from "react";
+
+import "@/components/ui/art-stack.css";
 import { FEATURE_ART } from "@/lib/features/art";
 import { CirclePostCard } from "@/components/social/circle/CircleVisuals";
 import { ButtonLink } from "@/components/ui/Button";
@@ -55,12 +58,12 @@ export function CommunityScreen({
         {/* THE COVER (8 November 2026): the community's art under a scrim,
             its object, its name, the live member count and Join or Joined,
             in the new Circle hero's register. */}
-        <section className="nf-ccover" data-theme="dark" aria-label={community.name} data-testid="community-cover">
-          <span className="nf-ccover__art" aria-hidden="true">
-            <Image src={FEATURE_ART.circlePromo.src} alt="" fill sizes="(max-width: 768px) 100vw, 720px" style={{ objectFit: "cover", objectPosition: FEATURE_ART.circlePromo.focus }} />
+        <section className="nf-ccover" data-art-stack="" style={{ "--nf-art-ratio": Math.max(FEATURE_ART.circlePromo.ratio, 1.4) } as CSSProperties} data-theme="dark" aria-label={community.name} data-testid="community-cover">
+          <span className="nf-ccover__art" data-art-stack-art="" aria-hidden="true">
+            <Image src={FEATURE_ART.circlePromo.src} alt="" fill sizes="(max-width: 768px) 100vw, 720px" style={{ objectFit: "contain", objectPosition: "var(--nf-art-pos, 50% 100%)" }} />
           </span>
-          <span className="nf-ccover__scrim" aria-hidden="true" />
-          <div className="nf-ccover__body">
+          <span className="nf-ccover__scrim" data-art-stack-scrim="" aria-hidden="true" />
+          <div className="nf-ccover__body" data-art-stack-body="">
             <CommunityGlyph category={community.category} size="lg" />
             <h2 className="nf-ccover__name">{community.name}</h2>
             <p className="nf-ccover__meta nf-numeric">

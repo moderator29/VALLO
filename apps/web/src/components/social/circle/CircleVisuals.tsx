@@ -13,6 +13,7 @@ import type { CirclePostView, HomeStats } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 import { initial } from "@/lib/text/initial";
 import { CircleComposeFab as ComposeFab, TabIntoView } from "./CircleClient";
+import "@/components/ui/art-stack.css";
 import "./circle-visuals.css";
 
 /**
@@ -88,12 +89,12 @@ export function CircleBanner({
   const members = stats?.members ?? 0;
   const more = Math.max(0, members - shown.length);
   return (
-    <section className="nf-cbn" data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
-      <span className="nf-cbn__art" aria-hidden="true">
+    <section className="nf-cbn" data-art-stack="" style={{ "--nf-art-ratio": art.ratio } as React.CSSProperties} data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
+      <span className="nf-cbn__art" data-art-stack-art="" aria-hidden="true">
         <Image src={art.src} alt="" fill sizes="(max-width: 768px) 100vw, 960px" priority style={{ objectFit: art.fit, objectPosition: art.focus }} />
       </span>
-      <span className="nf-cbn__scrim" aria-hidden="true" />
-      <div className="nf-cbn__body">
+      <span className="nf-cbn__scrim" data-art-stack-scrim="" aria-hidden="true" />
+      <div className="nf-cbn__body" data-art-stack-body="">
         <h2 id="circle-banner-title" className="nf-cbn__title">
           {H.heroTitle}
         </h2>

@@ -12,26 +12,56 @@
   .nf-scene {
     position: relative;
     isolation: isolate;
+    container-type: inline-size;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     overflow: hidden;
     border-radius: var(--nf-radius-island);
     background: var(--nf-surface-artwork);
     color: var(--nf-content-primary);
     box-shadow: var(--nf-elevation-floating);
   }
+  /* NARROW: the picture has a box of its own at the picture's own shape, so
+     nothing is cropped, and the words sit BELOW it over the fade. (The old
+     layout laid the words over the subject and cut off heads.) */
   .nf-scene__stage {
     grid-area: 1 / 1;
     position: relative;
-    min-block-size: 20rem;
+    aspect-ratio: var(--nf-scene-ratio, 4 / 3);
   }
   .nf-scene__words {
-    grid-area: 1 / 1;
+    grid-area: 2 / 1;
     position: relative;
     z-index: 5;
     display: grid;
-    align-content: end;
+    align-content: start;
     gap: var(--nf-space-sm);
-    padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-lg);
+    margin-block-start: calc(var(--nf-space-lg) * -1);
+    padding: 0 var(--nf-space-md) var(--nf-space-lg);
+  }
+  /* WIDE: words at the start, the subject at the end edge. */
+  @container (min-width: 44rem) {
+    .nf-scene__stage {
+      grid-area: 1 / 1;
+      aspect-ratio: auto;
+      min-block-size: 20rem;
+    }
+    .nf-scene__words {
+      grid-area: 1 / 1;
+      align-content: end;
+      margin-block-start: 0;
+      padding: var(--nf-space-xl) var(--nf-space-md) var(--nf-space-lg);
+    }
+    .nf-scene__subject[data-fit="contain"] {
+      inset: 0 0 0 auto;
+      inline-size: min(78%, 26rem);
+    }
+    .nf-scene__subject[data-fit="contain"] img {
+      object-position: 100% 100%;
+    }
+    .nf-scene__veil {
+      background: linear-gradient(180deg, transparent 0%, transparent 34%, color-mix(in oklab, var(--nf-surface-artwork) 45%, transparent) 62%, var(--nf-surface-artwork) 94%);
+    }
   }
 
   /* The brand bed and the soft veil that keeps the words legible. */
@@ -49,7 +79,7 @@
     inset: 0;
     z-index: 4;
     pointer-events: none;
-    background: linear-gradient(180deg, transparent 0%, transparent 34%, color-mix(in oklab, var(--nf-surface-artwork) 45%, transparent) 62%, var(--nf-surface-artwork) 94%);
+    background: linear-gradient(180deg, transparent 0%, transparent 60%, color-mix(in oklab, var(--nf-surface-artwork) 60%, transparent) 84%, var(--nf-surface-artwork) 100%);
   }
 
   /* Each layer takes a parallax offset from `--nf-scene-x/y` (-1..1) by its
@@ -75,12 +105,11 @@
     translate: calc(var(--nf-scene-x, 0) * -18px) calc(var(--nf-scene-y, 0) * -10px);
   }
   .nf-scene__subject[data-fit="contain"] {
-    inset: 0 0 0 auto;
-    inline-size: min(78%, 26rem);
+    inset: 0;
   }
   .nf-scene__subject[data-fit="contain"] img {
     object-fit: contain;
-    object-position: 100% 100%;
+    object-position: 50% 100%;
   }
   .nf-scene[data-anchor="center"] .nf-scene__subject[data-fit="contain"] {
     inset: 0;
