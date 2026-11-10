@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -69,6 +70,7 @@ export function RoommatesFeed({
   const [q, setQ] = useState(firstFilters.q);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [pending, start] = useSafeTransition();
+  const router = useRouter();
   const first = useRef(true);
   const today = lagosDay(now);
 
@@ -142,7 +144,7 @@ export function RoommatesFeed({
 
   const toggleSave = (id: string) => {
     if (!signedIn) {
-      window.location.assign(`/sign-in?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      router.push(`/sign-in?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
     const want = !saved.has(id);

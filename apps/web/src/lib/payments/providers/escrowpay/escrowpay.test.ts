@@ -149,6 +149,8 @@ const ALLOWED_IMPORTERS = new Set([
   "lib/money/protected-read.ts",
   "lib/money/protected-actions.ts",
   "app/api/escrowpay/webhook/route.ts",
+  /* The staff provider check reads whether its settings are present (no network). */
+  "lib/admin/provider-checks.ts",
 ]);
 
 describe("only the rail's server entry points reach the adapter", () => {

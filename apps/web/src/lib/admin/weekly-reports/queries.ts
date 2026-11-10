@@ -11,7 +11,12 @@ import { reportReadFault } from "@/lib/observability/read-error";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 import { BUCKET, isReportStatus, parseNumberRows, sanitizeProofs, type NumberRow, type Proof, type WeeklyReport } from "./model";
-import { bdRows, socialRows, taskRows } from "./prefill";
+import { bdRows, contentRows, marketingRows, socialRows, supportLeadRows, taskRows, technicalRows } from "./prefill";
+import { readContentItems } from "@/lib/admin/content/queries";
+import { readEntries } from "@/lib/admin/desk-entries/queries";
+import { readCampaigns, readResults } from "@/lib/admin/marketing/queries";
+import { readPolicyNotes, readQaReviews } from "@/lib/admin/support-lead/queries";
+import { readIncidents } from "@/lib/admin/technical/queries";
 
 export type Read<T> = { state: "ok"; data: T } | { state: "not-open" } | { state: "error" };
 
@@ -201,6 +206,18 @@ export async function readDeskRows(db: SupabaseClient, userId: string, position:
     } else if (position === "business_development_executive") {
       const [pipeline, activity] = await Promise.all([listPipeline(), listAllActivity()]);
       if (pipeline.state === "ok" && activity.state === "ok") rows.push(...bdRows(pipeline.data, activity.data, weekStart));
+    } else if (position === "marketing_manager") {
+      const [campaigns, results, entries] = await Promise.all([readCampaigns(db), readResults(db), readEntries(db, "marketing")]);
+      if (campaigns.state === "ok" && results.state === "ok") rows.push(...marketingRows(campaigns.data, results.data, entries.state === "ok" ? entries.data : [], weekStart));
+    } else if (position === "content_manager") {
+      const [items, entries] = await Promise.all([readContentItems(db), readEntries(db, "content")]);
+      if (items.state === "ok") rows.push(...contentRows(items.data, entries.state === "ok" ? entries.data : [], weekStart));
+    } else if (position === "technical_administrator") {
+      const [incidents, entries] = await Promise.all([readIncidents(db), readEntries(db, "technical")]);
+      if (incidents.state === "ok") rows.push(...technicalRows(incidents.data, entries.state === "ok" ? entries.data : [], weekStart));
+    } else if (position === "customer_support_lead") {
+      const [reviews, policy, entries] = await Promise.all([readQaReviews(db), readPolicyNotes(db), readEntries(db, "support_lead")]);
+      if (reviews.state === "ok" && policy.state === "ok") rows.push(...supportLeadRows(reviews.data, policy.data, entries.state === "ok" ? entries.data : [], weekStart));
     }
     const tasks = await readMyTasks(db, userId);
     if (tasks.state === "ok") rows.push(...taskRows(tasks.data, userId, weekStart));

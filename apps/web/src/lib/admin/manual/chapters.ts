@@ -22,7 +22,7 @@ import type { StaffScope } from "@/lib/admin/guard";
 /** The day the chapters were last read against the code. */
 export const MANUAL_UPDATED = "2026-11-10";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk", "weekly-report", "marketing", "content", "technical", "support-lead"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -90,6 +90,34 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     title: "Weekly report",
     icon: "clipboard-list",
     description: "Your report each week: when the form opens, what to write, what is filled in for you, how to add proof, and what a reviewer does.",
+  },
+  {
+    slug: "marketing",
+    number: 9,
+    title: "Marketing Manager",
+    icon: "price-tag",
+    description: "Campaigns, tracked links, results, acquisition and referral figures, briefs and the monthly report, for the Marketing Manager.",
+  },
+  {
+    slug: "content",
+    number: 10,
+    title: "Content Manager",
+    icon: "file-text",
+    description: "The editorial calendar, approvals, requests, style and SEO checklists, translations and help gaps, for the Content Manager.",
+  },
+  {
+    slug: "technical",
+    number: 11,
+    title: "Technical Administrator",
+    icon: "sliders",
+    description: "Reading platform health and errors, the incident log, runbooks, reminders and reviews, for the Technical Administrator.",
+  },
+  {
+    slug: "support-lead",
+    number: 12,
+    title: "Customer Support Lead",
+    icon: "headset",
+    description: "Running the team, escalations, quality reviews and coaching, the support figures, and replies and policy, for the Customer Support Lead.",
   },
 ];
 

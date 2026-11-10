@@ -136,6 +136,38 @@ export const COPILOT_CAPABILITIES: readonly DeskCapability[] = [
     prompts: ["What is on the calendar this week?", "Which posts are overdue?", "Draft a post for Friday"],
   },
   {
+    key: "marketing",
+    desk: "Marketing",
+    scopes: ["marketing"],
+    href: "/admin/marketing",
+    can: ["Read campaigns, the campaign calendar, acquisition and referral performance (counts, never budgets or names)", "Build a tracked link", "Draft a creative brief or a report reading for you to add (nothing is saved)"],
+    prompts: ["Which campaigns end this week?", "How did referrals do over the last eight weeks?", "Build a tracked link for the December push on Instagram"],
+  },
+  {
+    key: "content",
+    desk: "Content",
+    scopes: ["content"],
+    href: "/admin/content",
+    can: ["Read the editorial calendar, requests, checklists, translation status and help gaps", "Read feed moderation as counts only", "Draft an article outline or a staff announcement for you to add (nothing is saved or posted)"],
+    prompts: ["What is overdue on the calendar?", "Which help pages are failing members?", "Draft an outline for a help article on deposits"],
+  },
+  {
+    key: "technical",
+    desk: "Technical",
+    scopes: ["technical"],
+    href: "/admin/technical",
+    can: ["Read platform health, error trends, the incident log, runbooks and expiry reminders (never a key or secret)", "Draft an incident update, status page text or a post-incident review for you to add (nothing is posted)"],
+    prompts: ["Is anything late or failing today?", "How are errors trending this week?", "Draft a status page update for the open incident"],
+  },
+  {
+    key: "support-lead",
+    desk: "Support lead",
+    scopes: ["support_lead"],
+    href: "/admin/support-lead",
+    can: ["Read team load, quality scores, the repeated-issue tracker and the policy library (counts and references only)", "Draft a canned reply, a coaching note or a policy note for you to add (nothing is saved)"],
+    prompts: ["Who is holding the most open tickets?", "What are members writing about most?", "Draft a canned reply for deposit questions"],
+  },
+  {
     key: "coo",
     desk: "COO desk",
     scopes: ["operations"],
@@ -160,6 +192,10 @@ const STARTERS: Partial<Record<StaffScope, readonly string[]>> = {
   analyst: ["Give me the headline numbers", "How are bookings doing?"],
   business_development: ["What needs me first today?", "Which follow-ups are due this week?", "Summarise my pipeline"],
   social_media: ["What is on the calendar this week?", "Which posts are overdue?"],
+  marketing: ["Which campaigns end this week?", "How did referrals do lately?"],
+  content: ["What is overdue on the calendar?", "Which help pages are failing members?"],
+  technical: ["Is anything late or failing today?", "How are errors trending?"],
+  support_lead: ["Who is holding the most open tickets?", "What are members writing about most?"],
 };
 
 const GENERIC: readonly string[] = ["What needs me first today?", "What are my open tasks?", "Where do I find how to do this in the manual?"];

@@ -1,14 +1,12 @@
 import "server-only";
 
 import {
-  can,
   requireCapability,
   type AnyFiatProvider,
   type ChargeSplit,
   type CollectInput,
   type FiatProviderId,
 } from "../provider";
-import { providerEnabled } from "./kill-switch";
 import { paystackProvider } from "./paystack";
 import { escrowPayConfig } from "./escrowpay/config";
 import { protectedPaySwitchOn } from "../../money/protected-pay-switch";

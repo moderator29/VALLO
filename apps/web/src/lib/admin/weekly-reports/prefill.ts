@@ -1,6 +1,11 @@
 import type { BdActivity, BdProspect } from "@/lib/admin/business-development/types";
 import type { Task } from "@/lib/admin/my-desk/model";
+import type { Campaign, CampaignResult } from "@/lib/admin/marketing/model";
+import type { ContentItem } from "@/lib/admin/content/model";
+import type { Entry } from "@/lib/admin/desk-entries/model";
 import { FORMAT_LABEL, type SocialPost } from "@/lib/admin/social-media/model";
+import type { PolicyNote, QaReview } from "@/lib/admin/support-lead/model";
+import type { Incident } from "@/lib/admin/technical/model";
 
 import type { NumberRow } from "./model";
 import { inWeek } from "./week";
@@ -49,5 +54,56 @@ export function bdRows(prospects: readonly BdProspect[], activity: readonly BdAc
     row("Follow-ups", weekActivity.filter((a) => a.kind === "follow_up").length),
     row("Businesses onboarded", prospects.filter((p) => inWeek(weekStart, p.onboardedAt)).length),
     row("Listings submitted", prospects.filter((p) => p.listingId !== null && inWeek(weekStart, p.updatedAt)).length),
+  ];
+}
+
+/* --------------------------------------------- the four desks of 10 November */
+
+const made = (entries: readonly Entry[], kind: string, weekStart: string) => entries.filter((e) => e.kind === kind && inWeek(weekStart, e.createdAt)).length;
+
+/** Marketing Manager: what was planned, approved and logged in the week. */
+export function marketingRows(campaigns: readonly Campaign[], results: readonly CampaignResult[], entries: readonly Entry[], weekStart: string): NumberRow[] {
+  return [
+    row("Campaigns planned", campaigns.filter((c) => inWeek(weekStart, c.createdAt)).length),
+    row("Campaigns approved", campaigns.filter((c) => inWeek(weekStart, c.approvedAt)).length),
+    row("Campaigns started", campaigns.filter((c) => c.status !== "cancelled" && c.status !== "draft" && c.startsOn !== null && inWeek(weekStart, `${c.startsOn}T12:00:00+01:00`)).length),
+    row("Results logged", results.filter((r) => !r.voidedAt && inWeek(weekStart, r.createdAt)).length),
+    row("Creative briefs written", made(entries, "creative_brief", weekStart)),
+    row("A/B tests logged", made(entries, "ab_test", weekStart)),
+  ];
+}
+
+/** Content Manager: what was written, approved and published in the week. */
+export function contentRows(items: readonly ContentItem[], entries: readonly Entry[], weekStart: string): NumberRow[] {
+  return [
+    row("Items started", items.filter((i) => inWeek(weekStart, i.createdAt)).length),
+    row("Items approved", items.filter((i) => inWeek(weekStart, i.approvedAt)).length),
+    row("Items published", items.filter((i) => i.status === "published" && inWeek(weekStart, i.publishedAt)).length),
+    row("Requests received", made(entries, "content_request", weekStart)),
+    row("Help gaps logged", made(entries, "docs_gap", weekStart)),
+    row("Checklists run", made(entries, "seo_check", weekStart) + made(entries, "publish_check", weekStart)),
+  ];
+}
+
+/** Technical Administrator: incidents declared and resolved, and the notes kept. */
+export function technicalRows(incidents: readonly Incident[], entries: readonly Entry[], weekStart: string): NumberRow[] {
+  return [
+    row("Incidents declared", incidents.filter((i) => inWeek(weekStart, i.startedAt)).length),
+    row("Incidents resolved", incidents.filter((i) => inWeek(weekStart, i.resolvedAt)).length),
+    row("Post-incident reviews written", made(entries, "incident_review", weekStart)),
+    row("Runbooks written", made(entries, "runbook", weekStart)),
+    row("Release notes written", made(entries, "release_note", weekStart)),
+  ];
+}
+
+/** Customer Support Lead: reviews, coaching and policy work in the week. */
+export function supportLeadRows(reviews: readonly QaReview[], policy: readonly PolicyNote[], entries: readonly Entry[], weekStart: string): NumberRow[] {
+  return [
+    row("Quality reviews written", reviews.filter((r) => inWeek(weekStart, r.createdAt)).length),
+    row("Coaching notes written", made(entries, "coaching_note", weekStart)),
+    row("Policy notes written", policy.filter((p) => inWeek(weekStart, p.createdAt)).length),
+    row("Policy notes approved", policy.filter((p) => inWeek(weekStart, p.approvedAt)).length),
+    row("Canned replies written", made(entries, "macro", weekStart)),
+    row("Knowledge-base gaps logged", made(entries, "kb_gap", weekStart)),
   ];
 }

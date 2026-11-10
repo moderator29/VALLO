@@ -18,6 +18,7 @@ import { MODERATION_TOOLS } from "./moderation";
 import { OPERATIONS_TOOLS } from "./operations";
 import { PROPOSE_TOOLS } from "./propose";
 import { SOCIAL_TOOLS } from "./social-media";
+import { STAFF_DESK_TOOLS } from "./staff-desks";
 import { SUPPORT_TOOLS } from "./support";
 import { TRUST_TOOLS } from "./trust";
 import type { CopilotProposal, CopilotTool, CopilotViewer, ProposalDraft, ToolCtx } from "./types";
@@ -40,6 +41,7 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...ANALYTICS_TOOLS,
   ...BD_TOOLS,
   ...SOCIAL_TOOLS,
+  ...STAFF_DESK_TOOLS,
   ...COO_TOOLS,
   ...PROPOSE_TOOLS,
 ];

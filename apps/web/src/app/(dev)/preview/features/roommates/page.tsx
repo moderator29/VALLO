@@ -22,7 +22,6 @@ import { PostFlowScreen } from "@/app/(app)/roommates/new/_parts/PostFlowScreen"
 import { ConnectedScreen } from "@/components/roommates/ConnectedScreen";
 import { KeyDoorArt } from "@/components/roommates/RoommatesArt";
 import { ListingReviewPanel } from "@/components/roommates/ListingReviewPanel";
-import { RoommatesFeed } from "@/components/roommates/RoommatesFeed";
 import { RoommatesFirstRun } from "@/components/roommates/RoommatesFirstRun";
 import { EMPTY_FEED_FILTERS } from "@/lib/features/roommates/feed";
 import { VerificationBanner } from "@/components/roommates/VerificationBanner";

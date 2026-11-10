@@ -1,5 +1,9 @@
 import type { ManualSlug } from "@/lib/admin/manual/chapters";
 import { ACCESS } from "./access";
+import { CONTENT } from "./content";
+import { MARKETING } from "./marketing";
+import { SUPPORT_LEAD } from "./support-lead";
+import { TECHNICAL } from "./technical";
 import { DECISIONS } from "./decisions";
 import { DESKS } from "./desks";
 import { ESCALATION } from "./escalation";
@@ -19,4 +23,8 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   escalation: ESCALATION,
   "my-desk": MY_DESK,
   "weekly-report": WEEKLY_REPORT,
+  marketing: MARKETING,
+  content: CONTENT,
+  technical: TECHNICAL,
+  "support-lead": SUPPORT_LEAD,
 };

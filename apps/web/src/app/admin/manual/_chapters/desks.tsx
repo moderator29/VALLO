@@ -80,6 +80,8 @@ const SAFETY: Desk[] = [
   { href: "/admin/roommates", name: "Roommates", icon: "users", what: "Room posts, profiles, groups and their verification.", who: "Roommates moderation, Trust and Safety" },
   { href: "/admin/circle", name: "Circle", icon: "circle-people", what: "Communities: pause, remove or restore.", who: "Circle moderation, Reports and moderation, Trust and Safety" },
   { href: "/admin/social-media", name: "Social media", icon: "camera", what: "Vallo's own social media: the content calendar, drafts, campaigns, the media library and approvals. It never posts to a platform.", who: "Social media" },
+  { href: "/admin/marketing", name: "Marketing", icon: "price-tag", what: "Campaigns and promotions with approval, tracked links, the numbers you log, acquisition and referral figures, briefs and the monthly report. It never connects to an ad platform.", who: "Marketing" },
+  { href: "/admin/content", name: "Content", icon: "file-text", what: "Guides, announcements and articles through an approval step, the editorial calendar, requests, style and SEO checklists, translations and help gaps.", who: "Content" },
   { href: "/admin/blocked-terms", name: "Blocked terms", icon: "block", what: "The words the safety scan acts on.", who: "Reports and moderation" },
   { href: "/admin/social", name: "Around", icon: "compass", what: "Proposed neighbourhood areas and area moderator applications: open or refuse them, pause or resume an area.", who: "Admins" },
   { href: "/admin/standing", name: "Standing", icon: "star", what: "Badges granted and revoked by hand, each with a reason.", who: "Admins" },
@@ -90,6 +92,7 @@ const SUPPORT: Desk[] = [
   { href: "/admin/support", name: "Support", icon: "headset", what: "Every member question and complaint, in lanes, ordered by how late it is.", who: "Support" },
   { href: "/admin/people", name: "People", icon: "user", what: "The person file: everything Vallo holds about one member. Every opening is written to the audit log.", who: "Admins" },
   { href: "/admin/account-recovery", name: "Account recovery", icon: "key", what: "Moving an account to a new email address when its owner lost the old mailbox. Two super admins and a 72 hour wait.", who: "Admins open it; super admins move the address" },
+  { href: "/admin/support-lead", name: "Support lead", icon: "headset", what: "The support team's load and who holds what, escalations, quality reviews and coaching, the support figures, and canned replies and policy notes with approval.", who: "Support lead" },
 ];
 
 const OPERATIONS: Desk[] = [
@@ -99,6 +102,7 @@ const OPERATIONS: Desk[] = [
   { href: "/admin/crashes", name: "Crash log", icon: "alert-triangle", what: "Vallo's own crash log across the apps, the website and the server.", who: "Operations" },
   { href: "/admin/audit", name: "Audit log", icon: "history", what: "Every decision anybody made in the console. The CSV export is the Compliance area's.", who: "Admins (export: Compliance)" },
   { href: "/admin/oversight", name: "Team oversight", icon: "users", what: "Each queue's backlog and its oldest item, and each staff member's decisions over 30 days.", who: "Operations" },
+  { href: "/admin/technical", name: "Technical", icon: "sliders", what: "Read-only platform health and error trends, the incident log, runbooks, release notes, expiry reminders and post-incident reviews. It shows no key or credential and changes no infrastructure.", who: "Technical" },
   { href: "/admin/operations/providers", name: "Provider checks", icon: "key", what: "Read-only checks of each outside provider the platform depends on.", who: "Operations" },
   { href: "/admin/call-usage", name: "Call usage", icon: "phone", what: "Video and audio calls: volume, connect rate and minutes.", who: "Operations" },
   { href: "/admin/analytics", name: "Analytics", icon: "chart-bar", what: "Bookings, supply and demand over time.", who: "Admins" },

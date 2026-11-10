@@ -15,7 +15,7 @@ import type { FiatProviderId } from "../provider";
  * database blip must not stop every payment on the platform.
  *
  * The protected rail has its own fail-closed switches
- * (`lib/money/protected-pay-switch.ts`, `providers/escrowpay/switch.ts`).
+ * (`lib/money/protected-pay-switch.ts`, `escrowpay/switch.ts`).
  *
  * Gate only what STARTS money movement (collect, charge, refund). Never gate
  * verify, webhooks or reconciliation: money already taken must still be
