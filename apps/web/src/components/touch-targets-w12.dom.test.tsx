@@ -133,10 +133,13 @@ type Case = {
 
 const CASES: Case[] = [
   {
-    name: "1. the listing wizard's progress steps (f5/agent-list, a rental on step 4)",
+    name: "1. the listing wizard's Back and Close (f5/agent-list, a rental on step 4)",
     page: () => AgentListPreview({ searchParams: Promise.resolve({ draft: "rental", step: "4" }) }),
-    selector: ".nf-lw-rail ol > li > button",
-    count: 8,
+    /* The wizard moved onto StepFrame (Grade 1, November 2026): the numbered
+       rail became a progress bar that is not a control, so what a thumb
+       reaches at the top of every step is Back and Close. */
+    selector: ".nf-g1step__bar .nf-g1step__round:not(.nf-g1step__round--empty)",
+    count: 2,
   },
   {
     name: "2. the inspection's room checks (f5/inspection)",

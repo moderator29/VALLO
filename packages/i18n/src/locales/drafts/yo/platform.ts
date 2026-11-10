@@ -22,10 +22,10 @@ export const platformYo = {
     notMeBody:
       "Èyí ń mú gbogbo ẹ̀rọ mìíràn jáde, ó ń dá ìsanwó àti àyípadà sí àlàyé ìgbowó rẹ dúró fún wákàtí 24, ó sì ń mú ọ lọ láti yí ọ̀rọ̀ ìpamọ́ rẹ padà.",
     notMe: "Kì í ṣe èmi",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    notMeConfirm: "Tap again to pause payments",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    notMeWorking: "Pausing payments",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeConfirm` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeWorking` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
   },
 
   alert: {
@@ -250,8 +250,8 @@ export const platformYo = {
     paidBody: "Ìsanwó tí ó pàdánù ìsopọ̀ rẹ̀ dé ọ̀dọ̀ wa. Nọ́mbà ìtọ́kasí {reference}.",
     failedVerdict: "Ìsanwó rẹ kò lọ",
     failedBody: "A kò gba nǹkan kan fún nọ́mbà ìtọ́kasí {reference}. O lè tún sanwó.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    pendingVerdict: "Our payment processor has not told us yet",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `pendingVerdict` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     pendingBody: "À ń ṣàyẹ̀wò nọ́mbà ìtọ́kasí {reference} ní gbogbo ìṣẹ́jú. Má ṣe tún sanwó títí èyí yóò fi yí padà.",
     offline: "O kò sí lórí ayélujára. Sísanwó nílò ìsopọ̀. A kò gba owó kankan.",
     returnedVerdict: "A dá ìsanwó rẹ padà",

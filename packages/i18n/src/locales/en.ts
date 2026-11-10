@@ -6523,7 +6523,7 @@ export const en = {
       card_only: "This is paid by card only.",
       escrow_only: "This payment is not open on Vallo.",
       no_rail: "Payment is not open for this yet. Nothing has been charged.",
-      card_needs_review: "Paying by card on this deal needs a person at Vallo to check it first. Nothing has been charged.",
+      card_needs_review: "Paying by card is not open on this deal now, because it would need a person at Vallo to check it first.",
       unavailable: "That could not be saved just now. Nothing has been charged; try again in a moment.",
     },
     accept: {

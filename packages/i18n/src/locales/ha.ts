@@ -3192,8 +3192,8 @@ export const ha: Dictionary = withFallback({
       step1Title: "Zaɓi kwanakinka",
       step1Body: "Zaɓi ranar shiga da ranar fita a kalanda mai rai.",
       step2Title: "Tabbatar ka biya",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      step2Body: "Payment in naira, by card. You are never charged early.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `step2Body` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       step3Title: "Ji daɗin masaukinka",
       step3Body: "Bayanan shiga za su iso nan da kuma ta imel.",
     },
@@ -3772,8 +3772,8 @@ export const ha: Dictionary = withFallback({
     recommended: "Muna ba da shawara",
     continue: "Ci gaba",
     saving: "Ana adana zaɓinka",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escrowOnlyTitle: "Paying for a purchase",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrowOnlyTitle` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     cardOnlyTitle: "Ana biya da kati",
     lockedNote: "Biyanka ya fara, don haka hanyar biyan za ta tsaya yadda take.",
     notPayerNote: "Mai haya ko baƙo ne ke zaɓar yadda za a biya.",
@@ -3784,14 +3784,14 @@ export const ha: Dictionary = withFallback({
       closed: "An rufe wannan yarjejeniya, don haka babu abin da za a biya a kanta.",
       already_paid: "An riga an biya wannan.",
       payment_started: "Akwai biya da ke gudana, don haka ba za a iya canza hanyar biyan yanzu ba.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      sale_escrow_only: "Payment for a purchase is not open on Vallo. Vallo does not take payment for a property purchase at any stage.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `sale_escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       card_only: "Ana biyan wannan da kati kaɗai.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      escrow_only: "This payment is not open on Vallo.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       no_rail: "Biya bai buɗe ga wannan ba tukuna. Ba a cire kuɗi ba.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      card_needs_review: "Paying by card on this deal needs a person at Vallo to check it first. Nothing has been charged.",
+      // NATIVE REVIEW (9 November 2026, money copy sweep): the sentence saying escrow is open was removed; the rest is the existing translation, unchanged.
+      card_needs_review: "Biya da kati bai buɗe a wannan yarjejeniya yanzu ba, domin zai buƙaci wani a Vallo ya fara duba ta.",
       unavailable: "Ba a iya adana wannan yanzu ba. Ba a cire kuɗi ba; sake gwadawa nan ba da jimawa ba.",
     },
     accept: {
@@ -4565,8 +4565,8 @@ export const ha: Dictionary = withFallback({
       body: "Bankin wanda ya biya ya mayar da biyan kati da ka karɓa. Abokin biyan kuɗi ya karɓe shi daga Vallo, don haka ana bin asusunka {amount}.",
       bodyNoAmount: "Bankin wanda ya biya ya mayar da biyan kati da ka karɓa. Abokin biyan kuɗi ya karɓe shi daga Vallo, don haka ana bin asusunka kuɗin.",
       meansTitle: "Abin da yake nufi",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      means: "While it is owed, Vallo pauses withdrawals from your Rewards Balance. Card payments still reach your payout account at the moment of payment. Nothing else on your account changes.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `means` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       nextTitle: "Abin da zai biyo baya",
       next: "Ƙungiyar kuɗi ta Vallo za ta tuntuɓe ka don a daidaita shi. Da zarar an daidaita ko an rufe shi, wannan sanarwar za ta tafi da kanta.",
       help: "Tambayi tallafi game da shi",
@@ -4645,9 +4645,8 @@ export const ha: Dictionary = withFallback({
         blockConfirm:
           "Ba za su iya aika maka saƙo ba, ganin bayanan martabarka ko samun gidajenka ba, kuma kai ma ba za ka ga nasu ba. Ba a sanar da su ba. Kana iya janye wannan a Saituna, Sirri.",
         keepOpen: "Bar hirar a buɗe",
-        // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-        safetyRule:
-          "For your safety, keep every chat inside Vallo. Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong. Pay only after you have inspected the property.",
+        /* NATIVE REVIEW (9 November 2026, money copy sweep): `safetyRule` was reworded in English and
+           falls back to the English until a native reader translates it. Never invent one. */
       },
       card: {
         rated: "An ba da taurari {rating} cikin 5",

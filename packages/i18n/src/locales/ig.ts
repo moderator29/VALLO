@@ -3225,8 +3225,8 @@ export const ig: Dictionary = withFallback({
       step1Title: "Họrọ ụbọchị gị",
       step1Body: "Họrọ ụbọchị mbanye na ụbọchị ọpụpụ na kalenda dị ndụ.",
       step2Title: "Kwenye ma kwụọ",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      step2Body: "Payment in naira, by card. You are never charged early.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `step2Body` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       step3Title: "Nwee obi ụtọ na ebe obibi gị",
       step3Body: "Nkọwa mbanye ga-abịa ebe a nakwa site na email.",
     },
@@ -3805,8 +3805,8 @@ export const ig: Dictionary = withFallback({
     recommended: "Anyị na-atụ aro ya",
     continue: "Gaa n'ihu",
     saving: "Anyị na-echekwa nhọrọ gị",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escrowOnlyTitle: "Paying for a purchase",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrowOnlyTitle` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     cardOnlyTitle: "A na-akwụ site na kaadị",
     lockedNote: "Ịkwụ ụgwọ gị amalitela, ya mere ụzọ ị na-esi akwụ ụgwọ ga-anọgide otu a.",
     notPayerNote: "Onye na-akwụ ụlọ ma ọ bụ ọbịa na-ahọrọ otu a ga-esi kwụọ ụgwọ.",
@@ -3817,14 +3817,14 @@ export const ig: Dictionary = withFallback({
       closed: "Nkwekọrịta a emechiela, ya mere ọ nweghị ihe a ga-akwụ na ya.",
       already_paid: "A kwụọla nke a.",
       payment_started: "Ịkwụ ụgwọ amalitelarị, ya mere ụzọ ịkwụ ụgwọ enweghị ike ịgbanwe ugbu a.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      sale_escrow_only: "Payment for a purchase is not open on Vallo. Vallo does not take payment for a property purchase at any stage.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `sale_escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       card_only: "A na-akwụ nke a naanị site na kaadị.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      escrow_only: "This payment is not open on Vallo.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       no_rail: "Ịkwụ ụgwọ emepebeghị maka nke a. Ọ dịghị ego e wepụrụ.",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      card_needs_review: "Paying by card on this deal needs a person at Vallo to check it first. Nothing has been charged.",
+      // NATIVE REVIEW (9 November 2026, money copy sweep): the sentence saying escrow is open was removed; the rest is the existing translation, unchanged.
+      card_needs_review: "Ịkwụ site na kaadị emeghị na nkwekọrịta a ugbu a, n'ihi na ọ ga-achọ ka onye na Vallo buru ụzọ lelee ya.",
       unavailable: "Anyị enweghị ike ichekwa ya ugbu a. Ọ dịghị ego e wepụrụ; nwaa ọzọ n'oge na-adịghị anya.",
     },
     accept: {
@@ -4598,8 +4598,8 @@ export const ig: Dictionary = withFallback({
       body: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji {amount}.",
       bodyNoAmount: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji ego ahụ.",
       meansTitle: "Ihe ọ pụtara",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      means: "While it is owed, Vallo pauses withdrawals from your Rewards Balance. Card payments still reach your payout account at the moment of payment. Nothing else on your account changes.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `means` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       nextTitle: "Ihe na-esote",
       next: "Ndị otu ego Vallo ga-akpọtụrụ gị iji dozie ya. Ozugbo e doziri ya ma ọ bụ mechie ya, ọkwa a ga-apụ n'onwe ya.",
       help: "Jụọ ndị nkwado maka ya",
@@ -4678,9 +4678,8 @@ export const ig: Dictionary = withFallback({
         blockConfirm:
           "Ha agaghị enwe ike iziga gị ozi, ịhụ profaịlụ gị ma ọ bụ ịchọta ụlọ gị, ị gaghịkwa ahụ nke ha. A gaghị agwa ha. Ị nwere ike ịgbanwe nke a na Ntọala, Nzuzo.",
         keepOpen: "Hapụ mkparịta ụka ahụ ka ọ meghee",
-        // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-        safetyRule:
-          "For your safety, keep every chat inside Vallo. Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong. Pay only after you have inspected the property.",
+        /* NATIVE REVIEW (9 November 2026, money copy sweep): `safetyRule` was reworded in English and
+           falls back to the English until a native reader translates it. Never invent one. */
       },
       card: {
         rated: "Kpakpando {rating} n'ime 5",

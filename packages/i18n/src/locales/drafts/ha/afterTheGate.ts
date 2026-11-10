@@ -43,14 +43,14 @@ export const afterTheGateHa = {
   },
   refund: {
     heading: "Mayar da kuɗinka",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    landed: "Refunded to your card {date}. Our payment processor confirmed it went through.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    initiated: "Our payment processor started the refund to your card on {date}. Banks usually show it within a few business days.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    initiatedLate: "Our payment processor started the refund to your card on {date}, after the latest date promised, {due}.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    sending: "The refund is decided and is being sent to our payment processor, back to the card or account you paid with.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `landed` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiated` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiatedLate` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `sending` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     nothingOwed: "Babu abin da ya kamata ya dawo ƙarƙashin sharuɗɗan da aka biya wannan masauki a ƙarƙashinsu.",
     amount: "{amount} zai dawo",
     retained: "An riƙe {amount} ƙarƙashin sharuɗɗan",
@@ -104,8 +104,8 @@ export const afterTheGateHa = {
       agreed: "An amince da ragi",
       disputed: "Wani ragi yana wurin ma'aikatan Vallo",
       returned: "An daidaita",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      escalated: "With Vallo staff",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalated` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     cautionCovered: "An mayar da {returned} kuma an rage {deducted}, {outstanding} har yanzu ana bin bashi.",
     cautionGuaranteed: "An biya mai haya {amount} daga Garantin Vallo.",
@@ -150,12 +150,12 @@ export const afterTheGateHa = {
     contestNote: "Abin da ya faru",
     contestSubmit: "Gaya wa Vallo",
     escalateHeading: "Ba a mayar da kariyar ba",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateHelp: "It was due back by {date}. {amount} is still owed and not in dispute. Vallo can look into it, using the inspection report and your messages as the record.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateSubmit: "Ask Vallo to look into it",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateOpen: "Vallo staff are looking into the caution that is still owed.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateHelp` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateSubmit` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateOpen` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     promiseHeading: "Abin da aka yi maka alkawari",
     promiseLede: "Jerin kamar yadda yake lokacin da aka biya jimlar kuɗin shiga a {date}. Gyare-gyaren jerin tun daga lokacin ba sa canza wannan.",
     promiseNone: "Ana rubuta alkawarin jerin idan biyan kuɗin shiga ya kammala.",

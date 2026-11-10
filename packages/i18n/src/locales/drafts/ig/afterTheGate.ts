@@ -43,14 +43,14 @@ export const afterTheGateIg = {
   },
   refund: {
     heading: "Nkwụghachi gị",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    landed: "Refunded to your card {date}. Our payment processor confirmed it went through.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    initiated: "Our payment processor started the refund to your card on {date}. Banks usually show it within a few business days.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    initiatedLate: "Our payment processor started the refund to your card on {date}, after the latest date promised, {due}.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    sending: "The refund is decided and is being sent to our payment processor, back to the card or account you paid with.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `landed` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiated` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiatedLate` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `sending` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     nothingOwed: "Ọ dịghị ihe kwesịrị ịlọghachi n'okpuru usoro e ji kwụọ ụgwọ ebe obibi a.",
     amount: "{amount} ga-alọghachi",
     retained: "E jidere {amount} n'okpuru usoro ahụ",
@@ -104,8 +104,8 @@ export const afterTheGateIg = {
       agreed: "E kwekọrịtara na mbelata",
       disputed: "Otu mbelata nọ n'aka ndị ọrụ Vallo",
       returned: "Edozila",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      escalated: "With Vallo staff",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalated` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     cautionCovered: "Akwụghachila {returned}, e belatara {deducted}, a ka ji {outstanding}.",
     cautionGuaranteed: "A kwụrụ onye mgbazinye {amount} site na Nkwa Vallo.",
@@ -150,12 +150,12 @@ export const afterTheGateIg = {
     contestNote: "Ihe mere",
     contestSubmit: "Gwa Vallo",
     escalateHeading: "Akwụghachighị ego nchekwa ahụ",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateHelp: "It was due back by {date}. {amount} is still owed and not in dispute. Vallo can look into it, using the inspection report and your messages as the record.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateSubmit: "Ask Vallo to look into it",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    escalateOpen: "Vallo staff are looking into the caution that is still owed.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateHelp` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateSubmit` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateOpen` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     promiseHeading: "Ihe e kwere gị na nkwa",
     promiseLede: "Ndepụta ahụ dịka ọ dị mgbe a kwụrụ mkpokọta ego ịbanye na {date}. Mgbanwe e mere na ndepụta ahụ kemgbe ahụ anaghị agbanwe nke a.",
     promiseNone: "A na-edekọ nkwa ndepụta ahụ mgbe ịkwụ ụgwọ ịbanye zuru ezu.",

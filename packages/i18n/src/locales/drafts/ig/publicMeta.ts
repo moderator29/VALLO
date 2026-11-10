@@ -27,9 +27,8 @@ export const publicMetaIg = {
     },
     terms: {
       title: "Usoro ọrụ",
-      // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-      description:
-        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, and acceptable use.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `description` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     privacy: {
       title: "Iwu nzuzo",

@@ -236,14 +236,19 @@ describe("Guarantee claim payouts pause too (migration fm02)", () => {
     expect(FM02).not.toMatch(/\bdelete\s+from\b/i);
   });
 
-  it("names the claim kind and its statuses on the desk, and tells the lister in four languages", () => {
+  it("names the claim kind and its statuses on the desk, and tells the lister what pauses in four languages", () => {
     const en = getDictionary("en").chargebacks;
     expect(en.override.kinds.guarantee_claim).toBeTruthy();
     for (const status of HELD_CLAIM_STATUSES) expect((en.override.statuses as Record<string, string>)[status]).toBeTruthy();
     expect(en.override.claimHeld.approve).toMatch(/override this one claim/);
     expect(en.override.claimHeld.markPaid).toMatch(/override this one claim/);
+    /* The Vallo Guarantee was retired on 9 November 2026 (FOUNDER_DECISIONS):
+       the lister is told what pauses, and the sentence no longer names it.
+       The desk above still names old claims, which are a historical record. */
     for (const locale of ["en", "yo", "ig", "ha"] as const) {
-      expect(getDictionary(locale).chargebacks.hold.means).toMatch(/Vallo Guarantee/);
+      const means = getDictionary(locale).chargebacks.hold.means;
+      expect(means).toMatch(/pauses withdrawals/);
+      expect(means).not.toMatch(/Guarantee/i);
     }
   });
 });

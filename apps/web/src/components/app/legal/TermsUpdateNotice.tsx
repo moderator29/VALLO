@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
 import { banner } from "@/lib/ui/toast";
 import { acknowledgeTermsUpdate } from "@/lib/legal/terms-update-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 
 /**
  * THE NEW TERMS, SHOWN ONCE (founder, 9 November 2026). A sheet with what
@@ -15,16 +17,21 @@ import { acknowledgeTermsUpdate } from "@/lib/legal/terms-update-actions";
  */
 export function TermsUpdateNotice() {
   const [open, setOpen] = useState(true);
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const acknowledge = () =>
     start(async () => {
-      const result = await acknowledgeTermsUpdate();
-      if (result.ok) {
-        setOpen(false);
-        banner.success("Thanks. You are on the new Terms.");
-      } else {
-        banner.error(result.error);
+      try {
+        const result = await acknowledgeTermsUpdate();
+        if (result.ok) {
+          setOpen(false);
+          banner.success("Thanks. You are on the new Terms.");
+        } else {
+          banner.error(result.error);
+        }
+      } catch (error) {
+        /* A weak signal keeps the sheet open and says so (3 November 2026). */
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 

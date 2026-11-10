@@ -22,10 +22,10 @@ export const platformIg = {
     notMeBody:
       "Nke a na-ewepụ ngwaọrụ ọ bụla ọzọ, na-akwụsị ịkwụ ụgwọ na mgbanwe na nkọwa nnata ego gị ruo awa 24, ma kpọga gị ka ị gbanwee okwuntughe gị.",
     notMe: "Ọ bụghị m",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    notMeConfirm: "Tap again to pause payments",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    notMeWorking: "Pausing payments",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeConfirm` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeWorking` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
   },
 
   alert: {
@@ -250,8 +250,8 @@ export const platformIg = {
     paidBody: "Ịkwụ ụgwọ nke tụfuru njikọ ya rutere anyị. Ntụaka {reference}.",
     failedVerdict: "Ịkwụ ụgwọ gị agaghị",
     failedBody: "E wereghị ihe ọ bụla maka ntụaka {reference}. Ị nwere ike ịkwụ ọzọ.",
-    // NATIVE REVIEW: new English copy of 9 November 2026 (money copy sweep); a native reader must translate it. Never invent one.
-    pendingVerdict: "Our payment processor has not told us yet",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `pendingVerdict` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     pendingBody: "Anyị na-elele ntụaka {reference} kwa nkeji. Akwụla ọzọ ruo mgbe nke a gbanwere.",
     offline: "Ị nọghị n'ịntanetị. Ịkwụ ụgwọ chọrọ njikọ. Ọ dịghị ihe a nara.",
     returnedVerdict: "E weghachiri ịkwụ ụgwọ gị",
