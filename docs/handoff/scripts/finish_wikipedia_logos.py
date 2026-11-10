@@ -9,20 +9,21 @@ name must share a distinctive word with the school or its article, or the articl
 school's own name), resolves a 128px thumbnail, fetches it, and keeps it only on HTTP 200 and an
 image/* content type.
 """
-import json, os, re, sys, time
+import json, os, re, sys, time, urllib.parse, hashlib
 sys.argv_backup = sys.argv
 import importlib.util
 spec = importlib.util.spec_from_file_location("h", os.path.join(os.path.dirname(os.path.abspath(__file__)), "harvest_wikipedia_images.py"))
 src = open(spec.origin).read().replace("\nmain()\n", "\n")
 h = type(sys)("h"); exec(compile(src, spec.origin, "exec"), h.__dict__)
 
-h.PAUSE = 3.0
+h.PAUSE = 5.0
 first = json.load(open(sys.argv[1])); schools = {s["slug"]: s for s in json.load(open(sys.argv[2]))}
 log = open(sys.argv[4], "a") if len(sys.argv) > 4 else sys.stderr
 L = lambda *a: print(*a, file=log, flush=True)
-todo = {slug: r for slug, r in first.items() if r["wiki_title"] and not r["logo_url"]}
+todo = {slug: r for slug, r in first.items() if r["wiki_title"]}
+known = {slug: urllib.parse.unquote(r["logo_source"].split("File:", 1)[1]).replace("_", " ") for slug, r in first.items() if r["logo_url"]}
 L(f"{len(todo)} schools to finish")
-titles = sorted({r["wiki_title"] for r in todo.values()})
+titles = sorted({r["wiki_title"] for slug, r in todo.items() if slug not in known})
 files = {}
 for i in range(0, len(titles), 5):
     chunk = titles[i : i + 5]
@@ -46,6 +47,9 @@ def distinct(*texts):
     return w
 chosen = {}
 for slug, r in todo.items():
+    if slug in known:
+        chosen[slug] = known[slug]
+        continue
     s = schools[slug]; title = r["wiki_title"]; e = files.get(title)
     if not e:
         continue
@@ -62,7 +66,7 @@ for i in range(0, len(wanted), 20):
     chunk = wanted[i : i + 20]
     d = {}
     for _ in range(4):
-        d = h.api(action="query", titles="|".join("File:" + f for f in chunk), prop="imageinfo", iiprop="url|mime", iiurlwidth=128)
+        d = h.api(action="query", titles="|".join("File:" + f for f in chunk), prop="imageinfo", iiprop="url|mime|size")
         if d.get("query"):
             break
         time.sleep(10)
@@ -73,18 +77,36 @@ for i in range(0, len(wanted), 20):
         t = norm.get("File:" + f, "File:" + f)
         if t in byt:
             ii = byt[t]
-            info[f] = ((ii.get("thumburl") or ii.get("url") or "").split("?")[0], ii.get("descriptionurl"))
+            info[f] = (ii.get("url", "").split("?")[0], ii.get("descriptionurl"), ii.get("width", 0), ii.get("mime", ""))
     L(f"imageinfo {i + len(chunk)}/{len(wanted)}")
+def thumb(url, width, mime):
+    """The 120px thumbnail address on upload.wikimedia.org (Wikimedia serves standard widths only)."""
+    m = re.match(r"https://upload\.wikimedia\.org/wikipedia/([a-z]+)/(\w/\w\w)/(.+)$", url)
+    if not m:
+        return None
+    repo, path, name = m.groups()
+    suffix = ".png" if name.lower().endswith(".svg") else ""
+    return f"https://upload.wikimedia.org/wikipedia/{repo}/thumb/{path}/{name}/{width}px-{name}{suffix}"
+
 out = {}
 for slug, f in chosen.items():
     if f not in info or not info[f][0].startswith("https://upload.wikimedia.org/"):
+        L(f"no file info for {slug} {f}")
         continue
-    url, desc = info[f]
-    time.sleep(h.PAUSE)
-    st, ct, body = h.get(url, binary=True)
-    ok = st == 200 and ct.lower().startswith("image/") and len(body) > 100
-    L(json.dumps(dict(slug=slug, url=url, status=st, type=ct, ok=ok)))
-    if ok:
-        out[slug] = dict(slug=slug, logo_url=url, logo_source=desc, wiki_title=todo[slug]["wiki_title"], note="ok (second pass)")
+    url, desc, width, mime = info[f]
+    tries = []
+    if mime == "image/svg+xml" or width > 120:
+        t = thumb(url, 120, mime)
+        if t:
+            tries.append(t)
+    tries.append(url)
+    for cand in tries:
+        time.sleep(h.PAUSE)
+        st, ct, body = h.get(cand, binary=True)
+        ok = st == 200 and ct.lower().startswith("image/") and len(body) > 100
+        L(json.dumps(dict(slug=slug, url=cand, status=st, type=ct, ok=ok)))
+        if ok:
+            out[slug] = dict(slug=slug, logo_url=cand, logo_source=desc, wiki_title=todo[slug]["wiki_title"], note="ok")
+            break
 json.dump(out, open(sys.argv[3], "w"), indent=1)
 L(f"done: {len(out)} more verified")
