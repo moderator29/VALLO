@@ -230,6 +230,9 @@
      elements keep their table roles in the markup, so a screen reader still
      reads a table; nothing scrolls sideways. */
   @container dktable (max-width: 34rem) {
+    .nf-dk-table caption {
+      display: block;
+    }
     .nf-dk-table,
     .nf-dk-table tbody,
     .nf-dk-table tr,

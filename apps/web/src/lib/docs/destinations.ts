@@ -1,4 +1,5 @@
 import type { UiIconName } from "@/design-system/icons/UiIcon";
+import { BALANCE_TITLE } from "@/lib/money/balance-copy";
 import { offersHref, offersTabHref } from "@/lib/offers/routes";
 
 /**
@@ -108,11 +109,11 @@ export const DOC_DESTINATIONS = {
     explain: "Messages are private to your account, so you will be asked to sign in first.",
   },
   "open-wallet": {
-    label: "Open my wallet",
+    label: `Open my ${BALANCE_TITLE.toLowerCase()}`,
     href: "/wallet",
     needs: "account",
     icon: "wallet",
-    explain: "Your wallet is part of your account, so you will be asked to sign in first.",
+    explain: `Your ${BALANCE_TITLE.toLowerCase()} is part of your account, so you will be asked to sign in first.`,
   },
   "open-payouts": {
     label: "Open payouts",

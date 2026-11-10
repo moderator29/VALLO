@@ -591,7 +591,7 @@ const OFFERS: ManualPage = {
   slug: "offers-and-deals-desk",
   title: "The Offers and Deals desk",
   summary: "Overview figures with their definitions, the deals table, inspecting a deal, and the three things staff may do.",
-  icon: "doc-review",
+  icon: "file-check",
   updated: UPDATED,
   desks: [{ href: "/admin/offers", label: "Offers and Deals" }],
   glance: [

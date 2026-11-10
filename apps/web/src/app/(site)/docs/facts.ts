@@ -38,13 +38,13 @@ export const PAY_INSIDE_VALLO =
 export const VALLO_NEVER_HOLDS =
   "Vallo never holds customer money. Licensed payment partners hold payments and escrow.";
 
-/** Rule 3: how rent and shortlets are paid today. Corrected 11 November 2026: protected payment is not live, so it is not described as available. */
+/** Rule 3: how rent and shortlets are paid today. Corrected 11 November 2026: protected payment is not available, so it is not described as available. */
 export const ESCROW_OR_CARD =
-  "Today, rent and shortlets are paid by card, through our licensed payment partner. Protected payment, where a licensed partner holds your payment until you confirm, is not live yet.";
+  "Today, rent and shortlets are paid by card, through our licensed payment partner. Holding a payment with a licensed partner until you confirm is not available yet.";
 
 /** What escrow does. */
 export const ESCROW_MEANS =
-  "Protected payment is not live yet. When it is, a licensed payment partner will hold your payment until the deal is confirmed and only then release it to the owner, agent or host. Vallo will not hold it.";
+  "Holding a payment until you confirm is not available yet. When it is, a licensed payment partner will hold your payment until the deal is confirmed and only then release it to the owner, agent or host. Vallo will not hold it.";
 
 /** What paying by card does. */
 export const CARD_MEANS =
@@ -75,4 +75,4 @@ export const VIEWINGS_AND_LISTING_FREE = "Viewings never take money, and listing
  * only when the server reads it as working (`protectedRailLive()`).
  */
 export const ESCROW_PAUSED =
-  "Where protected payment is not live, nothing that needs it can be paid and nothing is charged. For rent and shortlets you pay by card.";
+  "Where holding a payment is not available, nothing that needs it can be paid and nothing is charged. For rent and shortlets you pay by card.";

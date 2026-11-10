@@ -17,7 +17,7 @@ export type DocCalloutKind = "note" | "warning" | "not-live";
 const KIND: Record<DocCalloutKind, { icon: UiIconName; label: string }> = {
   note: { icon: "info", label: "Note" },
   warning: { icon: "alert-triangle", label: "Take care" },
-  "not-live": { icon: "clock", label: "Not live yet" },
+  "not-live": { icon: "clock", label: "Not available yet" },
 };
 
 export function DocCallout({

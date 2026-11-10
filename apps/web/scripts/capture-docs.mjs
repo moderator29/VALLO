@@ -107,6 +107,8 @@ try {
         await page.evaluate((t) => {
           document.documentElement.dataset.theme = t;
         }, theme);
+        /* The Next dev server draws a round "N" badge over the corner; it is not part of the screen. */
+        await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
         await page.waitForTimeout(400);
         const file = join(OUT, `${item.key}-${theme}.webp`);
         mkdirSync(dirname(file), { recursive: true });

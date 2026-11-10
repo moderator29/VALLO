@@ -24,17 +24,17 @@ Three levels, stated plainly so nobody reads more into a date than it earns:
 1. **Protected payment was described as available.** `facts.ts` said rent and
    shortlets "choose Escrow, which is selected for you, or Pay by card" and that
    "a sale is always paid through escrow". The code says the live rail is
-   `direct` (`lib/money/rails.ts`, `LIVE_RAIL`), protected payment is not live
+   `direct` (`lib/money/rails.ts`, `LIVE_RAIL`), protected payment is not available
    (`lib/money/copy.ts`), and a purchase takes no money through Vallo
    (`OFFERS_AND_DEAL_ROOM.md` 7). Reworded: today, card through the payment
-   partner; protected payment is "not live yet" and drawn in a "not live" callout;
+   partner; protected payment is "not available yet" and drawn in a "not available" callout;
    a purchase is not paid through Vallo. The constant `SALE_IS_ESCROW` was
    renamed `SALE_TAKES_NO_MONEY` everywhere (it no longer meant what it said).
    This flows to the help answers, the FAQ and the guides, which import the constants.
 2. `paying-on-vallo`: the "Pay with Escrow" section became "Protected payment (not
    live yet)" with its diagram labelled "designed to move"; the list of how each
    deal is paid and the lister payout lines were corrected to match.
-3. `agreements-and-paying` and `for-agents`/`for-owners` summary lines no longer
+3. The `agreements-and-paying` summary and the `for-owners` payout line no longer
    say "paying with Escrow or by card".
 4. The old contents rail (`OnThisPage`) and the old search field (`DocsSearch`) and
    the `.nf-guides`/`.nf-guide-card` and `.nf-doc-rail*` styles were deleted:

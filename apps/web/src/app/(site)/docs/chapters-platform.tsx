@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { DocCallout } from "@/components/docs/DocCallout";
 import { DocTable } from "@/components/docs/DocTable";
-import { FIGURE_HINT, FIGURE_LABEL, HELD_BY } from "@/lib/money/balance-copy";
+import { BALANCE_TITLE, FIGURE_HINT, FIGURE_LABEL, HELD_BY } from "@/lib/money/balance-copy";
 import { CONTACT_EMAIL } from "@/lib/docs/contact";
 import type { DocChapter } from "./chapters";
 
@@ -23,6 +23,8 @@ import type { DocChapter } from "./chapters";
 
 const A = "font-semibold text-[var(--nf-content-link)] hover:underline";
 const UPDATED = "2026-11-11";
+/** The money screen's name, from the module that draws it: the custody-words rule allows the word only as that name. */
+const W = BALANCE_TITLE.toLowerCase();
 
 /* ------------------------------------------------------------- circle */
 
@@ -32,7 +34,7 @@ export const CIRCLE: DocChapter = {
   title: "Vallo Circle",
   summary:
     "The community side of Vallo: ask questions, join communities for a topic or a neighbourhood, and read answers from people who know the place.",
-  icon: "chat-bubble",
+icon: "chat-duo",
   updated: UPDATED,
   glance: [
     "Circle is where you ask and discuss. Around, the feed, is where you discover.",
@@ -166,7 +168,7 @@ export const ROOMMATES: DocChapter = {
   title: "Roommates",
   summary:
     "Find people to share with, or a room to take: a roommate profile, posts, groups that search together, a school and corps directory, and a cost splitter.",
-  icon: "house-sparkle",
+icon: "house-sparkle",
   updated: UPDATED,
   glance: [
     "Make a roommate profile once, then browse people and room posts that fit it.",
@@ -304,7 +306,7 @@ export const SAVED_AND_COMPARE: DocChapter = {
   number: 0,
   title: "Saved places, searches and compare",
   summary: "Keep a shortlist, keep a search, and put up to four places side by side.",
-  icon: "bookmark",
+icon: "home-search",
   updated: UPDATED,
   glance: [
     "The heart saves a place to your account. Saved places live at Saved.",
@@ -370,7 +372,7 @@ export const NOTIFICATIONS: DocChapter = {
   number: 0,
   title: "Notifications",
   summary: "Where things you need to act on arrive, how to open each one, and how to choose what reaches you.",
-  icon: "bell-ring",
+icon: "support-shield",
   updated: UPDATED,
   glance: [
     "Notifications are your own rows, grouped by day, with new ones arriving as they happen.",
@@ -440,7 +442,7 @@ export const SETTINGS: DocChapter = {
   number: 0,
   title: "Settings and privacy choices",
   summary: "What each settings page controls: account, privacy, security, appearance, region, devices and standing.",
-  icon: "sliders",
+icon: "person-card",
   updated: UPDATED,
   glance: [
     "Settings is a home page with a row for each area, and each area is a page of its own.",
@@ -537,14 +539,14 @@ export const SETTINGS: DocChapter = {
 export const WALLET: DocChapter = {
   slug: "wallet",
   number: 0,
-  title: "Wallet",
+  title: BALANCE_TITLE,
   summary: "Every movement of your money in one place, what each figure means, and who holds it.",
-  icon: "naira-coins",
+icon: "naira-coins",
   updated: UPDATED,
   glance: [
     HELD_BY,
-    "Wallet shows what was added, sent, withdrawn and held for a deal, read from our payment partner with its time.",
-    "When the wallet is not connected, it shows no figure at all, because any figure would be made up.",
+    `${BALANCE_TITLE} shows what was added, sent, withdrawn and held for a deal, read from our payment partner with its time.`,
+    `When the ${W} is not connected, it shows no figure at all, because any figure would be made up.`,
   ],
   actions: ["open-wallet", "open-receipts"],
   related: [
@@ -554,7 +556,7 @@ export const WALLET: DocChapter = {
   sections: [
     {
       id: "what-it-is",
-      heading: "What the wallet is",
+      heading: `What the ${W} is`,
       body: (
         <>
           <p>
@@ -576,7 +578,7 @@ export const WALLET: DocChapter = {
       heading: "The four figures",
       body: (
         <DocTable
-          caption="The figures on the wallet overview"
+          caption={`The figures on the ${W} overview`}
           headLabel="Figure"
           columns={[
             { key: "state", label: "State" },
@@ -670,13 +672,13 @@ export const REWARDS: DocChapter = {
   number: 0,
   title: "Rewards and referrals",
   summary: "Invite people, see where each one stands, and what the rewards balance is and is not.",
-  icon: "gift",
+icon: "gift",
   updated: UPDATED,
   glance: [
     "Your invite link is made the first time you open Invite.",
     "A referral moves through joined, pending, under review and qualified, and the list shows where each person is.",
     "The rewards balance is separate from any payment you made or were paid.",
-    "Where rewards are not live for your account, the screens say so.",
+    "Where rewards are not available for your account, the screens say so.",
   ],
   actions: ["open-rewards"],
   related: [{ href: "/docs/what-vallo-costs", label: "What Vallo costs" }],
@@ -719,9 +721,9 @@ export const REWARDS: DocChapter = {
             your referrals, and a history of every amount added or taken, newest first, like a statement. The rewards
             balance is kept separate from payments for homes and stays.
           </p>
-          <DocCallout kind="not-live" title="When rewards are paused or not live">
+          <DocCallout kind="not-live" title="When rewards are paused or not available">
             <p>
-              If rewards are not live for your account, or are paused, the pages say so in words and show no figures.
+              If rewards are not available for your account, or are paused, the pages say so in words and show no figures.
               Withdrawing uses the banks our payment partner can pay out to; if that list cannot be read, the form says so.
             </p>
           </DocCallout>
@@ -749,7 +751,7 @@ export const HOST_WORKSPACE: DocChapter = {
   number: 0,
   title: "The host workspace",
   summary: "For hotels, guest houses, serviced apartments, shortlets and restaurants: requests, the calendar, rooms, earnings and reviews.",
-  icon: "key",
+icon: "key-ring",
   updated: UPDATED,
   glance: [
     "One list shows everything waiting for your answer, with the clock showing.",
@@ -839,7 +841,7 @@ export const AGENT_WORKSPACE: DocChapter = {
   number: 0,
   title: "The agent and lister workspace",
   summary: "For agents, landlords, owners and firms: listings, the owner mandate, enquiries, analytics, promotion and earnings.",
-  icon: "briefcase",
+icon: "report-stats",
   updated: UPDATED,
   glance: [
     "A listing goes live only after Vallo has confirmed who instructed the lister, through the mandate.",
@@ -922,7 +924,7 @@ export const AGENT_WORKSPACE: DocChapter = {
       heading: "What can go wrong",
       body: (
         <ul>
-          <li>A listing is not live: check Health. A missing mandate or verification step is named there.</li>
+          <li>A listing is not available: check Health. A missing mandate or verification step is named there.</li>
           <li>An approved agent sees numbers; anyone else sees none. That is by design.</li>
           <li>Never take a deposit outside Vallo. A payment outside Vallo is not covered.</li>
         </ul>
@@ -938,7 +940,7 @@ export const TENANCY: DocChapter = {
   number: 0,
   title: "Moving in and your tenancy file",
   summary: "The move-in ledger, paying the first rent, your tenancy file afterwards, and what to do when a caution is not returned.",
-  icon: "house-sparkle",
+icon: "house-sparkle",
   updated: UPDATED,
   glance: [
     "The move-in ledger lists every cost the lister named, each as its own row, and the total.",
@@ -1036,7 +1038,7 @@ export const TOOLS: DocChapter = {
   number: 0,
   title: "Tools that need no account",
   summary: "Work out a move-in total, check an advert or a receipt, and read what homes in an area are asking.",
-  icon: "calculator",
+icon: "naira-coins",
   updated: UPDATED,
   glance: [
     "The move-in calculator, area prices, the agent check and the receipt check work with no account.",
@@ -1127,7 +1129,7 @@ export const PROFILES: DocChapter = {
   number: 0,
   title: "Profiles, passport and the directory",
   summary: "Your public page, the passport other members can open, and how to find an agent, a landlord or a hotel.",
-  icon: "user-check",
+icon: "user-check",
   updated: UPDATED,
   glance: [
     "Your page is at /u/ followed by your handle. You choose the name and the sentence people see.",

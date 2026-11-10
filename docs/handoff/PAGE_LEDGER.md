@@ -39,7 +39,9 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/fees` | FE |  |  |  |  |  |
 | `/admin/field-speed` | FE |  |  |  |  |  |
 | `/admin/front-door` | FE |  |  |  |  |  |
-| `/admin/handbook` | FE |  |  |  |  |  |
+| `/admin/handbook` | DOCS |  |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). Adds a link to the manual. |
+| `/admin/handbook/manual` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
+| `/admin/handbook/manual/[slug]` | DOCS | DocShell |  |  |  | DOCS: staff manual on the document kit. Not seen: needs a staff session (type-checked, linted, route covered by coverage test). |
 | `/admin/handbook/position` | FE |  |  |  |  |  |
 | `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
@@ -263,8 +265,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/docs` | FE |  |  |  |  |  |
-| `/docs/[slug]` | FE |  |  |  |  |  |
+| `/docs` | DOCS | DocShell | yes | yes | yes | DOCS: on the document kit (DocShell, DocCards/DocToc). Seen on the dev server (not a production build) at 390, 360, 1280, both themes, no sideways scroll. |
+| `/docs/[slug]` | DOCS | DocShell | yes | yes | yes | DOCS: on the document kit (DocShell, DocCards/DocToc). Seen on the dev server (not a production build) at 390, 360, 1280, both themes, no sideways scroll. |
 
 ## Member: email
 
@@ -313,14 +315,14 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/guides` | FE |  |  |  |  |  |
-| `/guides/[slug]` | FE |  |  |  |  |  |
+| `/guides` | DOCS | DocShell | yes | yes | yes | DOCS: on the document kit (DocShell, DocCards/DocToc). Seen on the dev server (not a production build) at 390, 360, 1280, both themes, no sideways scroll. |
+| `/guides/[slug]` | DOCS | DocShell | yes | yes | yes | DOCS: on the document kit (DocShell, DocCards/DocToc). Seen on the dev server (not a production build) at 390, 360, 1280, both themes, no sideways scroll. |
 
 ## Member: help
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/help` | FE |  |  |  |  |  |
+| `/help` | DOCS | DocShell | yes | yes | yes | DOCS: on the document kit (DocShell, DocCards/DocToc). Seen on the dev server (not a production build) at 390, 360, 1280, both themes, no sideways scroll. |
 
 ## Member: home
 
