@@ -483,9 +483,9 @@ export const UNDERSTANDING_A_LISTING: DocChapter = {
               { key: "answers", label: "The answers a lister can give" },
             ]}
             rows={[
-              { id: "grid", icon: "bolt", cells: { part: <strong>The grid</strong>, answers: "Band A (20 hours a day or more), mostly on, patchy, rarely on, or no grid supply." } },
-              { id: "backup", icon: "bolt", cells: { part: <strong>The backup</strong>, answers: "None, a generator, an inverter, solar, or generator and inverter, and how many hours a day it runs." } },
-              { id: "meter", icon: "bolt", cells: { part: <strong>The meter</strong>, answers: "Whether the unit is on a prepaid meter." } },
+              { id: "grid", cells: { part: <strong>The grid</strong>, answers: "Band A (20 hours a day or more), mostly on, patchy, rarely on, or no grid supply." } },
+              { id: "backup", cells: { part: <strong>The backup</strong>, answers: "None, a generator, an inverter, solar, or generator and inverter, and how many hours a day it runs." } },
+              { id: "meter", cells: { part: <strong>The meter</strong>, answers: "Whether the unit is on a prepaid meter." } },
             ]}
           />
           <p>If the lister has not answered, the listing says so. Message them to ask.</p>
@@ -898,6 +898,17 @@ export const FOR_OWNERS: DocChapter = {
       heading: "Set up your owner workspace",
       body: (
         <>
+          <DocFlow
+            label="From your own property to agreed terms"
+            steps={[
+              { icon: "briefcase", title: "Set up your owner workspace", href: SUPPLY_DOOR_HREF, outcome: SUPPLY_DOORS.owner.howLong },
+              { icon: "certificate", title: "Add your ownership document", href: "#ownership-document", outcome: "Once it is approved, an Ownership seen mark with the date appears beside you." },
+              { icon: "house", title: "List your property", href: "/guides/how-to-list", outcome: "Vallo reviews it before it goes up." },
+              { icon: "calendar-check", title: "Offer viewing times", href: "#viewings", outcome: "Renters book a free slot at once." },
+              { icon: "file-check", title: "Agree terms", href: "#get-paid", outcome: "You and the renter confirm the same agreement." },
+            ]}
+            end={RENT_PAYMENT_NOT_OPEN}
+          />
           <p>
             Open{" "}
             <Link href={SUPPLY_DOOR_HREF} className={A}>
