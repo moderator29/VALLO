@@ -193,14 +193,13 @@ export const ACCESS: ManualBody = {
       body: (
         <>
           <p>
-            The console has no named position and no access area for business development or for social media
-            management. The positions and areas above are the whole list. If your work is one of these, you hold no
-            console access unless the founder grants you an area, and the narrowest one is the read-only analyst area,
-            which shows numbers and never what a case says.
+            Business development and social media each have their own access area and named position, listed in the
+            tables above. The Business Development area opens the Business Development desk, and the Director position also holds
+            listing review. Social media opens the Social Media desk only, with no listing, moderation or member data. Anything else needs another area.
           </p>
           <FounderToName>
-            Which access area, if any, a business developer or a social media manager holds, and who they ask when they
-            need something from a desk they cannot open.
+            Which extra access area, if any, a business developer or a social media manager needs, and who they ask when
+            they need something from a desk they cannot open.
           </FounderToName>
         </>
       ),

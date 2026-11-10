@@ -336,7 +336,7 @@ export const FAQS: Faq[] = [
   {
     category: "Verification and trust",
     q: "Does Vallo charge any fees?",
-    a: `Not to a renter, buyer or guest. ${PRICE_IS_THE_PRICE} ${COMMISSION_FROM_SHARE} An agency or caution fee can be part of what a landlord asks for; when it is, it is named on the listing and counted into the move-in total. Anyone presenting an inspection fee, a holding fee or a platform fee as a Vallo charge is lying: report them.`,
+    a: `Not to a renter, buyer or guest. ${PRICE_IS_THE_PRICE} ${COMMISSION_FROM_SHARE} An agency or caution fee can be part of what a landlord asks for; when it is, it is named on the listing and counted into the move-in total. Anyone presenting an inspection fee, a holding fee or a platform fee to a renter or guest as a Vallo charge is lying: report them.`,
   },
   {
     category: "Verification and trust",
