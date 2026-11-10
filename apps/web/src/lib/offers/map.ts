@@ -52,10 +52,6 @@ export function termsOf(raw: unknown, fallbackProposer: Side = "buyer"): OfferTe
   };
 }
 
-const ACTION_WORDS: Record<string, (v: number) => string> = {
-  paymentPreference: () => "Payment preference changed",
-};
-
 /** What changed between two versions, in words and figures. */
 export function changesBetween(prev: OfferVersion | null, next: Pick<OfferVersion, "amountMinor" | "terms">, fmt: (minor: number) => string): string[] {
   if (!prev) return [];
@@ -64,7 +60,7 @@ export function changesBetween(prev: OfferVersion | null, next: Pick<OfferVersio
     const d = next.amountMinor - prev.amountMinor;
     out.push(`Amount ${d > 0 ? "up" : "down"} ${fmt(Math.abs(d))}, from ${fmt(prev.amountMinor)} to ${fmt(next.amountMinor)}`);
   }
-  if (next.terms.paymentPreference !== prev.terms.paymentPreference) out.push(`${ACTION_WORDS.paymentPreference(0)} from ${prev.terms.paymentPreference} to ${next.terms.paymentPreference}`);
+  if (next.terms.paymentPreference !== prev.terms.paymentPreference) out.push(`Payment preference changed from ${prev.terms.paymentPreference} to ${next.terms.paymentPreference}`);
   if ((next.terms.deposit_minor ?? null) !== (prev.terms.deposit_minor ?? null)) out.push("Deposit proposal changed");
   if ((next.terms.instalment_months ?? null) !== (prev.terms.instalment_months ?? null)) out.push("Instalment period changed");
   if ((next.terms.targetClosing ?? null) !== (prev.terms.targetClosing ?? null)) out.push("Proposed closing date changed");

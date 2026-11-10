@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { DOC_SLUGS } from "@/app/(site)/docs/slugs";
 import { GUIDE_SLUGS } from "@/lib/guides/slugs";
 import { DOC_DESTINATIONS } from "./destinations";
-import { COVERAGE, MAX_KNOWN_GAPS, findStale, findUncovered, hrefResolves, manifestRoutes } from "./coverage";
+import { COVERAGE, MAX_KNOWN_GAPS, RETIRED_IN_LEDGER, findStale, findUncovered, hrefResolves, manifestRoutes } from "./coverage";
 
 /**
  * THE DOCUMENTATION CANNOT ROT (Agent DOCS, 11 November 2026).
@@ -52,7 +52,9 @@ describe("documentation coverage", () => {
   });
 
   it("names every page in the page ledger", () => {
-    expect(findUncovered(ledgerRoutes()), "ledger pages with no documentation entry").toEqual([]);
+    const ledger = ledgerRoutes();
+    expect(findUncovered(ledger).filter((route) => !RETIRED_IN_LEDGER.includes(route)), "ledger pages with no documentation entry").toEqual([]);
+    for (const route of RETIRED_IN_LEDGER) expect(ROUTES.includes(route), `${route} is back in the app: drop it from RETIRED_IN_LEDGER`).toBe(false);
   });
 
   it("names no page that has gone", () => {
@@ -115,5 +117,6 @@ describe("documentation coverage", () => {
   it("detects a page that is added without documentation (the fixture)", () => {
     expect(findUncovered([...ROUTES, "/fake-feature"])).toEqual(["/fake-feature"]);
     expect(findStale([...ROUTES.filter((r) => r !== "/about")])).toEqual(["/about"]);
+    expect(hrefResolves("/offers/does-not-exist/deep/path", ROUTES)).toBe(false);
   });
 });

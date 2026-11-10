@@ -18,7 +18,7 @@ describe("offerActionFor", () => {
     expect(offerActionFor({ ...base, signedIn: true, gate: FIXTURE_GATE_EXISTING })).toEqual({ label: "View your offer", href: "/offers/off-open" });
   });
   it("offers nothing when the listing cannot take offers", () => {
-    expect(offerActionFor({ ...base, signedIn: true, gate: gate({ canOffer: false, reason: "Offers are not turned on for this property." }) })).toBeNull();
+    expect(offerActionFor({ ...base, signedIn: true, gate: gate({ canOffer: false, canOpenForm: false, reason: "Offers are not turned on for this property." }) })).toBeNull();
   });
   it("shows Make an offer to a signed-out reader, and nothing to a signed-in one with no read", () => {
     expect(offerActionFor({ ...base, signedIn: false, gate: null })?.label).toBe("Make an offer");

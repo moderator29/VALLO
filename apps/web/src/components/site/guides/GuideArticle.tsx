@@ -1,4 +1,7 @@
 import type { Dictionary } from "@vallo/i18n/core";
+import { DocButtons } from "@/components/docs/DocButton";
+import { WasThisHelpful } from "@/components/docs/WasThisHelpful";
+import type { DocDestinationId } from "@/lib/docs/destinations";
 import { ButtonLink } from "@/components/ui/Button";
 import { IconPlate, type IconPlateTone } from "@/components/ui/IconPlate";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
@@ -127,6 +130,8 @@ export function GuideArticle({
             </ButtonLink>
           </div>
 
+          <DocButtons items={GUIDE_BUTTONS[guide.slug] ?? ["search-homes"]} title="Go straight to it" foot />
+          <WasThisHelpful path={`/guides/${guide.slug}`} title={guide.title} />
           <nav className="nf-guide__more" aria-label={copy.more}>
             <ListGroup label={copy.more}>
               {others.map((other) => (
@@ -154,6 +159,15 @@ export function GuideArticle({
     </div>
   );
 }
+
+/** Where each guide's reader most likely wants to go next. */
+const GUIDE_BUTTONS: Record<string, DocDestinationId[]> = {
+  "avoiding-rental-scams": ["report-safety", "search-homes", "ask-support"],
+  "what-a-move-in-total-includes": ["move-in-cost", "price-check"],
+  "renting-in-lagos": ["search-homes", "price-check"],
+  "renting-in-abuja": ["search-homes", "price-check"],
+  "how-stays-work-on-vallo": ["search-stays", "open-bookings"],
+};
 
 function Block({ block }: { block: GuideBlock }) {
   if (typeof block === "string") return <p>{block}</p>;

@@ -152,7 +152,10 @@ export async function counterOffer(input: {
   );
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
   const amount = nairaToKobo(parsed.data.amountNaira, "Counteroffer");
-  if (amount.kobo === null) return fail(amount.error ?? DOOR_WORDS.bad_amount, { amountNaira: amount.error ?? DOOR_WORDS.bad_amount });
+  if (amount.kobo === null) {
+    const words = amount.error ?? DOOR_WORDS.bad_amount ?? "Enter an offer above zero.";
+    return fail(words, { amountNaira: words });
+  }
   const deposit = nairaToKobo(parsed.data.depositNaira, "Deposit");
   if (deposit.error) return fail(deposit.error, { depositNaira: deposit.error });
   // The terms not restated carry over from the version being answered, in the database.

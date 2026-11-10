@@ -24,7 +24,7 @@ export function OfferConfirmation({ room }: { room: DealRoom }) {
         <span aria-hidden="true" className="text-[var(--nf-state-success)]">
           <UiIcon name="circle-check" size={40} />
         </span>
-        <h1 className="nf-h2 text-[var(--nf-content-primary)]">Offer sent</h1>
+        <h2 className="nf-h2 text-[var(--nf-content-primary)]">Sent to the seller</h2>
         <p className="nf-lede text-[var(--nf-content-secondary)]">The seller has your offer. Nothing is agreed yet.</p>
       </header>
       <Panel variant="card" className="p-card">

@@ -129,6 +129,14 @@ export const COVERAGE: readonly CoverageGroup[] = [
   { doc: M("operations-and-tools"), routes: ["/admin/operations", "/admin/operations/providers", "/admin/crashes", "/admin/field-speed", "/admin/call-usage", "/admin/analytics", "/admin/front-door", "/admin/retention", "/admin/compliance", "/admin/switches", "/admin/settings"] },
 ];
 
+/**
+ * Pages the page ledger still lists that are no longer in the app (removed or
+ * renamed since the ledger was generated). They need no documentation; the
+ * ledger rows are stale and the lead can drop them. Listed so the ledger check
+ * stays exact instead of being loosened.
+ */
+export const RETIRED_IN_LEDGER: readonly string[] = ["/around/manage", "/profile/setup/firm", "/sign-up/phone"];
+
 /** The most known gaps allowed. Lower this as gaps close; never raise it without a line in DOCS_COVERAGE.md. */
 export const MAX_KNOWN_GAPS = 3;
 

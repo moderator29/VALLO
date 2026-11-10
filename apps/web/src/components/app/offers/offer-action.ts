@@ -8,8 +8,8 @@ import { dealRoomHref, makeOfferHref, offersTabHref } from "@/lib/offers/routes"
  *
  *   the seller (or the listing's own agent)   View offers
  *   somebody with a live offer                View your offer
- *   somebody who may offer, or who still has
- *   a requirement to finish                   Make an offer
+ *   somebody whose form may open (even with a
+ *   requirement still to finish)              Make an offer
  *   a closed listing, no mandate, offers off  nothing (the page keeps the visit)
  *   a signed-out reader                       Make an offer (sign-in, then back)
  *
@@ -22,6 +22,6 @@ export function offerActionFor(args: { listingId: string; signedIn: boolean; gat
   if (!gate) return signedIn ? null : { label: "Make an offer", href: makeOfferHref(listingId) };
   if (gate.viewerSide === "seller") return { label: "View offers", href: offersTabHref("received") };
   if (gate.existingOfferId) return { label: "View your offer", href: dealRoomHref(gate.existingOfferId) };
-  if (gate.canOffer || !gate.eligibility.eligible) return { label: "Make an offer", href: makeOfferHref(listingId) };
+  if (gate.canOpenForm) return { label: "Make an offer", href: makeOfferHref(listingId) };
   return null;
 }

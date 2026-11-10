@@ -83,6 +83,7 @@ export function gate(over: Partial<OfferGate> = {}): OfferGate {
     eligibility: FIXTURE_ELIGIBLE,
     mandate: FIXTURE_MANDATE,
     canOffer: true,
+    canOpenForm: true,
     reason: null,
     viewerSide: "none",
     existingOfferId: null,
@@ -91,8 +92,8 @@ export function gate(over: Partial<OfferGate> = {}): OfferGate {
 }
 
 export const FIXTURE_GATE_BLOCKED = gate({ eligibility: FIXTURE_BLOCKED, canOffer: false, reason: "Finish the requirements below to send an offer." });
-export const FIXTURE_GATE_OWN = gate({ canOffer: false, reason: "You cannot make an offer on your own listing.", viewerSide: "seller" });
-export const FIXTURE_GATE_EXISTING = gate({ canOffer: false, reason: "You already have an open offer on this property.", existingOfferId: "off-open" });
+export const FIXTURE_GATE_OWN = gate({ canOffer: false, canOpenForm: false, reason: "You cannot make an offer on your own listing.", viewerSide: "seller" });
+export const FIXTURE_GATE_EXISTING = gate({ canOffer: false, canOpenForm: false, reason: "You already have an open offer on this property.", existingOfferId: "off-open" });
 
 /* ------------------------------------------------------------------- rows */
 

@@ -77,7 +77,7 @@ describe("the offer flow", () => {
 describe("the confirmation", () => {
   it("says the offer was sent and agreed nothing", () => {
     const out = html(<OfferConfirmation room={F.ROOM_BUYER_WAITING} />);
-    expect(out).toContain("Offer sent");
+    expect(out).toContain("Sent to the seller");
     expect(out).toContain("Nothing is agreed yet");
     expect(out).toContain("View Deal Room");
     expect(out).toContain("Return to Property");

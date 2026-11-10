@@ -26,9 +26,10 @@ export default async function MakeOfferPage({ params }: { params: Promise<{ id: 
   if (!gate) notFound();
   if (gate.existingOfferId) redirect(dealRoomHref(gate.existingOfferId));
 
-  /* A reason that is not about the member's own requirements ends here with one
-     plain sentence. An unmet requirement keeps the form visible instead. */
-  if (!gate.canOffer && gate.eligibility.eligible) {
+  /* When the form may not open (an unavailable listing, no sale mandate, offers
+     off, the member's own listing) the page ends here with one plain sentence.
+     An unmet requirement keeps the form visible but unsubmittable instead. */
+  if (!gate.canOpenForm) {
     return <CannotOffer listingHref={here} reason={gate.reason ?? "You cannot make an offer on this property right now."} />;
   }
 

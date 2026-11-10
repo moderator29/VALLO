@@ -3,6 +3,9 @@ import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { SiteHead } from "@/components/site/SiteHead";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
+import { DocShell } from "@/components/docs/DocShell";
+import { DocButtons } from "@/components/docs/DocButton";
+import { CONTACT_EMAIL } from "@/lib/docs/contact";
 import { IndexRows } from "@/components/site/guides/IndexRows";
 import { SupportChat } from "@/components/app/account/SupportChat";
 import { HelpSearch } from "./HelpSearch";
@@ -55,6 +58,7 @@ export default async function HelpPage() {
       />
     <div className="nf-shell pb-section">
       <div className="mx-auto max-w-3xl">
+        <DocShell section="Help centre" home="/help">
 
         {/* ------------------------------------------------------ topics */}
         {/* THE INDEX (reference 7086): a Plate row per topic, its glyph, its
@@ -113,13 +117,21 @@ export default async function HelpPage() {
               <UiIcon name="chat-bubble" size={20} />
             </IconPlate>
             <p className="text-[length:var(--nf-text-row)] leading-snug text-[var(--nf-content-secondary)]">
-              Still stuck? A person replies within one business day.
+              Still stuck? A person replies within one business day, at{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="font-semibold text-[var(--nf-content-link)] hover:underline">
+                {CONTACT_EMAIL}
+              </a>{" "}
+              or through the form.
             </p>
           </div>
           <ButtonLink href="/contact" variant="primary" className="shrink-0">
             Contact support
           </ButtonLink>
         </div>
+        <div className="mt-section-tight">
+          <DocButtons items={["start-verification", "open-bookings", "open-receipts"]} title="Go straight to it" />
+        </div>
+        </DocShell>
       </div>
     </div>
     </>
