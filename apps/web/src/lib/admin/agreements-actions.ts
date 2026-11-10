@@ -7,11 +7,6 @@ import { fail, ok, validate, type ActionResult } from "../actions/envelope";
 import { getLocale } from "../locale";
 import { parseNairaToKobo } from "../money/amount";
 import { adminRefusal, requireAdmin } from "./guard";
-import { recordAlert } from "../alerts";
-import { lagosToday } from "../bookings/schema";
-import { adminDb } from "../money/member-wallet";
-import { staffResolve } from "../money/provider-arrangements";
-import { paylukContext } from "../payments/providers/payluk";
 import { KillSwitchInput, RiskSettingsInput, settingsAnswer, settingsRpcArgs } from "./risk-settings";
 
 /**
@@ -141,11 +136,9 @@ export async function resumeRelease(input: { arrangementId: string }): Promise<A
 
 /*
  * A held payment decided by a person (founder instruction, 13 October 2026:
- * refund or dispute). The partner documents one road from a held payment:
- * the payer's dispute, resolved by the merchant. `staffResolve` opens it for
- * the payer and resolves it at once; the partner's webhook (or a read-back)
- * then records refunded or released, and a refunded stay is cancelled
- * through the database's explicit unwind. Nothing is recorded as moved here.
+ * refund or dispute). With no rail able to carry the decision, the action
+ * answers that the partner is not configured and nothing moves. Nothing is
+ * recorded as moved here.
  */
 const RESOLVE_WORDS: Record<string, string> = {
   switched_off: "The payment partner is not configured here, so nothing can be asked of it.",
@@ -176,34 +169,10 @@ export async function resolveHeldPayment(input: {
     input,
   );
   if (!parsed.ok) return fail(parsed.error, parsed.fieldErrors);
-  const db = adminDb();
-  const ctx = paylukContext();
-  if (!db || !ctx) return fail(RESOLVE_WORDS.switched_off!);
-  const { data: party } = await db
-    .from("provider_arrangements")
-    .select("buyer_user_id, seller_user_id")
-    .eq("id", parsed.data.arrangementId)
-    .maybeSingle();
-  const parties = party as { buyer_user_id: string; seller_user_id: string } | null;
-  if (!parties) return fail(RESOLVE_WORDS.not_found!);
-  if (parties.buyer_user_id === access.user.id || parties.seller_user_id === access.user.id) return fail(RESOLVE_WORDS.own_payment!);
-  const outcome = await staffResolve(
-    {
-      db,
-      ctx,
-      todayLagos: lagosToday,
-      alert: async (kind, detail) => {
-        await recordAlert({ kind, severity: "critical", detail });
-      },
-    },
-    parsed.data.arrangementId,
-    parsed.data.outcome === "refund" ? "REFUNDED" : "COMPLETED",
-    parsed.data.note,
-    access.user.id,
-  );
-  revalidatePath("/admin/agreements");
-  if (outcome.outcome === "submitted") return ok({ to: outcome.to });
-  return fail(RESOLVE_WORDS[outcome.reason] ?? RESOLVE_WORDS.store!);
+  /* The previous rail's resolve road was removed (founder, 10 November 2026).
+     The new protected rail has no staff-resolve road until its provider's
+     documentation arrives, so nothing can be asked of it and nothing moves. */
+  return fail(RESOLVE_WORDS.switched_off!);
 }
 
 const CLAIM_WORDS: Record<string, string> = {

@@ -45,7 +45,6 @@ describe("ledgerEntryProblem", () => {
 
   it("refuses what each pot may never carry", () => {
     expect(ledgerEntryProblem({ ...ok, event: "ESCROW_FUNDED" })).toMatch(/never carries ESCROW_FUNDED/);
-    expect(ledgerEntryProblem({ ...ok, pot: "marketing_float", provider: "payluk" })).toMatch(/never carries a payluk/);
     expect(ledgerEntryProblem({ ...ok, pot: "customer_funds", provider: "vallo" })).toMatch(/never carries a vallo/);
     expect(ledgerEntryProblem({ ...ok, pot: "marketing_float", event: "DISPUTE_OPENED" })).not.toBeNull();
   });

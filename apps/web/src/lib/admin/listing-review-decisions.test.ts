@@ -15,6 +15,8 @@ const seam = vi.hoisted(() => ({
   results: {} as Record<string, { data?: unknown; error: unknown }>,
   announce: vi.fn(),
   audit: vi.fn(),
+  gate: false,
+  identity: "approved" as "approved" | "pending" | "failed" | "none",
 }));
 
 function client() {
@@ -54,6 +56,14 @@ vi.mock("./guard", () => ({
 vi.mock("../supabase/admin", () => ({ createAdminClient: () => client() }));
 vi.mock("../notify/junction", () => ({ announce: seam.announce }));
 vi.mock("./audit", () => ({ writeAudit: seam.audit }));
+vi.mock("@/lib/verification/lister-identity", async (original) => {
+  const real = await original<typeof import("@/lib/verification/lister-identity")>();
+  return {
+    ...real,
+    identityGateApplies: async () => seam.gate,
+    listerIdentityStatus: async (userId: string) => real.describeIdentity(seam.identity, userId),
+  };
+});
 vi.mock("../stays/arrival-gate", () => ({
   ARRIVAL_DECLARATION_NEEDED: "declare the arrival charges",
   arrivalChargesDeclared: async () => true,
@@ -86,6 +96,8 @@ beforeEach(() => {
   seam.calls = [];
   seam.announce.mockReset();
   seam.audit.mockReset();
+  seam.gate = false;
+  seam.identity = "approved";
   seam.results = {
     "listings.select": { data: LISTING, error: null },
     "listings.update": { data: [{ id: LISTING.id }], error: null },
@@ -232,5 +244,61 @@ describe("every decision tells the lister and leaves one audit row", () => {
     });
     const entry = seam.audit.mock.calls[0]![1] as { detail: Record<string, unknown> };
     expect(entry.detail).toMatchObject({ before_status: "SUBMITTED", after_status: "MORE_INFO_REQUIRED", decision: "request_changes" });
+  });
+});
+
+describe("the identity gate on a new approval (10 November 2026)", () => {
+  const cases = [
+    ["pending", "Cannot approve: identity check not approved. The ID is still waiting for review."],
+    ["none", "Cannot approve: identity check not approved. No ID sent yet."],
+    ["failed", "Cannot approve: identity check not approved. The ID check failed."],
+  ] as const;
+
+  for (const [status, message] of cases) {
+    it(`refuses an approval when the lister's identity is ${status}, with the cause in the message`, async () => {
+      seam.gate = true;
+      seam.identity = status;
+      holding("SUBMITTED");
+      const result = await decide("approve");
+      expect(result).toEqual({ ok: false, error: message });
+      expectNothingWritten();
+    });
+  }
+
+  it("refuses the first publish the same way", async () => {
+    seam.gate = true;
+    seam.identity = "none";
+    holding("APPROVED", { published_at: null });
+    const result = await decide("publish");
+    expect(result.ok).toBe(false);
+    expectNothingWritten();
+  });
+
+  it("passes an approved lister", async () => {
+    seam.gate = true;
+    seam.identity = "approved";
+    holding("SUBMITTED");
+    expect((await decide("approve")).ok).toBe(true);
+  });
+
+  it("does not hold a listing that has been live before (grandfathered)", async () => {
+    seam.gate = true;
+    seam.identity = "none";
+    holding("APPROVED", { published_at: "2026-09-01T10:00:00.000Z" });
+    expect((await decide("publish")).ok).toBe(true);
+  });
+
+  it("does not hold a rejection or a request for changes", async () => {
+    seam.gate = true;
+    seam.identity = "none";
+    holding("SUBMITTED");
+    expect((await decide("request_changes", { notes: "Add a photo of the kitchen too." })).ok).toBe(true);
+  });
+
+  it("asks nothing when the platform switch is off", async () => {
+    seam.gate = false;
+    seam.identity = "none";
+    holding("SUBMITTED");
+    expect((await decide("approve")).ok).toBe(true);
   });
 });

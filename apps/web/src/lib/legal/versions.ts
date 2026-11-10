@@ -51,10 +51,14 @@ export const TERMS_VERSION = "2026-11-09";
 /* 2026-11-03: verification described as it now runs (ID, selfie, proof of
    address, the reviewer-recorded name, the bank name check, a photo holding
    the ID on request, decided by a person); the selfie's explicit consent; the
-   phone-code senders (Termii, Twilio) and the wallet provider (Payluk) named;
+   phone-code senders (Termii, Twilio) and the wallet provider named;
    who can open verification documents and how. */
 /* 2026-11-09: the Guarantee reserve leg is gone from the payment data and the
    processor list; Guarantee claims are described as made before it retired. */
+/* 2026-11-10 (NOT a version bump, flagged for counsel): the retired protected-payment
+   provider is no longer named in the processor list; the switched-off
+   replacement sends nothing and is not named. See
+   docs/handoff/LEGAL_PAGES_CHANGES.md. */
 export const PRIVACY_VERSION = "2026-11-09";
 
 /**

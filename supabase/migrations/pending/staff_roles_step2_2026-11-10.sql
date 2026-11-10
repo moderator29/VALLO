@@ -33,6 +33,14 @@
 --   content_items                                     (/admin/content)
 --   tech_incidents, tech_incident_updates             (/admin/technical)
 --   support_qa_reviews, support_policy_notes          (/admin/support-lead)
+--   staff_desk_entries  (the smaller tools of all four desks: segment and
+--     market notes, creative briefs, A/B test log, monthly reports; content
+--     requests, style notes, SEO and publishing checklists, translation
+--     status, staff announcement drafts; runbooks, on-call notes, release
+--     notes, status page drafts, expiry reminders, post-incident reviews;
+--     macros, rota notes, escalation matrix rows, coaching notes, knowledge
+--     base gaps). One row shape, a `desk` and a `kind`, validated per kind by
+--     the app; a small closed `fields` object holds the kind's own fields.
 --
 -- No secret, key, credential or platform token is stored by any of them.
 
@@ -343,20 +351,53 @@ comment on table public.support_policy_notes is
   'Support policy notes: written by the Customer Support Lead, approved by the COO or an admin, read by the support team.';
 create index if not exists support_policy_notes_status_idx on public.support_policy_notes (status, updated_at desc);
 
+create table if not exists public.staff_desk_entries (
+  id           uuid primary key default gen_random_uuid(),
+  desk         text not null,
+  kind         text not null,
+  title        text not null,
+  body         text not null default '',
+  status       text not null default 'open',
+  due_on       date,
+  link_url     text,
+  subject_user uuid references auth.users (id) on delete set null,
+  fields       jsonb not null default '{}'::jsonb,
+  review_note  text,
+  approved_by  uuid references auth.users (id) on delete set null,
+  approved_at  timestamptz,
+  owner_id     uuid references auth.users (id) on delete set null,
+  created_by   uuid references auth.users (id) on delete set null,
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  constraint staff_desk_entries_desk_check check (desk in ('marketing', 'content', 'technical', 'support_lead')),
+  constraint staff_desk_entries_kind_check check (kind ~ '^[a-z][a-z_]{1,39}$'),
+  constraint staff_desk_entries_status_check check (status in ('open', 'done', 'draft', 'submitted', 'approved', 'sent_back', 'retired')),
+  constraint staff_desk_entries_title_len check (char_length(btrim(title)) between 1 and 200),
+  constraint staff_desk_entries_body_len check (char_length(body) <= 20000),
+  constraint staff_desk_entries_link_len check (link_url is null or char_length(link_url) <= 2000),
+  constraint staff_desk_entries_review_len check (review_note is null or char_length(review_note) <= 1000),
+  constraint staff_desk_entries_fields_shape check (jsonb_typeof(fields) = 'object' and pg_column_size(fields) <= 6000),
+  constraint staff_desk_entries_approved_pair check (approved_by is null or approved_at is not null)
+);
+comment on table public.staff_desk_entries is
+  'The smaller tools of the Marketing, Content, Technical and Support Lead desks (notes, briefs, checklists, runbooks, reminders, macros, coaching notes). The desk and kind decide what a row means; the app validates each kind. Never holds a secret, a credential, a message from a member or a payment detail.';
+create index if not exists staff_desk_entries_desk_idx on public.staff_desk_entries (desk, kind, status, due_on);
+create index if not exists staff_desk_entries_subject_idx on public.staff_desk_entries (subject_user) where subject_user is not null;
+
 -- ------------------------------------------------------------ triggers, RLS, grants
 
 do $apply$
 declare
   t text;
 begin
-  foreach t in array array['marketing_campaigns', 'content_items', 'tech_incidents', 'support_policy_notes'] loop
+  foreach t in array array['marketing_campaigns', 'content_items', 'tech_incidents', 'support_policy_notes', 'staff_desk_entries'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_touch_updated_at', t);
     execute format('create trigger %I before update on public.%I for each row execute function private.staff_desks_touch_updated_at()',
                    t || '_touch_updated_at', t);
   end loop;
 
   -- Tables a person may read, add to and change.
-  foreach t in array array['marketing_campaigns', 'marketing_campaign_results', 'content_items', 'tech_incidents', 'support_policy_notes'] loop
+  foreach t in array array['marketing_campaigns', 'marketing_campaign_results', 'content_items', 'tech_incidents', 'support_policy_notes', 'staff_desk_entries'] loop
     execute format('alter table public.%I enable row level security', t);
     execute format('revoke all on table public.%I from public, anon, authenticated', t);
     execute format('grant select, insert, update on table public.%I to authenticated', t);
@@ -425,7 +466,8 @@ begin
   if (select count(*) from information_schema.tables
        where table_schema = 'public'
          and table_name in ('marketing_campaigns', 'marketing_campaign_results', 'content_items',
-                            'tech_incidents', 'tech_incident_updates', 'support_qa_reviews', 'support_policy_notes')) <> 7 then
+                            'tech_incidents', 'tech_incident_updates', 'support_qa_reviews', 'support_policy_notes',
+                            'staff_desk_entries')) <> 8 then
     raise exception 'staff_roles: a table is missing';
   end if;
 end

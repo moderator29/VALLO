@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { countOf } from "@vallo/i18n/core";
 
+import { CopyButton } from "@/components/docs/CopyButton";
 import { UnderlineTabs } from "@/components/ui/UnderlineTabs";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { marketingContext } from "@/lib/admin/copilot/contexts/marketing";
@@ -21,7 +22,12 @@ import {
   type Campaign,
   type CampaignResult,
 } from "@/lib/admin/marketing/model";
-import { readAcquisition, readCampaigns, readResults, type Acquisition } from "@/lib/admin/marketing/queries";
+import { buildMonthlyReport, campaignCalendar, channelClashes, currentMonth, type CalendarRow } from "@/lib/admin/marketing/extras";
+import { readAcquisition, readCampaigns, readReferralPerformance, readResults, type Acquisition, type ReferralPerformance } from "@/lib/admin/marketing/queries";
+import { readEntries, readNames } from "@/lib/admin/desk-entries/queries";
+import { countEntries, entryRef } from "@/lib/admin/desk-entries/model";
+import { EntryTool } from "../_components/EntryTool";
+import { ReportBuilder } from "./ReportBuilder";
 
 import { DeskLink, DeskRefused, DeskTable, Fact, Source, shortDate } from "../_components/desk-parts";
 import { Badge, CalmNote, KpiGrid, NotWired, PageHead, Panel, type BadgeTone, type KpiItem } from "../_components/panels";
@@ -32,9 +38,14 @@ export const dynamic = "force-dynamic";
 
 const TABS = [
   ["campaigns", "Campaigns"],
+  ["calendar", "Calendar"],
   ["links", "Tracked links"],
   ["results", "Results"],
   ["acquisition", "Acquisition"],
+  ["referrals", "Referrals"],
+  ["briefs", "Briefs and tests"],
+  ["audience", "Audience and market"],
+  ["report", "Monthly report"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
 
@@ -59,11 +70,17 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
   const asked = one(params.tab);
   const tab: Tab = door.viaApprover ? "campaigns" : ((TABS.find(([k]) => k === asked)?.[0] ?? "campaigns") as Tab);
 
-  const [campaignsRead, resultsRead, acquisition] = await Promise.all([
+  const month = one(params.month) && /^\d{4}-\d{2}$/.test(one(params.month) ?? "") ? (one(params.month) as string) : currentMonth();
+  const [campaignsRead, resultsRead, acquisition, entriesRead, referrals] = await Promise.all([
     readCampaigns(door.db),
     readResults(door.db),
-    tab === "acquisition" ? readAcquisition(door.db) : Promise.resolve(null),
+    tab === "acquisition" || tab === "report" ? readAcquisition(door.db) : Promise.resolve(null),
+    readEntries(door.db, "marketing"),
+    tab === "referrals" ? readReferralPerformance(door.db) : Promise.resolve(null),
   ]);
+  const entries = entriesRead.state === "ok" ? entriesRead.data : [];
+  const names = Object.fromEntries(await readNames(door.db, entries.flatMap((e) => [e.approvedBy, e.createdBy])));
+  const entryCounts = countEntries(entries);
   const notOpen = campaignsRead.state === "not-open";
   const campaigns = campaignsRead.state === "ok" ? campaignsRead.data : [];
   const results = resultsRead.state === "ok" ? resultsRead.data : [];
@@ -73,7 +90,7 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
     ? marketingContext({
         live: summary.byStatus.live + summary.byStatus.paused,
         planned: summary.byStatus.planned + summary.byStatus.draft,
-        waitingApproval: summary.waitingApproval,
+        waitingApproval: summary.waitingApproval + entryCounts.waitingApproval,
         sentBack: summary.sentBack,
         endingWithinSevenDays: summary.endingWithinSevenDays,
         overBudget: summary.overBudget,
@@ -99,6 +116,9 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
           <CalmNote kind="error" title="The campaigns could not be read" fills="Nothing was changed. Refresh in a moment." />
         </Panel>
       ) : null}
+      {entriesRead.state === "not-open" && !notOpen ? (
+        <Panel><NotWired what="The notes, briefs and reports tables are not on this database yet." request="Ask the lead to apply supabase/migrations/pending/staff_roles_step2_2026-11-10.sql." /></Panel>
+      ) : null}
       {door.viaApprover ? (
         <Panel>
           <p className="nf-body-sm text-[var(--nf-content-secondary)]">You are here to approve. You can read every campaign and approve or send one back; the Marketing Manager makes the changes.</p>
@@ -109,7 +129,29 @@ export default async function MarketingPage({ searchParams }: { searchParams: Pr
       {tab === "campaigns" ? <Campaigns campaigns={campaigns} results={results} readable={readable} canApprove={door.canApprove} viaApprover={door.viaApprover} summary={summary} /> : null}
       {tab === "links" ? <Links campaigns={campaigns} /> : null}
       {tab === "results" ? <Results campaigns={campaigns} results={results} readable={readable} /> : null}
+      {tab === "calendar" ? <CalendarPanel campaigns={campaigns} month={month} /> : null}
       {tab === "acquisition" && acquisition ? <AcquisitionPanel data={acquisition} /> : null}
+      {tab === "referrals" ? <ReferralsPanel data={referrals} /> : null}
+      {tab === "briefs" ? (
+        <div className="grid gap-lg">
+          <Panel title="Creative briefs"><EntryTool kind="creative_brief" entries={entries} canMake={!door.viaApprover} canApprove={false} names={names} readable={entriesRead.state === "ok"} /></Panel>
+          <Panel title="A/B test log"><EntryTool kind="ab_test" entries={entries} canMake={!door.viaApprover} canApprove={false} names={names} readable={entriesRead.state === "ok"} /></Panel>
+        </div>
+      ) : null}
+      {tab === "audience" ? (
+        <div className="grid gap-lg">
+          <Panel title="Audience segments"><EntryTool kind="segment_note" entries={entries} canMake={!door.viaApprover} canApprove={false} names={names} readable={entriesRead.state === "ok"} /></Panel>
+          <Panel title="Market notes"><EntryTool kind="market_note" entries={entries} canMake={!door.viaApprover} canApprove={false} names={names} readable={entriesRead.state === "ok"} /></Panel>
+        </div>
+      ) : null}
+      {tab === "report" ? (
+        <div className="grid gap-lg">
+          <Panel title="Report builder">
+            <ReportBuilder month={month} draft={buildMonthlyReport({ month, campaigns, results, signups: acquisition?.signups ? acquisition.signups.reduce((t, n, i) => (acquisition.weeks[i]!.startsWith(month) ? t + n : t), 0) : null })} />
+          </Panel>
+          <Panel title="Monthly reports"><EntryTool kind="monthly_report" entries={entries} canMake={!door.viaApprover} canApprove={door.canApprove} names={names} readable={entriesRead.state === "ok"} /></Panel>
+        </div>
+      ) : null}
       <DeskCopilot scope="marketing" deskName="Marketing" context={context} />
     </div>
   );
@@ -129,7 +171,7 @@ function CampaignCard({ campaign, results, canApprove, viaApprover }: { campaign
         <Badge tone={APPROVAL_TONE[campaign.approval]}>{APPROVAL_LABEL[campaign.approval]}</Badge>
       </div>
       <p className="nf-caption mt-3xs text-[var(--nf-content-secondary)]">
-        {CHANNEL_LABEL[campaign.channel]} · {shortDate(campaign.startsOn)} to {shortDate(campaign.endsOn)}
+        {CHANNEL_LABEL[campaign.channel]} · {shortDate(campaign.startsOn)} to {shortDate(campaign.endsOn)} · {entryRef("campaign", campaign.id)} <CopyButton text={entryRef("campaign", campaign.id)} label="Reference" />
       </p>
       {campaign.objective ? <p className="nf-body-sm mt-xs whitespace-pre-wrap">{campaign.objective}</p> : null}
       <dl className="mt-sm grid gap-sm sm:grid-cols-2">
@@ -140,7 +182,7 @@ function CampaignCard({ campaign, results, canApprove, viaApprover }: { campaign
             {spent > campaign.budgetKobo ? " (over budget)" : ` · ${nairaFromKobo(campaign.budgetKobo - spent)} left`}
           </Fact>
         ) : null}
-        {link?.ok ? <Fact label="Tracked link">{link.url}</Fact> : null}
+        {link?.ok ? <Fact label="Tracked link"><span className="[overflow-wrap:anywhere]">{link.url}</span> <CopyButton text={link.url} label="Tracked link" icon="link" /></Fact> : null}
       </dl>
       {campaign.approval === "sent_back" && campaign.approvalNote ? (
         <p className="nf-caption mt-xs" role="note">Sent back: {campaign.approvalNote}</p>
@@ -346,6 +388,96 @@ function AcquisitionPanel({ data }: { data: Acquisition }) {
           ))}
         </ul>
         <Source>Counts only, weeks start on Monday in Lagos time. These are the platform&apos;s own records, not an ad platform&apos;s numbers, and they say nothing about which campaign brought a person in: use the tracked links and your logged results for that.</Source>
+      </Panel>
+    </div>
+  );
+}
+
+function CalendarPanel({ campaigns, month }: { campaigns: Campaign[]; month: string }) {
+  const rows: CalendarRow[] = campaignCalendar(campaigns, month);
+  const clashes = channelClashes(campaigns);
+  const [y, m] = month.split("-").map(Number) as [number, number];
+  const shift = (by: number) => {
+    const i = y * 12 + (m - 1) + by;
+    return `${Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
+  };
+  return (
+    <div className="grid gap-lg">
+      <Panel title={`Campaign calendar, ${month}`}>
+        <div className="mb-sm flex gap-xs">
+          <DeskLink href={`/admin/marketing?tab=calendar&month=${shift(-1)}`}>Earlier month</DeskLink>
+          <DeskLink href={`/admin/marketing?tab=calendar&month=${shift(1)}`}>Later month</DeskLink>
+        </div>
+        <ul className="grid gap-sm">
+          {rows.map((row) => (
+            <li key={row.start} className="nf-admin-card p-md">
+              <p className="nf-caption text-[var(--nf-content-secondary)]">Week {row.label}</p>
+              {row.campaigns.length === 0 ? (
+                <p className="nf-body-sm">Nothing planned.</p>
+              ) : (
+                <ul className="nf-body-sm grid gap-3xs">
+                  {row.campaigns.map((c) => (
+                    <li key={c.id} className="[overflow-wrap:anywhere]">
+                      {c.name} · {CHANNEL_LABEL[c.channel]} · {CAMPAIGN_STATUS_LABEL[c.status]} · {shortDate(c.startsOn)} to {shortDate(c.endsOn)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      </Panel>
+      {clashes.length > 0 ? (
+        <Panel title="Two campaigns on one channel at once">
+          <ul className="nf-body-sm grid gap-3xs">
+            {clashes.map(([a, b]) => (
+              <li key={`${a.id}-${b.id}`}>{a.name} and {b.name} both use {CHANNEL_LABEL[a.channel]} on overlapping dates.</li>
+            ))}
+          </ul>
+          <Source>Not always a mistake. Check the audiences do not overlap.</Source>
+        </Panel>
+      ) : null}
+    </div>
+  );
+}
+
+function ReferralsPanel({ data }: { data: ReferralPerformance | null }) {
+  if (!data) {
+    return (
+      <Panel>
+        <CalmNote kind="error" title="Referral figures could not be read" fills="Nothing is shown rather than a zero. Refresh in a moment." />
+      </Panel>
+    );
+  }
+  return (
+    <div className="grid gap-lg">
+      <Panel title="Invited people, by week" flush>
+        <DeskTable
+          caption="People who signed up with a referral code, Monday start, Lagos time"
+          columns={[{ key: "week", label: "Week starting" }, { key: "n", label: "Signed up with a code", numeric: true }]}
+          rows={data.weeks.map((week, i) => ({ key: week, cells: { week: shortDate(week), n: String(data.attributed[i] ?? 0) } }))}
+        />
+      </Panel>
+      <Panel title="What became of them">
+        <ul className="nf-body-sm grid gap-3xs">
+          <li>Not earned yet (signed up, or still inside the review window): {data.buckets.pending}</li>
+          <li>Earned and past review: {data.buckets.earned}</li>
+          <li>Refused or taken back: {data.buckets.reversed}</li>
+        </ul>
+        <Source>Counts over the last eight weeks. Reward amounts and the Rewards Balance belong to Finance and are not shown here.</Source>
+      </Panel>
+      <Panel title="Referral campaigns" flush>
+        {data.campaigns === null ? (
+          <div className="p-md"><p className="nf-body-sm">Could not be read just now.</p></div>
+        ) : data.campaigns.length === 0 ? (
+          <div className="p-md"><p className="nf-body-sm">No referral campaign has been set up.</p></div>
+        ) : (
+          <DeskTable
+            caption="Referral campaigns"
+            columns={[{ key: "title", label: "Campaign" }, { key: "status", label: "Status" }, { key: "dates", label: "Dates" }]}
+            rows={data.campaigns.map((c) => ({ key: `${c.title}-${c.startsAt}`, cells: { title: c.title, status: c.status, dates: `${shortDate(c.startsAt)} to ${shortDate(c.endsAt)}` } }))}
+          />
+        )}
       </Panel>
     </div>
   );

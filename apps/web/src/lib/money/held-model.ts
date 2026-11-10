@@ -18,7 +18,7 @@ export type HeldFacts = {
   /** Vallo's state (lib/money/arrangement-states.ts). */
   status: string;
   amountMinor: number;
-  /** Payluk's fee, once the provider reported it; borne by the lister (VALLO_PRICING section 6). */
+  /** The provider's fee, once it reported it; borne by the lister (VALLO_PRICING section 6). */
   providerFeeMinor: number | null;
   paused: boolean;
   counterpartName: string;
@@ -34,7 +34,7 @@ export type HeldModel = {
   title: string;
   /** The tone of the badge on the platinum card. */
   badge: { label: string; tone: "held" | "moving" | "done" | "attention" | "waiting" };
-  /** The lister's take-home once Payluk's fee is known; null until it is. */
+  /** The lister's take-home once the provider's fee is known; null until it is. */
   receiveMinor: number | null;
   steps: HeldStep[];
   note: string | null;

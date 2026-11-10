@@ -369,7 +369,7 @@ export function receiveRangeNote(escrowIsLowest: boolean): string {
 
 /**
  * WHO PAYS THE SECOND FEE, SAID PLAINLY (VALLO_PRICING sections 2 and 6, as
- * corrected on 6 October): Payluk's whoPays is `seller`, and the lister is the
+ * corrected on 6 October): the protected provider's fee is borne by the `seller`, and the lister is the
  * split's bearer on a direct payment, so the lister bears it on both rails,
  * always. The arithmetic already takes it off the lister's side; this says so
  * in words, so nobody reads the "when" lines as a fee the buyer might pay.

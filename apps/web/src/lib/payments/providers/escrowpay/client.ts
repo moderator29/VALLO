@@ -5,7 +5,8 @@ import type { EscrowPayConfig } from "./config";
 import { failureFromHttp, notConfigured } from "./errors";
 
 /**
- * THE HTTP CLIENT, with the request discipline of `../payluk-client.ts` and
+ * THE HTTP CLIENT, with a strict request discipline (one idempotency
+ * reference per call, a timeout is unknown, never retried blindly) and
  * nothing invented.
  *
  * `DOCUMENTED` is false until the provider's sandbox documentation confirms

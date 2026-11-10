@@ -7,7 +7,7 @@ import { CircleBanner, CircleComposeFab, CircleDestinations, CircleFeaturedCard,
 import { PullToRefresh } from "@/components/ui/PullToRefresh";
 import { ButtonLink } from "@/components/ui/Button";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
-import { CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
+import { CATEGORY_LABEL, CIRCLE_TABS, PROFESSIONAL_LABEL, TAB_TYPE, countWords, readSort, readTab, type CircleCategory, type CircleTab, type ProfessionalKind } from "@/lib/features/circle/model";
 import { readCircleHome, readCirclePosts, readFollowingPosts, readMyInvites, readNeighbourhoods, readProfessionals } from "@/lib/features/circle/queries";
 import { requestNow } from "@/lib/format/when";
 import { getDictionary } from "@vallo/i18n";
@@ -54,7 +54,7 @@ export default async function CirclePage({ searchParams }: { searchParams: Promi
     >
       <PullToRefresh>
         <div className="nf-circle" data-testid="circle-home">
-          <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} />
+          <CircleBanner stats={home.stats} signedIn={home.signedIn} faces={facesOf(home)} hasCommunities={home.mine.length > 0} />
           {tab === "for-you" ? <CircleDestinations /> : null}
           <CircleTabs items={tabs} active={tab} />
           {!home.live ? <CircleEmpty>{C.empty.idle}</CircleEmpty> : await TabBody({ tab, sort, following, cursor, now, home })}
@@ -95,6 +95,7 @@ async function TabBody({
       <div className="nf-circle nf-circle--split">
         <div className="nf-circle">
           {invites.length > 0 && <InviteList invites={invites} />}
+          <PopularTopics communities={[...home.mine, ...home.communities]} />
           <Section title={C.home.featured} more="/circle?tab=discussions">
             {home.trending.length ? (
               <ul className="nf-circle-list" data-testid="circle-featured">
@@ -120,7 +121,7 @@ async function TabBody({
             </Section>
           ) : null}
           {home.communities.length ? (
-            <Section title={C.sections.communities}>
+            <Section title={C.sections.communities} id="circle-communities">
               <ul className="nf-circle-list">{home.communities.map((c) => <li key={c.id}><CommunityCard community={c} /></li>)}</ul>
             </Section>
           ) : null}
@@ -244,9 +245,9 @@ async function RoommatesDoor() {
   );
 }
 
-function Section({ title, more, children }: { title: string; more?: string; children: ReactNode }) {
+function Section({ title, more, id, children }: { title: string; more?: string; id?: string; children: ReactNode }) {
   return (
-    <section className="nf-circle-section">
+    <section className="nf-circle-section" id={id}>
       <div className="nf-circle-section__head">
         <h2 className="nf-circle-section__title">{title}</h2>
         {more ? (
@@ -269,5 +270,38 @@ function PostList({ posts, now }: { posts: Awaited<ReturnType<typeof readCircleP
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * POPULAR TOPICS: the categories that real communities sit in, biggest first
+ * by member count. Each chip goes to the largest community of that topic; a
+ * topic with no community is not drawn.
+ */
+function PopularTopics({ communities }: { communities: { slug: string; category: CircleCategory; members: number }[] }) {
+  const best = new Map<CircleCategory, { slug: string; members: number }>();
+  const totals = new Map<CircleCategory, number>();
+  for (const c of communities) {
+    totals.set(c.category, (totals.get(c.category) ?? 0) + c.members);
+    const cur = best.get(c.category);
+    if (!cur || c.members > cur.members) best.set(c.category, { slug: c.slug, members: c.members });
+  }
+  const topics = [...best.entries()].sort((a, b) => (totals.get(b[0]) ?? 0) - (totals.get(a[0]) ?? 0)).slice(0, 8);
+  if (topics.length < 2) return null;
+  return (
+    <section className="nf-circle-section" data-testid="circle-topics" aria-label={C.home.topicsTitle}>
+      <div className="nf-circle-section__head">
+        <h2 className="nf-circle-section__title">{C.home.topicsTitle}</h2>
+      </div>
+      <ul className="nf-ctopics">
+        {topics.map(([category, target]) => (
+          <li key={category}>
+            <Link href={`/circle/c/${target.slug}`} className="nf-ctopic" aria-label={`${CATEGORY_LABEL[category]}. ${C.home.topicsMore}`}>
+              {CATEGORY_LABEL[category]}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

@@ -1,6 +1,6 @@
 /**
  * D73 Part B (phases 11 and 12): the states of a protected rental payment,
- * which the licensed provider (Payluk escrow) holds and Vallo records.
+ * which the licensed provider (provider escrow) holds and Vallo records.
  *
  * Vallo's state is kept apart from the provider's (founder section 54): the
  * provider's `state` and `status` words are stored as they were said, and this
@@ -83,7 +83,7 @@ export function valloStateFor(providerState: string, providerStatus: string): Ar
 }
 
 /**
- * The delivery window Payluk is told, in days: from today (Lagos) to the
+ * The delivery window the provider is told, in days: from today (Lagos) to the
  * move-in date, plus the Guarantee claim window for the move-in inspection.
  * It matters because one day after the window the lister may claim the money
  * without the renter's confirmation (concepts_escrow-lifecycle, CLAIMED).

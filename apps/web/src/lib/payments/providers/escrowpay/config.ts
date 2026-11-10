@@ -13,7 +13,7 @@ import "server-only";
  *                             whether it is distinct from the API key.
  *   ESCROWPAY_ENVIRONMENT     "sandbox" or "production".
  *
- * The rule copied from the Payluk key reader: production credentials are used
+ * The rule: production credentials are used
  * only when the deployment itself is production (`VERCEL_ENV` production or
  * unset, as on a local machine). A preview or development deployment with a
  * production environment marker is refused outright, never downgraded.

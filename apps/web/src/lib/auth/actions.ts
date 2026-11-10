@@ -1,7 +1,7 @@
 "use server";
 
 import { normalisePhone } from "@/lib/phone";
-import { normalisePhone as paylukLocalPhone } from "@/lib/money/funds";
+import { normalisePhone as localPhone } from "@/lib/money/funds";
 import { safeReturnPath } from "@/lib/security/return-path";
 import { withNext } from "./next-link";
 import { emailFromQuery } from "@/components/auth/auth-intent";
@@ -130,7 +130,7 @@ function validateCredentials(
 function signUpPhone(formData: FormData): string | null {
   const raw = field(formData, "phone").trim();
   if (!raw) return null;
-  const local = paylukLocalPhone(raw);
+  const local = localPhone(raw);
   if (local) return local;
   const any = normalisePhone(raw, field(formData, "phoneCountry"));
   return any && !any.startsWith("+234") ? any : null;

@@ -2,7 +2,7 @@
  * THE PROTECTED PAYMENT READ FAILS CLOSED (lib/money/protected-read.ts).
  *
  * Pinned: while the switch is off nothing is read at all, so the fund and
- * held pages behave exactly as before; a Payluk row, a stranger, a missing
+ * held pages behave exactly as before; a row of another provider, a stranger, a missing
  * category function, any category status but approved, and a sale each give
  * null; the lifecycle columns are read only when present; "I've made the
  * transfer" is read from transfer_reported_at and never moves the status;
@@ -85,7 +85,7 @@ describe("the protected read, switched off", () => {
 
 describe("the protected read, switched on, still fails closed", () => {
   it.each([
-    ["a Payluk arrangement", { arrangement: { ...bare, provider: "payluk" } }],
+    ["another provider's arrangement", { arrangement: { ...bare, provider: "another" } }],
     ["no arrangement", { arrangement: null }],
     ["the category function not applied yet", { category: { data: null, error: { code: "PGRST202", message: "Could not find the function" } } }],
     ["a disabled category", { category: { data: { category: "shortlet", status: "disabled" } } }],
@@ -190,7 +190,7 @@ describe("the protected read, approved", () => {
   it("lists the viewer's approved protected payments with their stage", async () => {
     const db = fakeSupabase({
       ...script(),
-      provider_arrangements: { select: { data: [{ ...bare, status: "released" }, { ...bare, reference: "PAYLUK-1", provider: "payluk" }] } },
+      provider_arrangements: { select: { data: [{ ...bare, status: "released" }, { ...bare, reference: "OTHER-1", provider: "another" }] } },
       deal_agreements: { select: { data: [{ id: AGREEMENT, listing_id: "l1" }] } },
       listings: { select: { data: [{ id: "l1", title: "A shortlet" }] } },
     });

@@ -79,7 +79,7 @@ describe("movement status (section 54)", () => {
   it("labels never carry a provider word or a backend state", () => {
     for (const status of ["preparing", "awaiting_confirmation", "awaiting_payment", "processing", "unknown", "completed", "failed", "reversed", "cancelled", "under_review"] as const) {
       const label = movementStatusLabel("withdrawal", status);
-      expect(label).not.toMatch(/payluk|paystack|intent|webhook|escrow_|PENDING|ONGOING|_/);
+      expect(label).not.toMatch(/paystack|intent|webhook|escrow_|PENDING|ONGOING|_/);
     }
   });
 });

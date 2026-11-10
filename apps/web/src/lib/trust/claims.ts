@@ -124,9 +124,9 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
      centre's Protected figure) and is drawn only where the server reads the
      rail as working: protectedRailLive() in lib/money/rail-live.ts (13 October
      2026, replacing the constant PROTECTED_RAIL_LIVE), which is true only
-     while a Payluk key is configured for the deployment (live key in
-     production only), PAYMENTS_KILL_PAYLUK is not set and payments_payluk_on
-     is on. "Held" is recorded only from the partner's own report (its signed
+     while the protected-pay provider's key is configured for the deployment,
+     the environment stop is not set and the protected-pay switch
+     (lib/money/protected-pay-switch.ts) is on. "Held" is recorded only from the partner's own report (its signed
      webhook or a read-back): provider_arrangement_observe refuses any state
      but "asked" or "unknown" from Vallo itself. The dev previews that draw it
      are fixtures.
@@ -138,7 +138,7 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
       /^Your payment is protected through Vallo's transaction infrastructure\.$|^Protected$|^Held in protected payments until each one's release condition is met\. Not yours to withdraw yet\.$/,
     onlyIn: MONEY_COPY_FILE,
     mechanism:
-      "the protected rail: funds held by the licensed provider's escrow until release (docs/payments/VALLO_FINANCIAL_LAYER.md); a payment reads as held only after the provider reports it (signed webhook or read-back, public.provider_arrangement_observe); surfaces gated on the server by protectedRailLive() in apps/web/src/lib/money/rail-live.ts (Payluk key configured for the deployment, PAYMENTS_KILL_PAYLUK not set, payments_payluk_on on)",
+      "the protected rail: funds held by the licensed provider's escrow until release (docs/payments/VALLO_FINANCIAL_LAYER.md); a payment reads as held only after the provider reports it (signed webhook or read-back, public.provider_arrangement_observe); surfaces gated on the server by protectedRailLive() in apps/web/src/lib/money/rail-live.ts (the provider's key configured for the deployment, the environment stop not set, the protected-pay switch on)",
   },
   /* The protected rail's screens (EscrowPay, 10 November 2026): the same
      claim as above, for the new provider. Each sentence names the transfer

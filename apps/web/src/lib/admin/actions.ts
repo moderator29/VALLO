@@ -18,6 +18,7 @@
  * twice would be worse than not telling them at all.
  */
 
+import { identityGateApplies, identityRefusal, listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { composeReviewNote, isReviewReasonCode } from "./review-reasons";
 import { revalidatePath } from "next/cache";
 import { eddGateMessage, isEddGateRefusal } from "../compliance/gate";
@@ -888,6 +889,16 @@ async function decideListing(input: ListingDecisionInput, opts: { quiet?: boolea
   }
   if (decision === "publish" && listing.status !== "APPROVED") {
     return fail("Approve this listing first, then publish it.");
+  }
+  /* THE IDENTITY GATE ON A NEW APPROVAL (founder, 10 November 2026). A
+     listing can be drafted and sent for review before the lister is verified,
+     but it is approved and published only once their identity is approved.
+     Only a NEW approval is held: a listing that has been live before
+     (`published_at` set) is grandfathered and can be re-published. The banner
+     shows the cause so the reviewer knows what is needed next. */
+  if ((decision === "approve" || (decision === "publish" && !listing.published_at)) && (await identityGateApplies(listerUserId))) {
+    const identity = await listerIdentityStatus(listerUserId);
+    if (identity.status !== "approved") return fail(identityRefusal(identity));
   }
   /* V-57: a nightly stay is published only once its arrival charges are
      declared (all five, an amount or none). Lets and sales are untouched. */

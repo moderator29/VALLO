@@ -1,10 +1,44 @@
 import { isValidElement, type ReactNode } from "react";
 import { MANUAL_CHAPTERS } from "@/lib/admin/manual/chapters";
+import type { StaffScope } from "@/lib/admin/guard";
 import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
 
 /** Pure passage building and ranking for search_manual; no server imports, so it can be tested alone. */
 
-export type ManualPassage = { source: "manual" | "position"; title: string; heading: string; text: string; link: string };
+export type ManualPassage = {
+  source: "manual" | "position" | "docs" | "help" | "money";
+  title: string;
+  heading: string;
+  text: string;
+  link: string;
+  /** Present when the passage belongs to one desk: only a viewer holding one of these scopes (or an admin) is shown its text. */
+  scopes?: readonly StaffScope[];
+};
+
+/**
+ * WHICH MANUAL SECTIONS BELONG TO ONE DESK. The manual itself is open to all
+ * staff (every chapter is readable at /admin/manual), so this is the copilot's
+ * own, conservative rule: it does not read out the step by step of a desk the
+ * person has no access area for, and points to the lead instead. Keyed by
+ * chapter slug and section id.
+ */
+export const SECTION_SCOPES: Readonly<Record<string, readonly StaffScope[]>> = {
+  "queues#identity": ["kyc_review"],
+  "queues#refunds": ["finance", "support"],
+};
+
+/** What the viewer may be shown. Admins and super admins see everything. */
+export function visiblePassages(passages: readonly ManualPassage[], viewer: { isAdmin: boolean; isSuperAdmin: boolean; scopes: readonly StaffScope[] }): ManualPassage[] {
+  if (viewer.isAdmin || viewer.isSuperAdmin) return [...passages];
+  return passages.filter((p) => !p.scopes || p.scopes.some((s) => viewer.scopes.includes(s)));
+}
+
+/** The text sources beyond the staff manual, handed in by the caller so this file stays server-free. */
+export type ExtraSources = {
+  docs?: readonly { slug: string; number: number; title: string; sections: readonly { id: string; heading: string; body: ReactNode }[] }[];
+  faqs?: readonly { category: string; q: string; a: string }[];
+  facts?: readonly { title: string; text: string; link: string }[];
+};
 
 const SKIP_KEYS = new Set(["id", "key", "icon", "kind", "tone", "href", "className", "role", "testId", "numeric", "ref"]);
 const TEXT_PROPS = new Set(["caption", "title", "label", "note", "summary", "children"]);
@@ -30,6 +64,11 @@ export function nodeText(node: unknown, depth = 0): string {
   return "";
 }
 
+function scopeOf(slug: string, id: string): { scopes?: readonly StaffScope[] } {
+  const scopes = SECTION_SCOPES[`${slug}#${id}`];
+  return scopes ? { scopes } : {};
+}
+
 const squash = (text: string) => text.replace(/\s+/g, " ").trim();
 
 /** Cut long text into windows of about `size` characters at sentence ends. */
@@ -50,7 +89,7 @@ function windows(text: string, size = 650): string[] {
 
 export type ManualBodies = Record<string, { intro: ReactNode; glance: ReactNode[]; sections: { id: string; title: string; body: ReactNode }[] }>;
 
-export function buildPassages(bodies: ManualBodies): ManualPassage[] {
+export function buildPassages(bodies: ManualBodies, extra: ExtraSources = {}): ManualPassage[] {
   const out: ManualPassage[] = [];
   for (const chapter of MANUAL_CHAPTERS) {
     const body = bodies[chapter.slug];
@@ -60,7 +99,7 @@ export function buildPassages(bodies: ManualBodies): ManualPassage[] {
     for (const w of windows(glance)) out.push({ source: "manual", title: `Chapter ${chapter.number}: ${chapter.title}`, heading: "At a glance", text: w, link: base });
     for (const section of body.sections) {
       const text = squash(nodeText(section.body));
-      for (const w of windows(text)) out.push({ source: "manual", title: `Chapter ${chapter.number}: ${chapter.title}`, heading: section.title, text: w, link: `${base}#${section.id}` });
+      for (const w of windows(text)) out.push({ source: "manual", title: `Chapter ${chapter.number}: ${chapter.title}`, heading: section.title, text: w, link: `${base}#${section.id}`, ...scopeOf(chapter.slug, section.id) });
     }
   }
   for (const position of STAFF_POSITIONS) {
@@ -68,8 +107,16 @@ export function buildPassages(bodies: ManualBodies): ManualPassage[] {
     const link = "/admin/handbook/position";
     out.push({ source: "position", title: `Job description: ${job.title}`, heading: "Summary", text: `${job.summary} Reports to ${job.reportsTo}.`, link });
     out.push({ source: "position", title: `Job description: ${job.title}`, heading: "Responsibilities", text: job.responsibilities.join(" "), link });
+    out.push({ source: "position", title: `Job description: ${job.title}`, heading: "What is expected of you", text: job.expectations.join(" "), link });
     out.push({ source: "position", title: `Job description: ${job.title}`, heading: "Where to take what you cannot decide", text: job.escalate.join(" "), link });
   }
+  for (const chapter of extra.docs ?? []) {
+    for (const section of chapter.sections) {
+      for (const w of windows(squash(nodeText(section.body)))) out.push({ source: "docs", title: `Public docs: ${chapter.title}`, heading: section.heading, text: w, link: `/docs/${chapter.slug}#${section.id}` });
+    }
+  }
+  for (const faq of extra.faqs ?? []) out.push({ source: "help", title: `Help article: ${faq.category}`, heading: faq.q, text: faq.a, link: "/help" });
+  for (const fact of extra.facts ?? []) out.push({ source: "money", title: `Money and refund facts: ${fact.title}`, heading: fact.title, text: fact.text, link: fact.link });
   return out;
 }
 

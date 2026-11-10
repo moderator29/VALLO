@@ -109,7 +109,6 @@ describe("the Wallet overview (D81)", () => {
 
   it("says our licensed provider holds the money, and never names the provider (28 October 2026)", () => {
     const html = render(true);
-    expect(html).not.toContain("Payluk");
     expect(html).toContain(HELD_BY);
   });
 
@@ -168,7 +167,7 @@ describe("the Wallet before it is connected (founder, 7 October)", () => {
   });
 
   it("names no provider and carries no paragraph about partners or rails", () => {
-    expect(words).not.toMatch(/Payluk|escrow|partner|rail/i);
+    expect(words).not.toMatch(/escrow|partner|rail/i);
   });
 });
 

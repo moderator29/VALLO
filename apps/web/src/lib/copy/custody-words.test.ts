@@ -170,8 +170,6 @@ const NOT_MEMBER_COPY = [/^app\/\(dev\)\//, /^app\/admin\//, /^lib\/admin\//, /^
  *     are (`wallets`, `wallet_entries`, from before ADR-0002). A legal
  *     disclosure of what is retained, not a claim that a wallet exists.
  *   - The payments log line names a legacy wallet id field. Never shown.
- *   - The commission sweep's reason names Vallo's own merchant account at
- *     Payluk by Payluk's word for it; it reaches staff logs, never a member.
  */
 const BARE_WALLET_ALLOWED: { file: string; text: RegExp; why: string }[] = [
   {
@@ -182,11 +180,6 @@ const BARE_WALLET_ALLOWED: { file: string; text: RegExp; why: string }[] = [
   { file: "lib/account-deletion/emails.ts", text: /\bwallet entries\b/, why: "legal: records retained under AML rules" },
   { file: "lib/account-deletion/plan.ts", text: /^a wallet is a ledger\b/, why: "legal: the retained `wallets` table's reason" },
   { file: "lib/payments/observability.ts", text: /^wallet=/, why: "technical: a log field" },
-  {
-    file: "lib/payouts/payluk-merchant.ts",
-    text: /^Payluk documents no API route that withdraws the merchant wallet\./,
-    why: "operations: the commission sweep's reason about Vallo's own Payluk merchant account (Payluk's word); no member surface reads it",
-  },
   /* D78 (the founder, 7 October: "What is balance? Call it WALLET"): the
      screen's NAME, capitalised as a name, and only where the screen itself is
      named. Every sentence about the money says account, Available or the
@@ -202,7 +195,7 @@ const BARE_WALLET_ALLOWED: { file: string; text: RegExp; why: string }[] = [
   { file: "lib/money/balance-copy.ts", text: /^(Set up Wallet|Setting up Wallet|Wallet is ready|We could not set up Wallet)$/, why: "D78: the screen's name (onboarding titles and action)" },
   {
     file: "lib/money/balance-copy.ts",
-    text: /^Your money is held by (our escrow partner|Payluk, our licensed provider|our licensed provider), never by Vallo\. To set up Wallet we share/,
+    text: /^Your money is held by (our escrow partner|our licensed provider), never by Vallo\. To set up Wallet we share/,
     why: "D78: the screen's name, in the sentence that says the partner, never Vallo, holds the money",
   },
   { file: "lib/money/balance-copy.ts", text: /^Wallet is not connected yet, so nothing was sent\.$/, why: "D78: the screen's name" },

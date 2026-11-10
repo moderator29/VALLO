@@ -3,64 +3,70 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * THE PAYMENTS PARTNER IS NEVER NAMED TO A MEMBER (founder, 29 October 2026:
- * "nothing shown to our users that it is held by Payluk"). Member-facing text
- * says "our licensed provider". The name stays in code identifiers,
- * the provider adapters, the webhook, the staff-only admin console and the
- * development harness, none of which a member reads.
+ * THE RETIRED PAYMENT PROVIDER IS GONE FROM THE PLATFORM (founder, 10 November
+ * 2026: "Remove it. We are not using them in our platform no more.").
+ *
+ * No source file under apps/web/src and packages may carry its name, in copy,
+ * comments, identifiers, file names or routes, except lines that carry the
+ * marker `legacy-name`: the old live flag key and the old deploy setting,
+ * still read for compatibility until the next deploy settings change and the
+ * pending removal SQL have both landed. This file is exempt because it must
+ * say the word to look for it.
  */
 const SRC = join(__dirname, "..", "..");
-const STAFF_OR_INTERNAL = [
-  /^app\/admin\//,
-  /^app\/\(dev\)\//,
-  /^app\/api\//,
-  /^lib\/admin\//,
-  /^lib\/payments\//,
-  /^lib\/payouts\//,
-  /^lib\/trust\/claims\.ts$/,
-  /\.test\.tsx?$/,
-];
-
-/** A line with its tags and {expressions} taken out: what is left is the words a member reads. */
-function jsxText(line: string): string {
-  return line.replace(/<[^>]*>/g, "").replace(/\{[^}]*\}/g, "");
-}
+const PACKAGES = join(SRC, "..", "..", "..", "packages");
+const WORD = new RegExp(["pay", "luk"].join(""), "i");
+const THIS_FILE = "lib/copy/provider-name.test.ts";
 
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name);
-    if (statSync(full).isDirectory()) return name === "node_modules" ? [] : files(full);
-    return /\.(ts|tsx)$/.test(name) ? [full] : [];
+    if (name === "node_modules" || name === ".next") return [];
+    if (statSync(full).isDirectory()) return files(full);
+    return /\.(ts|tsx|css|json|mjs|md)$/.test(name) ? [full] : [];
   });
 }
 
-describe("member copy never names the payments partner", () => {
-  it("finds no string literal that says Payluk outside the staff and internal trees", () => {
+describe("the retired payment provider is not named anywhere in the source", () => {
+  it("finds the name in no file, line or file name except the marked compatibility lines", () => {
     const found: string[] = [];
-    for (const file of files(SRC)) {
-      const at = relative(SRC, file).split("\\").join("/");
-      if (STAFF_OR_INTERNAL.some((tree) => tree.test(at))) continue;
-      let block = false;
-      readFileSync(file, "utf8")
-        .split("\n")
-        .forEach((line, i) => {
-          const t = line.trim();
-          if (t.includes("/*") && !t.includes("*/")) block = true;
-          if (block) {
-            if (t.includes("*/")) block = false;
-            return;
-          }
-          if (t.startsWith("//") || t.startsWith("*") || t.startsWith("/*")) return;
-          const code = line.split(" //")[0] ?? line;
-          /* JSX text is not a string literal: a line of a .tsx file that is plain words (no quote, no brace, no tag) and says Payluk is member-facing text. */
-          if (at.endsWith(".tsx") && jsxText(code).includes("Payluk") && !/["'`=;()<>]/.test(jsxText(code))) {
-            found.push(`${at}:${i + 1}: ${t.slice(0, 100)}`);
-          }
-          if (/["'`][^"'`]*Payluk[^"'`]*["'`]/.test(code) && !/\b(Payluk[A-Z]\w*|payluk)\b/.test(code.replace(/["'`][^"'`]*["'`]/g, ""))) {
-            found.push(`${at}:${i + 1}: ${t.slice(0, 100)}`);
-          }
-        });
+    for (const root of [SRC, PACKAGES]) {
+      for (const file of files(root)) {
+        const at = relative(root, file).split("\\").join("/");
+        if (root === SRC && at === THIS_FILE) continue;
+        if (WORD.test(at)) found.push(`${at}: file name`);
+        readFileSync(file, "utf8")
+          .split("\n")
+          .forEach((line, i) => {
+            if (WORD.test(line) && !line.includes("legacy-name")) found.push(`${at}:${i + 1}: ${line.trim().slice(0, 100)}`);
+          });
+      }
     }
     expect(found).toEqual([]);
+  });
+
+  it("keeps the marked compatibility lines to the two known ones, both in the protected-pay switch", () => {
+    const marked: string[] = [];
+    for (const file of files(SRC)) {
+      const at = relative(SRC, file).split("\\").join("/");
+      if (at === THIS_FILE) continue;
+      readFileSync(file, "utf8")
+        .split("\n")
+        .forEach((line) => {
+          if (WORD.test(line) && line.includes("legacy-name")) marked.push(at);
+        });
+    }
+    expect(marked.sort()).toEqual([
+      "lib/money/member-wallet.ts",
+      "lib/money/protected-pay-switch.ts",
+      "lib/money/protected-pay-switch.ts",
+    ]);
+  });
+
+  it("has no route under app/api whose path names it", () => {
+    const routes = files(join(SRC, "app", "api"))
+      .map((f) => relative(SRC, f).split("\\").join("/"))
+      .filter((f) => WORD.test(f));
+    expect(routes).toEqual([]);
   });
 });

@@ -4,6 +4,7 @@ import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { ActionSheetIllustrated, type ActionSheetRow } from "@/components/ui/ActionSheetIllustrated";
 import { countOf } from "@vallo/i18n/core";
 import type { MenuWords } from "./sheet-words";
+import { SHARE_WORDS } from "@/lib/features/listing-share/model";
 
 /**
  * The sheet behind a card's `…`.
@@ -125,6 +126,8 @@ export function actionsForPost(options: {
       entry both have a null author, and neither can be muted or blocked. */
   hasAuthor: boolean;
   who: string;
+  /** A listing shared into the feed: "Remove share" replaces Delete (and an edit is not offered). */
+  isListingShare?: boolean;
 }, words: MenuWords): SheetAction[] {
   /* The public count, said in words. The card's row has five items already and
      the owner's standing note is that nothing is jam-packed, so the number
@@ -191,6 +194,17 @@ export function actionsForPost(options: {
     note: words.copyNote,
     glyph: "link",
   });
+
+  if (options.isMine && options.isListingShare) {
+    rows.push({
+      key: "remove-share",
+      title: SHARE_WORDS.removeRow,
+      note: SHARE_WORDS.removeNote,
+      glyph: "trash",
+      danger: true,
+    });
+    return rows;
+  }
 
   if (options.isMine) {
     if (options.editable) {

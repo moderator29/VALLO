@@ -1,0 +1,68 @@
+/* The share sheet's preview of the feed card, and its note field. Tokens only. */
+@layer components {
+  .nf-lsp {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding-block-end: var(--nf-space-md);
+  }
+  .nf-lsp__label {
+    color: var(--nf-content-muted);
+  }
+  .nf-lsp__card {
+    overflow: hidden;
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-artwork);
+    min-block-size: 12rem;
+  }
+  .nf-lsp__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    inline-size: 100%;
+  }
+  .nf-lsp__media img {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .nf-lsp__badge {
+    position: absolute;
+    inset-block-start: var(--nf-space-sm);
+    inset-inline-start: var(--nf-space-sm);
+  }
+  .nf-lsp__foot {
+    position: absolute;
+    inset: auto 0 0;
+    display: grid;
+    gap: var(--nf-space-3xs);
+    padding: var(--nf-space-md);
+    background: transparent;
+    color: var(--nf-content-primary);
+  }
+  .nf-lsp__note {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-lsp__textarea {
+    inline-size: 100%;
+    min-block-size: 5rem;
+    padding: var(--nf-space-sm);
+    resize: vertical;
+    border: var(--nf-border-width) solid var(--nf-panel-edge);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-primary);
+    font: inherit;
+  }
+  .nf-lsp__textarea:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  .nf-lsp__slots {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    color: var(--nf-content-secondary);
+  }
+}

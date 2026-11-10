@@ -198,7 +198,6 @@ describe("the wiring: every new moment is gated on the server, before the write"
     ["lib/bookings/checkout.ts", "async function guardPayable", '"payment"'],
     ["lib/rent/actions.ts", "export async function startRentPayment", '"payment"'],
     ["lib/crypto/actions.ts", "export async function startCryptoPayment", '"payment"'],
-    ["lib/money/fund-actions.ts", "export async function fundEscrowPayment", '"payment"'],
     ["lib/tenancy/share-checkout.ts", "export async function startShareCheckout", '"payment"'],
     ["lib/subscriptions/actions.ts", "export async function startSubscriptionCheckout", '"payment"'],
     ["lib/reservations/deposit-actions.ts", "export async function payReservationDeposit", '"payment"'],

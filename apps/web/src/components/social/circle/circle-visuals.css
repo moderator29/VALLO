@@ -150,6 +150,84 @@
     animation: none;
   }
 
+  /* Original hero artwork (CircleHeroArt) and the real figures under the line. */
+  .nf-cbn__svg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .nf-cbn__figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs) var(--nf-space-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-cbn__figure {
+    display: grid;
+    min-inline-size: 0;
+  }
+  .nf-cbn__figure-n {
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .nf-cbn__figure-w {
+    font-size: var(--nf-text-caption);
+    opacity: 0.85;
+  }
+  .nf-ctopics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-ctopic {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--nf-touch-target, 2.75rem);
+    padding-inline: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    text-decoration: none;
+  }
+  .nf-ctopic:hover {
+    background: var(--nf-brand-tint-soft, var(--nf-surface-secondary));
+  }
+  .nf-ctopic:focus-visible {
+    outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+    outline-offset: var(--nf-focus-ring-offset);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-cbn__ring {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: nf-cbn-turn 20s var(--nf-ease-standard) 1 both;
+    }
+    .nf-cbn__ring--b {
+      animation-duration: 26s;
+      animation-direction: reverse;
+    }
+    .nf-cbn__ring--c {
+      animation-duration: 16s;
+    }
+  }
+  @keyframes nf-cbn-turn {
+    from {
+      transform: rotate(-36deg);
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-cbn__ring {
+    animation: none;
+  }
+
   /* ------------------------------------------------------- destinations */
   .nf-cdest {
     display: grid;

@@ -33,7 +33,7 @@ import type { ProtectedDeal, ProtectedPaymentSummary } from "@/components/money/
  *     When it is off NOTHING else is read, so a page that asks behaves
  *     exactly as it did before this module existed.
  *  2. The viewer is a party to the arrangement, and its provider is
- *     'escrowpay' (a Payluk row is never drawn on these screens).
+ *     'escrowpay' (a row of any other provider is never drawn on these screens).
  *  3. The agreement's category is approved, as the database says it through
  *     `public.protected_category_status_for_agreement` (pending SQL
  *     protected_category_read_2026-11-10.sql). A function that does not

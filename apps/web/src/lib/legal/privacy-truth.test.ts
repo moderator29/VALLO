@@ -29,7 +29,6 @@ const PROCESSORS: Array<[RegExp, string]> = [
   [/api\.paystack\.co|checkout\.paystack\.com/, "Paystack"],
   [/api\.ng\.termii\.com/, "Termii"],
   [/api\.twilio\.com/, "Twilio"],
-  [/api\.payluk\.ng/, "Payluk"],
   [/api\.resend\.com/, "Resend"],
   [/api\.anthropic\.com/, "Anthropic"],
   [/api\.maptiler\.com/, "MapTiler"],

@@ -13,7 +13,7 @@ import { applyProtectedWebhook, protectedRailDeps } from "@/lib/money/protected-
 
 /**
  * THE PROTECTED RAIL'S WEBHOOK (EscrowPay; BUILD section 5 phase 3, built
- * switched off). The same pipeline as the Payluk route:
+ * switched off). The pipeline:
  *
  *   signature  ->  raw event stored  ->  idempotency  ->  processing  ->  answer
  *

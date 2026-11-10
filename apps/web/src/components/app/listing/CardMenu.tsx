@@ -12,6 +12,9 @@ import { useShare } from "@/lib/ui/use-copy";
 import { useLongPress } from "@/lib/ui/use-long-press";
 import { hideListing, isHidden, subscribeHidden, unhideListing } from "@/lib/ui/hidden-listings";
 import { toggleCompare, useCompareTray } from "@/lib/compare/tray";
+import { useRequireAuth } from "@/components/auth/AuthGate";
+import { ShareToFeedHost } from "@/components/social/share/ShareToFeedHost";
+import { SHARE_WORDS } from "@/lib/features/listing-share/model";
 import "@/app/css/catalogue.css";
 import "@/app/css/list-views.css";
 
@@ -97,8 +100,12 @@ export function CardMenu({
   const inTray = compare.has(listingId);
 
   const close = () => onOpenChange(false);
+  const { requireAuth } = useRequireAuth();
+  const [feedOpen, setFeedOpen] = useState(false);
 
   return (
+    <>
+    <ShareToFeedHost listingId={listingId} open={feedOpen} onClose={() => setFeedOpen(false)} />
     <Sheet open={open} onOpenChange={onOpenChange} title={words.title} hideTitle detents={[0.5]} testId="card-menu">
       <div className="nf-card-menu__head">
         {thumb ? (
@@ -145,6 +152,21 @@ export function CardMenu({
             }}
           />
         ) : null}
+        {shareable ? (
+          <ListRow
+            data-testid="card-menu-share-to-feed"
+            leading={
+              <IconPlate size="sm" shape="round" tone="brand">
+                <UiIcon name="feed" size={18} />
+              </IconPlate>
+            }
+            title={SHARE_WORDS.button}
+            onClick={() => {
+              close();
+              requireAuth("share", () => setFeedOpen(true));
+            }}
+          />
+        ) : null}
         <ListRow
           data-testid="card-menu-compare"
           leading={
@@ -179,5 +201,6 @@ export function CardMenu({
         ) : null}
       </ListGroup>
     </Sheet>
+    </>
   );
 }

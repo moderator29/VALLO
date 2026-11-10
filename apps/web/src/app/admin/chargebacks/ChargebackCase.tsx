@@ -117,7 +117,7 @@ export function ChargebackCase({
               <Fact label={f.reference}>
                 <span className="font-mono [user-select:all]">{row.reference || d.notSet}</span>
               </Fact>
-              <Fact label={f.provider}>{copy.open.providers[row.provider as "paystack" | "payluk"] ?? row.provider}</Fact>
+              <Fact label={f.provider}>{copy.open.providers[row.provider as "paystack"] ?? row.provider}</Fact>
               <Fact label={f.disputeId}>
                 <span className="font-mono [user-select:all]">{row.providerDisputeId}</span>
               </Fact>

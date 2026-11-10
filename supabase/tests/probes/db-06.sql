@@ -74,6 +74,16 @@
 -- delete grant on any of them by design. Staff reach them through the service
 -- client, so these policies only serve an admin on their own session.
 --
+-- 10 November 2026 (staff roles, pending/staff_roles_step2_2026-11-10.sql, NOT
+-- APPLIED when this was written): content_items iu, marketing_campaign_results
+-- iu, marketing_campaigns iu, staff_desk_entries iu, support_policy_notes iu,
+-- support_qa_reviews i, tech_incident_updates i, tech_incidents iu. Each grant
+-- has a permissive policy for the same command behind it (`<table>_admin_write`
+-- for insert, `<table>_admin_update` for update), `to authenticated`, admin or
+-- super_admin only through private.has_role. No delete grant on any of them;
+-- the two insert-only tables (incident updates, QA reviews) are append-only.
+-- This probe reads the live database, so it fails until step 2 is applied.
+--
 do $$
 declare
   member constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
@@ -132,6 +142,7 @@ begin
       ('circle_question_follows', 'id'),
       ('circle_shared_shortlists', 'id'),
       ('circle_vouches', 'id'),
+      ('content_items', 'iu'),
       ('conversation_archives', 'idu'),
       ('conversation_prefs', 'idu'),
       ('conversations', 'i'),
@@ -159,6 +170,8 @@ begin
       ('listing_videos', 'idu'),
       ('listings', 'idu'),
       ('local_governments', 'idu'),
+      ('marketing_campaign_results', 'iu'),
+      ('marketing_campaigns', 'iu'),
       ('member_notes', 'i'),
       ('message_attachments', 'i'),
       ('message_flags', 'u'),
@@ -214,6 +227,7 @@ begin
       ('staff_access_recommendations', 'iu'),
       ('staff_announcement_reads', 'iu'),
       ('staff_announcements', 'iu'),
+      ('staff_desk_entries', 'iu'),
       ('staff_task_comments', 'i'),
       ('staff_tasks', 'iu'),
       ('staff_weekly_reports', 'iu'),
@@ -222,9 +236,13 @@ begin
       ('story_comments', 'idu'),
       ('story_reactions', 'id'),
       ('story_views', 'i'),
+      ('support_policy_notes', 'iu'),
+      ('support_qa_reviews', 'i'),
       ('support_ticket_attachments', 'i'),
       ('support_ticket_messages', 'i'),
       ('support_tickets', 'idu'),
+      ('tech_incident_updates', 'i'),
+      ('tech_incidents', 'iu'),
       ('tenancy_pins', 'i'),
       ('tenancy_reviews', 'i'),
       ('units', 'idu'),

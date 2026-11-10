@@ -54,7 +54,7 @@ describe("the read", () => {
   });
 
   it("reads a row without any pending column", () => {
-    expect(toOpsRow({ id: "a2", reference: "R", provider: "payluk", status: "protected", amount_minor: 100 })).toMatchObject({
+    expect(toOpsRow({ id: "a2", reference: "R", provider: "escrowpay", status: "protected", amount_minor: 100 })).toMatchObject({
       lastWebhookAt: null,
       lastReconcileAt: null,
       reviewReason: null,

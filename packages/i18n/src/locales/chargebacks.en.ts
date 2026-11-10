@@ -95,7 +95,6 @@ export const chargebacksEn = {
       provider: "Payment partner",
       providers: {
         paystack: "Paystack",
-        payluk: "Payluk",
       },
       disputeId: "Partner's dispute id",
       amount: "Disputed amount (NGN)",

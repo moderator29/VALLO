@@ -12,7 +12,7 @@ import type { ArrangementStatus } from "@/lib/money/arrangement-states";
  *  - funded (`protected`) and `released` come ONLY from a word the
  *    documentation says means exactly that;
  *  - an unknown word is never `released`, never `protected`;
- *  - `split` is historical (Payluk) and is never produced here.
+ *  - `split` is historical and is never produced here.
  */
 export const ESCROWPAY_STATUS_WORDS: Readonly<Record<string, ArrangementStatus>> = Object.freeze({});
 

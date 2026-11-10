@@ -14,9 +14,6 @@ vi.mock("server-only", () => ({}));
 vi.mock("next/cache", () => ({ revalidatePath }));
 vi.mock("../locale", () => ({ getLocale: async () => "en" }));
 vi.mock("../alerts", () => ({ recordAlert: vi.fn() }));
-vi.mock("../money/member-wallet", () => ({ adminDb: vi.fn() }));
-vi.mock("../money/provider-arrangements", () => ({ staffResolve: vi.fn() }));
-vi.mock("../payments/providers/payluk", () => ({ paylukContext: vi.fn() }));
 vi.mock("./guard", () => ({
   requireAdmin: vi.fn(async (scope?: string) => {
     expect(scope).toBe("guarantee");

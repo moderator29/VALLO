@@ -7,10 +7,11 @@ import { escrowRailLive } from "../payments/providers";
  * PROTECTED_RAIL_LIVE, founder instruction of 13 October 2026).
  *
  * True only when all of these hold, read at request time:
- *  - a Payluk key is configured for this deployment (`paylukMerchantConfig`:
- *    the live key in production only, the test key on previews and staging);
- *  - `PAYMENTS_KILL_PAYLUK` is not `1` (the outage stop, no database needed);
- *  - `payments_payluk_on` is on (fail closed: a failed read is off).
+ *  - the protected-pay provider's key is configured for this deployment
+ *    (`escrowPayConfig`, production credentials in production only);
+ *  - the environment stop (`PAYMENTS_KILL_PROTECTED_PAY`) is not `1`, no database needed;
+ *  - the protected-pay switch is on (`protectedPaySwitchOn`, fail closed: a
+ *    failed read is off).
  * Any error is false: escrow is then simply not offered, and a payer who may
  * pay by card is offered card.
  */

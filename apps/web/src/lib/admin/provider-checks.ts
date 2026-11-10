@@ -1,6 +1,6 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
-import { paylukMerchantConfig, readMerchantBalance } from "@/lib/payouts/payluk-merchant";
+import { escrowPayConfig } from "@/lib/payments/providers/escrowpay/config";
 import { getCallProvider, callProviderConfigured } from "@/lib/calls/provider";
 import { apnsProviderToken } from "@/lib/push/transport/apns";
 import { TERMII_DEFAULT_BASE } from "@/lib/phone-otp/termii";
@@ -9,14 +9,14 @@ import { OPENFREEMAP_ORIGIN } from "@/lib/maps/tiles";
 
 /**
  * PROVIDER CHECKS (the founder, 8 October 2026: "trigger deployment and test
- * Payluk and livekit"). The sandbox that builds Vallo cannot reach Payluk,
+ * the providers"). The sandbox that builds Vallo cannot reach
  * LiveKit Cloud or Termii, so the checks run here, on the live
  * server, behind the operations scope.
  *
  * EVERY CHECK IS READ-ONLY OR SELF-CLEANING. No money moves, no message is
  * sent, no member sees anything:
- *   - Payluk: GET /v1/merchant/balance, once with the live key and once with
- *     the test key (staging), each only if that key is set.
+ *   - Protected-pay provider: whether its settings are present for this
+ *     deployment (no network: its API is not documented to us yet).
  *   - LiveKit: create an empty throwaway room, read its participants, delete
  *     it. Proves the URL, the key and the secret against the real server.
  *   - Apple push: sign the provider token with the .p8 (no network).
@@ -36,12 +36,11 @@ export type CheckOutcome = {
 
 const TIMEOUT = 15_000;
 
-async function paylukCheck(label: string, env: Record<string, string | undefined>): Promise<CheckOutcome> {
-  const config = paylukMerchantConfig(env);
-  if (!config) return { name: label, ok: false, detail: "Key not set (or not the right sk_live_ / sk_test_ prefix)." };
-  const res = await readMerchantBalance(config, (url, init) => fetch(url, init));
-  if ("failed" in res) return { name: label, ok: false, detail: `Payluk answered ${res.code}${res.detail ? `: ${res.detail}` : ""}` };
-  return { name: label, ok: true, detail: `Connected to ${config.environment}. Balance read (${res.currency || "currency not stated"}).` };
+function protectedPayCheck(): CheckOutcome {
+  const name = "Protected-pay provider (settings only)";
+  return escrowPayConfig(process.env)
+    ? { name, ok: true, detail: "Settings are present. Nothing is sent to the provider until its documentation is confirmed and the switch is on." }
+    : { name, ok: false, detail: "Settings not set for this deployment. This is expected while the protected rail is switched off." };
 }
 
 async function liveKitCheck(): Promise<CheckOutcome> {
@@ -159,8 +158,7 @@ async function mapTilesCheck(): Promise<CheckOutcome> {
 
 export async function runProviderChecks(): Promise<CheckOutcome[]> {
   return Promise.all([
-    paylukCheck("Payluk, live key", { PAYLUK_SECRET_KEY: process.env.PAYLUK_SECRET_KEY }),
-    paylukCheck("Payluk, test key (staging)", { PAYLUK_TEST_SECRET_KEY: process.env.PAYLUK_TEST_SECRET_KEY }),
+    Promise.resolve(protectedPayCheck()),
     liveKitCheck(),
     Promise.resolve(apnsCheck()),
     termiiCheck(),

@@ -19,6 +19,7 @@ import {
   type GroupStage,
   type InstitutionRef,
   type InterestStatus,
+  type ListingStatus,
   type MyRoommateProfile,
   type PeopleFilters,
   type PersonRef,
@@ -626,4 +627,48 @@ export async function readMyConnections(): Promise<(PersonRef & { interestId: st
   if (!v?.id) return [];
   const res = await rpc<(PersonRef & { interestId: string })[]>(v.db, "roommate_my_connections", {}, "read.roommates.connections");
   return res.data ?? [];
+}
+
+/* ------------------------------------------------------------------ the review of my room offers */
+
+export type ListingReview = {
+  id: string;
+  status: ListingStatus;
+  /** What staff wrote with their decision: what to change, or why it was not approved. */
+  note: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  /** True while an approval is on record (a paused post can resume without a new review). */
+  approved: boolean;
+};
+
+/**
+ * The review record of the signed-in member's own posts, by id. It is read
+ * straight from the member's own rows (the table's own policy shows an owner
+ * their rows), so another member's note can never come back. A server without
+ * the review SQL answers an empty map, and the screens then draw no banner.
+ */
+export async function readMyListingReviews(ids?: string[]): Promise<Record<string, ListingReview>> {
+  const v = await viewer();
+  if (!v?.id) return {};
+  let q = v.db.from("roommate_listings").select("id, status, review_note, submitted_at, reviewed_at, approved_at").eq("owner_id", v.id).limit(200);
+  if (ids && ids.length) q = q.in("id", ids.slice(0, 200));
+  const { data, error } = await q;
+  if (error) {
+    await reportReadFault("read.roommates.review", ...faults(error));
+    return {};
+  }
+  const out: Record<string, ListingReview> = {};
+  for (const r of (data ?? []) as { id: string; status: ListingStatus; review_note: string | null; submitted_at: string | null; reviewed_at: string | null; approved_at: string | null }[]) {
+    out[r.id] = { id: r.id, status: r.status, note: r.review_note, submittedAt: r.submitted_at, reviewedAt: r.reviewed_at, approved: Boolean(r.approved_at) };
+  }
+  return out;
+}
+
+/** The signed-in member's identity check, for the "Confirm your identity first" step. Null when it cannot be read (then the database still decides at submit). */
+export async function readMyIdentityState(): Promise<"approved" | "pending" | "rejected" | "none" | null> {
+  const v = await viewer();
+  if (!v?.id) return null;
+  const res = await rpc<string>(v.db, "roommate_my_identity_state", {}, "read.roommates.identity");
+  return res.data === "approved" || res.data === "pending" || res.data === "rejected" || res.data === "none" ? res.data : null;
 }

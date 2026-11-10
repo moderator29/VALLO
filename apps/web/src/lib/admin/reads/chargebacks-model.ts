@@ -18,7 +18,7 @@ export type ChargebackState = (typeof CHARGEBACK_STATES)[number];
 export const RECOVERY_STATES = ["none", "owed", "recovered", "written_off"] as const;
 export type RecoveryState = (typeof RECOVERY_STATES)[number];
 
-export const CHARGEBACK_PROVIDERS = ["paystack", "payluk"] as const;
+export const CHARGEBACK_PROVIDERS = ["paystack"] as const;
 export type ChargebackProvider = (typeof CHARGEBACK_PROVIDERS)[number];
 
 /** Not yet decided by the payment partner. The nav badge counts these. */
@@ -109,7 +109,7 @@ export function outstandingMinor(row: Pick<ChargebackBase, "state" | "recoverySt
 
 /**
  * A payment the payout rule is holding for this lister (migration cbh01): a
- * Payluk escrow payment Vallo would release to them, or a Rewards Balance
+ * protected payment Vallo would release to them, or a Rewards Balance
  * payout Vallo would send them, or (migration fm02) a Vallo Guarantee claim
  * a person would pay them by bank transfer. Finance overrides one at a time.
  */

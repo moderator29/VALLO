@@ -191,3 +191,51 @@ export async function readAcquisition(db: SupabaseClient, now: number = Date.now
   ]);
   return { weeks: starts, signups, listingsCreated, referrals };
 }
+
+/* ------------------------------------------------------ referral performance */
+
+export type ReferralPerformance = {
+  weeks: string[];
+  /** Invited people per week who signed up with a code. */
+  attributed: number[];
+  /** How many of all the referrals in the window sit in each bucket now. */
+  buckets: { pending: number; earned: number; reversed: number };
+  /** Referral campaigns: title, status and dates only. No reward figure, no liability. */
+  campaigns: { title: string; status: string; startsAt: string; endsAt: string | null }[] | null;
+};
+
+/**
+ * REFERRAL AND PROMO PERFORMANCE FROM THE REAL REFERRAL ROWS. Counts only, in
+ * Monday-start Lagos weeks. The reward amounts, the Rewards Balance and the
+ * member names stay with Finance: the marketing desk sees how many people a
+ * code brought in and what became of them, nothing about money.
+ */
+export async function readReferralPerformance(db: SupabaseClient, now: number = Date.now(), weeks = 8): Promise<ReferralPerformance | null> {
+  const starts = lastWeekStarts(weeks, lagosToday(now));
+  const fromIso = lagosDayStartIso(starts[0]!);
+  const [rows, campaigns] = await Promise.all([
+    db.from("referrals").select("status, attributed_at").gte("attributed_at", fromIso).order("attributed_at").limit(20000),
+    db.from("referral_campaigns").select("title, status, starts_at, ends_at").order("starts_at", { ascending: false }).limit(10),
+  ]);
+  if (rows.error || !rows.data) {
+    if (rows.error && !isNotLive(rows.error)) await reportReadFault("read.admin.marketing.referral-performance", ...faults(rows.error));
+    return null;
+  }
+  const data = rows.data as { status: string | null; attributed_at: string | null }[];
+  const earned = new Set(["approved", "available", "withdrawal_requested", "sent", "paid"]);
+  const pending = new Set(["attributed", "qualified", "pending", "under_review"]);
+  const buckets = { pending: 0, earned: 0, reversed: 0 };
+  for (const r of data) {
+    if (earned.has(r.status ?? "")) buckets.earned += 1;
+    else if (pending.has(r.status ?? "")) buckets.pending += 1;
+    else if (r.status === "rejected" || r.status === "reversed") buckets.reversed += 1;
+  }
+  return {
+    weeks: starts,
+    attributed: weeklyCounts(data.map((r) => r.attributed_at).filter((v): v is string => typeof v === "string"), starts),
+    buckets,
+    campaigns: campaigns.error
+      ? null
+      : ((campaigns.data ?? []) as { title: string; status: string; starts_at: string; ends_at: string | null }[]).map((c) => ({ title: c.title, status: c.status, startsAt: c.starts_at, endsAt: c.ends_at })),
+  };
+}

@@ -7,7 +7,7 @@ import { normaliseEscrowPayStatus } from "../payments/providers/escrowpay/normal
 import { escrowPayEnabled } from "../payments/providers/escrowpay/switch";
 import type { ArrangementStatus } from "./arrangement-states";
 import type { Db } from "./member-wallet";
-import { releaseGate } from "./provider-arrangements";
+import { releaseGate } from "./release-gate";
 
 /**
  * THE PROTECTED RAIL, SERVER SIDE (BUILD section 5, phase 3; 10 November

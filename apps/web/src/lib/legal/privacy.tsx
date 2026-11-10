@@ -297,12 +297,6 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
                 nominate for payouts.
               </li>
               <li>
-                Payluk (Nigeria): the provider behind the protected payment rail, which is
-                built but switched off, so nothing is sent to it today. Vallo has no
-                wallet. If the rail is ever switched on, Payluk (Nigeria) would receive your name,
-                email address and phone number for that payment.
-              </li>
-              <li>
                 Termii (Nigeria) and Twilio (United States): sending the one-time codes
                 that confirm your phone number. They receive your phone number and the
                 message with the code.

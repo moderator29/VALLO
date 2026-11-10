@@ -20,7 +20,7 @@ import { createAdminClient } from "../supabase/admin";
  * REFUSED on every direct (card) path, never opened on the direct rail
  * instead, because a direct Paystack split settles the lister at the moment
  * of charge and the hold the policy promised would silently not exist. An
- * escrow payment opens only on the escrow path (`lib/money/fund-actions.ts`).
+ * escrow payment opens only on the escrow path (`lib/money/protected-rail.ts`).
  *
  * THE PAYER'S CHOICE (founder ruling 2, 13 October 2026). On a rent or a
  * shortlet the payer picks escrow (the default) or card
@@ -268,7 +268,7 @@ export type RailDecision =
  * that opens on `opensOn`. Today every caller opens on the direct (Paystack
  * split) rail, so an escrow answer is refused whatever the switch says: a
  * direct charge cannot hold, and opening one would release money the policy
- * says must be held. `escrowLive` is the Payluk adapter-and-switch check.
+ * says must be held. `escrowLive` is the protected-pay switch and provider check.
  */
 export function railGate(answer: RailAnswer, opensOn: "direct" | "escrow", escrowLive: boolean): RailDecision {
   if (answer.state === "unavailable") return { open: false, reason: "unavailable", message: RAIL_REFUSAL.unavailable };

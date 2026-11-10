@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fakeSupabase } from "../testing/fake-supabase";
 import type { RailResult } from "../payments/provider";
 
-vi.mock("./provider-arrangements", () => ({ releaseGate: async () => "clear" }));
+vi.mock("./release-gate", () => ({ releaseGate: async () => "clear" }));
 
 const rail = await import("./protected-rail");
 
@@ -99,8 +99,8 @@ describe("a dispute is Vallo's own process and moves no money", () => {
     expect(await rail.raiseProtectedDispute(d, { arrangementId: "arr-1", actorUserId: "payer", statement: "short" })).toMatchObject({ reason: "statement_too_short" });
   });
 
-  it("a Payluk row is never touched by this rail", async () => {
-    const { d } = deps({ row: { ...ROW, provider: "payluk" } });
+  it("a row of another provider is never touched by this rail", async () => {
+    const { d } = deps({ row: { ...ROW, provider: "another" } });
     expect(await rail.raiseProtectedDispute(d, { arrangementId: "arr-1", actorUserId: "payer", statement: "x".repeat(20) })).toMatchObject({ reason: "not_found" });
   });
 });

@@ -20,6 +20,7 @@ import { TierBadge } from "@/components/trust/TierBadge";
 import type { BadgeTier } from "@/lib/trust/badge-tier";
 import { countOf } from "@vallo/i18n/core";
 import type { ClientCopy } from "@/lib/i18n/client-copy-of";
+import { SHARE_CARD_WORDS } from "@/lib/features/listing-share/model";
 import "./feed-v2.css";
 
 /** The words a post card draws, from `feedV2.card` in the dictionary. */
@@ -114,6 +115,13 @@ export type PostView = {
   areaName: string | null;
   areaSlug: string | null;
   listing: PostListing | null;
+  /**
+   * A listing shared into the feed by a member (`posts.is_listing_share`).
+   * `available` is false when the listing was unpublished, closed or deleted
+   * since: the card then says it is no longer available and draws nothing of
+   * the listing. Optional: older reads leave it out.
+   */
+  listingShare?: { listingId: string | null; available: boolean } | null;
   /** A Vallo Roommates post shared to the feed, when there is one (optional: older reads leave it out). */
   roommateListing?: PostRoommateListing | null;
   /** The bot's own note about where its answer came from. */
@@ -569,9 +577,18 @@ export function PostCard({
    * listing is the one `posts-queries` read through `listings_select_published`,
    * so a taken-down flat never reaches this card.
    */
-  const featured = post.listing && post.listing.photoUrl && !hasMedia && !isBot && !editor ? post.listing : null;
-  if (featured) {
-    const tag = isSystem || post.kind === "SHOWCASE" ? words.newListing : words.featuredListing;
+  /* A listing a member SHARED into the feed (founder, 10 November 2026) is the
+     same card with the badge "Shared": it needs no photograph (a placeholder
+     holds the space), and when the listing is gone it says so quietly and
+     draws nothing of it. */
+  const share = post.listingShare && !hasMedia && !isBot && !editor ? post.listingShare : null;
+  const featured = share
+    ? (post.listing ?? null)
+    : post.listing && post.listing.photoUrl && !hasMedia && !isBot && !editor
+      ? post.listing
+      : null;
+  if (featured || share) {
+    const tag = share ? SHARE_CARD_WORDS.badge : isSystem || post.kind === "SHOWCASE" ? words.newListing : words.featuredListing;
     return (
       <article
         className="nf-post nf-post--pressable nf-pc nf-pc--feature"
@@ -579,14 +596,21 @@ export function PostCard({
         onClick={openPost}
         onAuxClick={openPost}
         data-testid="post-card"
-        data-variant="feature"
+        data-variant={share ? "share" : "feature"}
+        data-unavailable={share && !featured ? "" : undefined}
       >
         <div
           ref={mediaRef}
           className="nf-pcf__media"
           style={arriving ? { viewTransitionName: `post-photo-${post.id}` } : undefined}
         >
-          <PostPicture src={featured.photoUrl as string} alt={featured.title} width={1200} height={1500} sizes="(max-width: 640px) 100vw, 600px" />
+          {featured?.photoUrl ? (
+            <PostPicture src={featured.photoUrl} alt={featured.title} width={1200} height={1500} sizes="(max-width: 640px) 100vw, 600px" />
+          ) : (
+            <span className="nf-pcf__empty" aria-hidden="true">
+              <UiIcon name="house" size={40} />
+            </span>
+          )}
           <span className="nf-pcf__scrim" aria-hidden="true" />
         </div>
 
@@ -652,13 +676,22 @@ export function PostCard({
             </span>
           </div>
 
-          <h3 className="nf-pcf__title">{featured.title}</h3>
-          <p className="nf-pcf__line">
-            <span>{[featured.area, featured.city].filter(Boolean).join(", ")}</span>
-            <span className="nf-pcf__price nf-numeric">
-              {featured.priceLabel} <span className="nf-pcf__period">{featured.periodLabel}</span>
-            </span>
-          </p>
+          {featured ? (
+            <>
+              <h3 className="nf-pcf__title">{featured.title}</h3>
+              <p className="nf-pcf__line">
+                <span>{[featured.area, featured.city].filter(Boolean).join(", ")}</span>
+                <span className="nf-pcf__price nf-numeric">
+                  {featured.priceLabel} <span className="nf-pcf__period">{featured.periodLabel}</span>
+                </span>
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="nf-pcf__title" data-testid="share-gone">{SHARE_CARD_WORDS.gone}</h3>
+              <p className="nf-pcf__line">{SHARE_CARD_WORDS.goneNote}</p>
+            </>
+          )}
           {hasWords ? <p className="nf-pcf__caption">{post.body}</p> : null}
 
           <div className="nf-pcf__row">
@@ -671,10 +704,12 @@ export function PostCard({
               onRepost={onRepost}
               onShare={onShare}
             />
-            <Link href={`/listing/${featured.id}`} className="nf-btn nf-btn--primary nf-btn--sm nf-pcf__view" data-testid="post-view-property">
-              <span>{words.viewProperty}</span>
-              <UiIcon name="arrow-right" size={16} />
-            </Link>
+            {featured ? (
+              <Link href={`/listing/${featured.id}`} className="nf-btn nf-btn--primary nf-btn--sm nf-pcf__view" data-testid="post-view-property">
+                <span>{words.viewProperty}</span>
+                <UiIcon name="arrow-right" size={16} />
+              </Link>
+            ) : null}
           </div>
         </div>
       </article>

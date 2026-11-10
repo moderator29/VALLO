@@ -7,6 +7,8 @@ import { referenceOf } from "../rows";
 import { listingStatusWord, reviewHref } from "../tabs";
 import { ListingReview } from "./ListingReview";
 import { ReviewActionBar } from "./ReviewActionBar";
+import { IdentityRow } from "./IdentityRow";
+import { listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { ReopenControl } from "./PropertyMatchButtons";
 import { PhotoProvenance } from "./PhotoProvenance";
 import { InternalNotes } from "../../_components/InternalNotes";
@@ -71,6 +73,7 @@ export default async function ListingUnderReviewPage({
   const hubHref = listingHubHref(found.id, raw);
   const tabParam = typeof raw.tab === "string" ? raw.tab : "";
   const tab = isListingSection(tabParam) ? tabParam : "photos";
+  const identity = extra?.lister?.userId ? await listerIdentityStatus(extra.lister.userId) : null;
 
   return (
     <>
@@ -130,12 +133,15 @@ export default async function ListingUnderReviewPage({
                 <ReopenControl listingId={found.id} copy={t.landlord.admin} />
               </Panel>
             ) : decidable ? (
+              <>
+              {identity ? <IdentityRow identity={identity} /> : null}
               <ReviewActionBar
                 listingId={found.id}
                 status={found.status}
                 nextHref={nextId ? reviewHref(nextId, carried) : null}
                 queueHref={queueHref}
               />
+              </>
             ) : (
               <Panel>
                 <p className="nf-rv-msg">

@@ -38,13 +38,13 @@ export type LedgerPot = (typeof LEDGER_POTS)[number];
 
 export type LedgerDirection = "in" | "out";
 export type LedgerStatus = "pending" | "confirmed" | "failed" | "unknown";
-export type LedgerProvider = "paystack" | "payluk" | "vallo";
+export type LedgerProvider = "paystack" | "vallo";
 
 /** What each pot may never carry, exactly as the table constraints say. */
 const POT_RULES: Record<LedgerPot, { providers: readonly LedgerProvider[]; forbidden: readonly LedgerEvent[] }> = {
-  customer_funds: { providers: ["paystack", "payluk"], forbidden: [] },
+  customer_funds: { providers: ["paystack"], forbidden: [] },
   vallo_revenue: {
-    providers: ["paystack", "payluk", "vallo"],
+    providers: ["paystack", "vallo"],
     forbidden: ["ESCROW_CREATED", "ESCROW_FUNDED", "ESCROW_RELEASED", "DEPOSIT_INITIATED", "DEPOSIT_CONFIRMED"],
   },
   marketing_float: {

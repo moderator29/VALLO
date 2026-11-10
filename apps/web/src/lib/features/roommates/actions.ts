@@ -9,10 +9,13 @@ import { z } from "zod";
 import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
 import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "@/lib/actions/session";
 import { sendEmail } from "@/lib/email/client";
+import { consume, subjectForUser } from "@/lib/security/rate-limit";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recordRoommatesStep } from "@/lib/funnel/roommates";
 
 import { isNotLive } from "../degrade";
+import { discoverPeople, searchRooms } from "./queries";
+import { FEED_TABS, hasMore, tabReads, toPeopleFilters, toRoomFilters, weave, type FeedCursor, type FeedItem } from "./feed";
 import {
   AMENITIES,
   AUTHORITIES,
@@ -29,6 +32,7 @@ import {
   ROOMMATES_ROUTES,
   ROOM_PREFS,
   ROOM_TYPES,
+  REVIEW_MIN_PHOTOS,
   canPublishProfile,
   listingProblems,
   type ListingDraft,
@@ -64,6 +68,7 @@ function wordsFor(error: { code?: string; message?: string } | null): string {
   if (isNotLive(error)) return NOT_OPEN;
   if (error.code === "54000" || error.code === "program_limit_exceeded") return "That is more than we accept in this time. Please wait a little and try again.";
   if (error.code === "23505") return "That is already done.";
+  if (error.code === "23514") return "Sending a room for review is not open on this server yet. Your draft is safe; try again soon.";
   if (typeof error.code === "string" && /^RM\d{3}$/.test(error.code) && error.message) return error.message;
   return FAILED;
 }
@@ -72,6 +77,12 @@ const uuid = z.string().uuid("That could not be found.");
 const minor = z.number().int().nonnegative().max(1_000_000_000_00).nullable();
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Choose a date.").nullable();
 const shortText = (max: number) => z.string().trim().max(max);
+
+/** A ceiling on a member's writes; null means go ahead, otherwise the sentence says when to try again. The limiter fails open. */
+async function limited(bucket: string, userId: string, limit: number, windowSeconds: number): Promise<string | null> {
+  const verdict = await consume({ bucket: `roommates_${bucket}`, subject: subjectForUser(userId), limit, windowSeconds });
+  return verdict.allowed ? null : `That is a lot in a short time. Please try again ${verdict.retryIn}.`;
+}
 
 function refresh(...paths: string[]) {
   for (const p of paths) revalidatePath(p);
@@ -253,16 +264,29 @@ export async function saveRoommateListing(input: ListingDraft, options: { publis
     if (problems.includes("rent")) return fail("Add the rent to publish a room.", { rentMinor: "Add the rent." });
     if (problems.includes("authority")) return fail("Tell us who you are to this home.", { authority: "Choose one." });
     if (problems.includes("declared")) return fail("Confirm you have the right to offer this room.", { declared: "Tick to confirm." });
+    if (problems.includes("photos")) return fail(`Add at least ${REVIEW_MIN_PHOTOS} photos so our team can review this home.`, { photos: `Add at least ${REVIEW_MIN_PHOTOS} photos.` });
     if (problems.length) return fail("Some details are missing.");
+    if (d.kind === "room_offer") {
+      /* A draft may be saved by anyone; sending it for review needs an approved identity check (the database repeats this). */
+      const { data: idState, error: idError } = await who.db.rpc("roommate_my_identity_state");
+      if (!idError && typeof idState === "string" && idState !== "approved") return fail("Confirm your identity first. Your draft is saved and waits here.", { identity: idState });
+    }
+    const slow = await limited("listing_publish", who.userId, 8, 60 * 60);
+    if (slow) return fail(slow);
     /* Only the photo paths in the member's own folder are accepted. */
     if (d.photos.some((p) => !p.startsWith(`${who.userId}/`))) return fail("One of the photos could not be used. Upload it again.");
   }
 
-  let status: string = options.publish ? "live" : "draft";
-  if (d.id && !options.publish) {
-    const { data: cur } = await who.db.from("roommate_listings").select("status").eq("id", d.id).maybeSingle();
-    const s = (cur as { status?: string } | null)?.status;
-    if (s && s !== "draft") status = s;
+  /* A room offer is reviewed before it shows: it is SENT, and goes live when our team approves it.
+     A room offer that was approved before (paused, filled, expired) can go back live; the database
+     sends it to review again if the rent, place, photos or authority changed since. Other kinds go live. */
+  let status: string = options.publish ? (d.kind === "room_offer" ? "submitted" : "live") : "draft";
+  if (d.id) {
+    const { data: cur } = await who.db.from("roommate_listings").select("status, approved_at").eq("id", d.id).maybeSingle();
+    const c = cur as { status?: string; approved_at?: string | null } | null;
+    if (c?.status && !options.publish && c.status !== "draft") status = c.status;
+    if (c?.status && options.publish && d.kind === "room_offer" && c.approved_at && ["paused", "filled", "expired"].includes(c.status)) status = "live";
+    if (c?.status && options.publish && d.kind === "room_offer" && c.status === "live") status = "live";
   }
 
   const row = {
@@ -301,24 +325,32 @@ export async function saveRoommateListing(input: ListingDraft, options: { publis
   };
 
   if (d.id) {
-    const { error } = await who.db.from("roommate_listings").update(row).eq("id", d.id).eq("owner_id", who.userId);
+    const { data: saved, error } = await who.db.from("roommate_listings").update(row).eq("id", d.id).eq("owner_id", who.userId).select("status").maybeSingle();
     if (error) return fail(wordsFor(error));
     refresh(ROOMMATES_ROUTES.listing(d.id), ROOMMATES_ROUTES.hub, ROOMMATES_ROUTES.home);
+    /* The database has the last word (a material edit of a live offer goes back to review). */
+    const finalStatus = (saved as { status?: string } | null)?.status ?? status;
     if (options.publish) void recordRoommatesStep("roommates_listing_published");
-    return ok({ id: d.id, status });
+    return ok({ id: d.id, status: finalStatus });
   }
-  const { data, error } = await who.db.from("roommate_listings").insert({ ...row, owner_id: who.userId }).select("id").single();
+  const { data, error } = await who.db.from("roommate_listings").insert({ ...row, owner_id: who.userId }).select("id, status").single();
   if (error || !data) return fail(wordsFor(error));
   const id = (data as { id: string }).id;
   refresh(ROOMMATES_ROUTES.hub, ROOMMATES_ROUTES.home);
   if (options.publish) void recordRoommatesStep("roommates_listing_published");
-  return ok({ id, status });
+  return ok({ id, status: (data as { status?: string }).status ?? status });
 }
 
-export async function setRoommateListingStatus(input: { id: string; status: "live" | "paused" | "filled" }): Promise<ActionResult<{ status: string }>> {
+/**
+ * The owner's own moves on a post: pause, resume, mark filled, and take it
+ * back to a draft (withdraw it from review, or unpublish it). Going live is
+ * only ever a resume of an approved post: the database refuses any other
+ * route to `live` for a room offer (RM203).
+ */
+export async function setRoommateListingStatus(input: { id: string; status: "live" | "paused" | "filled" | "draft" }): Promise<ActionResult<{ status: string }>> {
   const who = await member();
   if ("error" in who) return fail(who.error);
-  if (!uuid.safeParse(input.id).success || !["live", "paused", "filled"].includes(input.status)) return fail(FAILED);
+  if (!uuid.safeParse(input.id).success || !["live", "paused", "filled", "draft"].includes(input.status)) return fail(FAILED);
   const { error } = await who.db.from("roommate_listings").update({ status: input.status }).eq("id", input.id).eq("owner_id", who.userId);
   if (error) return fail(wordsFor(error));
   refresh(ROOMMATES_ROUTES.listing(input.id), ROOMMATES_ROUTES.hub);
@@ -351,12 +383,17 @@ async function call<T>(db: Db, fn: string, args: Record<string, unknown>): Promi
   return { data: data as T, error: null };
 }
 
+const interestSchema = z.object({ toId: uuid, listingId: uuid.nullable(), note: z.string().trim().max(LIMITS.noteMax).catch("") });
+
 export async function expressInterest(input: { toId: string; listingId?: string | null; note?: string }): Promise<ActionResult<{ id: string }>> {
   const who = await member();
   if ("error" in who) return fail(who.error);
-  if (!uuid.safeParse(input.toId).success) return fail("That person could not be found.");
+  const parsed = validate(interestSchema, { toId: input.toId, listingId: input.listingId ?? null, note: input.note ?? "" });
+  if (!parsed.ok) return fail("That person could not be found.");
   if (input.toId === who.userId) return fail("That is you.");
-  const note = (input.note ?? "").trim().slice(0, LIMITS.noteMax);
+  const slow = await limited("interest", who.userId, 30, 60 * 60);
+  if (slow) return fail(slow);
+  const note = parsed.data.note;
   const res = await call<string>(who.db, "roommate_express_interest", {
     p_to: input.toId,
     p_listing: input.listingId && uuid.safeParse(input.listingId).success ? input.listingId : null,
@@ -954,4 +991,63 @@ export async function setListingSharing(input: { listingId: string; ok: boolean;
   if (res.error) return fail(res.error);
   refresh(`/agent/listings/${input.listingId}/sharing`, `/listing/${input.listingId}`);
   return ok({ ok: Boolean(input.ok), maxOccupants: max });
+}
+
+
+/* ------------------------------------------------------------------ the feed */
+
+const feedSchema = z.object({
+  tab: z.enum(FEED_TABS),
+  filters: z.object({
+    q: z.string().trim().max(80),
+    stateCode: z.string().length(2).nullable(),
+    city: z.string().trim().max(60).nullable(),
+    minNaira: z.number().int().min(0).max(100_000_000).nullable(),
+    maxNaira: z.number().int().min(0).max(100_000_000).nullable(),
+    genderPref: z.enum(GENDER_PREFS).nullable(),
+    roomType: z.enum(ROOM_TYPES).nullable(),
+    moveBy: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  }),
+  cursor: z.object({ rooms: z.number().int().min(0).max(5000).nullable(), people: z.number().int().min(0).max(5000).nullable() }),
+});
+
+export type FeedPage = { items: FeedItem[]; next: FeedCursor | null; peopleNote: "need-profile" | "signed-out" | null };
+
+/**
+ * One page of the Roommates feed ("Load more" and the first paint both use
+ * it). Every filter runs in the database (`roommate_search_listings` and
+ * `roommate_discover`), the page size is fixed there, and only APPROVED room
+ * posts are ever returned (`status = 'live'`), so a post in review cannot
+ * show here. The people half answers honestly when the reader has no
+ * profile yet instead of showing nobody.
+ */
+export async function loadRoommatesFeed(input: z.input<typeof feedSchema>): Promise<ActionResult<FeedPage>> {
+  const parsed = validate(feedSchema, input);
+  if (!parsed.ok) return fail(FAILED);
+  const { tab, filters, cursor } = parsed.data;
+  const session = await resolveSession();
+  if (session.state === "signed-in") {
+    const slow = await limited("feed", session.user.id, 120, 60);
+    if (slow) return fail(slow);
+  }
+  const reads = tabReads(tab);
+  let rooms: Awaited<ReturnType<typeof searchRooms>> | null = null;
+  let people: Awaited<ReturnType<typeof discoverPeople>> | null = null;
+  try {
+    [rooms, people] = await Promise.all([
+      reads.rooms && cursor.rooms !== null ? searchRooms(toRoomFilters(tab, filters), cursor.rooms) : Promise.resolve(null),
+      reads.people && cursor.people !== null ? discoverPeople(toPeopleFilters(filters), cursor.people) : Promise.resolve(null),
+    ]);
+  } catch {
+    return fail(FAILED);
+  }
+  if ((rooms && rooms.state === "not-open") || (tab === "looking" && people && people.state === "not-open")) return fail(NOT_OPEN);
+  const roomItems = rooms && rooms.state === "ok" ? rooms.items : [];
+  const peopleItems = people && people.state === "ok" ? people.items : [];
+  const next: FeedCursor = {
+    rooms: rooms && rooms.state === "ok" ? rooms.next : null,
+    people: people && people.state === "ok" ? people.next : null,
+  };
+  const peopleNote = people && (people.state === "need-profile" || people.state === "signed-out") ? people.state : null;
+  return ok({ items: weave(roomItems, peopleItems), next: hasMore(next) ? next : null, peopleNote });
 }

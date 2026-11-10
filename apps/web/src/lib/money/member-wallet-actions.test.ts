@@ -101,6 +101,7 @@ vi.mock("./member-wallet", async (importOriginal) => {
 
 const actions = await import("./member-wallet-actions");
 const { REFUSAL } = await import("./balance-copy");
+const { WALLET_PROVIDER_KEY } = await import("./member-wallet");
 
 const KEY = "11111111-1111-4111-8111-111111111111";
 const withdraw = (over: Record<string, unknown> = {}) =>
@@ -109,8 +110,8 @@ const withdraw = (over: Record<string, unknown> = {}) =>
 beforeEach(() => {
   db.tables = {
     financial_provider_accounts: [
-      { user_id: "user-a", provider: "payluk", provider_customer_id: "cust-a", status: "ACTIVE" },
-      { user_id: "user-b", provider: "payluk", provider_customer_id: "cust-b", status: "ACTIVE" },
+      { user_id: "user-a", provider: WALLET_PROVIDER_KEY, provider_customer_id: "cust-a", status: "ACTIVE" },
+      { user_id: "user-b", provider: WALLET_PROVIDER_KEY, provider_customer_id: "cust-b", status: "ACTIVE" },
     ],
     profiles: [
       { id: "user-a", first_name: "Ada", surname: "Eze", phone: "08011111111" },

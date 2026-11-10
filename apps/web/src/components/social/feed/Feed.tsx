@@ -26,6 +26,9 @@ import type { ReviewCard } from "@/lib/social/profile-tabs-queries";
 import { PostEditor } from "./PostEditor";
 import { LEAD_SETTLE_MS, leadIndexes, leadPropsFor } from "./lead";
 import { feedback } from "@/lib/ui/feedback";
+import { useCopy } from "@/lib/ui/use-copy";
+import { SHARE_WORDS } from "@/lib/features/listing-share/model";
+import { removeListingShare, shareListingToFeed } from "@/lib/features/listing-share/actions";
 import { ViewportPost } from "./ViewportPost";
 import { inCategory, type FeedCategory } from "./categories";
 import { FreshArrival } from "./FreshArrival";
@@ -220,6 +223,7 @@ export function Feed({
     return () => window.clearTimeout(timer);
   }, []);
   const [, startTransition] = useSafeTransition();
+  const copy = useCopy();
 
   /*
    * The server is the truth. When a refresh brings new props, take them.
@@ -395,13 +399,11 @@ export function Feed({
         });
         return;
       }
-      void navigator.clipboard?.writeText(url);
-      banner.success(POST_COPY.copied);
+      void copy(url, "link");
       return;
     }
     if (action === "copy") {
-      void navigator.clipboard?.writeText(`${window.location.origin}/post/${post.id}`);
-      banner.success(POST_COPY.copied);
+      void copy(`${window.location.origin}/post/${post.id}`, "link");
       return;
     }
     /*
@@ -434,6 +436,38 @@ export function Feed({
     }
     if (action === "report") {
       setReporting(post);
+      return;
+    }
+    /* Remove share: no slide to confirm, because the banner offers Undo, which
+       puts it back only if a share is still free. */
+    if (action === "remove-share") {
+      startTransition(async () => {
+        try {
+          const result = await removeListingShare({ postId: post.id });
+          if (!result.ok) {
+            banner.error(result.error);
+            return;
+          }
+          setPosts((all) => all.filter((p) => p.id !== post.id));
+          const listingId = post.listingShare?.listingId ?? null;
+          const note = post.body;
+          if (!listingId) {
+            banner.success(SHARE_WORDS.removed);
+          } else {
+            bannerWithUndo(SHARE_WORDS.removed, {
+              undo: async () => {
+                const again = await shareListingToFeed({ listingId, ...(note ? { note } : {}) });
+                return again.ok ? { ok: true } : { ok: false, error: again.error };
+              },
+              undone: SHARE_WORDS.restored,
+              onUndone: () => router.refresh(),
+            });
+          }
+          router.refresh();
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
+        }
+      });
       return;
     }
     if (action === "edit") {
@@ -737,6 +771,7 @@ export function Feed({
             editable: sheetFor.editable,
             hasAuthor: Boolean(sheetFor.author?.id),
             who: sheetFor.author?.handle ? `@${sheetFor.author.handle}` : sheet.thisPerson,
+            isListingShare: Boolean(sheetFor.listingShare),
           }, sheet.menu)}
           onChoose={(key) => onMenuAction(sheetFor, key)}
           onClose={() => setSheetFor(null)}

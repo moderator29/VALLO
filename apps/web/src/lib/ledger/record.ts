@@ -6,8 +6,8 @@ import { ledgerEntryProblem, type LedgerEntryInput } from "./events";
 /**
  * The app's door into the ledger pots. Nothing here writes a table: both
  * calls are database functions that are the only writers
- * (`public.ledger_record`, `public.ledger_record_payluk_commission`,
- * service_role only).
+ * (`public.ledger_record`),
+ * service_role only.
  *
  * DEPENDS ON THE PENDING MIGRATION `supabase/migrations/pending/b2_ledger.sql`.
  * Until it is applied the RPC does not exist and every call answers

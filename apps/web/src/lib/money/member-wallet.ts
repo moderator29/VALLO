@@ -3,8 +3,8 @@ import "server-only";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { resolveSession } from "../actions/session";
 import { getAdminClient } from "../supabase/service";
-import { can, type AnyFiatProvider, type FiatProvider, type RailFailure, type RailMovement } from "../payments/provider";
-import { fiatProvider, memberWalletRailLive } from "../payments/providers";
+import { type AnyFiatProvider, type FiatProvider, type RailFailure, type RailMovement } from "../payments/provider";
+import { memberWalletRailLive } from "../payments/providers";
 import { reportReadFault } from "../observability/read-error";
 import {
   balanceFigures,
@@ -75,9 +75,20 @@ export type MovementRow = {
 export const MOVEMENT_COLUMNS =
   "id, user_id, kind, reference, amount_minor, provider_fee_minor, vallo_fee_minor, vat_minor, currency, status, status_source, status_observed_at, counterparty, narration, provider_metadata, created_at";
 
+/**
+ * The value the `provider` column holds on wallet rows (financial_provider_accounts,
+ * funds_movements, member_funds_reported) written before the wallet's provider
+ * was removed. Kept as data only, so old rows still read.
+ */
+export const WALLET_PROVIDER_KEY = "payluk"; // legacy-name: stored value of the provider column
+
+/**
+ * No provider is registered for the member balance: the previous one was
+ * removed (founder, 10 November 2026), so the wallet reads as not configured
+ * everywhere until a new provider is chosen.
+ */
 export function walletProvider(): WalletProvider | null {
-  const p = fiatProvider("payluk");
-  return p && can(p, "member_wallet") ? p : null;
+  return null;
 }
 
 export function adminDb(): Db | null {
@@ -91,7 +102,7 @@ export async function loadAccount(db: Db, userId: string): Promise<AccountRow | 
     .from("financial_provider_accounts")
     .select("id, user_id, provider, provider_customer_id, status, provider_status, status_observed_at, metadata")
     .eq("user_id", userId)
-    .eq("provider", "payluk")
+    .eq("provider", WALLET_PROVIDER_KEY)
     .maybeSingle();
   if (error) throw error;
   return (data as AccountRow | null) ?? null;
@@ -211,7 +222,7 @@ export async function reportedBalance(
     .from("member_funds_reported")
     .select("available_minor, protected_minor, currency, observed_at")
     .eq("user_id", userId)
-    .eq("provider", "payluk")
+    .eq("provider", WALLET_PROVIDER_KEY)
     .maybeSingle();
   const row = cached as { available_minor: number; protected_minor: number; currency: string; observed_at: string } | null;
   const fromRow = (r: NonNullable<typeof row>, live: boolean): Reported => ({
@@ -229,7 +240,7 @@ export async function reportedBalance(
   await db.from("member_funds_reported").upsert(
     {
       user_id: userId,
-      provider: "payluk",
+      provider: WALLET_PROVIDER_KEY,
       provider_balance_id: r.value.providerBalanceId || customerId,
       available_minor: r.value.availableMinor,
       protected_minor: r.value.protectedMinor,

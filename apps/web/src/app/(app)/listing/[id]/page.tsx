@@ -76,6 +76,7 @@ import { ListingMoveInBlock } from "@/components/app/listing/ListingMoveInBlock"
 import { AffordabilityLine } from "@/components/app/listing/AffordabilityLine";
 import { OwnerAvailabilityLine, PropertyOffers } from "@/components/app/listing/LandlordFacts";
 import { ExactPlace } from "@/components/app/listing/ExactPlace";
+import { ShareToFeedButton } from "@/components/social/share/ShareToFeedButton";
 import { ListingCodeRow } from "@/components/app/listing/ListingCode";
 import { ListingMoveIn } from "@/components/app/listing/ListingMoveIn";
 import { SimilarListings } from "@/components/app/listing/SimilarListings";
@@ -1561,6 +1562,16 @@ export default async function ListingDetailPage({
                   it is still guarded, because the model carries it as optional
                   and a guard is cheaper than a promise.
                 */}
+                {/* SHARE TO FEED (founder, 10 November 2026): anyone signed in may put a
+                    live listing in the feed; a guest is sent through sign-up and back. */}
+                {!isExample && (
+                  <Reveal>
+                    <Section divided>
+                      <ShareToFeedButton listingId={listing.id} />
+                    </Section>
+                  </Reveal>
+                )}
+
                 {listing.reference && (
                   <Reveal>
                     <Section divided>

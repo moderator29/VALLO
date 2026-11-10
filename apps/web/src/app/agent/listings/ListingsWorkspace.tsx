@@ -23,6 +23,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { ShareToFeedButton } from "@/components/social/share/ShareToFeedButton";
 import { Sheet } from "@/components/ui/Sheet";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { LISTING_STATUS_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
@@ -546,6 +547,7 @@ function ListingRow({
         Boolean(healthLabel) ||
         Boolean(listing.listingRole && listing.listingRole !== "owner")) && (
       <div className="flex flex-wrap items-center gap-x-2xs border-t border-[var(--nf-border-subtle)] px-xs py-2xs">
+        {listing.status === "PUBLISHED" && <ShareToFeedButton listingId={listing.id} />}
         {editable && (
           <ButtonLink href={`/agent/list?id=${listing.id}`} variant="quiet" size="sm" arrow>
             {t.workspace.actions.edit}

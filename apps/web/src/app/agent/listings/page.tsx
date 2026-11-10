@@ -13,6 +13,8 @@ import {
 } from "@/lib/agent/listings-queries";
 import { ListingPitch } from "../list/ListingPitch";
 import { ListingsWorkspace } from "./ListingsWorkspace";
+import { IdentityNotice } from "./IdentityNotice";
+import { identityGateApplies, listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { ButtonLink } from "@/components/ui/Button";
 import { SuccessFromFlag } from "@/components/ui/SuccessFromFlag";
 import { readDone } from "@/lib/ui/success-moments";
@@ -133,6 +135,8 @@ export default async function Page({
         }
       >
       <div>
+
+      {identity ? <IdentityNotice status={identity.status} /> : null}
 
       {/* The search that used to sit in the workspace bar, on the one screen
           it ever searched. A real GET form, so `?q=` narrows server side. */}
