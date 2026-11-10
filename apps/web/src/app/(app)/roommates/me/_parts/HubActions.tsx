@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { FieldProblem } from "@/components/ui/FieldProblem";
+import { ConfirmSheet as PlatformConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { Sheet } from "@/components/ui/Sheet";
 import { Switch } from "@/components/ui/Switch";
 import {
@@ -105,7 +106,7 @@ function InviteCard({
   );
 }
 
-/** A yes-or-no question before something that cannot be undone. */
+/** A yes-or-no question before something that cannot be undone: the platform's ConfirmSheet, with this area's prop names. */
 function ConfirmSheet({
   open,
   onOpenChange,
@@ -127,21 +128,7 @@ function ConfirmSheet({
   onYes: () => void;
   testId: string;
 }) {
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={title} card testId={testId}>
-      <div className="nf-rmh-invite">
-        <p className="nf-rmh-invite__line">{line}</p>
-        <div className="nf-rmh-invite__buttons">
-          <Button variant="secondary" size="md" disabled={pending} onClick={() => onOpenChange(false)}>
-            {cancel}
-          </Button>
-          <Button variant="danger" size="md" loading={pending} onClick={onYes} data-testid={`${testId}-yes`}>
-            {yes}
-          </Button>
-        </div>
-      </div>
-    </Sheet>
-  );
+  return <PlatformConfirmSheet open={open} onOpenChange={onOpenChange} title={title} line={line} confirmLabel={yes} cancelLabel={cancel} pending={pending} onConfirm={onYes} testId={testId} />;
 }
 
 export { ConfirmSheet, InviteCard };

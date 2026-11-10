@@ -16,9 +16,9 @@ import json, re, sys, time, urllib.parse, urllib.request, urllib.error
 
 UA = "ValloSchoolLogoBot/1.0 (project VALLO; contact via repo)"
 API = "https://en.wikipedia.org/w/api.php"
-PAUSE = 0.35
+PAUSE = 1.0
 
-def get(url, binary=False, tries=4):
+def get(url, binary=False, tries=6):
     for i in range(tries):
         req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "*/*"})
         try:
@@ -27,7 +27,11 @@ def get(url, binary=False, tries=4):
                 return r.status, r.headers.get("Content-Type", ""), body
         except urllib.error.HTTPError as e:
             if e.code in (429, 503):
-                time.sleep(5 * (i + 1))
+                try:
+                    wait = int(e.headers.get("Retry-After", "0"))
+                except Exception:
+                    wait = 0
+                time.sleep(max(wait, 10 * (i + 1)))
                 continue
             return e.code, e.headers.get("Content-Type", "") if e.headers else "", b""
         except Exception as e:  # network
@@ -218,6 +222,7 @@ def main():
                 r["note"] = "file info unavailable"
             else:
                 url, desc, mime = fi
+                url = url.split("?")[0]  # drop the utm_* tracking query the API adds
                 if url not in verified:
                     verified[url] = verify_image(url)
                 ok, st, ct = verified[url]
