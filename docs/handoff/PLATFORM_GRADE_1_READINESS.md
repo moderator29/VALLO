@@ -95,9 +95,18 @@ Store submission.
    do it yourself in sequence rather than racing. A batch that "mostly worked"
    is a batch that damaged files: read the diff of every agent's work before
    you commit it, and never report a batch as done on an agent's word alone.
-5. **Re-audit every piece of work.** After each workstream: re-read the diff
-   adversarially, run the gates, look at the screens at phone width (390 x 844
-   and 360 x 800) in light and dark, then fix what you find. Only then move on.
+5. **Re-audit every piece of work, and on anything large do it THREE TIMES**
+   (the founder, 10 November 2026: "audit and get everything clean clear two
+   to three times"). Three passes with three different lenses, not the same
+   pass three times: one for correctness against the requirement, one
+   adversarial where you actively try to break it, one for craft and truth
+   (both themes, every empty and error state, the kit used throughout, the
+   copy, and whether the documentation still matches the code). Write the
+   findings down before fixing them, re-run the gates after each pass, and
+   remember that a pass which finds nothing on a large change is a pass that
+   did not really happen. The full method is section 15B of
+   `OFFERS_AND_DEAL_ROOM.md` and it applies to every large workstream, not
+   only that one.
 6. **No em dashes anywhere** (code, copy, docs, commits). The repo enforces it:
    `node apps/web/scripts/check-no-em-dash.mjs`. Use a colon, a comma or two
    sentences.
@@ -862,7 +871,11 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
    no longer use (the retired provider and the rest). It is for YOU, this same session, on
    this same branch. I am sending more Hauslet screenshots of those exact
    screens: study every one.
-7. READ the two payments documents, in this order, because the protected
+7. READ docs/handoff/OFFERS_AND_DEAL_ROOM.md. Sales on Vallo stop at
+   "contact the agent" today: there is no offer, no negotiation and no deal
+   room. That document is the whole system, all of it, not phased, with what
+   already exists to build on and what must never be said about a sale.
+8. READ the two payments documents, in this order, because the protected
    payment rail is part of YOUR job now:
      docs/handoff/PROTECTED_PAYMENTS_BUILD.md   (the rules, read first)
      docs/handoff/PROTECTED_PAYMENTS_SPECS.md   (the two commissioned specs,
@@ -871,10 +884,10 @@ SETUP, IN THIS ORDER, BEFORE ANYTHING ELSE
                                                  terms in the appendix)
    Build that rail to ready, flagged OFF, in this same branch. Do not switch
    it on: the agreement is not signed yet.
-8. Load the Supabase MCP tools and confirm you can query the project.
-9. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
-   for platform-grade-1-readiness.
-10. Check supabase/migrations/pending/ and its README. Anything waiting there
+9. Load the Supabase MCP tools and confirm you can query the project.
+10. Confirm apps/web/vercel.json has git.deploymentEnabled switching Vercel OFF
+    for platform-grade-1-readiness.
+11. Check supabase/migrations/pending/ and its README. Anything waiting there
    is SQL I have to run myself. List it for me in your first report.
 
 MY RULES
