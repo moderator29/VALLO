@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { InstitutionRef } from "@/lib/features/roommates/model";
-import { filterSchools, groupSchoolsByState } from "./SchoolPicker";
+import { filterSchools, groupSchoolsByState } from "./school-list";
 
 const s = (id: string, name: string, shortName: string | null, stateCode: string | null, city: string | null): InstitutionRef => ({ id, slug: id, name, shortName, kind: "university", stateCode, city });
 const list = [s("a", "University of Lagos", "UNILAG", "LA", "Akoka"), s("b", "University of Ibadan", "UI", "OY", "Ibadan"), s("c", "Lagos State University", "LASU", "LA", "Ojo"), s("d", "Open School", null, null, null)];

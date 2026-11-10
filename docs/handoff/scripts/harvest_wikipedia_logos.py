@@ -76,17 +76,34 @@ def variants(school):
 
 LOGO_PARAMS = ("logo", "seal", "coat_of_arms", "crest", "logo_image", "image_name_logo")
 
+LOGOISH = re.compile(r"logo|seal|crest|emblem|coat[ _]of[ _]arms|insignia|badge|shield|wordmark", re.I)
+NOTLOGO = re.compile(r"flag of|map of|location|campus|building|gate|aerial|hostel|library|chapel", re.I)
+IMG = r"\.(png|jpe?g|svg|gif|webp)$"
+
+def _file_from(v):
+    m2 = re.search(r"(?:File|Image):([^|\]\n]+)", v, re.I)
+    name = m2.group(1) if m2 else v.split("|")[0].split("<")[0]
+    name = name.strip().replace("_", " ")
+    return name if re.search(IMG, name, re.I) else None
+
 def infobox_logo(text):
+    """A logo file name from the infobox, else a logo-named file used in the article."""
     for p in LOGO_PARAMS:
         m = re.search(r"^\s*\|\s*" + p + r"\s*=\s*(.*?)\s*$", text, re.M | re.I)
-        if not m:
-            continue
-        v = m.group(1)
-        m2 = re.search(r"(?:File|Image):([^|\]\n]+)", v, re.I)
-        name = m2.group(1) if m2 else v.split("|")[0].split("<")[0]
-        name = name.strip().replace("_", " ")
-        if re.search(r"\.(png|jpe?g|svg|gif|webp)$", name, re.I):
-            return name
+        if m:
+            n = _file_from(m.group(1))
+            if n:
+                return n
+    for p in ("image", "image_name", "image_file"):
+        m = re.search(r"^\s*\|\s*" + p + r"\s*=\s*(.*?)\s*$", text, re.M | re.I)
+        if m:
+            n = _file_from(m.group(1))
+            if n and LOGOISH.search(n) and not NOTLOGO.search(n):
+                return n
+    for m in re.finditer(r"\[\[(?:File|Image):([^|\]\n]+)", text, re.I):
+        n = m.group(1).strip().replace("_", " ")
+        if re.search(IMG, n, re.I) and LOGOISH.search(n) and not NOTLOGO.search(n):
+            return n
     return None
 
 def pages_with_content(titles):
