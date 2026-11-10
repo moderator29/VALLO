@@ -47,6 +47,46 @@ A Nigerian app for homes, hotels, shortlets and restaurants, with one account: r
 - **Line icons:** `scripts/marketing/node_modules/lucide-static/icons/<name>.svg` (ISC) inside pills and pop-up cards.
 - **Do not use** the retired glass objects (`brand/glass/`) anywhere. (The earlier ban on `brand/3d/` is lifted by the founder's ruling above: the new 3D identity icons are welcome, mainly in the social campaign.)
 
+## 3b. The pop-out container (16 October 2026, the pump.fun blueprint)
+
+The founder sent five pump.fun App Store images as "a perfect blueprint" and
+asked for them in both the store set and the films. What those images do, and
+what Vallo does in answer. The parts are in
+`scripts/marketing/store/callouts.mjs` (stills) and
+`scripts/marketing/video/films/popout.js` (film), drawn from one description.
+
+- **The container is the product, not a card we drew.** pump.fun's floating
+  card is one row of their own app, lifted off the glass, blown up about 15
+  per cent, given a thick bright edge and dropped back over the place it came
+  from. So the first container in every image is `mags` (stills) or `lift` /
+  `windowLift` (films): a real component, at size, inside one heavy rule.
+  **Its box must sit on the component's own edges** — `films/blocks.py` reads
+  them off a capture — so nothing can ever be cut.
+- **A drawn container is the second one at most**, for what no screen shows in
+  one place: a total, a breakdown, a rule, a promise. Four contents: a line, a
+  stat, label/value cells on their own plate, a row of counters.
+- **Solid, and thick edged.** Solid ink, one heavy rule in the sky blue
+  (#8FD3FF), no hairline, no corner marks, nothing translucent, no fuzzy
+  glows. The founder's correction, the same day: "ours need to be black, thick
+  edges... make the things clean clear!!! Redo them all."
+- **The stage panel.** A solid black rounded field inset from the image's
+  edge, as the blueprint's is solid green, that the props and badges overhang.
+- **The round badges.** The blueprint's scattered coins: solid discs with the
+  same rule, carrying one of the brand's 3D objects, a line glyph or the Vallo
+  mark. Two to four per image, one white among them at most.
+- **The key word in a box.** One word of a headline may sit in a rounded box
+  instead of taking the sky colour (`keyStyle: "chip"`). It works on the first
+  line only: under a line with descenders it eats the line gap.
+- **The oversized outlined figure**, stroked not filled, beside a container,
+  for the one loud number.
+- **The 3D objects are welcome in the store images now.** The 30 September
+  ruling ("store images: none, except the two 'You got paid' images") is
+  superseded by this brief, which asks for them by name. The size rule holds:
+  never over about 260 px on a 1080-wide canvas.
+- **Copy rules are unchanged.** Section 2 governs every word in every
+  container: no invented numbers (a figure must be printed on the screen under
+  it), no testimonials, no promise words, "verified" only about people.
+
 ## 4. Pop-up cards (the "You got paid!" moments)
 
 Floating cards that overlap a phone's edge, like a notification that just arrived. Glass: white at 92% (on light) or navy `rgb(10 16 60 / .82)` with a 1.5 px `rgb(120 170 255 / .35)` edge (on dark), backdrop blur, radius 28–36 px, soft long shadow. An icon chip (Fluent sticker or lucide icon on a tinted circle), a bold title, one line under it, optional amount, optional "now". Only phrasing that describes what the product really does:

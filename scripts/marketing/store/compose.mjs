@@ -497,7 +497,7 @@ for (const store of STORE_LIST) {
          uncovered (a layout's `cardCheck.clearOf`, the x its left edge keeps to). */
       const pops = await tab.evaluate(() => [...document.querySelectorAll(".half")].map((h) => {
         const hr = h.getBoundingClientRect();
-        return [...h.querySelectorAll(".pop")].map((el) => { const r = el.getBoundingClientRect(); return { l: r.left - hr.left, r: r.right - hr.left, t: r.top, b: r.bottom }; });
+        return [...h.querySelectorAll(".pop, .co[data-card]")].map((el) => { const r = el.getBoundingClientRect(); return { l: r.left - hr.left, r: r.right - hr.left, t: r.top, b: r.bottom }; });
       }));
       ctxs.forEach((c, k) => {
         if (!c.cardCheck) return;

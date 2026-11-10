@@ -12,27 +12,32 @@ const q = new URLSearchParams(location.search);
 const film = q.get("film") === "desktop" ? "desktop" : "mobile";
 /* A reel: its own scene list and clock under /video/reels/<name>/ (no voice plan, captions or chapter pill). */
 const reel = q.get("reel");
+/* An October film: its scenes, clock and chapters under /video/films/<name>/ (with captions and the pill). */
+const proj = q.get("proj");
 
 try {
-  const list = q.get("scenes") ? q.get("scenes").split(",") : reel ? (await import(`/video/reels/${reel}/index.js`)).SCENES : (await import("/video/scenes/index.js")).SCENES;
+  const list = q.get("scenes") ? q.get("scenes").split(",") : proj ? (await import(`/video/films/${proj}/index.js`)).SCENES : reel ? (await import(`/video/reels/${reel}/index.js`)).SCENES : (await import("/video/scenes/index.js")).SCENES;
   const stage = document.getElementById("stage");
-  const ctx = await createContext({ film, stage, ...(reel ? { timeline: `/video/reels/${reel}/timeline.json` } : {}) });
+  const ctx = await createContext({ film, stage, ...(proj ? { timeline: `/video/films/${proj}/timeline.json` } : reel ? { timeline: `/video/reels/${reel}/timeline.json` } : {}) });
+  ctx.proj = proj;
   ctx.reel = reel;
   /* The ending: "soon" (Coming soon on iPhone and Android, no badges) or
      "live" (the official store badges; only once Vallo is in both stores). */
   ctx.ending = q.get("ending") === "live" ? "live" : "soon";
   window.__ctx = ctx;
   for (const id of list) {
-    const mod = await import(reel ? `/video/reels/${reel}/${id}.js` : `/video/scenes/${id}.js`);
+    const mod = await import(proj ? `/video/films/${proj}/${id}.js` : reel ? `/video/reels/${reel}/${id}.js` : `/video/scenes/${id}.js`);
     await mod.build(ctx);
   }
   if (!reel && q.get("captions") !== "0") installCaptions(ctx);
   if (!reel) {
-    const { CHAPTERS, groundAt } = await import("/video/scenes/chapters.js");
+    const { CHAPTERS, groundAt } = await import(proj ? `/video/films/${proj}/chapters.js` : "/video/scenes/chapters.js");
     ctx.groundAt = groundAt;
     if (q.get("pill") !== "0") installChapterPill(ctx, CHAPTERS, { theme: groundAt });
   }
-  if (q.get("grain") === "1") installGrain(ctx);
+  if (q.get("grain") === "1" || (proj && q.get("grain") !== "0")) installGrain(ctx, { opacity: proj ? 0.028 : 0.045 });
+  /* the October films' lens: a soft vignette over everything but the captions */
+  if (proj) ctx.el("div", { class: "fill", style: { zIndex: 875, pointerEvents: "none", background: "radial-gradient(120% 90% at 50% 45%, transparent 62%, rgb(0 0 12 / 0.38) 100%)" } }, stage);
   await Promise.all(ctx.pending ?? []);
   await ctx.finish();
   ctx.seek(Number(q.get("t") ?? 0));

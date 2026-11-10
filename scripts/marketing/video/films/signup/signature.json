@@ -1,0 +1,30 @@
+{
+ "about": "The sign-up film's payoffs lifted over the bed: the last thing struck off the list, and the chime when the account is made. The end card rides the music back up from the logo hit.",
+ "dip_db": -3,
+ "dip_s": 0.25,
+ "end_ride": {
+  "from": 36.923,
+  "ramp": 0.6,
+  "db": 6.5
+ },
+ "cues": [
+  {
+   "name": "chime_notify",
+   "from": 13.971,
+   "to": 14.371,
+   "lift_db": 8
+  },
+  {
+   "name": "stamp",
+   "from": 12.754,
+   "to": 13.054,
+   "lift_db": 6
+  },
+  {
+   "name": "stamp",
+   "from": 9.341,
+   "to": 9.641,
+   "lift_db": 5
+  }
+ ]
+}

@@ -84,8 +84,8 @@ export function words(ctx, text, { cls = "display", style = {}, parent = null, t
  * allowed phrasings, and `example: true` whenever it is illustrative.
  * { theme: "dark"|"light", sticker: codepoint | icon: lucide name, title, line, now, example, fontSize }
  */
-export function popup(ctx, { theme = "dark", sticker, icon, title, line, now = "now", example = true, fontSize = 40, parent = null, style = {} }) {
-  const card = ctx.el("div", { class: `popup glass-${theme}`, style: { fontSize: `${fontSize}px`, ...style } }, parent);
+export function popup(ctx, { theme = "dark", sticker, icon, title, line, now = "now", example = true, fontSize = 40, wrap = false, parent = null, style = {} }) {
+  const card = ctx.el("div", { class: `popup glass-${theme}${wrap ? " wrap" : ""}`, style: { fontSize: `${fontSize}px`, ...style } }, parent);
   const chip = ctx.el("div", { class: "chip" }, card);
   if (sticker) ctx.sticker(sticker, Math.round(fontSize * 1.5), chip);
   else if (icon) {
@@ -242,12 +242,25 @@ export function installCaptions(ctx) {
     return { line, from, to };
   });
 
-  /* Centred on y 1290 (mobile: above the TikTok and Reels overlays) or y 960 (desktop). */
   /* Mobile: centred on y 1580, below the phone's readable content and above
-     the Reels and TikTok bottom overlays. Desktop: y 960. */
-  const box = ctx.el("div", { class: "captions", style: { top: mobile ? "1580px" : "960px", transform: "translateY(-50%)" } }, ctx.stage);
-  /* Mobile captions stay inside x 140–940: clear of the right-hand buttons of TikTok and Reels. */
-  const pill = ctx.el("div", { class: "pill", style: { fontSize: mobile ? "44px" : "34px", ...(mobile ? { maxWidth: "800px" } : {}) } }, box);
+     the Reels and TikTok bottom overlays.
+     Desktop: low (y 985) and in the right-hand column, x 920–1860, centred
+     it sits in the band BELOW the browser window rather than on it. Centred
+     at y 1012 it clears the window in its side pose (which ends at 953) and
+     the right-hand column's lowest row (which ends at 912), and it keeps
+     well over 40px to every edge. Centred on the frame it used to sit on the
+     subject itself: on the phone's own bottom bar and floating button in
+     most shots, and now on the page the window is showing. */
+  const box = ctx.el("div", {
+    class: "captions",
+    style: mobile
+      ? { top: "1580px", transform: "translateY(-50%)" }
+      : { left: "240px", right: "240px", top: "1012px", transform: "translateY(-50%)" },
+  }, ctx.stage);
+  /* Mobile captions stay inside x 140–940: clear of the right-hand buttons of
+     TikTok and Reels. Desktop is a little smaller, so a line usually still
+     fits on one row in the narrower column. */
+  const pill = ctx.el("div", { class: "pill", style: { fontSize: mobile ? "44px" : "30px", ...(mobile ? { maxWidth: "800px" } : {}) } }, box);
   let shown = -1;
   let nodes = [];
   ctx.onFrame((t) => {
@@ -579,11 +592,17 @@ export function odometer(ctx, parent, { value, t0, t1, prefix = "₦", fontSize 
     k += 1;
     const col = ctx.el("span", { style: { display: "inline-block", height: "1em", overflow: "hidden", position: "relative" } }, box);
     const strip = ctx.el("span", { style: { display: "flex", flexDirection: "column" } }, col);
-    const spins = 2 + (digits - idx);
+    /* enough turn to read as a roll, few enough that a frame caught mid-roll
+       still looks like a number */
+    const spins = 1 + Math.min(3, digits - idx);
     const final = Number(ch);
     const seq = [];
     for (let s = 0; s < spins * 10 + final + 1; s += 1) seq.push(s % 10);
-    seq.forEach((d) => ctx.el("span", { text: String(d), style: { height: "1em", display: "block" } }, strip));
+    /* A column is as wide as the widest digit, so a narrow digit has to be
+       centred in it. Left-aligned, a "1" left a hole beside it and
+       ₦26,100,000 read as "₦26,1 00,000". The display font has no tabular
+       figures to do this for us. */
+    seq.forEach((d) => ctx.el("span", { text: String(d), style: { height: "1em", display: "block", textAlign: "center" } }, strip));
     const land = t0 + ((t1 - t0) * (idx + 1)) / digits;
     const e = ctx.ease("power3.out");
     ctx.onFrame((t) => {
@@ -591,7 +610,7 @@ export function odometer(ctx, parent, { value, t0, t1, prefix = "₦", fontSize 
       const pos = p * (seq.length - 1);
       strip.style.transform = `translateY(${-pos}em)`;
       const speed = p < 1 ? (1 - p) * 6 : 0;
-      col.style.filter = speed > 0.3 ? `blur(${Math.min(3, speed * 0.6).toFixed(2)}px)` : "none";
+      col.style.filter = speed > 0.5 ? `blur(${Math.min(1.5, speed * 0.3).toFixed(2)}px)` : "none";
     });
   });
   return box;

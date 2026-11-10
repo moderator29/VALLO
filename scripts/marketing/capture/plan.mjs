@@ -364,9 +364,66 @@ const GUIDES = [
 /** Every guide shot id, for the reference check. */
 export const GUIDE_SHOT_IDS = GUIDES.map((c) => c.id);
 
+
+/* The film set (October 2026): the host, agent and member screens for the two
+   promo films, on the QA account's example hotel, apartments, restaurant and
+   agent profile. Dark as f-<name>, desktop as d-f-<name>, light as f-<name>-lt.
+   `seen` marks the feature first runs as already shown on this device (the
+   cookie the app itself writes), so a workspace opens on its desk and not on
+   its intro. `fullMax` caps a whole-page capture's height in pixels. Every
+   one of these only navigates: nothing is paid, sent or saved. */
+const HOTEL = "/stay/ea000000-0000-4000-8000-000000000001"; // Grand Vista Hotel
+const HOTEL_BIZ = "eb000000-0000-4000-8000-000000000001";
+const HARBOUR = "eb000000-0000-4000-8000-000000000006"; // Harbour Lights Kitchen
+const FILM_BASE = [
+  { id: "f-host-home", full: true, fullMax: 8000, steps: go("/host") },
+  { id: "f-host-rooms", steps: go(`/host/rooms?business=${HOTEL_BIZ}`) },
+  { id: "f-host-calendar", full: true, fullMax: 8000, steps: go(`/host/calendar?business=${HOTEL_BIZ}&month=2026-10`) },
+  { id: "f-host-bookings", steps: go("/host/bookings") },
+  { id: "f-host-reservations", steps: go("/host/reservations") },
+  { id: "f-host-settings", steps: go("/host/settings") },
+  { id: "f-host-start", steps: go("/host/start") },
+  { id: "f-agent-dashboard", full: true, fullMax: 8000, steps: go("/agent/dashboard") },
+  { id: "f-agent-listings", steps: go("/agent/listings") },
+  { id: "f-agent-listing-edit", steps: go("/agent/list") },
+  { id: "f-agent-portfolio", steps: go("/agent/portfolio") },
+  { id: "f-agent-analytics", full: true, fullMax: 8000, steps: go("/agent/analytics") },
+  { id: "f-agent-inspections", steps: go("/agent/inspections") },
+  { id: "f-agent-earnings", steps: go("/agent/earnings") },
+  { id: "f-agent-promotion", steps: go("/agent/promotion") },
+  { id: "f-rewards", full: true, fullMax: 8000, steps: [{ goto: "/rewards" }, { clickIf: "[data-testid=rewards-explainer] button[aria-label=Skip]" }, { wait: 800 }] },
+  /* The invite's first run, opened as "how it works" (a sheet; nothing is saved). */
+  { id: "f-rewards-how", steps: [{ goto: "/rewards" }, { clear: ["nf-explainer-rewards-v1"] }, { goto: "/rewards" }] },
+  { id: "f-host-deposits", steps: [{ goto: "/host/reservations" }, { reveal: "text=Table deposits", offset: 90 }] },
+  { id: "f-rent-movein", steps: go(`/rent/move-in/${LISTING_RENT.split("/").pop()}`) },
+  { id: "f-rewards-withdraw", steps: go("/rewards/withdraw") },
+  { id: "f-rewards-history", steps: go("/rewards/history") },
+  { id: "f-passport", steps: go("/settings/passport") },
+  { id: "f-pro", steps: go("/pro") },
+  { id: "f-agreements", steps: go("/agreements") },
+  { id: "f-bookings", steps: go("/bookings") },
+  { id: "f-receipts", steps: go("/receipts") },
+  { id: "f-around", steps: go("/around") },
+  { id: "f-verification", steps: go("/verification") },
+  { id: "d-f-host-home", kind: "desktop", steps: go("/host") },
+  { id: "d-f-host-calendar", kind: "desktop", steps: go(`/host/calendar?business=${HOTEL_BIZ}&month=2026-10`) },
+  { id: "d-f-host-reservations", kind: "desktop", steps: go("/host/reservations") },
+  { id: "d-f-agent-dashboard", kind: "desktop", steps: go("/agent/dashboard") },
+  { id: "d-f-agent-analytics", kind: "desktop", steps: go("/agent/analytics") },
+  { id: "d-f-agent-portfolio", kind: "desktop", steps: go("/agent/portfolio") },
+  { id: "d-f-rewards", kind: "desktop", steps: [{ goto: "/rewards" }, { clickIf: "[data-testid=rewards-explainer] button[aria-label=Skip]" }, { wait: 800 }] },
+  { id: "d-f-pro", kind: "desktop", steps: go("/pro") },
+  { id: "d-f-around", kind: "desktop", steps: go("/around") },
+].map((c) => ({ seen: true, ...c }));
+const FILM_LIGHT = ["f-host-home", "f-agent-dashboard", "f-rewards", "f-passport"];
+const FILM = [
+  ...FILM_BASE,
+  ...FILM_LIGHT.map((id) => ({ ...FILM_BASE.find((c) => c.id === id), id: `${id}-lt`, theme: "light", full: false })),
+];
 export const CAPTURES = [
   ...BASE_CAPTURES,
   ...GUIDES,
+  ...FILM,
   ...SHOWCASE,
   ...LIGHT_TWINS.map((id) => {
     const cap = BASE_CAPTURES.find((c) => c.id === id);
@@ -374,3 +431,37 @@ export const CAPTURES = [
     return { ...cap, id: `${id}-lt`, theme: "light", full: FULL_TWINS.includes(id) ? cap.full : false };
   }),
 ];
+
+/* The films' second pass (14 October, afternoon): every screen the films had
+   from before main's 13 October home, icons and dock, captured again from the
+   live app. */
+export const NOW = [
+  { id: "n-home", full: true, fullMax: 9000, steps: HOME },
+  { id: "d-n-home", kind: "desktop", full: true, fullMax: 6000, steps: HOME },
+  { id: "n-welcome-en", auth: false, steps: [{ goto: "/welcome" }, { wait: 2600 }] },
+  ...["yo", "ha", "ig"].map((loc) => ({ id: `n-welcome-${loc}`, auth: false, locale: loc, steps: [{ goto: "/welcome" }, { wait: 2600 }] })),
+  { id: "n-stays-dates", steps: go(STAYS_DATES) },
+  { id: "n-stays", steps: go("/stays") },
+  { id: "d-n-stays-dates", kind: "desktop", steps: go(STAYS_DATES) },
+  { id: "d-n-search", kind: "desktop", steps: go("/search?market=rent") },
+  { id: "n-search", full: true, fullMax: 7000, steps: go("/search?market=rent") },
+  { id: "n-wallet", steps: go("/wallet") },
+  { id: "f-stay-checkout", steps: go(HOTEL) },
+  /* tall captures the films scroll through (14 October, afternoon) */
+  { id: "n-home2", stitch: 9, full: true, fullMax: 9000, steps: HOME },
+  { id: "n-search2", stitch: 9, full: true, fullMax: 8000, steps: go("/search") },
+  { id: "n-listing", full: true, fullMax: 8000, steps: go(LISTING_RENT) },
+  { id: "n-stay", full: true, fullMax: 8000, steps: go(HOTEL) },
+  { id: "n-resort", full: true, fullMax: 8000, steps: go(STAY) },
+  { id: "n-staysd", stitch: 8, full: true, fullMax: 8000, steps: go(STAYS_DATES) },
+  { id: "n-restaurant", full: true, fullMax: 8000, steps: go(RESTAURANT) },
+  { id: "d-n-listing", kind: "desktop", steps: go(LISTING_RENT) },
+  { id: "d-n-stay", kind: "desktop", steps: go(STAY) },
+  { id: "n-search-all", steps: go("/search") },
+  { id: "d-n-search-all", kind: "desktop", steps: go("/search") },
+  { id: "f-restaurant-reserve", steps: go(RESTAURANT) },
+  /* the home's sections, each scrolled into view (they load as they come on screen) */
+  ...[["premium", "Premium listings"], ["featured", "Featured listings"], ["best", "Best matches"], ["new", "New listings"], ["space", "Browse by space"]].map(([k, title]) => ({ id: `n-home-${k}`, steps: [...HOME, { reveal: `text="${title}"`, offset: 300 }, { wait: 2200 }] })),
+  ...[["premium", "Premium listings"], ["featured", "Featured listings"]].map(([k, title]) => ({ id: `d-n-home-${k}`, kind: "desktop", steps: [...HOME, { reveal: `text="${title}"`, offset: 140 }, { wait: 2200 }] })),
+];
+CAPTURES.push(...NOW);

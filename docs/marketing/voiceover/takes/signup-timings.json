@@ -1,0 +1,1264 @@
+{
+  "duration": 36.72,
+  "sentences": [
+    {
+      "i": 1,
+      "start": 0.12,
+      "end": 2.21,
+      "text": "Getting on Vallo takes about a minute."
+    },
+    {
+      "i": 2,
+      "start": 2.454,
+      "end": 5.722,
+      "text": "Your name, your email, a password you choose."
+    },
+    {
+      "i": 3,
+      "start": 6.156,
+      "end": 7.293,
+      "text": "No long form."
+    },
+    {
+      "i": 4,
+      "start": 7.543,
+      "end": 9.129,
+      "text": "No agent to call first."
+    },
+    {
+      "i": 5,
+      "start": 9.364,
+      "end": 10.322,
+      "text": "Nothing to pay."
+    },
+    {
+      "i": 6,
+      "start": 10.776,
+      "end": 20.264,
+      "text": "Confirm your email, and the whole platform is open: homes to rent, homes to buy, hotels, shortlets and restaurants, all under the one account."
+    },
+    {
+      "i": 7,
+      "start": 20.693,
+      "end": 27.103,
+      "text": "Your shortlist, your conversations and your agreements stay with that account, on every device you open it on."
+    },
+    {
+      "i": 8,
+      "start": 27.537,
+      "end": 31.863,
+      "text": "And if you ever want to list a place of your own, the same account becomes your workspace."
+    },
+    {
+      "i": 9,
+      "start": 32.297,
+      "end": 33.549,
+      "text": "One minute to start."
+    },
+    {
+      "i": 10,
+      "start": 33.974,
+      "end": 34.487,
+      "text": "Vallo."
+    },
+    {
+      "i": 11,
+      "start": 34.856,
+      "end": 36.572,
+      "text": "Real estate, done right."
+    }
+  ],
+  "words": [
+    {
+      "start": 0.12,
+      "end": 0.42,
+      "word": "Getting",
+      "sentence": 1
+    },
+    {
+      "start": 0.42,
+      "end": 0.57,
+      "word": "on",
+      "sentence": 1
+    },
+    {
+      "start": 0.57,
+      "end": 1.01,
+      "word": "Vallo",
+      "sentence": 1
+    },
+    {
+      "start": 1.01,
+      "end": 1.34,
+      "word": "takes",
+      "sentence": 1
+    },
+    {
+      "start": 1.34,
+      "end": 1.57,
+      "word": "about",
+      "sentence": 1
+    },
+    {
+      "start": 1.57,
+      "end": 1.61,
+      "word": "a",
+      "sentence": 1
+    },
+    {
+      "start": 1.61,
+      "end": 2.21,
+      "word": "minute.",
+      "sentence": 1
+    },
+    {
+      "start": 2.454,
+      "end": 2.61,
+      "word": "Your",
+      "sentence": 2
+    },
+    {
+      "start": 2.61,
+      "end": 3.26,
+      "word": "name,",
+      "sentence": 2
+    },
+    {
+      "start": 3.45,
+      "end": 3.57,
+      "word": "your",
+      "sentence": 2
+    },
+    {
+      "start": 3.57,
+      "end": 4.315,
+      "word": "email,",
+      "sentence": 2
+    },
+    {
+      "start": 4.52,
+      "end": 4.57,
+      "word": "a",
+      "sentence": 2
+    },
+    {
+      "start": 4.57,
+      "end": 5.09,
+      "word": "password",
+      "sentence": 2
+    },
+    {
+      "start": 5.09,
+      "end": 5.22,
+      "word": "you",
+      "sentence": 2
+    },
+    {
+      "start": 5.22,
+      "end": 5.722,
+      "word": "choose.",
+      "sentence": 2
+    },
+    {
+      "start": 6.156,
+      "end": 6.393,
+      "word": "No",
+      "sentence": 3
+    },
+    {
+      "start": 6.393,
+      "end": 6.743,
+      "word": "long",
+      "sentence": 3
+    },
+    {
+      "start": 6.743,
+      "end": 7.293,
+      "word": "form.",
+      "sentence": 3
+    },
+    {
+      "start": 7.543,
+      "end": 7.813,
+      "word": "No",
+      "sentence": 4
+    },
+    {
+      "start": 7.813,
+      "end": 8.203,
+      "word": "agent",
+      "sentence": 4
+    },
+    {
+      "start": 8.203,
+      "end": 8.273,
+      "word": "to",
+      "sentence": 4
+    },
+    {
+      "start": 8.273,
+      "end": 8.513,
+      "word": "call",
+      "sentence": 4
+    },
+    {
+      "start": 8.513,
+      "end": 9.129,
+      "word": "first.",
+      "sentence": 4
+    },
+    {
+      "start": 9.364,
+      "end": 9.803,
+      "word": "Nothing",
+      "sentence": 5
+    },
+    {
+      "start": 9.803,
+      "end": 9.903,
+      "word": "to",
+      "sentence": 5
+    },
+    {
+      "start": 9.903,
+      "end": 10.322,
+      "word": "pay.",
+      "sentence": 5
+    },
+    {
+      "start": 10.776,
+      "end": 11.165,
+      "word": "Confirm",
+      "sentence": 6
+    },
+    {
+      "start": 11.165,
+      "end": 11.305,
+      "word": "your",
+      "sentence": 6
+    },
+    {
+      "start": 11.305,
+      "end": 11.855,
+      "word": "email,",
+      "sentence": 6
+    },
+    {
+      "start": 11.855,
+      "end": 12.065,
+      "word": "and",
+      "sentence": 6
+    },
+    {
+      "start": 12.065,
+      "end": 12.125,
+      "word": "the",
+      "sentence": 6
+    },
+    {
+      "start": 12.125,
+      "end": 12.605,
+      "word": "whole",
+      "sentence": 6
+    },
+    {
+      "start": 12.605,
+      "end": 13.185,
+      "word": "platform",
+      "sentence": 6
+    },
+    {
+      "start": 13.185,
+      "end": 13.325,
+      "word": "is",
+      "sentence": 6
+    },
+    {
+      "start": 13.325,
+      "end": 13.804,
+      "word": "open:",
+      "sentence": 6
+    },
+    {
+      "start": 14.088,
+      "end": 14.415,
+      "word": "homes",
+      "sentence": 6
+    },
+    {
+      "start": 14.415,
+      "end": 14.515,
+      "word": "to",
+      "sentence": 6
+    },
+    {
+      "start": 14.515,
+      "end": 15.135,
+      "word": "rent,",
+      "sentence": 6
+    },
+    {
+      "start": 15.135,
+      "end": 15.445,
+      "word": "homes",
+      "sentence": 6
+    },
+    {
+      "start": 15.445,
+      "end": 15.525,
+      "word": "to",
+      "sentence": 6
+    },
+    {
+      "start": 15.525,
+      "end": 16.095,
+      "word": "buy,",
+      "sentence": 6
+    },
+    {
+      "start": 16.095,
+      "end": 16.945,
+      "word": "hotels,",
+      "sentence": 6
+    },
+    {
+      "start": 16.945,
+      "end": 17.595,
+      "word": "shortlets",
+      "sentence": 6
+    },
+    {
+      "start": 17.595,
+      "end": 17.715,
+      "word": "and",
+      "sentence": 6
+    },
+    {
+      "start": 17.715,
+      "end": 18.355,
+      "word": "restaurants,",
+      "sentence": 6
+    },
+    {
+      "start": 18.777,
+      "end": 19.155,
+      "word": "all",
+      "sentence": 6
+    },
+    {
+      "start": 19.155,
+      "end": 19.345,
+      "word": "under",
+      "sentence": 6
+    },
+    {
+      "start": 19.345,
+      "end": 19.455,
+      "word": "the",
+      "sentence": 6
+    },
+    {
+      "start": 19.455,
+      "end": 19.735,
+      "word": "one",
+      "sentence": 6
+    },
+    {
+      "start": 19.735,
+      "end": 20.264,
+      "word": "account.",
+      "sentence": 6
+    },
+    {
+      "start": 20.693,
+      "end": 20.912,
+      "word": "Your",
+      "sentence": 7
+    },
+    {
+      "start": 20.912,
+      "end": 21.691,
+      "word": "shortlist,",
+      "sentence": 7
+    },
+    {
+      "start": 21.696,
+      "end": 21.951,
+      "word": "your",
+      "sentence": 7
+    },
+    {
+      "start": 21.951,
+      "end": 22.881,
+      "word": "conversations",
+      "sentence": 7
+    },
+    {
+      "start": 22.881,
+      "end": 23.171,
+      "word": "and",
+      "sentence": 7
+    },
+    {
+      "start": 23.171,
+      "end": 23.341,
+      "word": "your",
+      "sentence": 7
+    },
+    {
+      "start": 23.341,
+      "end": 24.002,
+      "word": "agreements",
+      "sentence": 7
+    },
+    {
+      "start": 24.002,
+      "end": 24.351,
+      "word": "stay",
+      "sentence": 7
+    },
+    {
+      "start": 24.351,
+      "end": 24.521,
+      "word": "with",
+      "sentence": 7
+    },
+    {
+      "start": 24.524,
+      "end": 24.691,
+      "word": "that",
+      "sentence": 7
+    },
+    {
+      "start": 24.691,
+      "end": 25.183,
+      "word": "account,",
+      "sentence": 7
+    },
+    {
+      "start": 25.298,
+      "end": 25.441,
+      "word": "on",
+      "sentence": 7
+    },
+    {
+      "start": 25.582,
+      "end": 25.882,
+      "word": "every",
+      "sentence": 7
+    },
+    {
+      "start": 25.882,
+      "end": 26.292,
+      "word": "device",
+      "sentence": 7
+    },
+    {
+      "start": 26.292,
+      "end": 26.422,
+      "word": "you",
+      "sentence": 7
+    },
+    {
+      "start": 26.422,
+      "end": 26.681,
+      "word": "open",
+      "sentence": 7
+    },
+    {
+      "start": 26.681,
+      "end": 26.802,
+      "word": "it",
+      "sentence": 7
+    },
+    {
+      "start": 26.802,
+      "end": 27.103,
+      "word": "on.",
+      "sentence": 7
+    },
+    {
+      "start": 27.537,
+      "end": 27.669,
+      "word": "And",
+      "sentence": 8
+    },
+    {
+      "start": 27.669,
+      "end": 27.749,
+      "word": "if",
+      "sentence": 8
+    },
+    {
+      "start": 27.749,
+      "end": 27.899,
+      "word": "you",
+      "sentence": 8
+    },
+    {
+      "start": 27.899,
+      "end": 28.189,
+      "word": "ever",
+      "sentence": 8
+    },
+    {
+      "start": 28.189,
+      "end": 28.369,
+      "word": "want",
+      "sentence": 8
+    },
+    {
+      "start": 28.369,
+      "end": 28.429,
+      "word": "to",
+      "sentence": 8
+    },
+    {
+      "start": 28.429,
+      "end": 28.689,
+      "word": "list",
+      "sentence": 8
+    },
+    {
+      "start": 28.689,
+      "end": 28.739,
+      "word": "a",
+      "sentence": 8
+    },
+    {
+      "start": 28.739,
+      "end": 29.019,
+      "word": "place",
+      "sentence": 8
+    },
+    {
+      "start": 29.019,
+      "end": 29.109,
+      "word": "of",
+      "sentence": 8
+    },
+    {
+      "start": 29.109,
+      "end": 29.309,
+      "word": "your",
+      "sentence": 8
+    },
+    {
+      "start": 29.309,
+      "end": 29.618,
+      "word": "own,",
+      "sentence": 8
+    },
+    {
+      "start": 29.857,
+      "end": 29.929,
+      "word": "the",
+      "sentence": 8
+    },
+    {
+      "start": 29.929,
+      "end": 30.259,
+      "word": "same",
+      "sentence": 8
+    },
+    {
+      "start": 30.259,
+      "end": 30.679,
+      "word": "account",
+      "sentence": 8
+    },
+    {
+      "start": 30.72,
+      "end": 31.049,
+      "word": "becomes",
+      "sentence": 8
+    },
+    {
+      "start": 31.049,
+      "end": 31.139,
+      "word": "your",
+      "sentence": 8
+    },
+    {
+      "start": 31.139,
+      "end": 31.863,
+      "word": "workspace.",
+      "sentence": 8
+    },
+    {
+      "start": 32.297,
+      "end": 32.598,
+      "word": "One",
+      "sentence": 9
+    },
+    {
+      "start": 32.598,
+      "end": 32.895,
+      "word": "minute",
+      "sentence": 9
+    },
+    {
+      "start": 32.905,
+      "end": 33.008,
+      "word": "to",
+      "sentence": 9
+    },
+    {
+      "start": 33.008,
+      "end": 33.549,
+      "word": "start.",
+      "sentence": 9
+    },
+    {
+      "start": 33.974,
+      "end": 34.487,
+      "word": "Vallo.",
+      "sentence": 10
+    },
+    {
+      "start": 34.856,
+      "end": 35.092,
+      "word": "Real",
+      "sentence": 11
+    },
+    {
+      "start": 35.092,
+      "end": 35.594,
+      "word": "estate,",
+      "sentence": 11
+    },
+    {
+      "start": 35.834,
+      "end": 36.062,
+      "word": "done",
+      "sentence": 11
+    },
+    {
+      "start": 36.062,
+      "end": 36.572,
+      "word": "right.",
+      "sentence": 11
+    }
+  ],
+  "notes": "Times are seconds on the voice file's own timeline (t=0 = first decoded sample; the MP3 decodes to 36.720s - ffprobe's 87.64s container duration includes the 25 ms encoder delay). sentences[].i is 1-based; words[].sentence refers to sentences[].i; joining a sentence's words[].word with spaces reproduces its text exactly (punctuation stays on the words). Method: pocketsphinx 5.0.3 forced alignment sentence by sentence inside the ffmpeg-silencedetect speech islands (-35 dB, 0.35 s); word edges snapped to the RMS envelope (-55 dBFS). Median speech rate 3.90 syllables/s. FLAGS: S1: sentence start is +120 ms from the silence-map edge; loudest audio in between -27 dBFS (vowel-level energy: check) / S3: sentence end is -70 ms from the silence-map edge; loudest audio in between -31 dBFS (vowel-level energy: check) Info: S7: sentence end is +71 ms from the silence-map edge; loudest audio in between -49 dBFS (only a decaying tail / weak consonant release: consistent) / S9: sentence end is +62 ms from the silence-map edge; loudest audio in between -51 dBFS (only a decaying tail / weak consonant release: consistent)",
+  "unspoken": [],
+  "phrases": [
+    {
+      "start": 0.12,
+      "end": 2.21,
+      "sentence": 1,
+      "text": "Getting on Vallo takes about a minute."
+    },
+    {
+      "start": 2.454,
+      "end": 3.26,
+      "sentence": 2,
+      "text": "Your name,"
+    },
+    {
+      "start": 3.45,
+      "end": 4.315,
+      "sentence": 2,
+      "text": "your email,"
+    },
+    {
+      "start": 4.52,
+      "end": 5.722,
+      "sentence": 2,
+      "text": "a password you choose."
+    },
+    {
+      "start": 6.156,
+      "end": 7.293,
+      "sentence": 3,
+      "text": "No long form."
+    },
+    {
+      "start": 7.543,
+      "end": 9.129,
+      "sentence": 4,
+      "text": "No agent to call first."
+    },
+    {
+      "start": 9.364,
+      "end": 10.322,
+      "sentence": 5,
+      "text": "Nothing to pay."
+    },
+    {
+      "start": 10.776,
+      "end": 11.855,
+      "sentence": 6,
+      "text": "Confirm your email,"
+    },
+    {
+      "start": 11.855,
+      "end": 13.804,
+      "sentence": 6,
+      "text": "and the whole platform is open:"
+    },
+    {
+      "start": 14.088,
+      "end": 15.135,
+      "sentence": 6,
+      "text": "homes to rent,"
+    },
+    {
+      "start": 15.135,
+      "end": 16.095,
+      "sentence": 6,
+      "text": "homes to buy,"
+    },
+    {
+      "start": 16.095,
+      "end": 16.945,
+      "sentence": 6,
+      "text": "hotels,"
+    },
+    {
+      "start": 16.945,
+      "end": 18.355,
+      "sentence": 6,
+      "text": "shortlets and restaurants,"
+    },
+    {
+      "start": 18.777,
+      "end": 20.264,
+      "sentence": 6,
+      "text": "all under the one account."
+    },
+    {
+      "start": 20.693,
+      "end": 21.691,
+      "sentence": 7,
+      "text": "Your shortlist,"
+    },
+    {
+      "start": 21.696,
+      "end": 25.183,
+      "sentence": 7,
+      "text": "your conversations and your agreements stay with that account,"
+    },
+    {
+      "start": 25.298,
+      "end": 27.103,
+      "sentence": 7,
+      "text": "on every device you open it on."
+    },
+    {
+      "start": 27.537,
+      "end": 29.618,
+      "sentence": 8,
+      "text": "And if you ever want to list a place of your own,"
+    },
+    {
+      "start": 29.857,
+      "end": 31.863,
+      "sentence": 8,
+      "text": "the same account becomes your workspace."
+    },
+    {
+      "start": 32.297,
+      "end": 33.549,
+      "sentence": 9,
+      "text": "One minute to start."
+    },
+    {
+      "start": 33.974,
+      "end": 34.487,
+      "sentence": 10,
+      "text": "Vallo."
+    },
+    {
+      "start": 34.856,
+      "end": 35.594,
+      "sentence": 11,
+      "text": "Real estate,"
+    },
+    {
+      "start": 35.834,
+      "end": 36.572,
+      "sentence": 11,
+      "text": "done right."
+    }
+  ],
+  "silence_map": {
+    "noise_db": -35,
+    "min_silence_s": 0.35,
+    "silences": [
+      [
+        5.704,
+        6.181
+      ],
+      [
+        10.291,
+        10.795
+      ],
+      [
+        13.74,
+        14.115
+      ],
+      [
+        20.233,
+        20.71
+      ],
+      [
+        27.032,
+        27.559
+      ],
+      [
+        31.835,
+        32.321
+      ],
+      [
+        33.487,
+        33.961
+      ],
+      [
+        34.451,
+        34.874
+      ]
+    ],
+    "islands": [
+      [
+        0.0,
+        5.704
+      ],
+      [
+        6.181,
+        10.291
+      ],
+      [
+        10.795,
+        13.74
+      ],
+      [
+        14.115,
+        20.233
+      ],
+      [
+        20.71,
+        27.032
+      ],
+      [
+        27.559,
+        31.835
+      ],
+      [
+        32.321,
+        33.487
+      ],
+      [
+        33.961,
+        34.451
+      ],
+      [
+        34.874,
+        36.72
+      ]
+    ]
+  },
+  "qa": {
+    "decoder_resets": 17,
+    "sentence_edge_vs_silence_map_max_ms": 120.0,
+    "speech_rate_median_syl_per_s": 3.9,
+    "speech_rate_range_syl_per_s": [
+      2.64,
+      5.43
+    ],
+    "island_vs_sentence_alignment_ms": {
+      "median": 0.0,
+      "p95": 10.0,
+      "max": 250.0,
+      "raw_edges_over_100ms": [
+        "S3 'form.': sentence 6.74-7.29 vs island 6.74-7.54",
+        "S6 'homes': sentence 13.98-14.42 vs island 14.09-14.42"
+      ]
+    },
+    "word_starts_vs_free_recognizer_ms": {
+      "matched_words": 70,
+      "median": 1.4,
+      "p90": 23.2,
+      "max": 280.1
+    },
+    "whole_file_alignment_vs_final_ms": {
+      "word_starts_median": 2.0,
+      "word_starts_p95": 32.0,
+      "all_edges_max": 216.0,
+      "word_starts_off_by_more_than_100ms": 2,
+      "edges_over_100ms": [
+        "S5 'Nothing': final 9.36-9.80 vs whole-file 9.24-9.79",
+        "S6 'homes': final 14.09-14.41 vs whole-file 13.98-14.41",
+        "S11 'estate,': final 35.09-35.59 vs whole-file 35.09-35.81"
+      ],
+      "passes": 2
+    },
+    "silence_after_last_word_s": 0.148,
+    "islands": [
+      {
+        "island": 1,
+        "start": 0.0,
+        "end": 5.704,
+        "recognized": "getting on fellow takes about a minute your name your email password teachings",
+        "script": "Getting on Vallo takes about a minute. Your name, your email, a password you choose.",
+        "score_gap_vs_recognizer": 0.07,
+        "phone_similarity": 0.86,
+        "word_similarity": 0.786,
+        "syllables": 21,
+        "syl_per_s_island": 3.68
+      },
+      {
+        "island": 2,
+        "start": 6.181,
+        "end": 10.291,
+        "recognized": "no long form no wage and to call first nothing to pay",
+        "script": "No long form. No agent to call first. Nothing to pay.",
+        "score_gap_vs_recognizer": -0.65,
+        "phone_similarity": 0.943,
+        "word_similarity": 0.87,
+        "syllables": 13,
+        "syl_per_s_island": 3.16
+      },
+      {
+        "island": 3,
+        "start": 10.795,
+        "end": 13.74,
+        "recognized": "confirm your email and the whole platform is open",
+        "script": "Confirm your email, and the whole platform is open:",
+        "score_gap_vs_recognizer": 0.0,
+        "phone_similarity": 1.0,
+        "word_similarity": 1.0,
+        "syllables": 13,
+        "syl_per_s_island": 4.41
+      },
+      {
+        "island": 4,
+        "start": 14.115,
+        "end": 20.233,
+        "recognized": "hollister rents cons to buy a hotel's shortlets in restaurants all under the one account",
+        "script": "homes to rent, homes to buy, hotels, shortlets and restaurants, all under the one account.",
+        "score_gap_vs_recognizer": 0.46,
+        "phone_similarity": 0.806,
+        "word_similarity": 0.6,
+        "syllables": 21,
+        "syl_per_s_island": 3.43
+      },
+      {
+        "island": 5,
+        "start": 20.71,
+        "end": 27.032,
+        "recognized": "your shortlist your conversations and your agreements stay with that account on every device you open it on",
+        "script": "Your shortlist, your conversations and your agreements stay with that account, on every device you open it on.",
+        "phone_similarity": 1.0,
+        "word_similarity": 1.0,
+        "syllables": 29,
+        "syl_per_s_island": 4.59
+      },
+      {
+        "island": 6,
+        "start": 27.559,
+        "end": 31.835,
+        "recognized": "and if you ever wanna was to preserve your own the same account becomes your workspace",
+        "script": "And if you ever want to list a place of your own, the same account becomes your workspace.",
+        "score_gap_vs_recognizer": -1.93,
+        "phone_similarity": 0.81,
+        "word_similarity": 0.765,
+        "syllables": 22,
+        "syl_per_s_island": 5.15
+      },
+      {
+        "island": 7,
+        "start": 32.321,
+        "end": 33.487,
+        "recognized": "one minute to start",
+        "script": "One minute to start.",
+        "score_gap_vs_recognizer": -0.16,
+        "phone_similarity": 1.0,
+        "word_similarity": 1.0,
+        "syllables": 5,
+        "syl_per_s_island": 4.29
+      },
+      {
+        "island": 8,
+        "start": 33.961,
+        "end": 34.451,
+        "recognized": "value",
+        "script": "Vallo.",
+        "score_gap_vs_recognizer": 3.43,
+        "phone_similarity": 0.6,
+        "word_similarity": 0.0,
+        "syllables": 2,
+        "syl_per_s_island": 4.09
+      },
+      {
+        "island": 9,
+        "start": 34.874,
+        "end": 36.72,
+        "recognized": "real estate down right",
+        "script": "Real estate, done right.",
+        "score_gap_vs_recognizer": -0.69,
+        "phone_similarity": 0.929,
+        "word_similarity": 0.75,
+        "syllables": 5,
+        "syl_per_s_island": 2.71
+      }
+    ],
+    "flags": [
+      "S1: sentence start is +120 ms from the silence-map edge; loudest audio in between -27 dBFS (vowel-level energy: check)",
+      "S3: sentence end is -70 ms from the silence-map edge; loudest audio in between -31 dBFS (vowel-level energy: check)"
+    ],
+    "info": [
+      "S7: sentence end is +71 ms from the silence-map edge; loudest audio in between -49 dBFS (only a decaying tail / weak consonant release: consistent)",
+      "S9: sentence end is +62 ms from the silence-map edge; loudest audio in between -51 dBFS (only a decaying tail / weak consonant release: consistent)"
+    ],
+    "sentences": [
+      {
+        "i": 1,
+        "start": 0.12,
+        "end": 2.21,
+        "syl_per_s": 5.26,
+        "edge_offsets_ms": [
+          120,
+          60
+        ],
+        "islands": [
+          1
+        ],
+        "window": [
+          0.0,
+          2.35
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 2,
+        "start": 2.454,
+        "end": 5.722,
+        "syl_per_s": 3.47,
+        "edge_offsets_ms": [
+          -10,
+          18
+        ],
+        "islands": [
+          1
+        ],
+        "window": [
+          2.35,
+          5.943
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 3,
+        "start": 6.156,
+        "end": 7.293,
+        "syl_per_s": 2.64,
+        "edge_offsets_ms": [
+          -25,
+          -70
+        ],
+        "islands": [
+          2
+        ],
+        "window": [
+          5.943,
+          7.543
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 4,
+        "start": 7.543,
+        "end": 9.129,
+        "syl_per_s": 3.78,
+        "edge_offsets_ms": [
+          -5,
+          20
+        ],
+        "islands": [
+          2
+        ],
+        "window": [
+          7.543,
+          9.193
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 5,
+        "start": 9.364,
+        "end": 10.322,
+        "syl_per_s": 4.18,
+        "edge_offsets_ms": [
+          -10,
+          31
+        ],
+        "islands": [
+          2
+        ],
+        "window": [
+          9.193,
+          10.541
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 6,
+        "start": 10.776,
+        "end": 20.264,
+        "syl_per_s": 3.72,
+        "edge_offsets_ms": [
+          -19,
+          31
+        ],
+        "islands": [
+          3,
+          4
+        ],
+        "window": [
+          10.545,
+          20.472
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 7,
+        "start": 20.693,
+        "end": 27.103,
+        "syl_per_s": 4.64,
+        "edge_offsets_ms": [
+          -17,
+          71
+        ],
+        "islands": [
+          5
+        ],
+        "window": [
+          20.472,
+          27.282
+        ],
+        "method": "sentence (1-pass)"
+      },
+      {
+        "i": 8,
+        "start": 27.537,
+        "end": 31.863,
+        "syl_per_s": 5.43,
+        "edge_offsets_ms": [
+          -22,
+          28
+        ],
+        "islands": [
+          6
+        ],
+        "window": [
+          27.309,
+          32.078
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 9,
+        "start": 32.297,
+        "end": 33.549,
+        "syl_per_s": 3.99,
+        "edge_offsets_ms": [
+          -24,
+          62
+        ],
+        "islands": [
+          7
+        ],
+        "window": [
+          32.078,
+          33.724
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 10,
+        "start": 33.974,
+        "end": 34.487,
+        "syl_per_s": 3.9,
+        "edge_offsets_ms": [
+          13,
+          36
+        ],
+        "islands": [
+          8
+        ],
+        "window": [
+          33.724,
+          34.662
+        ],
+        "method": "sentence (2-pass)"
+      },
+      {
+        "i": 11,
+        "start": 34.856,
+        "end": 36.572,
+        "syl_per_s": 3.55,
+        "edge_offsets_ms": [
+          -18,
+          30
+        ],
+        "islands": [
+          9
+        ],
+        "window": [
+          34.662,
+          36.72
+        ],
+        "method": "sentence (2-pass)"
+      }
+    ],
+    "pronunciations_added": {
+      "vallo": [
+        "V AA L OW",
+        "V AH L OW"
+      ],
+      "shortlets": [
+        "SH AO R T L AH T S",
+        "SH AO R T L EH T S"
+      ],
+      "shortlet": [
+        "SH AO R T L AH T",
+        "SH AO R T L EH T"
+      ],
+      "move-in": [
+        "M UW V IH N"
+      ],
+      "a_i": [
+        "EY AY"
+      ],
+      "yoruba": [
+        "Y AO R UW B AA",
+        "Y AO R UW B AH"
+      ],
+      "igbo": [
+        "IY B OW",
+        "IH G B OW",
+        "IY G B OW"
+      ],
+      "hausa": [
+        "HH AW S AA"
+      ],
+      "naija": [
+        "N AY JH AA"
+      ],
+      "lagos": [
+        "L EY G AA S",
+        "L AA G OW S"
+      ],
+      "abuja": [
+        "AH B UW JH AH"
+      ],
+      "shortlist": [
+        "SH AO R T L IH S T"
+      ]
+    },
+    "pronunciations_guessed": {
+      "shortlist": "SH AO R T L IH S T"
+    }
+  }
+}

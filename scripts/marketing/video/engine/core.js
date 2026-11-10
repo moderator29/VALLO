@@ -134,6 +134,10 @@ export async function createContext({ film, stage, timeline = "/video/timeline.j
       photo: (name) => `${REPO}/apps/web/public/brand/photos/${name}`,
       art: (name) => `${REPO}/apps/web/public/brand/onboarding/${name}`,
       brand: (name) => `${REPO}/apps/web/public/brand/${name}`,
+      /* The founder's own 3D objects (apps/web/public/brand/3d), at 2x. */
+      object: (name) => `${REPO}/apps/web/public/brand/3d/${name}@2x.webp`,
+      /* A photographed place (apps/web/public/brand/scenes): house, hotel, villa, tower… */
+      scene: (name) => `${REPO}/apps/web/public/brand/scenes/${name}.jpg`,
       sticker: (code) => `${NODE}/@lobehub/fluent-emoji-3d/assets/${code}.webp`,
       asset: (name) => `/video/assets/${name}`,
     },

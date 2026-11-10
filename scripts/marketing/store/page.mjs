@@ -7,6 +7,7 @@
  * (one raster, the same in every image) after Chromium has drawn it.
  */
 import { fontCss } from "./lib.mjs";
+import { CALLOUT_CSS } from "./callouts.mjs";
 
 const BASE = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,6 +24,9 @@ const BASE = `
   .hl .ln { display: inline; white-space: nowrap; position: relative; }
   .hl .sub { font-family: "Inter", sans-serif; font-weight: 500; line-height: 1.3; letter-spacing: -0.005em; white-space: nowrap; }
   .hl .sub span { position: relative; }
+  /* the marked word in a rounded box (the blueprint's way, 16 October) */
+  .hl .kw.chip { display: inline-block; padding: 0.02em 0.20em 0.08em; margin: 0 0.03em; border-radius: 0.28em;
+    background: #04071C; box-shadow: inset 0 0 0 0.062em #8FD3FF; color: #FFFFFF; }
 
   /* pop-up card (DESIGN.md section 4): opaque navy, so nothing on the screen shows through it */
   .pop { display: flex; align-items: center; font-family: "Inter", sans-serif; }
@@ -43,7 +47,7 @@ const BASE = `
   /* the Example chip, as the product draws it */
   .ex { display: inline-flex; align-items: center; border-radius: 999px; font-family: "Inter", sans-serif; font-weight: 600; line-height: 1; white-space: nowrap; letter-spacing: 0.005em; }
   .ex.dk { background: rgb(1 1 24 / 0.50); box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.26); color: #E8EFFF; }
-`;
+${CALLOUT_CSS}`;
 
 /*
  * Each headline is set on its ink, not on its type box: a line's box carries

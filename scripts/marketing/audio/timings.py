@@ -626,6 +626,31 @@ def run(voice: str, script_path: str, out_dir: str, full_check: bool = True) -> 
             word_out.append({"start": round(w.start, 3), "end": round(w.end, 3), "word": w.display,
                              "sentence": s.i, "token": w.token})
 
+    # -- 6b. A word the island fallback could not place (NaN) is spread over the
+    # gap between its placed neighbours, by letter count; the sentence edges follow.
+    n_w = len(word_out)
+    k = 0
+    while k < n_w:
+        if math.isfinite(word_out[k]["start"]) and math.isfinite(word_out[k]["end"]):
+            k += 1
+            continue
+        j = k
+        while j < n_w and not (math.isfinite(word_out[j]["start"]) and math.isfinite(word_out[j]["end"])):
+            j += 1
+        lo = word_out[k - 1]["end"] if k > 0 else 0.0
+        hi = word_out[j]["start"] if j < n_w else lo + 0.35 * (j - k)
+        sizes = [max(1, len(w["word"])) for w in word_out[k:j]]
+        tot, acc = sum(sizes), 0
+        for w, size in zip(word_out[k:j], sizes):
+            w["start"] = round(lo + (hi - lo) * acc / tot, 3)
+            acc += size
+            w["end"] = round(lo + (hi - lo) * acc / tot - 0.02, 3)
+        flags.append(f"words {k}-{j - 1} placed by interpolation")
+        k = j
+    for so in sent_out:
+        ws = [w for w in word_out if w["sentence"] == so["i"]]
+        so["start"], so["end"] = ws[0]["start"], ws[-1]["end"]
+
     # -- 7. QA
     qa: dict = {"decoder_resets": 0}
     # 7a sentence edges vs silence map: nearest island edge / internal pause edge,

@@ -30,6 +30,7 @@ const args = process.argv.slice(2);
 const opt = (name, fallback = null) => (args.includes(`--${name}`) ? args[args.indexOf(`--${name}`) + 1] : fallback);
 const film = opt("film", "mobile");
 const reel = opt("reel");
+const proj = opt("proj");
 const fps = Number(opt("fps", 60));
 const workers = Number(opt("workers", 3));
 const scale = Number(opt("scale", 1));
@@ -59,7 +60,7 @@ async function openFilm(pageScale = scale) {
   const page = await context.newPage();
   page.on("console", (m) => { if (m.type() === "error") console.error(`[page] ${m.text()}`); });
   page.on("pageerror", (e) => console.error(`[page error] ${e.message}`));
-  const query = new URLSearchParams({ film, ending: opt("ending", "soon"), ...(reel ? { reel } : {}), ...(scenes ? { scenes } : {}) });
+  const query = new URLSearchParams({ film, ending: opt("ending", "soon"), ...(reel ? { reel } : {}), ...(proj ? { proj } : {}), ...(scenes ? { scenes } : {}) });
   await page.goto(`${url}/film.html?${query}`, { waitUntil: "load", timeout: 120_000 });
   await page.waitForFunction(() => window.__ready || window.__error, null, { timeout: 300_000, polling: 200 });
   const error = await page.evaluate(() => window.__error);
@@ -99,7 +100,7 @@ try {
     const film0 = await openFilm();
     for (const t of stills.split(",").map(Number)) {
       const png = await film0.frame(t, "png");
-      const file = join(dirname(out), `${reel ?? film}-${t.toFixed(2)}.png`);
+      const file = join(dirname(out), `${proj ? `${proj}-${film}` : reel ?? film}-${t.toFixed(2)}.png`);
       await sharp(png).resize(Math.round(SIZE.W * scale), Math.round(SIZE.H * scale), { kernel: "lanczos3" }).png().toFile(file);
       console.log(file);
     }
@@ -150,7 +151,7 @@ try {
     const to = Math.min(Number(opt("to", probe.duration)), probe.duration);
     const total = Math.round((to - from) * fps);
     const cues = await probe.page.evaluate(() => window.__film.cues());
-    writeFileSync(join(dirname(out), `sfx-${reel ?? film}.json`), JSON.stringify(cues.filter((c) => c.t >= from && c.t < to).map((c) => ({ ...c, t: +(c.t - from).toFixed(3) })), null, 1) + "\n");
+    writeFileSync(join(dirname(out), `sfx-${proj ? `${proj}-${film}` : reel ?? film}.json`), JSON.stringify(cues.filter((c) => c.t >= from && c.t < to).map((c) => ({ ...c, t: +(c.t - from).toFixed(3) })), null, 1) + "\n");
     const pages = [probe];
     for (let k = 1; k < workers; k += 1) pages.push(await openFilm());
     const parts = [];

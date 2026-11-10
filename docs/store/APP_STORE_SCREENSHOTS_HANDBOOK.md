@@ -1,6 +1,6 @@
 # App Store and Google Play screenshots: the handbook
 
-Produced on 30 September 2026: the sixth round, after five premium reviews. This records what is in `docs/store/screenshots/`, how every image was made, the sizes each store takes, and which images to submit. Everything in it can be regenerated with two commands (section 8).
+Produced on 30 September 2026 and redrawn on 14 October 2026 against that afternoon's recapture of the live app. This records what is in `docs/store/screenshots/`, how every image was made, the sizes each store takes, and which images to submit. Everything in it can be regenerated with two commands (section 8).
 
 **The short version.** There are 35 images for each store, in store order, made to DESIGN.md section 6a (`scripts/marketing/DESIGN.md`):
 
@@ -38,63 +38,63 @@ The App Store takes up to 10 screenshots per display size; Google Play takes up 
 
 The picks are the store order's first eight or ten, plus 12 and 13. They cover homes and the move-in total, one account, stays and booking, the money rule, a stay's own page, the assistant, the verified mark, and hosts with their payout.
 
-- They never hold two screens that look alike. 06 ("Vallo never holds your money") and 25 ("Vallo charges no inspection fee") are the same help-centre page with a different answer open, so only one goes in.
-- To show the inspection fee instead of the money rule, swap `06` for `25`.
-- The critic's round-2 proposal put both in, at the old 12 and 17. It is adjusted here so twins are never both picked.
+- They never hold two screens that look alike.
+- To lead on the whole cost rather than the home, swap `03` forward; it is the strongest single image in the set.
 
 ## 3. The 35
 
-Every screen is the live product at <https://www.vallospaces.com>, in its dark theme, captured on 30 September 2026 as the QA member account (public pages signed out), and composited into a whole phone display with its status bar by `scripts/marketing/screens.mjs`. The capture ids are the files in `docs/marketing/source/` (see `capture-report.json` there).
+Every screen is the live product at <https://www.vallospaces.com>, in its dark theme (23 in light), captured on **14 October 2026** as the QA member account (the welcome pages signed out), and composited into a whole phone display with its status bar by `scripts/marketing/screens.mjs`. The capture ids are the files in `docs/marketing/source/` (see `capture-report.json` there); they are the same `n-`, `f-` and `sc-` captures the October films use, so the store set and the films now show one and the same build.
 
 | # | Headline | Screen (capture id) | Notes |
 |---|---|---|---|
-| 01 | Find your next home / in Nigeria | `home` | |
-| 02 | The move-in total, / before you call | `listing` | the villa, its Example notice and "Move-in total ₦26,100,000"; no lister name in view |
-| 03 | Homes and stays, / one account | `welcome-1` | public |
-| 04 | Hotels, shortlets / and resorts | `stays` | the pair's left half; card "Room booked · Lagoon Crest Resort · 3 nights", Example |
-| 05 | Book a room / in a few taps | `stays` | the pair's right half |
-| 06 | Vallo never holds / your money | `support-money` | the help centre's own answer; header cleaned (section 6) |
-| 07 | See the stay / before you book | `stay` | Lagoon Crest Resort |
-| 08 | Ask the AI assistant / any time of day | `assistant-caution-2` | the assistant's own answer, unedited |
-| 09 | Save favourites, / compare later | `saved` | recaptured; opens on the Chevron Drive house ("4 places saved"), whose photograph is the same stock living room as the Maitama villa on 02. The floating apps button crosses the foot of "Remove" (the product's own layout at the top of the page); a recapture scrolled about 24 CSS px would clear it |
-| 10 | Find a restaurant / you love | `restaurant` | |
-| 11 | Every fee, / added up | `listing-cost` | the fee lines; not for submission until the lister is renamed (section 6) |
-| 12 | Each verified mark, / checked by a person | `welcome-2` | public; "Verified means a person checked." |
-| 13 | Have a property? / Put it on Vallo | `host-start` | recaptured scrolled to the page's foot, so "I am an agent" sits whole above the dock (the back arrow shows faintly through the frosted header, as the product draws it); card "Payment settled · Straight to your bank", Example, no amount |
-| 14 | Search homes / across Nigeria | `search-villas` | the Map button sits over photographs, not over an Example chip |
-| 15 | Six digits, / and you’re back in | `lock` | the passcode lock |
-| 16 | Vallo speaks / your language | `welcome-yo` | public; subline "English, Hausa, Yorùbá and Igbo." |
-| 17 | Power, water / and the gate | `listing-amenities` | recaptured; opens on the section "Light, water and getting in", with Light, Water and The gate |
-| 18 | Pick your dates, / see the price | `stays-dates` | British dates, 16/10/2026 to 19/10/2026 |
-| 19 | Homes to buy, / not just to rent | `listing-sale` | the Karsana terrace, ₦95,000,000 asking price |
-| 20 | Real help, / from real people | `support` | |
-| 21 | Inspect first, / then pay on Vallo | `welcome-3` | public; the screen's own claim ("book an inspection first. When you pay, pay on Vallo"), not its headline |
-| 22 | Filter down / to what you need | `filters-villas` | Villas selected, Apply (3) |
-| 23 | Light or dark, / your call | `appearance` | recaptured with more air above the Theme label; the label and the whole switch sit under the header; the "Appearance" title behind the header is cleaned out |
-| 24 | Rooms, amenities, / all laid out | `stay-amenities` | recaptured; opens on the Amenities heading; the outline of the card above is blended out, column by column |
-| 25 | Vallo charges no / inspection fee | `support-inspection` | worded exactly so; header cleaned; 06's twin, 19 places apart |
-| 26 | Earn the / verified mark | `verification` | step 1 of 5, the ID upload; "verified" about a person |
-| 27 | Back where / you left off | `home-recent` | recaptured; opens on "Looked at recently"; header cleaned |
-| 28 | Ask about prices, / areas or renting | `assistant` | the assistant's start screen and its suggestion chips; 08's twin, 20 places apart |
-| 29 | Restaurants, / all in one place | `restaurants` | shares a photograph with 10, 19 places apart |
-| 30 | Lock Vallo / with a passcode | `passcode` | the settings screen; 15's twin, 15 places apart |
-| 31 | Need a BQ? / Filter for it | `filters-detached-bq` | "Comes with a BQ" on, Apply (6); 22's twin, 9 places apart |
-| 32 | One account / for all of Vallo | `sign-up` | public |
-| 33 | The agent’s fees, / spelled out | `listing-cost-total` | "Fees to the agent: ₦4,500,000, 25.0% of a year's rent"; 11's twin; not for submission until the rename |
-| 34 | Browse stays / before you sign up | `stays-dates-gb` | public (Sign in and Sign up in its header); 18's twin, 16 places apart |
-| 35 | Vallo. Real estate, / done right. | `welcome-4` | public; subline "Homes, hotels, shortlets and restaurants." |
+| 01 | Find your next home / in Nigeria | `n-home` | the home's own hero reads "Find your next home" |
+| 02 | The move-in total, / before you call | `n-listing` | the Maitama villa, its Example chips and the foot bar "₦26.1m Move-in total" |
+| 03 | Every fee, / added up | `sc-listing-cost` | "What you will actually pay": rent, agency fee, legal fee, agreement fee, refundable caution deposit |
+| 04 | Hotels, shortlets / and restaurants | `n-stays` | the pair's left half; the stays home's own tiles are Hotels, Shortlets, Restaurants and Local talk; card "Room booked · Lagoon Crest Resort · 3 nights", Example |
+| 05 | Book a room / in a few taps | `n-stays` | the pair's right half |
+| 06 | Vallo never holds / your money | `sc-payments` | the payments page says it in its own words; it opens on "No payments yet" for this account |
+| 07 | See the stay / before you book | `n-resort` | Lagoon Crest Resort |
+| 08 | Ask the AI assistant / any time of day | `sc-assistant-start` | "AI Assistant. Always here. Ask anything." The assistant's long answer is left out: it still shows raw markdown asterisks |
+| 09 | Save favourites, / compare later | `sc-saved` | "4 places saved", Compare |
+| 10 | Find a restaurant / you love | `sc-restaurant` | Harbour Lights Kitchen; the example restaurant has no photographs of its own, so the page carries a "No photographs yet" chip |
+| 11 | Featured homes, / see them all | `n-home-featured` | the home scrolled to its Featured listings row |
+| 12 | Each verified mark, / checked by a person | `sc-verification` | "Each one names what a person at Vallo actually looks at" |
+| 13 | Have a property? / Put it on Vallo | `f-host-start` | "Add a workspace"; "I own the property: List it yourself. No agency fee."; card "Payment settled · Straight to your bank", Example, no amount |
+| 14 | Search homes / across Nigeria | `n-search` | 40 properties found; For you, Near me, New listed |
+| 15 | Ask to view, / schedule a visit | `sc-thread` | the thread's own buttons: "Ask to view this home", "Schedule a visit" |
+| 16 | Vallo speaks / your language | `n-welcome-yo` | public, Yorùbá; subline "English, Hausa, Yorùbá and Igbo." |
+| 17 | Price check, / area by area | `sc-price` | "Price Check. What are properties near here asking?" |
+| 18 | Pick your dates, / see the price | `n-stays-dates` | British dates, 16/10/2026 to 19/10/2026 |
+| 19 | Homes to buy, / not just to rent | `n-home-premium` | the Premium listings row, led by the Karsana terrace for sale at ₦95m; header cleaned (section 6) |
+| 20 | Rooms and nights, / set by you | `f-host-rooms` | Grand Vista Hotel's room types and the nights they are on sale |
+| 21 | Inspect first, / then pay on Vallo | `f-agreements` | the page's own first line: "Payment opens as soon as the inspection report is submitted and both of you confirm the agreement" |
+| 22 | Filter down / to what you need | `sc-filters` | price range, bedrooms, bathrooms, "See 52 homes" |
+| 23 | Light or dark, / your call | `f-host-home-lt` | the one light capture in the set |
+| 24 | Rooms, amenities, / all laid out | `n-stay` | Grand Vista Hotel: sleeps, room types, star, the amenity chips and "About this stay" |
+| 25 | The guest pays / the price you set | `f-host-bookings` | the page's own words: "The guest pays the price you set, with nothing added" |
+| 26 | Earn the / verified mark | `f-agent-dashboard` | "Verification in review ... the tick appears on all of them at once when the check clears" |
+| 27 | New homes, / as they arrive | `n-home-new` | the home scrolled to its New listings row; header cleaned (section 6) |
+| 28 | Your calendar, / night by night | `f-host-calendar` | October 2026, a rate on every night |
+| 29 | Restaurants, / all in one place | `sc-restaurants` | "Book a table on Vallo. The restaurant confirms" |
+| 30 | Paste the message / you already send | `f-agent-listing-edit` | "Start from your WhatsApp message ... Nothing is sent to anybody." |
+| 31 | Pro adds tools / to your workspace | `f-pro` | the page's own sentence: "Pro adds tools to the workspace you already run" |
+| 32 | One account, / every business | `f-host-settings` | three businesses, all live, on one account |
+| 33 | The agent's fees, / spelled out | `f-rent-movein` | "Agency fee: the agent's own fee, 10.0% of a year's rent", under the total move-in cost |
+| 34 | All homes, / list or map | `n-search-all` | the screen's own heading; 52 properties found, with the Map button |
+| 35 | Vallo. Real estate, / done right. | `n-welcome-en` | public; subline "Homes, hotels, shortlets and restaurants." |
+
+**Screens the 14 October pass did not take.** The lock and passcode screens, the help centre, Appearance, sign-up, a listing for sale, the listing and stay amenity sections, and the signed-out stay dates were not recaptured, and the welcome carousel was captured on its last slide only. The images that used them (old 03, 15, 17, 19, 20, 21, 23, 25, 27, 28, 30, 31, 32, 34) were pointed at other 14 October screens and their headlines rewritten to what those screens say. Recapturing those routes would let the old lines come back.
 
 The layouts are in `scripts/marketing/store/shots/premium.mjs`.
 
 **The order.** The first swipe shows 1, 2 and 3 and then the pair (4 and 5). No more than two screens without a photograph or artwork come in a row. Screens that look alike at store size sit at least nine places apart, and never both in the picks:
 
-- 06 and 25 (help centre);
-- 08 and 28 (assistant);
-- 11 and 33 (fee lines);
-- 15 and 30 (passcode);
-- 18 and 34 (stay dates);
-- 22 and 31 (filter sheet);
-- 10 and 29 (a shared photograph).
+- 03 and 33 (cost lines), 30 places apart;
+- 11, 19 and 27 (the home's rows), 8 and 16 places apart;
+- 14 and 34 (search), 20 places apart;
+- 07 and 24 (a stay's own page), 17 places apart;
+- 10 and 29 (the same restaurant), 19 places apart;
+- 20, 25 and 28 (the stays workspace), 5 and 8 places apart.
 
 The Maitama living-room photograph, which the example stock reuses for several listings, leads 02. It also leads 09 (the Chevron Drive house uses the same stock photograph) and 14's first card, and appears twice on 27. That is the example stock's own repeat.
 
@@ -185,7 +185,7 @@ One to ten screenshots per display size and language, in .png, .jpg or .jpeg, wi
 - **Every listing, stay and restaurant on screen is example stock**, because that is all the platform holds today. Their own pages show the Example notice and cards show the Example tag; no image crops either out. The two cards (04, 13) carry the Example chip; their names and nights are illustrative, from DESIGN.md section 4, and neither shows an amount.
 - **The QA account's home area is "Ibeju-Lekki, Lagos State"** (the founder's choice). It shows on 01, 04 and the feature graphic, and in a pill on the home and stays hero photographs.
 - **The QA account's first name, "omojuni", is on screen** on the home greetings (01, 04) and on 20 ("Hi omojuni") and 15 ("Welcome back, omojuni"). No email address or phone number appears in any image.
-- **Four headers were cleaned (06, 23, 25 and 27), and one capture patched (24):** the outline of the card above, under the status bar, is blended out column by column between the clean rows above and below it. `clean.mjs` holds the patch.
+- **Two headers are cleaned (19 and 27):** both captures are the home scrolled to a row, and the labels that scroll under the translucent header are rebuilt from the unscrolled home of the same pass (`n-home`). `clean.mjs` holds the map. No capture needs the column patch now.
   - These captures were taken scrolled, and the app's translucent header let what scrolled under it show through as faint ghost text.
   - `scripts/marketing/store/clean.mjs` finds the header's own parts (the status bar, the menu, the logo and the bell) on an unscrolled capture of the same header. It keeps them as captured and sets the rest of the band to the band's own colour. Nothing below the header's hairline is touched.
 - **Product text that is shown but never lifted:**

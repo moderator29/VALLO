@@ -125,13 +125,60 @@ async function run(page, steps, signed) {
 
 /* Walk the page so lazily loaded images arrive before a full-page shot. */
 async function loadWholePage(page) {
+  /* the app skips drawing what is off screen (content-visibility); a whole-page shot needs all of it drawn */
+  await page.addStyleTag({ content: "*, *::before, *::after { content-visibility: visible !important; }" }).catch(() => {});
   const height = await page.evaluate(() => document.documentElement.scrollHeight);
-  for (let y = 0; y < height; y += 600) {
+  /* slowly, so cards that load as they come into view have loaded (and their photos decoded) */
+  for (let y = 0; y < height; y += 420) {
     await page.evaluate((to) => window.scrollTo(0, to), y);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(850);
   }
+  await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
+  await page.evaluate(() => Promise.race([
+    Promise.all([...document.images].map((img) => (img.complete ? null : img.decode().catch(() => null)))),
+    new Promise((ok) => setTimeout(ok, 4000)),
+  ]));
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(900);
+}
+
+async function stitchPage(page, screens) {
+  const dpr = await page.evaluate(() => devicePixelRatio);
+  const vh = await page.evaluate(() => innerHeight);
+  /* the header that stays stuck at the top once the page scrolls */
+  await page.evaluate(() => window.scrollTo(0, 500));
+  await page.waitForTimeout(900);
+  const top = await page.evaluate(() => {
+    let edge = 0;
+    for (const el of document.querySelectorAll("body *")) {
+      const st = getComputedStyle(el);
+      if (st.position !== "fixed" && st.position !== "sticky") continue;
+      const r = el.getBoundingClientRect();
+      if (r.top <= 2 && r.height > 0 && r.height < 320 && r.width > innerWidth * 0.6) edge = Math.max(edge, r.bottom);
+    }
+    return Math.ceil(edge);
+  });
+  const step = vh - top;
+  const pieces = [];
+  for (let k = 0; k < screens; k += 1) {
+    await page.evaluate((y) => window.scrollTo(0, y), k * step);
+    await page.waitForTimeout(1400);
+    const at = await page.evaluate(() => window.scrollY);
+    const shot = await page.screenshot({ type: "png" });
+    pieces.push({ shot, at });
+    if (k > 0 && at < k * step - 2) break; /* the page ended */
+  }
+  const W = Math.round(page.viewportSize().width * dpr);
+  const total = Math.round((pieces[pieces.length - 1].at + vh) * dpr);
+  const layers = [];
+  pieces.forEach(({ shot, at }, k) => {
+    if (k === 0) { layers.push({ input: shot, top: 0, left: 0 }); return; }
+    const y0 = Math.round(top * dpr);
+    const h = Math.round(vh * dpr) - y0;
+    layers.push({ input: sharp(shot).extract({ left: 0, top: y0, width: W, height: h }), top: Math.round((at + top) * dpr), left: 0 });
+  });
+  const resolved = await Promise.all(layers.map(async (l) => ({ ...l, input: Buffer.isBuffer(l.input) ? l.input : await l.input.png().toBuffer() })));
+  return sharp({ create: { width: W, height: total, channels: 4, background: "#010118" }, limitInputPixels: false }).composite(resolved).png().toBuffer();
 }
 
 const reportFile = join(OUT, "capture-report.json");
@@ -164,7 +211,12 @@ async function captureOnce(cap, ctx) {
   await ctx.addCookies([{ name: "nf_theme", value: theme, url: BASE }]);
   await ctx.clearCookies({ name: "nf_locale" });
   if (cap.locale) await ctx.addCookies([{ name: "nf_locale", value: cap.locale, url: BASE }]);
+  /* The feature first runs, marked shown the way the app marks them. */
+  await ctx.clearCookies({ name: "vallo_feature_runs" });
+  if (cap.seen) await ctx.addCookies([{ name: "vallo_feature_runs", value: "agent.agreements.analytics.host.invite.passport.portfolio.promotion.tenancy.verification", url: BASE }]);
   const page = await ctx.newPage();
+  /* Whole-page shots: with reduced motion the app draws cards that animate in on scroll at once, so a tall shot has none still waiting off screen. */
+  if (cap.full) await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript((t) => { try { localStorage.setItem("nf_theme", t); } catch {} }, theme);
   const signed = cap.auth !== false;
   try {
@@ -238,8 +290,27 @@ for (const cap of CAPTURES) {
       await loadWholePage(page);
       /* Shot at the device scale, then brought to 2x (880 px wide) for the
          video, which never shows a phone screen wider than that. */
-      const whole = await page.screenshot({ type: "png", fullPage: true });
-      await sharp(whole, { limitInputPixels: false }).resize({ width: kind === "desktop" ? 2880 : 880 }).webp({ quality: 92, effort: 6 }).toFile(join(OUT, `${cap.id}-full.webp`));
+      /* A whole-page shot draws the floating dock and its action button once,
+         mid-page, where the first screen had them: a capped (tall) capture
+         leaves them out, the video's scroll adds its own. */
+      if (cap.fullMax) await page.evaluate(() => {
+        for (const el of document.querySelectorAll("body *")) {
+          const s = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          if (s.position === "fixed" && r.top > innerHeight * 0.55 && r.height < 200) el.style.visibility = "hidden";
+        }
+      });
+      /* stitch: pages that draw only what is on screen are shot a screen at a
+         time and joined under their stuck header, so the tall page is whole. */
+      const whole = cap.stitch ? await stitchPage(page, cap.stitch) : await page.screenshot({ type: "png", fullPage: true });
+      let tall = sharp(whole, { limitInputPixels: false }).resize({ width: kind === "desktop" ? 2880 : 880 });
+      if (cap.fullMax) {
+        const resized = await tall.png().toBuffer();
+        const { height } = await sharp(resized, { limitInputPixels: false }).metadata();
+        tall = sharp(resized, { limitInputPixels: false });
+        if (height > cap.fullMax) tall = tall.extract({ left: 0, top: 0, width: kind === "desktop" ? 2880 : 880, height: cap.fullMax });
+      }
+      await tall.webp({ quality: 92, effort: 6 }).toFile(join(OUT, `${cap.id}-full.webp`));
     }
     record(cap.id, { url: page.url().replace(BASE, ""), at: new Date().toISOString(), kind, theme: cap.theme ?? "dark", signedIn: needsAuth, ...(cap.locale ? { locale: cap.locale } : {}), ...(cap.usedBy ? { usedBy: cap.usedBy, dest: "apps/web/public/help/shots" } : {}) });
     console.log(`ok    ${cap.id.padEnd(22)} ${page.url().replace(BASE, "")}`);

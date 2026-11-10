@@ -20,13 +20,21 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
  * "left"); page.mjs then sets every line on its ink (centred, or flush with
  * the left edge). `max` is the widest a line's ink may run; the page shrinks
  * the type to fit if a line would overrun it.
+ *
+ * `keyStyle: "chip"` sets the marked word in a rounded box instead of in the
+ * sky blue: the blueprint's own way of marking the word that matters (16
+ * October). The box is a tint of the brand blue with a hairline, and the word
+ * inside it stays white, so the line still reads as one sentence.
  */
 export function headline({
   lines, x = 0, cx, y, max, size = 112, align = "center", weight = 600, lineHeight = 1.08, z = 40,
-  color = "#FFFFFF", key = "#8FD3FF", sub, subSize, subGap, subColor = "rgb(255 255 255 / 0.6)",
+  color = "#FFFFFF", key = "#8FD3FF", keyStyle = "color", sub, subSize, subGap, subColor = "rgb(255 255 255 / 0.6)",
 }) {
+  const mark = keyStyle === "chip"
+    ? `<span class="kw chip">$1</span>`
+    : `<span class="kw" style="color:${key}">$1</span>`;
   const body = lines
-    .map((l) => `<span class="ln">${esc(l).replace(/\*(.+?)\*/g, `<span class="kw" style="color:${key}">$1</span>`)}</span>`)
+    .map((l) => `<span class="ln">${esc(l).replace(/\*(.+?)\*/g, mark)}</span>`)
     .join("<br>");
   const left = align === "center" ? cx - max / 2 : x;
   const ss = subSize || size * 0.36;

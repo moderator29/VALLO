@@ -1,0 +1,30 @@
+{
+ "about": "The film's payoff sounds lifted over the bed, the dip they make in the music, and the end card riding the music back up.",
+ "dip_db": -3,
+ "dip_s": 0.25,
+ "end_ride": {
+  "from": 133.546,
+  "ramp": 0.6,
+  "db": 6.5
+ },
+ "cues": [
+  {
+   "name": "success",
+   "from": 35.05,
+   "to": 35.35,
+   "lift_db": 8
+  },
+  {
+   "name": "stamp",
+   "from": 103.6,
+   "to": 103.9,
+   "lift_db": 8
+  },
+  {
+   "name": "stamp",
+   "from": 62.03,
+   "to": 62.33,
+   "lift_db": 6
+  }
+ ]
+}
