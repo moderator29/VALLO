@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode, type SyntheticEvent } from "react";
 import { useHydrated } from "@/components/motion/useInView";
+import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 
 /**
  * A REAL SCREEN OF THE PRODUCT, OR NOTHING (DOCS_AND_PRESENCE_UPGRADE.md
@@ -78,5 +79,23 @@ export function GuideShot({
         className={`${img} hidden [:root[data-theme=light]_&]:block`}
       />
     </figure>
+  );
+}
+
+/**
+ * Where a shot will go, until the capture runs: a brand-tinted panel with the
+ * subject's glyph on the kit's icon plate, so a card or a step keeps its
+ * shape and never shows a broken image.
+ */
+export function ShotPlaceholder({ icon, ratio = "16/9" }: { icon: UiIconName; ratio?: "16/9" | "3/4" }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid w-full place-items-center rounded-[var(--nf-radius-lg)] [background:var(--nf-brand-tint-2)] ${ratio === "3/4" ? "mx-auto aspect-[3/4] max-w-[14rem]" : "aspect-[16/9]"}`}
+    >
+      <span className="nf-doc-card__icon">
+        <UiIcon name={icon} size={22} />
+      </span>
+    </span>
   );
 }

@@ -3,6 +3,7 @@ import {
   LISTER_AGREE_TERMS,
   LISTING_SALE_ABOUT,
   NO_INSPECTION_FEE,
+  PAYMENT_GATE_SENTENCE,
   PRIVATE_FEE_NOTE,
   RENT_PAYMENT_NOT_OPEN,
   SALE_NEVER_PAID_ON_VALLO,
@@ -12,7 +13,7 @@ import { SUPPLY_DOORS, SUPPLY_DOOR_HREF, doorsSentence } from "@/lib/supply/role
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { MAX_BLOCK_NIGHTS } from "@/lib/agent/calendar-model";
 import type { DocChapter } from "./chapters";
-import { DocsFlow } from "./DocsFlow";
+import { DocFlow } from "@/components/docs/DocFlow";
 import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "./facts";
 
 /**
@@ -550,16 +551,14 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
       heading: "The steps, in order",
       body: (
         <>
-          <DocsFlow
-            label="From viewing to keys"
+          <DocFlow
+            label="From viewing to agreed terms"
             steps={[
-              { object: "calendar-check", label: "View it" },
-              { object: "doc-home", label: "Inspection report" },
-              { object: "contract-sign", label: "Both confirm" },
-              { object: "payment-sent", label: "Pay on Vallo" },
-              { object: "keys-handover", label: "Move in" },
+              { icon: "calendar-check", title: "View the place", href: "/docs/viewings", outcome: NO_INSPECTION_FEE },
+              { icon: "clipboard-list", title: "Submit the inspection report", href: "#inspection-report", outcome: "It records what you saw and when." },
+              { icon: "file-check", title: "Confirm the agreement", href: "/agreements", outcome: "You and the owner or agent each confirm the same version." },
             ]}
-            caption={NO_INSPECTION_FEE}
+            end={PAYMENT_GATE_SENTENCE}
           />
           <p>
             Money moves only after you have seen the place and decided. Nothing on this road is paid
@@ -672,13 +671,13 @@ export const BOOKING_A_STAY: DocChapter = {
       heading: "Book a stay",
       body: (
         <>
-          <DocsFlow
+          <DocFlow
             label="Booking a stay"
             steps={[
-              { object: "calendar-grid", label: "Pick your dates" },
-              { object: "receipt-check", label: "See the full price" },
-              { object: "payment-sent", label: "Pay on Vallo" },
-              { object: "luggage-check", label: "In your Plans" },
+              { icon: "calendar-booking", title: "Pick your dates", href: "/stays", outcome: "Every price becomes the total for your nights." },
+              { icon: "receipt", title: "See the full price", href: "#the-price-breakdown", outcome: "The total. Nothing from Vallo is added to it." },
+              { icon: "credit-card", title: "Pay by card", href: "/docs/paying-on-vallo#card", outcome: STAYS_PAID_BY_CARD },
+              { icon: "calendar-check", title: "Find it in Plans", href: "/bookings", outcome: "Plans lists your stays and tables by date." },
             ]}
           />
           <p>

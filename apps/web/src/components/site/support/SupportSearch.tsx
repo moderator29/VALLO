@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { loadSupportIndex } from "@/lib/support/search-actions";
-import { markMatches, prepare, searchPrepared, SECTION_LABEL, type PreparedEntry, type SearchHit } from "@/lib/support/search";
+import { groupHitsByKind, markMatches, prepare, searchPrepared, SECTION_LABEL, type PreparedEntry, type SearchHit } from "@/lib/support/search";
 
 /**
  * ONE SEARCH for Help, Docs, Guides and the legal pages.
@@ -44,17 +44,9 @@ export function useSupportSearch(query: string) {
     if (query.trim()) load();
   }, [query, load]);
 
-  const hits = useMemo<SearchHit[]>(() => (index && query.trim() ? searchPrepared(index, query) : []), [index, query]);
+  const hits = useMemo<SearchHit[]>(() => (index && query.trim() ? groupHitsByKind(searchPrepared(index, query)) : []), [index, query]);
   const loading = query.trim().length > 0 && !index && !failed;
   return { hits, loading, failed, load, ready: index !== null };
-}
-
-export function SectionChip({ section }: { section: SearchHit["entry"]["section"] }) {
-  return (
-    <span className="inline-flex shrink-0 items-center rounded-full border border-[var(--nf-border-subtle)] bg-[var(--nf-surface-inset)] px-xs py-3xs text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-secondary)]">
-      {SECTION_LABEL[section]}
-    </span>
-  );
 }
 
 type FieldProps = {
@@ -195,52 +187,82 @@ function MarkedText({ text, terms }: { text: string; terms: readonly string[] })
 const FIRST = "[background:var(--nf-brand-tint-1)] border-[var(--nf-border-brand)]";
 
 export function SupportResults({ hits, listId, activeIndex, inline = false, onNavigate }: ResultsProps) {
+  /* GROUPED BY KIND (R99): the hits arrive grouped (`groupHitsByKind`), so
+     each run of one section is drawn under its small label, and the option
+     ids keep their place in the one list the arrow keys walk. */
+  const groups: { section: SearchHit["entry"]["section"]; items: { hit: SearchHit; i: number }[] }[] = [];
+  hits.forEach((hit, i) => {
+    const last = groups[groups.length - 1];
+    if (last && last.section === hit.entry.section) last.items.push({ hit, i });
+    else groups.push({ section: hit.entry.section, items: [{ hit, i }] });
+  });
   return (
-    <ul id={listId} role="listbox" aria-label="Search results" className="space-y-row">
-      {hits.map((hit, i) => {
-        const active = i === activeIndex;
-        const id = `${listId}-${i}`;
-        const common = `${i === 0 ? FIRST : ""} ${active ? "ring-2 ring-[var(--nf-brand-primary)]" : ""}`;
-        if (inline && hit.entry.section === "help") {
-          return (
-            <li key={hit.entry.id} id={id} role="option" aria-selected={active}>
-              <details className={`nf-panel nf-panel--card nf-m-details group block p-0 ${common}`}>
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-row p-card-sm font-semibold leading-snug [&::-webkit-details-marker]:hidden">
-                  <span className="flex min-w-0 flex-col items-start gap-2xs">
-                    <SectionChip section="help" />
-                    <span>{hit.entry.title}</span>
-                  </span>
-                  <UiIcon name="chevron-down" size={20} className="nf-m-chevron shrink-0 text-[var(--nf-content-muted)]" />
-                </summary>
-                <p className="max-w-measure-body px-group pb-group text-[length:var(--nf-text-row)] leading-[1.6] text-[var(--nf-content-secondary)] sm:px-heading sm:pb-heading">
-                  <MarkedText text={hit.entry.text} terms={hit.terms} />
-                </p>
-              </details>
-            </li>
-          );
-        }
-        return (
-          <li key={hit.entry.id} id={id} role="option" aria-selected={active}>
-            <Link
-              href={hit.entry.href}
-              onClick={onNavigate}
-              className={`nf-panel nf-panel--card nf-tap block p-card-sm hover:underline-offset-4 ${common}`}
-            >
-              <span className="flex flex-wrap items-center gap-inline">
-                <SectionChip section={hit.entry.section} />
-                <span className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{hit.entry.trail}</span>
-              </span>
-              <span className="mt-2xs block font-semibold leading-snug">{hit.entry.title}</span>
-              {hit.snippet && (
-                <span className="mt-2xs block text-[length:var(--nf-text-row)] leading-[1.5] text-[var(--nf-content-secondary)]">
-                  <MarkedText text={hit.snippet} terms={hit.terms} />
-                </span>
-              )}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <div id={listId} role="listbox" aria-label="Search results" className="grid gap-block">
+      {groups.map((group) => (
+        <div key={group.section} role="group" aria-labelledby={`${listId}-g-${group.section}`} className="grid gap-row">
+          <p id={`${listId}-g-${group.section}`} className="nf-overline text-[var(--nf-content-muted)]">
+            {SECTION_LABEL[group.section]}
+          </p>
+          {group.items.map(({ hit, i }) => (
+            <ResultRow key={hit.entry.id} hit={hit} i={i} listId={listId} active={i === activeIndex} inline={inline} onNavigate={onNavigate} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ResultRow({
+  hit,
+  i,
+  listId,
+  active,
+  inline,
+  onNavigate,
+}: {
+  hit: SearchHit;
+  i: number;
+  listId: string;
+  active: boolean;
+  inline: boolean;
+  onNavigate?: () => void;
+}) {
+  const id = `${listId}-${i}`;
+  const common = `${i === 0 ? FIRST : ""} ${active ? "ring-2 ring-[var(--nf-brand-primary)]" : ""}`;
+  if (inline && hit.entry.section === "help") {
+    return (
+      <div id={id} role="option" aria-selected={active}>
+        <details className={`nf-panel nf-panel--card nf-m-details group block p-0 ${common}`}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-row p-card-sm font-semibold leading-snug [&::-webkit-details-marker]:hidden">
+            <span className="flex min-w-0 flex-col items-start gap-2xs">
+              <span className="text-[length:var(--nf-text-caption)] font-normal text-[var(--nf-content-muted)]">{hit.entry.trail}</span>
+              <span>{hit.entry.title}</span>
+            </span>
+            <UiIcon name="chevron-down" size={20} className="nf-m-chevron shrink-0 text-[var(--nf-content-muted)]" />
+          </summary>
+          <p className="max-w-measure-body px-group pb-group text-[length:var(--nf-text-row)] leading-[1.6] text-[var(--nf-content-secondary)] sm:px-heading sm:pb-heading">
+            <MarkedText text={hit.entry.text} terms={hit.terms} />
+          </p>
+        </details>
+      </div>
+    );
+  }
+  return (
+    <div id={id} role="option" aria-selected={active}>
+      <Link
+        href={hit.entry.href}
+        onClick={onNavigate}
+        className={`nf-panel nf-panel--card nf-tap block p-card-sm hover:underline-offset-4 ${common}`}
+      >
+        <span className="block text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">{hit.entry.trail}</span>
+        <span className="mt-2xs block font-semibold leading-snug">{hit.entry.title}</span>
+        {hit.snippet && (
+          <span className="mt-2xs block text-[length:var(--nf-text-row)] leading-[1.5] text-[var(--nf-content-secondary)]">
+            <MarkedText text={hit.snippet} terms={hit.terms} />
+          </span>
+        )}
+      </Link>
+    </div>
   );
 }
 

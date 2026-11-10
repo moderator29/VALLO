@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
+import type { UiIconName } from "@/design-system/icons/UiIcon";
 import { DocCard, DocCardGrid } from "@/components/docs/DocCard";
-import { GuideShot } from "./GuideShot";
+import { GuideShot, ShotPlaceholder } from "./GuideShot";
 
 /** One guide as the index needs it: plain data, no paragraphs. */
 export type GuideCardData = {
@@ -98,18 +98,7 @@ export function GuidesMagazine({
  * so the card keeps its shape and never shows a broken image.
  */
 function FeaturedCard({ guide }: { guide: GuideCardData }) {
-  /* Until the capture runs: a brand-tinted panel with the category's glyph
-     on the kit's icon plate, so the card keeps its shape. */
-  const plate = (
-    <span
-      aria-hidden="true"
-      className="grid aspect-[16/9] w-full place-items-center rounded-[var(--nf-radius-lg)] [background:var(--nf-brand-tint-2)]"
-    >
-      <span className="nf-doc-card__icon">
-        <UiIcon name={guide.icon} size={22} />
-      </span>
-    </span>
-  );
+  const plate = <ShotPlaceholder icon={guide.icon} />;
   return (
     <Link
       href={`/guides/${guide.slug}`}

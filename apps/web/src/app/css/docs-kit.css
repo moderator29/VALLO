@@ -327,6 +327,71 @@
     color: var(--nf-content-secondary);
   }
 
+  /* THE PROSE (10 November 2026): what a section's body holds, styled by the
+     kit itself, so a chapter or a guide needs no second sheet. A reading
+     measure, the strong words in the primary ink, brand dots for bullets and
+     muted numerals for steps. Only bare lists: a list that carries a class
+     (the card grid, a flow) is a component and keeps its own look. */
+  .nf-doc-section__body > :is(p, ul, ol) {
+    max-inline-size: 68ch;
+  }
+  .nf-doc-section__body :is(p, li) {
+    text-wrap: pretty;
+  }
+  .nf-doc-section__body :is(strong, em) {
+    font-weight: 600;
+    font-style: normal;
+    color: var(--nf-content-primary);
+  }
+  .nf-doc-section__body :is(ul, ol):not([class]) {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding-inline-start: 0;
+    list-style: none;
+  }
+  .nf-doc-section__body ul:not([class]) > li {
+    position: relative;
+    padding-inline-start: 1.5rem;
+  }
+  .nf-doc-section__body ul:not([class]) > li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.375rem;
+    inset-block-start: 0.72em;
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+  }
+  .nf-doc-section__body ol:not([class]) {
+    counter-reset: nf-doc-step;
+  }
+  .nf-doc-section__body ol:not([class]) > li {
+    position: relative;
+    padding-inline-start: 2rem;
+    counter-increment: nf-doc-step;
+  }
+  .nf-doc-section__body ol:not([class]) > li::before {
+    content: counter(nf-doc-step);
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.83;
+    color: var(--nf-content-muted);
+  }
+  .nf-doc-section__body code {
+    padding: 0.05rem 0.375rem;
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-surface-inset);
+    font-size: var(--nf-text-caption);
+    overflow-wrap: anywhere;
+    color: var(--nf-content-primary);
+  }
+
   /* THE CONTENTS CARD */
   .nf-doc-toc {
     display: grid;
@@ -606,6 +671,245 @@
     background: var(--nf-surface-secondary);
     color: var(--nf-content-link);
     font-weight: 600;
+  }
+
+  /* THE FLOW: a numbered vertical stepper, plates joined by a hairline. */
+  .nf-doc-flow {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-raised);
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-border-subtle);
+  }
+  .nf-doc-flow__label {
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nf-content-muted);
+  }
+  .nf-doc-flow__list {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-doc-flow__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--nf-space-sm);
+    padding-block-end: var(--nf-space-md);
+  }
+  .nf-doc-flow__step:last-child {
+    padding-block-end: 0;
+  }
+  /* The line between plates: from under one plate to the next. */
+  .nf-doc-flow__step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: calc(1.125rem - var(--nf-border-width) / 2);
+    inset-block-start: 2.5rem;
+    inset-block-end: 0.25rem;
+    inline-size: var(--nf-border-width);
+    background: var(--nf-brand-edge-soft);
+  }
+  .nf-doc-flow__mark {
+    display: grid;
+    place-items: start center;
+    inline-size: 2.25rem;
+  }
+  .nf-doc-flow__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+    padding-block-start: var(--nf-space-3xs);
+  }
+  .nf-doc-flow__title {
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--nf-content-primary);
+  }
+  .nf-doc-flow__num {
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-link);
+  }
+  .nf-doc-flow__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    color: var(--nf-content-link);
+    text-underline-offset: 0.2em;
+  }
+  .nf-doc-flow__link:hover {
+    text-decoration: underline;
+  }
+  .nf-doc-flow__outcome {
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.55;
+    color: var(--nf-content-secondary);
+  }
+  .nf-doc-flow__end {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--nf-space-xs);
+    align-items: start;
+    padding: var(--nf-space-sm);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-brand-tint-1);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.55;
+    color: var(--nf-content-primary);
+  }
+  .nf-doc-flow__end > svg {
+    margin-block-start: 0.15rem;
+    color: var(--nf-content-link);
+  }
+
+  /* WAS THIS HELPFUL: one quiet row at a page's foot. */
+  .nf-doc-helpful {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding-block: var(--nf-space-md);
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-doc-helpful__q,
+  .nf-doc-helpful__label {
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+  .nf-doc-helpful__choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+  .nf-doc-helpful__choices .nf-chip {
+    gap: var(--nf-space-2xs);
+  }
+  .nf-doc-helpful__why {
+    display: grid;
+    gap: var(--nf-space-xs);
+    justify-items: start;
+    max-inline-size: 36rem;
+  }
+  .nf-doc-helpful__why .nf-field {
+    inline-size: 100%;
+  }
+  .nf-doc-helpful__thanks {
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+
+  /* THE STEP GUIDE PLAYER: one step at a time, a thin progress bar, the
+     screen beside the words from 40rem. */
+  .nf-doc-player {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-raised);
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-brand-edge-soft);
+  }
+  .nf-doc-player__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  .nf-doc-player__label {
+    font-size: var(--nf-text-overline);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nf-content-link);
+  }
+  .nf-doc-player__count {
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-secondary);
+  }
+  .nf-doc-player__bar {
+    block-size: 0.25rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-tint-1);
+    overflow: hidden;
+  }
+  .nf-doc-player__bar > span {
+    display: block;
+    block-size: 100%;
+    border-radius: inherit;
+    background: var(--nf-brand-primary);
+    transition: inline-size var(--nf-duration-base) var(--nf-ease-entrance);
+  }
+  .nf-doc-player__stage {
+    display: grid;
+    gap: var(--nf-space-md);
+    animation: nf-doc-rise var(--nf-duration-base) var(--nf-ease-entrance) both;
+  }
+  @media (min-width: 40rem) {
+    .nf-doc-player__stage {
+      grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+      align-items: center;
+    }
+  }
+  .nf-doc-player__text {
+    display: grid;
+    gap: var(--nf-space-xs);
+    align-content: start;
+  }
+  .nf-doc-player__title {
+    font-family: var(--nf-font-display);
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--nf-content-primary);
+  }
+  .nf-doc-player__body {
+    line-height: 1.6;
+    color: var(--nf-content-secondary);
+  }
+  .nf-doc-player__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-doc-player__stage {
+      animation: none;
+    }
+    .nf-doc-player__bar > span {
+      transition: none;
+    }
+  }
+  :root[data-motion="off"] .nf-doc-player__stage {
+    animation: none;
+  }
+  :root[data-motion="off"] .nf-doc-player__bar > span {
+    transition: none;
+  }
+
+  /* THE COPY CONTROL: a round, quiet button beside a reference, an address
+     or an answer's link; a tick in the brand ink once copied. */
+  .nf-doc-copy {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-content-secondary);
+    background: transparent;
+  }
+  .nf-doc-copy:hover {
+    color: var(--nf-content-primary);
+    background: var(--nf-brand-tint-1);
+  }
+  .nf-doc-copy[data-done="true"] {
+    color: var(--nf-content-link);
   }
 
   @keyframes nf-doc-rise {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FAQS } from "./help-articles";
-import { markMatches, search, stem, queryTerms, type SearchEntry } from "./search";
+import { groupHitsByKind, markMatches, search, stem, queryTerms, type SearchEntry, type SearchHit } from "./search";
 
 const E: SearchEntry[] = [
   { id: "1", section: "help", title: "Does it cost anything to list?", trail: "Listing your property", text: "Listing is free. Vallo only charges when a deal is completed.", href: "/help#a" },
@@ -42,6 +42,19 @@ describe("unified search", () => {
 
   it("does not drag in everything for a nonsense word", () => {
     expect(search(E, "zzzqx")).toEqual([]);
+  });
+});
+
+describe("results grouped by kind (R99)", () => {
+  const hit = (id: string, section: SearchEntry["section"]): SearchHit => ({
+    entry: { id, section, title: id, trail: "", text: "", href: "/" },
+    score: 0,
+    snippet: "",
+    terms: [],
+  });
+  it("keeps the best match first and each kind in rank order", () => {
+    const ranked = [hit("a", "docs"), hit("b", "help"), hit("c", "docs"), hit("d", "legal"), hit("e", "help")];
+    expect(groupHitsByKind(ranked).map((h) => h.entry.id)).toEqual(["a", "c", "b", "e", "d"]);
   });
 });
 

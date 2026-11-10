@@ -6,6 +6,7 @@ import { bpsLabel } from "@/lib/site/move-in-calculator";
 import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
 import { WIZARD_WORDS } from "@/app/agent/list/steps/copy";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
+import { getDictionary } from "@vallo/i18n";
 import type { GuideSlug } from "./slugs";
 
 /**
@@ -100,6 +101,11 @@ export type Guide = {
   beforeYouStart?: string[];
   /** The screen the index card shows, dark and light, when it has one. */
   cover?: GuideShotBlock;
+  /**
+   * A how-to whose steps are also drawn as the step guide player, under this
+   * label (DOCS_AND_PRESENCE_UPGRADE.md 4.6). Each section is one step.
+   */
+  player?: string;
   /** ISO date the guide was first published. */
   published: string;
   /** ISO date a person last read it against the product and the sources. */
@@ -119,6 +125,10 @@ const LAGOS_RULE = LAGOS
 
 const REVIEWED = "2026-10-13";
 
+/* The verification flow's own English words, the strings its screens print. */
+const VF = getDictionary("en").verifyFlow;
+const KYC = getDictionary("en").experienceAccount.kyc;
+
 export const GUIDES: readonly Guide[] = [
   {
     /*
@@ -132,6 +142,7 @@ export const GUIDES: readonly Guide[] = [
     slug: "how-to-list",
     category: "listing",
     featured: true,
+    player: "Walk through the listing",
     title: "How to list your property on Vallo",
     description:
       "From the first question to sending it for review: what the listing asks, what to have ready before you start, and what happens after.",
@@ -240,6 +251,83 @@ export const GUIDES: readonly Guide[] = [
     ],
     sources: [],
     next: { href: "/docs/listing-on-vallo", label: "Read the full chapter on listing" },
+  },
+  {
+    /*
+     * THE VERIFICATION STEP-BY-STEP. Every sentence is the verification
+     * flow's own words (`verifyFlow` and `experienceAccount.kyc` in the
+     * English dictionary, the strings the screens print), so the guide says
+     * exactly what the screen will ask and cannot drift from it.
+     */
+    slug: "how-verification-works",
+    category: "listing",
+    player: "Walk through verification",
+    title: "How verification works on Vallo",
+    description:
+      "What the identity check asks for, step by step, who sees your documents, and what happens after you send it.",
+    published: "2026-11-10",
+    reviewed: "2026-11-10",
+    beforeYouStart: [VF.introNeedId, VF.introNeedSelfie, VF.introNeedAddress],
+    cover: {
+      dark: "/help/shots/g-verify-start.webp",
+      light: "/help/shots/g-verify-start-lt.webp",
+      alt: "The start of the identity check on Vallo, with what you will need.",
+    },
+    sections: [
+      {
+        id: "why",
+        title: VF.introTitle,
+        blocks: [`${VF.introBody} ${VF.introTime}`],
+        shot: {
+          dark: "/help/shots/g-verify-start.webp",
+          light: "/help/shots/g-verify-start-lt.webp",
+          alt: "The start of the identity check on Vallo, with what you will need.",
+        },
+      },
+      {
+        id: "id",
+        title: KYC.steps["identity-document"].title,
+        blocks: [
+          `${KYC.steps["identity-document"].hint} ${KYC.documents.identity.qualifies}`,
+          `${VF.steps["id-country"].hint} ${VF.steps["identity-document"].hint}`,
+        ],
+      },
+      {
+        id: "selfie",
+        title: KYC.steps.selfie.title,
+        blocks: [KYC.steps.selfie.hint, { list: [...KYC.selfie.tips] }, KYC.selfie.privacy],
+      },
+      {
+        id: "address",
+        title: KYC.steps["address-document"].title,
+        blocks: [
+          `${KYC.steps["address-document"].hint} ${KYC.documents.address.qualifies}`,
+          { tone: "warn", title: KYC.documents.address.title, callout: KYC.documents.address.caution },
+        ],
+      },
+      {
+        id: "business",
+        title: KYC.steps["business-question"].title,
+        blocks: [`${KYC.steps["business-question"].hint} ${KYC.steps["business-details"].hint}`],
+      },
+      {
+        id: "send",
+        title: KYC.steps.review.title,
+        blocks: [`${KYC.steps.review.hint} ${VF.review.finalBody}`],
+      },
+      {
+        id: "after",
+        title: KYC.nextTitle,
+        blocks: [
+          KYC.sentBody,
+          KYC.sentMeanwhile,
+          KYC.nextPayout,
+          { tone: "vallo", title: "Who sees your documents", callout: VF.introPrivacy },
+        ],
+      },
+    ],
+    sources: [],
+    next: { href: "/docs/badges-and-verification", label: "What each verification mark means" },
   },
   {
     slug: "avoiding-rental-scams",

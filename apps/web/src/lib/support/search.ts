@@ -247,6 +247,18 @@ export function markMatches(snippet: string, terms: readonly string[]): { text: 
   return parts;
 }
 
+/**
+ * RESULTS GROUPED BY KIND (R99): every hit of the kind the best result is,
+ * then the next kind, each kind in its own rank order. The best match stays
+ * first, and the arrow keys walk the rows in the order they are drawn,
+ * because the list is reordered here, not only drawn in groups.
+ */
+export function groupHitsByKind(hits: readonly SearchHit[]): SearchHit[] {
+  const order: SearchSection[] = [];
+  for (const hit of hits) if (!order.includes(hit.entry.section)) order.push(hit.entry.section);
+  return order.flatMap((section) => hits.filter((hit) => hit.entry.section === section));
+}
+
 export function search(entries: readonly SearchEntry[], query: string, limit?: number): SearchHit[] {
   return searchPrepared(prepare(entries), query, limit);
 }

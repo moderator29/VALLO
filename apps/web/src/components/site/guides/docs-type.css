@@ -10,11 +10,10 @@
  *   THE INDEX   `.nf-index`: reference 7086's rows. A round glyph plate, a
  *               title in the display face, one line, a trailing fact. One
  *               Card holds them, a row's only treatment is the Plate's wash.
- *   THE PROSE   `.nf-doc-prose`: a chapter's reading text. Inter at 16px on
- *               1.6, a 68 character measure, the ink for strong words, brand
- *               dots for bullets, and inline code on an inset well. The
- *               section heads above it are the display face, with a numeral
- *               and a hairline between sections (`.nf-doc-section`).
+ *   THE STATEMENT `.nf-lead-statement`: a page's one stated sentence.
+ *
+ * The chapter prose that was the second thing here moved to the docs kit on
+ * 10 November 2026 (app/css/docs-kit.css, THE PROSE).
  *
  * Tokens only; the sizes are the type scale's own. Nothing here animates
  * beyond the Plate wash: the arrival is the shared reveal's.
@@ -105,143 +104,10 @@
     white-space: nowrap;
   }
 
-  /* ------------------------------------------------- the chapter prose */
-  .nf-doc-section {
-    padding-top: var(--nf-space-xl);
-    border-top: var(--nf-border-width) solid var(--nf-divider);
-  }
-  .nf-doc-sections > .nf-doc-section + .nf-doc-section {
-    margin-top: var(--nf-space-xl);
-  }
-  .nf-doc-section:first-child {
-    padding-top: 0;
-    border-top: 0;
-  }
-  .nf-doc-section__n {
-    display: block;
-    margin-bottom: var(--nf-space-3xs);
-    font-size: var(--nf-text-overline);
-    font-weight: 600;
-    letter-spacing: var(--nf-tracking-label);
-    color: var(--nf-brand-primary);
-  }
-  :root:not([data-theme="light"]) .nf-doc-section__n {
-    color: var(--nf-brand-secondary);
-  }
-  .nf-doc-section__title {
-    font-family: var(--nf-font-display);
-    font-size: clamp(1.3125rem, 1.15rem + 0.7vw, 1.625rem);
-    font-weight: 600;
-    line-height: 1.22;
-    letter-spacing: -0.018em;
-    color: var(--nf-content-primary);
-    text-wrap: balance;
-  }
-  .nf-doc-prose {
-    max-width: 68ch;
-    margin-top: var(--nf-space-sm);
-    font-size: var(--nf-text-body);
-    line-height: 1.6;
-    color: var(--nf-content-secondary);
-  }
-  .nf-doc-prose > * + *:not(.nf-flow) {
-    margin-top: var(--nf-space-sm);
-  }
-  .nf-doc-prose :is(p, li) {
-    text-wrap: pretty;
-  }
-  .nf-doc-prose strong {
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-doc-prose em {
-    font-style: normal;
-    font-weight: 600;
-    color: var(--nf-content-primary);
-  }
-  .nf-doc-prose :is(ul, ol) {
-    display: grid;
-    gap: var(--nf-space-xs);
-    padding-inline-start: 0;
-    list-style: none;
-  }
-  .nf-doc-prose ul > li {
-    position: relative;
-    padding-inline-start: 1.5rem;
-  }
-  .nf-doc-prose ul > li::before {
-    content: "";
-    position: absolute;
-    inset-inline-start: 0.375rem;
-    top: 0.72em;
-    width: 0.375rem;
-    height: 0.375rem;
-    border-radius: var(--nf-radius-circle);
-    background: var(--nf-brand-primary);
-  }
-  .nf-doc-prose ol {
-    counter-reset: nf-doc-step;
-  }
-  .nf-doc-prose ol > li {
-    position: relative;
-    padding-inline-start: 2rem;
-    counter-increment: nf-doc-step;
-  }
-  .nf-doc-prose ol > li::before {
-    content: counter(nf-doc-step);
-    position: absolute;
-    inset-inline-start: 0;
-    top: 0;
-    font-size: var(--nf-text-body-sm);
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    /* 14px on the prose's 25.6px line: the numeral sits on the text's own line. */
-    line-height: 1.83;
-    color: var(--nf-content-muted);
-  }
-  .nf-doc-prose code {
-    padding: 0.05rem 0.375rem;
-    border: var(--nf-border-width) solid var(--nf-border-subtle);
-    border-radius: var(--nf-radius-xs);
-    background: var(--nf-surface-inset);
-    font-size: var(--nf-text-caption);
-    overflow-wrap: anywhere;
-    color: var(--nf-content-primary);
-  }
-
-  /* ------------------------------------------------ one guide's sections */
-  /* The guide's section heads take the chapters' hierarchy: a numeral, the
-     display face (public-doors.css already sets it), and a hairline between
-     sections so a long guide reads as numbered parts. The numeral is
-     generated content with an empty alternative, so a screen reader hears
-     the heading and not "zero one". Two classes deep to sit over the older
-     one-class rules in public-doors.css whichever sheet loads last. */
-  .nf-guide .nf-guide__body {
-    counter-reset: nf-guide-sec;
-  }
-  .nf-guide .nf-guide__section {
-    counter-increment: nf-guide-sec;
-  }
-  .nf-guide .nf-guide__section + .nf-guide__section {
-    margin-top: var(--nf-space-xl);
-    padding-top: var(--nf-space-xl);
-    border-top: var(--nf-border-width) solid var(--nf-divider);
-  }
-  .nf-guide .nf-guide__section h2::before {
-    content: counter(nf-guide-sec, decimal-leading-zero);
-    content: counter(nf-guide-sec, decimal-leading-zero) / "";
-    display: block;
-    margin-bottom: var(--nf-space-3xs);
-    font-family: var(--nf-font-sans);
-    font-size: var(--nf-text-overline);
-    font-weight: 600;
-    letter-spacing: var(--nf-tracking-label);
-    font-variant-numeric: tabular-nums;
-    color: var(--nf-brand-primary);
-  }
-  :root:not([data-theme="light"]) .nf-guide .nf-guide__section h2::before {
-    color: var(--nf-brand-secondary);
-  }
+  /* The chapter prose and the guide's section heads lived here until 10
+     November 2026; the docs kit's section body styles them now
+     (app/css/docs-kit.css, THE PROSE), so the two sheets no longer fight over
+     `.nf-doc-section`. */
 
   /* ----------------------------------------------------- the statement */
   /* A page's one stated sentence (about's mission, the vision beside it):

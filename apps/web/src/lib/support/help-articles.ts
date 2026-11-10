@@ -47,6 +47,12 @@ export type Faq = {
   category: string;
   q: string;
   a: string;
+  /**
+   * The things the answer names that a member can open (a screen, a policy, a
+   * chapter): on the help centre the name itself becomes the link. Each `text`
+   * must appear in `a` exactly as written (`help-links.test.ts`).
+   */
+  links?: readonly { text: string; href: string }[];
 };
 
 /**
@@ -106,6 +112,7 @@ export const FAQS: Faq[] = [
   {
     category: "Property and Stays",
     q: "What does Verified mean, and what is Ownership seen?",
+    links: [{ text: "Ownership seen", href: "/docs/badges-and-verification#ownership-seen" }],
     a: "Verified means a person at Vallo checked the ID of the lister behind the listing. Ownership seen means a reviewer has seen the owner's own proof of ownership, on the date shown. Neither is a guarantee, and Ownership seen is not a title search: before you buy, have your own lawyer look at the title.",
   },
 
@@ -113,11 +120,13 @@ export const FAQS: Faq[] = [
   {
     category: "Booking a stay",
     q: "How do I book a stay on Vallo?",
+    links: [{ text: "Open Stays", href: "/stays" }],
     a: `Open Stays and set where, your dates and your guests. Every price becomes the total for your nights. Open a place and see the full price, including any charge at the door, before you book. ${HOTEL_ROOM_BY_CARD} For a shortlet or serviced apartment, reserve: the nights are held for 48 hours at no cost while the host answers. The stay then appears in Plans.`,
   },
   {
     category: "Booking a stay",
     q: "How do I hold a table at a restaurant?",
+    links: [{ text: "Open Restaurants", href: "/restaurants" }],
     a: "Open Restaurants, pick one, and ask for a date, a time and a party size. Times are Lagos time. The restaurant confirms or declines and you are told either way. The booking opens its own conversation and sits in Plans with a check-in code to show when you arrive.",
   },
   {
@@ -133,6 +142,7 @@ export const FAQS: Faq[] = [
   {
     category: "Booking a stay",
     q: "How do I cancel a booking?",
+    links: [{ text: "Plans", href: "/bookings" }],
     a: "Open the booking from Plans. A booking you have not paid for can be let go at any time for nothing. For a paid stay, ask from the booking for it to be cancelled and refunded: a person at Vallo decides it by the cancellation policy on your booking. If the host cancels, or the place was not as listed, you get everything back.",
   },
   {
@@ -160,6 +170,7 @@ export const FAQS: Faq[] = [
   {
     category: "Payments and refunds",
     q: "How do refunds work?",
+    links: [{ text: "cancellation policy", href: "/cancellations" }],
     a: `Every stay shows its cancellation policy before you book, and the refund follows the policy on your booking. Hotels, shortlets and serviced apartments run as a business pick Flexible, Moderate, Firm or Strict. A stay listed by an owner or agent follows the standard schedule: everything back more than ${FULL_REFUND_HOURS} hours before check-in, half inside that, and nothing once check-in day has started. If the host cancels, or the place was not as listed, you get everything back. ${REFUND_ROUTE}`,
   },
   {
@@ -175,6 +186,7 @@ export const FAQS: Faq[] = [
   {
     category: "Payments and refunds",
     q: "Is Vallo free to use?",
+    links: [{ text: "free", href: "/docs/what-vallo-costs" }],
     a: "Yes. Making an account, searching, saving, messaging and asking to view a property are free, and listing is free. Vallo only charges when a deal is completed, from the lister's or host's share. A renter or guest pays the listed price, with nothing added by Vallo. No one has to pay a monthly subscription.",
   },
   {
@@ -236,6 +248,7 @@ export const FAQS: Faq[] = [
   {
     category: "Listing your property",
     q: "How do I list my property on Vallo?",
+    links: [{ text: "Add a workspace", href: "/profile/setup" }],
     a: `Open Add a workspace from your profile and pick the one that fits: ${doorsSentence()}. The owner form takes about five minutes and asks for your name, an ID and whatever you hold on the property; there is an honest answer if you hold no document. Then post the listing from your workspace. Vallo reviews it before it goes up.`,
   },
   {
@@ -246,6 +259,7 @@ export const FAQS: Faq[] = [
   {
     category: "Listing your property",
     q: "When do owners, agents and hosts get paid?",
+    links: [{ text: "payout details", href: "/settings/payments" }, { text: "earnings", href: "/payouts" }],
     a: `Add a Nigerian bank account in your own name to your payout details first. ${CARD_SHARE_WHEN_CLEARS} Vallo's commission comes out of your share, and every payment shows on your earnings.`,
   },
   {
@@ -271,6 +285,7 @@ export const FAQS: Faq[] = [
   {
     category: "Hosting",
     q: "How do I set up a hotel, shortlet or restaurant?",
+    links: [{ text: "host setup", href: "/docs/hosting" }, { text: "the Terms", href: "/terms" }],
     a: "Use host setup. You give your identity and business papers, and Vallo reviews them before you are published. If you are sent back, you edit the same application and send it again. You agree to the Terms, the Privacy Policy and the Host Agreement before you publish.",
   },
   {
@@ -281,6 +296,7 @@ export const FAQS: Faq[] = [
   {
     category: "Hosting",
     q: "What cancellation policies can a host choose?",
+    links: [{ text: "Flexible, Moderate, Firm or Strict", href: "/cancellations" }],
     a: "Flexible, Moderate, Firm or Strict. The guest sees the terms of the one a host picks before they book, and the refund follows them.",
   },
   {
@@ -303,6 +319,7 @@ export const FAQS: Faq[] = [
   {
     category: "Verification and trust",
     q: "How are agents verified?",
+    links: [{ text: "verification ladder", href: "/docs/badges-and-verification#the-ladder" }],
     a: "Every agent gives their NIN or a government ID, proof of address and a bank account in their own name. A firm also gives its CAC registration. A person at Vallo reviews each application, and the verification ladder shows how far each lister has climbed.",
   },
   {
@@ -313,6 +330,7 @@ export const FAQS: Faq[] = [
   {
     category: "Verification and trust",
     q: "How do I report a suspicious listing or user?",
+    links: [{ text: "contact form", href: "/contact" }],
     a: `Use the report option on the listing, or ${SUPPORT_SENTENCE} with the listing link and what you saw. A person reads every report, and a listing can be hidden while it is looked at.`,
   },
   {
@@ -340,6 +358,7 @@ export const FAQS: Faq[] = [
   {
     category: "Around",
     q: "What is Around?",
+    links: [{ text: "Around", href: "/around" }],
     a: "Around is the part of Vallo for places. Join your local government, your estate or your campus, and read what people there are saying today: whether there is light, whether the road is open, whether the tanker came. Reading needs no account; posting needs one. A listing published in a place is announced there once.",
   },
   {
@@ -357,6 +376,7 @@ export const FAQS: Faq[] = [
   {
     category: "Your account and data",
     q: "How do I delete my account?",
+    links: [{ text: "Delete account", href: "/delete-account" }],
     a: `Go to Settings, then Account, then Delete account. Confirm it is you and type ${DELETE_CONFIRM_PHRASE}. You are signed out everywhere at once, and nothing is destroyed for ${GRACE_WINDOW_DAYS} days: the code we email you stops it. After that your profile, posts, saved places and uploaded files are destroyed. Records of money that moved are kept for at least five years with your name, email and phone number removed, because Nigerian anti-money-laundering law requires it. A booking or a listing still open has to be finished, cancelled or unpublished first, and the screen tells you which.`,
   },
   {
@@ -367,11 +387,13 @@ export const FAQS: Faq[] = [
   {
     category: "Your account and data",
     q: "Can I appeal a decision Vallo made?",
+    links: [{ text: "contact form", href: "/contact" }],
     a: `Yes. If a post or a listing was taken down, an application refused or your account stopped, reply to the notice or write through the contact form with what happened and why you think the decision was wrong. A person who did not make the first decision reads it. Appeals are answered ${RESPONSE_COMMITMENTS.routine.label.toLowerCase()}.`,
   },
   {
     category: "Your account and data",
     q: "How do I contact Vallo?",
+    links: [{ text: "contact form", href: "/contact" }],
     a: `Use the contact form at vallospaces.com/contact, or the support chat in the app. A person replies within one business day, and a report about paying outside Vallo ${RESPONSE_COMMITMENTS.urgent.label.toLowerCase()}. Vallo is run by ${COMPANY_FORMAL_NAME}, whose registered office is ${COMPANY_REGISTERED_OFFICE}.`,
   },
 
@@ -389,6 +411,7 @@ export const FAQS: Faq[] = [
   {
     category: "Using the app",
     q: "Can I switch between light and dark?",
+    links: [{ text: "Settings", href: "/settings" }],
     a: "Yes. Under Settings, then Appearance, then Theme, choose Light, Dark or System. System follows your phone or computer. The choice is kept on this device.",
   },
   {

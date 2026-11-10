@@ -14,6 +14,7 @@ import { EDIT_WINDOW_MINUTES, POST_MAX, POST_MEDIA_MAX } from "@/lib/social/post
 import { MODERATOR_CAN, MODERATOR_CANNOT } from "@/lib/social/areas-model";
 import type { DocChapter, DocSection } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
+import { DocFlow } from "@/components/docs/DocFlow";
 import { PAY_INSIDE_VALLO } from "./facts";
 import { EULA_ZERO_TOLERANCE } from "@/lib/legal/eula-copy";
 
@@ -414,13 +415,13 @@ export const LISTING_ON_VALLO: DocChapter = {
             . The one you pick decides what Vallo asks you for, because each kind of lister can go wrong
             in a different way. One account holds one side: owner or agent, never both.
           </p>
-          <DocsFlow
+          <DocFlow
             label="From a workspace to a published listing"
             steps={[
-              { object: "person-card", label: "Pick a workspace" },
-              { object: "id-card-check", label: "Say who you are" },
-              { object: "doc-review", label: "A person reviews it" },
-              { object: "home-check", label: "Publish" },
+              { icon: "briefcase", title: "Pick a workspace", href: SUPPLY_DOOR_HREF, outcome: "Owner or agent, never both on one account." },
+              { icon: "id-card", title: "Say who you are", href: "/guides/how-verification-works", outcome: "What Vallo asks for depends on the workspace you pick." },
+              { icon: "house", title: "Post a listing", href: "/guides/how-to-list", outcome: "Photos, the price and every cost, light and water." },
+              { icon: "user-check", title: "A person reviews it", href: "#review", outcome: "They approve it, ask for more, or reject it with a reason." },
             ]}
           />
         </>

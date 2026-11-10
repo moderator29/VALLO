@@ -1,4 +1,5 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { readListerFeePolicy } from "@/lib/money/lister-fee-read";
@@ -80,7 +81,8 @@ async function readPublicStayRates(): Promise<StayRates | null> {
 
 async function readSeatedFee(): Promise<{ seatedFeeMinor: number } | null> {
   try {
-    const db = await createClient();
+    /* Not in the generated types yet (the admin desk reads it the same way). */
+    const db = (await createClient()) as unknown as SupabaseClient;
     const { data, error } = await db.from("restaurant_money_settings").select("seated_fee_minor").maybeSingle();
     const fee = Number((data as { seated_fee_minor?: unknown } | null)?.seated_fee_minor);
     if (error || !data || !Number.isSafeInteger(fee) || fee < 0) return null;

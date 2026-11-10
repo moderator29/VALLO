@@ -27,8 +27,30 @@ export function textOf(node: ReactNode): string {
   if (typeof node === "string" || typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(textOf).join(" ");
   if (isValidElement(node)) {
-    const props = node.props as { children?: ReactNode };
-    return textOf(props.children);
+    /* The kit's table and flow carry their words in props, not children:
+       a DocTable's cells, a DocFlow's steps and its closing line. */
+    const props = node.props as {
+      children?: ReactNode;
+      caption?: unknown;
+      rows?: { cells?: Record<string, unknown> }[];
+      steps?: { title?: unknown; outcome?: unknown }[];
+      end?: ReactNode;
+    };
+    const parts: string[] = [textOf(props.children)];
+    if (Array.isArray(props.rows)) {
+      for (const row of props.rows) {
+        for (const cell of Object.values(row.cells ?? {})) {
+          if (cell && typeof cell === "object" && "state" in cell) parts.push(String((cell as { state: unknown }).state));
+          else if (cell && typeof cell === "object" && "yes" in cell) continue;
+          else parts.push(textOf(cell as ReactNode));
+        }
+      }
+    }
+    if (Array.isArray(props.steps)) {
+      for (const step of props.steps) parts.push(textOf(step.title as ReactNode), textOf(step.outcome as ReactNode));
+    }
+    if (props.end) parts.push(textOf(props.end));
+    return parts.filter(Boolean).join(" ");
   }
   return "";
 }

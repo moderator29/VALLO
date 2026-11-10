@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { MotionReveal } from "@/components/motion/Reveal";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { countOf } from "@vallo/i18n/core";
@@ -11,6 +12,8 @@ export type Faq = {
   category: string;
   q: string;
   a: string;
+  /** Names in the answer that are things a member can open: the name becomes the link. */
+  links?: readonly { text: string; href: string }[];
 };
 
 /**
@@ -26,6 +29,8 @@ export function HelpSearch({
   faqs,
   browse,
   answersLabel,
+  extras,
+  feet,
 }: {
   faqs: Faq[];
   /**
@@ -37,6 +42,10 @@ export function HelpSearch({
   browse?: ReactNode;
   /** The heading over the full list of answers. */
   answersLabel?: string;
+  /** Drawn inside a topic, after its answers (the fee calculator under payments). */
+  extras?: Readonly<Record<string, ReactNode>>;
+  /** Drawn at the foot of every topic: its copy-link control and "Was this helpful?". */
+  feet?: Readonly<Record<string, ReactNode>>;
 }) {
   const [query, setQuery] = useState("");
 
@@ -167,11 +176,13 @@ export function HelpSearch({
                         />
                       </summary>
                       <p className="max-w-measure-body px-group pb-group text-[length:var(--nf-text-row)] leading-[1.6] text-[var(--nf-content-secondary)] sm:px-heading sm:pb-heading">
-                        {f.a}
+                        <LinkedAnswer text={f.a} links={f.links} />
                       </p>
                     </details>
                   ))}
               </div>
+              {extras?.[cat] ? <div className="mt-row">{extras[cat]}</div> : null}
+              {feet?.[cat] ?? null}
             </MotionReveal>
           ))}
         </div>
@@ -180,4 +191,30 @@ export function HelpSearch({
       )}
     </div>
   );
+}
+
+/**
+ * An answer with its named things as links (the founder's pass, 10 November
+ * 2026): where an answer names a page a member can open, that name is the
+ * link, in the kit's link style, never a separate "click here". Each link
+ * text is found once, in order; a text the answer no longer contains is
+ * simply not linked (`help-links.test.ts` refuses that case).
+ */
+function LinkedAnswer({ text, links }: { text: string; links?: Faq["links"] }) {
+  if (!links || links.length === 0) return <>{text}</>;
+  const parts: ReactNode[] = [];
+  let rest = text;
+  links.forEach((link, i) => {
+    const at = rest.indexOf(link.text);
+    if (at === -1) return;
+    parts.push(rest.slice(0, at));
+    parts.push(
+      <Link key={i} href={link.href} className="nf-doc-xlink">
+        {link.text}
+      </Link>,
+    );
+    rest = rest.slice(at + link.text.length);
+  });
+  parts.push(rest);
+  return <>{parts}</>;
 }

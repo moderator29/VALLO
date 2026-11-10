@@ -11,11 +11,15 @@ import {
   chapterBySlug,
   chapterNeighbours,
 } from "../chapters";
-import "@/components/site/guides/docs-type.css";
 import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
-import { DocHeader, DocSection } from "@/components/docs/DocArticle";
+import { DocHeader, DocSection, DocSummary } from "@/components/docs/DocArticle";
+import { DocCard, DocCardGrid } from "@/components/docs/DocCard";
+import { CopyButton } from "@/components/docs/CopyButton";
+import { DocHelpfulSlot } from "@/components/docs/DocHelpfulSlot";
+import { chapterGlance } from "../glance";
 import { DocToc } from "@/components/docs/DocToc";
 import { DocHelpPanel } from "@/components/docs/DocShell";
+import { FeeCalculatorSection } from "../fee-calculator/FeeCalculatorSection";
 import { SITE_CARD } from "@/lib/site/site-card";
 
 /**
@@ -70,6 +74,7 @@ export default async function DocChapterPage({
   const group =
     DOC_GROUPS.find((g) => g.id === chapter.group)?.label ?? "Documentation";
   /* The siblings a reader may actually want instead: the rest of its group. */
+  const groupMates = CHAPTER_INDEX.filter((c) => c.group === chapter.group && c.slug !== chapter.slug).slice(0, 4);
   const related = CHAPTER_INDEX.filter(
     (c) => c.group === chapter.group && c.slug !== chapter.slug
   )
@@ -108,6 +113,13 @@ export default async function DocChapterPage({
           </p>
         </DocHeader>
 
+        <DocSummary items={chapterGlance(chapter)} />
+
+        <div className="flex items-center gap-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+          <CopyButton text={`/docs/${chapter.slug}`} label="Link" icon="link" />
+          <span>Copy a link to this chapter</span>
+        </div>
+
         {chapter.sections.length >= 3 ? (
           <DocToc
             sections={chapter.sections.map((section) => ({
@@ -117,7 +129,7 @@ export default async function DocChapterPage({
           />
         ) : null}
 
-        <div className="nf-doc-sections grid gap-xl">
+        <div className="grid gap-xl">
           {chapter.sections.map((section, index) => (
             <DocSection
               key={section.id}
@@ -125,10 +137,34 @@ export default async function DocChapterPage({
               number={index + 1}
               title={section.heading}
             >
-              <div className="nf-doc-prose">{section.body}</div>
+              {section.body}
+              {section.tool === "fee-calculator" ? <FeeCalculatorSection /> : null}
             </DocSection>
           ))}
         </div>
+
+        <DocHelpfulSlot page={`/docs/${chapter.slug}`} />
+
+        {/* RELATED (beyond Hauslet): the rest of the chapter's group as
+            cards, so a reader who finished one answer finds the next. */}
+        {groupMates.length > 0 ? (
+          <section aria-labelledby="chapter-related" className="grid gap-sm">
+            <h2 id="chapter-related" className="nf-h3">
+              Related
+            </h2>
+            <DocCardGrid label="Related chapters">
+              {groupMates.map((c) => (
+                <DocCard
+                  key={c.slug}
+                  href={`/docs/${c.slug}`}
+                  icon={lineGlyphFor(c.icon)}
+                  title={c.title}
+                  description={c.summary}
+                />
+              ))}
+            </DocCardGrid>
+          </section>
+        ) : null}
 
         {/* ---------------------------------------------------- prev / next */}
         <nav

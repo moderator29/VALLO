@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { DocTable } from "@/components/docs/DocTable";
+import { DocFlow } from "@/components/docs/DocFlow";
 import { formatMoney } from "@vallo/i18n/core";
 import type { BrandIconName } from "@/design-system/icons/BrandIcon";
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
@@ -94,6 +96,12 @@ export type DocSection = {
   id: string;
   heading: string;
   body: ReactNode;
+  /**
+   * A tool drawn under the section's words (DOCS_AND_PRESENCE_UPGRADE.md
+   * 4.6). Named, not embedded, so the chapters stay plain data: the page
+   * places the tool, which reads its own figures on the server.
+   */
+  tool?: "fee-calculator";
 };
 
 export type DocChapter = {
@@ -108,6 +116,12 @@ export type DocChapter = {
   group?: DocGroupId;
   /** ISO date this chapter was last read against the product; `DOCS_REVIEWED` when unset. */
   updated?: string;
+  /**
+   * The "At a glance" lines, when the chapter names its own. Each must be a
+   * sentence the chapter already says (`glance.test.ts`); unset, the first
+   * sentence of each of the first sections is lifted (`glance.ts`).
+   */
+  glance?: string[];
   sections: DocSection[];
 };
 
@@ -338,26 +352,23 @@ const PAYING_ON_VALLO: DocChapter = {
       id: "which-way",
       heading: "See how each kind of deal is paid",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Rent.</strong> {RENT_PAYMENT_NOT_OPEN}
-          </li>
-          <li>
-            <strong>Shortlets and serviced apartments.</strong> {STAYS_PAID_BY_CARD}
-          </li>
-          <li>
-            <strong>A sale.</strong> {SALE_NOT_PAID}
-          </li>
-          <li>
-            <strong>A hotel room.</strong> By card, when you book, at the price shown.
-          </li>
-          <li>
-            <strong>A restaurant table.</strong> Free to book. You pay your bill at the restaurant.
-          </li>
-          <li>
-            <strong>A viewing.</strong> Never any money.
-          </li>
-        </ul>
+        <DocTable
+          caption="How each kind of deal is paid"
+          captionHidden
+          columns={[
+            { key: "deal", label: "Deal" },
+            { key: "how", label: "How it is paid" },
+            { key: "open", label: "Paid on Vallo today", kind: "yesno" },
+          ]}
+          rows={[
+            { id: "stay", icon: "building-apartment", cells: { deal: "Shortlets and serviced apartments", how: STAYS_PAID_BY_CARD, open: { yes: true } } },
+            { id: "hotel", icon: "building-hotel", cells: { deal: "A hotel room", how: "By card, when you book, at the price shown.", open: { yes: true } } },
+            { id: "rent", icon: "key", cells: { deal: "Rent", how: RENT_PAYMENT_NOT_OPEN, open: { yes: false } } },
+            { id: "sale", icon: "price-tag", cells: { deal: "A sale", how: SALE_NOT_PAID, open: { yes: false } } },
+            { id: "table", icon: "utensils", cells: { deal: "A restaurant table", how: "Free to book. You pay your bill at the restaurant.", open: { yes: false, note: "Free" } } },
+            { id: "viewing", icon: "calendar-check", cells: { deal: "A viewing", how: "Never any money.", open: { yes: false, note: "Free" } } },
+          ]}
+        />
       ),
     },
     /* "Pay with Escrow" (id `escrow`) is removed (sweep item 34): escrow is not
@@ -460,12 +471,15 @@ const PAYING_ON_VALLO: DocChapter = {
       id: "for-listers",
       heading: "Get paid as an owner, agent or host",
       body: (
-        <ul role="list">
-          <li>Add a Nigerian bank account in your own name before anybody can pay you.</li>
-          <li>Before you publish, Vallo shows you what you will receive after its commission.</li>
-          <li>{CARD_SHARE_WHEN_CLEARS}</li>
-          <li>Every payment and every refund appears on your earnings, line by line.</li>
-        </ul>
+        <DocFlow
+          label="From a payment to your bank"
+          steps={[
+            { icon: "bank", title: "Add your payout details", href: "/settings/payments", outcome: "Add a Nigerian bank account in your own name before anybody can pay you." },
+            { icon: "price-tag", title: "See what you receive", href: "/docs/what-vallo-costs#work-it-out", outcome: "Before you publish, Vallo shows you what you will receive after its commission." },
+            { icon: "credit-card", title: "A guest pays by card", outcome: CARD_SHARE_WHEN_CLEARS },
+            { icon: "receipt", title: "Check your payouts", href: "/payouts", outcome: "Every payment and every refund appears on your earnings, line by line." },
+          ]}
+        />
       ),
     },
     {
@@ -535,24 +549,21 @@ const REFUNDS: DocChapter = {
             <strong>Hotels, shortlets and serviced apartments run as a business</strong> pick one of
             four policies:
           </p>
-          <ul role="list">
-            <li>
-              <strong>Flexible.</strong> Cancel at least 24 hours before check-in for a full refund.
-              After that, no refund.
-            </li>
-            <li>
-              <strong>Moderate.</strong> Cancel at least 5 days before check-in for a full refund.
-              After that, half back.
-            </li>
-            <li>
-              <strong>Firm.</strong> Cancel at least 30 days before check-in for a full refund, or at
-              least 7 days before for half back. After that, no refund.
-            </li>
-            <li>
-              <strong>Strict.</strong> Cancel at least 7 days before check-in for half back. After
-              that, no refund.
-            </li>
-          </ul>
+          <DocTable
+            caption="The four cancellation policies"
+            columns={[
+              { key: "policy", label: "Policy" },
+              { key: "full", label: "Full refund" },
+              { key: "half", label: "Half back" },
+              { key: "after", label: "After that" },
+            ]}
+            rows={[
+              { id: "flexible", cells: { policy: <strong>Flexible</strong>, full: "Cancel at least 24 hours before check-in", half: "Not offered", after: "No refund" } },
+              { id: "moderate", cells: { policy: <strong>Moderate</strong>, full: "Cancel at least 5 days before check-in", half: "After that", after: "Half back" } },
+              { id: "firm", cells: { policy: <strong>Firm</strong>, full: "Cancel at least 30 days before check-in", half: "At least 7 days before", after: "No refund" } },
+              { id: "strict", cells: { policy: <strong>Strict</strong>, full: "Not offered", half: "At least 7 days before check-in", after: "No refund" } },
+            ]}
+          />
           <p>
             <strong>A stay listed by an owner or agent</strong> follows Vallo&rsquo;s standard
             schedule: full refund more than {FULL_REFUND_HOURS} hours before check-in, half back
@@ -574,13 +585,15 @@ const REFUNDS: DocChapter = {
       id: "ask-for-a-refund",
       heading: "Ask for a refund on a paid stay",
       body: (
-        <ol role="list">
-          <li>Open the booking from Plans.</li>
-          <li>Ask for the booking to be cancelled and refunded.</li>
-          <li>A person at Vallo decides it by the policy on your booking, and tells you the amount.</li>
-          <li>The refund is started by the end of the fifth Nigerian business day after you asked.</li>
-          <li>{REFUND_ROUTE}</li>
-        </ol>
+        <DocFlow
+          label="Asking for a refund"
+          steps={[
+            { icon: "calendar-booking", title: "Open the booking from Plans", href: "/bookings", outcome: "Every stay shows its cancellation policy, fixed on your booking when you pay." },
+            { icon: "send", title: "Ask for it to be cancelled and refunded", outcome: "From the booking itself." },
+            { icon: "user-check", title: "A person at Vallo decides it", outcome: "By the policy on your booking, and you are told the amount." },
+            { icon: "banknote", title: "The refund is started", outcome: <>By the end of the fifth Nigerian business day after you asked. {REFUND_ROUTE}</> },
+          ]}
+        />
       ),
     },
     {
@@ -824,18 +837,20 @@ const YOUR_DATA: DocChapter = {
       id: "how-it-is-protected",
       heading: "Who can see what",
       body: (
-        <ul role="list">
-          <li>
-            Your bookings, agreements, messages and settings are protected with row level security, so
-            the database hands them only to you and to the people on the same deal.
-          </li>
-          <li>
-            Gate details for a stay are shown only to the host, to Vallo staff, and to a guest with a
-            confirmed booking.
-          </li>
-          <li>ID and ownership documents sit in a private store that only you and a reviewer can open.</li>
-          <li>Data is encrypted in transit, and passwords are stored only as a hash.</li>
-        </ul>
+        <DocTable
+          caption="Who can see what"
+          captionHidden
+          columns={[
+            { key: "what", label: "What" },
+            { key: "who", label: "Who can see it" },
+          ]}
+          rows={[
+            { id: "deals", icon: "lock", cells: { what: "Your bookings, agreements, messages and settings", who: "Only you and the people on the same deal. They are protected with row level security." } },
+            { id: "gate", icon: "gate", cells: { what: "Gate details for a stay", who: "The host, Vallo staff, and a guest with a confirmed booking." } },
+            { id: "docs", icon: "id-card", cells: { what: "ID and ownership documents", who: "Only you and a reviewer. They sit in a private store." } },
+            { id: "transit", icon: "shield-lock", cells: { what: "Your data in transit, and your password", who: "Data is encrypted in transit, and passwords are stored only as a hash." } },
+          ]}
+        />
       ),
     },
     {

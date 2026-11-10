@@ -13,6 +13,10 @@ import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
 import { DocCard, DocCardGrid } from "@/components/docs/DocCard";
 import { DocHelpPanel, DocShell } from "@/components/docs/DocShell";
 import { PopularTopics } from "./PopularTopics";
+import { CopyButton } from "@/components/docs/CopyButton";
+import { DocHelpfulSlot } from "@/components/docs/DocHelpfulSlot";
+import { FeeCalculatorSection } from "../docs/fee-calculator/FeeCalculatorSection";
+import { SUPPORT_EMAIL } from "@/lib/support-email";
 
 /* A10: the title and description in the page's own language, with its
    canonical and hreflang (lib/i18n/public-metadata.ts; words in publicMeta). */
@@ -125,11 +129,37 @@ export default async function HelpPage() {
         {/* The on-device search: Help, Docs, Guides and the legal pages,
             answered with no round trip. While somebody types, results
             replace everything under the field. */}
-        <HelpSearch faqs={FAQS} browse={browse} answersLabel="Every answer, by topic" />
+        <HelpSearch
+          faqs={FAQS}
+          browse={browse}
+          answersLabel="Every answer, by topic"
+          extras={{ "Payments and refunds": <FeeCalculatorSection /> }}
+          feet={Object.fromEntries(
+            topics.map((topic) => [
+              topic.category,
+              <div key={topic.category} className="mt-row grid gap-2xs">
+                <div className="flex items-center gap-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+                  <CopyButton text={`/help#${topicId(topic.category)}`} label="Link" icon="link" />
+                  <span>Copy a link to {topic.category}</span>
+                </div>
+                <DocHelpfulSlot page={`/help#${topicId(topic.category)}`} />
+              </div>,
+            ]),
+          )}
+        />
 
         {/* The assistant, with the button through to a person. */}
         <SupportChat aiConsented={await aiConsentForViewer()} assistantCopy={dictionary.experienceInbox.assistant} />
 
+        {/* The one address, with a copy control, for somebody writing from
+            their own mail (DOCS_AND_PRESENCE_UPGRADE.md section 9). */}
+        <p className="flex flex-wrap items-center gap-2xs text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
+          <span>Or email us at</span>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="nf-doc-xlink">
+            {SUPPORT_EMAIL}
+          </a>
+          <CopyButton text={SUPPORT_EMAIL} label="Email address" />
+        </p>
         <DocHelpPanel href="/contact" />
       </DocShell>
     </>
