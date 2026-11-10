@@ -104,8 +104,9 @@ export const ACCESS: ManualBody = {
             </li>
           </ol>
           <p>
-            A staff member does not see the operator&apos;s rail. You see a short frame with Console, Handbook, Your role,
-            Staff manual and Help and support, then one button for each desk your access opens. Every desk asks the
+            A staff member does not see the operator&apos;s rail. You see a short frame with My desk, Console, Handbook, Your
+            role, Staff manual and Help and support, then one button for each desk your access opens. My desk is your own
+            workspace: your tasks, announcements and a summary of what needs you. Every desk asks the
             database again when it opens, so a typed address to any other desk gets the same refusal.
           </p>
           <ScreenshotSlot desk="the staff frame and the security key screen" />
