@@ -22,7 +22,7 @@ import type { StaffScope } from "@/lib/admin/guard";
 /** The day the chapters were last read against the code. */
 export const MANUAL_UPDATED = "2026-11-10";
 
-export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation"] as const;
+export const MANUAL_SLUGS = ["access", "desks", "queues", "decisions", "records", "escalation", "my-desk"] as const;
 export type ManualSlug = (typeof MANUAL_SLUGS)[number];
 
 export type ManualChapter = {
@@ -76,6 +76,13 @@ export const MANUAL_CHAPTERS: readonly ManualChapter[] = [
     title: "Escalation and out of hours",
     icon: "alert-triangle",
     description: "Where to take what you cannot decide, who answers for each area, and what to do out of hours.",
+  },
+  {
+    slug: "my-desk",
+    number: 7,
+    title: "My desk, tasks and announcements",
+    icon: "user",
+    description: "Your personal workspace: who you are here, your tasks, the announcements sent to you, and where to ask for help.",
   },
 ];
 

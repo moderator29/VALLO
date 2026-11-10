@@ -72,9 +72,14 @@ export default async function AppealsPage({ searchParams }: { searchParams: Prom
             statusLabel: status === "open" ? "waiting" : status === "overturned" ? "accepted" : "upheld",
             createdAt: rows.map((a) => a.createdAt),
           },
-          Date.now(),
+          requestTime(),
         )}
       />
     </div>
   );
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

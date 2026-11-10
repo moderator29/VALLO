@@ -3,6 +3,7 @@ import { ACCESS } from "./access";
 import { DECISIONS } from "./decisions";
 import { DESKS } from "./desks";
 import { ESCALATION } from "./escalation";
+import { MY_DESK } from "./my-desk";
 import type { ManualBody } from "./parts";
 import { QUEUES } from "./queues";
 import { RECORDS } from "./records";
@@ -15,4 +16,5 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   decisions: DECISIONS,
   records: RECORDS,
   escalation: ESCALATION,
+  "my-desk": MY_DESK,
 };
