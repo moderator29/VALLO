@@ -179,12 +179,12 @@ export const MY_DESK: ManualBody = {
     },
     {
       id: "rules",
-      title: "What is checked, and what is written down",
+      title: "What is written down, and what is refused",
       body: (
         <>
           <ul role="list">
             <li>Creating a task, reassigning it, changing its status, commenting, posting and pinning are each written to the audit log with your name.</li>
-            <li>Every button is checked again on the server. A button you can see but are not allowed to use is refused with a plain sentence.</li>
+            <li>The server asks again who you are every time you press a button. A button you can see but are not allowed to use is refused with a plain sentence.</li>
             <li>If the audit line cannot be written, the console tells you so after the action. The action itself has still happened. Tell operations.</li>
             <li>If you see &quot;not on this database yet&quot;, the tasks tables have not been switched on. This is not your fault. Tell the lead.</li>
           </ul>

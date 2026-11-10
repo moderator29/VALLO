@@ -34,10 +34,8 @@ export type DeskDoor =
 
 export async function requireDeskUser(): Promise<DeskDoor> {
   const door = await requireConsole();
-  if (door.state === "unconfigured" || door.state === "signed-out" || door.state === "not-admin") {
-    return { state: door.state };
-  }
   if (door.state === "step-up") return { state: "step-up" };
+  if (door.state !== "console") return { state: door.state };
   const staff = door.staff;
   const isAdminRole = staff.isAdmin || staff.isSuperAdmin;
   if (!isAdminRole && !staff.handbookAcknowledged) return { state: "handbook" };

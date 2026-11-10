@@ -8,16 +8,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
  * own scope and position.
  */
 const door = vi.hoisted(() => ({ value: null as unknown }));
-vi.mock("@/lib/admin/my-desk/access", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/admin/my-desk/access")>("@/lib/admin/my-desk/access").catch(() => null);
-  return {
-    requireDeskUser: async () => door.value,
-    doorWords: (state: string) =>
-      state === "signed-out" ? "Sign in with your operations account to continue." : state === "handbook" ? "Read and acknowledge the staff handbook to open your desk." : state === "step-up" ? "Confirm your security key to use the console." : "My Desk is for Vallo staff.",
-    ...(actual ?? {}),
-    ...{ requireDeskUser: async () => door.value },
-  };
-});
+vi.mock("@/lib/admin/my-desk/access", () => ({
+  requireDeskUser: async () => door.value,
+  doorWords: (state: string) =>
+    state === "signed-out"
+      ? "Sign in with your operations account to continue."
+      : state === "handbook"
+        ? "Read and acknowledge the staff handbook to open your desk."
+        : state === "step-up"
+          ? "Confirm your security key to use the console."
+          : "My Desk is for Vallo staff.",
+}));
 vi.mock("@/lib/admin/guard", () => ({
   STAFF_SCOPE_LABEL: { support: "Support", operations: "Operations", finance: "Finance" },
 }));
