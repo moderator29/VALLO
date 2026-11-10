@@ -90,7 +90,9 @@
     ".next-features/types/**/*.ts",
     ".next-features/dev/types/**/*.ts",
     ".next-mapbase/types/**/*.ts",
-    ".next-mapbase/dev/types/**/*.ts"
+    ".next-mapbase/dev/types/**/*.ts",
+    ".next-weight/types/**/*.ts",
+    ".next-weight/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

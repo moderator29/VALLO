@@ -16,6 +16,7 @@ spec = importlib.util.spec_from_file_location("h", os.path.join(os.path.dirname(
 src = open(spec.origin).read().replace("\nmain()\n", "\n")
 h = type(sys)("h"); exec(compile(src, spec.origin, "exec"), h.__dict__)
 
+h.PAUSE = 3.0
 first = json.load(open(sys.argv[1])); schools = {s["slug"]: s for s in json.load(open(sys.argv[2]))}
 log = open(sys.argv[4], "a") if len(sys.argv) > 4 else sys.stderr
 L = lambda *a: print(*a, file=log, flush=True)
