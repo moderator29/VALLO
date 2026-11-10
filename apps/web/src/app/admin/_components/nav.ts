@@ -171,6 +171,9 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "appeals", href: "/admin/appeals", icon: ui("scale"), label: "Appeals" },
       { key: "roommates", href: "/admin/roommates", icon: ui("users"), label: "Roommates" },
       { key: "circle-desk", href: "/admin/circle", icon: ui("circle-people"), label: "Circle" },
+      /* The Social Media Manager position (10 November 2026): the content
+         calendar, drafts, the media library and approvals. No platform API. */
+      { key: "social-media", href: "/admin/social-media", icon: ui("camera"), label: "Social media" },
       { key: "standing", href: "/admin/standing", icon: ui("star"), label: "Standing" },
       /* AR-11: the words the safety scan acts on. */
       { key: "blocked-terms", href: "/admin/blocked-terms", icon: ui("block"), label: "Blocked terms" },
