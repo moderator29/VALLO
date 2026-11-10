@@ -9,7 +9,7 @@
 --    The table's grants (select to anon and authenticated, staff-only write through
 --    RLS, roommates_1_core.sql) are table level, so the new columns are readable exactly
 --    like the existing ones and no grant changes.
--- 2. 23 logos, found on the English Wikipedia article for each school (the file
+-- 2. 27 logos, found on the English Wikipedia article for each school (the file
 --    its page uses for the logo, seal or crest), recorded as a 128px thumbnail on
 --    upload.wikimedia.org and the file's description page as logo_source. Each address
 --    was fetched on 10 November 2026 and answered HTTP 200 with an image content type.
@@ -43,9 +43,11 @@ update public.institutions i
   ('abia-state-university', 'https://upload.wikimedia.org/wikipedia/en/thumb/a/a9/Abia_State_University_logo.svg/120px-Abia_State_University_logo.svg.png', 'https://en.wikipedia.org/wiki/File:Abia_State_University_logo.svg'),
   ('abubakar-tafawa-balewa-university-bauchi', 'https://upload.wikimedia.org/wikipedia/en/6/6e/Abubakar_Tafawa_Balewa_University_%28crest%29.png', 'https://en.wikipedia.org/wiki/File:Abubakar_Tafawa_Balewa_University_(crest).png'),
   ('adeleke-university-ede', 'https://upload.wikimedia.org/wikipedia/en/0/04/Logo_of_Adeleke_University.png', 'https://en.wikipedia.org/wiki/File:Logo_of_Adeleke_University.png'),
+  ('ahmadu-bello-university', 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/ABU_Zaria_logo.jpg/120px-ABU_Zaria_logo.jpg', 'https://commons.wikimedia.org/wiki/File:ABU_Zaria_logo.jpg'),
   ('akwa-ibom-state-university-ikot-akpaden', 'https://upload.wikimedia.org/wikipedia/en/1/1f/Akwa_Ibom_State_University_Logo.jpg', 'https://en.wikipedia.org/wiki/File:Akwa_Ibom_State_University_Logo.jpg'),
   ('babcock-university', 'https://upload.wikimedia.org/wikipedia/en/thumb/e/ea/Babcock_University_Logo.jpg/120px-Babcock_University_Logo.jpg', 'https://en.wikipedia.org/wiki/File:Babcock_University_Logo.jpg'),
   ('bayero-university-kano', 'https://upload.wikimedia.org/wikipedia/en/0/04/Bayerouniversitylogo.jpg', 'https://en.wikipedia.org/wiki/File:Bayerouniversitylogo.jpg'),
+  ('baze-university', 'https://upload.wikimedia.org/wikipedia/en/d/d9/Logo_of_Baze_University_Abuja%2C_Nigeri.png', 'https://en.wikipedia.org/wiki/File:Logo_of_Baze_University_Abuja%2C_Nigeri.png'),
   ('clifford-university-owerrinta', 'https://upload.wikimedia.org/wikipedia/en/0/0a/Logo_of_Clifford_University.jpg', 'https://en.wikipedia.org/wiki/File:Logo_of_Clifford_University.jpg'),
   ('federal-college-of-education-technical-akoka', 'https://upload.wikimedia.org/wikipedia/en/2/28/FCE%2C_Akoka_logo.png', 'https://en.wikipedia.org/wiki/File:FCE,_Akoka_logo.png'),
   ('federal-polytechnic-offa', 'https://upload.wikimedia.org/wikipedia/en/9/9d/Federal_Polytechnic%2C_Offa_%28logo%29.png', 'https://en.wikipedia.org/wiki/File:Federal_Polytechnic,_Offa_(logo).png'),
@@ -57,10 +59,12 @@ update public.institutions i
   ('lagos-state-university', 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Lagos_State_University_logo.png/120px-Lagos_State_University_logo.png', 'https://commons.wikimedia.org/wiki/File:Lagos_State_University_logo.png'),
   ('mcpherson-university-seriki-sotayo', 'https://upload.wikimedia.org/wikipedia/en/a/a8/The_McPherson_University_logo.png', 'https://en.wikipedia.org/wiki/File:The_McPherson_University_logo.png'),
   ('michael-okpara-university-of-agriculture', 'https://upload.wikimedia.org/wikipedia/en/5/5a/Moua_logo.jpg', 'https://en.wikipedia.org/wiki/File:Moua_logo.jpg'),
+  ('nile-university-of-nigeria', 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Logo_of_Nile_University_Abuja_Nigeria.svg/120px-Logo_of_Nile_University_Abuja_Nigeria.svg.png', 'https://en.wikipedia.org/wiki/File:Logo_of_Nile_University_Abuja_Nigeria.svg'),
   ('nnamdi-azikiwe-university', 'https://upload.wikimedia.org/wikipedia/en/thumb/8/8e/Badge_of_Nnamdi_Azikiwe_University.png/120px-Badge_of_Nnamdi_Azikiwe_University.png', 'https://en.wikipedia.org/wiki/File:Badge_of_Nnamdi_Azikiwe_University.png'),
   ('pan-atlantic-university', 'https://upload.wikimedia.org/wikipedia/en/thumb/6/66/Logo_of_Pan-Atlantic_University.png/120px-Logo_of_Pan-Atlantic_University.png', 'https://en.wikipedia.org/wiki/File:Logo_of_Pan-Atlantic_University.png'),
   ('paul-university-awka', 'https://upload.wikimedia.org/wikipedia/en/2/25/Paul_University%2C_Awka_school_logo.jpg', 'https://en.wikipedia.org/wiki/File:Paul_University,_Awka_school_logo.jpg'),
   ('renaissance-university-enugu', 'https://upload.wikimedia.org/wikipedia/en/8/8b/Renaissance_University_logo.png', 'https://en.wikipedia.org/wiki/File:Renaissance_University_logo.png'),
+  ('university-of-abuja', 'https://upload.wikimedia.org/wikipedia/en/thumb/e/ec/Logo_of_the_University_of_Abuja%2C_Nigeria.png/120px-Logo_of_the_University_of_Abuja%2C_Nigeria.png', 'https://en.wikipedia.org/wiki/File:Logo_of_the_University_of_Abuja%2C_Nigeria.png'),
   ('university-of-ibadan', 'https://upload.wikimedia.org/wikipedia/en/7/7e/University_of_Ibadan_logo.jpeg', 'https://en.wikipedia.org/wiki/File:University_of_Ibadan_logo.jpeg'),
   ('university-of-jos', 'https://upload.wikimedia.org/wikipedia/en/e/ef/University_of_Jos_logo.jpg', 'https://en.wikipedia.org/wiki/File:University_of_Jos_logo.jpg')
   ) as v(slug, logo_url, logo_source)

@@ -19,7 +19,7 @@ type Props = { params: Promise<{ id: string }> };
 export default async function EditRoommatePostPage({ params }: Props) {
   const { id } = await params;
   const session = await resolveSessionClaims();
-  const schoolsRead = listInstitutions({ limit: 400 });
+  const schoolsRead = listInstitutions({ limit: 1500 });
   if (session.state !== "signed-in") {
     return <PostFlowScreen read={{ state: "signed-out", next: ROOMMATES_ROUTES.editListing(id) }} schools={(await schoolsRead).items} t={copy} />;
   }

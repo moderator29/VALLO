@@ -32,7 +32,7 @@ export default async function RoommateVerifyPage() {
   const locale = await getLocale();
   const R = getDictionary(locale).roommates;
   const V = R.verifyX;
-  const [hub, schools, claims] = await Promise.all([readRoommatesHub(), listInstitutions({ limit: 400 }), resolveSessionClaims()]);
+  const [hub, schools, claims] = await Promise.all([readRoommatesHub(), listInstitutions({ limit: 1500 }), resolveSessionClaims()]);
   if (hub.live && !hub.signedIn) redirect(withNext("/sign-in", ROOMMATES_ROUTES.verify));
   const now = requestNow();
   if (!hub.live) {

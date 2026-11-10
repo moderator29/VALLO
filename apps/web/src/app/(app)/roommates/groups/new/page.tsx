@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
  * so nothing is typed twice, and every field can be changed.
  */
 export default async function NewRoommateGroupPage() {
-  const [mine, schools] = await Promise.all([readMyRoommateProfile(), listInstitutions({ limit: 400 })]);
+  const [mine, schools] = await Promise.all([readMyRoommateProfile(), listInstitutions({ limit: 1500 })]);
   if (mine.state === "signed-out") redirect(withNext("/sign-in", ROOMMATES_ROUTES.newGroup));
   const p = mine.state === "ok" ? mine.profile : null;
   return (

@@ -17,7 +17,7 @@ export default async function NewRoommatePostPage({ searchParams }: { searchPara
   const q = await searchParams;
   const kind = (LISTING_KINDS as readonly string[]).includes(String(q.kind)) ? (q.kind as ListingKind) : EMPTY_LISTING.kind;
   const next = `${ROOMMATES_ROUTES.create}${q.kind ? `?kind=${kind}` : ""}`;
-  const [session, mine, schools] = await Promise.all([resolveSessionClaims(), readMyRoommateProfile(), listInstitutions({ limit: 400 })]);
+  const [session, mine, schools] = await Promise.all([resolveSessionClaims(), readMyRoommateProfile(), listInstitutions({ limit: 1500 })]);
   let read: PostFlowState;
   if (mine.state === "not-open") read = { state: "not-open" };
   else if (session.state !== "signed-in" || mine.state !== "ok") read = { state: "signed-out", next };

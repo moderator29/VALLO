@@ -93,8 +93,9 @@ export function ProtectedPaymentLive({
         else done?.(result.data);
       } catch {
         banner.error(PROTECTED_ACTION_REFUSED.unavailable);
+      } finally {
+        router.refresh();
       }
-      router.refresh();
     });
 
   return (

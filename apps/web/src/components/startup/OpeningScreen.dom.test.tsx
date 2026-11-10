@@ -65,7 +65,9 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the opening screen, in a browse
     const first = await state(page);
     expect(first.display).toBe("block");
     expect(first.opacity).toBe(1);
-    expect(first.markWidth).toBe(Math.round(390 * 0.36));
+    // 36 per cent of the width, give or take the entrance's small scale (0.96 to 1.04)
+    expect(first.markWidth).toBeGreaterThanOrEqual(Math.round(390 * 0.36 * 0.94));
+    expect(first.markWidth).toBeLessThanOrEqual(Math.round(390 * 0.36 * 1.06));
     expect(Math.abs(first.markCentreY - Math.round(844 * 0.46))).toBeLessThanOrEqual(8);
     await page.waitForTimeout(OPEN_MIN_MS - 250);
     expect((await state(page)).open).toBe("on");

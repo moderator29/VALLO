@@ -14,6 +14,6 @@ export const dynamic = "force-dynamic";
 export default async function CampusDirectoryPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const raw = (await searchParams).q;
   const q = typeof raw === "string" ? raw.trim().slice(0, 60) : "";
-  const list = await listInstitutions({ q, limit: 400 });
+  const list = await listInstitutions({ q, limit: 1500 });
   return <CampusDirectoryView live={list.live} items={list.items} q={q} t={copy} />;
 }
