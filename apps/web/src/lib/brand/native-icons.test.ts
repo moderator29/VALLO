@@ -119,6 +119,7 @@ describe("the Android notification icon", () => {
   it("is white on transparent: only opaque white fills, a 24dp vector", () => {
     const fills = [...xml.matchAll(/android:fillColor="([^"]+)"/g)].map((m) => m[1]);
     expect(fills.length).toBeGreaterThan(0);
+    // eslint-disable-next-line nf/no-raw-colour -- the literal value of an Android fillColor attribute being asserted, not a colour this product paints with
     expect(new Set(fills)).toEqual(new Set(["#FFFFFFFF"]));
     expect(xml).toContain('android:width="24dp"');
     expect(xml).toContain('android:height="24dp"');
