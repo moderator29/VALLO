@@ -157,6 +157,22 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
     mechanism:
       "the new protected rail (lib/payments/providers/escrowpay): funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; the screens draw 'protected' only on a provider-confirmed state recorded in provider_arrangements; switched off by payments_escrowpay_on (fail closed), DOCUMENTED false in lib/payments/providers/escrowpay/client.ts, and every category disabled in public.protected_payment_categories",
   },
+  /* The protected rail's trust page, failure states and receipt (10
+     November 2026), the same claim as the entry above, for the explainer at
+     /docs/how-protection-works (PROTECTED_HOW in copy.ts). Each sentence
+     describes the rail as it works once open, beside PROTECTED_NOT_OPEN,
+     which the page draws first: protected payment is not open, and nothing
+     is paid this way today. Whole sentences or a sentence's opening words,
+     copy.ts only. */
+  {
+    phrase:
+      /^A protected payment is a bank transfer that a licensed bank holds under your agreement until the handover you agreed has happened\.|^When protected payment opens, the money you transfer goes to a designated account at a licensed bank\.|^How a protected payment moves$|^A protected payment, from agreement to release$|^Only now does the payment read as protected, with the bank named on screen\.$|^The states of a protected payment$|^Protected bank transfer, from a Nigerian account$/,
+    onlyIn: MONEY_COPY_FILE,
+    mechanism:
+      "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed) with DOCUMENTED false in lib/payments/providers/escrowpay/client.ts",
+  },
+  /* An import path, not copy: the protected payment screens' own folder. */
+  { phrase: /^@\/components\/money\/protected\/[A-Za-z-]+$/, mechanism: "a module specifier (components/money/protected), not text a person reads" },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 
   /* "Instant" (29 September): the word promises speed, so it is a claim word

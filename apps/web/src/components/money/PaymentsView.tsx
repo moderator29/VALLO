@@ -24,6 +24,10 @@ import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { MoneyCentre } from "./MoneyCentre";
+import { Amount } from "@/components/ui/Amount";
+import { StagePill } from "./protected/kit";
+import type { ProtectedPaymentSummary } from "./protected/types";
+import { PROTECTED_PAYMENTS_HEADING } from "@/lib/money/copy";
 
 /* The records a payer reaches from here, each its own screen (one job each). */
 const DOORS: { href: string; icon: UiIconName; key: keyof typeof PAYMENTS_DOOR }[] = [
@@ -46,6 +50,7 @@ export function PaymentsView({
   balances,
   locale,
   show = null,
+  protectedPayments = [],
 }: {
   summary: PaymentsSummary;
   entries: HistoryEntry[];
@@ -55,6 +60,12 @@ export function PaymentsView({
   locale: Locale;
   /** The filter chip chosen, from `?show=`: payments or refunds; anything else is all. */
   show?: string | null;
+  /**
+   * BUILD 7.5: the viewer's protected payments (`readMyProtectedPayments`),
+   * each with its state in words and an icon. Empty while the rail is off,
+   * which is today, so nothing is drawn.
+   */
+  protectedPayments?: readonly ProtectedPaymentSummary[];
 }) {
   const words = getDictionary(locale).experienceMoney.payments;
   /* Reference 4's filter chips. The filter runs over the rows this page
@@ -75,6 +86,22 @@ export function PaymentsView({
           which needs the protected rail live (D50 condition 3). Until
           then nothing is drawn here: no zero, no "coming" card. */}
       {balances.state === "ok" ? <MoneyCentre balances={balances.data} locale={locale} /> : null}
+      {protectedPayments.length > 0 ? (
+        <ListGroup label={PROTECTED_PAYMENTS_HEADING} labelAs="h2" data-testid="payments-protected">
+          {protectedPayments.map((p) => (
+            <ListRow
+              key={p.reference}
+              href={p.href}
+              chevron
+              title={p.title}
+              sub={p.reference}
+              value={<Amount minorUnits={p.amountMinor} locale={locale} showFraction />}
+              status={<StagePill stage={p.stage} />}
+              data-testid="payments-protected-row"
+            />
+          ))}
+        </ListGroup>
+      ) : null}
       <HistoryHero
         id="nf-payments-total"
         label={PAYMENTS_TOTAL_LABEL}
