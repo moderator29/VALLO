@@ -1,9 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useState, useTransition } from "react";
 import { banner } from "@/lib/ui/toast";
-import { useSafeTransition } from "@/lib/ui/use-safe-transition";
-import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { submitDocFeedback } from "@/lib/support/doc-feedback";
 import "@/app/css/docs-kit.css";
@@ -21,18 +19,19 @@ export function DocHelpful({ page }: { page: string }) {
   const id = useId();
   const [state, setState] = useState<"ask" | "why" | "done">("ask");
   const [note, setNote] = useState("");
-  const [pending, start] = useSafeTransition();
+  const [pending, start] = useTransition();
 
-  /* A refusal is said through the banner and the question stays; a weak
-     signal keeps the screen as it was (lib/offline/tap-failed). */
+  /* A refusal or a lost signal is said through the banner and the question
+     stays. This page is public and weight-budgeted, so it does not pull in the
+     app's offline helpers just to word a lost signal. */
   const send = (helpful: boolean, withNote?: string) =>
     start(async () => {
       try {
         const result = await submitDocFeedback({ page, helpful, note: withNote });
         if (result.ok) setState("done");
         else banner.error(result.error);
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
+      } catch {
+        banner.error("That did not go through. Check your connection and try again.");
       }
     });
 

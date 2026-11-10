@@ -94,7 +94,7 @@ describe.skipIf(!have)("the schools directory SQL", () => {
   });
 
   describe("the logos and aliases file", () => {
-    const sql = read(FILES.logos);
+    const sql = have ? read(FILES.logos) : "";
     const known = new Set(all.map((r) => r.slug));
     const logoBlock = sql.slice(sql.indexOf("set logo_url = v.logo_url"), sql.indexOf("as v(slug, logo_url, logo_source)"));
     const tuples = [...logoBlock.matchAll(/^\s*\('([^']+)', '([^']+)', '([^']+)'\)/gm)].map((m) => ({ slug: m[1]!, url: m[2]!, source: m[3]! }));

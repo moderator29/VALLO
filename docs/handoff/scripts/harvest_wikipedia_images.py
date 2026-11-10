@@ -78,7 +78,9 @@ def main():
     schools = json.load(open(sys.argv[1]))
     log = open(sys.argv[3], "a") if len(sys.argv) > 3 else sys.stderr
     L = lambda *a: print(*a, file=log, flush=True)
-    titles = list(dict.fromkeys(t for s in schools for t in variants(s)))
+    # SEARCH_ONLY=1 skips the direct-title pass (one search per school instead of up to three title lookups).
+    import os
+    titles = [] if os.environ.get("SEARCH_ONLY") == "1" else list(dict.fromkeys(t for s in schools for t in variants(s)))
     L(f"{len(titles)} candidate titles")
     pages = {}  # requested title -> (resolved title, description, files)
     for i in range(0, len(titles), 10):
@@ -138,7 +140,7 @@ def main():
     L(f"{len(chosen)} from direct titles; searching for the rest")
     todo = [s for s in schools if s["slug"] not in chosen]
     for n, s in enumerate(todo):
-        d = api(action="query", generator="search", gsrsearch=s["name"].split(",")[0] + " Nigeria", gsrlimit=2, prop="description|images", imlimit="max")
+        d = api(action="query", generator="search", gsrsearch=s["name"].split(",")[0] + " Nigeria", gsrlimit=3, prop="description|images", imlimit="max")
         for p in d.get("query", {}).get("pages", []):
             f = pick_file(s, p["title"], p.get("description", ""), [im["title"][5:] for im in p.get("images", [])])
             if f:
