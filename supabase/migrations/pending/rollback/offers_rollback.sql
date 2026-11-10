@@ -22,7 +22,8 @@ drop trigger if exists transactions_no_sale_money on public.transactions;
 drop trigger if exists deal_agreements_sale_terms_fixed on public.deal_agreements;
 drop function if exists private.sale_agreements_take_no_money(), private.sale_agreed_terms_are_fixed();
 drop table if exists public.deal_document_access, public.deal_documents, public.deal_reads, public.offer_requirements, public.offer_policy;
-delete from storage.buckets where id = 'deal-documents';
+-- The private bucket 'deal-documents' is left in place on purpose: Supabase refuses a direct
+-- DELETE on storage tables (use the Storage page to remove it by hand if you ever want to).
 -- Only when no sale rows remain:
 delete from public.deal_agreements where kind = 'sale';
 alter table public.deal_agreements drop constraint if exists deal_agreements_sale_takes_no_money, drop constraint if exists deal_agreements_sale_shape,
