@@ -926,8 +926,8 @@ const YOUR_DATA: DocChapter = {
             </li>
           </ol>
           <p>
-            What is kept: records of money that moved, for at least five years, because Nigerian
-            anti-money-laundering law requires it, with your name, email address and phone number removed.
+            What is kept: records of money that moved, for six years, because Nigerian
+            tax and anti-money-laundering rules require it, with your name, email address and phone number removed.
             Messages you sent stay in the other person&rsquo;s conversation, shown as from a deleted account.
             The full list is on{" "}
             <Link href="/delete-account" className={A}>
