@@ -1570,7 +1570,7 @@ export default async function ListingDetailPage({
                     <Section divided>
                       <div className="flex flex-wrap items-center gap-xs">
                         <ShareToFeedButton listingId={listing.id} />
-                        <CopyLink path={`/listing/${listing.id}`} label="Copy link to this listing" />
+                        <CopyLink path={`/listing/${listing.id}`} label={t.offPlatform.copy} />
                       </div>
                     </Section>
                   </Reveal>

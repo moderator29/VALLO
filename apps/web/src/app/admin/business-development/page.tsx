@@ -1,3 +1,4 @@
+import { countOf } from "@vallo/i18n/core";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/guard";
@@ -19,7 +20,7 @@ function requestTime(): number {
 function dateLabel(iso: string | null): string {
   if (!iso) return "no date";
   try {
-    return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+    return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-NG", { day: "numeric", month: "short", timeZone: "UTC" });
   } catch {
     return iso;
   }
@@ -71,7 +72,7 @@ export default async function BusinessDevelopmentPage() {
           <Panel title="Listings">
             <p className="nf-body">
               <Link href="/admin/listings" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-                {listingsWaiting} listing{listingsWaiting === 1 ? "" : "s"} waiting on a review decision
+                {countOf(listingsWaiting, "listings")} waiting on a review decision
               </Link>
               .
             </p>
@@ -96,10 +97,10 @@ export default async function BusinessDevelopmentPage() {
   const week = weeklySummary(prospects, activity, requestTime());
 
   const contextParts: string[] = [
-    `${kpi.prospectsIdentified} prospect${kpi.prospectsIdentified === 1 ? "" : "s"} in your pipeline`,
-    `${followUps.length} follow-up${followUps.length === 1 ? "" : "s"} due this week`,
+    `${countOf(kpi.prospectsIdentified, "prospects")} in your pipeline`,
+    `${countOf(followUps.length, "followUps")} due this week`,
   ];
-  if (listingsWaiting !== null) contextParts.push(`${listingsWaiting} listing${listingsWaiting === 1 ? "" : "s"} awaiting your review`);
+  if (listingsWaiting !== null) contextParts.push(`${countOf(listingsWaiting, "listings")} awaiting your review`);
   const context = contextParts.join(", ") + ".";
 
   return (
@@ -111,9 +112,9 @@ export default async function BusinessDevelopmentPage() {
 
       <Panel title="This week">
         <ul className="grid gap-2xs nf-body">
-          <li>{week.prospectsAdded} prospect{week.prospectsAdded === 1 ? "" : "s"} added</li>
-          <li>{week.contactsLogged} contact{week.contactsLogged === 1 ? "" : "s"} logged</li>
-          <li>{week.followUpsDone} follow-up{week.followUpsDone === 1 ? "" : "s"} done</li>
+          <li>{countOf(week.prospectsAdded, "prospects")} added</li>
+          <li>{countOf(week.contactsLogged, "contacts")} logged</li>
+          <li>{countOf(week.followUpsDone, "followUps")} done</li>
           <li>{week.onboardedThisWeek} onboarded</li>
         </ul>
         <p className="nf-caption mt-row text-[var(--nf-content-secondary)]">
@@ -130,7 +131,7 @@ export default async function BusinessDevelopmentPage() {
             "Could not be read just now."
           ) : (
             <Link href="/admin/listings" className="font-semibold text-[var(--nf-content-link)] hover:underline">
-              {listingsWaiting} listing{listingsWaiting === 1 ? "" : "s"} waiting on a review decision
+              {countOf(listingsWaiting, "listings")} waiting on a review decision
             </Link>
           )}
         </p>

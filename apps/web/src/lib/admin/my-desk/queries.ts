@@ -103,7 +103,8 @@ export async function readAnnouncements(db: SupabaseClient, who: DeskIdentity): 
     db.from("staff_announcement_reads").select("announcement_id").eq("user_id", who.userId).limit(2000),
   ]);
   if (rows.error || reads.error) {
-    if (isNotLive(rows.error) || isNotLive(reads.error)) return { state: "not-open" };
+    const notOpen = isNotLive(rows.error) || isNotLive(reads.error);
+    if (notOpen) return { state: "not-open" };
     await reportReadFault("read.admin.my-desk.announcements", ...faults(rows.error, reads.error));
     return { state: "error" };
   }

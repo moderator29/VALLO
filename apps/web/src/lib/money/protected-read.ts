@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveSession } from "../actions/session";
 import { flagIsOn } from "../flags/read";
+import { reportReadFault } from "../observability/read-error";
 import { escrowPayEnabled } from "../payments/providers/escrowpay/switch";
 import { ARRANGEMENT_STATUSES, type ArrangementStatus } from "./arrangement-states";
 import {
@@ -89,6 +90,7 @@ export async function approvedCategory(db: Db, agreementId: string): Promise<Pro
   try {
     const { data, error } = await db.rpc("protected_category_status_for_agreement", { p_agreement: agreementId });
     /* A missing function (not applied yet) is an error, and an error is disabled. */
+    await reportReadFault("read.money.protected_category_status", error);
     if (error || !data || typeof data !== "object") return null;
     const row = data as RowLike;
     if (!isProtectedCategory(row.category)) return null;
@@ -139,11 +141,13 @@ async function payoutMissing(db: Db, userId: string): Promise<boolean> {
       db.from("bank_accounts").select("id").eq("user_id", userId).is("deleted_at", null).limit(1),
       db.from("agents").select("id").eq("user_id", userId),
     ]);
+    await reportReadFault("read.money.payout_missing", bank.error, agents.error);
     if (bank.error || agents.error) return false;
     if (Array.isArray(bank.data) && bank.data.length > 0) return false;
     const ids = ((agents.data ?? []) as { id: string }[]).map((a) => a.id);
     if (ids.length === 0) return true;
     const payout = await db.from("payout_accounts").select("id").in("agent_id", ids).limit(1);
+    await reportReadFault("read.money.payout_missing", payout.error);
     if (payout.error) return false;
     return !(Array.isArray(payout.data) && payout.data.length > 0);
   } catch {
@@ -181,6 +185,7 @@ export async function buildProtectedDeal(
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+    await reportReadFault("read.money.protected_arrangement", arrError);
     if (arrError || !arrRow) return null;
     const arr = arrRow as RowLike;
     if (arr.provider !== "escrowpay") return null;
@@ -202,6 +207,7 @@ export async function buildProtectedDeal(
       .select("id, kind, listing_id, renter_id, owner_id, terms, terms_version")
       .eq("id", agreementId)
       .maybeSingle();
+    await reportReadFault("read.money.protected_agreement", agError);
     if (agError || !agRow) return null;
     const ag = agRow as RowLike;
     const terms = ag.terms && typeof ag.terms === "object" && !Array.isArray(ag.terms) ? (ag.terms as RowLike) : null;
@@ -296,6 +302,7 @@ export async function buildMyProtectedPayments(db: Db, userId: string, deps: Pro
       .eq("provider", "escrowpay")
       .order("created_at", { ascending: false })
       .limit(limit);
+    await reportReadFault("read.money.my_protected_payments", error);
     if (error || !Array.isArray(data)) return [];
     const rows: ProtectedPaymentSummary[] = [];
     for (const raw of data as RowLike[]) {

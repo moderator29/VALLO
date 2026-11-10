@@ -14,8 +14,9 @@ import { SOCIAL_OFF_MESSAGE, isSocialEnabled } from "@/lib/social/flag";
 import { listingPhotoUrl } from "@/lib/social/posts-media";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-import { POST_LISTING_COLUMNS, firstPhotoPath, statedPrice, type PostListingRow } from "../post-listing/model";
+import { firstPhotoPath, statedPrice, type PostListingRow } from "../post-listing/model";
 import {
+  LIVE_LISTING_COLUMNS,
   SHARE_WORDS,
   cleanNote,
   decideShare,
@@ -84,7 +85,7 @@ type LiveListing = PostListingRow & { agent_id: string; closed_at: string | null
 async function readLiveListing(db: Db, listingId: string): Promise<LiveListing | null> {
   const { data, error } = await db
     .from("listings")
-    .select(`${POST_LISTING_COLUMNS}, agent_id, closed_at, is_demo`)
+    .select(LIVE_LISTING_COLUMNS)
     .eq("id", listingId)
     .eq("status", "PUBLISHED")
     .is("closed_at", null)

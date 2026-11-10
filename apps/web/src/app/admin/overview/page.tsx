@@ -1,3 +1,4 @@
+import { countOf } from "@vallo/i18n/core";
 import type { Metadata } from "next";
 import { requireCoo, cooRefusal } from "@/lib/admin/overview/guard";
 import { readCooBacklog, listEscalations, listStaffAccessRecommendations } from "@/lib/admin/overview/reads";
@@ -45,9 +46,9 @@ export default async function OverviewPage() {
   const openEscalations = escalationsRead.state === "ok" ? escalationsRead.data.filter((e) => e.status !== "resolved").length : null;
 
   const contextParts: string[] = [];
-  if (openListings !== null) contextParts.push(`${openListings} listing${openListings === 1 ? "" : "s"} awaiting review`);
-  if (openAlerts !== null) contextParts.push(`${openAlerts} open operations alert${openAlerts === 1 ? "" : "s"}`);
-  if (openEscalations !== null) contextParts.push(`${openEscalations} open escalation${openEscalations === 1 ? "" : "s"} waiting on you`);
+  if (openListings !== null) contextParts.push(`${countOf(openListings, "listings")} awaiting review`);
+  if (openAlerts !== null) contextParts.push(`${countOf(openAlerts, "alerts")} open in operations`);
+  if (openEscalations !== null) contextParts.push(`${countOf(openEscalations, "escalations")} open and waiting on you`);
   const context = contextParts.length > 0 ? `${contextParts.join(", ")}.` : null;
 
   return (

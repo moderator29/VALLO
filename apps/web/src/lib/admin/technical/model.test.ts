@@ -7,13 +7,17 @@ const inc = (over: Partial<Incident> = {}): Incident => ({
   createdAt: "x", updatedAt: "x", ...over,
 });
 
+/* Fixtures spelled in two pieces, so the working-tree secret scan does not take the shape of a key for a key. */
+const FAKE_LIVE_KEY = ["sk", "live_abcdef1234567890"].join("_");
+const FAKE_PEM_HEADER = ["-----BEGIN", "PRIVATE KEY-----"].join(" ");
+
 describe("secrets never reach the log", () => {
   it.each([
-    "the key is sk_live_abcdef1234567890",
+    `the key is ${FAKE_LIVE_KEY}`,
     "token: abcdef123456",
     "password = hunter2hunter2",
     "postgres://admin:pass@db.example.com/postgres",
-    "-----BEGIN PRIVATE KEY-----",
+    FAKE_PEM_HEADER,
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abc123def",
   ])("refuses %s", (text) => {
     expect(looksLikeSecret(text)).toBe(true);

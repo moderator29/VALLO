@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
+import { Badge, type BadgeTone } from "./Badge";
 import { PersonTier } from "./PersonTier";
+
+export { Badge, type BadgeTone };
 import type { PersonTier as PersonTierValue } from "@/lib/admin/reads/shapes";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { intlTag } from "@vallo/i18n/core";
@@ -128,13 +131,6 @@ export function IconPlate({ icon, tone = "brand", size = "md" }: { icon: AdminIc
       <NavIcon icon={icon} size={ICON_PLATE_GLYPH[size]} />
     </UiIconPlate>
   );
-}
-
-export type BadgeTone = "success" | "pending" | "error" | "info";
-
-/** A status badge: a rounded rectangle carrying its word, per the shape law. */
-export function Badge({ tone, solid = false, children }: { tone: BadgeTone; solid?: boolean; children: ReactNode }) {
-  return <span className={`nf-admin-badge nf-admin-badge--${tone}${solid ? " nf-admin-badge--solid" : ""}`}>{children}</span>;
 }
 
 /** The change against the previous period, with its arrow and its words. */

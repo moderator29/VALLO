@@ -10,6 +10,8 @@
  * actions share, so the two never drift.
  */
 
+import { countOf } from "@vallo/i18n/core";
+
 export const PLATFORMS = ["instagram", "facebook", "tiktok", "x", "linkedin", "youtube", "other"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
@@ -199,7 +201,7 @@ export function copilotContext(summary: ReportSummary): string {
   return [
     `${summary.thisWeekScheduled} posts scheduled this week`,
     `${summary.overdue} overdue`,
-    `${summary.activeCampaigns} campaign${summary.activeCampaigns === 1 ? "" : "s"} active`,
+    `${countOf(summary.activeCampaigns, "campaigns")} active`,
     `${summary.postedThisMonth} posted this month`,
   ].join(", ");
 }

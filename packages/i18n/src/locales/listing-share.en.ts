@@ -34,7 +34,7 @@ export const listingShareEn = {
   gone: "No longer available",
   goneNote: "The listing this post shared is not on Vallo any more.",
   alreadyShared: "You have already shared this listing. Remove that share first.",
-  notLive: "This listing is not live, so it cannot be shared.",
+  notLive: "This listing is not open to the public, so it cannot be shared.",
   signInPrompt: "Sign in to share this listing to the feed.",
   notOpen: "Sharing to the feed is not open yet.",
   limitReached: "You can share up to 2 listings at a time. Remove one to share another.",

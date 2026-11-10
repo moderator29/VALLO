@@ -240,6 +240,15 @@ export const unitsEn = {
   /* Schedule a visit: the note's counter and a day's open times. */
   charactersLeft: { one: "1 character left", other: "{count} characters left" },
   openTimes: { one: "1 open time", other: "{count} open times" },
+  /* Admin desks: counted phrases that were inflected by hand (10 November 2026). */
+  listings: { one: "1 listing", other: "{count} listings" },
+  prospects: { one: "1 prospect", other: "{count} prospects" },
+  followUps: { one: "1 follow-up", other: "{count} follow-ups" },
+  contacts: { one: "1 contact", other: "{count} contacts" },
+  escalations: { one: "1 escalation", other: "{count} escalations" },
+  claims: { one: "1 claim", other: "{count} claims" },
+  pastDeadline: { one: "{count} is past its deadline", other: "{count} are past their deadline" },
+  pastPromisedTime: { one: "{count} past its promised time", other: "{count} past their promised time" },
 } satisfies Record<string, PluralForms>;
 
 export type UnitNoun = keyof typeof unitsEn;

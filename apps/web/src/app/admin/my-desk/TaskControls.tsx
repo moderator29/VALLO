@@ -14,7 +14,7 @@ import {
   type TaskComment,
 } from "@/lib/admin/my-desk/model";
 
-import { Badge, type BadgeTone } from "../_components/panels";
+import { Badge, type BadgeTone } from "../_components/Badge";
 import { useDesk } from "./useDesk";
 
 /**

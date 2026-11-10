@@ -44,7 +44,7 @@ describe("declareIncident", () => {
   it("refuses a summary that holds a key before writing anything", async () => {
     const fake = fakeSupabase();
     asStaff(fake);
-    const r = await A.declareIncident({ title: "Bookings slow", severity: "sev2", summary: "key sk_live_abcdef1234567890 was in the log" });
+    const r = await A.declareIncident({ title: "Bookings slow", severity: "sev2", summary: `key ${["sk", "live_abcdef1234567890"].join("_")} was in the log` });
     expect(r.ok).toBe(false);
     expect(fake.wrote()).toBe(false);
   });

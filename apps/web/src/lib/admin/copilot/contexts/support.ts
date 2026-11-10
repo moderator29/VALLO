@@ -1,3 +1,4 @@
+import { countOf } from "@vallo/i18n/core";
 import { countWord, notLive, oldestAge, sentences } from "./common";
 
 export type SupportRowFigures = {
@@ -12,7 +13,7 @@ export function supportContext(rows: readonly SupportRowFigures[] | null, nowMs:
   const waitingOnUs = open.filter((r) => r.lane !== "waiting_on_member");
   const late = open.filter((r) => r.breached).length;
   return sentences([
-    `${countWord(waitingOnUs.length, "ticket")} waiting on the team, ${late} past ${late === 1 ? "its" : "their"} promised time`,
+    `${countWord(waitingOnUs.length, "ticket")} waiting on the team, ${countOf(late, "pastPromisedTime")}`,
     `${open.filter((r) => r.lane === "new").length} new, ${open.filter((r) => r.lane === "escalated").length} escalated and ${open.filter((r) => r.lane === "waiting_on_member").length} waiting on the member`,
     waitingOnUs.length > 0 ? `The oldest open ticket was filed ${oldestAge(waitingOnUs.map((r) => r.createdAt), nowMs)} ago` : null,
   ]);

@@ -12,7 +12,7 @@ import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
-import { Badge } from "../../_components/panels";
+import { Badge } from "../../_components/Badge";
 
 /**
  * THE WEEKLY REPORT FORM. English throughout, a banner for every outcome,

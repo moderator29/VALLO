@@ -12,7 +12,7 @@ const CARDS: { key: keyof CooBacklog; title: string; viewAll: string }[] = [
 function dateLabel(iso: string): string {
   if (!iso) return "no date";
   try {
-    return new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short" });
+    return new Date(iso).toLocaleDateString("en-NG", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
   } catch {
     return iso;
   }

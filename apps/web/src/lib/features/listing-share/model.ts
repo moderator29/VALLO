@@ -13,6 +13,11 @@
  */
 import { listingShareEn } from "@vallo/i18n/en/listing-share";
 
+import { POST_LISTING_COLUMNS } from "../post-listing/model";
+
+/** The card columns plus what the action checks again after the read (the owner, closed and demo flags). */
+export const LIVE_LISTING_COLUMNS = `${POST_LISTING_COLUMNS}, agent_id, closed_at, is_demo`;
+
 export const LISTING_SHARE_LIMIT = 2;
 export const LISTING_SHARE_NOTE_MAX = 280;
 
