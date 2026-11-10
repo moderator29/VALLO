@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Locale } from "@vallo/i18n";
+import type { Locale } from "@vallo/i18n/core";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -63,6 +63,8 @@ import {
 import { PROTECTED_FUNDS_WORDING_FULL } from "@/lib/money/protected-wording";
 import { stageFor, type ProtectedStage } from "@/lib/money/protected-journey";
 import { CopyValue } from "./CopyValue";
+import { IssueScreen } from "./IssueScreen";
+import { PartnerMark } from "./PartnerMark";
 import { TransferClock } from "./TransferClock";
 import { AmountHero, DetailRows, InfoCard, PlaceCard, ScreenHead, TimelineSpine, lagosTime, money } from "./kit";
 import type { ProtectedDeal } from "./types";
@@ -123,6 +125,12 @@ export function ProtectedPayment({
     />
   );
 
+  /* One of the screens nobody asks for, read from the recorded state,
+     replaces the ordinary screen for that state (spec two, A to C). */
+  if (deal.issue && deal.issue.kind !== "payout_missing") {
+    return <IssueScreen deal={deal} issue={deal.issue} stage={stage} locale={locale} refresh={actions.refresh} pending={pending} />;
+  }
+
   switch (stage) {
     case "awaiting_transfer":
       return (
@@ -165,6 +173,7 @@ export function ProtectedPayment({
               {PROTECTED_FUNDING_CTA}
             </Button>
             <p className="nf-pp-fine nf-pp-fine--center">{PROTECTED_FUNDING_CTA_NOTE}</p>
+            <PartnerMark on={deal.partnerMark === true} />
           </div>
           {timeline}
         </div>

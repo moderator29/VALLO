@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { Locale } from "@vallo/i18n";
+import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import {
@@ -28,6 +28,7 @@ import {
 import { PROTECTED_FUNDS_WORDING_SHORT, THIRD_PARTIES_LINE } from "@/lib/money/protected-wording";
 import type { ProtectedQuote } from "@/lib/money/protected-fees";
 import { DetailRows, PlaceCard, ScreenHead, money } from "./kit";
+import { PartnerMark } from "./PartnerMark";
 import type { ProtectedDeal } from "./types";
 
 /** Why the protected option is not drawn, when it is not. */
@@ -51,8 +52,11 @@ export function ChooseHowToPay({
   cardAllowed,
   locale,
   onContinue,
+  partnerMark = false,
 }: {
   deal: Pick<ProtectedDeal, "amountMinor" | "place">;
+  /** The partner mark beside the pay button, read on the server (`partnerMarkOn`). */
+  partnerMark?: boolean;
   offer: ProtectedOffer;
   cardAllowed: boolean;
   locale: Locale;
@@ -139,6 +143,7 @@ export function ChooseHowToPay({
           <Button variant="primary" size="lg" full onClick={() => onContinue(rail)} data-testid="pp-choose-continue">
             {rail === "protected" ? PROTECTED_CHOOSE_CTA : CARD_CHOOSE_CTA}
           </Button>
+          {rail === "protected" ? <PartnerMark on={partnerMark} /> : null}
         </div>
       ) : null}
     </div>

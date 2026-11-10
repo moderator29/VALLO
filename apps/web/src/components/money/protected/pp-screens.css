@@ -617,3 +617,183 @@
     animation: none;
   }
 }
+
+/*
+ * THE SCREENS NOBODY ASKS FOR, THE PARTNER MARK, THE DISPUTE SHEET AND THE
+ * RECEIPT (10 November 2026). The same family: the attention tint behind a
+ * plate or a pill always sits beside words and an icon.
+ */
+@layer components {
+  .nf-pp-mark[data-tone="attention"],
+  .nf-pp-info__plate[data-tone="attention"] {
+    background: var(--nf-state-warning-surface);
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-stale {
+    display: inline-grid;
+    justify-items: end;
+    gap: var(--nf-space-3xs);
+  }
+
+  .nf-pp-stale__at {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-notice__title {
+    font-weight: 700;
+  }
+
+  .nf-pp-alert {
+    display: flex;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-raised);
+  }
+
+  .nf-pp-alert .nf-pp-info__text {
+    justify-items: start;
+    gap: var(--nf-space-xs);
+  }
+
+  /* The partner mark: one quiet line under the pay button, never the hero. */
+  .nf-pp-partner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-3xs);
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+
+  /* --------------------------------------------------------- the dispute */
+  .nf-pp-reasons {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .nf-pp-reasons legend,
+  .nf-pp-field-label {
+    margin-block-end: var(--nf-space-2xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-reason {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-height: 48px;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: 1px solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-primary);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+    cursor: pointer;
+  }
+
+  .nf-pp-reason[data-on] {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-tint-1);
+  }
+
+  .nf-pp-reason__dot {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--nf-radius-circle);
+    border: 2px solid var(--nf-brand-edge-soft);
+  }
+
+  .nf-pp-reason[data-on] .nf-pp-reason__dot {
+    border-color: var(--nf-brand-primary);
+    box-shadow: inset 0 0 0 3px var(--nf-surface-primary);
+    background: var(--nf-brand-primary);
+  }
+
+  .nf-pp-reason:has(:focus-visible) {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* ----------------------------------------------------------- the receipt */
+  .nf-pp-receipt {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-raised);
+    scroll-margin-top: var(--nf-space-xl);
+  }
+
+  .nf-pp-receipt__title {
+    margin: 0;
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-history {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nf-pp-history li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--nf-space-3xs) var(--nf-space-md);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-history time {
+    color: var(--nf-content-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nf-pp-help {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nf-pp-help a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-height: 48px;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-link);
+  }
+
+  .nf-pp-help li + li {
+    border-top: 1px solid var(--nf-divider);
+  }
+
+  /* ---------------------------------------------------- the payments list */
+  .nf-pp-list-amount {
+    display: grid;
+    justify-items: end;
+    gap: var(--nf-space-3xs);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { countOf } from "@vallo/i18n/core";
 import { PROTECTED_FUNDING_NO_EXPIRY, protectedExpiresIn } from "@/lib/money/copy";
 import { transferCountdown } from "@/lib/money/protected-journey";
 
@@ -28,7 +29,7 @@ export function TransferClock({ expiresAt, now }: { expiresAt: string | null; no
       <p>
         <span aria-hidden="true">{protectedExpiresIn(clock.label)}</span>
         <span className="sr-only" aria-live="polite">
-          {protectedExpiresIn(`${minute} minute${minute === 1 ? "" : "s"}`)}
+          {protectedExpiresIn(countOf(minute, "minutes"))}
         </span>
       </p>
       <span className="nf-pp-clock__bar" aria-hidden="true">

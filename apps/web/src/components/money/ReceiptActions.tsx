@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { ActionTile } from "@/components/ui/ActionTile";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { toast } from "@/lib/ui/toast";
 import type { ReceiptModel } from "@/components/app/money/receipt-model";
 import { canvasBlob, receiptCanvas, receiptPdf, saveFile, shareOrSave } from "@/lib/money/receipt-image";
+import { PROTECTED_RECEIPT_HELP } from "@/lib/money/copy";
 import "@/app/css/money-layer.css";
 
 /**
@@ -26,6 +28,7 @@ export function ReceiptActions({
   back,
   print = true,
   testId,
+  help,
 }: {
   /** The model the sheet drew. Without it only printing is offered. */
   receipt?: ReceiptModel;
@@ -33,6 +36,12 @@ export function ReceiptActions({
   /** Offer the browser's print, where the page carries a printable sheet. */
   print?: boolean;
   testId?: string;
+  /**
+   * Help inside the receipt (BUILD 7.4), for a protected payment: the
+   * problem path with the payment attached, where the money is now, and who
+   * is holding it. Each is a link the page supplies; absent, nothing is drawn.
+   */
+  help?: { wrong: string; where: string; who: string };
 }) {
   const [busy, setBusy] = useState<"pdf" | "image" | "share" | null>(null);
   const name = receipt ? `vallo-receipt-${(receipt.reference?.value ?? receipt.title).replace(/[^a-z0-9]+/gi, "-").toLowerCase().slice(0, 48)}` : "vallo-receipt";
@@ -78,6 +87,18 @@ export function ReceiptActions({
           <ActionTile icon="share" label="Share" onClick={() => void run("share")} data-testid={testId ? `${testId}-share` : undefined} />
           {print ? <ActionTile icon="document" label="Print" onClick={() => window.print()} data-testid={testId ? `${testId}-print` : undefined} /> : null}
         </div>
+      ) : null}
+      {help ? (
+        <ul className="nf-pp-help" aria-label={PROTECTED_RECEIPT_HELP.wrong} data-testid={testId ? `${testId}-help` : undefined}>
+          {(["wrong", "where", "who"] as const).map((key) => (
+            <li key={key}>
+              <Link href={help[key]}>
+                {PROTECTED_RECEIPT_HELP[key]}
+                <UiIcon name="chevron-right" size={16} />
+              </Link>
+            </li>
+          ))}
+        </ul>
       ) : null}
       {back ? (
         <ButtonLink href={back.href} variant="ghost" size="lg" full>

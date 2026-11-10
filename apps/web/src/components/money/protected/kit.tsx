@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { formatMoney, type Locale } from "@vallo/i18n";
+import { formatMoney, type Locale } from "@vallo/i18n/core";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import {
   PROTECTED_STAGE_LABEL,

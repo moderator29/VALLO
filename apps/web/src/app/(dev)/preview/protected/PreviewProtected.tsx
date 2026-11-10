@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Locale } from "@vallo/i18n";
+import type { Locale } from "@vallo/i18n/core";
 import { banner } from "@/lib/ui/toast";
 import { ChooseHowToPay, type ProtectedOffer } from "@/components/money/protected/ChooseHowToPay";
 import { ReviewProtection } from "@/components/money/protected/ReviewProtection";

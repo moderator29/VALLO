@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { Locale } from "@vallo/i18n";
+import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/Check";
 import {

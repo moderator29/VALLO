@@ -1645,3 +1645,292 @@ export const PROTECTED_LISTER_STAGE = {
 /* Screen 11, the persistent timeline. */
 export const PROTECTED_TIMELINE_TITLE = "This payment, step by step";
 export const PROTECTED_TIMELINE_STOPPED = "Stopped here";
+
+/* The screens nobody asks for (spec two, A, B, C and the delays), 10
+   November 2026. Each is a state of the same screens: words, an icon and
+   what to do next. None blames the payer and none promises a time. */
+export const PROTECTED_ISSUE = {
+  partner_unavailable: {
+    label: "Partner not answering",
+    title: "We can't reach the payment partner just now",
+    body: "Your payment is still here and nothing has moved because of this. Below is the last status we confirmed, with the time we confirmed it.",
+    next: "We'll keep trying and update this page when the partner answers. You don't need to do anything or pay again.",
+  },
+  amount_mismatch: {
+    label: "Different amount received",
+    title: "We received a different amount",
+    body: "The amount received doesn't match your agreement, so this payment needs a review before it can continue.",
+    next: "A person at Vallo will look at the transfer and tell you here what happens next. Please don't send another transfer to make up a difference: any further payment is agreed separately and linked to this one.",
+  },
+  late_transfer: {
+    label: "Arrived after expiry",
+    title: "A transfer arrived after the details expired",
+    body: "Money reached the bank after these transfer details had expired, so this payment needs a review before it can continue.",
+    next: "A person at Vallo will match the transfer to this payment and tell you here what happens next. Please don't send another transfer in the meantime.",
+  },
+  duplicate_transfer: {
+    label: "More than one transfer",
+    title: "We received more than one transfer",
+    body: "The bank reported more than one transfer for this payment, so it needs a review before it can continue.",
+    next: "A person at Vallo will look at every transfer and tell you here what happens to the extra one. Please don't send another transfer.",
+  },
+  release_delayed: {
+    label: "Release taking longer",
+    title: "The release is taking longer than usual",
+    body: "Vallo asked the bank to release the payment, and the bank has not confirmed it yet. Nothing more is needed from you.",
+    next: "We're following it up with the payment partner and will update this page when the bank confirms. If you have a question, contact support with the reference below.",
+  },
+  refund_delayed: {
+    label: "Refund taking longer",
+    title: "Your refund is taking longer than usual",
+    body: "Vallo asked the bank to refund you, and the bank has not confirmed it yet. Nothing more is needed from you.",
+    next: "We're following it up with the payment partner and will update this page when the bank confirms. If you have a question, contact support with the reference below.",
+  },
+  payout_missing: {
+    label: "Payout account needed",
+    title: "Add a payout account to be paid",
+    body: "A released payment goes to your payout account, and there isn't one on your Vallo account yet.",
+    next: "Add it now, so nothing waits on you when a release is confirmed. Nothing changes for the payer.",
+  },
+} as const;
+export const PROTECTED_ISSUE_NEXT_TITLE = "What happens now";
+export const PROTECTED_ISSUE_ROWS = {
+  agreed: "Agreed amount",
+  received: "Amount received",
+  difference: "Difference",
+  lastConfirmed: "Last confirmed status",
+  askedAt: "Asked of the bank",
+} as const;
+export const PROTECTED_ADD_PAYOUT = "Add a payout account";
+export function protectedLastConfirmed(time: string): string {
+  return `Last confirmed ${time}`;
+}
+/** The lister's line beside the payer's delay, in the lister's words. */
+export const PROTECTED_LISTER_ISSUE = {
+  partner_unavailable: "We can't reach the payment partner just now. Below is the last status we confirmed; nothing has moved because of this.",
+  amount_mismatch: "The amount the bank received doesn't match the agreement. A person at Vallo is reviewing it before anything continues.",
+  late_transfer: "A transfer arrived after the payer's details had expired. A person at Vallo is reviewing it before anything continues.",
+  duplicate_transfer: "The bank reported more than one transfer. A person at Vallo is reviewing it before anything continues.",
+  release_delayed: "The release is taking longer than usual. Vallo is following it up and will update this page when the bank confirms.",
+  refund_delayed: "The refund to the payer is taking longer than usual. Vallo is following it up with the payment partner.",
+} as const;
+
+/* Raising a problem (spec screen 8): the reasons, the statement and what
+   happens after. A statement once sent is never edited; more evidence is a
+   new entry. */
+export const PROTECTED_PROBLEM_TITLE = "Something isn't right?";
+export const PROTECTED_PROBLEM_LEAD =
+  "Tell us what happened. Your payment will be reviewed under the agreement, and the funds remain held where the partner's arrangement permits.";
+export const PROTECTED_PROBLEM_REASONS = {
+  not_as_described: "The property is not as described",
+  no_access: "I could not access the property",
+  no_keys: "The keys or access were not provided",
+  unusable: "The property is unusable",
+  unresponsive: "The host or agent is unresponsive",
+  other: "Something else",
+} as const;
+export const PROTECTED_PROBLEM_REASON_LABEL = "What went wrong";
+export const PROTECTED_PROBLEM_STATEMENT_LABEL = "What happened";
+export const PROTECTED_PROBLEM_STATEMENT_HINT =
+  "Say what happened and when. Avoid passwords, card details or unrelated personal information.";
+export const PROTECTED_PROBLEM_DRAFT_KEPT = "Your draft is kept on this device until you send it.";
+export const PROTECTED_PROBLEM_SUBMIT = "Send the report";
+export const PROTECTED_PROBLEM_SENT =
+  "Your report has been submitted. The payment is now under review, and we'll update this page when the other party responds or there is news.";
+
+/* The server's refusals for the protected actions. */
+export const PROTECTED_ACTION_REFUSED = {
+  rail_off: "Protected payment is not open on Vallo yet. Nothing has been sent and nothing has moved.",
+  not_found: "We could not find that payment on your account.",
+  too_many: "That was asked a lot just now. Wait a moment, then try again.",
+  bad_input: "Something in that request was not right. Nothing was sent.",
+  unavailable: "That could not be done just now. Nothing has moved; try again in a moment.",
+} as const;
+
+/** The plain statement the trust page and the payment step lean on. It names no date. */
+export const PROTECTED_NOT_OPEN =
+  "Protected payment is not open on Vallo yet. This page explains how it will work, so you know what to expect before it opens; nothing on Vallo is paid this way today.";
+
+/* The protected receipt (BUILD 7.4): the custodian in the provider's own
+   words, the provider's reference, and the release or refund history. */
+export const PROTECTED_RECEIPT_TITLE = "Payment record";
+export const PROTECTED_RECEIPT_ROWS = {
+  reference: "Vallo reference",
+  providerReference: "Partner reference",
+  agreement: "Agreement version",
+  custodian: "Where the money was held",
+  rail: "Paid by",
+  status: "Status",
+} as const;
+export const PROTECTED_RECEIPT_RAIL = "Bank transfer to the designated account";
+export const PROTECTED_RECEIPT_HISTORY = "History";
+export const PROTECTED_RECEIPT_EVENT = {
+  funded: "The bank confirmed it received the transfer",
+  release_requested: "Vallo asked the bank to release the payment",
+  released: "The bank confirmed the release",
+  refund_requested: "Vallo asked the bank to refund the payer",
+  refunded: "The bank confirmed the refund",
+} as const;
+export function protectedAgreementVersion(version: number): string {
+  return `Version ${version}`;
+}
+export const PROTECTED_RECEIPT_NOTE =
+  "This is a Vallo transaction record with the partner's references. It is not a bank statement.";
+export const PROTECTED_RECEIPT_HELP = {
+  wrong: "Something wrong with this payment?",
+  where: "Where is my money?",
+  who: "Who is holding this?",
+} as const;
+
+/* The payments list (BUILD 7.5). */
+export const PROTECTED_PAYMENTS_HEADING = "Bank transfer payments";
+
+/* "How protection works" (BUILD 7.7), the trust page at
+   /docs/how-protection-works. Written to be read by a nervous person: who
+   holds the money, how it moves, what each state means, the fees (always
+   computed from protected-fees.ts, never typed), what it does not cover and
+   what happens when something goes wrong. The provider's and the
+   custodian's names come from protected-wording.ts. */
+export const PROTECTED_HOW = {
+  title: "How protection works",
+  category: "Money",
+  summary:
+    "A protected payment is a bank transfer that a licensed bank holds under your agreement until the handover you agreed has happened. This page explains who holds the money, how it moves, what it costs, and what it does not cover.",
+  notOpenTitle: "Not open yet",
+  glance: [
+    "The money is held by a licensed bank, never by Vallo.",
+    "It is released only when you confirm the handover, or through the dispute process.",
+    "The lister pays the fee; you transfer the agreed amount and no more.",
+    "Shortlets, hotel rooms and restaurants are paid by card instead.",
+  ],
+  who: {
+    title: "Who holds the money",
+    lead: "When protected payment opens, the money you transfer goes to a designated account at a licensed bank. In the partner's own words:",
+    vallo:
+      "Vallo provides the marketplace, the agreement and the screens you see. Vallo does not hold your funds at any point, and cannot spend, lend or keep them.",
+  },
+  flow: {
+    title: "How a protected payment moves",
+    label: "A protected payment, from agreement to release",
+    end: "Every step after your transfer is moved by the bank's own confirmation, never by a button you press.",
+    steps: [
+      { title: "Agree the terms", outcome: "Both of you approve the agreement, and you read the protection terms before paying." },
+      { title: "Get the transfer details", outcome: "A designated account, the exact amount and a unique reference, all copyable." },
+      { title: "Make the transfer", outcome: "From your own Nigerian bank account, in naira. Saying you've paid only asks us to look again." },
+      { title: "The bank confirms", outcome: "Only now does the payment read as protected, with the bank named on screen." },
+      { title: "Confirm the handover", outcome: "Check-in for a stay, the keys for a rental. Confirm only when it has really happened." },
+      { title: "The money is released", outcome: "Vallo instructs the release; the payment is final when the bank confirms it." },
+    ],
+  },
+  states: {
+    title: "What each state means",
+    caption: "The states of a protected payment",
+    columns: { state: "State", means: "What it means", you: "What you do" },
+    rows: {
+      awaiting_transfer: { means: "Transfer details issued. No payment has been confirmed.", you: "Transfer the exact amount with the reference." },
+      confirming: { means: "We're waiting for the bank to confirm your transfer.", you: "Nothing. You can close Vallo." },
+      protected: { means: "The bank confirmed it holds the payment under your agreement.", you: "Confirm the handover when it happens." },
+      release_processing: { means: "Vallo asked the bank to release the payment.", you: "Nothing. The receipt follows." },
+      released: { means: "The bank confirmed the release to the lister.", you: "Keep the receipt." },
+      disputed: { means: "A problem was raised. No release decision has been made.", you: "Add evidence and answer questions." },
+      refund_processing: { means: "Vallo asked the bank to refund the payer.", you: "Nothing. We update you here." },
+      refunded: { means: "The bank confirmed the refund to the original account.", you: "Check your bank account." },
+      requires_review: { means: "Something needs a person, such as an amount that doesn't match.", you: "Wait for us; don't send another transfer." },
+    },
+  },
+  deals: {
+    title: "Which deals can use it",
+    caption: "How each kind of deal is paid",
+    columns: { deal: "Deal", how: "How it is paid", release: "Released when" },
+    rent: "Protected bank transfer, from a Nigerian account",
+    stays: "Card, from any country",
+    sale: "Not paid on Vallo",
+    keys: "You confirm you have the keys",
+    checkIn: "Not held: card terms apply",
+    none: "Not applicable",
+    names: { rent: "Renting a home", stays: "Shortlets and hotel rooms", sale: "Buying property or land" },
+    approval:
+      "A kind of deal can use this only after the partner has approved it in writing. Until then the option is simply not shown.",
+  },
+  fees: {
+    title: "What it costs",
+    lead: "The partner charges a protection fee on the money that comes in. The lister pays it, so you transfer exactly the agreed amount.",
+    caption: "The protection fee",
+    columns: { amount: "Amount transferred", fee: "Fee", who: "Who pays" },
+    examplesCaption: "Worked examples",
+    exampleColumns: { amount: "Agreed amount", fee: "Protection fee", payer: "You transfer", lister: "Reaches the lister" },
+    lister: "The lister",
+    aboveBand: "Above that, the fee is agreed in advance with the partner before any payment opens.",
+    payout: "When the money is released, the partner also charges a small transfer fee on the payout to the lister:",
+    identity: "Identity checks are carried out once per member by a third party and are charged to Vallo, not to you.",
+  },
+  limits: {
+    title: "What protection does not cover",
+    items: [
+      "Money sent any other way: cash, a transfer to a personal account, or a payment arranged outside Vallo.",
+      "A transfer to the wrong account or with the wrong reference may not be matched to your payment.",
+      "It does not decide every dispute in your favour. An outcome follows the agreement and the evidence from both sides.",
+      "It does not judge the property itself. Inspect before you agree, and read what the listing says.",
+      "It is not insurance against bank failure or fraud by a third party.",
+    ],
+  },
+  dispute: {
+    title: "If something goes wrong",
+    steps: [
+      "Tap Something is wrong on the payment, choose what happened and say it in your own words.",
+      "Add photos or documents. A statement once sent is never edited; anything new is a new, dated entry.",
+      "The release stays paused while the dispute is reviewed, where the partner's arrangement permits.",
+      "The lister sees what was reported and can answer with their own evidence.",
+      "A person at Vallo reads both sides and records the decision and the reason on the payment.",
+      "A refund goes back to the account the money came from, once the bank confirms it.",
+    ],
+    timing: "We don't promise how long a review or a refund takes. Each step shows on the payment the moment it is confirmed.",
+  },
+  does: {
+    title: "What Vallo does, and does not do",
+    caption: "What Vallo does and does not do",
+    columns: { what: "What", vallo: "Vallo does it" },
+    rows: [
+      { what: "Shows you the agreement, the fees and the total before you pay", yes: true },
+      { what: "Issues the transfer details from the partner and shows them unchanged", yes: true },
+      { what: "Instructs the release or the refund under your agreement", yes: true },
+      { what: "Runs the dispute process and records every step", yes: true },
+      { what: "Holds, keeps or lends your money", yes: false },
+      { what: "Marks a payment as paid because you said you paid", yes: false },
+      { what: "Releases money because the lister asked", yes: false },
+    ],
+  },
+  related: {
+    paying: "Paying on Vallo",
+    refunds: "Refunds and cancellations",
+    terms: "Terms of use",
+  },
+} as const;
+
+export function protectedFeeBand(percent: string, fixed: string, cap: string | null): string {
+  return cap ? `${percent} plus ${fixed}, at most ${cap}` : `${percent} plus ${fixed}`;
+}
+export function protectedFeeRange(from: string | null, to: string): string {
+  return from ? `${from} to ${to}` : `Up to ${to}`;
+}
+export function protectedPayoutFee(small: string, upTo: string, large: string): string {
+  return `${small} on a payout up to ${upTo}, and ${large} above that.`;
+}
+export function protectedPartnerLine(provider: string): string {
+  return `Vallo's payment partner for this is ${provider}. The partner never holds members' money itself: the bank named above does, and it moves only on Vallo's instruction under your agreement.`;
+}
+
+/* The real read's wording for a deal's dates and refunds. */
+export function protectedMoveIn(date: string): string {
+  return `Move-in ${date}`;
+}
+export function protectedStayDates(from: string, to: string): string {
+  return `${from} to ${to}`;
+}
+export const PROTECTED_REFUND_TERMS_DEFAULT = "As set out in your agreement";
+export const PROTECTED_PLACE_DEFAULT = "Your home";
+export const PROTECTED_PAYER_DEFAULT = "The payer";
+export const PROTECTED_PAYEE_DEFAULT = "The lister";
+export const PROTECTED_RECEIPT_FIGURE = "Amount";
+export const PROTECTED_RECEIPT_TOTAL = "Total transferred";
+export const PROTECTED_RECEIPT_KEEP = "More ways to keep this record";
