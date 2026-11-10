@@ -107,6 +107,7 @@ export async function switchEscrowToCard(input: { agreementId: string }): Promis
       .from("deal_agreements")
       .select("id, kind, booking_id, inspection_id")
       .eq("id", agreementId)
+      .neq("kind", "sale")
       .maybeSingle();
     const ag = agRow as { id: string; kind: string; booking_id: string | null; inspection_id: string | null } | null;
     const next = ag

@@ -107,7 +107,23 @@ const TEMPLATES_THE_TRIGGERS_WRITE = [
   "booking.request_closed",
   /* 3 November: the founder-run newsletter (public.newsletter_enqueue). */
   "platform.newsletter",
+  /* 10 November: offers and the Deal Room (private.sale_tell, supabase/migrations/pending/offers_02). */
+  "offer.received",
+  "offer.countered",
+  "offer.agreed",
+  "offer.declined",
+  "offer.withdrawn",
+  "offer.expired",
+  "offer.reminder",
+  "offer.info_requested",
+  "offer.info_provided",
+  "offer.stage",
+  "offer.document",
+  "offer.disputed",
+  "offer.cancelled",
 ] as const;
+
+const OFFER_PAYLOAD: Payload = { agreement_id: AGREEMENT, listing_id: LISTING, reference: "VO-AB12CD34", amount_minor: 8_050_000_000, terms_version: 3 };
 
 
 /** One real payload per template, of the shape its own trigger composes. */
@@ -169,6 +185,20 @@ const PAYLOADS: Record<(typeof TEMPLATES_THE_TRIGGERS_WRITE)[number], Payload> =
   "message.unread": LIFECYCLE_PAYLOADS["message.unread"]!,
   "booking.request_closed": LIFECYCLE_PAYLOADS["booking.request_closed"]!,
   "platform.newsletter": { campaign: "2026-11-launch" },
+  "offer.received": OFFER_PAYLOAD,
+  "offer.countered": OFFER_PAYLOAD,
+  "offer.agreed": OFFER_PAYLOAD,
+  "offer.declined": OFFER_PAYLOAD,
+  "offer.withdrawn": OFFER_PAYLOAD,
+  "offer.expired": OFFER_PAYLOAD,
+  "offer.reminder": OFFER_PAYLOAD,
+  "offer.info_requested": OFFER_PAYLOAD,
+  "offer.info_provided": OFFER_PAYLOAD,
+  "offer.stage": OFFER_PAYLOAD,
+  "offer.document": OFFER_PAYLOAD,
+  "offer.disputed": OFFER_PAYLOAD,
+  "offer.cancelled": OFFER_PAYLOAD,
+
 };
 
 describe("the lifecycle templates (29 September)", () => {

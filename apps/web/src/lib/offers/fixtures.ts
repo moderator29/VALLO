@@ -96,6 +96,8 @@ export const FIXTURE_GATE_EXISTING = gate({ canOffer: false, reason: "You alread
 
 /* ------------------------------------------------------------------- rows */
 
+const REFS: Record<string, string> = { "off-open": "OFR-2041", "off-counter": "OFR-2042", "off-agreed": "OFR-2043", "off-declined": "OFR-2044", "off-withdrawn": "OFR-2045", "off-expired": "OFR-2046", "off-cancelled": "OFR-2047", "off-above": "OFR-2048" };
+
 type RowOver = Partial<OfferRow> & { id: string };
 
 function row(over: RowOver): OfferRow {
@@ -103,7 +105,7 @@ function row(over: RowOver): OfferRow {
   const askingMinor = over.askingMinor ?? ASKING;
   const diff = differenceOf(amountMinor, askingMinor);
   return {
-    reference: `OFR-${over.id.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8)}`,
+    reference: REFS[over.id] ?? "OFR-1100",
     listingId: "lst-oniru-1",
     listingTitle: "Four bedroom duplex in Oniru, Lagos",
     listingThumb: null,

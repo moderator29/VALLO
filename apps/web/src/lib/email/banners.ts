@@ -113,6 +113,7 @@ const BY_KIND: Readonly<Record<string, BannerFile>> = {
   supportTicketFiled: "support",
   supportReplied: "support",
   unreadMessages: "message",
+  dealUpdate: "message",
 };
 
 /** Every email carries one: its own family's banner, the "safe" one for security, else the general one. */

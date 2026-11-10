@@ -31,6 +31,7 @@ export const STAFF_DESK: Record<StaffScope, string> = {
 
 /** The other desks a scope opens, beyond its front door. */
 export const STAFF_EXTRA_DESKS: Partial<Record<StaffScope, { href: string; label: string }[]>> = {
+  agreements: [{ href: "/admin/offers", label: "Offers and deals" }],
   finance: [
     { href: "/admin/payments", label: "Payments" },
     { href: "/admin/chargebacks", label: "Chargebacks" },

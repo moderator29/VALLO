@@ -47,11 +47,37 @@ import {
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
+  SALE_TAKES_NO_MONEY,
   VALLO_NEVER_HOLDS,
   VIEWINGS_AND_LISTING_FREE,
 } from "./facts";
 import { DocsFlow } from "./DocsFlow";
+import {
+  AGENT_WORKSPACE,
+  CIRCLE,
+  HOST_WORKSPACE,
+  NOTIFICATIONS,
+  PROFILES,
+  REWARDS,
+  ROOMMATES,
+  SAVED_AND_COMPARE,
+  SETTINGS,
+  TENANCY,
+  TOOLS,
+  WALLET,
+} from "./chapters-platform";
+import {
+  COUNTEROFFERS,
+  DEAL_ROOM,
+  HOW_OFFERS_WORK,
+  MAKING_AN_OFFER,
+  OFFER_DOCUMENTS,
+  OFFER_FEES,
+  OFFER_INSPECTIONS,
+  RECEIVING_OFFERS,
+} from "./chapters-offers";
+import { DocCallout } from "@/components/docs/DocCallout";
+import type { DocDestinationId } from "@/lib/docs/destinations";
 import { DOC_GROUPS, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
 
 /* The navigation lives in `docs-groups.ts` so the client rail can import it
@@ -103,6 +129,18 @@ export type DocChapter = {
   icon: BrandIconName;
   /** The sidebar group. Set from the order below. */
   group?: DocGroupId;
+  /**
+   * The date (YYYY-MM-DD) somebody last checked every sentence against the
+   * code. Set it ONLY when that was done: a date on a page nobody re-read is
+   * a false promise, and `DOCS_COVERAGE.md` records which pages carry one.
+   */
+  updated?: string;
+  /** Three or four bullets for the reader who will not read it all. */
+  glance?: string[];
+  /** Buttons into the product, shown at the foot of the page. */
+  actions?: DocDestinationId[];
+  /** Sibling documents a reader might want instead. */
+  related?: { href: string; label: string }[];
   sections: DocSection[];
 };
 
@@ -289,9 +327,10 @@ const WHAT_VALLO_IS: DocChapter = {
  * HOW PAYING WORKS (replaces "Money and agreements", whose slug named the
  * retired Vallo Guarantee; `/docs/money-and-the-guarantee` and the older
  * `/docs/your-wallet` redirect here). The founder's rules of 13 October 2026:
- * every payment inside Vallo; Escrow (the default) or card for rent and
- * shortlets; a sale always escrow; a hotel room by card at once; Vallo never
- * holds the money. The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
+  * every payment inside Vallo; a hotel room by card at once; Vallo never
+ * holds the money. CORRECTED 11 NOVEMBER 2026 (Agent DOCS): protected payment
+ * is not live, and a purchase takes no money through Vallo, so neither is
+ * described as available. The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
  * `for-listers`, `references` and `off-platform` are kept from the old
  * chapter so its links still land on the right heading.
  */
@@ -300,7 +339,7 @@ const PAYING_ON_VALLO: DocChapter = {
   number: 0,
   title: "How paying works",
   summary:
-    "Every payment happens inside Vallo. Escrow or card for rent and shortlets, escrow for a sale, card for a hotel room, and Vallo never holds the money.",
+    "Every payment happens inside Vallo. Today rent, shortlets and hotel rooms are paid by card. Protected payment is not live yet. Vallo takes no money for a purchase, and never holds yours.",
   icon: "shield-lock",
   sections: [
     {
@@ -332,14 +371,13 @@ const PAYING_ON_VALLO: DocChapter = {
       body: (
         <ul role="list">
           <li>
-            <strong>Rent.</strong> Escrow, selected for you, or Pay by card.
+            <strong>Rent.</strong> By card, through our licensed payment partner. Protected payment is not live yet.
           </li>
           <li>
-            <strong>Shortlets and serviced apartments.</strong> Escrow, selected for you, or Pay by
-            card.
+            <strong>Shortlets and serviced apartments.</strong> By card, through our licensed payment partner.
           </li>
           <li>
-            <strong>A sale.</strong> Escrow only.
+            <strong>A purchase.</strong> Not paid through Vallo. Vallo takes no money for a purchase, at any stage.
           </li>
           <li>
             <strong>A hotel room.</strong> By card, when you book, at the price shown.
@@ -355,11 +393,17 @@ const PAYING_ON_VALLO: DocChapter = {
     },
     {
       id: "escrow",
-      heading: "Pay with Escrow",
+      heading: "Protected payment (not live yet)",
       body: (
         <>
+          <DocCallout kind="not-live" title="Protected payment is not live yet">
+            <p>
+              Nothing on this page describes a payment you can make today as protected. What follows is how protected
+              payment is designed to work, so you know what to expect when it opens. These pages will say so when it does.
+            </p>
+          </DocCallout>
           <DocsFlow
-            label="How an escrow payment moves"
+            label="How a protected payment is designed to move (not live yet)"
             steps={[
               { object: "payment-sent", label: "You pay" },
               { object: "doc-lock", label: "A licensed partner holds it" },
@@ -370,7 +414,7 @@ const PAYING_ON_VALLO: DocChapter = {
           <p>{ESCROW_OR_CARD}</p>
           <p>{ESCROW_MEANS}</p>
           <p>{RAIL_COPY.protected.refund}</p>
-          <p>{SALE_IS_ESCROW}</p>
+          <p>{SALE_TAKES_NO_MONEY}</p>
           <p>{ESCROW_PAUSED}</p>
         </>
       ),
@@ -400,8 +444,8 @@ const PAYING_ON_VALLO: DocChapter = {
         <>
           <ul role="list">
             <li>
-              <strong>Rent or a sale.</strong> After the viewing, the inspection report and the
-              agreement. See{" "}
+              <strong>Rent.</strong> After the viewing, the inspection report and the
+              agreement. A purchase never opens a payment in Vallo. See{" "}
               <Link href="/docs/agreements-and-paying" className={A}>
                 From viewing to keys
               </Link>
@@ -478,7 +522,7 @@ const PAYING_ON_VALLO: DocChapter = {
           <li>Add a Nigerian bank account in your own name before anybody can pay you.</li>
           <li>Before you publish, Vallo shows you what you will receive after its commission.</li>
           <li>With Pay by card, your share goes to your bank account when the payment clears.</li>
-          <li>With Escrow, your share is released when the deal is confirmed.</li>
+          <li>When protected payment is live, your share will be released when the deal is confirmed.</li>
           <li>Every payment and every refund appears on your earnings, line by line.</li>
         </ul>
       ),
@@ -619,8 +663,8 @@ const REFUNDS: DocChapter = {
     },
     {
       id: "escrow-refunds",
-      heading: "Get back a payment held in escrow",
-      body: <p>{RAIL_COPY.protected.refund}</p>,
+      heading: "Protected payment refunds (not live yet)",
+      body: <p>When protected payment is live, this is how a refund will work. {RAIL_COPY.protected.refund}</p>,
     },
     {
       id: "tables-and-viewings",
@@ -1115,15 +1159,28 @@ const TROUBLESHOOTING: DocChapter = {
  * number, and a chapter cannot sit outside a group.
  */
 const ORDER: readonly { group: DocGroupId; chapters: DocChapter[] }[] = [
-  { group: "start", chapters: [WHAT_VALLO_IS, QUICK_START, ACCOUNT_AND_WORKSPACES, GETTING_AROUND] },
+  { group: "start", chapters: [WHAT_VALLO_IS, QUICK_START, ACCOUNT_AND_WORKSPACES, GETTING_AROUND, TOOLS] },
   {
     group: "renting",
-    chapters: [FINDING_A_PLACE, UNDERSTANDING_A_LISTING, VIEWINGS, AGREEMENTS_AND_PAYING, PRICE_CHECK],
+    chapters: [FINDING_A_PLACE, UNDERSTANDING_A_LISTING, VIEWINGS, AGREEMENTS_AND_PAYING, TENANCY, PRICE_CHECK, SAVED_AND_COMPARE],
+  },
+  {
+    group: "offers",
+    chapters: [
+      HOW_OFFERS_WORK,
+      MAKING_AN_OFFER,
+      RECEIVING_OFFERS,
+      COUNTEROFFERS,
+      DEAL_ROOM,
+      OFFER_INSPECTIONS,
+      OFFER_DOCUMENTS,
+      OFFER_FEES,
+    ],
   },
   { group: "stays", chapters: [BOOKING_A_STAY, RESTAURANTS] },
-  { group: "money", chapters: [WHAT_VALLO_COSTS, PAYING_ON_VALLO, REFUNDS] },
-  { group: "listing", chapters: [LISTING_ON_VALLO, FOR_OWNERS, FOR_AGENTS, HOSTING] },
-  { group: "tools", chapters: [MESSAGES, AI_ASSISTANT, AROUND] },
+  { group: "money", chapters: [WHAT_VALLO_COSTS, PAYING_ON_VALLO, REFUNDS, WALLET, REWARDS] },
+  { group: "listing", chapters: [LISTING_ON_VALLO, FOR_OWNERS, FOR_AGENTS, HOSTING, AGENT_WORKSPACE, HOST_WORKSPACE] },
+  { group: "tools", chapters: [MESSAGES, NOTIFICATIONS, AI_ASSISTANT, AROUND, CIRCLE, ROOMMATES, PROFILES, SETTINGS] },
   { group: "trust", chapters: [BADGES_AND_VERIFICATION, REVIEWS, TRUST_AND_SAFETY, YOUR_DATA, TROUBLESHOOTING] },
 ];
 

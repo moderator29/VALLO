@@ -75,6 +75,7 @@ export function ListingStickyBar({
   moveInLabel,
   moveInFromLabel,
   secondaryShortLabel,
+  inspect = null,
   sidePanelFromLg = false,
   stackOnPhone = false,
 }: {
@@ -117,6 +118,11 @@ export function ListingStickyBar({
   moveInFromLabel?: string;
   /** The ghost half's one-word label on a phone, e.g. "Breakdown". */
   secondaryShortLabel?: string;
+  /**
+   * Schedule Inspection, beside Contact Agent, on a property for sale where
+   * the primary is Make an offer. A quiet icon on a phone, labelled from `sm`.
+   */
+  inspect?: StickyAction | null;
   /**
    * The page draws its own sticky side panel from `lg` (the listing page's
    * booking panel), carrying the same action. The bar then stands down from
@@ -315,6 +321,21 @@ export function ListingStickyBar({
               className="nf-detail-foot__secondary"
             >
               <span className="nf-btn__label hidden sm:inline">{secondary.label}</span>
+            </ButtonLink>
+          </AuthGate>
+        ) : null}
+
+        {inspect ? (
+          <AuthGate action="inspect">
+            <ButtonLink
+              href={inspect.href}
+              variant="ghost"
+              leadingIcon="calendar-booking"
+              aria-label={inspect.label}
+              className="nf-detail-foot__secondary"
+              data-testid="sticky-inspect"
+            >
+              <span className="nf-btn__label hidden sm:inline">{inspect.label}</span>
             </ButtonLink>
           </AuthGate>
         ) : null}

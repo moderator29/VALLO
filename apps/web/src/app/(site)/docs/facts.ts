@@ -38,20 +38,21 @@ export const PAY_INSIDE_VALLO =
 export const VALLO_NEVER_HOLDS =
   "Vallo never holds customer money. Licensed payment partners hold payments and escrow.";
 
-/** Rule 3: the payer's choice for rent and shortlets. */
+/** Rule 3: how rent and shortlets are paid today. Corrected 11 November 2026: protected payment is not live, so it is not described as available. */
 export const ESCROW_OR_CARD =
-  "For rent and shortlets you choose how to pay: Escrow, which is selected for you, or Pay by card.";
+  "Today, rent and shortlets are paid by card, through our licensed payment partner. Protected payment, where a licensed partner holds your payment until you confirm, is not live yet.";
 
 /** What escrow does. */
 export const ESCROW_MEANS =
-  "With Escrow, a licensed payment partner holds your payment until the deal is confirmed. Only then is it released to the owner, agent or host.";
+  "Protected payment is not live yet. When it is, a licensed payment partner will hold your payment until the deal is confirmed and only then release it to the owner, agent or host. Vallo will not hold it.";
 
 /** What paying by card does. */
 export const CARD_MEANS =
   "With Pay by card, your payment goes to the owner, agent or host through our licensed payment partner as soon as it clears.";
 
-/** Rule 4: a sale. */
-export const SALE_IS_ESCROW = "A sale is always paid through escrow. There is no card option for a sale.";
+/** Rule 4: a sale. Corrected 11 November 2026: a purchase is not paid through Vallo (OFFERS_AND_DEAL_ROOM.md section 7). */
+export const SALE_TAKES_NO_MONEY =
+  "Vallo takes no money for a purchase, at any stage. A buyer and seller settle the price between themselves, with their own solicitors.";
 
 /** Rule 5: a hotel room. */
 export const HOTEL_ROOM_BY_CARD = "A hotel room is paid by card when you book, at the price shown.";
@@ -74,4 +75,4 @@ export const VIEWINGS_AND_LISTING_FREE = "Viewings never take money, and listing
  * only when the server reads it as working (`protectedRailLive()`).
  */
 export const ESCROW_PAUSED =
-  "If escrow is paused, a payment that must go through escrow does not open, and nothing is charged. For rent and shortlets you can pay by card instead.";
+  "Where protected payment is not live, nothing that needs it can be paid and nothing is charged. For rent and shortlets you pay by card.";

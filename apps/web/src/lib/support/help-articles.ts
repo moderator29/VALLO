@@ -16,7 +16,7 @@ import {
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
+  SALE_TAKES_NO_MONEY,
   SEATED_TABLE_FEE,
   VALLO_NEVER_HOLDS,
 } from "@/app/(site)/docs/facts";
@@ -137,7 +137,7 @@ export const FAQS: Faq[] = [
   {
     category: "Payments and refunds",
     q: "Should I pay with Escrow or by card?",
-    a: `${ESCROW_OR_CARD} ${ESCROW_MEANS} ${CARD_MEANS} ${SALE_IS_ESCROW}`,
+    a: `${ESCROW_OR_CARD} ${ESCROW_MEANS} ${CARD_MEANS} ${SALE_TAKES_NO_MONEY}`,
   },
   {
     category: "Payments and refunds",

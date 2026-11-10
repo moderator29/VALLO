@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { DOC_SLUGS } from "./slugs";
 
 /* Read as text: the chapter files hold JSX that this environment does not load. */
-const FILES = ["chapters.tsx", "chapters-more.tsx", "chapters-guide.tsx", "chapters-people.tsx"];
+const FILES = [
+  "chapters.tsx",
+  "chapters-more.tsx",
+  "chapters-guide.tsx",
+  "chapters-people.tsx",
+  "chapters-platform.tsx",
+  "chapters-offers.tsx",
+];
 const here = new URL("./", import.meta.url);
 
 describe("DOC_SLUGS", () => {

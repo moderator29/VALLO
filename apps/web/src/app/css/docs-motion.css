@@ -2,9 +2,8 @@
  * THE DOCUMENTATION MOVES (Track M, the docs pass, 25 September 2026): the
  * sections rise in as they arrive with their headings word by word, the
  * lists inside them step in, the flow diagrams draw themselves and a small
- * light walks their line, and the contents rail's marker slides to the
- * section being read. The components are app/(site)/docs/DocsFlow.tsx and
- * OnThisPage.tsx; the reveal and the heading gate are the motion kit's
+ * light walks their line. The component is app/(site)/docs/DocsFlow.tsx
+ * (the contents card is now the kit's DocToc, components/docs/DocToc.tsx); the reveal and the heading gate are the motion kit's
  * (motion-kit.css, landing-rooms.css).
  *
  * Transform and opacity only, token timings, no stagger past six. Reduced
@@ -52,37 +51,6 @@
       opacity: 1;
       transform: none;
     }
-  }
-
-  /* ------------------------------------------------ the contents rail */
-
-  .nf-doc-rail__wrap {
-    position: relative;
-  }
-  /* A 1px bar scaled to the lit link's height and moved to its top. */
-  .nf-doc-rail__marker {
-    position: absolute;
-    top: 0;
-    left: -1px;
-    width: 2px;
-    height: 1px;
-    background: var(--nf-brand-secondary);
-    transform-origin: 50% 0;
-    transform: scaleY(0);
-    opacity: 0;
-    transition:
-      transform var(--nf-duration-base) var(--nf-ease-standard),
-      opacity var(--nf-duration-fast) var(--nf-ease-standard);
-    pointer-events: none;
-    z-index: 1;
-  }
-  .nf-doc-rail__marker[data-on="true"] {
-    opacity: 1;
-  }
-  /* The lit heading changes colour only: a weight change would re-wrap a
-     long heading in the narrow rail and nudge the list under the marker. */
-  .nf-doc-rail__link[aria-current="location"] {
-    color: var(--nf-content-primary);
   }
 
   /* ------------------------------------------------------ the flows */
@@ -282,14 +250,8 @@
     .nf-flow__pulse {
       display: none;
     }
-    .nf-doc-rail__marker {
-      transition: none;
-    }
   }
   :root:is([data-motion="calm"], [data-motion="off"], [data-save-data="on"]) .nf-flow__pulse {
     display: none;
-  }
-  :root:is([data-motion="calm"], [data-motion="off"]) .nf-doc-rail__marker {
-    transition: none;
   }
 }

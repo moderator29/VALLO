@@ -64,6 +64,8 @@ export async function readMyAgreements(): Promise<AgreementSummary[] | null> {
   const { data, error } = await session.supabase
     .from("deal_agreements")
     .select("id, kind, status, listing_id, accommodation_id, amount_minor, renter_id, owner_id, updated_at")
+    // A sale offer lives in the Deal Room (/offers), never in the rent and stay agreements.
+    .neq("kind", "sale")
     .order("updated_at", { ascending: false })
     .limit(100);
   await reportReadError("read.agreements.readMyAgreements", error);
@@ -107,7 +109,7 @@ export async function readAgreement(id: string): Promise<AgreementDetail | null>
   const session = await resolveSession();
   if (session.state !== "signed-in") return null;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
-  const { data: a } = await session.supabase.from("deal_agreements").select("*").eq("id", id).maybeSingle();
+  const { data: a } = await session.supabase.from("deal_agreements").select("*").eq("id", id).neq("kind", "sale").maybeSingle();
   if (!a) return null;
   const [listing, people, events, claims, policy] = await Promise.all([
     subjectTitles(session.supabase, [a as unknown as AgreementSubject]),

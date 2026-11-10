@@ -63,6 +63,7 @@ export async function fundEscrowPayment(input: { agreementId: string }): Promise
       .from("deal_agreements")
       .select("renter_id, kind, status, listing_id, accommodation_id")
       .eq("id", agreementId)
+      .neq("kind", "sale") /* No payment for a purchase, at any stage. */
       .maybeSingle();
     const ag = agRow as {
       renter_id: string;

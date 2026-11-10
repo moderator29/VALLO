@@ -55,6 +55,7 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
     audit: { entityType: "wallet_entry", term: "wallet.reconciliation.run" },
   },
   { name: "pg-cron-watch", cron: "20 * * * *", schedule: "Hourly at :20", maxGapHours: 3, audit: { entityType: "cron_job", term: "pg-cron-watch" } },
+  { name: "offers-sweep", cron: "35 * * * *", schedule: "Hourly at :35", maxGapHours: 4, audit: { entityType: "cron_job", term: "offers-sweep" } },
   { name: "complete-stays", cron: "30 2 * * *", schedule: "Daily at 03:30", maxGapHours: 26, audit: { entityType: "cron_job", term: "complete-stays" } },
   { name: "inventory-drift", cron: "45 2 * * *", schedule: "Daily at 03:45", maxGapHours: 26, audit: { entityType: "cron_job", term: "inventory-drift" } },
   { name: "account-purge", cron: "15 3 * * *", schedule: "Daily at 04:15", maxGapHours: 26, audit: { entityType: "cron_job", term: "account-purge" } },

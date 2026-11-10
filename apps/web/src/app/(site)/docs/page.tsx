@@ -4,7 +4,10 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { ButtonLink } from "@/components/ui/Button";
 import { CHAPTER_INDEX, CHAPTERS, chaptersByGroup } from "./chapters";
-import { IndexRows } from "@/components/site/guides/IndexRows";
+import { DocCards } from "@/components/docs/DocCard";
+import { DocButtons } from "@/components/docs/DocButton";
+import { DocCallout } from "@/components/docs/DocCallout";
+import { CONTACT_EMAIL } from "@/lib/docs/contact";
 import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
 
 /* A10: the title and description in the page's own language, with its
@@ -60,35 +63,41 @@ export default async function DocsHomePage() {
           with how long it is on the right. */}
       {chaptersByGroup(CHAPTER_INDEX).map((group) => (
         <section key={group.id} className="mt-block" aria-labelledby={`docs-group-${group.id}`}>
-          <h2 id={`docs-group-${group.id}`} className="nf-h3">
+          <h2 id={`docs-group-${group.id}`} className="nf-h3 mb-group">
             {group.label}
           </h2>
-          <IndexRows
-            as="ol"
+          <DocCards
             label={group.label}
-            className="mt-group"
             items={group.items.map((chapter) => {
               const count = sectionCount.get(chapter.slug) ?? 0;
               return {
                 href: `/docs/${chapter.slug}`,
                 icon: lineGlyphFor(chapter.icon),
                 title: chapter.title,
-                line: chapter.summary,
-                meta: count === 1 ? x.sectionOne : x.sections.replace("{count}", String(count)),
+                line: `${chapter.summary} ${count === 1 ? x.sectionOne : x.sections.replace("{count}", String(count))}.`,
               };
             })}
           />
         </section>
       ))}
 
+      <section className="mt-section" aria-label="Still have questions">
+        <DocCallout kind="note" title="Still have questions?">
+          <p>
+            Search from the bar above, open the help centre, or write to us at{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>. A person answers within one business day.
+          </p>
+        </DocCallout>
+        <DocButtons items={["search-homes", "ask-support", "contact-form"]} />
+      </section>
+
       {/* --------------------------------------------------- other surfaces */}
       <section className="mt-section" aria-labelledby="docs-elsewhere">
         <h2 id="docs-elsewhere" className="nf-h3">
           Where else to look
         </h2>
-        <IndexRows
+        <DocCards
           label="Where else to look"
-          className="mt-group"
           items={[
             {
               href: "/help",

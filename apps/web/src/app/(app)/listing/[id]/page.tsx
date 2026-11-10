@@ -89,6 +89,11 @@ import { PriceContextRow } from "@/components/app/listing/PriceContextRow";
 import { PhotographedLine } from "@/components/app/listing/PhotographedLine";
 import { CautionRecordLine } from "@/components/app/listing/CautionRecordLine";
 import { ListingPurchase } from "@/components/app/listing/ListingPurchase";
+import { PriceBlockView } from "@/components/app/offers/OfferParts";
+import { offerActionFor } from "@/components/app/offers/offer-action";
+import { getOfferGate, type OfferGate } from "@/lib/offers/queries";
+import { mandateLine, TITLE_NOT_VERIFIED } from "@/lib/offers/words";
+import { formatDay } from "@/lib/offers/format";
 import { ListingSectionTabs } from "@/components/app/listing/ListingSectionTabs";
 import { ListingSpecChips } from "@/components/app/listing/ListingSpecChips";
 import { specChips } from "@/components/app/listing/spec-chips";
@@ -484,6 +489,20 @@ export default async function ListingDetailPage({
   const doorLine = doorHonesty === null ? null : doorHonestyLine(doorHonesty, t.trustVisible.tenancy);
   const initialSaved = savedListings.some((entry) => entry.listing.id === listing.id);
   const signedIn = session.state === "signed-in";
+  /* OFFERS: on a property for sale the primary action is Make an offer. The
+     server's gate says who may offer, whether they already have a live offer
+     and whether a signed sale mandate stands behind the lister. A failed read
+     draws the page as it was, never a dead button. */
+  let offerGate: OfferGate | null = null;
+  if (isSale && !listing.isDemo) {
+    try {
+      offerGate = await getOfferGate(listing.id);
+    } catch {
+      offerGate = null;
+    }
+  }
+  const offerAction = isSale && !listing.isDemo ? offerActionFor({ listingId: listing.id, signedIn, gate: offerGate }) : null;
+  const mandateText = offerGate ? mandateLine(offerGate.mandate.held, offerGate.mandate.reviewedOn, offerGate.mandate.expiresOn, formatDay) : null;
 
   /* V-41: the neighbours' account is read with the caller's session; the
      summary function applies its own threshold. These three need the session,
@@ -670,7 +689,7 @@ export default async function ListingDetailPage({
     : isBookable
       ? { label: t.catalogue.detail.checkAvailability, href: "#reserve" }
       : isVisit
-        ? { label: t.catalogue.detail.scheduleVisit, href: visitHref }
+        ? offerAction ?? { label: t.catalogue.detail.scheduleVisit, href: visitHref }
         : { label: L.messageAgent, href: messageHref };
 
   const stickySecondary: StickyAction | null = isExample
@@ -1000,6 +1019,7 @@ export default async function ListingDetailPage({
       lister={listerCard}
       call={callButton}
       hours={agentHours}
+      mandate={mandateText}
     />
   );
 
@@ -1391,6 +1411,12 @@ export default async function ListingDetailPage({
                     divided
                     className="scroll-mt-16"
                   >
+                    {offerGate ? (
+                      <div className="mb-block grid gap-sm">
+                        <PriceBlockView price={offerGate.price} />
+                        <p className="nf-body-sm text-[var(--nf-content-muted)]">{TITLE_NOT_VERIFIED}</p>
+                      </div>
+                    ) : null}
                     <ListingPurchase listing={listing} locale={locale} t={t} />
                   </Section>
                 )}
@@ -1721,10 +1747,11 @@ export default async function ListingDetailPage({
                       lister={listerCard}
                       call={callButton}
                       hours={agentHours}
+                      mandate={mandateText}
                       className="nf-lister--flat"
                     />
                   ) : null}
-                  action={{ label: stickyAction.label, href: stickyAction.href, icon: "calendar-booking" }}
+                  action={{ label: stickyAction.label, href: stickyAction.href, icon: offerAction ? "document" : "calendar-booking" }}
                   secondary={
                     stickySecondary
                       ? { ...stickySecondary, icon: isRental ? "document" : "chat-bubble" }
@@ -1749,6 +1776,7 @@ export default async function ListingDetailPage({
           perLabel={perLabel}
           action={stickyAction}
           secondary={stickySecondary}
+          inspect={offerAction ? { label: t.catalogue.detail.scheduleVisit, href: visitHref } : null}
           secondaryIcon={isRental ? "document" : undefined}
           fallbackLabel={listing.title}
           moveInMinor={listing.moveInCostMinor}

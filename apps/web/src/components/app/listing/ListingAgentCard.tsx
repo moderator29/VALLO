@@ -96,6 +96,7 @@ export function ListingAgentCard({
   call,
   className,
   hours,
+  mandate,
 }: {
   verified: boolean;
   t: Dictionary;
@@ -117,10 +118,12 @@ export function ListingAgentCard({
   call?: ReactNode;
   className?: string;
   hours?: string | null;
+  /** "This agent holds a signed sale mandate...", only when one is held. */
+  mandate?: string | null;
 }) {
   const copy = t.catalogue.detail;
   if (lister) {
-    return <ListedByCard lister={lister} t={t} messageHref={messageHref} call={call} className={className} hours={hours ?? null} />;
+    return <ListedByCard lister={lister} t={t} messageHref={messageHref} call={call} className={className} hours={hours ?? null} mandate={mandate ?? null} />;
   }
   /* THE RULE LIVES IN `lister-role.ts` AND NOT HERE, because nothing that
      imports a `.tsx` file can be tested under this vitest config, and a rule
@@ -176,6 +179,11 @@ export function ListingAgentCard({
         <p className="nf-caption mt-3xs text-[var(--nf-content-muted)]">
           {verified ? copy.verifiedBeforeLive : copy.managesListing}
         </p>
+        {mandate ? (
+          <p className="nf-caption mt-3xs text-[var(--nf-content-muted)]" data-testid="lister-mandate">
+            {mandate}
+          </p>
+        ) : null}
       </div>
       <AuthGate action="message">
         <ButtonLink href={messageHref} variant="secondary" leadingIcon="chat-bubble" className="nf-agent-card__cta shrink-0">
@@ -194,6 +202,7 @@ function ListedByCard({
   call,
   className,
   hours,
+  mandate,
 }: {
   lister: ListerCard;
   t: Dictionary;
@@ -202,6 +211,7 @@ function ListedByCard({
   className?: string;
   /** "Mon to Fri, 9:00 to 18:00." when the agent has set hours. */
   hours?: string | null;
+  mandate?: string | null;
 }) {
   const copy = t.catalogue.detail;
   const roleLabel = lister.role ? t.socialProfile.roleLine[lister.role] : null;
@@ -243,6 +253,11 @@ function ListedByCard({
         {hours && (
           <span className="nf-lister__role" data-testid="lister-hours">
             Usually available: {hours}
+          </span>
+        )}
+        {mandate && (
+          <span className="nf-lister__role" data-testid="lister-mandate">
+            {mandate}
           </span>
         )}
       </span>

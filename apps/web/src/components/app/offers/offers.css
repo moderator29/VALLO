@@ -1,0 +1,381 @@
+/* OFFERS AND THE DEAL ROOM: the few rules the Grade 1 kit does not already
+   carry. Tokens only. Imported by the components that draw these classes. */
+
+.nf-ofr-money {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* The figures block: the offer is the hero, the asking price sits quietly under it. */
+.nf-ofr-figures {
+  display: grid;
+  gap: var(--nf-space-xs);
+}
+.nf-ofr-figures__label {
+  font-size: var(--nf-text-label);
+  color: var(--nf-content-muted);
+}
+.nf-ofr-figures__hero {
+  font-size: var(--nf-text-figure);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--nf-content-primary);
+}
+.nf-ofr-figures__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--nf-space-xs) var(--nf-space-sm);
+  font-size: var(--nf-text-body-sm);
+  color: var(--nf-content-secondary);
+}
+.nf-ofr-diff {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-2xs);
+  padding: var(--nf-space-3xs) var(--nf-space-xs);
+  border-radius: var(--nf-radius-badge);
+  border: var(--nf-border-width) solid var(--nf-border-default);
+  font-size: var(--nf-text-body-sm);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nf-ofr-diff[data-dir="above"] {
+  background: var(--nf-state-success-surface);
+  color: var(--nf-state-success);
+}
+.nf-ofr-diff[data-dir="below"] {
+  background: var(--nf-state-warning-surface);
+  color: var(--nf-state-warning);
+}
+.nf-ofr-diff[data-dir="at"] {
+  background: var(--nf-state-info-surface);
+  color: var(--nf-state-info);
+}
+
+/* The honest price block. */
+.nf-ofr-cost {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--nf-space-2xs) var(--nf-space-md);
+  align-items: baseline;
+  padding-block: var(--nf-space-sm);
+  border-top: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-ofr-cost:first-child {
+  border-top: 0;
+}
+.nf-ofr-cost__basis {
+  grid-column: 1 / -1;
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+}
+
+/* The requirements card. */
+.nf-ofr-req {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--nf-space-sm);
+  min-height: 3.5rem;
+  padding-block: var(--nf-space-sm);
+  border-top: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-ofr-req:first-of-type {
+  border-top: 0;
+}
+.nf-ofr-req__name {
+  font-weight: 600;
+  color: var(--nf-content-primary);
+}
+.nf-ofr-req__end {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--nf-space-xs);
+}
+.nf-ofr-notice {
+  display: flex;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-space-sm) var(--nf-space-md);
+  border-radius: var(--nf-radius-card-sm);
+  border: var(--nf-border-width) solid var(--nf-state-error);
+  background: var(--nf-state-error-surface);
+  color: var(--nf-content-primary);
+  font-size: var(--nf-text-body-sm);
+}
+.nf-ofr-notice[data-tone="info"] {
+  border-color: var(--nf-state-info);
+  background: var(--nf-state-info-surface);
+}
+
+/* The summary list. */
+.nf-ofr-facts {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+.nf-ofr-facts > div {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
+  gap: var(--nf-space-sm);
+  padding-block: var(--nf-space-sm);
+  border-top: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-ofr-facts > div:first-child {
+  border-top: 0;
+}
+.nf-ofr-facts dt {
+  font-size: var(--nf-text-body-sm);
+  color: var(--nf-content-muted);
+}
+.nf-ofr-facts dd {
+  margin: 0;
+  color: var(--nf-content-primary);
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* One offer in a list. */
+.nf-ofr-card {
+  display: grid;
+  gap: var(--nf-space-sm);
+  padding: var(--nf-pad-card);
+  color: inherit;
+  text-decoration: none;
+}
+.nf-ofr-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--nf-space-sm);
+}
+.nf-ofr-card__title {
+  font-weight: 600;
+  color: var(--nf-content-primary);
+  overflow-wrap: anywhere;
+}
+.nf-ofr-card__sub {
+  font-size: var(--nf-text-body-sm);
+  color: var(--nf-content-muted);
+}
+.nf-ofr-unread {
+  display: inline-block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  margin-inline-end: var(--nf-space-xs);
+  border-radius: var(--nf-radius-circle);
+  background: var(--nf-brand-primary);
+}
+.nf-ofr-list {
+  display: grid;
+  gap: var(--nf-space-sm);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.nf-ofr-table-wrap {
+  display: none;
+}
+@media (min-width: 64rem) {
+  .nf-ofr-list[data-wide-hidden] {
+    display: none;
+  }
+  .nf-ofr-table-wrap {
+    display: block;
+  }
+}
+
+/* The Deal Room. */
+.nf-room {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--nf-space-lg);
+}
+.nf-room > * {
+  min-width: 0;
+}
+.nf-room__cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--nf-space-lg);
+}
+@media (min-width: 64rem) {
+  .nf-room__cols {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .nf-room__side {
+    position: sticky;
+    top: var(--nf-space-lg);
+  }
+}
+.nf-room__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--nf-space-md);
+  align-items: center;
+}
+.nf-room__thumb {
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+  border-radius: var(--nf-radius-card-sm);
+  background: var(--nf-surface-raised);
+  display: grid;
+  place-items: center;
+  color: var(--nf-content-muted);
+  overflow: hidden;
+}
+.nf-room__thumb img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.nf-room__ref {
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+  letter-spacing: 0.02em;
+}
+.nf-room__title {
+  font-size: var(--nf-text-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--nf-content-primary);
+  overflow-wrap: anywhere;
+}
+.nf-room__four {
+  display: grid;
+  gap: var(--nf-space-sm);
+  margin: 0;
+}
+.nf-room__four > div {
+  display: grid;
+  gap: var(--nf-space-3xs);
+}
+.nf-room__four dt {
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+  text-transform: none;
+}
+.nf-room__four dd {
+  margin: 0;
+  color: var(--nf-content-primary);
+  font-weight: 500;
+}
+@media (min-width: 40rem) {
+  .nf-room__four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.nf-room__tabs {
+  position: sticky;
+  top: 0;
+  z-index: var(--nf-z-content);
+}
+.nf-room__panel[hidden] {
+  display: none;
+}
+@media (min-width: 64rem) {
+  /* On a wide screen the overview rides in the side column, so a room opened
+     on Overview shows the negotiation beside it. */
+  .nf-room__panel[data-wide-show] {
+    display: block;
+  }
+}
+.nf-room__foot-spacer {
+  block-size: 5.5rem;
+}
+@media (min-width: 64rem) {
+  .nf-room__foot-spacer {
+    display: none;
+  }
+}
+
+/* A negotiation version. */
+.nf-ver {
+  display: grid;
+  gap: var(--nf-space-sm);
+  padding-inline-start: var(--nf-space-md);
+  border-inline-start: 2px solid var(--nf-border-default);
+  position: relative;
+}
+.nf-ver[data-current] {
+  border-inline-start-color: var(--nf-brand-primary);
+}
+.nf-ver__changes {
+  margin: 0;
+  padding-inline-start: var(--nf-space-md);
+  color: var(--nf-content-secondary);
+  font-size: var(--nf-text-body-sm);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nf-ver[data-new] {
+    animation: nf-ofr-join 260ms var(--nf-ease-out, ease-out) both;
+  }
+}
+@keyframes nf-ofr-join {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A document in the checklist. */
+.nf-doc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--nf-space-2xs) var(--nf-space-sm);
+  align-items: center;
+  padding-block: var(--nf-space-sm);
+  border-top: var(--nf-border-width) solid var(--nf-border-subtle);
+}
+.nf-doc:first-child {
+  border-top: 0;
+}
+.nf-doc__line {
+  grid-column: 1 / -1;
+  font-size: var(--nf-text-body-sm);
+  color: var(--nf-content-muted);
+}
+.nf-doc__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nf-space-xs);
+}
+
+/* The admin desk. */
+.nf-ofr-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--nf-space-sm);
+}
+@media (min-width: 64rem) {
+  .nf-ofr-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.nf-ofr-define {
+  font-size: var(--nf-text-caption);
+  color: var(--nf-content-muted);
+  margin-block-start: var(--nf-space-3xs);
+}
+.nf-ofr-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--nf-space-sm);
+  align-items: end;
+}
+.nf-ofr-scroll {
+  overflow-x: auto;
+}
+
+@media (min-width: 40rem) {
+  .nf-room__side .nf-room__four {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

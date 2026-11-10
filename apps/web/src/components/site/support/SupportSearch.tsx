@@ -1,8 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { loadSupportIndex } from "@/lib/support/search-actions";
 import { prepare, searchPrepared, SECTION_LABEL, type PreparedEntry, type SearchHit } from "@/lib/support/search";
@@ -231,55 +230,6 @@ export function NoResults({ failed }: { failed: boolean }) {
           Contact support
         </Link>
       </p>
-    </div>
-  );
-}
-
-/**
- * The compact search for the Docs frame: the field, and a panel of results
- * that opens under it. Choosing a result navigates and closes the panel.
- */
-export function DocsSearch() {
-  const router = useRouter();
-  const listId = useId();
-  const [query, setQuery] = useState("");
-  const [active, setActive] = useState(0);
-  const { hits, loading, failed, load } = useSupportSearch(query);
-  const open = query.trim().length > 0;
-
-  const go = (hit: SearchHit) => {
-    setQuery("");
-    router.push(hit.entry.href);
-  };
-
-  return (
-    <div className="mx-auto mb-heading max-w-6xl">
-      <SupportSearchField
-        value={query}
-        onChange={setQuery}
-        hits={hits}
-        onFocus={load}
-        listId={listId}
-        activeIndex={active}
-        setActiveIndex={setActive}
-        placeholder="Search the docs, help and guides, e.g. is Vallo free"
-        label="Search documentation, help, guides and policies"
-        onOpen={go}
-      />
-      <p className="sr-only" role="status" aria-live="polite">
-        {open && !loading ? `${hits.length} results` : ""}
-      </p>
-      {open && (
-        <div className="mt-row">
-          {loading ? (
-            <p className="text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">Searching...</p>
-          ) : hits.length > 0 ? (
-            <SupportResults hits={hits.slice(0, 8)} listId={listId} activeIndex={active} onNavigate={() => setQuery("")} />
-          ) : (
-            <NoResults failed={failed} />
-          )}
-        </div>
-      )}
     </div>
   );
 }

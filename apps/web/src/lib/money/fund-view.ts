@@ -26,6 +26,7 @@ export async function readFundPayment(agreementId: string): Promise<FundRead> {
       .from("deal_agreements")
       .select("id, kind, status, renter_id, owner_id, amount_minor, listing_id, accommodation_id, terms")
       .eq("id", agreementId)
+      .neq("kind", "sale") /* Vallo takes no money for a purchase: a sale offer never opens a payment screen. */
       .maybeSingle();
     if (error) return { state: "unavailable" };
     if (!agRow) return { state: "missing" };

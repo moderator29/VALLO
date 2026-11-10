@@ -12,7 +12,7 @@ import {
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
+  SALE_TAKES_NO_MONEY,
 } from "./facts";
 
 /**
@@ -542,7 +542,7 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
   number: 0,
   title: "From viewing to keys",
   summary:
-    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, paying with Escrow or by card, and moving in.",
+    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, paying by card, and moving in.",
   icon: "contract-sign",
   sections: [
     {
@@ -628,7 +628,7 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
             <li>{CARD_MEANS}</li>
           </ul>
           <p>
-            <strong>For a sale:</strong> {SALE_IS_ESCROW} {LISTING_SALE_ABOUT}
+            <strong>For a sale:</strong> {SALE_TAKES_NO_MONEY} {LISTING_SALE_ABOUT}
           </p>
           <p>
             {PAY_INSIDE_VALLO} See{" "}
@@ -972,7 +972,7 @@ export const FOR_OWNERS: DocChapter = {
       body: (
         <p>
           After the viewing and the inspection report, you and the renter confirm the same agreement. The
-          renter then pays inside Vallo, with Escrow or by card, and your share comes to the bank account
+          renter then pays inside Vallo, by card, and your share comes to the bank account
           on your payout details. See{" "}
           <Link href="/docs/paying-on-vallo#for-listers" className={A}>
             Get paid

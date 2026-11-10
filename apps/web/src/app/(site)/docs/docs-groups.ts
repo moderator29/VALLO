@@ -17,7 +17,8 @@ import type { BrandIconName } from "@/design-system/icons/BrandIcon";
 /** The groups the chapters sit in, in reading order. */
 export const DOC_GROUPS = [
   { id: "start", label: "Start here" },
-  { id: "renting", label: "Renting and buying" },
+  { id: "renting", label: "Renting and moving in" },
+  { id: "offers", label: "Buying and offers" },
   { id: "stays", label: "Stays and restaurants" },
   { id: "money", label: "Money" },
   { id: "listing", label: "Listing and hosting" },
