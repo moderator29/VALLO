@@ -23,6 +23,8 @@ import { LedgerBooks } from "./LedgerBooks";
 import { readLedgerBooks } from "@/lib/admin/desk-reads/ledger-books";
 import { readCautionDesk } from "@/lib/admin/reads/caution-desk";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { moneyContext } from "@/lib/admin/copilot/contexts/money";
 import "./_desk/desk.css";
 import "../agreements/agreements.css";
 
@@ -186,6 +188,17 @@ export default async function AdminMoneyPage({
       {/* Every payment and refund that has already moved, platform-wide, read
           as the caller (the finance scope decides), with its CSV export. */}
       <MoneyHistoryPanel userClient={access.userClient} locale={locale} />
+
+      <DeskCopilot
+        scope="finance"
+        deskName="Money"
+        context={moneyContext({
+          reconciliationRead: runs.state === "ok",
+          tenancyCharges: rent.state === "ok" ? rent.data.total : null,
+          guaranteeReserveMinor: guarantee.state === "ok" ? guarantee.balanceMinor : null,
+          openClaims: guarantee.state === "ok" ? guarantee.claims.filter((claim) => claim.status === "submitted").length : null,
+        })}
+      />
     </div>
   );
 }

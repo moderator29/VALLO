@@ -6,6 +6,8 @@ import { getSupportQueue, getSupportTicketDetail } from "@/lib/admin/support-que
 import { isSupportTab } from "@/lib/admin/support-workspace";
 import { CalmNote, PageHead } from "../_components/panels";
 import { SupportDesk, type SupportDeskProps } from "./SupportDesk";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { supportContext } from "@/lib/admin/copilot/contexts/support";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDictionary(await getLocale());
@@ -77,6 +79,20 @@ export default async function AdminSupportPage({
   }
 
   return (
-    <SupportDesk now={now} tab={tab} q={q} queue={queue} selected={selected} missing={missing} copy={t.admin.support} />
+    <>
+      <SupportDesk now={now} tab={tab} q={q} queue={queue} selected={selected} missing={missing} copy={t.admin.support} />
+      {door.state === "admin" ? (
+        <DeskCopilot
+          scope="support"
+          deskName="Support"
+          context={supportContext(
+            queue.state === "ok"
+              ? queue.rows.map((r) => ({ lane: r.lane, breached: r.sla.breached, createdAt: r.createdAt }))
+              : null,
+            now,
+          )}
+        />
+      ) : null}
+    </>
   );
 }

@@ -6,6 +6,8 @@ import { getBookingOutcomes, getPriceCheckDemand, getSupplySeries, getThinAreas 
 import type { CollectedRange } from "@/lib/admin/reads/shapes";
 import { LiveRefresh } from "../_components/LiveRefresh";
 import { AnalyticsView } from "./AnalyticsView";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { analyticsContext } from "@/lib/admin/copilot/contexts/analytics";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +57,20 @@ export default async function AdminAnalyticsPage({
         Internal activity excluded: {countOf(internal.length, "accounts", locale)} (QA, staff and
         anyone marked on the staff page). Example listings are left out as well.
       </p>
+      <DeskCopilot
+        scope="analyst"
+        deskName="Analytics"
+        context={analyticsContext({
+          range,
+          internalAccountsExcluded: internal.length,
+          live: {
+            bookings: bookings.state === "ok",
+            supply: supply.state === "ok",
+            thinAreas: thin.state === "ok",
+            demand: demand.state === "ok",
+          },
+        })}
+      />
     </>
   );
 }

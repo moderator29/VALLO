@@ -10,6 +10,8 @@ import { GuaranteeClaims } from "../money/GuaranteeDesk";
 import { PageHead, Panel } from "../_components/panels";
 import { AgreementQueue } from "./AgreementQueue";
 import { WatchList } from "./WatchList";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { agreementsContext } from "@/lib/admin/copilot/contexts/agreements";
 import "./agreements.css";
 
 export const metadata: Metadata = {
@@ -110,6 +112,20 @@ export default async function AgreementsDeskPage() {
         </>
       )}
       {claimsPanel}
+      <DeskCopilot
+        scope="agreements"
+        deskName="Agreements"
+        context={agreementsContext(
+          queue.state === "ok"
+            ? {
+                waitingSubmittedAt: queue.waiting.map((row) => row.submittedAt),
+                decidedRecently: queue.decided.length,
+                watching: watch === null ? null : watch.length,
+              }
+            : null,
+          now,
+        )}
+      />
     </div>
   );
 }

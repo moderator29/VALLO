@@ -6,6 +6,8 @@ import { requireAdmin } from "@/lib/admin/guard";
 import { getChargebackDesk, readChargebackQuery } from "@/lib/admin/reads/chargebacks";
 import { readPage } from "@/lib/admin/reads/money-derive";
 import { ChargebacksDesk } from "./ChargebacksDesk";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { chargebacksContext } from "@/lib/admin/copilot/contexts/chargebacks";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = getDictionary(await getLocale());
@@ -39,16 +41,37 @@ export default async function AdminChargebacksPage({
   const read = await getChargebackDesk();
   const reference = Array.isArray(params.reference) ? params.reference[0] : params.reference;
 
+  const counts = read.state === "ok" ? read.data.counts : null;
   return (
-    <ChargebacksDesk
-      query={query}
-      read={read}
-      page={readPage(params.page)}
-      now={requestTime()}
-      copy={t.chargebacks.desk}
-      locale={locale}
-      prefill={reference?.trim().slice(0, 200) || null}
-    />
+    <>
+      <ChargebacksDesk
+        query={query}
+        read={read}
+        page={readPage(params.page)}
+        now={requestTime()}
+        copy={t.chargebacks.desk}
+        locale={locale}
+        prefill={reference?.trim().slice(0, 200) || null}
+      />
+      <DeskCopilot
+        scope="finance"
+        deskName="Chargebacks"
+        context={chargebacksContext(
+          counts
+            ? {
+                all: counts.all,
+                opened: counts.opened,
+                evidenceRequested: counts.evidence_requested,
+                evidenceSubmitted: counts.evidence_submitted,
+                won: counts.won,
+                lost: counts.lost,
+                owed: counts.owed,
+                undecided: counts.undecided,
+              }
+            : null,
+        )}
+      />
+    </>
   );
 }
 

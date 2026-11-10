@@ -79,7 +79,7 @@ export default async function OverviewPage() {
           <p className="nf-body">
             Not set up on this server yet
             (<code>supabase/migrations/pending/coo_overview_2026-11-10.sql</code>). Access is still granted only by the
-            founder's super admin account from the Staff desk.
+            founder&apos;s super admin account from the Staff desk.
           </p>
         ) : recommendationsRead.state === "unavailable" ? (
           <p className="nf-body">Could not be read just now. Refresh to try again.</p>

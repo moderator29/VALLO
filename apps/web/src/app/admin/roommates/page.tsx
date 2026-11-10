@@ -21,6 +21,8 @@ import { reportReadFault } from "@/lib/observability/read-error";
 
 import { adminUi } from "../_components/ui";
 import { PageHead } from "../_components/panels";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { roommatesContext } from "@/lib/admin/copilot/contexts/roommates";
 import { AddInstitutionForm, InstitutionControls, TargetActions, VerificationDecision, WeightsForm } from "./RoommateControls";
 
 export const metadata: Metadata = {
@@ -101,6 +103,7 @@ export default async function AdminRoommatesPage({ searchParams }: { searchParam
       {tab === "verification" ? <Checks ui={ui} params={params} /> : null}
       {tab === "schools" ? <Schools db={db} ui={ui} /> : null}
       {tab === "weights" ? <Weights db={db} ui={ui} /> : null}
+      <DeskCopilot scope="roommates" deskName="Roommates" context={roommatesContext(TABS.find(([key]) => key === tab)?.[1] ?? "Overview")} />
     </div>
   );
 }

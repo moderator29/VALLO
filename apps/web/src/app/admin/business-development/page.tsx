@@ -12,6 +12,10 @@ import { ProspectBoard } from "./ProspectBoard";
 export const metadata: Metadata = { title: "Business development", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
+function requestTime(): number {
+  return Date.now();
+}
+
 function dateLabel(iso: string | null): string {
   if (!iso) return "no date";
   try {
@@ -87,9 +91,9 @@ export default async function BusinessDevelopmentPage() {
 
   const prospects = pipeline.data;
   const activity = activityRead.state === "ok" ? activityRead.data : [];
-  const followUps = dueThisWeek(prospects);
+  const followUps = dueThisWeek(prospects, requestTime());
   const kpi = kpiCounts(prospects, activity);
-  const week = weeklySummary(prospects, activity, Date.now());
+  const week = weeklySummary(prospects, activity, requestTime());
 
   const contextParts: string[] = [
     `${kpi.prospectsIdentified} prospect${kpi.prospectsIdentified === 1 ? "" : "s"} in your pipeline`,

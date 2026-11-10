@@ -9,6 +9,8 @@ import { PageHead, PanelEmpty, TabRow } from "../_components/panels";
 import { adminUi } from "../_components/ui";
 import { DeskRefusal } from "../cases/DeskRefusal";
 import { CommunityActions } from "./CommunityActions";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { circleContext } from "@/lib/admin/copilot/contexts/circle";
 
 export const metadata: Metadata = { title: "Circle", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -92,6 +94,19 @@ export default async function CircleDeskPage({ searchParams }: { searchParams: P
           </table>
         </div>
       )}
+      <DeskCopilot
+        scope="circle"
+        deskName="Circle"
+        context={circleContext({
+          communities: rows.length,
+          live: rows.filter((c) => c.status === "live").length,
+          paused: rows.filter((c) => c.status === "paused").length,
+          removed: rows.filter((c) => c.status === "removed").length,
+          held: rows.reduce((sum, c) => sum + c.held, 0),
+          openCases: rows.reduce((sum, c) => sum + c.openCases, 0),
+          statusFilter: status,
+        })}
+      />
     </div>
   );
 }

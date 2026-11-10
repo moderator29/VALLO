@@ -11,6 +11,8 @@ import { sanctionsLane } from "./_lanes/SanctionsLane";
 import { riskLane } from "./_lanes/RiskLane";
 import { pepLane } from "./_lanes/PepLane";
 import { beneficialOwnershipLane } from "./_lanes/BeneficialOwnershipLane";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { complianceContext } from "@/lib/admin/copilot/contexts/compliance";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +71,7 @@ export default async function CompliancePage({
       ) : (
         <ui.QueueEmpty title={c.noLanes} body={c.lede} everHadRows={false} />
       )}
+      <DeskCopilot scope="compliance" deskName="Compliance" context={complianceContext(lane ? lane.title(t) : null)} />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { readTrustOverview } from "@/lib/admin/cases/queries";
 
 import { KpiGrid, KpiStrip, PageHead, Panel, TabRow, type KpiItem } from "../_components/panels";
 import { DeskRefusal } from "../cases/DeskRefusal";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { trustContext } from "@/lib/admin/copilot/contexts/trust";
 
 export const metadata: Metadata = { title: "Trust overview", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -131,6 +133,23 @@ export default async function TrustPage({ searchParams }: { searchParams: Promis
 
       <KpiGrid items={roommates} label="Vallo Roommates" />
       <KpiGrid items={circle} label="Vallo Circle" />
+      <DeskCopilot
+        scope="analyst"
+        deskName="Trust overview"
+        context={trustContext({
+          days,
+          open: o.cases.open,
+          overdue: o.cases.overdue,
+          escalated: o.cases.escalated,
+          unassigned: o.cases.unassigned,
+          critical: o.cases.critical,
+          openedInPeriod: o.cases.openedInPeriod,
+          resolvedInPeriod: o.cases.resolvedInPeriod,
+          medianHoursToResolve: o.cases.medianHoursToResolve,
+          restrictedNow: o.restrictions.active,
+          appealsOpen: o.restrictions.appealsOpen,
+        })}
+      />
     </div>
   );
 }

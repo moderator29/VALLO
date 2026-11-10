@@ -9,6 +9,8 @@ import { PageHead, PanelEmpty, TabRow } from "../_components/panels";
 import { adminUi } from "../_components/ui";
 import { DeskRefusal } from "../cases/DeskRefusal";
 import { AppealDecision } from "./AppealDecision";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { appealsContext } from "@/lib/admin/copilot/contexts/appeals";
 
 export const metadata: Metadata = { title: "Appeals", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -62,6 +64,17 @@ export default async function AppealsPage({ searchParams }: { searchParams: Prom
           ))}
         </ul>
       )}
+      <DeskCopilot
+        scope="trust_safety"
+        deskName="Appeals"
+        context={appealsContext(
+          {
+            statusLabel: status === "open" ? "waiting" : status === "overturned" ? "accepted" : "upheld",
+            createdAt: rows.map((a) => a.createdAt),
+          },
+          Date.now(),
+        )}
+      />
     </div>
   );
 }

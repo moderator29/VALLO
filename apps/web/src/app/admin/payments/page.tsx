@@ -20,6 +20,8 @@ import { CalmNote, DeskHead, Panel, flatParams } from "../money/_desk/Desk";
 import { PaymentsCharts, PaymentsKpis, PaymentsTable } from "./PaymentsFlow";
 import { currentPaystack, describePaystackMode } from "@/lib/payments/paystack-mode";
 import { getSubscriptionsDesk, LIVE_SUBSCRIPTION_STATUSES } from "@/lib/admin/reads/subscriptions";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { paymentsContext } from "@/lib/admin/copilot/contexts/payments";
 import "../money/_desk/desk.css";
 
 /** Payment attempts per page. */
@@ -149,6 +151,20 @@ export default async function AdminPaymentsPage({
     found ? getTermsStanding(found) : Promise.resolve(null),
   ]);
 
+  const copilot = (
+    <DeskCopilot
+      scope="finance"
+      deskName="Payments"
+      context={paymentsContext({
+        unsettled: read.state === "ok" ? read.data.unsettled.length : null,
+        liveSubscriptions:
+          subs.state === "ok" ? LIVE_SUBSCRIPTION_STATUSES.reduce((sum, status) => sum + subs.data.counts[status], 0) : null,
+        outcomeFilter: flat.outcome ? ui.columnLabel("transactionStatus", flat.outcome) : null,
+        searching: term.length > 0,
+      })}
+    />
+  );
+
   if (read.state !== "ok") {
     return (
       <div className="nf-console nf-md">
@@ -159,6 +175,7 @@ export default async function AdminPaymentsPage({
         <PaymentsTable desk={payments} params={flat} locale={locale} ui={ui} />
         {subscriptions}
         <ui.QueueUnavailable />
+        {copilot}
       </div>
     );
   }
@@ -285,6 +302,7 @@ export default async function AdminPaymentsPage({
         <ActingForLookup action="/admin/payments" kind={acting.kind} id={acting.id} locale={locale} />
         {acting.id.length > 0 && <ActingFor kind={acting.kind} id={acting.id} locale={locale} />}
       </ui.Section>
+      {copilot}
     </div>
   );
 }
