@@ -112,7 +112,7 @@ export default async function WeeklyReportsPage({ searchParams }: { searchParams
               Latest week
             </Link>
           ) : null}
-          <a className="nf-btn nf-btn--sm nf-btn--secondary" href={`/admin/reports/weekly/export?week=${week}`}>
+          <a className="nf-btn nf-btn--sm nf-btn--glass" href={`/admin/reports/weekly/export?week=${week}`}>
             Download as CSV
           </a>
         </nav>

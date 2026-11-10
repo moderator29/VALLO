@@ -71,7 +71,7 @@ export function ReviewControls({ reportId, status, ownReport }: { reportId: stri
           </button>
         ) : null}
         {canReopen ? (
-          <button type="button" className="nf-btn nf-btn--secondary" disabled={pending} onClick={() => run(() => reopenReport(reportId, note), "Reopened for the author")}>
+          <button type="button" className="nf-btn nf-btn--glass" disabled={pending} onClick={() => run(() => reopenReport(reportId, note), "Reopened for the author")}>
             Reopen
           </button>
         ) : null}

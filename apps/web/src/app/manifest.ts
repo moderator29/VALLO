@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CHROME_COLOUR } from "@/lib/theme/chrome";
 import { SHELL_START } from "@/lib/native/shell";
+import { versioned } from "@/lib/theme/brand-assets";
 
 /**
  * Web app manifest, served by Next at `/manifest.webmanifest`.
@@ -84,13 +85,13 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["lifestyle", "shopping", "travel"],
     icons: [
       {
-        src: "/pwa/icon-192.png",
+        src: versioned("/pwa/icon-192.png"),
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/pwa/icon-512.png",
+        src: versioned("/pwa/icon-512.png"),
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
@@ -98,7 +99,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         // Held inside the 80 per cent safe zone so an aggressive circular or
         // squircle launcher mask cannot clip the roof off the mark.
-        src: "/pwa/icon-maskable-512.png",
+        src: versioned("/pwa/icon-maskable-512.png"),
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

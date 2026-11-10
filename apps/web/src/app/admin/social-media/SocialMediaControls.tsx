@@ -246,7 +246,7 @@ export function ApprovalActions({ post }: { post: SocialPost }) {
           <button type="button" className="nf-btn nf-btn--sm nf-btn--primary" disabled={pending} onClick={() => run(() => Act.approve(post.id), "Approved")}>
             Approve
           </button>
-          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
+          <button type="button" className="nf-btn nf-btn--sm nf-btn--glass" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
             Cancel
           </button>
         </div>
@@ -300,7 +300,7 @@ export function ApprovalActions({ post }: { post: SocialPost }) {
           >
             Mark as posted
           </button>
-          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
+          <button type="button" className="nf-btn nf-btn--sm nf-btn--glass" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
             Cancel
           </button>
         </div>

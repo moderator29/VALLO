@@ -30,7 +30,7 @@ export function launchScript(version: string): string {
   return (
     "(function(){try{var d=document,r=d.documentElement,W=window;" +
     "var force=/[?&]launch=1(?:&|$)/.test(location.search);" +
-    "if(r.hasAttribute('data-native')||(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())||/VALLO-NATIVE/.test(navigator.userAgent))return;" +
+    "if(r.getAttribute('data-open')==='on'||r.hasAttribute('data-native')||(W.Capacitor&&W.Capacitor.isNativePlatform&&W.Capacitor.isNativePlatform())||/VALLO-NATIVE/.test(navigator.userAgent))return;" +
     "if(!force){if(!/^\\/(?:home|stays|sign-in|sign-up|start|welcome)?\\/?$/.test(location.pathname))return;" +
     "try{if(sessionStorage.getItem('nf_launch'))return;sessionStorage.setItem('nf_launch','1')}catch(e){return}}" +
     "var still=false;try{still=W.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}" +

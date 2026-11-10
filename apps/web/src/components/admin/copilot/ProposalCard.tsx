@@ -76,7 +76,7 @@ export function ProposalCard({
               {status === "confirming" ? "Working..." : "Confirm"}
             </Button>
           )}
-          <Link href={proposal.deskHref} className="nf-btn nf-btn--secondary nf-btn--sm" onClick={onNavigate}>
+          <Link href={proposal.deskHref} className="nf-btn nf-btn--glass nf-btn--sm" onClick={onNavigate}>
             {isDraft ? "Open in the desk" : "Edit in the desk"}
           </Link>
           <Button type="button" variant="quiet" size="sm" onClick={onDismiss} disabled={status === "confirming"}>

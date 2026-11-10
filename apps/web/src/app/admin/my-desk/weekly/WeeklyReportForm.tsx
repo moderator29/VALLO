@@ -149,7 +149,7 @@ export function WeeklyReportForm(props: FormProps) {
         <div className="flex flex-wrap gap-xs">
           <button
             type="button"
-            className="nf-btn nf-btn--sm nf-btn--secondary"
+            className="nf-btn nf-btn--sm nf-btn--glass"
             disabled={rows.length >= LIMITS.numberRows}
             onClick={() => setRows((all) => [...all, { label: "", value: "", target: "", source: "typed", deskValue: null }])}
           >
@@ -210,7 +210,7 @@ export function WeeklyReportForm(props: FormProps) {
           </label>
           <button
             type="button"
-            className="nf-btn nf-btn--sm nf-btn--secondary"
+            className="nf-btn nf-btn--sm nf-btn--glass"
             disabled={pending}
             onClick={() => run(() => addProofLink(week, { url: linkUrl, caption: linkCaption }), "Link added", () => { setLinkUrl(""); setLinkCaption(""); setProblems({}); }, setProblems)}
           >
@@ -229,7 +229,7 @@ export function WeeklyReportForm(props: FormProps) {
           </label>
           <button
             type="button"
-            className="nf-btn nf-btn--sm nf-btn--secondary"
+            className="nf-btn nf-btn--sm nf-btn--glass"
             disabled={pending}
             onClick={() => {
               const file = fileRef.current?.files?.[0];
@@ -258,7 +258,7 @@ export function WeeklyReportForm(props: FormProps) {
       <div className="flex flex-wrap items-center gap-xs">
         <button
           type="button"
-          className="nf-btn nf-btn--secondary"
+          className="nf-btn nf-btn--glass"
           disabled={pending}
           onClick={() => run(() => saveWeeklyReportDraft(input()), submitted ? "Changes saved" : "Draft saved", undefined, setProblems)}
         >
