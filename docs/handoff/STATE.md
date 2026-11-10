@@ -137,3 +137,12 @@ tiles), the payment rail design pass.
 - Privacy notice no longer names the provider. PRIVACY_VERSION NOT bumped:
   counsel decides (docs/handoff/LEGAL_PAGES_CHANGES.md, "Payluk removal").
 
+## 10 November 2026: founder rulings A to G (fees, wallet, cookies, retention, under 18)
+- Wallet hidden (A): `lib/money/wallet-open.ts`, `WALLET_OPEN = false`. `app/(app)/wallet/layout.tsx` answers not found for every wallet route; the nav model and keyboard shortcut read the switch. Code kept. Rent payments stay on the protected rail (switched off); everything else is Paystack.
+- Fees (B): one source `lib/money/fee-schedule.ts` (Vallo 2% plus partner about 1.5% on rent, total about 3.5%; every other payment about 3.5%). Sentences in `lib/money/copy.ts` (`FEE_*`, `WHO_PAYS_SENTENCE`) feed the Terms, glance, docs chapter, help, assistant and copilot, fee screen labels. Pending SQL `fee_schedule_2026-11-10.sql` (NOT APPLIED) adds the 1.5 row to `fee_protection_rates`.
+- Protected payment wording (C): Terms section 4A and the trust page, from `TERMS_HELD_*` in `copy.ts`; proposed wording recorded in COUNSEL_BRIEF 2.7. Rail still off.
+- Under 18 (D): Terms section 3 and Privacy section 10. Sign-up age gate is another workstream.
+- Cookies (E): `lib/consent/` (inventory, consent cookie `vallo_consent`), `components/consent/` (lazy bar and sheet), `/cookies` and `/legal/cookies`, footer and Settings entries. Preferences and analytics storage is written only after consent (`consentAllows`).
+- Retention (F): `lib/legal/retention.ts`, drawn by `components/legal/RetentionTable.tsx` in Privacy section 7. Pending counsel.
+- Displayed "Last updated" for Terms and Privacy moved to 10 November; `TERMS_VERSION` and `PRIVACY_VERSION` NOT bumped (the update sheet's words are about the Guarantee). Founder's call with counsel.
+- COUNSEL_BRIEF 2.1 handled by Vallo, 2.9 closed, 2.2 to 2.5 and 2.7 carry the new status.

@@ -1913,6 +1913,7 @@ export const PROTECTED_HOW = {
   fees: {
     title: "What it costs",
     lead: "The partner charges a protection fee on the money that comes in. The lister pays it, so you transfer exactly the agreed amount.",
+    schedule: `${FEE_RENT_LINE} ${FEE_PROVIDER_CHARGES} The table below is the partner's tariff, and your exact figure is shown in naira before you agree.`,
     caption: "The protection fee",
     columns: { amount: "Amount transferred", fee: "Fee", who: "Who pays" },
     examplesCaption: "Worked examples",

@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
 import type { CookiesCopy } from "./CookieConsent";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { banner } from "@/lib/ui/toast";
 
 const CookieConsent = dynamic(() => import("./CookieConsent"), { ssr: false });
 
@@ -21,9 +23,11 @@ export function useCookieSheet(): { open: () => void; sheet: ReactNode } {
     void (async () => {
       try {
         const response = await fetch("/api/cookie-copy", { headers: { accept: "application/json" } });
-        if (response.ok) setCopy((await response.json()) as CookiesCopy);
-      } catch {
-        /* Offline: the sheet cannot load its words; the control works again on the next press. */
+        if (!response.ok) throw new TypeError("Failed to fetch");
+        setCopy((await response.json()) as CookiesCopy);
+      } catch (error) {
+        /* A weak signal says so and changes nothing (the tap-failed rule); the control works again on the next press. */
+        if (!tapFailedOffline(error)) banner.error("Cookie settings could not open. Try again in a moment.");
       } finally {
         setBusy(false);
       }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CookieSettingsButton } from "@/components/consent/CookieSettingsButton";
+import { CookieSettingsPageButton } from "@/components/consent/CookieSettingsPageButton";
 import { CookieTable } from "@/components/legal/CookieTable";
 import { CATEGORY_ORDER, itemsIn } from "@/lib/consent/inventory";
 import { COOKIES_UPDATED_ISO, longDate } from "./versions";
@@ -75,9 +75,7 @@ export const COOKIES_SECTIONS: { id: string; title: string; body: React.ReactNod
           stored before you choose. You can change your mind at any time:
         </p>
         <p>
-          <CookieSettingsButton className="nf-btn nf-btn--secondary nf-btn--md" data-testid="cookies-page-settings">
-            Cookie settings
-          </CookieSettingsButton>
+          <CookieSettingsPageButton>Cookie settings</CookieSettingsPageButton>
         </p>
         <p>
           Switching a kind off clears what it had stored on this device. Your choice is kept in a

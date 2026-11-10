@@ -783,6 +783,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/auth/email-hook": "Supabase Auth's send-email webhook.",
   "/api/build": "GET only, the build id the running page should be on, so a page that has been open across a release reloads itself once (DeployWatch) instead of waiting for the app to be deleted and installed again.",
   "/api/client-error": "the browser's error beacon.",
+  "/api/cookie-copy": "the cookie sheet's words in the reader's language, fetched when it opens.",
   "/api/passcode/touch": "POST only, the passcode unlock's heartbeat (docs/PASSCODE.md).",
   "/api/vitals": "the browser's field speed beacon (V-80).",
   "/gallery/ported": "a development harness for the ported component library (Session 3, D34), behind the preview flag like /gallery; not product, so it has no place in the hierarchy.",

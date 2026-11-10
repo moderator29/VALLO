@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import type { Dictionary } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -30,9 +30,9 @@ export type CookiesCopy = Dictionary["cookies"];
  */
 export default function CookieConsent({ copy, start, onDone }: { copy: CookiesCopy; start: "bar" | "sheet"; onDone(): void }) {
   const [view, setView] = useState<"bar" | "sheet">(start);
-  const saved = useRef(readConsent());
-  const [preferences, setPreferences] = useState(saved.current?.preferences ?? false);
-  const [analytics, setAnalytics] = useState(saved.current?.analytics ?? false);
+  const [saved] = useState(() => readConsent());
+  const [preferences, setPreferences] = useState(saved?.preferences ?? false);
+  const [analytics, setAnalytics] = useState(saved?.analytics ?? false);
   const titleId = useId();
 
   const finish = (choice: { preferences: boolean; analytics: boolean }) => {
@@ -83,7 +83,7 @@ export default function CookieConsent({ copy, start, onDone }: { copy: CookiesCo
     <Sheet
       open
       onOpenChange={(open) => {
-        if (!open) finish({ preferences: saved.current?.preferences ?? false, analytics: saved.current?.analytics ?? false });
+        if (!open) finish({ preferences: saved?.preferences ?? false, analytics: saved?.analytics ?? false });
       }}
       title={copy.sheet.title}
       description={copy.sheet.intro}

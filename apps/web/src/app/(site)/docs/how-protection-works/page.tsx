@@ -195,6 +195,7 @@ export default function HowProtectionWorksPage() {
 
           <DocSection id="fees" number={5} title={H.fees.title}>
             <p>{H.fees.lead}</p>
+            <p>{H.fees.schedule}</p>
             <DocTable
               caption={H.fees.caption}
               captionHidden
