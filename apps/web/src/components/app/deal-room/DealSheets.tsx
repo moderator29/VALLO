@@ -173,7 +173,7 @@ function CounterForm({ room, onDone }: { room: DealRoom; onDone: () => void }) {
             setError(parsed.ok ? "Enter the figure you propose." : doorSentence(parsed.reason));
             return;
           }
-          void run(() => counterOffer({ offerId: room.offer.id, amountNaira: amount, paymentPreference: pref, targetClosing: closing || null, note: note.trim() || null, idempotencyKey: key }), "Your proposal was sent as a new version.", onDone);
+          void run(() => counterOffer({ offerId: room.offer.id, baseVersion: room.offer.version, amountNaira: amount, paymentPreference: pref, targetClosing: closing || null, note: note.trim() || null, idempotencyKey: key }), "Your proposal was sent as a new version.", onDone);
         }}
       >
         Send proposal

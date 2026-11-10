@@ -127,7 +127,7 @@ export async function declineOffer(input: { offerId: string; reason?: string | n
 export async function counterOffer(input: {
   offerId: string;
   /** The version being answered. The database refuses if it is no longer the latest. */
-  baseVersion?: number;
+  baseVersion: number;
   amountNaira: string;
   paymentPreference?: PaymentPreference;
   depositNaira?: string | null;
@@ -139,7 +139,7 @@ export async function counterOffer(input: {
   const parsed = validate(
     z.object({
       offerId: uuid,
-      baseVersion: z.number().int().min(1).optional(),
+      baseVersion: z.number().int().min(1),
       amountNaira: z.string().trim().min(1, DOOR_WORDS.bad_amount),
       paymentPreference: PaymentSchema.optional(),
       depositNaira: z.string().nullable().optional(),
@@ -171,7 +171,7 @@ export async function counterOffer(input: {
     (userId) => ({
       p_actor: userId,
       p_agreement: parsed.data.offerId,
-      p_base_version: parsed.data.baseVersion ?? offer.version,
+      p_base_version: parsed.data.baseVersion,
       p_amount_minor: amount.kobo,
       p_pref: pref,
       p_deposit_minor: pref === "cash" ? null : (parsed.data.depositNaira !== undefined ? deposit.kobo : (current?.terms.deposit_minor ?? null)),
