@@ -91,12 +91,13 @@
 
   .nf-pp-amount__figure {
     margin: 0;
-    font-size: var(--nf-text-figure-xl);
+    /* Large, but always one line on a 360 phone (eleven characters of ₦). */
+    font-size: min(var(--nf-text-figure-xl), 11vw);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: 1.05;
     color: var(--nf-content-primary);
-    overflow-wrap: anywhere;
+    white-space: nowrap;
   }
 
   .nf-pp-amount__caption {

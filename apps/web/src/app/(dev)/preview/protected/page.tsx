@@ -43,7 +43,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
   const { screen = "choose", offer } = await searchParams;
   const locale = await getLocale();
   const key = screen === "review-state" ? "review" : screen;
-  const deal = PREVIEW_DEALS[key] ?? PREVIEW_DEALS.funding!;
+  const recorded = PREVIEW_DEALS[key] ?? PREVIEW_DEALS.funding!;
+  /* The clock runs on the real time in the browser, so a live preview moves
+     a genuine-looking expiry to 24 minutes from this request (the recorded
+     fixture stays fixed for the tests). */
+  const now = requestTime();
+  const relative = (iso: string | null) => (iso ? new Date(now + (Date.parse(iso) - PREVIEW_NOW)).toISOString() : null);
+  const deal = recorded.funding ? { ...recorded, funding: { ...recorded.funding, expiresAt: relative(recorded.funding.expiresAt) } } : recorded;
   return (
     <div className="mx-auto max-w-xl px-md py-lg">
       <nav className="mb-lg flex flex-wrap gap-xs text-[length:var(--nf-text-caption)]" aria-label="Fixture screens">
@@ -59,11 +65,16 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ s
         <PreviewProtected
           screen={screen === "choose" ? "choose" : screen === "review" ? "review" : "journey"}
           deal={screen === "choose" || screen === "review" ? PREVIEW_DEALS.funding! : deal}
-          now={PREVIEW_NOW}
+          now={now}
           locale={locale}
           {...(offer === "absent" || offer === "fee_failed" || offer === "service_down" || offer === "agreement_invalid" ? { offer } : {})}
         />
       )}
     </div>
   );
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }
