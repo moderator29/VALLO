@@ -40,16 +40,21 @@ const pt = ([x, y]) => `${r2(x)} ${r2(y)}`;
 /* ---------- palettes ---------- */
 
 export const COLOURS = {
-  blueTop: "#3FDCFF",
-  blueMid: "#1C86FF",
-  blueLow: "#1A4CF0",
-  blueDeep: "#1238C8",
-  cyan: "#3FDCFF",
-  orangeTop: "#FFA04A",
-  orange: "#FF8A3C",
-  orangeLow: "#F2561E",
-  sheen: 0.22,
-  side: "#0B2A9E",
+  /* BRAND REFRESH (10 November 2026): the same blues and oranges, lifted. The
+     founder found the mark dull on a dark home screen. Every stop is brighter
+     (the low blue was #1238C8, close to the navy ground), the shaded tower
+     face is lighter, and the gloss is stronger, so the towers read clean and
+     crisp on navy and on white alike. */
+  blueTop: "#5BE7FF",
+  blueMid: "#2F95FF",
+  blueLow: "#2F6BFF",
+  blueDeep: "#2455F2",
+  cyan: "#5BE7FF",
+  orangeTop: "#FFB25E",
+  orange: "#FF9244",
+  orangeLow: "#F96B28",
+  sheen: 0.34,
+  side: "#1D47D8",
 };
 
 /* ---------- small geometry helpers ---------- */
