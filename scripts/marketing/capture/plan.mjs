@@ -465,3 +465,47 @@ export const NOW = [
   ...[["premium", "Premium listings"], ["featured", "Featured listings"]].map(([k, title]) => ({ id: `d-n-home-${k}`, kind: "desktop", steps: [...HOME, { reveal: `text="${title}"`, offset: 140 }, { wait: 2200 }] })),
 ];
 CAPTURES.push(...NOW);
+
+/*
+ * The upgraded platform (10 November 2026): the new dock with Circle at its
+ * centre, Vallo Circle, Roommates, the feed, and the property pages as they
+ * are now. The store images (store/shots/v3.mjs) are made from these. The
+ * test account's place is Eti-Osa, Lagos, with seven places saved, so home,
+ * search and the feed open on Lagos.
+ */
+const SPLIT = [
+  /* the listing's own figures (₦18m a year, caution ₦3.6m, agency and legal ₦1.8m each), three people */
+  { goto: "/roommates/split?rent=1800000000&period=year&people=3" },
+  { type: "#rm-split-deposit", text: "3600000" },
+  { type: "#rm-split-agency", text: "1800000" },
+  { type: "#rm-split-legal", text: "1800000" },
+  { reveal: "#rm-split-results", offset: 120 },
+];
+const V3 = [
+  { id: "v3-home", steps: HOME },
+  { id: "v3-home-new", steps: [...HOME, { reveal: "h2:text-is('New listings')", offset: 90 }, { wait: 2200 }] },
+  { id: "v3-drawer", steps: [...HOME, { click: "button[aria-label='Open menu']" }, { wait: 1400 }] },
+  { id: "v3-circle", steps: go("/circle") },
+  { id: "v3-circle-explore", steps: [{ goto: "/circle" }, { reveal: "text=Explore Circle", offset: 96 }] },
+  { id: "v3-roommates", steps: go("/roommates") },
+  { id: "v3-roommates-2", steps: [{ goto: "/roommates" }, { clickIf: "button:has-text('Next')", pause: 1800 }] },
+  { id: "v3-schools", steps: go("/roommates/campus") },
+  { id: "v3-safety", steps: go("/roommates/safety") },
+  { id: "v3-split", steps: SPLIT },
+  { id: "v3-listing", steps: go(LISTING_RENT) },
+  { id: "v3-listing-cost", steps: reveal(LISTING_RENT, "h2:text-is('What you will actually pay')", 96) },
+  { id: "v3-listing-total", steps: reveal(LISTING_RENT, "[data-testid=move-in-line-caution]", 150) },
+  { id: "v3-listing-sale", steps: go(LISTING_SALE) },
+  { id: "v3-search", steps: go("/search?market=rent") },
+  { id: "v3-filters", steps: go("/search?filters=open") },
+  { id: "v3-saved", steps: go("/saved") },
+  { id: "v3-stays", steps: go("/stays") },
+  { id: "v3-stay", steps: [{ goto: STAY }, { reveal: "h1", offset: 900 }, { wait: 800 }] },
+  { id: "v3-restaurant", steps: go(RESTAURANT) },
+  { id: "v3-passport", steps: go("/settings/passport") },
+  { id: "v3-notifications", steps: go("/notifications") },
+  { id: "v3-payments", steps: go("/payments") },
+  { id: "v3-sign-up", auth: false, steps: go("/sign-up") },
+  { id: "v3-welcome", auth: false, steps: [{ goto: "/welcome" }, { wait: 2600 }] },
+];
+CAPTURES.push(...V3);

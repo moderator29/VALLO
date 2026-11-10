@@ -209,6 +209,9 @@ Only to the QA member account, and only through the product's own screens: sign-
 
 ## 8. Regenerating
 
+**The 10 November 2026 set (20 images per store).** Drawn on the upgraded platform (the new dock with Vallo Circle at its centre, Roommates, the property pages) from the `v3-` captures in `scripts/marketing/capture/plan.mjs`. The layouts are `store/shots/v3.mjs`, the pop-outs `store/shots/furniture/v3.mjs`. Capture with `QA_MEMBER_EMAIL=... QA_MEMBER_PASSWORD=... node scripts/marketing/capture/run.mjs --only v3-home,...` (credentials on the command line only, never in a file), then `node scripts/marketing/screens.mjs`, then `STORE_SET=v3 node scripts/marketing/store/compose.mjs --feature`. Shots 3 and 4 are one connected pair (the stays home across the seam). No image promises a payment, a refund or a balance: rental payment is not open yet.
+
+
 Everything lives in `scripts/marketing/`:
 
 | File | What it does |

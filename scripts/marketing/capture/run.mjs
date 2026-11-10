@@ -61,9 +61,15 @@ const kindOnly = args.includes("--kind") ? args[args.indexOf("--kind") + 1] : nu
 async function run(page, steps, signed) {
   for (const step of steps) {
     if (step.goto) {
-      await page.goto(`${BASE}${step.goto}`, { waitUntil: "load", timeout: 90_000 });
+      await page.goto(`${BASE}${step.goto}`, { waitUntil: "load", timeout: 240_000 });
       await settle(page, 1800);
       if (signed) await touchUnlock(page);
+      /* One-time sheets the account meets on its way (the terms notice, the
+         name confirmation, a badge earned): put away the way a member does. */
+      if (signed) for (let k = 0; k < 2; k += 1) for (const sel of ["button:has-text('Skip for now')", "button:has-text('Got it')"]) {
+        const l = page.locator(sel).first();
+        if (await l.count() && await l.isVisible().catch(() => false)) { await l.click({ timeout: 3000 }).catch(() => {}); await page.waitForTimeout(900); }
+      }
     } else if (step.click) {
       await page.locator(step.click).first().click({ timeout: 12_000 });
       await page.waitForTimeout(step.pause ?? 900);
@@ -198,7 +204,7 @@ const signedIn = {};
 async function signedInContext(kind) {
   if (!signedIn[kind]) {
     const ctx = await browser.newContext({ ...VIEWPORTS[kind], reducedMotion: "reduce", locale: "en-NG", timezoneId: "Africa/Lagos" });
-    await ctx.addCookies([{ name: "vallo_first_run", value: "seen", url: BASE }]);
+    await ctx.addCookies([{ name: "vallo_first_run", value: "seen", url: BASE }, { name: "vallo_consent", value: "1.00", url: BASE }]);
     await keepUnlocked(ctx);
     await signInWithin(ctx, { fresh: true });
     signedIn[kind] = ctx;
@@ -223,6 +229,8 @@ async function captureOnce(cap, ctx) {
     await run(page, cap.steps, signed);
     const path = new URL(page.url()).pathname;
     if (signed && (path.startsWith("/sign-in") || !(await hasSession(ctx)))) return { page, signedOut: true };
+    /* the home's signed-out face ("Sign in and this screen becomes yours") means the app did not take the session: sign in again */
+    if (signed && (await page.evaluate(() => (document.body?.innerText ?? "").includes("this screen becomes yours")).catch(() => false))) return { page, signedOut: true };
     if (signed && (await isLocked(page))) return { page, locked: true };
     return { page };
   } catch (error) {
@@ -240,7 +248,7 @@ for (const cap of CAPTURES) {
   const kind = cap.kind ?? "mobile";
   let result;
   let ctx;
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
     ctx = needsAuth ? await signedInContext(kind) : await contextFor(browser, { kind, theme: cap.theme ?? "dark", locale: cap.locale });
     result = await captureOnce(cap, ctx);
     if (!result.signedOut && !result.locked) break;

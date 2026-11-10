@@ -51,8 +51,13 @@ async function typeInto(page, selector, value) {
 export async function signIn(browser, { email = process.env.QA_MEMBER_EMAIL, password = process.env.QA_MEMBER_PASSWORD } = {}) {
   if (!email || !password) return null;
   for (let attempt = 1; attempt <= 4; attempt += 1) {
-    const ctx = await browser.newContext(VIEWPORTS.mobile);
-    await ctx.addCookies([{ name: "vallo_first_run", value: "seen", url: BASE }]);
+    /* Reduced motion also skips the opening animation (November upgrade), which
+       otherwise sits over the form for several seconds and swallows its taps. */
+    const ctx = await browser.newContext({ ...VIEWPORTS.mobile, reducedMotion: "reduce" });
+    /* The cookie notice (added in the November upgrade) sits over the sign-in form and
+       swallows its taps. "Only necessary" is what a member who declines chooses: it
+       writes vallo_consent=1.00, and so does this. */
+    await ctx.addCookies([{ name: "vallo_first_run", value: "seen", url: BASE }, { name: "vallo_consent", value: "1.00", url: BASE }]);
     const page = await ctx.newPage();
     try {
       await page.goto(`${BASE}/sign-in`, { waitUntil: "load", timeout: 90_000 });
@@ -175,6 +180,7 @@ export async function contextFor(browser, { kind = "mobile", theme = "dark", loc
   });
   await ctx.addCookies([
     { name: "vallo_first_run", value: "seen", url: BASE },
+    { name: "vallo_consent", value: "1.00", url: BASE },
     { name: "nf_theme", value: theme, url: BASE },
     ...(locale ? [{ name: "nf_locale", value: locale, url: BASE }] : []),
   ]);

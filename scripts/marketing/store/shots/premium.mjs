@@ -116,7 +116,7 @@ function withDisplay(ctx, p) {
  * tick edges, the brand's 3D objects and the oversized outlined numbers.
  */
 export function std(n, slug, id, lines, { sub, extra, ...rest } = {}) {
-  const spec = { ...(FURNITURE[n] || {}), ...rest };
+  const spec = { ...(rest.bare ? {} : FURNITURE[n] || {}), ...rest };
   return {
     n, slug, captures: [id],
     async layout(ctx) {
@@ -182,7 +182,7 @@ export function pair(a, b, { id, rotation, fov, dx = 0, h = 1, clear, through, e
      is tilted, not flat, so there is no display layer to magnify. */
   const words = (S, extra) => async (ctx) => {
     const m = M(ctx);
-    const spec = FURNITURE[S.n] || {};
+    const spec = S.spec ?? FURNITURE[S.n] ?? {};
     const furniture = furnish(ctx, m, null, { props: spec.props, badges: spec.badges, figures: spec.figures });
     return [panelFor(ctx, m), head(ctx, m, S.lines, { align: "left", keyStyle: spec.keyStyle }), furniture, extra ? await extra(ctx, m) : ""].join("\n");
   };
@@ -193,6 +193,75 @@ export function pair(a, b, { id, rotation, fov, dx = 0, h = 1, clear, through, e
 }
 
 /* ------------------------------------------------------------- the 35 */
+
+/** The stays pair's shared-phone options (the "Room booked" card on the left half), for any capture `id`. */
+export const staysPairOpts = (id) => (
+  {
+    id, rotation: { x: -16, y: -16, z: -17 }, fov: 26, h: 1, through: [893, 1272],
+    async extraA(ctx, m) {
+      const { W, ios } = ctx;
+      const sp = ctx.shared.phone;
+      /* (04 is the pair's left half, so the shared phone's page x is this image's x) */
+      /* the frame's left rim, as page x at page y (sampled along the display's left edge) */
+      const rim = Array.from({ length: 60 }, (_, k) => sp.at(-m.frame, (k * 2868) / 59));
+      const rimX = (y) => {
+        for (let k = 1; k < rim.length; k += 1) {
+          const [xa, ya] = rim[k - 1]; const [xb, yb] = rim[k];
+          if ((y - ya) * (y - yb) <= 0) return xa + ((xb - xa) * (y - ya)) / (yb - ya || 1);
+        }
+        return rim[0][0];
+      };
+      const [, midY] = sp.at(0, 275);
+      /* The card sits level with the header's middle, and is lowered (where the rim
+         lies further left) only as far as it takes to reach 20 px over the rim while
+         keeping clear of the menu above and the greeting below. Its right edge goes
+         past the rim by the rule's overhang plus 52 px (App Store) or 42 (Play), so
+         the rounded top corner sits over the frame too. */
+      const menu = pageBox(sp.at, MENU, "the menu button");
+      const greeting = pageBox(sp.at, [45, 478, 470, 640], "the greeting");
+      /*
+       * The band between the menu above and the greeting below is narrower
+       * than it was: the handset came down a tenth on 16 October and the
+       * container that replaced the old pop-up is taller (the heavy rule
+       * adds to every edge). So the card is fitted rather than assumed: the
+       * largest size, from the set's own down to four fifths of it, that
+       * keeps 8 px of corner over the rim, 20 px off the menu and 20 px off
+       * the greeting. A card is 172 px tall per unit of scale (the disc at
+       * 104, its padding 26 each way, the rule 8 each way).
+       */
+      let best = null;
+      for (let k = 1; k >= 0.70 && !best; k -= 0.02) {
+        const scale = m.card * k;
+        const cardH = 172 * scale;
+        const radius = 40 * scale;
+        let menuGap = 24;
+        const fit = (t) => {
+          const r = Math.min(menu.x - menuGap, Math.max(Math.min(rimX(t), rimX(t + cardH)) + m.overhang + (ios ? 52 : 42), rimX(t) + 20, rimX(t + cardH) + 20));
+          /* the overlap where the corner's curve meets the rim: the corner at 45 degrees */
+          return { right: r, overlap: r - radius * (1 - Math.SQRT1_2) - rimX(t + radius * (1 - Math.SQRT1_2)) };
+        };
+        const clear = (t) => Math.hypot(Math.max(greeting.x - fit(t).right, 0), Math.max(greeting.y - (t + cardH), 0));
+        let t = midY - cardH / 2;
+        while (fit(t).overlap < 8 && clear(t + 1) >= 22) t += 1;
+        while (fit(t).overlap < 8 && menuGap > 22) menuGap -= 1;
+        const { right, overlap } = fit(t);
+        if (overlap >= 8 && menu.x - right >= 20.5 && clear(t) >= 20.5) best = { scale, cardH, top: t, right, overlap };
+      }
+      /* nothing fitted: take the smallest and let the check report it */
+      if (!best) {
+        const scale = m.card * 0.70;
+        const cardH = 172 * scale;
+        const t = midY - cardH / 2;
+        const r = Math.min(menu.x - 22, Math.max(rimX(t) + m.overhang + (ios ? 52 : 42), rimX(t) + 20));
+        best = { scale, cardH, top: t, right: r, overlap: r - 40 * scale * (1 - Math.SQRT1_2) - rimX(t + 40 * scale * (1 - Math.SQRT1_2)) };
+      }
+      ctx.cornerOverlap = best.overlap;
+      ctx.cardCheck = { avoid: [menu, greeting, pageBox(sp.at, CAMERA[ctx.model], "the camera")], minCornerOverlap: 8 };
+      if (process.env.STORE_DEBUG) console.log(`  04 card: scale ${best.scale.toFixed(3)} of ${m.card.toFixed(3)}, top ${best.top.toFixed(0)}, right ${best.right.toFixed(0)}, menu gap ${(menu.x - best.right).toFixed(1)}, corner overlap ${best.overlap.toFixed(1)} px`);
+      return lineCallout({ card: true, right: W - best.right, fit: true, y: best.top, lucide: "bed-double", title: "Room booked", line: "Lagoon Crest Resort · 3 nights", meta: null, example: true, scale: best.scale });
+    },
+  }
+);
 
 export const SHOTS = [
   std(1, "find-your-next-home-in-nigeria", "n-home", ["Find your next *home*", "in Nigeria"], { keyStyle: "chip" }),
@@ -211,71 +280,7 @@ export const SHOTS = [
   ...pair(
     { n: 4, slug: "hotels-shortlets-and-restaurants", lines: ["Hotels, shortlets", "and restaurants"] },
     { n: 5, slug: "book-a-room-in-a-few-taps", lines: ["Book a room", "in a few taps"] },
-    {
-      id: "n-stays", rotation: { x: -16, y: -16, z: -17 }, fov: 26, h: 1, through: [893, 1272],
-      async extraA(ctx, m) {
-        const { W, ios } = ctx;
-        const sp = ctx.shared.phone;
-        /* (04 is the pair's left half, so the shared phone's page x is this image's x) */
-        /* the frame's left rim, as page x at page y (sampled along the display's left edge) */
-        const rim = Array.from({ length: 60 }, (_, k) => sp.at(-m.frame, (k * 2868) / 59));
-        const rimX = (y) => {
-          for (let k = 1; k < rim.length; k += 1) {
-            const [xa, ya] = rim[k - 1]; const [xb, yb] = rim[k];
-            if ((y - ya) * (y - yb) <= 0) return xa + ((xb - xa) * (y - ya)) / (yb - ya || 1);
-          }
-          return rim[0][0];
-        };
-        const [, midY] = sp.at(0, 275);
-        /* The card sits level with the header's middle, and is lowered (where the rim
-           lies further left) only as far as it takes to reach 20 px over the rim while
-           keeping clear of the menu above and the greeting below. Its right edge goes
-           past the rim by the rule's overhang plus 52 px (App Store) or 42 (Play), so
-           the rounded top corner sits over the frame too. */
-        const menu = pageBox(sp.at, MENU, "the menu button");
-        const greeting = pageBox(sp.at, [45, 478, 470, 640], "the greeting");
-        /*
-         * The band between the menu above and the greeting below is narrower
-         * than it was: the handset came down a tenth on 16 October and the
-         * container that replaced the old pop-up is taller (the heavy rule
-         * adds to every edge). So the card is fitted rather than assumed: the
-         * largest size, from the set's own down to four fifths of it, that
-         * keeps 8 px of corner over the rim, 20 px off the menu and 20 px off
-         * the greeting. A card is 172 px tall per unit of scale (the disc at
-         * 104, its padding 26 each way, the rule 8 each way).
-         */
-        let best = null;
-        for (let k = 1; k >= 0.70 && !best; k -= 0.02) {
-          const scale = m.card * k;
-          const cardH = 172 * scale;
-          const radius = 40 * scale;
-          let menuGap = 24;
-          const fit = (t) => {
-            const r = Math.min(menu.x - menuGap, Math.max(Math.min(rimX(t), rimX(t + cardH)) + m.overhang + (ios ? 52 : 42), rimX(t) + 20, rimX(t + cardH) + 20));
-            /* the overlap where the corner's curve meets the rim: the corner at 45 degrees */
-            return { right: r, overlap: r - radius * (1 - Math.SQRT1_2) - rimX(t + radius * (1 - Math.SQRT1_2)) };
-          };
-          const clear = (t) => Math.hypot(Math.max(greeting.x - fit(t).right, 0), Math.max(greeting.y - (t + cardH), 0));
-          let t = midY - cardH / 2;
-          while (fit(t).overlap < 8 && clear(t + 1) >= 22) t += 1;
-          while (fit(t).overlap < 8 && menuGap > 22) menuGap -= 1;
-          const { right, overlap } = fit(t);
-          if (overlap >= 8 && menu.x - right >= 20.5 && clear(t) >= 20.5) best = { scale, cardH, top: t, right, overlap };
-        }
-        /* nothing fitted: take the smallest and let the check report it */
-        if (!best) {
-          const scale = m.card * 0.70;
-          const cardH = 172 * scale;
-          const t = midY - cardH / 2;
-          const r = Math.min(menu.x - 22, Math.max(rimX(t) + m.overhang + (ios ? 52 : 42), rimX(t) + 20));
-          best = { scale, cardH, top: t, right: r, overlap: r - 40 * scale * (1 - Math.SQRT1_2) - rimX(t + 40 * scale * (1 - Math.SQRT1_2)) };
-        }
-        ctx.cornerOverlap = best.overlap;
-        ctx.cardCheck = { avoid: [menu, greeting, pageBox(sp.at, CAMERA[ctx.model], "the camera")], minCornerOverlap: 8 };
-        if (process.env.STORE_DEBUG) console.log(`  04 card: scale ${best.scale.toFixed(3)} of ${m.card.toFixed(3)}, top ${best.top.toFixed(0)}, right ${best.right.toFixed(0)}, menu gap ${(menu.x - best.right).toFixed(1)}, corner overlap ${best.overlap.toFixed(1)} px`);
-        return lineCallout({ card: true, right: W - best.right, fit: true, y: best.top, lucide: "bed-double", title: "Room booked", line: "Lagoon Crest Resort · 3 nights", meta: null, example: true, scale: best.scale });
-      },
-    },
+    staysPairOpts("n-stays"),
   ),
 
   std(6, "vallo-never-holds-your-money", "sc-payments", ["Vallo *never* holds", "your money"], { keyStyle: "chip" }),
@@ -339,7 +344,7 @@ export const SHOTS = [
 
 /** Play's feature graphic, 1024 x 500, on the same night ground: the wordmark, one line, one phone. */
 export async function FEATURE(ctx) {
-  const p = await ctx.phone({ id: "n-home", cx: 766, cy: 258, h: 440, rotation: { x: -6, y: -16, z: 4 }, fov: 24, margin: 30, color: PHONE_COLOR });
+  const p = await ctx.phone({ id: process.env.STORE_SET === "v3" ? "v3-home" : "n-home", cx: 766, cy: 258, h: 440, rotation: { x: -6, y: -16, z: 4 }, fov: 24, margin: 30, color: PHONE_COLOR });
   return [
     `<img class="abs" src="${brandUrl("vallo-wordmark.png")}" style="left:146px;top:146px;width:176px;z-index:30">`,
     `<div class="abs" style="left:144px;top:206px;width:460px;z-index:30;font:600 64px/1.04 Poppins;letter-spacing:-0.03em;color:#fff">Real estate,<br>done right.</div>`,

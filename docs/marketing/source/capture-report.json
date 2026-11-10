@@ -2103,6 +2103,174 @@
     "theme": "light",
     "signedIn": true
   },
+  "v3-circle": {
+    "url": "/circle",
+    "at": "2026-11-10T21:29:03.677Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-circle-explore": {
+    "url": "/circle",
+    "at": "2026-11-10T21:29:30.209Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-drawer": {
+    "url": "/home",
+    "at": "2026-11-10T21:26:58.522Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-filters": {
+    "url": "/search?filters=open",
+    "at": "2026-11-10T21:37:26.481Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-home": {
+    "url": "/home",
+    "at": "2026-11-10T21:24:30.070Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-home-new": {
+    "url": "/home",
+    "at": "2026-11-10T21:25:37.572Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-listing": {
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-10T21:34:00.203Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-listing-cost": {
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-10T21:34:28.350Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-listing-sale": {
+    "url": "/listing/ed000000-0000-4000-8000-000000000040",
+    "at": "2026-11-10T21:36:39.309Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-listing-total": {
+    "url": "/listing/ed000000-0000-4000-8000-00000000003e",
+    "at": "2026-11-10T21:35:06.114Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-notifications": {
+    "url": "/notifications",
+    "at": "2026-11-10T21:44:01.594Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-passport": {
+    "url": "/settings/passport",
+    "at": "2026-11-10T21:43:14.252Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-payments": {
+    "url": "/payments",
+    "at": "2026-11-10T21:50:01.200Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-restaurant": {
+    "url": "/restaurant/eb000000-0000-4000-8000-000000000006",
+    "at": "2026-11-10T21:40:04.912Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-roommates": {
+    "url": "/roommates",
+    "at": "2026-11-10T21:31:31.704Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-roommates-2": {
+    "url": "/roommates",
+    "at": "2026-11-10T21:31:59.135Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-safety": {
+    "url": "/roommates/safety",
+    "at": "2026-11-10T21:32:56.398Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-saved": {
+    "url": "/saved",
+    "at": "2026-11-10T21:38:26.437Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-schools": {
+    "url": "/roommates/campus",
+    "at": "2026-11-10T21:32:37.067Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-search": {
+    "url": "/search?market=rent",
+    "at": "2026-11-10T21:37:04.807Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-sign-up": {
+    "url": "/sign-up",
+    "at": "2026-11-10T21:50:29.207Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": false
+  },
+  "v3-split": {
+    "url": "/roommates/split",
+    "at": "2026-11-10T21:33:14.688Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-stays": {
+    "url": "/stays",
+    "at": "2026-11-10T21:38:49.590Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": true
+  },
+  "v3-welcome": {
+    "url": "/welcome",
+    "at": "2026-11-10T22:37:40.065Z",
+    "kind": "mobile",
+    "theme": "dark",
+    "signedIn": false
+  },
   "verification": {
     "url": "/verification",
     "at": "2026-09-30T15:32:58.444Z",
