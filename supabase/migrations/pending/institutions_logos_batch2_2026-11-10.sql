@@ -26,6 +26,8 @@
 --    any addresses printed on the page or its contact page are on that same domain. Only rows
 --    whose email_domains is empty are touched, and the check is switched on only with a domain.
 
+begin;
+
 update public.institutions i
    set logo_url = v.logo_url, logo_source = v.logo_source
   from (values
@@ -306,3 +308,5 @@ begin
   end if;
 end
 $check$;
+
+commit;

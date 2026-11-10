@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -47,7 +47,6 @@ describe.skipIf(!have)("batch 2 school logos and domains", () => {
     }
   });
   it("leaves no unreferenced logo file behind", () => {
-    const { readdirSync } = require("node:fs") as typeof import("node:fs");
     const named = new Set(logos.map((l) => `${l.slug}.webp`));
     for (const f of readdirSync(PUBLIC_SCHOOLS)) expect(named.has(f), `orphan ${f}`).toBe(true);
   });
