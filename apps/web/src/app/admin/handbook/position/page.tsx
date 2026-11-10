@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { STAFF_SCOPE_LABEL, requireConsole } from "@/lib/admin/guard";
 import { JOB_DESCRIPTIONS, STAFF_POSITIONS, type JobDescription } from "@/lib/admin/staff-positions";
 import { PageHead, Panel } from "../../_components/panels";
@@ -31,6 +32,13 @@ function Description({ job }: { job: JobDescription }) {
             </li>
           ))}
         </ul>
+        <p className="nf-body mt-sm">
+          File your weekly report every week. It opens on Saturday and is due Monday at 12:00, Lagos time.{" "}
+          <Link href="/admin/manual/weekly-report" className="font-semibold text-[var(--nf-content-link)] underline underline-offset-2">
+            How the weekly report works
+          </Link>
+          .
+        </p>
       </Panel>
       <Panel title="When to escalate">
         <ul className="grid gap-xs">

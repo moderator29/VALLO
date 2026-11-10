@@ -240,6 +240,8 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/my-desk": "My desk",
   "/admin/my-desk/tasks": "My tasks",
   "/admin/my-desk/announcements": "Announcements",
+  "/admin/my-desk/weekly": "Weekly report",
+  "/admin/reports/weekly": "Weekly reports",
   "/admin/oversight": "Oversight",
   "/admin/bookings/reservations": "Reservations",
   "/admin/bookings/visits": "Visits",

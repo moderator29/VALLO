@@ -209,3 +209,14 @@ export async function readDeskRows(db: SupabaseClient, userId: string, position:
   }
   return rows;
 }
+
+export type WeekTableRow = { person: RosterPerson; report: WeeklyReport | null };
+
+/** The reviewer's table for one week: every current staff member and their report, or none. */
+export async function readWeekTable(db: SupabaseClient, weekStart: string): Promise<Read<WeekTableRow[]>> {
+  const [roster, reports] = await Promise.all([readRoster(), readWeekReports(db, weekStart)]);
+  if (reports.state !== "ok") return reports;
+  if (roster.state !== "ok") return roster;
+  const byAuthor = new Map(reports.data.filter((r) => r.authorId).map((r) => [r.authorId as string, r]));
+  return { state: "ok", data: roster.data.map((person) => ({ person, report: byAuthor.get(person.userId) ?? null })) };
+}

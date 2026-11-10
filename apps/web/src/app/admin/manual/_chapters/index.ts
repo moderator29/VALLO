@@ -7,6 +7,7 @@ import { MY_DESK } from "./my-desk";
 import type { ManualBody } from "./parts";
 import { QUEUES } from "./queues";
 import { RECORDS } from "./records";
+import { WEEKLY_REPORT } from "./weekly-report";
 
 /** Each chapter's words, keyed by the slug the index in `lib/admin/manual` lists. */
 export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
@@ -17,4 +18,5 @@ export const MANUAL_BODIES: Record<ManualSlug, ManualBody> = {
   records: RECORDS,
   escalation: ESCALATION,
   "my-desk": MY_DESK,
+  "weekly-report": WEEKLY_REPORT,
 };
