@@ -6,6 +6,7 @@ import { getFeeConsole, type FeeRateView } from "@/lib/admin/money-queries";
 import { getRevenueSummary, REVENUE_WINDOW_DAYS } from "@/lib/admin/revenue-queries";
 import type { RevenueSummary } from "@/lib/admin/revenue-queries";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { FeeRateForm } from "../_components/MoneyDecisions";
 import { PaperLedger, PaperLedgerRow, PaperStatus } from "../_components/paper";
 import { DocFigure, DocHead, DocRow, DocRows, DocSection, DocState, DocumentSheet } from "@/components/app/money/DocumentSheet";
@@ -71,7 +72,7 @@ export default async function AdminFeesPage({
   if (read.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title="Fees" lede="What the platform charges." />
+        <PageHead title="Fees" lede="What the platform charges." />
         <ui.QueueUnavailable />
       </div>
     );
@@ -79,7 +80,7 @@ export default async function AdminFeesPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader
+      <PageHead
         title="Fees"
         lede="What the platform charges, with the date each rate started. Changing a rate adds a row rather than editing one, so anything already charged stays explainable by the rate that was in force at the time."
       />

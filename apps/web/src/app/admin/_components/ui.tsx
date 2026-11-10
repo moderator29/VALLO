@@ -279,7 +279,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
 
   /**
    * The heading the queue pages opened with before they moved onto `PageHead`
-   * (AD-01). Kept for the desks still on it (fees, restaurant fees).
+   * (AD-01). Kept for the development previews still drawn with it; every live desk is on PageHead.
    */
   function QueueHeader({
     title,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { formatDate, formatMoney, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/app/Screen";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
@@ -68,12 +69,16 @@ export default async function PromotionHubPage() {
   const howHref = `${firstRunPath("promotion")}?next=${encodeURIComponent(PROMOTION_HUB_HREF)}`;
 
   return (
-    <AgentShell t={t} locale={locale} active={PROMOTION_HUB_HREF} profile={agentProfileFrom(context.agent)}>
-      <div className="mx-auto flex max-w-2xl flex-col gap-group py-lg" data-testid="promotion-hub">
-        <div>
-          <h1 className="nf-h2">{p.hub.title}</h1>
-          <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{p.hub.lede}</p>
-        </div>
+    <AgentShell
+      t={t}
+      locale={locale}
+      active={PROMOTION_HUB_HREF}
+      profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
+    >
+      <PageFrame title={p.hub.title} subtitle={p.hub.lede} fallback="/agent/dashboard">
+      <div className="flex flex-col gap-group" data-testid="promotion-hub">
         <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="note" data-testid="promotion-hub-not-on-sale">
           {PROMOTION_NOT_ON_SALE}
         </p>
@@ -166,6 +171,7 @@ export default async function PromotionHubPage() {
           />
         </ListGroup>
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }
