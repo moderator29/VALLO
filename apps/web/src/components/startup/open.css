@@ -1,0 +1,120 @@
+/*
+ * THE OPENING SCREEN (10 November 2026, the founder's film of the installed
+ * app: a long blank navy screen, then half the chrome, then the lock).
+ *
+ * The bright mark, centred on the brand ground, from the very first frame of an
+ * installed app, with no script needed to draw it. This rule REPLACES the D68c
+ * rule that the logo never appears alone on open: the founder reversed it on
+ * 10 November because the "product arriving" opening could not be seen at all.
+ *
+ * WHY A STYLESHEET AND NOT AN INLINE STYLE ELEMENT. The Content Security Policy
+ * allows no `<style>` element (style-src-elem is 'self'), and a test holds it
+ * there. This sheet is render-blocking like every other one in the head, so the
+ * browser paints nothing until it is loaded, and then the first frame already
+ * has the mark: no script, no image fetch (the mark is inline SVG in the first
+ * HTML, `OpeningScreen.tsx`).
+ *
+ * WHEN IT SHOWS. Only in an installed app (`display-mode: standalone`, which is
+ * what an iPhone home-screen web app is), never on the native shell (its own
+ * launch plays there) and never in a browser tab. `open-script.ts` hides it on
+ * a warm open (the same session) and lifts it once the page is ready.
+ *
+ * WHEN IT GOES. The script lifts it after its minimum time and once the page
+ * (and the passcode guard) have decided what to show, a crossfade of 320ms.
+ * With no script at all, the animation `nf-open-cap` lifts it by 2,500ms. The
+ * same ground and mark size and position are drawn into the iOS launch images
+ * (scripts/build-brand-launch.mjs), so iOS's own snapshot hands over to this
+ * screen without a visible move.
+ */
+@layer components {
+  .nf-open {
+    --nf-open-w: min(36vw, 11rem);
+    position: fixed;
+    inset: 0;
+    z-index: 2147483600;
+    display: none;
+    overflow: hidden;
+    background: radial-gradient(
+      ellipse 62% 62% at 50% 44%,
+      color-mix(in srgb, var(--nf-brand-primary) 24%, var(--nf-surface-artwork)) 0%,
+      var(--nf-surface-artwork) 100%
+    );
+    animation: nf-open-cap 300ms var(--nf-ease-exit) 2200ms forwards;
+  }
+  @media (display-mode: standalone) {
+    .nf-open {
+      display: block;
+    }
+  }
+  :root[data-open="on"] .nf-open,
+  :root[data-open="leave"] .nf-open {
+    display: block;
+  }
+  :root[data-open="off"] .nf-open,
+  :root[data-native] .nf-open {
+    display: none;
+  }
+  :root[data-open="leave"] .nf-open {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 320ms var(--nf-ease-exit);
+  }
+
+  /* The mark is 36 per cent of the width, its centre at 46 per cent of the
+     height: the same as the launch images. 0.4278 is half of 1 / 1.1687, the
+     mark's aspect. */
+  .nf-open__mark {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(46% - var(--nf-open-w) * 0.4278);
+    margin-inline: auto;
+    inline-size: var(--nf-open-w);
+    animation:
+      nf-open-in 520ms var(--nf-ease-entrance) both,
+      nf-open-drift 2400ms var(--nf-ease-standard) 520ms forwards;
+  }
+  .nf-open__mark svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+  }
+
+  /* Frame one is already the mark, a hair small and a touch soft, so it does
+     not jump from iOS's launch image; it settles, then drifts a little larger
+     while it waits. */
+  @keyframes nf-open-in {
+    from {
+      opacity: 0.82;
+      scale: 0.96;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+  @keyframes nf-open-drift {
+    from {
+      scale: 1;
+    }
+    to {
+      scale: 1.04;
+    }
+  }
+  @keyframes nf-open-cap {
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  /* Reduced motion and Calm and Off: the still mark, shown for the same time,
+     then the fade (a fade is not movement). */
+  @media (prefers-reduced-motion: reduce) {
+    .nf-open__mark {
+      animation: none;
+    }
+  }
+  :root:is([data-motion="calm"], [data-motion="off"]) .nf-open__mark {
+    animation: none;
+  }
+}
