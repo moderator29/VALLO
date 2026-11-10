@@ -368,7 +368,7 @@ const PAYING_ON_VALLO: DocChapter = {
           rows={[
             { id: "stay", icon: "building-apartment", cells: { deal: "Shortlets and serviced apartments", how: STAYS_PAID_BY_CARD, open: { yes: true } } },
             { id: "hotel", icon: "building-hotel", cells: { deal: "A hotel room", how: "By card, when you book, at the price shown.", open: { yes: true } } },
-            { id: "rent", icon: "key", cells: { deal: "Rent", how: RENT_PAYMENT_NOT_OPEN, open: { yes: false } } },
+            { id: "rent", icon: "house", cells: { deal: "Rent", how: RENT_PAYMENT_NOT_OPEN, open: { yes: false } } },
             { id: "sale", icon: "price-tag", cells: { deal: "A sale", how: SALE_NOT_PAID, open: { yes: false } } },
             { id: "table", icon: "utensils", cells: { deal: "A restaurant table", how: "Free to book. You pay your bill at the restaurant.", open: { yes: false, note: "Free" } } },
             { id: "viewing", icon: "calendar-check", cells: { deal: "A viewing", how: "Never any money.", open: { yes: false, note: "Free" } } },

@@ -412,9 +412,9 @@ export const VIEWINGS: DocChapter = {
               { key: "time", label: "Lagos time", numeric: true },
             ]}
             rows={[
-              { id: "eve", icon: "moon", cells: { when: "The evening before", time: "19:00" } },
-              { id: "morning", icon: "sun", cells: { when: "The morning of the visit", time: "08:00" } },
-              { id: "before", icon: "clock", cells: { when: "Before the visit", time: "Two hours before" } },
+              { id: "eve", cells: { when: "The evening before", time: "19:00" } },
+              { id: "morning", cells: { when: "The morning of the visit", time: "08:00" } },
+              { id: "before", cells: { when: "Before the visit", time: "Two hours before" } },
             ]}
           />
           <p>Each reminder says whether the visit is in person or by video.</p>

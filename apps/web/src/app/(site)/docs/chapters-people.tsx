@@ -831,7 +831,7 @@ export const REVIEWS: DocChapter = {
           rows={[
             { id: "stay", icon: "calendar-booking", cells: { what: <strong>A stay</strong>, who: "The guest, after a completed booking." } },
             { id: "restaurant", icon: "utensils", cells: { what: <strong>A restaurant</strong>, who: "Only a diner whose table was marked seated." } },
-            { id: "tenancy", icon: "key", cells: { what: <strong>A tenancy</strong>, who: "The tenant, about a month after moving in. The first question is whether you paid anyone anything beyond what you paid on Vallo. That answer is private." } },
+            { id: "tenancy", icon: "house", cells: { what: <strong>A tenancy</strong>, who: "The tenant, about a month after moving in. The first question is whether you paid anyone anything beyond what you paid on Vallo. That answer is private." } },
           ]}
         />
       ),
