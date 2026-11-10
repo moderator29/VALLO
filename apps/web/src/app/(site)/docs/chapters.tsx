@@ -670,8 +670,8 @@ const TRUST_AND_SAFETY: DocChapter = {
             numbers are flagged to the Vallo team.
           </li>
           <li>
-            {NO_INSPECTION_FEE} There is no holding fee or platform fee to pay anyone. Anybody presenting
-            one as a Vallo charge is lying.
+            {NO_INSPECTION_FEE} Renters and guests pay no holding fee or platform fee to anyone. Anybody
+            presenting one as a Vallo charge is lying.
           </li>
         </ul>
       ),
