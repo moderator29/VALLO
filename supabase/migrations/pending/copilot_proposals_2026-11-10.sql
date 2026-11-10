@@ -26,9 +26,9 @@
 -- from a scheduled job, it is not scheduled here.
 --
 -- RLS. The route reaches this table with the service client. RLS is the same
--- admin-role shape as `social_posts_2026-11-10.sql`: read and insert for an
--- admin or super admin on their own session, no update, no delete, no other
--- caller. No `private.staff_can` in a policy.
+-- admin-role shape as `social_posts_2026-11-10.sql`: read for an
+-- admin or super admin on their own session; no insert, update or delete grant
+-- for any signed-in role, no other caller. No `private.staff_can` in a policy.
 
 create table if not exists public.copilot_proposals (
   nonce      text primary key,
@@ -52,7 +52,8 @@ create index if not exists copilot_proposals_user_id_idx on public.copilot_propo
 
 alter table public.copilot_proposals enable row level security;
 revoke all on table public.copilot_proposals from public, anon, authenticated;
-grant select, insert on table public.copilot_proposals to authenticated;
+-- Read only for an admin session. Writes are the service client's alone (no insert grant), so db-06's write allowlist needs no entry.
+grant select on table public.copilot_proposals to authenticated;
 
 drop policy if exists copilot_proposals_admin_read on public.copilot_proposals;
 create policy copilot_proposals_admin_read on public.copilot_proposals
@@ -61,10 +62,6 @@ create policy copilot_proposals_admin_read on public.copilot_proposals
          or private.has_role((select auth.uid()), 'super_admin'::public.app_role));
 
 drop policy if exists copilot_proposals_admin_insert on public.copilot_proposals;
-create policy copilot_proposals_admin_insert on public.copilot_proposals
-  for insert to authenticated
-  with check (private.has_role((select auth.uid()), 'admin'::public.app_role)
-              or private.has_role((select auth.uid()), 'super_admin'::public.app_role));
 
 create or replace function private.copilot_proposals_cleanup()
 returns integer
@@ -89,7 +86,7 @@ begin
                  where n.nspname = 'public' and c.relname = 'copilot_proposals' and c.relrowsecurity) then
     raise exception 'copilot_proposals: row level security is not on';
   end if;
-  if (select count(*) from pg_policies where schemaname = 'public' and tablename = 'copilot_proposals') <> 2 then
-    raise exception 'copilot_proposals: expected exactly two policies';
+  if (select count(*) from pg_policies where schemaname = 'public' and tablename = 'copilot_proposals') <> 1 then
+    raise exception 'copilot_proposals: expected exactly one policy';
   end if;
 end $$;
