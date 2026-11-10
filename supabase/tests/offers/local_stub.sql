@@ -26,7 +26,7 @@ create table public.messages (id uuid primary key default gen_random_uuid(), con
 create table public.inspection_requests (id uuid primary key default gen_random_uuid(), listing_id uuid, requester_id uuid);
 create table public.identity_verifications (id uuid primary key default gen_random_uuid(), subject_id uuid, outcome text);
 create table public.identity_checks (id uuid primary key default gen_random_uuid(), subject_id uuid, status text);
-create table public.agent_documents (id uuid primary key default gen_random_uuid(), uploader_id uuid, kind text, review_status public.document_review_status default 'pending');
+create table public.agent_documents (id uuid primary key default gen_random_uuid(), uploader_id uuid, kind text, review_status public.document_review_status default 'pending', reviewed_by uuid);
 create table public.audit_log (id uuid primary key default gen_random_uuid(), actor_id uuid, action text not null, entity_type text not null, entity_id text, metadata jsonb default '{}', created_at timestamptz default now());
 create table public.reports (id uuid primary key default gen_random_uuid(), reporter_id uuid not null, target_type text not null, target_id text not null, reason text not null, category text, status public.report_status default 'open');
 create table public.transactions (id uuid primary key default gen_random_uuid(), agreement_id uuid);

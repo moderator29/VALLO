@@ -148,5 +148,30 @@ begin
   if public.admin_sale_offer_detail(ag)::text ~* 'storage_path|body' then raise exception 'E2E_FAIL admin saw path or messages'; end if;
   if public.admin_sale_doc_access((select id from public.deal_documents limit 1), 'too short') ->> 'status' <> 'reason_required' then raise exception 'E2E_FAIL staff doc reason'; end if;
 
+  -- ADVERSARIAL: a self-approved identity document is not eligibility
+  insert into public.agent_documents (uploader_id, kind, review_status, reviewed_by) values (poor, 'identity', 'approved', poor);
+  if (private.sale_eligibility(poor, lst) ->> 'eligible')::boolean then raise exception 'E2E_FAIL self-approved id counted'; end if;
+  insert into public.agent_documents (uploader_id, kind, review_status, reviewed_by) values (poor, 'identity', 'approved', staff);
+  if not (private.sale_eligibility(poor, lst) ->> 'eligible')::boolean then raise exception 'E2E_FAIL reviewed id not counted'; end if;
+  delete from public.agent_documents where uploader_id = poor;
+  -- ADVERSARIAL: an agent with a mandate on file but none live cannot take offers; a live one can
+  insert into public.listing_mandates (listing_id, kind, review_status, reviewed_at, expires_on) values (lst, 'sale', 'approved', now(), current_date - 1);
+  if public.sale_offer_submit_as(buyer, lst, null, 'cash', null, null, null, null, 'key-mand-0001') ->> 'status' <> 'no_mandate' then raise exception 'E2E_FAIL expired mandate'; end if;
+  update public.listing_mandates set expires_on = current_date + 30 where listing_id = lst;
+  r := public.sale_offer_submit_as(buyer, lst, null, 'cash', null, null, null, null, 'key-mand-0002');
+  if r ->> 'status' <> 'ok' then raise exception 'E2E_FAIL live mandate refused %', r; end if;
+  if (select mandate_id from public.deal_agreements where id = (r ->> 'agreement_id')::uuid) is null then raise exception 'E2E_FAIL mandate not linked'; end if;
+  -- mandate lapses mid-negotiation: acceptance refused
+  update public.listing_mandates set expires_on = current_date - 1 where listing_id = lst;
+  if public.sale_offer_accept_as(seller, (r ->> 'agreement_id')::uuid, 1, 'k') ->> 'status' <> 'no_mandate' then raise exception 'E2E_FAIL accept after mandate lapsed'; end if;
+  update public.listing_mandates set expires_on = current_date + 30 where listing_id = lst;
+  -- price changed under a live offer: acceptance still works and the record names both prices
+  update public.listings set sale_price_minor = 9000000000 where id = lst;
+  if public.sale_offer_accept_as(seller, (r ->> 'agreement_id')::uuid, 1, 'k') ->> 'status' <> 'ok' then raise exception 'E2E_FAIL accept after price change'; end if;
+  if (select note from public.deal_agreement_events where agreement_id = (r ->> 'agreement_id')::uuid and action = 'approved') not like '%NGN%' and (select note from public.deal_agreement_events where agreement_id = (r ->> 'agreement_id')::uuid and action = 'approved') not like '%₦%' then raise exception 'E2E_FAIL price note'; end if;
+  -- a suspended listing takes no new offer
+  update public.listings set status = 'SUSPENDED' where id = lst;
+  if public.sale_offer_submit_as(buyer2, lst, null, 'cash', null, null, null, null, 'key-susp-0001') ->> 'status' <> 'listing_unavailable' then raise exception 'E2E_FAIL suspended submit'; end if;
+
   raise exception 'E2E_OK';
 end $$;

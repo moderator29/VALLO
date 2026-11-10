@@ -139,3 +139,58 @@ the handoff, which restates it, is the checklist. If his text differs, his wins.
 ### Fix and gates
 
 P1-1 and P1-2 fixed; local database tests re-run (E2E_OK, RACE_OK).
+
+---
+
+## PASS TWO: ADVERSARIAL (10 November 2026)
+
+Tried to break it. Database attacks are in `supabase/tests/offers/e2e.sql` and
+`race.sh` (run on a local Postgres 16, both pass); the rest were read against
+the code.
+
+| Attack | Result |
+|---|---|
+| Two sellers accept two different offers at once; one seller in two tabs on one offer | `race.sh`: exactly one agreement and one approval event; the second tab gets a harmless replay; the other offer gets `listing_has_agreed_offer` |
+| Double-tapped or retried submit | same key returns the same offer; a second live offer is refused |
+| Accept a superseded version; accept an expired offer | `superseded`; `expired` (and the row is marked expired) |
+| Stale counter (a version arrived while the sheet was open) | refused: **this is the P1-1 fix**, tested |
+| Seller accepts their own counter; buyer accepts their own offer | `wrong_turn` |
+| Stranger with a Deal Room link; seller reading buyer data | `not_found`; seller answer carries an outcome boolean and no identity fields (string-checked) |
+| Document: foreign storage path, stranger access, own review, reject without reason | all refused; every open is logged |
+| Edit agreed terms, mark paid, mark in_review, attach a transaction | refused by the database for everyone |
+| Listing suspended mid-negotiation; new offer on a suspended listing | acceptance and new offers refused |
+| Price changed under a live offer | accept still works; the record names the asking price when proposed and now |
+| Agent with a lapsed mandate | offers closed, acceptance refused; live mandate linked on the offer |
+| Zero, negative, non-numeric, enormous amounts | `parseNairaToKobo` gives null for text, 0 for "0", 1e32 for 30 nines; all refused before the database, and the database refuses again |
+| **A buyer making their own eligibility true** | **FOUND AND FIXED.** `agent_documents` lets an applicant insert their own row; a self-approved identity document (`reviewed_by` = themselves) would have counted as verified. Eligibility now needs a reviewer who is not the uploader. Test added. |
+| Offline halfway through | the action layer returns a sentence and nothing changes; idempotency key makes the retry safe. Not exercised in a browser. |
+
+### Money and status sentences read against section 7
+
+Read `lib/offers/words.ts`, the emails, the SQL notices and the docs
+chapters. Nothing says a document is verified, funds are checked, a property is
+secured or sold, or that Vallo lends. Agreed is always "Terms agreed" with
+"This is not a sale". Notes: the tracker label "Offer accepted" (the founder's
+own stage name) always sits beside the not-a-sale sentence; "Cancelled" by an
+agreed party is recorded with the actor.
+
+### Left, with reasons
+
+- Offline behaviour not driven in a real browser (no live backend here).
+- Concurrency proven in Postgres, not through the web server.
+
+## PASS THREE: CRAFT AND TRUTH (10 November 2026)
+
+Looked at the real components through the fixture previews: flow, My offers,
+Deal Room, admin desk and the price parts, light and dark at 390 wide, plus
+the earlier 360 and 1280 checks by the screens agent and the docs agent (13
+documentation pages, three widths, both themes, no sideways scroll).
+
+| # | Finding | Disposition |
+|---|---|---|
+| P3-1 | Admin desk title sits flush against the screen edge at 390 | Staff workspace; a phone gutter is the console frame's, not the page's. Left, noted. |
+| P3-2 | Messages and Inspection tabs link out | Left, reported (see P1-5) |
+| P3-3 | Light theme verified for flow, list, room, admin overview and parts only; the sheets, document upload and listing-page edits were not opened in a browser | Left, stated plainly |
+| P3-4 | `WasThisHelpful` (docs) used a bare `useTransition`; the repo's weak-signal rule failed its test | **Fixed** (`useSafeTransition`) |
+| P3-5 | Docs: coverage test proven to fail on a fake route and pass on the real tree; every captured step is captioned as an example screen | ok |
+| P3-6 | The older 22 chapters were searched for stale terms but not re-read against their screens | Left, stated by the docs agent |

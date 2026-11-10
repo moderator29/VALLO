@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { reportPageNotHelpful } from "@/lib/docs/helpful-actions";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { CopyControl } from "./CopyControl";
 import "./docs-kit.css";
 
@@ -19,7 +20,7 @@ export function WasThisHelpful({ path, title }: { path: string; title: string })
   const [note, setNote] = useState("");
   const [reference, setReference] = useState("");
   const [message, setMessage] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
   const send = () =>
     start(async () => {

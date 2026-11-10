@@ -255,7 +255,9 @@ begin
   if exists (select 1 from public.identity_verifications v where v.subject_id = p_user and v.outcome = 'matched')
      or exists (select 1 from public.identity_checks c where c.subject_id = p_user and c.status in ('passed', 'approved'))
      or exists (select 1 from public.agent_documents d
-                 where d.uploader_id = p_user and d.kind = 'identity' and d.review_status::text = 'approved') then
+                 where d.uploader_id = p_user and d.kind = 'identity' and d.review_status::text = 'approved'
+                   -- A person cannot approve their own document: the reviewer must be somebody else.
+                   and d.reviewed_by is not null and d.reviewed_by <> d.uploader_id) then
     id_state := 'met';
   elsif exists (select 1 from public.identity_checks c where c.subject_id = p_user and c.status = 'review')
      or exists (select 1 from public.agent_documents d
