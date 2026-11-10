@@ -422,6 +422,48 @@ export const FEE_RATE_MOVED =
 export const FEE_NEEDS_FIGURE = "Set your price above and the figures appear here.";
 
 /* -------------------------------------------------------------------------- */
+/* THE DOCS' FEE CALCULATOR (DOCS_AND_PRESENCE_UPGRADE.md 4.6, 10 November     */
+/* 2026): the lines the worked example in /docs/what-vallo-costs prints that   */
+/* no sentence above already says. Every figure beside them is computed from  */
+/* the rates in force, never typed; rent and sales are never offered (the     */
+/* calculator prints PAYMENT_GATE_SENTENCE instead), and the protected rail's */
+/* fees are not shown.                                                        */
+/* -------------------------------------------------------------------------- */
+
+export const FEE_CALC = {
+  title: "Work it out",
+  kindLabel: "What is being paid for",
+  kinds: { stay: "A shortlet", hotel: "A hotel room", restaurant: "A restaurant table" },
+  nights: "Nights",
+  tables: "Tables seated in a month",
+  columns: { line: "Line", amount: "Amount", who: "Who receives it" },
+  guestPays: "The guest pays",
+  dinerPays: "The diner pays for the booking",
+  restaurantBill: "Vallo bills the restaurant",
+  toHost: "The host, to their bank account",
+  toVallo: "Vallo",
+  toProcessor: "Our payment processor",
+  toRestaurant: "Nobody: booking a table is free",
+  youReceive: "You receive",
+  nothing: "Nothing",
+} as const;
+
+/** The calculator's figure for a host when the processor's most is not known (signed out). */
+export const FEE_CALC_RECEIVE_BEFORE_PROCESSING = "You receive, before payment processing";
+
+/** Signed out, the processor's cap is not read: said, never guessed. */
+export const FEE_CALC_PROCESSING_SIGNED_OUT =
+  "Payment processing also comes off the host's share on a card payment. Sign in to see the most it can be, in naira.";
+
+/** The restaurant fee, said beside the worked bill. */
+export const FEE_CALC_RESTAURANT_NOTE =
+  "Vallo bills the restaurant once a month for each table seated from a Vallo booking. A no-show or a cancelled table costs the restaurant nothing.";
+
+/** The rates could not be read: the calculator says so and shows no figure. */
+export const FEE_CALC_UNREADABLE =
+  "The figures come from the rates in force, and they could not be read just now. Nothing here is a guess, so nothing is shown. Try again in a moment.";
+
+/* -------------------------------------------------------------------------- */
 /* THE HISTORY SCREENS: /payments, the earnings history, the Money desk.      */
 /*                                                                            */
 /* A history is a record of money that has already moved, read at the moment */
