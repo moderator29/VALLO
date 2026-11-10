@@ -164,7 +164,7 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           total,
           shown: items.length,
           overdueOnPage: items.filter((c) => c.overdue).length,
-          statusFilter: filters.status ? STATUS_LABEL[filters.status] : null,
+          statusFilter: STATUS_TABS.find((tab) => tab.key === filters.status)?.label ?? null,
           narrowed: Boolean(filters.q || filters.module || filters.severity || filters.overdue || filters.assigned !== "any"),
         })}
       />

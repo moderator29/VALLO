@@ -213,3 +213,63 @@ export function totalsFor(tasks: readonly Task[], today = todayIso(), weekStart 
   }
   return { open, overdue, completedThisWeek };
 }
+
+/**
+ * The department each access area belongs to, in the words the sidebar uses
+ * for its Departments group. A position's department is the department of
+ * its first access area.
+ */
+export const DEPARTMENT_OF_SCOPE: Record<StaffScope, string> = {
+  listing_approval: "Listing verification",
+  kyc_review: "Listing verification",
+  moderation: "Trust and Safety",
+  support: "Support",
+  agreements: "Operations",
+  guarantee: "Finance",
+  finance: "Finance",
+  compliance: "Compliance",
+  operations: "Operations",
+  trust_safety: "Trust and Safety",
+  roommates: "Trust and Safety",
+  circle: "Trust and Safety",
+  analyst: "Intelligence",
+  business_development: "Business Development",
+  social_media: "Social Media",
+};
+
+export function departmentFor(who: Pick<DeskIdentity, "isAdmin" | "isSuperAdmin" | "scopes">): string {
+  const first = who.scopes[0];
+  if (first) return DEPARTMENT_OF_SCOPE[first];
+  return who.isAdmin || who.isSuperAdmin ? "Administration" : "Not assigned yet";
+}
+
+/**
+ * The queue counts (`getQueueCounts` keys) each access area's front desk
+ * waits on. A scope not listed has no cheap, honest count, so its row is a
+ * link only, never a made-up figure.
+ */
+export const SCOPE_COUNT_KEYS: Partial<Record<StaffScope, readonly string[]>> = {
+  listing_approval: ["listings"],
+  kyc_review: ["verification", "applications"],
+  moderation: ["reports", "flags", "moderation"],
+  support: ["tickets"],
+  agreements: ["agreements"],
+  guarantee: ["claims"],
+  finance: ["referrals", "payouts"],
+  operations: ["alerts"],
+};
+
+export type AttentionRow = { scope: StaffScope; count: number | null; href: string };
+
+/** One row per access area the person holds. `counts` null means the counts could not be read. */
+export function attentionRows(
+  scopes: readonly StaffScope[],
+  counts: Record<string, number> | null,
+  deskOf: Record<StaffScope, string>,
+): AttentionRow[] {
+  return scopes.map((scope) => {
+    const keys = SCOPE_COUNT_KEYS[scope];
+    const count = keys && counts ? keys.reduce((total, key) => total + (counts[key] ?? 0), 0) : null;
+    return { scope, count, href: deskOf[scope] };
+  });
+}
