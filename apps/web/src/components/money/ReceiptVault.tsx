@@ -19,8 +19,8 @@ import { KIND_LABEL, statusFor, type HistoryEntry } from "@/lib/money/history-mo
 import { referenceLabel } from "@/lib/money/references";
 import type { VaultKind } from "@/lib/money/vault";
 import { PROTECTED_PAYMENTS_HEADING } from "@/lib/money/copy";
-import { StagePill } from "./protected/kit";
-import type { ProtectedPaymentSummary } from "./protected/types";
+import { StagePill } from "./protected-rail/kit";
+import type { ProtectedPaymentSummary } from "./protected-rail/types";
 
 /**
  * THE RECEIPT VAULT (R3-05; FL section 4.4): search, filter, open (to print or

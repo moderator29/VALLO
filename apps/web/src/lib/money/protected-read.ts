@@ -16,8 +16,8 @@ import {
 import { categoryMayUseProtectedRail, isProtectedCategory, readCategoryStatus, type ProtectedCategory } from "./protected-categories";
 import { milestoneFor, stageFor } from "./protected-journey";
 import { partnerMarkReady } from "./protected-wording";
-import { issueFor } from "@/components/money/protected/issues";
-import type { ProtectedDeal, ProtectedPaymentSummary } from "@/components/money/protected/types";
+import { issueFor } from "@/components/money/protected-rail/issues";
+import type { ProtectedDeal, ProtectedPaymentSummary } from "@/components/money/protected-rail/types";
 
 /**
  * THE PROTECTED PAYMENT, AS ONE VIEWER MAY SEE IT (BUILD 7.2; spec two).

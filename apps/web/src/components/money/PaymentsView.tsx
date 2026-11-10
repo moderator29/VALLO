@@ -25,8 +25,8 @@ import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { UiIcon, type UiIconName } from "@/design-system/icons/UiIcon";
 import { MoneyCentre } from "./MoneyCentre";
 import { Amount } from "@/components/ui/Amount";
-import { StagePill } from "./protected/kit";
-import type { ProtectedPaymentSummary } from "./protected/types";
+import { StagePill } from "./protected-rail/kit";
+import type { ProtectedPaymentSummary } from "./protected-rail/types";
 import { PROTECTED_PAYMENTS_HEADING } from "@/lib/money/copy";
 
 /* The records a payer reaches from here, each its own screen (one job each). */

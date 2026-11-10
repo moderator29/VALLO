@@ -1441,7 +1441,7 @@ export const PAYSTACK_NAMED: Readonly<Record<string, PaystackSurface>> = {
 /* ======================================================================
  * THE PROTECTED PAYMENT SCREENS (PROTECTED_PAYMENTS_SPECS spec two, 10
  * November 2026). Built switched off: these sentences are drawn only by
- * components/money/protected, which no live page mounts while
+ * components/money/protected-rail, which no live page mounts while
  * `payments_escrowpay_on` is off and no category is approved. Every sentence
  * that says a payment is protected or held is drawn only on a state the
  * provider confirmed (lib/money/protected-journey.ts reads the recorded

@@ -8,7 +8,7 @@ import { withNext } from "@/lib/auth/next-link";
 import { HeldPaymentBody } from "./HeldPaymentBody";
 import { PROTECTED_PAGE_TITLE } from "@/lib/money/copy";
 import { readProtectedDeal } from "@/lib/money/protected-read";
-import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected/ProtectedAgreementView";
+import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected-rail/ProtectedAgreementView";
 
 /**
  * STEP 8, FUNDED (D68d, B.3.5): the screen that wins the market. A renter in

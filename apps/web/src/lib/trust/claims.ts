@@ -143,7 +143,7 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
   /* The protected rail's screens (EscrowPay, 10 November 2026): the same
      claim as above, for the new provider. Each sentence names the transfer
      rail or a state the provider confirmed, and is drawn only by
-     components/money/protected, which picks its screen from the recorded
+     components/money/protected-rail, which picks its screen from the recorded
      state (lib/money/protected-journey.ts), never from the browser. No live
      page mounts it: the rail is switched off (payments_escrowpay_on, fail
      closed, lib/payments/providers/escrowpay/switch.ts), the client sends
@@ -171,8 +171,6 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
     mechanism:
       "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed) with DOCUMENTED false in lib/payments/providers/escrowpay/client.ts",
   },
-  /* An import path, not copy: the protected payment screens' own folder. */
-  { phrase: /^@\/components\/money\/protected\/[A-Za-z-]+$/, mechanism: "a module specifier (components/money/protected), not text a person reads" },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 
   /* "Instant" (29 September): the word promises speed, so it is a claim word

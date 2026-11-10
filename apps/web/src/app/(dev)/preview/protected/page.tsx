@@ -16,7 +16,7 @@
      ?screen=releasing  released  dispute  refunding  refunded  review-state  failed
      ?screen=lister                            screen 10, the lister's side */
 import { getLocale } from "@/lib/locale";
-import { ListerProtectedView } from "@/components/money/protected/ListerProtectedView";
+import { ListerProtectedView } from "@/components/money/protected-rail/ListerProtectedView";
 import { PREVIEW_DEALS, PREVIEW_NOW } from "./fixtures";
 import { PreviewProtected } from "./PreviewProtected";
 

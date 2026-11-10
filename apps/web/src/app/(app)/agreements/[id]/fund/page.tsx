@@ -14,7 +14,7 @@ import { readAgreementPayChoice } from "@/lib/payments/rail-choice-read";
 import { protectedRailLive } from "@/lib/money/rail-live";
 import { FUND_TITLE, PROTECTED_PAGE_TITLE } from "@/lib/money/copy";
 import { readProtectedDeal } from "@/lib/money/protected-read";
-import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected/ProtectedAgreementView";
+import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected-rail/ProtectedAgreementView";
 
 /**
  * STEP 7, FUND (D77): the renter pays the agreed rent on the protected rail,

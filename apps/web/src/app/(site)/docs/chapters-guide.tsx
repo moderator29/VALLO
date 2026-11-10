@@ -20,7 +20,7 @@ import {
 } from "./facts";
 
 /** One glyph per rung, the same wherever the ladder is drawn. */
-const RUNG_ICON: Record<VerificationRung, UiIconName> = { identity: "id-card", address: "location", payout: "bank", in_person: "users" };
+export const RUNG_ICON: Record<VerificationRung, UiIconName> = { identity: "id-card", address: "location", payout: "bank", in_person: "users" };
 
 /**
  * THE CHAPTERS WRITTEN FROM THE FOUNDER'S DECISIONS OF 13 OCTOBER 2026

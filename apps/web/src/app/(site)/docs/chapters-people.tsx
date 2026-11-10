@@ -13,6 +13,7 @@ import { SUPPLY_DOORS, SUPPLY_DOOR_HREF, doorsSentence } from "@/lib/supply/role
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { MAX_BLOCK_NIGHTS } from "@/lib/agent/calendar-model";
 import type { DocChapter } from "./chapters";
+import { RUNG_ICON } from "./chapters-guide";
 import { DocFlow } from "@/components/docs/DocFlow";
 import { DocTable } from "@/components/docs/DocTable";
 import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "./facts";
@@ -1048,13 +1049,19 @@ export const FOR_AGENTS: DocChapter = {
       heading: "Climb the verification ladder",
       body: (
         <>
-          <ol role="list">
-            {VERIFICATION_ORDER.map((rung) => (
-              <li key={rung.kind}>
-                <strong>{rung.label}.</strong> {rung.meaning}
-              </li>
-            ))}
-          </ol>
+          <DocTable
+            caption="The verification ladder"
+            captionHidden
+            columns={[
+              { key: "rung", label: "Rung" },
+              { key: "means", label: "What it proves" },
+            ]}
+            rows={VERIFICATION_ORDER.map((rung) => ({
+              id: rung.kind,
+              icon: RUNG_ICON[rung.kind],
+              cells: { rung: <strong>{`${rung.step}. ${rung.label}`}</strong>, means: rung.meaning },
+            }))}
+          />
           <p>
             A person at Vallo decides each rung, in order. See where you stand at{" "}
             <Link href="/agent/verification" className={A}>

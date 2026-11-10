@@ -3,7 +3,7 @@
    nothing here is read by any live page. The account number is the
    provider's documentation placeholder shape, ten digits of zeros and ones. */
 import type { ArrangementStatus } from "@/lib/money/arrangement-states";
-import type { ProtectedDeal } from "@/components/money/protected/types";
+import type { ProtectedDeal } from "@/components/money/protected-rail/types";
 
 export const PREVIEW_NOW = Date.parse("2026-11-10T10:00:00Z");
 

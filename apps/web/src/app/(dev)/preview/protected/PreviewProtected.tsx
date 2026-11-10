@@ -3,11 +3,11 @@
 import { useState } from "react";
 import type { Locale } from "@vallo/i18n/core";
 import { banner } from "@/lib/ui/toast";
-import { ChooseHowToPay, type ProtectedOffer } from "@/components/money/protected/ChooseHowToPay";
-import { ReviewProtection } from "@/components/money/protected/ReviewProtection";
-import { ProtectedPayment } from "@/components/money/protected/ProtectedPayment";
+import { ChooseHowToPay, type ProtectedOffer } from "@/components/money/protected-rail/ChooseHowToPay";
+import { ReviewProtection } from "@/components/money/protected-rail/ReviewProtection";
+import { ProtectedPayment } from "@/components/money/protected-rail/ProtectedPayment";
 import { protectedQuote } from "@/lib/money/protected-fees";
-import type { ProtectedDeal } from "@/components/money/protected/types";
+import type { ProtectedDeal } from "@/components/money/protected-rail/types";
 
 /** The real screens with recorded answers: every action says, in the banner, that the preview called nothing. */
 export function PreviewProtected({
