@@ -1,5 +1,6 @@
 "use client";
 
+import { ButtonLink } from "@/components/ui/Button";
 import { PhoneGateLink } from "@/components/app/PhoneGateLink";
 import { VerifyGateLink } from "@/components/app/VerifyGateLink";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -1659,16 +1660,6 @@ export function ListingWizard({
      flow (identity, the broadcast's unchecked figures, the fee acceptance,
      a stay's charges at the door). */
   const fixes: Fix[] = [];
-  if (verifyFirst && !verifyGate) {
-    fixes.push({
-      key: "verify",
-      label: WW.check.verify,
-      detail: WW.check.verifyBody,
-      href: "/verification",
-      hrefLabel: WW.check.verifyAction,
-      testId: "verify-first",
-    });
-  }
   const seenRows = new Set<string>();
   for (const problem of unmet) {
     const row = fixRowOf(problem.field);
@@ -1825,6 +1816,14 @@ export function ListingWizard({
                   submittedAt={sent.at}
                   locale={locale}
                 />
+                {verifyFirst ? (
+                  <p className="nf-body mt-row" data-testid="sent-identity-note">
+                    Submitted. It cannot go live until your identity is approved.{" "}
+                    <ButtonLink href="/verification" variant="primary" size="sm">
+                      Verify your identity
+                    </ButtonLink>
+                  </p>
+                ) : null}
                 {/* Sent: the lister now wants to know when somebody asks. */}
                 <PushPrompt moment="listing_published" />
               </>
@@ -1842,6 +1841,14 @@ export function ListingWizard({
                   onChange={editStep}
                   after={
                     <>
+                      {verifyFirst ? (
+                        <p className="nf-caption text-[var(--nf-content-muted)]" data-testid="verify-first">
+                          You can send this now. It cannot go live until your identity is approved.{" "}
+                          <ButtonLink href="/verification" variant="quiet" size="sm">
+                            Verify your identity
+                          </ButtonLink>
+                        </p>
+                      ) : null}
                       {/* V-10: whose saved searches this would reach, once it exists. */}
                       {demandCopy && listingId ? <DraftMatches listingId={listingId} copy={demandCopy} /> : null}
                       {/* Drawn once the read has answered (or when there is no saved

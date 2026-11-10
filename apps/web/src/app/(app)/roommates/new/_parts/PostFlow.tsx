@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { RoomCardView } from "@/components/roommates/Cards";
 import { Celebration } from "@/components/roommates/Celebrate";
 import { KeyDoorArt } from "@/components/roommates/RoommatesArt";
-import { identityProblem, type IdentityState } from "@/lib/features/roommates/review";
+import type { ListerIdentityStatus } from "@/lib/verification/lister-identity";
 import { FEATURE_ART } from "@/lib/features/art";
 import { ChoiceChips, ToggleChips } from "@/components/roommates/ChoiceChips";
 import { AMENITY_ICON, counted, fill, naira } from "@/components/roommates/format";
@@ -97,7 +97,7 @@ export function PostFlow({
   identity = null,
 }: {
   /** The poster's identity check, from the server (null when it cannot be read: the database still decides at submit). */
-  identity?: IdentityState | null;
+  identity?: ListerIdentityStatus | null;
   initial: ListingDraft;
   /** The post's status when editing (null for a new post). */
   status: ListingStatus | null;
@@ -233,23 +233,6 @@ export function PostFlow({
       }
     });
 
-  /* A draft may always be saved; sending a room offer for review needs an approved identity check. */
-  const gated = d.kind === "room_offer" && publishing && identity !== null && identity !== "approved";
-  const confirmIdentity = () =>
-    start(async () => {
-      try {
-        if (d.title.trim().length >= LIMITS.titleMin && d.city.trim().length >= 2) {
-          const saved = await saveRoommateListing(d);
-          if (saved.ok) keep(storeKey, null);
-          else keep(storeKey, d);
-        } else keep(storeKey, d);
-        banner.info(copy.review.savedWaiting);
-        router.push("/verification");
-      } catch (error) {
-        if (!tapFailedOffline(error)) throw error;
-      }
-    });
-
   const words = { saving: F.saving, saved: F.saved, device: F.device, error: F.notSaved };
   const common = {
     total: TOTAL,
@@ -274,6 +257,7 @@ export function PostFlow({
           {copy.review.done.title}
         </h1>
         <p className="nf-rmcn__body">{copy.review.done.body}</p>
+        {identity && identity !== "approved" ? <p className="nf-rmcn__body">{copy.review.identity.waitingDone}</p> : null}
         <ol className="nf-rmcn__list">
           {copy.review.done.next.map((line, n) => (
             <li key={line}>
@@ -485,8 +469,8 @@ export function PostFlow({
       title={copy.create.review}
       subtitle={C.reviewBody}
       primary={{
-        label: gated ? copy.review.identity.cta : publishing ? (d.kind === "room_offer" ? copy.review.submit : copy.actions.publish) : copy.ui.onboarding.saveChanges,
-        onClick: gated ? confirmIdentity : publish,
+        label: publishing ? (d.kind === "room_offer" ? copy.review.submit : copy.actions.publish) : copy.ui.onboarding.saveChanges,
+        onClick: publish,
         loading: pending,
         disabled: pending,
         testId: "post-publish",
@@ -494,27 +478,26 @@ export function PostFlow({
       secondary={{ label: copy.actions.saveDraft, onClick: saveDraft, disabled: pending, testId: "post-save-draft" }}
       testId="post-step-review"
     >
-      {gated ? <IdentityStep state={identity} /> : null}
+      {d.kind === "room_offer" && identity && identity !== "approved" ? <IdentityStep state={identity} /> : null}
       <Review d={d} me={me} problems={problems} onPatch={patch} onEdit={goto} />
     </StepFrame>
   );
 }
 
 /** "Confirm your identity first": what is missing, in the words of the exact cause, and the way to fix it. */
-function IdentityStep({ state }: { state: IdentityState }) {
+function IdentityStep({ state }: { state: ListerIdentityStatus }) {
   const copy = useScopedCopy("roommates");
   const I = copy.review.identity;
-  const line = state === "pending" ? I.pending : state === "rejected" ? I.rejected : I.none;
+  const line = state === "pending" ? I.pending : state === "failed" ? I.rejected : I.none;
   return (
     <section className="nf-rmrv" data-tone="act" aria-labelledby="post-identity" data-testid="post-identity">
       <h2 id="post-identity" className="nf-rmrv__title">
         {I.title}
       </h2>
       <p className="nf-rmrv__body">{line}</p>
-      <p className="nf-rmrv__note">{identityProblem(state)}</p>
       {state !== "pending" ? (
         <ButtonLink href="/verification" variant="secondary" size="md" leadingIcon="id-card">
-          {state === "rejected" ? I.ctaAgain : I.cta}
+          {state === "failed" ? I.ctaAgain : I.cta}
         </ButtonLink>
       ) : null}
     </section>

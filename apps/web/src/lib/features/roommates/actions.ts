@@ -266,11 +266,6 @@ export async function saveRoommateListing(input: ListingDraft, options: { publis
     if (problems.includes("declared")) return fail("Confirm you have the right to offer this room.", { declared: "Tick to confirm." });
     if (problems.includes("photos")) return fail(`Add at least ${REVIEW_MIN_PHOTOS} photos so our team can review this home.`, { photos: `Add at least ${REVIEW_MIN_PHOTOS} photos.` });
     if (problems.length) return fail("Some details are missing.");
-    if (d.kind === "room_offer") {
-      /* A draft may be saved by anyone; sending it for review needs an approved identity check (the database repeats this). */
-      const { data: idState, error: idError } = await who.db.rpc("roommate_my_identity_state");
-      if (!idError && typeof idState === "string" && idState !== "approved") return fail("Confirm your identity first. Your draft is saved and waits here.", { identity: idState });
-    }
     const slow = await limited("listing_publish", who.userId, 8, 60 * 60);
     if (slow) return fail(slow);
     /* Only the photo paths in the member's own folder are accepted. */

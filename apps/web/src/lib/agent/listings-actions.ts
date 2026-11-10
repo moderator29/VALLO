@@ -27,7 +27,6 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { hashListingPhotos } from "../photo-hash/hash-server";
 import { fail, ok, validate, type ActionResult } from "../actions/envelope";
-import { listingVerificationGate } from "@/lib/identity/listing-verification-gate";
 import { phoneGateFor } from "../phone-otp/gate";
 import {
   NOT_CONFIGURED_MESSAGE,
@@ -1512,11 +1511,9 @@ export async function submitListing(input: {
      (`phone-otp/core.ts`). */
   const phoneGate = await phoneGateFor(gate.supabase, gate.user.id, "listing");
   if (phoneGate) return phoneGate;
-  /* GRADE 1 (P0.3, 6 November 2026): verified before a deal. A listing goes
-     for review only once the lister's identity check is sent or approved; it
-     still publishes only on approval. Fails closed on a failed read. */
-  const identityGate = await listingVerificationGate(gate.supabase, gate.user.id, gate.agentId);
-  if (identityGate) return identityGate;
+  /* IDENTITY IS NOT A SUBMIT GATE (founder, 10 November 2026): an unverified
+     lister may send a listing for review so it reaches the desk; the block is
+     at approval and publish (`decideListing`, `lib/verification/lister-identity.ts`). */
   if (!EDITABLE.includes(listing.status)) {
     return fail("This listing has already been through review. Return it to a draft to change it.");
   }

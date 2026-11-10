@@ -48,6 +48,7 @@ export function RoomListingScreen({
   now,
   openViewing = false,
   review,
+  identity = null,
 }: {
   read: ListingRead;
   groups: { id: string; name: string }[];
@@ -57,6 +58,8 @@ export function RoomListingScreen({
   openViewing?: boolean;
   /** The owner's review record for this post (empty for anyone else). */
   review?: ListingReview;
+  /** The owner's identity check, for the waiting banner. */
+  identity?: "approved" | "pending" | "failed" | "none" | null;
 }) {
   if (read.state !== "ok") {
     return (
@@ -99,7 +102,7 @@ export function RoomListingScreen({
     >
       <RecordView id={l.id} />
       <div className="nf-rmv" data-testid="room-listing">
-        {l.isOwner ? <ListingReviewPanel id={l.id} kind={l.kind} status={l.status} review={review} now={now} /> : null}
+        {l.isOwner ? <ListingReviewPanel id={l.id} kind={l.kind} status={l.status} review={review} now={now} identity={identity} /> : null}
         <div className="nf-rmv__main">
           <Gallery
             urls={l.photoUrls}

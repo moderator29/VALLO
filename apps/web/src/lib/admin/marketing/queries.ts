@@ -83,9 +83,8 @@ export function campaignFromRow(r: CampaignRow): Campaign {
 export async function readCampaigns(db: SupabaseClient): Promise<DeskRead<Campaign[]>> {
   const { data, error } = await db.from("marketing_campaigns").select(CAMPAIGN_SELECT).order("created_at", { ascending: false }).limit(500);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.marketing.campaigns", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as CampaignRow[]).map(campaignFromRow) };
 }
@@ -109,9 +108,8 @@ export async function readResults(db: SupabaseClient): Promise<DeskRead<Campaign
     .order("recorded_on", { ascending: false })
     .limit(3000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.marketing.results", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",

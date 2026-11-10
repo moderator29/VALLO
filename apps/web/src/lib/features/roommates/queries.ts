@@ -6,6 +6,7 @@ import { resolveSessionClaims } from "@/lib/actions/session";
 import { reportReadFault } from "@/lib/observability/read-error";
 import { createClient } from "@/lib/supabase/server";
 import { SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/env";
+import { identityGateApplies, listerIdentityStatus, type ListerIdentityStatus } from "@/lib/verification/lister-identity";
 
 import { faults, isNotLive } from "../degrade";
 import { SCHOOL_MAX_LIMIT, searchSchools } from "./school-search";
@@ -665,10 +666,19 @@ export async function readMyListingReviews(ids?: string[]): Promise<Record<strin
   return out;
 }
 
-/** The signed-in member's identity check, for the "Confirm your identity first" step. Null when it cannot be read (then the database still decides at submit). */
-export async function readMyIdentityState(): Promise<"approved" | "pending" | "rejected" | "none" | null> {
+/**
+ * The signed-in member's identity check, for the "Waiting on identity" step
+ * and banner. It is the one shared helper (`lib/verification/lister-identity`),
+ * which respects the platform's own switch; null means no wall applies or it
+ * could not be read (the staff approval still decides).
+ */
+export async function readMyIdentityState(): Promise<ListerIdentityStatus | null> {
   const v = await viewer();
   if (!v?.id) return null;
-  const res = await rpc<string>(v.db, "roommate_my_identity_state", {}, "read.roommates.identity");
-  return res.data === "approved" || res.data === "pending" || res.data === "rejected" || res.data === "none" ? res.data : null;
+  try {
+    if (!(await identityGateApplies(v.id))) return "approved";
+    return (await listerIdentityStatus(v.id)).status;
+  } catch {
+    return null;
+  }
 }

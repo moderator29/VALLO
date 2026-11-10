@@ -91,35 +91,6 @@ create policy roommate_listings_owner_insert on public.roommate_listings for ins
     and (status in ('draft', 'submitted') or (status = 'live' and kind <> 'room_offer'))
   );
 
--- WHO HAS CONFIRMED THEIR IDENTITY: one answer for the guard, the staff decision and the
--- screens. approved: a matched national ID check, a passed identity check, or an approved
--- ID document (the newest one on file); rejected: the newest ID document or check was
--- refused; pending: sent and waiting; none: nothing sent yet.
-create or replace function private.roommate_identity_state(p_user uuid)
-returns text language sql stable security definer set search_path to '' as $$
-  select case
-    when exists (select 1 from public.identity_verifications iv where iv.subject_id = p_user and iv.outcome = 'matched')
-      or exists (select 1 from public.identity_checks ic where ic.subject_id = p_user and ic.status in ('passed', 'approved')) then 'approved'
-    else coalesce((
-      select case d.review_status::text when 'approved' then 'approved' when 'rejected' then 'rejected' else 'pending' end
-        from public.agent_documents d
-       where d.uploader_id = p_user and d.kind = 'identity'
-       order by d.uploaded_at desc limit 1),
-      case when exists (select 1 from public.identity_checks ic where ic.subject_id = p_user and ic.status::text in ('failed', 'rejected')) then 'rejected'
-           when exists (select 1 from public.identity_checks ic where ic.subject_id = p_user) then 'pending'
-           else 'none' end)
-  end;
-$$;
-revoke all on function private.roommate_identity_state(uuid) from public, anon, authenticated;
-
--- The member's own answer, for the "Confirm your identity first" step.
-create or replace function public.roommate_my_identity_state()
-returns text language sql stable security definer set search_path to '' as $$
-  select private.roommate_identity_state((select auth.uid()));
-$$;
-revoke all on function public.roommate_my_identity_state() from public, anon;
-grant execute on function public.roommate_my_identity_state() to authenticated;
-
 -- THE OWNER'S RULES, now with the review. Staff (and the database owner) are
 -- exempt; everything below binds a member.
 create or replace function private.roommate_listing_guard()
@@ -138,9 +109,6 @@ begin
     if new.status = 'submitted' then
       if new.kind <> 'room_offer' then
         raise exception 'Only a room offer is sent for review.' using errcode = 'RM203';
-      end if;
-      if private.roommate_identity_state(new.owner_id) <> 'approved' then
-        raise exception 'Confirm your identity first: a room offer is sent for review once your ID is approved.' using errcode = 'RM204';
       end if;
       new.submitted_at := now();
     elsif new.status = 'live' and new.kind = 'room_offer' then
@@ -202,9 +170,6 @@ begin
       if new.status = 'submitted' then
         if old.status not in ('draft', 'changes_requested', 'paused', 'filled', 'expired') then
           raise exception 'This post cannot be sent for review from here.' using errcode = 'RM203';
-        end if;
-        if private.roommate_identity_state(new.owner_id) <> 'approved' then
-          raise exception 'Confirm your identity first: a room offer is sent for review once your ID is approved.' using errcode = 'RM204';
         end if;
         new.submitted_at := now();
         new.review_note := null;
@@ -279,7 +244,7 @@ begin
              'authority', l.authority, 'declaredAt', l.authority_declared_at, 'photoCount', cardinality(l.photos), 'photoPaths', to_jsonb(l.photos),
              'linkedListingId', l.listing_id, 'submittedAt', l.submitted_at, 'reviewedAt', l.reviewed_at, 'reviewNote', l.review_note,
              'owner', private.rm_person(l.owner_id),
-             'ownerVerified', private.rm_badges(l.owner_id), 'ownerIdentity', private.roommate_identity_state(l.owner_id),
+             'ownerVerified', private.rm_badges(l.owner_id),
              'openCases', (select count(*) from public.moderation_cases c where c.target_type = 'roommate_listing' and c.target_id = l.id::text and c.status not in ('resolved', 'closed'))) x
       from public.roommate_listings l
      where l.kind = 'room_offer'
@@ -291,7 +256,7 @@ $$;
 
 -- THE DECISION. One function, one transaction, the audit line inside it.
 --   claim    submitted -> in_review
---   approve  submitted | in_review -> live (needs the declaration, a rent and three photos)
+--   approve  submitted | in_review -> live (needs the declaration, a rent and three photos; the identity wall is the app's, see lib/verification/lister-identity.ts)
 --   changes  submitted | in_review -> changes_requested (the note says what to fix)
 --   reject   submitted | in_review | changes_requested -> rejected (the note says why)
 create or replace function public.admin_roommate_review_decide(p_id uuid, p_decision text, p_note text)
@@ -301,7 +266,6 @@ declare
   why text := trim(coalesce(p_note, ''));
   l public.roommate_listings;
   out_status text;
-  id_state text;
 begin
   if not private.case_can(me, 'roommates', 'resolve') then
     raise exception 'Your staff role does not allow this.' using errcode = 'RM401';
@@ -316,13 +280,6 @@ begin
     update public.roommate_listings set status = 'in_review', reviewed_by = me where id = p_id;
   elsif p_decision = 'approve' then
     if l.status not in ('submitted', 'in_review') then raise exception 'Nothing changed: this post is not waiting for review.' using errcode = 'RM417'; end if;
-    id_state := private.roommate_identity_state(l.owner_id);
-    if id_state <> 'approved' then
-      raise exception '%', case id_state
-        when 'pending' then 'Identity check not approved: the ID is still waiting for review.'
-        when 'rejected' then 'Identity check not approved: the ID check failed.'
-        else 'Identity check not approved: no ID sent yet.' end using errcode = 'RM411';
-    end if;
     if l.authority is null or l.authority_declared_at is null then raise exception 'The owner has not declared the right to offer this home.' using errcode = 'RM410'; end if;
     if l.rent_minor is null then raise exception 'The post has no rent.' using errcode = 'RM410'; end if;
     if cardinality(l.photos) < 3 then raise exception 'A room offer needs at least three photos.' using errcode = 'RM410'; end if;
@@ -433,7 +390,7 @@ select
   (select count(*) from information_schema.columns where table_schema = 'public' and table_name = 'roommate_listings'
      and column_name in ('submitted_at', 'reviewed_at', 'reviewed_by', 'review_note', 'approved_at')) as review_columns_expected_5,
   (select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public' and p.proname in ('admin_roommate_review_queue', 'admin_roommate_review_decide', 'roommate_search_listings', 'roommate_my_identity_state')) as functions_expected_4,
+    where n.nspname = 'public' and p.proname in ('admin_roommate_review_queue', 'admin_roommate_review_decide', 'roommate_search_listings')) as functions_expected_3,
   (select count(*) from public.roommate_listings where status = 'live' and kind = 'room_offer' and approved_at is null) as live_without_approval_expected_0;
 
 commit;

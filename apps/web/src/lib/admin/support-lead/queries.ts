@@ -16,9 +16,8 @@ export async function readQaReviews(db: SupabaseClient): Promise<DeskRead<QaRevi
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.support-lead.qa", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",
@@ -44,9 +43,8 @@ export async function readPolicyNotes(db: SupabaseClient): Promise<DeskRead<Poli
     .order("updated_at", { ascending: false })
     .limit(300);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.support-lead.policy", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",

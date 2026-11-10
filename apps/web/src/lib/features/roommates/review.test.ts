@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { LISTING_STATUSES, listingProblems, EMPTY_LISTING, REVIEW_MIN_PHOTOS, type ListingDraft } from "./model";
-import { decisionProblem, identityProblem, inReview, needsReview, ownerMoves, reviewTimeline, showsInFeed, statusAfter } from "./review";
+import { decisionProblem, inReview, needsReview, ownerMoves, reviewTimeline, showsInFeed, statusAfter } from "./review";
 import { mapQueueRow } from "./review-queue";
 
-const good = { status: "submitted" as const, authority: "owner", declared: true, rentMinor: 100, photoCount: 3, identity: "approved" as const };
+const good = { status: "submitted" as const, authority: "owner", declared: true, rentMinor: 100, photoCount: 3 };
 
 describe("the review states", () => {
   it("only a room offer is reviewed, only live shows in the feed", () => {
@@ -41,20 +41,9 @@ describe("the review states", () => {
   });
 });
 
-describe("identity and decisions", () => {
-  it("names the exact cause", () => {
-    expect(identityProblem("approved")).toBeNull();
-    expect(identityProblem("pending")).toContain("still waiting for review");
-    expect(identityProblem("rejected")).toContain("failed");
-    expect(identityProblem("none")).toContain("no ID sent yet");
-    expect(identityProblem(null)).toContain("no ID sent yet");
-  });
-
-  it("refuses to approve without an approved identity check, and says why", () => {
+describe("decisions", () => {
+  it("approves a complete post waiting for review", () => {
     expect(decisionProblem("approve", "", good)).toBeNull();
-    expect(decisionProblem("approve", "", { ...good, identity: "pending" })).toContain("still waiting");
-    expect(decisionProblem("approve", "", { ...good, identity: "none" })).toContain("no ID sent yet");
-    expect(decisionProblem("approve", "", { ...good, identity: "rejected" })).toContain("failed");
   });
 
   it("holds the other approval rules", () => {
@@ -77,14 +66,13 @@ describe("identity and decisions", () => {
 });
 
 describe("the queue row", () => {
-  it("turns storage paths into URLs, hides nothing private, and defaults the identity to none", () => {
+  it("turns storage paths into URLs, hides nothing private", () => {
     const row = mapQueueRow(
       { id: "1", title: "t", status: "submitted", city: "Lagos", area: null, stateCode: "LA", description: null, rentMinor: 5, rentPeriod: "year", authority: "owner", declaredAt: "2026-11-01", photoCount: 1, photoPaths: ["u/a.jpg"], linkedListingId: null, submittedAt: null, reviewedAt: null, reviewNote: null, owner: null, ownerVerified: null, openCases: 0 },
       "https://x.supabase.co",
     );
     expect(row.photoUrls[0]).toBe("https://x.supabase.co/storage/v1/object/public/roommate-photos/u/a.jpg");
     expect(row.declared).toBe(true);
-    expect(row.ownerIdentity).toBe("none");
     expect(Object.keys(row)).not.toContain("phone");
   });
 });
@@ -97,10 +85,9 @@ describe("roommates_8 SQL", () => {
     expect(sql).toContain("drop trigger if exists roommate_listings_guard");
     expect(sql).not.toContain("—");
   });
-  it("keeps a room offer out of live without approval and without identity", () => {
+  it("keeps a room offer out of live without approval (identity is the app's wall)", () => {
     expect(sql).toContain("roommate_listings_review_shape");
-    expect(sql).toContain("private.roommate_identity_state(new.owner_id) <> 'approved'");
-    expect(sql).toContain("Identity check not approved: no ID sent yet.");
+    expect(sql).not.toContain("roommate_identity_state");
     expect(sql).toContain("cardinality(l.photos) < 3");
   });
 });

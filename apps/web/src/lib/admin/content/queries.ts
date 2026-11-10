@@ -57,9 +57,8 @@ export function itemFromRow(r: Row): ContentItem {
 export async function readContentItems(db: SupabaseClient): Promise<DeskRead<ContentItem[]>> {
   const { data, error } = await db.from("content_items").select(ITEM_SELECT).order("created_at", { ascending: false }).limit(1000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.content.items", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as Row[]).map(itemFromRow) };
 }

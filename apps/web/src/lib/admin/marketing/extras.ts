@@ -1,3 +1,5 @@
+import { countOf } from "@vallo/i18n/core";
+
 import { addDays, isIsoDate, lagosToday, mondayOfIso, nairaFromKobo } from "@/lib/admin/desk-rules";
 
 import { CAMPAIGN_STATUS_LABEL, CHANNEL_LABEL, budgetLines, metricTotals, type Campaign, type CampaignResult } from "./model";
@@ -70,7 +72,7 @@ export function buildMonthlyReport(input: { month: string; campaigns: readonly C
     lines.push(`- ${c.name} (${CHANNEL_LABEL[c.channel]}, ${CAMPAIGN_STATUS_LABEL[c.status].toLowerCase()}): ${parts.join(", ")}.`);
   }
   const over = budgetLines(campaigns, results).filter((l) => l.over);
-  lines.push("", over.length > 0 ? `Over budget: ${over.length} campaign${over.length === 1 ? "" : "s"}. Reasons to be added below.` : "No campaign is over its approved budget.");
+  lines.push("", over.length > 0 ? `Over budget: ${countOf(over.length, "campaigns")}. Reasons to be added below.` : "No campaign is over its approved budget.");
   lines.push(input.signups === null ? "New accounts this month: not available from the console just now." : `New accounts in the weeks that start in this month (all sources): ${input.signups}.`);
   lines.push("", "What worked:", "", "What did not:", "", "Next month:");
   return lines.join("\n");

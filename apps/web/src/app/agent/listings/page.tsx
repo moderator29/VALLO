@@ -153,6 +153,7 @@ export default async function Page({
       </form>
 
       <ListingsWorkspace
+        identityPending={identity !== null && identity.status !== "approved"}
         t={t.agentListings}
         reference={t.listingReference}
         listings={listings}

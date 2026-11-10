@@ -46,9 +46,8 @@ export function entryFromRow(r: Row): Entry | null {
 export async function readEntries(db: SupabaseClient, desk: EntryDesk): Promise<DeskRead<Entry[]>> {
   const { data, error } = await db.from("staff_desk_entries").select(ENTRY_SELECT).eq("desk", desk).order("created_at", { ascending: false }).limit(1000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.desk-entries", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as Row[]).map(entryFromRow).filter((e): e is Entry => e !== null) };
 }

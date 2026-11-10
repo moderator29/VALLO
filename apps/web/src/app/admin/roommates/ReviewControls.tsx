@@ -28,15 +28,15 @@ const DONE: Record<ReviewDecision, string> = {
  * naming the exact cause; the database repeats every rule. A reason is
  * required where the owner reads it.
  */
-export function ReviewControls({ row }: { row: ReviewQueueRow }) {
+export function ReviewControls({ row, blocked }: { row: ReviewQueueRow; /** The identity refusal for this owner (null when the wall is met or off), computed on the server with the shared helper. */ blocked: string | null }) {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
   const [note, setNote] = useState("");
   const [problem, setProblem] = useState<string | undefined>();
-  const subject = { status: row.status, authority: row.authority, declared: row.declared, rentMinor: row.rentMinor, photoCount: row.photoCount, identity: row.ownerIdentity };
+  const subject = { status: row.status, authority: row.authority, declared: row.declared, rentMinor: row.rentMinor, photoCount: row.photoCount };
 
   const run = (decision: ReviewDecision) => {
-    const stop = decisionProblem(decision, note, subject);
+    const stop = decision === "approve" && blocked ? blocked : decisionProblem(decision, note, subject);
     if (stop) {
       feedback("error");
       setProblem(decision === "changes" || decision === "reject" ? stop : undefined);

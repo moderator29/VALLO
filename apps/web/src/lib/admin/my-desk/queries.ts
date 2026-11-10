@@ -61,9 +61,8 @@ export async function readMyTasks(db: SupabaseClient, userId: string): Promise<D
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.my-desk.tasks", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as TaskRow[]).map(taskFromRow) };
 }
@@ -77,9 +76,8 @@ export async function readTaskComments(db: SupabaseClient, taskIds: readonly str
     .order("created_at", { ascending: true })
     .limit(2000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.my-desk.comments", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",

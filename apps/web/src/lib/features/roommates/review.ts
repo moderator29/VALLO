@@ -87,16 +87,6 @@ export function ownerMoves(status: ListingStatus, kind: ListingKind, approved: b
   }
 }
 
-export type IdentityState = "approved" | "pending" | "rejected" | "none";
-
-/** The exact cause that stops a submission or an approval, or null when the identity check is approved. */
-export function identityProblem(state: IdentityState | null | undefined): string | null {
-  if (state === "approved") return null;
-  if (state === "pending") return "Identity check not approved: the ID is still waiting for review.";
-  if (state === "rejected") return "Identity check not approved: the ID check failed.";
-  return "Identity check not approved: no ID sent yet.";
-}
-
 export type ReviewDecision = "claim" | "approve" | "changes" | "reject";
 
 export type ReviewSubject = {
@@ -105,8 +95,6 @@ export type ReviewSubject = {
   declared: boolean;
   rentMinor: number | null;
   photoCount: number;
-  /** The owner's identity check; unset skips the check (the database repeats it). */
-  identity?: IdentityState | null;
 };
 
 /** The sentence that stops a decision, or null when it may go ahead. */
@@ -115,10 +103,6 @@ export function decisionProblem(decision: ReviewDecision, note: string, s: Revie
   if (decision === "claim") return s.status === "submitted" ? null : "This post is not waiting to be picked up.";
   if (decision === "approve") {
     if (!waiting) return "This post is not waiting for review.";
-    if (s.identity !== undefined) {
-      const id = identityProblem(s.identity);
-      if (id) return id;
-    }
     if (!s.authority || !s.declared) return "The owner has not declared the right to offer this home.";
     if (s.rentMinor === null) return "The post has no rent.";
     if (s.photoCount < REVIEW_MIN_PHOTOS) return "A room offer needs at least three photos.";

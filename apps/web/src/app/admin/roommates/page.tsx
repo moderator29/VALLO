@@ -24,6 +24,7 @@ import { PageHead } from "../_components/panels";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { roommatesContext } from "@/lib/admin/copilot/contexts/roommates";
 import { ReviewControls } from "./ReviewControls";
+import { identityGateApplies, identityRefusal, listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { REVIEW_QUEUE_FILTERS, readReviewQueue } from "@/lib/features/roommates/review-queue";
 import { AddInstitutionForm, InstitutionControls, TargetActions, VerificationDecision, WeightsForm } from "./RoommateControls";
 
@@ -235,7 +236,7 @@ async function Profiles({ ui, params }: { ui: Ui; params: Params }) {
 const IDENTITY_WORDS: Record<string, string> = {
   approved: "Identity approved",
   pending: "ID waiting for review",
-  rejected: "ID check failed",
+  failed: "ID check failed",
   none: "No ID sent yet",
 };
 
@@ -243,6 +244,22 @@ const IDENTITY_WORDS: Record<string, string> = {
 async function ReviewQueue({ ui, db, params }: { ui: Ui; db: SupabaseClient; params: Params }) {
   const status = pick(one(params.status), REVIEW_QUEUE_FILTERS);
   const read = await readReviewQueue(db, status);
+  /* The identity wall for each owner: the shared helper, so a normal listing and a roommate listing say the same thing. */
+  const identities = new Map<string, { chip: string; tone: "success" | "danger" | "warning"; blocked: string | null }>();
+  if (read.state === "ok") {
+    await Promise.all(
+      read.rows.map(async (r) => {
+        if (!r.owner) return;
+        const applies = await identityGateApplies(r.owner.userId);
+        const id = await listerIdentityStatus(r.owner.userId);
+        identities.set(r.id, {
+          chip: IDENTITY_WORDS[id.status] ?? "No ID sent yet",
+          tone: id.status === "approved" ? "success" : id.status === "failed" ? "danger" : "warning",
+          blocked: applies && id.status !== "approved" ? identityRefusal(id) : null,
+        });
+      }),
+    );
+  }
   return (
     <ui.Section
       title="Review"
@@ -266,7 +283,7 @@ async function ReviewQueue({ ui, db, params }: { ui: Ui; db: SupabaseClient; par
                   {r.title}
                 </Link>
                 <ui.StatusChip status={r.status} label={r.status.replace(/_/g, " ")} />
-                <ui.StatusChip label={IDENTITY_WORDS[r.ownerIdentity] ?? "No ID sent yet"} tone={r.ownerIdentity === "approved" ? "success" : r.ownerIdentity === "rejected" ? "danger" : "warning"} />
+                {identities.get(r.id) ? <ui.StatusChip label={identities.get(r.id)!.chip} tone={identities.get(r.id)!.tone} /> : null}
                 {r.openCases > 0 ? <ui.StatusChip label={`${r.openCases} open cases`} tone="warning" /> : null}
               </div>
               <p className="nf-body-sm mt-3xs text-content-2">
@@ -284,7 +301,7 @@ async function ReviewQueue({ ui, db, params }: { ui: Ui; db: SupabaseClient; par
                   ))}
                 </ul>
               ) : null}
-              <ReviewControls row={r} />
+              <ReviewControls row={r} blocked={identities.get(r.id)?.blocked ?? null} />
             </li>
           ))}
         </ul>

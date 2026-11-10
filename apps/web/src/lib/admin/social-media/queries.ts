@@ -81,9 +81,8 @@ export async function readSocialPosts(db: SupabaseClient): Promise<DeskRead<Soci
     .order("planned_at", { ascending: true })
     .limit(2000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.social-media.posts", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as Row[]).map(fromRow) };
 }
@@ -91,9 +90,8 @@ export async function readSocialPosts(db: SupabaseClient): Promise<DeskRead<Soci
 export async function readSocialPost(db: SupabaseClient, id: string): Promise<DeskRead<SocialPost | null>> {
   const { data, error } = await db.from("social_posts").select(SELECT).eq("id", id).maybeSingle();
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.social-media.post", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: data ? fromRow(data as unknown as Row) : null };
 }

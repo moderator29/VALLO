@@ -3,7 +3,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { SUPABASE_URL } from "@/lib/supabase/env";
 
 import { isNotLive } from "../degrade";
-import type { IdentityState } from "./review";
 import { roommatePhotoUrl, type ListingStatus, type PersonRef } from "./model";
 
 /**
@@ -33,7 +32,6 @@ export type ReviewQueueRow = {
   reviewNote: string | null;
   owner: PersonRef | null;
   ownerBadges: string[];
-  ownerIdentity: IdentityState;
   openCases: number;
 };
 
@@ -59,7 +57,6 @@ type Raw = {
   reviewNote: string | null;
   owner: PersonRef | null;
   ownerVerified: string[] | null;
-  ownerIdentity?: string | null;
   openCases: number;
 };
 
@@ -85,7 +82,6 @@ export function mapQueueRow(r: Raw, supabaseUrl: string = SUPABASE_URL): ReviewQ
     reviewNote: r.reviewNote,
     owner: r.owner,
     ownerBadges: r.ownerVerified ?? [],
-    ownerIdentity: r.ownerIdentity === "approved" || r.ownerIdentity === "pending" || r.ownerIdentity === "rejected" ? r.ownerIdentity : "none",
     openCases: Number(r.openCases ?? 0),
   };
 }

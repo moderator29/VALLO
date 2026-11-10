@@ -40,9 +40,8 @@ const INC_SELECT = "id, title, severity, status, started_at, resolved_at, summar
 export async function readIncidents(db: SupabaseClient): Promise<DeskRead<Incident[]>> {
   const { data, error } = await db.from("tech_incidents").select(INC_SELECT).order("started_at", { ascending: false }).limit(300);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.technical.incidents", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",
@@ -65,9 +64,8 @@ export async function readIncidents(db: SupabaseClient): Promise<DeskRead<Incide
 export async function readIncidentUpdates(db: SupabaseClient): Promise<DeskRead<IncidentUpdate[]>> {
   const { data, error } = await db.from("tech_incident_updates").select("id, incident_id, body, status_after, author_id, created_at").order("created_at", { ascending: true }).limit(2000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.technical.updates", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return {
     state: "ok",
@@ -141,13 +139,11 @@ export async function readHealth(now: number = Date.now()): Promise<Health> {
     admin.from("crash_reports").select("id", { count: "exact", head: true }).gte("last_seen_at", since24),
     admin.from("crash_reports").select("last_seen_at").gte("last_seen_at", since14).limit(5000),
   ]);
-  for (const [kind, error] of [
-    ["read.admin.technical.jobs", runs.error],
-    ["read.admin.technical.alerts", alerts.error],
-    ["read.admin.technical.crashes", openCrashes.error ?? recent.error ?? stamps.error],
-  ] as const) {
-    if (error && !isNotLive(error)) await reportReadFault(kind, ...faults(error));
-  }
+  if (runs.error) await reportReadFault("read.admin.technical.jobs", ...faults(runs.error));
+  if (alerts.error) await reportReadFault("read.admin.technical.alerts", ...faults(alerts.error));
+  if (openCrashes.error) await reportReadFault("read.admin.technical.crashes", ...faults(openCrashes.error));
+  if (recent.error) await reportReadFault("read.admin.technical.recent", ...faults(recent.error));
+  if (stamps.error) await reportReadFault("read.admin.technical.trend", ...faults(stamps.error));
   const jobRuns: JobRun[] | null = runs.error
     ? null
     : ((runs.data ?? []) as { action: string; created_at: string }[]).flatMap((r) => {

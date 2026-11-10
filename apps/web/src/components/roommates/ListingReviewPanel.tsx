@@ -28,7 +28,7 @@ const DAY = 24 * 60 * 60 * 1000;
  * post per device (it is a convenience: blocked storage shows it again).
  * Only the owner sees this; the record comes from the owner's own rows.
  */
-export function ListingReviewPanel({ id, kind, status, review, now }: { id: string; kind: ListingKind; status: ListingStatus; review?: ListingReview; now: number }) {
+export function ListingReviewPanel({ id, kind, status, review, now, identity = null }: { id: string; kind: ListingKind; status: ListingStatus; review?: ListingReview; now: number; /** The owner's identity check (the shared helper); anything but approved shows "Waiting on identity". */ identity?: "approved" | "pending" | "failed" | "none" | null }) {
   const copy = useScopedCopy("roommates");
   const R = copy.review;
   const router = useRouter();
@@ -139,7 +139,18 @@ export function ListingReviewPanel({ id, kind, status, review, now }: { id: stri
           {review.note}
         </p>
       ) : null}
+      {(status === "submitted" || status === "in_review") && identity && identity !== "approved" ? (
+        <p className="nf-rmrv__note" data-testid="review-waiting-identity">
+          <strong>{R.identity.title}: </strong>
+          {identity === "pending" ? R.identity.pending : identity === "failed" ? R.identity.rejected : R.identity.none}
+        </p>
+      ) : null}
       <div className="nf-rmrv__actions">
+        {(status === "submitted" || status === "in_review") && identity && identity !== "approved" && identity !== "pending" ? (
+          <ButtonLink href="/verification" variant="primary" size="md" leadingIcon="id-card">
+            {identity === "failed" ? R.identity.ctaAgain : R.identity.cta}
+          </ButtonLink>
+        ) : null}
         {status === "changes_requested" ? (
           <ButtonLink href={ROOMMATES_ROUTES.editListing(id)} variant="primary" size="md" leadingIcon="pencil">
             {R.edit}
