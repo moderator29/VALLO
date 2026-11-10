@@ -549,6 +549,55 @@ listing that changes status mid-transition.
 
 ---
 
+## 15B. THE THREE AUDIT PASSES
+
+The founder's instruction, 10 November 2026: audit it and get everything clean
+and clear, two to three times.
+
+One pass is never enough on work this size, and three passes of the same kind
+is just reading the same page three times and feeling better. So the three
+passes use three different lenses, in this order, and each one is a fresh read
+of the whole diff.
+
+**Pass one, correctness.** Does it do what the specification says? Walk every
+numbered requirement in the founder's specification and in this document and
+tick it off against the code, not against your memory of writing it. Run the
+tests, run the gates, click the journey end to end. Every requirement is
+either done, deliberately not done with a reason, or a bug.
+
+**Pass two, adversarial.** Now try to break it. Two sellers accepting at the
+same moment. One seller accepting in two tabs. A double-tapped submit on a
+dropping connection. Accepting a version that has been superseded or has
+expired. A buyer editing their own eligibility. An agent acting on a listing
+with no mandate. A stranger with a Deal Room URL. A document link shared
+outside. A listing suspended mid-negotiation. A price changed under a live
+offer. Negative, zero, enormous and non-numeric amounts. Offline halfway
+through. Then read every money sentence and every status sentence on every
+screen against section 7 and ask whether a worried member could reasonably
+read it as a promise Vallo has not made.
+
+**Pass three, craft and truth.** Both themes, 390x844 and 360x800 and a
+desktop width. Every empty, loading, offline and error state. Every screen
+built from the Grade 1 kit rather than its own one-off components. Copy read
+aloud: short, plain, no jargon. The next action obvious on every screen. Then
+the documentation: does every page match what the code now does, do the
+screenshots show the current screens, does every button in a document still
+go somewhere real.
+
+Rules for all three:
+
+- **Write the findings down** before fixing them, in
+  `docs/handoff/OFFERS_AUDIT.md` under the pass number. A finding you fix
+  without recording is a finding the next session repeats.
+- **Fix, then re-run the gates**, then start the next pass from the top.
+- **A pass that finds nothing is a pass that did not happen.** On a system
+  this size, pass one finding zero issues means the pass was not real. Say so
+  and do it again properly rather than reporting a clean sweep.
+- **Report each pass to the founder in plain language**: what you looked for,
+  what you found, what you fixed, what you left and why.
+
+---
+
 ## 16. DONE MEANS
 
 Every part of the founder's specification is built, not mocked. The whole

@@ -95,9 +95,18 @@ Store submission.
    do it yourself in sequence rather than racing. A batch that "mostly worked"
    is a batch that damaged files: read the diff of every agent's work before
    you commit it, and never report a batch as done on an agent's word alone.
-5. **Re-audit every piece of work.** After each workstream: re-read the diff
-   adversarially, run the gates, look at the screens at phone width (390 x 844
-   and 360 x 800) in light and dark, then fix what you find. Only then move on.
+5. **Re-audit every piece of work, and on anything large do it THREE TIMES**
+   (the founder, 10 November 2026: "audit and get everything clean clear two
+   to three times"). Three passes with three different lenses, not the same
+   pass three times: one for correctness against the requirement, one
+   adversarial where you actively try to break it, one for craft and truth
+   (both themes, every empty and error state, the kit used throughout, the
+   copy, and whether the documentation still matches the code). Write the
+   findings down before fixing them, re-run the gates after each pass, and
+   remember that a pass which finds nothing on a large change is a pass that
+   did not really happen. The full method is section 15B of
+   `OFFERS_AND_DEAL_ROOM.md` and it applies to every large workstream, not
+   only that one.
 6. **No em dashes anywhere** (code, copy, docs, commits). The repo enforces it:
    `node apps/web/scripts/check-no-em-dash.mjs`. Use a colon, a comma or two
    sentences.
