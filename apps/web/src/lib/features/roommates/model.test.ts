@@ -136,7 +136,7 @@ describe("profile completeness", () => {
 
 describe("listing problems", () => {
   it("asks a room offer for a title, a city, the rent, the lister's standing and the declaration", () => {
-    expect(listingProblems(EMPTY_LISTING)).toEqual(["title", "city", "rent", "authority", "declared"]);
+    expect(listingProblems(EMPTY_LISTING)).toEqual(["title", "city", "rent", "authority", "declared", "photos"]);
   });
 
   it("asks a roommate-wanted post only for a title and a city", () => {
@@ -146,7 +146,7 @@ describe("listing problems", () => {
 
   it("has nothing to say about a complete room offer", () => {
     expect(
-      listingProblems({ ...EMPTY_LISTING, title: "Ensuite room in Yaba", city: "Lagos", rentMinor: 700_000_00, authority: "tenant_permitted", declared: true }),
+      listingProblems({ ...EMPTY_LISTING, title: "Ensuite room in Yaba", city: "Lagos", rentMinor: 700_000_00, authority: "tenant_permitted", declared: true, photos: ["u/1.jpg", "u/2.jpg", "u/3.jpg"] }),
     ).toEqual([]);
   });
 });

@@ -98,7 +98,7 @@ describe("helpers", () => {
     const list = [entry({ id: "a" }), entry({ id: "b", status: "submitted", dueOn: null }), entry({ id: "c", status: "done" }), entry({ id: "d", status: "retired" }), entry({ id: "e", dueOn: "2026-10-01" })];
     expect(countEntries(list, "2026-11-10")).toEqual({ open: 2, overdue: 1, waitingApproval: 1, done: 1 });
     expect(isEntryOverdue(entry({ dueOn: "2026-11-01" }), "2026-11-10")).toBe(true);
-    expect(expiringSoon(list, 30, "2026-11-10").map((e) => e.id)).toEqual(["e"]);
-    expect(expiringSoon(list, 30, "2026-11-10").length).toBe(1);
+    expect(expiringSoon(list, 30, "2026-11-10").map((e) => e.id)).toEqual(["e", "a"]);
+    expect(expiringSoon(list, 10, "2026-11-10").map((e) => e.id)).toEqual(["e"]);
   });
 });

@@ -77,7 +77,7 @@ export function ShareToFeedSheet({ open, onClose, listingId }: { open: boolean; 
         banner.error(result.error);
         return;
       }
-      feedback("success");
+      feedback("select");
       setSlots(result.data.slots);
       onClose();
       const postId = result.data.postId;

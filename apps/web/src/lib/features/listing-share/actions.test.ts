@@ -85,7 +85,7 @@ function builder(table: string) {
           const mine = world.posts.filter((p) => p.author_id === uid && p.status !== "REMOVED");
           if (mine.some((p) => p.shared_listing_id === lid)) return { data: null, error: { code: "LS002" } };
           if (!world.roles.has(uid) && mine.length >= 2) return { data: null, error: { code: "LS001" } };
-          const row = { id: `p${++world.seq}`, author_id: uid, shared_listing_id: lid, status: "LIVE", body: (payload.body as string | null) ?? null };
+          const row = { id: `10000000-0000-4000-8000-00000000000${++world.seq}`, author_id: uid, shared_listing_id: lid, status: "LIVE", body: (payload.body as string | null) ?? null };
           world.posts.push(row);
           return { data: [{ id: row.id, status: row.status }], error: null };
         } finally {
@@ -185,7 +185,7 @@ describe("shareListingToFeed", () => {
     await shareListingToFeed({ listingId: L(1) });
     await shareListingToFeed({ listingId: L(2) });
     expect((await shareListingToFeed({ listingId: L(3) })).ok).toBe(false);
-    const removed = await removeListingShare({ postId: "p1" });
+    const removed = await removeListingShare({ postId: world.posts[0]!.id });
     expect(removed.ok && removed.data.slots.left).toBe(1);
     expect((await shareListingToFeed({ listingId: L(3) })).ok).toBe(true);
   });
@@ -200,7 +200,7 @@ describe("shareListingToFeed", () => {
   it("removal only touches the sharer's own share", async () => {
     await shareListingToFeed({ listingId: L(1) });
     world.session = { state: "signed-in", user: { id: "someone-else" } };
-    expect((await removeListingShare({ postId: "p1" })).ok).toBe(false);
+    expect((await removeListingShare({ postId: world.posts[0]!.id })).ok).toBe(false);
   });
 });
 

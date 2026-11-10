@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
-import { auditDesk, deskDoor, deskRefusal, deskWords } from "@/lib/admin/desk-door";
+import { auditDesk, deskDoor, deskRefusal, deskWords, type DeskDoor } from "@/lib/admin/desk-door";
 import { isUuid, trimmed } from "@/lib/admin/desk-rules";
 
 import { canMoveIncident, isIncidentStatus, looksLikeSecret, parseIncident, parseUpdateBody, SECRET_REFUSAL, type IncidentInput, type IncidentStatus } from "./model";
@@ -23,11 +23,13 @@ const NOT_OPEN = "The incident tables are not set up on this server yet. Ask the
 const PATH = "/admin/technical";
 const ENTITY = "tech_incident";
 
-async function door() {
+type Gate = { ctx: Extract<DeskDoor, { state: "ok" }> } | { error: string };
+
+async function door(): Promise<Gate> {
   const d = await deskDoor("technical", { approverMayEnter: true });
-  if (d.state !== "ok") return { error: deskRefusal(d.state) } as const;
-  if (d.viaApprover) return { error: "The Technical Administrator or an admin keeps the incident log. You can read it." } as const;
-  return { ctx: d } as const;
+  if (d.state !== "ok") return { error: deskRefusal(d.state) };
+  if (d.viaApprover) return { error: "The Technical Administrator or an admin keeps the incident log. You can read it." };
+  return { ctx: d };
 }
 
 type Done = ActionResult<{ note: string | null }>;

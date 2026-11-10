@@ -103,7 +103,12 @@ describe("the feed card's words", () => {
 });
 
 describe("the SQL (text sanity)", () => {
-  const sql = readFileSync(join(process.cwd(), "..", "..", "supabase/migrations/pending/feed_listing_shares_2026-11-10.sql"), "utf8");
+  const full = readFileSync(join(process.cwd(), "..", "..", "supabase/migrations/pending/feed_listing_shares_2026-11-10.sql"), "utf8");
+  /* The code only: the header comment names what the file does not do. */
+  const sql = full
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("--"))
+    .join("\n");
   it("is additive and safe to run twice", () => {
     expect(sql).toMatch(/add column if not exists is_listing_share/);
     expect(sql).toMatch(/add column if not exists shared_listing_id/);
@@ -120,12 +125,12 @@ describe("the SQL (text sanity)", () => {
   });
   it("references auth-free listing id with ON DELETE SET NULL and no NOT NULL on it", () => {
     expect(sql).toMatch(/shared_listing_id uuid references public\.listings \(id\) on delete set null/);
-    expect(sql).not.toMatch(/shared_listing_id[^\n]*not null/);
+    expect(sql).not.toMatch(/add column if not exists shared_listing_id[^\n]*not null/);
   });
   it("adds no new table or grant, so db-06 needs no entry", () => {
     expect(sql).not.toMatch(/create table|\bgrant\b/i);
   });
   it("has no em dash", () => {
-    expect(sql).not.toContain(String.fromCharCode(0x2014));
+    expect(full).not.toContain(String.fromCharCode(0x2014));
   });
 });

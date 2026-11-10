@@ -47,6 +47,7 @@ describe("the door", () => {
 
 describe("health", () => {
   it("shows late jobs, services as set up or not, the release code, and no key", async () => {
+    vi.stubEnv("VERCEL_GIT_COMMIT_SHA", "abcdef1234567890");
     const out = text((await Page({ searchParams: Promise.resolve({}) })) as React.ReactElement);
     expect(out).toMatch(/canary/);
     expect(out).toMatch(/Late/);

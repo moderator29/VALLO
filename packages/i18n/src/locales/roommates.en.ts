@@ -1272,7 +1272,7 @@ export const roommatesEn = {
       learn: "How it works",
       steps: [
         { title: "Say what you need", body: "A room, a roommate or a place to share. Your profile or listing says who you are and what you want." },
-        { title: "See what people confirmed", body: "A badge says exactly what was checked: a school email, an ID, a phone number. Nothing more is claimed." },
+        { title: "See what people confirmed", body: "A badge says exactly what was confirmed: a school email, an ID, a phone number. Nothing more is claimed." },
         { title: "Chat in Messages, split the costs", body: "When you both say yes, the chat opens in your normal Messages. Plan the rent split here. Vallo never holds your money." },
       ],
       next: "Next",

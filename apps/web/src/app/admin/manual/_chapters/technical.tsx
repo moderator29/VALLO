@@ -120,7 +120,7 @@ export const TECHNICAL: ManualBody = {
               { icon: "alert-triangle", title: "Declare", outcome: "A title, a severity and what you know.", href: "/admin/technical?tab=incidents" },
               { icon: "bell", title: "Tell", outcome: "The COO for severity 1 or 2." },
               { icon: "history", title: "Update", outcome: "A line each time the position changes." },
-              { icon: "check-circle", title: "Resolve", outcome: "With a written summary." },
+              { icon: "circle-check", title: "Resolve", outcome: "With a written summary." },
               { icon: "file-text", title: "Review", outcome: "A post-incident review within days." },
             ]}
           />

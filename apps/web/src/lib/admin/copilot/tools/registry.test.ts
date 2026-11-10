@@ -178,8 +178,13 @@ describe("no tool exists for a forbidden action", () => {
 
   it("has exactly the propose tools the brief names, and drafts are never executable", () => {
     const proposers = COPILOT_TOOLS.filter((t) => t.kind === "propose").map((t) => t.name).sort();
+    /* The ten that can run a desk action once confirmed, two older drafts, and the draft-only tools of the Marketing, Content, Technical and Support Lead desks (10 November 2026): every one of those is a draft, so confirming runs nothing. */
+    const staffDeskDrafts = [
+      "draft_creative_brief", "draft_marketing_report_reading", "draft_content_outline", "draft_staff_announcement_text", "draft_incident_update", "draft_status_page_text",
+      "draft_post_incident_review", "draft_canned_reply", "draft_coaching_note", "draft_policy_note",
+    ];
     expect(proposers).toEqual(
-      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access"].sort(),
+      ["add_bd_prospect", "add_task_comment", "create_my_task", "create_social_draft", "draft_case_note", "draft_ticket_reply", "log_bd_activity", "post_announcement", "raise_escalation", "recommend_staff_access", ...staffDeskDrafts].sort(),
     );
   });
 

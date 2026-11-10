@@ -75,7 +75,7 @@ export const SUPPORT_LEAD: ManualBody = {
             steps={[
               { icon: "headset", title: "See it", outcome: "On Team, under Nobody holding, with its reference and its clock.", href: "/admin/support-lead" },
               { icon: "user", title: "Choose", outcome: "A colleague who is on and has room." },
-              { icon: "check-circle", title: "Assign", outcome: "The ticket is handed to them and the banner says so." },
+              { icon: "circle-check", title: "Assign", outcome: "The ticket is handed to them and the banner says so." },
               { icon: "flag", title: "Watch", outcome: "If its clock turns red, speak to them." },
             ]}
           />

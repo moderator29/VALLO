@@ -82,8 +82,8 @@ export const MARKETING: ManualBody = {
               { icon: "price-tag", title: "Plan", outcome: "A draft with a name, channel, audience, dates and, if you are authorised, a budget.", href: "/admin/marketing" },
               { icon: "link", title: "Tag", outcome: "A tracked link saved on the campaign.", href: "/admin/marketing?tab=links" },
               { icon: "clipboard-list", title: "Send for approval", outcome: "The COO or an admin reads it." },
-              { icon: "check-circle", title: "Go live", outcome: "Approved, then moved to Live on its start date." },
-              { icon: "bars", title: "Log", outcome: "Numbers from the platform, each with its source.", href: "/admin/marketing?tab=results" },
+              { icon: "circle-check", title: "Go live", outcome: "Approved, then moved to Live on its start date." },
+              { icon: "chart-bar", title: "Log", outcome: "Numbers from the platform, each with its source.", href: "/admin/marketing?tab=results" },
               { icon: "flag", title: "End and report", outcome: "Ended, and told in the monthly report." },
             ]}
           />
@@ -313,7 +313,7 @@ export const MARKETING: ManualBody = {
           ]}
           rows={[
             { id: "over-budget", cells: { situation: "A campaign shows over budget.", answer: "Stop adding spend on the platform. Message the COO: the campaign, the approved budget, what is logged, why. Ask for a decision before anything more is committed. Do not edit the budget down to hide it; that reopens approval." } },
-            { id: "pressure", cells: { situation: "A colleague asks you to say a payment is safe in a promotion.", answer: "Say no kindly and offer the true line: what Vallo checks and who checks it, or how the payment partner handles the money. Vallo never holds customer money and does not use the words safe, protected or guaranteed without a named check behind them." } },
+            { id: "pressure", cells: { situation: "A colleague asks you to promise in a promotion that a payment carries no risk.", answer: "Say no kindly and offer the true line: what Vallo checks and who checks it, or how the payment partner handles the money. Vallo never holds customer money, and we promise no safety or protection without a named check behind it." } },
             { id: "no-source", cells: { situation: "You cannot find where a number came from.", answer: "Do not log it. Log what you can prove, or note that it is unknown. A missing number is honest; a doubtful one gets quoted." } },
             { id: "clash", cells: { situation: "Two campaigns clash on the same channel.", answer: "Check whether the audiences overlap. If they do, move one, or merge them. Tell the Social Media Manager so the calendar matches." } },
             { id: "lead", cells: { situation: "An agent writes to you asking for a refund of a promotion fee.", answer: "Money is not yours to decide. Thank them, give no promise, and pass it to the COO with the reference. Never say it will be refunded." } },

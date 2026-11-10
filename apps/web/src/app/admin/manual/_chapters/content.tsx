@@ -78,7 +78,7 @@ export const CONTENT: ManualBody = {
               { icon: "file-text", title: "Draft", outcome: "Title, kind, summary, text and a planned date.", href: "/admin/content" },
               { icon: "file-search", title: "Check", outcome: "SEO checklist and style rules run." },
               { icon: "clipboard-list", title: "Send for approval", outcome: "The COO or an admin reads it." },
-              { icon: "check-circle", title: "Approved", outcome: "Ready to publish." },
+              { icon: "circle-check", title: "Approved", outcome: "Ready to publish." },
               { icon: "link", title: "Publish", outcome: "You put it live and record the link." },
               { icon: "history", title: "Look after", outcome: "Retire it when it goes out of date." },
             ]}
@@ -140,8 +140,8 @@ export const CONTENT: ManualBody = {
               ticked boxes.
             </li>
             <li>
-              <strong>Publishing checklist.</strong> Facts checked with the desk that owns them; money wording right;
-              no promise that a payment is safe, protected or guaranteed; approved; links open; languages ready; date and
+              <strong>Publishing checklist.</strong> Facts confirmed with the desk that owns them; money wording right;
+              no promise of safety or protection for a payment; approved; links open; languages ready; date and
               channel agreed; staff told if they will get questions.
             </li>
           </ul>
@@ -270,7 +270,7 @@ export const CONTENT: ManualBody = {
           ]}
           rows={[
             { id: "fact", cells: { situation: "A department wants an article out today and cannot confirm a fact.", answer: "Publish what is confirmed and leave out the rest, or hold. Write in the request card what is missing and who owns it. An article with a wrong fact costs more than a late one." } },
-            { id: "safe", cells: { situation: "A draft says payments are safe.", answer: "Change it to what is true and checkable: who processes the payment and what the member can see. Vallo never holds customer money. Do not use safe, protected, guaranteed or verified without a named check." } },
+            { id: "safe", cells: { situation: "A draft promises that payments carry no risk.", answer: "Change it to what is true and checkable: who processes the payment and what the member can see. Vallo never holds customer money. Do not promise safety or protection without a named check behind it." } },
             { id: "yoruba", cells: { situation: "The Yoruba translation is late.", answer: "Ship in English, mark Yoruba Drafting, and tell the requester. Do not use an unread translation." } },
             { id: "oldlink", cells: { situation: "A published article has a dead link.", answer: "Fix it now if you can, and note it on the card. If it points to a page owned by another desk, tell them." } },
             { id: "harm", cells: { situation: "A feed post looks harmful or illegal.", answer: "Do not engage. Send the link to the Head of Trust and Safety the same hour. You see counts, not the decision." } },

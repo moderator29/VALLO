@@ -3,9 +3,7 @@
 import { useCallback } from "react";
 
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { copyText } from "@/lib/ui/clipboard";
-import { feedback } from "@/lib/ui/feedback";
-import { banner } from "@/lib/ui/toast";
+import { COPY_WORDS, copyAndSay, type CopyKind } from "@/lib/ui/copy-and-say";
 import { useDoneFlash } from "@/lib/ui/use-done-flash";
 import "./copy-button.css";
 
@@ -24,16 +22,6 @@ import "./copy-button.css";
  * Small on purpose: no dictionary, no sheet, nothing but the clipboard helper,
  * the banner and an icon, so it is cheap on any page.
  */
-export type CopyKind = "text" | "link" | "code";
-
-export const COPY_WORDS = {
-  text: "Copied",
-  link: "Link copied",
-  code: "Code copied",
-  failed: "Could not copy. Select it and copy by hand.",
-  action: "Copy",
-} as const;
-
 export function CopyButton({
   value,
   kind = "text",
@@ -54,14 +42,7 @@ export function CopyButton({
 }) {
   const [copied, flash] = useDoneFlash(1800);
   const onCopy = useCallback(async () => {
-    const done = await copyText(typeof value === "function" ? value() : value);
-    if (done) {
-      feedback("select");
-      flash();
-      banner.success(message ?? COPY_WORDS[kind]);
-    } else {
-      banner.error(COPY_WORDS.failed);
-    }
+    if (await copyAndSay(typeof value === "function" ? value() : value, kind, message)) flash();
   }, [value, kind, message, flash]);
 
   return (

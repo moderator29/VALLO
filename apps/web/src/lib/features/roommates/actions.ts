@@ -68,7 +68,7 @@ function wordsFor(error: { code?: string; message?: string } | null): string {
   if (isNotLive(error)) return NOT_OPEN;
   if (error.code === "54000" || error.code === "program_limit_exceeded") return "That is more than we accept in this time. Please wait a little and try again.";
   if (error.code === "23505") return "That is already done.";
-  if (error.code === "23514") return "Sending a room for review is not open on this server yet. Your draft is safe; try again soon.";
+  if (error.code === "23514") return "Sending a room for review is not open on this server yet. Your draft is kept; try again soon.";
   if (typeof error.code === "string" && /^RM\d{3}$/.test(error.code) && error.message) return error.message;
   return FAILED;
 }

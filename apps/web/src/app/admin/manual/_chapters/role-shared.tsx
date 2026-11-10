@@ -139,7 +139,7 @@ export function aboutVallo(role: { who: string; keeps: string }): ManualSection[
           <DocCallout tone="warning" title="Never write these">
             <ul role="list">
               <li>That Vallo holds, keeps, safeguards or looks after anybody&apos;s money.</li>
-              <li>That a payment, a listing, a person or a place is safe, protected, guaranteed or verified, unless a real check behind that exact word is named. Say what was checked and by whom.</li>
+              <li>That a payment, a listing, a person or a place comes with a promise of safety or protection, unless a real check behind that exact claim is named. Say what was looked at and by whom.</li>
               <li>That a member will get a refund, a payout or a particular outcome that another desk decides.</li>
             </ul>
           </DocCallout>

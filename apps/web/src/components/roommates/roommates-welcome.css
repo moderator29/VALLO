@@ -24,7 +24,7 @@
     fill: color-mix(in oklab, var(--nf-surface-artwork) 78%, var(--nf-brand-primary));
   }
   .nf-rma__win--lit {
-    fill: var(--nf-spark-fill);
+    fill: var(--nf-spark-ink);
     opacity: 0.92;
   }
   .nf-rma__ground {
@@ -37,7 +37,7 @@
     stroke-linecap: round;
   }
   .nf-rma__dot {
-    fill: var(--nf-spark-fill);
+    fill: var(--nf-spark-ink);
   }
   .nf-rma__home path {
     fill: var(--nf-content-primary);
@@ -46,7 +46,7 @@
     fill: var(--nf-brand-primary);
   }
   .nf-rma__knob {
-    fill: var(--nf-spark-fill);
+    fill: var(--nf-spark-ink);
   }
   .nf-rma__sweep {
     fill: color-mix(in oklab, var(--nf-content-primary) 14%, transparent);
@@ -77,13 +77,13 @@
     opacity: 0.55;
   }
   .nf-rma__spark circle {
-    fill: var(--nf-spark-fill);
+    fill: var(--nf-spark-ink);
   }
   .nf-rma__frame rect {
     fill: color-mix(in oklab, var(--nf-brand-primary) 50%, var(--nf-surface-artwork));
   }
   .nf-rma__open {
-    fill: var(--nf-spark-fill);
+    fill: var(--nf-spark-ink);
     opacity: 0.9;
   }
   .nf-rma__key circle {
@@ -119,14 +119,14 @@
     inset-inline: 0;
     inset-block-end: 0;
     z-index: -1;
-    block-size: 42%;
+    block-size: 36%;
     opacity: 0.9;
     overflow: hidden;
   }
   .nf-rmw__words {
     display: grid;
     gap: var(--nf-space-sm);
-    padding: var(--nf-space-xl) var(--nf-space-md) 11rem;
+    padding: var(--nf-space-xl) var(--nf-space-md) 13rem;
   }
   .nf-rmw__eyebrow {
     display: inline-flex;
@@ -166,7 +166,7 @@
   }
   .nf-rmw__line[data-n="2"] {
     padding-inline-start: 2.2rem;
-    color: var(--nf-spark-fill);
+    color: var(--nf-spark-ink);
   }
   .nf-rmw__sub {
     max-inline-size: 30rem;
@@ -304,7 +304,7 @@
     font-size: 5rem;
     font-weight: 800;
     line-height: 0.9;
-    color: var(--nf-spark-fill);
+    color: var(--nf-spark-ink);
   }
   .nf-rmfr__title {
     margin: 0;
@@ -410,6 +410,7 @@
   }
   .nf-rmfd__tab {
     flex: none;
+    white-space: nowrap;
     min-block-size: 2.5rem;
     padding-inline: var(--nf-space-md);
     border: var(--nf-border-width) solid var(--nf-border-default);
@@ -590,7 +591,7 @@
     background: var(--nf-brand-primary);
   }
   .nf-rmrv__step[data-state="stopped"]::before {
-    background: var(--nf-spark-fill);
+    background: var(--nf-spark-ink);
   }
   .nf-rmrv__step[data-state="done"],
   .nf-rmrv__step[data-state="now"] {
@@ -670,7 +671,7 @@
     inline-size: 0.5rem;
     block-size: 0.9rem;
     border-radius: var(--nf-radius-xs);
-    background: var(--nf-spark-fill);
+    background: var(--nf-spark-ink);
     opacity: 0;
   }
   .nf-rmcn__piece:nth-child(3n) {

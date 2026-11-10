@@ -95,6 +95,7 @@ export function RoommatesFeed({
           const r = await loadRoommatesFeed({ tab: t, filters: fl, cursor });
           if (!r.ok) {
             setFailed(r.error);
+            banner.error(r.error, { retry: () => fetchPage(t, fl, cursor, append) });
             return;
           }
           setFailed(null);
@@ -230,7 +231,7 @@ export function RoommatesFeed({
       {note === "signed-out" ? <p className="nf-rmfd__note">{f.peopleSignedOut}</p> : null}
 
       {failed ? (
-        <div className="nf-rmfd__note" role="alert" data-testid="feed-error">
+        <div className="nf-rmfd__note" data-testid="feed-error">
           <p>{failed}</p>
           <Button variant="secondary" size="sm" onClick={() => fetchPage(tab, filters, startCursor(tab), false)}>
             {f.retry}
