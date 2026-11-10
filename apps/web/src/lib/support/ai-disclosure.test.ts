@@ -38,7 +38,10 @@ describe("the helper says what it is", () => {
   });
 
   it("labels the Help row as the FAQs it opens", () => {
-    expect(src("app/(app)/profile/AccountBody.tsx")).toContain('sub="FAQs, contact us"');
+    /* The Help row moved into the profile's Support group (9 November 2026),
+       which both the signed-in and signed-out profile draw. */
+    expect(src("components/app/account/SupportGroup.tsx")).toContain('sub="FAQs, contact us"');
+    expect(src("app/(app)/profile/AccountBody.tsx")).toContain("<SupportGroup />");
     const en = readFileSync(join(process.cwd(), "..", "..", "packages/i18n/src/locales/en.ts"), "utf8");
     expect(en).not.toContain("Get an answer from a person");
   });

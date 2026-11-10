@@ -4,13 +4,18 @@ import { breadcrumbLd } from "@/lib/site/structured-data";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
-import { CHAPTER_INDEX, DOC_GROUPS, chapterBySlug, chapterNeighbours } from "../chapters";
-import { OnThisPage } from "../OnThisPage";
+import {
+  CHAPTER_INDEX,
+  DOC_GROUPS,
+  DOCS_REVIEWED,
+  chapterBySlug,
+  chapterNeighbours,
+} from "../chapters";
 import "@/components/site/guides/docs-type.css";
-import { DepthWords } from "@/components/motion/DepthWords";
-import { MotionReveal } from "@/components/motion/Reveal";
-import { IconPlate } from "@/components/ui/IconPlate";
 import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
+import { DocHeader, DocSection } from "@/components/docs/DocArticle";
+import { DocToc } from "@/components/docs/DocToc";
+import { DocHelpPanel } from "@/components/docs/DocShell";
 import { SITE_CARD } from "@/lib/site/site-card";
 
 /**
@@ -42,7 +47,13 @@ export async function generateMetadata({
     description: chapter.summary,
     /* The chapter's own words on the unfurl (it read the home page's), and
        the site's card, which a page that sets Open Graph must name. */
-    openGraph: { type: "article", siteName: "Vallo", title: chapter.title, description: chapter.summary, images: [SITE_CARD] },
+    openGraph: {
+      type: "article",
+      siteName: "Vallo",
+      title: chapter.title,
+      description: chapter.summary,
+      images: [SITE_CARD],
+    },
   };
 }
 
@@ -56,10 +67,14 @@ export default async function DocChapterPage({
   if (!chapter) notFound();
 
   const { previous, next } = chapterNeighbours(chapter.slug);
-  const headings = chapter.sections.map((section) => ({
-    id: section.id,
-    heading: section.heading,
-  }));
+  const group =
+    DOC_GROUPS.find((g) => g.id === chapter.group)?.label ?? "Documentation";
+  /* The siblings a reader may actually want instead: the rest of its group. */
+  const related = CHAPTER_INDEX.filter(
+    (c) => c.group === chapter.group && c.slug !== chapter.slug
+  )
+    .slice(0, 2)
+    .map((c) => ({ href: `/docs/${c.slug}`, label: c.title }));
 
   return (
     <div>
@@ -71,120 +86,91 @@ export default async function DocChapterPage({
           { name: chapter.title, path: `/docs/${chapter.slug}` },
         ])}
       />
-      {/* --------------------------------------------------------- heading */}
-      <header className="nf-rise">
-        <nav aria-label="Breadcrumb" className="mb-row">
-          <Link
-            href="/docs"
-            className="nf-tap inline-flex min-h-11 items-center gap-inline text-[length:var(--nf-text-caption)] font-semibold text-[var(--nf-content-muted)] transition-colors hover:text-[var(--nf-content-primary)]"
-          >
-            <UiIcon name="arrow-left" size={16} />
-            All chapters
-          </Link>
-        </nav>
+      {/*
+        ON THE KIT (DOCS_AND_PRESENCE_UPGRADE.md 2.3 and 2.4): the category
+        pill (the chapter's group), the title, the date the chapter was last
+        read against the product, its summary as the scope, the sibling
+        chapters, then the contents card, which marks the section being read.
+        The section ids are the chapter's own, unchanged, so every link to
+        `/docs/<slug>#<section>` still lands; the kit anchors the whole
+        section, not only its heading.
+      */}
+      <article className="grid gap-xl">
+        <DocHeader
+          category={{ icon: lineGlyphFor(chapter.icon), label: group }}
+          title={chapter.title}
+          updated={chapter.updated ?? DOCS_REVIEWED}
+          related={related}
+        >
+          <p>{chapter.summary}</p>
+          <p className="mt-2xs nf-numeric text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+            Chapter {chapter.number} of {CHAPTER_INDEX.length}
+          </p>
+        </DocHeader>
 
-        <div className="flex items-start gap-row">
-          <IconPlate size="md" className="shrink-0">
-            <UiIcon name={lineGlyphFor(chapter.icon)} size={20} />
-          </IconPlate>
-          <div className="min-w-0">
-            <span className="nf-numeric block text-[length:var(--nf-text-label)] font-semibold tracking-[var(--nf-tracking-label)] text-[var(--nf-content-muted)] uppercase">
-              {DOC_GROUPS.find((group) => group.id === chapter.group)?.label ?? "Documentation"}, chapter{" "}
-              {chapter.number} of {CHAPTER_INDEX.length}
-            </span>
-            {/* The title arrives word by word out of depth (Track M). */}
-            <h1 className="nf-h1 nf-doc-title mt-inline-tight">
-              <DepthWords text={chapter.title} />
-            </h1>
-          </div>
+        {chapter.sections.length >= 3 ? (
+          <DocToc
+            sections={chapter.sections.map((section) => ({
+              id: section.id,
+              title: section.heading,
+            }))}
+          />
+        ) : null}
+
+        <div className="nf-doc-sections grid gap-xl">
+          {chapter.sections.map((section, index) => (
+            <DocSection
+              key={section.id}
+              id={section.id}
+              number={index + 1}
+              title={section.heading}
+            >
+              <div className="nf-doc-prose">{section.body}</div>
+            </DocSection>
+          ))}
         </div>
 
-        <p className="mt-group max-w-[62ch] text-[var(--nf-content-secondary)]">{chapter.summary}</p>
-      </header>
-
-      {/*
-        The article and the heading rail.
-
-        The rail is declared first so a phone meets it directly under the
-        chapter heading, which is where a contents list is worth having, and
-        `xl:order-last` moves it to the right the moment there is room for a
-        third column. `min-w-0` on the article is what stops a long reference
-        from widening the column and giving the page a sideways scroll.
-      */}
-      <div className="mt-heading flex flex-col gap-block xl:mt-block xl:flex-row xl:items-start">
-        <OnThisPage sections={headings} />
-
-        <article className="min-w-0 flex-1 xl:order-first">
-          {/* ---------------------------------------------------- sections */}
-          <div className="nf-panel nf-panel--card block nf-rise p-card sm:p-lg" style={{ animationDelay: "80ms" }}>
-            <div className="nf-doc-sections">
-              {/* Each section rises in as it arrives, its heading word by word
-                  and its lists a step at a time (docs-motion.css); a section
-                  already on screen is simply there. */}
-              {chapter.sections.map((section, index) => (
-                <MotionReveal as="section" key={section.id} id={section.id} className="nf-doc-section nf-depth-gate scroll-mt-28">
-                  <span className="nf-doc-section__n nf-numeric" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <h2 className="nf-doc-section__title">
-                    <DepthWords text={section.heading} />
-                  </h2>
-                  <div className="nf-doc-prose">{section.body}</div>
-                </MotionReveal>
-              ))}
-            </div>
-          </div>
-
-          {/* -------------------------------------------------- prev / next */}
-          <nav aria-label="Chapter navigation" className="mt-block grid gap-row sm:grid-cols-2">
-            {previous ? (
-              <Link
-                href={`/docs/${previous.slug}`}
-                rel="prev"
-                className="nf-panel nf-panel--card nf-card--interactive flex min-h-11 flex-col p-card-sm"
-              >
-                <span className="flex items-center gap-inline text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-muted)]">
-                  <UiIcon name="arrow-left" size={12} />
-                  Previous
-                </span>
-                <span className="mt-inline-tight text-[length:var(--nf-text-body-sm)] leading-snug font-semibold text-[var(--nf-content-primary)]">
-                  {previous.number}. {previous.title}
-                </span>
-              </Link>
-            ) : (
-              <span aria-hidden="true" className="hidden sm:block" />
-            )}
-
-            {next && (
-              <Link
-                href={`/docs/${next.slug}`}
-                rel="next"
-                className="nf-panel nf-panel--card nf-card--interactive flex min-h-11 flex-col p-card-sm sm:items-end sm:text-right"
-              >
-                <span className="flex items-center gap-inline text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-muted)]">
-                  Next
-                  <UiIcon name="arrow-right" size={12} />
-                </span>
-                <span className="mt-inline-tight text-[length:var(--nf-text-body-sm)] leading-snug font-semibold text-[var(--nf-content-primary)]">
-                  {next.number}. {next.title}
-                </span>
-              </Link>
-            )}
-          </nav>
-
-          {/* ---------------------------------------------------- closing */}
-          <p className="mt-block text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-muted)]">
-            Something here unclear, or something missing?{" "}
+        {/* ---------------------------------------------------- prev / next */}
+        <nav
+          aria-label="Chapter navigation"
+          className="grid gap-row sm:grid-cols-2"
+        >
+          {previous ? (
             <Link
-              href="/contact"
-              className="font-semibold text-[var(--nf-content-link)] hover:underline"
+              href={`/docs/${previous.slug}`}
+              rel="prev"
+              className="nf-panel nf-panel--card nf-card--interactive flex min-h-11 flex-col p-card-sm"
             >
-              Tell us
-            </Link>{" "}
-            and a person will answer within one business day.
-          </p>
-        </article>
-      </div>
+              <span className="flex items-center gap-inline text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-muted)]">
+                <UiIcon name="arrow-left" size={12} />
+                Previous
+              </span>
+              <span className="mt-inline-tight text-[length:var(--nf-text-body-sm)] leading-snug font-semibold text-[var(--nf-content-primary)]">
+                {previous.number}. {previous.title}
+              </span>
+            </Link>
+          ) : (
+            <span aria-hidden="true" className="hidden sm:block" />
+          )}
+
+          {next && (
+            <Link
+              href={`/docs/${next.slug}`}
+              rel="next"
+              className="nf-panel nf-panel--card nf-card--interactive flex min-h-11 flex-col p-card-sm sm:items-end sm:text-right"
+            >
+              <span className="flex items-center gap-inline text-[length:var(--nf-text-overline)] font-semibold text-[var(--nf-content-muted)]">
+                Next
+                <UiIcon name="arrow-right" size={12} />
+              </span>
+              <span className="mt-inline-tight text-[length:var(--nf-text-body-sm)] leading-snug font-semibold text-[var(--nf-content-primary)]">
+                {next.number}. {next.title}
+              </span>
+            </Link>
+          )}
+        </nav>
+        <DocHelpPanel href="/contact" />
+      </article>
     </div>
   );
 }

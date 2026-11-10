@@ -3,6 +3,9 @@ import { FEE_RULES } from "@/lib/trust/fee-rules";
 import { NO_INSPECTION_FEE, PAYMENT_GATE_SENTENCE, REFUND_ROUTE } from "@/lib/money/copy";
 import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "@/app/(site)/docs/facts";
 import { bpsLabel } from "@/lib/site/move-in-calculator";
+import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
+import { WIZARD_WORDS } from "@/app/agent/list/steps/copy";
+import type { UiIconName } from "@/design-system/icons/UiIcon";
 import type { GuideSlug } from "./slugs";
 
 /**
@@ -40,6 +43,16 @@ export type GuideBlock =
   | { quote: string }
   | { callout: string; title: string; tone: "vallo" | "rule" | "warn" };
 
+/**
+ * A real screen of the product, captured signed in by the capture harness
+ * (the capture plan's GUIDE_SHOT_IDS, in the capture tool's plan.mjs), dark and light. The
+ * paths are written out in full so `components/docs/guide-shots.test.ts`
+ * can hold every one to a shot the plan still produces. The files exist only
+ * once the founder runs the capture, so the page draws a shot behind a
+ * component that hides an image that has not arrived (`GuideShot`).
+ */
+export type GuideShotBlock = { dark: string; light: string; alt: string };
+
 /** Every sentence a block prints, for the word count, the claims lint and the quote check. */
 export function blockText(block: GuideBlock): string[] {
   if (typeof block === "string") return [block];
@@ -48,12 +61,45 @@ export function blockText(block: GuideBlock): string[] {
   return [block.title, block.callout];
 }
 
-export type GuideSection = { id: string; title: string; blocks: GuideBlock[] };
+export type GuideSection = {
+  id: string;
+  title: string;
+  blocks: GuideBlock[];
+  /** The real screen this step shows, drawn after its words (R85). */
+  shot?: GuideShotBlock;
+};
+
+/**
+ * THE GUIDES' CATEGORIES (R91): the chips across the top of the index, in
+ * the order they sit. Each guide sits in exactly one.
+ */
+export const GUIDE_CATEGORIES = [
+  { id: "listing", label: "For owners and agents", icon: "key" },
+  { id: "renting", label: "Renting tips", icon: "house" },
+  { id: "safety", label: "Safety", icon: "shield-check" },
+  { id: "stays", label: "Stays", icon: "building-hotel" },
+] as const satisfies readonly { id: string; label: string; icon: UiIconName }[];
+
+export type GuideCategory = (typeof GUIDE_CATEGORIES)[number]["id"];
+
+export function guideCategory(id: GuideCategory): (typeof GUIDE_CATEGORIES)[number] {
+  return GUIDE_CATEGORIES.find((c) => c.id === id) ?? GUIDE_CATEGORIES[0];
+}
 
 export type Guide = {
   slug: GuideSlug;
   title: string;
   description: string;
+  category: GuideCategory;
+  /** The one guide the index leads with, on its own card. */
+  featured?: boolean;
+  /**
+   * "Before you start" (R90): what to have in hand, for a how-to. Shown as
+   * the tinted panel at the top of the guide.
+   */
+  beforeYouStart?: string[];
+  /** The screen the index card shows, dark and light, when it has one. */
+  cover?: GuideShotBlock;
   /** ISO date the guide was first published. */
   published: string;
   /** ISO date a person last read it against the product and the sources. */
@@ -75,7 +121,129 @@ const REVIEWED = "2026-10-13";
 
 export const GUIDES: readonly Guide[] = [
   {
+    /*
+     * THE STEP-BY-STEP (R85 to R90, DOCS_AND_PRESENCE_UPGRADE.md 2.8): a
+     * "Before you start" list, then the listing's own steps, each a short
+     * paragraph and, where the capture plan takes one, the real screen with
+     * its chrome. The wizard's words are read from the wizard
+     * (`WIZARD_WORDS`), and the limits from `listings-model.ts`, so the guide
+     * cannot drift from the screen it shows.
+     */
+    slug: "how-to-list",
+    category: "listing",
+    featured: true,
+    title: "How to list your property on Vallo",
+    description:
+      "From the first question to sending it for review: what the listing asks, what to have ready before you start, and what happens after.",
+    published: "2026-11-10",
+    reviewed: "2026-11-10",
+    beforeYouStart: [
+      "A workspace to list from: an owner, an agent or a firm, set up from Add a workspace.",
+      `At least ${MIN_MEDIA} photos or videos of the place, and ${RECOMMENDED_MEDIA} is better. The first one is the cover, and it must be a photo.`,
+      "The state, the city, the area and the street address.",
+      "The price, and every cost a tenant or buyer will meet before the keys.",
+    ],
+    cover: {
+      dark: "/help/shots/d-g-list-kind.webp",
+      light: "/help/shots/d-g-list-kind.webp",
+      alt: "The first step of listing a property on Vallo, on a wide screen.",
+    },
+    sections: [
+      {
+        id: "kind",
+        title: "Say what you are listing",
+        blocks: [
+          `Open List a property in your workspace. The first question is "${WIZARD_WORDS.kind.title}" Pick a stay, booked by the night; a property to let, paid yearly, quarterly or monthly; or a property for sale. ${WIZARD_WORDS.kind.subtitle}`,
+        ],
+        shot: {
+          dark: "/help/shots/g-list-kind.webp",
+          light: "/help/shots/g-list-kind-lt.webp",
+          alt: "The listing's first step, What are you listing today?, with its three choices.",
+        },
+      },
+      {
+        id: "type",
+        title: "Pick the type",
+        blocks: [
+          `The next question is "${WIZARD_WORDS.type.title}" ${WIZARD_WORDS.type.subtitle}`,
+        ],
+        shot: {
+          dark: "/help/shots/g-list-type.webp",
+          light: "/help/shots/g-list-type-lt.webp",
+          alt: "The listing's type step, Which best describes it?, as a grid of property types.",
+        },
+      },
+      {
+        id: "location",
+        title: "Say where it is",
+        blocks: [
+          `${WIZARD_WORDS.location.subtitle} Then the street address, which is not shown on the listing.`,
+          { tone: "vallo", title: WIZARD_WORDS.location.privacyTitle, callout: WIZARD_WORDS.location.privacyBody },
+        ],
+        shot: {
+          dark: "/help/shots/g-list-location.webp",
+          light: "/help/shots/g-list-location-lt.webp",
+          alt: "The listing's location step, Where is the property?, with the note on who sees the exact location.",
+        },
+      },
+      {
+        id: "details",
+        title: "Rooms, the place, and light and water",
+        blocks: [
+          {
+            list: [
+              `How many rooms it has. ${WIZARD_WORDS.rooms.subtitle}`,
+              `${WIZARD_WORDS.place.title} ${WIZARD_WORDS.place.subtitle}`,
+              "Light and water. A question you leave unanswered shows as unanswered on the listing.",
+              "For a stay, how somebody gets through the gate. It stays private until a booking is confirmed.",
+            ],
+          },
+        ],
+      },
+      {
+        id: "price",
+        title: "Set the price and the charges",
+        blocks: [
+          "Set the price and every cost a tenant or buyer will meet before the keys. Before you publish, Vallo shows the price a renter or guest pays and what you receive after its commission, in naira. Listing is free.",
+          { tone: "warn", title: "Charge nothing that is not on the listing", callout: NO_INSPECTION_FEE },
+        ],
+      },
+      {
+        id: "photos",
+        title: "Add photos and videos, then describe it",
+        blocks: [
+          {
+            list: [
+              `At least ${MIN_MEDIA} items, and ${RECOMMENDED_MEDIA} is recommended. Photos and videos go in one uploader.`,
+              "The first item is the cover, and it must be a photo. Lead with the wide shot that sells it.",
+              `Up to ${MAX_VIDEOS} videos, each up to ${MAX_UPLOAD_LABEL} and ${MAX_VIDEO_SECONDS} seconds.`,
+            ],
+          },
+          `Then the description. ${WIZARD_WORDS.describe.subtitle}`,
+        ],
+      },
+      {
+        id: "review",
+        title: "Check it and send it for review",
+        blocks: [
+          `The last step is "${WIZARD_WORDS.check.title}". ${WIZARD_WORDS.check.subtitle}`,
+          {
+            list: [
+              "A person at Vallo reviews the listing.",
+              "They approve it, ask for more, or reject it with a reason.",
+              "If it comes back, the listing reopens with their note. Edit it and send it again.",
+              "Once approved, it is published.",
+            ],
+          },
+        ],
+      },
+    ],
+    sources: [],
+    next: { href: "/docs/listing-on-vallo", label: "Read the full chapter on listing" },
+  },
+  {
     slug: "avoiding-rental-scams",
+    category: "safety",
     title: "How to avoid rental scams in Nigeria",
     description:
       "The patterns behind most rental and shortlet scams, the questions that expose them, and how to check an agent before you pay anybody.",
@@ -166,6 +334,7 @@ export const GUIDES: readonly Guide[] = [
 
   {
     slug: "what-a-move-in-total-includes",
+    category: "renting",
     title: "What a move-in total includes",
     description:
       "Rent, caution deposit, service charge, agency fee, legal fee and agreement fee: what each line means, who it goes to, and how to add them up before you pay.",
@@ -242,6 +411,7 @@ export const GUIDES: readonly Guide[] = [
 
   {
     slug: "renting-in-lagos",
+    category: "renting",
     title: "Renting in Lagos: a plain guide",
     description:
       "How renting a home in Lagos usually works, from searching and inspecting to fees, agreements and paying, with the questions worth asking at each step.",
@@ -312,6 +482,7 @@ export const GUIDES: readonly Guide[] = [
 
   {
     slug: "renting-in-abuja",
+    category: "renting",
     title: "Renting in Abuja: a plain guide",
     description:
       "How renting a home in Abuja usually works, what the move-in total is made of, and what to ask before you pay an agent or a landlord.",
@@ -364,6 +535,7 @@ export const GUIDES: readonly Guide[] = [
 
   {
     slug: "how-stays-work-on-vallo",
+    category: "stays",
     title: "How stays work on Vallo",
     description:
       "Booking a hotel room, a shortlet or a restaurant table on Vallo: how you pay, how cancellation refunds work, and what to do if the place is not what was listed.",

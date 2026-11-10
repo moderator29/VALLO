@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import { localizedAlternates } from "@/lib/i18n/public-metadata";
-import Link from "next/link";
-import { MotionReveal } from "@/components/motion/Reveal";
 import { formatDate } from "@vallo/i18n/core";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { SiteHead } from "@/components/site/SiteHead";
 import { JsonLd } from "@/components/site/JsonLd";
-import { UiIcon } from "@/design-system/icons/UiIcon";
-import { GUIDES, readingMinutes } from "@/lib/guides/articles";
+import { DocHelpPanel, DocShell } from "@/components/docs/DocShell";
+import { GUIDES, GUIDE_CATEGORIES, guideCategory, readingMinutes } from "@/lib/guides/articles";
 import { breadcrumbLd, webPageLd } from "@/lib/site/structured-data";
+import { GuidesMagazine, type GuideCardData } from "./GuidesMagazine";
 
 /**
- * A14. `/guides`: plain answers for renters and guests, public while the
- * catalogue is closed. The articles live in `lib/guides/articles.ts`.
+ * A14, on the documentation kit (R91). `/guides`: plain answers and
+ * step-by-steps, public and free to read with no account. The articles live
+ * in `lib/guides/articles.ts`; the index reads only their titles, lines,
+ * categories and dates, and hands the browser those alone.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const g = getDictionary(await getLocale()).publicDoors.guides;
@@ -29,6 +29,29 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GuidesPage() {
   const locale = await getLocale();
   const g = getDictionary(locale).publicDoors.guides;
+  const dateOf = (iso: string) =>
+    formatDate(new Date(`${iso}T12:00:00+01:00`), locale, { day: "numeric", month: "long", year: "numeric" });
+
+  /* Newest first: "Latest" means it. */
+  const cards: GuideCardData[] = [...GUIDES]
+    .sort((a, b) => b.published.localeCompare(a.published) || b.reviewed.localeCompare(a.reviewed))
+    .map((guide) => {
+      const category = guideCategory(guide.category);
+      return {
+        slug: guide.slug,
+        title: guide.title,
+        description: guide.description,
+        category: guide.category,
+        categoryLabel: category.label,
+        icon: category.icon,
+        reviewed: guide.reviewed,
+        reviewedDate: dateOf(guide.reviewed),
+        readLine: g.readTime.replace("{minutes}", String(readingMinutes(guide))),
+        featured: guide.featured === true,
+        cover: guide.cover,
+      };
+    });
+
   return (
     <>
       <JsonLd
@@ -40,34 +63,22 @@ export default async function GuidesPage() {
           ]),
         ]}
       />
-      <SiteHead plate="living-room-dusk" icon="doc-review" chip={g.chip} title={g.title} lede={g.lede} />
-      <div className="nf-shell pb-section">
-        {/* The guides rise 60ms apart on the shared reveal (Session 3), the
-            same arrival as every card list on the public site. */}
+      <DocShell section="Guides" sectionHref="/guides" back={false} wide>
+        <header className="grid gap-sm">
+          <h1 className="font-[family-name:var(--nf-font-display)] text-[length:var(--nf-text-title-lg)] font-bold leading-tight">
+            {g.title}
+          </h1>
+          {/* The one-line promise. */}
+          <p className="max-w-measure-body text-[length:var(--nf-text-body)] leading-relaxed text-[var(--nf-content-secondary)]">
+            {g.lede}
+          </p>
+          {locale !== "en" && <p className="nf-caption text-[var(--nf-content-muted)]">{g.englishOnly}</p>}
+        </header>
         <div lang="en">
-        <MotionReveal as="ul" stagger className="nf-guides mx-auto max-w-4xl">
-          {GUIDES.map((guide) => (
-            <li key={guide.slug} className="grid">
-              <Link href={`/guides/${guide.slug}`} className="nf-pd-card nf-guide-card">
-                <span className="nf-plate nf-plate--brand nf-plate--sm nf-plate--round" aria-hidden="true">
-                  <UiIcon name="file-text" size={20} />
-                </span>
-                <span className="nf-guide-card__title">{guide.title}</span>
-                <span className="nf-supply__body">{guide.description}</span>
-                <span className="nf-guide-card__meta">
-                  {g.readTime.replace("{minutes}", String(readingMinutes(guide)))} ·{" "}
-                  {g.reviewed.replace(
-                    "{date}",
-                    formatDate(new Date(`${guide.reviewed}T12:00:00+01:00`), locale, { day: "numeric", month: "long", year: "numeric" }),
-                  )}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </MotionReveal>
+          <GuidesMagazine guides={cards} categories={GUIDE_CATEGORIES.map(({ id, label }) => ({ id, label }))} />
         </div>
-        {locale !== "en" && <p className="nf-caption mt-md text-center text-[var(--nf-content-muted)]">{g.englishOnly}</p>}
-      </div>
+        <DocHelpPanel href="/help" label="Open the help centre" />
+      </DocShell>
     </>
   );
 }

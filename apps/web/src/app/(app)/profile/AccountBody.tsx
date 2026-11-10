@@ -30,6 +30,7 @@ import { banner } from "@/lib/ui/toast";
 import { NO_FACTS, rowValue, type BelongingsFacts } from "./belongings";
 import { useClientCopy } from "@/lib/i18n/client-copy";
 import { SwitchRoleRow } from "./SwitchRoleRow";
+import { SupportGroup } from "@/components/app/account/SupportGroup";
 import { COVER_INPUT_ID } from "./AccountHero";
 import { FieldProblem } from "@/components/ui/FieldProblem";
 
@@ -326,8 +327,11 @@ export function AccountBody({
               />
               {/* Vallo Roommates (8 November 2026): the member's hub. */}
               <RowLink href="/roommates/me" icon="house-duplex" label="Roommates" sub="Requests, groups and your posts" testId="account-roommates" />
-              <RowLink href="/help" icon="ticket" label="Help" sub="FAQs, contact us" />
             </SettingsGroup>
+
+            {/* Help, guides, legal and privacy: the same group the signed-out
+                profile carries (DOCS_AND_PRESENCE_UPGRADE.md 8). */}
+            <SupportGroup />
           </div>
         </div>
       ) : (

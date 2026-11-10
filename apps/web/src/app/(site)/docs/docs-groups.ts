@@ -53,3 +53,12 @@ export function chaptersByGroup<T extends { group: DocGroupId }>(
     items: items.filter((item) => item.group === group.id),
   })).filter((group) => group.items.length > 0);
 }
+
+/**
+ * THE DATE THE CHAPTERS WERE LAST READ AGAINST THE PRODUCT (DocHeader's
+ * "Last updated"). Every chapter's money sentences were corrected from
+ * `lib/money/copy.ts` and `facts.ts` on this day, so every chapter carries it
+ * until a chapter states its own (`DocChapter.updated`). Move it when the
+ * chapters are read through again, never to make a page look fresh.
+ */
+export const DOCS_REVIEWED = "2026-11-09";

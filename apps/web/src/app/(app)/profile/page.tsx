@@ -6,6 +6,7 @@ import { getDictionary, type Locale } from "@vallo/i18n";
 import { intlTag } from "@vallo/i18n/core";
 import { getLocale } from "@/lib/locale";
 import { RowLink, SettingsGroup } from "@/components/app/account/rows";
+import { SupportGroup } from "@/components/app/account/SupportGroup";
 import { loadProfileState } from "@/lib/profile/queries";
 import { loadAccountSocialIdentity } from "@/lib/profile/social-identity";
 import { getProfileFeed } from "@/lib/social/posts-queries";
@@ -219,8 +220,12 @@ export default async function ProfilePage({
 
           <SettingsGroup label={t.experienceSocial.account.more}>
             <RowLink href="/settings" icon="settings-gear" label={t.nav.settings} />
-            <RowLink href="/help" icon="ticket" label={t.experienceSocial.account.help} />
           </SettingsGroup>
+
+          {/* SUPPORT, signed out too (DOCS_AND_PRESENCE_UPGRADE.md 2.9): a
+              visitor can read every policy before creating an account. The
+              Help row that stood in "More" is the group's first row. */}
+          <SupportGroup />
         </div>
       </div>
     );

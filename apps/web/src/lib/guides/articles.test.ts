@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { unbackedClaim } from "@/lib/trust/claims";
-import { GUIDES, blockText, guideBySlug, readingMinutes } from "./articles";
+import { GUIDES, GUIDE_CATEGORIES, blockText, guideBySlug, readingMinutes } from "./articles";
 import { GUIDE_SLUGS } from "./slugs";
 
 const EVERY_TEXT = (slug: string) => {
@@ -9,6 +9,7 @@ const EVERY_TEXT = (slug: string) => {
   return [
     guide.title,
     guide.description,
+    ...(guide.beforeYouStart ?? []),
     ...guide.sections.flatMap((s) => [s.title, ...s.blocks.flatMap(blockText)]),
   ];
 };
@@ -48,6 +49,23 @@ describe("A14 guides", () => {
         .toLowerCase();
       for (const block of blocks) {
         if (typeof block === "object" && "quote" in block) expect(prose, `${guide.slug}: ${block.quote}`).toContain(block.quote.toLowerCase());
+      }
+    }
+  });
+
+  it("leads the index with exactly one featured guide, and fills every category chip", () => {
+    expect(GUIDES.filter((g) => g.featured)).toHaveLength(1);
+    for (const category of GUIDE_CATEGORIES) expect(GUIDES.some((g) => g.category === category.id), category.id).toBe(true);
+  });
+
+  it("gives every screen in a guide words for somebody who cannot see it", () => {
+    for (const guide of GUIDES) {
+      for (const shot of [guide.cover, ...guide.sections.map((s) => s.shot)]) {
+        if (!shot) continue;
+        expect(shot.alt.length, guide.slug).toBeGreaterThan(20);
+        expect(unbackedClaim(shot.alt), shot.alt).toBeNull();
+        expect(shot.dark).toMatch(/^\/help\/shots\/[a-z0-9-]+\.webp$/);
+        expect(shot.light).toMatch(/^\/help\/shots\/[a-z0-9-]+\.webp$/);
       }
     }
   });

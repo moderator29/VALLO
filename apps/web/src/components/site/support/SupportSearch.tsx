@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { loadSupportIndex } from "@/lib/support/search-actions";
-import { prepare, searchPrepared, SECTION_LABEL, type PreparedEntry, type SearchHit } from "@/lib/support/search";
+import { markMatches, prepare, searchPrepared, SECTION_LABEL, type PreparedEntry, type SearchHit } from "@/lib/support/search";
 
 /**
  * ONE SEARCH for Help, Docs, Guides and the legal pages.
@@ -167,13 +167,40 @@ type ResultsProps = {
   onNavigate?: () => void;
 };
 
+/**
+ * A passage with the words the search matched set in bold (R99), so a reader
+ * sees WHY a result came back before they open it. `<strong>` rather than
+ * `<mark>`: the weight carries it in both themes without a highlighter fill,
+ * and a screen reader reads the sentence as one sentence.
+ */
+function MarkedText({ text, terms }: { text: string; terms: readonly string[] }) {
+  return (
+    <>
+      {markMatches(text, terms).map((part, i) =>
+        part.match ? (
+          <strong key={i} className="font-semibold text-[var(--nf-content-primary)]">
+            {part.text}
+          </strong>
+        ) : (
+          <span key={i}>{part.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+/* THE BEST MATCH SITS ON A TINTED PLATE (R99): the first row is the one
+   Enter opens, so it reads as the answer, not as one row of many. The brand
+   tint is a fill and a hairline, never a black or grey block, in both themes. */
+const FIRST = "[background:var(--nf-brand-tint-1)] border-[var(--nf-border-brand)]";
+
 export function SupportResults({ hits, listId, activeIndex, inline = false, onNavigate }: ResultsProps) {
   return (
     <ul id={listId} role="listbox" aria-label="Search results" className="space-y-row">
       {hits.map((hit, i) => {
         const active = i === activeIndex;
         const id = `${listId}-${i}`;
-        const common = active ? "ring-2 ring-[var(--nf-brand-primary)]" : "";
+        const common = `${i === 0 ? FIRST : ""} ${active ? "ring-2 ring-[var(--nf-brand-primary)]" : ""}`;
         if (inline && hit.entry.section === "help") {
           return (
             <li key={hit.entry.id} id={id} role="option" aria-selected={active}>
@@ -186,7 +213,7 @@ export function SupportResults({ hits, listId, activeIndex, inline = false, onNa
                   <UiIcon name="chevron-down" size={20} className="nf-m-chevron shrink-0 text-[var(--nf-content-muted)]" />
                 </summary>
                 <p className="max-w-measure-body px-group pb-group text-[length:var(--nf-text-row)] leading-[1.6] text-[var(--nf-content-secondary)] sm:px-heading sm:pb-heading">
-                  {hit.entry.text}
+                  <MarkedText text={hit.entry.text} terms={hit.terms} />
                 </p>
               </details>
             </li>
@@ -206,7 +233,7 @@ export function SupportResults({ hits, listId, activeIndex, inline = false, onNa
               <span className="mt-2xs block font-semibold leading-snug">{hit.entry.title}</span>
               {hit.snippet && (
                 <span className="mt-2xs block text-[length:var(--nf-text-row)] leading-[1.5] text-[var(--nf-content-secondary)]">
-                  {hit.snippet}
+                  <MarkedText text={hit.snippet} terms={hit.terms} />
                 </span>
               )}
             </Link>
@@ -253,7 +280,7 @@ export function DocsSearch() {
   };
 
   return (
-    <div className="mx-auto mb-heading max-w-6xl">
+    <div className="w-full">
       <SupportSearchField
         value={query}
         onChange={setQuery}
@@ -262,7 +289,7 @@ export function DocsSearch() {
         listId={listId}
         activeIndex={active}
         setActiveIndex={setActive}
-        placeholder="Search the docs, help and guides, e.g. is Vallo free"
+        placeholder="Search the docs, help and guides"
         label="Search documentation, help, guides and policies"
         onOpen={go}
       />

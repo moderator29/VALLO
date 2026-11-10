@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import { localizedAlternates } from "@/lib/i18n/public-metadata";
 import { notFound } from "next/navigation";
-import { formatDate } from "@vallo/i18n/core";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { JsonLd } from "@/components/site/JsonLd";
-import { GuideArticle } from "@/components/site/guides/GuideArticle";
-import { GUIDES, guideBySlug } from "@/lib/guides/articles";
+import { ButtonLink } from "@/components/ui/Button";
+import { DocCard, DocCardGrid } from "@/components/docs/DocCard";
+import { DocCallout, DocHeader, DocSection, DocSummary, type DocCalloutTone } from "@/components/docs/DocArticle";
+import { DocToc } from "@/components/docs/DocToc";
+import { DocHelpPanel, DocShell } from "@/components/docs/DocShell";
+import { GUIDES, guideBySlug, guideCategory, readingMinutes, type GuideBlock } from "@/lib/guides/articles";
 import { GUIDE_SLUGS } from "@/lib/guides/slugs";
 import { articleLd, breadcrumbLd } from "@/lib/site/structured-data";
+import { GuideShot } from "../GuideShot";
+/* The chapters' prose: brand dots for bullets, numbered steps, the measure. */
+import "@/components/site/guides/docs-type.css";
 
 /** A14. One guide. Unknown slugs are a 404; the list is fixed at build. */
 export const dynamicParams = false;
@@ -37,18 +43,33 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+/** A guide's own callout tones, on the kit's: what Vallo does, a published rule, a step not to skip. */
+const TONE: Record<"vallo" | "rule" | "warn", DocCalloutTone> = { vallo: "tip", rule: "note", warn: "warning" };
+
+/** From four sections a guide gets the contents card; a short one reads straight through. */
+const TOC_FROM = 4;
+
+/**
+ * ONE GUIDE, ON THE DOCUMENTATION KIT (DOCS_AND_PRESENCE_UPGRADE.md 2.3, 2.8;
+ * R85 to R90, R97). It opens by saying what it will say: the category pill,
+ * the title, the date a person last read it against the product, the scope
+ * and the sibling guides. Then "Before you start" where the guide is a
+ * how-to, the contents card for a long one, the numbered sections with their
+ * callouts and the real screens, the sources, the next step and more guides.
+ * Every section keeps its id, so a link to `/guides/<slug>#<section>` lands.
+ */
 export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
   const guide = guideBySlug((await params).slug);
   if (!guide) notFound();
   const locale = await getLocale();
   const g = getDictionary(locale).publicDoors.guides;
   const path = `/guides/${guide.slug}`;
-  const reviewed = formatDate(new Date(`${guide.reviewed}T12:00:00+01:00`), locale, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const others = GUIDES.filter((other) => other.slug !== guide.slug).slice(0, 3);
+  const category = guideCategory(guide.category);
+  /* The siblings a reader may want instead: the same category first. */
+  const others = [
+    ...GUIDES.filter((o) => o.slug !== guide.slug && o.category === guide.category),
+    ...GUIDES.filter((o) => o.slug !== guide.slug && o.category !== guide.category),
+  ];
 
   return (
     <>
@@ -68,7 +89,112 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
           ]),
         ]}
       />
-      <GuideArticle guide={guide} others={others} copy={g} reviewed={reviewed} englishNote={locale !== "en"} />
+      <DocShell section="Guides" sectionHref="/guides" back={false}>
+        <article lang="en" className="grid gap-xl" aria-labelledby="guide-title">
+          <DocHeader
+            category={{ icon: category.icon, label: category.label }}
+            title={guide.title}
+            updated={guide.reviewed}
+            related={others.slice(0, 2).map((o) => ({ href: `/guides/${o.slug}`, label: o.title }))}
+          >
+            <p>{guide.description}</p>
+            <p className="mt-2xs text-[length:var(--nf-text-caption)] text-[var(--nf-content-muted)]">
+              {g.readTime.replace("{minutes}", String(readingMinutes(guide)))}
+            </p>
+            {locale !== "en" ? <p className="mt-2xs text-[length:var(--nf-text-caption)]">{g.englishOnly}</p> : null}
+          </DocHeader>
+
+          {guide.beforeYouStart && guide.beforeYouStart.length > 0 ? (
+            <DocSummary title="Before you start" items={guide.beforeYouStart} />
+          ) : null}
+
+          {guide.sections.length >= TOC_FROM ? (
+            <DocToc title={g.onThisPage} sections={guide.sections.map(({ id, title }) => ({ id, title }))} />
+          ) : null}
+
+          <div className="nf-doc-sections grid gap-xl">
+            {guide.sections.map((section, index) => (
+              <DocSection key={section.id} id={section.id} number={index + 1} title={section.title}>
+                <div className="nf-doc-prose">
+                  {section.blocks.map((block, i) => (
+                    <Block key={i} block={block} />
+                  ))}
+                  {section.shot ? <GuideShot dark={section.shot.dark} light={section.shot.light} alt={section.shot.alt} /> : null}
+                </div>
+              </DocSection>
+            ))}
+          </div>
+
+          {guide.sources.length > 0 ? (
+            <section aria-labelledby="guide-sources" className="grid gap-xs">
+              <h2 id="guide-sources" className="nf-doc-search__eyebrow">
+                {g.sources}
+              </h2>
+              <ol className="grid list-decimal gap-2xs ps-md text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-secondary)]">
+                {guide.sources.map((source) => (
+                  <li key={source}>{source}</li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
+
+          <section aria-labelledby="guide-next" className="grid gap-sm">
+            <h2 id="guide-next" className="nf-doc-search__eyebrow">
+              {g.nextLabel}
+            </h2>
+            <ButtonLink href={guide.next.href} variant="primary" size="lg" full trailingIcon="arrow-right">
+              {guide.next.label}
+            </ButtonLink>
+          </section>
+
+          <section aria-labelledby="guide-more" className="grid gap-sm">
+            <h2 id="guide-more" className="nf-h3">
+              {g.more}
+            </h2>
+            <DocCardGrid label={g.more}>
+              {others.slice(0, 4).map((o) => (
+                <DocCard
+                  key={o.slug}
+                  href={`/guides/${o.slug}`}
+                  icon={guideCategory(o.category).icon}
+                  title={o.title}
+                  description={o.description}
+                  meta={g.readTime.replace("{minutes}", String(readingMinutes(o)))}
+                />
+              ))}
+            </DocCardGrid>
+          </section>
+        </article>
+        <DocHelpPanel href="/help" label="Open the help centre" />
+      </DocShell>
     </>
+  );
+}
+
+function Block({ block }: { block: GuideBlock }) {
+  if (typeof block === "string") return <p>{block}</p>;
+  if ("list" in block) {
+    return (
+      <ul role="list">
+        {block.list.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    );
+  }
+  if ("quote" in block) {
+    /* A sentence the guide already says, set large on a brand rule. */
+    return (
+      <figure className="m-0 border-s-2 border-[var(--nf-brand-primary)] ps-md">
+        <blockquote className="font-[family-name:var(--nf-font-display)] text-[length:var(--nf-text-body-lg)] leading-snug font-semibold text-[var(--nf-content-primary)]">
+          <p>{block.quote}</p>
+        </blockquote>
+      </figure>
+    );
+  }
+  return (
+    <DocCallout tone={TONE[block.tone]} title={block.title}>
+      {block.callout}
+    </DocCallout>
   );
 }

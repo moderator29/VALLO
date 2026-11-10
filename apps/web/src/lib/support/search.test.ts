@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { FAQS } from "./help-articles";
-import { search, stem, queryTerms, type SearchEntry } from "./search";
+import { markMatches, search, stem, queryTerms, type SearchEntry } from "./search";
 
 const E: SearchEntry[] = [
   { id: "1", section: "help", title: "Does it cost anything to list?", trail: "Listing your property", text: "Listing is free. Vallo only charges when a deal is completed.", href: "/help#a" },
@@ -42,6 +42,25 @@ describe("unified search", () => {
 
   it("does not drag in everything for a nonsense word", () => {
     expect(search(E, "zzzqx")).toEqual([]);
+  });
+});
+
+describe("the matched words, marked (R99)", () => {
+  it("marks a plural or an ending of a matched term, and nothing else", () => {
+    const parts = markMatches("Refunds go back to the card. A refund starts within days.", ["refund"]);
+    expect(parts.filter((p) => p.match).map((p) => p.text)).toEqual(["Refunds", "refund"]);
+    expect(parts.map((p) => p.text).join("")).toBe("Refunds go back to the card. A refund starts within days.");
+  });
+
+  it("never marks filler words, and leaves a snippet with no terms whole", () => {
+    expect(markMatches("How do I pay", ["how", "pay"]).filter((p) => p.match).map((p) => p.text)).toEqual(["pay"]);
+    expect(markMatches("Plain text", [])).toEqual([{ text: "Plain text", match: false }]);
+    expect(markMatches("", ["pay"])).toEqual([]);
+  });
+
+  it("carries the hit's terms, so a result row can mark them", () => {
+    const [hit] = search(E, "cancel");
+    expect(hit?.terms).toContain("cancel");
   });
 });
 

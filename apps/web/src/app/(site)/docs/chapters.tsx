@@ -55,11 +55,11 @@ import {
   VALLO_NEVER_HOLDS,
   VIEWINGS_AND_LISTING_FREE,
 } from "./facts";
-import { DOC_GROUPS, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
+import { DOC_GROUPS, DOCS_REVIEWED, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
 
 /* The navigation lives in `docs-groups.ts` so the client rail can import it
    without this file's text; re-exported here for the server callers. */
-export { DOC_GROUPS, chaptersByGroup };
+export { DOC_GROUPS, DOCS_REVIEWED, chaptersByGroup };
 export type { DocChapterIndexEntry, DocGroupId };
 
 /**
@@ -106,6 +106,8 @@ export type DocChapter = {
   icon: BrandIconName;
   /** The sidebar group. Set from the order below. */
   group?: DocGroupId;
+  /** ISO date this chapter was last read against the product; `DOCS_REVIEWED` when unset. */
+  updated?: string;
   sections: DocSection[];
 };
 

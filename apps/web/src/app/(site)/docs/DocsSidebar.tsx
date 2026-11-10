@@ -1,9 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UiIcon } from "@/design-system/icons/UiIcon";
 import { chaptersByGroup, type DocChapterIndexEntry } from "./docs-groups";
 
 /**
@@ -13,78 +12,29 @@ import { chaptersByGroup, type DocChapterIndexEntry } from "./docs-groups";
  * between chapters and the reader keeps their place in the list instead of
  * watching a sidebar rebuild itself on every chapter.
  *
- * ONE list of links, drawn two ways.
- *
- * From `lg` up it is an ordinary sticky column and the opener is not rendered.
- * Below that a phone has no room for a permanent 248px rail, so the same list
- * collapses behind a control that says where you currently are, which is the
- * only thing worth spending a line of a 390px screen on. It is a real button
- * with real state rather than a `<details>` element, because the browsers
- * involved disagree about whether CSS may keep details content visible, and a
- * navigation that vanishes on one engine is not a navigation.
- *
- * Choosing a chapter closes it: the pathname changing is the signal, so it
- * closes on a back gesture too, not only on a tap.
+ * From `lg` up it is a sticky column beside the chapter. It was also drawn,
+ * below `lg`, as a folded list behind a button; that copy was retired when
+ * the chapter page gained the kit's contents card.
  */
 export function DocsSidebar({ items }: { items: DocChapterIndexEntry[] }) {
   const pathname = usePathname();
-  /* Open for the path it was opened on: choosing a chapter (or a back
-     gesture) changes the path, which closes it with no effect to do so. */
-  const [openAt, setOpenAt] = useState<string | null>(null);
-  const open = openAt === pathname;
   const panelId = useId();
-
-  const current = items.find((item) => pathname === `/docs/${item.slug}`);
-  const onContents = pathname === "/docs";
-
-  const label = current ? `${current.number}. ${current.title}` : "Contents";
+  /*
+   * ON THE KIT (DOCS_AND_PRESENCE_UPGRADE.md 4.1, 9 November 2026): the rail
+   * is the wide screen's chapter list and nothing else. A phone no longer
+   * gets a folded copy of it above the chapter's own contents card (two
+   * contents lists, one on top of the other); it moves between chapters by
+   * the shell's "Documentation" link and the previous and next cards. The
+   * contents page draws nothing here: that page IS the list of chapters.
+   */
+  if (pathname === "/docs") return null;
 
   return (
-    <div className="lg:sticky lg:top-24 lg:w-[248px] lg:shrink-0 lg:self-start">
-      {/*
-        The phone opener, which the contents page itself does not get: that
-        page IS the list of chapters, so a control that unfolds the same
-        titles above it is one tap to see what is already on screen.
-      */}
-      {!onContents && (
-        <button
-          type="button"
-          onClick={() => setOpenAt(open ? null : pathname)}
-          aria-expanded={open}
-          aria-controls={panelId}
-          className="nf-tap flex min-h-11 w-full items-center justify-between gap-row rounded-control border border-[var(--nf-btn-glass-edge)] bg-[image:var(--nf-btn-glass-fill)] shadow-[var(--nf-rim-lit)] px-group py-inline text-left lg:hidden"
-        >
-          <span className="flex min-w-0 items-center gap-inline">
-            <UiIcon
-              name="panel-left"
-              size={16}
-              className="shrink-0 text-[var(--nf-content-muted)]"
-            />
-            <span className="min-w-0 text-[length:var(--nf-text-body-sm)] font-semibold text-[var(--nf-content-primary)]">
-              {label}
-            </span>
-          </span>
-          <UiIcon
-            name="chevron-down"
-            size={16}
-            className={`shrink-0 text-[var(--nf-content-muted)] transition-transform duration-[var(--nf-duration-base)] ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </button>
-      )}
-
-      {/* ---------------------------------------------------- the list */}
-      <nav
-        id={panelId}
-        aria-label="Documentation chapters"
-        className={`${open ? "mt-inline block" : "hidden"} lg:mt-0 lg:block`}
-      >
-        <p className="nf-overline hidden px-row pb-inline text-[var(--nf-content-muted)] lg:block">
-          Documentation
-        </p>
-        <div className="rounded-[var(--nf-container-radius)] border border-[var(--nf-panel-edge)] bg-[image:var(--nf-panel-fill-card)] p-inline lg:border-0 lg:bg-none lg:bg-transparent lg:p-0">
-          <ChapterLink href="/docs" active={onContents} number={null} title="All chapters" />
+    <div className="hidden lg:sticky lg:top-24 lg:block lg:w-[248px] lg:shrink-0 lg:self-start">
+      <nav id={panelId} aria-label="Documentation chapters">
+        <p className="nf-overline px-row pb-inline text-[var(--nf-content-muted)]">Documentation</p>
+        <div>
+          <ChapterLink href="/docs" active={false} number={null} title="All chapters" />
           {/* The chapters in their groups (the docs track, 13 October 2026):
               each group's name labels the list under it, so a screen
               reader hears "Money, list, 3 items" and not a flat run of
