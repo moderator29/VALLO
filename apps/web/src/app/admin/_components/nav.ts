@@ -190,6 +190,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     children: [
       { key: "people", href: "/admin/people", icon: ui("user"), label: "People" },
       { key: "account-recovery", href: "/admin/account-recovery", icon: ui("key"), label: "Account recovery", countKeys: ["recovery"], countLabel: "email recoveries opened and not yet finished" },
+      /* The docs upgrade: which help pages members say did not help. */
+      { key: "doc-feedback", href: "/admin/doc-feedback", icon: ui("file-search"), label: "Pages that fail" },
     ],
   },
   {

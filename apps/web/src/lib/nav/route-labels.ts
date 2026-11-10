@@ -141,6 +141,7 @@ const NAMES: Readonly<Record<string, string>> = {
   "/admin/people/[id]": "the person",
   "/admin/queue": "the queue",
   "/admin/support": "Support",
+  "/admin/doc-feedback": "Pages that fail",
   "/admin/review-calls": "Review calls",
   "/admin/review-calls/[id]": "Review call",
   "/admin/money": "Money",
