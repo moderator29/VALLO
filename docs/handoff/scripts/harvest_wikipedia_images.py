@@ -64,8 +64,15 @@ def sim(a, b):
 def variants(s):
     name = s["name"]
     base = name.split(",")[0].strip()
-    out = [name] + ([base] if base != name else [])
-    return out
+    out = [name, base, name.replace(", ", " ", 1)]
+    if s.get("short_name") and len(s["short_name"]) > 3 and " " not in s["short_name"]:
+        out.append(s["short_name"])
+    seen, res = set(), []
+    for v in out:
+        if v and v not in seen:
+            seen.add(v)
+            res.append(v)
+    return res
 
 def main():
     schools = json.load(open(sys.argv[1]))
@@ -103,26 +110,53 @@ def main():
                 pages[t] = (r, files[r]["desc"], files[r]["files"])
         if (i // 10) % 10 == 0:
             L(f"titles {i + len(chunk)}/{len(titles)}")
+    GENERIC = {"university", "college", "polytechnic", "federal", "state", "of", "the", "and", "technology", "education", "science", "sciences", "institute", "school", "nigeria", "logo", "seal", "crest", "emblem", "badge", "png", "jpg", "jpeg", "svg", "gif", "coat", "arms", "new", "old", "wordmark", "insignia", "technical", "management", "agriculture"}
+    def distinct(*texts):
+        w = set()
+        for t in texts:
+            w |= {x for x in fold(t).split() if len(x) >= 3 and x not in GENERIC}
+        return w
+    def pick_file(s, title, desc, files):
+        if not PLACE.search(desc or ""):
+            return None
+        if sim(title, s["name"]) < 0.6 and sim(title, s["name"].split(",")[0]) < 0.6:
+            return None
+        cands = [f for f in files if IMG.search(f) and LOGOISH.search(f) and not NOTLOGO.search(f)]
+        want = distinct(s["name"], s.get("short_name") or "", title)
+        for f in cands:
+            if distinct(f) & want or sim(title, s["name"].split(",")[0]) >= 0.9:
+                return f
+        return None
     chosen = {}
     for s in schools:
         for v in variants(s):
-            if v not in pages:
-                continue
-            title, desc, files = pages[v]
-            if not PLACE.search(desc or ""):
-                continue
-            if sim(title, v) < 0.6 and sim(title, s["name"]) < 0.6:
-                continue
-            cands = [f for f in files if IMG.search(f) and LOGOISH.search(f) and not NOTLOGO.search(f)]
-            if cands:
-                chosen[s["slug"]] = (title, cands[0])
+            if v in pages:
+                f = pick_file(s, *pages[v])
+                if f:
+                    chosen[s["slug"]] = (pages[v][0], f)
+                    break
+    L(f"{len(chosen)} from direct titles; searching for the rest")
+    todo = [s for s in schools if s["slug"] not in chosen]
+    for n, s in enumerate(todo):
+        d = api(action="query", generator="search", gsrsearch=s["name"].split(",")[0] + " Nigeria", gsrlimit=2, prop="description|images", imlimit="max")
+        for p in d.get("query", {}).get("pages", []):
+            f = pick_file(s, p["title"], p.get("description", ""), [im["title"][5:] for im in p.get("images", [])])
+            if f:
+                chosen[s["slug"]] = (p["title"], f)
                 break
+        if n % 40 == 0:
+            L(f"search {n}/{len(todo)}")
     L(f"{len(chosen)} schools with a logo-named file on a Nigerian article")
     wanted = sorted({f for _, f in chosen.values()})
     info = {}
-    for i in range(0, len(wanted), 40):
-        chunk = wanted[i : i + 40]
-        d = api(action="query", titles="|".join("File:" + f for f in chunk), prop="imageinfo", iiprop="url|mime", iiurlwidth=128)
+    for i in range(0, len(wanted), 20):
+        chunk = wanted[i : i + 20]
+        d = {}
+        for _try in range(4):
+            d = api(action="query", titles="|".join("File:" + f for f in chunk), prop="imageinfo", iiprop="url|mime", iiurlwidth=128)
+            if d.get("query"):
+                break
+            time.sleep(10)
         q = d.get("query", {})
         norm = {n["from"]: n["to"] for n in q.get("normalized", [])}
         byt = {p["title"]: p["imageinfo"][0] for p in q.get("pages", []) if p.get("imageinfo")}
