@@ -64,6 +64,7 @@ export default async function Page({
   }
 
   const listings = await readMyListings(context.supabase, context.agent.id);
+  const identity = (await identityGateApplies(context.user.id)) ? await listerIdentityStatus(context.user.id) : null;
   if (listings === null) {
     return (
       <AgentShell
