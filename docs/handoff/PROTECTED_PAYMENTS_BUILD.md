@@ -547,3 +547,19 @@ The founder launches in days, and this build is NOT on that path:
 
 Nothing here blocks the launch, and nothing in the launch should promise what
 this build has not yet delivered. Audit the money copy before launch day.
+
+---
+
+## 11. PROGRESS (kept current)
+
+| Phase | State | Where |
+|---|---|---|
+| 1. Audit | Done, 9 Nov 2026 | `PAYMENTS_MIGRATION_AUDIT.md` |
+| 2. Adapter, disabled | Skeleton done, 10 Nov 2026: config (no invented base URL, production credentials only on a production deployment), a client that sends nothing while `DOCUMENTED` is false, HTTP error mapping, an empty status table, webhooks refused, a fail-closed switch. Every unknown is a `TODO(provider-docs)`. Nothing imports it. | `apps/web/src/lib/payments/providers/escrowpay/` |
+| 3. Backend | Database preparation written and dry-run, NOT APPLIED: provider id, lifecycle columns, `refund_requested` and `requires_review`, webhook provider, rent switch on the new flag. Categories and flags in the 9 Nov pending file. | `supabase/migrations/pending/protected_rail_prep_2026-11-10.sql`, `protected_payment_categories_all_disabled_2026-11-09.sql` |
+| 3. Backend, still to do | Provider-aware open function (10.6 item 9), named payer (item 10), funding-expiry sweep (item 11), provider-agnostic `lib/money/provider-arrangements.ts`, webhook route, reconcile by provider. Blocked on the provider's sandbox documentation for anything that calls it. | |
+| 4. Frontend | Not started (section 7; audit 10.7 lists what exists). | |
+| 5 to 7 | Waiting on the signed agreement and sandbox access. | |
+
+Rent payment is also closed in code until the founder opens it
+(`apps/web/src/lib/rent/payment-open.ts`, `RENT_PAYMENT_OPEN = false`).
