@@ -93,7 +93,9 @@ export default async function HostDecidePage() {
   const unreadable = rooms.state === "unavailable" || tables.state === "unavailable";
 
   return (
-    <HostShell fallback="/host" wide>
+    /* The view's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell fallback="/host" wide chromeBack={false} nav>
       <HostInnerNav active="decide" {...hostInnerNavCopy(getDictionary(locale))} />
       <DecideView rows={sorted} now={now} locale={locale} unreadable={unreadable} />
     </HostShell>

@@ -109,13 +109,13 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/host/assistant` | FE |  |  |  |  |  |
 | `/host/bookings` | FE | PageFrame |  |  |  | PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
 | `/host/calendar` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row; Back now in the header. Not seen: needs a host session |
-| `/host/decide` | FE |  |  |  |  |  |
+| `/host/decide` | FE | PageFrame |  |  |  | DecideView on PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
 | `/host/earnings` | FE | PageFrame |  |  |  | PageFrame under the host inner nav, as rooms; 10 Nov. Not seen: needs a host session |
 | `/host/earnings/statement` | FE |  |  |  |  |  |
 | `/host/notifications` | FE |  |  |  |  |  |
 | `/host/photos` | FE | PageFrame |  |  |  | PageFrame; venue chips in the tab row. Not seen: needs a host session |
 | `/host/reservations` | FE | PageFrame |  |  |  | PageFrame; the desk keeps its search. Not seen: needs a host session |
-| `/host/reviews` | FE |  |  |  |  |  |
+| `/host/reviews` | FE | PageFrame |  |  |  | HostReviewsView on PageFrame wide, Back in the header, 10 Nov. Not seen: needs a host session |
 | `/host/rooms` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row. Not seen: needs a host session |
 | `/host/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
 | `/host/start` | FE |  |  |  |  |  |
