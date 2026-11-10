@@ -4,7 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 
 import { resolveSessionClaims } from "@/lib/actions/session";
 import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
-import { listInstitutions, readMyListingDraft, readMyRoommateProfile, readRoomListing } from "@/lib/features/roommates/queries";
+import { listInstitutions, readMyIdentityState, readMyListingDraft, readMyRoommateProfile, readRoomListing } from "@/lib/features/roommates/queries";
 
 import { PostFlowScreen } from "../../../new/_parts/PostFlowScreen";
 
@@ -23,9 +23,9 @@ export default async function EditRoommatePostPage({ params }: Props) {
   if (session.state !== "signed-in") {
     return <PostFlowScreen read={{ state: "signed-out", next: ROOMMATES_ROUTES.editListing(id) }} schools={(await schoolsRead).items} t={copy} />;
   }
-  const [draft, view, mine, schools] = await Promise.all([readMyListingDraft(id), readRoomListing(id), readMyRoommateProfile(), schoolsRead]);
+  const [draft, view, mine, schools, identity] = await Promise.all([readMyListingDraft(id), readRoomListing(id), readMyRoommateProfile(), schoolsRead, readMyIdentityState()]);
   if (!draft) notFound();
   const status = view.state === "ok" ? view.listing.status : "draft";
   const name = mine.state === "ok" && mine.name ? mine.name : copy.title;
-  return <PostFlowScreen read={{ state: "ok", initial: draft, status, me: { userId: session.userId, name, avatarUrl: view.state === "ok" ? view.listing.owner.avatarUrl : null } }} schools={schools.items} t={copy} />;
+  return <PostFlowScreen read={{ state: "ok", initial: draft, status, me: { userId: session.userId, name, avatarUrl: view.state === "ok" ? view.listing.owner.avatarUrl : null }, identity }} schools={schools.items} t={copy} />;
 }

@@ -23,6 +23,8 @@ import { adminUi } from "../_components/ui";
 import { PageHead } from "../_components/panels";
 import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
 import { roommatesContext } from "@/lib/admin/copilot/contexts/roommates";
+import { ReviewControls } from "./ReviewControls";
+import { REVIEW_QUEUE_FILTERS, readReviewQueue } from "@/lib/features/roommates/review-queue";
 import { AddInstitutionForm, InstitutionControls, TargetActions, VerificationDecision, WeightsForm } from "./RoommateControls";
 
 export const metadata: Metadata = {
@@ -33,6 +35,7 @@ export const dynamic = "force-dynamic";
 
 const TABS = [
   ["overview", "Overview"],
+  ["review", "Review"],
   ["profiles", "Profiles"],
   ["posts", "Posts"],
   ["groups", "Groups"],
@@ -97,6 +100,7 @@ export default async function AdminRoommatesPage({ searchParams }: { searchParam
       </div>
       <UnderlineTabs label="Roommates desk" active={tab} items={TABS.map(([key, label]) => ({ key, label, href: base(key) }))} />
       {tab === "overview" ? <Overview ui={ui} /> : null}
+      {tab === "review" ? <ReviewQueue ui={ui} db={db} params={params} /> : null}
       {tab === "profiles" ? <Profiles ui={ui} params={params} /> : null}
       {tab === "posts" ? <Posts ui={ui} params={params} /> : null}
       {tab === "groups" ? <Groups ui={ui} params={params} /> : null}
@@ -220,6 +224,67 @@ async function Profiles({ ui, params }: { ui: Ui; params: Params }) {
                 targetId={p.userId}
                 actions={p.status === "held" ? [{ action: "restore", label: "Restore profile", done: "Profile restored" }] : [{ action: "hold", label: "Hold profile", done: "Profile held for review", danger: true }]}
               />
+            </li>
+          ))}
+        </ul>
+      )}
+    </ui.Section>
+  );
+}
+
+const IDENTITY_WORDS: Record<string, string> = {
+  approved: "Identity approved",
+  pending: "ID waiting for review",
+  rejected: "ID check failed",
+  none: "No ID sent yet",
+};
+
+/** Room offers waiting for a decision: the same rules as a normal listing (identity, ownership declaration, photos), then staff review. */
+async function ReviewQueue({ ui, db, params }: { ui: Ui; db: SupabaseClient; params: Params }) {
+  const status = pick(one(params.status), REVIEW_QUEUE_FILTERS);
+  const read = await readReviewQueue(db, status);
+  return (
+    <ui.Section
+      title="Review"
+      hint="A room offer shows in the Roommates feed only after approval. Approval needs the owner's identity check approved, the ownership declaration and three photos."
+      action={<Filters tab="review" name="status" values={REVIEW_QUEUE_FILTERS} current={status} />}
+    >
+      {read.state === "not-open" ? (
+        <ui.QueueEmpty title="Not open on this server yet" body="The review functions are not on this database yet. This tab fills in once the roommates review SQL is applied." everHadRows={false} />
+      ) : read.state === "refused" ? (
+        <ui.QueueEmpty title="Not for your role" body="Your staff role does not include roommate review." everHadRows={false} />
+      ) : read.state === "failed" ? (
+        <ui.QueueEmpty title="Could not load the queue" body="Refresh to try again. If it keeps failing, tell operations." everHadRows={false} />
+      ) : read.rows.length === 0 ? (
+        <ui.QueueEmpty title="Nothing waiting" body={status ? "No post has this status." : "No room offer is waiting for review."} state={status ? "no-match" : undefined} />
+      ) : (
+        <ul className="flex flex-col gap-sm">
+          {read.rows.map((r) => (
+            <li key={r.id} className="nf-panel nf-panel--card nf-admin-card p-md" data-testid="review-row">
+              <div className="flex flex-wrap items-center gap-xs">
+                <Link href={ROOMMATES_ROUTES.listing(r.id)} className="font-semibold text-[var(--nf-content-primary)]">
+                  {r.title}
+                </Link>
+                <ui.StatusChip status={r.status} label={r.status.replace(/_/g, " ")} />
+                <ui.StatusChip label={IDENTITY_WORDS[r.ownerIdentity] ?? "No ID sent yet"} tone={r.ownerIdentity === "approved" ? "success" : r.ownerIdentity === "rejected" ? "danger" : "warning"} />
+                {r.openCases > 0 ? <ui.StatusChip label={`${r.openCases} open cases`} tone="warning" /> : null}
+              </div>
+              <p className="nf-body-sm mt-3xs text-content-2">
+                {[who(r.owner), [r.area, r.city].filter(Boolean).join(", "), r.authority?.replace(/_/g, " ") ?? "no authority declared", `${r.photoCount} photos`, r.linkedListingId ? "linked to a Vallo listing" : null, r.submittedAt ? `submitted ${ui.when(r.submittedAt)}` : null].filter(Boolean).join(" · ")}
+              </p>
+              {r.description ? <p className="nf-body-sm mt-xs">{r.description.slice(0, 400)}</p> : null}
+              {r.reviewNote ? <p className="nf-body-sm mt-xs text-content-2">Last note: {r.reviewNote}</p> : null}
+              {r.photoUrls.length ? (
+                <ul className="mt-xs flex gap-xs overflow-x-auto" aria-label="Photos">
+                  {r.photoUrls.slice(0, 6).map((u) => (
+                    <li key={u} className="shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- a member's own upload from the public bucket */}
+                      <img src={u} alt="" width={96} height={72} loading="lazy" style={{ objectFit: "cover", borderRadius: "var(--nf-radius-control-sm)" }} />
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <ReviewControls row={r} />
             </li>
           ))}
         </ul>

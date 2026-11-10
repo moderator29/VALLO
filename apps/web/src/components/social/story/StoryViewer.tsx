@@ -1,5 +1,6 @@
 "use client";
 
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 import { initial } from "@/lib/text/initial";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { aimPhotoMorph } from "@/lib/motion/photo-morph";
@@ -185,7 +186,20 @@ export function StoryViewer({
           return;
         }
         /* A save is said in the banner; a like shows on its heart. */
-        if (kind === "SAVE") banner.success(on ? "Story saved. Only you can see what you save." : "Removed from your saved stories.");
+        if (kind === "SAVE") {
+          saveDoneBanner({
+            saved: on,
+            message: on ? "Story saved. It is in Saved, under Stories. Only you can see it." : "Removed from your saved stories.",
+            undo: async () => {
+              const back = await toggleStoryMark({ storyId: story.id, mark: "SAVE" });
+              return back.ok ? { ok: true } : { ok: false, error: back.error };
+            },
+            onUndone: () => {
+              setSaved(!on);
+              setSaveCount((n) => n + (on ? -1 : 1));
+            },
+          });
+        }
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

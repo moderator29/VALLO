@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
@@ -50,7 +51,7 @@ export async function declareIncident(input: IncidentInput): Promise<ActionResul
 
 type Row = { id: string; status: string };
 
-async function load(db: Extract<Awaited<ReturnType<typeof door>>, { ctx: unknown }>["ctx"]["db"], id: string): Promise<{ row: Row } | { error: string }> {
+async function load(db: SupabaseClient, id: string): Promise<{ row: Row } | { error: string }> {
   const { data, error } = await db.from("tech_incidents").select("id, status").eq("id", id).maybeSingle();
   if (error) return { error: deskWords(error, NOT_OPEN) };
   if (!data) return { error: "That incident could not be found." };
