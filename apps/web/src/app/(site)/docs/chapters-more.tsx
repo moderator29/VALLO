@@ -81,7 +81,7 @@ export const GETTING_AROUND: DocChapter = {
         <p>
           The menu button at the top of the screen opens the full list of destinations, grouped,
           with your name and your standing at the top. On a computer the same list stays open as
-          a rail down the left of the screen. The switch between the Property side and Vallo Stays
+          a rail down the left of the screen. The switch between the Property side and the Stays side
           lives in the menu too, and the chapter on{" "}
           <Link href="/docs/what-vallo-is#the-two-sides" className={A}>
             the two sides
@@ -715,7 +715,7 @@ export const AROUND: DocChapter = {
         <ul role="list">
           <li>
             Open{" "}
-            <Link href="/around/manage" className={A}>
+            <Link href="/around/settings" className={A}>
               the directory
             </Link>
             , find your state, then your local government, and join. Leave any time.
@@ -742,7 +742,7 @@ export const AROUND: DocChapter = {
             {POST_MAX.toLocaleString("en-NG")} characters and {POST_MEDIA_MAX} pictures. You have{" "}
             {EDIT_WINDOW_MINUTES} minutes to edit a post, and you can take it down any time.
           </p>
-          <p>People reply, mark what is useful, and repost to their own places. Replies are one level deep.</p>
+          <p>People reply, mark what is useful, and repost to their own places. Replies can go three levels deep, and after that a reply attaches to the one above.</p>
         </>
       ),
     },
