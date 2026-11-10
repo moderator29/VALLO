@@ -14,7 +14,7 @@ import { TextField } from "@/components/ui/Field";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { differenceOf, formatPct, proposedDate, waitingFor } from "@/lib/offers/format";
 import { dealRoomHref } from "@/lib/offers/routes";
-import { PAYMENT_LABEL, STATE_FILTER_LABEL, holderLine, turnSentence } from "@/lib/offers/words";
+import { PAYMENT_LABEL, STATE_FILTER_LABEL, turnSentence } from "@/lib/offers/words";
 import type { OfferRow, OfferState } from "@/lib/offers/types";
 import type { OfferCounts } from "@/lib/offers/queries";
 import { GapBar, Naira, OfferStateChip } from "./OfferParts";
@@ -140,7 +140,6 @@ function OfferTable({ rows, nowMs, side, sort, onSort }: { rows: OfferRow[]; now
                 <SortHead label="Against asking" k="gap" sort={sort} onSort={onSort} />
                 <th scope="col">Payment</th>
                 <th scope="col">State</th>
-                <th scope="col">With</th>
                 <SortHead label="Waiting" k="activity" sort={sort} onSort={onSort} end />
                 <th scope="col">
                   <span className="sr-only">Open</span>
@@ -176,7 +175,6 @@ function OfferTable({ rows, nowMs, side, sort, onSort }: { rows: OfferRow[]; now
                   <td>
                     <OfferStateChip row={row} />
                   </td>
-                  <td>{row.state === "open" ? holderLine(row) : "None"}</td>
                   <td data-end="">{row.state === "open" ? waitingFor(row.lastActivityAt, nowMs) : ""}</td>
                   <td>
                     <span className="nf-dt__open">

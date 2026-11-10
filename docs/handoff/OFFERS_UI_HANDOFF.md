@@ -33,3 +33,29 @@
 
 ## Still to do
 Full re-audit pass (light mode on every screen, sheets, 360 on admin), real keyboard test on the desk, ledger ticks once seen live.
+
+---
+
+## DESIGN UPGRADE (founder: "not to my taste, make it advanced")
+
+### What changed
+- **One card language**: kit `Panel` cards with `SectionHead` (icon plate and title), `Receipt` (dashed dividers, tabular figures; used on the offer summary, confirmation, Deal Room terms and the admin deal; no total line unless real).
+- **Money hero**: `HeroMoney` counts in once with the kit `CountUp` (off under reduced motion, Calm, Off). `OfferFigures` adds the difference pill (arrow, amount, percent, word) and a `GapBar` (offer marker, asking marker, fill for the gap). Used on offer cards, Deal Room, versions, summary, confirmation, accept sheet, admin deal.
+- **Tables**: `.nf-dt` language on My offers (desktop) and the admin desk: sticky tinted header, sticky filter bar with counts, search (`/`), thumbnail plus title plus reference cell, difference pill, sortable headers with a turning arrow, up/down arrow keys and Enter, row "Open" cue on hover and focus. Phone keeps rich cards (thumbnail, figure, gap bar, whose turn).
+- **Deal Room**: `StageRail` (fill glides, current node pops, done nodes draw their tick, once; vertical on phone inside a disclosure with a "Step n of 7" line, horizontal on desktop); `FourStrip` (the four answers, 2x2 on phone, four columns on desktop, "your move" tinted); negotiation as a timeline (node per version, diff chips with arrows, a joining version animates); tabs with one sliding ink bar; the primary action has one sheen; messages restyled (tails, day separators, growing composer); inspection report as eight check cards with the photo count.
+- **Flow**: StepFrame direction set so steps slide the right way; payment fields reveal with a height and opacity transition (`inert` while closed); eligibility checks draw themselves in; summary is a receipt.
+- **Listing**: Make an offer gets one sheen; Contact agent and Schedule inspection now share the quiet slot (they overlapped before: found by looking); mandate shows as a quiet green plate only when held.
+- **Skeletons** in the real shapes (flow, cards and table, Deal Room); empty states with Icon3D art and an invitation.
+- Fixtures: eight-item report and a four-message thread added; new preview `/preview/offers/listing`.
+
+### Seen (Playwright, deviceScaleFactor 1, dev server on 3120, fixtures only)
+Flow steps 1 to 3 (blocked and open), instalment reveal, confirmation, My offers (cards 390/360, table 1280, empty), Deal Room (overview, negotiation, documents, messages, inspection at 390/360/1280), admin desk and admin deal at 1280, listing sticky bar and price block at 390/360; sheets opened at 390 dark: respond, accept, decline, counter, info, withdraw, concern, request document, review document. No horizontal overflow measured on any screen. Found and fixed by looking: overlapping sticky-bar icons, offer/asking labels overlapping on the gap bar, a clashing global `.nf-msg` class, the tab row overflowing, the four-answer strip pushing the terms below the fold, and an unstyled admin deal page.
+
+### Gates
+eslint clean on my files; em dash, valuation words, css tokens clean; tsc no errors; vitest (css, type-weights, i18n, ui, design, nav, trust, offers, offers components, deal-room, admin/_components): 990 pass, 1 fails (`lib/nav/route-files.test.ts` names `/api/build`, not mine).
+
+### Not verified
+- Sheets and the admin desk in light mode, and sheets at 360 and 1280, were not opened. Light mode checked for flow, list, Deal Room, admin desk, listing.
+- Real motion was not watched (screenshots are still frames); animation correctness is by CSS review and by the gates keeping it to transform and opacity, once, behind the motion gate. Reduced-motion and Calm paths not exercised in a browser.
+- Document upload to a signed URL, live listing page, keyboard row navigation and the `/` shortcut were not driven in a browser.
+- Dev server stopped; nothing committed.

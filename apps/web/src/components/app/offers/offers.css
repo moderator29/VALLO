@@ -1323,6 +1323,7 @@
 .nf-ofr-table-wrap {
   min-width: 0;
   max-width: 100%;
+  overflow-x: auto;
 }
 .nf-dt tbody td {
   min-inline-size: 6rem;
@@ -1347,4 +1348,19 @@
 .nf-ofr-mandate > span:first-child {
   flex: none;
   margin-block-start: 0.125rem;
+}
+
+.nf-ofr-admin-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--nf-space-md);
+}
+@media (min-width: 64rem) {
+  .nf-ofr-admin-cols {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.nf-tl .nf-ofr-figures__hero {
+  font-size: 2rem;
 }
