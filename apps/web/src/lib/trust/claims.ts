@@ -99,6 +99,7 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
 
   /* Everyday senses of "checked". */
   { phrase: /\bchecked out\b/i, mechanism: "a stay's check-out, not a trust claim" },
+  { phrase: /^Have you checked in\?$|^Yes, I've checked in$/, onlyIn: MONEY_COPY_FILE, mechanism: "a stay's check-in, asked of the guest on the protected payment milestone (spec screen 6), not a trust claim" },
   { phrase: /\brooms checked\b|^\s+checked$|\bthings that can be checked\b/i, mechanism: "the member's own inspection checklist and evidence, not a platform claim" },
   { phrase: /\bchecked many times\b|\bhave checked that (?:payment|movement)\b|\bhave checked several accounts\b|\bcould not be checked\b|\buntil you have checked\b/i, mechanism: "payment status polling against the provider, not a trust claim" },
   { phrase: /\bwhat you already checked\b|\breservation is checked against\b|\buntil it is checked\b/i, mechanism: "a process description, not a claim about a listing or a person" },
@@ -138,6 +139,23 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
     onlyIn: MONEY_COPY_FILE,
     mechanism:
       "the protected rail: funds held by the licensed provider's escrow until release (docs/payments/VALLO_FINANCIAL_LAYER.md); a payment reads as held only after the provider reports it (signed webhook or read-back, public.provider_arrangement_observe); surfaces gated on the server by protectedRailLive() in apps/web/src/lib/money/rail-live.ts (Payluk key configured for the deployment, PAYMENTS_KILL_PAYLUK not set, payments_payluk_on on)",
+  },
+  /* The protected rail's screens (EscrowPay, 10 November 2026): the same
+     claim as above, for the new provider. Each sentence names the transfer
+     rail or a state the provider confirmed, and is drawn only by
+     components/money/protected, which picks its screen from the recorded
+     state (lib/money/protected-journey.ts), never from the browser. No live
+     page mounts it: the rail is switched off (payments_escrowpay_on, fail
+     closed, lib/payments/providers/escrowpay/switch.ts), the client sends
+     nothing while the API is undocumented (DOCUMENTED false), and every
+     category is disabled (public.protected_payment_categories). Whole
+     sentences, copy.ts only. */
+  {
+    phrase:
+      /^Protected bank transfer$|^Continue with protected transfer$|^Your payment is protected\.$|^Protected transaction amount$/,
+    onlyIn: MONEY_COPY_FILE,
+    mechanism:
+      "the new protected rail (lib/payments/providers/escrowpay): funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; the screens draw 'protected' only on a provider-confirmed state recorded in provider_arrangements; switched off by payments_escrowpay_on (fail closed), DOCUMENTED false in lib/payments/providers/escrowpay/client.ts, and every category disabled in public.protected_payment_categories",
   },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 

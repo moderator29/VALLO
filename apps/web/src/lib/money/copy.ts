@@ -1437,3 +1437,211 @@ export const PAYSTACK_NAMED: Readonly<Record<string, PaystackSurface>> = {
   HOW_PAYING_PROCESSOR_NAMED: "help-paying",
   ADMIN_HISTORY_NOTE: "staff",
 };
+
+/* ======================================================================
+ * THE PROTECTED PAYMENT SCREENS (PROTECTED_PAYMENTS_SPECS spec two, 10
+ * November 2026). Built switched off: these sentences are drawn only by
+ * components/money/protected, which no live page mounts while
+ * `payments_escrowpay_on` is off and no category is approved. Every sentence
+ * that says a payment is protected or held is drawn only on a state the
+ * provider confirmed (lib/money/protected-journey.ts reads the recorded
+ * state, never the browser). The provider's own funds wording is in
+ * protected-wording.ts and is used unaltered.
+ * ==================================================================== */
+
+/** Each screen's written label (spec: never a financial state by colour alone). */
+export const PROTECTED_STAGE_LABEL = {
+  awaiting_transfer: "Awaiting transfer",
+  confirming: "Transfer being confirmed",
+  expired: "Transfer details expired",
+  protected: "Protected",
+  release_processing: "Release in progress",
+  released: "Released",
+  disputed: "In dispute",
+  refund_processing: "Refund in progress",
+  refunded: "Refunded",
+  requires_review: "With a person at Vallo",
+  failed: "Not completed",
+} as const;
+
+/* Screen 1, choose how to pay. */
+export const PROTECTED_CHOOSE_EYEBROW = "Complete your booking";
+export const PROTECTED_CHOOSE_TITLE = "Choose how you want to pay";
+export const PROTECTED_OPTION_TITLE = "Protected bank transfer";
+export const PROTECTED_OPTION_RECOMMENDED = "Recommended";
+export const PROTECTED_ROW_METHOD = "Payment method";
+export const PROTECTED_ROW_METHOD_VALUE = "Bank transfer";
+export const PROTECTED_ROW_FEE = "Protection fee";
+export const PROTECTED_ROW_FEE_LISTER_PAYS = "Paid by the lister";
+export const PROTECTED_ROW_TOTAL = "Total to transfer";
+export const PROTECTED_FEE_NOTE = "The exact fee and any other charges are shown before you continue.";
+export const CARD_OPTION_TITLE = "Pay by card";
+export const CARD_OPTION_LINE = "Standard card checkout";
+export const CARD_OPTION_NOTE =
+  "Card payments follow the standard payment terms and may not include the protected holding arrangement.";
+export const PROTECTED_CHOOSE_CONDITIONS = "The payment and release conditions are set out in your agreement.";
+export const PROTECTED_CHOOSE_CTA = "Continue with protected transfer";
+export const CARD_CHOOSE_CTA = "Continue to card payment";
+export const PROTECTED_UNAVAILABLE_FEE =
+  "We could not work out the fee just now, so this cannot be paid yet. Nothing has been charged.";
+export const PROTECTED_UNAVAILABLE_SERVICE =
+  "The payment service is not answering just now. Nothing has been charged. Try again in a moment.";
+export const PROTECTED_UNAVAILABLE_AGREEMENT =
+  "This agreement has changed since it was approved, so it cannot be paid. Open the agreement to see the current version.";
+
+/* Screen 2, review the protection agreement. */
+export const PROTECTED_REVIEW_TITLE = "Before you protect this payment";
+export function protectedReviewLead(amount: string, place: string): string {
+  return `You are paying ${amount} for ${place}.`;
+}
+export const PROTECTED_REVIEW_HELD =
+  "The funds will be held by the designated licensed bank after your transfer is confirmed. They will remain held until you confirm that the agreed handover has taken place, or an authorised outcome is reached through the dispute process.";
+export const PROTECTED_REVIEW_DISPUTE =
+  "If there is a problem, you can submit evidence through Vallo. The funds remain held while the dispute is reviewed, subject to the agreement and applicable rules.";
+export const PROTECTED_REVIEW_ROWS = {
+  property: "Property",
+  payer: "Paying",
+  payee: "Receiving",
+  amount: "Amount",
+  dates: "Dates",
+  release: "Released when",
+  refunds: "Refunds",
+  fee: "Protection fee",
+} as const;
+export const PROTECTED_RELEASE_WHEN = {
+  check_in: "You confirm check-in",
+  keys: "You confirm you have the keys",
+} as const;
+export const PROTECTED_REVIEW_CHECKBOX = "I have reviewed the agreement, payment conditions and refund process.";
+export const PROTECTED_REVIEW_CTA = "Agree and continue";
+export const PROTECTED_REVIEW_FULL = "Read the full agreement";
+
+/* Screen 3, funding instructions. */
+export const PROTECTED_FUNDING_EYEBROW = "Vallo payment reference";
+export const PROTECTED_FUNDING_EXACT = "Transfer the exact amount shown below.";
+export const PROTECTED_FUNDING_ROWS = {
+  bank: "Bank",
+  accountName: "Account name",
+  accountNumber: "Account number",
+  reference: "Transfer reference",
+} as const;
+export function protectedExpiresIn(clock: string): string {
+  return `Transfer expires in ${clock}`;
+}
+export const PROTECTED_FUNDING_NO_EXPIRY = "No time limit was given for these details.";
+export const PROTECTED_FUNDING_WARNING =
+  "Use the exact account details and reference. A transfer to another account may not be matched to this payment.";
+export const PROTECTED_FUNDING_CTA = "I've made the transfer";
+export const PROTECTED_FUNDING_CTA_NOTE = "This does not confirm payment. We'll verify the transfer with the bank.";
+export const PROTECTED_COPIED = {
+  accountNumber: "Account number copied",
+  reference: "Reference copied",
+} as const;
+export const PROTECTED_EXPIRED_TITLE = "These transfer details have expired";
+export const PROTECTED_EXPIRED_BODY =
+  "Do not send money to them now. If you already sent a transfer, contact support with the reference below so it can be traced.";
+export const PROTECTED_EXPIRED_CTA = "Get new transfer details";
+
+/* Screen 4, waiting for the transfer. */
+export const PROTECTED_WAITING_TITLE = "We're checking for your transfer";
+export const PROTECTED_WAITING_BODY = "Your payment instructions are ready. We're waiting for confirmation from the bank.";
+export const PROTECTED_WAITING_CLOSE = "You can close Vallo. We'll keep checking and update this payment when the bank confirms it.";
+export function protectedLastUpdated(time: string): string {
+  return `Updated ${time}`;
+}
+export const PROTECTED_WAITING_REFRESH = "Refresh status";
+export const PROTECTED_NEED_HELP = "I need help";
+export const PROTECTED_STILL_WAITING =
+  "Still waiting for confirmation. Bank transfers can take a while to be confirmed. If you are worried, contact support with your reference.";
+
+/* Screen 5, the payment held. */
+export const PROTECTED_HERO_EYEBROW = "Payment confirmed";
+export const PROTECTED_HERO_TITLE = "Your payment is protected.";
+export const PROTECTED_HERO_PROMISE = {
+  check_in: "Your payment is held by a licensed bank until you confirm check-in. Vallo never holds your money.",
+  keys: "Your payment is held by a licensed bank until you confirm you have the keys. Vallo never holds your money.",
+} as const;
+export const PROTECTED_NEXT_TITLE = "What happens next";
+export const PROTECTED_STEP_LABEL = {
+  transfer: "Transfer received by the bank",
+  held: "Funds held by the bank",
+  milestone: { check_in: "Confirm check-in", keys: "Confirm you have the keys" },
+  release: "Funds released under your agreement",
+} as const;
+export const PROTECTED_WHEN_PAID_TITLE = "When is the lister paid?";
+export const PROTECTED_WHEN_PAID = {
+  check_in:
+    "Once you confirm check-in and the agreed handover is complete, Vallo will instruct the release of funds under your agreement.",
+  keys: "Once you confirm you have the keys and the agreed handover is complete, Vallo will instruct the release of funds under your agreement.",
+} as const;
+export const PROTECTED_WHERE_TITLE = "Where is your money?";
+export const PROTECTED_WHERE_VALLO = "Vallo does not hold your funds.";
+export const PROTECTED_HOW_LINK = "How protection works";
+export const PROTECTED_VIEW_DETAILS = "View transaction details";
+
+/* Screen 6, the milestone, by category. */
+export const PROTECTED_MILESTONE = {
+  check_in: {
+    title: "Have you checked in?",
+    body: "Confirm that you received access to the accommodation described in your agreement.",
+    yes: "Yes, I've checked in",
+  },
+  keys: {
+    title: "Do you have the keys?",
+    body: "Confirm that you received the keys and possession of the property described in your agreement.",
+    yes: "Yes, I have the keys",
+  },
+} as const;
+export const PROTECTED_MILESTONE_PROBLEM = "Something is wrong";
+export const PROTECTED_MILESTONE_CONFIRM_TITLE = "Release the payment?";
+export const PROTECTED_MILESTONE_CONFIRM_BODY =
+  "Confirming tells Vallo to instruct the bank to release the payment to the lister. This cannot be undone.";
+export const PROTECTED_MILESTONE_CONFIRM_CTA = "Confirm and release";
+export const PROTECTED_NOT_YET = "Not yet";
+
+/* Screens 7 and 9, release and refund. */
+export const PROTECTED_RELEASE_PROCESSING_TITLE = "We have asked the bank to release the payment";
+export const PROTECTED_RELEASE_PROCESSING_BODY = "The lister is paid when the bank confirms the release. Nothing more is needed from you.";
+export const PROTECTED_RELEASED_TITLE = "Payment released";
+export const PROTECTED_RELEASED_BODY = "The bank confirmed the release to the lister. Your receipt is ready.";
+export const PROTECTED_REFUND_PROCESSING_TITLE = "We have asked the bank to refund you";
+export const PROTECTED_REFUND_PROCESSING_BODY = "The refund is complete when the bank confirms it. You will see it here.";
+export const PROTECTED_REFUNDED_TITLE = "Refund confirmed";
+export const PROTECTED_REFUNDED_BODY = "The bank confirmed your refund. Your receipt is ready.";
+export const PROTECTED_DOWNLOAD_RECEIPT = "Download receipt";
+
+/* Screen 8, dispute. */
+export const PROTECTED_DISPUTE_TITLE = "You raised a problem";
+export const PROTECTED_DISPUTE_BODY =
+  "The payment stays held while the dispute is reviewed, subject to your agreement. Add what you have: photos, messages and a short statement.";
+export const PROTECTED_DISPUTE_ADD = "Add evidence";
+export const PROTECTED_DISPUTE_NEXT =
+  "A person at Vallo reads both sides, may ask either of you for more, and tells you the outcome here.";
+
+/* The states nobody asks for. */
+export const PROTECTED_REVIEW_STATE_TITLE = "A person at Vallo is looking at this payment";
+export const PROTECTED_REVIEW_STATE_BODY =
+  "Something about this transfer needs a closer look, for example an amount that does not match. Nothing moves until it is resolved, and you will see the outcome here.";
+export const PROTECTED_FAILED_TITLE = "This payment did not go through";
+export const PROTECTED_FAILED_BODY = "If money left your account, contact support with the reference below.";
+
+/* Screen 10, the lister's side. */
+export const PROTECTED_LISTER_AMOUNT = "Protected transaction amount";
+export const PROTECTED_LISTER_NOT_BALANCE = "This is not a balance you can spend. It becomes yours when the bank releases it.";
+export const PROTECTED_LISTER_STAGE = {
+  awaiting_transfer: "The payer has their transfer details. No money has arrived yet.",
+  confirming: "The payer says they have transferred. The bank has not confirmed it yet.",
+  expired: "The payer's transfer details expired before any money arrived.",
+  protected: "The bank confirmed the payment is held. It is released to you once the payer confirms the handover.",
+  release_processing: "The payer confirmed the handover. Vallo has asked the bank to release the payment to you.",
+  released: "The bank confirmed the release to your payout account.",
+  disputed: "The payer raised a problem. The payment stays held while the dispute is reviewed. Add your side below.",
+  refund_processing: "Vallo has asked the bank to refund the payer.",
+  refunded: "The bank confirmed the refund to the payer.",
+  requires_review: "A person at Vallo is looking at this payment. Nothing moves until it is resolved.",
+  failed: "This payment did not go through. No money reached the bank.",
+} as const;
+
+/* Screen 11, the persistent timeline. */
+export const PROTECTED_TIMELINE_TITLE = "This payment, step by step";
+export const PROTECTED_TIMELINE_STOPPED = "Stopped here";
