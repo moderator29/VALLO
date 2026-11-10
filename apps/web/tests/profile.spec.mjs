@@ -189,9 +189,18 @@ try {
     await page.locator('[data-testid="delete-continue"]').click();
     await page.waitForTimeout(400);
 
+    const reasonContinue = page.locator('[data-testid="delete-reason-continue"]');
+    check("second step asks why they are leaving", await page.locator('[data-testid="delete-reason-step"]').isVisible());
+    check("continue is disabled until a reason is chosen", await reasonContinue.isDisabled());
+    await page.locator('[data-testid="delete-reason-prefer_not_to_say"]').click();
+    await page.waitForTimeout(150);
+    check("choosing a reason arms continue", await reasonContinue.isEnabled());
+    await reasonContinue.click();
+    await page.waitForTimeout(400);
+
     const phrase = page.locator('[data-testid="delete-phrase"]');
     const confirm = page.locator('[data-testid="delete-confirm"]');
-    check("second step asks for the phrase", await phrase.isVisible());
+    check("third step asks for the phrase", await phrase.isVisible());
     check("confirm button starts disabled", await confirm.isDisabled());
 
     await phrase.fill("delete my account");

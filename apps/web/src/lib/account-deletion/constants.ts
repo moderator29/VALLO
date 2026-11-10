@@ -9,6 +9,26 @@
 /** How long the account is deactivated before anything is destroyed. */
 export const GRACE_WINDOW_DAYS = 30;
 
+/**
+ * Why somebody is leaving, as a closed list. Only the code is kept (in the
+ * audit line), never free text: that table is readable by every admin, so it
+ * carries machine-readable reasons and nothing a person typed.
+ */
+export const DELETION_REASONS = [
+  "not_using",
+  "found_place",
+  "not_found",
+  "hard_to_use",
+  "notifications",
+  "privacy",
+  "safety",
+  "second_account",
+  "other",
+  "prefer_not_to_say",
+] as const;
+
+export type DeletionReason = (typeof DELETION_REASONS)[number];
+
 /** Typed in capitals, checked on the server, never translated. */
 export const DELETE_CONFIRM_PHRASE = "DELETE MY ACCOUNT";
 

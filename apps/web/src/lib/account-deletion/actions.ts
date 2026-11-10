@@ -211,7 +211,7 @@ async function startDeletionInner(
     action: "account.deletion.requested",
     userId: user.id,
     requestId,
-    detail: { grace_days: GRACE_WINDOW_DAYS },
+    detail: { grace_days: GRACE_WINDOW_DAYS, reason: parsed.data.reason ?? "not_given" },
   });
 
   // Signed out everywhere, then banned for the length of the window. The ban
