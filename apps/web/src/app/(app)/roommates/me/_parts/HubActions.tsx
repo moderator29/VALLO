@@ -46,7 +46,7 @@ export function ProfileStatusActions({ status }: { status: "active" | "paused" }
       size="sm"
       loading={pending}
       data-testid="rm-hub-profile-toggle"
-      onClick={() => run(() => setRoommateProfileStatus(next), { success: next === "paused" ? X.paused : X.resumed })}
+      onClick={() => run(() => setRoommateProfileStatus(next), { success: next === "paused" ? X.paused : X.resumed, undo: () => setRoommateProfileStatus(status) })}
     >
       {status === "active" ? X.pause : X.resume}
     </Button>
@@ -301,17 +301,17 @@ export function PostActions({ id, status }: { id: string; status: ListingStatus 
         </ButtonLink>
       ) : null}
       {status === "live" ? (
-        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "paused" }), { success: X.pausedDone })}>
+        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "paused" }), { success: X.pausedDone, undo: () => setRoommateListingStatus({ id, status: "live" }) })}>
           {X.pause}
         </Button>
       ) : null}
       {status === "paused" || status === "filled" || status === "expired" ? (
-        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "live" }), { success: X.liveDone })}>
+        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "live" }), { success: X.liveDone, undo: status === "paused" ? () => setRoommateListingStatus({ id, status: "paused" }) : undefined })}>
           {X.resume}
         </Button>
       ) : null}
       {status === "live" || status === "paused" ? (
-        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "filled" }), { success: X.filledDone })}>
+        <Button variant="quiet" size="sm" disabled={pending} onClick={() => run(() => setRoommateListingStatus({ id, status: "filled" }), { success: X.filledDone, undo: () => setRoommateListingStatus({ id, status: status === "paused" ? "paused" : "live" }) })}>
           {X.filled}
         </Button>
       ) : null}
@@ -506,7 +506,7 @@ export function SearchActions({ id, alert, href }: { id: string; alert: boolean;
         disabled={toggle.pending}
         onCheckedChange={(next) => {
           setOn(next);
-          toggle.run(() => setRoommateSearchAlert({ id, alert: next }), { success: next ? X.alertOn : X.alertOff, onFail: () => setOn(!next), refresh: false });
+          toggle.run(() => setRoommateSearchAlert({ id, alert: next }), { success: next ? X.alertOn : X.alertOff, onFail: () => setOn(!next), refresh: false, undo: async () => { setOn(!next); return setRoommateSearchAlert({ id, alert: !next }); } });
         }}
       />
       <ButtonLink href={href} variant="secondary" size="sm">

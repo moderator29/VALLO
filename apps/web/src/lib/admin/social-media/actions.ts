@@ -234,6 +234,24 @@ export async function cancelPost(id: string): Promise<ActionResult<{ note: strin
   return ok({ note });
 }
 
+/**
+ * The inverse of `cancelPost`, behind the banner's Undo. A cancelled post
+ * comes back as a DRAFT, never as approved: an approval is a decision by a
+ * second person and is not carried across a cancel, so the post goes through
+ * "Send for approval" again. Only a cancelled post is touched.
+ */
+export async function restoreCancelledPost(id: string): Promise<ActionResult<{ note: string | null }>> {
+  const s = await staff();
+  if ("error" in s) return fail(s.error);
+  if (!uuid.test(id)) return fail(FAILED);
+  const { data, error } = await s.db.from("social_posts").update({ status: "draft" }).eq("id", id).eq("status", "cancelled").select("id");
+  if (error) return fail(words(error));
+  if (!data || data.length === 0) return fail("That post is not cancelled any more, so there is nothing to restore.");
+  const note = await audit(s, "social_post.restore", id);
+  revalidatePath(PATH);
+  return ok({ note });
+}
+
 const IMAGE_MAX_BYTES = 10 * 1024 * 1024; // matches lib/host/photos.ts PHOTO_MAX_BYTES
 const VIDEO_MAX_BYTES = 100 * 1024 * 1024; // matches lib/agent/listings-model.ts MAX_UPLOAD_BYTES
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/quicktime", "video/webm"]);

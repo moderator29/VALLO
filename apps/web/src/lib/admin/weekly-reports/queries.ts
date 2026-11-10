@@ -70,9 +70,8 @@ export async function readReport(db: SupabaseClient, authorId: string, weekStart
     .eq("week_start", weekStart)
     .maybeSingle();
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.weekly-reports.report", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: data ? reportFromRow(data as unknown as Row) : null };
 }
@@ -86,9 +85,8 @@ export async function readHistory(db: SupabaseClient, authorId: string): Promise
     .order("week_start", { ascending: false })
     .limit(104);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.weekly-reports.history", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as Row[]).map(reportFromRow) };
 }
@@ -101,9 +99,8 @@ export async function readWeekReports(db: SupabaseClient, weekStart: string): Pr
     .eq("week_start", weekStart)
     .limit(1000);
   if (error) {
-    if (isNotLive(error)) return { state: "not-open" };
     await reportReadFault("read.admin.weekly-reports.week", ...faults(error));
-    return { state: "error" };
+    return isNotLive(error) ? { state: "not-open" } : { state: "error" };
   }
   return { state: "ok", data: ((data ?? []) as unknown as Row[]).map(reportFromRow) };
 }
@@ -111,7 +108,10 @@ export async function readWeekReports(db: SupabaseClient, weekStart: string): Pr
 /** The weeks that have any report, newest first, for the reviewer's week picker. */
 export async function readWeeksWithReports(db: SupabaseClient): Promise<string[]> {
   const { data, error } = await db.from("staff_weekly_reports").select("week_start").order("week_start", { ascending: false }).limit(400);
-  if (error) return [];
+  if (error) {
+    await reportReadFault("read.admin.weekly-reports.weeks", ...faults(error));
+    return [];
+  }
   return [...new Set(((data ?? []) as { week_start: string }[]).map((r) => r.week_start))];
 }
 

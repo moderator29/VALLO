@@ -77,7 +77,7 @@ export function oldestFirst<T>(items: readonly T[], at: (item: T) => string | nu
 export function clip(text: string | null | undefined, max = 240): string | null {
   if (!text) return null;
   const flat = text.replace(/\s+/g, " ").trim();
-  return flat.length > max ? `${flat.slice(0, max - 1)}...` : flat;
+  return flat.length > max ? `${flat.slice(0, max - 3)}...` : flat;
 }
 
 /**

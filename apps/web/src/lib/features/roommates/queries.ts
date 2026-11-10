@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/env";
 
 import { faults, isNotLive } from "../degrade";
+import { SCHOOL_MAX_LIMIT, searchSchools } from "./school-search";
 import {
   EMPTY_LIFESTYLE,
   EMPTY_PROFILE,
@@ -509,36 +510,62 @@ export async function readOpenGroups(filters: { stateCode: string | null; city: 
 
 /* ------------------------------------------------------------------ institutions */
 
+type InstitutionRow = { id: string; slug: string; name: string; short_name: string | null; kind: string; state_code: string | null; city: string | null; logo_url?: string | null; aliases?: string[] | null };
+
+const INSTITUTION_COLUMNS = "id, slug, name, short_name, kind, state_code, city";
+
+/** One page of live schools. The logo and alias columns arrive with institutions_logos_and_aliases; until then the base columns are read. */
+async function readInstitutionRows(db: SupabaseClient, stateCode: string | null | undefined, withExtras: boolean) {
+  const rows: InstitutionRow[] = [];
+  for (let from = 0; from < SCHOOL_MAX_LIMIT; from += 1000) {
+    let query = db
+      .from("institutions")
+      .select(withExtras ? `${INSTITUTION_COLUMNS}, logo_url, aliases` : INSTITUTION_COLUMNS)
+      .eq("status", "live")
+      .order("name")
+      .range(from, from + 999);
+    if (stateCode) query = query.eq("state_code", stateCode);
+    const { data, error } = await query;
+    if (error) return { rows, error };
+    const page = (data ?? []) as unknown as InstitutionRow[];
+    rows.push(...page);
+    if (page.length < 1000) break;
+  }
+  return { rows, error: null };
+}
+
+/**
+ * The schools directory. `q` is matched word by word against name, short name,
+ * city and aliases (see school-search.ts); `stateCode` narrows to one state; the
+ * list is capped at `limit` (default 200). With no `q` the order is kind, then
+ * name. Each item carries `logoUrl` (null until a logo is recorded).
+ */
 export async function listInstitutions(input: { q?: string; stateCode?: string | null; limit?: number } = {}): Promise<{ live: boolean; items: InstitutionRef[] }> {
   const v = await viewer();
   if (!v) return { live: false, items: [] };
-  let query = v.db
-    .from("institutions")
-    .select("id, slug, name, short_name, kind, state_code, city")
-    .eq("status", "live")
-    .order("name")
-    .limit(Math.min(input.limit ?? 200, 400));
-  if (input.stateCode) query = query.eq("state_code", input.stateCode);
-  const q = input.q?.trim();
-  if (q) query = query.or(`name.ilike.%${q.replace(/[%_,()]/g, " ")}%,short_name.ilike.%${q.replace(/[%_,()]/g, " ")}%`);
-  const { data, error } = await query;
-  if (error) {
-    await reportReadFault("read.roommates.institutions", ...faults(error));
-    if (isNotLive(error)) return { live: false, items: [] };
+  let read = await readInstitutionRows(v.db, input.stateCode, true);
+  if (read.error && isMissingColumn(read.error)) read = await readInstitutionRows(v.db, input.stateCode, false);
+  if (read.error) {
+    await reportReadFault("read.roommates.institutions", ...faults(read.error));
+    if (isNotLive(read.error)) return { live: false, items: [] };
     return { live: true, items: [] };
   }
-  return {
-    live: true,
-    items: ((data ?? []) as { id: string; slug: string; name: string; short_name: string | null; kind: string; state_code: string | null; city: string | null }[]).map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      name: r.name,
-      shortName: r.short_name,
-      kind: r.kind,
-      stateCode: r.state_code,
-      city: r.city,
-    })),
-  };
+  const items: InstitutionRef[] = read.rows.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    shortName: r.short_name,
+    kind: r.kind,
+    stateCode: r.state_code,
+    city: r.city,
+    logoUrl: r.logo_url ?? null,
+    aliases: r.aliases ?? [],
+  }));
+  return { live: true, items: searchSchools(items, { q: input.q, stateCode: input.stateCode, limit: input.limit }) };
+}
+
+function isMissingColumn(error: { code?: string | null }): boolean {
+  return error.code === "42703" || error.code === "PGRST204";
 }
 
 export type InstitutionPage = {

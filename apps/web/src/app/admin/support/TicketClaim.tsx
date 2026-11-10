@@ -6,6 +6,7 @@ import { releaseTicket, takeTicket } from "@/lib/admin/support-desk-actions";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 
 /**
  * Who has this ticket, and the one button that changes it: Take it when it is
@@ -27,8 +28,16 @@ export function TicketClaim({
     start(async () => {
       try {
         const r = verb === "take" ? await takeTicket({ ticketId }) : await releaseTicket({ ticketId });
-        if (r.ok) router.refresh();
-        else banner.error(r.error, { retry: () => run(verb) });
+        if (r.ok) {
+          /* Undo is the other half of the pair. If a colleague took the
+             ticket in between, the server refuses and says so. */
+          bannerWithUndo(verb === "take" ? "You took this ticket. It is under Mine." : "You handed the ticket back. It is free for the team.", {
+            undo: () => (verb === "take" ? releaseTicket({ ticketId }) : takeTicket({ ticketId })),
+            undone: verb === "take" ? "You handed the ticket back." : "The ticket is yours again.",
+            onUndone: () => router.refresh(),
+          });
+          router.refresh();
+        } else banner.error(r.error, { retry: () => run(verb) });
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

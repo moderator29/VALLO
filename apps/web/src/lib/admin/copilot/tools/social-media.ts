@@ -50,7 +50,7 @@ export const getSocialDesk = defineTool({
       label: d.label,
       posts: [...Object.values(d.slots).flat(), ...d.unslotted].filter((p) => p.status !== "cancelled").map(postRow),
     }));
-    const drafts = read.data.filter((p) => p.status === "draft" || p.status === "awaiting_approval" || (p.status === "draft" && p.rejectionReason));
+    const drafts = read.data.filter((p) => p.status === "draft" || p.status === "awaiting_approval");
     return {
       ok: true,
       data: {

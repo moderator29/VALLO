@@ -24,6 +24,7 @@ import {
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
@@ -102,7 +103,18 @@ export function JoinControl({
             () => setState("active"),
             () => {
               setState("none");
-              banner.success(CIRCLE_COPY.leftBanner);
+              /* Undo is the real inverse (join). A private community would
+                 only send a request again, so no Undo is offered there. */
+              if (visibility === "public") {
+                bannerWithUndo(CIRCLE_COPY.leftBanner, {
+                  undo: () => joinCommunity({ communityId, slug }),
+                  undone: CIRCLE_COPY.rejoinedBanner.replace("{name}", name),
+                  onUndone: () => {
+                    setState("active");
+                    router.refresh();
+                  },
+                });
+              } else banner.success(CIRCLE_COPY.leftPrivateBanner);
               router.refresh();
             },
           )
@@ -123,7 +135,16 @@ export function JoinControl({
           const result = await joinCommunity({ communityId, slug });
           if (result.ok) {
             setState(result.data.status);
-            banner.success(result.data.status === "requested" ? CIRCLE_COPY.requestedBanner : `${CIRCLE_COPY.joinedBanner} ${name}`);
+            if (result.data.status === "requested") banner.success(CIRCLE_COPY.requestedBanner);
+            else
+              bannerWithUndo(`${CIRCLE_COPY.joinedBanner} ${name}`, {
+                undo: () => leaveCommunity({ communityId, slug }),
+                undone: CIRCLE_COPY.leftAgainBanner.replace("{name}", name),
+                onUndone: () => {
+                  setState("none");
+                  router.refresh();
+                },
+              });
             router.refresh();
             return { ok: true };
           }
@@ -151,7 +172,16 @@ export function HelpfulToggle({ postId, rootId, count, initial, disabled }: { po
       onClick={() => {
         const next = !on;
         setOn(next);
-        run(async () => setHelpful({ postId, rootId, on: next }), () => setOn(!next));
+        run(
+          async () => setHelpful({ postId, rootId, on: next }),
+          () => setOn(!next),
+          () =>
+            bannerWithUndo(next ? CIRCLE_COPY.helpfulOn : CIRCLE_COPY.helpfulOff, {
+              undo: () => setHelpful({ postId, rootId, on: !next }),
+              undone: CIRCLE_COPY.undone,
+              onUndone: () => setOn(!next),
+            }),
+        );
       }}
     >
       {`${CIRCLE_COPY.thread.helpful}${shown > 0 ? ` ${shown}` : ""}`}
@@ -169,7 +199,16 @@ export function AcceptToggle({ questionId, answerId, accepted }: { questionId: s
       aria-pressed={accepted}
       loading={pending}
       data-testid="circle-accept"
-      onClick={() => run(async () => acceptAnswer({ questionId, answerId: accepted ? null : answerId }), undefined, () => router.refresh())}
+      onClick={() =>
+        run(async () => acceptAnswer({ questionId, answerId: accepted ? null : answerId }), undefined, () => {
+          bannerWithUndo(accepted ? CIRCLE_COPY.unacceptedAnswer : CIRCLE_COPY.acceptedAnswer, {
+            undo: () => acceptAnswer({ questionId, answerId: accepted ? answerId : null }),
+            undone: CIRCLE_COPY.undone,
+            onUndone: () => router.refresh(),
+          });
+          router.refresh();
+        })
+      }
     >
       {accepted ? CIRCLE_COPY.thread.unaccept : CIRCLE_COPY.thread.accept}
     </Button>
@@ -190,7 +229,16 @@ export function FollowToggle({ questionId, initial }: { questionId: string; init
       onClick={() => {
         const next = !on;
         setOn(next);
-        run(async () => followQuestion({ questionId, on: next }), () => setOn(!next));
+        run(
+          async () => followQuestion({ questionId, on: next }),
+          () => setOn(!next),
+          () =>
+            bannerWithUndo(next ? CIRCLE_COPY.followingQuestion : CIRCLE_COPY.unfollowedQuestion, {
+              undo: () => followQuestion({ questionId, on: !next }),
+              undone: CIRCLE_COPY.undone,
+              onUndone: () => setOn(!next),
+            }),
+        );
       }}
     >
       {on ? CIRCLE_COPY.thread.following : CIRCLE_COPY.thread.follow}
@@ -310,10 +358,21 @@ export function SendInviteButton({
       loading={pending}
       data-testid="circle-send-invite"
       onClick={() =>
-        run(async () => sendCircleInvite({ communityId, inviteeId }), undefined, () => {
-          banner.success(`${CIRCLE_COPY.invite.inviteSent} to ${inviteeName}`);
-          router.refresh();
-        })
+        run(
+          async () => {
+            const result = await sendCircleInvite({ communityId, inviteeId });
+            if (!result.ok) return result;
+            /* Undo withdraws this exact invite. */
+            const inviteId = result.data.id;
+            bannerWithUndo(`${CIRCLE_COPY.invite.inviteSent} to ${inviteeName}`, {
+              undo: () => withdrawCircleInvite({ inviteId }),
+              undone: CIRCLE_COPY.inviteWithdrawnUndo,
+              onUndone: () => router.refresh(),
+            });
+            router.refresh();
+            return { ok: true };
+          },
+        )
       }
     >
       {CIRCLE_COPY.invite.inviteMember}
@@ -399,7 +458,11 @@ export function RequestDecision({ communityId, userId, slug }: { communityId: st
   const router = useRouter();
   const { pending, run } = useRun();
   const decide = (approve: boolean) =>
-    run(async () => decideJoinRequest({ communityId, userId, approve, slug }), undefined, () => router.refresh());
+    run(async () => decideJoinRequest({ communityId, userId, approve, slug }), undefined, () => {
+      /* No Undo: the person is told either way, and a member is removed only by Remove. */
+      banner.success(approve ? CIRCLE_COPY.requestApproved : CIRCLE_COPY.requestDeclined);
+      router.refresh();
+    });
   return (
     <span className="nf-circle-reply__actions">
       <Button variant="primary" size="sm" disabled={pending} onClick={() => decide(true)} data-testid="circle-approve">

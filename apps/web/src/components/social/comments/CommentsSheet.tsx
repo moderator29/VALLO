@@ -10,7 +10,8 @@ import { DELETE_WORDS, DeleteSheet } from "@/components/social/DeleteSheet";
 import type { ReportWords } from "@/components/social/sheet-words";
 import { Sheet } from "@/components/ui/Sheet";
 import { Button } from "@/components/ui/Button";
-import { blockUser, muteTarget } from "@/lib/social/posts-actions";
+import { blockUser, muteTarget, unblockUser, unmuteTarget } from "@/lib/social/posts-actions";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import {
   POST_COPY,
   POST_MAX,
@@ -239,8 +240,14 @@ export function CommentsSheet({
           action === "block"
             ? await blockUser({ userId: target })
             : await muteTarget({ targetKind: "USER", targetId: target });
-        if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
-        else banner.error(result.error);
+        if (result.ok) {
+          bannerWithUndo(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone, {
+            undo: () =>
+              action === "block" ? unblockUser({ userId: target }) : unmuteTarget({ targetKind: "USER", targetId: target }),
+            undone: action === "block" ? POST_COPY.blockedUndone : POST_COPY.mutedUndone,
+            onUndone: () => router.refresh(),
+          });
+        } else banner.error(result.error);
         /* Their comments leave this sheet now. The rows are held here, and the
            refresh below re-reads the page behind the sheet, so without this the
            person just blocked kept talking in the open sheet until it closed.

@@ -136,6 +136,7 @@ export default async function AdminListingsPage({
               examples: Object.values(counts.data.examples).reduce((sum, n) => sum + n, 0),
               medianMinutesThisWeek: times.state === "ok" ? times.data.thisWeek.medianMinutes : null,
               decisionsThisWeek: times.state === "ok" ? times.data.thisWeek.decisions : 0,
+              waitingSubmittedAt: read.state === "ok" ? read.data.waiting.map((l) => l.submittedAt) : [],
             }
           : null,
       )}

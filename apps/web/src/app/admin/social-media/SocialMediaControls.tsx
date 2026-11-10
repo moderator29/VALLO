@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { FieldProblem } from "@/components/ui/FieldProblem";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { feedback } from "@/lib/ui/feedback";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 import {
   approveDraft,
   cancelPost,
+  restoreCancelledPost,
   createDraft,
   deleteMedia,
   markPosted,
@@ -44,10 +46,12 @@ import type { MediaItem } from "@/lib/admin/social-media/queries";
 
 type Outcome = { ok: true; data: { note?: string | null } & Record<string, unknown> } | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
+type Reversible = { message: string; undo: () => Promise<Outcome>; undone: string };
+
 function useDesk() {
   const router = useRouter();
   const [pending, start] = useSafeTransition();
-  const run = (task: () => Promise<Outcome>, done: string, after?: (r: Outcome & { ok: true }) => void, onFail?: (f: Record<string, string>) => void) =>
+  const run = (task: () => Promise<Outcome>, done: string | Reversible, after?: (r: Outcome & { ok: true }) => void, onFail?: (f: Record<string, string>) => void) =>
     start(async () => {
       try {
         const result = await task();
@@ -58,7 +62,8 @@ function useDesk() {
         }
         feedback("confirm");
         if (result.data.note) banner.warning(result.data.note);
-        else banner.success(done);
+        else if (typeof done === "string") banner.success(done);
+        else bannerWithUndo(done.message, { undo: done.undo, undone: done.undone, onUndone: () => router.refresh() });
         after?.(result);
         router.refresh();
       } catch (error) {
@@ -212,6 +217,13 @@ const Act = {
 };
 
 /** The approval and record-keeping buttons a post's status offers. */
+/** Cancelling says where the post went and offers the real inverse. */
+const CANCELLED = (id: string): Reversible => ({
+  message: "Post cancelled. It is under Cancelled.",
+  undo: () => restoreCancelledPost(id),
+  undone: "Post restored as a draft. It needs approval again.",
+});
+
 export function ApprovalActions({ post }: { post: SocialPost }) {
   const { pending, run } = useDesk();
   const [reason, setReason] = useState("");
@@ -234,7 +246,7 @@ export function ApprovalActions({ post }: { post: SocialPost }) {
           <button type="button" className="nf-btn nf-btn--sm nf-btn--primary" disabled={pending} onClick={() => run(() => Act.approve(post.id), "Approved")}>
             Approve
           </button>
-          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), "Cancelled")}>
+          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
             Cancel
           </button>
         </div>
@@ -288,7 +300,7 @@ export function ApprovalActions({ post }: { post: SocialPost }) {
           >
             Mark as posted
           </button>
-          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), "Cancelled")}>
+          <button type="button" className="nf-btn nf-btn--sm nf-btn--secondary" disabled={pending} onClick={() => run(() => cancelPost(post.id), CANCELLED(post.id))}>
             Cancel
           </button>
         </div>

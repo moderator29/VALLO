@@ -39,6 +39,7 @@ import type { PersonRef } from "@/lib/features/roommates/model";
 import type { ActionResult } from "@/lib/actions/envelope";
 import { feedback } from "@/lib/ui/feedback";
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 type SheetKind = "note" | "escalate" | "message" | "act" | "restrict" | "resolve" | "reopen" | null;
@@ -80,18 +81,25 @@ export function CaseActions({
     (p, i, all) => all.findIndex((q) => q.userId === p.userId) === i,
   );
 
-  const run = (fn: () => Promise<ActionResult<unknown>>, success: string) =>
+  /* `reversible` is the real inverse, for the moves that have one (a status
+     change, a close). Undo says its own outcome and refreshes the case. */
+  const run = (
+    fn: () => Promise<ActionResult<unknown>>,
+    success: string,
+    reversible?: { undo: () => Promise<ActionResult<unknown>>; undone: string },
+  ) =>
     start(async () => {
       const res = await fn();
       if (res.ok) {
         feedback("confirm");
-        banner.success(success);
+        if (reversible) bannerWithUndo(success, { ...reversible, onUndone: () => router.refresh() });
+        else banner.success(success);
         setOpen(null);
         setText("");
         router.refresh();
       } else {
         feedback("error");
-        banner.error(res.error, { retry: () => run(fn, success) });
+        banner.error(res.error, { retry: () => run(fn, success, reversible) });
       }
     });
 
@@ -119,12 +127,18 @@ export function CaseActions({
             </Button>
           ) : null}
           {can.status && status !== "awaiting_info" ? (
-            <Button size="sm" variant="secondary" onClick={() => run(() => setCaseStatus({ caseId, status: "awaiting_info" }), "Marked as awaiting information.")}>
+            <Button size="sm" variant="secondary" onClick={() => run(() => setCaseStatus({ caseId, status: "awaiting_info" }), "Marked as awaiting information.", {
+              undo: () => setCaseStatus({ caseId, status: "under_review" }),
+              undone: "Back under review.",
+            })}>
               Awaiting information
             </Button>
           ) : null}
           {can.status && status === "awaiting_info" ? (
-            <Button size="sm" variant="secondary" onClick={() => run(() => setCaseStatus({ caseId, status: "under_review" }), "Back under review.")}>
+            <Button size="sm" variant="secondary" onClick={() => run(() => setCaseStatus({ caseId, status: "under_review" }), "Back under review.", {
+              undo: () => setCaseStatus({ caseId, status: "awaiting_info" }),
+              undone: "Marked as awaiting information again.",
+            })}>
               Back to review
             </Button>
           ) : null}
@@ -157,7 +171,10 @@ export function CaseActions({
       ) : (
         <div className="flex flex-wrap gap-xs">
           {can.resolve && status === "resolved" ? (
-            <Button size="sm" variant="secondary" onClick={() => run(() => closeCase({ caseId }), "Case closed.")}>
+            <Button size="sm" variant="secondary" onClick={() => run(() => closeCase({ caseId }), "Case closed. It stays on record under Closed.", {
+              undo: () => reopenCase({ caseId, reason: "Closed by mistake. Reopened from the banner." }),
+              undone: "Case reopened.",
+            })}>
               Close case
             </Button>
           ) : null}

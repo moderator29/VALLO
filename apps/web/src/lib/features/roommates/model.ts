@@ -141,7 +141,7 @@ export type PersonRef = {
   avatarUrl: string | null;
 };
 
-export type InstitutionRef = { id: string; slug: string; name: string; shortName: string | null; kind: string; stateCode: string | null; city: string | null };
+export type InstitutionRef = { id: string; slug: string; name: string; shortName: string | null; kind: string; stateCode: string | null; city: string | null; logoUrl?: string | null; aliases?: string[] };
 
 export type Budget = { minMinor: number | null; maxMinor: number | null; period: Period };
 

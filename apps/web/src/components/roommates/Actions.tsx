@@ -9,7 +9,7 @@ import { TextArea } from "@/components/ui/Field";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
-import { expressInterest } from "@/lib/features/roommates/actions";
+import { expressInterest, withdrawInterest } from "@/lib/features/roommates/actions";
 import { listSavedPlaces, savePlace, unsavePlace } from "@/lib/saved/places-actions";
 import { LIMITS } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
@@ -75,8 +75,22 @@ export function SaveButton({ kind, id, signedIn = true }: { kind: "person" | "ro
           banner.error(result.error, { retry: toggle });
           return;
         }
-        if (want) banner.success(copy.actions.saved);
-        else banner.info(copy.ui.profile.removedSave);
+        /* Either way is reversible, so either way carries Undo (the real inverse). */
+        const undo = {
+          label: copy.area.undo,
+          run: () => {
+            setSaved(!want);
+            void (want ? unsavePlace({ entityKind, entityId: id }) : savePlace({ entityKind, entityId: id })).then((back) => {
+              if (back.ok) banner.info(copy.area.undone);
+              else {
+                setSaved(want);
+                banner.error(back.error);
+              }
+            });
+          },
+        };
+        if (want) banner.success(copy.actions.saved, { action: undo });
+        else banner.info(copy.ui.profile.removedSave, { action: undo });
       } catch (error) {
         setSaved(!want);
         if (!tapFailedOffline(error)) throw error;
@@ -220,6 +234,7 @@ export function InterestSheet({
   title,
   body,
   onSent,
+  onUndone,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -229,8 +244,11 @@ export function InterestSheet({
   title?: string;
   body?: string;
   onSent: (interestId: string) => void;
+  /** Called after Undo withdrew the interest, so the parent shows the open state again. */
+  onUndone?: () => void;
 }) {
   const copy = useScopedCopy("roommates");
+  const router = useRouter();
   const [note, setNote] = useState("");
   const [pending, start] = useSafeTransition();
   const send = () =>
@@ -243,7 +261,21 @@ export function InterestSheet({
           return;
         }
         feedback("confirm");
-        banner.success(copy.ui.profile.sentBanner);
+        const sentId = result.data.id;
+        banner.success(copy.ui.profile.sentBanner, {
+          action: {
+            label: copy.area.undo,
+            run: () => {
+              void withdrawInterest(sentId).then((back) => {
+                if (back.ok) {
+                  onUndone?.();
+                  banner.info(copy.area.undone);
+                  router.refresh();
+                } else banner.error(back.error);
+              });
+            },
+          },
+        });
         setNote("");
         onOpenChange(false);
         onSent(result.data.id);

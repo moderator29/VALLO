@@ -37,7 +37,11 @@ export type FeatureKey =
   /* Founder, 7 November 2026: a renter verifies their identity before the
      first payment of a rental of 5 months or more. Stays never ask. On
      unless a row says off. */
-  | "rental_verification";
+  | "rental_verification"
+  /* Vallo Roommates, the whole product area (its own place in the side nav and
+     every /roommates route). One row takes the entry and the pages down with
+     no deploy; a missing row, table or network error reads as on. */
+  | "roommates";
 
 export async function isFeatureEnabled(key: FeatureKey): Promise<boolean> {
   if (!isSupabaseConfigured()) return true;

@@ -1,6 +1,7 @@
 import { AdminCopilot } from "@/components/admin/copilot/AdminCopilot";
 import { requireConsole, type StaffScope } from "@/lib/admin/guard";
 import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
+import { starterPromptsFor } from "../capabilities";
 
 /**
  * A desk's copilot, for a server page (founder, 10 November 2026). It works
@@ -17,11 +18,14 @@ export async function DeskCopilot({
   scope,
   deskName,
   context,
+  starters,
 }: {
   scope: StaffScope;
   deskName: string;
   /** From the desk's own `copilotContext` function, or null when nothing is live. */
   context: string | null;
+  /** Starter chips for this desk; the shared set for its scope when omitted. */
+  starters?: readonly string[];
 }) {
   const door = await requireConsole();
   if (door.state !== "console") return null;
@@ -35,6 +39,7 @@ export async function DeskCopilot({
       position={position}
       deskName={deskName}
       context={context}
+      starters={starters ?? starterPromptsFor(scope)}
       {...(position ? { greeting: JOB_DESCRIPTIONS[position].summary } : {})}
     />
   );

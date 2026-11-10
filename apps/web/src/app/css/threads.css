@@ -95,8 +95,8 @@
     position: relative;
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
     flex-shrink: 0;
     border-radius: var(--nf-radius-circle);
     /* The avatar stays round (the shape law exempts it); its edge, rim and

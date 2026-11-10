@@ -16,6 +16,7 @@ import { JOB_DESCRIPTIONS } from "@/lib/admin/staff-positions";
 
 import { Badge, CalmNote, NotWired, PageHead, Panel } from "../_components/panels";
 import { STAFF_DESK } from "../_components/StaffFrame";
+import { WeeklyReportBanner } from "@/lib/admin/weekly-reports/WeeklyReportBanner";
 import { DeskTabs } from "./DeskTabs";
 import { DeskRefusal } from "./refusal";
 
@@ -34,11 +35,12 @@ export default async function MyDeskPage() {
   if (door.state !== "ok") return <DeskRefusal state={door.state} title="My desk" />;
   const { who, db } = door;
 
-  const [tasksRead, announcementsRead, queueCounts, names] = await Promise.all([
+  const [tasksRead, announcementsRead, queueCounts, names, weeklyBanner] = await Promise.all([
     readMyTasks(db, who.userId),
     readAnnouncements(db, who),
     getQueueCounts(),
     readNames([who.userId]),
+    WeeklyReportBanner({ db, userId: who.userId }),
   ]);
   const tasksOpen = tasksRead.state === "ok";
   const mine: Task[] = tasksRead.state === "ok" ? tasksRead.data.filter((t) => t.assignedTo === who.userId) : [];
@@ -66,6 +68,7 @@ export default async function MyDeskPage() {
     <div className="nf-console nf-admin-stack" data-testid="my-desk">
       <PageHead title="My desk" lede="Your workspace: who you are here, what needs you, your tasks and announcements, and where to find the guidance." />
       <DeskTabs active="desk" />
+      {weeklyBanner}
 
       <Panel title="Who you are">
         <dl className="grid gap-xs sm:grid-cols-2" data-testid="my-desk-identity">

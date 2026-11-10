@@ -53,6 +53,12 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "my-desk", href: "/admin/my-desk", icon: ui("user"), label: "My desk" },
       { key: "my-tasks", href: "/admin/my-desk/tasks", icon: ui("clipboard-list"), label: "My tasks" },
       { key: "announcements", href: "/admin/my-desk/announcements", icon: ui("bell"), label: "Announcements" },
+      /* The weekly report opens every Saturday; the reviewers' table of who has
+         filed sits under Staff and Access. The copilot is on every desk and
+         here as a full page. */
+      { key: "weekly-report", href: "/admin/my-desk/weekly", icon: ui("calendar-check"), label: "Weekly report" },
+      { key: "weekly-reports", href: "/admin/reports/weekly", icon: ui("file-search"), label: "Weekly reports" },
+      { key: "copilot", href: "/admin/copilot", icon: ui("bot"), label: "Copilot" },
       {
         key: "queue",
         href: "/admin/queue",
@@ -301,8 +307,8 @@ function pick(...keys: string[]): AdminDestination[] {
 
 export const ADMIN_GROUPS: AdminGroup[] = [
   { key: "g-overview", label: "Overview", icon: glyph("home-solid"), sections: [{ key: "overview", label: null, items: pick("overview", "queue", "lookup", "coo-overview") }] },
-  { key: "g-my-desk", label: "My Desk", icon: ui("user"), sections: [{ key: "my-desk", label: null, items: pick("my-desk", "my-tasks", "announcements") }] },
-  { key: "g-staff", label: "Staff and Access", icon: ui("users"), sections: [{ key: "staff", label: null, items: pick("staff", "oversight") }] },
+  { key: "g-my-desk", label: "My Desk", icon: ui("user"), sections: [{ key: "my-desk", label: null, items: pick("my-desk", "my-tasks", "announcements", "weekly-report", "copilot") }] },
+  { key: "g-staff", label: "Staff and Access", icon: ui("users"), sections: [{ key: "staff", label: null, items: pick("staff", "oversight", "weekly-reports") }] },
   {
     key: "g-operations",
     label: "Operations",

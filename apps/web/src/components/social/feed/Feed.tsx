@@ -1,6 +1,7 @@
 "use client";
 
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
@@ -31,6 +32,8 @@ import { FreshArrival } from "./FreshArrival";
 import {
   blockUser,
   muteTarget,
+  unblockUser,
+  unmuteTarget,
   removePost,
   reportPost,
   toggleMark,
@@ -457,7 +460,14 @@ export function Feed({
           if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
             banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+            return;
           }
+          /* Said in the banner, with Undo: the inverse is the same toggle. */
+          bannerWithUndo(saved ? POST_COPY.savedDone : POST_COPY.unsavedDone, {
+            undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
+            undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
+            onUndone: () => patch(post.id, { saved: !saved }),
+          });
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
         }
@@ -483,8 +493,14 @@ export function Feed({
             action === "block"
               ? await blockUser({ userId: target })
               : await muteTarget({ targetKind: "USER", targetId: target });
-          if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
-          else banner.error(result.error);
+          if (result.ok) {
+            bannerWithUndo(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone, {
+              undo: () =>
+                action === "block" ? unblockUser({ userId: target }) : unmuteTarget({ targetKind: "USER", targetId: target }),
+              undone: action === "block" ? POST_COPY.blockedUndone : POST_COPY.mutedUndone,
+              onUndone: () => router.refresh(),
+            });
+          } else banner.error(result.error);
           /* Their posts leave the list now. The refresh re-reads only the first
              page, so anything of theirs on a page read further down stayed on
              screen after the block said it was done. */

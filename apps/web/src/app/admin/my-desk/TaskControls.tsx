@@ -174,7 +174,16 @@ export function TaskCard({
               className="nf-field"
               value={task.status}
               disabled={pending}
-              onChange={(e) => run(() => setTaskStatus(task.id, e.target.value), "Status updated")}
+              onChange={(e) => {
+                const from = task.status;
+                const to = e.target.value;
+                /* Undo moves it back; the server refuses if someone moved it since. */
+                run(() => setTaskStatus(task.id, to), {
+                  message: `Status changed to ${STATUS_LABEL[to as Task["status"]] ?? to}`,
+                  undo: () => setTaskStatus(task.id, from),
+                  undone: `Status is back to ${STATUS_LABEL[from]}`,
+                });
+              }}
             >
               {TASK_STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -192,7 +201,21 @@ export function TaskCard({
               value=""
               disabled={pending}
               onChange={(e) => {
-                if (e.target.value) run(() => reassignTask(task.id, e.target.value), "Task reassigned");
+                const to = e.target.value;
+                if (!to) return;
+                const before = task.assignedTo;
+                const toName = people.find((p) => p.id === to)?.name ?? "that person";
+                /* Undo hands it back; with nobody to hand it back to, it only confirms. */
+                run(
+                  () => reassignTask(task.id, to),
+                  before
+                    ? {
+                        message: `Task reassigned to ${toName}`,
+                        undo: () => reassignTask(task.id, before),
+                        undone: before === viewerId ? "Task is back with you" : `Task is back with ${nameOf(before)}`,
+                      }
+                    : `Task reassigned to ${toName}`,
+                );
               }}
             >
               <option value="">Choose a person</option>

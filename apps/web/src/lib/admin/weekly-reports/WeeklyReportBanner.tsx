@@ -41,7 +41,13 @@ export async function WeeklyReportBanner({ db, userId, now = new Date() }: { db?
     me = door.who.userId;
   }
   const week = weekWindow(now);
-  const read = await readReport(client, me, week.weekStart);
+  let read: Awaited<ReturnType<typeof readReport>>;
+  try {
+    read = await readReport(client, me, week.weekStart);
+  } catch {
+    /* A strip on someone else's page: if it cannot read, it says nothing. */
+    return null;
+  }
   if (read.state !== "ok") return null;
   const state = weeklyState(week, read.data?.status ?? null, now, true);
   const copy = words(state, dateLabel(addDays(week.nextWeekStart, 5)));

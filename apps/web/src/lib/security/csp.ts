@@ -141,6 +141,11 @@ const IMAGE_HOSTS: readonly string[] = [
   // The avatar a Google account already has. Google picks the shard, lh3
   // through lh6, so the wildcard is on the subdomain and nothing wider.
   "https://*.googleusercontent.com",
+  // School logos in the Roommates school picker (public.institutions.logo_url).
+  // Wikimedia serves them (upload.wikimedia.org), one named host and no
+  // wildcard. Drawn as a plain <img> at about 128px; a school without a
+  // logo, or a logo that fails, shows the neutral school icon instead.
+  "https://upload.wikimedia.org",
   // No map host. The map's provider, OpenFreeMap, is fetched rather than
   // drawn as an <img>, so its host is in MAP_DATA_ORIGINS below. CARTO's
   // host (non-commercial tiles) and MapTiler's (the paid path the founder

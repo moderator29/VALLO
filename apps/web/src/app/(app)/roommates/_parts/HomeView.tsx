@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { RoommatesDashboard } from "./Dashboard";
+
 import { PageFrame } from "@/components/app/PageFrame";
 import {
   CardRail,
@@ -179,7 +181,7 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
       <PullToRefresh>
         <div className="nf-rmp" data-testid="roommates-home">
         {hero}
-        <Pending home={home} t={copy} />
+        <RoommatesDashboard home={home} t={copy} />
         {home.myStatus === "none" ? (
           <FirstRunCard href={home.signedIn ? ROOMMATES_ROUTES.profile : signInTo(ROOMMATES_ROUTES.profile)} />
         ) : needsProfile ? (
@@ -191,35 +193,6 @@ export function RoommatesHomeView({ home, t: copy, now }: { home: RoommatesHome;
         </div>
       </PullToRefresh>
     </PageFrame>
-  );
-}
-
-function Pending({ home, t: copy }: { home: RoommatesHome; t: RoommatesCopy }) {
-  const p = home.pending;
-  const lines = [
-    p.requests ? counted(p.requests, copy.ui.pending.requests) : null,
-    p.invites ? counted(p.invites, copy.ui.pending.invites) : null,
-    p.viewings ? counted(p.viewings, copy.ui.pending.viewings) : null,
-  ].filter((x): x is string => Boolean(x));
-  if (!home.signedIn || !lines.length) return null;
-  return (
-    <Link href={ROOMMATES_ROUTES.hub} className="nf-rmp-pending" data-testid="roommates-pending">
-      <span className="nf-rm-plate" aria-hidden="true">
-        <UiIcon name="bell" size={20} />
-      </span>
-      <span className="nf-rmp-pending__words">
-        <span className="nf-rmp-pending__title">{copy.ui.openHub}</span>
-        <span className="nf-rmp-pending__line">
-          {lines.map((line, i) => (
-            <span key={line} className="nf-rmp-pending__part">
-              {i > 0 ? <span aria-hidden="true">{"· "}</span> : null}
-              {line}
-            </span>
-          ))}
-        </span>
-      </span>
-      <UiIcon name="chevron-right" size={20} />
-    </Link>
   );
 }
 

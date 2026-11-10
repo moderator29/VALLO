@@ -94,7 +94,13 @@ export function PinToggle({ id, pinned }: { id: string; pinned: boolean }) {
       type="button"
       className="nf-btn nf-btn--glass nf-btn--sm"
       disabled={pending}
-      onClick={() => run(() => setAnnouncementPinned(id, !pinned), pinned ? "Unpinned" : "Pinned")}
+      onClick={() =>
+        run(() => setAnnouncementPinned(id, !pinned), {
+          message: pinned ? "Announcement unpinned" : "Announcement pinned to the top",
+          undo: () => setAnnouncementPinned(id, pinned),
+          undone: pinned ? "Announcement is pinned again" : "Announcement is unpinned again",
+        })
+      }
     >
       {pinned ? "Unpin" : "Pin to the top"}
     </button>

@@ -168,8 +168,6 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
-            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ]
         : [
             { href: "/home", label: t.nav.home, icon: "home" },
@@ -180,11 +178,23 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
-            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ],
     },
   ];
+
+  /*
+   * VALLO ROOMMATES IS ITS OWN PRODUCT AREA (founder, 10 November 2026). It was
+   * one row at the end of the docked group, which a phone hides (the dock
+   * repeats that group), so on a phone it had no row at all. It is its own
+   * section now, not docked, so the drawer and the rail both show it at the
+   * same level as Circle. The `roommates` switch drops `roommatesEntry`.
+   */
+  if (t.roommatesEntry) {
+    sections.push({
+      heading: null,
+      items: [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" }],
+    });
+  }
 
   /*
    * The account block, which only means anything once there is an account.
@@ -507,6 +517,8 @@ export function formerTrayItems(t: ShellDictionary, signedIn: boolean, stays: bo
  */
 export function isCurrent(href: string, activePath: string, activeType: string | null): boolean {
   const [path, query] = href.split("?");
+  /* Roommates is a whole area: every /roommates/** page lights its row. */
+  if (path === ROOMMATES_ROUTES.home && !query) return activePath === path || activePath.startsWith(`${path}/`);
   if (path !== activePath) return false;
   if (!query) return true;
   const wanted = new URLSearchParams(query).get("type");

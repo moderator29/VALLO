@@ -105,8 +105,22 @@ export function ListingActions(props: ListingActionsProps) {
         const result = await setRoommateListingStatus({ id: props.id, status: next });
         if (!result.ok) return result;
         feedback("confirm");
+        const before = status;
         setStatus(next);
-        banner.success(words);
+        banner.success(words, {
+          action: {
+            label: copy.area.undo,
+            run: () => {
+              void setRoommateListingStatus({ id: props.id, status: before === "paused" ? "paused" : "live" }).then((back) => {
+                if (back.ok) {
+                  setStatus(before);
+                  banner.info(copy.area.undone);
+                  router.refresh();
+                } else banner.error(back.error);
+              });
+            },
+          },
+        });
         router.refresh();
         return { ok: true };
       });
@@ -259,6 +273,7 @@ export function ListingActions(props: ListingActionsProps) {
           setConnection({ state: "sent", interestId });
           router.refresh();
         }}
+        onUndone={() => setConnection({ state: "none" })}
       />
       <ViewingSheet open={sheet === "viewing"} onOpenChange={(o) => setSheet(o ? "viewing" : null)} listingId={props.id} />
       <Sheet open={sheet === "shortlist"} onOpenChange={(o) => setSheet(o ? "shortlist" : null)} title={L.shortlistTitle} description={L.shortlistBody} closeLabel={copy.ui.flow.close} detents={[0.6]}>
