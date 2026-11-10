@@ -319,6 +319,11 @@ const WHAT_VALLO_IS: DocChapter = {
  */
 const PAYING_ON_VALLO: DocChapter = {
   slug: "paying-on-vallo",
+  glance: [
+    "Every payment for a deal happens inside Vallo.",
+    "Vallo never holds customer money.",
+    CARD_MEANS,
+  ],
   number: 0,
   title: "How paying works",
   summary:

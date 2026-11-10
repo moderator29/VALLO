@@ -1,6 +1,9 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useId, useState } from "react";
+import { banner } from "@/lib/ui/toast";
+import { useSafeTransition } from "@/lib/ui/use-safe-transition";
+import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { submitDocFeedback } from "@/lib/support/doc-feedback";
 import "@/app/css/docs-kit.css";
@@ -16,18 +19,20 @@ import "@/app/css/docs-kit.css";
  */
 export function DocHelpful({ page }: { page: string }) {
   const id = useId();
-  const [state, setState] = useState<"ask" | "why" | "done" | "failed">("ask");
+  const [state, setState] = useState<"ask" | "why" | "done">("ask");
   const [note, setNote] = useState("");
-  const [message, setMessage] = useState("");
-  const [pending, start] = useTransition();
+  const [pending, start] = useSafeTransition();
 
+  /* A refusal is said through the banner and the question stays; a weak
+     signal keeps the screen as it was (lib/offline/tap-failed). */
   const send = (helpful: boolean, withNote?: string) =>
     start(async () => {
-      const result = await submitDocFeedback({ page, helpful, note: withNote });
-      if (result.ok) setState("done");
-      else {
-        setMessage(result.error);
-        setState("failed");
+      try {
+        const result = await submitDocFeedback({ page, helpful, note: withNote });
+        if (result.ok) setState("done");
+        else banner.error(result.error);
+      } catch (error) {
+        if (!tapFailedOffline(error)) throw error;
       }
     });
 
@@ -71,12 +76,8 @@ export function DocHelpful({ page }: { page: string }) {
               Send
             </button>
           </form>
-        ) : state === "done" ? (
-          <p className="nf-doc-helpful__thanks">Thank you. The support team reads every answer.</p>
         ) : (
-          <p className="nf-doc-helpful__thanks" role="alert">
-            {message}
-          </p>
+          <p className="nf-doc-helpful__thanks">Thank you. The support team reads every answer.</p>
         )}
       </div>
     </section>

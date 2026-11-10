@@ -660,6 +660,11 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
  */
 export const BOOKING_A_STAY: DocChapter = {
   slug: "booking-a-stay",
+  glance: [
+    "The nights are held for you for 48 hours at no cost.",
+    "The price is fixed from the listing when you book, so it cannot move before you pay.",
+    "The person paying need not be the person staying.",
+  ],
   number: 0,
   title: "Booking a stay",
   summary:
@@ -982,6 +987,10 @@ export const FOR_OWNERS: DocChapter = {
 
 export const FOR_AGENTS: DocChapter = {
   slug: "for-agents",
+  glance: [
+    "State your own fees on the listing, where a tenant can read them.",
+    "A person at Vallo decides each rung, in order.",
+  ],
   number: 0,
   title: "For agents and firms",
   summary:

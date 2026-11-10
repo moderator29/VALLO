@@ -3,7 +3,7 @@
  * ordered list whose step names are the links, the fee calculator's figures
  * come out of the rates it is handed and update as the reader types, and axe
  * finds nothing. The rates below exist only for the arithmetic: the page
- * itself never holds one (`fee-calculator/config.ts` reads them).
+ * itself never holds one (`app/(site)/docs/fee-calculator/config.ts` reads them).
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { BROWSER_TEST_TIMEOUT, closeBrowser, hasBrowser, mountInBrowser, warmBrowser } from "@/lib/testing/mount-in-browser";

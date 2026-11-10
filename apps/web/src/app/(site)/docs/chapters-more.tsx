@@ -160,6 +160,11 @@ const pc = en.priceCheck;
 
 export const PRICE_CHECK: DocChapter = {
   slug: "price-check",
+  glance: [
+    "It reads the asking prices on listings published on Vallo.",
+    "It is not what anybody has paid, it is not an opinion on a particular property, and it is not advice.",
+    "Opened from a listing, it arrives filled in from that listing, and you can change anything that is wrong.",
+  ],
   number: 0,
   title: "Price Check",
   summary:
@@ -396,6 +401,11 @@ const STANDINGS = (["draft", "pending", "refused", "suspended"] as const).flatMa
 
 export const LISTING_ON_VALLO: DocChapter = {
   slug: "listing-on-vallo",
+  glance: [
+    "Before you publish, Vallo shows the price a renter or guest pays and what you receive after Vallo’s commission, in naira.",
+    "A person at Vallo reviews the listing.",
+    "Charge nothing that is not on the listing.",
+  ],
   number: 0,
   title: "Listing a property",
   summary:
