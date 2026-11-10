@@ -29,6 +29,7 @@ records it in `APPLIED.txt`.
 | `rt01_remove_retired_objects.sql` | Lead | Draft, 13 Oct 2026 | DROPS objects. Never run without the founder's explicit yes. |
 | `rt02_remove_v100_renter_passport.sql` | Lead | Applied by hand 29 Oct 2026 | Kept as the record only. Do not run again. |
 | `LANDMARKS.md` and `rollback/` | Lead | | Reference only. |
+| `staff_weekly_reports_2026-11-10.sql` | Weekly reports agent | Brief, 10 Nov 2026 (the weekly report at `/admin/my-desk/weekly` and the reviewer table at `/admin/reports/weekly`) | NOT APPLIED. Additive: `public.staff_weekly_reports` (one report per person per week, Monday start enforced by a check; accomplishments, numbers jsonb prefilled from the desks or typed, blockers, next week, proofs jsonb, status draft/submitted/reviewed/reopened, `is_late`, reviewer and review note) and a new private storage bucket `staff-report-proofs` (no `storage.objects` policy; the app signs 10 minute URLs). `author_id` and `reviewed_by` are nullable with ON DELETE SET NULL, no NOT NULL contradiction. RLS is admin and super admin only through `private.has_role((select auth.uid()), ...)`, the `social_posts_2026-11-10.sql` shape (no `private.staff_can` in a policy); staff reach the table through the service client `requireAdmin` hands out and every action re-checks ownership or reviewer rights. No delete grant. Depends on nothing pending. Not run against live or a local copy. The pages read gracefully ("not set up yet") until this is applied. |
 
 ## Vallo Roommates (8 November 2026): ONE file to paste
 
