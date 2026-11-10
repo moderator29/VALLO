@@ -96,6 +96,7 @@ const SUPPORT: Desk[] = [
 ];
 
 const OPERATIONS: Desk[] = [
+  { href: "/admin/account-deletions", name: "Account deletions", icon: "user", what: "Why members delete their account: requests in 7, 30 or 90 days or all time, the reasons ranked with their share, the change on the period before, how many were restored within 30 days, and how many gave no reason. Counts and shares only; the free-text notes show to a super admin alone. Copy summary and Copy as CSV are on the page.", who: "Operations, Support lead, Marketing" },
   { href: "/admin/doc-feedback", name: "Pages that fail", icon: "file-search", what: "Which help pages members say did not help. Read only.", who: "Support" },
   { href: "/admin/operations", name: "Operations", icon: "settings-gear", what: "Scheduled jobs, notifications and the platform's health.", who: "Operations" },
   { href: "/admin/alerts", name: "Alerts", icon: "bell", what: "Risk and system alerts waiting on a person. Resolving one is an admin decision.", who: "Operations to read" },

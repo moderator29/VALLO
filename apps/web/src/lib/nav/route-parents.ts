@@ -140,6 +140,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/r": "/",
   "/r/[code]": "/r",
   "/privacy": "/",
+  "/cookies": "/",
   "/disclaimer": "/",
   "/host-agreement": "/",
   "/safety": "/",
@@ -466,6 +467,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/settings/phone": "/settings",
   "/settings/passcode": "/settings",
   "/legal/privacy": "/settings",
+  "/legal/cookies": "/settings",
   "/legal/terms": "/settings",
   "/legal/disclaimer": "/settings",
 
@@ -511,6 +513,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/fees": "/admin",
   "/admin/restaurant-fees": "/admin",
   "/admin/account-recovery": "/admin",
+  "/admin/account-deletions": "/admin/operations",
   "/admin/doc-feedback": "/admin/support",
   "/admin/kyc": "/admin",
   "/admin/kyc/guide": "/admin/kyc",

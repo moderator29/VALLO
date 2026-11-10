@@ -50,6 +50,7 @@ import { GRACE_WINDOW_DAYS } from "./constants";
 import { deletionStarted } from "./emails";
 import { blockersFrom, readingFrom } from "./preconditions";
 import { reauthenticate, sendReauthCode } from "./reauthenticate";
+import { markReasonRestored, recordDeletionReason } from "./reasons";
 import { hashRestoreCode, looksLikeRestoreCode, newRestoreCode } from "./restore-code";
 import { asRecord, callDeletionRpc } from "./rpc";
 import { confirmDeletionSchema, restoreWithCodeSchema } from "./schema";
@@ -214,6 +215,15 @@ async function startDeletionInner(
     detail: { grace_days: GRACE_WINDOW_DAYS, reason: parsed.data.reason ?? "not_given" },
   });
 
+  // The reason, kept for the admin rates desk. Best effort: until the SQL is
+  // applied (or if the write fails) the deletion still goes ahead.
+  await recordDeletionReason(admin, {
+    userId: user.id,
+    reason: parsed.data.reason,
+    note: parsed.data.reasonNote,
+    accountCreatedAt: user.created_at,
+  });
+
   // Signed out everywhere, then banned for the length of the window. The ban
   // is what makes "deactivated" a fact rather than a promise: GoTrue refuses
   // to mint a token for a banned row, so no screen in the product has to
@@ -315,6 +325,7 @@ async function cancelDeletionInner(): Promise<ActionResult<null>> {
     userId: session.user.id,
     detail: { by: "session" },
   });
+  await markReasonRestored(admin, session.user.id);
 
   revalidatePath("/", "layout");
   return ok(null);
@@ -378,6 +389,7 @@ async function restoreWithCodeInner(input: unknown): Promise<ActionResult<null>>
     userId,
     detail: { by: "restore_code" },
   });
+  await markReasonRestored(admin, userId);
 
   return ok(null);
 }

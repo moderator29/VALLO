@@ -2143,6 +2143,11 @@ export const en = {
         "Pick the closest one. It helps us fix what went wrong. Only the Vallo team sees it, and it does not change what happens next.",
       reasonContinue: "Continue",
       reasonBack: "Back",
+      reasonNoteLabel: "Tell us more (optional)",
+      reasonNoteHint:
+        "In a few words, what would have made you stay. Please do not include names, phone numbers or other personal details. Up to {max} characters.",
+      scheduledBanner:
+        "Your account is scheduled for deletion. You can restore it within 30 days by signing in.",
       reasons: {
         not_using: "I am not using Vallo any more",
         found_place: "I found a place",
@@ -2179,7 +2184,7 @@ export const en = {
         "Everything is destroyed on {date}, which is in {days} days. Until then nothing has gone and you can put it all back.",
       restore: "Restore my account",
       restoring: "Restoring",
-      restored: "Your account is back. Nothing was destroyed.",
+      restored: "Welcome back, your account is restored.",
 
       /* The preconditions. Each one names what is in the way and carries the
          control that clears it. None of them is a dead end. */

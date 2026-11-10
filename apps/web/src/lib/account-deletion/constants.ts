@@ -10,9 +10,10 @@
 export const GRACE_WINDOW_DAYS = 30;
 
 /**
- * Why somebody is leaving, as a closed list. Only the code is kept (in the
- * audit line), never free text: that table is readable by every admin, so it
- * carries machine-readable reasons and nothing a person typed.
+ * Why somebody is leaving, as a closed list. The code goes in the audit line
+ * (which never carries free text: it is readable by every admin) and in
+ * `account_deletion_reasons`, where an optional note of at most
+ * `DELETION_NOTE_MAX` characters is kept apart, shown to a super admin only.
  */
 export const DELETION_REASONS = [
   "not_using",
@@ -26,6 +27,8 @@ export const DELETION_REASONS = [
   "other",
   "prefer_not_to_say",
 ] as const;
+
+export const DELETION_NOTE_MAX = 500;
 
 export type DeletionReason = (typeof DELETION_REASONS)[number];
 

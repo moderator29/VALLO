@@ -9,6 +9,7 @@ import { ANALYTICS_TOOLS } from "./analytics";
 import { BD_TOOLS } from "./business-development";
 import { COMPLIANCE_TOOLS } from "./compliance";
 import { COO_TOOLS } from "./coo";
+import { DELETION_REASON_TOOLS } from "./deletion-reasons";
 import { FINANCE_TOOLS } from "./finance";
 import { KYC_TOOLS } from "./kyc";
 import { LISTING_TOOLS } from "./listings";
@@ -42,6 +43,7 @@ export const COPILOT_TOOLS: readonly CopilotTool[] = [
   ...BD_TOOLS,
   ...SOCIAL_TOOLS,
   ...STAFF_DESK_TOOLS,
+  ...DELETION_REASON_TOOLS,
   ...COO_TOOLS,
   ...PROPOSE_TOOLS,
 ];

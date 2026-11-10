@@ -25,7 +25,7 @@ export function RestoreForm() {
   /* Said by the one banner at the top of the screen (founder, 7 November
      2026). A refusal about the code is said by the code field itself. */
   const codeProblem = state && !state.ok ? state.fieldErrors?.restoreCode : undefined;
-  useActionBanner(codeProblem ? null : state, { ok: "Your account is restored" });
+  useActionBanner(codeProblem ? null : state, { ok: "Welcome back, your account is restored." });
 
   if (state?.ok) {
     return (

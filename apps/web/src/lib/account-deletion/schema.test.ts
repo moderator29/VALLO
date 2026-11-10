@@ -37,3 +37,13 @@ describe("the deletion confirmation, with a reason", () => {
     expect(GRACE_WINDOW_DAYS).toBe(30);
   });
 });
+
+describe("the optional note", () => {
+  it("accepts up to 500 characters and trims", () => {
+    const parsed = confirmDeletionSchema.safeParse({ ...base, reasonNote: `  ${"a".repeat(500)}  ` });
+    expect(parsed.success).toBe(true);
+  });
+  it("refuses 501 characters", () => {
+    expect(confirmDeletionSchema.safeParse({ ...base, reasonNote: "a".repeat(501) }).success).toBe(false);
+  });
+});

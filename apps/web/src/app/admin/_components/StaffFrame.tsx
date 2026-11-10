@@ -61,7 +61,10 @@ export const STAFF_EXTRA_DESKS: Partial<Record<StaffScope, { href: string; label
     { href: "/admin/bookings", label: "Bookings" },
     { href: "/admin/bookings/visits", label: "Visits" },
     { href: "/admin/oversight", label: "Team oversight" },
+    { href: "/admin/account-deletions", label: "Account deletions" },
   ],
+  support_lead: [{ href: "/admin/account-deletions", label: "Account deletions" }],
+  marketing: [{ href: "/admin/account-deletions", label: "Account deletions" }],
 };
 
 export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name: string; children: ReactNode }) {

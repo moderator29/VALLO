@@ -244,6 +244,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "call-usage", href: "/admin/call-usage", icon: ui("phone"), label: "Call usage" },
       /* Money records past their retention date, and the typed-confirmation tool. */
       { key: "retention", href: "/admin/retention", icon: ui("archive"), label: "Record retention", countKeys: ["retention"], countLabel: "accounts whose money records are past retention" },
+      /* Why members delete their account, as rates (Operations, Support lead, Marketing). */
+      { key: "account-deletions", href: "/admin/account-deletions", icon: ui("user"), label: "Account deletions" },
     ],
   },
   {
@@ -355,7 +357,7 @@ export const ADMIN_GROUPS: AdminGroup[] = [
       { key: "compliance", label: "Compliance", items: pick("compliance") },
     ],
   },
-  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "front-door", "field-speed", "trust", "audit") }] },
+  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
   { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
   { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "switches", "reference", "examples", "help") }] },
 ];
