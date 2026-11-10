@@ -44,9 +44,12 @@ def main():
         base = s["name"].split(",")[0]
         # the full name decides (a state or town in the NUC name is part of it); the part before the comma only breaks ties
         scored = sorted(((max(sim(n, s["name"]), 0.95 * sim(n.split(",")[0], base) if sim(n, s["name"]) >= 0.5 else 0), sim(n.split(",")[0] + " " + (n.split(",")[1] if "," in n else ""), s["name"]), n, u, v) for n, u, v in refs), reverse=True)
-        for sc, _tie, n, u, v in scored[:2]:
-            if sc >= 0.5 and all(u.rstrip("/") != x["url"].rstrip("/") for x in c):
-                c.append(dict(url=u, via=f"{v}: {n} (match {sc:.2f})"))
+        GEN = {"university", "college", "polytechnic", "of", "the", "and", "for", "federal", "state", "technology", "science", "sciences", "education", "nigeria", "institute", "school", "medical", "health", "agriculture", "management", "open", "applied", "technical"}
+        need = {t for t in words(s["name"].split(",")[0]) | words(s["name"].split(",")[-1]) if t not in GEN}
+        for sc, _tie, n, u, v in scored[:1]:
+            # one NUC or Wikipedia candidate: it must match well AND carry every distinctive word of the name (the town, the founder)
+            if sc >= 0.6 and need <= words(n) and all(u.rstrip("/") != x["url"].rstrip("/") for x in c):
+                c.append(dict(url=u, via=f"{v}: {n} (match {sc:.2f}; every distinctive word of the name is in the listed name)"))
         if c:
             out[s["slug"]] = dict(name=s["name"], kind=s["kind"], candidates=c)
     json.dump(out, open(sys.argv[5], "w"), indent=1, ensure_ascii=False)

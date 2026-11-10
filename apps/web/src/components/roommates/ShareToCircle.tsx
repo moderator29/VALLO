@@ -16,11 +16,11 @@ import { banner } from "@/lib/ui/toast";
 import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
-import { fill } from "./format";
+import { fill, type RoommatesCopy } from "./format";
 
 export type ShareTarget = { kind: "room" | "person"; id: string };
 
-type Load = { state: "loading" } | { state: "failed"; message: string } | { state: "ready"; circles: ShareableCircle[]; memberOf: number };
+export type Load = { state: "loading" } | { state: "failed"; message: string } | { state: "ready"; circles: ShareableCircle[]; memberOf: number };
 
 const NOTE_MAX = 280;
 
@@ -104,49 +104,92 @@ export function ShareToCircleSheet({ open, onOpenChange, target }: { open: boole
           }
         : {})}
     >
-      <div data-testid="circle-share-sheet" data-state={load.state === "ready" ? (load.circles.length > 0 ? "list" : load.memberOf > 0 ? "blocked" : "none") : load.state}>
-        {load.state === "loading" ? (
-          <p className="nf-rm-note" role="status">
-            {w.loading}
-          </p>
-        ) : null}
-        {load.state === "failed" ? (
-          <div className="nf-rmv-act">
-            <p className="nf-rmv-act__line">{load.message}</p>
-            <Button variant="secondary" size="md" onClick={() => setAttempt((n) => n + 1)} data-testid="circle-share-retry">
-              {w.retry}
-            </Button>
-          </div>
-        ) : null}
-        {load.state === "ready" && load.circles.length === 0 ? (
-          <div className="nf-rmv-act">
-            <p className="nf-rmv-act__line">{load.memberOf > 0 ? w.emptyBlocked : w.emptyNone}</p>
-            <ButtonLink href="/circle" variant="primary" size="md" data-testid="circle-share-find">
-              {w.findCircle}
-            </ButtonLink>
-          </div>
-        ) : null}
-        {ready ? (
-          <>
-            <p className="nf-rm-note">{w.pick}</p>
-            <ul className="nf-rmv-picklist">
-              {load.circles.map((c) => (
-                <li key={c.id}>
-                  <button type="button" className="nf-rmv-pick" aria-pressed={picked === c.id} onClick={() => { feedback("select"); setPicked(c.id); }} data-testid="circle-share-option">
-                    <span className="nf-rm-plate" aria-hidden="true">
-                      <UiIcon name={picked === c.id ? "check" : "circle-people"} size={20} />
-                    </span>
-                    <span className="nf-rmv-pick__name">{c.name}</span>
-                    {c.visibility === "private" ? <UiIcon name="lock" size={16} /> : <span aria-hidden="true" />}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <TextArea label={w.noteLabel} optionalText={copy.ui.flow.optional} value={note} maxLength={NOTE_MAX} rows={3} onChange={(e) => setNote(e.target.value)} />
-          </>
-        ) : null}
-      </div>
+      <ShareToCircleBody
+        load={load}
+        picked={picked}
+        note={note}
+        words={w}
+        optional={copy.ui.flow.optional}
+        onPick={(id) => {
+          feedback("select");
+          setPicked(id);
+        }}
+        onNote={setNote}
+        onRetry={() => setAttempt((n) => n + 1)}
+      />
     </Sheet>
+  );
+}
+
+/**
+ * What the sheet shows, by state: finding the Circles, a failed load with a
+ * retry, "you are in none" or "none of yours take posts" with the way to find
+ * a Circle, and the list with the optional note. Pure of effects, so every
+ * state is rendered in the tests.
+ */
+export function ShareToCircleBody({
+  load,
+  picked,
+  note,
+  words: w,
+  optional,
+  onPick,
+  onNote,
+  onRetry,
+}: {
+  load: Load;
+  picked: string | null;
+  note: string;
+  words: RoommatesCopy["circleShare"];
+  optional: string;
+  onPick: (id: string) => void;
+  onNote: (note: string) => void;
+  onRetry: () => void;
+}) {
+  const state = load.state === "ready" ? (load.circles.length > 0 ? "list" : load.memberOf > 0 ? "blocked" : "none") : load.state;
+  return (
+    <div data-testid="circle-share-sheet" data-state={state}>
+      {load.state === "loading" ? (
+        <p className="nf-rm-note" role="status">
+          {w.loading}
+        </p>
+      ) : null}
+      {load.state === "failed" ? (
+        <div className="nf-rmv-act">
+          <p className="nf-rmv-act__line">{load.message}</p>
+          <Button variant="secondary" size="md" onClick={onRetry} data-testid="circle-share-retry">
+            {w.retry}
+          </Button>
+        </div>
+      ) : null}
+      {load.state === "ready" && load.circles.length === 0 ? (
+        <div className="nf-rmv-act">
+          <p className="nf-rmv-act__line">{load.memberOf > 0 ? w.emptyBlocked : w.emptyNone}</p>
+          <ButtonLink href="/circle" variant="primary" size="md" data-testid="circle-share-find">
+            {w.findCircle}
+          </ButtonLink>
+        </div>
+      ) : null}
+      {load.state === "ready" && load.circles.length > 0 ? (
+        <>
+          <p className="nf-rm-note">{w.pick}</p>
+          <ul className="nf-rmv-picklist">
+            {load.circles.map((c) => (
+              <li key={c.id}>
+                <button type="button" className="nf-rmv-pick" aria-pressed={picked === c.id} onClick={() => onPick(c.id)} data-testid="circle-share-option">
+                  <span className="nf-rm-plate" aria-hidden="true">
+                    <UiIcon name={picked === c.id ? "check" : "circle-people"} size={20} />
+                  </span>
+                  <span className="nf-rmv-pick__name">{c.name}</span>
+                  {c.visibility === "private" ? <UiIcon name="lock" size={16} /> : <span aria-hidden="true" />}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <TextArea label={w.noteLabel} optionalText={optional} value={note} maxLength={NOTE_MAX} rows={3} onChange={(e) => onNote(e.target.value)} />
+        </>
+      ) : null}
+    </div>
   );
 }
 
