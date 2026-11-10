@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Locale } from "@vallo/i18n/core";
 import { Button } from "@/components/ui/Button";
@@ -136,7 +136,18 @@ export function ProtectedPaymentLive({
  * and a send. The draft is kept on the device until it is sent; once sent it
  * is never edited (new evidence is a new entry, recorded by the server).
  */
-export function ProblemSheet({
+export function ProblemSheet(props: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  arrangementId: string;
+  pending: boolean;
+  onSubmit: (reason: Reason, statement: string, sent: () => void) => void;
+}) {
+  /* Remounted on each opening, so the kept draft is read fresh then. */
+  return <ProblemSheetBody key={props.open ? "open" : "closed"} {...props} />;
+}
+
+function ProblemSheetBody({
   open,
   onOpenChange,
   arrangementId,
@@ -150,16 +161,10 @@ export function ProblemSheet({
   onSubmit: (reason: Reason, statement: string, sent: () => void) => void;
 }) {
   const key = draftKey(arrangementId);
-  const [reason, setReason] = useState<Reason | null>(null);
-  const [statement, setStatement] = useState("");
+  const [draft] = useState(() => (open ? readDraft(key) : { reason: null, statement: "" }));
+  const [reason, setReason] = useState<Reason | null>(draft.reason);
+  const [statement, setStatement] = useState(draft.statement);
   const name = useId();
-
-  useEffect(() => {
-    if (!open) return;
-    const draft = readDraft(key);
-    setReason(draft.reason);
-    setStatement(draft.statement);
-  }, [open, key]);
 
   const keep = (next: { reason: Reason | null; statement: string }) => {
     setReason(next.reason);

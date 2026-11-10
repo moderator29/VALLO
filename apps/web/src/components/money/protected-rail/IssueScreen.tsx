@@ -18,7 +18,7 @@ import {
 import type { ProtectedStage } from "@/lib/money/protected-journey";
 import { CopyValue } from "./CopyValue";
 import { ISSUE_ICON, type ProtectedIssue, type ProtectedIssueKind } from "./issues";
-import { DetailRows, InfoCard, PlaceCard, ScreenHead, StagePill, TimelineSpine, lagosTime, money } from "./kit";
+import { DetailRows, InfoCard, PlaceCard, StagePill, TimelineSpine, lagosTime, money } from "./kit";
 import type { ProtectedDeal } from "./types";
 
 /** The issue's own label and icon, in the pill's shape (never colour alone). */
