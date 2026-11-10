@@ -161,10 +161,10 @@ describe.skipIf(!hasBrowser && !process.env.CI)("the protected payment screens (
     expect(
       await axe(
         renderToStaticMarkup(
-          <main>
+          <div>
             <h1>Your payment</h1>
             <ProtectedReceipt deal={PREVIEW_DEALS.receipt!} now={PREVIEW_NOW} locale="en" paymentHref="/x" />
-          </main>,
+          </div>,
         ),
       ),
     ).toEqual([]);
