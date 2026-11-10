@@ -1,7 +1,7 @@
 -- B3-FEE-ACCEPTANCE (D61): the fee acceptance record is a legal artifact.
 -- Needs b3_money_policy_versions (applied) and b3_fee_acceptance_record.sql.
 -- Does NOT need b3_rate_agreement_gate.sql and never moves a listing's status.
---  1. the worst-case range: 1,800,000 naira -> fee 36,000..72,000, receive 1,728,000..1,764,000
+--  1. the worst-case range: 1,800,000 naira -> fee 36,000..63,000 (Vallo 2 percent, plus the payment partner's 1.5 percent in the worst case; founder rate of 10 Nov 2026), receive 1,737,000..1,764,000
 --  2. a stranger cannot quote or accept for the listing
 --  3. stale version, stale protection rate, stale rent, any wrong figure, bad terms version: refused
 --  4. the owner accepts; the row carries actor, both rates, terms version, every figure
@@ -52,9 +52,9 @@ begin
   -- 1. The range, computed by the server.
   f := private.fee_terms_figures(lst.id);
   if f->>'status' <> 'ok' or (f->>'rent_minor')::bigint <> 180000000
-     or (f->>'commission_bps')::int <> 200 or (f->>'protection_bps')::int <> 200
-     or (f->>'fee_low_minor')::bigint <> 3600000 or (f->>'fee_high_minor')::bigint <> 7200000
-     or (f->>'receive_low_minor')::bigint <> 172800000 or (f->>'receive_high_minor')::bigint <> 176400000 then
+     or (f->>'commission_bps')::int <> 200 or (f->>'protection_bps')::int <> 150
+     or (f->>'fee_low_minor')::bigint <> 3600000 or (f->>'fee_high_minor')::bigint <> 6300000
+     or (f->>'receive_low_minor')::bigint <> 173700000 or (f->>'receive_high_minor')::bigint <> 176400000 then
     raise exception 'PROBE_FAIL b3-fee-acceptance 1: figures wrong: %', f;
   end if;
 
@@ -64,7 +64,7 @@ begin
   q := public.fee_terms_quote(lst.id);
   if q->>'status' <> 'not_found' then raise exception 'PROBE_FAIL b3-fee-acceptance 2a: stranger quoted: %', q; end if;
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
-         180000000, 3600000, 7200000, 172800000, 176400000);
+         180000000, 3600000, 6300000, 173700000, 176400000);
   if q->>'status' <> 'not_found' then raise exception 'PROBE_FAIL b3-fee-acceptance 2b: stranger accepted: %', q; end if;
   -- 5a. Direct insert.
   begin
@@ -82,30 +82,30 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', lst.user_id, 'role', 'authenticated')::text, true);
   set local role authenticated;
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint + 1000000, (f->>'protection_rate_id')::bigint,
-         180000000, 3600000, 7200000, 172800000, 176400000);
+         180000000, 3600000, 6300000, 173700000, 176400000);
   if q->>'status' <> 'rate_changed' then raise exception 'PROBE_FAIL b3-fee-acceptance 3a: stale version: %', q; end if;
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint + 1000000,
-         180000000, 3600000, 7200000, 172800000, 176400000);
+         180000000, 3600000, 6300000, 173700000, 176400000);
   if q->>'status' <> 'rate_changed' then raise exception 'PROBE_FAIL b3-fee-acceptance 3b: stale protection: %', q; end if;
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
-         180000001, 3600000, 7200000, 172800001, 176400001);
+         180000001, 3600000, 6300000, 173700001, 176400001);
   if q->>'status' <> 'price_changed' then raise exception 'PROBE_FAIL b3-fee-acceptance 3c: stale rent: %', q; end if;
   -- The old D61-wrong figure: "keeps 96 percent" on the high side.
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
-         180000000, 3600000, 7200000, 172800000, 172800000);
+         180000000, 3600000, 6300000, 173700000, 173700000);
   if q->>'status' <> 'figures_mismatch' then raise exception 'PROBE_FAIL b3-fee-acceptance 3d: wrong figure: %', q; end if;
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
          180000000, 3600000, 3600000, 176400000, 176400000);
   if q->>'status' <> 'figures_mismatch' then raise exception 'PROBE_FAIL b3-fee-acceptance 3e: best case only: %', q; end if;
   q := public.accept_fee_terms(lst.id, 'v1', (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
-         180000000, 3600000, 7200000, 172800000, 176400000);
+         180000000, 3600000, 6300000, 173700000, 176400000);
   if q->>'status' <> 'bad_terms_version' then raise exception 'PROBE_FAIL b3-fee-acceptance 3f: terms version: %', q; end if;
   select count(*) into n from public.listing_fee_acceptances where listing_id = lst.id;
   if n <> 0 then raise exception 'PROBE_FAIL b3-fee-acceptance 3g: a refused call wrote % rows', n; end if;
 
   -- 4. Accept.
   q := public.accept_fee_terms(lst.id, tv, (f->>'policy_version_id')::bigint, (f->>'protection_rate_id')::bigint,
-         180000000, 3600000, 7200000, 172800000, 176400000);
+         180000000, 3600000, 6300000, 173700000, 176400000);
   if q->>'status' <> 'ok' or (q->>'accepted')::boolean is not true then
     raise exception 'PROBE_FAIL b3-fee-acceptance 4: owner could not accept: %', q;
   end if;
@@ -117,10 +117,10 @@ begin
   if acc.id is null or acc.id <> (q->>'acceptance_id')::uuid then
     raise exception 'PROBE_FAIL b3-fee-acceptance 6a: current record not returned to its owner';
   end if;
-  if acc.member_id <> lst.user_id or acc.terms_version <> tv or acc.commission_bps <> 200 or acc.protection_bps <> 200
-     or acc.rent_minor <> 180000000 or acc.fee_low_minor <> 3600000 or acc.fee_high_minor <> 7200000
-     or acc.receive_low_minor <> 172800000 or acc.receive_high_minor <> 176400000
-     or acc.figures_shown->>'receive_low_naira' <> '1,728,000.00' then
+  if acc.member_id <> lst.user_id or acc.terms_version <> tv or acc.commission_bps <> 200 or acc.protection_bps <> 150
+     or acc.rent_minor <> 180000000 or acc.fee_low_minor <> 3600000 or acc.fee_high_minor <> 6300000
+     or acc.receive_low_minor <> 173700000 or acc.receive_high_minor <> 176400000
+     or acc.figures_shown->>'receive_low_naira' <> '1,737,000.00' then
     raise exception 'PROBE_FAIL b3-fee-acceptance 4c: record wrong: %', to_jsonb(acc);
   end if;
 
