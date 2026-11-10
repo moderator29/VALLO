@@ -8,7 +8,6 @@ import { CHAPTER_INDEX, DOC_GROUPS, chapterBySlug, chapterNeighbours } from "../
 import "@/components/site/guides/docs-type.css";
 import { DepthWords } from "@/components/motion/DepthWords";
 import { MotionReveal } from "@/components/motion/Reveal";
-import { IconPlate } from "@/components/ui/IconPlate";
 import { lineGlyphFor } from "@/design-system/icons/glass-to-line";
 import { SITE_CARD } from "@/lib/site/site-card";
 import { DocHeader } from "@/components/docs/DocHeader";
