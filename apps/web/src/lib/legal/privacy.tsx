@@ -297,9 +297,10 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
                 nominate for payouts.
               </li>
               <li>
-                Payluk (Nigeria): where the Vallo wallet is offered, the payment provider
-                that holds and moves that money. It receives your name, email address and
-                phone number.
+                Payluk (Nigeria): the provider behind the protected payment rail, which is
+                built but switched off, so nothing is sent to it today. Vallo has no
+                wallet. If the rail is ever switched on, Payluk would receive your name,
+                email address and phone number for that payment.
               </li>
               <li>
                 Termii (Nigeria) and Twilio (United States): sending the one-time codes
@@ -383,6 +384,12 @@ export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNod
           <strong>You can delete your account yourself,</strong> in <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">Settings</Link> then Account,
           in the app or on this website. You do not need to write to us and we do not do
           it by hand.
+        </p>
+        <p>
+          <strong>Why you are leaving.</strong> When you delete your account we ask why,
+          from a short list of choices, and you can choose not to say. You never type
+          anything for this. Only the code of the choice you made is recorded, in our
+          audit log, and no free text is kept.
         </p>
         <p>
           <strong>Nothing is destroyed for {GRACE_WINDOW_DAYS} days.</strong> The moment

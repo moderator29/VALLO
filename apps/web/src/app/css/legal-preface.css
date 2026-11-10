@@ -1,0 +1,147 @@
+/*
+ * THE LEGAL PREFACE (founder, November 2026, "high end" legal pages): the
+ * short version card, the contents, and the at-a-glance block that sit above
+ * the unchanged legal text. Tokens only, light and dark from the same rules.
+ * It sits inside the document sheet, so it prints with it.
+ */
+@layer components {
+  .nf-legal-short {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-raised);
+    box-shadow: inset 0 0 0 var(--nf-border-width) var(--nf-border-subtle);
+    break-inside: avoid;
+  }
+  .nf-legal-short__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-2xs);
+  }
+  .nf-legal-short__title {
+    margin: 0;
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+  .nf-legal-short__meta {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+  .nf-legal-short__list {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-legal-short__item {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--nf-space-sm);
+    align-items: start;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+  .nf-legal-short__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-link);
+  }
+  .nf-legal-short__note {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+
+  .nf-legal-toc {
+    margin-block-start: var(--nf-space-md);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-inset);
+  }
+  .nf-legal-toc > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-block-size: 2.75rem;
+    padding-inline: var(--nf-space-md);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    cursor: pointer;
+    list-style: none;
+  }
+  .nf-legal-toc > summary::-webkit-details-marker {
+    display: none;
+  }
+  .nf-legal-toc > summary:focus-visible {
+    outline: var(--nf-focus-ring-width, 2px) solid var(--nf-focus-ring, currentColor);
+    outline-offset: 2px;
+  }
+  .nf-legal-toc[open] > summary svg {
+    transform: rotate(180deg);
+  }
+  .nf-legal-toc ol {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0 var(--nf-space-md) var(--nf-space-sm);
+    list-style: none;
+  }
+  .nf-legal-toc a {
+    display: block;
+    min-block-size: 2.75rem;
+    padding-block: var(--nf-space-xs);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.4;
+    color: var(--nf-content-secondary);
+    text-decoration: none;
+  }
+  .nf-legal-toc a:hover {
+    color: var(--nf-content-link);
+  }
+  @media (min-width: 64rem) {
+    .nf-legal-toc[data-sticky="true"] {
+      position: sticky;
+      top: var(--nf-space-md);
+      z-index: var(--nf-z-sticky);
+    }
+    .nf-legal-toc[data-sticky="true"][open] ol {
+      max-block-size: 60vh;
+      overflow-y: auto;
+    }
+  }
+
+  .nf-legal-glance {
+    display: grid;
+    gap: var(--nf-space-md);
+    margin-block-start: var(--nf-space-lg);
+  }
+  .nf-legal-glance__title {
+    margin: 0;
+    font-size: var(--nf-text-body-lg);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+  .nf-legal-glance__note {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+
+  @media print {
+    .nf-legal-toc {
+      display: none;
+    }
+  }
+}

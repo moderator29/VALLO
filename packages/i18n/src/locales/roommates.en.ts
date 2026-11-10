@@ -1191,7 +1191,7 @@ export const roommatesEn = {
         nysc: { title: "Corps members", body: "Share a place near your posting." },
         mine: { title: "My roommates", body: "Requests, connections and your posts." },
         split: { title: "Split costs", body: "Work out each person's share." },
-        verify: { title: "Get verified", body: "Show a check next to your name." },
+        verify: { title: "Add a check", body: "Confirm a school email, or send an ID for our team to review." },
         safety: { title: "Safety guide", body: "Meet in public, view before you pay." },
       },
     },
