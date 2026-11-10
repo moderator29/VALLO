@@ -237,6 +237,8 @@ export const ADMIN_SETTINGS: AdminDestination = {
     /* Track K: who holds staff access (super admin only) and the handbook. */
     { key: "staff", href: "/admin/staff", icon: ui("user"), label: "Staff" },
     { key: "handbook", href: "/admin/handbook", icon: ui("document"), label: "Staff handbook" },
+    /* Section 10 of the docs upgrade: how each desk works, on the docs kit. */
+    { key: "manual", href: "/admin/manual", icon: ui("clipboard-list"), label: "Staff manual" },
     { key: "help", href: "/settings/help", icon: ui("headset"), label: "Help and support" },
   ],
 };

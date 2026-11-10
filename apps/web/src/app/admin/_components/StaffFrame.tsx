@@ -93,6 +93,11 @@ export function StaffFrame({ staff, name, children }: { staff: StaffAccess; name
               </Link>
             </li>
             <li>
+              <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/admin/manual">
+                Staff manual
+              </Link>
+            </li>
+            <li>
               <Link className="nf-btn nf-btn--glass nf-btn--sm" href="/settings/help">
                 Help and support
               </Link>

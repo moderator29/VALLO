@@ -279,6 +279,8 @@ const NAMES: Readonly<Record<string, string>> = {
   "/agent/listings/[listingId]/arrival": "the arrival guide",
   "/admin/examples": "Examples",
   "/admin/handbook/position": "the position",
+  "/admin/manual": "the staff manual",
+  "/admin/manual/[chapter]": "the chapter",
   "/admin/account-recovery": "Account recovery",
   "/admin/field-speed": "Field speed",
   "/admin/blocked-terms": "Blocked terms",

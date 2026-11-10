@@ -1,4 +1,5 @@
 import type { UiIconName } from "@/design-system/icons/UiIcon";
+import type { StaffScope } from "@/lib/admin/guard";
 
 /**
  * THE STAFF MANUAL, AS A LIST (DOCS_AND_PRESENCE_UPGRADE.md section 10).
@@ -94,3 +95,25 @@ export function manualNeighbours(slug: ManualSlug): { previous: ManualChapter | 
     next: index >= 0 && index < MANUAL_CHAPTERS.length - 1 ? MANUAL_CHAPTERS[index + 1]! : null,
   };
 }
+
+/**
+ * The access areas' names, as the console prints them. A copy of
+ * `STAFF_SCOPE_LABEL` in `lib/admin/guard.ts`, which is server-only, so the
+ * manual's words stay client-safe; `app/admin/manual/manual.test.ts` fails the
+ * moment the two disagree.
+ */
+export const MANUAL_AREA_LABEL: Record<StaffScope, string> = {
+  listing_approval: "Listing approval",
+  kyc_review: "KYC review",
+  moderation: "Reports and moderation",
+  support: "Support",
+  agreements: "Agreement approval",
+  guarantee: "Guarantee claims",
+  finance: "Finance",
+  compliance: "Compliance",
+  operations: "Operations",
+  trust_safety: "Trust and Safety",
+  roommates: "Roommates moderation",
+  circle: "Circle moderation",
+  analyst: "Read-only analyst",
+};

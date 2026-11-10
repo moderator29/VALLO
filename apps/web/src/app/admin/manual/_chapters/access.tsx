@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { DocCallout } from "@/components/docs/DocArticle";
 import { DocTable, type DocTableRow } from "@/components/docs/DocTable";
-import { STAFF_SCOPE_LABEL, type StaffScope } from "@/lib/admin/guard";
+import type { StaffScope } from "@/lib/admin/guard";
+import { MANUAL_AREA_LABEL as STAFF_SCOPE_LABEL } from "@/lib/admin/manual/chapters";
 import { JOB_DESCRIPTIONS, STAFF_POSITIONS } from "@/lib/admin/staff-positions";
 import { A, FounderToName, ScreenshotSlot, type ManualBody } from "./parts";
 
@@ -75,7 +76,7 @@ export const ACCESS: ManualBody = {
         <>
           <ol role="list">
             <li>
-              <strong>Sign in with your own Vallo account.</strong> An account with no staff access gets the site's ordinary
+              <strong>Sign in with your own Vallo account.</strong> An account with no staff access gets the site&apos;s ordinary
               &quot;not found&quot; at every console address, so the console does not confirm it exists to anybody who
               cannot use it.
             </li>
