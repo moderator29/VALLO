@@ -19,6 +19,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 | `/admin/agents` | FE |  |  |  |  |  |
 | `/admin/agreements` | FE |  |  |  |  |  |
 | `/admin/agreements/settings` | FE |  |  |  |  |  |
+| `/admin/offers` | UI | PageHead | fixture | fixture | fixture | Offers and deals desk: overview metrics with definitions, filterable table. Seen through the preview fixtures only (needs a staff session live) |
+| `/admin/offers/[id]` | UI | PageHead | fixture | fixture | fixture | Deal inspection and intervention. Fixture preview only |
 | `/admin/alerts` | FE |  |  |  |  |  |
 | `/admin/analytics` | FE |  |  |  |  |  |
 | `/admin/audit` | FE |  |  |  |  |  |
@@ -362,8 +364,9 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/listing/[id]` | FE |  |  |  |  |  |
+| `/listing/[id]` | FE |  |  |  |  | UI: sale action area (Make an offer / View your offer), honest price block, mandate line. Smallest edits only |
 | `/listing/[id]/trust` | FE |  |  |  |  |  |
+| `/listing/[id]/offer` | UI | StepFrame | fixture | fixture | fixture | Offer flow: requirements, amount, payment, summary. Fixture preview only |
 | `/listing/[id]/visit` | FE |  |  |  |  |  |
 | `/listing/[id]/visit/[inspectionId]` | FE |  |  |  |  |  |
 
@@ -399,6 +402,8 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
+| `/offers` | UI | PageFrame | fixture | fixture | fixture | My offers: Made and Received with true counts. Fixture preview only |
+| `/offers/[id]` | UI | PageFrame | fixture | fixture | fixture | The Deal Room, both sides. Fixture preview only |
 | `/passport/[who]` | PAGES | PageFrame | yes | yes | yes | R3 job 1; seen through /preview/pages-frame (real page, signed-out or not-found state; no session here) |
 
 ## Member: pay

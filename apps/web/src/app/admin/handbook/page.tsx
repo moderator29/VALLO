@@ -40,6 +40,15 @@ export default async function HandbookPage() {
           </ul>
         </Panel>
       ))}
+      <Panel title="The staff manual">
+        <p className="nf-body">
+          What each desk is for and how to work it.{" "}
+          <Link href="/admin/handbook/manual" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            Open the staff manual
+          </Link>
+          .
+        </p>
+      </Panel>
       <Panel title="Your role">
         <p className="nf-body">
           {door.staff.position
