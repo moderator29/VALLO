@@ -15,6 +15,7 @@ records it in `APPLIED.txt`.
 | `payluk_switch_off_2026-11-09.sql` | Lead | Founder rule (rail OFF until signed), 9 Nov 2026 | APPLIED by the founder on 9 Nov 2026 in one block, verified live by the lead (switch false, no open alert, the grants gone, roommate_groups UPDATE kept). Kept as the record; do not run again. |
 | `resolve_stale_payluk_signature_alert_2026-11-09.sql` | Lead | Lead, 9 Nov 2026 | APPLIED by the founder on 9 Nov 2026 in one block, verified live by the lead (switch false, no open alert, the grants gone, roommate_groups UPDATE kept). Kept as the record; do not run again. |
 | `revoke_write_grants_with_no_policy_2026-11-09.sql` | Lead | Lead, 9 Nov 2026 | APPLIED by the founder on 9 Nov 2026 in one block, verified live by the lead (switch false, no open alert, the grants gone, roommate_groups UPDATE kept). Kept as the record; do not run again. |
+| `retire_unread_flag_rentals_protected_pay_2026-11-10.sql` | Lead | Removal audit, 10 Nov 2026 | NOT APPLIED. Deletes the `rentals_protected_pay` flag row (false, read by no code and no database function). No behaviour changes. For the founder's end-of-batch block. |
 | `rt01_remove_retired_objects.sql` | Lead | Draft, 13 Oct 2026 | DROPS objects. Never run without the founder's explicit yes. |
 | `rt02_remove_v100_renter_passport.sql` | Lead | Applied by hand 29 Oct 2026 | Kept as the record only. Do not run again. |
 | `LANDMARKS.md` and `rollback/` | Lead | | Reference only. |

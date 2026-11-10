@@ -63,6 +63,21 @@ tiles), the payment rail design pass.
   status table is empty and webhooks are refused. The switch
   `payments_escrowpay_on` fails closed. Nothing imports it yet. Next: the
   provider's sandbox documentation (audit 10.2), then phase 3.
+- Map migration committed (c37667ee3) and its follow-ups (7a1698401): every
+  map on OpenFreeMap, no key; the staff review panel draws the still map; the
+  privacy notice names OpenFreeMap (Hungary); MapTiler gone from code, CI,
+  the env example and the deploy docs. The old MapTiler key can be deleted
+  from Vercel, the repository variables and the MapTiler account.
+- Help, guides and docs on the docs kit committed (7c45b869e), with the
+  profile Support group and in-context help links.
+- Framing leftovers (c178f6f39, a42c49d02): fees and restaurant-fees desks on
+  PageHead; promotion hub, host bookings, earnings, decide and reviews on
+  PageFrame.
+- Removal audit, flags: `rentals_protected_pay` is read by nothing; its row
+  goes in the end block (pending file of 10 Nov). Old guide CSS (`.nf-guide*`
+  in public-doors.css) is now unused and is next for the sweep.
+- Running: staff manual (new agent, app/admin/manual); docs tools (fee
+  calculator from real config, copy control, was this helpful, step player).
 - Both agents (map, docs) stopped on the account's weekly limit on 9 Nov at
   about 17:30 UTC and were resumed on 10 Nov at 02:00 UTC with their work
   intact.
