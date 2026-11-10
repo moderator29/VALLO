@@ -13,13 +13,14 @@ import { NavIcon } from "./AdminGlyph";
 import { searchBase } from "./palette";
 import "./admin-material.css";
 import {
+  ADMIN_GROUPS,
   ADMIN_NAV,
-  ADMIN_PRIMARY,
-  ADMIN_SECONDARY,
   ADMIN_SETTINGS,
+  activeGroupKey,
+  activeItemKey,
   countFor,
   currentDestination,
-  isActiveHref,
+  groupItems,
   isSectionActive,
   countLabelFor,
   labelFor,
@@ -78,7 +79,15 @@ function Row({
   );
 }
 
-/** The twelve rows, the open section's desks under it, and every desk at the foot. */
+/**
+ * The rail, grouped the way the founder's brief draws it (Overview, My Desk,
+ * Staff and Access, Operations, Departments, Intelligence, Knowledge Centre,
+ * Settings). Each group is an expandable category: it opens by itself while
+ * one of its desks is the open page, and a badge on the closed group sums
+ * the queues its desks carry so waiting work is seen with the group shut.
+ * Every destination in `nav.ts` is in exactly one group, so no desk is an
+ * orphan and the old "All desks" list is no longer needed.
+ */
 export function AdminRail({
   counts,
   navLabel,
@@ -93,89 +102,58 @@ export function AdminRail({
   ledes?: Readonly<Record<string, string | undefined>>;
 }) {
   const pathname = usePathname() ?? "/admin";
+  const openGroup = activeGroupKey(pathname);
+  const litKey = activeItemKey(pathname);
   return (
     <nav aria-label={navLabel} className="nf-admin-nav">
       <ul className="nf-admin-nav__list">
-        {ADMIN_PRIMARY.map((item) => {
-          const sectionOpen = isSectionActive(pathname, item);
-          const onParent = isActiveHref(pathname, item.href);
+        {ADMIN_GROUPS.map((group) => {
+          const items = groupItems(group);
+          const waiting = [...new Set(items.flatMap((item) => item.countKeys ?? []))].reduce(
+            (total, key) => total + (counts[key] ?? 0),
+            0,
+          );
+          const open = group.key === openGroup || group.key === "g-overview" || group.key === "g-my-desk";
           return (
-            <li key={item.key}>
-              <Row item={item} counts={counts} shell={shell} active={sectionOpen} lede={ledes?.[item.key]} />
-              {sectionOpen && item.children && item.children.length > 0 && (
-                <ul className="nf-admin-nav__children" aria-label={labelFor(item, shell)}>
-                  {item.children.map((child) => (
-                    <li key={child.key}>
-                      <Row
-                        item={child}
-                        counts={counts}
-                        shell={shell}
-                        active={!onParent && isActiveHref(pathname, child.href)}
-                        child
-                        lede={ledes?.[child.key]}
-                      />
-                    </li>
+            <li key={group.key}>
+              <details className="nf-admin-nav__group" open={open || undefined} data-group={group.key}>
+                <summary className="nf-admin-nav__row">
+                  <NavIcon icon={group.icon} size={20} />
+                  <span className="min-w-0 flex-1">{group.label}</span>
+                  {waiting > 0 && (
+                    <span className="nf-admin-nav__count" title={`${waiting} waiting`} aria-label={`${waiting} waiting`}>
+                      {waiting}
+                    </span>
+                  )}
+                  <UiIcon name="chevron-down" size={16} className="nf-admin-nav__more-chev shrink-0" />
+                </summary>
+                <div className="nf-admin-nav__children">
+                  {group.sections.map((section) => (
+                    <div key={section.key}>
+                      {section.label ? <p className="nf-admin-nav__section">{section.label}</p> : null}
+                      <ul className="grid gap-[2px]">
+                        {section.items.map((item) => (
+                          <li key={item.key}>
+                            <Row
+                              item={item}
+                              counts={counts}
+                              shell={shell}
+                              active={item.key === litKey}
+                              child
+                              lede={ledes?.[item.key]}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
-              )}
+                </div>
+              </details>
             </li>
           );
         })}
       </ul>
-      <AllDesks counts={counts} shell={shell} pathname={pathname} ledes={ledes} />
     </nav>
-  );
-}
-
-/**
- * Every desk that is not one of the twelve rows, behind one disclosure, so a
- * desk is never an orphan reachable only by typing its address.
- */
-function AllDesks({
-  counts,
-  shell,
-  pathname,
-  ledes,
-}: {
-  counts: Record<string, number>;
-  shell?: ShellCopy;
-  pathname: string;
-  ledes?: Readonly<Record<string, string | undefined>>;
-}) {
-  const allWaiting = (n: number) =>
-    (shell?.nav.allDesksWaiting ?? "{count} waiting across the desks below").replace("{count}", String(n));
-  const waiting = ADMIN_SECONDARY.reduce((total, item) => total + countFor(item, counts), 0);
-  return (
-    <details className="nf-admin-nav__more">
-      <summary className="nf-admin-nav__row nf-admin-nav__row--child">
-        <UiIcon name="grid" size={16} className="shrink-0" />
-        <span className="min-w-0 flex-1">{shell?.nav.allDesks ?? "All desks"}</span>
-        {waiting > 0 && (
-          <span
-            className="nf-admin-nav__count"
-            title={allWaiting(waiting)}
-            aria-label={allWaiting(waiting)}
-          >
-            {waiting}
-          </span>
-        )}
-        <UiIcon name="chevron-down" size={16} className="nf-admin-nav__more-chev shrink-0" />
-      </summary>
-      <ul className="nf-admin-nav__children">
-        {ADMIN_SECONDARY.map((item) => (
-          <li key={item.key}>
-            <Row
-              item={item}
-              counts={counts}
-              shell={shell}
-              active={isActiveHref(pathname, item.href)}
-              child
-              lede={ledes?.[item.key]}
-            />
-          </li>
-        ))}
-      </ul>
-    </details>
   );
 }
 

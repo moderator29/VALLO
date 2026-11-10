@@ -48,6 +48,11 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     icon: glyph("home-solid"),
     label: "Overview",
     children: [
+      /* My Desk (10 November 2026): the personal workspace every staff member
+         and admin has, with its tasks and the announcements addressed to them. */
+      { key: "my-desk", href: "/admin/my-desk", icon: ui("user"), label: "My desk" },
+      { key: "my-tasks", href: "/admin/my-desk/tasks", icon: ui("clipboard-list"), label: "My tasks" },
+      { key: "announcements", href: "/admin/my-desk/announcements", icon: ui("bell"), label: "Announcements" },
       {
         key: "queue",
         href: "/admin/queue",
@@ -269,6 +274,103 @@ export const ADMIN_NAV: AdminDestination[] = [...ADMIN_PRIMARY, ADMIN_SETTINGS].
 export const ADMIN_SECONDARY: AdminDestination[] = [...ADMIN_PRIMARY, ADMIN_SETTINGS].flatMap(
   (item) => item.children ?? [],
 );
+
+/**
+ * THE RAIL'S GROUPING (founder brief, 10 November 2026): Overview, My Desk,
+ * Staff and Access, Operations, Departments, Intelligence, Knowledge Centre
+ * and Settings. Each group is an expandable category. The groups only
+ * REGROUP the destinations above by key: no key or href is renamed, no desk
+ * is removed, and every destination appears in exactly one group (a test
+ * holds both). Departments carries named sections, one per department,
+ * mapped onto the desks that exist.
+ */
+export type AdminGroupSection = { key: string; label: string | null; items: AdminDestination[] };
+export type AdminGroup = { key: string; label: string; icon: AdminIcon; sections: AdminGroupSection[] };
+
+const BY_KEY = new Map<string, AdminDestination>(
+  [...ADMIN_PRIMARY, ADMIN_SETTINGS].flatMap((item) => [item, ...(item.children ?? [])]).map((item) => [item.key, item]),
+);
+
+function pick(...keys: string[]): AdminDestination[] {
+  return keys.map((key) => {
+    const found = BY_KEY.get(key);
+    if (!found) throw new Error(`nav group names a destination that does not exist: ${key}`);
+    return found;
+  });
+}
+
+export const ADMIN_GROUPS: AdminGroup[] = [
+  { key: "g-overview", label: "Overview", icon: glyph("home-solid"), sections: [{ key: "overview", label: null, items: pick("overview", "queue", "lookup", "coo-overview") }] },
+  { key: "g-my-desk", label: "My Desk", icon: ui("user"), sections: [{ key: "my-desk", label: null, items: pick("my-desk", "my-tasks", "announcements") }] },
+  { key: "g-staff", label: "Staff and Access", icon: ui("users"), sections: [{ key: "staff", label: null, items: pick("staff", "oversight") }] },
+  {
+    key: "g-operations",
+    label: "Operations",
+    icon: glyph("operations"),
+    sections: [
+      {
+        key: "operations",
+        label: null,
+        items: pick(
+          "operations", "alerts", "crashes", "providers", "call-usage", "retention",
+          "supply", "applications", "businesses", "stops",
+          "bookings", "visits", "reservations", "restaurant-fees",
+          "agreements", "agreement-settings",
+        ),
+      },
+    ],
+  },
+  {
+    key: "g-departments",
+    label: "Departments",
+    icon: ui("building-apartment"),
+    sections: [
+      { key: "business-development", label: "Business Development", items: pick("business-development") },
+      { key: "social-media", label: "Social Media", items: pick("social-media") },
+      { key: "support", label: "Support", items: pick("tickets", "people", "account-recovery") },
+      { key: "listing-verification", label: "Listing verification", items: pick("listings", "kyc", "review-calls") },
+      {
+        key: "trust-safety",
+        label: "Trust and Safety",
+        items: pick("social", "cases", "appeals", "roommates", "circle-desk", "standing", "blocked-terms", "weight-withheld"),
+      },
+      { key: "finance", label: "Finance", items: pick("money", "payments", "chargebacks", "arrangements", "fees", "referrals") },
+      { key: "compliance", label: "Compliance", items: pick("compliance") },
+    ],
+  },
+  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "front-door", "field-speed", "trust", "audit") }] },
+  { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
+  { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "switches", "reference", "examples", "help") }] },
+];
+
+/** The destinations a group holds, in order. */
+export function groupItems(group: AdminGroup): AdminDestination[] {
+  return group.sections.flatMap((section) => section.items);
+}
+
+/** The group a path belongs to: the one holding the longest matching href. */
+export function activeGroupKey(pathname: string): string | null {
+  let best: { key: string; length: number } | null = null;
+  for (const group of ADMIN_GROUPS) {
+    for (const item of groupItems(group)) {
+      if (isActiveHref(pathname, item.href) && (!best || item.href.length > best.length)) {
+        best = { key: group.key, length: item.href.length };
+      }
+    }
+  }
+  return best?.key ?? null;
+}
+
+/** The single destination lit for a path: the longest matching href across every group. */
+export function activeItemKey(pathname: string): string | null {
+  let best: AdminDestination | null = null;
+  for (const group of ADMIN_GROUPS) {
+    for (const item of groupItems(group)) {
+      if (isActiveHref(pathname, item.href) && (!best || item.href.length > best.href.length)) best = item;
+    }
+  }
+  return best?.key ?? null;
+}
 
 export function isActiveHref(pathname: string, href: string): boolean {
   if (href === "/admin") return pathname === "/admin";
