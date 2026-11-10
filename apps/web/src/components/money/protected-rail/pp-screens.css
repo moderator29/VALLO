@@ -730,10 +730,6 @@
   .nf-pp-receipt {
     display: grid;
     gap: var(--nf-space-md);
-    padding: var(--nf-space-lg) var(--nf-space-md);
-    border: 1px solid var(--nf-divider);
-    border-radius: var(--nf-radius-card);
-    background: var(--nf-surface-raised);
     scroll-margin-top: var(--nf-space-xl);
   }
 
@@ -795,5 +791,12 @@
     gap: var(--nf-space-3xs);
     font-variant-numeric: tabular-nums;
     font-weight: 600;
+  }
+}
+
+@layer components {
+  /* The stale status keeps to the right edge even when its row wraps at 360. */
+  .nf-pp-row:has(.nf-pp-stale) dd {
+    margin-inline-start: auto;
   }
 }

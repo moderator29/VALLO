@@ -137,8 +137,8 @@ describe("the protected receipt", () => {
     expect(text).toContain(PROTECTED_FUNDS_WORDING_FULL);
     expect(text).toContain("Vallo does not hold your funds.");
     expect(text).toContain("EXAMPLE-REF-0001");
-    expect(text).toContain("The bank confirmed it received the transfer");
-    expect(text).toContain("The bank confirmed the release");
+    expect(text).toContain("Transfer confirmed by the bank");
+    expect(text).toContain("Release confirmed by the bank");
     expect(text).toContain("Something wrong with this payment?");
     expect(text).toContain("Who is holding this?");
     expect(text).toContain("It is not a bank statement.");

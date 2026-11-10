@@ -1765,11 +1765,11 @@ export const PROTECTED_RECEIPT_ROWS = {
 export const PROTECTED_RECEIPT_RAIL = "Bank transfer to the designated account";
 export const PROTECTED_RECEIPT_HISTORY = "History";
 export const PROTECTED_RECEIPT_EVENT = {
-  funded: "The bank confirmed it received the transfer",
-  release_requested: "Vallo asked the bank to release the payment",
-  released: "The bank confirmed the release",
-  refund_requested: "Vallo asked the bank to refund the payer",
-  refunded: "The bank confirmed the refund",
+  funded: "Transfer confirmed by the bank",
+  release_requested: "Release asked of the bank",
+  released: "Release confirmed by the bank",
+  refund_requested: "Refund asked of the bank",
+  refunded: "Refund confirmed by the bank",
 } as const;
 export function protectedAgreementVersion(version: number): string {
   return `Version ${version}`;
