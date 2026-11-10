@@ -382,7 +382,10 @@ await out(
 );
 for (const size of [16, 32, 48, 64]) await out(path.join(PWA, `icon-${size}.png`), await tab(size));
 /* Install icons stay full-bleed squares: the platform applies its own mask. */
-for (const size of [192, 512]) await out(path.join(PWA, `icon-${size}.png`), await iconOn(size, { scale: 0.72, bright: true }));
+/* The 192 is the one a browser fetches for its tab and install prompt on every page
+   load, so it is palette-coded (smaller on the wire, no visible banding at this size). */
+await out(path.join(PWA, "icon-192.png"), await sharp(await iconOn(192, { scale: 0.72, bright: true })).png({ palette: true, quality: 92, effort: 10, dither: 0.6 }).toBuffer());
+await out(path.join(PWA, "icon-512.png"), await iconOn(512, { scale: 0.72, bright: true }));
 await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.72, bright: true }));
 /* Maskable: everything meaningful inside the middle 80 per cent (the safe
    circle is 40 per cent of the width in radius). The mark's half-diagonal

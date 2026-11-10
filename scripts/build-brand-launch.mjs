@@ -36,15 +36,10 @@ export const MARK_CENTRE_Y = 0.46;
 /** [css width, css height, pixel ratio], portrait. */
 const DEVICES = [
   [440, 956, 3],
-  [430, 932, 3],
-  [428, 926, 3],
   [402, 874, 3],
   [393, 852, 3],
   [390, 844, 3],
-  [414, 896, 3],
-  [375, 812, 3],
-  [414, 896, 2],
-  [375, 667, 2],
+  [430, 932, 3],
 ];
 
 const mark = markSvg();
