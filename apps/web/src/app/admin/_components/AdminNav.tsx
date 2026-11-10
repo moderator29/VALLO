@@ -131,7 +131,7 @@ export function AdminRail({
                   {group.sections.map((section) => (
                     <div key={section.key}>
                       {section.label ? <p className="nf-admin-nav__section">{section.label}</p> : null}
-                      <ul className="grid gap-[2px]">
+                      <ul className="grid gap-3xs">
                         {section.items.map((item) => (
                           <li key={item.key}>
                             <Row
