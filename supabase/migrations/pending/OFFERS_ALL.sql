@@ -544,7 +544,6 @@ declare
   ag public.deal_agreements%rowtype;
   amount bigint;
   problem text;
-  conv uuid;
   elig jsonb;
 begin
   if p_actor is null or p_listing is null or p_key is null or length(p_key) < 8 or length(p_key) > 100 then
@@ -622,10 +621,6 @@ begin
 
   perform private.agreement_log(ag, p_actor, 'opened', null,
     case when p_amount_minor is null then 'Offer at the asking price.' else 'Offer made.' end);
-  conv := private.sale_conversation(lst.id, p_actor, seller);
-  perform private.sale_post(conv, p_actor,
-    'New offer ' || ag.reference || ': ' || private.sale_naira(amount) || ' (' || p_pref || '). Asking price ' ||
-    private.sale_naira(lst.sale_price_minor) || '. Open the Deal Room to respond.');
   perform private.sale_tell(ag, seller, 'offer.received', 'New offer on ' || coalesce(lst.title, 'your property'),
     private.sale_naira(amount) || ' offered. Asking price ' || private.sale_naira(lst.sale_price_minor) || '.');
   return jsonb_build_object('status', 'ok', 'agreement_id', ag.id, 'reference', ag.reference);
@@ -709,9 +704,6 @@ begin
    where id = ag.id returning * into ag;
 
   perform private.agreement_log(ag, p_actor, 'countered', 'awaiting_parties', nullif(btrim(coalesce(p_note, '')), ''));
-  perform private.sale_post(private.sale_conversation(ag.listing_id, ag.renter_id, ag.owner_id), p_actor,
-    case when side = 'seller' then 'Counteroffer ' else 'Revised offer ' end || ag.reference || ' (version ' ||
-    ag.terms_version || '): ' || private.sale_naira(p_amount_minor) || '. Open the Deal Room to respond.');
   perform private.sale_tell(ag, other, 'offer.countered',
     case when side = 'seller' then 'Counteroffer received' else 'Revised offer received' end,
     private.sale_naira(p_amount_minor) || ' proposed (version ' || ag.terms_version || '). Your answer is waiting.');
@@ -807,9 +799,6 @@ begin
     values (p_actor, 'sale_offer.listing_under_offer', 'listing', lst.id::text, jsonb_build_object('agreement_id', ag.id));
   end if;
 
-  perform private.sale_post(private.sale_conversation(ag.listing_id, ag.renter_id, ag.owner_id), p_actor,
-    'Terms agreed on ' || ag.reference || ': ' || private.sale_naira(ag.amount_minor) ||
-    '. This is not a sale. The inspection, the documents and the transfer still have to happen.');
   perform private.sale_tell(ag, other, 'offer.agreed', 'Terms agreed',
     private.sale_naira(ag.amount_minor) || ' agreed. This is not a sale yet: the inspection, documents and transfer still have to happen.');
   return jsonb_build_object('status', 'ok');
@@ -845,8 +834,6 @@ begin
          decision_reason = coalesce(reason, 'The seller declined this offer.'), updated_at = now()
    where id = ag.id returning * into ag;
   perform private.agreement_log(ag, p_actor, 'declined', 'awaiting_parties', reason);
-  perform private.sale_post(private.sale_conversation(ag.listing_id, ag.renter_id, ag.owner_id), p_actor,
-    'Offer ' || ag.reference || ' was declined.' || coalesce(' Reason: ' || reason, ''));
   perform private.sale_tell(ag, ag.renter_id, 'offer.declined', 'Offer declined',
     'The seller declined offer ' || ag.reference || '.' || coalesce(' They said: ' || reason, ''));
   return jsonb_build_object('status', 'ok');
@@ -874,8 +861,6 @@ begin
   before_status := ag.status;
   update public.deal_agreements set status = 'withdrawn', awaiting_side = null, updated_at = now() where id = ag.id returning * into ag;
   perform private.agreement_log(ag, p_actor, 'withdrawn', before_status, null);
-  perform private.sale_post(private.sale_conversation(ag.listing_id, ag.renter_id, ag.owner_id), p_actor,
-    'Offer ' || ag.reference || ' was withdrawn by the buyer.');
   perform private.sale_tell(ag, ag.owner_id, 'offer.withdrawn', 'Offer withdrawn',
     'The buyer withdrew offer ' || ag.reference || '.');
   return jsonb_build_object('status', 'ok');

@@ -35,6 +35,7 @@ vi.mock("../actions/session", () => ({
         const chain = {
           select: () => chain,
           eq: () => chain,
+          neq: () => chain,
           maybeSingle: async () => ({ data: { id: AG, kind: "stay", booking_id: "bk-1", inspection_id: null }, error: null }),
         };
         return chain;
