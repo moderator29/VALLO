@@ -48,7 +48,7 @@ The custody tables (`wallets`, `wallet_entries`, `wallet_pots`, `escrows`, `escr
 | `ledger_customer_funds` | pot 1 of 3: customer money at the provider, never Vallo's. Append-only; a correction is a new entry. | the money rail (append-only) |
 | `ledger_vallo_revenue` | pot 2 of 3: Vallo's own revenue (commission, withdrawal fees, promotion). Never VAT, never customer money. Append-only. | the money rail (append-only) |
 | `ledger_marketing_float` | pot 3 of 3: Vallo's marketing float that funds referral payouts. Append-only. | the money rail (append-only) |
-| `payluk_commission_sweeps` | each run that reads the Payluk balances and, when there is commission to move, withdraws it to the main account, with the outcome and the amounts. | the commission sweep job |
+| `retired_provider_commission_sweeps` | each run that reads the the retired provider balances and, when there is commission to move, withdraws it to the main account, with the outcome and the amounts. | the commission sweep job |
 | `provider_arrangements` | an arrangement between a member and a service provider, with the amount and the provider's fee, paid through the provider rail. | `provider_arrangement_open`, `provider_arrangement_observe`, `admin_pause_release`, `admin_resume_release` |
 | `provider_arrangement_milestones` | the staged amounts inside one provider arrangement and where each stands. | `provider_arrangement_open`, `provider_arrangement_observe` |
 | `reservation_deposits` | the deposit charged to hold a restaurant reservation: the amount, Vallo's commission and the restaurant's share. | `reservation_deposit_open`, `reservation_deposit_settle`, `reservation_deposit_close`, `reservation_deposit_refunded` |

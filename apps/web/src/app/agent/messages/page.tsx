@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { countOf, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { getAgentInbox } from "@/lib/agent/messages-queries";
 import { Unreachable } from "@/components/app/Unreachable";
@@ -59,21 +60,23 @@ export default async function Page({
 
   if (context.state === "unconfigured") {
     return (
-      <AgentShell t={t} locale={locale} active="/agent/messages" profile={null}>
+      <AgentShell t={t} locale={locale} active="/agent/messages" profile={null} chromeBack={false}>
         {/* "Guest enquiries appear here the moment the platform keys land"
             stood here. It named a date nobody can name and it named our
             deployment while doing it. This branch is what an agent meets when
             the inbox cannot be read at all, which is a fault, not a launch.
             See F2-003. */}
-        {/* The heading stays. `EmptyState` sets its title as a paragraph,
-            deliberately, so the branch needs its own h1 or this route has no
-            heading at all for anybody reading it by landmark. */}
-        <h1 className="nf-h1">{t.agent.nav.messages}</h1>
-        <Unreachable
-          noun="inbox"
-          icon="chat-duo"
-          action={{ label: t.agent.nav.dashboard, href: "/agent/dashboard" }}
-        />
+        {/* The heading stays (the page frame's h1). `EmptyState` sets its
+            title as a paragraph, deliberately, so the branch needs its own h1
+            or this route has no heading at all for anybody reading it by
+            landmark. */}
+        <PageFrame title={t.agent.nav.messages} fallback="/agent/dashboard" width="wide">
+          <Unreachable
+            noun="inbox"
+            icon="chat-duo"
+            action={{ label: t.agent.nav.dashboard, href: "/agent/dashboard" }}
+          />
+        </PageFrame>
       </AgentShell>
     );
   }
@@ -90,12 +93,15 @@ export default async function Page({
     ]);
     const homes = mine === null ? null : mine.filter((one) => one.status === "PUBLISHED").map((one) => ({ id: one.id, title: one.title }));
     return (
-      <AgentShell t={t} locale={locale} active="/agent/messages" profile={profile}>
-        <h1 className="nf-h1">{t.agent.nav.messages}</h1>
+      <AgentShell t={t} locale={locale} active="/agent/messages" profile={profile} chromeBack={false}>
+        <PageFrame title={t.agent.nav.messages} fallback="/agent/dashboard" width="wide">
+        <div>
         <Link href="/agent/messages?filter=all" className="nf-link-quiet nf-body-sm text-[var(--nf-content-link)]">
           {t.frontDoor.desk.all}
         </Link>
         <BriefsDesk briefs={briefs} homes={homes} copy={t.frontDoor.briefs} locale={locale} />
+        </div>
+        </PageFrame>
       </AgentShell>
     );
   }
@@ -112,15 +118,19 @@ export default async function Page({
   const dueIds = followups ? dueNowIds(groupFollowups(followups, stages, new Date())) : null;
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/messages" profile={profile}>
-      <div className="mb-block">
-        <h1 className="nf-h1">{t.agent.nav.messages}</h1>
-        <p className="mt-3xs text-[var(--nf-content-secondary)]">
-          {read.state === "ready" && read.inbox.waitingCount > 0
+    <AgentShell t={t} locale={locale} active="/agent/messages" profile={profile} chromeBack={false}>
+      {/* The frame's header carries the one way back (Grade 1 page frame). */}
+      <PageFrame
+        title={t.agent.nav.messages}
+        subtitle={
+          read.state === "ready" && read.inbox.waitingCount > 0
             ? `${countOf(read.inbox.waitingCount, "enquiriesAre", locale)} waiting on your reply. Guests book the agents who answer.`
-            : "Every guest enquiry about your listings, oldest wait first."}
-        </p>
-      </div>
+            : "Every guest enquiry about your listings, oldest wait first."
+        }
+        fallback="/agent/dashboard"
+        width="wide"
+      >
+      <div>
 
       {read.state === "ready" ? (
         <AgentInbox
@@ -146,6 +156,8 @@ export default async function Page({
           action={{ label: t.agent.nav.dashboard, href: "/agent/dashboard" }}
         />
       )}
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

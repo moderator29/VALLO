@@ -1,3 +1,5 @@
+-- (9 November 2026: the escrow commission assertions described below were
+-- retired with ledger_record_payluk_commission; see the dated note in the body.)
 -- B2 LEDGER (pending migration b2_ledger): three pots as three tables; an
 -- entry is written once per key and a disagreeing replay is refused; a
 -- correction is a new entry that moves the opposite way and never exceeds
@@ -40,7 +42,6 @@ declare
   c1 uuid;
   refused boolean;
   t text;
-  pair jsonb;
   net bigint;
   tg name;
 begin
@@ -130,28 +131,11 @@ begin
   end;
   if not refused then raise exception 'PROBE_FAIL b2-ledger: the float accepted a Payluk entry'; end if;
 
-  -- Escrow commission: refused off the escrow rail, paired on it.
-  refused := false;
-  begin
-    perform public.ledger_record_payluk_commission(tx_direct, 200);
-  exception when insufficient_privilege then refused := true;
-  end;
-  if not refused then raise exception 'PROBE_FAIL b2-ledger: escrow commission recorded on a direct payment'; end if;
-  refused := false;
-  begin
-    perform public.ledger_record_payluk_commission(tx_escrow_pending, 200);
-  exception when insufficient_privilege then refused := true;
-  end;
-  if not refused then raise exception 'PROBE_FAIL b2-ledger: escrow commission recorded on a payment that has not succeeded'; end if;
-  pair := public.ledger_record_payluk_commission(tx_escrow, 200);
-  if (select count(*) from public.ledger_customer_funds where transaction_id = tx_escrow and direction = 'out' and amount_minor = 200 and event_type = 'FEE_CHARGED') <> 1
-     or (select count(*) from public.ledger_vallo_revenue where transaction_id = tx_escrow and direction = 'in' and amount_minor = 200 and event_type = 'FEE_CHARGED') <> 1 then
-    raise exception 'PROBE_FAIL b2-ledger: escrow commission was not one paired movement';
-  end if;
-  pair := public.ledger_record_payluk_commission(tx_escrow, 200);
-  if (select count(*) from public.ledger_vallo_revenue where transaction_id = tx_escrow) <> 1 then
-    raise exception 'PROBE_FAIL b2-ledger: a replayed escrow commission was recorded twice';
-  end if;
+  -- 9 November 2026: the escrow commission checks that stood here are gone.
+  -- They exercised public.ledger_record_payluk_commission, which no code has
+  -- ever called (its only wrapper, recordEscrowCommission, was removed as dead
+  -- code that day) and which the founder's SQL block drops with the rest of
+  -- the retired Payluk rail. Every other ledger rule above and below is kept.
 
   -- Direct settlement posts the pots, netting customer funds to zero.
   insert into public.ledger_entries (booking_id, transaction_id, gross_minor, platform_fee_minor, agent_share_minor,

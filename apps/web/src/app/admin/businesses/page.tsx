@@ -5,6 +5,7 @@ import { resolveSession } from "@/lib/actions/session";
 import { BUSINESS_STATUSES, getBusinessQueue } from "@/lib/admin/business-queries";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import {
   QueueFilters,
   QueuePager,
@@ -107,7 +108,7 @@ export default async function AdminBusinessesPage({
   if (queue.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title="Businesses" lede={LEDE} />
+        <PageHead title="Businesses" lede={LEDE} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -117,7 +118,7 @@ export default async function AdminBusinessesPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title="Businesses" lede={LEDE} count={waitingCount} />
+      <PageHead title="Businesses" lede={LEDE} trail={<ui.WaitingBadge count={waitingCount} />} />
 
       <QueueFilters
         base="/admin/businesses"

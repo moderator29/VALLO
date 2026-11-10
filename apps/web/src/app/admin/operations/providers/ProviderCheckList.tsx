@@ -1,5 +1,6 @@
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import type { CheckOutcome } from "@/lib/admin/provider-checks";
+import { PageHead } from "../../_components/panels";
 
 /* Said in words, never by colour alone. */
 const SENDER_STATUS_WORD = {
@@ -17,10 +18,10 @@ const SENDER_STATUS_WORD = {
 export function ProviderCheckList({ checks }: { checks: readonly CheckOutcome[] }) {
   return (
     <div className="nf-console">
-      <h1 className="mb-xs text-[length:var(--nf-text-title)] font-semibold">Provider checks</h1>
-      <p className="mb-md text-[length:var(--nf-text-body-sm)] text-[var(--nf-content-secondary)]">
-        Read-only. Nothing is charged or sent and no member sees anything. Refresh to run again.
-      </p>
+      <PageHead
+        title="Provider checks"
+        lede="Read-only. Nothing is charged or sent and no member sees anything. Refresh to run again."
+      />
       <ul className="nf-queue-list">
         {checks.map((check) => (
           <li key={check.name} className="nf-panel nf-panel--card nf-admin-card mb-sm flex gap-sm p-md" data-testid="provider-check">

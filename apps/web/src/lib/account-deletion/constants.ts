@@ -9,6 +9,29 @@
 /** How long the account is deactivated before anything is destroyed. */
 export const GRACE_WINDOW_DAYS = 30;
 
+/**
+ * Why somebody is leaving, as a closed list. The code goes in the audit line
+ * (which never carries free text: it is readable by every admin) and in
+ * `account_deletion_reasons`, where an optional note of at most
+ * `DELETION_NOTE_MAX` characters is kept apart, shown to a super admin only.
+ */
+export const DELETION_REASONS = [
+  "not_using",
+  "found_place",
+  "not_found",
+  "hard_to_use",
+  "notifications",
+  "privacy",
+  "safety",
+  "second_account",
+  "other",
+  "prefer_not_to_say",
+] as const;
+
+export const DELETION_NOTE_MAX = 500;
+
+export type DeletionReason = (typeof DELETION_REASONS)[number];
+
 /** Typed in capitals, checked on the server, never translated. */
 export const DELETE_CONFIRM_PHRASE = "DELETE MY ACCOUNT";
 

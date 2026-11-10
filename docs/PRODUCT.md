@@ -306,8 +306,10 @@ inspection's outcome and not on the payment. The moment a badge can be bought,
 every badge on the platform is worth nothing.
 
 The standing safety rule, stated on `/rent`, on every rental detail and in first
-message education: keep every chat and payment inside Vallo, deals made outside
-are not protected by us, pay only after you have inspected the property. A
+message education, in the founder's approved words of 9 November 2026: "Pay
+through Vallo. A payment made outside the platform leaves no record, so we
+cannot help you if something goes wrong." Payment for rentals is not open on
+Vallo yet (`lib/rent/payment-open.ts`); a sale is never paid on Vallo. A
 database trigger flags ten digit account numbers and payment keywords in
 messages, listing text, reviews and posts into an admin queue.
 

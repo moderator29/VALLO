@@ -359,7 +359,7 @@ export function ContestReturn({ tenancyId, returnId, copy }: { tenancyId: string
   );
 }
 
-/** Past its due date, the tenant takes the unreturned part to the Vallo Guarantee. */
+/** Past its due date, the tenant asks Vallo to look into the unreturned part (the Vallo Guarantee it once went to was retired on 9 November 2026). */
 export function EscalateCaution({ tenancyId, obligationId, copy }: { tenancyId: string; obligationId: string; copy: Copy }) {
   const { pending, run } = useRun();
   return (
@@ -369,7 +369,7 @@ export function EscalateCaution({ tenancyId, obligationId, copy }: { tenancyId: 
         full
         loading={pending}
         disabled={pending}
-        onClick={() => run(() => escalateCaution({ tenancyId, obligationId }), "Escalated to Vallo Guarantee")}
+        onClick={() => run(() => escalateCaution({ tenancyId, obligationId }), "Sent to Vallo. We will look into it.")}
       >
         {copy.escalateSubmit}
       </Button>

@@ -76,7 +76,7 @@ export const VERCEL_JOBS: readonly VercelJob[] = [
   { name: "risk-classes", cron: "50 3 * * *", schedule: "Daily at 04:50", maxGapHours: 26, audit: { entityType: "cron_job", term: "risk-classes" } },
   /* Crypto payments read back from the provider (lib/crypto/reconcile.ts). A no-op while nothing is moving. */
   { name: "crypto-reconcile", cron: "3,18,33,48 * * * *", schedule: "Every 15 minutes", maxGapHours: 2, audit: { entityType: "cron_job", term: "crypto-reconcile" } },
-  /* Escrow arrangements still waiting on the payment partner, read back (lib/money/provider-arrangements.ts). At most 3 per run: the key allows 10 requests a minute. */
+  /* Escrow arrangements still waiting on the payment partner, read back (lib/money/protected-rail.ts). At most 3 per run. */
   { name: "arrangements-reconcile", cron: "8,18,28,38,48,58 * * * *", schedule: "Every 10 minutes", maxGapHours: 2, audit: { entityType: "cron_job", term: "arrangements-reconcile" } },
   { name: "rent-share-refunds", cron: "35 * * * *", schedule: "Hourly at :35", maxGapHours: 2, audit: { entityType: "cron_job", term: "rent-share-refunds" } },
   /* C2: hosts' Airbnb and Booking.com calendars pulled in. A no-op while CALENDAR_SYNC_ENABLED is off. */

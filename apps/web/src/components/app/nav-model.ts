@@ -1,3 +1,4 @@
+import { WALLET_OPEN } from "@/lib/money/wallet-open";
 import type { ShellDictionary } from "@/lib/i18n/shell-dictionary";
 import { SUBSCRIPTIONS_OPEN } from "@/lib/subscriptions/open";
 import type { UiIconName } from "@/design-system/icons/UiIcon";
@@ -116,6 +117,7 @@ export function buildNav({
   isAdmin,
   isHost = false,
   signedIn,
+  walletLive = WALLET_OPEN,
 }: {
   t: ShellDictionary;
   /**
@@ -134,6 +136,13 @@ export function buildNav({
   /** Holds a Stays host business: one row into `/host`, on either side. */
   isHost?: boolean;
   signedIn: boolean;
+  /**
+   * True only once the member's Wallet is connected on the new rail. Until
+   * then the Wallet row is not drawn (the founder, 9 November 2026, sweep item
+   * 25): the rail behind it is switched off. The route itself keeps working
+   * for anybody with a link. No caller passes it yet, so it is hidden.
+   */
+  walletLive?: boolean;
 }): NavSection[] {
   const stays = side === "stays";
   const sections: NavSection[] = [
@@ -160,8 +169,6 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
-            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ]
         : [
             { href: "/home", label: t.nav.home, icon: "home" },
@@ -172,11 +179,23 @@ export function buildNav({
             { href: "/around", label: t.nav.feed, icon: "feed" },
             { href: CIRCLE_ROUTE, label: t.nav.circle, icon: "circle-people" },
             { href: "/around/people", label: t.feedV2.people.navPeople, icon: "users" },
-            /* Vallo Roommates (8 November 2026): one row after Circle and People, nothing moved. */
-            ...(t.roommatesEntry ? [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" as const }] : []),
           ],
     },
   ];
+
+  /*
+   * VALLO ROOMMATES IS ITS OWN PRODUCT AREA (founder, 10 November 2026). It was
+   * one row at the end of the docked group, which a phone hides (the dock
+   * repeats that group), so on a phone it had no row at all. It is its own
+   * section now, not docked, so the drawer and the rail both show it at the
+   * same level as Circle. The `roommates` switch drops `roommatesEntry`.
+   */
+  if (t.roommatesEntry) {
+    sections.push({
+      heading: null,
+      items: [{ href: ROOMMATES_ROUTES.home, label: t.roommatesEntry.nav, icon: "house-duplex" }],
+    });
+  }
 
   /*
    * The account block, which only means anything once there is an account.
@@ -283,7 +302,7 @@ export function buildNav({
     sections.push({
       heading: t.experienceShell.navMoneyLabel,
       items: [
-        { href: "/wallet", label: t.experienceShell.navBalance, icon: "wallet" },
+        ...(walletLive ? [{ href: "/wallet", label: t.experienceShell.navBalance, icon: "wallet" } as NavLeaf] : []),
         /* "Rewards" is the Rewards page's own title. Whether a reward is
            running is said by the page itself, from the rewards read
            (`lib/referral/rewards-read.ts`); the row never shows a figure. */
@@ -499,6 +518,8 @@ export function formerTrayItems(t: ShellDictionary, signedIn: boolean, stays: bo
  */
 export function isCurrent(href: string, activePath: string, activeType: string | null): boolean {
   const [path, query] = href.split("?");
+  /* Roommates is a whole area: every /roommates/** page lights its row. */
+  if (path === ROOMMATES_ROUTES.home && !query) return activePath === path || activePath.startsWith(`${path}/`);
   if (path !== activePath) return false;
   if (!query) return true;
   const wanted = new URLSearchParams(query).get("type");

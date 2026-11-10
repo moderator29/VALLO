@@ -1,7 +1,7 @@
 "use server";
 
 import { normalisePhone } from "@/lib/phone";
-import { normalisePhone as paylukLocalPhone } from "@/lib/money/funds";
+import { normalisePhone as localPhone } from "@/lib/money/funds";
 import { safeReturnPath } from "@/lib/security/return-path";
 import { withNext } from "./next-link";
 import { emailFromQuery } from "@/components/auth/auth-intent";
@@ -36,7 +36,8 @@ import {
   socialProviderOfSession,
   surfaceFromUserAgent,
 } from "./providers";
-import { HEAR_ABOUT_VALUES, REFERRAL_CODE_RE } from "./signup-options";
+import { HEAR_ABOUT_VALUES } from "./signup-options";
+import { parseInviteInput } from "@/lib/referral/code";
 import { CONFIRMATION_CODE_LENGTH, CONFIRMATION_CODE_RE } from "./confirmation-code";
 import {
   deactivatedAccountNotice,
@@ -130,7 +131,7 @@ function validateCredentials(
 function signUpPhone(formData: FormData): string | null {
   const raw = field(formData, "phone").trim();
   if (!raw) return null;
-  const local = paylukLocalPhone(raw);
+  const local = localPhone(raw);
   if (local) return local;
   const any = normalisePhone(raw, field(formData, "phoneCountry"));
   return any && !any.startsWith("+234") ? any : null;
@@ -228,9 +229,10 @@ function validateSignUp(formData: FormData, w: Refusals): Partial<Record<AuthFie
   if (occupationCode !== "" && !OCCUPATION_CODE_RE.test(occupationCode))
     errors.occupationCode = "Choose what you do from the list.";
 
-  // Referral code is optional; when supplied it must at least look like one.
-  if (referralCode && !REFERRAL_CODE_RE.test(referralCode))
-    errors.referralCode = "Referral codes are 4 to 24 letters, numbers or hyphens.";
+  /* Optional. A code or a pasted invite link both work; whatever was typed must
+     contain one, or the person is told rather than silently unreferred. */
+  if (referralCode && parseInviteInput(referralCode) === null)
+    errors.referralCode = "That is not a Vallo referral code or invite link.";
 
   return errors;
 }
@@ -484,7 +486,7 @@ export async function signUpWithEmail(
         locale: await getLocale(),
         /* A5: the form's field is gone (A1), so the code the /join/<code>
            door left in this browser is what records who invited them. */
-        referral_code: field(formData, "referralCode").trim() || (await inviteCodeFromCookie()) || null,
+        referral_code: parseInviteInput(field(formData, "referralCode")) || (await inviteCodeFromCookie()) || null,
         /*
          * WHAT THEY ACCEPTED, AND WHEN, RECORDED RATHER THAN ASSUMED.
          *
@@ -575,6 +577,7 @@ export async function signUpWithEmail(
    */
   if (!data.session) {
     await rememberPendingEmail(email);
+    await rememberSuccess("check-email");
     redirect(`/sign-up/verify?next=${encodeURIComponent(landingAfterAuth(formData))}`);
   }
 

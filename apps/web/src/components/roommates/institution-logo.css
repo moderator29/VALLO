@@ -1,0 +1,29 @@
+/*
+ * The school logo plate (`InstitutionLogo.tsx`). A rounded plate on a neutral
+ * surface, the logo contained inside with a little padding so a crest never
+ * touches the edge. The fallback is the same blue plate with the id-card glyph
+ * that the school rows already use (`nf-rm-plate`, from roommates-kit.css).
+ */
+@layer components {
+  .nf-rm-logo {
+    display: grid;
+    flex: none;
+    place-items: center;
+    overflow: hidden;
+    inline-size: var(--nf-rm-logo-size, 2.5rem);
+    block-size: var(--nf-rm-logo-size, 2.5rem);
+    padding: var(--nf-space-2xs);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-secondary);
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-rm-logo--lg {
+    border-radius: var(--nf-radius-lg);
+  }
+  .nf-rm-logo__img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+}

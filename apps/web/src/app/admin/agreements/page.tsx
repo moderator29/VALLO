@@ -10,6 +10,8 @@ import { GuaranteeClaims } from "../money/GuaranteeDesk";
 import { PageHead, Panel } from "../_components/panels";
 import { AgreementQueue } from "./AgreementQueue";
 import { WatchList } from "./WatchList";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { agreementsContext } from "@/lib/admin/copilot/contexts/agreements";
 import "./agreements.css";
 
 export const metadata: Metadata = {
@@ -47,7 +49,7 @@ export default async function AgreementsDeskPage() {
       ? await readGuaranteeDesk(claimsAccess.supabase, claimsAccess.userClient)
       : null;
   const claimsPanel = claimsDesk ? (
-    <Panel title="Guarantee claims" id="claims">
+    <Panel title="Guarantee claims (made before it retired)" id="claims">
       {claimsDesk.state !== "ok" ? (
         <p className="nf-body">The claims could not be read just now. Refresh to try again.</p>
       ) : (
@@ -58,7 +60,7 @@ export default async function AgreementsDeskPage() {
   if (access.state !== "admin") {
     return (
       <div className="nf-console">
-        <PageHead title="Guarantee claims" lede="Decide each claim against the inspection report and the agreement. The claimant reads your reason." />
+        <PageHead title="Guarantee claims" lede="The Vallo Guarantee was retired on 9 November 2026. Decide each claim made before then against the inspection report and the agreement. The claimant reads your reason." />
         {claimsPanel}
       </div>
     );
@@ -110,6 +112,20 @@ export default async function AgreementsDeskPage() {
         </>
       )}
       {claimsPanel}
+      <DeskCopilot
+        scope="agreements"
+        deskName="Agreements"
+        context={agreementsContext(
+          queue.state === "ok"
+            ? {
+                waitingSubmittedAt: queue.waiting.map((row) => row.submittedAt),
+                decidedRecently: queue.decided.length,
+                watching: watch === null ? null : watch.length,
+              }
+            : null,
+          now,
+        )}
+      />
     </div>
   );
 }

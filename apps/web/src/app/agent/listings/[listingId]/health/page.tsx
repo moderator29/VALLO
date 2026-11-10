@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
@@ -52,18 +52,15 @@ export default async function ListingHealthPage({ params }: { params: Promise<{ 
 
   const read = await readListingHealth(context.supabase, context.agent.id, listingId);
   const profile = agentProfileFrom(context.agent);
-  const back = (
-    <Link href="/agent/listings" className="nf-caption font-semibold text-[var(--nf-content-muted)]">
-      {t.agent.nav.myListings}
-    </Link>
-  );
 
   if (read.state !== "ok") {
     const words = read.state === "missing" ? h.missing : read.state === "example" ? h.example : h.unavailable;
     return (
-      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-        <div className="mx-auto max-w-2xl">
-          {back}
+      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+        {/* The frame's header carries the one way back, to My listings, where
+            the text link above the title used to. */}
+        <PageFrame title={h.title} fallback="/agent/listings">
+        <div>
           <EmptyState
             icon="doc-review"
             title={read.state === "example" ? read.title : h.title}
@@ -76,6 +73,7 @@ export default async function ListingHealthPage({ params }: { params: Promise<{ 
             data-testid="health-state"
           />
         </div>
+        </PageFrame>
       </AgentShell>
     );
   }
@@ -84,12 +82,10 @@ export default async function ListingHealthPage({ params }: { params: Promise<{ 
   const live = read.status === "PUBLISHED";
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-      <div className="mx-auto max-w-2xl" data-testid="listing-health">
-        {back}
-        <h1 className="nf-h1 mt-xs">{h.title}</h1>
-        <p className="nf-body mt-2xs font-semibold text-[var(--nf-content-primary)]">{read.title}</p>
-        <p className="mt-2xs max-w-[62ch] text-[var(--nf-content-secondary)]">{h.lede}</p>
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+      <PageFrame title={h.title} subtitle={read.title} fallback="/agent/listings">
+      <div data-testid="listing-health">
+        <p className="max-w-[62ch] text-[var(--nf-content-secondary)]">{h.lede}</p>
 
         <HealthReport health={health} listingId={read.id} t={t} locale={locale} />
 
@@ -101,6 +97,7 @@ export default async function ListingHealthPage({ params }: { params: Promise<{ 
           </div>
         ) : null}
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

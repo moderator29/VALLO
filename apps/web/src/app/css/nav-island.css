@@ -363,11 +363,4 @@
     line-height: 1.3;
     color: var(--nf-content-muted);
   }
-  .nf-create-sheet__option--quiet .nf-create-sheet__icon {
-    background: color-mix(in oklab, var(--nf-content-primary) 7%, transparent);
-    color: var(--nf-content-secondary);
-  }
-  .nf-create-sheet__option--quiet .nf-create-sheet__title {
-    color: var(--nf-content-secondary);
-  }
 }

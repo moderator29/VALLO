@@ -18,7 +18,7 @@ export type LifeStage = (typeof LIFE_STAGES)[number];
 export const LISTING_KINDS = ["room_offer", "roommate_wanted", "together"] as const;
 export type ListingKind = (typeof LISTING_KINDS)[number];
 
-export const LISTING_STATUSES = ["draft", "live", "paused", "filled", "expired", "removed"] as const;
+export const LISTING_STATUSES = ["draft", "submitted", "in_review", "changes_requested", "rejected", "live", "paused", "filled", "expired", "removed"] as const;
 export type ListingStatus = (typeof LISTING_STATUSES)[number];
 
 export const PERIODS = ["month", "year"] as const;
@@ -141,7 +141,7 @@ export type PersonRef = {
   avatarUrl: string | null;
 };
 
-export type InstitutionRef = { id: string; slug: string; name: string; shortName: string | null; kind: string; stateCode: string | null; city: string | null };
+export type InstitutionRef = { id: string; slug: string; name: string; shortName: string | null; kind: string; stateCode: string | null; city: string | null; logoUrl?: string | null; aliases?: string[] };
 
 export type Budget = { minMinor: number | null; maxMinor: number | null; period: Period };
 
@@ -386,6 +386,7 @@ export const LIMITS = {
   noteMax: 300,
   areasMax: 6,
   photosMax: 12,
+  galleryMax: 6,
   rulesMax: 10,
   ruleMax: 120,
   groupNameMin: 3,
@@ -394,6 +395,20 @@ export const LIMITS = {
   postMax: 1000,
   pageSize: 20,
 } as const;
+
+/**
+ * The profile gallery's paths, cleaned: only photos in the member's own
+ * folder, no repeats, no climbing out of it, at most six. Null when a path is
+ * not theirs (the action then refuses, the database repeats the rule).
+ */
+export function cleanGallery(userId: string, paths: readonly string[]): string[] | null {
+  const out: string[] = [];
+  for (const p of paths) {
+    if (!p.startsWith(`${userId}/`) || p.includes("..") || p.length > 300) return null;
+    if (!out.includes(p)) out.push(p);
+  }
+  return out.length > LIMITS.galleryMax ? null : out;
+}
 
 /* ------------------------------------------------------------------ money */
 
@@ -532,9 +547,13 @@ export function listingProblems(d: ListingDraft): string[] {
     if (d.rentMinor === null) out.push("rent");
     if (!d.authority) out.push("authority");
     if (!d.declared) out.push("declared");
+    if (d.photos.length < REVIEW_MIN_PHOTOS) out.push("photos");
   }
   return out;
 }
+
+/** A room offer needs this many photos to be sent for review (the database repeats it on approval). */
+export const REVIEW_MIN_PHOTOS = 3;
 
 /* ------------------------------------------------------------------ discover filters */
 
@@ -558,7 +577,11 @@ export type RoomFilters = {
   city: string | null;
   institutionId: string | null;
   kind: ListingKind | null;
+  /** Several kinds at once (the feed's "Offering a room" chip); wins over `kind` when set. */
+  kinds?: ListingKind[];
   maxMinor: number | null;
+  /** The budget range's floor (monthly equivalent, with `period`); optional so older callers are unchanged. */
+  minMinor?: number | null;
   period: Period;
   moveBy: string | null;
   roomType: RoomType | null;
@@ -638,6 +661,7 @@ export function readRoomFilters(p: Params): RoomFilters {
     institutionId: inst && uuidShape.test(inst) ? inst : null,
     kind: pick(one(p.kind), LISTING_KINDS),
     maxMinor: amount(one(p.max)),
+    ...(amount(one(p.min)) !== null ? { minMinor: amount(one(p.min)) } : {}),
     period: pick(one(p.per), PERIODS) ?? "year",
     moveBy: move && dateShape.test(move) ? move : null,
     roomType: pick(one(p.room), ROOM_TYPES),
@@ -657,6 +681,7 @@ export function filtersQuery(f: Partial<PeopleFilters & RoomFilters> & { mode?: 
   if (f.city) q.set("city", f.city);
   if (f.institutionId) q.set("school", f.institutionId);
   if (f.maxMinor) q.set("max", String(f.maxMinor));
+  if (f.minMinor) q.set("min", String(f.minMinor));
   if (f.period && f.period !== "year") q.set("per", f.period);
   if (f.moveBy) q.set("by", f.moveBy);
   if (f.lifeStage) q.set("who", f.lifeStage);
@@ -683,10 +708,13 @@ export const ROOMMATES_ROUTES = {
   create: "/roommates/new",
   profile: "/roommates/profile",
   hub: "/roommates/me",
+  connected: (interestId: string) => `/roommates/connected/${interestId}`,
   groups: "/roommates/groups",
   group: (id: string) => `/roommates/groups/${id}`,
   newGroup: "/roommates/groups/new",
   split: "/roommates/split",
+  checklist: "/roommates/tools/checklist",
+  agreement: "/roommates/tools/agreement",
   safety: "/roommates/safety",
   verify: "/roommates/verify",
   campus: (slug: string) => `/roommates/campus/${slug}`,

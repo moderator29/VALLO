@@ -9,7 +9,8 @@ import "@/app/css/map.css";
 /**
  * THE MAP CREDIT, COMPACT (the MapLibre attribution pattern, 13 October 2026).
  *
- * The map data credit ("© MapTiler · OpenStreetMap") is a licence requirement
+ * The map data credit ("© OpenMapTiles · © OpenStreetMap contributors ·
+ * OpenFreeMap") is a licence requirement
  * and must stay reachable on every map. A line of credit text under a small
  * map is noise on a screen about a home, so the map carries a small round "i"
  * and the credit appears when it is tapped, the way MapLibre's own compact

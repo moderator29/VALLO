@@ -6,8 +6,10 @@ import { resolveSessionClaims } from "@/lib/actions/session";
 import { reportReadFault } from "@/lib/observability/read-error";
 import { createClient } from "@/lib/supabase/server";
 import { SUPABASE_URL, isSupabaseConfigured } from "@/lib/supabase/env";
+import { identityGateApplies, listerIdentityStatus, type ListerIdentityStatus } from "@/lib/verification/lister-identity";
 
 import { faults, isNotLive } from "../degrade";
+import { SCHOOL_MAX_LIMIT, searchSchools } from "./school-search";
 import {
   EMPTY_LIFESTYLE,
   EMPTY_PROFILE,
@@ -18,6 +20,7 @@ import {
   type GroupStage,
   type InstitutionRef,
   type InterestStatus,
+  type ListingStatus,
   type MyRoommateProfile,
   type PeopleFilters,
   type PersonRef,
@@ -509,36 +512,64 @@ export async function readOpenGroups(filters: { stateCode: string | null; city: 
 
 /* ------------------------------------------------------------------ institutions */
 
+type InstitutionRow = { id: string; slug: string; name: string; short_name: string | null; kind: string; state_code: string | null; city: string | null; logo_url?: string | null; aliases?: string[] | null };
+
+const INSTITUTION_COLUMNS = "id, slug, name, short_name, kind, state_code, city";
+
+/** One page of live schools. The logo and alias columns arrive with institutions_logos_and_aliases; until then the base columns are read. */
+async function readInstitutionRows(db: SupabaseClient, stateCode: string | null | undefined, withExtras: boolean) {
+  const rows: InstitutionRow[] = [];
+  for (let from = 0; from < SCHOOL_MAX_LIMIT; from += 1000) {
+    let query = db
+      .from("institutions")
+      .select(withExtras ? `${INSTITUTION_COLUMNS}, logo_url, aliases` : INSTITUTION_COLUMNS)
+      .eq("status", "live")
+      .order("name")
+      .range(from, from + 999);
+    if (stateCode) query = query.eq("state_code", stateCode);
+    /* Handed back, not branched on: the one caller reports it (and retries without the extra columns). */
+    const { data, error: refused } = await query;
+    const failed = refused ? { rows, error: refused } : null;
+    if (failed) return failed;
+    const page = (data ?? []) as unknown as InstitutionRow[];
+    rows.push(...page);
+    if (page.length < 1000) break;
+  }
+  return { rows, error: null };
+}
+
+/**
+ * The schools directory. `q` is matched word by word against name, short name,
+ * city and aliases (see school-search.ts); `stateCode` narrows to one state; the
+ * list is capped at `limit` (default 200). With no `q` the order is kind, then
+ * name. Each item carries `logoUrl` (null until a logo is recorded).
+ */
 export async function listInstitutions(input: { q?: string; stateCode?: string | null; limit?: number } = {}): Promise<{ live: boolean; items: InstitutionRef[] }> {
   const v = await viewer();
   if (!v) return { live: false, items: [] };
-  let query = v.db
-    .from("institutions")
-    .select("id, slug, name, short_name, kind, state_code, city")
-    .eq("status", "live")
-    .order("name")
-    .limit(Math.min(input.limit ?? 200, 400));
-  if (input.stateCode) query = query.eq("state_code", input.stateCode);
-  const q = input.q?.trim();
-  if (q) query = query.or(`name.ilike.%${q.replace(/[%_,()]/g, " ")}%,short_name.ilike.%${q.replace(/[%_,()]/g, " ")}%`);
-  const { data, error } = await query;
-  if (error) {
-    await reportReadFault("read.roommates.institutions", ...faults(error));
-    if (isNotLive(error)) return { live: false, items: [] };
+  let read = await readInstitutionRows(v.db, input.stateCode, true);
+  if (read.error && isMissingColumn(read.error)) read = await readInstitutionRows(v.db, input.stateCode, false);
+  if (read.error) {
+    await reportReadFault("read.roommates.institutions", ...faults(read.error));
+    if (isNotLive(read.error)) return { live: false, items: [] };
     return { live: true, items: [] };
   }
-  return {
-    live: true,
-    items: ((data ?? []) as { id: string; slug: string; name: string; short_name: string | null; kind: string; state_code: string | null; city: string | null }[]).map((r) => ({
-      id: r.id,
-      slug: r.slug,
-      name: r.name,
-      shortName: r.short_name,
-      kind: r.kind,
-      stateCode: r.state_code,
-      city: r.city,
-    })),
-  };
+  const items: InstitutionRef[] = read.rows.map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    name: r.name,
+    shortName: r.short_name,
+    kind: r.kind,
+    stateCode: r.state_code,
+    city: r.city,
+    logoUrl: r.logo_url ?? null,
+    aliases: r.aliases ?? [],
+  }));
+  return { live: true, items: searchSchools(items, { q: input.q, stateCode: input.stateCode, limit: input.limit }) };
+}
+
+function isMissingColumn(error: { code?: string | null }): boolean {
+  return error.code === "42703" || error.code === "PGRST204";
 }
 
 export type InstitutionPage = {
@@ -599,4 +630,69 @@ export async function readMyConnections(): Promise<(PersonRef & { interestId: st
   if (!v?.id) return [];
   const res = await rpc<(PersonRef & { interestId: string })[]>(v.db, "roommate_my_connections", {}, "read.roommates.connections");
   return res.data ?? [];
+}
+
+/* ------------------------------------------------------------------ the review of my room offers */
+
+export type ListingReview = {
+  id: string;
+  status: ListingStatus;
+  /** What staff wrote with their decision: what to change, or why it was not approved. */
+  note: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+  /** True while an approval is on record (a paused post can resume without a new review). */
+  approved: boolean;
+};
+
+/**
+ * The review record of the signed-in member's own posts, by id. It is read
+ * straight from the member's own rows (the table's own policy shows an owner
+ * their rows), so another member's note can never come back. A server without
+ * the review SQL answers an empty map, and the screens then draw no banner.
+ */
+export async function readMyListingReviews(ids?: string[]): Promise<Record<string, ListingReview>> {
+  const v = await viewer();
+  if (!v?.id) return {};
+  let q = v.db.from("roommate_listings").select("id, status, review_note, submitted_at, reviewed_at, approved_at").eq("owner_id", v.id).limit(200);
+  if (ids && ids.length) q = q.in("id", ids.slice(0, 200));
+  const { data, error } = await q;
+  if (error) {
+    await reportReadFault("read.roommates.review", ...faults(error));
+    return {};
+  }
+  const out: Record<string, ListingReview> = {};
+  for (const r of (data ?? []) as { id: string; status: ListingStatus; review_note: string | null; submitted_at: string | null; reviewed_at: string | null; approved_at: string | null }[]) {
+    out[r.id] = { id: r.id, status: r.status, note: r.review_note, submittedAt: r.submitted_at, reviewedAt: r.reviewed_at, approved: Boolean(r.approved_at) };
+  }
+  return out;
+}
+
+/**
+ * The signed-in member's identity check, for the "Waiting on identity" step
+ * and banner. It is the one shared helper (`lib/verification/lister-identity`),
+ * which respects the platform's own switch; null means no wall applies or it
+ * could not be read (the staff approval still decides).
+ */
+export async function readMyIdentityState(): Promise<ListerIdentityStatus | null> {
+  const v = await viewer();
+  if (!v?.id) return null;
+  try {
+    if (!(await identityGateApplies(v.id))) return "approved";
+    return (await listerIdentityStatus(v.id)).status;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A person's gallery photos as URLs. The database decides who may see them
+ * (the owner and staff always; others only while the profile is active and
+ * not blocked), so an empty list is also the answer while the SQL is absent.
+ */
+export async function readProfileGallery(userId: string): Promise<{ path: string; url: string }[]> {
+  const v = await viewer();
+  if (!v?.id) return [];
+  const res = await rpc<string[]>(v.db, "roommate_profile_gallery", { p_user: userId }, "read.roommates.gallery");
+  return (res.data ?? []).map((path) => ({ path, url: photo(path) }));
 }

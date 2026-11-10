@@ -17,6 +17,7 @@
  */
 import {
   DIRECT_RAIL_STANDING,
+  ESCROW_NOT_OFFERED,
   LEGACY_GUARANTEE_CLAIM,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
@@ -28,7 +29,6 @@ import {
   WHO_PAYS_SENTENCE,
 } from "../money/copy";
 import { GRACE_WINDOW_DAYS } from "../account-deletion/constants";
-import { ESCROW_MEANS } from "@/app/(site)/docs/facts";
 
 export type FaqEntry = {
   id: string;
@@ -66,7 +66,7 @@ export const SUPPORT_FAQ: FaqEntry[] = [
       "landlord",
     ],
     answer:
-      `Annual rentals work as message, inspect, agree, then pay. Message the agent inside Vallo, inspect the property in person and submit the eight-item inspection report with photos. ${PAYMENT_GATE_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE}`,
+      `Annual rentals work as message, inspect, then agree. Message the agent inside Vallo, inspect the property in person and submit the eight-item inspection report with photos. ${PAYMENT_GATE_SENTENCE} ${NO_INSPECTION_FEE} ${OFF_PLATFORM_SENTENCE}`,
   },
   {
     id: "payments",
@@ -87,7 +87,7 @@ export const SUPPORT_FAQ: FaqEntry[] = [
       /* The id stays `wallet`, the word members type. The answer says the
          narrower true thing (A9): no balance holds a payment, and the Rewards
          Balance is separate. "Nothing to withdraw" was untrue beside it. */
-      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${ESCROW_MEANS} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
+      `${NO_PAYMENT_BALANCE} ${NO_CUSTODY_SENTENCE} ${ESCROW_NOT_OFFERED} ${REWARDS_BALANCE_SEPARATE} Refunds go back to the card or account you paid with.`,
   },
   {
     id: "guarantee",

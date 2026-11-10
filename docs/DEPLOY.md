@@ -83,9 +83,9 @@ re-count rather than quoting them.
 - **CI** in `.github/workflows/ci.yml`: typecheck, lint, tests and a build on
   every push. The Build job reads two public values from repository
   **Variables** (GitHub, Settings, Secrets and variables, Actions, Variables):
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the publishable key) and
-  `NEXT_PUBLIC_MAPTILER_KEY` (the same value as Vercel Production). Without
-  them the run warns that it is not building production's config.
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (the publishable key). Without it the run
+  warns that it is not building production's config. (The maps need no key
+  since 10 November 2026; `NEXT_PUBLIC_MAPTILER_KEY` can be deleted.)
 
 ---
 
@@ -681,9 +681,8 @@ deploy.
 - **CI exists but does not gate.** `.github/workflows/ci.yml` runs typecheck,
   lint, tests and a build, and `main` has no branch protection
   (THE_AUDIT DOC-01).
-- **Map tiles are on the non-commercial CARTO endpoint** wherever
-  `NEXT_PUBLIC_MAPTILER_KEY` is unset. It is set in Vercel for Production and
-  Preview; a local build without it falls back.
+- **Map tiles are on OpenFreeMap** everywhere (10 November 2026), free for
+  commercial use with no key. The CARTO and MapTiler paths are removed.
 - **Universal Links and Android App Links**: both association files exist and
   carry placeholders that fail verification rather than looking plausible.
   `docs/MOBILE.md` section 5.

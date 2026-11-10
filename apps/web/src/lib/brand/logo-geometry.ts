@@ -40,8 +40,8 @@ export const MARK_TOWERS = [
     "side": null
   }
 ] as const;
-export const MARK_SIDE = "#0B2A9E";
-export const MARK_ACCENT = "#FF8A3C";
+export const MARK_SIDE = "#1D47D8";
+export const MARK_ACCENT = "#FF9244";
 export const MARK_GRADIENTS = [
   {
     "id": "blue",
@@ -53,15 +53,15 @@ export const MARK_GRADIENTS = [
     "stops": [
       [
         0,
-        "#3FDCFF"
+        "#5BE7FF"
       ],
       [
         0.45,
-        "#1C86FF"
+        "#2F95FF"
       ],
       [
         1,
-        "#1238C8"
+        "#2455F2"
       ]
     ]
   },
@@ -75,15 +75,15 @@ export const MARK_GRADIENTS = [
     "stops": [
       [
         0,
-        "#FFA04A"
+        "#FFB25E"
       ],
       [
         0.35,
-        "#FF8A3C"
+        "#FF9244"
       ],
       [
         1,
-        "#F2561E"
+        "#F96B28"
       ]
     ]
   },
@@ -98,7 +98,7 @@ export const MARK_GRADIENTS = [
       [
         0,
         "#FFFFFF",
-        0.22
+        0.34
       ],
       [
         0.45,
@@ -117,31 +117,31 @@ export const MARK_GRADIENTS = [
     "stops": [
       [
         0,
-        "#3FDCFF"
+        "#5BE7FF"
       ],
       [
         0.16,
-        "#1C86FF"
+        "#2F95FF"
       ],
       [
         0.38,
-        "#1A4CF0"
+        "#2F6BFF"
       ],
       [
         0.6,
-        "#1C86FF"
+        "#2F95FF"
       ],
       [
         0.74,
-        "#1A4CF0"
+        "#2F6BFF"
       ],
       [
         0.9,
-        "#FF8A3C"
+        "#FF9244"
       ],
       [
         1,
-        "#FFA04A"
+        "#FFB25E"
       ]
     ]
   },
@@ -156,7 +156,7 @@ export const MARK_GRADIENTS = [
       [
         0,
         "#FFFFFF",
-        0.2
+        0.3
       ],
       [
         0.55,

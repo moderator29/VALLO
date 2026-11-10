@@ -6,6 +6,7 @@ import { Row, RowList, Section, Stack, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { UiIcon } from "@/design-system/icons/UiIcon";
+import { PageFrame } from "@/components/app/PageFrame";
 import { BusinessTierFan } from "@/components/app/artefact/BusinessTierFan";
 import { AccountNotificationsCard } from "../../(app)/settings/AccountToggles";
 import { forAccountToggles } from "@/lib/i18n/slice";
@@ -30,14 +31,8 @@ export function HostSettingsBody({
   const words = t.experienceHost;
   const page = words.settingsPage;
   return (
-    <>
-      <div className="nf-agent-head">
-        <div>
-          <h1 className="nf-agent-head__title">{page.title}</h1>
-          <p className={`mt-row ${TYPE.bodyLg}`}>{page.sub}</p>
-        </div>
-      </div>
-
+    /* The Grade 1 page frame: the large title with Back and its line. */
+    <PageFrame title={page.title} subtitle={page.sub} fallback="/host">
       <Stack>
         <Section title={t.hostWorkspace.settings.businessesTitle}>
           {businesses.length === 0 ? (
@@ -141,6 +136,6 @@ export function HostSettingsBody({
           </Link>
         </div>
       </Stack>
-    </>
+    </PageFrame>
   );
 }

@@ -4,6 +4,8 @@
  * `articles.test.ts` holds this list and `GUIDES` to the same set.
  */
 export const GUIDE_SLUGS = [
+  "how-to-list",
+  "how-verification-works",
   "avoiding-rental-scams",
   "what-a-move-in-total-includes",
   "renting-in-lagos",

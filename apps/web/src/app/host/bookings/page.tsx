@@ -7,6 +7,7 @@ import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { Amount } from "@/components/ui/Amount";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { readHostRoomBookings, type HostRoomBooking } from "@/lib/host/room-bookings";
 import { readHotelDesk } from "@/lib/host/tape-chart-read";
 import { HotelDashboard } from "@/components/host/dashboard/HotelDashboard";
@@ -64,11 +65,13 @@ export default async function HostRoomBookingsPage() {
   const hotelUp = hotel.state === "ok";
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide chromeBack={false} nav>
+      <PageFrame title={words.title} fallback="/host" width="wide">
       <div className="nf-dash">
         <div>
-          <h1 className="nf-h2">{words.title}</h1>
-          <p className={`mt-xs max-w-2xl ${TYPE.body}`}>
+          <p className={`max-w-2xl ${TYPE.body}`}>
             {words.lede} {HOST_ROOM_BOOKING_PAYMENT}
           </p>
           {/* Vallo's fee on a paid room, said plainly where the host reads their bookings. */}
@@ -105,6 +108,7 @@ export default async function HostRoomBookingsPage() {
           )
         ) : null}
       </div>
+      </PageFrame>
     </HostShell>
   );
 }

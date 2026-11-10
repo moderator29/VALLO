@@ -558,7 +558,14 @@ export function HostReservationsBoard({
   billsOn = false,
   title,
   depositLines = null,
+  framed = false,
 }: {
+  /**
+   * The page frame above already draws the title and its line (`/host/
+   * reservations`, Grade 1 page frame), so the board draws only the search
+   * in its head row. Off (the previews, the tests), it draws its own title.
+   */
+  framed?: boolean;
   board: HostTableBoard;
   /** D75: the deposit line words, while `restaurant_deposits` is on; null draws no deposit line. */
   depositLines?: DeskDepositLines | null;
@@ -604,10 +611,12 @@ export function HostReservationsBoard({
   return (
     <Desk.Provider value={context}>
       <div className="nf-agent-head">
-        <div className="min-w-0">
-          <h1 className="nf-agent-head__title">{title.heading}</h1>
-          <p className={`mt-row ${TYPE.bodyLg}`}>{title.line}</p>
-        </div>
+        {framed ? null : (
+          <div className="min-w-0">
+            <h1 className="nf-agent-head__title">{title.heading}</h1>
+            <p className={`mt-row ${TYPE.bodyLg}`}>{title.line}</p>
+          </div>
+        )}
         <form role="search" className="w-full lg:w-auto lg:min-w-[20rem]" onSubmit={(event) => event.preventDefault()}>
           <label htmlFor={searchId} className="sr-only">
             {words.search.label}

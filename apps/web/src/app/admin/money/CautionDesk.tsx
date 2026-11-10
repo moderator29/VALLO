@@ -15,7 +15,8 @@ import { banner } from "@/lib/ui/toast";
  * deduction gets the amount that stands (zero to what the lister proposed)
  * and a reason both parties read. A return the tenant says never arrived is
  * found received or not received, with a reason. What is left owed after the
- * due date can then be claimed from the Vallo Guarantee by the tenant.
+ * due date comes to this desk as an escalation to investigate (it went to the
+ * Vallo Guarantee until that was retired on 9 November 2026).
  */
 
 const ITEM_LABEL: Record<string, string> = {

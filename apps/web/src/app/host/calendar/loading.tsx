@@ -1,7 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { LargeHeaderSkeleton } from "@/components/app/ScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import { HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
 import "../host-desk.css";
 
@@ -18,7 +18,9 @@ import "../host-desk.css";
 export default async function LoadingHostCalendar() {
   return (
     <HostScreenSkeleton label={getDictionary(await getLocale()).hostWorkspace.loadingScreens.calendar} wide>
-      <LargeHeaderSkeleton />
+      {/* The page frame (wide): the large title with Back and the property's name. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
       <div className="nf-rcal" aria-hidden="true">
         <div className="nf-rcal__main">
           <div className="nf-rcal__plan">
@@ -61,6 +63,7 @@ export default async function LoadingHostCalendar() {
             <Skeleton className="mt-md" height="3rem" radius="pill" />
           </div>
         </div>
+      </div>
       </div>
     </HostScreenSkeleton>
   );

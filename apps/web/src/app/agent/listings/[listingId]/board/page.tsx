@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { EmptyState } from "@/components/app/Screen";
 import { boardFor } from "@/lib/listings/board";
@@ -82,8 +83,12 @@ export default async function BoardPage({ params }: { params: Promise<{ listingI
   }
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={null}>
-      <BoardPrint listingId={listingId} lines={verdict.lines} copy={copy} />
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={null} chromeBack={false}>
+      <PageFrame title={copy.title} subtitle={copy.lede} fallback="/agent/listings" width="narrow">
+        <div>
+          <BoardPrint listingId={listingId} lines={verdict.lines} copy={copy} />
+        </div>
+      </PageFrame>
     </AgentShell>
   );
 }

@@ -20,6 +20,8 @@ import { MandateDecision } from "./MandateDecision";
 import { landlordLineIsOpen, readClosedReasons, readMandateConsents } from "@/lib/landlord/queries";
 import { consentLine } from "@/lib/landlord/consent";
 import { toQueueRow } from "./rows";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { listingsContext } from "@/lib/admin/copilot/contexts/listings";
 import { LISTING_TABS, isDecidedStatus, listingStatusWord, reviewHref } from "./tabs";
 import "../_review/review.css";
 
@@ -123,23 +125,43 @@ export default async function AdminListingsPage({
     })),
   ];
   const hrefFor = (id: string) => reviewHref(id, query);
+  const copilot = (
+    <DeskCopilot
+      scope="listing_approval"
+      deskName="Listings"
+      context={listingsContext(
+        counts.state === "ok"
+          ? {
+              real: counts.data.real,
+              examples: Object.values(counts.data.examples).reduce((sum, n) => sum + n, 0),
+              medianMinutesThisWeek: times.state === "ok" ? times.data.thisWeek.medianMinutes : null,
+              decisionsThisWeek: times.state === "ok" ? times.data.thisWeek.decisions : 0,
+              waitingSubmittedAt: read.state === "ok" ? read.data.waiting.map((l) => l.submittedAt) : [],
+            }
+          : null,
+      )}
+    />
+  );
 
   if (read.state !== "ok") {
     return (
-      <ListingsQueue
-        title="Listings"
-        sub="Review and manage all submitted listings."
-        tabs={tabs}
-        rows={[]}
-        statusLabel={(status) => listingStatusWord(status, ui.statusLabel)}
-        counts={null}
-        reviewTimes={null}
-        page={page}
-        hasNext={false}
-        hrefForPage={() => base}
-        empty={null}
-        unavailable
-      />
+      <>
+        <ListingsQueue
+          title="Listings"
+          sub="Review and manage all submitted listings."
+          tabs={tabs}
+          rows={[]}
+          statusLabel={(status) => listingStatusWord(status, ui.statusLabel)}
+          counts={null}
+          reviewTimes={null}
+          page={page}
+          hasNext={false}
+          hrefForPage={() => base}
+          empty={null}
+          unavailable
+        />
+        {copilot}
+      </>
     );
   }
 
@@ -247,6 +269,7 @@ export default async function AdminListingsPage({
             : null
         }
       />
+      {copilot}
     </>
   );
 }

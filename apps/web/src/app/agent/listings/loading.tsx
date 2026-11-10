@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
  * The wait, on the agent's own listings.
@@ -12,7 +13,9 @@ import { AgentScreenSkeleton, AgentTitleSkeleton } from "@/components/agent/Agen
 export default function LoadingAgentListings() {
   return (
     <AgentScreenSkeleton label="Loading your listings">
-      <AgentTitleSkeleton />
+      {/* The page frame's geometry (wide), with its large title and lede. */}
+      <div className="nf-g1page" data-width="wide">
+      <PageHeaderSkeleton layout="large" subtitle />
 
       {/* The status filter rail above the list. */}
       <div className="mb-md flex gap-xs">
@@ -35,6 +38,7 @@ export default function LoadingAgentListings() {
           </li>
         ))}
       </ul>
+      </div>
     </AgentScreenSkeleton>
   );
 }

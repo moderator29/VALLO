@@ -341,6 +341,7 @@ export const ig: Dictionary = withFallback({
       coverPhoto: "Foto mkpuchi",
       coverPhotoSub: "Foto dị n'elu peeji gị",
       memberSince: "Onye otu kemgbe",
+      addPhoto: "Tinye foto gị",
       claimHandle: "Nweta aha njirimara gị",
       claimHandleNote:
         "Aha njirimara bụ adreesị gị na Vallo. Nweta otu, peeji a ga-enwe foto mkpuchi, peeji ọha na ebe ihe i dere ga-ebi.",
@@ -3225,7 +3226,8 @@ export const ig: Dictionary = withFallback({
       step1Title: "Họrọ ụbọchị gị",
       step1Body: "Họrọ ụbọchị mbanye na ụbọchị ọpụpụ na kalenda dị ndụ.",
       step2Title: "Kwenye ma kwụọ",
-      step2Body: "Ịkwụ ụgwọ na naira site na Paystack. Anyị anaghị anara gị ụgwọ n'oge na-erubeghị.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `step2Body` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       step3Title: "Nwee obi ụtọ na ebe obibi gị",
       step3Body: "Nkọwa mbanye ga-abịa ebe a nakwa site na email.",
     },
@@ -3804,7 +3806,8 @@ export const ig: Dictionary = withFallback({
     recommended: "Anyị na-atụ aro ya",
     continue: "Gaa n'ihu",
     saving: "Anyị na-echekwa nhọrọ gị",
-    escrowOnlyTitle: "A na-akwụ n'ime nchekwa ego",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrowOnlyTitle` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     cardOnlyTitle: "A na-akwụ site na kaadị",
     lockedNote: "Ịkwụ ụgwọ gị amalitela, ya mere ụzọ ị na-esi akwụ ụgwọ ga-anọgide otu a.",
     notPayerNote: "Onye na-akwụ ụlọ ma ọ bụ ọbịa na-ahọrọ otu a ga-esi kwụọ ụgwọ.",
@@ -3815,11 +3818,14 @@ export const ig: Dictionary = withFallback({
       closed: "Nkwekọrịta a emechiela, ya mere ọ nweghị ihe a ga-akwụ na ya.",
       already_paid: "A kwụọla nke a.",
       payment_started: "Ịkwụ ụgwọ amalitelarị, ya mere ụzọ ịkwụ ụgwọ enweghị ike ịgbanwe ugbu a.",
-      sale_escrow_only: "A na-akwụ ụgwọ ịzụ ụlọ naanị n'ime nchekwa ego.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `sale_escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       card_only: "A na-akwụ nke a naanị site na kaadị.",
-      escrow_only: "A na-akwụ nke a naanị n'ime nchekwa ego.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       no_rail: "Ịkwụ ụgwọ emepebeghị maka nke a. Ọ dịghị ego e wepụrụ.",
-      card_needs_review: "Ịkwụ site na kaadị emeghị na nkwekọrịta a ugbu a, n'ihi na ọ ga-achọ ka onye na Vallo buru ụzọ lelee ya. Nchekwa ego meghere.",
+      // NATIVE REVIEW (9 November 2026, money copy sweep): the sentence saying escrow is open was removed; the rest is the existing translation, unchanged.
+      card_needs_review: "Ịkwụ site na kaadị emeghị na nkwekọrịta a ugbu a, n'ihi na ọ ga-achọ ka onye na Vallo buru ụzọ lelee ya.",
       unavailable: "Anyị enweghị ike ichekwa ya ugbu a. Ọ dịghị ego e wepụrụ; nwaa ọzọ n'oge na-adịghị anya.",
     },
     accept: {
@@ -4593,7 +4599,8 @@ export const ig: Dictionary = withFallback({
       body: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji {amount}.",
       bodyNoAmount: "Ụlọ akụ onye kwụrụ ụgwọ tụgharịrị ịkwụ ụgwọ kaadị ị natara. Onye mmekọ ịkwụ ụgwọ weghachiri ya n'aka Vallo, ya mere akaụntụ gị ji ego ahụ.",
       meansTitle: "Ihe ọ pụtara",
-      means: "Ka ọ ka dị n'ụgwọ, Vallo na-akwụsịtụ ịhapụ ego onye mmekọ anyị nwere ikikere jidere maka gị, iwepụ ego na Rewards Balance gị, na ịkwụ gị ego arịrịọ Vallo Guarantee. Ego e ji kaadị kwụọ ka na-abata n'akaụntụ ịkwụ ụgwọ gị n'oge a kwụrụ ya. Ọ dịghị ihe ọzọ na-agbanwe n'akaụntụ gị.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `means` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       nextTitle: "Ihe na-esote",
       next: "Ndị otu ego Vallo ga-akpọtụrụ gị iji dozie ya. Ozugbo e doziri ya ma ọ bụ mechie ya, ọkwa a ga-apụ n'onwe ya.",
       help: "Jụọ ndị nkwado maka ya",
@@ -4672,8 +4679,8 @@ export const ig: Dictionary = withFallback({
         blockConfirm:
           "Ha agaghị enwe ike iziga gị ozi, ịhụ profaịlụ gị ma ọ bụ ịchọta ụlọ gị, ị gaghịkwa ahụ nke ha. A gaghị agwa ha. Ị nwere ike ịgbanwe nke a na Ntọala, Nzuzo.",
         keepOpen: "Hapụ mkparịta ụka ahụ ka ọ meghee",
-        safetyRule:
-          "Maka nchekwa gị, debe mkparịta ụka na ịkwụ ụgwọ niile n'ime Vallo. Anyị anaghị echekwa nkwekọrịta e mere na mpụga ikpo okwu a. Kwụọ ụgwọ naanị mgbe ị lechara ụlọ ahụ.",
+        /* NATIVE REVIEW (9 November 2026, money copy sweep): `safetyRule` was reworded in English and
+           falls back to the English until a native reader translates it. Never invent one. */
       },
       card: {
         rated: "Kpakpando {rating} n'ime 5",

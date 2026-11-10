@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { openFailureKind } from "./funds";
 
 describe("openFailureKind", () => {
-  it("reads a phone already on another Payluk account as phone_taken", () => {
+  it("reads a phone already on another provider account as phone_taken", () => {
     expect(openFailureKind("The phone number is already registered to your own merchant account (merchant_super_admin)")).toBe("phone_taken");
     expect(openFailureKind("Phone number already exists")).toBe("phone_taken");
   });

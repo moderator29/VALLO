@@ -18,6 +18,8 @@ import { RentSummary } from "./RentSummary";
 import { RentLandlordFact } from "./RentLandlordFact";
 import { chargeRentSavedCardFor } from "./saved-card-action";
 import { withNext } from "@/lib/auth/next-link";
+import { RENT_NOT_OPEN_NEXT, RENT_NOT_OPEN_SHORT } from "@/lib/money/copy";
+import { RENT_PAYMENT_OPEN } from "@/lib/rent/payment-open";
 
 export const metadata: Metadata = { title: "Pay the rent" };
 
@@ -210,6 +212,31 @@ export default async function RentPayPage({
           <Suspense fallback={null}>
             <RentLandlordFact inspectionId={inspectionId} copy={getDictionary(locale).landlord.rentFact} locale={locale} />
           </Suspense>
+        </div>
+      </Shell>
+    );
+  }
+
+  /* Payment for rentals is not open (9 November 2026, `lib/rent/payment-open`).
+     The figures stay on screen so the renter knows what was agreed; no pay
+     button is drawn, and the server actions behind it refuse on their own. */
+  if (!RENT_PAYMENT_OPEN) {
+    return (
+      <Shell subtitle={view.title}>
+        <Reveal>
+          <RentSummary view={view} />
+        </Reveal>
+        <div className="mt-lg">
+          <ResultScreen
+            state="pending"
+            mark="card-lock"
+            verdict={RENT_NOT_OPEN_SHORT}
+            consequence={RENT_NOT_OPEN_NEXT}
+            actions={[
+              { label: c.openMessages, href: "/messages", tone: "primary" },
+              { label: c.backToListing, href: `/listing/${view.listingId}`, tone: "quiet" },
+            ]}
+          />
         </div>
       </Shell>
     );

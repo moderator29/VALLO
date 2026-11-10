@@ -91,6 +91,10 @@ export type ClientCopy = {
 const SLICED_MOMENTS = [
   "accountCreated",
   "signedIn",
+  "signedOut",
+  "profileConfirmed",
+  "photoAdded",
+  "checkEmail",
   "emailVerified",
   "passwordChanged",
   "passcodeSet",

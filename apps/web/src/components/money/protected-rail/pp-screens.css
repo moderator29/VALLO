@@ -1,0 +1,802 @@
+/*
+ * THE PROTECTED PAYMENT SCREENS (PROTECTED_PAYMENTS_SPECS spec two, design
+ * system). Tokens only, so dark (the default) and light both come from the
+ * theme. Money, account numbers and the clock in tabular figures. Every state
+ * carries words and an icon; colour only tints them. Motion is one calm
+ * orbit while the bank confirms and one settle of the shield, both still
+ * under reduced motion.
+ */
+@layer components {
+  .nf-pp-screen {
+    display: grid;
+    gap: var(--nf-space-lg);
+    max-width: 34rem;
+    margin-inline: auto;
+    padding-block-end: var(--nf-space-xl);
+  }
+
+  /* ------------------------------------------------------------- the head */
+  .nf-pp-head {
+    display: grid;
+    gap: var(--nf-space-xs);
+    justify-items: start;
+  }
+
+  .nf-pp-overline {
+    margin: 0;
+    font-size: var(--nf-text-overline);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nf-content-muted);
+  }
+
+  .nf-pp-title {
+    margin: 0;
+    font-size: var(--nf-text-h1);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--nf-content-primary);
+    text-wrap: balance;
+  }
+
+  .nf-pp-lead {
+    font-size: var(--nf-text-body);
+    line-height: 1.55;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-lead p {
+    margin: 0;
+  }
+
+  /* ------------------------------------------------------- the state pill */
+  .nf-pp-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    padding: var(--nf-space-3xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-badge);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    background: var(--nf-status-pending-surface);
+    color: var(--nf-status-pending);
+  }
+
+  .nf-pp-pill[data-tone="held"] {
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-pp-pill[data-tone="done"] {
+    background: var(--nf-state-success-surface);
+    color: var(--nf-state-success);
+  }
+
+  .nf-pp-pill[data-tone="attention"] {
+    background: var(--nf-state-warning-surface);
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-pill[data-tone="problem"] {
+    background: var(--nf-status-rejected-surface);
+    color: var(--nf-status-rejected);
+  }
+
+  /* ----------------------------------------------------------- the amount */
+  .nf-pp-amount {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+
+  .nf-pp-amount__figure {
+    margin: 0;
+    /* Large, but always one line on a 360 phone (eleven characters of ₦). */
+    font-size: min(var(--nf-text-figure-xl), 11vw);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.05;
+    color: var(--nf-content-primary);
+    white-space: nowrap;
+  }
+
+  .nf-pp-amount__caption {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+
+  /* ------------------------------------------------------------- the rows */
+  .nf-pp-rows {
+    margin: 0;
+    display: grid;
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+  }
+
+  .nf-pp-rows[data-sunken] {
+    background: var(--nf-surface-inset);
+  }
+
+  .nf-pp-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-2xs) var(--nf-space-md);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+  }
+
+  .nf-pp-row + .nf-pp-row {
+    border-top: 1px solid var(--nf-divider);
+  }
+
+  .nf-pp-row dt {
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-row dd {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+    overflow-wrap: anywhere;
+  }
+
+  .nf-pp-row[data-strong] dd {
+    font-weight: 700;
+    font-size: var(--nf-text-body-lg);
+  }
+
+  /* ------------------------------------------------------------ the copy */
+  .nf-pp-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+  }
+
+  .nf-pp-copy__value {
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nf-pp-copy__button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-block: calc(var(--nf-space-xs) * -1);
+    border: 1px solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-primary);
+    color: var(--nf-brand-primary);
+    cursor: pointer;
+  }
+
+  .nf-pp-copy__button:focus-visible {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: 2px;
+  }
+
+  /* ------------------------------------------------------------ the place */
+  .nf-pp-place {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-sm);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+  }
+
+  .nf-pp-place__photo {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--nf-radius-md);
+    object-fit: cover;
+  }
+
+  .nf-pp-place__photo--empty {
+    display: grid;
+    place-items: center;
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-pp-place__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nf-pp-place__title {
+    font-weight: 600;
+    color: var(--nf-content-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .nf-pp-place__area {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-3xs);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-place__amount {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-primary);
+  }
+
+  /* ---------------------------------------------------------- the options */
+  .nf-pp-options {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-pp-option {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+    cursor: pointer;
+  }
+
+  .nf-pp-option[data-on] {
+    border-color: var(--nf-brand-primary);
+    box-shadow: 0 0 0 1px var(--nf-brand-primary);
+  }
+
+  .nf-pp-option:has(input:focus-visible) {
+    outline: 2px solid var(--nf-brand-primary);
+    outline-offset: 2px;
+  }
+
+  .nf-pp-option__head {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-pp-option__plate {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-pp-option__name {
+    flex: 1;
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-option__radio {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: var(--nf-radius-circle);
+    border: 2px solid var(--nf-content-muted);
+  }
+
+  .nf-pp-option[data-on] .nf-pp-option__radio {
+    border: 7px solid var(--nf-brand-primary);
+  }
+
+  .nf-pp-option__promise,
+  .nf-pp-option__line {
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-option__note {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-chip {
+    padding: var(--nf-space-3xs) var(--nf-space-xs);
+    border-radius: var(--nf-radius-badge);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  /* ------------------------------------------------- notices, fine, links */
+  .nf-pp-notice {
+    display: flex;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card-sm);
+    background: var(--nf-state-info-surface);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-notice[data-tone="attention"] {
+    background: var(--nf-state-warning-surface);
+  }
+
+  .nf-pp-notice > svg {
+    flex: none;
+    margin-top: 2px;
+  }
+
+  .nf-pp-fine {
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-fine--center {
+    text-align: center;
+  }
+
+  .nf-pp-link {
+    justify-self: center;
+    padding: var(--nf-space-xs);
+    font-weight: 600;
+    color: var(--nf-content-link);
+  }
+
+  .nf-pp-prose {
+    display: grid;
+    gap: var(--nf-space-sm);
+    font-size: var(--nf-text-body);
+    line-height: 1.6;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-prose p {
+    margin: 0;
+  }
+
+  .nf-pp-actions {
+    display: grid;
+    gap: var(--nf-space-sm);
+  }
+
+  /* ------------------------------------------------------------ the clock */
+  .nf-pp-clock {
+    display: grid;
+    gap: var(--nf-space-xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-clock p {
+    margin: 0;
+  }
+
+  .nf-pp-clock--none {
+    font-weight: 400;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-clock__bar {
+    display: block;
+    height: 4px;
+    border-radius: var(--nf-radius-badge);
+    background: var(--nf-divider);
+    overflow: hidden;
+  }
+
+  .nf-pp-clock__bar > span {
+    display: block;
+    height: 100%;
+    background: var(--nf-brand-primary);
+    transform-origin: left center;
+    transition: transform 1s linear;
+  }
+
+  /* --------------------------------------------------------- the timeline */
+  .nf-pp-timeline ol {
+    list-style: none;
+    margin: var(--nf-space-sm) 0 0;
+    padding: 0;
+    display: grid;
+  }
+
+  .nf-pp-step {
+    position: relative;
+    display: flex;
+    gap: var(--nf-space-sm);
+    padding-bottom: var(--nf-space-md);
+  }
+
+  .nf-pp-step:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 26px;
+    bottom: 2px;
+    width: 2px;
+    background: var(--nf-divider);
+  }
+
+  .nf-pp-step[data-state="done"]:not(:last-child)::before {
+    background: var(--nf-brand-primary);
+  }
+
+  .nf-pp-step__dot {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--nf-radius-circle);
+    border: 2px solid var(--nf-content-muted);
+    color: var(--nf-content-on-brand);
+  }
+
+  .nf-pp-step[data-state="done"] .nf-pp-step__dot {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-primary);
+  }
+
+  .nf-pp-step[data-state="now"] .nf-pp-step__dot {
+    border-color: var(--nf-brand-primary);
+    box-shadow: 0 0 0 4px var(--nf-brand-tint-1);
+  }
+
+  .nf-pp-step[data-state="stopped"] .nf-pp-step__dot {
+    border-color: var(--nf-state-warning);
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-step__text {
+    display: grid;
+    gap: var(--nf-space-3xs);
+  }
+
+  .nf-pp-step__label {
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-step[data-state="next"] .nf-pp-step__label {
+    font-weight: 400;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-step__at {
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ----------------------------------------------------- the info cards */
+  .nf-pp-info {
+    display: flex;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+  }
+
+  .nf-pp-info__plate {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-pp-info__text {
+    display: grid;
+    gap: var(--nf-space-2xs);
+  }
+
+  .nf-pp-info__title {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-info__body {
+    display: grid;
+    gap: var(--nf-space-2xs);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.55;
+    color: var(--nf-content-secondary);
+  }
+
+  .nf-pp-info__body p {
+    margin: 0;
+  }
+
+  /* ---------------------------------------------------------- milestone */
+  .nf-pp-milestone {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-lg) var(--nf-space-md);
+    border: 1px solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-raised);
+  }
+
+  .nf-pp-milestone__title {
+    margin: 0;
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-milestone p {
+    margin: 0;
+    color: var(--nf-content-secondary);
+  }
+
+  /* -------------------------------------------------- marks and motion */
+  .nf-pp-mark,
+  .nf-pp-shield,
+  .nf-pp-orbit {
+    justify-self: start;
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-pp-shield {
+    width: 88px;
+    height: 88px;
+    box-shadow: 0 0 0 8px var(--nf-brand-tint-1);
+    animation: nf-pp-settle 600ms var(--nf-ease-entrance) both;
+  }
+
+  .nf-pp-orbit {
+    position: relative;
+  }
+
+  .nf-pp-orbit > span {
+    position: absolute;
+    inset: -6px;
+    border-radius: var(--nf-radius-circle);
+    border: 2px solid transparent;
+    border-top-color: var(--nf-brand-primary);
+    animation: nf-pp-orbit 2.4s linear 6;
+  }
+
+  @keyframes nf-pp-settle {
+    from {
+      transform: scale(0.85);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes nf-pp-orbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-pp-shield,
+    .nf-pp-orbit > span {
+      animation: none;
+    }
+
+    .nf-pp-clock__bar > span {
+      transition: none;
+    }
+  }
+
+  [data-motion-lite] .nf-pp-shield,
+  [data-motion-lite] .nf-pp-orbit > span {
+    animation: none;
+  }
+}
+
+/*
+ * THE SCREENS NOBODY ASKS FOR, THE PARTNER MARK, THE DISPUTE SHEET AND THE
+ * RECEIPT (10 November 2026). The same family: the attention tint behind a
+ * plate or a pill always sits beside words and an icon.
+ */
+@layer components {
+  .nf-pp-mark[data-tone="attention"],
+  .nf-pp-info__plate[data-tone="attention"] {
+    background: var(--nf-state-warning-surface);
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-stale {
+    display: inline-grid;
+    justify-items: end;
+    gap: var(--nf-space-3xs);
+  }
+
+  .nf-pp-stale__at {
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+    color: var(--nf-state-warning);
+  }
+
+  .nf-pp-notice__title {
+    font-weight: 700;
+  }
+
+  .nf-pp-alert {
+    display: flex;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: 1px solid var(--nf-divider);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-raised);
+  }
+
+  .nf-pp-alert .nf-pp-info__text {
+    justify-items: start;
+    gap: var(--nf-space-xs);
+  }
+
+  /* The partner mark: one quiet line under the pay button, never the hero. */
+  .nf-pp-partner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--nf-space-3xs);
+    margin: 0;
+    font-size: var(--nf-text-caption);
+    color: var(--nf-content-muted);
+  }
+
+  /* --------------------------------------------------------- the dispute */
+  .nf-pp-reasons {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .nf-pp-reasons legend,
+  .nf-pp-field-label {
+    margin-block-end: var(--nf-space-2xs);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-reason {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    min-height: 48px;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    border: 1px solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-primary);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+    cursor: pointer;
+  }
+
+  .nf-pp-reason[data-on] {
+    border-color: var(--nf-brand-primary);
+    background: var(--nf-brand-tint-1);
+  }
+
+  .nf-pp-reason__dot {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--nf-radius-circle);
+    border: 2px solid var(--nf-brand-edge-soft);
+  }
+
+  .nf-pp-reason[data-on] .nf-pp-reason__dot {
+    border-color: var(--nf-brand-primary);
+    box-shadow: inset 0 0 0 3px var(--nf-surface-primary);
+    background: var(--nf-brand-primary);
+  }
+
+  .nf-pp-reason:has(:focus-visible) {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* ----------------------------------------------------------- the receipt */
+  .nf-pp-receipt {
+    display: grid;
+    gap: var(--nf-space-md);
+    scroll-margin-top: var(--nf-space-xl);
+  }
+
+  .nf-pp-receipt__title {
+    margin: 0;
+    font-size: var(--nf-text-h3);
+    font-weight: 700;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-history {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nf-pp-history li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--nf-space-3xs) var(--nf-space-md);
+    font-size: var(--nf-text-body-sm);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-pp-history time {
+    color: var(--nf-content-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nf-pp-help {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nf-pp-help a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    min-height: 48px;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-link);
+  }
+
+  .nf-pp-help li + li {
+    border-top: 1px solid var(--nf-divider);
+  }
+
+  /* ---------------------------------------------------- the payments list */
+  .nf-pp-list-amount {
+    display: grid;
+    justify-items: end;
+    gap: var(--nf-space-3xs);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  /* The stale status keeps to the right edge even when its row wraps at 360. */
+  .nf-pp-row:has(.nf-pp-stale) dd {
+    margin-inline-start: auto;
+  }
+}

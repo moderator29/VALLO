@@ -1,6 +1,7 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { fill } from "../_components/copy";
 import { QueueTabs } from "../_components/QueueTable";
 import type { ComplianceLane } from "./_lanes/lane";
@@ -10,6 +11,8 @@ import { sanctionsLane } from "./_lanes/SanctionsLane";
 import { riskLane } from "./_lanes/RiskLane";
 import { pepLane } from "./_lanes/PepLane";
 import { beneficialOwnershipLane } from "./_lanes/BeneficialOwnershipLane";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { complianceContext } from "@/lib/admin/copilot/contexts/compliance";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +51,7 @@ export default async function CompliancePage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={c.title} lede={c.lede} />
+      <PageHead title={c.title} lede={c.lede} />
       {lane ? (
         <>
           <QueueTabs
@@ -68,6 +71,7 @@ export default async function CompliancePage({
       ) : (
         <ui.QueueEmpty title={c.noLanes} body={c.lede} everHadRows={false} />
       )}
+      <DeskCopilot scope="compliance" deskName="Compliance" context={complianceContext(lane ? lane.title(t) : null)} />
     </div>
   );
 }

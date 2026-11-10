@@ -1,6 +1,7 @@
 "use client";
 
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { joinArea, leaveArea } from "@/lib/social/areas-actions";
@@ -66,7 +67,14 @@ export function JoinButton({
           return;
         }
         /* Said by the one banner at the top of the screen (Grade 1). */
-        banner.success(next ? "You joined this area. Its posts are in your feed now." : "You left this area.");
+        bannerWithUndo(next ? "You joined this area. Its posts are in your feed now." : "You left this area. Its posts leave your feed.", {
+          undo: () => (next ? leaveArea({ areaId }) : joinArea({ areaId })),
+          undone: next ? "You left this area again." : "You are back in this area.",
+          onUndone: () => {
+            setIsJoined(!next);
+            router.refresh();
+          },
+        });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

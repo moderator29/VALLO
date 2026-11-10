@@ -69,9 +69,9 @@ export default async function ContactPage({
               works. It offered a dead route in the largest type on the page
               and the live one underneath it in the smallest.
 
-              The address returns here on its own the moment
-              NEXT_PUBLIC_SUPPORT_EMAIL names a real one. Until then the
-              promise is the hero, because the promise is the true part.
+              Since 9 November 2026 there is one real address,
+              hello@vallospaces.com (CONTACT_EMAIL in lib/support-email.ts),
+              so it sits here beside the promise.
             */}
             {SUPPORT_MAILBOX ? (
               <>

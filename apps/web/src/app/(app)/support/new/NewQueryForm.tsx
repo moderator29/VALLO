@@ -1,5 +1,6 @@
 "use client";
 
+import { CopyButton } from "@/components/ui/CopyButton";
 import { banner } from "@/lib/ui/toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -458,6 +459,7 @@ export function FiledView({ filed, topic, copy }: { filed: Filed; topic: string 
         >
           {filed.reference}
         </span>
+        <CopyButton value={filed.reference} kind="code" label="Copy ticket number" message="Ticket number copied" />
       </div>
       <div className="mt-block space-y-row">
         {filed.id ? (

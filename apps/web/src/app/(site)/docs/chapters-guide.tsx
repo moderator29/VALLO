@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import { FEE_PROVIDER_CHARGES, FEE_ROUND_NOTE, FEE_WHO_PAYS, NO_INSPECTION_FEE, OFF_PLATFORM_SENTENCE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import { FEE_PERCENT } from "@/lib/money/fee-schedule";
 import { SUPPLY_DOOR_HREF } from "@/lib/supply/roles";
 import { MAX_DAYS_AHEAD, MAX_PARTY } from "@/lib/reservations/limits";
 import { MAX_UPLOAD_LABEL, MAX_VIDEOS, MAX_VIDEO_SECONDS, MIN_MEDIA, RECOMMENDED_MEDIA } from "@/lib/agent/listings-model";
-import { VERIFICATION_ORDER } from "@/lib/trust/verification";
+import { VERIFICATION_ORDER, type VerificationRung } from "@/lib/trust/verification";
+import type { UiIconName } from "@/design-system/icons/UiIcon";
+
 import type { DocChapter } from "./chapters";
-import { DocsFlow } from "./DocsFlow";
+import { DocFlow } from "@/components/docs/DocFlow";
+import { DocTable } from "@/components/docs/DocTable";
 import {
   COMMISSION_FROM_SHARE,
   HOTEL_COMMISSION_SENTENCE,
@@ -15,6 +19,9 @@ import {
   SEATED_TABLE_FEE,
   VALLO_NEVER_HOLDS,
 } from "./facts";
+
+/** One glyph per rung, the same wherever the ladder is drawn. */
+export const RUNG_ICON: Record<VerificationRung, UiIconName> = { identity: "id-card", address: "location", payout: "bank", in_person: "users" };
 
 /**
  * THE CHAPTERS WRITTEN FROM THE FOUNDER'S DECISIONS OF 13 OCTOBER 2026
@@ -215,11 +222,45 @@ export const WHAT_VALLO_COSTS: DocChapter = {
       body: (
         <>
           <p>{COMMISSION_FROM_SHARE}</p>
-          <p>
-            A renter, buyer or guest pays exactly the listed price. Before a lister publishes, Vallo
-            shows them what they will receive after its commission, in naira.
-          </p>
-          <p>{NO_INSPECTION_FEE}</p>
+          <DocTable
+            caption="Who pays Vallo what"
+            columns={[
+              { key: "who", label: "Who" },
+              { key: "what", label: "What Vallo charges" },
+              { key: "pays", label: "Pays Vallo anything?", kind: "yesno" },
+            ]}
+            rows={[
+              { id: "guest", icon: "user", cells: { who: "A renter, buyer or guest", what: "Nothing. They pay exactly the listed price.", pays: { yes: false } } },
+              { id: "viewer", icon: "calendar-check", cells: { who: "Somebody viewing a property", what: NO_INSPECTION_FEE, pays: { yes: false } } },
+              { id: "lister", icon: "key", cells: { who: "An owner, agent or shortlet host", what: <>Vallo&rsquo;s commission, from their share, shown to them in naira before they publish.</>, pays: { yes: true, note: "From their share" } } },
+              { id: "hotel", icon: "building-hotel", cells: { who: "A hotel", what: <Link href="#hotels" className={A}>The hotel commission</Link>, pays: { yes: true, note: "From their share" } } },
+              { id: "restaurant", icon: "utensils", cells: { who: "A restaurant", what: <Link href="#restaurants" className={A}>The fee for each table seated</Link>, pays: { yes: true, note: "Billed monthly" } } },
+            ]}
+          />
+        </>
+      ),
+    },
+    {
+      id: "payment-fees",
+      heading: "The fee on a payment",
+      body: (
+        <>
+          <p>{FEE_WHO_PAYS}</p>
+          <DocTable
+            caption="What a payment costs, and what each part is"
+            columns={[
+              { key: "payment", label: "Payment" },
+              { key: "vallo", label: "Vallo's service fee" },
+              { key: "provider", label: "The provider's fee" },
+              { key: "total", label: "Total" },
+            ]}
+            rows={[
+              { id: "rent", icon: "key", cells: { payment: "Rent, through the payment partner (not open yet)", vallo: `${FEE_PERCENT.vallo}%`, provider: `About ${FEE_PERCENT.rentPartner}%, the payment partner's`, total: `About ${FEE_PERCENT.rentTotal}%` } },
+              { id: "other", icon: "credit-card", cells: { payment: "Every other payment, by card", vallo: `${FEE_PERCENT.vallo}%`, provider: `About ${FEE_PERCENT.otherProcessor}%, the payment processor's`, total: `About ${FEE_PERCENT.otherTotal}%` } },
+            ]}
+          />
+          <p>{FEE_PROVIDER_CHARGES}</p>
+          <p>{FEE_ROUND_NOTE}</p>
         </>
       ),
     },
@@ -240,6 +281,18 @@ export const WHAT_VALLO_COSTS: DocChapter = {
           </p>
         </>
       ),
+    },
+    {
+      id: "work-it-out",
+      heading: "Work out what a booking pays",
+      body: (
+        <p>
+          Put in a nightly price and the number of nights, or the tables a restaurant seats in a month,
+          and see each line with who receives it. The figures come from the rates in force, the same ones
+          a lister sees before publishing.
+        </p>
+      ),
+      tool: "fee-calculator",
     },
     {
       id: "pro",
@@ -306,13 +359,13 @@ export const VIEWINGS: DocChapter = {
       heading: "Schedule a visit",
       body: (
         <>
-          <DocsFlow
+          <DocFlow
             label="Scheduling a visit"
             steps={[
-              { object: "home-search", label: "Choose the visit type" },
-              { object: "calendar-grid", label: "Pick a day and time" },
-              { object: "doc-review", label: "Check it" },
-              { object: "calendar-check", label: "Send or book" },
+              { icon: "video", title: "Choose the visit type", outcome: "In person, or a live video call from the property." },
+              { icon: "calendar-clock", title: "Pick a day and time", outcome: "All times are Lagos time." },
+              { icon: "clipboard-list", title: "Check it", outcome: "The date, the time and the visit type." },
+              { icon: "calendar-check", title: "Send or book", href: "#status", outcome: "The visit has its own page, showing where it really stands." },
             ]}
           />
           <ol role="list">
@@ -346,21 +399,21 @@ export const VIEWINGS: DocChapter = {
       body: (
         <>
           <p>After you send it, the visit has its own page. It shows where it really stands:</p>
-          <ul role="list">
-            <li>
-              <strong>Request sent.</strong> Waiting for the lister. Nothing is booked yet.
-            </li>
-            <li>
-              <strong>Visit confirmed.</strong> The lister is expecting you.
-            </li>
-            <li>
-              <strong>A new time was offered.</strong> Accept it in one tap, or cancel the request.
-            </li>
-            <li>
-              <strong>Request declined</strong> or <strong>Visit cancelled.</strong> Ask for another time
-              from the same page.
-            </li>
-          </ul>
+          <DocTable
+            caption="Where a visit stands"
+            captionHidden
+            columns={[
+              { key: "state", label: "Status", kind: "state" },
+              { key: "means", label: "What it means" },
+            ]}
+            rows={[
+              { id: "sent", cells: { state: { state: "Request sent", tone: "pending" }, means: "Waiting for the lister. Nothing is booked yet." } },
+              { id: "confirmed", cells: { state: { state: "Visit confirmed", tone: "success" }, means: "The lister is expecting you." } },
+              { id: "offered", cells: { state: { state: "A new time was offered", tone: "info" }, means: "Accept it in one tap, or cancel the request." } },
+              { id: "declined", cells: { state: { state: "Request declined", tone: "danger" }, means: "Ask for another time from the same page." } },
+              { id: "cancelled", cells: { state: { state: "Visit cancelled", tone: "neutral" }, means: "Ask for another time from the same page." } },
+            ]}
+          />
           <p>
             <strong>What happens next</strong> is listed on the same page: the lister confirms, the
             reminders, the visit, then your decision. Once the visit is confirmed, use{" "}
@@ -376,11 +429,19 @@ export const VIEWINGS: DocChapter = {
       body: (
         <>
           <p>The renter and the lister are both reminded three times, in Lagos time:</p>
-          <ul role="list">
-            <li>the evening before, at 19:00;</li>
-            <li>on the morning of the visit, at 08:00;</li>
-            <li>two hours before the visit.</li>
-          </ul>
+          <DocTable
+            caption="When a viewing reminder arrives"
+            captionHidden
+            columns={[
+              { key: "when", label: "Reminder" },
+              { key: "time", label: "Lagos time", numeric: true },
+            ]}
+            rows={[
+              { id: "eve", cells: { when: "The evening before", time: "19:00" } },
+              { id: "morning", cells: { when: "The morning of the visit", time: "08:00" } },
+              { id: "before", cells: { when: "Before the visit", time: "Two hours before" } },
+            ]}
+          />
           <p>Each reminder says whether the visit is in person or by video.</p>
         </>
       ),
@@ -495,13 +556,13 @@ export const HOSTING: DocChapter = {
       heading: "Set up as a host",
       body: (
         <>
-          <DocsFlow
+          <DocFlow
             label="From setup to published"
             steps={[
-              { object: "person-card", label: "Choose hotel or shortlet" },
-              { object: "id-card-check", label: "ID and business papers" },
-              { object: "doc-review", label: "Vallo reviews" },
-              { object: "home-check", label: "Publish" },
+              { icon: "building-hotel", title: "Start host setup", href: "/host/start", outcome: "One host wizard for hotels, shortlets, serviced apartments and restaurants." },
+              { icon: "id-card", title: "Give your ID and business papers", outcome: "Your identity, your business papers and the details of the place." },
+              { icon: "user-check", title: "A person at Vallo reviews it", outcome: "If it comes back, you edit the same application and send it again." },
+              { icon: "circle-check", title: "Publish", outcome: "Your place is published once it is approved." },
             ]}
           />
           <p>
@@ -701,12 +762,12 @@ export const RESTAURANTS: DocChapter = {
       heading: "Book a table",
       body: (
         <>
-          <DocsFlow
+          <DocFlow
             label="Booking a table"
             steps={[
-              { object: "calendar-grid", label: "Ask for a table" },
-              { object: "seal-check", label: "The restaurant confirms" },
-              { object: "concierge-bell", label: "Show your code" },
+              { icon: "utensils", title: "Ask for a table", href: "/restaurants", outcome: "A date, a time and a party size, in Lagos time." },
+              { icon: "circle-check", title: "The restaurant confirms", outcome: "Or declines, and you are told." },
+              { icon: "concierge-bell", title: "Show your code", href: "/bookings", outcome: "It sits in Plans at its time, with a check-in code." },
             ]}
           />
           <ol role="list">
@@ -842,16 +903,38 @@ export const BADGES_AND_VERIFICATION: DocChapter = {
       id: "the-ladder",
       heading: "Read the verification ladder",
       body: (
-        <p>
-          A lister climbs four rungs, in order:{" "}
-          {VERIFICATION_ORDER.map((rung) => rung.label.toLowerCase()).join(", ")}. The{" "}
-          <strong>Verified</strong> tick appears only once a person here
-          has checked the ID of the lister behind the listing. See{" "}
-          <Link href="/docs/for-agents#verification" className={A}>
-            the ladder in full
-          </Link>
-          .
-        </p>
+        <>
+          <p>
+            A lister climbs four rungs, in order. The <strong>Verified</strong> tick appears only once a
+            person here has checked the ID of the lister behind the listing. See{" "}
+            <Link href="/docs/for-agents#verification" className={A}>
+              the ladder in full
+            </Link>
+            .
+          </p>
+          <DocTable
+            caption="The verification ladder"
+            columns={[
+              { key: "rung", label: "Rung" },
+              { key: "means", label: "What it proves" },
+              { key: "checked", label: "What a reviewer looks at" },
+            ]}
+            rows={VERIFICATION_ORDER.map((rung) => ({
+              id: rung.kind,
+              icon: RUNG_ICON[rung.kind],
+              cells: { rung: <strong>{`${rung.step}. ${rung.label}`}</strong>, means: rung.meaning, checked: rung.evidence },
+            }))}
+          />
+          <DocFlow
+            label="Your own identity check"
+            steps={[
+              { icon: "id-card", title: "Photograph your ID", href: "/verification", outcome: "One government issued document that shows your face and your name." },
+              { icon: "camera", title: "Take a selfie", outcome: "Compared with the photo on your ID, so we know the ID is yours." },
+              { icon: "location", title: "Show where you live", outcome: "One recent document that shows your name at your address." },
+              { icon: "user-check", title: "A person checks it", href: "/guides/how-verification-works", outcome: "Most decisions come back within one working day." },
+            ]}
+          />
+        </>
       ),
     },
     {
@@ -890,29 +973,45 @@ export const BADGES_AND_VERIFICATION: DocChapter = {
       id: "agent-badges",
       heading: "Agent badges",
       body: (
-        <ul role="list">
-          <li><strong>Verified agent.</strong> Identity and payout account confirmed and the application approved.</li>
-          <li><strong>First listing.</strong> The first listing was published.</li>
-          <li><strong>Fast responder.</strong> A quick typical first reply across many conversations.</li>
-          <li><strong>Ten stays.</strong> Ten bookings completed.</li>
-          <li><strong>Estate specialist.</strong> Several published listings in one area.</li>
-          <li><strong>Photo pro.</strong> Listings that passed the photo checks.</li>
-          <li><strong>Vallo Elite.</strong> A high bar over time. It is removed while there is an open trust flag.</li>
-        </ul>
+        <DocTable
+          caption="Agent badges"
+          captionHidden
+          columns={[
+            { key: "badge", label: "Badge" },
+            { key: "means", label: "How it is earned" },
+          ]}
+          rows={[
+              { id: "verified-agent", cells: { badge: <strong>Verified agent</strong>, means: "Identity and payout account confirmed and the application approved." } },
+              { id: "first-listing", cells: { badge: <strong>First listing</strong>, means: "The first listing was published." } },
+              { id: "fast-responder", cells: { badge: <strong>Fast responder</strong>, means: "A quick typical first reply across many conversations." } },
+              { id: "ten-stays", cells: { badge: <strong>Ten stays</strong>, means: "Ten bookings completed." } },
+              { id: "estate-specialist", cells: { badge: <strong>Estate specialist</strong>, means: "Several published listings in one area." } },
+              { id: "photo-pro", cells: { badge: <strong>Photo pro</strong>, means: "Listings that passed the photo checks." } },
+              { id: "elite", cells: { badge: <strong>Vallo Elite</strong>, means: "A high bar over time. It is removed while there is an open trust flag." } },
+          ]}
+        />
       ),
     },
     {
       id: "member-badges",
       heading: "Member badges",
       body: (
-        <ul role="list">
-          <li><strong>Confirmed member.</strong> Email and phone confirmed.</li>
-          <li><strong>First stay.</strong> A first completed booking.</li>
-          <li><strong>Honest reviewer.</strong> Reviews written after real stays.</li>
-          <li><strong>Neighbour</strong> and <strong>Local guide.</strong> Helpful contributions to a place on Around.</li>
-          <li><strong>Year one.</strong> A year since joining.</li>
-          <li><strong>Top contributor.</strong> Given by Vallo to someone who has helped others.</li>
-        </ul>
+        <DocTable
+          caption="Member badges"
+          captionHidden
+          columns={[
+            { key: "badge", label: "Badge" },
+            { key: "means", label: "How it is earned" },
+          ]}
+          rows={[
+              { id: "confirmed", cells: { badge: <strong>Confirmed member</strong>, means: "Email and phone confirmed." } },
+              { id: "first-stay", cells: { badge: <strong>First stay</strong>, means: "A first completed booking." } },
+              { id: "honest-reviewer", cells: { badge: <strong>Honest reviewer</strong>, means: "Reviews written after real stays." } },
+              { id: "neighbour", cells: { badge: <strong>Neighbour and Local guide</strong>, means: "Helpful contributions to a place on Around." } },
+              { id: "year-one", cells: { badge: <strong>Year one</strong>, means: "A year since joining." } },
+              { id: "top-contributor", cells: { badge: <strong>Top contributor</strong>, means: "Given by Vallo to someone who has helped others." } },
+          ]}
+        />
       ),
     },
   ],

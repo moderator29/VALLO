@@ -63,7 +63,9 @@ export default async function HostReservationsPage() {
   const [read, deposits, billsOn] = await Promise.all([readHostTableBoard(now), readDeskDeposits(), billPayOn()]);
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide>
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" wide chromeBack={false} nav>
       <HostTablesBody
         copy={t.hostWorkspace}
         words={t.experienceHost}

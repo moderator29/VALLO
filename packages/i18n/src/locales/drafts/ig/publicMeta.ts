@@ -27,8 +27,8 @@ export const publicMetaIg = {
     },
     terms: {
       title: "Usoro ọrụ",
-      description:
-        "Iwu maka iji Vallo: akaụntụ, ịkwụ ụgwọ, nkwụghachi, ihe akara nkwado pụtara, idepụta ụlọ, nkwekọrịta na nnabata, Nkwa Vallo na iji ya n'ụzọ kwesịrị ekwesị.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `description` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     privacy: {
       title: "Iwu nzuzo",

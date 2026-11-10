@@ -15,6 +15,7 @@ import { loadMoneyHoldUntil, loadPendingAddressMove } from "@/lib/auth/pending-a
 import { PendingAddressMove } from "./PendingAddressMove";
 import { countMyBlocks } from "@/lib/safety/blocks-queries";
 import { RowLink, SettingsGroup } from "@/components/app/account/rows";
+import { CookieSettingsRow } from "@/components/consent/CookieSettingsRow";
 import { withNext } from "@/lib/auth/next-link";
 import { MONEY_LOCK_ROW } from "@/lib/money/copy";
 
@@ -131,6 +132,8 @@ export default async function PrivacySettingsPage() {
               sub={copy.privacy.aiSub}
               testId="settings-ai-row"
             />
+            {/* The cookie choice, reachable from here as well as from the footer (components/consent). */}
+            <CookieSettingsRow label={t.cookies.settingsRow.label} sub={t.cookies.settingsRow.sub} />
             <RowLink
               href="/settings/privacy/data"
               icon="document"

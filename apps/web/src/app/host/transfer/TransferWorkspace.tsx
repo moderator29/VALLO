@@ -9,6 +9,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { EmptyState, Row, RowList, Section, Stack, TYPE } from "@/components/app/Screen";
 import { StatusPill } from "@/components/ui/StatusPill";
+import { PageFrame } from "@/components/app/PageFrame";
 import {
   closeBusiness,
   offerBusinessTransfer,
@@ -70,27 +71,25 @@ export function TransferWorkspace({
   const trading = businesses.filter((business) => business.stillTrading).length;
 
   return (
-    <>
-      <div className="nf-agent-head">
-        <div>
-          <h1 className="nf-agent-head__title">{w.screens.transfer}</h1>
-          <p className={`mt-row ${TYPE.bodyLg}`}>
-            {businesses.length === 0
-              ? tw.noBusiness
-              : trading === 0
-                ? tw.nothingTrading
-                : /*
-                     THE VERB AGREES WITH `trading`, NOT WITH `businesses.length`.
-                     Two businesses with one of them trading once read "1 of
-                     your businesses are still trading". The subject is the
-                     number that is trading, so that count picks the form; a
-                     single business on the account has its own sentence.
-                  */
-                  `${countOf(trading, businesses.length > 1 ? "businessesStillTrading" : "yourBusinessTrading", locale)} ${tw.whyItMatters}`}
-          </p>
-        </div>
-      </div>
-
+    /* The Grade 1 page frame: the large title with Back and its line. */
+    <PageFrame
+      title={w.screens.transfer}
+      subtitle={
+        businesses.length === 0
+          ? tw.noBusiness
+          : trading === 0
+            ? tw.nothingTrading
+            : /*
+                 THE VERB AGREES WITH `trading`, NOT WITH `businesses.length`.
+                 Two businesses with one of them trading once read "1 of
+                 your businesses are still trading". The subject is the
+                 number that is trading, so that count picks the form; a
+                 single business on the account has its own sentence.
+              */
+              `${countOf(trading, businesses.length > 1 ? "businessesStillTrading" : "yourBusinessTrading", locale)} ${tw.whyItMatters}`
+      }
+      fallback="/host"
+    >
       <Stack>
         {incoming.length > 0 && (
           <Section
@@ -143,7 +142,7 @@ export function TransferWorkspace({
           </p>
         )}
       </Stack>
-    </>
+    </PageFrame>
   );
 }
 

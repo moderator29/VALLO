@@ -18,21 +18,21 @@ Rollback SQL: `supabase/migrations/pending/rollback/`. Probes:
 
 What is true live today (read 13 October 2026):
 
-- `payments_payluk_on` is **on**. Since D77 it is the only escrow switch: the
+- `payments_protected_pay_on` is **on**. Since D77 it is the only escrow switch: the
   app reads it (`PROTECTED_PAY_FLAG`) and the database reads it
   (`private.rentals_protected_pay_on`). `rentals_protected_pay` is read by
   nothing.
-- No Payluk key is set in Vercel, so escrow is closed in practice.
+- No the retired provider key is set in Vercel, so escrow is closed in practice.
 - There are no `deal_agreements` and no `provider_arrangements` rows yet.
 
-Consequence: **the moment `PAYLUK_SECRET_KEY` is set in production with this
+Consequence: **the moment `PROVIDER_SECRET_KEY` is set in production with this
 branch deployed, escrow opens to every rent and shortlet payer.** To release
 in steps, keep one of these closed until the smoke tests in section 4 are
 ready:
 
-- set `PAYMENTS_KILL_PAYLUK=1` in Vercel production (stops every Payluk call,
+- set `PAYMENTS_KILL_PROTECTED_PAY=1` in Vercel production (stops every the retired provider call,
   no database needed; recording from the partner still works), or
-- turn `payments_payluk_on` off in the admin switches.
+- turn `payments_protected_pay_on` off in the admin switches.
 
 While escrow is closed the app offers card to a rent or shortlet payer, tells
 a buyer on a sale that escrow is paused and takes nothing, and never shows a
@@ -102,7 +102,7 @@ definition checks showed nothing had persisted):
 | 2 | Apply `nt01` to `nt06`, in order, one at a time, with the check after each | **Done 13 October 2026** (versions below) |
 | 3 | Deploy `track/notice-release` to production (after "push to main") | Next: as soon as possible, see the note below |
 | 4 | Apply `pov08` | Only after step 3 is serving traffic |
-| 5 | Set the Payluk keys and the webhook, keep escrow closed | After step 3 |
+| 5 | Set the the retired provider keys and the webhook, keep escrow closed | After step 3 |
 | 6 | Smoke tests, then open escrow | After step 5 |
 
 Applied on 13 October 2026, through the Supabase connector, each file
@@ -467,30 +467,30 @@ rb04, rb03, rb02, rb01. None of them removes a row, a table or a function.
 
 ## 3. Keys, webhook and switches (after the deploy)
 
-1. Vercel production: set `PAYLUK_SECRET_KEY` (an `sk_live_` key). Vercel
-   preview: set `PAYLUK_TEST_SECRET_KEY` (an `sk_test_` key) only.
-   `paylukMerchantConfig` refuses the live key on any deployment whose
+1. Vercel production: set `PROVIDER_SECRET_KEY` (an `sk_live_` key). Vercel
+   preview: set `PROVIDER_TEST_SECRET_KEY` (an `sk_test_` key) only.
+   `retired_providerMerchantConfig` refuses the live key on any deployment whose
    `VERCEL_ENV` is not `production`, so a preview can never move real money.
-   Keep `PAYMENTS_KILL_PAYLUK=1` (or `payments_payluk_on` off) for now.
-2. Payluk dashboard, production merchant: webhook URL
-   `https://<production domain>/api/payluk/webhook`. The route checks
-   `x-payluk-signature` (HMAC SHA-512 of the raw body with the secret key).
+   Keep `PAYMENTS_KILL_PROTECTED_PAY=1` (or `payments_protected_pay_on` off) for now.
+2. the retired provider dashboard, production merchant: webhook URL
+   `https://<production domain>/api/retired_provider/webhook`. The route checks
+   `x-retired_provider-signature` (HMAC SHA-512 of the raw body with the secret key).
    For staging, point the test merchant's webhook at a preview URL.
 3. Check the recorder is live without opening escrow: the route answers 503
    `not_configured` without a key and 401 `signature_invalid` on an unsigned
    post. Expect 401 now:
-   `curl -s -X POST https://<production domain>/api/payluk/webhook -d '{}'`.
+   `curl -s -X POST https://<production domain>/api/retired_provider/webhook -d '{}'`.
 4. Check the reconcile cron: `/admin/jobs` lists `arrangements-reconcile`
    every ten minutes (minutes 8, 18, ... 58). It verifies at most three open
-   arrangements per run, inside Payluk's 10 requests per minute per key.
+   arrangements per run, inside the retired provider's 10 requests per minute per key.
 
 ## 4. Production smoke tests
 
 Use two real accounts the team owns (a payer and a lister), never a member's.
-Both must have linked a Payluk account through the Wallet
-(`financial_provider_accounts`, provider `payluk`, status `ACTIVE`), and the
-payer's Payluk balance must cover the test amount. Open escrow for the test
-(`PAYMENTS_KILL_PAYLUK` unset and `payments_payluk_on` on), and close it again
+Both must have linked a the retired provider account through the Wallet
+(`financial_provider_accounts`, provider `retired_provider`, status `ACTIVE`), and the
+payer's the retired provider balance must cover the test amount. Open escrow for the test
+(`PAYMENTS_KILL_PROTECTED_PAY` unset and `payments_protected_pay_on` on), and close it again
 straight after if the founder has not said to leave it open.
 
 ### A. Rent through escrow: funded, held, released
@@ -514,7 +514,7 @@ straight after if the founder has not said to leave it open.
 
 4. As the payer, confirm the deal. Expect `release_requested`, then
    `released` once the partner reports `escrow.completed`. The agreement reads
-   paid, and the lister's Payluk balance shows the amount less the partner's
+   paid, and the lister's the retired provider balance shows the amount less the partner's
    fee.
 5. Nothing is marked paid before the partner says so: between steps 2 and 3
    the agreement must still read approved, not paid.
@@ -559,7 +559,7 @@ straight after if the founder has not said to leave it open.
 
 ### D. The way out (no money needed)
 
-With escrow closed (`PAYMENTS_KILL_PAYLUK=1`), open the payment step of a
+With escrow closed (`PAYMENTS_KILL_PROTECTED_PAY=1`), open the payment step of a
 rent agreement: it offers card and says escrow is paused. On a sale it says
 escrow is paused and offers nothing to pay. Reopen escrow afterwards only if
 the founder said so.

@@ -7,11 +7,9 @@ import type { MoneyRail } from "./copy";
  * nobody holds anything) is always live. The PROTECTED rail (a licensed
  * partner holds the payment until the payer confirms) is live only when it
  * can genuinely work, which is a fact the SERVER reads at request time, never
- * a constant: the partner's key is configured for this deployment (the live
- * key in production only, the test key elsewhere), the outage stop
- * `PAYMENTS_KILL_PAYLUK` is not set, and the founder's switch
- * `payments_payluk_on` is on (`protectedRailLive()` in `rail-live.ts`, which
- * asks `escrowRailLive()`; the database checks the same switch again).
+ * a constant: the partner's key is configured for this deployment, the outage
+ * stop is not set, and the founder's protected-pay switch is on
+ * (`protectedRailLive()` in `rail-live.ts`, which asks `escrowRailLive()`).
  *
  * This file stays pure so client components can import the type: the answer
  * is passed in by the server page that read it.

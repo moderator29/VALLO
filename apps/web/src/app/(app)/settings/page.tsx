@@ -115,7 +115,7 @@ export default async function SettingsPage() {
             same block: the hub is a list of doors, not a second copy of a
             screen (track G). */}
 
-        <LogOutRow t={forHub(t)} signedIn={signedIn} />
+        <LogOutRow t={forHub(t)} signedIn={signedIn} email={profile?.email || undefined} />
       </div>
     </PageFrame>
   );

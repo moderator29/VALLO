@@ -7,6 +7,7 @@ import { NavIcon } from "../_components/AdminGlyph";
 import { PageHead, Panel } from "../_components/panels";
 import { ADMIN_SETTINGS, labelFor } from "../_components/nav";
 import { SampleEmails } from "./SampleEmails";
+import { CONTACT_EMAIL } from "@/lib/support-email";
 
 /**
  * Settings, the row the renders pin to the rail's foot.
@@ -56,7 +57,7 @@ export default async function AdminSettingsPage() {
         <p className="nf-body-sm mb-sm text-[var(--nf-content-secondary)]">
           Sends about 30 sample emails, one or more of every design, each marked Sample, to the addresses you write. Founder only. No member is emailed.
         </p>
-        <SampleEmails initial="phantomfcalls@gmail.com, samuelbabatola@gmail.com" />
+        <SampleEmails initial={CONTACT_EMAIL} />
       </Panel>
     </div>
   );

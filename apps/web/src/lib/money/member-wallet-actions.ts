@@ -7,7 +7,6 @@ import { resolveSession } from "../actions/session";
 import { phoneGateFor } from "../phone-otp/gate";
 import { guardMoney } from "../security/money-limits";
 import { accountNumberSchema, sameAccountName } from "../payments/bank-resolve";
-import { needsOtp } from "../payments/providers/payluk-client";
 import { memberWalletRailLive } from "../payments/providers";
 import { provisionWallet, type OpenResult } from "./wallet-provision";
 import type { HostedCollection, RailFailure } from "../payments/provider";
@@ -34,6 +33,7 @@ import {
   readBack,
   reportedBalance,
   walletProvider,
+  WALLET_PROVIDER_KEY,
   type Db,
   type MovementRow,
   type MovementView,
@@ -194,7 +194,7 @@ async function stage(
   const { error } = await ctx.db.from("funds_movements").insert({
     id,
     user_id: ctx.userId,
-    provider: "payluk",
+    provider: WALLET_PROVIDER_KEY,
     kind: row.kind,
     reference,
     client_key: clientKey,
@@ -334,7 +334,7 @@ export async function confirmBalanceMovement(input: unknown): Promise<ActionResu
   } else if (sent.kind === "unknown") {
     await observe(ctx.db, m.reference, "unknown", "vallo", { detail: { submit: "no_answer" } });
     message = REFUSAL.submittedUnknown;
-  } else if (sent.kind === "refused" && needsOtp(sent)) {
+  } else if (sent.kind === "refused" && /\b(otp|pin)\b/i.test(sent.detail)) {
     await observe(ctx.db, m.reference, "awaiting_confirmation", "provider_response", { detail: { otp_required: true } });
     otp = true;
     message = REFUSAL.otpNeeded;

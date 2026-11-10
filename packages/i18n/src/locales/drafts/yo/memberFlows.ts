@@ -293,7 +293,7 @@ export const memberFlowsYo = {
     longer: "Ìyálé tó gùn jù",
     rentFor: "Owó ilé fún {term}",
     rentOnly: "Owó ilé nìkan, ṣáájú owó ìdúró, owó aṣojú àti owó agbẹjọ́rò. Aṣojú náà yóò fohùn ṣọ̀kan pẹ̀lú rẹ lórí àwọn òfin ìkẹyìn.",
-    keepInside:
-      "Fún ààbò rẹ, jẹ́ kí gbogbo ìjíròrò àti ìsanwó wà nínú Vallo. A kò dáàbò bo àdéhùn tí a ṣe lóde pèpéle yìí. Sanwó nìkan lẹ́yìn tí o bá ti yẹ ilé náà wò.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `keepInside` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
   },
 } satisfies NonNullable<Translation["memberFlows"]>;

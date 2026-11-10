@@ -23,6 +23,7 @@ import { UiIcon } from "@/design-system/icons/UiIcon";
 import { Icon3D } from "@/components/ui/Icon3D";
 import { RemoteImage } from "@/components/ui/RemoteImage";
 import { Button, ButtonLink } from "@/components/ui/Button";
+import { ShareToFeedButton } from "@/components/social/share/ShareToFeedButton";
 import { Sheet } from "@/components/ui/Sheet";
 import { StatusPill, toneForStatus } from "@/components/ui/StatusPill";
 import { LISTING_STATUS_GLYPH, glyphSrc } from "@/design-system/icons/glyphs";
@@ -326,8 +327,11 @@ function ListingRow({
   ownerCopy,
   selection,
   payoff,
+  identityPending,
 }: {
   t: WorkspaceCopy;
+  /** The lister's identity is not approved yet: a listing in review reads "Waiting on identity". */
+  identityPending?: boolean | undefined;
   /**
    * Round 5: this listing just went live, by the server's row, and this device
    * has not seen it yet (lib/agent/lister-live.ts). The row plays the one
@@ -363,6 +367,7 @@ function ListingRow({
   ownerAsk?: boolean;
   ownerCopy?: Dictionary["landlord"]["owner"] | undefined;
 }) {
+  const waitingOnIdentity = Boolean(identityPending) && (listing.status === "SUBMITTED" || listing.status === "UNDER_REVIEW" || listing.status === "APPROVED");
   const editable = EDITABLE.includes(listing.status) && !closedReason;
   const live = listing.status === "PUBLISHED" || listing.status === "APPROVED";
   /* A live RENTAL is closed with a reason rather than taken down. A stay or a
@@ -513,6 +518,14 @@ function ListingRow({
         </div>
       </div>
 
+      {waitingOnIdentity && (
+        <p className="nf-caption border-t border-[var(--nf-border-subtle)] px-md py-xs text-[var(--nf-content-secondary)]" data-testid="row-waiting-identity">
+          Waiting on identity. It cannot go live until your identity is approved.{" "}
+          <ButtonLink href="/verification" variant="quiet" size="sm">
+            Verify your identity
+          </ButtonLink>
+        </p>
+      )}
       {payoff && (
         <div className="nf-live-payoff__line flex flex-wrap items-center justify-between gap-xs border-t border-[var(--nf-border-subtle)] px-md py-sm" role="status">
           <p className="min-w-0 text-[length:var(--nf-text-body-sm)]">
@@ -546,6 +559,7 @@ function ListingRow({
         Boolean(healthLabel) ||
         Boolean(listing.listingRole && listing.listingRole !== "owner")) && (
       <div className="flex flex-wrap items-center gap-x-2xs border-t border-[var(--nf-border-subtle)] px-xs py-2xs">
+        {listing.status === "PUBLISHED" && <ShareToFeedButton listingId={listing.id} />}
         {editable && (
           <ButtonLink href={`/agent/list?id=${listing.id}`} variant="quiet" size="sm" arrow>
             {t.workspace.actions.edit}
@@ -663,6 +677,7 @@ function ListingRow({
 }
 
 export function ListingsWorkspace({
+  identityPending,
   t,
   reference,
   listings: all,
@@ -680,6 +695,7 @@ export function ListingsWorkspace({
   liveCopy,
   liveArrivalId,
 }: {
+  identityPending?: boolean | undefined;
   t: WorkspaceCopy;
   /** Round 5: the live payoff's words. Absent (harnesses), no payoff plays. */
   liveCopy?: { title: string; body: string; open: string };
@@ -903,6 +919,7 @@ export function ListingsWorkspace({
                   <ListingRow
                     key={listing.id}
                     t={t}
+                    identityPending={identityPending}
                     reference={reference}
                     listing={listing}
                     locale={locale}
@@ -948,6 +965,7 @@ export function ListingsWorkspace({
                 <ListingRow
                   key={listing.id}
                   t={t}
+                  identityPending={identityPending}
                   reference={reference}
                   listing={listing}
                   locale={locale}

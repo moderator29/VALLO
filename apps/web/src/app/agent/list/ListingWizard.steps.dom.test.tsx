@@ -1,15 +1,18 @@
 /**
- * The listing wizard's step changes, mounted in Chromium with the product's
- * stylesheets and read from computed animations, not a clock (round 5, a
- * lister publishing):
+ * The listing wizard's step changes, one question per screen on the shared
+ * StepFrame (P1.1), mounted in Chromium with the product's stylesheets and
+ * read from computed animations, not a clock:
  *
- *   - the first paint is still: nothing has changed yet, so nothing moves;
- *   - Next is browsing pace: the title arrives in 160ms, the body 60ms behind
- *     it, at rest by 240ms, by transform and opacity only, from the side the
- *     lister is travelling; Back arrives from the other side;
- *   - the step bar is honest: the reached segment fills (240ms), the one left
- *     on Back empties (380ms, an unhurried exit), no sheen;
- *   - reduced motion tells the same story as a 160ms crossfade with no travel.
+ *   - Continue slides the next question in from the right, at base (240ms),
+ *     by transform and opacity only; Back brings the previous one in from the
+ *     left (the travel direction the wizard has always had);
+ *   - the progress bar moves on transform;
+ *   - reduced motion: the question simply changes, nothing travels;
+ *   - a refused title (the Finish step) shakes its field once, 4px at whip,
+ *     takes the focus and says why.
+ *
+ * Rewritten for the re-flow: the old version read the wizard's own rail
+ * segments and head classes, which the StepFrame replaced.
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Page } from "playwright-core";
@@ -26,10 +29,14 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
-/* The stylesheets the agent workspace loads around the wizard: Track M's
-   journey (flow-m, and inner-m for its depth keyframes) and the surface
-   partial, then the wizard's own, which has to win over them. */
-const CSS = productCss("app/css/inner-m.css", "app/css/flow-m.css", "app/css/catalogue.css", "app/css/lister-publish.css");
+const CSS = productCss(
+  "app/css/inner-m.css",
+  "app/css/flow-m.css",
+  "app/css/grade1.css",
+  "app/css/catalogue.css",
+  "app/css/lister-publish.css",
+  "app/agent/list/steps/listing-steps.css",
+);
 
 /* A complete tenancy, derived from ListingWizard.fee-gate.dom.test.tsx's
    DRAFT (itself from the f5 harness). Example content, never written. */
@@ -61,25 +68,24 @@ const ENTRY = `
       copy={t.agentListings} reference={t.listingReference} moveInCopy={t.moveIn}
       compoundCopy={t.shape.compound} serviceCopy={t.shape.service} unitCopy={t.shape.unit} floodCopy={t.shape.neighbours}
       locale="en" userId={null} states={STATE_CODES.map((code) => ({ code, name: code }))} amenities={AMENITY_CHOICES}
-      initial={DRAFT} canPersist={false} startAt={1}
+      initial={DRAFT} canPersist={false} startAt="location"
     />,
   );
 `;
 
-type Motion = { kind: string; name: string; duration: number; delay: number; frames: string[] };
+type Motion = { kind: string; name: string; duration: number; frames: string[] };
+type Read = { title: string; page: Motion[]; fill: Motion[] };
 
-/*
- * Taps a footer control and, in the frame the new step first renders, reads
- * every animation on the title, the body and the rail (transitions on the
- * segments' fill included, which are gone once they finish).
- */
-type Read = { title: Motion[]; body: Motion[]; fills: Motion[]; segs: Motion[] };
-
-async function stepAndRead(page: Page, label: "Next" | "Back"): Promise<Read> {
-  return page.evaluate(async (label) => {
-    const title = () => document.querySelector(".nf-lw-head__title")?.textContent;
+/* Taps Continue or Back and, in the frame the new question first renders,
+   reads the animations on the question's page and on the progress fill. */
+async function stepAndRead(page: Page, which: "continue" | "back"): Promise<Read> {
+  return page.evaluate(async (which) => {
+    const title = () => document.querySelector(".nf-g1step__title")?.textContent ?? "";
     const before = title();
-    const button = [...document.querySelectorAll<HTMLButtonElement>(".fixed button")].find((b) => b.textContent?.trim() === label);
+    const button =
+      which === "continue"
+        ? document.querySelector<HTMLButtonElement>('[data-testid="step-continue"]')
+        : document.querySelector<HTMLButtonElement>('.nf-g1step__bar button[aria-label="Back"]');
     button!.click();
     await new Promise<void>((done) => {
       const tick = () => (title() !== before ? done() : requestAnimationFrame(tick));
@@ -87,75 +93,71 @@ async function stepAndRead(page: Page, label: "Next" | "Back"): Promise<Read> {
     });
     const describe = (a: Animation): Motion => {
       const effect = a.effect as KeyframeEffect;
-      const timing = effect.getTiming();
       return {
         kind: a instanceof CSSTransition ? "transition" : "animation",
         name: a instanceof CSSAnimation ? a.animationName : (a as CSSTransition).transitionProperty,
-        duration: Number(timing.duration),
-        delay: Number(timing.delay),
+        duration: Number(effect.getTiming().duration),
         frames: effect.getKeyframes().map((f) => `${f.opacity ?? ""}|${f.transform ?? ""}|${(f as Record<string, unknown>).filter ?? ""}`),
       };
     };
-    const on = (el: Element | null, pseudo: string | null = null) =>
-      document
-        .getAnimations()
-        .filter((a) => (a.effect as KeyframeEffect).target === el && ((a.effect as KeyframeEffect).pseudoElement ?? null) === pseudo)
-        .map(describe);
-    const segs = [...document.querySelectorAll(".nf-lw-rail__seg")];
+    const on = (el: Element | null) =>
+      document.getAnimations().filter((a) => (a.effect as KeyframeEffect).target === el).map(describe);
     return {
-      title: on(document.querySelector(".nf-lw-head__title")),
-      body: on(document.querySelector(".nf-lw-body > *")),
-      fills: segs.flatMap((s) => on(s, "::before")),
-      segs: segs.flatMap((s) => [...on(s), ...on(s, "::after")]),
+      title: title(),
+      page: on(document.querySelector(".nf-g1step__page")),
+      fill: on(document.querySelector(".nf-g1step__progress-fill")),
     };
-  }, label) as Promise<Read>;
+  }, which) as Promise<Read>;
 }
 
 describe.runIf(hasBrowser)("the wizard's step changes", () => {
-  it("paints still, then moves at browsing pace: title 160ms, body 60ms behind, at rest by 240ms", async () => {
+  it("slides the next question in from the right at base, and the last one back from the left", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS });
     try {
-      const first = await page.evaluate(() =>
-        [".nf-lw-head__title", ".nf-lw-head__sub", ".nf-lw-body > *", ".nf-lw-rail__seg[data-done]"].flatMap((s) =>
-          [...document.querySelectorAll(s)].flatMap((el) => el.getAnimations().map((a) => (a as CSSAnimation).animationName)),
-        ),
-      );
-      expect(first, "nothing has changed yet, so nothing moves").toEqual([]);
+      expect(await page.locator(".nf-g1step__title").innerText()).toBe("Where is the property?");
+      expect(await page.locator(".nf-g1step__eyebrow").innerText()).toMatch(/location/i);
 
-      const next = await stepAndRead(page, "Next");
-      expect(next.title).toHaveLength(1);
-      expect(next.title[0]).toMatchObject({ name: "nf-lw-arrive", duration: 160, delay: 0 });
-      expect(next.body[0]).toMatchObject({ name: "nf-lw-arrive", duration: 160, delay: 60 });
-      for (const m of [...next.title, ...next.body]) {
-        expect(m.delay + m.duration).toBeLessThanOrEqual(240);
-        /* Transform and opacity only, from the right (forward). */
-        expect(m.frames.join(" ")).not.toMatch(/blur/);
-        expect(m.frames[0]).toMatch(/^0\|translate3d\(12px, 0px, 0px\)/);
-      }
-      /* The step reached fills from the left, at base, and nothing sheens. */
-      expect(next.fills).toEqual([expect.objectContaining({ kind: "transition", name: "transform", duration: 240 })]);
-      expect(next.segs).toEqual([]);
+      const next = await stepAndRead(page, "continue");
+      expect(next.title).toBe("How many rooms does it have?");
+      expect(next.page).toEqual([expect.objectContaining({ name: "nf-g1-step-in", duration: 240 })]);
+      /* Transform and opacity only, from the right (forward). */
+      expect(next.page[0]!.frames.join(" ")).not.toMatch(/blur/);
+      expect(next.page[0]!.frames[0]).toMatch(/^0\|translate3d\(24px, 0px, 0px\)/);
+      /* The bar moves on transform. */
+      expect(next.fill).toEqual([expect.objectContaining({ kind: "transition", name: "transform" })]);
 
-      /* Let the fill land, so Back starts a fresh transition rather than
-         reversing a running one (which shortens it, as CSS specifies). */
       await page.waitForTimeout(500);
-      const back = await stepAndRead(page, "Back");
-      expect(back.title[0]!.frames[0]).toMatch(/^0\|translate3d\(-12px, 0px, 0px\)/);
-      /* The segment left behind empties, slower than it filled. */
-      expect(back.fills).toEqual([expect.objectContaining({ kind: "transition", name: "transform", duration: 380 })]);
+      const back = await stepAndRead(page, "back");
+      expect(back.title).toBe("Where is the property?");
+      expect(back.page).toEqual([expect.objectContaining({ name: "nf-g1-step-in-back", duration: 240 })]);
+      expect(back.page[0]!.frames[0]).toMatch(/^0\|translate3d\(-24px, 0px, 0px\)/);
     } finally {
       await close();
     }
   });
 
-  it("under reduced motion, a 160ms crossfade with no travel, and the bar simply changes", async () => {
+  it("keeps the field being typed in focused from one keystroke to the next", async () => {
+    const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS });
+    try {
+      const input = page.locator('input[placeholder="Lagos"]');
+      await input.click();
+      await page.keyboard.type("ab");
+      /* Every letter lands: the frame re-renders on each one and must not
+         take the focus with it (see steps/FocusKeeper.tsx). */
+      expect(await input.inputValue()).toBe("Lagosab");
+      expect(await page.evaluate(() => document.activeElement?.getAttribute("placeholder"))).toBe("Lagos");
+    } finally {
+      await close();
+    }
+  });
+
+  it("under reduced motion, the question simply changes: nothing travels", async () => {
     const { page, close } = await mountInBrowser({ entry: ENTRY, css: CSS, reducedMotion: true });
     try {
-      const next = await stepAndRead(page, "Next");
-      expect(next.title).toEqual([expect.objectContaining({ name: "nf-lw-fade", duration: 160 })]);
-      expect(next.body).toEqual([expect.objectContaining({ name: "nf-lw-fade", duration: 160 })]);
-      for (const m of [...next.title, ...next.body]) expect(m.frames.join(" ")).not.toMatch(/translate|scale/);
-      expect(next.fills.every((m) => m.duration <= 1)).toBe(true);
+      const next = await stepAndRead(page, "continue");
+      expect(next.title).toBe("How many rooms does it have?");
+      expect(next.page).toEqual([]);
+      expect(next.fill.every((m) => m.duration <= 1)).toBe(true);
     } finally {
       await close();
     }
@@ -163,12 +165,13 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
 
   it("a refused title shakes its field once, 4px at whip, and says why", async () => {
     const { page, close } = await mountInBrowser({
-      entry: ENTRY.replace('title: "Bright 2 bedroom flat in Lekki Phase 1"', 'title: ""').replace("startAt={1}", "startAt={0}"),
+      entry: ENTRY.replace('title: "Bright 2 bedroom flat in Lekki Phase 1"', 'title: ""').replace('startAt="location"', 'startAt="describe"'),
       css: CSS,
     });
     try {
+      expect(await page.locator(".nf-g1step__title").innerText()).toBe("Describe the property");
       const shake = await page.evaluate(async () => {
-        [...document.querySelectorAll<HTMLButtonElement>(".fixed button")].find((b) => b.textContent?.trim() === "Next")!.click();
+        document.querySelector<HTMLButtonElement>('[data-testid="step-continue"]')!.click();
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
         const field = document.getElementById("listing-title-field")!;
         return {
@@ -178,10 +181,12 @@ describe.runIf(hasBrowser)("the wizard's step changes", () => {
             easing: getComputedStyle(field).animationTimingFunction,
           })),
           focused: document.activeElement === field.querySelector("input"),
+          still: document.querySelector(".nf-g1step__title")?.textContent,
         };
       });
       expect(shake.motions).toEqual([{ name: "nf-lw-shake", duration: 160, easing: "cubic-bezier(0.7, 0, 0.2, 1)" }]);
       expect(shake.focused).toBe(true);
+      expect(shake.still).toBe("Describe the property");
     } finally {
       await close();
     }

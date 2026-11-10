@@ -20,6 +20,16 @@ export const socialPostEn = {
   reportedDone:
     "Thank you. Somebody will look at this. We do not tell them who reported it.",
   copied: "Link copied.",
+  savedDone: "Post saved. Only you can see what you save.",
+  unsavedDone: "Removed from your saved posts.",
+  savedUndone: "Saved again.",
+  unsavedUndone: "Removed from your saved posts.",
+  mutedUndone: "Unmuted. Their posts will show again the next time the feed loads.",
+  blockedUndone: "Unblocked. Their posts will show again the next time the feed loads.",
+  followedDone: "You follow {name}. Their posts are in your feed now.",
+  unfollowedDone: "You unfollowed {name}.",
+  followUndone: "You follow {name} again.",
+  unfollowUndone: "You do not follow {name} any more.",
   picturePrompt: "Add a picture",
   pictureNote: "Up to four. Each one is redrawn on your phone first, so the location tag your camera wrote never leaves it.",
   pictureNeedsWords:

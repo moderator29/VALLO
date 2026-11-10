@@ -32,6 +32,7 @@ import {
   acceptanceMatches,
   acceptanceOf,
   listerFeeFigures,
+  listerFeeShown,
   type ListerFeeAcceptance,
   type ListerFeePolicy,
 } from "@/lib/money/lister-fee";
@@ -65,6 +66,13 @@ import "@/app/css/money-layer.css";
  * explicit checkbox is the only accept; the wizard sends the acceptance to be
  * recorded before the listing, and a price edit, a new rate or new terms void
  * it on the next render because `acceptanceMatches` compares every figure.
+ *
+ * THE ESCROW ROW IS DRAWN ONLY WHILE THE PROTECTED RAIL IS LIVE (9 November
+ * 2026, sweep items 7 to 9). The server's answer travels on the policy
+ * (`escrowShown`); without it the screen draws the card rail alone
+ * (`listerFeeShown`). The acceptance still records every rate in force,
+ * because `lister_fee_accept` re-derives the figures from them and refuses
+ * anything else; its worst case is never above the figure drawn.
  *
  * Honest states: no policy read (the gate says so, and says whether publishing
  * waits), and no price yet (a sentence, never a zero).
@@ -113,9 +121,10 @@ export function ListerFeeGate({ kind, priceMinor, policy, locale, blocking, acce
 
   const money = (minor: number) => formatMoney(minor, locale);
   const isAccepted = blocking && acceptanceMatches(accepted, figures, policy);
+  const shown = listerFeeShown(figures, policy);
   const priceText = money(figures.priceMinor);
-  const ranged = figures.receiveLowMinor !== figures.receiveHighMinor;
-  const bears = listerBearsFeesSentence(figures.escrowProtectionMinor > 0, figures.processorUpToMinor > 0);
+  const ranged = shown.receiveLowMinor !== shown.receiveHighMinor;
+  const bears = listerBearsFeesSentence(shown.showEscrow, figures.processorUpToMinor > 0);
   const state = !blocking ? "preview" : isAccepted ? "accepted" : "open";
 
   return (
@@ -130,13 +139,13 @@ export function ListerFeeGate({ kind, priceMinor, policy, locale, blocking, acce
         </div>
         <div className="nf-feegate__row">
           <dt>{PLATFORM_FEE_LABEL}</dt>
-          <dd data-testid="fee-gate-fee">{feeRangeText(money(figures.platformFeeLowMinor), money(figures.platformFeeHighMinor))}</dd>
+          <dd data-testid="fee-gate-fee">{feeRangeText(money(shown.platformFeeLowMinor), money(shown.platformFeeHighMinor))}</dd>
         </div>
         <div className="nf-feegate__row nf-feegate__row--part">
           <dt>{valloFeeLabel(figures.valloPercentText, figures.valloCapped)}</dt>
           <dd data-testid="fee-gate-vallo">{money(figures.valloMinor)}</dd>
         </div>
-        {figures.escrowProtectionMinor > 0 && (
+        {shown.showEscrow && (
           <div className="nf-feegate__row nf-feegate__row--part">
             <dt>
               {escrowProtectionLabel(figures.escrowProtectionPercentText)}
@@ -157,15 +166,15 @@ export function ListerFeeGate({ kind, priceMinor, policy, locale, blocking, acce
         <div className="nf-feegate__row nf-feegate__row--total">
           <dt>{LISTER_RECEIVE_LABEL}</dt>
           <dd data-testid="fee-gate-receive">
-            <span className="nf-feegate__headline">{money(figures.receiveLowMinor)}</span>
-            {ranged && <span className="nf-feegate__upper"> {rangeUpperText(money(figures.receiveHighMinor))}</span>}
+            <span className="nf-feegate__headline">{money(shown.receiveLowMinor)}</span>
+            {ranged && <span className="nf-feegate__upper"> {rangeUpperText(money(shown.receiveHighMinor))}</span>}
           </dd>
         </div>
       </dl>
 
       {ranged && (
         <p className="nf-body-sm mt-row text-[var(--nf-content-secondary)]" data-testid="fee-gate-range-note">
-          {receiveRangeNote(figures.escrowIsLowest)}
+          {receiveRangeNote(shown.escrowIsLowest)}
         </p>
       )}
       {bears && (

@@ -60,4 +60,4 @@ export const safetyReportTargetNounEn = {
 };
 
 export const safetyEducationEn =
-  "For your safety, keep every chat and payment inside Vallo. Deals made outside the platform are not protected by us. Pay only after you have inspected the property.";
+  "For your safety, keep every chat inside Vallo. Pay through Vallo. A payment made outside the platform leaves no record, so we cannot help you if something goes wrong. Pay only after you have inspected the property.";

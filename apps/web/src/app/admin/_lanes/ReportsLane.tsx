@@ -17,6 +17,7 @@ import { Constants } from "@/lib/supabase/database.types";
 import { ReportDecision } from "../_components/AdminActions";
 import { fill, type AdminCommon, type AdminCopy } from "../_components/copy";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QueueTable, shortRef, type QueueRowData } from "../_components/QueueTable";
 import { gradeForReportCategory } from "@/lib/trust/standards";
 import { dueChip } from "../_components/due";
@@ -200,7 +201,7 @@ export async function ReportsLane({
   if (reports.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} lede={copy.lede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -227,7 +228,7 @@ export async function ReportsLane({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={copy.title} lede={copy.lede} count={open.length} />
+      <PageHead title={copy.title} lede={copy.lede} trail={<ui.WaitingBadge count={open.length} />} />
 
       {/*
         A ZERO IS PRINTED AS A ZERO, and null is not printed at all. "Nothing

@@ -18,10 +18,10 @@ const SENDERS: SenderIdRow[] = [
 ];
 
 const CHECKS: CheckOutcome[] = [
-  { name: "Payluk, live key", ok: true, detail: "Connected to live. Balance read (NGN)." },
+  { name: "Protected-pay provider (settings only)", ok: true, detail: "Settings are present. Nothing is sent until the switch is on." },
   { name: "Termii (SMS codes)", ok: true, detail: "Key accepted and balance read. Sender ID set." },
   { name: "Termii sender IDs", ok: senderIdVerdict("Vallo", SENDERS).ok, detail: senderIdVerdict("Vallo", SENDERS).line, senders: SENDERS },
-  { name: "MapTiler (maps)", ok: true, detail: "Key accepted for www.vallospaces.com." },
+  { name: "OpenFreeMap (maps)", ok: true, detail: "The map style answered. No key is needed." },
 ];
 
 export default function PreviewProviders() {

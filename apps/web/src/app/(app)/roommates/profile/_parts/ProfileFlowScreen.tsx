@@ -11,7 +11,7 @@ import { ProfileFlow } from "./ProfileFlow";
  * itself, which opens on the first question for a new profile and on the
  * review for one that exists.
  */
-export function ProfileFlowScreen({ read, schools, t: copy }: { read: MyProfileRead; schools: InstitutionRef[]; t: RoommatesCopy }) {
+export function ProfileFlowScreen({ read, schools, t: copy, gallery = [] }: { read: MyProfileRead; schools: InstitutionRef[]; t: RoommatesCopy; gallery?: { path: string; url: string }[] }) {
   if (read.state !== "ok") {
     return (
       <PageFrame title={copy.profile.create} fallback={ROOMMATES_ROUTES.home} width="narrow">
@@ -26,5 +26,5 @@ export function ProfileFlowScreen({ read, schools, t: copy }: { read: MyProfileR
     );
   }
   const { status, ...initial } = read.profile;
-  return <ProfileFlow initial={initial} status={status} exists={read.exists} hasPhoto={read.hasPhoto} schools={schools} />;
+  return <ProfileFlow initial={initial} status={status} exists={read.exists} hasPhoto={read.hasPhoto} schools={schools} gallery={gallery} />;
 }

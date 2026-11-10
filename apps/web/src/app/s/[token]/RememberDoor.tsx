@@ -1,5 +1,6 @@
 "use client";
 
+import { consentAllows } from "@/lib/consent/consent";
 import { useEffect } from "react";
 import { FIRST_TOUCH_COOKIE, firstTouchCookie, withFirstTouch } from "@/lib/share/first-touch";
 
@@ -12,6 +13,8 @@ import { FIRST_TOUCH_COOKIE, firstTouchCookie, withFirstTouch } from "@/lib/shar
  */
 export function RememberDoor({ token, listingId }: { token: string; listingId: string }) {
   useEffect(() => {
+    /* Which link you opened first is attribution, which is analytics: not stored before the person agrees. */
+    if (!consentAllows("analytics")) return;
     try {
       const current = document.cookie
         .split(";")

@@ -99,6 +99,7 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
 
   /* Everyday senses of "checked". */
   { phrase: /\bchecked out\b/i, mechanism: "a stay's check-out, not a trust claim" },
+  { phrase: /^Have you checked in\?$|^Yes, I've checked in$/, onlyIn: MONEY_COPY_FILE, mechanism: "a stay's check-in, asked of the guest on the protected payment milestone (spec screen 6), not a trust claim" },
   { phrase: /\brooms checked\b|^\s+checked$|\bthings that can be checked\b/i, mechanism: "the member's own inspection checklist and evidence, not a platform claim" },
   { phrase: /\bchecked many times\b|\bhave checked that (?:payment|movement)\b|\bhave checked several accounts\b|\bcould not be checked\b|\buntil you have checked\b/i, mechanism: "payment status polling against the provider, not a trust claim" },
   { phrase: /\bwhat you already checked\b|\breservation is checked against\b|\buntil it is checked\b/i, mechanism: "a process description, not a claim about a listing or a person" },
@@ -123,9 +124,9 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
      centre's Protected figure) and is drawn only where the server reads the
      rail as working: protectedRailLive() in lib/money/rail-live.ts (13 October
      2026, replacing the constant PROTECTED_RAIL_LIVE), which is true only
-     while a Payluk key is configured for the deployment (live key in
-     production only), PAYMENTS_KILL_PAYLUK is not set and payments_payluk_on
-     is on. "Held" is recorded only from the partner's own report (its signed
+     while the protected-pay provider's key is configured for the deployment,
+     the environment stop is not set and the protected-pay switch
+     (lib/money/protected-pay-switch.ts) is on. "Held" is recorded only from the partner's own report (its signed
      webhook or a read-back): provider_arrangement_observe refuses any state
      but "asked" or "unknown" from Vallo itself. The dev previews that draw it
      are fixtures.
@@ -137,7 +138,38 @@ export const BACKED_CLAIMS: readonly BackedClaim[] = [
       /^Your payment is protected through Vallo's transaction infrastructure\.$|^Protected$|^Held in protected payments until each one's release condition is met\. Not yours to withdraw yet\.$/,
     onlyIn: MONEY_COPY_FILE,
     mechanism:
-      "the protected rail: funds held by the licensed provider's escrow until release (docs/payments/VALLO_FINANCIAL_LAYER.md); a payment reads as held only after the provider reports it (signed webhook or read-back, public.provider_arrangement_observe); surfaces gated on the server by protectedRailLive() in apps/web/src/lib/money/rail-live.ts (Payluk key configured for the deployment, PAYMENTS_KILL_PAYLUK not set, payments_payluk_on on)",
+      "the protected rail: funds held by the licensed provider's escrow until release (docs/payments/VALLO_FINANCIAL_LAYER.md); a payment reads as held only after the provider reports it (signed webhook or read-back, public.provider_arrangement_observe); surfaces gated on the server by protectedRailLive() in apps/web/src/lib/money/rail-live.ts (the provider's key configured for the deployment, the environment stop not set, the protected-pay switch on)",
+  },
+  /* The protected rail's screens (EscrowPay, 10 November 2026): the same
+     claim as above, for the new provider. Each sentence names the transfer
+     rail or a state the provider confirmed, and is drawn only by
+     components/money/protected-rail, which picks its screen from the recorded
+     state (lib/money/protected-journey.ts), never from the browser. No live
+     page mounts it: the rail is switched off (payments_escrowpay_on, fail
+     closed, lib/payments/providers/escrowpay/switch.ts), the client sends
+     nothing while the API is undocumented (DOCUMENTED false), and every
+     category is disabled (public.protected_payment_categories). Whole
+     sentences, copy.ts only. */
+  {
+    phrase:
+      /^Protected bank transfer$|^Continue with protected transfer$|^Your payment is protected\.$|^Protected transaction amount$/,
+    onlyIn: MONEY_COPY_FILE,
+    mechanism:
+      "the new protected rail (lib/payments/providers/escrowpay): funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; the screens draw 'protected' only on a provider-confirmed state recorded in provider_arrangements; switched off by payments_escrowpay_on (fail closed), DOCUMENTED false in lib/payments/providers/escrowpay/client.ts, and every category disabled in public.protected_payment_categories",
+  },
+  /* The protected rail's trust page, failure states and receipt (10
+     November 2026), the same claim as the entry above, for the explainer at
+     /docs/how-protection-works (PROTECTED_HOW in copy.ts). Each sentence
+     describes the rail as it works once open, beside PROTECTED_NOT_OPEN,
+     which the page draws first: protected payment is not open, and nothing
+     is paid this way today. Whole sentences or a sentence's opening words,
+     copy.ts only. */
+  {
+    phrase:
+      /^A protected payment is a bank transfer that a licensed bank holds under your agreement until the handover you agreed has happened\.|^When protected payment opens, the money you transfer goes to a designated account at a licensed bank\.|^How a protected payment moves$|^A protected payment, from agreement to release$|^Only now does the payment read as protected, with the bank named on screen\.$|^The states of a protected payment$|^Protected bank transfer, from a Nigerian account$/,
+    onlyIn: MONEY_COPY_FILE,
+    mechanism:
+      "the new protected rail's explainer: funds held by the custodian bank named in lib/money/protected-wording.ts under the provider's agreement until release; 'protected' is drawn on a payment only on a provider-confirmed state recorded in provider_arrangements (lib/money/protected-journey.ts); the page states first that the rail is not open (PROTECTED_NOT_OPEN), and the rail is switched off by payments_escrowpay_on (fail closed) with DOCUMENTED false in lib/payments/providers/escrowpay/client.ts",
   },
   { phrase: /^; Secure$/, mechanism: "the Secure attribute of the theme cookie (lib/theme/theme-client.ts), an HTTP cookie flag, not copy" },
 

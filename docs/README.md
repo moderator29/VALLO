@@ -26,7 +26,7 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 | Document | What it is for |
 |---|---|
 | [ARCHITECTURE_DECISIONS.md](ARCHITECTURE_DECISIONS.md) | ADR-001 to ADR-014 in one file |
-| [adr/0003-a-licensed-provider-holds-the-money-vallo-records-it.md](adr/0003-a-licensed-provider-holds-the-money-vallo-records-it.md) | **Current.** A licensed provider holds the money; Vallo records it. Escrow, balances, deposits and withdrawals are built, Payluk holds the funds, Vallo never takes custody, and the custody naming guard stays (amends ADR 0002) |
+| [adr/0003-a-licensed-provider-holds-the-money-vallo-records-it.md](adr/0003-a-licensed-provider-holds-the-money-vallo-records-it.md) | **Current.** A licensed provider holds the money; Vallo records it. Escrow, balances, deposits and withdrawals are built, the retired provider holds the funds, Vallo never takes custody, and the custody naming guard stays (amends ADR 0002) |
 | [adr/0004-two-rails-direct-and-provider-held-escrow.md](adr/0004-two-rails-direct-and-provider-held-escrow.md) | **Current, subordinate to ADR 0003.** Which rail a payment takes: direct settlement by split for fixed-price bookings, provider held escrow for negotiated deals, chosen by data in `payment_rail_policy` |
 | [adr/0002-vallo-never-holds-customer-money.md](adr/0002-vallo-never-holds-customer-money.md) | Vallo never holds customer money (supersedes ADR 0001, amended by ADR 0003 and 0004) |
 | [adr/0001-held-payments-custody-purpose-and-the-float.md](adr/0001-held-payments-custody-purpose-and-the-float.md) | Superseded: held payments (escrow), kept as an ADR record only |
@@ -38,9 +38,8 @@ Retired material (old session handoffs, dated sweeps and audits, research notes 
 |---|---|
 | [MONEY_ARCHITECTURE.md](MONEY_ARCHITECTURE.md) | **How money moves now**: the status block at the top is the current truth (escrow by a licensed partner, the Guarantee retired, the switches live), then the split-at-payment mechanism |
 | [payments/VALLO_PRICING.md](payments/VALLO_PRICING.md) | What Vallo charges and what the provider charges: the commission as policy data, the retired Guarantee, why no VAT yet, the withdrawal bands and the referral economics |
-| [payments/VALLO_FINANCIAL_LAYER.md](payments/VALLO_FINANCIAL_LAYER.md) | Vallo presents, the provider holds: what Payluk provides endpoint by endpoint, the four conditions under which a balance surface is legal, and the provider abstraction |
-| [payments/VALLO_PAYMENTS_ARCHITECTURE.md](payments/VALLO_PAYMENTS_ARCHITECTURE.md) | Paystack, Payluk and Yellow Card: the provider interface, the ledger, the two tracks and the legal gate. Section 0 is an evidence warning that must be read before any Payluk code |
-| [payments/PAYLUK_LIVE_DOCS_FINDINGS.md](payments/PAYLUK_LIVE_DOCS_FINDINGS.md), [payments/payluk-source/](payments/payluk-source/) | What Payluk's live documentation actually says, and the saved source pages the client is written against |
+| [payments/VALLO_FINANCIAL_LAYER.md](payments/VALLO_FINANCIAL_LAYER.md) | Vallo presents, the provider holds: what the retired provider provides endpoint by endpoint, the four conditions under which a balance surface is legal, and the provider abstraction |
+| [payments/VALLO_PAYMENTS_ARCHITECTURE.md](payments/VALLO_PAYMENTS_ARCHITECTURE.md) | Paystack, the retired provider and Yellow Card: the provider interface, the ledger, the two tracks and the legal gate. Section 0 is an evidence warning that must be read before any the retired provider code |
 | [payments/RELEASE_RUNBOOK.md](payments/RELEASE_RUNBOOK.md) | The steps that open the escrow rail in production |
 | [ROOM_CHECKOUT.md](ROOM_CHECKOUT.md) | Hotel rooms: how a guest requests and pays for a room, how the host is paid, test mode, switching `room_bookings` on |
 | [promotion/VALLO_PROMOTION.md](promotion/VALLO_PROMOTION.md) | Paid promotion: the tiers, what each buys, and the rules the placements obey |

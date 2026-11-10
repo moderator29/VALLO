@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getAgentContext, agentProfileFrom } from "@/lib/agent/listings-queries";
 import { readDeclaration } from "@/lib/stays/arrival-queries";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ArrivalChargesForm } from "@/components/stays/ArrivalChargesForm";
 import { ListingPitch } from "../../../list/ListingPitch";
@@ -41,20 +41,22 @@ export default async function ListingArrivalPage({ params }: { params: Promise<{
   const existing = listing && !error ? await readDeclaration({ listingId: listing.id }) : undefined;
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-      <div className="mx-auto max-w-2xl">
-        <Link href="/agent/listings" className="nf-caption font-semibold text-[var(--nf-content-muted)]">
-          {t.agent.nav.myListings}
-        </Link>
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+      {/* The frame's header carries the one way back, to My listings, where
+          the text link above the title used to. */}
+      <PageFrame
+        title={copy.title}
+        subtitle={!error && listing && listing.rate_period === "night" ? listing.title : undefined}
+        fallback="/agent/listings"
+      >
+      <div>
         {error ? (
           <EmptyState icon="calendar-home" title={copy.title} body={t.afterTheGate.tenancy.unavailableBody} />
         ) : !listing || listing.rate_period !== "night" ? (
           <EmptyState icon="calendar-home" title={t.afterTheGate.tenancy.missingTitle} body={copy.noStays} data-testid="arrival-missing" />
         ) : (
           <>
-            <h1 className="nf-h2 mt-sm">{copy.title}</h1>
-            <p className={`mt-2xs ${TYPE.rowMeta}`}>{listing.title}</p>
-            <p className={`mt-xs ${TYPE.body}`}>{copy.lede}</p>
+            <p className={TYPE.body}>{copy.lede}</p>
             <div className="mt-lg">
               {existing === undefined ? (
                 <p className={TYPE.body}>{t.afterTheGate.tenancy.unavailableBody}</p>
@@ -65,6 +67,7 @@ export default async function ListingArrivalPage({ params }: { params: Promise<{
           </>
         )}
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

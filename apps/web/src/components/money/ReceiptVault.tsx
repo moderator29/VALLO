@@ -18,6 +18,9 @@ import { formatMoneyDate } from "@/lib/money/dates";
 import { KIND_LABEL, statusFor, type HistoryEntry } from "@/lib/money/history-model";
 import { referenceLabel } from "@/lib/money/references";
 import type { VaultKind } from "@/lib/money/vault";
+import { PROTECTED_PAYMENTS_HEADING } from "@/lib/money/copy";
+import { StagePill } from "./protected-rail/kit";
+import type { ProtectedPaymentSummary } from "./protected-rail/types";
 
 /**
  * THE RECEIPT VAULT (R3-05; FL section 4.4): search, filter, open (to print or
@@ -38,6 +41,7 @@ export function ReceiptVault({
   basePath,
   locale,
   counts,
+  protectedReceipts = [],
 }: {
   /** Already filtered. */
   entries: readonly HistoryEntry[];
@@ -52,7 +56,15 @@ export function ReceiptVault({
    * is the whole record, so a chip never shows a part as the whole.
    */
   counts?: Record<VaultKind, number>;
+  /**
+   * BUILD 7.4: the viewer's protected payments whose outcome the bank
+   * confirmed (released or refunded). Each opens its payment, where the
+   * receipt names the custodian in the provider's words, the partner's
+   * reference and the release or refund history. Empty while the rail is off.
+   */
+  protectedReceipts?: readonly ProtectedPaymentSummary[];
 }) {
+  const finalReceipts = protectedReceipts.filter((p) => p.stage === "released" || p.stage === "refunded");
   const href = (k: VaultKind) => {
     const p = new URLSearchParams();
     if (k !== "all") p.set("kind", k);
@@ -86,6 +98,23 @@ export function ReceiptVault({
         ))}
       </div>
       {query ? <p className="nf-caption text-[var(--nf-content-muted)]">{receiptsSearchScope(scanned)}</p> : null}
+
+      {finalReceipts.length > 0 ? (
+        <ListGroup label={PROTECTED_PAYMENTS_HEADING} labelAs="h2" data-testid="vault-protected">
+          {finalReceipts.map((p) => (
+            <ListRow
+              key={p.reference}
+              data-testid="vault-protected-row"
+              title={p.title}
+              sub={[formatMoneyDate(p.at, locale), `${referenceLabel({ kind: "transaction", value: p.reference })} ${p.reference}`].filter(Boolean).join(" · ")}
+              value={<Amount minorUnits={p.amountMinor} locale={locale} showFraction />}
+              status={<StagePill stage={p.stage} />}
+              href={`/agreements/${encodeURIComponent(p.agreementId)}/held#receipt`}
+              chevron
+            />
+          ))}
+        </ListGroup>
+      ) : null}
 
       {entries.length === 0 ? (
         <p className="nf-body-sm text-[var(--nf-content-secondary)]" role="status" data-testid="vault-no-match">

@@ -53,7 +53,7 @@ or a real account can prove it. Nothing here is merged to `main`.
 
 1. Calls: ring, answer, sound both ways, background and locked ring, late push (`docs/video-calling/DEVICE_TEST_SCRIPT.md`).
 2. Push enrolment: `push_tokens` has 0 rows; the failure reference on the phone says why.
-3. Wallet opening at Payluk after a real phone confirmation (Payluk is unreachable from here).
+3. Wallet opening at the retired provider after a real phone confirmation (the retired provider is unreachable from here).
 4. Invite flow with a real invitee and a real SMS code.
 5. Signed-in screens in light and dark at the five widths (217 pages marked "needs session").
 6. Settings "Follow Vallo" group (signed-in, not seen).

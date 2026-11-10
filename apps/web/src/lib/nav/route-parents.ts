@@ -129,6 +129,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/delete-account": "/",
   "/docs": "/",
   "/docs/[slug]": "/docs",
+  /* The protected payment's trust page (BUILD 7.7), a static docs page beside the chapters. */
+  "/docs/how-protection-works": "/docs",
   "/eula": "/",
   "/ai/terms": "/",
   "/ai/privacy": "/",
@@ -138,6 +140,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/r": "/",
   "/r/[code]": "/r",
   "/privacy": "/",
+  "/cookies": "/",
   "/disclaimer": "/",
   "/host-agreement": "/",
   "/safety": "/",
@@ -154,6 +157,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/standards": "/",
   "/styleguide": "/",
   "/terms": "/",
+  /* The legal index (9 November 2026): every policy as a card. */
+  "/legal": "/",
 
   /* ------------------------------------------------------------- the door
    *
@@ -282,10 +287,13 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/roommates/nysc": "/roommates",
   "/roommates/safety": "/roommates",
   "/roommates/me": "/roommates",
+  "/roommates/connected/[interestId]": "/roommates/me",
   "/roommates/groups": "/roommates",
   "/roommates/groups/new": "/roommates/groups",
   "/roommates/groups/[id]": "/roommates/groups",
   "/roommates/split": "/roommates",
+  "/roommates/tools/checklist": "/roommates",
+  "/roommates/tools/agreement": "/roommates",
   "/roommates/verify": "/roommates/me",
   /* The compare tray's table (29 October 2026): places set aside from the
      catalogue, so back is the home screen like Saved. */
@@ -459,6 +467,7 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/settings/phone": "/settings",
   "/settings/passcode": "/settings",
   "/legal/privacy": "/settings",
+  "/legal/cookies": "/settings",
   "/legal/terms": "/settings",
   "/legal/disclaimer": "/settings",
 
@@ -476,6 +485,13 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/front-door": "/admin/analytics",
   "/admin/audit": "/admin",
   "/admin/lookup": "/admin",
+  /* My Desk (10 November 2026): the personal workspace, its tasks and its announcements. */
+  "/admin/my-desk": "/admin",
+  "/admin/my-desk/tasks": "/admin/my-desk",
+  "/admin/my-desk/announcements": "/admin/my-desk",
+  "/admin/my-desk/weekly": "/admin/my-desk",
+  "/admin/reports/weekly": "/admin",
+  "/admin/copilot": "/admin",
   "/admin/oversight": "/admin",
   "/admin/bookings": "/admin",
   "/admin/bookings/[bookingId]": "/admin/bookings",
@@ -492,14 +508,20 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/staff": "/admin/settings",
   "/admin/handbook": "/admin/settings",
   "/admin/handbook/position": "/admin/handbook",
+  "/admin/manual": "/admin/settings",
+  "/admin/manual/[chapter]": "/admin/manual",
   "/admin/fees": "/admin",
   "/admin/restaurant-fees": "/admin",
   "/admin/account-recovery": "/admin",
+  "/admin/account-deletions": "/admin/operations",
+  "/admin/doc-feedback": "/admin/support",
   "/admin/kyc": "/admin",
   "/admin/kyc/guide": "/admin/kyc",
   "/admin/compliance": "/admin/kyc",
   "/admin/listings": "/admin",
   "/admin/listings/[id]": "/admin/listings",
+  "/admin/business-development": "/admin",
+  "/admin/overview": "/admin",
   "/admin/money": "/admin",
   "/admin/operations": "/admin",
   /* V-80: field speed, one panel read from real phones. */
@@ -507,6 +529,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/payments": "/admin",
   /* Chargebacks: the finance desk, and one case. */
   "/admin/chargebacks": "/admin",
+  /* Protected payments: the read-only arrangement operations desk (BUILD 7.11). */
+  "/admin/arrangements": "/admin",
   "/admin/chargebacks/[chargebackId]": "/admin/chargebacks",
   "/admin/people": "/admin",
   /*
@@ -526,6 +550,12 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/trust": "/admin",
   "/admin/appeals": "/admin",
   "/admin/circle": "/admin",
+  "/admin/social-media": "/admin",
+  /* The staff roles of 10 November 2026: four desks, each one level under the console. */
+  "/admin/marketing": "/admin",
+  "/admin/content": "/admin",
+  "/admin/technical": "/admin",
+  "/admin/support-lead": "/admin",
   "/admin/standing": "/admin",
   "/admin/stops": "/admin",
   "/admin/people/[id]": "/admin/people",
@@ -746,10 +776,14 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/admin/audit/export": "the audit log for a period as a CSV download, not a page.",
   "/admin/money/export": "the platform payments history as a CSV download for the finance scope, not a page.",
   "/admin/oversight/export": "the oversight tables as a CSV download, not a page.",
+  "/admin/reports/weekly/export": "one week of weekly reports as a CSV download for reviewers, not a page.",
   "/api/assistant": "POST only, the assistant's model call.",
+  "/api/admin/copilot": "POST only, the staff desks' copilot model call.",
+  "/api/admin/copilot/act": "POST only, confirms one signed copilot proposal and runs the desk action.",
   "/api/auth/email-hook": "Supabase Auth's send-email webhook.",
   "/api/build": "GET only, the build id the running page should be on, so a page that has been open across a release reloads itself once (DeployWatch) instead of waiting for the app to be deleted and installed again.",
   "/api/client-error": "the browser's error beacon.",
+  "/api/cookie-copy": "the cookie sheet's words in the reader's language, fetched when it opens.",
   "/api/passcode/touch": "POST only, the passcode unlock's heartbeat (docs/PASSCODE.md).",
   "/api/vitals": "the browser's field speed beacon (V-80).",
   "/gallery/ported": "a development harness for the ported component library (Session 3, D34), behind the preview flag like /gallery; not product, so it has no place in the hierarchy.",
@@ -804,7 +838,7 @@ export const NON_NAVIGABLE: Readonly<Record<string, string>> = {
   "/api/map/listings": "JSON read for the map.",
   "/api/paystack/reconcile": "processor reconciliation.",
   "/api/paystack/webhook": "processor webhook.",
-  "/api/payluk/webhook": "processor webhook.",
+  "/api/escrowpay/webhook": "processor webhook (the new payment rail, built switched off).",
   "/api/dojah/webhook": "identity provider webhook.",
   "/api/identity-checks/[id]/[file]": "a staff-only identity file stream, not a page.",
   "/api/push/drain": "scheduled job, bearer token.",

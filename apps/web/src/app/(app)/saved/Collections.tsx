@@ -9,6 +9,7 @@ import { createCollection, deleteCollection, renameCollection, setInCollection }
 import { COLLECTION_NAME_MAX, type SavedCollection } from "@/lib/saved/collections";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { banner } from "@/lib/ui/toast";
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 
 const WORDS = {
   all: "All",
@@ -28,7 +29,7 @@ const WORDS = {
   created: "List created. Add places to it from any saved card.",
   deleted: "List deleted. Everything you saved is still here.",
   renamed: "List renamed",
-  addedTo: "Added to {name}",
+  addedTo: "Added to {name}. It is in Saved.",
   takenOff: "Taken off {name}",
 };
 
@@ -191,7 +192,15 @@ export function AddToList({
       const result = await setInCollection({ collectionId, kind, id, on });
       if (result.ok) {
         const name = collections.find((c) => c.id === collectionId)?.name ?? "";
-        banner.success((on ? WORDS.addedTo : WORDS.takenOff).replace("{name}", name));
+        saveDoneBanner({
+          saved: on,
+          message: (on ? WORDS.addedTo : WORDS.takenOff).replace("{name}", name),
+          undo: async () => {
+            const back = await setInCollection({ collectionId, kind, id, on: !on });
+            return back.ok ? { ok: true } : { ok: false, error: back.error };
+          },
+          onUndone: () => router.refresh(),
+        });
         router.refresh();
       } else banner.error(result.error, { retry: () => toggle(collectionId, on) });
     });

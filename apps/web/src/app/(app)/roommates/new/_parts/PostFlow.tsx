@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { RoomCardView } from "@/components/roommates/Cards";
 import { Celebration } from "@/components/roommates/Celebrate";
+import { KeyDoorArt } from "@/components/roommates/RoommatesArt";
+import type { ListerIdentityStatus } from "@/lib/verification/lister-identity";
 import { FEATURE_ART } from "@/lib/features/art";
 import { ChoiceChips, ToggleChips } from "@/components/roommates/ChoiceChips";
 import { AMENITY_ICON, counted, fill, naira } from "@/components/roommates/format";
@@ -92,7 +94,10 @@ export function PostFlow({
   status,
   schools,
   me,
+  identity = null,
 }: {
+  /** The poster's identity check, from the server (null when it cannot be read: the database still decides at submit). */
+  identity?: ListerIdentityStatus | null;
   initial: ListingDraft;
   /** The post's status when editing (null for a new post). */
   status: ListingStatus | null;
@@ -111,7 +116,7 @@ export function PostFlow({
   const [dir, setDir] = useState<"forward" | "back">("forward");
   const [save, setSave] = useState<StepSaveState>("idle");
   const [problems, setProblems] = useState<Record<string, string>>({});
-  const [done, setDone] = useState<{ id: string; city: string } | null>(null);
+  const [done, setDone] = useState<{ id: string; city: string; submitted: boolean } | null>(null);
   const [pending, start] = useSafeTransition();
 
   useEffect(() => {
@@ -185,7 +190,7 @@ export function PostFlow({
       }
     });
 
-  const publishing = status === null || status === "draft" || status === "expired";
+  const publishing = status === null || status === "draft" || status === "expired" || status === "changes_requested";
 
   const publish = () =>
     start(async () => {
@@ -199,6 +204,7 @@ export function PostFlow({
         banner.error(issues.length > 1 ? `${counted(issues.length, F.fix)}. ${words[issues[0]!]}` : (words[issues[0]!] ?? F.notSaved));
         if (issues.includes("city")) goto(2);
         else if (issues.includes("rent")) goto(3);
+        else if (issues.includes("photos")) goto(6);
         else if (issues.includes("title")) goto(7);
         return;
       }
@@ -218,8 +224,9 @@ export function PostFlow({
           router.refresh();
           return;
         }
-        banner.success(copy.create.published);
-        setDone({ id: result.data.id, city: d.city });
+        const submitted = result.data.status === "submitted";
+        banner.success(submitted ? copy.review.done.title : copy.create.published);
+        setDone({ id: result.data.id, city: d.city, submitted });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -241,6 +248,35 @@ export function PostFlow({
     secondary: step < TOTAL ? { label: copy.actions.saveDraft, onClick: saveDraft, disabled: pending, testId: "post-save-draft" } : undefined,
   } as const;
   const cont = (disabled = false) => ({ label: F.next, onClick: () => goto(step + 1), disabled, testId: "post-next" });
+
+  if (done && done.submitted) {
+    return (
+      <section className="nf-rmcn" data-theme="dark" aria-labelledby="rmcn-title" data-testid="post-submitted">
+        <KeyDoorArt className="nf-rmcn__art" />
+        <h1 id="rmcn-title" className="nf-rmcn__title">
+          {copy.review.done.title}
+        </h1>
+        <p className="nf-rmcn__body">{copy.review.done.body}</p>
+        {identity && identity !== "approved" ? <p className="nf-rmcn__body">{copy.review.identity.waitingDone}</p> : null}
+        <ol className="nf-rmcn__list">
+          {copy.review.done.next.map((line, n) => (
+            <li key={line}>
+              <span aria-hidden="true">{n + 1}.</span>
+              {line}
+            </li>
+          ))}
+        </ol>
+        <div className="nf-rmcn__actions">
+          <ButtonLink href={ROOMMATES_ROUTES.listing(done.id)} variant="primary" size="lg" full arrow glow data-testid="post-live-view">
+            {copy.review.done.view}
+          </ButtonLink>
+          <ButtonLink href={ROOMMATES_ROUTES.home} variant="secondary" size="lg" full>
+            {copy.review.done.home}
+          </ButtonLink>
+        </div>
+      </section>
+    );
+  }
 
   if (done) {
     return (
@@ -432,12 +468,39 @@ export function PostFlow({
       step={TOTAL}
       title={copy.create.review}
       subtitle={C.reviewBody}
-      primary={{ label: publishing ? copy.actions.publish : copy.ui.onboarding.saveChanges, onClick: publish, loading: pending, disabled: pending, testId: "post-publish" }}
+      primary={{
+        label: publishing ? (d.kind === "room_offer" ? copy.review.submit : copy.actions.publish) : copy.ui.onboarding.saveChanges,
+        onClick: publish,
+        loading: pending,
+        disabled: pending,
+        testId: "post-publish",
+      }}
       secondary={{ label: copy.actions.saveDraft, onClick: saveDraft, disabled: pending, testId: "post-save-draft" }}
       testId="post-step-review"
     >
+      {d.kind === "room_offer" && identity && identity !== "approved" ? <IdentityStep state={identity} /> : null}
       <Review d={d} me={me} problems={problems} onPatch={patch} onEdit={goto} />
     </StepFrame>
+  );
+}
+
+/** "Confirm your identity first": what is missing, in the words of the exact cause, and the way to fix it. */
+function IdentityStep({ state }: { state: ListerIdentityStatus }) {
+  const copy = useScopedCopy("roommates");
+  const I = copy.review.identity;
+  const line = state === "pending" ? I.pending : state === "failed" ? I.rejected : I.none;
+  return (
+    <section className="nf-rmrv" data-tone="act" aria-labelledby="post-identity" data-testid="post-identity">
+      <h2 id="post-identity" className="nf-rmrv__title">
+        {I.title}
+      </h2>
+      <p className="nf-rmrv__body">{line}</p>
+      {state !== "pending" ? (
+        <ButtonLink href="/verification" variant="secondary" size="md" leadingIcon="id-card">
+          {state === "failed" ? I.ctaAgain : I.cta}
+        </ButtonLink>
+      ) : null}
+    </section>
   );
 }
 

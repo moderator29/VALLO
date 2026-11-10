@@ -119,6 +119,7 @@ export function AgreementBody({ f }: { f: AgreementFixture }) {
               version={a.termsVersion}
               changes={f.worded.length > 0 ? f.worded : undefined}
               changesLead={kit.confirmLead}
+              kind={a.kind}
             />
           }
           secondary={[

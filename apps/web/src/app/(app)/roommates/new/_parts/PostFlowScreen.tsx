@@ -3,12 +3,14 @@ import { RoommatesEmpty, type RoommatesCopy } from "@/components/roommates";
 import { ButtonLink } from "@/components/ui/Button";
 import { ROOMMATES_ROUTES, type InstitutionRef, type ListingDraft, type ListingStatus } from "@/lib/features/roommates/model";
 
+import type { ListerIdentityStatus } from "@/lib/verification/lister-identity";
+
 import { PostFlow } from "./PostFlow";
 
 export type PostFlowState =
   | { state: "not-open" }
   | { state: "signed-out"; next: string }
-  | { state: "ok"; initial: ListingDraft; status: ListingStatus | null; me: { userId: string; name: string; avatarUrl: string | null } };
+  | { state: "ok"; initial: ListingDraft; status: ListingStatus | null; me: { userId: string; name: string; avatarUrl: string | null }; identity?: ListerIdentityStatus | null };
 
 /** THE POST FLOW'S DOOR (server safe): not open, signed out, or the flow (new or editing). */
 export function PostFlowScreen({ read, schools, t: copy }: { read: PostFlowState; schools: InstitutionRef[]; t: RoommatesCopy }) {
@@ -25,5 +27,5 @@ export function PostFlowScreen({ read, schools, t: copy }: { read: PostFlowState
       </PageFrame>
     );
   }
-  return <PostFlow initial={read.initial} status={read.status} schools={schools} me={read.me} />;
+  return <PostFlow initial={read.initial} status={read.status} schools={schools} me={read.me} identity={read.identity ?? null} />;
 }

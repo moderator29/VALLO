@@ -7,11 +7,14 @@ import { staffAccessGranted } from "../email/staff-messages";
 /**
  * The position list and each position's default scopes live twice: in SQL
  * (`private.staff_position_title`, `private.staff_position_scopes`) and here.
- * This reads the migration so the two cannot drift.
+ * This reads the newest definition so the two cannot drift. Since 10
+ * November 2026 that is the pending file (step 2 of the staff roles) that
+ * repeats every earlier position and adds Marketing Manager, Content Manager,
+ * Technical Administrator and Customer Support Lead, so it is the whole list.
  */
 const MIGRATION = fileURLToPath(
   new URL(
-    "../../../../../supabase/migrations/20260929094459_named_staff_positions_with_default_scope_bundles.sql",
+    "../../../../../supabase/migrations/pending/staff_roles_step2_2026-11-10.sql",
     import.meta.url,
   ),
 );

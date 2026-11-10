@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { InterestSheet } from "@/components/roommates/Actions";
+import { ShareToCircleSheet } from "@/components/roommates/ShareToCircle";
 import { dayText, fill, naira } from "@/components/roommates/format";
 import { ShareComposer } from "@/components/share/ShareComposer";
 import { type ShareCopy } from "@/components/share/ShareSheet";
@@ -105,8 +106,22 @@ export function ListingActions(props: ListingActionsProps) {
         const result = await setRoommateListingStatus({ id: props.id, status: next });
         if (!result.ok) return result;
         feedback("confirm");
+        const before = status;
         setStatus(next);
-        banner.success(words);
+        banner.success(words, {
+          action: {
+            label: copy.area.undo,
+            run: () => {
+              void setRoommateListingStatus({ id: props.id, status: before === "paused" ? "paused" : "live" }).then((back) => {
+                if (back.ok) {
+                  setStatus(before);
+                  banner.info(copy.area.undone);
+                  router.refresh();
+                } else banner.error(back.error);
+              });
+            },
+          },
+        });
         router.refresh();
         return { ok: true };
       });
@@ -259,6 +274,7 @@ export function ListingActions(props: ListingActionsProps) {
           setConnection({ state: "sent", interestId });
           router.refresh();
         }}
+        onUndone={() => setConnection({ state: "none" })}
       />
       <ViewingSheet open={sheet === "viewing"} onOpenChange={(o) => setSheet(o ? "viewing" : null)} listingId={props.id} />
       <Sheet open={sheet === "shortlist"} onOpenChange={(o) => setSheet(o ? "shortlist" : null)} title={L.shortlistTitle} description={L.shortlistBody} closeLabel={copy.ui.flow.close} detents={[0.6]}>
@@ -405,6 +421,7 @@ export function ListingShareMenu({
   const [open, setOpen] = useState(false);
   const [feed, setFeed] = useState(false);
   const [card, setCard] = useState(false);
+  const [circle, setCircle] = useState(false);
   const [line, setLine] = useState("");
   const [pending, start] = useSafeTransition();
 
@@ -542,6 +559,26 @@ export function ListingShareMenu({
                   className="nf-rmv-pick"
                   onClick={() => {
                     feedback("select");
+                    setOpen(false);
+                    setCircle(true);
+                  }}
+                  data-testid="listing-share-circle"
+                >
+                  <span className="nf-rm-plate" aria-hidden="true">
+                    <UiIcon name="circle-people" size={20} />
+                  </span>
+                  <span className="nf-rmv-pick__name">{copy.circleShare.action}</span>
+                  <UiIcon name="chevron-right" size={18} />
+                </button>
+              </li>
+            ) : null}
+            {signedIn ? (
+              <li>
+                <button
+                  type="button"
+                  className="nf-rmv-pick"
+                  onClick={() => {
+                    feedback("select");
                     setFeed(true);
                   }}
                   data-testid="listing-share-feed"
@@ -557,6 +594,7 @@ export function ListingShareMenu({
           </ul>
         )}
       </Sheet>
+      {signedIn ? <ShareToCircleSheet open={circle} onOpenChange={setCircle} target={{ kind: "room", id }} /> : null}
     </>
   );
 }

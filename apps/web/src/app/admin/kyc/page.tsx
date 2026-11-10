@@ -16,6 +16,8 @@ import { notesOf, readMemberNotesFor } from "@/lib/admin/notes";
 import { VerificationDesk, type RecentDecision, type VerificationRow } from "./VerificationDesk";
 import { getIdentityChecks } from "@/lib/admin/identity-checks";
 import { IdentityChecksPanel } from "./IdentityChecksPanel";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { kycContext } from "@/lib/admin/copilot/contexts/kyc";
 import "../_review/review.css";
 
 export const metadata: Metadata = {
@@ -78,6 +80,25 @@ export default async function AdminKycPage({
   const selfieChecks =
     selfie.state === "ok" ? <IdentityChecksPanel waiting={selfie.waiting} decided={selfie.decided} /> : null;
   const summaryData = summary.state === "ok" ? summary.data : null;
+  const copilot = (
+    <DeskCopilot
+      scope="kyc_review"
+      deskName="KYC review"
+      context={kycContext(
+        summaryData
+          ? {
+              awaiting: summaryData.awaiting,
+              awaitingLastWeek: summaryData.awaitingLastWeek,
+              passedToday: summaryData.passedToday,
+              failedToday: summaryData.failedToday,
+              decisionsThisWeek: summaryData.decisionsThisWeek,
+              medianDecisionMinutesThisWeek: summaryData.medianDecisionMinutes.thisWeek,
+              selfieChecksWaiting: selfie.state === "ok" ? selfie.waiting.length : null,
+            }
+          : null,
+      )}
+    />
+  );
 
   const filters = (
     <QueueFilters
@@ -91,15 +112,18 @@ export default async function AdminKycPage({
 
   if (read.state !== "ok") {
     return (
-      <VerificationDesk
-        filters={filters}
-        rows={[]}
-        empty={{ title: "Nothing to show", body: "" }}
-        summary={summaryData}
-        recent={null}
-        selfieChecks={selfieChecks}
-        unavailable
-      />
+      <>
+        <VerificationDesk
+          filters={filters}
+          rows={[]}
+          empty={{ title: "Nothing to show", body: "" }}
+          summary={summaryData}
+          recent={null}
+          selfieChecks={selfieChecks}
+          unavailable
+        />
+        {copilot}
+      </>
     );
   }
 
@@ -200,6 +224,7 @@ export default async function AdminKycPage({
           ) : null
         }
       />
+      {copilot}
     </>
   );
 }

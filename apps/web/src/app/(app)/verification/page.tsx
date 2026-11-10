@@ -26,6 +26,7 @@ import {
 import { resolveSession } from "@/lib/actions/session";
 import { readMyApplication } from "@/lib/agent/application-status";
 import { answerVerificationRequest, submitVerification } from "./actions";
+import { HelpLink } from "@/components/site/support/HelpLink";
 
 /**
  * Where the caller's own filed identity and address documents stand: the
@@ -382,6 +383,7 @@ export default async function VerificationPage({
           </div>
           <KycStatus status={status} locale={locale} />
           <div className="mt-block">{path}</div>
+          <HelpLink to="verification" className="mt-sm" />
           {requested}
           {pep}
           {dojah}
@@ -405,6 +407,7 @@ export default async function VerificationPage({
               for it to sit behind. */}
           <PageHeader title={t.agent.nav.verification} fallback="/profile" />
           <div className="mb-block">{path}</div>
+          <HelpLink to="verification" className="mb-block" />
           {requested}
           {pep}
           {dojah}

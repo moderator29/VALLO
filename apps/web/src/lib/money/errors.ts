@@ -3,8 +3,8 @@
  * server log and the audit view; a member sees a Vallo error code and a
  * sentence that claims nothing about money it cannot know.
  *
- * Built from the documented codes only: Payluk `essentials_errors` (400, 401,
- * 403, 404, 410, 429, 500, 503) and plain HTTP for Paystack. The sentences
+ * Built from the documented codes only: plain HTTP status codes (400, 401,
+ * 403, 404, 410, 429, 500, 503) and Paystack's own. The sentences
  * are operational, and deliberately never say "nothing was charged": after
  * a timeout that is not known (a timeout is unknown, not a failure).
  */

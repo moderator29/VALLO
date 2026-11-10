@@ -41,6 +41,7 @@ export function LegalDocument({
   otherHref,
   otherLabel,
   also,
+  preface,
 }: {
   title: string;
   intro: string;
@@ -55,6 +56,8 @@ export function LegalDocument({
    * and nothing pointed at it, so Terms names it here.
    */
   also?: { href: string; label: string };
+  /** The short version card and the at-a-glance tables, drawn above the contents. */
+  preface?: React.ReactNode;
 }) {
   return (
     <PageFrame title={title} subtitle={intro} fallback="/settings">
@@ -64,6 +67,8 @@ export function LegalDocument({
           <span>Last updated</span>
           <time>{updated}</time>
         </p>
+
+        {preface}
 
         <nav id="legal-contents" aria-labelledby="legal-contents-title" className="nf-legal__toc">
           <p id="legal-contents-title" className="nf-overline nf-legal__toc-title">

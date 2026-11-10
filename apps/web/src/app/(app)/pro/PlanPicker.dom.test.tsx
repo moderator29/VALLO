@@ -59,7 +59,8 @@ describe("the /pro plan page (D83: Vallo Pro and Vallo Business)", () => {
   it("states the price, the trial, that it renews monthly and how to cancel before anything is charged", () => {
     const text = words(picker());
     expect(text).toContain("4 days free, no card needed.");
-    expect(text).toContain("₦9,500 a month, paid by card through Paystack.");
+    /* The processor is named once, on the pay sheet, not on the plan page (9 November 2026). */
+    expect(text).toContain("₦9,500 a month, paid by card.");
     expect(text).toContain("Renews every month until you cancel.");
     expect(text).toContain("Cancel any time on this page.");
     expect(text).not.toMatch(/not on sale/i);

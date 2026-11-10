@@ -27,8 +27,8 @@ export const publicMetaHa = {
     },
     terms: {
       title: "Sharuɗɗan sabis",
-      description:
-        "Dokokin amfani da Vallo: asusu, biyan kuɗi, mayar da kuɗi, ma'anar alamar tabbatarwa, sanya gida, yarjejeniyoyi da amincewa, Garantin Vallo da amfani mai kyau.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `description` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     privacy: {
       title: "Manufar sirri",

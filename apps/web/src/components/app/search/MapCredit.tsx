@@ -7,8 +7,9 @@ import "./search-v2.css";
 /**
  * THE MAP'S CREDIT, BEHIND A ROUND "i" (search-map track, 13 October 2026).
  *
- * MapTiler's and OpenStreetMap's terms require their credit on the map, and
- * they allow it to be compact: MapLibre's own `compact` attribution is a round
+ * The map data's terms (OpenMapTiles and OpenStreetMap, served by
+ * OpenFreeMap) require their credit on the map, and they allow it to be
+ * compact: MapLibre's own `compact` attribution is a round
  * "i" that opens the credit on a tap. The founder wanted the line of text off
  * the map, so this is that pattern: the credit is always one tap away, it is
  * a real disclosure (`aria-expanded`, `aria-controls`), Escape and a second
@@ -29,7 +30,7 @@ export function MapCredit({
   note,
 }: {
   credits: readonly { label: string; href: string }[];
-  /** The joiner between two credits, from the dictionary (" and "). */
+  /** The joiner before the last credit, from the dictionary (" and "); earlier ones take a comma. */
   join: string;
   /** The control's accessible name ("About this map"). */
   label: string;
@@ -80,7 +81,7 @@ export function MapCredit({
         <p>
           {credits.map((credit, i) => (
             <span key={credit.href}>
-              {i > 0 ? join : null}
+              {i === 0 ? null : i === credits.length - 1 ? join : ", "}
               <a href={credit.href} target="_blank" rel="noopener noreferrer" className="nf-tap">
                 {credit.label}
               </a>

@@ -12,6 +12,7 @@ import { PayoutsView } from "@/components/money/PayoutsView";
 import { getDictionary } from "@vallo/i18n";
 import { readMyChargebackHold } from "@/lib/money/chargeback-hold";
 import { ChargebackHoldNotice } from "@/components/money/ChargebackHoldNotice";
+import { HelpLink } from "@/components/site/support/HelpLink";
 
 export const metadata: Metadata = { title: "Payouts", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -56,6 +57,7 @@ export default async function PayoutsPage({
       ) : (
         <PayoutsView summary={read.summary} entries={read.entries} nextBefore={read.nextBefore} before={before} locale={locale} now={new Date().getTime()} />
       )}
+      <HelpLink to="payouts" className="mt-block" />
       </div>
     </PageFrame>
     </main>

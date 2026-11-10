@@ -7,12 +7,14 @@
  * provider module and drives it both ways, because this is a LICENSING rule
  * before it is a rendering one and a licensing rule is worth a guard.
  *
- * CARTO's public basemaps are free and non-commercial use only. A marketplace
- * taking a booking fee is a commercial use, so the platform must be able to
- * move off them with one environment variable - and when it does, the credit
- * line has to move with it, because both providers require attribution and
- * they require different attribution. A provider swap that silently kept the
- * old credit replaces one licence breach with another.
+ * CARTO's public basemaps were free and non-commercial use only, and a
+ * marketplace taking a booking fee is a commercial use. Since 9 November 2026
+ * the map draws on OpenFreeMap, which is free, needs no key and allows
+ * commercial use. The MapTiler switch (`NEXT_PUBLIC_MAPTILER_KEY`, the paid
+ * path the founder declined) was removed the same day, and this guard holds
+ * that: setting the old variable must change nothing. The credit line has to
+ * travel with the provider, because a swap that silently kept the old credit
+ * replaces one licence breach with another.
  *
  * Node strips the TypeScript itself (22.6+).
  */
@@ -33,69 +35,75 @@ function check(name, condition, detail) {
   }
 }
 
-/* ------------------------------------------------- with no key: CARTO, flagged */
+/* -------------------------------------- OpenFreeMap, commercial use allowed */
 
 delete process.env.NEXT_PUBLIC_MAPTILER_KEY;
 const free = await import(`${MODULE}?free`);
 
 for (const theme of ["light", "dark"]) {
   const p = free.tileProvider(theme);
-  check(`${theme}: falls back to CARTO`, p.id === "carto", p.url);
-  check(`${theme}: the URL is a real tile template`, /\{z\}\/\{x\}\/\{y\}/.test(p.url), p.url);
-  check(`${theme}: it is flagged as non-commercial`, p.nonCommercial === true);
+  check(`${theme}: draws on OpenFreeMap`, p.id === "openfreemap", p.id);
+  check(`${theme}: a vector style, not an image template`, p.kind === "vector" && p.url === "", String(p.url));
   check(
-    `${theme}: CARTO and OpenStreetMap are both credited`,
-    p.credits.some((c) => c.label === "CARTO") &&
-      p.credits.some((c) => c.label === "OpenStreetMap"),
+    `${theme}: the style and TileJSON are OpenFreeMap's own, over https`,
+    /^https:\/\/tiles\.openfreemap\.org\/styles\//.test(p.style) && /^https:\/\/tiles\.openfreemap\.org\//.test(p.tileJson),
+    `${p.style} ${p.tileJson}`,
+  );
+  check(`${theme}: it is NOT flagged non-commercial`, p.nonCommercial === false);
+  check(
+    `${theme}: OpenMapTiles and OpenStreetMap are credited, as OpenFreeMap's terms require`,
+    p.credits.some((c) => c.label.includes("OpenMapTiles")) &&
+      p.credits.some((c) => c.label.includes("OpenStreetMap")),
     JSON.stringify(p.credits.map((c) => c.label)),
   );
+  check(`${theme}: OpenFreeMap is named too`, p.credits.some((c) => c.label === "OpenFreeMap"));
+  check(`${theme}: CARTO is no longer credited or fetched`, !p.credits.some((c) => /CARTO/.test(c.label)) && !JSON.stringify(p).includes("cartocdn"));
+  check(`${theme}: no key of any kind is in any URL`, !/key=/.test(JSON.stringify(p)));
   check(
     `${theme}: every credit carries a link somebody can follow`,
     p.credits.every((c) => /^https:\/\//.test(c.href)),
   );
 }
-check("with no key, hasCommercialTiles() is false", free.hasCommercialTiles() === false);
-check(
-  "the light and dark styles differ",
-  free.tileProvider("light").url !== free.tileProvider("dark").url,
-);
+check("hasCommercialTiles() is true: the pre-launch check reads clean", free.hasCommercialTiles() === true);
 
-/* ------------------------------------------ with a key: MapTiler, credited right */
+/* ---------------- the old MapTiler variable, still set in production, does nothing */
 
 process.env.NEXT_PUBLIC_MAPTILER_KEY = "test-key-not-a-real-one";
-const paid = await import(`${MODULE}?paid`);
+const keyed = await import(`${MODULE}?keyed`);
 
 for (const theme of ["light", "dark"]) {
-  const p = paid.tileProvider(theme);
-  check(`${theme}: a key moves the map to MapTiler`, p.id === "maptiler", p.url);
-  check(`${theme}: the key reaches the URL`, p.url.includes("test-key-not-a-real-one"));
-  check(`${theme}: it is no longer flagged non-commercial`, p.nonCommercial === false);
-  check(
-    `${theme}: the credit moves to MapTiler, with OpenStreetMap kept`,
-    p.credits[0].label === "MapTiler" && p.credits.some((c) => c.label === "OpenStreetMap"),
-    JSON.stringify(p.credits.map((c) => c.label)),
-  );
-  check(`${theme}: CARTO is no longer credited`, !p.credits.some((c) => c.label === "CARTO"));
-  check(`${theme}: no CARTO host is left in the URL`, !p.url.includes("cartocdn"));
+  const p = keyed.tileProvider(theme);
+  check(`${theme}: a MapTiler key does not move the map off OpenFreeMap`, p.id === "openfreemap" && p.kind === "vector", p.id);
+  check(`${theme}: the key reaches no URL`, !JSON.stringify(p).includes("test-key-not-a-real-one"));
+  check(`${theme}: MapTiler is not credited or fetched`, !/maptiler/i.test(JSON.stringify(p)));
 }
-check("with a key, hasCommercialTiles() is true", paid.hasCommercialTiles() === true);
+check("with the old key set, hasCommercialTiles() is still true", keyed.hasCommercialTiles() === true);
+const tilesSource = (await import("node:fs")).readFileSync(new URL(MODULE), "utf8");
+check("tiles.ts reads no provider key from the environment", !/process\.env/.test(tilesSource));
+delete process.env.NEXT_PUBLIC_MAPTILER_KEY;
 
 /* --------------------------------------------------------- the component is wired */
 
 const { readFileSync } = await import("node:fs");
 const canvas = readFileSync(path.join(HERE, "..", "src/components/app/search/MapCanvas.tsx"), "utf8");
 check(
-  "the map reads the provider rather than a hard-coded URL",
-  /tileProvider\(/.test(canvas) && !/cartocdn/.test(canvas),
-  "a literal CARTO host is still in MapCanvas.tsx",
+  "the map reads the provider and draws through the shared ground, not a hard-coded URL",
+  /tileProvider\(/.test(canvas) && /addBaseLayer\(/.test(canvas) && !/cartocdn|openfreemap\.org/.test(canvas),
+  "a literal tile host is in MapCanvas.tsx",
 );
+const creditControl = readFileSync(path.join(HERE, "..", "src/components/app/search/MapCredit.tsx"), "utf8");
 check(
   "the credit line is rendered from the provider, not hard-coded",
-  /credits\.map\(/.test(canvas),
+  /credits=\{credits\}/.test(canvas) && /credits\.map\(/.test(creditControl),
+);
+const ground = readFileSync(path.join(HERE, "..", "src/lib/maps/base-layer.ts"), "utf8");
+check(
+  "a non-commercial provider, if one ever comes back, is said out loud to whoever runs the build",
+  /warnIfNonCommercialTiles\(\)/.test(ground),
 );
 check(
-  "the non-commercial state is said out loud to whoever runs the build",
-  /warnIfNonCommercialTiles\(\)/.test(canvas),
+  "MapLibre is only ever loaded by import(), never statically",
+  /import\("\.\/gl-layer"\)/.test(ground) && !/from "maplibre-gl"/.test(ground),
 );
 
 console.log(failures === 0 ? "\nall checks passed" : `\n${failures} check(s) failed`);

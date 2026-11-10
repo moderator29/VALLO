@@ -8,6 +8,7 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SuccessFromFlag } from "@/components/ui/SuccessFromFlag";
 import { businessArrival } from "@/lib/ui/arrival-moments";
 import { readHostRoomBookings } from "@/lib/host/room-bookings";
@@ -129,7 +130,11 @@ export default async function HostPage({
   const showRoomFigure = businesses.length > 0 && (hotel.state === "ok" || !hasRestaurant);
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} wide>
+    /* The workspace root (Grade 1 page frame): no Back, in the bar or in the
+       header; the destinations row, the drawer and the dock stay. */
+    <HostShell logoLabel={t.a11y.logoHome} wide chromeBack={false} nav>
+      <PageFrame title={t.hostNav.overview} back={false} width="wide">
+      <div>
       <SuccessFromFlag
         copy={t.success}
         show={approval !== null}
@@ -150,7 +155,10 @@ export default async function HostPage({
             <DeskFigure rows={bookingRows} kind="bookings" t={t} locale={locale} now={figureNow} />
           ) : null
         }
+        bandHeading="h2"
       />
+      </div>
+      </PageFrame>
     </HostShell>
   );
 }

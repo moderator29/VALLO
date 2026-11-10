@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getDictionary } from "@vallo/i18n";
 import { formatNumber } from "@vallo/i18n/core";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { fixText } from "@/lib/agent/funnel";
 import { EmptyState } from "@/components/app/Screen";
@@ -75,11 +75,6 @@ export default async function ListingWeekPage({
     readRequests(context.supabase, context.agent.id),
   ]);
   const profile = agentProfileFrom(context.agent);
-  const back = (
-    <Link href="/agent/analytics" className="nf-caption font-semibold text-[var(--nf-content-muted)]">
-      {a.back}
-    </Link>
-  );
 
   if (read.state !== "ok") {
     const words =
@@ -91,9 +86,11 @@ export default async function ListingWeekPage({
             ? w.notLive
             : w.unavailable;
     return (
-      <AgentShell t={t} locale={locale} active="/agent/analytics" profile={profile}>
-        <div className="mx-auto max-w-3xl">
-          {back}
+      <AgentShell t={t} locale={locale} active="/agent/analytics" profile={profile} chromeBack={false}>
+        {/* The frame's header carries the one way back, to Analytics, where
+            the text link above the title used to. */}
+        <PageFrame title={w.title} fallback="/agent/analytics">
+        <div>
           <EmptyState
             icon="chart-growth"
             title={"title" in read ? read.title : w.title}
@@ -112,6 +109,7 @@ export default async function ListingWeekPage({
             data-testid="listing-week-state"
           />
         </div>
+        </PageFrame>
       </AgentShell>
     );
   }
@@ -130,13 +128,10 @@ export default async function ListingWeekPage({
       : null;
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/analytics" profile={profile}>
-      <div className="mx-auto max-w-3xl">
-        {back}
-        <h1 className="nf-h1 mt-xs">{listing.title}</h1>
-        <p className="mt-2xs max-w-[62ch] text-[var(--nf-content-secondary)]">{w.lede}</p>
-
-        <section className="mt-lg" aria-labelledby="week-stages" data-testid="listing-week">
+    <AgentShell t={t} locale={locale} active="/agent/analytics" profile={profile} chromeBack={false}>
+      <PageFrame title={listing.title} subtitle={w.lede} fallback="/agent/analytics">
+      <div>
+        <section aria-labelledby="week-stages" data-testid="listing-week">
           <h2 id="week-stages" className="nf-section-label">
             {w.title} · {a.span["7d"]}
           </h2>
@@ -202,6 +197,7 @@ export default async function ListingWeekPage({
           </ButtonLink>
         </div>
       </div>
+      </PageFrame>
     </AgentShell>
   );
 }

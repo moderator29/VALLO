@@ -29,6 +29,7 @@ import { withNext } from "@/lib/auth/next-link";
 import { readBookedPolicyTerms } from "@/lib/stays/booked-policy";
 import { readAgreementPayChoice } from "@/lib/payments/rail-choice-read";
 import { PayChoiceCard } from "@/components/money/pay-choice/PayChoiceCard";
+import { HelpLink } from "@/components/site/support/HelpLink";
 
 export const metadata: Metadata = { title: "Checkout" };
 
@@ -401,6 +402,7 @@ export default async function CheckoutPage({
             headingLevel="h2"
             terms={chargeKind === "stay" ? bookedTerms : null}
           />
+          <HelpLink to="cancellation" className="mt-sm" />
         </Reveal>
       )}
 

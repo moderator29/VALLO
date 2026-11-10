@@ -14,7 +14,7 @@ describe("the front door's hooks on sign up", () => {
     const actions = src("lib/auth/actions.ts");
     expect(actions).toMatch(/import \{[^}]*inviteCodeFromCookie[^}]*\} from "@\/lib\/referral\/server";/);
     expect(actions).toMatch(
-      /referral_code: field\(formData, "referralCode"\)\.trim\(\) \|\| \(await inviteCodeFromCookie\(\)\) \|\| null/,
+      /referral_code: parseInviteInput\(field\(formData, "referralCode"\)\) \|\| \(await inviteCodeFromCookie\(\)\) \|\| null/,
     );
   });
 

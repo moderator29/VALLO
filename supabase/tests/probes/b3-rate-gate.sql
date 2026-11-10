@@ -43,17 +43,30 @@ declare
   ok10 boolean;
   ok11 boolean;
   stranger constant uuid := '957b3bd2-cce3-425d-bba9-5cd876ca3d62';
+  lister uuid;
+  lister_agent uuid;
 begin
+  -- 9 November 2026: the probe used to borrow a live non-demo DRAFT, and the
+  -- live database has none left (one APPROVED listing and the demo set), so
+  -- it failed at step 0 before asserting anything. The lister and the DRAFT
+  -- are now throwaways made here, like the other lister fixtures since 17
+  -- October, and rolled back with everything else.
+  lister := gen_random_uuid();
+  insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+  values (lister, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+          'probe-b3-rate-gate-lister-' || lister || '@example.invalid', '{}', '{}', now(), now());
+  insert into public.agents (user_id, display_name) values (lister, 'Probe B3 lister') returning id into lister_agent;
+  insert into public.listings (agent_id, title, property_type, status, listing_role, listing_intent)
+  values (lister_agent, 'Probe B3 rate gate', 'apartment', 'DRAFT', 'agent', 'rent');
   select l.id, a.user_id, l.listing_intent, l.sale_price_minor, l.rent_amount_minor, l.rate_minor
     into lst
     from public.listings l join public.agents a on a.id = l.agent_id
-   where l.status = 'DRAFT' and not coalesce(l.is_demo, false) and l.closed_at is null
-     and a.user_id is not null and a.user_id <> stranger
+   where l.agent_id = lister_agent and l.status = 'DRAFT'
    limit 1;
   if lst.id is null then
-    raise exception 'PROBE_FAIL b3-rate-gate 0: no non-demo DRAFT listing to exercise';
+    raise exception 'PROBE_FAIL b3-rate-gate 0: the DRAFT fixture was not filed';
   end if;
-  -- Price the fixture (the live DRAFT is unpriced).
+  -- Price the fixture (it is filed unpriced).
   if lst.listing_intent = 'sale' then
     update public.listings set sale_price_minor = 5000000 where id = lst.id;
     price := 5000000;

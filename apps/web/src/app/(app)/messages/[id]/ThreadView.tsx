@@ -1609,7 +1609,7 @@ export function ThreadView({
                 name={counterpartName}
                 tier={counterpartTier}
                 photoUrl={counterpartAvatarUrl ?? undefined}
-                size="md"
+                size="sm"
               />
             </a>
           ) : (
@@ -1618,7 +1618,7 @@ export function ThreadView({
                 name={counterpartName}
                 tier={counterpartTier}
                 photoUrl={counterpartAvatarUrl ?? undefined}
-                size="md"
+                size="sm"
               />
             </span>
           )

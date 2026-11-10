@@ -15,6 +15,8 @@ import { AuthPillButton } from "./slate";
 import { signUpMethodForEmail, startGoogleOAuth } from "@/lib/auth/actions";
 import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
 import { useAuthBanner } from "./use-auth-banner";
+import { ReferralField } from "./ReferralField";
+import { lookupReferrer } from "@/lib/referral/lookup-action";
 
 const EMPTY: AuthFormState = { ok: false };
 
@@ -71,6 +73,7 @@ export function EmailAuthForm({
   initialState = EMPTY,
   notice,
   emailReady = true,
+  invite,
 }: {
   mode: "sign-in" | "sign-up";
   t: Dictionary;
@@ -112,6 +115,9 @@ export function EmailAuthForm({
   /** False when accounts cannot be reached at all: the pill gives way to
       the sentence that says so, as the chooser used to. */
   emailReady?: boolean;
+  /** Sign-up only: the invite link that brought this person here (the code and
+      the referrer's first name), shown as "Referred by X" in the optional field. */
+  invite?: { code: string; firstName: string | null } | null;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   useAuthBanner(state);
@@ -364,6 +370,13 @@ export function EmailAuthForm({
                 <StrengthMeter password={password} t={t} />
               </div>
             </div>
+            <ReferralField
+              t={t}
+              error={state.fieldErrors?.referralCode}
+              check={lookupReferrer}
+              initialCode={invite?.code ?? ""}
+              initialName={invite?.firstName ?? null}
+            />
             <AcceptTerms
               t={t}
               accepted={accepted}

@@ -1,8 +1,6 @@
-import Image from "next/image";
 import { plural } from "@vallo/i18n/core";
 import { CountUp } from "@/components/motion/CountUp";
 import { Icon3D, type Icon3DName } from "@/components/ui/Icon3D";
-import { FEATURE_ART } from "@/lib/features/art";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
@@ -12,7 +10,9 @@ import { compactCount, countWords } from "@/lib/features/circle/model";
 import type { CirclePostView, HomeStats } from "@/lib/features/circle/queries";
 import { agoShort } from "@/lib/format/when";
 import { initial } from "@/lib/text/initial";
+import { CircleHeroArt } from "./CircleHeroArt";
 import { CircleComposeFab as ComposeFab, TabIntoView } from "./CircleClient";
+import { RoommateCircleCard } from "./RoommateCircleCard";
 import "./circle-visuals.css";
 
 /**
@@ -74,14 +74,23 @@ export function CircleBanner({
   stats,
   signedIn,
   faces = [],
+  hasCommunities = false,
 }: {
   /** From `circle_home_stats`. Null (the read is not live) draws no number. */
   stats: HomeStats | null;
   signedIn: boolean;
   faces?: readonly CircleFace[];
+  /** Signed in and already in a community: the button asks a question instead of pointing at the list. */
+  hasCommunities?: boolean;
 }) {
   const H = CIRCLE_COPY.home;
-  const art = FEATURE_ART.circleHero;
+  const S = CIRCLE_COPY.stats;
+  /* Real counts only: a zero or an unreadable count is not drawn. */
+  const figures = [
+    { key: "posts", n: stats?.posts ?? 0, words: S.posts },
+    { key: "active", n: stats?.active ?? 0, words: S.activeShort },
+    { key: "communities", n: stats?.communities ?? 0, words: S.communities },
+  ].filter((f) => Number.isFinite(f.n) && f.n > 0);
   const withPhoto = faces.filter((f) => f.avatar);
   /* Real photographs first; members without one wear their tinted initial. */
   const shown = (withPhoto.length ? withPhoto : faces).slice(0, 4);
@@ -90,7 +99,7 @@ export function CircleBanner({
   return (
     <section className="nf-cbn" data-theme="dark" aria-labelledby="circle-banner-title" data-testid="circle-hero">
       <span className="nf-cbn__art" aria-hidden="true">
-        <Image src={art.src} alt="" fill sizes="(max-width: 768px) 100vw, 960px" priority style={{ objectFit: art.fit, objectPosition: art.focus }} />
+        <CircleHeroArt />
       </span>
       <span className="nf-cbn__scrim" aria-hidden="true" />
       <div className="nf-cbn__body">
@@ -122,15 +131,25 @@ export function CircleBanner({
             </span>
           </p>
         ) : null}
+        {figures.length > 0 ? (
+          <ul className="nf-cbn__figures" data-testid="circle-figures" aria-label={H.glance}>
+            {figures.map((f) => (
+              <li key={f.key} className="nf-cbn__figure">
+                <span className="nf-numeric nf-cbn__figure-n">{compactCount(f.n)}</span>
+                <span className="nf-cbn__figure-w">{f.n === 1 ? f.words[0] : f.words[1]}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
         <div className="nf-cbn__actions">
           <ButtonLink
-            href={signedIn ? "/circle/ask" : "/sign-up?next=%2Fcircle"}
+            href={!signedIn ? "/sign-up?next=%2Fcircle" : hasCommunities ? "/circle/ask" : "#circle-communities"}
             variant="primary"
             size="lg"
-            leadingIcon={signedIn ? "chat-bubble" : "circle-people"}
+            leadingIcon={signedIn && hasCommunities ? "chat-bubble" : "circle-people"}
             data-testid="circle-hero-cta"
           >
-            {signedIn ? H.joined : H.join}
+            {!signedIn ? H.join : hasCommunities ? H.joined : H.explore}
           </ButtonLink>
         </div>
       </div>
@@ -318,6 +337,7 @@ export function CircleDiscussionCard({ post, now }: { post: CirclePostView; now:
       <Byline post={post} now={now} />
       <h3 className="nf-ccard__title">{post.title}</h3>
       {post.body && post.body !== post.title ? <p className="nf-ccard__body">{post.body}</p> : null}
+      {post.roommate ? <RoommateCircleCard card={post.roommate} link={false} /> : null}
       <span className="nf-ccard__counts">
         <span className="nf-ccard__count">
           <UiIcon name="chat-bubble" size={16} />

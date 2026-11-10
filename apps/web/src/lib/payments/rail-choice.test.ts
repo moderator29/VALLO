@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CHOICE_REFUSALS, payChoiceView, payNextHref, readChoiceRefusal, readPayChoice } from "./rail-choice";
+import { RENT_PAYMENT_OPEN } from "../rent/payment-open";
 import { getDictionary } from "@vallo/i18n";
 
 /*
@@ -110,6 +111,31 @@ describe("escrow appears only when the server reads it as working (protectedRail
     const choice = readPayChoice(answer({ options: ["card"], default: "card", rail: "card" }), false);
     expect(choice?.escrowPaused).toBeUndefined();
     expect(payChoiceView(choice)).toMatchObject({ mode: "card_only" });
+  });
+});
+
+describe("payment for rentals is not open (9 November 2026, RENT_PAYMENT_OPEN)", () => {
+  it("is off today", () => {
+    expect(RENT_PAYMENT_OPEN).toBe(false);
+  });
+
+  it("a rental draws the fact and offers no rail, with the protected rail on or off", () => {
+    const off = { mode: "rent_not_open", selected: null, canChoose: false };
+    expect(payChoiceView(readPayChoice(answer(), false), "rent")).toEqual(off);
+    expect(payChoiceView(readPayChoice(answer(), true), "rent")).toEqual(off);
+    expect(payChoiceView(readPayChoice(answer({ chosen: "card", rail: "card" }), false), "rent")).toEqual(off);
+  });
+
+  it("a stay is untouched: card while the protected rail is off", () => {
+    expect(payChoiceView(readPayChoice(answer(), false), "stay")).toMatchObject({ mode: "card_escrow_paused" });
+  });
+
+  it("opening it is the only thing that brings the rental choice back", () => {
+    expect(payChoiceView(readPayChoice(answer(), true), "rent", true)).toMatchObject({ mode: "choose" });
+  });
+
+  it("no choice read still draws nothing", () => {
+    expect(payChoiceView(null, "rent")).toMatchObject({ mode: "none" });
   });
 });
 

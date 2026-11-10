@@ -6,6 +6,7 @@ import { getLocale } from "@/lib/locale";
 import { readAgreement } from "@/lib/agreements/queries";
 import { readHeldPayment } from "@/lib/money/held-view";
 import { readAgreementRail } from "@/lib/money/fund-view";
+import { protectedRailLive } from "@/lib/money/rail-live";
 import { readAgreementPayChoice } from "@/lib/payments/rail-choice-read";
 import { readChangesSinceConfirmed } from "@/lib/agreements/changes-read";
 import type { TermChange } from "@/lib/agreements/terms-diff";
@@ -60,9 +61,16 @@ export default async function AgreementPage({
   const claimedApproved = a.claims.reduce((sum, c) => sum + (c.approvedMinor ?? 0), 0);
   const cap = Math.max(0, a.amountMinor - claimedApproved);
   const payRail = a.status === "approved" && a.role === "renter" ? await readAgreementRail(a.id) : null;
+  /* The escrow step redirects back here while the protected rail is off
+     (sweep item 14), so its link is drawn only while the rail is live.
+     Otherwise there is no Pay link for an escrow row: the payment step's
+     choice card on this page stores card first, then leads to the card route. */
+  const escrowLive = payRail === "escrow" ? await protectedRailLive() : false;
   const payHref =
     payRail === "escrow"
-      ? `/agreements/${a.id}/fund`
+      ? escrowLive
+        ? `/agreements/${a.id}/fund`
+        : null
       : a.kind === "rent" && a.inspectionId
         ? `/rent/pay/${a.inspectionId}`
         : a.bookingId

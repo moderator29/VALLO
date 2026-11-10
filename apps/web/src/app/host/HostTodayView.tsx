@@ -56,7 +56,14 @@ export function HostTodayView({
   figure,
   dashboard,
   children,
+  bandHeading = "h1",
 }: {
+  /**
+   * The band's title level. `h1` where the band IS the page's heading (the
+   * previews); `h2` under the page frame's large title on `/host`, so the
+   * page still has exactly one h1.
+   */
+  bandHeading?: "h1" | "h2";
   today: HostToday;
   t: Dictionary;
   locale: Locale;
@@ -92,7 +99,7 @@ export function HostTodayView({
       {/* The moving edge light on the one band that opens the desk (lead,
           29 September); `.nf-edge-lap` settles to a steady rim under reduced
           motion, data saver, Calm and Off. */}
-      <HeroBand lap label={dateLine} title={d.today.title} titleAs="h1" sub={sub} action={action}>
+      <HeroBand lap label={dateLine} title={d.today.title} titleAs={bandHeading} sub={sub} action={action}>
         <TodayHero
           caption={d.today.needsYou}
           count={readQueues ? today.needsYou : null}

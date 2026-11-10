@@ -25,6 +25,8 @@ import { QueueTable, type QueueRowData } from "../_components/QueueTable";
 import { adminUi } from "../_components/ui";
 import { CaseSearch } from "./CaseSearch";
 import { DeskRefusal } from "./DeskRefusal";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { casesContext } from "@/lib/admin/copilot/contexts/cases";
 
 export const metadata: Metadata = { title: "Cases", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -155,6 +157,17 @@ export default async function CasesPage({ searchParams }: { searchParams: Promis
           </p>
         </>
       )}
+      <DeskCopilot
+        scope="trust_safety"
+        deskName="Cases"
+        context={casesContext({
+          total,
+          shown: items.length,
+          overdueOnPage: items.filter((c) => c.overdue).length,
+          statusFilter: STATUS_TABS.find((tab) => tab.key === filters.status)?.label ?? null,
+          narrowed: Boolean(filters.q || filters.module || filters.severity || filters.overdue || filters.assigned !== "any"),
+        })}
+      />
     </div>
   );
 }

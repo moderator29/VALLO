@@ -5,6 +5,7 @@ import { getLocale } from "@/lib/locale";
 import { getStopsDesk, STOPS_STATUSES } from "@/lib/admin/suspension-queries";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import {
   QueueFilters,
   QueuePager,
@@ -86,7 +87,7 @@ export default async function AdminStopsPage({
   if (read.state !== "ready") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={t.admin.nav.stops.label} lede={LEDE} />
+        <PageHead title={t.admin.nav.stops.label} lede={LEDE} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -109,10 +110,10 @@ export default async function AdminStopsPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader
+      <PageHead
         title={t.admin.nav.stops.label}
         lede={LEDE}
-        count={read.stopped.length}
+        trail={<ui.WaitingBadge count={read.stopped.length} />}
       />
       {/* The person file is this desk's child in the hierarchy; the member
           search is its front door for someone who is not a lister. */}

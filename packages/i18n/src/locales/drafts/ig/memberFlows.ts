@@ -293,7 +293,7 @@ export const memberFlowsIg = {
     longer: "Mgbazinye dị ogologo",
     rentFor: "Ụgwọ ụlọ maka {term}",
     rentOnly: "Ụgwọ ụlọ naanị, tupu ego nchekwa, ego onye nnọchite na ego ọkàiwu. Onye nnọchite ahụ ga-ekwekọrịta usoro ikpeazụ na gị.",
-    keepInside:
-      "Maka nchekwa gị, debe mkparịta ụka na ịkwụ ụgwọ niile n'ime Vallo. Anyị anaghị echekwa nkwekọrịta e mere na mpụga ikpo okwu a. Kwụọ ụgwọ naanị mgbe ị lechara ụlọ ahụ.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `keepInside` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
   },
 } satisfies NonNullable<Translation["memberFlows"]>;

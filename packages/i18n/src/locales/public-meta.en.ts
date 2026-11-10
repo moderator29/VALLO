@@ -31,7 +31,7 @@ export const publicMetaEn = {
     terms: {
       title: "Terms of service",
       description:
-        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, the Vallo Guarantee and acceptable use.",
+        "The rules for using Vallo: accounts, payments, refunds, what a verified badge means, listing a property, agreements and approval, and acceptable use.",
     },
     privacy: {
       title: "Privacy policy",

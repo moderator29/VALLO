@@ -14,6 +14,8 @@ import { EDIT_WINDOW_MINUTES, POST_MAX, POST_MEDIA_MAX } from "@/lib/social/post
 import { MODERATOR_CAN, MODERATOR_CANNOT } from "@/lib/social/areas-model";
 import type { DocChapter, DocSection } from "./chapters";
 import { DocsFlow } from "./DocsFlow";
+import { DocFlow } from "@/components/docs/DocFlow";
+import { DocTable } from "@/components/docs/DocTable";
 import { PAY_INSIDE_VALLO } from "./facts";
 import { EULA_ZERO_TOLERANCE } from "@/lib/legal/eula-copy";
 
@@ -79,7 +81,7 @@ export const GETTING_AROUND: DocChapter = {
         <p>
           The menu button at the top of the screen opens the full list of destinations, grouped,
           with your name and your standing at the top. On a computer the same list stays open as
-          a rail down the left of the screen. The switch between the Property side and Vallo Stays
+          a rail down the left of the screen. The switch between the Property side and the Stays side
           lives in the menu too, and the chapter on{" "}
           <Link href="/docs/what-vallo-is#the-two-sides" className={A}>
             the two sides
@@ -116,20 +118,20 @@ export const GETTING_AROUND: DocChapter = {
             Under Settings, then {look.label}, then {look.motion}, you choose how much the app
             moves. {look.motionNote}
           </p>
-          <ul role="list">
-            <li>
-              <strong>{look.motionCinematic}.</strong> {look.motionCinematicSub}
-            </li>
-            <li>
-              <strong>{look.motionStandard}.</strong> {look.motionStandardSub}
-            </li>
-            <li>
-              <strong>{look.motionCalm}.</strong> {look.motionCalmSub}
-            </li>
-            <li>
-              <strong>{look.motionOff}.</strong> {look.motionOffSub}
-            </li>
-          </ul>
+          <DocTable
+            caption="The motion levels"
+            captionHidden
+            columns={[
+              { key: "level", label: "Level" },
+              { key: "does", label: "What moves" },
+            ]}
+            rows={[
+              { id: "cinematic", cells: { level: <strong>{look.motionCinematic}</strong>, does: look.motionCinematicSub } },
+              { id: "standard", cells: { level: <strong>{look.motionStandard}</strong>, does: look.motionStandardSub } },
+              { id: "calm", cells: { level: <strong>{look.motionCalm}</strong>, does: look.motionCalmSub } },
+              { id: "off", cells: { level: <strong>{look.motionOff}</strong>, does: look.motionOffSub } },
+            ]}
+          />
           <p>Three switches sit under the levels:</p>
           <ul role="list">
             <li>
@@ -159,6 +161,11 @@ const pc = en.priceCheck;
 
 export const PRICE_CHECK: DocChapter = {
   slug: "price-check",
+  glance: [
+    "It reads the asking prices on listings published on Vallo.",
+    "It is not what anybody has paid, it is not an opinion on a particular property, and it is not advice.",
+    "Opened from a listing, it arrives filled in from that listing, and you can change anything that is wrong.",
+  ],
   number: 0,
   title: "Price Check",
   summary:
@@ -395,6 +402,11 @@ const STANDINGS = (["draft", "pending", "refused", "suspended"] as const).flatMa
 
 export const LISTING_ON_VALLO: DocChapter = {
   slug: "listing-on-vallo",
+  glance: [
+    "Before you publish, Vallo shows the price a renter or guest pays and what you receive after Vallo’s commission, in naira.",
+    "A person at Vallo reviews the listing.",
+    "Charge nothing that is not on the listing.",
+  ],
   number: 0,
   title: "Listing a property",
   summary:
@@ -414,13 +426,13 @@ export const LISTING_ON_VALLO: DocChapter = {
             . The one you pick decides what Vallo asks you for, because each kind of lister can go wrong
             in a different way. One account holds one side: owner or agent, never both.
           </p>
-          <DocsFlow
+          <DocFlow
             label="From a workspace to a published listing"
             steps={[
-              { object: "person-card", label: "Pick a workspace" },
-              { object: "id-card-check", label: "Say who you are" },
-              { object: "doc-review", label: "A person reviews it" },
-              { object: "home-check", label: "Publish" },
+              { icon: "briefcase", title: "Pick a workspace", href: SUPPLY_DOOR_HREF, outcome: "Owner or agent, never both on one account." },
+              { icon: "id-card", title: "Say who you are", href: "/guides/how-verification-works", outcome: "What Vallo asks for depends on the workspace you pick." },
+              { icon: "house", title: "Post a listing", href: "/guides/how-to-list", outcome: "Photos, the price and every cost, light and water." },
+              { icon: "user-check", title: "A person reviews it", href: "#review", outcome: "They approve it, ask for more, or reject it with a reason." },
             ]}
           />
         </>
@@ -594,25 +606,21 @@ export const MESSAGES: DocChapter = {
       id: "message-tools",
       heading: "Reply, forward, delete and call",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Reply</strong> to one message, so everyone sees which you mean. On a phone, swipe it.
-          </li>
-          <li>
-            <strong>Forward</strong> a message to another conversation.
-          </li>
-          <li>
-            <strong>Delete for me</strong> removes a message from your view only.
-          </li>
-          <li>
-            <strong>Delete for everyone</strong> removes it for both sides, for 2 days and 12 hours after
-            it was sent.
-          </li>
-          <li>
-            <strong>Call</strong> by voice or video from inside the conversation, so the call stays on
-            Vallo.
-          </li>
-        </ul>
+        <DocTable
+          caption="What you can do with a message"
+          captionHidden
+          columns={[
+            { key: "action", label: "Action" },
+            { key: "does", label: "What it does" },
+          ]}
+          rows={[
+            { id: "reply", cells: { action: <strong>Reply</strong>, does: "To one message, so everyone sees which you mean. On a phone, swipe it." } },
+            { id: "forward", cells: { action: <strong>Forward</strong>, does: "Sends a message to another conversation." } },
+            { id: "delete-me", cells: { action: <strong>Delete for me</strong>, does: "Removes a message from your view only." } },
+            { id: "delete-all", cells: { action: <strong>Delete for everyone</strong>, does: "Removes it for both sides, for 2 days and 12 hours after it was sent." } },
+            { id: "call", cells: { action: <strong>Call</strong>, does: "By voice or video from inside the conversation, so the call stays on Vallo." } },
+          ]}
+        />
       ),
     },
     {
@@ -707,7 +715,7 @@ export const AROUND: DocChapter = {
         <ul role="list">
           <li>
             Open{" "}
-            <Link href="/around/manage" className={A}>
+            <Link href="/around/settings" className={A}>
               the directory
             </Link>
             , find your state, then your local government, and join. Leave any time.
@@ -734,7 +742,7 @@ export const AROUND: DocChapter = {
             {POST_MAX.toLocaleString("en-NG")} characters and {POST_MEDIA_MAX} pictures. You have{" "}
             {EDIT_WINDOW_MINUTES} minutes to edit a post, and you can take it down any time.
           </p>
-          <p>People reply, mark what is useful, and repost to their own places. Replies are one level deep.</p>
+          <p>People reply, mark what is useful, and repost to their own places. Replies can go three levels deep, and after that a reply attaches to the one above.</p>
         </>
       ),
     },

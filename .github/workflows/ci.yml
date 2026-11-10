@@ -16,8 +16,8 @@
 # THE BUILD COMPILES PRODUCTION'S CONFIG (DOC-P2-02). `next.config.ts` and
 # several `NEXT_PUBLIC_*` branches fold at build time, so a build with no env
 # compiles a program that never ships. The Build job therefore gets the same
-# PUBLIC values Vercel has: the Supabase project URL and publishable key, the
-# site URL and the MapTiler key. None of them is a secret (all four are in the
+# PUBLIC values Vercel has: the Supabase project URL and publishable key and
+# the site URL. None of them is a secret (all three are in the
 # browser bundle), and they come from repository VARIABLES (Settings, Secrets
 # and variables, Actions, Variables), never secrets, except the two addresses,
 # which fall back to their known values. A missing variable is a loud warning
@@ -60,9 +60,8 @@
 #   VARIABLE  NEXT_PUBLIC_SUPABASE_ANON_KEY. Public, not a secret. Without it
 #     every build here compiles the unconfigured branches, so nothing inside
 #     the platform loads and no signed-in page can be measured or scanned.
-#   VARIABLE  NEXT_PUBLIC_MAPTILER_KEY. Public, not a secret. Without it the
-#     map surfaces render their no-key state, so their weight and their
-#     accessibility are not the shipped ones.
+#   (The maps need no key since 10 November 2026: OpenFreeMap. The old
+#   NEXT_PUBLIC_MAPTILER_KEY variable is read by nothing and can be deleted.)
 #
 name: CI
 
@@ -267,7 +266,6 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://uccixoonmbhrnyczyigt.supabase.co' }}
       NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://www.vallospaces.com' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_MAPTILER_KEY: ${{ vars.NEXT_PUBLIC_MAPTILER_KEY }}
     steps:
       - uses: actions/checkout@v7
 
@@ -282,7 +280,7 @@ jobs:
 
       - name: Say which production values this build is missing
         run: |
-          for v in NEXT_PUBLIC_SUPABASE_ANON_KEY NEXT_PUBLIC_MAPTILER_KEY; do
+          for v in NEXT_PUBLIC_SUPABASE_ANON_KEY; do
             if [ -z "${!v}" ]; then
               echo "::warning title=Build is not production-shaped::Repository variable $v is not set, so this build compiles branches production never takes. Add it under Settings > Secrets and variables > Actions > Variables (it is public, not a secret)."
             fi
@@ -309,7 +307,6 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL || 'https://uccixoonmbhrnyczyigt.supabase.co' }}
       NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://www.vallospaces.com' }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-      NEXT_PUBLIC_MAPTILER_KEY: ${{ vars.NEXT_PUBLIC_MAPTILER_KEY }}
       BASE_URL: http://localhost:3210
     steps:
       - uses: actions/checkout@v7

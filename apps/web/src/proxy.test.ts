@@ -308,12 +308,15 @@ const EXPECTED_PUBLIC = new Set([
   "/contact",
   "/docs",
   "/docs/[slug]",
+  /* The protected payment's trust page, public like every docs page (the "docs" segment). */
+  "/docs/how-protection-works",
   "/help",
   // V-55: the receipt check, a door for people who are not members.
   "/r",
   "/r/[code]",
   /* Legal and policy. */
   "/cancellations",
+  "/cookies",
   "/disclaimer",
   "/eula",
   "/ai/terms",
@@ -326,6 +329,8 @@ const EXPECTED_PUBLIC = new Set([
   /* Vallo Roommates (8 November 2026): the schools directory, a shared address. */
   "/roommates/campus",
   "/standards",
+  /* 9 November 2026: the legal index, so a visitor reads every policy before signing up. */
+  "/legal",
   "/terms",
   /* Compliance. */
   "/delete-account",
@@ -385,6 +390,7 @@ const EXPECTED_PUBLIC = new Set([
      the site can reload itself (lib/deploy/watch.ts). */
   "/api/build",
   "/api/client-error",
+  "/api/cookie-copy",
   /* A12: RFC 8058 one-click unsubscribe, by signed token. A6: the
      first-party funnel beacon, rate limited, recording no person. */
   "/api/email/unsubscribe",
@@ -420,8 +426,8 @@ const EXPECTED_PUBLIC = new Set([
   "/api/landlord/inbound",
   "/api/paystack/reconcile",
   "/api/paystack/webhook",
-  /* Part B phase 15: Payluk webhooks, behind the HMAC-SHA512 signature. */
-  "/api/payluk/webhook",
+  /* The protected rail's webhooks (EscrowPay, built switched off), behind the provider's signature. */
+  "/api/escrowpay/webhook",
   /* V-98: the home-screen widget, behind its device-bound token. */
   "/api/plans/next",
   "/api/push/drain",
@@ -568,7 +574,7 @@ describe("who may see the platform with no session", () => {
   it("leaves the webhooks and the scheduler alone, which have no cookie and never will", () => {
     for (const path of [
       "/api/paystack/webhook",
-      "/api/payluk/webhook",
+      "/api/escrowpay/webhook",
       "/api/dojah/webhook",
       "/api/yellowcard/webhook",
       "/api/auth/email-hook",

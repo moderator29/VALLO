@@ -6,7 +6,7 @@ import { clockFor, type DecideItem } from "@/lib/host/decide";
 import { stayDateLabel } from "@/lib/stays/date-label";
 import type { HostReservationView } from "@/lib/reservations/queries";
 import { EmptyState } from "@/components/app/Screen";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
@@ -41,15 +41,14 @@ export function DecideView({
   const w = t.experienceHost.decideView;
 
   return (
-    <>
-      <PageHeader
-        variant="large"
-        back={false}
-        title={w.title}
-        subtitle={
-          sorted.length === 0 ? w.nothingWaiting : w.waiting.replace("{requests}", countOf(sorted.length, "requestsAre", locale))
-        }
-      />
+    <PageFrame
+      fallback="/host"
+      width="wide"
+      title={w.title}
+      subtitle={
+        sorted.length === 0 ? w.nothingWaiting : w.waiting.replace("{requests}", countOf(sorted.length, "requestsAre", locale))
+      }
+    >
 
       <div className="nf-decide">
         <div className="grid gap-md">
@@ -124,7 +123,7 @@ export function DecideView({
           </ListGroup>
         </aside>
       </div>
-    </>
+    </PageFrame>
   );
 }
 

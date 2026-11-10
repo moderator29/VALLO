@@ -261,13 +261,50 @@
     box-shadow: var(--nf-btn-glass-shadow) !important;
     overflow: hidden;
   }
+
+  /*
+   * THE VECTOR GROUND (OpenFreeMap, 9 November 2026; `lib/maps/base-layer.ts`).
+   *
+   * MapLibre draws through the Leaflet bridge into `.leaflet-gl-layer`, a
+   * div in the tile pane that Leaflet moves with the view. MapLibre's own
+   * stylesheet is not loaded (70 KB, nearly all of it for controls this
+   * product never shows), so the three rules it would have supplied for the
+   * container and its canvas are written here. The ground never takes a
+   * pointer: Leaflet owns every gesture, MapLibre only paints.
+   */
+  .leaflet-gl-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .leaflet-gl-layer .maplibregl-canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  /* The area map's credit (`AreaMap`): OpenFreeMap's terms name three marks,
+     too long for one row on a 360px phone. As inline text, only as wide as it
+     needs, it wraps between names and never inside one, so "© OpenMapTiles"
+     is never split from its sign. Two classes, so it outranks the single
+     class rule in `area-map.css` whatever order the sheets load in. */
+  .nf-areamap .nf-areamap__credit {
+    display: block;
+    inline-size: fit-content;
+    max-inline-size: calc(100% - 2 * var(--nf-space-2xs));
+    text-align: end;
+  }
+  .nf-areamap .nf-areamap__credit a {
+    white-space: nowrap;
+  }
 }
 
 /* ======================================================= THE STILL AREA MAP
-   `AreaMapTile`: four tiles of the live map's own style laid so the area's
-   centroid sits at the centre, one pin, and (on a large tile) the credit.
-   The quiet ground under the tiles is what shows on a data-saver connection
-   or when a tile fails, so the frame is never a hole. */
+   `AreaMapTile`: one canvas painted from OpenFreeMap's vector tiles in the
+   live map's palette, one pin, and (on a large tile) the credit. The quiet ground under the imagery is what shows on a
+   data-saver connection or when a tile fails, so the frame is never a hole. */
 @layer components {
   .nf-area-tile {
     position: relative;
@@ -279,24 +316,17 @@
       var(--nf-surface-raised);
     isolation: isolate;
   }
-  .nf-area-tile__sheet {
+  .nf-area-tile__canvas {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 512px;
-    height: 512px;
-    pointer-events: none;
-  }
-  .nf-area-tile__img {
-    position: absolute;
-    width: 256px;
-    height: 256px;
-    max-width: none;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
     opacity: 0;
-    user-select: none;
+    pointer-events: none;
     transition: opacity var(--nf-duration-base) var(--nf-ease-standard);
   }
-  .nf-area-tile__img[data-loaded] {
+  .nf-area-tile__canvas[data-loaded] {
     opacity: 1;
   }
   /* The pin: a brand disc with a white ring and a soft halo for the area it
@@ -322,13 +352,17 @@
     padding: var(--nf-space-3xs) var(--nf-space-2xs);
     border-top-left-radius: var(--nf-radius-xs);
     background: var(--nf-smoked-glass-fill);
+    max-inline-size: 100%;
+    text-align: end;
     font-size: var(--nf-text-overline);
     color: var(--nf-content-on-media);
   }
-  :root[data-save-data="on"] :is(.nf-area-tile__sheet, .nf-area-tile__credits) {
+  :root[data-save-data="on"] :is(.nf-area-tile__canvas, .nf-area-tile__credits) {
     display: none;
   }
+  /* Three marks wrap between names, never inside one. */
   .nf-area-tile__credits a {
+    white-space: nowrap;
     color: inherit;
     text-decoration: underline;
     text-underline-offset: 2px;
@@ -337,7 +371,7 @@
 
 @layer components {
   @media (prefers-reduced-motion: reduce) {
-    .nf-area-tile__img {
+    .nf-area-tile__canvas {
       transition: none;
     }
   }

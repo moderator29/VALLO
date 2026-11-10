@@ -41,7 +41,7 @@ His other instructions in the same message:
   documents are a designed surface, not a wall of text.
 - **Advanced and high end**, a serious platform's documentation, on a par with
   a large industry platform, in BOTH themes.
-- **Delete what is no longer used**, Payluk named explicitly, platform wide, so
+- **Delete what is no longer used**, the retired provider named explicitly, platform wide, so
   the codebase is coordinated rather than littered with abandoned work.
 - **Screenshot the platform signed in**, using the two accounts he will supply,
   so the guides show real Vallo screens the way Hauslet's guides do.
@@ -273,10 +273,10 @@ references an image the plan no longer produces.
 
 ## 6. REMOVE WHAT IS NO LONGER USED
 
-> "All of the hold stuffs we not using anymore, eg payluk, delete it wide
+> "All of the hold stuffs we not using anymore, eg retired_provider, delete it wide
 > platform, and let make it coordinated."
 
-Payluk alone is about **1,300 references across about 165 files**. This is a
+the retired provider alone is about **1,300 references across about 165 files**. This is a
 real piece of work and it must be done carefully, because some of those
 references MUST NOT be removed.
 
@@ -286,25 +286,25 @@ touching anything:
 
 1. **Dead code**: the adapter, the client, the webhook route, the types, the
    fixtures, the preview fixtures, the vendored source under
-   `docs/payments/payluk-source/`. This goes.
+   `docs/payments/retired-provider-source/`. This goes.
 2. **Active code to re-point**: the arrangement state machine still speaks
-   Payluk's vocabulary, the member screens are Payluk-shaped. This is remapped
+   the retired provider's vocabulary, the member screens are the retired provider-shaped. This is remapped
    by the protected payments work, not deleted out from under it. **Coordinate
    with that build so the two do not fight over the same files.**
 3. **Shared code to keep**: the provider abstraction, the rail router, the
-   ledger, the reconciliation cron, the kill switches. These are not Payluk's,
+   ledger, the reconciliation cron, the kill switches. These are not the retired provider's,
    they are the platform's, and the next provider needs them.
 4. **Historical records to leave exactly alone**: rows in `ledger_entries` and
    `provider_arrangements`, and anything in a receipt a member has already
    been shown. You never rewrite what a member was told happened to their
    money.
 5. **Applied migrations: NEVER EDIT.** About 15 migration files mention
-   Payluk. They are applied history and the migration gate enforces that they
-   are never changed. Removing Payluk from the database is a NEW migration
+   the retired provider. They are applied history and the migration gate enforces that they
+   are never changed. Removing the retired provider from the database is a NEW migration
    that drops what is unused, not an edit to an old one. Treat the probes the
    same way: update a probe deliberately, with a dated note saying why.
 
-**Then look wider.** Payluk was named as the example, not the whole job. Also
+**Then look wider.** the retired provider was named as the example, not the whole job. Also
 sweep for: abandoned feature flags, preview fixtures for screens that no
 longer exist, dead routes, unused exports (knip already reports these in CI),
 retired components, and documentation describing things that were removed. The

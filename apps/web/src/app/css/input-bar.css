@@ -115,6 +115,13 @@
 }
 :root form.nf-ai__composer:focus-within {
   border-color: var(--nf-brand-edge);
+  outline: var(--nf-focus-ring-width) solid var(--nf-focus-ring);
+  outline-offset: var(--nf-focus-ring-offset);
+}
+/* The ring belongs to the whole bar, so the send disc reads as inside it. The
+   inner field no longer draws its own ring around the text area alone. */
+:root form.nf-ai__composer .nf-ai__well:focus-within {
+  outline: 0;
 }
 :root form.nf-ai__composer .nf-ai__well {
   min-block-size: 2.5rem;

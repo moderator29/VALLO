@@ -1,0 +1,16 @@
+/* The copy control: a value and its button on one line. Tokens only. */
+@layer components {
+  .nf-copy-value {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--nf-space-2xs);
+    min-inline-size: 0;
+  }
+  .nf-copy-value__text {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+  .nf-copy[data-copied] {
+    color: var(--nf-status-verified);
+  }
+}

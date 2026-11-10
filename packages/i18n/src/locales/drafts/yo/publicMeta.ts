@@ -27,8 +27,8 @@ export const publicMetaYo = {
     },
     terms: {
       title: "Àwọn òfin iṣẹ́",
-      description:
-        "Àwọn òfin fún lílo Vallo: àkọọ́lẹ̀, ìsanwó, dídá owó padà, ìtumọ̀ àmì ìfọwọ́sí, kíkéde ilé, àdéhùn àti ìfọwọ́sí, Ìdánilójú Vallo àti lílò tí ó tọ́.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `description` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     privacy: {
       title: "Ìlànà àṣírí",

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
-import { ReadOnlyNote } from "../_components/panels";
+import { PageHead, ReadOnlyNote } from "../_components/panels";
 import { getAuditActivity, getAuditLog } from "@/lib/admin/audit-queries";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import {
@@ -72,7 +72,7 @@ export default async function AdminAuditPage({
   if (log.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={COPY.title} lede={COPY.lede} />
+        <PageHead title={COPY.title} lede={COPY.lede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -84,7 +84,7 @@ export default async function AdminAuditPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={COPY.title} lede={COPY.lede} />
+      <PageHead title={COPY.title} lede={COPY.lede} />
       <div className="mt-inline">
         <ReadOnlyNote locale={locale} />
       </div>

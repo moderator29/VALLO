@@ -8,6 +8,7 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { EarningsHistory } from "@/components/app/money-history/EarningsHistory";
 import { ListGroup, ListRow } from "@/components/ui/ListGroup";
 import { IconPlate, ICON_PLATE_GLYPH } from "@/components/ui/IconPlate";
@@ -52,11 +53,12 @@ export default async function HostEarningsPage({
   const monthName = new Intl.DateTimeFormat(tag, { month: "long", year: "numeric", timeZone: "UTC" });
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
-      <div className="mx-auto max-w-2xl">
-        <HostInnerNav active="earnings" {...hostInnerNavCopy(t)} />
-        <h1 className="nf-h2">{t.experienceHost.earnings.title}</h1>
-        <p className={`mt-xs mb-block ${TYPE.body}`}>{PAYOUT_ANSWER}</p>
+    /* The body's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
+      <HostInnerNav active="earnings" {...hostInnerNavCopy(t)} />
+      <PageFrame title={t.experienceHost.earnings.title} fallback="/host">
+        <p className={`mb-block ${TYPE.body}`}>{PAYOUT_ANSWER}</p>
         {/* Chargebacks: the payout rule, said calmly, only when it applies. */}
         <ChargebackHoldNotice hold={hold} copy={t.chargebacks.hold} locale={locale} />
         {read.state === "signed-out" ? (
@@ -99,7 +101,7 @@ export default async function HostEarningsPage({
             ))}
           </ListGroup>
         ) : null}
-      </div>
+      </PageFrame>
     </HostShell>
   );
 }

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-const { recordLedgerEntry, recordEscrowCommission } = await import("./record");
+const { recordLedgerEntry } = await import("./record");
 
 function admin(answer: { data: unknown; error: unknown } | Error) {
   const calls: { fn: string; args: Record<string, unknown> }[] = [];
@@ -43,23 +43,5 @@ describe("recordLedgerEntry", () => {
   it("reports a database refusal or a thrown call, never a success", async () => {
     expect(await recordLedgerEntry(admin({ data: null, error: { message: "no" } }) as never, entry)).toEqual({ ok: false, reason: "no" });
     expect(await recordLedgerEntry(admin(new Error("down")) as never, entry)).toEqual({ ok: false, reason: "down" });
-  });
-});
-
-describe("recordEscrowCommission", () => {
-  it("returns both halves of the paired movement", async () => {
-    const db = admin({ data: { customer_funds_entry: "a", revenue_entry: "b" }, error: null });
-    expect(await recordEscrowCommission(db as never, { transactionId: "t1", amountMinor: 200 })).toEqual({
-      ok: true, customerFundsEntry: "a", revenueEntry: "b",
-    });
-    expect(db.calls[0]).toEqual({
-      fn: "ledger_record_payluk_commission",
-      args: { p_transaction: "t1", p_amount: 200, p_provider_reference: null, p_actor: null },
-    });
-  });
-
-  it("refuses a non-positive amount and a half answer", async () => {
-    expect(await recordEscrowCommission(admin({ data: null, error: null }) as never, { transactionId: "t1", amountMinor: 0 })).toMatchObject({ ok: false });
-    expect(await recordEscrowCommission(admin({ data: { customer_funds_entry: "a" }, error: null }) as never, { transactionId: "t1", amountMinor: 5 })).toMatchObject({ ok: false });
   });
 });

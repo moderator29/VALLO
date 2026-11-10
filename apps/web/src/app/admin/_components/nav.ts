@@ -48,6 +48,17 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     icon: glyph("home-solid"),
     label: "Overview",
     children: [
+      /* My Desk (10 November 2026): the personal workspace every staff member
+         and admin has, with its tasks and the announcements addressed to them. */
+      { key: "my-desk", href: "/admin/my-desk", icon: ui("user"), label: "My desk" },
+      { key: "my-tasks", href: "/admin/my-desk/tasks", icon: ui("clipboard-list"), label: "My tasks" },
+      { key: "announcements", href: "/admin/my-desk/announcements", icon: ui("bell"), label: "Announcements" },
+      /* The weekly report opens every Saturday; the reviewers' table of who has
+         filed sits under Staff and Access. The copilot is on every desk and
+         here as a full page. */
+      { key: "weekly-report", href: "/admin/my-desk/weekly", icon: ui("calendar-check"), label: "Weekly report" },
+      { key: "weekly-reports", href: "/admin/reports/weekly", icon: ui("file-search"), label: "Weekly reports" },
+      { key: "copilot", href: "/admin/copilot", icon: ui("bot"), label: "Copilot" },
       {
         key: "queue",
         href: "/admin/queue",
@@ -59,6 +70,12 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       },
       /* W8: the lookup box answered Control K and nothing else; it is a desk. */
       { key: "lookup", href: "/admin/lookup", icon: ui("search"), label: "Lookup" },
+      /* The COO desk: escalations, staff access recommendations, and the
+         real backlog across listings, moderation, support, agreements and
+         operations. Open only to a super admin or a staff member holding
+         every one of the COO's scopes (`requireCoo`), not a single scope,
+         so it is not badged by any one desk's own count. */
+      { key: "coo-overview", href: "/admin/overview", icon: ui("trending-up"), label: "COO overview" },
     ],
   },
   {
@@ -78,6 +95,9 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "applications", href: "/admin/agents", icon: ui("user"), label: "Applications", countKeys: ["applications"], countLabel: "applications waiting on a decision" },
       { key: "businesses", href: "/admin/businesses", icon: ui("building-hotel"), label: "Businesses" },
       { key: "stops", href: "/admin/stops", icon: ui("shield-stop"), label: "Stops" },
+      /* Business development: landlords, agents, hotels, shortlet hosts and
+         restaurants brought onto Vallo, and the pipeline that tracks them. */
+      { key: "business-development", href: "/admin/business-development", icon: ui("hand-coins"), label: "Business development" },
     ],
   },
   {
@@ -114,6 +134,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
         countKeys: ["chargebacks"],
         countLabel: "chargebacks open, waiting on evidence or a decision",
       },
+      /* BUILD 7.11: every protected payment with the provider's state beside Vallo's. Read-only. */
+      { key: "arrangements", href: "/admin/arrangements", icon: ui("shield-check"), label: "Protected payments" },
       { key: "fees", href: "/admin/fees", icon: ui("document"), label: "Fees" },
       /* The referral desk: rewards owed, the monthly budget, and the referrals and payouts a person has to decide. */
       {
@@ -169,6 +191,13 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "appeals", href: "/admin/appeals", icon: ui("scale"), label: "Appeals" },
       { key: "roommates", href: "/admin/roommates", icon: ui("users"), label: "Roommates" },
       { key: "circle-desk", href: "/admin/circle", icon: ui("circle-people"), label: "Circle" },
+      /* The Social Media Manager position (10 November 2026): the content
+         calendar, drafts, the media library and approvals. No platform API. */
+      { key: "social-media", href: "/admin/social-media", icon: ui("camera"), label: "Social media" },
+      /* The staff roles of 10 November 2026: Marketing (campaigns), Content
+         (the editorial calendar and approvals). Each is its own desk and scope. */
+      { key: "marketing", href: "/admin/marketing", icon: ui("price-tag"), label: "Marketing" },
+      { key: "content", href: "/admin/content", icon: ui("file-text"), label: "Content" },
       { key: "standing", href: "/admin/standing", icon: ui("star"), label: "Standing" },
       /* AR-11: the words the safety scan acts on. */
       { key: "blocked-terms", href: "/admin/blocked-terms", icon: ui("block"), label: "Blocked terms" },
@@ -188,6 +217,10 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
     children: [
       { key: "people", href: "/admin/people", icon: ui("user"), label: "People" },
       { key: "account-recovery", href: "/admin/account-recovery", icon: ui("key"), label: "Account recovery", countKeys: ["recovery"], countLabel: "email recoveries opened and not yet finished" },
+      /* The docs upgrade: which help pages members say did not help. */
+      { key: "doc-feedback", href: "/admin/doc-feedback", icon: ui("file-search"), label: "Pages that fail" },
+      /* The Customer Support Lead: team workload, QA, support figures and policy notes. */
+      { key: "support-lead", href: "/admin/support-lead", icon: ui("headset"), label: "Support lead" },
     ],
   },
   {
@@ -203,12 +236,16 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
       { key: "crashes", href: "/admin/crashes", icon: ui("alert-triangle"), label: "Crash log" },
       { key: "audit", href: "/admin/audit", icon: ui("history"), label: "Audit log" },
       { key: "oversight", href: "/admin/oversight", icon: ui("user"), label: "Team oversight" },
-      /* Read-only checks of each provider key (Payluk, LiveKit, Apple push, Termii, MapTiler). */
+      /* The Technical Administrator's read-only health panel and incident log. */
+      { key: "technical", href: "/admin/technical", icon: ui("sliders"), label: "Technical" },
+      /* Read-only checks of each provider key (the protected-pay provider, LiveKit, Apple push, Termii) and the map tiles. */
       { key: "providers", href: "/admin/operations/providers", icon: ui("key"), label: "Provider checks" },
       /* Video and audio calls: volume, connect rate, minutes. */
       { key: "call-usage", href: "/admin/call-usage", icon: ui("phone"), label: "Call usage" },
       /* Money records past their retention date, and the typed-confirmation tool. */
       { key: "retention", href: "/admin/retention", icon: ui("archive"), label: "Record retention", countKeys: ["retention"], countLabel: "accounts whose money records are past retention" },
+      /* Why members delete their account, as rates (Operations, Support lead, Marketing). */
+      { key: "account-deletions", href: "/admin/account-deletions", icon: ui("user"), label: "Account deletions" },
     ],
   },
   {
@@ -237,6 +274,8 @@ export const ADMIN_SETTINGS: AdminDestination = {
     /* Track K: who holds staff access (super admin only) and the handbook. */
     { key: "staff", href: "/admin/staff", icon: ui("user"), label: "Staff" },
     { key: "handbook", href: "/admin/handbook", icon: ui("document"), label: "Staff handbook" },
+    /* Section 10 of the docs upgrade: how each desk works, on the docs kit. */
+    { key: "manual", href: "/admin/manual", icon: ui("clipboard-list"), label: "Staff manual" },
     { key: "help", href: "/settings/help", icon: ui("headset"), label: "Help and support" },
   ],
 };
@@ -251,6 +290,106 @@ export const ADMIN_NAV: AdminDestination[] = [...ADMIN_PRIMARY, ADMIN_SETTINGS].
 export const ADMIN_SECONDARY: AdminDestination[] = [...ADMIN_PRIMARY, ADMIN_SETTINGS].flatMap(
   (item) => item.children ?? [],
 );
+
+/**
+ * THE RAIL'S GROUPING (founder brief, 10 November 2026): Overview, My Desk,
+ * Staff and Access, Operations, Departments, Intelligence, Knowledge Centre
+ * and Settings. Each group is an expandable category. The groups only
+ * REGROUP the destinations above by key: no key or href is renamed, no desk
+ * is removed, and every destination appears in exactly one group (a test
+ * holds both). Departments carries named sections, one per department,
+ * mapped onto the desks that exist.
+ */
+export type AdminGroupSection = { key: string; label: string | null; items: AdminDestination[] };
+export type AdminGroup = { key: string; label: string; icon: AdminIcon; sections: AdminGroupSection[] };
+
+const BY_KEY = new Map<string, AdminDestination>(
+  [...ADMIN_PRIMARY, ADMIN_SETTINGS].flatMap((item) => [item, ...(item.children ?? [])]).map((item) => [item.key, item]),
+);
+
+function pick(...keys: string[]): AdminDestination[] {
+  return keys.map((key) => {
+    const found = BY_KEY.get(key);
+    if (!found) throw new Error(`nav group names a destination that does not exist: ${key}`);
+    return found;
+  });
+}
+
+export const ADMIN_GROUPS: AdminGroup[] = [
+  { key: "g-overview", label: "Overview", icon: glyph("home-solid"), sections: [{ key: "overview", label: null, items: pick("overview", "queue", "lookup", "coo-overview") }] },
+  { key: "g-my-desk", label: "My Desk", icon: ui("user"), sections: [{ key: "my-desk", label: null, items: pick("my-desk", "my-tasks", "announcements", "weekly-report", "copilot") }] },
+  { key: "g-staff", label: "Staff and Access", icon: ui("users"), sections: [{ key: "staff", label: null, items: pick("staff", "oversight", "weekly-reports") }] },
+  {
+    key: "g-operations",
+    label: "Operations",
+    icon: glyph("operations"),
+    sections: [
+      {
+        key: "operations",
+        label: null,
+        items: pick(
+          "operations", "alerts", "crashes", "providers", "call-usage", "retention",
+          "supply", "applications", "businesses", "stops",
+          "bookings", "visits", "reservations", "restaurant-fees",
+          "agreements", "agreement-settings",
+        ),
+      },
+    ],
+  },
+  {
+    key: "g-departments",
+    label: "Departments",
+    icon: ui("building-apartment"),
+    sections: [
+      { key: "business-development", label: "Business Development", items: pick("business-development") },
+      { key: "social-media", label: "Social Media", items: pick("social-media") },
+      { key: "marketing", label: "Marketing", items: pick("marketing") },
+      { key: "content", label: "Content", items: pick("content") },
+      { key: "technical", label: "Technical", items: pick("technical") },
+      { key: "support", label: "Support", items: pick("tickets", "people", "account-recovery", "support-lead") },
+      { key: "listing-verification", label: "Listing verification", items: pick("listings", "kyc", "review-calls") },
+      {
+        key: "trust-safety",
+        label: "Trust and Safety",
+        items: pick("social", "cases", "appeals", "roommates", "circle-desk", "standing", "blocked-terms", "weight-withheld"),
+      },
+      { key: "finance", label: "Finance", items: pick("money", "payments", "chargebacks", "arrangements", "fees", "referrals") },
+      { key: "compliance", label: "Compliance", items: pick("compliance") },
+    ],
+  },
+  { key: "g-intelligence", label: "Intelligence", icon: glyph("bars"), sections: [{ key: "intelligence", label: null, items: pick("analytics", "front-door", "field-speed", "trust", "account-deletions", "audit") }] },
+  { key: "g-knowledge", label: "Knowledge Centre", icon: ui("document"), sections: [{ key: "knowledge", label: null, items: pick("handbook", "manual", "doc-feedback") }] },
+  { key: "g-settings", label: "Settings", icon: ui("settings-gear"), sections: [{ key: "settings", label: null, items: pick("settings", "switches", "reference", "examples", "help") }] },
+];
+
+/** The destinations a group holds, in order. */
+export function groupItems(group: AdminGroup): AdminDestination[] {
+  return group.sections.flatMap((section) => section.items);
+}
+
+/** The group a path belongs to: the one holding the longest matching href. */
+export function activeGroupKey(pathname: string): string | null {
+  let best: { key: string; length: number } | null = null;
+  for (const group of ADMIN_GROUPS) {
+    for (const item of groupItems(group)) {
+      if (isActiveHref(pathname, item.href) && (!best || item.href.length > best.length)) {
+        best = { key: group.key, length: item.href.length };
+      }
+    }
+  }
+  return best?.key ?? null;
+}
+
+/** The single destination lit for a path: the longest matching href across every group. */
+export function activeItemKey(pathname: string): string | null {
+  let best: AdminDestination | null = null;
+  for (const group of ADMIN_GROUPS) {
+    for (const item of groupItems(group)) {
+      if (isActiveHref(pathname, item.href) && (!best || item.href.length > best.href.length)) best = item;
+    }
+  }
+  return best?.key ?? null;
+}
 
 export function isActiveHref(pathname: string, href: string): boolean {
   if (href === "/admin") return pathname === "/admin";

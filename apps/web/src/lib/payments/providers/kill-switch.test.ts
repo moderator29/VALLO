@@ -15,7 +15,6 @@ describe("provider kill switch", () => {
   });
   afterEach(() => {
     delete process.env.PAYMENTS_KILL_PAYSTACK;
-    delete process.env.PAYMENTS_KILL_PAYLUK;
   });
 
   it("Paystack fails open: only an explicit off flag or the env kill stops it", async () => {
@@ -30,15 +29,9 @@ describe("provider kill switch", () => {
     expect(await providerEnabled("paystack")).toBe(false);
   });
 
-  it("Payluk fails closed: it runs only while its on flag is explicitly on", async () => {
-    expect(await providerEnabled("payluk")).toBe(false);
-    flags.on.add("payments_payluk_on");
-    expect(await providerEnabled("payluk")).toBe(true);
-    flags.fail = true;
-    expect(await providerEnabled("payluk")).toBe(false);
-    flags.fail = false;
-    process.env.PAYMENTS_KILL_PAYLUK = "1";
-    expect(await providerEnabled("payluk")).toBe(false);
-    await expect(assertProviderEnabled("payluk")).rejects.toBeInstanceOf(FiatProviderDisabled);
+  it("assertProviderEnabled throws FiatProviderDisabled while Paystack is stopped", async () => {
+    await expect(assertProviderEnabled("paystack")).resolves.toBeUndefined();
+    process.env.PAYMENTS_KILL_PAYSTACK = "1";
+    await expect(assertProviderEnabled("paystack")).rejects.toBeInstanceOf(FiatProviderDisabled);
   });
 });

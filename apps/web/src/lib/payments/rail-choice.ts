@@ -17,6 +17,8 @@
  * what the payment step draws. Pure and client-safe.
  */
 
+import { RENT_PAYMENT_OPEN } from "../rent/payment-open";
+
 export type PayRail = "escrow" | "card";
 
 export const PAY_RAILS: readonly PayRail[] = ["escrow", "card"];
@@ -85,6 +87,8 @@ export type PayChoiceMode =
   | "card_escrow_paused"
   /** A purchase while escrow is paused: nothing can be paid now, said plainly. */
   | "escrow_paused"
+  /** A rental while payment for rentals is not open (`lib/rent/payment-open`): said, no rail offered. */
+  | "rent_not_open"
   /** Nothing resolves: no card at all. */
   | "none";
 
@@ -96,8 +100,19 @@ export type PayChoiceView = {
   canChoose: boolean;
 };
 
-/** What the step draws for a choice. */
-export function payChoiceView(choice: PayChoice | null): PayChoiceView {
+/**
+ * What the step draws for a choice. `rentOpen` false (the launch position,
+ * `RENT_PAYMENT_OPEN`) turns any rent agreement's choice into a plain fact:
+ * no rail is offered, whatever the database would allow.
+ */
+export function payChoiceView(
+  choice: PayChoice | null,
+  agreementKind?: string,
+  rentOpen: boolean = RENT_PAYMENT_OPEN,
+): PayChoiceView {
+  if (choice && agreementKind === "rent" && !rentOpen) {
+    return { mode: "rent_not_open", selected: null, canChoose: false };
+  }
   if (choice?.escrowPaused) {
     if (choice.options.includes("card")) {
       /* Card has to be STORED as the payer's choice before the card checkout

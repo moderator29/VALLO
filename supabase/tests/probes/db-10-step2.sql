@@ -4,6 +4,12 @@
 -- private columns from the tables; the lister's and owner's own screens and
 -- writes still work (the public read plus the definer door; the wizard's
 -- insert...returning; the host's first save and edit).
+-- 9 November 2026: brought up to the rules of 20260929110457 (private
+-- columns and exact points stay private), which tightened what this probe was
+-- written against: a signed-in member reads the public point
+-- (latitude_public, longitude_public), never the exact one, and staff act on a
+-- session that proved the console's second factor. Its sibling probe was
+-- updated on 29 September; this one joined the run on 13 October unchanged.
 do $$
 declare
   member constant uuid := gen_random_uuid(); -- a throwaway lister, see the 17 October 2026 note below
@@ -17,6 +23,16 @@ declare
   col text;
   r record;
 begin
+  -- 29 September: the console's second factor. An admin or a staff member
+  -- holds their role only on a session that proved a security key, so this
+  -- probe's session carries one for every admin and for the QA member (who
+  -- some probes make staff), rolled back with everything else.
+  insert into public.console_step_ups (user_id, session_id, expires_at)
+  select console_probe_uid, '00000000-0000-4000-8000-00000000c0de', now() + interval '1 hour'
+    from (select user_id from public.user_roles where role in ('admin', 'super_admin')
+          union select '03f3dd52-ea28-4852-9abe-e5b0a67c2a43'::uuid
+          union select '957b3bd2-cce3-425d-bba9-5cd876ca3d62'::uuid) s(console_probe_uid)
+  on conflict (user_id, session_id) do update set expires_at = excluded.expires_at;
   -- 17 October 2026: the QA member now holds a live agents row (one side per
   -- account), so inserting a second one failed on agents_user_id_key before
   -- anything was asserted. The lister is a throwaway account made here, an
@@ -26,7 +42,17 @@ begin
   values (member, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'probe-db-10-step2-member-' || member || '@example.invalid', '{}', '{}', now(), now());
   insert into public.agents (user_id, display_name) values (member, 'Probe DB-10 lister') returning id into agent;
   insert into public.listings (id, agent_id, title, property_type, status, listing_role, address, landmark, review_notes)
-  values (lid, agent, 'Probe DB-10', 'apartment', 'PUBLISHED', 'agent', '12 Probe Close', 'By the probe', 'probe note');
+  values (lid, agent, 'Probe DB-10', 'apartment', 'DRAFT', 'agent', '12 Probe Close', 'By the probe', 'probe note');
+  -- SCUML item 17 (live 29 Sep): an agent listing goes live only on an
+  -- approved mandate, and a mandate needs its listing to exist, so the
+  -- fixture is filed as a draft, given a mandate as the platform would, then
+  -- published (the same fixture db-10 and new-a4-01 use; this step-2 probe
+  -- missed the change because it joined the run on 13 October).
+  insert into public.listing_mandates (listing_id, kind, principal_name, review_status, reviewed_by, reviewed_at,
+         principal_relationship, principal_verified_how, principal_verified_by, principal_verified_at)
+  values (lid, 'letting', 'Probe Principal', 'approved', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now(),
+         'owner', 'call_back', '03f3dd52-ea28-4852-9abe-e5b0a67c2a43', now());
+  update public.listings set status = 'PUBLISHED' where id = lid;
 
   set local role authenticated;
   perform set_config('request.jwt.claims', json_build_object('sub', gen_random_uuid(), 'role', 'authenticated')::text, true);
@@ -49,7 +75,7 @@ begin
     raise exception 'PROBE_FAIL db-10: member read accommodations.address';
   exception when insufficient_privilege then null; end;
   -- CONTROL: the public columns read.
-  select count(*) into n from (select id, title, area, city, latitude, longitude from public.listings where status = 'PUBLISHED') s;
+  select count(*) into n from (select id, title, area, city, latitude_public, longitude_public from public.listings where status = 'PUBLISHED') s;
 
   -- CONTROL: the lister's wizard insert...returning and the step save.
   perform set_config('request.jwt.claims', json_build_object('sub', member, 'role', 'authenticated')::text, true);
@@ -78,7 +104,7 @@ begin
   if r.tin is distinct from '12345678-0002' then raise exception 'PROBE_FAIL db-10: owner read back %', row_to_json(r); end if;
 
   -- CONTROL: staff decide through their own client (DB-01's admin path).
-  perform set_config('request.jwt.claims', json_build_object('sub', admin, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', admin, 'role', 'authenticated', 'session_id', '00000000-0000-4000-8000-00000000c0de')::text, true);
   update public.businesses set status = 'PUBLISHED', verification_tier = 1, reviewer_id = admin, published_at = now()
    where id = biz;
   get diagnostics n = row_count;

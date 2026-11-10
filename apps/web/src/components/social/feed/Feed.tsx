@@ -1,6 +1,7 @@
 "use client";
 
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import type { SheetWords } from "@/components/social/sheet-words";
 import { Button } from "@/components/ui/Button";
 import { DEFAULT_LOCALE, type Locale } from "@vallo/i18n/core";
@@ -25,12 +26,17 @@ import type { ReviewCard } from "@/lib/social/profile-tabs-queries";
 import { PostEditor } from "./PostEditor";
 import { LEAD_SETTLE_MS, leadIndexes, leadPropsFor } from "./lead";
 import { feedback } from "@/lib/ui/feedback";
+import { useCopy } from "@/lib/ui/use-copy";
+import { SHARE_WORDS } from "@/lib/features/listing-share/model";
+import { removeListingShare, shareListingToFeed } from "@/lib/features/listing-share/actions";
 import { ViewportPost } from "./ViewportPost";
 import { inCategory, type FeedCategory } from "./categories";
 import { FreshArrival } from "./FreshArrival";
 import {
   blockUser,
   muteTarget,
+  unblockUser,
+  unmuteTarget,
   removePost,
   reportPost,
   toggleMark,
@@ -217,6 +223,7 @@ export function Feed({
     return () => window.clearTimeout(timer);
   }, []);
   const [, startTransition] = useSafeTransition();
+  const copy = useCopy();
 
   /*
    * The server is the truth. When a refresh brings new props, take them.
@@ -392,13 +399,11 @@ export function Feed({
         });
         return;
       }
-      void navigator.clipboard?.writeText(url);
-      banner.success(POST_COPY.copied);
+      void copy(url, "link");
       return;
     }
     if (action === "copy") {
-      void navigator.clipboard?.writeText(`${window.location.origin}/post/${post.id}`);
-      banner.success(POST_COPY.copied);
+      void copy(`${window.location.origin}/post/${post.id}`, "link");
       return;
     }
     /*
@@ -433,6 +438,38 @@ export function Feed({
       setReporting(post);
       return;
     }
+    /* Remove share: no slide to confirm, because the banner offers Undo, which
+       puts it back only if a share is still free. */
+    if (action === "remove-share") {
+      startTransition(async () => {
+        try {
+          const result = await removeListingShare({ postId: post.id });
+          if (!result.ok) {
+            banner.error(result.error);
+            return;
+          }
+          setPosts((all) => all.filter((p) => p.id !== post.id));
+          const listingId = post.listingShare?.listingId ?? null;
+          const note = post.body;
+          if (!listingId) {
+            banner.success(SHARE_WORDS.removed);
+          } else {
+            bannerWithUndo(SHARE_WORDS.removed, {
+              undo: async () => {
+                const again = await shareListingToFeed({ listingId, ...(note ? { note } : {}) });
+                return again.ok ? { ok: true } : { ok: false, error: again.error };
+              },
+              undone: SHARE_WORDS.restored,
+              onUndone: () => router.refresh(),
+            });
+          }
+          router.refresh();
+        } catch (error) {
+          if (!tapFailedOffline(error)) throw error;
+        }
+      });
+      return;
+    }
     if (action === "edit") {
       setEditing(post.id);
       return;
@@ -457,7 +494,14 @@ export function Feed({
           if (!result || !result.ok) {
             patch(post.id, { saved: post.saved });
             banner.error(result && !result.ok ? result.error : OUTBOX_KEEP_FAILED);
+            return;
           }
+          /* Said in the banner, with Undo: the inverse is the same toggle. */
+          bannerWithUndo(saved ? POST_COPY.savedDone : POST_COPY.unsavedDone, {
+            undo: () => toggleMark({ postId: post.id, mark: "SAVE", want: !saved }),
+            undone: saved ? POST_COPY.unsavedUndone : POST_COPY.savedUndone,
+            onUndone: () => patch(post.id, { saved: !saved }),
+          });
         } catch (error) {
           if (!tapFailedOffline(error)) throw error;
         }
@@ -483,8 +527,14 @@ export function Feed({
             action === "block"
               ? await blockUser({ userId: target })
               : await muteTarget({ targetKind: "USER", targetId: target });
-          if (result.ok) banner.success(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone);
-          else banner.error(result.error);
+          if (result.ok) {
+            bannerWithUndo(action === "block" ? POST_COPY.blockedDone : POST_COPY.mutedDone, {
+              undo: () =>
+                action === "block" ? unblockUser({ userId: target }) : unmuteTarget({ targetKind: "USER", targetId: target }),
+              undone: action === "block" ? POST_COPY.blockedUndone : POST_COPY.mutedUndone,
+              onUndone: () => router.refresh(),
+            });
+          } else banner.error(result.error);
           /* Their posts leave the list now. The refresh re-reads only the first
              page, so anything of theirs on a page read further down stayed on
              screen after the block said it was done. */
@@ -721,6 +771,7 @@ export function Feed({
             editable: sheetFor.editable,
             hasAuthor: Boolean(sheetFor.author?.id),
             who: sheetFor.author?.handle ? `@${sheetFor.author.handle}` : sheet.thisPerson,
+            isListingShare: Boolean(sheetFor.listingShare),
           }, sheet.menu)}
           onChoose={(key) => onMenuAction(sheetFor, key)}
           onClose={() => setSheetFor(null)}

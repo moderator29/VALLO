@@ -19,6 +19,7 @@ import {
   EmptyChart,
   KpiGrid,
   KpiStrip,
+  PageHead,
   Panel,
   PanelLink,
   PanelUnavailable,
@@ -230,7 +231,9 @@ export function OverviewView(props: OverviewProps) {
 
   return (
     <div className="nf-admin-stack">
-      <h1 className="sr-only">{c.title}</h1>
+      {/* The console's one header (`PageHead`, AD-01): the overview opens on
+          the same title every desk does. It was a screen-reader-only h1. */}
+      <PageHead title={c.title} />
       {props.headingTo && <HeadingTo href={props.headingTo} copy={shell.entry} shell={shell} />}
       {/* The overview's first answer: what is waiting on a person, as figures. */}
       <QueueFigures t={getDictionary(locale)} locale={locale} counts={props.queue ?? null} />

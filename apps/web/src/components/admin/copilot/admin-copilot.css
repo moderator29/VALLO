@@ -1,0 +1,350 @@
+@layer components {
+  .nf-copilot-launch {
+    position: fixed;
+    right: var(--nf-space-md);
+    bottom: calc(var(--nf-space-lg) + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: var(--nf-radius-circle);
+    border: 1px solid var(--nf-brand-edge-soft);
+    background: var(--nf-brand-primary);
+    color: var(--nf-content-on-brand);
+    box-shadow: var(--nf-float-shadow);
+  }
+
+  /* The conversation: a column that fills its container, the composer pinned to the bottom. */
+  .nf-copilot {
+    display: flex;
+    flex-direction: column;
+    gap: var(--nf-space-sm);
+    min-height: 100%;
+  }
+
+  .nf-copilot[data-variant="page"] {
+    min-height: calc(100dvh - 14rem);
+  }
+
+  .nf-copilot__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-copilot__hint {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-thread {
+    display: grid;
+    flex: 1;
+    align-content: start;
+    gap: var(--nf-space-sm);
+    min-height: 12rem;
+  }
+
+  .nf-copilot-empty {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+
+  .nf-copilot-greeting {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+
+  .nf-copilot-chip {
+    min-height: 44px;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-control);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .nf-copilot-chip:hover:not(:disabled) {
+    border-color: var(--nf-brand-edge-soft);
+    background: var(--nf-brand-tint-1);
+  }
+
+  .nf-copilot-chip:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .nf-copilot-row {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+
+  .nf-copilot-turn {
+    margin: 0;
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border-radius: var(--nf-radius-card-sm);
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    max-width: 92%;
+    overflow-wrap: anywhere;
+  }
+
+  .nf-copilot-turn[data-role="user"] {
+    justify-self: end;
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-content-primary);
+    white-space: pre-wrap;
+  }
+
+  .nf-copilot-turn[data-role="assistant"] {
+    justify-self: start;
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-primary);
+  }
+
+  .nf-copilot-md > :first-child {
+    margin-top: 0;
+  }
+
+  .nf-copilot-md > :last-child {
+    margin-bottom: 0;
+  }
+
+  .nf-copilot-md p,
+  .nf-copilot-md ul,
+  .nf-copilot-md ol {
+    margin: 0 0 var(--nf-space-xs);
+  }
+
+  .nf-copilot-md ul,
+  .nf-copilot-md ol {
+    padding-inline-start: var(--nf-space-lg);
+  }
+
+  .nf-copilot-md li + li {
+    margin-top: var(--nf-space-3xs);
+  }
+
+  .nf-copilot-md code {
+    padding: 0 var(--nf-space-3xs);
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-surface-canvas);
+    font-size: 0.92em;
+  }
+
+  .nf-copilot-copy {
+    margin-top: var(--nf-space-xs);
+    min-height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .nf-copilot-status {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  .nf-copilot-status__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-brand-primary);
+    animation: nf-copilot-pulse 1.2s var(--nf-ease-standard) 10;
+  }
+
+  @keyframes nf-copilot-pulse {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-copilot-status__dot {
+      animation: none;
+    }
+  }
+
+  /* A suggested change. */
+  .nf-copilot-card {
+    display: grid;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card-sm);
+    background: var(--nf-surface-canvas);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-card[data-status="done"] {
+    border-color: var(--nf-state-success);
+  }
+
+  .nf-copilot-card[data-status="failed"],
+  .nf-copilot-card[data-status="expired"] {
+    border-color: var(--nf-state-error);
+  }
+
+  .nf-copilot-card__label {
+    margin: 0;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-overline);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .nf-copilot-card__summary {
+    margin: 0;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-copilot-card__fields {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    margin: 0;
+  }
+
+  .nf-copilot-card__fields > div {
+    display: grid;
+    grid-template-columns: minmax(5rem, 30%) 1fr;
+    gap: var(--nf-space-xs);
+  }
+
+  .nf-copilot-card__fields dt {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    text-transform: capitalize;
+  }
+
+  .nf-copilot-card__fields dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .nf-copilot-card__draft {
+    margin: 0;
+    padding: var(--nf-space-sm);
+    border-radius: var(--nf-radius-xs);
+    background: var(--nf-surface-inset);
+    font: inherit;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .nf-copilot-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-xs);
+  }
+
+  .nf-copilot-card__outcome {
+    margin: 0;
+    color: var(--nf-content-secondary);
+  }
+
+  /* The composer stays at the bottom of whatever scrolls. */
+  .nf-copilot-form {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    gap: var(--nf-space-sm);
+    padding-block: var(--nf-space-sm) calc(var(--nf-space-xs) + env(safe-area-inset-bottom, 0px));
+    background: var(--nf-surface-elevated);
+  }
+
+  .nf-copilot-form .nf-field {
+    flex: 1;
+  }
+
+  .nf-copilot-input {
+    min-height: 44px;
+    max-height: 9rem;
+    resize: none;
+    field-sizing: content;
+    line-height: 1.4;
+  }
+
+  /* The capabilities panel on the full page. */
+  .nf-copilot-can {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+
+  .nf-copilot-can__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: var(--nf-space-sm);
+  }
+
+  .nf-copilot-can__desk {
+    display: grid;
+    align-content: start;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-subtle);
+    border-radius: var(--nf-radius-card-sm);
+    background: var(--nf-surface-inset);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-can__desk h3 {
+    margin: 0;
+    font-size: var(--nf-text-body);
+  }
+
+  .nf-copilot-can__desk ul {
+    margin: 0;
+    padding-inline-start: var(--nf-space-lg);
+  }
+
+  .nf-copilot-can__prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+  }
+
+  .nf-copilot-limits {
+    margin: 0;
+    padding-inline-start: var(--nf-space-lg);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  .nf-copilot-page {
+    display: grid;
+    gap: var(--nf-space-lg);
+  }
+
+  @media (min-width: 64rem) {
+    .nf-copilot-page {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      align-items: start;
+    }
+  }
+}

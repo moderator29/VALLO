@@ -82,6 +82,25 @@ export const STAFF_SCOPES = [
   "circle",
   /* The numbers only: overview figures, never case content. */
   "analyst",
+  /* Added 10 November 2026 with the Business Development and Social Media
+     positions. `business_development` is never a new permission on its own:
+     a Business Development Executive also holds `listing_approval`, the
+     scope that already lets a Listings Reviewer review, verify, approve and
+     publish a listing, and restrict a member on a property case (founder
+     ruling, 10 Nov: "3 yes they do"). `social_media` carries no listing,
+     moderation or financial access at all. */
+  "business_development",
+  "social_media",
+  /* Added 10 November 2026 with the Marketing Manager, Content Manager,
+     Technical Administrator and Customer Support Lead positions. Each opens
+     its own desk and nothing else: `marketing` (campaigns), `content`
+     (editorial items), `technical` (read-only health and the incident log,
+     never a secret or a credential) and `support_lead` (team workload, QA and
+     policy notes; the Customer Support Lead also holds `support`). */
+  "marketing",
+  "content",
+  "technical",
+  "support_lead",
 ] as const;
 export type StaffScope = (typeof STAFF_SCOPES)[number];
 
@@ -99,6 +118,12 @@ export const STAFF_SCOPE_LABEL: Record<StaffScope, string> = {
   roommates: "Roommates moderation",
   circle: "Circle moderation",
   analyst: "Read-only analyst",
+  business_development: "Business development",
+  social_media: "Social media",
+  marketing: "Marketing",
+  content: "Content",
+  technical: "Technical",
+  support_lead: "Support lead",
 };
 
 export type StaffAccess = {

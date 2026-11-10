@@ -1,23 +1,20 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { formatMoney } from "@vallo/i18n/core";
 import { getLocale } from "@/lib/locale";
 import { PageFrame } from "@/components/app/PageFrame";
-import { ButtonLink } from "@/components/ui/Button";
-import { FundScreen } from "@/components/money/fund/FundScreen";
-import { readFundPayment } from "@/lib/money/fund-view";
-import { fundModel } from "@/lib/money/fund-model";
-import { withNext } from "@/lib/auth/next-link";
-import { FundControl } from "./FundControl";
-import { SwitchToCard } from "./SwitchToCard";
-import { readAgreementPayChoice } from "@/lib/payments/rail-choice-read";
+import { FUND_TITLE, PROTECTED_PAGE_TITLE } from "@/lib/money/copy";
+import { readProtectedDeal } from "@/lib/money/protected-read";
+import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected-rail/ProtectedAgreementView";
 
 /**
- * STEP 7, FUND (D77): the renter pays the agreed rent into escrow, from their
- * Vallo balance, with one deliberate swipe. Hands off to
- * /agreements/[id]/held the moment the money is on its way.
+ * STEP 7, FUND: the payer's funding screen on the protected rail. It draws
+ * only from `readProtectedDeal`, which answers while the protected rail's
+ * switch is on, the arrangement belongs to the rail and the deal's category
+ * is approved. Anything else (the rail switched off, no protected payment on
+ * this agreement) sends the member to the agreement itself, before reading
+ * anything, so no member is shown a protected screen over a closed sentence.
  */
-export const metadata: Metadata = { title: "Pay into escrow" };
+export const metadata: Metadata = { title: FUND_TITLE };
 export const dynamic = "force-dynamic";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -25,55 +22,28 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export default async function FundPaymentPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
-  const [locale, read, payChoice] = await Promise.all([getLocale(), readFundPayment(id), readAgreementPayChoice(id)]);
-  /* The way out to card, where the rules allow it (a purchase is escrow only;
-     a closed or finished agreement has nothing to switch). */
-  const cardAllowed =
-    payChoice !== null &&
-    payChoice.payer &&
-    payChoice.options.includes("card") &&
-    /* An escrow opened and never funded reads as a payment started; the
-       action withdraws it at the partner first, and says so calmly when the
-       money is moving or held instead. */
-    (payChoice.locked === null || payChoice.locked === "payment_started");
-
-  if (read.state === "signed-out") {
+  /* THE NEW PROTECTED RAIL (10 November 2026), built switched off. Its read
+     answers only while payments_escrowpay_on is on, the arrangement is the
+     new provider's and the deal's category is approved; it reads nothing
+     else while the switch is off. */
+  const now = requestTime();
+  const protectedDeal = await readProtectedDeal(id, now);
+  if (protectedDeal) {
+    if (protectedDeal.role === "payer" && !isFundingStage(protectedStageOf(protectedDeal, now))) redirect(`/agreements/${id}/held`);
+    const locale = await getLocale();
     return (
-      <PageFrame title="Pay into escrow" fallback="/agreements" width="narrow">
-        <div className="px-md">
-        <ButtonLink href={withNext("/sign-in", `/agreements/${id}/fund`)} variant="primary" full>
-          Sign in to pay
-        </ButtonLink>
+      <PageFrame title={PROTECTED_PAGE_TITLE} fallback={`/agreements/${id}`} width="narrow">
+        <div className="px-md pb-2xl">
+          <ProtectedAgreementView read={protectedDeal} now={now} locale={locale} />
         </div>
       </PageFrame>
     );
   }
-  if (read.state === "unavailable") {
-    return (
-      <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
-        <div className="px-md">
-        <p className="nf-body">This could not be read just now. Nothing has been taken; refresh to try again.</p>
-        </div>
-      </PageFrame>
-    );
-  }
-  if (read.state !== "ready") return notFound();
+  /* No protected payment to show: the agreement itself says what to do. */
+  redirect(`/agreements/${id}`);
+}
 
-  const model = fundModel(read.facts);
-  if (model.kind === "go_held") redirect(`/agreements/${id}/held`);
-
-  return (
-    <PageFrame title="Pay into escrow" fallback={`/agreements/${id}`} width="narrow">
-      <div className="px-md pb-2xl">
-      <FundScreen
-        facts={read.facts}
-        model={model}
-        locale={locale}
-        backHref={`/agreements/${id}`}
-        control={<FundControl agreementId={id} amountLabel={formatMoney(read.facts.amountMinor, locale, "NGN")} />}
-        fallback={cardAllowed ? <SwitchToCard agreementId={id} /> : undefined}
-      />
-      </div>
-    </PageFrame>
-  );
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

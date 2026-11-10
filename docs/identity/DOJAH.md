@@ -162,7 +162,7 @@ script policy is untouched: no Dojah script is loaded on our pages.
   the NIMC legal name (not the display name) passed to the payout name match.
 - **Mandates and beneficial ownership:** send the property owner their own
   Dojah link so `principal_verified_how` can be a real identity check.
-- **Payluk wallet tiers:** a BVN-plus-selfie check is what a higher wallet
+- **the retired provider wallet tiers:** a BVN-plus-selfie check is what a higher wallet
   tier will ask for; the result is already recorded.
 - **Sensitive actions** (changing a payout account, a large withdrawal):
   Dojah EasyAuthentication, a fresh liveness against the enrolled face.

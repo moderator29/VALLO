@@ -23,6 +23,8 @@ import { LedgerBooks } from "./LedgerBooks";
 import { readLedgerBooks } from "@/lib/admin/desk-reads/ledger-books";
 import { readCautionDesk } from "@/lib/admin/reads/caution-desk";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { moneyContext } from "@/lib/admin/copilot/contexts/money";
 import "./_desk/desk.css";
 import "../agreements/agreements.css";
 
@@ -104,7 +106,7 @@ export default async function AdminMoneyPage({
     <div className="nf-console nf-md">
       <PageHead
         title="Money"
-        lede="Vallo never holds customer money: every payment settles at the processor straight to the lister, the Guarantee reserve and Vallo in one transaction. This desk watches the Guarantee, refunds to the card, and the reconciliation job."
+        lede="Vallo never holds customer money: every card payment settles at the processor straight to the lister and Vallo in one transaction. This desk watches cautions, refunds to the card, the reconciliation job, and the record of the retired Vallo Guarantee."
       />
 
       {/* One desk, six questions: the glass pull lists them and scrolls to each. */}
@@ -115,7 +117,7 @@ export default async function AdminMoneyPage({
           it are controls, so they stay in the console's own theme (D28.1). */}
       <section id="guarantee" className="nf-admin-doc nf-admin-anchor">
         <DocumentSheet aria-labelledby="guarantee-title" data-testid="guarantee-statement">
-          <DocHead label={x.money.statementOverline} title="The Vallo Guarantee" id="guarantee-title" />
+          <DocHead label={x.money.statementOverline} title="The Vallo Guarantee (retired 9 November 2026)" id="guarantee-title" />
           {guarantee.state !== "ok" ? (
             <p className="nf-body mt-sm">The Guarantee reserve could not be read just now. Refresh to try again.</p>
           ) : (
@@ -132,14 +134,14 @@ export default async function AdminMoneyPage({
                 </DocRow>
               </DocRows>
               <p className="nf-doc__note">
-                {guarantee.guaranteeBps / 100}% of each settled charge. Claims are raised within {guarantee.claimWindowHours} hours of
-                move-in or check-in.
+                Retired by the founder on 9 November 2026: no new contributions and no new claims. What is shown is the
+                record, and any claim made before it retired is still decided here.
               </p>
             </>
           )}
         </DocumentSheet>
         {guarantee.state === "ok" && (
-          <Panel title="Claims" id="claims" className="mt-md">
+          <Panel title="Claims made before it retired" id="claims" className="mt-md">
             <GuaranteeClaims claims={guarantee.claims} locale={locale} words={words} />
           </Panel>
         )}
@@ -148,7 +150,8 @@ export default async function AdminMoneyPage({
       <Panel title="Cautions" id="caution" className="nf-admin-anchor">
         <p className="nf-body">
           Vallo never holds a caution: it was paid to the lister with the move-in and is paid back between the parties. Rule on
-          the record here. What is still owed after the due date, not in question, can be claimed from the Guarantee.
+          the record here. What is still owed after the due date, not in question, comes here as an escalation: investigate it
+          against the inspection report and the messages, and give both sides the evidence held.
         </p>
         <div className="mt-block">
           <CautionRulings desk={caution} locale={locale} words={words} />
@@ -185,6 +188,17 @@ export default async function AdminMoneyPage({
       {/* Every payment and refund that has already moved, platform-wide, read
           as the caller (the finance scope decides), with its CSV export. */}
       <MoneyHistoryPanel userClient={access.userClient} locale={locale} />
+
+      <DeskCopilot
+        scope="finance"
+        deskName="Money"
+        context={moneyContext({
+          reconciliationRead: runs.state === "ok",
+          tenancyCharges: rent.state === "ok" ? rent.data.total : null,
+          guaranteeReserveMinor: guarantee.state === "ok" ? guarantee.balanceMinor : null,
+          openClaims: guarantee.state === "ok" ? guarantee.claims.filter((claim) => claim.status === "submitted").length : null,
+        })}
+      />
     </div>
   );
 }

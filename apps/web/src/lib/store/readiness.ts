@@ -219,7 +219,6 @@ export const PROCESSORS: readonly { name: string; env: readonly string[] }[] = [
   { name: "Yellow Card", env: ["YELLOWCARD_API_KEY", "YELLOWCARD_API_SECRET"] },
   { name: "Anthropic", env: ["ANTHROPIC_API_KEY"] },
   { name: "Resend", env: ["RESEND_API_KEY"] },
-  { name: "MapTiler", env: ["NEXT_PUBLIC_MAPTILER_KEY"] },
 ];
 
 /** The processor names whose key is present, from a presence map. */

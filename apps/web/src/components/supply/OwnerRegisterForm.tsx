@@ -66,9 +66,7 @@ import { tapFailedOffline } from "@/lib/offline/tap-failed";
  * WHAT SCREEN TWO DOES NOT DRAW, SAID PLAINLY RATHER THAN QUIETLY OMITTED
  *
  * `GOVERNING-03` screen two draws a map with a draggable pin. This screen ships
- * without one and that is deliberate on two grounds. `NEXT_PUBLIC_MAPTILER_KEY`
- * is unset on this platform, so a map here would be a rectangle of nothing
- * where the render draws a city. And the exact building is a fact about a
+ * without one, deliberately. The exact building is a fact about a
  * PROPERTY, which the listing wizard already owns and already asks for; a pin
  * dropped during registration, before any property exists, would be a pin
  * attached to nobody. The state, the local government and the neighbourhood

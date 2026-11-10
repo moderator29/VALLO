@@ -9,7 +9,7 @@ import { CALENDAR_HORIZON_MONTHS, addMonths, lagosToday, openingMonth, parseMont
 import { siteUrl } from "@/lib/site";
 import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState } from "@/components/app/Screen";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
 import { RateCalendar } from "@/components/host/calendar/RateCalendar";
@@ -94,23 +94,33 @@ export default async function HostCalendarPage({
   const read = await readRateCalendar(accommodation.id, { from: month, to: month });
 
   return (
-    <HostShell fallback="/host" wide>
+    /* The frame's header carries the one way back (Grade 1 page frame); the
+       bar keeps the host's destinations. */
+    <HostShell fallback="/host" wide chromeBack={false} nav>
       <HostInnerNav active="calendar" {...hostInnerNavCopy(getDictionary(locale))} />
-      <PageHeader variant="large" back={false} title={words.title} subtitle={accommodation.name} />
-      {businesses.length > 1 ? (
-        <nav className="nf-rcal__places" aria-label={words.propertiesLabel}>
-          {businesses.map((business) => (
-            <Link
-              key={business.id}
-              href={`/host/calendar?business=${business.id}&month=${month}`}
-              className={`nf-chip${business.id === chosen.id ? " nf-chip--active" : ""}`}
-              aria-current={business.id === chosen.id ? "page" : undefined}
-            >
-              {business.name}
-            </Link>
-          ))}
-        </nav>
-      ) : null}
+      <PageFrame
+        title={words.title}
+        subtitle={accommodation.name}
+        fallback="/host"
+        width="wide"
+        tabs={
+          businesses.length > 1 ? (
+            <nav className="nf-rcal__places" aria-label={words.propertiesLabel}>
+              {businesses.map((business) => (
+                <Link
+                  key={business.id}
+                  href={`/host/calendar?business=${business.id}&month=${month}`}
+                  className={`nf-chip${business.id === chosen.id ? " nf-chip--active" : ""}`}
+                  aria-current={business.id === chosen.id ? "page" : undefined}
+                >
+                  {business.name}
+                </Link>
+              ))}
+            </nav>
+          ) : undefined
+        }
+      >
+      <div>
 
       {read.state === "unavailable" || read.state === "signed-out" ? (
         <p className="nf-body mt-block" role="alert">
@@ -147,6 +157,8 @@ export default async function HostCalendarPage({
           clearSelectionLabel={getDictionary(locale).experienceUi.clearSelection}
         />
       )}
+      </div>
+      </PageFrame>
     </HostShell>
   );
 }

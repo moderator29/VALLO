@@ -343,6 +343,7 @@ export const yo: Dictionary = withFallback({
       coverPhoto: "Àwòrán ìbòrí",
       coverPhotoSub: "Àwòrán tó wà lókè ojú-ìwé rẹ",
       memberSince: "Ọmọ ẹgbẹ́ láti",
+      addPhoto: "Fi fọ́tò rẹ kún",
       claimHandle: "Gba orúkọ ìdánimọ̀ rẹ",
       claimHandleNote:
         "Orúkọ ìdánimọ̀ ni àdírẹ́sì rẹ lórí Vallo. Gba ọ̀kan, ojú-ìwé yìí yóò ní àwòrán ìbòrí, ojú-ìwé gbangba àti ibi tí ohun tí o kọ yóò máa gbé.",
@@ -3239,7 +3240,8 @@ export const yo: Dictionary = withFallback({
       step1Title: "Yan àwọn ọjọ́ rẹ",
       step1Body: "Yan ọjọ́ ìwọlé àti ọjọ́ ìjáde lórí kàlẹ́ńdà ààyè.",
       step2Title: "Fọwọ́sí kí o sì san",
-      step2Body: "Ìsanwó ní naira nípasẹ̀ Paystack. A kì í gba owó ní kùtùkùtù.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `step2Body` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       step3Title: "Gbádùn ibùgbé rẹ",
       step3Body: "Àwọn àlàyé ìwọlé yóò dé síbí àti nípasẹ̀ ímeèlì.",
     },
@@ -3818,7 +3820,8 @@ export const yo: Dictionary = withFallback({
     recommended: "A dámọ̀ràn rẹ̀",
     continue: "Tẹ̀síwájú",
     saving: "À ń fi ìyàn rẹ pamọ́",
-    escrowOnlyTitle: "Sísan sínú àbò owó",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrowOnlyTitle` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     cardOnlyTitle: "Sísan pẹ̀lú káàdì",
     lockedNote: "Ìsanwó rẹ ti bẹ̀rẹ̀, nítorí náà ọ̀nà tí o fi ń sanwó kò ní yí padà.",
     notPayerNote: "Ayálégbé tàbí àlejò ni yóò yan bí a ṣe máa sanwó.",
@@ -3829,11 +3832,14 @@ export const yo: Dictionary = withFallback({
       closed: "Àdéhùn yìí ti parí, kò sí nǹkan láti san lórí rẹ̀.",
       already_paid: "A ti san èyí tán.",
       payment_started: "Ìsanwó kan ti ń lọ lọ́wọ́, nítorí náà ọ̀nà ìsanwó kò lè yí padà báyìí.",
-      sale_escrow_only: "Rírà ilé ni a máa ń san sínú àbò owó nìkan.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `sale_escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       card_only: "Káàdì nìkan ni a fi ń san èyí.",
-      escrow_only: "Àbò owó nìkan ni a fi ń san èyí.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escrow_only` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       no_rail: "Ìsanwó kò tíì ṣí fún èyí. A kò gba owó kankan.",
-      card_needs_review: "Sísan pẹ̀lú káàdì kò ṣí lórí àdéhùn yìí báyìí, nítorí ẹnìkan ní Vallo yóò kọ́kọ́ ní láti wò ó. Àbò owó ti ṣí.",
+      // NATIVE REVIEW (9 November 2026, money copy sweep): the sentence saying escrow is open was removed; the rest is the existing translation, unchanged.
+      card_needs_review: "Sísan pẹ̀lú káàdì kò ṣí lórí àdéhùn yìí báyìí, nítorí ẹnìkan ní Vallo yóò kọ́kọ́ ní láti wò ó.",
       unavailable: "A kò lè fi pamọ́ báyìí. A kò gba owó kankan; gbìyànjú lẹ́ẹ̀kan sí i láìpẹ́.",
     },
     accept: {
@@ -4610,7 +4616,8 @@ export const yo: Dictionary = withFallback({
       body: "Báńkì ẹni tó sanwó dá ìsanwó káàdì kan tí o gbà padà. Alábàáṣiṣẹ́ ìsanwó gbà á padà lọ́wọ́ Vallo, nítorí náà àkọọ́lẹ̀ rẹ jẹ {amount}.",
       bodyNoAmount: "Báńkì ẹni tó sanwó dá ìsanwó káàdì kan tí o gbà padà. Alábàáṣiṣẹ́ ìsanwó gbà á padà lọ́wọ́ Vallo, nítorí náà àkọọ́lẹ̀ rẹ jẹ owó náà.",
       meansTitle: "Ohun tó túmọ̀ sí",
-      means: "Níwọ̀n ìgbà tí owó náà bá ṣì wà lọ́rùn rẹ, Vallo yóò dá ìtúsílẹ̀ àwọn ìsanwó tí alábàáṣiṣẹ́pọ̀ wa tó ní ìwé-àṣẹ ń dì mú fún ọ dúró, yíyọ owó kúrò nínú Rewards Balance rẹ, àti sísan owó ìbéèrè Vallo Guarantee fún ọ. Ìsanwó káàdì ṣì ń dé àkọọ́lẹ̀ ìsanwó rẹ ní àkókò ìsanwó. Kò sí ohun mìíràn tó yí padà lórí àkọọ́lẹ̀ rẹ.",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `means` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
       nextTitle: "Ohun tó kàn",
       next: "Ẹgbẹ́ ìṣúná Vallo yóò kàn sí ọ láti yanjú rẹ̀. Nígbà tí a bá yanjú rẹ̀ tàbí tí a pa á dé, ìkéde yìí yóò lọ fúnra rẹ̀.",
       help: "Béèrè lọ́wọ́ ẹ̀ka ìrànlọ́wọ́ nípa rẹ̀",
@@ -4689,8 +4696,8 @@ export const yo: Dictionary = withFallback({
         blockConfirm:
           "Wọn kò ní lè fi ọ̀rọ̀ ránṣẹ́ sí ọ, rí ojú-ìwé rẹ tàbí rí àwọn ilé rẹ, ìwọ náà kò sì ní rí tiwọn. A kò ní sọ fún wọn. O lè yí èyí padà nínú Ètò, Ìpamọ́.",
         keepOpen: "Jẹ́ kí ìjíròrò náà ṣí sílẹ̀",
-        safetyRule:
-          "Fún ààbò rẹ, jẹ́ kí gbogbo ìjíròrò àti ìsanwó wà nínú Vallo. A kò dáàbò bo àdéhùn tí a ṣe lóde pèpéle yìí. Sanwó nìkan lẹ́yìn tí o bá ti yẹ ilé náà wò.",
+        /* NATIVE REVIEW (9 November 2026, money copy sweep): `safetyRule` was reworded in English and
+           falls back to the English until a native reader translates it. Never invent one. */
       },
       card: {
         rated: "Ìràwọ̀ {rating} nínú 5",

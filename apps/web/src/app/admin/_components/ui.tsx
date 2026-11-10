@@ -6,6 +6,10 @@ import { toneForStatus, type StatusTone } from "@/components/ui/StatusPill";
 import { ConsoleStatus } from "./chip-state";
 import { QUEUE_EMPTY_MARK, queueEmptyKind, type QueueEmptyKind } from "./queue-empty";
 import { fill, type AdminCommon } from "./copy";
+import { CopyValue } from "@/components/ui/CopyButton";
+
+/** Labels whose value people copy: a reference, id, email, case, ticket or number. */
+const COPYABLE_LABEL = /\b(ref|reference|id|email|case|ticket|number|code)\b/i;
 
 /**
  * The console's shared furniture.
@@ -267,7 +271,20 @@ export function adminUi(t: Dictionary, locale: Locale) {
     );
   }
 
-  /** The heading every queue page opens with. */
+  /**
+   * The waiting count as a brand badge, "3 waiting". A queue page hands it to
+   * the console's one header (`PageHead`, AD-01) as its `trail`, beside the
+   * title. Draws nothing at zero: an empty queue says so in its own panel.
+   */
+  function WaitingBadge({ count }: { count: number }) {
+    if (count <= 0) return null;
+    return <span className="nf-badge nf-badge--brand nf-numeric">{fill(c.waiting, { count })}</span>;
+  }
+
+  /**
+   * The heading the queue pages opened with before they moved onto `PageHead`
+   * (AD-01). Kept for the development previews still drawn with it; every live desk is on PageHead.
+   */
   function QueueHeader({
     title,
     lede,
@@ -284,11 +301,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
       <header className="nf-admin-head">
         <div className="flex flex-wrap items-center gap-inline">
           <h1 className="nf-admin-head__title">{title}</h1>
-          {typeof count === "number" && count > 0 && (
-            <span className="nf-badge nf-badge--brand nf-numeric">
-              {fill(c.waiting, { count })}
-            </span>
-          )}
+          {typeof count === "number" && <WaitingBadge count={count} />}
         </div>
         <p className="nf-admin-head__sub">{lede}</p>
       </header>
@@ -530,12 +543,17 @@ export function adminUi(t: Dictionary, locale: Locale) {
    * a `dl` (axe: definition-list, W12 F28).
    */
   function DetailRow({ label, value }: { label: string; value: ReactNode }) {
+    /* A reference, id, email, case or ticket number carries a copy control (founder,
+       10 November 2026, "easy copy" across the admin panel). */
+    const copyable = typeof value === "string" && value !== "" && COPYABLE_LABEL.test(label);
     return (
       <dl className="flex flex-col gap-inline-tight border-t border-[var(--nf-brand-edge-soft)] py-row sm:flex-row sm:gap-group">
         <dt className="nf-overline shrink-0 sm:w-48">{label}</dt>
         <dd className="nf-body min-w-0 break-words text-content">
           {value === null || value === "" ? (
             <span className="text-muted">{c.notGiven}</span>
+          ) : copyable ? (
+            <CopyValue value={value as string} label={`Copy ${label.toLowerCase()}`} message={`${label} copied`} />
           ) : (
             value
           )}
@@ -586,6 +604,7 @@ export function adminUi(t: Dictionary, locale: Locale) {
     statusLabel,
     columnLabel,
     StatusChip,
+    WaitingBadge,
     QueueHeader,
     Section,
     Stat,

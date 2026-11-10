@@ -13,7 +13,7 @@ import { NOT_CONFIGURED_MESSAGE, SIGNED_OUT_MESSAGE, resolveSession } from "../a
  *
  * While no code can be sent (`phone_confirmation` off, no SMS sender), the
  * number still has to be on file for what is opened in the member's own name:
- * the Payluk wallet reads `profiles.phone` (lib/money/member-wallet.ts
+ * the wallet reads `profiles.phone` (lib/money/member-wallet.ts
  * profileFor). This writes only the member's own row, through their own
  * session, so RLS (`profiles_update_own`) and the phone denylist trigger
  * decide exactly as they would for any profile edit. It never writes
@@ -27,7 +27,7 @@ export async function saveProfilePhone(raw: string): Promise<ActionResult<{ last
 
   /* A Nigerian number is kept in the local form the payments partner stores
      (`08031234567`), as before; a number from any other country in E.164
-     (`+447911123456`), which `paylukPhone` reads when a wallet is opened. */
+     (`+447911123456`), which `providerPhone` reads when a wallet is opened. */
   const text = typeof raw === "string" ? raw : "";
   const local = normalisePhone(text);
   const any = local ? null : normaliseAnyPhone(text);

@@ -2,7 +2,7 @@
  * Send for review, mounted in Chromium with the product's stylesheets and the
  * server actions staged (round 5, a lister publishing):
  *
- *   - one continuous space: the member card on the last step is the SAME
+ *   - one continuous space: the member card on the check page is the SAME
  *     element after the server accepts; the step's controls give way to the
  *     chain beneath it; no sheet, no other screen;
  *   - nothing turns until the server answers ok: while the action is pending
@@ -30,7 +30,7 @@ vi.setConfig({ testTimeout: BROWSER_TEST_TIMEOUT });
 beforeAll(warmBrowser);
 afterAll(closeBrowser);
 
-const CSS = productCss("app/css/inner-m.css", "app/css/flow-m.css", "app/css/catalogue.css", "app/css/lister-publish.css");
+const CSS = productCss("app/css/inner-m.css", "app/css/flow-m.css", "app/css/grade1.css", "app/css/catalogue.css", "app/css/lister-publish.css", "app/agent/list/steps/listing-steps.css");
 
 /* Every vibration the page asks for, in order (Android web's channel). */
 const BUZZ = `Object.defineProperty(navigator, "vibrate", { configurable: true, value: (p) => { (window.__buzz = window.__buzz || []).push(p); return true; } });`;
@@ -69,7 +69,7 @@ const ENTRY = `
       copy={t.agentListings} reference={t.listingReference} moveInCopy={t.moveIn}
       compoundCopy={t.shape.compound} serviceCopy={t.shape.service} unitCopy={t.shape.unit} floodCopy={t.shape.neighbours}
       locale="en" userId={null} states={STATE_CODES.map((code) => ({ code, name: code }))} amenities={AMENITY_CHOICES}
-      initial={DRAFT} canPersist startAt={7} initialFeePolicy={null}
+      initial={DRAFT} canPersist startAt="check" initialFeePolicy={null}
     />,
   );
 `;
@@ -132,7 +132,9 @@ describe.runIf(hasBrowser)("Send for review becomes the card in review, in place
       expect(await page.evaluate(() => document.querySelector('[data-testid="member-card"]') === (window as unknown as { __card: Element }).__card)).toBe(true);
       expect(await status(page)).toBe("Submitted");
       expect(await page.locator('[data-testid="listing-send"]').count()).toBe(0);
-      expect(await page.locator('[role="dialog"]').count()).toBe(0);
+      /* No sheet: the only dialog is the step frame itself (the wizard is a
+         full-screen StepFrame since P1.1). */
+      expect(await page.locator('[role="dialog"]:not([data-testid="listing-steps"])').count()).toBe(0);
       /* The status words are the workspace's; the state is said in words too. */
       expect(await page.locator(".nf-lw-chain__name").allTextContents()).toEqual(["Submitted, Done", "Under review, Not yet", "Live, Not yet"]);
       const chain = await page.locator(".nf-lw-chain__row").allInnerTexts();

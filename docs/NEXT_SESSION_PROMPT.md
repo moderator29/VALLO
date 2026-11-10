@@ -19,7 +19,7 @@ Written 27 October 2026 for the next session, at the founder's request. Read `HA
 6. **Push to the working branch, never to `main`.** Commit each finished, double-audited area and push it to the branch this session names (the founder's instruction, 27 October 2026). Do not merge to `main` and do not open a pull request; Seyi decides when to merge. Because nothing reaches the live site from the branch, verify with a production build and Chromium screenshots instead, and say that the live site is unchanged until he merges.
 7. **No em dashes** anywhere. Gates (`apps/web/scripts/check-no-em-dash.mjs`, `check-valuation-words.mjs`, `check-css-tokens.mjs`, `scripts/check-migrations.mjs`) and `npx tsc --noEmit` must pass. Known baseline tsc errors only in `components/calls/media/session.ts` and `.next/types/validator.ts`.
 8. **Never print, log or commit a credential.** Credentials pasted in chat earlier must be rotated by Seyi.
-9. **Sandbox limits.** No real device, and MapTiler, Payluk, LiveKit and Termii are unreachable from here. Write code and tests to the best of your knowledge, and list what only a device can prove.
+9. **Sandbox limits.** No real device, and MapTiler, the retired provider, LiveKit and Termii are unreachable from here. Write code and tests to the best of your knowledge, and list what only a device can prove.
 
 ## 1. What is already done and live (do not redo)
 
@@ -84,7 +84,7 @@ Audit every container, card, button, form and sheet for alignment, spacing, hit 
 ### 3.1 Phone number verification and the wallet
 
 - Build the front end for number verification to industry standard: country code picker (Nigeria first), clean number field, a six-digit code screen with auto-advance, paste and SMS autofill (`autocomplete="one-time-code"`), a resend timer, clear errors, success state. The logic lives in `apps/web/src/lib/phone-otp/` (`core.ts`, `actions.ts`, `gate.ts`, `send.ts`, `termii.ts`); read `docs/PHONE_SIGNIN.md` first.
-- **When a number is verified, the Payluk wallet must be provisioned automatically** (no extra button), and the wallet screen must show a real balance and its actions cleanly. Stop showing "verify your number" once verified. Remove options that should be backend-only. Do not fabricate balances or references. Read `docs/MONEY_ARCHITECTURE.md` and the money code under `src/lib/money`, `src/lib/payments`, `src/lib/payouts` first. Payluk is unreachable from the sandbox, so write the trigger idempotently, with a retry and a visible "setting up your wallet" state, and list what must be tested live.
+- **When a number is verified, the the retired provider wallet must be provisioned automatically** (no extra button), and the wallet screen must show a real balance and its actions cleanly. Stop showing "verify your number" once verified. Remove options that should be backend-only. Do not fabricate balances or references. Read `docs/MONEY_ARCHITECTURE.md` and the money code under `src/lib/money`, `src/lib/payments`, `src/lib/payouts` first. the retired provider is unreachable from the sandbox, so write the trigger idempotently, with a retry and a visible "setting up your wallet" state, and list what must be tested live.
 - Leave for later (founder: "what should be left"): sub-accounts, referral top-up of the balance, and the escrow flows. Do not build these, but do not break them.
 
 ### 3.2 Referral, end to end

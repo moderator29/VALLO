@@ -2,7 +2,7 @@ import { countOf, getDictionary, type Locale } from "@vallo/i18n";
 import type { HostReviewsRead } from "@/lib/host/reviews";
 import { RATING_TREND_MIN, averageRating } from "@/lib/host/review-contest";
 import { EmptyState } from "@/components/app/Screen";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageFrame } from "@/components/app/PageFrame";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 import { HostReviewCard } from "./HostReviewCard";
 import "@/app/host/host-desk.css";
@@ -25,21 +25,20 @@ export function HostReviewsView({
   const counts = [5, 4, 3, 2, 1].map((stars) => ({ stars, count: visible.filter((r) => r.rating === stars).length }));
 
   return (
-    <>
-      <PageHeader
-        variant="large"
-        back={false}
-        title={copy.screens.reviews}
-        subtitle={
-          read.state !== "ok"
-            ? words.subtitle
-            : reviews.length === 0
-              ? words.none
-              : countOf(reviews.length, "reviewsOfYourStays", locale)
-        }
-      />
+    <PageFrame
+      fallback="/host"
+      width="wide"
+      title={copy.screens.reviews}
+      subtitle={
+        read.state !== "ok"
+          ? words.subtitle
+          : reviews.length === 0
+            ? words.none
+            : countOf(reviews.length, "reviewsOfYourStays", locale)
+      }
+    >
 
-      <div className="mt-md grid gap-md">
+      <div className="grid gap-md">
         {read.state === "not-ready" ? (
           <EmptyState
             icon="reviews"
@@ -89,6 +88,6 @@ export function HostReviewsView({
           </>
         )}
       </div>
-    </>
+    </PageFrame>
   );
 }

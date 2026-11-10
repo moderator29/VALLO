@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 
-import { readMyActiveGroups, readRoomListing } from "@/lib/features/roommates/queries";
+import { readMyActiveGroups, readMyIdentityState, readMyListingReviews, readRoomListing } from "@/lib/features/roommates/queries";
 import { requestNow } from "@/lib/format/when";
 
 import { RoomListingScreen } from "./_parts/ListingScreen";
@@ -22,6 +22,6 @@ export default async function RoomListingPage({ params, searchParams }: Props) {
   const { id } = await params;
   /* `?viewing=1` (the hub's link) opens the viewing request on arrival. */
   const openViewing = (await searchParams).viewing === "1";
-  const [read, groups] = await Promise.all([readRoomListing(id), readMyActiveGroups()]);
-  return <RoomListingScreen read={read} groups={groups} t={copy} now={requestNow()} openViewing={openViewing} />;
+  const [read, groups, reviews, identity] = await Promise.all([readRoomListing(id), readMyActiveGroups(), readMyListingReviews([id]), readMyIdentityState()]);
+  return <RoomListingScreen read={read} groups={groups} t={copy} now={requestNow()} openViewing={openViewing} review={reviews[id]} identity={identity} />;
 }

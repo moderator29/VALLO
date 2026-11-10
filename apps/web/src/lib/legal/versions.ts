@@ -31,7 +31,12 @@
    seated restaurant table) and the Host Agreement applies to hosts. */
 /* 2026-11-03: section 7 says what verifying involves, who reviews it, the
    photo holding the ID a reviewer may ask for, and what false documents lead to. */
-export const TERMS_VERSION = "2026-11-03";
+/* 2026-11-09 (founder): the Vallo Guarantee is retired. Section 14 is now
+   "What Vallo does, and what it does not do"; section 4 names Paystack as the
+   processor and drops the Guarantee reserve; section 7 no longer points at
+   Guarantee claims. Existing members are shown the change once
+   (`lib/legal/terms-update.ts`). */
+export const TERMS_VERSION = "2026-11-09";
 
 /**
  * The privacy notice moves with them today and has its own constant anyway,
@@ -46,9 +51,15 @@ export const TERMS_VERSION = "2026-11-03";
 /* 2026-11-03: verification described as it now runs (ID, selfie, proof of
    address, the reviewer-recorded name, the bank name check, a photo holding
    the ID on request, decided by a person); the selfie's explicit consent; the
-   phone-code senders (Termii, Twilio) and the wallet provider (Payluk) named;
+   phone-code senders (Termii, Twilio) and the wallet provider named;
    who can open verification documents and how. */
-export const PRIVACY_VERSION = "2026-11-03";
+/* 2026-11-09: the Guarantee reserve leg is gone from the payment data and the
+   processor list; Guarantee claims are described as made before it retired. */
+/* 2026-11-10 (NOT a version bump, flagged for counsel): the retired protected-payment
+   provider is no longer named in the processor list; the switched-off
+   replacement sends nothing and is not named. See
+   docs/handoff/LEGAL_PAGES_CHANGES.md. */
+export const PRIVACY_VERSION = "2026-11-09";
 
 /**
  * The Host Agreement (`lib/legal/host-agreement.tsx`, page /host-agreement),
@@ -80,3 +91,33 @@ export const ACCEPTED_AT_SIGNUP = [
 ];
 
 export type LegalDocument = (typeof ACCEPTED_AT_SIGNUP)[number]["document"];
+
+/**
+ * THE DATE EACH DOCUMENT SHOWS AS "LAST UPDATED", read from its version, so a
+ * page can never again show a date older than the text under it (found 9
+ * November 2026: Terms and Privacy both said 25 September after two changes).
+ * The Disclaimer forms part of the Terms and moves with them.
+ */
+/*
+ * 10 NOVEMBER 2026 (founder rulings, flagged for counsel): the fee statement,
+ * rent payment held by a licensed bank (section 4A, not open yet), the
+ * under-18 closure, the retention table and the Cookies page changed the text.
+ * The DISPLAYED date moves so a page never shows a date older than its text;
+ * `TERMS_VERSION` and `PRIVACY_VERSION` (what a person accepted) are NOT bumped,
+ * because a bump re-shows the "We have updated our Terms" sheet, whose words
+ * are about the retired Guarantee (`TermsUpdateNotice`). Bumping both, and
+ * rewriting that sheet, is the founder's call once counsel has read
+ * docs/handoff/COUNSEL_BRIEF.md.
+ */
+export const LEGAL_TEXT_UPDATED_ISO = "2026-11-10";
+export const TERMS_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+export const PRIVACY_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+export const COOKIES_UPDATED_ISO = LEGAL_TEXT_UPDATED_ISO;
+export const DISCLAIMER_UPDATED_ISO = TERMS_VERSION;
+
+const LONG_DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Lagos" });
+/** "9 November 2026" from "2026-11-09". */
+export function longDate(iso: string): string {
+  const d = new Date(`${iso.slice(0, 10)}T12:00:00Z`);
+  return Number.isNaN(d.getTime()) ? iso : LONG_DATE.format(d);
+}

@@ -3,7 +3,8 @@ import { countOf, getDictionary, type Dictionary, type Locale } from "@vallo/i18
 import type { MyAccommodation, MyBusiness } from "@/lib/host/queries";
 import type { BusinessPhoto } from "@/lib/stays/business-photos";
 import type { AccommodationPhoto } from "@/lib/stays/accommodation-photos";
-import { EmptyState, TYPE } from "@/components/app/Screen";
+import { EmptyState } from "@/components/app/Screen";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ButtonLink } from "@/components/ui/Button";
 import { BusinessPhotoManager } from "@/components/host/BusinessPhotoManager";
 import { AccommodationPhotoManager } from "@/components/host/AccommodationPhotoManager";
@@ -39,18 +40,22 @@ export function HostPhotosBody({
   /** The reader's language, for the count; English in the previews. */
   locale?: Locale;
 }) {
+  /* Every state sits under the Grade 1 page frame: the large title with
+     Back, so the page always has its heading and its one way back. */
   if (!chosen) {
     return (
-      <EmptyState
-        icon="camera"
-        title={copy.photos.noVenueTitle}
-        body={copy.photos.noVenueBody}
-        action={
-          <ButtonLink href="/host/apply" variant="primary" size="lg">
-            {copy.doors.startApplication}
-          </ButtonLink>
-        }
-      />
+      <PageFrame title={words.screens.photos} fallback="/host">
+        <EmptyState
+          icon="camera"
+          title={copy.photos.noVenueTitle}
+          body={copy.photos.noVenueBody}
+          action={
+            <ButtonLink href="/host/apply" variant="primary" size="lg">
+              {copy.doors.startApplication}
+            </ButtonLink>
+          }
+        />
+      </PageFrame>
     );
   }
 
@@ -61,34 +66,30 @@ export function HostPhotosBody({
   const subjectName = accommodation ? accommodation.name : chosen.name;
 
   return (
-    <>
-      <div className="nf-agent-head">
-        <div>
-          <h1 className="nf-agent-head__title">{words.screens.photos}</h1>
-          <p className={`mt-row ${TYPE.bodyLg}`}>
-            {onRecord === 0 ? words.photosNone.replace("{name}", subjectName) : `${subjectName}${countOf(onRecord, "photographsOnRecord", locale)}`}
-          </p>
-        </div>
-      </div>
-
-      {/* Only drawn where there is a choice to make. One venue is the common
-          case and a picker above it would be furniture. */}
-      {businesses.length > 1 && (
-        <nav className="mt-block flex flex-wrap gap-inline" aria-label={copy.photos.venuesLabel}>
-          {businesses.map((business) => (
-            <Link
-              key={business.id}
-              href={`/host/photos?business=${business.id}`}
-              className={`nf-chip${business.id === chosen.id ? " nf-chip--active" : ""}`}
-              aria-current={business.id === chosen.id ? "page" : undefined}
-            >
-              {business.name}
-            </Link>
-          ))}
-        </nav>
-      )}
-
-      <div className="mt-block">
+    <PageFrame
+      title={words.screens.photos}
+      subtitle={onRecord === 0 ? words.photosNone.replace("{name}", subjectName) : `${subjectName}${countOf(onRecord, "photographsOnRecord", locale)}`}
+      fallback="/host"
+      /* Only drawn where there is a choice to make. One venue is the common
+         case and a picker above it would be furniture. */
+      tabs={
+        businesses.length > 1 ? (
+          <nav className="flex flex-wrap gap-inline" aria-label={copy.photos.venuesLabel}>
+            {businesses.map((business) => (
+              <Link
+                key={business.id}
+                href={`/host/photos?business=${business.id}`}
+                className={`nf-chip${business.id === chosen.id ? " nf-chip--active" : ""}`}
+                aria-current={business.id === chosen.id ? "page" : undefined}
+              >
+                {business.name}
+              </Link>
+            ))}
+          </nav>
+        ) : undefined
+      }
+    >
+      <div>
         {accommodation ? (
           <AccommodationPhotoManager
             accommodationId={accommodation.id}
@@ -117,6 +118,6 @@ export function HostPhotosBody({
           />
         )}
       </div>
-    </>
+    </PageFrame>
   );
 }

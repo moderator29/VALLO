@@ -11,6 +11,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { withNext } from "@/lib/auth/next-link";
 import { HistoryEmpty, HistoryUnavailable } from "@/components/app/money-history/HistoryStates";
 import { ReceiptVault } from "@/components/money/ReceiptVault";
+import { readMyProtectedPayments } from "@/lib/money/protected-read";
 
 export const metadata: Metadata = { title: "Receipts", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -36,7 +37,8 @@ export default async function ReceiptsPage({
   const before = parseBefore(params.before);
   const kind = parseVaultKind(params.kind);
   const query = parseVaultQuery(params.q);
-  const read = await readMyPayments(before);
+  /* Protected payments (BUILD 7.4): empty while the rail is off, which reads nothing. */
+  const [read, protectedRows] = await Promise.all([readMyPayments(before), readMyProtectedPayments()]);
 
   return (
     <main className="nf-page nf-md">
@@ -56,7 +58,7 @@ export default async function ReceiptsPage({
       ) : (
         <div className="mt-inline space-y-block">
           <p className={TYPE.body}>{RECEIPTS_LEDE}</p>
-          {read.entries.length === 0 && !before ? (
+          {read.entries.length === 0 && !before && protectedRows.length === 0 ? (
             <HistoryEmpty title={RECEIPTS_EMPTY_TITLE} body={RECEIPTS_EMPTY_BODY} next={{ href: "/payments", label: "See your payments" }} />
           ) : (
             <ReceiptVault
@@ -66,6 +68,7 @@ export default async function ReceiptsPage({
               query={query}
               basePath="/receipts"
               locale={locale}
+              protectedReceipts={protectedRows}
               counts={
                 read.nextBefore || before
                   ? undefined

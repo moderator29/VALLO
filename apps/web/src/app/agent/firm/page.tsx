@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { readFirmDesk, readFirmRouting, readFirmTeam, readMyRoutingFirms } from "@/lib/firm/queries";
 import { publicAreaName } from "@/lib/share/public-text";
@@ -34,17 +35,19 @@ export default async function FirmDeskPage({ searchParams }: { searchParams: Pro
 
   if (firms === null) {
     return (
-      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-        <h1 className="nf-h1">{copy.title}</h1>
-        <Unreachable noun="firm desk" icon="chat-duo" action={{ label: t.agent.nav.dashboard, href: "/agent/dashboard" }} />
+      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+        <PageFrame title={copy.title} fallback="/agent/dashboard" width="wide">
+          <Unreachable noun="firm desk" icon="chat-duo" action={{ label: t.agent.nav.dashboard, href: "/agent/dashboard" }} />
+        </PageFrame>
       </AgentShell>
     );
   }
   if (!firm) {
     return (
-      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-        <h1 className="nf-h1">{copy.title}</h1>
-        <p className="mt-inline nf-body text-[var(--nf-content-secondary)]">{copy.notRouter}</p>
+      <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+        <PageFrame title={copy.title} fallback="/agent/dashboard" width="wide">
+          <p className="nf-body text-[var(--nf-content-secondary)]">{copy.notRouter}</p>
+        </PageFrame>
       </AgentShell>
     );
   }
@@ -59,17 +62,21 @@ export default async function FirmDeskPage({ searchParams }: { searchParams: Pro
   const areas = [...new Set((listings ?? []).map((l) => publicAreaName(l.area)).filter((a): a is string => a !== null))].sort();
 
   return (
-    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile}>
-      <div className="mb-block">
-        <h1 className="nf-h1">
-          {copy.title}: {firm.firmName}
-        </h1>
-        <p className="mt-3xs text-[var(--nf-content-secondary)]">{copy.lede}</p>
-        {firms && firms.length > 1 && (
-          <FirmPicker firms={firms} current={firm.firmId} label={copy.pickFirm} />
-        )}
-      </div>
+    <AgentShell t={t} locale={locale} active="/agent/listings" profile={profile} chromeBack={false}>
+      <PageFrame
+        title={`${copy.title}: ${firm.firmName}`}
+        subtitle={copy.lede}
+        fallback="/agent/dashboard"
+        width="wide"
+        /* A principal of more than one firm picks it here, under the title. */
+        {...(firms.length > 1
+          ? { tabs: <FirmPicker firms={firms} current={firm.firmId} label={copy.pickFirm} /> }
+          : {})}
+      >
+      <div>
       <FirmDesk firmId={firm.firmId} listings={listings} team={team} routing={routing} areas={areas} copy={copy} />
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

@@ -12,6 +12,7 @@ import { withNext } from "@/lib/auth/next-link";
 import { HistoryUnavailable } from "@/components/app/money-history/HistoryStates";
 import { PaymentsView } from "@/components/money/PaymentsView";
 import { readMyBalances } from "@/lib/money/partner-reads";
+import { readMyProtectedPayments } from "@/lib/money/protected-read";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -46,7 +47,8 @@ export default async function PaymentsPage({
   const words = getDictionary(locale).experienceMoney.payments;
   const params = await searchParams;
   const before = parseBefore(params.before);
-  const [read, balances] = await Promise.all([readMyPayments(before), readMyBalances()]);
+  /* Protected payments (BUILD 7.5): empty while the rail is off, which reads nothing. */
+  const [read, balances, protectedRows] = await Promise.all([readMyPayments(before), readMyBalances(), readMyProtectedPayments()]);
 
   return (
     <main className="nf-page nf-md nf-history">
@@ -84,6 +86,7 @@ export default async function PaymentsPage({
           balances={balances}
           locale={locale}
           show={typeof params.show === "string" ? params.show : null}
+          protectedPayments={protectedRows}
         />
         </>
       )}

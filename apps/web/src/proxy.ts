@@ -166,6 +166,8 @@ const PUBLIC_SEGMENTS = new Set([
   // `/ai/permissions`, `/ai/security`): read before the assistant is turned on.
   "ai",
   "cancellations",
+  // Cookies and device storage (10 November 2026): a legal page like the others.
+  "cookies",
   // The disclaimer is a legal page like the other four and was gated by
   // omission: a stranger following a footer link got a sign-in wall.
   "disclaimer",
@@ -251,7 +253,11 @@ const PUBLIC_SEGMENTS = new Set([
  * chunks, the brand and icon directories, the fonts, the PWA assets,
  * `/.well-known/`, `/sw.js` and `/manifest.webmanifest`.
  */
-const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-image.jpg"]);
+/* `/legal` (9 November 2026): the legal index, every policy as a card, open to a
+   visitor with no account, who must be able to read every policy before
+   signing up. Only the bare index: the in-app copies under `/legal/*` stay
+   signed in, and their public twins are `/terms`, `/privacy`, `/disclaimer`. */
+const PUBLIC_PATHS = new Set(["/", "/robots.txt", "/sitemap.xml", "/opengraph-image.jpg", "/legal"]);
 
 /**
  * Open below a closed first segment, matched on the WHOLE path (Vallo
@@ -365,6 +371,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/calendar/feed",
   "/api/build",
   "/api/client-error",
+  /* The cookie sheet's words, opened from the footer by a visitor with no account. */
+  "/api/cookie-copy",
   "/api/calls/webhook",
   "/api/cron/account-purge",
   "/api/cron/calls-sweep",
@@ -407,8 +415,8 @@ const PUBLIC_API_PATHS = new Set([
   "/api/push/key",
   "/api/paystack/reconcile",
   "/api/paystack/webhook",
-  /* Part B phase 15: Payluk webhooks, behind the HMAC-SHA512 signature. */
-  "/api/payluk/webhook",
+  /* The protected rail's webhooks (EscrowPay, built switched off), behind the provider's signature. */
+  "/api/escrowpay/webhook",
   /* V-98: the home-screen widget, behind its device-bound token. */
   "/api/plans/next",
   "/api/push/drain",

@@ -20,7 +20,6 @@ import { VerificationDesk } from "@/app/admin/kyc/VerificationDesk";
 import { Pager } from "@/app/admin/_review/parts";
 import type { QueueRow } from "@/app/admin/listings/rows";
 import { listingStatusWord } from "@/app/admin/listings/tabs";
-import { tileProvider } from "@/lib/maps/tiles";
 import "@/app/admin/_review/review.css";
 
 export const dynamic = "force-dynamic";
@@ -216,7 +215,6 @@ export default async function Harness({
       />
     );
   } else if (desk === "review") {
-    const dark = tileProvider("dark");
       const listing = fail
       ? LISTING
       : {
@@ -257,7 +255,6 @@ export default async function Harness({
         sqm={t.catalogue.card.sqm}
         statusLabel={(s: string) => listingStatusWord(s, ui.statusLabel)}
         backHref="#"
-        tiles={{ dark: dark.url, credit: dark.credits.map((c) => c.label).join(", ") }}
         keepers={{ moveIn: t.moveIn, purchase: t.purchase }}
         actions={<ReviewActionBar listingId={LISTING.id} status="SUBMITTED" nextHref={null} queueHref="#" />}
       />

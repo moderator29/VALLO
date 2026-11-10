@@ -3,6 +3,7 @@ import { countOf, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getInventoryDriftAlerts, getRiskAlerts } from "@/lib/admin/queries";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import {
   queueNoMatch,
@@ -59,7 +60,7 @@ export default async function AdminAlertsPage({
   if (alerts.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={copy.title} lede={copy.lede} />
+        <PageHead title={copy.title} lede={copy.lede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -78,7 +79,7 @@ export default async function AdminAlertsPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={copy.title} lede={copy.lede} count={open.length} />
+      <PageHead title={copy.title} lede={copy.lede} trail={<ui.WaitingBadge count={open.length} />} />
 
       {/*
         INVENTORY DRIFT, FIRST AND WHATEVER THE QUEUE IS NARROWED TO.

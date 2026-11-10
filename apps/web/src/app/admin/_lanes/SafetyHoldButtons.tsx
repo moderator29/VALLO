@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { decideSafetyHold } from "@/lib/admin/safety-holds";
 import { Button } from "@/components/ui/Button";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
@@ -17,13 +18,20 @@ export function SafetyHoldButtons({
   holdId: string;
   copy: { working: string; clear: string; extend: string };
 }) {
+  const router = useRouter();
   const [pending, startTransition] = useSafeTransition();
 
   function act(action: "clear" | "extend") {
     startTransition(async () => {
       try {
         const result = await decideSafetyHold({ holdId, action });
-        if (!result.ok) banner.error(result.error, { retry: () => act(action) });
+        if (!result.ok) {
+          banner.error(result.error, { retry: () => act(action) });
+          return;
+        }
+        /* No Undo: a cleared safety hold is a decision on record, not a toggle. */
+        banner.success(action === "clear" ? "Hold cleared. It leaves the holds list." : "Hold extended. It stays on the holds list.");
+        router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
       }

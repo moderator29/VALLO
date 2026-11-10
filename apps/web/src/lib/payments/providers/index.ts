@@ -1,32 +1,29 @@
 import "server-only";
 
 import {
-  can,
   requireCapability,
   type AnyFiatProvider,
   type ChargeSplit,
   type CollectInput,
   type FiatProviderId,
 } from "../provider";
-import { providerEnabled } from "./kill-switch";
 import { paystackProvider } from "./paystack";
-import { PAYLUK_ESCROW_FLOWS_BUILT, paylukProvider } from "./payluk";
+import { escrowPayConfig } from "./escrowpay/config";
+import { protectedPaySwitchOn } from "../../money/protected-pay-switch";
 
 export { assertProviderEnabled, FiatProviderDisabled, providerEnabled } from "./kill-switch";
 
 /**
  * Call sites take a provider from here, as `AnyFiatProvider`, and ask `can()`
  * for anything beyond the core, rather than importing an adapter directly and
- * bypassing the capability check. Payluk is registered whether or not a key
- * is present: `isConfigured()` says which, and every member_wallet method
- * answers `not_configured` without one.
+ * bypassing the capability check. Paystack is the only fiat adapter that
+ * takes payments through this seam; the protected rail has its own server
+ * module (`lib/money/protected-rail.ts`).
  */
 export function fiatProvider(id: FiatProviderId): AnyFiatProvider | null {
   switch (id) {
     case "paystack":
       return paystackProvider;
-    case "payluk":
-      return paylukProvider;
   }
 }
 
@@ -36,23 +33,19 @@ export function paystackSeam(): AnyFiatProvider {
 }
 
 /**
- * True only when an escrow payment could genuinely be held: a registered
- * provider that declares `hold_in_escrow`, the escrow flows themselves built
- * (phases 11 and 12, `PAYLUK_ESCROW_FLOWS_BUILT`, true from D77), a key
- * present, and its switch on. In practice, from D77: the key and
- * `payments_payluk_on`, nothing else (PAYMENTS_KILL_PAYLUK=1 stops it in an outage).
+ * True only when a protected payment could genuinely be held: the protected
+ * rail's provider key is configured for this deployment and the founder's
+ * protected-pay switch is on (`protectedPaySwitchOn`, fail closed; the
+ * environment stop needs no database). Any error is false.
  */
 export async function escrowRailLive(): Promise<boolean> {
-  const p = fiatProvider("payluk");
-  if (!p || !can(p, "hold_in_escrow") || !PAYLUK_ESCROW_FLOWS_BUILT || !p.isConfigured()) return false;
-  return providerEnabled("payluk");
+  if (escrowPayConfig(process.env) === null) return false;
+  return protectedPaySwitchOn();
 }
 
-/** The member balance rail: the adapter registered, a key present, and the founder's switch on. */
+/** The member balance rail has no provider registered: it is not configured. */
 export async function memberWalletRailLive(): Promise<"live" | "not_configured" | "switched_off"> {
-  const p = fiatProvider("payluk");
-  if (!p || !can(p, "member_wallet") || !p.isConfigured()) return "not_configured";
-  return (await providerEnabled("payluk")) ? "live" : "switched_off";
+  return "not_configured";
 }
 
 /** The provider's full record of a reference. Read-only, so never gated by the kill switch. */

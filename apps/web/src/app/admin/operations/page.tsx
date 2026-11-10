@@ -10,6 +10,8 @@ import { adminReader } from "@/lib/admin/reads/shared";
 import { authOrigin } from "@/lib/site";
 import { runStoreChecks } from "@/lib/store/run";
 import { OperationsView, type OpsTab } from "./OperationsView";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { operationsContext } from "@/lib/admin/copilot/contexts/operations";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +97,19 @@ export default async function AdminOperationsPage({
         inspections={inspections && inspections.state === "ok" ? inspections.data : null}
         store={store}
         ops={ops}
+      />
+      <DeskCopilot
+        scope="operations"
+        deskName="Operations"
+        context={operationsContext(
+          {
+            tab,
+            openAlertTimes:
+              alerts.state === "ok" ? alerts.data.rows.filter((row) => row.status === "open").map((row) => row.createdAt) : null,
+            alertsCapped: alerts.state === "ok" && alerts.data.full,
+          },
+          now,
+        )}
       />
     </>
   );

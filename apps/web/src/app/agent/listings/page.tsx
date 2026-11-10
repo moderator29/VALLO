@@ -5,6 +5,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import {
   agentProfileFrom,
   getAgentContext,
@@ -12,6 +13,8 @@ import {
 } from "@/lib/agent/listings-queries";
 import { ListingPitch } from "../list/ListingPitch";
 import { ListingsWorkspace } from "./ListingsWorkspace";
+import { IdentityNotice } from "./IdentityNotice";
+import { identityGateApplies, listerIdentityStatus } from "@/lib/verification/lister-identity";
 import { ButtonLink } from "@/components/ui/Button";
 import { SuccessFromFlag } from "@/components/ui/SuccessFromFlag";
 import { readDone } from "@/lib/ui/success-moments";
@@ -61,6 +64,7 @@ export default async function Page({
   }
 
   const listings = await readMyListings(context.supabase, context.agent.id);
+  const identity = (await identityGateApplies(context.user.id)) ? await listerIdentityStatus(context.user.id) : null;
   if (listings === null) {
     return (
       <AgentShell
@@ -101,6 +105,8 @@ export default async function Page({
       locale={locale}
       active="/agent/listings"
       profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
     >
       <SuccessFromFlag
         copy={t.success}
@@ -111,22 +117,27 @@ export default async function Page({
         /* A notice read later is not the moment it happened in. */
         haptic={done === "listing-submitted" ? undefined : false}
       />
-      <div className="mb-lg flex flex-wrap items-end justify-between gap-md">
-        <div>
-          <h1 className="nf-h1">{t.agentListings.workspace.title}</h1>
-          <p className="mt-2xs text-[var(--nf-content-secondary)]">
-            {t.agentListings.workspace.lede}
-          </p>
-        </div>
-        <ButtonLink href="/agent/list" variant="primary">
-          {t.agentListings.workspace.start}
-        </ButtonLink>
-        {routingFirms && routingFirms.length > 0 && (
-          <ButtonLink href="/agent/firm" variant="secondary">
-            {t.frontDoor.firm.title}
-          </ButtonLink>
-        )}
-      </div>
+      <PageFrame
+        title={t.agentListings.workspace.title}
+        subtitle={t.agentListings.workspace.lede}
+        fallback="/agent/dashboard"
+        width="wide"
+        actions={
+          <>
+            <ButtonLink href="/agent/list" variant="primary">
+              {t.agentListings.workspace.start}
+            </ButtonLink>
+            {routingFirms && routingFirms.length > 0 && (
+              <ButtonLink href="/agent/firm" variant="secondary">
+                {t.frontDoor.firm.title}
+              </ButtonLink>
+            )}
+          </>
+        }
+      >
+      <div>
+
+      {identity ? <IdentityNotice status={identity.status} /> : null}
 
       {/* The search that used to sit in the workspace bar, on the one screen
           it ever searched. A real GET form, so `?q=` narrows server side. */}
@@ -142,6 +153,7 @@ export default async function Page({
       </form>
 
       <ListingsWorkspace
+        identityPending={identity !== null && identity.status !== "approved"}
         t={t.agentListings}
         reference={t.listingReference}
         listings={listings}
@@ -164,6 +176,8 @@ export default async function Page({
         }}
         liveArrivalId={arrival === "listingLive" ? namedId : undefined}
       />
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

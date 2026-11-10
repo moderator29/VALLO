@@ -396,9 +396,9 @@ page.on("console", (message) => {
  * `/search` is the one that matters most. It dynamically imports Leaflet, which
  * is exactly the case `strict-dynamic` exists to permit and exactly the case a
  * badly written policy breaks: the nonced bootstrap injects the chunk, and if
- * the browser does not trust it the map never draws. It also fetches raster
- * tiles from a third party, which is the only cross-origin image load on the
- * platform, and it is the only surface that asks for geolocation.
+ * the browser does not trust it the map never draws. It also fetches its
+ * vector tiles, style and glyphs from a third party (OpenFreeMap, in
+ * `connect-src`), and it is the only surface that asks for geolocation.
  *
  * This sandbox has no Supabase keys, so the middleware is a pass through and
  * these product routes render their signed-out or unconfigured states rather
@@ -560,17 +560,17 @@ try {
    * page where the map never opened also blocks nothing. The two things this
    * policy could plausibly break are both here and neither is visible from a
    * violation count: `strict-dynamic` has to let the nonced bootstrap import
-   * the Leaflet chunk, and `img-src` has to name the tile host. If either is
+   * the Leaflet chunk, and `connect-src` has to name the tile host. If either is
    * wrong the map is a grey box, the page still loads, and every check above
    * still passes.
    *
    * So this opens the map and insists on the evidence: a constructed Leaflet
-   * container, and raster tiles actually fetched from the third party.
+   * container, and map data actually fetched from the third party.
    */
-  console.log("the map, which is what strict-dynamic and img-src are for");
+  console.log("the map, which is what strict-dynamic and connect-src are for");
   const tiles = [];
   page.on("request", (request) => {
-    if (/cartocdn|maptiler/.test(request.url())) tiles.push(request.url());
+    if (/tiles\.openfreemap\.org/.test(request.url())) tiles.push(request.url());
   });
 
   /*
@@ -592,7 +592,7 @@ try {
    */
   const wide = await context.newPage();
   wide.on("request", (request) => {
-    if (/cartocdn|maptiler/.test(request.url())) tiles.push(request.url());
+    if (/tiles\.openfreemap\.org/.test(request.url())) tiles.push(request.url());
   });
   await wide.setViewportSize({ width: 1280, height: 900 });
   /*
@@ -620,7 +620,7 @@ try {
     "Leaflet's chunk loads and constructs, so strict-dynamic permits the import",
     (await wide.locator(".leaflet-container").count()) > 0,
   );
-  check("tiles load from the third party, so img-src names the host", tiles.length > 0, `${tiles.length} tile requests`);
+  check("map data loads from OpenFreeMap, so connect-src names the host", tiles.length > 0, `${tiles.length} map data requests`);
   const mapRefusals = await classifyRefusals(wide);
   check(
     "and the map triggered no violation this codebase can nonce",

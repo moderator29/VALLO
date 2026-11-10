@@ -43,10 +43,14 @@ export const afterTheGateHa = {
   },
   refund: {
     heading: "Mayar da kuɗinka",
-    landed: "An mayar zuwa katinka a {date}. Paystack ya tabbatar ya wuce.",
-    initiated: "Paystack ya fara mayar da kuɗi zuwa katinka a {date}. Bankuna yawanci suna nuna shi cikin 'yan kwanakin aiki.",
-    initiatedLate: "Paystack ya fara mayar da kuɗi zuwa katinka a {date}, bayan ranar ƙarshe da aka yi alkawari, {due}.",
-    sending: "An yanke hukuncin mayar da kuɗin kuma ana aika shi zuwa Paystack, zuwa katin ko asusun da ka biya da shi.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `landed` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiated` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiatedLate` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `sending` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     nothingOwed: "Babu abin da ya kamata ya dawo ƙarƙashin sharuɗɗan da aka biya wannan masauki a ƙarƙashinsu.",
     amount: "{amount} zai dawo",
     retained: "An riƙe {amount} ƙarƙashin sharuɗɗan",
@@ -100,7 +104,8 @@ export const afterTheGateHa = {
       agreed: "An amince da ragi",
       disputed: "Wani ragi yana wurin ma'aikatan Vallo",
       returned: "An daidaita",
-      escalated: "Yana tare da Garantin Vallo",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalated` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     cautionCovered: "An mayar da {returned} kuma an rage {deducted}, {outstanding} har yanzu ana bin bashi.",
     cautionGuaranteed: "An biya mai haya {amount} daga Garantin Vallo.",
@@ -145,9 +150,12 @@ export const afterTheGateHa = {
     contestNote: "Abin da ya faru",
     contestSubmit: "Gaya wa Vallo",
     escalateHeading: "Ba a mayar da kariyar ba",
-    escalateHelp: "Ya kamata a mayar kafin {date}. Har yanzu ana bin {amount} kuma babu jayayya a kai. Vallo zai iya duba shi a matsayin buƙatar Garantin Vallo.",
-    escalateSubmit: "Nema daga Garantin Vallo",
-    escalateOpen: "Buƙatarka a kan Garantin Vallo tana wurin ma'aikatan Vallo.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateHelp` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateSubmit` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateOpen` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     promiseHeading: "Abin da aka yi maka alkawari",
     promiseLede: "Jerin kamar yadda yake lokacin da aka biya jimlar kuɗin shiga a {date}. Gyare-gyaren jerin tun daga lokacin ba sa canza wannan.",
     promiseNone: "Ana rubuta alkawarin jerin idan biyan kuɗin shiga ya kammala.",

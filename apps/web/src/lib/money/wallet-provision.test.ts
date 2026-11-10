@@ -11,6 +11,7 @@ vi.mock("../payments/providers", () => ({ memberWalletRailLive: async () => "liv
 vi.mock("../security/money-limits", () => ({ guardMoney: async () => ({ allowed: true, degraded: false }) }));
 vi.mock("./audit", () => ({ recordMoneyAudit: async () => undefined }));
 vi.mock("./member-wallet", () => ({
+  WALLET_PROVIDER_KEY: "wallet_provider",
   adminDb: () => ({
     from: () => ({
       upsert: async (row: unknown) => {

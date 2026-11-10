@@ -11,6 +11,7 @@ import {
   getSupportTickets,
 } from "@/lib/admin/queries";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { requireConsole, type StaffScope } from "@/lib/admin/guard";
 import { ReportsLane } from "../_lanes/ReportsLane";
 import { FlagsLane } from "../_lanes/FlagsLane";
@@ -36,6 +37,8 @@ import { BulkSubmit, QueueSelection } from "../_components/QueueSelection";
 import { BannerOnArrival } from "@/components/ui/BannerOnArrival";
 import { bulkAct, deleteView, releaseRow, saveView, takeRow } from "@/lib/admin/queue-desk-actions";
 import { Button } from "@/components/ui/Button";
+import { DeskCopilot } from "@/lib/admin/copilot/contexts/DeskCopilot";
+import { queueContext } from "@/lib/admin/copilot/contexts/queue";
 
 export const dynamic = "force-dynamic";
 
@@ -174,6 +177,20 @@ export default async function AdminQueuePage({
             held: counts.data.moderation,
           }
         : {};
+    const deskContext = queueContext(
+      counts.state === "ok"
+        ? {
+            listings: counts.data.listings,
+            applications: counts.data.applications,
+            reports: counts.data.reports,
+            tickets: counts.data.tickets,
+            flags: counts.data.flags,
+            held: counts.data.moderation,
+            tab: tabs.find((entry) => entry.key === tab)?.label ?? "All",
+            late: null,
+          }
+        : null,
+    );
     return (
       <>
         <div className="nf-console">
@@ -206,6 +223,7 @@ export default async function AdminQueuePage({
         ) : (
           <HeldLane params={params} />
         )}
+        <DeskCopilot scope="moderation" deskName="Queue" context={deskContext} />
       </>
     );
   }
@@ -222,7 +240,7 @@ export default async function AdminQueuePage({
   if (counts.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title={o.queueTitle} lede={o.queueLede} />
+        <PageHead title={o.queueTitle} lede={o.queueLede} />
         <ui.QueueUnavailable />
       </div>
     );
@@ -471,9 +489,10 @@ export default async function AdminQueuePage({
   return (
     <div className="nf-console">
       {/* The one console heading that could not show a count now can: it is
-          the same `QueueHeader` the other eighteen desks already use, and the
-          total is a real sum of real reads rather than a number typed in. */}
-      <ui.QueueHeader title={o.queueTitle} lede={o.queueLede} count={total} />
+          the console's one header (`PageHead`, AD-01) with the waiting badge
+          beside the title, and the total is a real sum of real reads rather
+          than a number typed in. */}
+      <PageHead title={o.queueTitle} lede={o.queueLede} trail={<ui.WaitingBadge count={total} />} />
 
       <QueueTabs
         label="Queues"
@@ -670,6 +689,20 @@ export default async function AdminQueuePage({
           );
         })}
       </ul>
+      <DeskCopilot
+        scope="moderation"
+        deskName="Queue"
+        context={queueContext({
+          listings: counts.data.listings,
+          applications: counts.data.applications,
+          reports: counts.data.reports,
+          tickets: counts.data.tickets,
+          flags: counts.data.flags,
+          held: counts.data.moderation,
+          tab: tabs.find((entry) => entry.key === tab)?.label ?? "All",
+          late: rows.filter((row) => row.clock?.overdue === true).length,
+        })}
+      />
     </div>
   );
 }

@@ -16,6 +16,7 @@ import "@/app/css/detail-m.css";
 import "@/app/css/member-loop.css";
 /* The second premium motion layer, after the member sheets (css-diet C6 keeps their order first). */
 import "@/app/css/premium-motion-2.css";
+import { Suspense } from "react";
 import { getDictionary, type Locale } from "@vallo/i18n";
 import { VitalsReporter } from "@/components/app/VitalsReporter";
 import { DataMeterRecorder } from "@/components/app/DataMeterRecorder";
@@ -29,9 +30,12 @@ import { getShellIdentity, getShellWorkspaces } from "@/lib/app/shell-queries";
 import { getSide } from "@/lib/side";
 import { shellDictionary } from "@/lib/i18n/shell-dictionary";
 import { AppShell } from "@/components/app/AppShell";
+import { TermsUpdateMount } from "@/components/app/legal/TermsUpdateMount";
+import { ProfileSetupMount } from "@/components/app/first-run/ProfileSetupMount";
 import { PasscodeGate, passkeyOfferedThisRequest } from "@/components/passcode/PasscodeGate";
 import { resolvePasscodeGate } from "@/lib/passcode/state";
 import { isSocialEnabled } from "@/lib/social/flag";
+import { isFeatureEnabled } from "@/lib/flags";
 import { CallLayerMount } from "@/components/calls/CallLayerMount";
 import { GyroTiltInit } from "@/components/motion/GyroTiltInit";
 /* C12: the feed's motion sheet, out of `globals.css`; only this tree draws a post. */
@@ -127,12 +131,17 @@ export default async function AppLayout({
     { userName, userHandle, unreadNotifications, avatarUrl, signedIn, isAgent, isAdmin, isHost },
     { workspaces, current },
     socialOn,
-  ] = await Promise.all([getSide(), getShellIdentity(), getShellWorkspaces(), isSocialEnabled()]);
+    roommatesOn,
+  ] = await Promise.all([getSide(), getShellIdentity(), getShellWorkspaces(), isSocialEnabled(), isFeatureEnabled("roommates")]);
+  /* The `roommates` switch: off takes the nav row and the Create row out in
+     one place (both read `roommatesEntry`, so dropping it drops both). */
+  const shellT = shellDictionary(t);
+  const shell = roommatesOn ? shellT : { ...shellT, roommatesEntry: undefined };
 
   return (
     <AppShell
       /* The shell's slice, not the whole dictionary: see shell-dictionary.ts. */
-      t={shellDictionary(t)}
+      t={shell}
       side={side}
       userName={userName}
       userHandle={userHandle}
@@ -148,6 +157,20 @@ export default async function AppLayout({
          navigation while the `social` switch is off (fails open). */
       socialOn={socialOn}
     >
+      {/* 9 November 2026: the new Terms (the Guarantee retired), shown once to
+          each existing member at their next visit, and never to a new one. */}
+      {signedIn ? (
+        <Suspense fallback={null}>
+          <TermsUpdateMount />
+        </Suspense>
+      ) : null}
+      {/* After sign-up: confirm your name, then add a photo; each skippable,
+          never more than once a session nor within days of a skip. */}
+      {signedIn ? (
+        <Suspense fallback={null}>
+          <ProfileSetupMount />
+        </Suspense>
+      ) : null}
       {/* 9.2: gyroscope-driven parallax on mobile. */}
       <GyroTiltInit />
       {/* V-79: counts, on this phone only, what each page could measure. */}

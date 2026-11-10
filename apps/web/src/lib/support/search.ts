@@ -39,6 +39,11 @@ export type SearchHit = {
   score: number;
   /** A short passage around the first match, for the result row. */
   snippet: string;
+  /**
+   * The stems this hit matched on (the query's terms and the words they
+   * widen to), so the row can mark the matched words in its snippet (R99).
+   */
+  terms: string[];
 };
 
 const STOP = new Set(
@@ -207,11 +212,51 @@ export function searchPrepared(index: PreparedEntry[], query: string, limit = 24
         p.entry.text,
         terms.map((t) => t.stem),
       ),
+      terms: [...new Set(terms.flatMap((t) => [t.stem, ...t.also]))],
     });
   }
 
   hits.sort((a, b) => b.matched - a.matched || b.score - a.score || a.entry.title.localeCompare(b.entry.title));
   return hits.slice(0, limit).map(({ matched: _matched, ...hit }) => hit);
+}
+
+/**
+ * THE MATCHED WORDS, MARKED (R99). The snippet cut into runs, each saying
+ * whether it is a word the search matched, so the row can set those words in
+ * bold. A word matches when its rough stem is one of the hit's terms, or
+ * starts with one of three letters or more (the same prefix rule the ranking
+ * uses), so "refunds" is marked for a search for "refund". Filler and
+ * punctuation are never marked. Pure, so a test can hold it.
+ */
+export function markMatches(snippet: string, terms: readonly string[]): { text: string; match: boolean }[] {
+  const wanted = terms.filter(Boolean);
+  if (!snippet || wanted.length === 0) return snippet ? [{ text: snippet, match: false }] : [];
+  const parts: { text: string; match: boolean }[] = [];
+  const push = (text: string, match: boolean) => {
+    const last = parts[parts.length - 1];
+    if (last && last.match === match) last.text += text;
+    else parts.push({ text, match });
+  };
+  for (const piece of snippet.split(/([A-Za-z0-9]+)/)) {
+    if (!piece) continue;
+    const word = /^[A-Za-z0-9]+$/.test(piece) ? piece.toLowerCase() : "";
+    const s = word && !STOP.has(word) ? stem(word) : "";
+    const hit = s !== "" && wanted.some((t) => s === t || (t.length >= 3 && s.startsWith(t)));
+    push(piece, hit);
+  }
+  return parts;
+}
+
+/**
+ * RESULTS GROUPED BY KIND (R99): every hit of the kind the best result is,
+ * then the next kind, each kind in its own rank order. The best match stays
+ * first, and the arrow keys walk the rows in the order they are drawn,
+ * because the list is reordered here, not only drawn in groups.
+ */
+export function groupHitsByKind(hits: readonly SearchHit[]): SearchHit[] {
+  const order: SearchSection[] = [];
+  for (const hit of hits) if (!order.includes(hit.entry.section)) order.push(hit.entry.section);
+  return order.flatMap((section) => hits.filter((hit) => hit.entry.section === section));
 }
 
 export function search(entries: readonly SearchEntry[], query: string, limit?: number): SearchHit[] {

@@ -23,7 +23,7 @@ describe("step 8, FUNDED (D68d)", () => {
     expect(m.note).toMatch(/Do not confirm/);
   });
 
-  it("the lister cannot release, and their take-home shows only once Payluk reported its fee", () => {
+  it("the lister cannot release, and their take-home shows only once the provider reported its fee", () => {
     expect(heldModel({ ...base, role: "lister" })).toMatchObject({ canRelease: false, receiveMinor: null });
     expect(heldModel({ ...base, role: "lister", providerFeeMinor: 3_600_000 }).receiveMinor).toBe(176_400_000);
   });

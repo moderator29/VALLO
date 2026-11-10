@@ -64,7 +64,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 2.6 E5: Marketing email consent unticked by default (NDPR), choice also in Privacy settings -- DONE
 
 ### Listing Wizard
-- [x] 2.7 Listing wizard onto StepFrame, one question per screen (WORK_QUEUE round 2, LW-01 to LW-04) -- ASSESSED: not needed. ListingWizard (4721 lines) has its own 8-step system with travel direction animations, ProgressPath overview, draft persistence (localStorage + server), broadcast paste from WhatsApp, lister fee gate, field validation with step-specific gates, and media uploads with reordering. StepFrame is a simpler one-question-per-screen frame that would lose these capabilities.
+- [x] 2.7 Listing wizard onto StepFrame, one question per screen -- DONE 9 Nov 2026 (app/agent/list on StepFrame, one question per screen, steps/ components; draft save, broadcast paste, fee gate, media and validation kept). Not tested on a device. The earlier "not needed" assessment was overruled by the founder brief (P1.1).
 
 ### Universal Systems
 - [x] 2.8 Bottom sheets audited onto one Sheet (drag, dismiss, keyboard, safe areas) for filters, sort, share, collections, account/booking actions -- DONE (audited: unified Sheet.tsx with drag, spring physics, detents, focus trap, body scroll lock; 30+ files already use it)
@@ -177,7 +177,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 ## 8. BUILD AND DEPLOY
 
 - [ ] 8.1 Build 1.0.2: ship all native items (rich push, notification sound, CallKit, iOS shell polish, Android renderer recovery)
-- [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- founder must trigger manually from Actions UI
+- [ ] 8.2 Run all GitHub Actions workflows (CI, iOS compile, Android compile) -- CI now runs on the draft PR #114 for every push (first full run 9 Nov, 8 failures, all fixed 10 Nov); iOS and Android compile cost about 10x and are skipped for this branch until the founder asks
 - [x] 8.3 Full tsc --noEmit clean pass on the entire tree -- DONE (passes clean with 0 errors)
 - [x] 8.4 Full vitest run, fix remaining test failures -- DONE (9/9 calls tests pass: outcome form counts reverted to 1, call-switch test fixed with waitFor after More menu opens; tsc clean; all gates pass)
 
@@ -262,7 +262,7 @@ FEATURE_BACKLOG.md, and every agent hand-off this session.
 - [x] 10.19 Privacy choices screen (/settings/privacy): visibility, messaging, discovery, AI, data -- DONE
 - [x] 10.20 Community Promise page and trust siblings -- DONE
 - [x] 10.21 Marketing email consent unticked by default (NDPR compliance) -- DONE
-- [x] 10.22 Listing wizard onto StepFrame (one question per screen) -- ASSESSED: not needed (see 2.7)
+- [x] 10.22 Listing wizard onto StepFrame (one question per screen) -- DONE 9 Nov 2026 (see 2.7)
 - [x] 10.23 Bottom sheets audit: all onto one Sheet (drag, dismiss, keyboard, safe areas) -- DONE (see 2.8)
 - [x] 10.24 Saved collections: custom collections, covers, sort, share, compare -- MOSTLY DONE (see 2.9)
 - [x] 10.25 Activity Centre: categories, grouping, unread, mark all read, archive -- DONE (see 2.10)

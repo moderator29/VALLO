@@ -17,7 +17,7 @@ import {
   type OpenFailure,
   type ProfileGap,
 } from "./funds";
-import { adminDb, loadAccount, profileFor, walletProvider } from "./member-wallet";
+import { WALLET_PROVIDER_KEY, adminDb, loadAccount, profileFor, walletProvider } from "./member-wallet";
 
 export type OpenResult = { state: OnboardingState; gaps: ProfileGap[]; failure?: OpenFailure | null };
 
@@ -68,7 +68,7 @@ export async function provisionWallet(user: User): Promise<ActionResult<OpenResu
   if (gaps.length > 0) {
     await db
       .from("financial_provider_accounts")
-      .upsert({ user_id: userId, provider: "payluk", status: "VERIFICATION_REQUIRED", status_observed_at: new Date().toISOString() }, { onConflict: "user_id,provider" });
+      .upsert({ user_id: userId, provider: WALLET_PROVIDER_KEY, status: "VERIFICATION_REQUIRED", status_observed_at: new Date().toISOString() }, { onConflict: "user_id,provider" });
     return ok({ state: "VERIFICATION_REQUIRED", gaps });
   }
 
@@ -76,7 +76,7 @@ export async function provisionWallet(user: User): Promise<ActionResult<OpenResu
     await db.from("financial_provider_accounts").upsert(
       {
         user_id: userId,
-        provider: "payluk",
+        provider: WALLET_PROVIDER_KEY,
         provider_customer_id: customerId,
         status: state,
         provider_status: providerStatus,
@@ -96,7 +96,7 @@ export async function provisionWallet(user: User): Promise<ActionResult<OpenResu
       lastName: profile.lastName!.trim(),
       email,
       phone: normalisePhone(profile.phone ?? "")!,
-      /* No countryId: Payluk's live API refuses "NG" (it casts the field to its
+      /* No countryId: the provider's live API refused "NG" (it casts the field to its
          own internal id, despite the docs), and an omitted country inherits the
          merchant account's, which is Nigeria (create-merchant-customer). Seen
          live 9 October 2026: "Cast to ObjectId failed for value NG". */

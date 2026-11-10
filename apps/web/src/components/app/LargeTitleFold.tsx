@@ -29,11 +29,19 @@ export function LargeTitleFold({ title, children }: { title: string; children: R
   const [slot, setSlot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    const header = document.querySelector<HTMLElement>(".nf-app-header");
     const target = ref.current?.querySelector<HTMLElement>("[data-fold-anchor]");
-    const fold = header?.querySelector<HTMLElement>(".nf-app-header__fold") ?? null;
-    if (!header || !target || !fold || typeof IntersectionObserver === "undefined") return;
-    setSlot(fold);
+    if (!target || typeof IntersectionObserver === "undefined") return;
+    /* The app shell's bar takes the title through a portal into its fold
+       slot. A workspace bar (`WorkspaceHeader`) already prints the page's
+       name, so there it is only hidden while the large title is in view
+       (`data-large-title` on the bar) and shown again once it is folded:
+       one title on screen at a time in both shells. */
+    const appHeader = document.querySelector<HTMLElement>(".nf-app-header");
+    const fold = appHeader?.querySelector<HTMLElement>(".nf-app-header__fold") ?? null;
+    const header = appHeader && fold ? appHeader : document.querySelector<HTMLElement>(".nf-ws-bar");
+    if (!header) return;
+    if (fold && header === appHeader) setSlot(fold);
+    else header.setAttribute("data-large-title", "");
     const barHeight = Math.round(header.getBoundingClientRect().height) || 56;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -47,6 +55,7 @@ export function LargeTitleFold({ title, children }: { title: string; children: R
     return () => {
       observer.disconnect();
       header.removeAttribute("data-folded");
+      header.removeAttribute("data-large-title");
       setSlot(null);
     };
   }, []);

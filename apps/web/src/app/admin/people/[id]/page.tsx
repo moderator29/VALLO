@@ -4,9 +4,11 @@ import { formatDate, getDictionary, type Locale } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { readPerson } from "@/lib/admin/person-queries";
 import { readMemberExtras } from "@/lib/admin/member-queries";
+import { readReferredBy } from "@/lib/admin/referred-by";
 import { MemberSections } from "./MemberSections";
 import { MemberStanding } from "./MemberStanding";
 import { adminUi } from "../../_components/ui";
+import { PageHead } from "../../_components/panels";
 import { UpholdControl } from "./UpholdControl";
 import { ConsiderStr } from "../../_components/ConsiderStr";
 import { InternalNotes } from "../../_components/InternalNotes";
@@ -63,7 +65,7 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
   if (file.state !== "ready") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader title="Person file" lede={LEDE} />
+        <PageHead title="Person file" lede={LEDE} />
         {file.state === "failed" ? (
           <ui.QueueUnavailable />
         ) : (
@@ -77,10 +79,10 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
   /* Only once the person file answered "ready": it is the read that refuses
      scoped staff in the database and writes the person.view audit row, so
      nothing more about this person is read unless it has passed. */
-  const extras = await readMemberExtras(person.userId);
+  const [extras, referredBy] = await Promise.all([readMemberExtras(person.userId), readReferredBy(person.userId)]);
   return (
     <div className="nf-console">
-      <ui.QueueHeader title={person.name ?? "A person"} lede={LEDE} />
+      <PageHead title={person.name ?? "A person"} lede={LEDE} />
       <p className="mb-row nf-caption">
         <Link href="/admin/people" className="inline-flex min-h-11 items-center underline underline-offset-2">
           Find another person
@@ -100,6 +102,20 @@ export default async function PersonFilePage({ params }: { params: Promise<{ id:
           <div>
             <dt className="nf-caption text-[var(--nf-content-muted)]">Joined</dt>
             <dd>{when(person.joinedAt, locale) || "Not recorded"}</dd>
+          </div>
+          <div data-testid="person-referred-by">
+            <dt className="nf-caption text-[var(--nf-content-muted)]">Referred by</dt>
+            <dd>
+              {referredBy.state === "referred" ? (
+                <Link href={`/admin/people/${referredBy.referrerId}`} className="underline underline-offset-2">
+                  {referredBy.referrerName ?? "A member"}
+                </Link>
+              ) : referredBy.state === "none" ? (
+                "Nobody"
+              ) : (
+                "Could not be read"
+              )}
+            </dd>
           </div>
           <div>
             <dt className="nf-caption text-[var(--nf-content-muted)]">Workspaces</dt>

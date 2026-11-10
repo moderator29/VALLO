@@ -111,9 +111,10 @@
  *   19  Governing law, which must stay consistent with the Co-Founder and
  *       Investment Agreement: Nigerian law, and arbitration in Abuja under the
  *       Arbitration and Mediation Act 2023.
- *   14  The Vallo Guarantee: a discretionary, capped, reviewed protection
- *       funded from a reserve. It must not read as insurance or as an
- *       unconditional promise to pay.
+ *   14  What Vallo does, and what it does not do. Until 9 November 2026 this
+ *       was the Vallo Guarantee, a discretionary, capped protection funded from
+ *       a reserve; the founder retired it, and the section now makes only
+ *       specific promises Vallo can keep, never a guarantee of the deal.
  *
  * AND ONE CORRECTION OF FACT MADE ON 22 SEPTEMBER, recorded here because a
  * legal document should carry its own history. Section 7 described the
@@ -131,14 +132,29 @@
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { COMPANY_FORMAL_NAME, COMPANY_TRADING_NAME } from "./company";
+import { TERMS_UPDATED_ISO, longDate } from "./versions";
+
+/** "Last updated" for the Terms, from their version. */
+export const TERMS_UPDATED = longDate(TERMS_UPDATED_ISO);
 import {
-  GUARANTEE_SCOPE,
+  FEE_OTHER_LINE,
+  FEE_PROVIDER_CHARGES,
+  FEE_RENT_LINE,
+  FEE_ROUND_NOTE,
+  FEE_WHO_PAYS,
   NO_CUSTODY_SENTENCE,
   NO_INSPECTION_FEE,
   OFF_PLATFORM_SENTENCE,
   PAYMENT_GATE_SENTENCE,
   PRIVATE_FEE_NOTE,
   REFUND_ROUTE,
+  TERMS_HELD_DISPUTE,
+  TERMS_HELD_LIMITS,
+  TERMS_HELD_NOT_OPEN,
+  TERMS_HELD_REFUND,
+  TERMS_HELD_RELEASE,
+  TERMS_HELD_WHAT,
+  TERMS_HELD_WHO,
 } from "@/lib/money/copy";
 import Link from "next/link";
 
@@ -160,8 +176,9 @@ import Link from "next/link";
  */
 const LADDER = VERIFICATION_ORDER.map((rung) => rung.label.toLowerCase()).join(", then ");
 
-export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
+export const TERMS_SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
   {
+    id: "about",
     title: "1. About these terms",
     body: (
       <p>
@@ -175,6 +192,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "what-vallo-is",
     title: `2. What ${COMPANY_TRADING_NAME} is`,
     body: (
       <>
@@ -223,10 +241,17 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "accounts",
     title: "3. Accounts and eligibility",
     body: (
       <ul>
-        <li>You must be at least 18 years old to use {COMPANY_TRADING_NAME}.</li>
+        <li>
+          <strong>{COMPANY_TRADING_NAME} is for people aged 18 and over.</strong> You must be
+          at least 18 years old to create an account or use the platform. If we find that
+          an account belongs to someone under 18, we close it and delete their personal
+          data, except for anything the law requires us to keep. Tell us if you believe an
+          account belongs to a younger person.
+        </li>
         <li>
           The information on your account must be accurate and kept up to date, and you
           may hold only one personal account.
@@ -243,6 +268,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "payments",
     title: "4. Payments, and what happens to your money",
     body: (
       <>
@@ -252,11 +278,10 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
             shown before you confirm anything.
           </li>
           <li>
-            <strong>{NO_CUSTODY_SENTENCE}</strong> Our payment processor splits every
-            payment at the moment it is made: the share of the owner or agent goes to the
-            bank account on their payout details, the Vallo Guarantee contribution
-            described in section 14 goes to a separate reserve, and our commission, if
-            any, goes to us. {COMPANY_TRADING_NAME} has no wallet and keeps no balance for
+            <strong>{NO_CUSTODY_SENTENCE}</strong> Card payments are handled by Paystack,
+            our payment processor, which splits every payment at the moment it is made:
+            the share of the owner or agent goes to the bank account on their payout
+            details in the same transaction, and our commission, if any, goes to us. {COMPANY_TRADING_NAME} has no wallet and keeps no balance for
             you, so there is nothing to top up, nothing held and nothing to withdraw.
           </li>
           <li>
@@ -286,6 +311,43 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "held-payment",
+    title: "4A. Rent paid as a protected payment (not open yet)",
+    body: (
+      <ul>
+        <li>
+          <strong>{TERMS_HELD_NOT_OPEN}</strong>
+        </li>
+        <li>
+          <strong>What it is.</strong> {TERMS_HELD_WHAT}
+        </li>
+        <li>
+          <strong>Who holds the money.</strong> {TERMS_HELD_WHO}
+        </li>
+        <li>
+          <strong>When it is released.</strong> {TERMS_HELD_RELEASE}
+        </li>
+        <li>
+          <strong>Disputes.</strong> {TERMS_HELD_DISPUTE}
+        </li>
+        <li>
+          <strong>Refunds.</strong> {TERMS_HELD_REFUND}
+        </li>
+        <li>
+          <strong>Fees.</strong> {FEE_RENT_LINE} {FEE_WHO_PAYS} {FEE_PROVIDER_CHARGES}
+        </li>
+        <li>
+          <strong>What it does not do.</strong> {TERMS_HELD_LIMITS} See{" "}
+          <Link href="/docs/how-protection-works" className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            how it will work
+          </Link>
+          .
+        </li>
+      </ul>
+    ),
+  },
+  {
+    id: "cancellations",
     title: "5. Cancellations and refunds",
     body: (
       <ul>
@@ -301,7 +363,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
           it.</strong> What is payable, what is returnable and on what notice are terms of
           the agreement you make with the landlord, the vendor or their agent. A rental
           paid on {COMPANY_TRADING_NAME} is paid against an agreement both of you
-          confirmed and we approved (section 13), and the owner&rsquo;s or agent&rsquo;s
+          confirmed and we approved (<Link href="/terms#agreements" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 13</Link>), and the owner&rsquo;s or agent&rsquo;s
           share settles to them when you pay; the agreement decides what is returnable,
           between you and them.
         </li>
@@ -319,6 +381,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "listing",
     title: "6. Listing a property",
     body: (
       <ul>
@@ -332,6 +395,10 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
           is made through the platform, the platform fee comes out of your share as the
           lister, and it is shown to you in naira before you agree. A restaurant pays a
           fixed fee for each table that is seated; the diner pays nothing extra to book.
+        </li>
+        <li>
+          <strong>What the fee is.</strong> {FEE_RENT_LINE} {FEE_OTHER_LINE} {FEE_WHO_PAYS}{" "}
+          {FEE_PROVIDER_CHARGES} {FEE_ROUND_NOTE}
         </li>
         <li>
           If that ever changes, the rate will be shown before the action that incurs it,
@@ -374,6 +441,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "verification",
     title: "7. What verification means, and what it does not",
     body: (
       <>
@@ -422,6 +490,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "messages",
     title: "8. Messages, and what we can see",
     body: (
       <>
@@ -446,6 +515,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "inspections",
     title: "9. Inspections",
     body: (
       <>
@@ -466,13 +536,14 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
         <p>
           After a rental inspection you submit the inspection report on the platform:
           eight items, each with its photographs. It is the record of the property as you
-          found it, it is what an agreement is drawn up from, and it is what any claim on
-          the Vallo Guarantee is compared with.
+          found it, it is what an agreement is drawn up from, and it is the record we
+          look at first if something goes wrong (<Link href="/terms#what-vallo-does" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 14</Link>).
         </p>
       </>
     ),
   },
   {
+    id: "assistant",
     title: "10. The assistant and anything automated",
     body: (
       <p>
@@ -489,6 +560,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "reviews",
     title: "11. Reviews and content",
     body: (
       <p>
@@ -502,6 +574,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "acceptable-use",
     title: "12. Acceptable use",
     body: (
       <>
@@ -522,6 +595,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "agreements",
     title: "13. Agreements and approval",
     body: (
       <>
@@ -546,42 +620,56 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
-    title: "14. The Vallo Guarantee",
+    id: "what-vallo-does",
+    title: "14. What Vallo does, and what it does not do",
     body: (
       <>
         <p>
-          Between 1 and 2 percent of every payment made through the platform is set
-          aside, at the moment of payment, in a reserve kept apart from{" "}
-          {COMPANY_TRADING_NAME}&rsquo;s own money. The exact percentage is shown on the
-          agreement before you pay. {GUARANTEE_SCOPE}
+          This section says plainly what {COMPANY_TRADING_NAME} does for you and what it
+          does not. It replaces the Vallo Guarantee, which was retired on 9 November
+          2026.
         </p>
         <ul>
           <li>
-            A claim is made from the agreement on the platform, with evidence, within the
-            claim window: 72 hours from move-in on a rental or from check-in on a stay.
+            We check the identity of members and review listings before they go live.
           </li>
           <li>
-            A person at {COMPANY_TRADING_NAME} reviews every claim against the inspection
-            report and the agreement, and approves it, in full or in part, or declines it
-            with a reason.
+            <strong>{COMPANY_TRADING_NAME} never holds your money.</strong>
           </li>
           <li>
-            <strong>
-              A claim is capped at what you paid for that booking and by what is in the
-              reserve at the time it is decided.
-            </strong>{" "}
-            An approved claim is paid to your bank account from the reserve.
+            Card payments are handled by Paystack, and the owner&rsquo;s share reaches
+            their bank account in the same transaction.
           </li>
           <li>
-            The Guarantee is not insurance, it is not a deposit and it creates no
-            balance in your name. Anything arranged or paid outside the platform is not
-            covered.
+            Payment held by a licensed bank until you confirm is not open yet. When it
+            opens we will say so, and these Terms will be updated with a new version and
+            date.
           </li>
+          <li>
+            {COMPANY_TRADING_NAME} is not a party to your tenancy or your sale, is not
+            acting as agent for either side, and does not guarantee the transaction.
+          </li>
+        </ul>
+        <p>
+          <strong>What we will do if something goes wrong.</strong>
+        </p>
+        <ul>
+          <li>
+            Investigate, using the inspection report and the messages on the platform as
+            the record.
+          </li>
+          <li>
+            Act on members who break the rules, up to and including suspension and
+            removal.
+          </li>
+          <li>Give you the evidence we hold.</li>
+          <li>Refund anything {COMPANY_TRADING_NAME} itself charged.</li>
         </ul>
       </>
     ),
   },
   {
+    id: "responsibility",
     title: "15. Our responsibility to you",
     body: (
       <>
@@ -616,11 +704,12 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "suspension",
     title: "16. Suspension, closing your account, and appealing",
     body: (
       <>
         <p>
-          You may close your account at any time from settings or by contacting support.
+          You may close your account at any time from <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">settings</Link> or by contacting support.
           We may suspend or close an account that breaks these terms. Where we do, we
           tell you why and, where the breach can be fixed, give you the chance to fix
           it. Serious harm, fraud or a legal requirement may mean immediate suspension.
@@ -634,6 +723,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "privacy",
     title: "17. Privacy",
     body: (
       <p>
@@ -647,6 +737,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "changes",
     title: "18. Changes to these terms",
     body: (
       <p>
@@ -658,6 +749,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "governing-law",
     title: "19. Governing law and disputes",
     body: (
       <p>
@@ -669,6 +761,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "contact",
     title: "20. Contact",
     body: (
       <p>

@@ -18,6 +18,7 @@ import { POST_COPY, PROFILE_REPORT_REASONS } from "@/lib/social/posts-model";
 import { displayHost } from "@/lib/brand-domain";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { banner } from "@/lib/ui/toast";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import "./social-profile.css";
 import { useSignInHref } from "@/lib/auth/use-sign-in-href";
@@ -206,11 +207,26 @@ export function ProfileMenu({
           return;
         }
         setMuted(next);
-        banner.success(
-          next
-            ? POST_COPY.mutedDone
-            : `Unmuted. ${who} will show up in your feeds again.`,
-        );
+        if (next) {
+          /* Undo is the real inverse, and puts the menu's own state back. */
+          bannerWithUndo(POST_COPY.mutedDone, {
+            undo: () => unmuteTarget({ targetKind: "USER", targetId: userId }),
+            undone: `Unmuted. ${who} will show up in your feeds again.`,
+            onUndone: () => {
+              setMuted(false);
+              router.refresh();
+            },
+          });
+        } else {
+          bannerWithUndo(`Unmuted. ${who} will show up in your feeds again.`, {
+            undo: () => muteTarget({ targetKind: "USER", targetId: userId }),
+            undone: POST_COPY.mutedDone,
+            onUndone: () => {
+              setMuted(true);
+              router.refresh();
+            },
+          });
+        }
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -247,6 +263,7 @@ export function ProfileMenu({
           return;
         }
         setBlocked(false);
+        banner.success(`Unblocked. You and ${who} can see each other again.`);
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

@@ -4,7 +4,7 @@
  * The payout rule is `public.lister_chargeback_hold(lister)`: true while the
  * lister has a LOST chargeback whose recovery is still owed. Since migration
  * cbh01 (13 October 2026) it is enforced where Vallo instructs money to the
- * lister: Payluk escrow releases and Rewards Balance payouts are refused
+ * lister: protected-payment releases and Rewards Balance payouts are refused
  * while it holds, unless finance overrides one with a reason. Card payments
  * split at charge time still settle to the lister directly. An undecided
  * chargeback holds nothing (one dispute must not stop a lister's business

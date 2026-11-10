@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { reportReadFault } from "@/lib/observability/read-error";
 
 import { faults, isNotLive } from "../degrade";
+import { readCard, type CircleRoommateCard } from "./roommate-card";
 import {
   PAGE_SIZE,
   decodeCursor,
@@ -80,6 +81,8 @@ export type CirclePostView = {
   community: { slug: string; name: string } | null;
   listingId: string | null;
   answered: boolean;
+  /** A Roommates card the post carries (`posts.roommate_card`), or null. */
+  roommate: CircleRoommateCard | null;
 };
 
 export type ReplyView = {
@@ -153,13 +156,39 @@ type RawPost = {
   listing_id: string | null;
 };
 
+/**
+ * The Roommates cards on a page of posts. `posts.roommate_card` arrives with
+ * `circle_roommate_card_2026-11-10.sql`, so it is read on its own: before the
+ * SQL is run the read answers "no such column", this returns nothing and every
+ * Circle read stays exactly as it was. A stored card that does not pass
+ * `readCard` draws nothing.
+ */
+async function readRoommateCards(db: Db, ids: string[]): Promise<Map<string, CircleRoommateCard>> {
+  const out = new Map<string, CircleRoommateCard>();
+  if (ids.length === 0) return out;
+  try {
+    const { data, error } = await db.from("posts").select("id, roommate_card").in("id", ids).not("roommate_card", "is", null);
+    if (error) {
+      if (!isNotLive(error)) await reportReadFault("read.circle.roommate-cards", error);
+      return out;
+    }
+    for (const row of (data ?? []) as { id: string; roommate_card: unknown }[]) {
+      const card = readCard(row.roommate_card);
+      if (card) out.set(row.id, card);
+    }
+  } catch {
+    /* A card is an extra: the post is still drawn without it. */
+  }
+  return out;
+}
+
 /** Authors, communities and accepted marks for a page of posts, in three reads. */
 async function enrich(db: Db, rows: RawPost[]): Promise<CirclePostView[]> {
   if (rows.length === 0) return [];
   const authorIds = [...new Set(rows.map((r) => r.author_id).filter((v): v is string => Boolean(v)))];
   const communityIds = [...new Set(rows.map((r) => r.community_id).filter((v): v is string => Boolean(v)))];
   const questionIds = rows.filter((r) => r.circle_type === "question").map((r) => r.id);
-  const [authors, communities, accepted] = await Promise.all([
+  const [authors, communities, accepted, cards] = await Promise.all([
     readAuthors(db, authorIds),
     communityIds.length
       ? db.from("circle_communities").select("id, slug, name").in("id", communityIds)
@@ -167,6 +196,7 @@ async function enrich(db: Db, rows: RawPost[]): Promise<CirclePostView[]> {
     questionIds.length
       ? db.from("circle_accepted_answers").select("question_id").in("question_id", questionIds)
       : Promise.resolve({ data: [], error: null }),
+    readRoommateCards(db, rows.map((r) => r.id)),
   ]);
   await reportReadFault("read.circle.enrich", ...faults(communities.error, accepted.error));
   const byCommunity = new Map(((communities.data ?? []) as { id: string; slug: string; name: string }[]).map((c) => [c.id, c]));
@@ -187,6 +217,7 @@ async function enrich(db: Db, rows: RawPost[]): Promise<CirclePostView[]> {
       community: c ? { slug: c.slug, name: c.name } : null,
       listingId: r.listing_id,
       answered: answered.has(r.id),
+      roommate: cards.get(r.id) ?? null,
     };
   });
 }

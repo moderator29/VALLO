@@ -1,5 +1,6 @@
 "use client";
 
+import { saveDoneBanner } from "@/lib/ui/save-banner";
 import { initial } from "@/lib/text/initial";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { aimPhotoMorph } from "@/lib/motion/photo-morph";
@@ -30,7 +31,8 @@ import {
   toggleStoryCommentLike,
   toggleStoryMark,
 } from "@/lib/social/stories-actions";
-import { blockUser, muteTarget, reportProfile } from "@/lib/social/posts-actions";
+import { blockUser, muteTarget, reportProfile, unblockUser, unmuteTarget } from "@/lib/social/posts-actions";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { POST_COPY, PROFILE_REPORT_REASONS } from "@/lib/social/posts-model";
 import { STORY_COPY } from "@/lib/social/stories-model";
 import { RemoteImage } from "@/components/ui/RemoteImage";
@@ -183,6 +185,21 @@ export function StoryViewer({
           banner.error(result.error);
           return;
         }
+        /* A save is said in the banner; a like shows on its heart. */
+        if (kind === "SAVE") {
+          saveDoneBanner({
+            saved: on,
+            message: on ? "Story saved. It is in Saved, under Stories. Only you can see it." : "Removed from your saved stories.",
+            undo: async () => {
+              const back = await toggleStoryMark({ storyId: story.id, mark: "SAVE" });
+              return back.ok ? { ok: true } : { ok: false, error: back.error };
+            },
+            onUndone: () => {
+              setSaved(!on);
+              setSaveCount((n) => n + (on ? -1 : 1));
+            },
+          });
+        }
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;
@@ -226,9 +243,17 @@ export function StoryViewer({
              block. Leaving them here would answer the next refresh with a 404 and
              no explanation, so it leaves for a real destination itself. */
           router.replace("/around");
+          bannerWithUndo(POST_COPY.blockedDone, {
+            undo: () => unblockUser({ userId: target }),
+            undone: POST_COPY.blockedUndone,
+          });
           return;
         }
-        banner.success(POST_COPY.mutedDone);
+        bannerWithUndo(POST_COPY.mutedDone, {
+          undo: () => unmuteTarget({ targetKind: "USER", targetId: target }),
+          undone: POST_COPY.mutedUndone,
+          onUndone: () => router.refresh(),
+        });
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

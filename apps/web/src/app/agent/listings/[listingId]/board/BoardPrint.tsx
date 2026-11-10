@@ -24,11 +24,10 @@ export function BoardPrint({
 }) {
   const base = `/agent/listings/${listingId}/board/image`;
   return (
-    <div className="nf-board-page mx-auto max-w-md py-lg">
-      <h1 className="nf-h2">{copy.title}</h1>
-      <p className="mt-inline nf-body-sm text-[var(--nf-content-secondary)]">{copy.lede}</p>
-
-      <div className="nf-board mt-group" data-testid="board-preview" aria-label={`${lines.banner}. ${lines.shape}. ${lines.onVallo}. ${lines.code}`}>
+    /* The title and its line are the page frame's (`page.tsx`); this is the
+       column under them. */
+    <div className="nf-board-page max-w-md">
+      <div className="nf-board" data-testid="board-preview" aria-label={`${lines.banner}. ${lines.shape}. ${lines.onVallo}. ${lines.code}`}>
         <span className="nf-board__banner">{lines.banner}</span>
         <span className="nf-board__shape">{lines.shape}</span>
         <span className="nf-board__on">{lines.onVallo}</span>

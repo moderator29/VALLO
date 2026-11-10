@@ -477,6 +477,14 @@
   max-inline-size: 48rem;
   padding-block-end: calc(var(--nf-tabbar-clearance, 0px) + var(--nf-space-xl));
 }
+/* Inside a shell whose main already clears the dock (`nf-main--docked` in the
+   app and agent shells, `nf-host__body--docked` in the host shell), the frame
+   keeps only its own foot: clearing the dock twice left an empty band the
+   height of the dock under every framed page (found 9 November 2026). */
+.nf-main--docked .nf-g1page,
+.nf-host__body--docked .nf-g1page {
+  padding-block-end: var(--nf-space-xl);
+}
 .nf-g1page[data-width="narrow"] {
   max-inline-size: 36rem;
 }
@@ -1021,9 +1029,14 @@
   min-block-size: 4.75rem;
   padding-block: var(--nf-space-sm);
 }
-.nf-inbox-list [data-testid="inbox-archive"] {
+.nf-inbox-list li [data-testid="inbox-archive"] {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   color: var(--nf-content-muted);
-  opacity: 0.7;
+  opacity: 0.55;
 }
 @media (hover: hover) and (pointer: fine) {
   .nf-inbox-list [data-testid="inbox-archive"] {
@@ -1036,7 +1049,7 @@
 }
 /* Vallo Assistant, pinned first. */
 .nf-inbox-list .nf-inbox-pinned {
-  background: color-mix(in oklab, var(--nf-brand-primary) 6%, transparent);
+  background: transparent;
 }
 .nf-inbox-pinned__tile {
   display: grid;

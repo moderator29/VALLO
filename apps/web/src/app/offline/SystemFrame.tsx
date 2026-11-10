@@ -64,7 +64,7 @@ export function SystemFrame({
 
 /**
  * The moment with PLAIN images: fixed brand assets at their own sizes, each
- * small (the plate 24 KB, the tile 22 KB, the wordmark 28 KB), with explicit
+ * small (the plate 7 KB, the tile 7 KB, the wordmark 3 KB: the small plate and the vector wordmark, 10 November 2026, so the install of the offline shell stays light on every route), with explicit
  * dimensions so nothing shifts. These are the files the service worker
  * precaches or runtime-caches, which is why the offline variant always used
  * them, and they need no optimiser. The root error boundary uses this one
@@ -91,7 +91,7 @@ export function PlainSystemMoment({
       aside={aside}
       plate={
         // eslint-disable-next-line @next/next/no-img-element
-        <img src="/brand/photos/bg-blue-wave.jpg" alt="" width={941} height={1672} decoding="async" />
+        <img src="/brand/photos/bg-blue-wave-640.jpg" alt="" width={640} height={360} decoding="async" />
       }
       brand={
         <>
@@ -107,7 +107,7 @@ export function PlainSystemMoment({
           {!inset && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src="/brand/vallo-wordmark.png"
+              src="/brand/vallo-wordmark.svg"
               alt="Vallo"
               width={1664}
               height={352}

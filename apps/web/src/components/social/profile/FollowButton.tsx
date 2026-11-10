@@ -8,6 +8,8 @@ import { useRequireAuth } from "@/components/auth/AuthGate";
 import { toggleFollow } from "@/lib/social/follows-actions";
 import { setOrKeep } from "@/lib/offline/send-or-keep";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { POST_COPY } from "@/lib/social/posts-model";
+import { bannerWithUndo } from "@/lib/ui/undo-banner";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 
 /**
@@ -126,6 +128,20 @@ export function FollowButton({
         /* The database is the authority even when it agrees with us: a second tab
            may already have done this. */
         setFollowing(result.data.following);
+        /* Said in the banner, with Undo: the inverse is the same call the
+           other way. A kept tap (no signal) is said when it is sent. */
+        const who = `@${handle}`;
+        bannerWithUndo(
+          (next ? POST_COPY.followedDone : POST_COPY.unfollowedDone).replace("{name}", who),
+          {
+            undo: () => toggleFollow({ handle, want: !next }),
+            undone: (next ? POST_COPY.unfollowUndone : POST_COPY.followUndone).replace("{name}", who),
+            onUndone: () => {
+              setFollowing(!next);
+              router.refresh();
+            },
+          },
+        );
         router.refresh();
       } catch (error) {
         if (!tapFailedOffline(error)) throw error;

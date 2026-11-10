@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { readAgentEarnings, type AgentEarnings } from "@/lib/agent/earnings-queries";
 import { getPayoutAccounts } from "@/lib/agent/payout-queries";
@@ -93,11 +94,11 @@ export default async function Page({
       locale={locale}
       active="/agent/earnings"
       profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
     >
-      <div className="mb-lg">
-        <h1 className="nf-h1">{t.agentEarnings.title}</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">{t.agentEarnings.lede}</p>
-      </div>
+      <PageFrame title={t.agentEarnings.title} subtitle={t.agentEarnings.lede} fallback="/agent/dashboard" width="wide">
+      <div>
 
       {/* Chargebacks: the payout rule, said calmly, only when it applies. */}
       <ChargebackHoldNotice hold={hold} copy={t.chargebacks.hold} locale={locale} />
@@ -162,6 +163,8 @@ export default async function Page({
           resolveAvailable={payout.resolveAvailable}
         />
       )}
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

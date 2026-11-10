@@ -13,7 +13,10 @@
  * places is not a legal text.
  */
 
+import { RetentionTable } from "@/components/legal/RetentionTable";
+import Link from "next/link";
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
+import { PRIVACY_UPDATED_ISO, longDate } from "./versions";
 import { GRACE_WINDOW_DAYS } from "@/lib/account-deletion/constants";
 import {
   COMPANY_DOMAIN,
@@ -25,10 +28,11 @@ import {
 } from "./company";
 
 /** The date on the page; moves with PRIVACY_VERSION (`./versions`). */
-export const PRIVACY_UPDATED = "25 September 2026";
+export const PRIVACY_UPDATED = longDate(PRIVACY_UPDATED_ISO);
 
-export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNode }[] = [
+export const PRIVACY_SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
   {
+    id: "who-we-are",
     title: "1. Who we are",
     body: (
       <>
@@ -63,7 +67,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         <p>
           {DATA_PROTECTION_OFFICER ? <>Our Data Protection Officer is {DATA_PROTECTION_OFFICER}. </> : null}
           Questions about this policy, about the data we hold about you, or any request to
-          exercise the rights in section 8, should go to{" "}
+          exercise the rights in <Link href="/privacy#your-rights" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 8</Link>, should go to{" "}
           <a href={SUPPORT_HREF} className="font-semibold text-[var(--nf-content-link)] hover:underline">
             {SUPPORT_LABEL}
           </a>
@@ -80,6 +84,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
        stores, not from what a policy usually says. When a feature starts
        storing something new, this list changes in the same commit, and so do
        `docs/store/PRIVACY_LABELS.md` and PRIVACY_VERSION. */
+    id: "data-we-collect",
     title: "2. The data we collect",
     body: (
       <>
@@ -110,17 +115,17 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           </li>
           <li>
             <strong>Payment data.</strong> Payment references, amounts, how each payment
-            was split (the lister&rsquo;s share, the Vallo Guarantee contribution and
-            our commission), refunds, and, if you save them, a card token and the bank
+            was split (the lister&rsquo;s share and our commission), refunds, and, if you save them, a card token and the bank
             account you nominate for payouts. We do not keep a wallet or a balance for
             you, because we never hold your money. Card numbers are handled by Paystack;
             we never see or store your full card number.
           </li>
           <li>
-            <strong>Agreements and Guarantee claims.</strong> The agreements you draw
-            up and confirm, their versions, Vallo&rsquo;s decision and its reason, and,
-            if you make a claim on the Vallo Guarantee, what you claimed, the photographs
-            and evidence you upload, and the decision.
+            <strong>Agreements, and claims made before 9 November 2026.</strong> The
+            agreements you draw up and confirm, their versions, Vallo&rsquo;s decision and
+            its reason, and, if you made a claim on the Vallo Guarantee while it ran (it was
+            retired on 9 November 2026), what you claimed, the photographs and evidence you
+            uploaded, and the decision.
           </li>
           <li>
             <strong>Verification data.</strong> If you list property or get paid on
@@ -145,7 +150,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
             Assistant conversations are kept on your account so you can come back to
             them; the support chat is kept on your device, and a ticket you open with a
             person is kept on your account. What you type is processed by Anthropic to
-            write the answers, only if you agree to it. See section 12.
+            write the answers, only if you agree to it. See <Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>.
           </li>
           <li>
             <strong>Devices and notifications.</strong> If you turn notifications on, the
@@ -189,6 +194,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     ),
   },
   {
+    id: "how-we-use-data",
     title: "3. How we use your data",
     body: (
       <ul>
@@ -210,7 +216,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         <li>To show listings, stays and places on a map and near where you ask.</li>
         <li>
           To answer your questions with the AI assistant and the support chat, if you
-          agree to it (section 12).
+          agree to it (<Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>).
         </li>
         <li>
           To send you notifications and emails about your bookings, messages, money and
@@ -220,13 +226,14 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         <li>To keep the service secure, prevent abuse and comply with Nigerian law.</li>
         <li>
           News and updates by email are on when you sign up, with a box you can untick
-          there, and you can switch them off at any time in Settings. Every one includes
+          there, and you can switch them off at any time in <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">Settings</Link>. Every one includes
           a way to opt out.
         </li>
       </ul>
     ),
   },
   {
+    id: "lawful-bases",
     title: "4. Our lawful bases under the NDPA",
     body: (
       <>
@@ -261,6 +268,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     ),
   },
   {
+    id: "sharing",
     title: "5. Who we share data with",
     body: (
       <>
@@ -285,14 +293,9 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
               <li>Vercel (United States): hosting the website and app.</li>
               <li>
                 Paystack (Nigeria): card and bank payments, splitting each payment to the
-                lister&rsquo;s bank account and the Guarantee reserve, refunds, and
+                lister&rsquo;s bank account, refunds, and
                 confirming the account holder&rsquo;s name on the bank account you
                 nominate for payouts.
-              </li>
-              <li>
-                Payluk (Nigeria): where the Vallo wallet is offered, the payment provider
-                that holds and moves that money. It receives your name, email address and
-                phone number.
               </li>
               <li>
                 Termii (Nigeria) and Twilio (United States): sending the one-time codes
@@ -306,12 +309,13 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
               <li>Resend (United States): sending our emails.</li>
               <li>
                 Anthropic (United States): writing the answers of the AI assistant and
-                the support chat, if you agree to it (section 12).
+                the support chat, if you agree to it (<Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>).
               </li>
               <li>
-                MapTiler (Switzerland) and CARTO (United States, Spain): map tiles. When a
-                map is shown they receive your IP address and the part of the map you are
-                looking at.
+                OpenFreeMap (Hungary), which may deliver through Cloudflare (United
+                States): map tiles. When a map is shown they receive your IP address and
+                the part of the map you are looking at. OpenFreeMap keeps no IP address in
+                its access logs.
               </li>
               <li>
                 Google Firebase Cloud Messaging (United States) and Apple Push
@@ -342,11 +346,12 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     ),
   },
   {
+    id: "storage",
     title: "6. Storage and international transfers",
     body: (
       <p>
         Our database and files are stored in Ireland (EU). Some of our providers named in
-        section 5 process data in the United States, Switzerland or elsewhere. Where
+        <Link href="/privacy#sharing" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 5</Link> process data in the United States, Switzerland or elsewhere. Where
         personal data leaves Nigeria we rely on the transfer mechanisms the NDPA permits,
         including transfers to jurisdictions providing adequate protection and
         contractual safeguards with our providers, so your data keeps the same level of
@@ -360,6 +365,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
        not perform one at all for anybody who had transacted: see
        docs/design/audits/r3/findings.md F-17. Every sentence below describes
        what lib/account-deletion actually does. */
+    id: "retention",
     title: "7. How long we keep data, and what happens when you delete your account",
     body: (
       <>
@@ -370,9 +376,15 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           says plainly which is which.
         </p>
         <p>
-          <strong>You can delete your account yourself,</strong> in Settings then Account,
+          <strong>You can delete your account yourself,</strong> in <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">Settings</Link> then Account,
           in the app or on this website. You do not need to write to us and we do not do
           it by hand.
+        </p>
+        <p>
+          <strong>Why you are leaving.</strong> When you delete your account we ask why,
+          from a short list of choices, and you can choose not to say. You never type
+          anything for this. Only the code of the choice you made is recorded, in our
+          audit log, and no free text is kept.
         </p>
         <p>
           <strong>Nothing is destroyed for {GRACE_WINDOW_DAYS} days.</strong> The moment
@@ -404,8 +416,8 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         </p>
         <p>
           <strong>Money is never deleted with an account.</strong> On the day the deletion
-          runs we check again. If a payment or a refund is still in progress, a Guarantee
-          claim is open, or money is owed to you or by you, the deletion
+          runs we check again. If a payment or a refund is still in progress, a claim
+          made before 9 November 2026 is still open, or money is owed to you or by you, the deletion
           waits: nothing is destroyed, a person at Vallo is told, and we contact you to
           settle it first. Your code to stop the deletion keeps working while it waits.
         </p>
@@ -413,8 +425,9 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           <strong>Kept, with you removed from it.</strong> Vallo is registered with the
           Special Control Unit against Money Laundering and is subject to Nigeria&rsquo;s
           Money Laundering (Prevention and Prohibition) Act, which requires a business
-          that moves money to retain its transaction records for at least five years after
-          the transaction. So your bookings, reservations, agreements, payments, Guarantee claims,
+          that moves money to retain its transaction records for years after the
+          transaction, and tax and company law ask for similar records. We keep payment and
+          financial records, agreements and receipts for six years. So your bookings, reservations, agreements, payments, Guarantee claims,
           platform revenue lines, payout records, inspection requests and reviews are kept
           for that period. Your name, email address and telephone number are removed from
           every one of them, and what remains is an amount, a date and a reference that no
@@ -424,7 +437,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
         </p>
         <p>
           <strong>This is the retention exception to your right to erasure,</strong> and
-          section 8 sets out how to exercise that right. The NDPA permits us to keep
+          <Link href="/privacy#your-rights" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 8</Link> sets out how to exercise that right. The NDPA permits us to keep
           personal data where another law requires us to, and this is that case. It is
           limited to the records named above, for the period named above, and to nothing
           else.
@@ -440,6 +453,10 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           approved, none of this is kept: the documents and the numbers are destroyed with
           the rest of your account.
         </p>
+        <h3 className="nf-h4" id="retention-table">
+          How long we keep each kind of data
+        </h3>
+        <RetentionTable />
         <p>
           The full list of what is destroyed and what is kept, and the form that stops a
           deletion already running, are at{" "}
@@ -455,6 +472,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     ),
   },
   {
+    id: "your-rights",
     title: "8. Your rights under the NDPA",
     body: (
       <>
@@ -463,8 +481,8 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
           <li>Ask for a copy of the personal data we hold about you.</li>
           <li>Ask us to correct data that is inaccurate or incomplete.</li>
           <li>
-            Delete your account yourself, in Settings then Account, which destroys
-            everything except the records section 7 says we are required to keep.
+            Delete your account yourself, in <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">Settings</Link> then Account, which destroys
+            everything except the records <Link href="/privacy#retention" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 7</Link> says we are required to keep.
           </li>
           <li>Ask us to delete other data we no longer have a lawful reason to keep.</li>
           <li>Object to, or ask us to restrict, certain processing.</li>
@@ -502,44 +520,68 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     /* SEC-13: this said Vallo used "analytics that help us understand how the
        product is used". It does not: there is no analytics or advertising
        script, and the only cookies are the functional ones listed here. */
+    id: "cookies",
     title: "9. Cookies and similar technology",
     body: (
       <>
         <p>
-          We use only cookies and device storage that the product needs to work, and one
-          first-party cookie for the sign-up step counts in section 2. There is no analytics
-          from a third party, and no advertising or tracking cookie in Vallo.
+          Vallo stores small pieces of information on your device, as cookies and as device
+          storage. Everything is set by Vallo itself, apart from the sign-in cookie, which our
+          sign-in provider, Supabase, sets to keep you signed in. There is no analytics from a
+          third party, and no advertising or tracking cookie in Vallo.
         </p>
         <ul>
-          <li>Your sign-in session (set by our sign-in provider, Supabase).</li>
           <li>
-            Your choices: language, theme, which side of Vallo you last used, how you like
-            search results shown, and whether you have seen the welcome cards.
-          </li>
-          <li>That you agreed to how the AI assistant works (section 12).</li>
-          <li>
-            A random visit number for the sign-up step counts, deleted when you close your
-            browser.
+            <strong>Necessary.</strong> Your sign-in session, your language and theme, places you
+            saved, drafts you were typing, your agreement to how the AI assistant works (
+            <Link href="/privacy#ai" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 12</Link>
+            ) and the record of your cookie choice. These are always on.
           </li>
           <li>
-            On your device only: places you saved before signing in, your support chat,
-            whether notifications are on for this device, and your data-saver choice.
+            <strong>Preferences.</strong> Conveniences Vallo would remember on its own, such as
+            recent searches. Off until you agree.
+          </li>
+          <li>
+            <strong>Usage counts.</strong> A random visit number for the first-party sign-up step
+            counts in{" "}
+            <Link href="/privacy#data-we-collect" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 2</Link>
+            , and the shared link you opened first. Off until you agree.
           </li>
         </ul>
+        <p>
+          When you first visit, Vallo asks for your choice. Accept all, Only necessary and Choose
+          carry equal weight, and you can change your mind at any time from Settings, under
+          Privacy and security, or from Cookie settings at the foot of the site. The complete list,
+          with the name, purpose, type and lifetime of every item, is on the{" "}
+          <Link href="/cookies" className="font-semibold text-[var(--nf-content-link)] hover:underline">Cookies page</Link>.
+        </p>
       </>
     ),
   },
   {
-    title: "10. Children",
+    id: "children",
+    title: "10. People under 18",
     body: (
-      <p>
-        {COMPANY_TRADING_NAME} is for adults. You must be at least 18 years old to create
-        an account, book a stay or list a property. We do not knowingly collect personal
-        data from children, and we delete any such data we discover.
-      </p>
+      <>
+        <p>
+          {COMPANY_TRADING_NAME} is for people aged 18 and over. You must be at least 18
+          years old to create an account, book a stay or list a property. We do not
+          knowingly collect personal data from anyone under 18.
+        </p>
+        <p>
+          <strong>If we find that someone under 18 has an account,</strong> we close the
+          account and delete their personal data, except for anything the law requires us
+          to keep. If you think a younger person is using Vallo, tell us through{" "}
+          <a href={SUPPORT_HREF} className="font-semibold text-[var(--nf-content-link)] hover:underline">
+            {SUPPORT_LABEL}
+          </a>{" "}
+          and we will act on it.
+        </p>
+      </>
     ),
   },
   {
+    id: "security",
     title: "11. Security",
     body: (
       <>
@@ -605,6 +647,7 @@ export const PRIVACY_SECTIONS: { id?: string; title: string; body: React.ReactNo
     ),
   },
   {
+    id: "changes",
     title: "13. Changes to this policy",
     body: (
       <p>

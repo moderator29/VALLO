@@ -25,7 +25,7 @@ export default async function DiscoverPage({ searchParams }: { searchParams: Pro
   const pages = Math.min(MAX_PAGES, Math.max(1, Number.parseInt(typeof params.more === "string" ? params.more : "1", 10) || 1));
   const people = readPeopleFilters(params);
   const rooms = readRoomFilters(params);
-  const schools = await listInstitutions({ limit: 400 });
+  const schools = await listInstitutions({ limit: 1500 });
 
   let result: DiscoverResult;
   if (mode === "people") {

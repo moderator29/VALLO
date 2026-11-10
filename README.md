@@ -29,7 +29,7 @@ Vallo is built and operated by VALLO SPACES LTD (RC 9870413). Production runs at
 | Payments | Paystack split payments: each charge is divided between the lister, the Vallo Guarantee reserve and Vallo in the same transaction. Crypto through Yellow Card, off until configured |
 | Email | Resend, with a Supabase Send Email hook so auth mail uses the same sender |
 | Push | Web Push (VAPID), Firebase Cloud Messaging and APNs, through one drain in `lib/push/` |
-| Maps | Leaflet, with CARTO tiles by default and MapTiler when a key is set |
+| Maps | OpenFreeMap vector tiles (free for commercial use, no key), drawn by MapLibre with a light Leaflet fallback |
 | Native | Capacitor 8. The shell loads the live origin and bundles an offline fallback page |
 | Hosting | Vercel, with functions in `dub1` (Dublin) beside the database in eu-west-1 |
 | Languages | English, Yoruba, Hausa and Igbo (`packages/i18n`) |

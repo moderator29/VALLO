@@ -48,7 +48,10 @@ export const landingRoomsIg = {
       },
       { key: "pay", q: "Kedu ka ịkwụ ụgwọ si arụ ọrụ?" },
       { key: "inspection", q: "M ga-akwụ ụgwọ iji leta ụlọ?" },
-      { key: "guarantee", q: "Gịnị bụ Nkwa Vallo?" },
+      /* NATIVE REVIEW (9 November 2026): the retired "What is the Vallo Guarantee?" stood
+         here. Its slot is English's "standing" question, in English (its answer is a
+         money constant, English in every locale) until a native reader translates it. */
+      { key: "standing", q: "What stands behind my payment?" },
       {
         key: "lister",
         q: "Kedu ka m ga-esi mara onye nọ n'azụ ndepụta?",

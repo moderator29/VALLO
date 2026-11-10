@@ -4,6 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { searchPeople } from "@/lib/admin/member-queries";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { Button, ButtonLink } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function PeoplePage({
 
   return (
     <div className="nf-console" data-testid="people-desk">
-      <ui.QueueHeader title="People" lede={LEDE} />
+      <PageHead title="People" lede={LEDE} />
 
       <form method="get" action="/admin/people" role="search" className="nf-panel nf-panel--card nf-admin-card p-card">
         <label htmlFor="people-q" className="nf-label">

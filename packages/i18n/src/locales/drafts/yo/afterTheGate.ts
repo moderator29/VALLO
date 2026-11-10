@@ -43,10 +43,14 @@ export const afterTheGateYo = {
   },
   refund: {
     heading: "Owó rẹ tí a dá padà",
-    landed: "A dá a padà sí káàdì rẹ ní {date}. Paystack fìdí rẹ̀ múlẹ̀ pé ó ti lọ.",
-    initiated: "Paystack bẹ̀rẹ̀ dídá owó padà sí káàdì rẹ ní {date}. Àwọn báńkì sábà máa ń fi hàn láàrin ọjọ́ iṣẹ́ díẹ̀.",
-    initiatedLate: "Paystack bẹ̀rẹ̀ dídá owó padà sí káàdì rẹ ní {date}, lẹ́yìn ọjọ́ tí ó kẹ́yìn tí a ṣèlérí, {due}.",
-    sending: "A ti pinnu dídá owó padà, a sì ń fi ránṣẹ́ sí Paystack, padà sí káàdì tàbí àkọọ́lẹ̀ tí o fi sanwó.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `landed` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiated` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `initiatedLate` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `sending` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     nothingOwed: "Kò sí ohun tí ó yẹ kí ó padà lábẹ́ àwọn òfin tí a fi sanwó fún ibùgbé yìí.",
     amount: "{amount} yóò padà",
     retained: "A pa {amount} mọ́ lábẹ́ àwọn òfin náà",
@@ -100,7 +104,8 @@ export const afterTheGateYo = {
       agreed: "A fohùn ṣọ̀kan lórí àyọkúrò",
       disputed: "Àyọkúrò kan wà lọ́dọ̀ òṣìṣẹ́ Vallo",
       returned: "A ti yanjú rẹ̀",
-      escalated: "Ó wà lọ́dọ̀ Ìdánilójú Vallo",
+      /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalated` was reworded in English and
+         falls back to the English until a native reader translates it. Never invent one. */
     },
     cautionCovered: "A dá {returned} padà, a yọ {deducted} kúrò, a ṣì jẹ {outstanding}.",
     cautionGuaranteed: "A san {amount} fún ayálégbé láti inú Ìdánilójú Vallo.",
@@ -145,9 +150,12 @@ export const afterTheGateYo = {
     contestNote: "Ohun tí ó ṣẹlẹ̀",
     contestSubmit: "Sọ fún Vallo",
     escalateHeading: "A kò dá owó ìkìlọ̀ padà",
-    escalateHelp: "Ó yẹ kí a dá a padà ní {date}. A ṣì jẹ {amount}, kò sì sí àríyànjiyàn lórí rẹ̀. Vallo lè ṣàyẹ̀wò rẹ̀ bí ìbéèrè Ìdánilójú Vallo.",
-    escalateSubmit: "Béèrè rẹ̀ láti inú Ìdánilójú Vallo",
-    escalateOpen: "Ìbéèrè rẹ lórí Ìdánilójú Vallo wà lọ́dọ̀ òṣìṣẹ́ Vallo.",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateHelp` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateSubmit` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `escalateOpen` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     promiseHeading: "Ohun tí a ṣèlérí fún ọ",
     promiseLede: "Àkọsílẹ̀ náà bí ó ti rí nígbà tí a san àpapọ̀ owó ìwọlé ní {date}. Àtúnṣe sí àkọsílẹ̀ náà láti ìgbà náà kò yí èyí padà.",
     promiseNone: "A ń kọ ìlérí àkọsílẹ̀ náà sílẹ̀ nígbà tí ìsanwó ìwọlé bá parí.",

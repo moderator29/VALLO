@@ -74,6 +74,8 @@ import { visitOpsEn } from "./visit-ops.en";
 import { adminCoverageEn } from "./admin-coverage.en";
 /* The referral desk: the console's /admin/referrals (13 October). */
 import { referralDeskEn } from "./referral-desk.en";
+import { cookiesEn } from "./cookies.en";
+import { profileSetupEn } from "./profile-setup.en";
 /* The chargebacks desk and the lister's hold notice (13 October 2026). */
 import { chargebacksEn } from "./chargebacks.en";
 /* Circle (SW11): the community feature's words. */
@@ -898,6 +900,7 @@ export const en = {
       coverPhoto: "Cover photo",
       coverPhotoSub: "The picture across the top of your page",
       memberSince: "Member since",
+      addPhoto: "Add your photo",
       claimHandle: "Claim your handle",
       claimHandleNote:
         "A handle is your address on Vallo. Claim one and this page gets a cover, a public page and somewhere for what you write to live.",
@@ -1582,6 +1585,14 @@ export const en = {
     },
     referralLabel: "Referral code",
     referralPlaceholder: "Enter your code",
+    referralInviteLabel: "Referral code or invite link",
+    referralInviteHint: "Optional. Paste the code or the link a friend sent you.",
+    referralInvitePlaceholder: "Code or link",
+    referralFound: "Referred by {name}",
+    referralFoundNoName: "Referral code accepted",
+    referralUnknown: "We could not find that code. You can still create your account.",
+    referralUnreadable: "That is not a Vallo referral code or invite link.",
+    referralBusy: "We could not look that up just now. It is looked up again when you create your account.",
     /* The form in two steps on one page (the Slate pass). Step one is the
        account (name, email, password), step two is everything else. The
        server still checks every field; these are only the early answers the
@@ -1776,6 +1787,10 @@ export const en = {
       add: "Add",
       logOut: "Log out",
       loggingOut: "Signing out",
+      logOutTitle: "Log out of Vallo?",
+      logOutLine: "You will need to sign in again to use your account on this phone.",
+      logOutLineAs: "You are signed in as {email}. You will need to sign in again to use your account on this phone.",
+      logOutCancel: "Cancel",
       verified: "Verified",
       devices: { one: "{count} device", other: "{count} devices" },
     },
@@ -2040,6 +2055,10 @@ export const en = {
       unconfiguredSub: "Kept on this device for now.",
       activeOnThisDevice: "Active on this device",
       signingOut: "Signing out",
+      logOutTitle: "Log out of Vallo?",
+      logOutLine: "You will need to sign in again to use your account on this phone.",
+      logOutLineAs: "You are signed in as {email}. You will need to sign in again to use your account on this phone.",
+      logOutCancel: "Cancel",
       deleteAccount: "Delete my account",
       deleteAccountSub:
         "Removes your profile, preferences, saved places and message history for good. This cannot be undone.",
@@ -2130,6 +2149,28 @@ export const en = {
       keep: "Keep my account",
 
       /* Step two: prove it is you, then type the phrase. */
+      reasonTitle: "Why are you leaving?",
+      reasonHint:
+        "Pick the closest one. It helps us fix what went wrong. Only the Vallo team sees it, and it does not change what happens next.",
+      reasonContinue: "Continue",
+      reasonBack: "Back",
+      reasonNoteLabel: "Tell us more (optional)",
+      reasonNoteHint:
+        "In a few words, what would have made you stay. Please do not include names, phone numbers or other personal details. Up to {max} characters.",
+      scheduledBanner:
+        "Your account is scheduled for deletion. You can restore it within 30 days by signing in.",
+      reasons: {
+        not_using: "I am not using Vallo any more",
+        found_place: "I found a place",
+        not_found: "I could not find what I was looking for",
+        hard_to_use: "Vallo is hard to use",
+        notifications: "Too many notifications or emails",
+        privacy: "I am worried about my privacy",
+        safety: "I had a bad experience or did not feel safe",
+        second_account: "I have another account",
+        other: "Something else",
+        prefer_not_to_say: "I would rather not say",
+      },
       confirmTitle: "Confirm it is you",
       passwordLabel: "Your password",
       passwordHint: "The password you sign in with.",
@@ -2154,7 +2195,7 @@ export const en = {
         "Everything is destroyed on {date}, which is in {days} days. Until then nothing has gone and you can put it all back.",
       restore: "Restore my account",
       restoring: "Restoring",
-      restored: "Your account is back. Nothing was destroyed.",
+      restored: "Welcome back, your account is restored.",
 
       /* The preconditions. Each one names what is in the way and carries the
          control that clears it. None of them is a dead end. */
@@ -5355,7 +5396,7 @@ export const en = {
       step1Title: "Choose your dates",
       step1Body: "Pick check-in and check-out on a live calendar.",
       step2Title: "Confirm and pay",
-      step2Body: "Payment in naira through Paystack. You are never charged early.",
+      step2Body: "Payment in naira, by card. You are never charged early.",
       step3Title: "Enjoy your stay",
       step3Body: "Check-in details arrive right here and by email.",
     },
@@ -6155,6 +6196,10 @@ export const en = {
 
   referralDesk: referralDeskEn,
 
+  /* The cookie notice and choice sheet (10 November 2026). */
+  cookies: cookiesEn,
+  profileSetup: profileSetupEn,
+
 
   /*
    * THE SUCCESS SHEET (components/ui/SuccessSheet.tsx, docs/SUCCESS_MOMENTS.md).
@@ -6334,6 +6379,10 @@ export const en = {
       },
       accountCreated: { title: "Welcome to Vallo", body: "Your account is ready." },
       signedIn: { title: "Signed in. Welcome back.", body: "You are signed in on this device." },
+      signedOut: { title: "You are signed out", body: "See you soon." },
+      profileConfirmed: { title: "Thanks, your profile is confirmed.", body: "Name saved." },
+      photoAdded: { title: "Photo added", body: "Photo saved." },
+      checkEmail: { title: "Check your email", body: "Code sent." },
       emailVerified: { title: "Email confirmed", body: "Your email address is confirmed on this account." },
       passwordChanged: {
         title: "Password changed",
@@ -6508,7 +6557,7 @@ export const en = {
     recommended: "Recommended",
     continue: "Continue",
     saving: "Saving your choice",
-    escrowOnlyTitle: "Paid into escrow",
+    escrowOnlyTitle: "Paying for a purchase",
     cardOnlyTitle: "Paid by card",
     lockedNote: "Your payment has started, so the way you pay stays as it is.",
     notPayerNote: "The renter or guest chooses how to pay.",
@@ -6519,11 +6568,11 @@ export const en = {
       closed: "This agreement is closed, so there is nothing to pay on it.",
       already_paid: "This is already paid.",
       payment_started: "A payment is already under way, so the way you pay cannot change now.",
-      sale_escrow_only: "A purchase is paid into escrow only.",
+      sale_escrow_only: "Payment for a purchase is not open on Vallo. Vallo does not take payment for a property purchase at any stage.",
       card_only: "This is paid by card only.",
-      escrow_only: "This is paid into escrow only.",
+      escrow_only: "This payment is not open on Vallo.",
       no_rail: "Payment is not open for this yet. Nothing has been charged.",
-      card_needs_review: "Paying by card is not open on this deal now, because it would need a person at Vallo to check it first. Escrow is open.",
+      card_needs_review: "Paying by card is not open on this deal now, because it would need a person at Vallo to check it first.",
       unavailable: "That could not be saved just now. Nothing has been charged; try again in a moment.",
     },
     accept: {

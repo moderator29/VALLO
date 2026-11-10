@@ -68,7 +68,7 @@ export function profileGaps(p: { firstName: string | null; lastName: string | nu
   const gaps: ProfileGap[] = [];
   if (!p.firstName?.trim()) gaps.push("first_name");
   if (!p.lastName?.trim()) gaps.push("last_name");
-  if (!paylukPhone(p.phone ?? "")) gaps.push("phone");
+  if (!providerPhone(p.phone ?? "")) gaps.push("phone");
   if (!p.email?.trim()) gaps.push("email");
   return gaps;
 }
@@ -89,33 +89,31 @@ export function normalisePhone(raw: string): string | null {
 /**
  * THE NUMBER THE PAYMENTS PARTNER IS GIVEN (2 November 2026), for any country.
  *
- * A Nigerian mobile goes as before: the local form, no country (Payluk falls
+ * A Nigerian mobile goes as before: the local form, no country (the provider falls
  * back to the merchant account's country, Nigeria). A number from another
- * country goes only when Payluk has given us its internal id for that country
- * (`PAYLUK_COUNTRY_IDS`, `GB:<24-hex id>,US:<id>`): its live API refuses a
- * two-letter code, and which countries it serves is not documented (OPEN in
- * docs/payments/PAYLUK_LIVE_DOCS_FINDINGS.md section 10). Until a country is
+ * country goes only when the provider has given us its internal id for that
+ * country (`PROVIDER_COUNTRY_IDS`, `GB:<24-hex id>,US:<id>`). Until a country is
  * listed, a member whose profile number is foreign is told the wallet needs a
  * Nigerian number for now, and nothing is sent.
  */
-export type PaylukPhone = { phone: string; country?: string };
+export type ProviderPhone = { phone: string; country?: string };
 
-export function paylukCountryIds(env: Record<string, string | undefined> = process.env): Record<string, string> {
+export function providerCountryIds(env: Record<string, string | undefined> = process.env): Record<string, string> {
   const out: Record<string, string> = {};
-  for (const pair of (env.PAYLUK_COUNTRY_IDS ?? "").split(",")) {
+  for (const pair of (env.PROVIDER_COUNTRY_IDS ?? "").split(",")) {
     const [iso, id] = pair.split(":").map((part) => part.trim());
     if (iso && id && /^[A-Z]{2}$/.test(iso) && /^[0-9a-f]{24}$/i.test(id)) out[iso] = id;
   }
   return out;
 }
 
-export function paylukPhone(raw: string, env: Record<string, string | undefined> = process.env): PaylukPhone | null {
+export function providerPhone(raw: string, env: Record<string, string | undefined> = process.env): ProviderPhone | null {
   const local = normalisePhone(raw);
   if (local) return { phone: local };
   const e164 = normaliseAnyPhone(raw);
   if (!e164 || e164.startsWith("+234")) return null;
   const country = countryOfNumber(e164);
-  const id = country ? paylukCountryIds(env)[country] : undefined;
+  const id = country ? providerCountryIds(env)[country] : undefined;
   return id ? { phone: e164.slice(1), country: id } : null;
 }
 
@@ -318,8 +316,8 @@ export function movementReference(kind: "deposit" | "withdrawal" | "transfer_out
 }
 
 /**
- * Why the provider refused to open an account, in the member's terms. Payluk
- * holds one account per mobile number, and a number already on another Payluk
+ * Why the provider refused to open an account, in the member's terms. The provider
+ * holds one account per mobile number, and a number already on another
  * account (the founder's own was on Vallo's merchant account, 8 October 2026)
  * is refused; every other refusal is about the details as a whole.
  */

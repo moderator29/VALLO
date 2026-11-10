@@ -21,8 +21,8 @@ import { applySubscriptionEvent } from "./webhook";
  *
  * A single-party Paystack charge to Vallo's account, initialised with the
  * plan's Paystack plan code so Paystack creates the subscription and charges it
- * every month itself. No split, no subaccount, no escrow; Payluk is never
- * involved. Vallo stores no card data.
+ * every month itself. No split, no subaccount, no escrow; the protected
+ * rail is never involved. Vallo stores no card data.
  *
  * THE AMOUNT NEVER COMES FROM THE CLIENT. The caller names a plan key; the
  * price is the plan row's `price_minor`, the Paystack plan is made at that

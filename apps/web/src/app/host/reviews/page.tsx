@@ -49,7 +49,9 @@ export default async function HostReviewsPage() {
   }
 
   return (
-    <HostShell fallback="/host" wide>
+    /* The view's page frame carries the one way back; the bar keeps the
+       host's destinations. */
+    <HostShell fallback="/host" wide chromeBack={false} nav>
       <HostReviewsView read={read} locale={locale} />
     </HostShell>
   );

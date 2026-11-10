@@ -42,3 +42,21 @@ export function claimOutcome(raw: unknown): ClaimOutcome | null {
 export function claimIsFinal(outcome: ClaimOutcome): boolean {
   return outcome !== "signed_out";
 }
+
+/**
+ * WHAT A PERSON MAY PASTE INTO "Referral code or invite link": the six
+ * character code on its own, or the whole link (`/join/ABC234`, with or
+ * without the site's address), or an address carrying `?ref=ABC234`.
+ * Returns the normalised code, or null when nothing in it is a code.
+ */
+export function parseInviteInput(raw: string | null | undefined): string | null {
+  const text = (raw ?? "").trim();
+  if (!text) return null;
+  const direct = normaliseInviteCode(text);
+  if (direct) return direct;
+  const join = /\/join\/([A-Za-z0-9]{6})(?:[/?#]|$)/.exec(text);
+  if (join?.[1]) return normaliseInviteCode(join[1]);
+  const ref = /[?&](?:ref|code|invite)=([A-Za-z0-9]{6})(?:[&#]|$)/i.exec(text);
+  if (ref?.[1]) return normaliseInviteCode(ref[1]);
+  return null;
+}

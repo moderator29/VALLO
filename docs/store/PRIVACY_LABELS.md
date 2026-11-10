@@ -73,7 +73,7 @@ Facts that apply to every row:
 
   The notice (§7) and `/delete-account` say both.
 - **Processors are service providers, not "sharing".** Supabase, Vercel,
-  Paystack, Resend, Anthropic, MapTiler/CARTO, FCM/APNs and Sentry process
+  Paystack, Resend, Anthropic, OpenFreeMap, FCM/APNs and Sentry process
   data on our instructions. Under Play's definitions that is not sharing.
   Showing your booking details to the lister you booked with is a transfer the
   user starts, which Play also exempts. **So "Shared" is NO for every type.**

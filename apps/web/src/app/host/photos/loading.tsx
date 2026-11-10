@@ -1,18 +1,21 @@
 import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { HostHeadSkeleton, HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { HostScreenSkeleton } from "@/components/host/HostScreenSkeleton";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
- * The wait, on the photographs: the head and its count line, then the
+ * The wait, on the photographs: the page frame's large title with Back and
+ * its count line, then the
  * manager's card (title, guidance, the cover rule, a two-column grid of
  * tiles each with its label and Take down, and the dashed add target).
  */
 export default async function LoadingHostPhotos() {
   return (
     <HostScreenSkeleton label={getDictionary(await getLocale()).experienceHost.loadingScreens.photos}>
-      <HostHeadSkeleton />
-      <div className="nf-panel nf-panel--card mt-block block p-card" aria-hidden="true">
+      <div className="nf-g1page">
+      <PageHeaderSkeleton layout="large" subtitle />
+      <div className="nf-panel nf-panel--card block p-card" aria-hidden="true">
         <Skeleton width="55%" height="1.125rem" radius="sm" />
         <Skeleton className="mt-xs" height="0.875rem" radius="sm" />
         <Skeleton className="mt-2xs" width="80%" height="0.875rem" radius="sm" />
@@ -26,6 +29,7 @@ export default async function LoadingHostPhotos() {
           ))}
         </div>
         <Skeleton className="mt-md" height="4.5rem" radius="lg" />
+      </div>
       </div>
     </HostScreenSkeleton>
   );

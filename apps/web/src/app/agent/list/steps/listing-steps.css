@@ -1,0 +1,328 @@
+/*
+ * THE ONE-QUESTION LISTING WIZARD'S OWN PIECES (P1.1, November 2026).
+ *
+ * The frame is the platform's (`StepFrame`, grade1.css), the option cards
+ * and the Change pill are grade1.css's, and the old wizard's cards, tiles,
+ * photo grid and breakdown are catalogue.css's. What is here is only what
+ * the re-flow added: number chips, charge cards with their live total, the
+ * photo readiness line, the counters, the writer's buttons and its Undo, and
+ * the check page's answers and things to fix. Tokens only.
+ */
+@layer theme, base, components, utilities;
+
+@layer components {
+  /* The step's body is a grid item of the frame's content grid, whose track
+     would otherwise grow to the widest thing inside it (a 960px card photo
+     before its width rule lands): never a horizontal scroll at phone width. */
+  .nf-g1step__content > .nf-lw-wizard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--nf-space-md);
+    min-inline-size: 0;
+  }
+  /* A short lead over a secondary way in (the WhatsApp paste on the first step). */
+  .nf-lw2-aside {
+    display: grid;
+    gap: var(--nf-space-xs);
+    margin-block-start: var(--nf-space-md);
+  }
+  .nf-lw2-aside__lead {
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+
+  /* NUMBER CHIPS (R18.7, R32): two rows of five, one tap for a count. */
+  .nf-lw2-count {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-lw2-count__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  .nf-lw2-count__optional {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-lw2-count__exact {
+    margin-block-start: var(--nf-space-2xs);
+  }
+  .nf-lw2-chips {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--nf-space-xs);
+  }
+  @media (max-width: 24rem) {
+    .nf-lw2-chips {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .nf-lw2-chip {
+    min-block-size: 2.75rem;
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition:
+      border-color var(--nf-duration-fast) var(--nf-ease-standard),
+      background-color var(--nf-duration-fast) var(--nf-ease-standard),
+      scale var(--nf-duration-press) var(--nf-ease-press);
+  }
+  .nf-lw2-chip:active {
+    scale: var(--nf-press-scale);
+  }
+  .nf-lw2-chip:focus-visible {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+  .nf-lw2-chip[aria-checked="true"] {
+    border-color: var(--nf-brand-primary);
+    border-width: var(--nf-border-width-strong);
+    background: var(--nf-brand-tint-1);
+    color: var(--nf-brand-primary);
+  }
+
+  /* A field with its unit at the end ("m²", "%"). */
+  .nf-lw2-suffixed {
+    position: relative;
+    display: block;
+  }
+  .nf-lw2-suffixed > .nf-field {
+    padding-inline-end: var(--nf-space-2xl);
+  }
+  .nf-lw2-suffixed__unit {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: var(--nf-space-md);
+    display: flex;
+    align-items: center;
+    color: var(--nf-content-muted);
+    font-weight: 600;
+    pointer-events: none;
+  }
+
+  /* THE LIVE TOTAL (R33): the headline of the charges step. */
+  .nf-lw2-total {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-brand-tint-1);
+  }
+  .nf-lw2-total__glyph {
+    display: grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-brand-primary);
+  }
+  .nf-lw2-total__figure {
+    display: block;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-lw2-total__basis {
+    display: block;
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+
+  /* A CHARGE CARD: the name and its X, the amount, how often. */
+  .nf-lw2-charge {
+    display: grid;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-secondary);
+  }
+  .nf-lw2-charge__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+  }
+  .nf-lw2-charge__name {
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-lw2-charge__drop {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--nf-radius-circle);
+    color: var(--nf-content-secondary);
+  }
+  .nf-lw2-charge__drop:focus-visible {
+    outline: 2px solid var(--nf-focus-ring);
+    outline-offset: 2px;
+  }
+  .nf-lw2-charge__line {
+    display: block;
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    font-variant-numeric: tabular-nums;
+  }
+  .nf-lw2-charge__once {
+    color: var(--nf-content-primary);
+    font-weight: 600;
+  }
+
+  /* PHOTO READINESS (R34) and the check page's "ready" box. */
+  .nf-lw2-ready {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-state-info-surface);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+  .nf-lw2-ready[data-ready] {
+    border-color: color-mix(in oklab, var(--nf-state-success) 45%, transparent);
+    background: var(--nf-state-success-surface);
+  }
+  .nf-lw2-ready[data-ready] > svg {
+    color: var(--nf-state-success);
+  }
+  section.nf-lw2-ready {
+    display: grid;
+    gap: var(--nf-space-3xs);
+  }
+  .nf-lw2-ready__title {
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+  }
+
+  /* The counters under the title and the description: green once met. */
+  .nf-lw2-counter {
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+  .nf-lw2-counter[data-met] {
+    color: var(--nf-state-success);
+    font-weight: 600;
+  }
+
+  /* The two writers, pale and full width (R18.11). */
+  .nf-lw2-writers {
+    display: grid;
+    gap: var(--nf-space-xs);
+  }
+  .nf-lw2-undo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-md);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-inset);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+  }
+
+  /* THINGS TO FIX (inside grade1.css's `.nf-g1-fix` box). */
+  .nf-lw2-fixes {
+    display: grid;
+    gap: var(--nf-space-sm);
+    margin-block-start: var(--nf-space-sm);
+  }
+  .nf-lw2-fix {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--nf-space-sm);
+  }
+  .nf-lw2-fix__mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    margin-block-start: var(--nf-space-3xs);
+    border-radius: var(--nf-radius-circle);
+    background: var(--nf-surface-secondary);
+    color: var(--nf-state-warning);
+  }
+  .nf-lw2-fix__label {
+    display: block;
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  .nf-lw2-fix__detail {
+    display: block;
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+    line-height: 1.4;
+  }
+
+  /* EVERY ANSWER, WITH CHANGE (R18.12). */
+  .nf-lw2-answers {
+    margin-block-start: var(--nf-space-xs);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-xl);
+    background: var(--nf-surface-secondary);
+  }
+  .nf-lw2-answer {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-sm) var(--nf-space-md);
+  }
+  .nf-lw2-answer + .nf-lw2-answer {
+    border-block-start: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-lw2-answer__key {
+    display: block;
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-caption);
+  }
+  .nf-lw2-answer__value {
+    display: block;
+    margin-block-start: var(--nf-space-3xs);
+    color: var(--nf-content-primary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .nf-lw2-answer__value[data-unset] {
+    color: var(--nf-content-muted);
+    font-weight: 400;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-lw2-chip {
+      transition: none;
+    }
+    .nf-lw2-chip:active {
+      scale: none;
+    }
+  }
+}

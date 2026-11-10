@@ -12,6 +12,7 @@ import { ConfirmPanel } from "@/components/app/confirm/ConfirmPanel";
 import { useSafeTransition } from "@/lib/ui/use-safe-transition";
 import { uploadToStorage } from "@/lib/media/upload";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
+import { CARD_REVIEW_SOMETIMES, CONFIRM_PAYMENT_OPENS_BY_CARD, RENT_PAYMENT_NOT_OPEN } from "@/lib/money/copy";
 
 /**
  * The controls on an agreement page (Track A): confirm the exact version,
@@ -54,9 +55,12 @@ export function ConfirmTerms({
   disabled,
   changes,
   changesLead,
+  kind = "rent",
 }: {
   agreementId: string;
   version: number;
+  /** The agreement's kind: a stay is paid by card once approved; payment for rentals is not open. */
+  kind?: string;
   disabled?: boolean;
   /** B9: the lines that moved since this party confirmed, already worded. */
   changes?: { key: string; label: string; before: string; after: string }[];
@@ -106,15 +110,22 @@ export function ConfirmTerms({
             ),
           }))}
           /* What happens next, as the gate works (D68d, D83): the second
-             confirmation of the same version approves the agreement, escrow
-             opens at once, and only a card payment with a risk signal waits
-             for a person. It said "A person at Vallo reviews it" to everybody,
-             which is not what happens. Same words as PAYMENT_GATE_SENTENCE. */
-          next={[
-            { icon: "users", text: "When both of you have confirmed the same version, the agreement is approved." },
-            { icon: "credit-card", text: "Payment opens then. An escrow payment opens straight away." },
-            { icon: "shield-check", text: "A card payment waits for a person at Vallo only when something about the deal needs a second look." },
-          ]}
+             confirmation of the same version approves the agreement. On a
+             stay a card payment opens then, and waits for a person only on a
+             risk signal. Payment for rentals is not open on Vallo (sweep item
+             48, 9 November 2026), and escrow is never offered. */
+          next={
+            kind === "stay"
+              ? [
+                  { icon: "users", text: "When both of you have confirmed the same version, the agreement is approved." },
+                  { icon: "credit-card", text: CONFIRM_PAYMENT_OPENS_BY_CARD },
+                  { icon: "shield-check", text: CARD_REVIEW_SOMETIMES },
+                ]
+              : [
+                  { icon: "users", text: "When both of you have confirmed the same version, the agreement is approved." },
+                  { icon: "credit-card", text: RENT_PAYMENT_NOT_OPEN },
+                ]
+          }
           cancel={
             <Button variant="secondary" disabled={pending} onClick={() => setAsking(false)}>
               Not yet

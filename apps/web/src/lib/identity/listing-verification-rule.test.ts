@@ -3,13 +3,16 @@ import { identityOnFile, listingVerificationOwed } from "./listing-verification-
 
 const base = { flagOn: true, qa: false, tier: 0, identity: "none" as const };
 
-describe("verified before a deal (Grade 1, P0.3)", () => {
-  it("refuses a lister with nothing on file or only refused documents", () => {
+/* 10 November 2026: this rule says when identity is OWED BEFORE PUBLISHING (it drives the
+   "Verify your identity to publish" notes). It no longer refuses a submit: see
+   `submit-without-identity.test.ts`; the block is at approval. */
+describe("identity owed before publishing", () => {
+  it("is owed by a lister with nothing on file or only refused documents", () => {
     expect(listingVerificationOwed(base)).toBe(true);
     expect(listingVerificationOwed({ ...base, identity: "refused" })).toBe(true);
   });
 
-  it("lets a pending or approved identity send the listing for review", () => {
+  it("is not owed once a check is pending or approved", () => {
     expect(listingVerificationOwed({ ...base, identity: "pending" })).toBe(false);
     expect(listingVerificationOwed({ ...base, identity: "approved" })).toBe(false);
     expect(listingVerificationOwed({ ...base, tier: 1 })).toBe(false);

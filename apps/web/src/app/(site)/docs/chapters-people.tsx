@@ -1,19 +1,22 @@
 import Link from "next/link";
-import { LISTING_SALE_ABOUT, NO_INSPECTION_FEE, PRIVATE_FEE_NOTE } from "@/lib/money/copy";
+import {
+  LISTER_AGREE_TERMS,
+  LISTING_SALE_ABOUT,
+  NO_INSPECTION_FEE,
+  PAYMENT_GATE_SENTENCE,
+  PRIVATE_FEE_NOTE,
+  RENT_PAYMENT_NOT_OPEN,
+  SALE_NEVER_PAID_ON_VALLO,
+  SALE_PAYMENT_NOT_OPEN,
+} from "@/lib/money/copy";
 import { SUPPLY_DOORS, SUPPLY_DOOR_HREF, doorsSentence } from "@/lib/supply/roles";
 import { VERIFICATION_ORDER } from "@/lib/trust/verification";
 import { MAX_BLOCK_NIGHTS } from "@/lib/agent/calendar-model";
 import type { DocChapter } from "./chapters";
-import { DocsFlow } from "./DocsFlow";
-import {
-  CARD_MEANS,
-  ESCROW_MEANS,
-  ESCROW_OR_CARD,
-  HOTEL_ROOM_BY_CARD,
-  PAY_INSIDE_VALLO,
-  PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
-} from "./facts";
+import { RUNG_ICON } from "./chapters-guide";
+import { DocFlow } from "@/components/docs/DocFlow";
+import { DocTable } from "@/components/docs/DocTable";
+import { HOTEL_ROOM_BY_CARD, PAY_INSIDE_VALLO, PRICE_IS_THE_PRICE, STAYS_PAID_BY_CARD } from "./facts";
 
 /**
  * THE CHAPTERS FOR EACH KIND OF PERSON (the docs track, 13 October 2026):
@@ -23,7 +26,7 @@ import {
  *
  * The same rules as `chapters.tsx`: one topic each, task-first headings,
  * short sentences, nothing that is not built, money sentences from
- * `facts.ts` or `lib/money/copy.ts`, and no provider named.
+ * `lib/money/copy.ts` (some through `facts.ts`), and no provider named.
  */
 
 const A = "font-semibold text-[var(--nf-content-link)] hover:underline";
@@ -230,27 +233,22 @@ export const FINDING_A_PLACE: DocChapter = {
       id: "filters",
       heading: "Narrow it down with filters",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Budget.</strong> A minimum, a maximum, or both, in naira.
-          </li>
-          <li>
-            <strong>Bedrooms and bathrooms.</strong> The least you need.
-          </li>
-          <li>
-            <strong>Guests.</strong> How many the place must take.
-          </li>
-          <li>
-            <strong>Amenities.</strong> Wi-Fi, air conditioning, kitchen, parking, pool, security,
-            backup power, running water and more. Every one you tick must be there.
-          </li>
-          <li>
-            <strong>Instant book.</strong> Only places you can book without waiting for the host.
-          </li>
-          <li>
-            <strong>Verified only.</strong> Only listings whose lister a person at Vallo has checked.
-          </li>
-        </ul>
+        <DocTable
+          caption="The filters"
+          captionHidden
+          columns={[
+            { key: "filter", label: "Filter" },
+            { key: "keeps", label: "What it keeps" },
+          ]}
+          rows={[
+            { id: "budget", cells: { filter: <strong>Budget</strong>, keeps: "A minimum, a maximum, or both, in naira." } },
+            { id: "rooms", cells: { filter: <strong>Bedrooms and bathrooms</strong>, keeps: "The least you need." } },
+            { id: "guests", cells: { filter: <strong>Guests</strong>, keeps: "How many the place must take." } },
+            { id: "amenities", cells: { filter: <strong>Amenities</strong>, keeps: "Wi-Fi, air conditioning, kitchen, parking, pool, security, backup power, running water and more. Every one you tick must be there." } },
+            { id: "instant", cells: { filter: <strong>Instant book</strong>, keeps: "Only places you can book without waiting for the host." } },
+            { id: "verified", cells: { filter: <strong>Verified only</strong>, keeps: "Only listings whose lister a person at Vallo has checked." } },
+          ]}
+        />
       ),
     },
     {
@@ -472,20 +470,22 @@ export const UNDERSTANDING_A_LISTING: DocChapter = {
       id: "light",
       heading: "Read the light row",
       body: (
-        <ul role="list">
-          <li>
-            <strong>The grid.</strong> Band A (20 hours a day or more), mostly on, patchy, rarely on, or
-            no grid supply.
-          </li>
-          <li>
-            <strong>The backup.</strong> None, a generator, an inverter, solar, or generator and
-            inverter, and how many hours a day it runs.
-          </li>
-          <li>
-            <strong>The meter.</strong> Whether the unit is on a prepaid meter.
-          </li>
-          <li>If the lister has not answered, the listing says so. Message them to ask.</li>
-        </ul>
+        <>
+          <DocTable
+            caption="What the light row says"
+            captionHidden
+            columns={[
+              { key: "part", label: "Part" },
+              { key: "answers", label: "The answers a lister can give" },
+            ]}
+            rows={[
+              { id: "grid", cells: { part: <strong>The grid</strong>, answers: "Band A (20 hours a day or more), mostly on, patchy, rarely on, or no grid supply." } },
+              { id: "backup", cells: { part: <strong>The backup</strong>, answers: "None, a generator, an inverter, solar, or generator and inverter, and how many hours a day it runs." } },
+              { id: "meter", cells: { part: <strong>The meter</strong>, answers: "Whether the unit is on a prepaid meter." } },
+            ]}
+          />
+          <p>If the lister has not answered, the listing says so. Message them to ask.</p>
+        </>
       ),
     },
     {
@@ -542,7 +542,7 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
   number: 0,
   title: "From viewing to keys",
   summary:
-    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, paying with Escrow or by card, and moving in.",
+    "Renting or buying, step by step: the viewing, the inspection report, the agreement you both confirm, and moving in.",
   icon: "contract-sign",
   sections: [
     {
@@ -550,16 +550,14 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
       heading: "The steps, in order",
       body: (
         <>
-          <DocsFlow
-            label="From viewing to keys"
+          <DocFlow
+            label="From viewing to agreed terms"
             steps={[
-              { object: "calendar-check", label: "View it" },
-              { object: "doc-home", label: "Inspection report" },
-              { object: "contract-sign", label: "Both confirm" },
-              { object: "payment-sent", label: "Pay on Vallo" },
-              { object: "keys-handover", label: "Move in" },
+              { icon: "calendar-check", title: "View the place", href: "/docs/viewings", outcome: NO_INSPECTION_FEE },
+              { icon: "clipboard-list", title: "Submit the inspection report", href: "#inspection-report", outcome: "It records what you saw and when." },
+              { icon: "file-check", title: "Confirm the agreement", href: "/agreements", outcome: "You and the owner or agent each confirm the same version." },
             ]}
-            caption={NO_INSPECTION_FEE}
+            end={PAYMENT_GATE_SENTENCE}
           />
           <p>
             Money moves only after you have seen the place and decided. Nothing on this road is paid
@@ -621,14 +619,10 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
       body: (
         <>
           <p>
-            <strong>For rent:</strong> {ESCROW_OR_CARD}
+            <strong>For rent:</strong> {RENT_PAYMENT_NOT_OPEN}
           </p>
-          <ul role="list">
-            <li>{ESCROW_MEANS}</li>
-            <li>{CARD_MEANS}</li>
-          </ul>
           <p>
-            <strong>For a sale:</strong> {SALE_IS_ESCROW} {LISTING_SALE_ABOUT}
+            <strong>For a sale:</strong> {SALE_PAYMENT_NOT_OPEN} {SALE_NEVER_PAID_ON_VALLO} {LISTING_SALE_ABOUT}
           </p>
           <p>
             {PAY_INSIDE_VALLO} See{" "}
@@ -665,6 +659,11 @@ export const AGREEMENTS_AND_PAYING: DocChapter = {
  */
 export const BOOKING_A_STAY: DocChapter = {
   slug: "booking-a-stay",
+  glance: [
+    "The nights are held for you for 48 hours at no cost.",
+    "The price is fixed from the listing when you book, so it cannot move before you pay.",
+    "The person paying need not be the person staying.",
+  ],
   number: 0,
   title: "Booking a stay",
   summary:
@@ -676,13 +675,13 @@ export const BOOKING_A_STAY: DocChapter = {
       heading: "Book a stay",
       body: (
         <>
-          <DocsFlow
+          <DocFlow
             label="Booking a stay"
             steps={[
-              { object: "calendar-grid", label: "Pick your dates" },
-              { object: "receipt-check", label: "See the full price" },
-              { object: "payment-sent", label: "Pay on Vallo" },
-              { object: "luggage-check", label: "In your Plans" },
+              { icon: "calendar-booking", title: "Pick your dates", href: "/stays", outcome: "Every price becomes the total for your nights." },
+              { icon: "receipt", title: "See the full price", href: "#the-price-breakdown", outcome: "The total. Nothing from Vallo is added to it." },
+              { icon: "credit-card", title: "Pay by card", href: "/docs/paying-on-vallo#card", outcome: STAYS_PAID_BY_CARD },
+              { icon: "calendar-check", title: "Find it in Plans", href: "/bookings", outcome: "Plans lists your stays and tables by date." },
             ]}
           />
           <p>
@@ -695,7 +694,7 @@ export const BOOKING_A_STAY: DocChapter = {
             the host accepts or declines first, and you are told which.
           </p>
           <p>
-            <strong>Paying.</strong> {ESCROW_OR_CARD} See{" "}
+            <strong>Paying.</strong> {STAYS_PAID_BY_CARD} See{" "}
             <Link href="/docs/paying-on-vallo" className={A}>
               How paying works
             </Link>
@@ -822,18 +821,19 @@ export const REVIEWS: DocChapter = {
       id: "who-can-review",
       heading: "Who can leave a review",
       body: (
-        <ul role="list">
-          <li>
-            <strong>A stay.</strong> The guest, after a completed booking.
-          </li>
-          <li>
-            <strong>A restaurant.</strong> Only a diner whose table was marked seated.
-          </li>
-          <li>
-            <strong>A tenancy.</strong> The tenant, about a month after moving in. The first question is
-            whether you paid anyone anything beyond what you paid on Vallo. That answer is private.
-          </li>
-        </ul>
+        <DocTable
+          caption="Who can leave a review"
+          captionHidden
+          columns={[
+            { key: "what", label: "For" },
+            { key: "who", label: "Who can review, and when" },
+          ]}
+          rows={[
+            { id: "stay", icon: "calendar-booking", cells: { what: <strong>A stay</strong>, who: "The guest, after a completed booking." } },
+            { id: "restaurant", icon: "utensils", cells: { what: <strong>A restaurant</strong>, who: "Only a diner whose table was marked seated." } },
+            { id: "tenancy", icon: "house", cells: { what: <strong>A tenancy</strong>, who: "The tenant, about a month after moving in. The first question is whether you paid anyone anything beyond what you paid on Vallo. That answer is private." } },
+          ]}
+        />
       ),
     },
     {
@@ -895,6 +895,17 @@ export const FOR_OWNERS: DocChapter = {
       heading: "Set up your owner workspace",
       body: (
         <>
+          <DocFlow
+            label="From your own property to agreed terms"
+            steps={[
+              { icon: "briefcase", title: "Set up your owner workspace", href: SUPPLY_DOOR_HREF, outcome: SUPPLY_DOORS.owner.howLong },
+              { icon: "certificate", title: "Add your ownership document", href: "#ownership-document", outcome: "Once it is approved, an Ownership seen mark with the date appears beside you." },
+              { icon: "house", title: "List your property", href: "/guides/how-to-list", outcome: "Vallo reviews it before it goes up." },
+              { icon: "calendar-check", title: "Offer viewing times", href: "#viewings", outcome: "Renters book a free slot at once." },
+              { icon: "file-check", title: "Agree terms", href: "#get-paid", outcome: "You and the renter confirm the same agreement." },
+            ]}
+            end={RENT_PAYMENT_NOT_OPEN}
+          />
           <p>
             Open{" "}
             <Link href={SUPPLY_DOOR_HREF} className={A}>
@@ -971,9 +982,8 @@ export const FOR_OWNERS: DocChapter = {
       heading: "Agree terms and get paid",
       body: (
         <p>
-          After the viewing and the inspection report, you and the renter confirm the same agreement. The
-          renter then pays inside Vallo, with Escrow or by card, and your share comes to the bank account
-          on your payout details. See{" "}
+          After the viewing and the inspection report, you and the renter confirm the same agreement.{" "}
+          {LISTER_AGREE_TERMS} See{" "}
           <Link href="/docs/paying-on-vallo#for-listers" className={A}>
             Get paid
           </Link>
@@ -988,6 +998,10 @@ export const FOR_OWNERS: DocChapter = {
 
 export const FOR_AGENTS: DocChapter = {
   slug: "for-agents",
+  glance: [
+    "State your own fees on the listing, where a tenant can read them.",
+    "A person at Vallo decides each rung, in order.",
+  ],
   number: 0,
   title: "For agents and firms",
   summary:
@@ -1031,13 +1045,19 @@ export const FOR_AGENTS: DocChapter = {
       heading: "Climb the verification ladder",
       body: (
         <>
-          <ol role="list">
-            {VERIFICATION_ORDER.map((rung) => (
-              <li key={rung.kind}>
-                <strong>{rung.label}.</strong> {rung.meaning}
-              </li>
-            ))}
-          </ol>
+          <DocTable
+            caption="The verification ladder"
+            captionHidden
+            columns={[
+              { key: "rung", label: "Rung" },
+              { key: "means", label: "What it proves" },
+            ]}
+            rows={VERIFICATION_ORDER.map((rung) => ({
+              id: rung.kind,
+              icon: RUNG_ICON[rung.kind],
+              cells: { rung: <strong>{`${rung.step}. ${rung.label}`}</strong>, means: rung.meaning },
+            }))}
+          />
           <p>
             A person at Vallo decides each rung, in order. See where you stand at{" "}
             <Link href="/agent/verification" className={A}>

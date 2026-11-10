@@ -1,4 +1,4 @@
-# Vallo payments architecture: Paystack, Payluk, Yellow Card
+# Vallo payments architecture: Paystack, the retired provider, Yellow Card
 
 **Written by Session 1, 5 October 2026.** Architecture and decisions only. No
 implementation. Its companion session report was retired on 17 October 2026.
@@ -7,21 +7,21 @@ implementation. Its companion session report was retired on 17 October 2026.
 
 ## 0. Evidence warning: read before trusting anything in section 3
 
-**`docs.payluk.ng` could not be read.** This environment's egress policy refused
-every attempt (`https://docs.payluk.ng/llms.txt`, `/introduction`,
-`/guides/ai-agent-skill`, plus `payluk.ng`, `api.payluk.ng`, archive and reader
+**`docs.retired_provider.ng` could not be read.** This environment's egress policy refused
+every attempt (`https://docs.retired_provider.ng/llms.txt`, `/introduction`,
+`/guides/ai-agent-skill`, plus `retired_provider.ng`, `api.retired_provider.ng`, archive and reader
 proxies: all 403). Routing around a policy denial is not permitted, so it was not
 attempted.
 
 Everything in section 3 was reconstructed from three permitted sources:
 
-1. **npm**, which is allowlisted: `payluk-escrow-inline-checkout@0.3.0` (its
+1. **npm**, which is allowlisted: `retired_provider-escrow-inline-checkout@0.3.0` (its
    README and built `dist/`).
 2. **Search-index snippets** of a single docs page,
-   `/api-reference/disputes/resolve-dispute`, plus Payluk marketing and terms
+   `/api-reference/disputes/resolve-dispute`, plus the retired provider marketing and terms
    pages.
 3. **GitHub code-search fragments** of a public repository that vendored
-   Payluk's own agent skill (`.agents/skills/payluk-api/`): `SKILL.md`,
+   the retired provider's own agent skill (`.agents/skills/retired_provider-api/`): `SKILL.md`,
    `references/endpoints.md`, `flows.md`, `webhooks.md`,
    `errors-and-statuses.md`, `openapi.json`.
 
@@ -29,12 +29,12 @@ Everything in section 3 was reconstructed from three permitted sources:
 reproduced verbatim from it, which means they are either exactly right or exactly
 wrong, with no middle ground.
 
-**Therefore: no line of Payluk code may be written against this document.**
-Session 2's first task on the Payluk track is to read the live documentation in
+**Therefore: no line of the retired provider code may be written against this document.**
+Session 2's first task on the the retired provider track is to read the live documentation in
 an environment that can reach it, and to correct this file. Until then section 3
 is a hypothesis about an API, not a specification of one.
 
-The open questions for Payluk support are in section 7.
+The open questions for the retired provider support are in section 7.
 
 ---
 
@@ -44,7 +44,7 @@ The open questions for Payluk support are in section 7.
 |---|---|
 | **Paystack** | The only live rail. About 149 files. Split at the moment of charge, three legs, settled atomically |
 | **Yellow Card** | Fully built, behind a provider interface, off behind five independent gates, never run against a real merchant account |
-| **Payluk** | Does not exist in the codebase. Zero references |
+| **the retired provider** | Does not exist in the codebase. Zero references |
 | **Virtual accounts** | No code, ever. Mentioned in five documents, which should be corrected |
 | **Custody** | Retired by ADR-0002 on 25 September 2026, enforced by a schema move, revoked grants, off flags that refuse to turn on, and an event trigger refusing custody-named objects |
 
@@ -70,7 +70,7 @@ That is the single switch between a well-built money layer and a working one.
 **There is no fiat provider interface.** Paystack is called directly across
 about 149 files. The crypto path, by contrast, has a proper interface
 (`lib/crypto/provider.ts`) with a selector and a stub. That asymmetry is the
-highest-value refactor in the money layer and it is worth doing even if Payluk
+highest-value refactor in the money layer and it is worth doing even if the retired provider
 never ships, because it is what makes the fiat rail testable and replaceable.
 
 ---
@@ -96,45 +96,45 @@ workaround.
 
 ---
 
-## 3. What Payluk appears to be (UNVERIFIED: see section 0)
+## 3. What the retired provider appears to be (UNVERIFIED: see section 0)
 
 ### 3.1 Product shape
 
-Payluk is **escrow-as-a-service** for Nigerian merchants: a REST API offering
+the retired provider is **escrow-as-a-service** for Nigerian merchants: a REST API offering
 standard escrow, milestone escrow, vault escrow, per-customer wallets, payouts to
 banks, disputes, and an inline checkout widget.
 
-Payluk's marketing says escrow funds are "held with CBN-licensed partner banks".
-**Payluk therefore appears not to be the licensed institution itself**, which
-makes the custody chain Vallo to Payluk to a partner bank. Whose money it is at
-each hop is a question for counsel, and Payluk's answer must be in writing.
+the retired provider's marketing says escrow funds are "held with CBN-licensed partner banks".
+**the retired provider therefore appears not to be the licensed institution itself**, which
+makes the custody chain Vallo to the retired provider to a partner bank. Whose money it is at
+each hop is a question for counsel, and the retired provider's answer must be in writing.
 
 ### 3.2 Three findings that change the architecture
 
-These are the reasons Payluk is not a drop-in anything.
+These are the reasons the retired provider is not a drop-in anything.
 
-#### Finding A: Payluk cannot perform Vallo's three-way split
+#### Finding A: the retired provider cannot perform Vallo's three-way split
 
 One escrow has one seller. Release pays that seller, net of a fee share. The
 merchant separately earns a `commission` and an optional `additionalFee`, both
-landing in the merchant's own Payluk wallet. No multi-recipient split at release
+landing in the merchant's own the retired provider wallet. No multi-recipient split at release
 was found outside a dispute `SPLIT`, which is a dispute outcome, not a payment
 structure.
 
-**So Payluk cannot replicate the Paystack split.** Vallo's Guarantee reserve
+**So the retired provider cannot replicate the Paystack split.** Vallo's Guarantee reserve
 contribution has no atomic third leg. It would have to arrive in Vallo's merchant
 wallet and then be moved to the reserve by a separate transfer, which turns one
 atomic transaction into two steps with a reconciliation obligation between them.
 
-**Consequence: Payluk is not a second rail for the existing model. It is a
+**Consequence: the retired provider is not a second rail for the existing model. It is a
 different product, for a different flow, with custody at its centre.**
 
-#### Finding B: Vallo, not Payluk, would arbitrate every money dispute
+#### Finding B: Vallo, not the retired provider, would arbitrate every money dispute
 
 `POST /v1/escrow/dispute/resolve/{escrowId}` is a merchant endpoint. The merchant
 decides `COMPLETED`, `REFUNDED` or `SPLIT`, and on a split must supply
 `sellerAmount` and `buyerAmount` summing exactly to what the escrow still holds.
-The skill's own words: Payluk does not arbitrate; the merchant does.
+The skill's own words: the retired provider does not arbitrate; the merchant does.
 
 **This means Vallo would become the judge of who keeps a guest's money.** That is
 a consumer-protection posture, not a feature. It needs:
@@ -168,8 +168,8 @@ by asking is workable; one that assumes it will be told is not.
 
 ### 3.3 Mechanics, as far as they could be established
 
-**Environments and auth.** Staging `https://staging.api.payluk.ng`, production
-`https://api.payluk.ng`, everything under `/v1`. `Authorization: Bearer <secret
+**Environments and auth.** Staging `https://staging.api.retired_provider.ng`, production
+`https://api.retired_provider.ng`, everything under `/v1`. `Authorization: Bearer <secret
 key>`, where the prefix selects the environment: `sk_test_` for staging,
 `sk_live_` for production. Publishable `pk_live_` keys are browser-only. Some
 routes require a merchant super-admin key. Production enforces an IP allowlist if
@@ -212,7 +212,7 @@ be disqualifying for the booking flow.**
 **Fees are collected in every outcome**, including a cancelled vault.
 
 **Webhooks.** One dashboard callback URL per environment. Header
-`x-payluk-signature`, hex **HMAC-SHA512 over the raw request body**, keyed with
+`x-retired_provider-signature`, hex **HMAC-SHA512 over the raw request body**, keyed with
 the environment's secret key. 10 second timeout, up to 3 retries with
 exponential backoff, best effort, never rolled back. Envelope `{ event, data }`.
 Deduplicate on `data.reference` for payment events and `data.id` plus `event` for
@@ -230,7 +230,7 @@ Wallet-to-wallet transfer exists. Per-customer permissions `canWithdraw`,
 
 **Payouts.** Stage an intent with `transactionType: withdrawal` and
 `withdrawalDetails`, resolving the account first with `verify-account`, then
-`verify` with the reference and an OTP where required. Payluk sets the fee on the
+`verify` with the reference and an OTP where required. the retired provider sets the fee on the
 intent, so it must be read back rather than assumed.
 
 **Virtual accounts are deprecated.** `POST /v1/payment/virtual-account` is marked
@@ -238,22 +238,22 @@ deprecated and the customer documentation says virtual accounts are no longer
 issued. This independently confirms the founder's decision to drop that approach.
 The five Vallo documents that still describe it should be corrected.
 
-**No cNGN anywhere.** The brief's instruction not to build on Payluk cNGN is
+**No cNGN anywhere.** The brief's instruction not to build on the retired provider cNGN is
 moot: no cNGN surface was found. The only crypto surface is a BSC withdrawal path
 and a master deposit address, which is out of scope and should stay out.
 
 **Fee schedule is not documented at all.** No percentages, no caps, no withdrawal
-fee table, no dispute fee. **Nothing can be priced until Payluk supplies this.**
+fee table, no dispute fee. **Nothing can be priced until the retired provider supplies this.**
 
 **The agent skill** is a `SKILL.md`-format skill, not an npm package, carrying an
 `openapi.json` and two scripts (a request CLI and a webhook signature verifier).
 Its ground rules match the mechanics above and it explicitly tells integrators
 never to reference virtual accounts.
 
-**The only real npm package** is `payluk-escrow-inline-checkout@0.3.0`, MIT, a
+**The only real npm package** is `retired_provider-escrow-inline-checkout@0.3.0`, MIT, a
 browser widget with a React hook. It creates a session against
-`live.payluk.ng` or `staging.live.payluk.ng` and loads a script from
-`checkout.payluk.ng`. **A third-party script in the payment path is a CSP
+`live.retired_provider.ng` or `staging.live.retired_provider.ng` and loads a script from
+`checkout.retired_provider.ng`. **A third-party script in the payment path is a CSP
 decision**, and Vallo's CSP is nonce-based and strict. Session 2 must decide
 whether to use the widget at all or to drive the API directly.
 
@@ -267,7 +267,7 @@ whether to use the widget at all or to drive the API directly.
 
 | Rail | Carries | Mechanism |
 |---|---|---|
-| **ESCROW (Payluk)** | Rent and annual tenancy, shortlet, apartment, home, villa, land, shop, office, **and property sale** | Funds held by Payluk, released on confirmation, milestone escrow for sale |
+| **ESCROW (the retired provider)** | Rent and annual tenancy, shortlet, apartment, home, villa, land, shop, office, **and property sale** | Funds held by the retired provider, released on confirmation, milestone escrow for sale |
 | **DIRECT (Paystack)** | Hotel room bookings, restaurant reservations | Split at the moment of charge, three legs, exactly as today. Unchanged |
 
 ### 3A.2 The principle underneath it, which is the thing to implement
@@ -327,7 +327,7 @@ that should not be held and the other releases money that should have been held.
 
 ### 3A.4 The Guarantee question the two-rail model forces
 
-Payluk cannot perform the three-way split (Finding A), so the Guarantee
+the retired provider cannot perform the three-way split (Finding A), so the Guarantee
 contribution has no atomic leg on the escrow rail. There are two coherent answers
 and **the founder must pick one.**
 
@@ -344,7 +344,7 @@ transactions that need it. It also makes the escrow rail's release condition
 load-bearing: **release must be gated on the tenant or guest confirming arrival or
 move-in**, not on a timer, or the protection evaporates.
 
-**Option 2: the Guarantee applies to both.** Vallo's Payluk merchant commission
+**Option 2: the Guarantee applies to both.** Vallo's the retired provider merchant commission
 carries both its own fee and the Guarantee portion, and a scheduled transfer moves
 the Guarantee portion to the reserve account, reconciled, with a
 `guarantee_reserve_entries` row per transfer. Correct but it adds a two-step money
@@ -357,13 +357,13 @@ protection they have. That copy change is part of the ADR, not a tweak.
 
 ### 3A.5 The founder's instruction on the legal position
 
-**Recorded verbatim in substance, 5 October 2026:** the founder has decided Payluk
-may hold users' money on Vallo's behalf, states that Payluk holds the necessary
+**Recorded verbatim in substance, 5 October 2026:** the founder has decided the retired provider
+may hold users' money on Vallo's behalf, states that the retired provider holds the necessary
 licences, and has instructed that the escrow rail be built. The written legal
 opinion will be obtained later.
 
-**One distinction is noted once, for the record, and is not re-argued:** Payluk's
-licence authorises **Payluk**. Whether Vallo may orchestrate provider-held
+**One distinction is noted once, for the record, and is not re-argued:** the retired provider's
+licence authorises **the retired provider**. Whether Vallo may orchestrate provider-held
 customer funds without its own authorisation, and whether the objects clause
 covers it, is a question about **Vallo** that only Nigerian counsel can answer.
 Section 6 is unchanged and is still the list.
@@ -371,7 +371,7 @@ Section 6 is unchanged and is still the list.
 **How the build proceeds without waiting.** Everything is written, tested,
 reconciled and proven: the adapter, the router, the mirror, the dispute desk, the
 release conditions, the payer and lister interfaces, the reconciler, and the whole
-thing exercised against `staging.api.payluk.ng` with Payluk Test Bank. The only
+thing exercised against `staging.api.retired_provider.ng` with the retired provider Test Bank. The only
 act that is gated is **switching the escrow rail on for real customer money**, and
 that gate is a founder-controlled flag, fail-closed on the `lib/crypto/gate.ts`
 pattern. Nothing is lost by the letter arriving late, and nothing irreversible
@@ -389,7 +389,7 @@ requirement rather than a preference.
    the single most important fact to establish. If a funded escrow cannot be
    refunded outside a dispute, then **every ordinary cancellation becomes a ruling
    Vallo has to make**, and the frozen cancellation terms already in the product
-   cannot be honoured automatically. Ask Payluk before building the cancellation
+   cannot be honoured automatically. Ask the retired provider before building the cancellation
    path.
 3. **Vallo arbitrates, so Vallo needs the apparatus** (Finding B): a published
    dispute policy with an SLA, two-person rulings reusing the existing threshold
@@ -401,11 +401,11 @@ requirement rather than a preference.
    approves. Escrow then holds what the gate permitted.
 5. **Sale uses milestone escrow**, with the milestones mapped to the real steps of
    a Nigerian property transaction: deposit, title and documents verified,
-   completion. Milestone amounts must sum to the total, which Payluk enforces, and
+   completion. Milestone amounts must sum to the total, which the retired provider enforces, and
    each release needs its own confirmation and its own record.
 6. **The mirror is never truth.** Every balance and state shown to a member is a
    reconciled observation carrying the time it was observed.
-7. **Vallo owns idempotency** on its own reference, because Payluk documents none.
+7. **Vallo owns idempotency** on its own reference, because the retired provider documents none.
 8. **Reconciliation is the source of truth**, because no failure webhooks are
    documented.
 
@@ -423,11 +423,11 @@ words on the screen.
 ### 4.2 The provider interface
 
 Build `PaymentProvider` for fiat, modelled on the crypto interface that already
-works. It must express what the existing rail does and what Payluk would do,
+works. It must express what the existing rail does and what the retired provider would do,
 without either leaking into shared code:
 
 - Capability declaration, because the providers are not equivalent. Paystack can
-  split at payment and cannot hold. Payluk can hold and cannot split. Call sites
+  split at payment and cannot hold. the retired provider can hold and cannot split. Call sites
   must ask what a provider can do rather than assume.
 - Collection, with a Vallo-generated reference that is the idempotency key on
   Vallo's side regardless of what the provider offers.
@@ -456,11 +456,11 @@ refusing custody-named objects stays untouched:
 
 | Table | Holds |
 |---|---|
-| `payluk_customers` | The mapping from a Vallo user to a Payluk customer id |
-| `payluk_escrows` | One row per escrow: Vallo reference, Payluk `paymentToken` and `id`, state, status, amounts, the booking it belongs to |
-| `payluk_escrow_events` | Append-only, one row per webhook or reconciliation observation, unique on `(event, provider_event_id)` |
-| `payluk_balance_mirror` | Last observed `mainBalance` and `escrowBalance`, with the time observed |
-| `payluk_payouts` | One row per payout intent and its outcome |
+| `retired_provider_customers` | The mapping from a Vallo user to a the retired provider customer id |
+| `retired_provider_escrows` | One row per escrow: Vallo reference, the retired provider `paymentToken` and `id`, state, status, amounts, the booking it belongs to |
+| `retired_provider_escrow_events` | Append-only, one row per webhook or reconciliation observation, unique on `(event, provider_event_id)` |
+| `retired_provider_balance_mirror` | Last observed `mainBalance` and `escrowBalance`, with the time observed |
+| `retired_provider_payouts` | One row per payout intent and its outcome |
 
 **Three rules on the mirror.** It is never read as truth for a decision that
 moves money. It always carries the time it was observed, and the interface shows
@@ -479,13 +479,13 @@ guest pays ──► Paystack splits atomically ──► lister's bank
                                           └─► Vallo commission
 Vallo holds: nothing. Vallo records: transactions + ledger_entries.
 
-PAYLUK TRACK (custody at the provider)
-guest pays ──► Payluk escrow ──► funds held at Payluk's partner bank
+RETIRED PROVIDER TRACK (custody at the provider)
+guest pays ──► the retired provider escrow ──► funds held at the retired provider's partner bank
                                    │
                         booking confirmed / check-in
                                    ▼
                             release to lister
-                                   ├─► Vallo commission to Vallo's Payluk wallet
+                                   ├─► Vallo commission to Vallo's the retired provider wallet
                                    └─► Guarantee contribution: NO ATOMIC LEG
                                        requires a second transfer, reconciled
 Vallo holds: nothing. Vallo records: a mirror. Vallo decides: every dispute.
@@ -513,11 +513,11 @@ customer money. Everything below still ships, and the escrow build joins it.
    it needs no custodian, it cannot be withdrawn, and it only costs Vallo when
    the referred member actually transacts. It sidesteps the regulated activity
    entirely.
-4. **Payluk on staging only.** Test keys, `staging.api.payluk.ng`, Payluk Test
+4. **the retired provider on staging only.** Test keys, `staging.api.retired_provider.ng`, the retired provider Test
    Bank, no real customer money at any point. This proves the adapter, the
    webhook signature, the dispute path and the reconciler against a real API,
    and it answers most of section 7's questions empirically. **This is the single
-   most valuable Payluk work available before the letter exists, and it is
+   most valuable the retired provider work available before the letter exists, and it is
    entirely safe.**
 5. **Correct the documents** that still describe virtual accounts.
 
@@ -548,23 +548,23 @@ at `lib/crypto/providers/yellowcard.ts:246`.
 
 | # | Requirement | Owner |
 |---|---|---|
-| 1 | Written legal opinion: may Vallo operate provider-custodied balances with Payluk as custodian, without its own CBN licence, and does the objects clause need amending | Founder and counsel |
-| 2 | Payluk's licence position in writing: what it is licensed to do, who the regulated entity is, which partner banks hold funds, and whose money it is at each hop | Founder |
+| 1 | Written legal opinion: may Vallo operate provider-custodied balances with the retired provider as custodian, without its own CBN licence, and does the objects clause need amending | Founder and counsel |
+| 2 | the retired provider's licence position in writing: what it is licensed to do, who the regulated entity is, which partner banks hold funds, and whose money it is at each hop | Founder |
 | 3 | Counsel's view on Vallo arbitrating disputes over funds held by a third party on its behalf | Counsel |
 | 4 | ADR-0003, superseding ADR-0002, written before any production code | Session 1 or 2, on the founder's instruction |
-| 5 | `lib/money/copy.ts` rewritten. Every sentence currently says Vallo never holds your money. Under Track 2 the true sentence names Payluk. This is a legal act, not a copy tweak | Session 2, reviewed by counsel |
+| 5 | `lib/money/copy.ts` rewritten. Every sentence currently says Vallo never holds your money. Under Track 2 the true sentence names the retired provider. This is a legal act, not a copy tweak | Session 2, reviewed by counsel |
 | 6 | Terms and Privacy version bump with re-acceptance, because the answer to "who holds my money" is changing. Terms §17 already promises notice before significant changes | Founder and Session 2 |
 | 7 | A published dispute policy: SLA, escalation, forum, FCCPC reference | Founder and counsel |
 | 8 | A second super admin appointed, so two-person rulings stop failing closed | Founder |
-| 9 | Payluk's fee schedule in writing, or nothing can be priced | Founder |
-| 10 | Section 7 answered, especially question 3 | Founder with Payluk |
+| 9 | the retired provider's fee schedule in writing, or nothing can be priced | Founder |
+| 10 | Section 7 answered, especially question 3 | Founder with the retired provider |
 
 ---
 
-## 7. Open questions for Payluk
+## 7. Open questions for the retired provider
 
 Ordered by how much a wrong answer would hurt. Question 3 is the one that could
-disqualify Payluk for bookings outright.
+disqualify the retired provider for bookings outright.
 
 1. **Fee schedule.** Percentages and caps per `whoPays`, the merchant commission
    share, the withdrawal fee table, dispute fees, VAT handling.
@@ -574,9 +574,9 @@ disqualify Payluk for bookings outright.
 3. **Refund or cancel of a funded escrow without a dispute.** A guest cancelling
    a booking weeks ahead is routine. Is there any path to return their money that
    is not a dispute? Is any refund possible after `COMPLETED` or `CLAIMED`? **If
-   the answer is no, Payluk escrow cannot carry Vallo's booking flow as designed,
+   the answer is no, the retired provider escrow cannot carry Vallo's booking flow as designed,
    and this should be established before any further work.**
-4. **Auto-release.** Does Payluk release automatically when the delivery window
+4. **Auto-release.** Does the retired provider release automatically when the delivery window
    elapses, or only when the seller calls `claim-funds`? Does the 24-hour
    post-claim buyer window described in marketing apply to API escrows?
 5. **Split at release.** Can one escrow pay several recipients, so that the
@@ -607,7 +607,7 @@ disqualify Payluk for bookings outright.
 **Build Track 1. Design Track 2. Build Track 2 only when the letter exists.**
 
 Track 1 delivers a testable provider seam, a referral programme that pays, a
-proven existing rail, and a complete Payluk integration exercised against real
+proven existing rail, and a complete the retired provider integration exercised against real
 staging infrastructure with no customer money anywhere near it. That is most of
 the brief's value, in weeks, with no regulatory exposure and no new liability.
 
@@ -616,7 +616,7 @@ balance between transactions, and a hold released at check-in. That convenience
 is precisely what the licence covers, and Finding B means it also makes Vallo the
 judge of every disputed naira.
 
-**And answer question 3 first.** If a funded Payluk escrow cannot be refunded
+**And answer question 3 first.** If a funded the retired provider escrow cannot be refunded
 outside a dispute, then every ordinary guest cancellation becomes a dispute that
-Vallo must rule on. That is not an integration detail. It would make Payluk the
+Vallo must rule on. That is not an integration detail. It would make the retired provider the
 wrong tool for bookings, and it is one email to find out.

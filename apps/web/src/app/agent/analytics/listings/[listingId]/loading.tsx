@@ -1,5 +1,6 @@
 import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
-import { FigureCardSkeleton, InnerHeadSkeleton } from "@/components/agent/intel/IntelSkeletons";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
+import { FigureCardSkeleton } from "@/components/agent/intel/IntelSkeletons";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 /**
@@ -9,8 +10,8 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export default function LoadingListingWeek() {
   return (
     <AgentScreenSkeleton label="Loading this listing's week">
-      <div className="mx-auto max-w-3xl">
-        <InnerHeadSkeleton />
+      <div className="nf-g1page">
+        <PageHeaderSkeleton layout="large" subtitle />
         <Skeleton width="10rem" height="0.75rem" radius="sm" />
         <div className="nf-figure-tiles mt-sm">
           {Array.from({ length: 6 }, (_, i) => (

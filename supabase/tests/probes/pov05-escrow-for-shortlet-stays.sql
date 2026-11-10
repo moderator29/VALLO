@@ -36,7 +36,9 @@ begin
   select id, 'letting', 'Probe Principal', 'approved', host, now(), 'owner', 'call_back', host, now()
     from public.listings where id = v_short and listing_role <> 'owner' and not private.listing_has_live_mandate(id);
   update public.listings set is_demo = false where id = v_short;
-  update public.feature_flags set enabled = true where key = 'payments_payluk_on';
+  /* The open reads private.rentals_protected_pay_on(), which since 10 November
+     2026 follows payments_escrowpay_on. Both on, inside this transaction only. */
+  update public.feature_flags set enabled = true where key in ('payments_protected_pay_on', 'payments_escrowpay_on');
   update public.feature_flags set enabled = false where key = 'agreement_review_all';
 
   insert into public.bookings (id, listing_id, guest_id, check_in, check_out, nights, price_per_night_minor, subtotal_minor, total_minor, status)

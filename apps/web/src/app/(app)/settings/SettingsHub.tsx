@@ -3,6 +3,7 @@
 import type { HubCopy } from "@/components/app/account/settings-copy";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
 import { initial } from "@/lib/text/initial";
+import { useState } from "react";
 import Link from "next/link";
 import { withNext } from "@/lib/auth/next-link";
 import { useRouter } from "next/navigation";
@@ -12,6 +13,7 @@ import { SettingsGlyph, type SettingsGlyphName } from "@/components/app/account/
 import { ICON } from "@/components/app/Screen";
 import { ROW_GLYPH, RowButton, RowLink, SettingsGroup } from "@/components/app/account/rows";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { liveSocials } from "@/lib/brand/socials";
 import { useThemeChoice } from "@/lib/theme/theme-client";
 import { LanguageRow } from "@/components/app/account/SettingsGroups";
@@ -391,11 +393,49 @@ export function SettingsHub({
 }
 
 /** Log Out, the last row on the screen. Real `signOut`; a refusal is said by the one banner. */
-export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
+export function LogOutRow({ t, signedIn, email }: { t: HubCopy; signedIn: boolean; email?: string }) {
   const router = useRouter();
   const hub = t.settings.hub;
   const [signingOut, startSignOut] = useSafeTransition();
+  /* Asked first, so a stray tap cannot end a session. */
+  const [asking, setAsking] = useState(false);
   if (!signedIn) return null;
+
+  const leave = () => {
+    startSignOut(async () => {
+      try {
+        /* V-98: the widget stops reading this account before the session ends. */
+        await revokeWidgetTokens().catch(() => undefined);
+        /* The push row for THIS device is retired with the session. */
+        const result = await signOut(readLocalDevice()?.deviceRef);
+        if (!result.ok) {
+          setAsking(false);
+          banner.error(result.error);
+          return;
+        }
+        /* V-35, V-77: a shared phone keeps neither somebody else's gate code
+           nor their shortlist. */
+        await clearPacks();
+        await clearShelf();
+        /* SUP-16: a listing draft never outlives the session that wrote it. */
+        clearListingDrafts();
+        await clearOutbox();
+        /* The pages this phone kept for offline go with the session. */
+        await forgetKeptPages();
+        await forgetWidget();
+        clearAllInflight();
+        clearLocalDevice();
+        /* Track M: the page recedes and the panels close on the mark. */
+        await playThreshold("leave");
+        router.replace("/");
+        router.refresh();
+      } catch (error) {
+        setAsking(false);
+        if (!tapFailedOffline(error)) throw error;
+      }
+    });
+  };
+
   return (
     <div className="nf-hub">
       <SettingsGroup>
@@ -403,41 +443,23 @@ export function LogOutRow({ t, signedIn }: { t: HubCopy; signedIn: boolean }) {
           glyph={<HubGlyph name="log-out" />}
           label={signingOut ? hub.loggingOut : hub.logOut}
           disabled={signingOut}
-          onClick={() => {
-            startSignOut(async () => {
-              try {
-                /* V-98: the widget stops reading this account before the session ends. */
-                await revokeWidgetTokens().catch(() => undefined);
-                /* The push row for THIS device is retired with the session. */
-                const result = await signOut(readLocalDevice()?.deviceRef);
-                if (!result.ok) {
-                  banner.error(result.error);
-                  return;
-                }
-                /* V-35, V-77: a shared phone keeps neither somebody else's gate code
-                   nor their shortlist. */
-                await clearPacks();
-                await clearShelf();
-                /* SUP-16: a listing draft never outlives the session that wrote it. */
-                clearListingDrafts();
-                await clearOutbox();
-                /* The pages this phone kept for offline go with the session. */
-                await forgetKeptPages();
-                await forgetWidget();
-                clearAllInflight();
-                clearLocalDevice();
-                /* Track M: the page recedes and the panels close on the mark. */
-                await playThreshold("leave");
-                router.replace("/");
-                router.refresh();
-              } catch (error) {
-                if (!tapFailedOffline(error)) throw error;
-              }
-            });
-          }}
+          onClick={() => setAsking(true)}
           testId="hub-logout"
         />
       </SettingsGroup>
+      <ConfirmSheet
+        open={asking}
+        onOpenChange={(next) => {
+          if (!signingOut) setAsking(next);
+        }}
+        title={hub.logOutTitle}
+        line={email ? hub.logOutLineAs.replace("{email}", email) : hub.logOutLine}
+        confirmLabel={signingOut ? hub.loggingOut : hub.logOut}
+        cancelLabel={hub.logOutCancel}
+        pending={signingOut}
+        onConfirm={leave}
+        testId="hub-logout-sheet"
+      />
     </div>
   );
 }

@@ -23,6 +23,7 @@
  * dropped, never rendered and never thrown.
  */
 
+import { consentAllows } from "@/lib/consent/consent";
 import type { ViewKey } from "@/lib/listings/search-params";
 import { isSafePhoto, type CardGlanceMark } from "@/lib/listings/card-glance";
 import { syncRecentFlag } from "./recent-flag";
@@ -38,6 +39,8 @@ const VIEW_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 /** Remember the view the person is actually looking at. Client only. */
 export function rememberView(view: ViewKey): void {
   if (typeof document === "undefined") return;
+  /* A remembered view is a preference: nothing is written before the person agrees. */
+  if (!consentAllows("preferences")) return;
   try {
     document.cookie = `${VIEW_COOKIE}=${view}; path=/; max-age=${VIEW_COOKIE_MAX_AGE}; samesite=lax`;
   } catch {
@@ -63,6 +66,8 @@ function readList<T>(key: string, valid: (value: unknown) => value is T, max: nu
 
 function writeList<T>(key: string, entries: T[]): void {
   if (typeof window === "undefined") return;
+  /* Recent searches and recently viewed listings are preferences: not stored until the person agrees. */
+  if (!consentAllows("preferences")) return;
   try {
     window.localStorage.setItem(key, JSON.stringify(entries));
   } catch {

@@ -252,17 +252,22 @@ export function BalanceScreen({
             <UiIcon name="chevron-right" size={18} className="nf-mw-chev" />
           </Link>
 
-          <section className="nf-mw-banner" data-theme="dark" aria-labelledby="nf-mw-banner" data-order="banner" data-testid="balance-banner">
-            <Image className="nf-mw-banner__photo" src="/brand/photos/villa-exterior-sunset-640.jpg" alt="" width={640} height={427} unoptimized aria-hidden="true" />
-            <h2 id="nf-mw-banner" className="nf-mw-banner__title">
-              {SPACE_BANNER.title}
-            </h2>
-            <p className="nf-mw-banner__body">{SPACE_BANNER.body}</p>
-            <Link href={SPACE_BANNER.href} className="nf-mw-banner__cta">
-              {SPACE_BANNER.action}
-              <UiIcon name="chevron-right" size={16} />
-            </Link>
-          </section>
+          {/* Sweep item 25 (9 November 2026): the banner describes rent paid
+              from Wallet and held until the move-in, which is the protected
+              rail. It is drawn only once Wallet is connected. */}
+          {connected ? (
+            <section className="nf-mw-banner" data-theme="dark" aria-labelledby="nf-mw-banner" data-order="banner" data-testid="balance-banner">
+              <Image className="nf-mw-banner__photo" src="/brand/photos/villa-exterior-sunset-640.jpg" alt="" width={640} height={427} unoptimized aria-hidden="true" />
+              <h2 id="nf-mw-banner" className="nf-mw-banner__title">
+                {SPACE_BANNER.title}
+              </h2>
+              <p className="nf-mw-banner__body">{SPACE_BANNER.body}</p>
+              <Link href={SPACE_BANNER.href} className="nf-mw-banner__cta">
+                {SPACE_BANNER.action}
+                <UiIcon name="chevron-right" size={16} />
+              </Link>
+            </section>
+          ) : null}
 
           <section className="nf-mw-section" aria-labelledby="nf-mw-more" data-order="more">
             <div className="nf-mw-section__head">

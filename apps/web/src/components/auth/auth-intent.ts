@@ -52,6 +52,7 @@ export const GATED_ACTIONS = [
   "follow",
   "react",
   "post",
+  "share",
 ] as const;
 
 export type GatedAction = (typeof GATED_ACTIONS)[number];

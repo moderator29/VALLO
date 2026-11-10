@@ -1,0 +1,109 @@
+/*
+ * THE COOKIE BAR AND CHOICE SHEET (founder, 10 November 2026). Loaded with the
+ * lazy chunk only. Tokens only; transform and opacity are the only animated
+ * properties; weights 400, 600, 700; every control keeps a 44px target. The
+ * three buttons are the same variant and the same width so no choice is
+ * visually favoured.
+ */
+@layer components {
+  .nf-cookie-bar {
+    position: fixed;
+    inset-inline: var(--nf-space-sm);
+    bottom: var(--nf-tabbar-clearance, var(--nf-space-sm));
+    z-index: 60;
+    display: grid;
+    gap: var(--nf-space-xs);
+    max-width: 40rem;
+    margin-inline: auto;
+    padding: var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-border-default);
+    border-radius: var(--nf-radius-lg);
+    background: var(--nf-surface-raised);
+    color: var(--nf-content-primary);
+    box-shadow: var(--nf-elevation-dialog);
+    animation: nf-cookie-in var(--nf-duration-base) var(--nf-ease-standard) both;
+  }
+  .nf-cookie-bar__title {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 700;
+  }
+  .nf-cookie-bar__body {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+  .nf-cookie-bar__link,
+  .nf-cookie-sheet__policy a {
+    font-weight: 600;
+    color: var(--nf-content-link);
+    text-decoration: underline;
+  }
+  .nf-cookie-bar__actions,
+  .nf-cookie-sheet__actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nf-space-xs);
+  }
+  .nf-cookie-bar__actions > *,
+  .nf-cookie-sheet__actions > * {
+    width: 100%;
+    min-width: 0;
+  }
+  @media (max-width: 28rem) {
+    .nf-cookie-bar__actions,
+    .nf-cookie-sheet__actions {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .nf-cookie-sheet {
+    display: grid;
+    gap: var(--nf-space-md);
+    padding-bottom: var(--nf-space-sm);
+  }
+  .nf-cookie-sheet__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nf-space-md);
+    padding-bottom: var(--nf-space-md);
+    border-bottom: var(--nf-border-width) solid var(--nf-border-subtle);
+  }
+  .nf-cookie-sheet__text p {
+    margin: var(--nf-space-2xs) 0 0;
+    font-size: var(--nf-text-body-sm);
+    line-height: 1.5;
+    color: var(--nf-content-secondary);
+  }
+  .nf-cookie-sheet__h {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+  }
+  .nf-cookie-sheet__always {
+    flex: none;
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    color: var(--nf-content-muted);
+  }
+  .nf-cookie-sheet__policy {
+    margin: 0;
+    font-size: var(--nf-text-body-sm);
+  }
+  @keyframes nf-cookie-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--nf-space-sm));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .nf-cookie-bar {
+      animation: none;
+    }
+  }
+}

@@ -101,16 +101,20 @@ for (const name of declared) {
   }
 }
 
-/* 4. Nothing shipped imports out of the tool's folder. */
+/* 4. Nothing shipped imports out of the tool's folder. A test file is not
+      shipped (no build includes it), so a test may read the tool's capture
+      plan to check the help guides against it
+      (`apps/web/src/components/docs/guide-shots.test.ts`, 9 November 2026). */
 const SOURCE_ROOTS = [join(ROOT, "apps", "web", "src"), packagesDir];
 const SOURCE_EXT = /\.(?:ts|tsx|mjs|js|jsx|css)$/;
+const TEST_FILE = /\.(?:test|spec)\.[a-z]+$/;
 function walk(dir, found) {
   if (!existsSync(dir)) return found;
   for (const entry of readdirSync(dir)) {
     if (entry === "node_modules" || entry === ".next") continue;
     const path = join(dir, entry);
     if (statSync(path).isDirectory()) walk(path, found);
-    else if (SOURCE_EXT.test(entry) && readFileSync(path, "utf8").includes("scripts/marketing")) {
+    else if (SOURCE_EXT.test(entry) && !TEST_FILE.test(entry) && readFileSync(path, "utf8").includes("scripts/marketing")) {
       found.push(relative(ROOT, path));
     }
   }

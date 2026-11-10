@@ -1,5 +1,5 @@
 import { AgentScreenSkeleton } from "@/components/agent/AgentScreenSkeleton";
-import { InnerHeadSkeleton } from "@/components/agent/intel/IntelSkeletons";
+import { PageHeaderSkeleton } from "@/components/app/ScreenSkeleton";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 /**
@@ -9,8 +9,9 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export default function LoadingListingHealth() {
   return (
     <AgentScreenSkeleton label="Loading this listing's health">
-      <div className="mx-auto max-w-2xl">
-        <InnerHeadSkeleton />
+      <div className="nf-g1page">
+        <PageHeaderSkeleton layout="large" subtitle />
+        <Skeleton className="mb-lg" width="80%" height="0.9375rem" radius="sm" />
         <Skeleton width="16rem" height="1.375rem" radius="sm" />
         <div className="mt-md space-y-xs">
           {Array.from({ length: 6 }, (_, i) => (

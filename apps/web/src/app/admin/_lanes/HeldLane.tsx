@@ -9,6 +9,7 @@ import {
   type HeldEvent,
 } from "@/lib/admin/reads/moderation";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QueueFilters, readQueueQuery, type QueueQuery } from "../_components/QueueFilters";
 import { ageShort } from "../_review/metrics";
 import { LiveRefresh } from "@/app/admin/_components/LiveRefresh";
@@ -59,13 +60,13 @@ export async function HeldLane({
 
   if (access.state !== "admin") {
     return (
-      <div className="nf-panel nf-panel--card nf-admin-card p-lg">
-        <h1 className="text-[length:var(--nf-text-body-lg)] font-semibold text-[var(--nf-content-primary)]">
-          Moderation
-        </h1>
-        <p className="mt-xs text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
-          {adminRefusal(access)}
-        </p>
+      <div className="nf-console flex flex-col gap-xl">
+        <PageHead title="Moderation" />
+        <div className="nf-panel nf-panel--card nf-admin-card p-lg">
+          <p className="text-[length:var(--nf-text-body-sm)] leading-relaxed text-[var(--nf-content-muted)]">
+            {adminRefusal(access)}
+          </p>
+        </div>
       </div>
     );
   }

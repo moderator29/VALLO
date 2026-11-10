@@ -15,6 +15,8 @@ import {
 } from "@/lib/agent/listings-queries";
 import { AMENITY_CHOICES, STATE_CODES } from "@/lib/agent/listings-model";
 import { readBroadcastMarks } from "@/lib/agent/broadcast-marks-queries";
+import { readDeclaration } from "@/lib/stays/arrival-queries";
+import { aiConsentForViewer } from "@/lib/ai/consent-server";
 import {
   DRAFT_READ_FAILED_SENTENCE,
   MISSING_LISTING_SENTENCE,
@@ -34,7 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * /agent/list: the supply loop's front door.
  *
- * Three honest states. An approved agent gets the seven step wizard, loaded
+ * Three honest states. An approved agent gets the one-question-per-screen
+ * wizard (P1.1, twelve to fifteen steps computed from the answers), loaded
  * with the platform's states and amenities and, when `?id=` names one of their
  * drafts, with that draft restored. A signed-in visitor who is not an agent,
  * and anyone signed out, gets the pitch and a route to the application. When
@@ -160,7 +163,15 @@ export default async function Page({
   /* V-09: which figures from a pasted message are still unchecked, as the
      server holds them for this draft. */
   const shown = draft === "read-failed" ? null : draft;
-  const unconfirmed = shown?.id ? await readBroadcastMarks(context.supabase, shown.id) : [];
+  /* The second wave, in parallel: the draft's unchecked figures, its charges
+     at the door (V-57, declared inside the flow now, LW-04), and whether
+     this account already agreed to the AI disclosure (the Finish step's
+     writer asks first when it has not). */
+  const [unconfirmed, doorCharges, aiConsented] = await Promise.all([
+    shown?.id ? readBroadcastMarks(context.supabase, shown.id) : Promise.resolve([]),
+    shown?.id ? readDeclaration({ listingId: shown.id }) : Promise.resolve(null),
+    aiConsentForViewer().catch(() => false),
+  ]);
 
   return (
     <AgentShell
@@ -172,6 +183,9 @@ export default async function Page({
       flow
     >
       <ListingWizard
+        /* "List another" goes to a fresh `?new=` each time, and a fresh key
+           is a fresh wizard: nothing of the listing just sent carries over. */
+        key={startFresh ?? "open"}
         success={t.success}
         copy={t.agentListings}
           shotsCopy={t.afterTheGate.shots}
@@ -201,6 +215,8 @@ export default async function Page({
         guideCopy={t.frontDoor.guide}
         initialUnconfirmed={unconfirmed}
         demandCopy={t.frontDoor.demand}
+        arrival={{ copy: t.afterTheGate.arrival, existing: doorCharges }}
+        aiConsented={aiConsented}
       />
     </AgentShell>
   );

@@ -8965,54 +8965,6 @@ export type Database = {
           },
         ]
       }
-      payluk_commission_sweeps: {
-        Row: {
-          currency: string | null
-          environment: string
-          error_code: string | null
-          error_detail: string | null
-          escrow_balance_minor: number | null
-          finished_at: string | null
-          id: string
-          main_balance_minor: number | null
-          outcome: string
-          rate_limit_remaining: number | null
-          started_at: string
-          withdrawal_minor: number | null
-          withdrawal_reference: string | null
-        }
-        Insert: {
-          currency?: string | null
-          environment: string
-          error_code?: string | null
-          error_detail?: string | null
-          escrow_balance_minor?: number | null
-          finished_at?: string | null
-          id?: string
-          main_balance_minor?: number | null
-          outcome: string
-          rate_limit_remaining?: number | null
-          started_at?: string
-          withdrawal_minor?: number | null
-          withdrawal_reference?: string | null
-        }
-        Update: {
-          currency?: string | null
-          environment?: string
-          error_code?: string | null
-          error_detail?: string | null
-          escrow_balance_minor?: number | null
-          finished_at?: string | null
-          id?: string
-          main_balance_minor?: number | null
-          outcome?: string
-          rate_limit_remaining?: number | null
-          started_at?: string
-          withdrawal_minor?: number | null
-          withdrawal_reference?: string | null
-        }
-        Relationships: []
-      }
       payment_methods: {
         Row: {
           authorization_code: string
@@ -15308,7 +15260,6 @@ export type Database = {
         Args: { p_arrangement: string; p_reason: string }
         Returns: Json
       }
-      admin_payluk_commission_sweep: { Args: never; Returns: Json }
       admin_payment_health: {
         Args: { p_stale_minutes?: number }
         Returns: Json
@@ -16631,15 +16582,6 @@ export type Database = {
           p_transaction?: string
         }
         Returns: string
-      }
-      ledger_record_payluk_commission: {
-        Args: {
-          p_actor?: string
-          p_amount: number
-          p_provider_reference?: string
-          p_transaction: string
-        }
-        Returns: Json
       }
       lister_caution_record: { Args: { p_lister: string }; Returns: Json }
       lister_chargeback_hold: { Args: { p_lister: string }; Returns: boolean }

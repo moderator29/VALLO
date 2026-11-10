@@ -47,8 +47,10 @@ import { SUPABASE_URL } from "../supabase/env";
  *    `'self'` and only the `style=` attribute needs the inline allowance.
  *  - Nothing frames us and we frame nothing, so both frame directives are
  *    `'none'`.
- *  - The only cross-origin subresources are basemap tiles, Unsplash stock,
- *    Google avatars and Supabase storage, all of them images.
+ *  - The only cross-origin subresources are Unsplash stock, Google avatars
+ *    and Supabase storage, all of them images, and the map's vector tiles,
+ *    style, fonts and sprite from OpenFreeMap, which are fetched and so sit
+ *    in `connect-src`.
  *  - The only cross-origin NAVIGATION a form can reach is Paystack checkout.
  *    The Google and Apple sign-in rows that used to post to a server action
  *    ending in a redirect to Supabase authorize are gone from `AuthChoices`,
@@ -139,11 +141,28 @@ const IMAGE_HOSTS: readonly string[] = [
   // The avatar a Google account already has. Google picks the shard, lh3
   // through lh6, so the wildcard is on the subdomain and nothing wider.
   "https://*.googleusercontent.com",
-  // Basemap raster tiles. Both providers, because which one is drawn depends
-  // on whether NEXT_PUBLIC_MAPTILER_KEY is set at runtime. See lib/maps/tiles.
-  "https://basemaps.cartocdn.com",
-  "https://api.maptiler.com",
+  // School logos in the Roommates school picker (public.institutions.logo_url).
+  // Wikimedia serves them (upload.wikimedia.org), one named host and no
+  // wildcard. Drawn as a plain <img> at about 128px; a school without a
+  // logo, or a logo that fails, shows the neutral school icon instead.
+  "https://upload.wikimedia.org",
+  // No map host. The map's provider, OpenFreeMap, is fetched rather than
+  // drawn as an <img>, so its host is in MAP_DATA_ORIGINS below. CARTO's
+  // host (non-commercial tiles) and MapTiler's (the paid path the founder
+  // declined) were both removed on 9 November 2026 (see lib/maps/tiles).
 ];
+
+/**
+ * Where the map's data comes from, for `connect-src`.
+ *
+ * OpenFreeMap serves the vector tiles, the TileJSON that names them, the
+ * style, the glyphs and the sprite, all from this one host, and every one of
+ * them is FETCHED (by MapLibre and its worker, or by the lightweight canvas
+ * painter), never put in an `<img>`. One named host, no wildcard. MapLibre's
+ * worker is a same-origin file the bundler emits, which `worker-src 'self'`
+ * already covers.
+ */
+const MAP_DATA_ORIGINS: readonly string[] = ["https://tiles.openfreemap.org"];
 
 /**
  * Where a payment is allowed to take somebody.
@@ -370,9 +389,8 @@ export function contentSecurityPolicy(nonce: string): string {
      * There are no partner photos any more. Every image on this platform now
      * comes from a host we can name, so the wildcard is closed and the list is
      * the real one. It is the same set `next.config.ts` allows `next/image` to
-     * optimise, plus the two basemap providers, which serve raster tiles as
-     * plain `<img>` elements and are therefore governed by this directive
-     * rather than by `connect-src`.
+     * optimise. The map draws no `<img>` from a third party: its data is
+     * fetched, under `connect-src`.
      *
      * A photo that fails to load is a grey tile. A wildcard that stays open
      * because nobody revisited it is an exfiltration channel: an injected
@@ -402,12 +420,13 @@ export function contentSecurityPolicy(nonce: string): string {
     // Self-hosted faces only, and `data:` for nothing. See public/fonts.
     ["font-src", ["'self'"]],
 
-    // The browser talks to us, to Supabase and, on a call screen, to the
+    // The browser talks to us, to Supabase, to the map's data host
+    // (OpenFreeMap, MAP_DATA_ORIGINS above) and, on a call screen, to the
     // media provider's signalling host (VC1, `lib/calls/media-origins.ts`;
     // nothing is added while LIVEKIT_URL is unset). Every payment call is
     // server side, so Paystack does not belong here: if a browser ever
     // starts calling an API directly, this directive is what reports it.
-    ["connect-src", ["'self'", ...supabase, ...callMediaOrigins(process.env.LIVEKIT_URL)]],
+    ["connect-src", ["'self'", ...supabase, ...MAP_DATA_ORIGINS, ...callMediaOrigins(process.env.LIVEKIT_URL)]],
 
     // No plugins, no applets, ever.
     ["object-src", ["'none'"]],
@@ -454,7 +473,10 @@ export function contentSecurityPolicy(nonce: string): string {
     ["form-action", ["'self'", ...PAYSTACK_ORIGINS]],
 
     // A service worker is registered (public/sw.js), and it may be created
-    // from a blob by the framework's own loader.
+    // from a blob by the framework's own loader. MapLibre's tile worker is a
+    // same-origin static file (`lib/maps/gl-layer.ts`), so 'self' covers it;
+    // were the assets ever served from another origin, MapLibre would start
+    // it from a blob, which is already here.
     ["worker-src", ["'self'", "blob:"]],
     ["manifest-src", ["'self'"]],
   ];

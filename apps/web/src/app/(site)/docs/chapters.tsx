@@ -1,19 +1,25 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { DocTable } from "@/components/docs/DocTable";
+import { DocFlow } from "@/components/docs/DocFlow";
 import { formatMoney } from "@vallo/i18n/core";
 import type { BrandIconName } from "@/design-system/icons/BrandIcon";
 import { SUPPORT_HREF, SUPPORT_LABEL } from "@/lib/support-email";
 import { FULL_REFUND_HOURS } from "@/lib/trust/cancellation";
 import { MAX_MOVE_KOBO, MIN_MOVE_KOBO } from "@/lib/money/amount";
 import {
+  CARD_SHARE_WHEN_CLEARS,
   HELD_MONEY_NOT_US,
+  HOW_PAYING_PROCESSOR_NAMED,
   NO_INSPECTION_FEE,
   NO_PAYMENT_BALANCE,
   OFF_PLATFORM_SENTENCE,
-  RAIL_COPY,
+  PAY_ONLY_THROUGH_VALLO,
+  RENT_PAYMENT_NOT_OPEN,
   REFUND_NO_BALANCE,
   REFUND_ROUTE,
   REWARDS_BALANCE_SEPARATE,
+  TOLD_WHEN_IT_OPENS,
 } from "@/lib/money/copy";
 import { REPORT_CATEGORY_COPY, REPORT_CATEGORY_ORDER } from "@/lib/reports/schema";
 import { RESPONSE_COMMITMENTS } from "@/lib/trust/standards";
@@ -41,22 +47,21 @@ import {
 import {
   CARD_MEANS,
   COMMISSION_FROM_SHARE,
-  ESCROW_MEANS,
-  ESCROW_PAUSED,
-  ESCROW_OR_CARD,
+  ESCROW_NOT_OFFERED,
   HOTEL_ROOM_BY_CARD,
   PAY_INSIDE_VALLO,
   PRICE_IS_THE_PRICE,
-  SALE_IS_ESCROW,
+  RENT_AND_SALE_NOT_OPEN,
+  SALE_NOT_PAID,
+  STAYS_PAID_BY_CARD,
   VALLO_NEVER_HOLDS,
   VIEWINGS_AND_LISTING_FREE,
 } from "./facts";
-import { DocsFlow } from "./DocsFlow";
-import { DOC_GROUPS, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
+import { DOC_GROUPS, DOCS_REVIEWED, chaptersByGroup, type DocChapterIndexEntry, type DocGroupId } from "./docs-groups";
 
 /* The navigation lives in `docs-groups.ts` so the client rail can import it
    without this file's text; re-exported here for the server callers. */
-export { DOC_GROUPS, chaptersByGroup };
+export { DOC_GROUPS, DOCS_REVIEWED, chaptersByGroup };
 export type { DocChapterIndexEntry, DocGroupId };
 
 /**
@@ -91,6 +96,12 @@ export type DocSection = {
   id: string;
   heading: string;
   body: ReactNode;
+  /**
+   * A tool drawn under the section's words (DOCS_AND_PRESENCE_UPGRADE.md
+   * 4.6). Named, not embedded, so the chapters stay plain data: the page
+   * places the tool, which reads its own figures on the server.
+   */
+  tool?: "fee-calculator";
 };
 
 export type DocChapter = {
@@ -103,6 +114,14 @@ export type DocChapter = {
   icon: BrandIconName;
   /** The sidebar group. Set from the order below. */
   group?: DocGroupId;
+  /** ISO date this chapter was last read against the product; `DOCS_REVIEWED` when unset. */
+  updated?: string;
+  /**
+   * The "At a glance" lines, when the chapter names its own. Each must be a
+   * sentence the chapter already says (`glance.test.ts`); unset, the first
+   * sentence of each of the first sections is lifted (`glance.ts`).
+   */
+  glance?: string[];
   sections: DocSection[];
 };
 
@@ -289,18 +308,26 @@ const WHAT_VALLO_IS: DocChapter = {
  * HOW PAYING WORKS (replaces "Money and agreements", whose slug named the
  * retired Vallo Guarantee; `/docs/money-and-the-guarantee` and the older
  * `/docs/your-wallet` redirect here). The founder's rules of 13 October 2026:
- * every payment inside Vallo; Escrow (the default) or card for rent and
- * shortlets; a sale always escrow; a hotel room by card at once; Vallo never
- * holds the money. The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
+ * every payment inside Vallo and Vallo never holds the money. Rewritten on 9
+ * November 2026 (MONEY_COPY_SWEEP.md items 32 to 36): stays and hotel rooms are
+ * paid by card, payment for rentals is not open, Vallo takes no payment for a
+ * purchase, and escrow is not offered. This is the help page on how paying
+ * works, one of the five surfaces that name the processor
+ * (`HOW_PAYING_PROCESSOR_NAMED`). The ids `never-held`, `the-gate`, `the-fee`, `refunds`,
  * `for-listers`, `references` and `off-platform` are kept from the old
  * chapter so its links still land on the right heading.
  */
 const PAYING_ON_VALLO: DocChapter = {
   slug: "paying-on-vallo",
+  glance: [
+    "Every payment for a deal happens inside Vallo.",
+    "Vallo never holds customer money.",
+    CARD_MEANS,
+  ],
   number: 0,
   title: "How paying works",
   summary:
-    "Every payment happens inside Vallo. Escrow or card for rent and shortlets, escrow for a sale, card for a hotel room, and Vallo never holds the money.",
+    "Every payment happens inside Vallo. Card for stays and hotel rooms, and Vallo never holds the money.",
   icon: "shield-lock",
   sections: [
     {
@@ -330,62 +357,37 @@ const PAYING_ON_VALLO: DocChapter = {
       id: "which-way",
       heading: "See how each kind of deal is paid",
       body: (
-        <ul role="list">
-          <li>
-            <strong>Rent.</strong> Escrow, selected for you, or Pay by card.
-          </li>
-          <li>
-            <strong>Shortlets and serviced apartments.</strong> Escrow, selected for you, or Pay by
-            card.
-          </li>
-          <li>
-            <strong>A sale.</strong> Escrow only.
-          </li>
-          <li>
-            <strong>A hotel room.</strong> By card, when you book, at the price shown.
-          </li>
-          <li>
-            <strong>A restaurant table.</strong> Free to book. You pay your bill at the restaurant.
-          </li>
-          <li>
-            <strong>A viewing.</strong> Never any money.
-          </li>
-        </ul>
+        <DocTable
+          caption="How each kind of deal is paid"
+          captionHidden
+          columns={[
+            { key: "deal", label: "Deal" },
+            { key: "how", label: "How it is paid" },
+            { key: "open", label: "Paid on Vallo today", kind: "yesno" },
+          ]}
+          rows={[
+            { id: "stay", icon: "building-apartment", cells: { deal: "Shortlets and serviced apartments", how: STAYS_PAID_BY_CARD, open: { yes: true } } },
+            { id: "hotel", icon: "building-hotel", cells: { deal: "A hotel room", how: "By card, when you book, at the price shown.", open: { yes: true } } },
+            { id: "rent", icon: "house", cells: { deal: "Rent", how: RENT_PAYMENT_NOT_OPEN, open: { yes: false } } },
+            { id: "sale", icon: "price-tag", cells: { deal: "A sale", how: SALE_NOT_PAID, open: { yes: false } } },
+            { id: "table", icon: "utensils", cells: { deal: "A restaurant table", how: "Free to book. You pay your bill at the restaurant.", open: { yes: false, note: "Free" } } },
+            { id: "viewing", icon: "calendar-check", cells: { deal: "A viewing", how: "Never any money.", open: { yes: false, note: "Free" } } },
+          ]}
+        />
       ),
     },
-    {
-      id: "escrow",
-      heading: "Pay with Escrow",
-      body: (
-        <>
-          <DocsFlow
-            label="How an escrow payment moves"
-            steps={[
-              { object: "payment-sent", label: "You pay" },
-              { object: "doc-lock", label: "A licensed partner holds it" },
-              { object: "keys-handover", label: "The deal is confirmed" },
-              { object: "bank-column", label: "Released to them" },
-            ]}
-          />
-          <p>{ESCROW_OR_CARD}</p>
-          <p>{ESCROW_MEANS}</p>
-          <p>{RAIL_COPY.protected.refund}</p>
-          <p>{SALE_IS_ESCROW}</p>
-          <p>{ESCROW_PAUSED}</p>
-        </>
-      ),
-    },
+    /* "Pay with Escrow" (id `escrow`) is removed (sweep item 34): escrow is not
+       offered. Its anchor is kept on the card section below so old links land. */
     {
       id: "card",
       heading: "Pay by card",
       body: (
         <>
+          <span id="escrow" aria-hidden="true" />
           <p>{CARD_MEANS}</p>
-          <p>
-            You enter your card on the payment partner&rsquo;s own page, never on Vallo. Vallo never
-            sees your full card number.
-          </p>
+          <p>{HOW_PAYING_PROCESSOR_NAMED}</p>
           <p>{HOTEL_ROOM_BY_CARD}</p>
+          <p>{ESCROW_NOT_OFFERED}</p>
           <p>
             Tap Pay twice on a bad connection and you are charged once. A repeated attempt picks up the
             first one.
@@ -417,7 +419,7 @@ const PAYING_ON_VALLO: DocChapter = {
           </ul>
           <p>
             A card payment for an unusually large deal, or one where something changed recently, may wait
-            for a person at Vallo to look first. You are told by email and in the app when it opens.
+            for a person at Vallo to look first. {TOLD_WHEN_IT_OPENS}
           </p>
         </>
       ),
@@ -474,13 +476,15 @@ const PAYING_ON_VALLO: DocChapter = {
       id: "for-listers",
       heading: "Get paid as an owner, agent or host",
       body: (
-        <ul role="list">
-          <li>Add a Nigerian bank account in your own name before anybody can pay you.</li>
-          <li>Before you publish, Vallo shows you what you will receive after its commission.</li>
-          <li>With Pay by card, your share goes to your bank account when the payment clears.</li>
-          <li>With Escrow, your share is released when the deal is confirmed.</li>
-          <li>Every payment and every refund appears on your earnings, line by line.</li>
-        </ul>
+        <DocFlow
+          label="From a payment to your bank"
+          steps={[
+            { icon: "bank", title: "Add your payout details", href: "/settings/payments", outcome: "Add a Nigerian bank account in your own name before anybody can pay you." },
+            { icon: "price-tag", title: "See what you receive", href: "/docs/what-vallo-costs#work-it-out", outcome: "Before you publish, Vallo shows you what you will receive after its commission." },
+            { icon: "credit-card", title: "A guest pays by card", outcome: CARD_SHARE_WHEN_CLEARS },
+            { icon: "receipt", title: "Check your payouts", href: "/payouts", outcome: "Every payment and every refund appears on your earnings, line by line." },
+          ]}
+        />
       ),
     },
     {
@@ -499,7 +503,7 @@ const PAYING_ON_VALLO: DocChapter = {
       body: (
         <>
           <p>
-            {OFF_PLATFORM_SENTENCE} Payments made outside Vallo are not covered.
+            {OFF_PLATFORM_SENTENCE} {PAY_ONLY_THROUGH_VALLO}
           </p>
           <p>
             Say no, and report it. If you have already paid, read{" "}
@@ -550,24 +554,21 @@ const REFUNDS: DocChapter = {
             <strong>Hotels, shortlets and serviced apartments run as a business</strong> pick one of
             four policies:
           </p>
-          <ul role="list">
-            <li>
-              <strong>Flexible.</strong> Cancel at least 24 hours before check-in for a full refund.
-              After that, no refund.
-            </li>
-            <li>
-              <strong>Moderate.</strong> Cancel at least 5 days before check-in for a full refund.
-              After that, half back.
-            </li>
-            <li>
-              <strong>Firm.</strong> Cancel at least 30 days before check-in for a full refund, or at
-              least 7 days before for half back. After that, no refund.
-            </li>
-            <li>
-              <strong>Strict.</strong> Cancel at least 7 days before check-in for half back. After
-              that, no refund.
-            </li>
-          </ul>
+          <DocTable
+            caption="The four cancellation policies"
+            columns={[
+              { key: "policy", label: "Policy" },
+              { key: "full", label: "Full refund" },
+              { key: "half", label: "Half back" },
+              { key: "after", label: "After that" },
+            ]}
+            rows={[
+              { id: "flexible", cells: { policy: <strong>Flexible</strong>, full: "Cancel at least 24 hours before check-in", half: "Not offered", after: "No refund" } },
+              { id: "moderate", cells: { policy: <strong>Moderate</strong>, full: "Cancel at least 5 days before check-in", half: "After that", after: "Half back" } },
+              { id: "firm", cells: { policy: <strong>Firm</strong>, full: "Cancel at least 30 days before check-in", half: "At least 7 days before", after: "No refund" } },
+              { id: "strict", cells: { policy: <strong>Strict</strong>, full: "Not offered", half: "At least 7 days before check-in", after: "No refund" } },
+            ]}
+          />
           <p>
             <strong>A stay listed by an owner or agent</strong> follows Vallo&rsquo;s standard
             schedule: full refund more than {FULL_REFUND_HOURS} hours before check-in, half back
@@ -589,13 +590,15 @@ const REFUNDS: DocChapter = {
       id: "ask-for-a-refund",
       heading: "Ask for a refund on a paid stay",
       body: (
-        <ol role="list">
-          <li>Open the booking from Plans.</li>
-          <li>Ask for the booking to be cancelled and refunded.</li>
-          <li>A person at Vallo decides it by the policy on your booking, and tells you the amount.</li>
-          <li>The refund is started by the end of the fifth Nigerian business day after you asked.</li>
-          <li>{REFUND_ROUTE}</li>
-        </ol>
+        <DocFlow
+          label="Asking for a refund"
+          steps={[
+            { icon: "calendar-booking", title: "Open the booking from Plans", href: "/bookings", outcome: "Every stay shows its cancellation policy, fixed on your booking when you pay." },
+            { icon: "send", title: "Ask for it to be cancelled and refunded", outcome: "From the booking itself." },
+            { icon: "user-check", title: "A person at Vallo decides it", outcome: "By the policy on your booking, and you are told the amount." },
+            { icon: "banknote", title: "The refund is started", outcome: <>By the end of the fifth Nigerian business day after you asked. {REFUND_ROUTE}</> },
+          ]}
+        />
       ),
     },
     {
@@ -616,11 +619,6 @@ const REFUNDS: DocChapter = {
           </p>
         </>
       ),
-    },
-    {
-      id: "escrow-refunds",
-      heading: "Get back a payment held in escrow",
-      body: <p>{RAIL_COPY.protected.refund}</p>,
     },
     {
       id: "tables-and-viewings",
@@ -672,8 +670,8 @@ const TRUST_AND_SAFETY: DocChapter = {
             numbers are flagged to the Vallo team.
           </li>
           <li>
-            {NO_INSPECTION_FEE} There is no holding fee or platform fee to pay anyone. Anybody presenting
-            one as a Vallo charge is lying.
+            {NO_INSPECTION_FEE} Renters and guests pay no holding fee or platform fee to anyone. Anybody
+            presenting one as a Vallo charge is lying.
           </li>
         </ul>
       ),
@@ -844,18 +842,20 @@ const YOUR_DATA: DocChapter = {
       id: "how-it-is-protected",
       heading: "Who can see what",
       body: (
-        <ul role="list">
-          <li>
-            Your bookings, agreements, messages and settings are protected with row level security, so
-            the database hands them only to you and to the people on the same deal.
-          </li>
-          <li>
-            Gate details for a stay are shown only to the host, to Vallo staff, and to a guest with a
-            confirmed booking.
-          </li>
-          <li>ID and ownership documents sit in a private store that only you and a reviewer can open.</li>
-          <li>Data is encrypted in transit, and passwords are stored only as a hash.</li>
-        </ul>
+        <DocTable
+          caption="Who can see what"
+          captionHidden
+          columns={[
+            { key: "what", label: "What" },
+            { key: "who", label: "Who can see it" },
+          ]}
+          rows={[
+            { id: "deals", icon: "lock", cells: { what: "Your bookings, agreements, messages and settings", who: "Only you and the people on the same deal. They are protected with row level security." } },
+            { id: "gate", icon: "gate", cells: { what: "Gate details for a stay", who: "The host, Vallo staff, and a guest with a confirmed booking." } },
+            { id: "docs", icon: "id-card", cells: { what: "ID and ownership documents", who: "Only you and a reviewer. They sit in a private store." } },
+            { id: "transit", icon: "shield-lock", cells: { what: "Your data in transit, and your password", who: "Data is encrypted in transit, and passwords are stored only as a hash." } },
+          ]}
+        />
       ),
     },
     {
@@ -926,8 +926,8 @@ const YOUR_DATA: DocChapter = {
             </li>
           </ol>
           <p>
-            What is kept: records of money that moved, for at least five years, because Nigerian
-            anti-money-laundering law requires it, with your name, email address and phone number removed.
+            What is kept: records of money that moved, for six years, because Nigerian
+            tax and anti-money-laundering rules require it, with your name, email address and phone number removed.
             Messages you sent stay in the other person&rsquo;s conversation, shown as from a deleted account.
             The full list is on{" "}
             <Link href="/delete-account" className={A}>
@@ -1003,10 +1003,9 @@ const TROUBLESHOOTING: DocChapter = {
       heading: "Payment will not open",
       body: (
         <ul role="list">
-          <li>For rent or a sale, both of you must confirm the agreement first.</li>
+          <li>{RENT_AND_SALE_NOT_OPEN}</li>
           <li>For a shortlet that is a request, the host must accept first.</li>
           <li>The lister may not have added a payout account yet. Message them.</li>
-          <li>{ESCROW_PAUSED}</li>
         </ul>
       ),
     },

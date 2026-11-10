@@ -61,38 +61,17 @@ const PAYSTACK: Readonly<Record<string, ValloStatus>> = {
   reversed: "refunded",
 };
 
-/** Payluk escrow `status` (essentials_status-reference). */
-const PAYLUK_ESCROW: Readonly<Record<string, ValloStatus>> = {
-  PENDING: "awaiting_payment",
-  ONGOING: "protected",
-  COMPLETED: "released",
-  CLAIMED: "released",
-  REFUNDED: "refunded",
-  SPLIT: "under_review",
-  DISPUTED: "under_review",
-  INVESTIGATING: "under_review",
-};
-
-/** Payluk `payment.*` webhook payload `status` (concepts_webhooks). */
-const PAYLUK_PAYMENT: Readonly<Record<string, ValloStatus>> = {
-  success: "paid",
-  failed: "failed",
-  reversed: "refunded",
-};
-
-export type ProviderVocabulary = "paystack" | "payluk_escrow" | "payluk_payment";
+export type ProviderVocabulary = "paystack";
 
 const TABLES: Record<ProviderVocabulary, Readonly<Record<string, ValloStatus>>> = {
   paystack: PAYSTACK,
-  payluk_escrow: PAYLUK_ESCROW,
-  payluk_payment: PAYLUK_PAYMENT,
 };
 
 /** The Vallo status for a provider word. Unknown or missing: `under_review`. */
 export function valloStatusFor(vocabulary: ProviderVocabulary, providerStatus: unknown): ValloStatus {
   if (typeof providerStatus !== "string") return "under_review";
   const table = TABLES[vocabulary];
-  const key = vocabulary === "payluk_escrow" ? providerStatus.trim().toUpperCase() : providerStatus.trim().toLowerCase();
+  const key = providerStatus.trim().toLowerCase();
   return Object.prototype.hasOwnProperty.call(table, key) ? table[key]! : "under_review";
 }
 

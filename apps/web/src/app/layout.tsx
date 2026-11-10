@@ -22,6 +22,12 @@ import "./css/input-bar.css";
 import { launchScript } from "@/components/motion/launch-script";
 import packageJson from "../../package.json";
 import "@/components/startup/startup.css";
+import "@/components/startup/open.css";
+import { OpenReady } from "@/components/startup/OpenReady";
+import { OpeningScreen } from "@/components/startup/OpeningScreen";
+import { OPEN_SCRIPT } from "@/components/startup/open-script";
+import { LAUNCH_IMAGES } from "@/lib/brand/launch-images";
+import { versioned } from "@/lib/theme/brand-assets";
 import { siteUrl } from "@/lib/site";
 import { CHROME_COLOUR } from "@/lib/theme/chrome";
 import { THEME_BOOT_SCRIPT, THEME_KEY, parseThemeChoice, serverTheme } from "@/lib/theme/theme";
@@ -33,6 +39,8 @@ import { SuccessFlagHost } from "@/components/ui/SuccessFlagHost";
 import { DetailsHost } from "@/components/ui/DetailsHost";
 import { ImageFallbackGuard } from "@/components/app/ImageFallbackGuard";
 import { DeployWatch } from "@/components/app/DeployWatch";
+import { CookieGate } from "@/components/consent/CookieGate";
+import { CONSENT_COOKIE, parseConsent } from "@/lib/consent/consent";
 
 /*
  * The fonts are declared in `css/fonts.css` and served from `public/fonts`,
@@ -206,6 +214,9 @@ const baseMetadata: Metadata = {
     capable: true,
     title: "Vallo",
     statusBarStyle: "black-translucent",
+    /* The bright mark on the brand ground, so iOS shows it (not its own blank
+       snapshot) between the tap and the first page. scripts/build-brand-launch.mjs. */
+    startupImage: LAUNCH_IMAGES.map((i) => ({ url: versioned(i.url), media: i.media })),
   },
   other: {
     "apple-mobile-web-app-capable": "yes",
@@ -218,12 +229,12 @@ const baseMetadata: Metadata = {
    */
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
-      { url: "/pwa/icon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: versioned("/favicon.ico"), sizes: "16x16 32x32 48x48" },
+      { url: versioned("/pwa/icon-32.png"), sizes: "32x32", type: "image/png" },
+      { url: versioned("/pwa/icon-192.png"), sizes: "192x192", type: "image/png" },
+      { url: versioned("/pwa/icon-512.png"), sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/pwa/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: versioned("/pwa/apple-touch-icon.png"), sizes: "180x180", type: "image/png" }],
   },
 };
 
@@ -327,6 +338,8 @@ export default async function RootLayout({
   /* Track M: the motion preference, painted on the root by the server so the
      first frame (and the splash decision below) already honours it. */
   const motion = motionAttributes(parseMotion((await cookies()).get(MOTION_COOKIE)?.value));
+  /* The cookie notice is shipped only to a visitor with no current choice. */
+  const needsCookieChoice = parseConsent((await cookies()).get(CONSENT_COOKIE)?.value) === null;
 
   return (
     <html
@@ -347,6 +360,8 @@ export default async function RootLayout({
           report back. Silent on the website. See components/startup.
         */}
         <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: STARTUP_NATIVE_SCRIPT }} />
+        {/* THE OPENING SCREEN decides here, before the first frame (components/startup/open-script.ts). */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: OPEN_SCRIPT }} />
         {offlineStamp ? <meta name={VIEWER_HEADER} content={offlineStamp.viewer} data-path={offlineStamp.path} /> : null}
         {/*
           The face arrives with the stylesheet rather than after it. `crossorigin`
@@ -366,6 +381,9 @@ export default async function RootLayout({
         ))}
       </head>
       <body>
+        {/* THE OPENING SCREEN: the bright mark, in the first HTML (open.css shows it in an installed app only). */}
+        <OpeningScreen />
+        <OpenReady />
         {/*
           THE THEME SCRIPT WAS DELETED ON 23 SEPTEMBER 2026 AND CAME BACK ON
           THE 25TH, when the founder reversed the dark-only rule. It is the
@@ -557,6 +575,8 @@ export default async function RootLayout({
           <ImageFallbackGuard />
           {/* A phone still running an older deploy reloads itself once (lib/deploy/watch.ts). */}
           <DeployWatch />
+          {/* The cookie choice, first visit only and loaded lazily (components/consent). */}
+          {needsCookieChoice ? <CookieGate copy={t.cookies} /> : null}
         </ClientCopyProvider>
         <ThresholdStage welcome={t.authFlow.welcomeThrough} />
       </body>

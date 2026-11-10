@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { CopyValue } from "@/components/ui/CopyButton";
 import Link from "next/link";
 import { formatDate, getDictionary, type Locale } from "@vallo/i18n";
 import { DayDivider } from "@/components/app/messages/ThreadDividers";
@@ -216,6 +217,7 @@ export function TicketThreadView({
   return (
     <div className="mx-auto max-w-2xl pb-[env(safe-area-inset-bottom)]">
       <PageHeader title={topicName(ticket.topicCode, words.topicNames) ?? ticket.topic ?? words.pages.ticketTitle} subtitle={ticket.reference} fallback="/support/messages" />
+      <p className="mb-row flex justify-end"><CopyValue value={ticket.reference} kind="code" label="Copy ticket number" message="Ticket number copied" /></p>
 
       <div className="space-y-block">
         <section className="nf-panel nf-panel--card block p-card-sm" aria-label={w.status} data-testid="support-status">

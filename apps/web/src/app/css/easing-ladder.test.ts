@@ -28,6 +28,7 @@ const SRC = join(__dirname, "..", "..");
 
 /** `linear` may stay here, and only here. Count per file. */
 const LINEAR: Record<string, [number, string]> = {
+  "components/money/protected-rail/pp-screens.css": [2, "the transfer clock moves at the speed of the real clock, and the waiting orbit turns at one speed (six turns, then still)"],
   "app/css/animation.css": [1, "the undo window drains at the speed of the real clock (honest progress)"],
   "app/css/controls.css": [1, "the skeleton's sweep crosses at one speed (four passes, then still)"],
   "app/social.css": [1, "the social slab's skeleton sweep, the same as controls.css"],

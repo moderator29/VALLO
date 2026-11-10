@@ -51,6 +51,7 @@ import {
   SUBJECT_MAX,
 } from "./render";
 import { FONT_SANS, LEGAL_LINE, LIGHT, LINK, SIGN_OFF } from "./theme";
+import { NEWSLETTER_SALE_LINE } from "../money/copy";
 
 /* ----------------------------------------------------------------- routes */
 
@@ -200,7 +201,7 @@ export const NEWSLETTER_COPY = {
       },
       {
         title: "Buying and selling, done carefully",
-        body: "Property for sale with the title stated up front, an agreement both sides confirm before payment opens, and escrow through a licensed partner where you choose it.",
+        body: NEWSLETTER_SALE_LINE,
       },
       {
         title: "More places to stay and eat",

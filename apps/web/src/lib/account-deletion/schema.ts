@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DELETE_CONFIRM_PHRASE } from "./constants";
+import { DELETE_CONFIRM_PHRASE, DELETION_NOTE_MAX, DELETION_REASONS } from "./constants";
 
 /**
  * Everything the deletion flow accepts from a client, validated on the server
@@ -30,6 +30,10 @@ export const confirmDeletionSchema = z
       ),
     password: z.string().optional(),
     emailCode: z.string().trim().optional(),
+    /** Why they are leaving: a code from the closed list, never free text. */
+    reason: z.enum(DELETION_REASONS, { message: "Choose the closest reason." }).optional(),
+    /** "Tell us more", optional, capped. The form asks for nothing personal. */
+    reasonNote: z.string().trim().max(DELETION_NOTE_MAX, `Keep it to ${DELETION_NOTE_MAX} characters.`).optional(),
   })
   .refine(
     (value) => (value.password ?? "").length > 0 || (value.emailCode ?? "").length > 0,

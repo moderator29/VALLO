@@ -259,20 +259,30 @@ Verify each against the source before changing it.
 | Provider abstraction, typed capabilities | `lib/payments/provider.ts` | Built. `split_at_charge`, `hold_in_escrow`, `member_wallet` |
 | Rail router (which rail per deal type) | `lib/payments/router.ts`, `private.rail_for_booking`, `private.rail_for_agreement` | Built |
 | Payer's rail choice | `deal_agreements.payer_rail_choice`, `public.payment_rail_choose` | Built |
-| Arrangement state machine | `lib/money/arrangement-states.ts` | Built, but mapped to PAYLUK's vocabulary. Remap. |
+| Arrangement state machine | `lib/money/arrangement-states.ts` | Built, but mapped to RETIRED PROVIDER's vocabulary. Remap. |
 | Arrangements table | `provider_arrangements` | Built |
-| Webhook route | `app/api/payluk/webhook/route.ts` | Built for Payluk. Replace. |
+| Webhook route | `app/api/retired_provider/webhook/route.ts` | Built for the retired provider. Replace. |
 | Reconciliation cron | `/api/cron/arrangements-reconcile`, every 10 minutes | Built |
-| Member screens | `app/(app)/agreements/[id]/fund`, `.../held` | Built, Payluk-shaped |
+| Member screens | `app/(app)/agreements/[id]/fund`, `.../held` | Built, the retired provider-shaped |
 | Payment gate | `transactions_00_payment_gate`, `provider_arrangements_00_payable_gate` | Built |
 | Ledger | `ledger_entries` | Built |
 | Refund clock | `booking_refunds`, three forward-only stamps, 5 business days | Built |
-| Kill switches | env `PAYMENTS_KILL_PAYLUK`, flag `payments_payluk_on`, `private.rentals_protected_pay_on` | Built |
+| Kill switches | env `PAYMENTS_KILL_PROTECTED_PAY`, flag `payments_protected_pay_on`, `private.rentals_protected_pay_on` | Built |
 | Safety rails | card charge refused while partner holds; both-ways funding alerts; unfunded arrangement cancels after 2h | Built |
 
-**What does not exist: the HTTP client.** There is no provider API call
-anywhere in the codebase. That is the gap. Everything else is scaffolding
-waiting for it.
+**What does not exist: a client for the NEW provider.** (Corrected 9
+November 2026 against the code, see `PAYMENTS_MIGRATION_AUDIT.md`.) A full
+the retired provider HTTP client exists (`lib/payments/providers/retired_provider-client.ts`,
+`retired_provider-arrangements.ts`, `retired_provider.ts`) but was never run against the retired provider
+itself; nothing calls the new provider. Also true in the code, and not in the
+table above: `provider_arrangements.provider` only allows `'retired_provider'`; the
+protected rail writes nothing to the ledger (`recordEscrowCommission` is
+never called); the two hour cancel of an unfunded arrangement covers stays,
+not rent; `hold_in_escrow` is a capability flag with no methods; custody
+words are policed by `custody-words.test.ts` and a database trigger, not by
+`check-valuation-words.mjs`; and `provider-name.test.ts` still forbids naming
+the partner to a member, which the section 3 ruling now requires at the pay
+step, so that test is rewritten with the rail.
 
 ---
 
@@ -537,3 +547,20 @@ The founder launches in days, and this build is NOT on that path:
 
 Nothing here blocks the launch, and nothing in the launch should promise what
 this build has not yet delivered. Audit the money copy before launch day.
+
+---
+
+## 11. PROGRESS (kept current)
+
+| Phase | State | Where |
+|---|---|---|
+| 1. Audit | Done, 9 Nov 2026 | `PAYMENTS_MIGRATION_AUDIT.md` |
+| 2. Adapter, disabled | Skeleton done, 10 Nov 2026: config (no invented base URL, production credentials only on a production deployment), a client that sends nothing while `DOCUMENTED` is false, HTTP error mapping, an empty status table, webhooks refused, a fail-closed switch. Every unknown is a `TODO(provider-docs)`. Nothing imports it. | `apps/web/src/lib/payments/providers/escrowpay/` |
+| 3. Backend | Done, 10 Nov 2026, switched off. Items 1 to 11 of audit 10.6: the categories table and flags are applied live (verified); the lifecycle columns, the two new states, the category map, the provider-aware open, the named payer, the funding-expiry sweep and `provider_arrangement_observe`'s widened rules are written and reviewed, pending apply (`protected_rail_server_2026-11-10.sql`, `protected_category_read_2026-11-10.sql`, the second end-of-batch block). `lib/money/protected-rail.ts` is the provider-agnostic orchestration; the webhook route exists at `/api/escrowpay/webhook` and refuses every delivery until the signature scheme is documented; reconcile is split by provider so the retired provider's own read-back never touches an EscrowPay row. | `apps/web/src/lib/money/protected-rail.ts`, `apps/web/src/app/api/escrowpay/webhook/route.ts`, the pending SQL above |
+| 4. Frontend | Done, 10 Nov 2026, switched off: all 11 spec screens, the states nobody asks for (partner unavailable, wrong amount, late transfer, duplicate transfer, release delayed, refund delayed, lister payout missing), the partner mark (dark until `partnerMarkReady` and its flag are both true), receipts, the payments and receipts lists, the How protection works trust page, a read-only staff arrangements desk. Wired behind a read that answers null everywhere today, so no live page's behaviour has changed. | `apps/web/src/components/money/protected-rail/`, `apps/web/src/lib/money/protected-read.ts`, `apps/web/src/lib/money/protected-actions.ts` |
+| Still to do, no external blocker | A photo attachment on the dispute statement (the text statement works; a photo does not yet). Richer filtering on the staff arrangements desk. A fuller pass of real-device screenshots once the rail can actually be turned on in a sandbox. | |
+| Blocked on the provider | Every `TODO(provider-docs)` in `lib/payments/providers/escrowpay/`: the request and response bodies, the signature header and algorithm, the status vocabulary. `DOCUMENTED` stays false and the client sends nothing until EscrowPay's own sandbox documentation is in hand. | |
+| 5 to 7 | Waiting on the signed agreement and sandbox access. | |
+
+Rent payment is also closed in code until the founder opens it
+(`apps/web/src/lib/rent/payment-open.ts`, `RENT_PAYMENT_OPEN = false`).

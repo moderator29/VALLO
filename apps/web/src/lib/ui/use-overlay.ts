@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { isTopOverlay, joinOverlay, leaveOverlay } from "@/lib/ui/overlay-registry";
 
 /**
@@ -133,6 +133,18 @@ export function useOverlay({
   autoFocus?: boolean;
   modal?: boolean;
 }): void {
+  /* The latest close handler, read when Escape or Back fires. It is NOT a
+     dependency of the effect below: most callers pass an inline arrow, which
+     is a new function on every render, and as a dependency it tore the
+     overlay down and set it up again on each render. The teardown hands focus
+     back to the opener, so in a form inside an overlay (every StepFrame flow)
+     the first keystroke re-rendered the form, focus jumped off the field and
+     the next letter was lost (found 9 November 2026 in the listing wizard). */
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
 
@@ -158,7 +170,7 @@ export function useOverlay({
            and is always meant for the top overlay. */
         if (!modal && event.isTrusted && !panelRef.current?.contains(document.activeElement)) return;
         event.stopPropagation();
-        onClose();
+        closeRef.current();
         return;
       }
       if (!modal || event.key !== "Tab") return;
@@ -206,5 +218,5 @@ export function useOverlay({
         opener?.focus?.();
       }
     };
-  }, [open, onClose, panelRef, autoFocus, modal]);
+  }, [open, panelRef, autoFocus, modal]);
 }

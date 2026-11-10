@@ -3,7 +3,10 @@ import { publicPageMetadata } from "@/lib/i18n/public-metadata";
 import { SiteHead } from "@/components/site/SiteHead";
 import Link from "next/link";
 import { DocumentSheet } from "@/components/app/money/DocumentSheet";
-import { TERMS_SECTIONS as sections } from "@/lib/legal/terms";
+import { TERMS_SECTIONS as sections, TERMS_UPDATED } from "@/lib/legal/terms";
+import { TERMS_VERSION } from "@/lib/legal/versions";
+import { LegalContents, LegalGlance, LegalShortVersion } from "@/components/legal/LegalPreface";
+import { TERMS_SHORT, TermsGlance } from "@/lib/legal/glance";
 import "@/app/css/site.css";
 
 /* A10: the title and description in the page's own language, with its
@@ -34,7 +37,7 @@ export default function TermsPage() {
         title="Terms of service"
         lede="The rules of the platform, in plain language: what you can expect from Vallo, and what Vallo expects from you."
       >
-        <p className="nf-site-badge">Last updated: 25 September 2026</p>
+        <p className="nf-site-badge">Last updated: {TERMS_UPDATED}</p>
       </SiteHead>
     <div className="nf-shell pb-section">
       <div className="mx-auto max-w-3xl">
@@ -46,8 +49,13 @@ export default function TermsPage() {
            legal text exactly as it was. */}
         <DocumentSheet kind="document" printable className="mt-block nf-legal-sheet">
           <div className="space-y-block">
+            <LegalShortVersion items={TERMS_SHORT} version={TERMS_VERSION} updated={TERMS_UPDATED} />
+            <LegalContents sections={sections} />
+            <LegalGlance>
+              <TermsGlance />
+            </LegalGlance>
             {sections.map((s) => (
-              <section key={s.title}>
+              <section key={s.title} id={s.id} className="scroll-mt-28">
                 <h2 className="nf-h3">{s.title}</h2>
                 <div className="mt-inline space-y-row text-[length:var(--nf-text-body)] leading-relaxed text-[var(--nf-content-secondary)] [&_li]:mt-inline [&_strong]:text-[var(--nf-content-primary)] [&_ul]:list-disc [&_ul]:space-y-inline [&_ul]:pl-heading">
                   {s.body}

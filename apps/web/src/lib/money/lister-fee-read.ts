@@ -3,6 +3,7 @@ import { reportReadError, reportReadFault } from "@/lib/observability/read-error
 
 import { resolveSession } from "../actions/session";
 import { parseListerFeePolicy, type ListerFeePolicy } from "./lister-fee";
+import { protectedRailLive } from "./rail-live";
 
 /**
  * THE RATES IN FORCE FOR ONE LISTING, READ ON THE SERVER (D51, D61).
@@ -38,7 +39,10 @@ export async function readListerFeePolicy(input: {
        answer, so only a fault other than "not deployed" is reported. */
     await reportReadFault("read.money.lister_fee_policy", error);
     if (error) return null;
-    return parseListerFeePolicy(data);
+    const policy = parseListerFeePolicy(data);
+    /* The escrow row is drawn only while the protected rail is live (sweep
+       items 7 to 9); the rates themselves are recorded either way. */
+    return policy ? { ...policy, escrowShown: await protectedRailLive() } : null;
   } catch (error) {
     await reportReadError("read.money.lister_fee_policy", error);
     return null;

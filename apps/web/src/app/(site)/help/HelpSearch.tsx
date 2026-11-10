@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
+import Link from "next/link";
 import { MotionReveal } from "@/components/motion/Reveal";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { countOf } from "@vallo/i18n/core";
-import { topicId } from "./topics";
+import { questionAlias, topicAliases, topicId } from "./topics";
 import { NoResults, SupportResults, SupportSearchField, useSupportSearch } from "@/components/site/support/SupportSearch";
 
 export type Faq = {
   category: string;
   q: string;
   a: string;
+  /** Names in the answer that are things a member can open: the name becomes the link. */
+  links?: readonly { text: string; href: string }[];
 };
 
 /**
@@ -22,8 +25,48 @@ export type Faq = {
  * native details element inside a glass card: keyboard accessible, no JS
  * needed to open, and the search never traps focus.
  */
-export function HelpSearch({ faqs }: { faqs: Faq[] }) {
+export function HelpSearch({
+  faqs,
+  browse,
+  answersLabel,
+  extras,
+  feet,
+}: {
+  faqs: Faq[];
+  /**
+   * What a reader who has not typed sees between the field and the answers:
+   * the popular topics and the topic cards (the page draws them on the kit).
+   * A search replaces it with results, so nothing stands between a query and
+   * its answers.
+   */
+  browse?: ReactNode;
+  /** The heading over the full list of answers. */
+  answersLabel?: string;
+  /** Drawn inside a topic, after its answers (the fee calculator under payments). */
+  extras?: Readonly<Record<string, ReactNode>>;
+  /** Drawn at the foot of every topic: its copy-link control and "Was this helpful?". */
+  feet?: Readonly<Record<string, ReactNode>>;
+}) {
   const [query, setQuery] = useState("");
+
+  /*
+   * A SHORT ANCHOR OPENS ITS ANSWER. `/help#refunds` lands on one question
+   * (`HELP_ANCHORS`), and a question is a closed details element, so the
+   * landing would show only the question. On arrival, and on every later
+   * hash change, the targeted answer is opened; a topic anchor is left
+   * alone, because a topic is a list to read, not one answer.
+   */
+  useEffect(() => {
+    const open = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el instanceof HTMLDetailsElement) el.open = true;
+    };
+    open();
+    window.addEventListener("hashchange", open);
+    return () => window.removeEventListener("hashchange", open);
+  }, []);
 
   /*
    * A TOPIC LINK ALWAYS LANDS. The topic index at the top of the page jumps to
@@ -75,7 +118,7 @@ export function HelpSearch({ faqs }: { faqs: Faq[] }) {
         listId={listId}
         activeIndex={active}
         setActiveIndex={setActive}
-        placeholder="Search Help, Docs and guides, e.g. is Vallo free"
+        placeholder="Search help, docs and guides"
         label="Search help, documentation, guides and policies"
         onOpen={(hit) => {
           /* A Help answer opens where it is; anything else is a page to go to. */
@@ -106,17 +149,24 @@ export function HelpSearch({ faqs }: { faqs: Faq[] }) {
         </div>
       ) : (
         <>
+      {browse}
       {/* Grouped results */}
       {visible.length > 0 ? (
-        <div className="mt-heading space-y-block">
+        <div className="mt-block space-y-block">
+          {answersLabel ? <h2 className="nf-h3">{answersLabel}</h2> : null}
           {categories.map((cat) => (
             <MotionReveal as="section" key={cat} id={topicId(cat)} aria-label={cat} className="scroll-mt-28">
-              <h2 className="nf-overline mb-row">{cat}</h2>
+              {/* The short anchors for this topic sit on its first line, so
+                  `/help#bookings` lands where `#help-booking-a-stay` does. */}
+              {topicAliases(cat).map((alias) => (
+                <span key={alias} id={alias} className="block scroll-mt-28" aria-hidden="true" />
+              ))}
+              <h3 className="nf-overline mb-row">{cat}</h3>
               <div className="space-y-row">
                 {visible
                   .filter((f) => f.category === cat)
                   .map((f) => (
-                    <details key={f.q} className="nf-panel nf-panel--card nf-m-details group block p-0">
+                    <details key={f.q} id={questionAlias(f.q)} className="nf-panel nf-panel--card nf-m-details group block scroll-mt-28 p-0">
                       <summary className="flex cursor-pointer list-none items-center justify-between gap-row p-card-sm font-semibold leading-snug [&::-webkit-details-marker]:hidden">
                         {f.q}
                         <UiIcon
@@ -126,11 +176,13 @@ export function HelpSearch({ faqs }: { faqs: Faq[] }) {
                         />
                       </summary>
                       <p className="max-w-measure-body px-group pb-group text-[length:var(--nf-text-row)] leading-[1.6] text-[var(--nf-content-secondary)] sm:px-heading sm:pb-heading">
-                        {f.a}
+                        <LinkedAnswer text={f.a} links={f.links} />
                       </p>
                     </details>
                   ))}
               </div>
+              {extras?.[cat] ? <div className="mt-row">{extras[cat]}</div> : null}
+              {feet?.[cat] ?? null}
             </MotionReveal>
           ))}
         </div>
@@ -139,4 +191,30 @@ export function HelpSearch({ faqs }: { faqs: Faq[] }) {
       )}
     </div>
   );
+}
+
+/**
+ * An answer with its named things as links (the founder's pass, 10 November
+ * 2026): where an answer names a page a member can open, that name is the
+ * link, in the kit's link style, never a separate "click here". Each link
+ * text is found once, in order; a text the answer no longer contains is
+ * simply not linked (`help-links.test.ts` refuses that case).
+ */
+function LinkedAnswer({ text, links }: { text: string; links?: Faq["links"] }) {
+  if (!links || links.length === 0) return <>{text}</>;
+  const parts: ReactNode[] = [];
+  let rest = text;
+  links.forEach((link, i) => {
+    const at = rest.indexOf(link.text);
+    if (at === -1) return;
+    parts.push(rest.slice(0, at));
+    parts.push(
+      <Link key={i} href={link.href} className="nf-doc-xlink">
+        {link.text}
+      </Link>,
+    );
+    rest = rest.slice(at + link.text.length);
+  });
+  parts.push(rest);
+  return <>{parts}</>;
 }

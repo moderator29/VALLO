@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { PRIVACY_SECTIONS, PRIVACY_UPDATED } from "@/lib/legal/privacy";
 import { LegalDocument } from "../LegalDocument";
+import { LegalGlance, LegalShortVersion } from "@/components/legal/LegalPreface";
+import { PRIVACY_SHORT, PrivacyGlance } from "@/lib/legal/glance";
+import { PRIVACY_VERSION } from "@/lib/legal/versions";
 
 export const metadata: Metadata = {
   title: "Privacy policy",
@@ -20,6 +23,14 @@ export default function AppPrivacyPage() {
       intro="How Vallo collects, uses and protects your personal data, and the rights the Nigeria Data Protection Act 2023 gives you over it."
       updated={PRIVACY_UPDATED}
       sections={PRIVACY_SECTIONS}
+      preface={
+        <>
+          <LegalShortVersion items={PRIVACY_SHORT} version={PRIVACY_VERSION} updated={PRIVACY_UPDATED} />
+          <LegalGlance>
+            <PrivacyGlance />
+          </LegalGlance>
+        </>
+      }
       otherHref="/legal/terms"
       otherLabel="Terms of service"
     />

@@ -22,8 +22,10 @@ export const platformYo = {
     notMeBody:
       "Èyí ń mú gbogbo ẹ̀rọ mìíràn jáde, ó ń dá ìsanwó àti àyípadà sí àlàyé ìgbowó rẹ dúró fún wákàtí 24, ó sì ń mú ọ lọ láti yí ọ̀rọ̀ ìpamọ́ rẹ padà.",
     notMe: "Kì í ṣe èmi",
-    notMeConfirm: "Tẹ̀ ẹ́ lẹ́ẹ̀kan sí i láti dá owó rẹ dúró",
-    notMeWorking: "À ń dá owó rẹ dúró",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeConfirm` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `notMeWorking` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
   },
 
   alert: {
@@ -248,7 +250,8 @@ export const platformYo = {
     paidBody: "Ìsanwó tí ó pàdánù ìsopọ̀ rẹ̀ dé ọ̀dọ̀ wa. Nọ́mbà ìtọ́kasí {reference}.",
     failedVerdict: "Ìsanwó rẹ kò lọ",
     failedBody: "A kò gba nǹkan kan fún nọ́mbà ìtọ́kasí {reference}. O lè tún sanwó.",
-    pendingVerdict: "Paystack kò tíì sọ fún wa",
+    /* NATIVE REVIEW (9 November 2026, money copy sweep): `pendingVerdict` was reworded in English and
+       falls back to the English until a native reader translates it. Never invent one. */
     pendingBody: "À ń ṣàyẹ̀wò nọ́mbà ìtọ́kasí {reference} ní gbogbo ìṣẹ́jú. Má ṣe tún sanwó títí èyí yóò fi yí padà.",
     offline: "O kò sí lórí ayélujára. Sísanwó nílò ìsopọ̀. A kò gba owó kankan.",
     returnedVerdict: "A dá ìsanwó rẹ padà",

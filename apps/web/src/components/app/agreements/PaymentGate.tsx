@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PAYMENT_GATE_SENTENCE } from "@/lib/money/copy";
+import { AGREEMENT_PAYMENT_OPENS, PAYMENT_GATE_SENTENCE, RENT_NOT_OPEN_SHORT } from "@/lib/money/copy";
 import { StepPath, type PathState } from "@/components/money/StepPath";
 
 /**
@@ -13,6 +13,10 @@ import { StepPath, type PathState } from "@/components/money/StepPath";
  * (agree, review, pay) so a member sees where the deal is at a glance. The
  * path only shows the status it is given; it never decides when payment
  * opens, which stays the agreement's approval and nothing else.
+ *
+ * 9 November 2026 (sweep item 5): a stay's agreement leads to a card payment
+ * once approved; payment for rentals is not open on Vallo, so a rent
+ * agreement's gate says so rather than promising a payment.
  */
 
 const STEP: Record<string, string> = {
@@ -42,10 +46,14 @@ function trackFor(status: string | null): [PathState, PathState, PathState] {
 
 export function PaymentGate({
   agreement,
+  kind = "rent",
 }: {
   agreement: { id: string; status: string; reason: string | null } | null;
+  /** "stay" on the stay checkout; anything else is a rental's gate. */
+  kind?: "rent" | "stay";
 }) {
-  const line = agreement ? (STEP[agreement.status] ?? PAYMENT_GATE_SENTENCE) : PAYMENT_GATE_SENTENCE;
+  const gate = kind === "stay" ? AGREEMENT_PAYMENT_OPENS : PAYMENT_GATE_SENTENCE;
+  const line = agreement ? (STEP[agreement.status] ?? gate) : gate;
   const [agree, review, pay] = trackFor(agreement?.status ?? null);
   return (
     <section
@@ -75,7 +83,12 @@ export function PaymentGate({
                     "Approved at once, unless something needs a second look.",
               state: review,
             },
-            { key: "pay", title: "Pay", sub: "Payment opens once it is approved.", state: pay },
+            {
+              key: "pay",
+              title: "Pay",
+              sub: kind === "stay" ? "Payment opens once it is approved." : RENT_NOT_OPEN_SHORT,
+              state: pay,
+            },
           ]}
         />
       </div>
@@ -85,7 +98,7 @@ export function PaymentGate({
           {agreement.reason}
         </p>
       ) : null}
-      <p className="nf-caption mt-block text-[var(--nf-content-muted)]">{PAYMENT_GATE_SENTENCE}</p>
+      {line === gate ? null : <p className="nf-caption mt-block text-[var(--nf-content-muted)]">{gate}</p>}
       {agreement ? (
         <Link href={`/agreements/${agreement.id}`} className="nf-btn nf-btn--primary mt-block inline-flex">
           Open the agreement

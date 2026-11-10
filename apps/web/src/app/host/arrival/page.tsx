@@ -10,6 +10,7 @@ import { authHref, returnHref } from "@/components/auth/auth-intent";
 import { EmptyState, TYPE } from "@/components/app/Screen";
 import { ButtonLink } from "@/components/ui/Button";
 import { HostShell } from "@/components/host/HostShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { ArrivalChargesForm } from "@/components/stays/ArrivalChargesForm";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -57,20 +58,26 @@ export default async function HostArrivalPage({
   const existing = accommodation ? await readDeclaration({ accommodationId: accommodation.id }) : null;
 
   return (
-    <HostShell logoLabel={t.a11y.logoHome} fallback="/host">
-      <div className="mx-auto max-w-2xl">
-        <h1 className="nf-h2">{copy.title}</h1>
-        <p className={`mt-xs ${TYPE.body}`}>{copy.lede}</p>
-        {businesses.length > 1 && (
-          <nav aria-label={copy.pickTitle} className="mt-md flex flex-wrap gap-xs">
-            {businesses.map((business) => (
-              <Link key={business.id} href={`/host/arrival?business=${business.id}`} className="nf-chip" aria-current={business.id === chosen?.id ? "page" : undefined}>
-                {business.name}
-              </Link>
-            ))}
-          </nav>
-        )}
-        <div className="mt-lg">
+    /* The frame's header carries the one way back (Grade 1 page frame); the
+       bar keeps the host's destinations. */
+    <HostShell logoLabel={t.a11y.logoHome} fallback="/host" chromeBack={false} nav>
+      <PageFrame
+        title={copy.title}
+        subtitle={copy.lede}
+        fallback="/host"
+        tabs={
+          businesses.length > 1 ? (
+            <nav aria-label={copy.pickTitle} className="flex flex-wrap gap-xs">
+              {businesses.map((business) => (
+                <Link key={business.id} href={`/host/arrival?business=${business.id}`} className="nf-chip" aria-current={business.id === chosen?.id ? "page" : undefined}>
+                  {business.name}
+                </Link>
+              ))}
+            </nav>
+          ) : undefined
+        }
+      >
+        <div>
           {!accommodation ? (
             <State compact kind="empty" icon="hotel" title={copy.noStays} />
           ) : existing === undefined ? (
@@ -79,7 +86,7 @@ export default async function HostArrivalPage({
             <ArrivalChargesForm target={{ accommodationId: accommodation.id }} existing={existing} copy={copy} />
           )}
         </div>
-      </div>
+      </PageFrame>
     </HostShell>
   );
 }

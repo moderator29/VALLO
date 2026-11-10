@@ -14,112 +14,112 @@ Columns: Frame (on PageFrame or StepFrame), Light, Dark, 360, Notes.
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/admin` | FE |  |  |  |  |  |
-| `/admin/account-recovery` | FE |  |  |  |  |  |
-| `/admin/agents` | FE |  |  |  |  |  |
-| `/admin/agreements` | FE |  |  |  |  |  |
-| `/admin/agreements/settings` | FE |  |  |  |  |  |
-| `/admin/alerts` | FE |  |  |  |  |  |
-| `/admin/analytics` | FE |  |  |  |  |  |
-| `/admin/audit` | FE |  |  |  |  |  |
-| `/admin/blocked-terms` | FE |  |  |  |  |  |
+| `/admin` | FE | PageHead |  |  |  | PageHead (AD-01): was a screen-reader-only h1; staff front page on it too. Not seen: needs a staff session |
+| `/admin/account-recovery` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/agents` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/agreements` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/agreements/settings` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/alerts` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/analytics` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/audit` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/blocked-terms` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/bookings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/bookings/[bookingId]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/bookings/reservations` | FE |  |  |  |  |  |
-| `/admin/bookings/visits` | FE |  |  |  |  |  |
-| `/admin/businesses` | FE |  |  |  |  |  |
-| `/admin/call-usage` | FE |  |  |  |  |  |
+| `/admin/bookings/reservations` | FE | PageHead |  |  |  | PageHead (AD-01), back chip as lead, waiting count as trail. Not seen: needs a staff session |
+| `/admin/bookings/visits` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/businesses` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail. Not seen: needs a staff session |
+| `/admin/call-usage` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/chargebacks` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/chargebacks/[chargebackId]` | FE |  |  |  |  |  |
-| `/admin/compliance` | FE |  |  |  |  |  |
+| `/admin/compliance` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/crashes` | Lead |  |  |  |  |  |
-| `/admin/examples` | FE |  |  |  |  |  |
-| `/admin/fees` | FE |  |  |  |  |  |
-| `/admin/field-speed` | FE |  |  |  |  |  |
-| `/admin/front-door` | FE |  |  |  |  |  |
-| `/admin/handbook` | FE |  |  |  |  |  |
-| `/admin/handbook/position` | FE |  |  |  |  |  |
+| `/admin/examples` | FE | PageHead |  |  |  | PageHead (AD-01), overdue count as trail. Not seen: needs a staff session |
+| `/admin/fees` | FE | PageHead |  |  |  | PageHead (AD-01), off the old QueueHeader, 10 Nov. Not seen: needs a staff session |
+| `/admin/field-speed` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/front-door` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/handbook` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/handbook/position` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/kyc` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/kyc/guide` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/listings` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/listings/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/lookup` | FE |  |  |  |  |  |
+| `/admin/lookup` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/money` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/operations` | FE |  |  |  |  |  |
-| `/admin/operations/providers` | FE |  |  |  |  |  |
-| `/admin/oversight` | FE |  |  |  |  |  |
+| `/admin/operations` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/operations/providers` | FE | PageHead |  |  |  | PageHead (AD-01): was a raw h1; own loading added. Not seen: needs a staff session |
+| `/admin/oversight` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
 | `/admin/payments` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/people` | FE |  |  |  |  |  |
-| `/admin/people/[id]` | FE |  |  |  |  |  |
-| `/admin/queue` | FE |  |  |  |  |  |
-| `/admin/reference` | FE |  |  |  |  |  |
-| `/admin/referrals` | FE |  |  |  |  |  |
-| `/admin/restaurant-fees` | FE |  |  |  |  |  |
-| `/admin/retention` | FE |  |  |  |  |  |
+| `/admin/people` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/people/[id]` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/queue` | FE | PageHead |  |  |  | PageHead (AD-01), total as trail; the lanes too. Not seen: needs a staff session |
+| `/admin/reference` | FE | PageHead |  |  |  | PageHead (AD-01), refusal state too. Not seen: needs a staff session |
+| `/admin/referrals` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/restaurant-fees` | FE | PageHead |  |  |  | PageHead (AD-01), disputes waiting as trail, 10 Nov. Not seen: needs a staff session |
+| `/admin/retention` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 | `/admin/review-calls` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
 | `/admin/review-calls/[id]` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/settings` | FE |  |  |  |  |  |
-| `/admin/social` | FE |  |  |  |  |  |
-| `/admin/staff` | FE |  |  |  |  |  |
-| `/admin/standing` | FE |  |  |  |  |  |
-| `/admin/stops` | FE |  |  |  |  |  |
+| `/admin/settings` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/social` | FE | PageHead |  |  |  | PageHead (AD-01), waiting count as trail, refusal state too. Not seen: needs a staff session |
+| `/admin/staff` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
+| `/admin/standing` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/stops` | FE | PageHead |  |  |  | PageHead (AD-01), count as trail. Not seen: needs a staff session |
 | `/admin/supply` | PAGES | PageHead |  |  |  | PageHead (AD-01: the one console header; DeskHeads wrap it). Not seen: needs a staff session |
-| `/admin/support` | FE |  |  |  |  |  |
-| `/admin/switches` | FE |  |  |  |  |  |
-| `/admin/weight-withheld` | FE |  |  |  |  |  |
+| `/admin/support` | FE | PageHead |  |  |  | PageHead (AD-01), keys help as action, refusal state too. Not seen: needs a staff session |
+| `/admin/switches` | FE | PageHead |  |  |  | PageHead (AD-01). Not seen: needs a staff session |
+| `/admin/weight-withheld` | FE | PageHead |  |  |  | PageHead (AD-01); own loading added. Not seen: needs a staff session |
 
 ## Agent workspace
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/agent/analytics` | FE |  |  |  |  |  |
-| `/agent/analytics/[metric]` | FE |  |  |  |  |  |
-| `/agent/analytics/listings/[listingId]` | FE |  |  |  |  |  |
+| `/agent/analytics` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/analytics/[metric]` | FE | PageFrame |  |  |  | PageFrame; the text Back link became the header Back. Not seen: needs an agent session |
+| `/agent/analytics/listings/[listingId]` | FE | PageFrame |  |  |  | PageFrame; the text Back link became the header Back. Not seen: needs an agent session |
 | `/agent/assistant` | FE |  |  |  |  |  |
-| `/agent/bookings` | FE |  |  |  |  |  |
-| `/agent/dashboard` | FE |  |  |  |  |  |
-| `/agent/earnings` | FE |  |  |  |  |  |
-| `/agent/firm` | FE |  |  |  |  |  |
+| `/agent/bookings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/dashboard` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs an agent session |
+| `/agent/earnings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/firm` | FE | PageFrame |  |  |  | PageFrame; the firm picker in the tab row. Not seen: needs an agent session |
 | `/agent/inspections` | FE |  |  |  |  |  |
 | `/agent/list` | FE |  |  |  |  |  |
-| `/agent/listings` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/arrival` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/board` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/calendar` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/health` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/mandate` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/promotion` | FE |  |  |  |  |  |
-| `/agent/listings/[listingId]/status` | FE |  |  |  |  |  |
-| `/agent/messages` | FE |  |  |  |  |  |
+| `/agent/listings` | FE | PageFrame |  |  |  | PageFrame; Start a listing and Firm desk in the header actions. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/arrival` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/board` | FE | PageFrame |  |  |  | PageFrame (narrow); print layout unchanged. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/calendar` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/health` | FE | PageFrame |  |  |  | PageFrame; the text link to My listings became the header Back. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/mandate` | FE | PageFrame |  |  |  | PageFrame (narrow). Not seen: needs an agent session |
+| `/agent/listings/[listingId]/promotion` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/listings/[listingId]/status` | FE | PageFrame |  |  |  | PageFrame (narrow). Not seen: needs an agent session |
+| `/agent/messages` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
 | `/agent/messages/[id]` | FE |  |  |  |  |  |
 | `/agent/notifications` | FE |  |  |  |  |  |
-| `/agent/portfolio` | FE |  |  |  |  |  |
-| `/agent/promotion` | FE |  |  |  |  |  |
-| `/agent/reviews` | FE |  |  |  |  |  |
-| `/agent/settings` | FE |  |  |  |  |  |
-| `/agent/verification` | FE |  |  |  |  |  |
+| `/agent/portfolio` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/promotion` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off, 10 Nov. Not seen: needs an agent session |
+| `/agent/reviews` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
+| `/agent/verification` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs an agent session |
 
 ## Host workspace
 
 | Page | Owner | Frame | Light | Dark | 360 | Notes |
 |---|---|---|---|---|---|---|
-| `/host` | FE |  |  |  |  |  |
+| `/host` | FE | PageFrame |  |  |  | PageFrame, workspace root: no Back; the Today band sits under it as h2. Not seen: needs a host session |
 | `/host/apply` | FE |  |  |  |  |  |
-| `/host/arrival` | FE |  |  |  |  |  |
+| `/host/arrival` | FE | PageFrame |  |  |  | PageFrame; business chips in the tab row. Not seen: needs a host session |
 | `/host/assistant` | FE |  |  |  |  |  |
-| `/host/bookings` | FE |  |  |  |  |  |
-| `/host/calendar` | FE |  |  |  |  |  |
-| `/host/decide` | FE |  |  |  |  |  |
-| `/host/earnings` | FE |  |  |  |  |  |
+| `/host/bookings` | FE | PageFrame |  |  |  | PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
+| `/host/calendar` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row; Back now in the header. Not seen: needs a host session |
+| `/host/decide` | FE | PageFrame |  |  |  | DecideView on PageFrame wide, Back in the header, bar keeps the host's destinations, 10 Nov. Not seen: needs a host session |
+| `/host/earnings` | FE | PageFrame |  |  |  | PageFrame under the host inner nav, as rooms; 10 Nov. Not seen: needs a host session |
 | `/host/earnings/statement` | FE |  |  |  |  |  |
 | `/host/notifications` | FE |  |  |  |  |  |
-| `/host/photos` | FE |  |  |  |  |  |
-| `/host/reservations` | FE |  |  |  |  |  |
-| `/host/reviews` | FE |  |  |  |  |  |
-| `/host/rooms` | FE |  |  |  |  |  |
-| `/host/settings` | FE |  |  |  |  |  |
+| `/host/photos` | FE | PageFrame |  |  |  | PageFrame; venue chips in the tab row. Not seen: needs a host session |
+| `/host/reservations` | FE | PageFrame |  |  |  | PageFrame; the desk keeps its search. Not seen: needs a host session |
+| `/host/reviews` | FE | PageFrame |  |  |  | HostReviewsView on PageFrame wide, Back in the header, 10 Nov. Not seen: needs a host session |
+| `/host/rooms` | FE | PageFrame |  |  |  | PageFrame; property chips in the tab row. Not seen: needs a host session |
+| `/host/settings` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
 | `/host/start` | FE |  |  |  |  |  |
-| `/host/transfer` | FE |  |  |  |  |  |
+| `/host/transfer` | FE | PageFrame |  |  |  | PageFrame, Back in the header, bar Back off; shaped loading.tsx. Not seen: needs a host session |
 
 ## Member: about
 

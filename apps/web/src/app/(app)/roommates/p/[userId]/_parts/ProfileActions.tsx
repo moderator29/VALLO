@@ -10,7 +10,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { useScopedCopy } from "@/lib/i18n/copy-scope";
-import { answerInterest, inviteToGroup, openRoommateChat, withdrawInterest } from "@/lib/features/roommates/actions";
+import { answerInterest, expressInterest, inviteToGroup, openRoommateChat, withdrawInterest } from "@/lib/features/roommates/actions";
 import { ROOMMATES_ROUTES, type ConnectionState } from "@/lib/features/roommates/model";
 import { tapFailedOffline } from "@/lib/offline/tap-failed";
 import { feedback } from "@/lib/ui/feedback";
@@ -41,7 +41,7 @@ export function ProfileActions({
   const copy = useScopedCopy("roommates");
   const router = useRouter();
   const [state, setState] = useState<ConnectionState>(connection);
-  const [celebrate, setCelebrate] = useState(false);
+  const [celebrate] = useState(false);
   const [interestOpen, setInterestOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pending, start] = useSafeTransition();
@@ -104,6 +104,7 @@ export function ProfileActions({
               setState({ state: "sent", interestId: id });
               router.refresh();
             }}
+            onUndone={() => setState({ state: "none" })}
           />
         </>
       ) : null}
@@ -125,7 +126,20 @@ export function ProfileActions({
                 const result = await withdrawInterest(state.interestId);
                 if (!result.ok) return result;
                 feedback("confirm");
-                banner.info(copy.ui.profile.withdrawn);
+                banner.info(copy.ui.profile.withdrawn, {
+                  action: {
+                    label: copy.area.undo,
+                    run: () => {
+                      void expressInterest({ toId: userId }).then((back) => {
+                        if (back.ok) {
+                          setState({ state: "sent", interestId: back.data.id });
+                          banner.info(copy.area.undone);
+                          router.refresh();
+                        } else banner.error(back.error);
+                      });
+                    },
+                  },
+                });
                 setState({ state: "none" });
                 router.refresh();
                 return { ok: true };
@@ -178,8 +192,7 @@ export function ProfileActions({
                   feedback("confirm");
                   banner.success(copy.ui.profile.accepted);
                   setState({ state: "connected", interestId: state.interestId, conversationId: null });
-                  setCelebrate(true);
-                  router.refresh();
+                  router.push(ROOMMATES_ROUTES.connected(state.interestId));
                   return { ok: true };
                 })
               }

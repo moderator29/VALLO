@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { CardRowsSkeleton, LoadingShell, PageHeaderSkeleton, SummaryCardSkeleton } from "@/components/app/ScreenSkeleton";
 
 /**
- * Pay into escrow: the agreement in brief, the figure, then the one control.
+ * Pay for this deal: the agreement in brief, the figure, then the one control.
  *
  * SW12 (round 3): the page's own shape under the frame's large title, so
  * nothing moves when the read lands.

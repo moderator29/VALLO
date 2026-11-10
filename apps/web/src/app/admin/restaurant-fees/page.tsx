@@ -4,6 +4,7 @@ import { getLocale } from "@/lib/locale";
 import { getRestaurantFees, monthWords } from "@/lib/admin/restaurant-fees";
 import { billPayOn } from "@/lib/reservations/bill-pay";
 import { adminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { DisputeDecision } from "./DisputeDecision";
 
 export const metadata: Metadata = {
@@ -34,10 +35,10 @@ export default async function RestaurantFeesPage() {
   const money = (minor: number) => formatMoney(minor, locale, "NGN");
 
   const header = (
-    <ui.QueueHeader
+    <PageHead
       title="Restaurant fees"
       lede="Seated tables per restaurant per month and what each owes. Booking a table is free for diners; restaurants pay per seated table."
-      {...(read.state === "ok" ? { count: read.disputes.length } : {})}
+      trail={read.state === "ok" ? <ui.WaitingBadge count={read.disputes.length} /> : undefined}
     />
   );
 

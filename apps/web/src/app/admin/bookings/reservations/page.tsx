@@ -5,6 +5,7 @@ import { getLocale } from "@/lib/locale";
 import { getReservationBoard } from "@/lib/admin/bookings-queries";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import { adminUi } from "../../_components/ui";
+import { PageHead } from "../../_components/panels";
 import {
   QueueFilters,
   QueuePager,
@@ -63,8 +64,7 @@ export default async function AdminReservationsPage({
   if (board.state !== "ok") {
     return (
       <div className="nf-console">
-        {back}
-        <ui.QueueHeader title="Reservations" lede="Tables asked for at restaurants on Vallo." />
+        <PageHead lead={back} title="Reservations" lede="Tables asked for at restaurants on Vallo." />
         <ui.QueueUnavailable />
       </div>
     );
@@ -76,11 +76,11 @@ export default async function AdminReservationsPage({
 
   return (
     <div className="nf-console">
-      {back}
-      <ui.QueueHeader
+      <PageHead
+        lead={back}
         title="Reservations"
         lede="Tables asked for at restaurants on Vallo. Nothing here moves money."
-        count={waiting}
+        trail={<ui.WaitingBadge count={waiting} />}
       />
 
       <QueueFilters

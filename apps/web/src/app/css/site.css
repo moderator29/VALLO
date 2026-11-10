@@ -120,6 +120,14 @@
     color: var(--nf-content-secondary);
     transition: color var(--nf-duration-fast) var(--nf-ease-standard);
   }
+  /* The Cookie settings entry is a button that opens a sheet; it draws as its neighbours do. */
+  button.nf-site-footer-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
   @media (hover: hover) {
     .nf-site-footer-link:hover {
       color: var(--nf-content-primary);

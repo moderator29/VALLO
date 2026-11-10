@@ -27,8 +27,8 @@ import type { OffPlatformAsk } from "@/lib/messages/off-platform-ask";
  *
  * THE MENTION (founder ruling 7, 13 October 2026). In a listing chat, when
  * either side mentions an account number or a transfer (`mentionsPayingOutside`),
- * the same row is drawn with the founder's line as its lead: "Pay only through
- * Vallo. Payments made outside Vallo are not covered." On both sides and under
+ * the same row is drawn with the founder's line as its lead,
+ * `PAY_ONLY_THROUGH_VALLO` (reworded 9 November 2026, rule (a)). On both sides and under
  * the reader's own message too; Report is offered only on a message from the
  * other side. One shield, two leads, never two rows on one message.
  */

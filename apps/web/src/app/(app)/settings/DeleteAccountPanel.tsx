@@ -13,7 +13,13 @@ import { clearShelf } from "@/lib/offline/shelf-store";
 import { clearOutbox } from "@/lib/offline/outbox";
 import { forgetWidget } from "@/lib/native/widget";
 import { clearAllInflight } from "@/lib/offline/inflight";
-import { DELETE_CONFIRM_PHRASE, GRACE_WINDOW_DAYS } from "@/lib/account-deletion/constants";
+import {
+  DELETE_CONFIRM_PHRASE,
+  DELETION_NOTE_MAX,
+  DELETION_REASONS,
+  GRACE_WINDOW_DAYS,
+  type DeletionReason,
+} from "@/lib/account-deletion/constants";
 import type { Blocker } from "@/lib/account-deletion/preconditions";
 import {
   cancelDeletion,
@@ -298,7 +304,10 @@ function DeleteDrawer({
 }) {
   const router = useRouter();
   const copy = t.settings.delete;
-  const [step, setStep] = useState<"explain" | "confirm">("explain");
+  const [step, setStep] = useState<"explain" | "reason" | "confirm">("explain");
+  const [reason, setReason] = useState<DeletionReason | null>(null);
+  const [reasonNote, setReasonNote] = useState("");
+  const noteId = useId();
   const [phraseValue, setPhraseValue] = useState("");
   const [sending, startSending] = useSafeTransition();
   const phraseId = useId();
@@ -318,6 +327,9 @@ function DeleteDrawer({
   // behind this drawer to return to.
   useEffect(() => {
     if (!state?.ok) return;
+    /* The banner lives in the root layout's host, so it survives the move to
+       the home page below: the person lands signed out and is told so. */
+    banner.info(copy.scheduledBanner, { durationMs: 9000, "data-testid": "delete-scheduled-banner" });
     /* V-35, V-77: the account is going, so its gate codes, unsent
        check-ins and shortlist copy leave this phone now. */
     void clearPacks();
@@ -330,7 +342,7 @@ function DeleteDrawer({
       router.refresh();
     }, 4000);
     return () => window.clearTimeout(timer);
-  }, [state, router]);
+  }, [state, router, copy.scheduledBanner]);
 
   const ready = phraseValue.trim() === DELETE_CONFIRM_PHRASE;
   const refusal = state && !state.ok ? (state.fieldErrors?.confirmPhrase ?? state.fieldErrors?.password ?? state.error) : null;
@@ -436,14 +448,86 @@ function DeleteDrawer({
                   variant="dangerQuiet"
                   full
                   data-testid="delete-continue"
-                  onClick={() => setStep("confirm")}
+                  onClick={() => setStep("reason")}
                 >
                   {t.common.continue}
                 </Button>
               </div>
             </div>
+          ) : step === "reason" ? (
+            <div className="nf-panel nf-panel--card block p-lg" data-testid="delete-reason-step">
+              <p className="text-[length:var(--nf-text-body-sm)] font-semibold">{copy.reasonTitle}</p>
+              <p className="mt-2xs text-[length:var(--nf-text-caption)] leading-relaxed text-[var(--nf-content-secondary)]">
+                {copy.reasonHint}
+              </p>
+              <div role="radiogroup" aria-label={copy.reasonTitle} className="mt-md grid gap-xs">
+                {DELETION_REASONS.map((code) => {
+                  const chosen = reason === code;
+                  return (
+                    <button
+                      key={code}
+                      type="button"
+                      role="radio"
+                      aria-checked={chosen}
+                      data-testid={`delete-reason-${code}`}
+                      onClick={() => setReason(code)}
+                      className={
+                        "flex min-h-[48px] items-center gap-sm rounded-[var(--nf-radius-control)] border px-md text-left text-[length:var(--nf-text-body-sm)] " +
+                        (chosen
+                          ? "border-[var(--nf-content-link)] bg-[var(--nf-brand-tint-1)] font-semibold"
+                          : "border-[var(--nf-border-default)]")
+                      }
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border " +
+                          (chosen ? "border-[var(--nf-content-link)]" : "border-[var(--nf-border-default)]")
+                        }
+                      >
+                        {chosen ? (
+                          <span className="h-2.5 w-2.5 rounded-full bg-[var(--nf-content-link)]" />
+                        ) : null}
+                      </span>
+                      {copy.reasons[code]}
+                    </button>
+                  );
+                })}
+              </div>
+              <label htmlFor={noteId} className="nf-label mb-2xs mt-md block">
+                {copy.reasonNoteLabel}
+              </label>
+              <textarea
+                id={noteId}
+                rows={3}
+                maxLength={DELETION_NOTE_MAX}
+                value={reasonNote}
+                onChange={(event) => setReasonNote(event.target.value)}
+                className="nf-field"
+                data-testid="delete-reason-note"
+              />
+              <p className="mt-2xs text-[length:var(--nf-text-overline)] text-[var(--nf-content-muted)]">
+                {phrase(copy.reasonNoteHint, { max: String(DELETION_NOTE_MAX) })}
+              </p>
+              <div className="mt-md grid gap-sm sm:grid-cols-2">
+                <Button variant="secondary" full onClick={() => setStep("explain")}>
+                  {copy.reasonBack}
+                </Button>
+                <Button
+                  variant="dangerQuiet"
+                  full
+                  data-testid="delete-reason-continue"
+                  disabled={reason === null}
+                  onClick={() => setStep("confirm")}
+                >
+                  {copy.reasonContinue}
+                </Button>
+              </div>
+            </div>
           ) : (
             <form action={formAction} className="nf-panel nf-panel--card block p-lg">
+              <input type="hidden" name="reason" value={reason ?? ""} />
+              <input type="hidden" name="reasonNote" value={reasonNote} />
               <p className="text-[length:var(--nf-text-body-sm)] font-semibold">{copy.confirmTitle}</p>
 
               {method === "password" ? (

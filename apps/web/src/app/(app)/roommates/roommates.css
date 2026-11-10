@@ -1658,4 +1658,195 @@
       padding-block-end: 0;
     }
   }
+
+  /* THE SUB-NAVIGATION (10 November 2026): one scrolling tab bar on every
+     /roommates page, calm on a phone at 360px. */
+  .nf-rmnav {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 5;
+    background: var(--nf-surface-primary);
+    border-block-end: var(--nf-border-width) solid var(--nf-tier-card-edge);
+  }
+  .nf-rmnav__list {
+    display: flex;
+    gap: var(--nf-space-xs);
+    margin: 0 auto;
+    padding: var(--nf-space-xs) var(--nf-space-md);
+    max-inline-size: 72rem;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .nf-rmnav__list::-webkit-scrollbar {
+    display: none;
+  }
+  .nf-rmnav__tab {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding: 0 var(--nf-space-md);
+    border-radius: var(--nf-radius-control);
+    color: var(--nf-content-secondary);
+    font-size: var(--nf-text-body-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    scroll-snap-align: center;
+  }
+  .nf-rmnav__tab--on {
+    background: var(--nf-rm-tint-2);
+    color: var(--nf-brand-primary);
+  }
+
+  /* THE HOME DASHBOARD */
+  .nf-rmdash {
+    display: grid;
+    gap: var(--nf-space-md);
+  }
+  .nf-rmdash__next {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--nf-space-md);
+  }
+  .nf-rmdash__words {
+    display: grid;
+    flex: 1 1 14rem;
+    gap: var(--nf-space-3xs);
+    min-inline-size: 0;
+  }
+  .nf-rmdash__kicker {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-rmdash__counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--nf-space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-rmdash__count {
+    padding: var(--nf-space-3xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-rm-ink-wash);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-rmdash__areas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .nf-rmdash__area {
+    display: grid;
+    gap: var(--nf-space-3xs);
+    min-block-size: 4.5rem;
+    padding: var(--nf-space-sm);
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-primary);
+    text-decoration: none;
+  }
+  .nf-rmdash__area-title {
+    font-weight: 600;
+  }
+  .nf-rmdash__area-body {
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+  }
+
+  /* THE SCHOOL PICKER (browse by state, search inside the pill, chosen chip) */
+  .nf-rmsp__chosen {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    padding: var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-xs) var(--nf-space-sm);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-rm-tint);
+  }
+  .nf-rmsp__chosen-name {
+    flex: 1;
+    min-inline-size: 0;
+    font-weight: 600;
+  }
+  .nf-rmsp__search {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-xs);
+    min-block-size: 3rem;
+    padding: 0 var(--nf-space-xs) 0 var(--nf-space-md);
+    border: var(--nf-border-width) solid var(--nf-tier-card-edge);
+    border-radius: var(--nf-radius-pill);
+    background: var(--nf-surface-primary);
+  }
+  .nf-rmsp__search:focus-within {
+    border-color: var(--nf-brand-primary);
+  }
+  .nf-rmsp__input {
+    flex: 1;
+    min-inline-size: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--nf-content-primary);
+    font: inherit;
+    font-size: max(1rem, var(--nf-text-body));
+  }
+  .nf-rmsp__list {
+    max-block-size: min(22rem, 45dvh);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: var(--nf-space-lg);
+  }
+  .nf-rmsp__group {
+    position: sticky;
+    inset-block-start: 0;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    background: var(--nf-surface-primary);
+    color: var(--nf-content-muted);
+    font-size: var(--nf-text-caption);
+    font-weight: 600;
+  }
+  .nf-rmsp__row {
+    display: flex;
+    align-items: center;
+    gap: var(--nf-space-sm);
+    inline-size: 100%;
+    min-block-size: 3.25rem;
+    padding: var(--nf-space-xs) var(--nf-space-sm);
+    border: 0;
+    border-radius: var(--nf-radius-control);
+    background: transparent;
+    color: var(--nf-content-primary);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+  .nf-rmsp__row[aria-pressed="true"] {
+    background: var(--nf-rm-tint);
+  }
+  .nf-rmsp__words {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+  }
+  .nf-rmsp__name {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

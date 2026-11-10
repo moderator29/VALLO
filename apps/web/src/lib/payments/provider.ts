@@ -3,8 +3,8 @@
  *
  * Modelled on the crypto seam (`lib/crypto/provider.ts`), with one difference
  * that is the whole point: the fiat providers are not equivalent. Paystack
- * splits at the moment of charge and cannot hold money; Payluk holds money in
- * escrow, cannot split, and cannot refund without a dispute. So every
+ * splits at the moment of charge and cannot hold money; a protected-payment
+ * provider holds money in escrow and cannot split. So every
  * provider shares a small CORE, and everything else is a CAPABILITY whose
  * methods exist on the type only when it is declared:
  *
@@ -16,8 +16,8 @@
  *
  * Always true, for every provider:
  *  - The reference is Vallo's, generated before the call, and it is the
- *    idempotency key whatever the provider offers (Payluk offers none, so its
- *    adapter must look a reference up before creating).
+ *    idempotency key whatever the provider offers (a provider that offers none needs
+ *    an adapter that looks a reference up before creating).
  *  - Webhook signatures are checked over the RAW body, constant-time.
  *  - A timeout is UNKNOWN, never a failure. Never retry a money-moving call
  *    blindly; read back first.
@@ -31,7 +31,7 @@
    behind the seam changes no outcome. */
 import type { ChargeSummary, ChargedAuthorization, VerifiedTransaction } from "./paystack";
 
-export type FiatProviderId = "paystack" | "payluk";
+export type FiatProviderId = "paystack";
 
 export type CollectInput = {
   /** Vallo's reference: the idempotency key. */
@@ -48,7 +48,7 @@ export type CollectInput = {
   channels?: readonly string[];
   /**
    * The payer's customer id at the provider, for a provider that collects
-   * only on behalf of a customer it knows (Payluk: every payment route takes
+   * only on behalf of a customer it knows (a provider whose every payment route takes
    * a `customer-id`). Paystack ignores it.
    */
   payerCustomerId?: string;
@@ -80,7 +80,7 @@ export type FiatCore = {
   /**
    * Also the reconciliation read-back: the provider's state for one reference.
    * `scope` names the customer the reference belongs to, for a provider whose
-   * history is per customer (Payluk). Without it such a provider answers
+   * history is per customer. Without it such a provider answers
    * `unknown`, never a guess.
    */
   verifyByReference(reference: string, scope?: { customerId?: string }): Promise<VerifiedCollection>;
@@ -103,9 +103,8 @@ export type FiatCapabilityMethods = {
     collectWithSplit(input: CollectInput & { split: ChargeSplit }): Promise<CollectResult>;
   };
   /**
-   * Money is held until a release decision (Payluk escrow). Declared by the
-   * Payluk adapter because Payluk does hold; the arrange, fund, release and
-   * dispute methods land with phases 11 and 12 (standard and milestone escrow).
+   * Money is held until a release decision (provider escrow). The protected
+   * rail lives in `lib/money/protected-rail.ts` and `providers/escrowpay/`.
    */
   hold_in_escrow: Record<never, never>;
   /**
@@ -133,7 +132,7 @@ export type FiatCapabilityMethods = {
   /**
    * A charge can be refunded by API without a dispute. Paystack: yes, and on a
    * split charge the refund is drawn from the MAIN balance, because the
-   * lister's share has already settled to them. Payluk: NO (question 3).
+   * lister's share has already settled to them.
    */
   refund_without_dispute: {
     refund(input: { reference: string; amountMinor?: number; merchantNote?: string; customerNote?: string }): Promise<{ refundId: string; status: string }>;

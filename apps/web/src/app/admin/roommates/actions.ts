@@ -2,12 +2,14 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
-import { fail, ok, type ActionResult } from "@/lib/actions/envelope";
+import { fail, ok, validate, type ActionResult } from "@/lib/actions/envelope";
 import { requireConsole } from "@/lib/admin/guard";
 import { writeAudit } from "@/lib/admin/audit";
 import { isNotLive } from "@/lib/features/degrade";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { identityGateApplies, identityRefusal, listerIdentityStatus } from "@/lib/verification/lister-identity";
 
 /**
  * THE ROOMMATES DESK'S OWN WRITES (FE-B): the schools directory and the
@@ -146,4 +148,57 @@ export async function saveMatchWeights(input: Record<(typeof PARTS)[number], num
   const note = await audit(s, "roommates.weights.save", "roommate_match_weights", null, row);
   revalidatePath(PATH);
   return ok({ note });
+}
+
+/* ------------------------------------------------------------------ the room offer review */
+
+const reviewSchema = z.object({
+  id: z.string().regex(uuid),
+  decision: z.enum(["claim", "approve", "changes", "reject"]),
+  note: z.string().trim().max(1000),
+});
+
+const DECISION_AUDIT: Record<"claim" | "approve" | "changes" | "reject", string> = {
+  claim: "roommates.review.claim",
+  approve: "roommates.review.approve",
+  changes: "roommates.review.changes",
+  reject: "roommates.review.reject",
+};
+
+/**
+ * Decide a room offer waiting for review: pick it up, approve it (it goes live
+ * in the Roommates feed), ask for changes or turn it down. The reason is
+ * required for changes and for a refusal because the owner reads it. One
+ * database function does the change and writes the audit line in the same
+ * transaction (`admin_roommate_review_decide`); the app only checks the
+ * sentence first, so a mistake is caught before the round trip.
+ */
+export async function decideRoomOffer(input: { id: string; decision: "claim" | "approve" | "changes" | "reject"; note?: string }): Promise<ActionResult<{ status: string; note: string | null }>> {
+  const s = await staff();
+  if ("error" in s) return fail(s.error);
+  const parsed = validate(reviewSchema, { id: input.id, decision: input.decision, note: input.note ?? "" });
+  if (!parsed.ok) return fail(FAILED);
+  const { id, decision, note } = parsed.data;
+  if ((decision === "changes" || decision === "reject") && note.length < 5) {
+    return fail(decision === "changes" ? "Tell the owner what to fix, at least five characters." : "Say why it is not approved, at least five characters.", { note: "At least five characters." });
+  }
+  if (decision === "approve") {
+    /* The identity wall: the same helper and sentence as a normal listing's approval. */
+    const { data: row } = await s.db.from("roommate_listings").select("owner_id").eq("id", id).maybeSingle();
+    const ownerId = (row as { owner_id?: string } | null)?.owner_id;
+    if (ownerId && (await identityGateApplies(ownerId))) {
+      const identity = await listerIdentityStatus(ownerId);
+      if (identity.status !== "approved") return fail(identityRefusal(identity));
+    }
+  }
+  const { data, error } = await s.db.rpc("admin_roommate_review_decide", { p_id: id, p_decision: decision, p_note: note || null });
+  if (error) {
+    const e = error as { code?: string; message?: string };
+    if (typeof e.code === "string" && /^RM\d{3}$/.test(e.code) && e.message) return fail(e.message);
+    return fail(words(error));
+  }
+  revalidatePath(PATH);
+  revalidatePath("/roommates");
+  revalidatePath(`/roommates/r/${id}`);
+  return ok({ status: typeof data === "string" ? data : DECISION_AUDIT[decision], note: null });
 }

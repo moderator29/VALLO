@@ -3,6 +3,7 @@ import { countOf, formatMoney, getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { getExamplesConsole, isOverdue, lagosToday } from "@/lib/admin/examples-queries";
 import { adminUi, type AdminUi } from "../_components/ui";
+import { PageHead } from "../_components/panels";
 import { QUEUE_PAGE_SIZE } from "@/lib/admin/queue-filter";
 import {
   QueueFilters,
@@ -71,7 +72,7 @@ export default async function AdminExamplesPage({
   if (read.state !== "ok") {
     return (
       <div className="nf-console">
-        <ui.QueueHeader
+        <PageHead
           title="Examples"
           lede="The seeded properties that keep the catalogue from looking empty."
         />
@@ -85,10 +86,10 @@ export default async function AdminExamplesPage({
 
   return (
     <div className="nf-console">
-      <ui.QueueHeader
+      <PageHead
         title="Examples"
         lede="The seeded properties that keep the catalogue from looking empty while real supply arrives. They are marked in the database, they can never be booked against, and every one of them carries the day it is due to come down."
-        count={totals.overdueCount}
+        trail={<ui.WaitingBadge count={totals.overdueCount} />}
       />
 
       <ui.StatRow>

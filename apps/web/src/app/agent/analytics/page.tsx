@@ -8,6 +8,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import { agentProfileFrom, getAgentContext } from "@/lib/agent/listings-queries";
 import { readAgentAnalytics } from "@/lib/agent/analytics-queries";
 import { ButtonLink } from "@/components/ui/Button";
@@ -137,11 +138,11 @@ export default async function Page({
       locale={locale}
       active="/agent/analytics"
       profile={agentProfileFrom(context.agent)}
+      /* The frame's header carries the one way back (Grade 1 page frame). */
+      chromeBack={false}
     >
-      <div className="mb-lg">
-        <h1 className="nf-h1">{t.agentAnalytics.title}</h1>
-        <p className="mt-2xs text-[var(--nf-content-secondary)]">{t.agentAnalytics.lede}</p>
-      </div>
+      <PageFrame title={t.agentAnalytics.title} subtitle={t.agentAnalytics.lede} fallback="/agent/dashboard" width="wide">
+      <div>
 
       {analytics ? (
         <AnalyticsWorkspace
@@ -186,6 +187,8 @@ export default async function Page({
       {/* V-72: the lister's enquiries by stage, and why enquiries are lost by area. */}
       <EnquiryFunnel counts={stages ? countByStage(stages.values()) : null} copy={t.frontDoor.desk} />
       <LostByAreaPanel areas={lost} copy={t.frontDoor.desk} />
+      </div>
+      </PageFrame>
     </AgentShell>
   );
 }

@@ -89,6 +89,24 @@ export const unitsEn = {
   reviewsAre: { one: "{count} review is", other: "{count} reviews are" },
   enquiriesAre: { one: "{count} enquiry is", other: "{count} enquiries are" },
   businesses: { one: "1 business", other: "{count} businesses" },
+  /* The staff desks of 10 November 2026 (marketing, content, technical, support lead). */
+  campaigns: { one: "1 campaign", other: "{count} campaigns" },
+  contentItems: { one: "1 content item", other: "{count} content items" },
+  incidents: { one: "1 incident", other: "{count} incidents" },
+  tickets: { one: "1 ticket", other: "{count} tickets" },
+  qaReviews: { one: "1 quality review", other: "{count} quality reviews" },
+  signups: { one: "1 sign-up", other: "{count} sign-ups" },
+  agents: { one: "1 agent", other: "{count} agents" },
+  policyNotes: { one: "1 policy note", other: "{count} policy notes" },
+  jobs: { one: "1 scheduled job", other: "{count} scheduled jobs" },
+  errorTypes: { one: "1 error type", other: "{count} error types" },
+  alerts: { one: "1 alert", other: "{count} alerts" },
+  reminders: { one: "1 expiry reminder", other: "{count} expiry reminders" },
+  requests: { one: "1 request", other: "{count} requests" },
+  macros: { one: "1 canned reply", other: "{count} canned replies" },
+  gaps: { one: "1 gap", other: "{count} gaps" },
+  coachingNotes: { one: "1 coaching note", other: "{count} coaching notes" },
+  heldNow: { one: "1 held", other: "{count} held" },
   matches: { one: "1 match", other: "{count} matches" },
   entries: { one: "1 entry", other: "{count} entries" },
   cities: { one: "1 city", other: "{count} cities" },
@@ -222,6 +240,21 @@ export const unitsEn = {
   /* Schedule a visit: the note's counter and a day's open times. */
   charactersLeft: { one: "1 character left", other: "{count} characters left" },
   openTimes: { one: "1 open time", other: "{count} open times" },
+  /* Admin desks: counted phrases that were inflected by hand (10 November 2026). */
+  listings: { one: "1 listing", other: "{count} listings" },
+  prospects: { one: "1 prospect", other: "{count} prospects" },
+  followUps: { one: "1 follow-up", other: "{count} follow-ups" },
+  contacts: { one: "1 contact", other: "{count} contacts" },
+  escalations: { one: "1 escalation", other: "{count} escalations" },
+  guaranteeClaimsOpen: {
+    one: "1 Guarantee claim made before it retired still open",
+    other: "{count} Guarantee claims made before it retired still open",
+  },
+  shownPastDeadline: {
+    one: "{count} of the {shown} shown on this page is past its deadline",
+    other: "{count} of the {shown} shown on this page are past their deadline",
+  },
+  pastPromisedTime: { one: "{count} past its promised time", other: "{count} past their promised time" },
 } satisfies Record<string, PluralForms>;
 
 export type UnitNoun = keyof typeof unitsEn;

@@ -9,7 +9,7 @@ describe("Vallo status vocabulary", () => {
   });
 
   it("maps every documented provider word into the vocabulary", () => {
-    for (const v of ["paystack", "payluk_escrow", "payluk_payment"] as const) {
+    for (const v of ["paystack"] as const) {
       for (const target of Object.values(providerMappingTable(v))) expect(VALLO_STATUSES).toContain(target);
     }
   });
@@ -18,18 +18,17 @@ describe("Vallo status vocabulary", () => {
     expect(valloStatusFor("paystack", "success")).toBe("paid");
     expect(valloStatusFor("paystack", "pending")).toBe("processing");
     expect(valloStatusFor("paystack", "abandoned")).toBe("awaiting_payment");
-    expect(valloStatusFor("payluk_escrow", "ongoing")).toBe("protected");
   });
 
   it("an unknown or missing word is under review, never a guess", () => {
     expect(valloStatusFor("paystack", "SOMETHING_NEW")).toBe("under_review");
-    expect(valloStatusFor("payluk_payment", undefined)).toBe("under_review");
-    expect(valloStatusFor("payluk_escrow", "__proto__")).toBe("under_review");
+    expect(valloStatusFor("paystack", undefined)).toBe("under_review");
+    expect(valloStatusFor("paystack", "__proto__")).toBe("under_review");
   });
 
   it("no label leaks a provider word", () => {
     const labels = Object.values(VALLO_STATUS_LABEL_DRAFT).join(" ");
-    expect(labels).not.toMatch(/paystack|payluk|ONGOING|INVESTIGATING|abandoned/i);
+    expect(labels).not.toMatch(/paystack|ONGOING|INVESTIGATING|abandoned/i);
   });
 });
 

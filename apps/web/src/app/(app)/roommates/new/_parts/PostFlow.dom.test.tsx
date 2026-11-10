@@ -36,7 +36,7 @@ describe("the post flow's review", () => {
     expect(html).toContain('data-testid="post-step-review"');
     expect(html).toContain(t.authority.owner);
     expect(html).toContain(t.create.declaration);
-    expect(html).toContain(t.actions.publish);
+    expect(html).toContain(t.review.submit);
   });
 
   it("does not ask a find-together post for a declaration", async () => {
@@ -82,12 +82,12 @@ describe.skipIf(!hasBrowser)("publishing, in a browser", () => {
     }
   });
 
-  it("sends a finished post once, with publish, and shows the live moment", async () => {
-    const draft = `{ id: "${EDITING.id}", title: "Ensuite room in a quiet flat", city: "Lagos", rentMinor: 120000000, authority: "owner", declared: true }`;
-    const { page, close } = await mountInBrowser({ entry: entry(draft), actions: { saveRoommateListing: "async () => ({ ok: true, data: { id: 'p1', status: 'live' } })" } });
+  it("sends a finished post once, with publish, and shows the submitted-for-review screen", async () => {
+    const draft = `{ id: "${EDITING.id}", title: "Ensuite room in a quiet flat", city: "Lagos", rentMinor: 120000000, authority: "owner", declared: true, photos: ["u/1.jpg", "u/2.jpg", "u/3.jpg"] }`;
+    const { page, close } = await mountInBrowser({ entry: entry(draft), actions: { saveRoommateListing: "async () => ({ ok: true, data: { id: 'p1', status: 'submitted' } })" } });
     try {
       await page.getByTestId("post-publish").click();
-      await page.getByTestId("post-live").waitFor();
+      await page.getByTestId("post-submitted").waitFor();
       const calls = (await page.evaluate(() => (window as unknown as { __calls?: unknown[][] }).__calls ?? [])) as unknown[][];
       expect(calls).toHaveLength(1);
       expect(calls[0]![0]).toBe("saveRoommateListing");

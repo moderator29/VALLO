@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { getDictionary } from "@vallo/i18n";
 
 import { PageFrame } from "@/components/app/PageFrame";
 import { FEATURE_ART } from "@/lib/features/art";
@@ -7,6 +8,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { CIRCLE_COPY } from "@/lib/features/circle/copy";
 import { CATEGORY_LABEL, CIRCLE_SORTS, compactCount, countWords, type CircleSort } from "@/lib/features/circle/model";
+import { ROOMMATES_ROUTES } from "@/lib/features/roommates/model";
 import type { CommunityPage, PostPage } from "@/lib/features/circle/queries";
 
 import { CircleEmpty } from "./CircleCards";
@@ -139,6 +141,24 @@ export function CommunityScreen({
             </span>
           ) : null}
         </section>
+
+        {community.category === "roommates" || community.category === "student_housing" ? (
+          /* A roommate community leads into Roommates, which keeps its own pages and moderation. */
+          <section className="nf-circle-card" data-testid="community-roommates-door" aria-label={getDictionary("en").roommates.area.connect.circleCardTitle}>
+            <h2 className="nf-circle-card__title">{getDictionary("en").roommates.area.connect.circleCardTitle}</h2>
+            <p>{getDictionary("en").roommates.area.connect.circleCardLine}</p>
+            <span className="nf-ccom__actions">
+              <ButtonLink href={community.category === "student_housing" ? ROOMMATES_ROUTES.campuses : ROOMMATES_ROUTES.home} variant="primary" size="sm" arrow>
+                {community.category === "student_housing" ? getDictionary("en").roommates.area.connect.nearCta : getDictionary("en").roommates.entryX.circleOpen}
+              </ButtonLink>
+              {isMember ? (
+                <ButtonLink href={ROOMMATES_ROUTES.rooms} variant="secondary" size="sm" data-testid="community-roommates-share">
+                  {getDictionary("en").roommates.circleShare.browse}
+                </ButtonLink>
+              ) : null}
+            </span>
+          </section>
+        ) : null}
 
         {!canRead ? (
           <CircleEmpty icon="lock">{words.privateDoor}</CircleEmpty>

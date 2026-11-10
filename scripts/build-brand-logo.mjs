@@ -64,6 +64,18 @@ const IOS_ICON = path.join(WEB, "ios/App/App/Assets.xcassets/AppIcon.appiconset/
 
 const NAVY = "#010118";
 const NAVY_LIFT = "#0B1C5C";
+/* THE BRIGHT APP ICON (10 November 2026). A navy tile sinks into a dark iOS
+   home screen and reads dull beside WhatsApp, Gmail and Instagram. The web icon
+   set is now the full-colour mark on a near-white tile with a pale blue lift:
+   the highest luminance on the screen, the mark's own cyan, blue and orange
+   at full strength, and the brand navy reserved for the launch field. */
+const BRIGHT_TOP = "#FFFFFF";
+const BRIGHT_BOTTOM = "#DCEBFF";
+const SKIP_NATIVE = process.env.BRAND_SKIP_NATIVE === "1";
+/* BRAND_ONLY_NATIVE=1 rewrites ONLY the native project files (apps/web/assets, android/, ios/) and
+   leaves every web file alone, so the store icons can be regenerated without touching the web set. */
+const ONLY_NATIVE = process.env.BRAND_ONLY_NATIVE === "1";
+const isNativePath = (file) => [NATIVE, path.join(WEB, "android"), path.join(WEB, "ios")].some((dir) => file.startsWith(dir + path.sep));
 
 const svg = {
   markNight: markSvg(),
@@ -83,6 +95,7 @@ async function raster(source, width) {
 
 const written = [];
 async function out(file, buffer) {
+  if (ONLY_NATIVE && !isNativePath(file)) return;
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, buffer);
   const { size } = await stat(file);
@@ -91,11 +104,15 @@ async function out(file, buffer) {
 const png = (b) => sharp(b).png({ compressionLevel: 9, adaptiveFiltering: true }).toBuffer();
 
 /** A navy square (or rounded square, or circle) with the mark centred at `scale` of its width. */
-async function iconOn(size, { scale = 0.7, shape = "square", lift = true, transparent = false, dy = 0.03 } = {}) {
+async function iconOn(size, { scale = 0.7, shape = "square", lift = true, transparent = false, dy = 0.03, bright = false } = {}) {
   const r = shape === "circle" ? size / 2 : shape === "rounded" ? Math.round(size * 0.225) : 0;
   const ground = transparent
     ? ""
-    : `<defs><radialGradient id="g" cx="50%" cy="44%" r="62%"><stop offset="0" stop-color="${lift ? NAVY_LIFT : NAVY}"/><stop offset="1" stop-color="${NAVY}"/></radialGradient></defs>` +
+    : bright
+      ? `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${BRIGHT_TOP}"/><stop offset="1" stop-color="${BRIGHT_BOTTOM}"/></linearGradient></defs>` +
+        `<rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#g)"/>` +
+        (shape === "square" ? "" : `<rect x="0.5" y="0.5" width="${size - 1}" height="${size - 1}" rx="${r}" ry="${r}" fill="none" stroke="#9CC4FF" stroke-opacity="0.8"/>`)
+      : `<defs><radialGradient id="g" cx="50%" cy="44%" r="62%"><stop offset="0" stop-color="${lift ? NAVY_LIFT : NAVY}"/><stop offset="1" stop-color="${NAVY}"/></radialGradient></defs>` +
       `<rect width="${size}" height="${size}" rx="${r}" ry="${r}" fill="url(#g)"/>`;
   const base = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">${ground}</svg>`);
   /* A full square on navy carries no alpha channel at all: Apple rejects an
@@ -251,6 +268,45 @@ await out(path.join(BRAND, "vallo-wordmark-light.svg"), Buffer.from(svg.wordNigh
 /* The native shell's offline card draws the same mark from the binary. */
 await out(path.join(WEB, "native-shell/vallo-mark.svg"), Buffer.from(svg.markNight));
 
+/* ---------- the opening mark, inlined in the first HTML (components/startup/OpeningScreen.tsx) ---------- */
+{
+  /* The same drawing as vallo-mark.svg, with its ids prefixed and the ring's long
+     outline written once and reused, so the markup that rides in every HTML
+     response stays small. */
+  const prefixed = svg.markNight.replace(/id="vm-/g, 'id="om-').replace(/url\(#vm-/g, "url(#om-").replace(/ role="img" aria-label="Vallo"><title>Vallo<\/title>/, ' aria-hidden="true" focusable="false">');
+  const ring = /<path d="(M380\.3 625\.3[^"]+)"/.exec(prefixed)?.[1];
+  let compact = prefixed;
+  if (ring) {
+    let seen = 0;
+    compact = compact.replace(new RegExp(`<path d="${ring.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`, "g"), (m) => (++seen === 1 ? `<path id="om-ring" d="${ring}"` : `<use href="#om-ring"`));
+  }
+  /* The opening rides in every HTML response, so the outline is made light: long
+     polylines keep every third point (about 3 units apart on a 776 unit drawing, drawn
+     about 158px wide: not visible), and every number is rounded to a whole unit. */
+  compact = compact.replace(/ d="([^"]+)"/g, (m, d) => {
+    if (/^[MLZ0-9. -]+$/.test(d) && (d.match(/L/g) || []).length > 60) {
+      const pts = d.split(/(?=[ML])/).filter(Boolean);
+      const keep = pts.filter((_, i) => i === 0 || i === pts.length - 1 || i % 3 === 0);
+      d = keep.join("");
+    }
+    return ` d="${d.replace(/-?\d+\.\d+/g, (n) => String(Math.round(Number(n))))}"`;
+  });
+  const body = [
+    "/**",
+    " * GENERATED by `node scripts/build-brand-logo.mjs`. Do not hand edit.",
+    " * The brand mark as one inline SVG string, for the opening screen that must be",
+    " * in the first HTML (components/startup/OpeningScreen.tsx). Artwork colours are the",
+    " * logo's own palette, never a surface colour.",
+    " */",
+    "/* eslint-disable nf/no-raw-colour -- the logo artwork's own palette, generated */",
+    "",
+    `export const OPEN_MARK_SVG = ${JSON.stringify(compact)};`,
+    `export const OPEN_MARK_ASPECT = ${(MARK_VIEWBOX.w / MARK_VIEWBOX.h).toFixed(5)};`,
+    "",
+  ].join("\n");
+  await out(path.join(WEB, "src/components/startup/open-mark.generated.ts"), Buffer.from(body));
+}
+
 /* ---------- transparent PNGs ---------- */
 {
   const markPng = await png(await raster(svg.markNight, 1024));
@@ -286,7 +342,7 @@ await out(path.join(WEB, "native-shell/vallo-mark.svg"), Buffer.from(svg.markNig
     ),
   );
 }
-await out(path.join(BRAND, "vallo-icon.png"), await iconOn(1024, { scale: 0.72 }));
+await out(path.join(BRAND, "vallo-icon.png"), await iconOn(1024, { scale: 0.72, bright: true }));
 
 /* ---------- the older cuts, redrawn under their names ---------- */
 await out(path.join(BRAND, "startup/vallo-mark.webp"), await sharp(await raster(svg.markNight, 280)).webp({ quality: 92, alphaQuality: 100 }).toBuffer());
@@ -320,7 +376,7 @@ await out(path.join(BRAND, "startup/vallo-wordmark.webp"), await sharp(await ras
 /* Tab-sized icons are a rounded tile, so a tab or a bookmark bar shows a
    shape rather than a hard navy square; the mark sits larger at the
    smallest sizes, where every pixel of it counts. */
-const tab = async (size) => iconOn(size, { scale: size <= 32 ? 0.86 : 0.8, shape: "rounded", dy: 0.02 });
+const tab = async (size) => iconOn(size, { scale: size <= 32 ? 0.86 : 0.8, shape: "rounded", dy: 0.02, bright: true });
 await out(
   path.join(WEB, "public/favicon.ico"),
   ico([
@@ -331,31 +387,42 @@ await out(
 );
 for (const size of [16, 32, 48, 64]) await out(path.join(PWA, `icon-${size}.png`), await tab(size));
 /* Install icons stay full-bleed squares: the platform applies its own mask. */
-for (const size of [192, 512]) await out(path.join(PWA, `icon-${size}.png`), await iconOn(size, { scale: 0.72 }));
-await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.72 }));
+/* The 192 is the one a browser fetches for its tab and install prompt on every page
+   load, so it is palette-coded (smaller on the wire, no visible banding at this size). */
+await out(path.join(PWA, "icon-192.png"), await sharp(await iconOn(192, { scale: 0.72, bright: true })).png({ palette: true, quality: 92, effort: 10, dither: 0.6 }).toBuffer());
+await out(path.join(PWA, "icon-512.png"), await iconOn(512, { scale: 0.72, bright: true }));
+await out(path.join(PWA, "apple-touch-icon.png"), await iconOn(180, { scale: 0.72, bright: true }));
 /* Maskable: everything meaningful inside the middle 80 per cent (the safe
    circle is 40 per cent of the width in radius). The mark's half-diagonal
    at 0.56 of the width is 0.37 of it, inside that circle. */
-await out(path.join(PWA, "icon-maskable-512.png"), await iconOn(512, { scale: 0.56, dy: 0.02 }));
+await out(path.join(PWA, "icon-maskable-512.png"), await iconOn(512, { scale: 0.56, dy: 0.02, bright: true }));
 
-/* ---------- native ---------- */
-await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7 }));
+/* ---------- native (BRAND_SKIP_NATIVE=1 leaves the store binaries' icons alone) ---------- */
+/* THE STORE ICONS ARE THE BRIGHT SET TOO (10 November 2026): the full-colour mark on the
+   near-white tile, the same as the web icons, so the home screen, the app switcher and the
+   store listing all show one icon. The iOS marketing icon is a square with no alpha channel
+   and no rounded corners (Apple rounds it); the Android adaptive foreground is the mark alone
+   on transparency inside the safe zone, over a full-bleed bright background layer. */
+if (!SKIP_NATIVE) {
+await out(path.join(NATIVE, "icon-only.png"), await iconOn(1024, { scale: 0.7, bright: true }));
 /* The adaptive foreground: the mark alone, on transparency. Capacitor wraps
    it in a 16.7 per cent inset, so it is drawn in the inner 72 of 108 units
-   and must fit the guaranteed 66-unit circle: 0.62 of the file's width keeps
-   the mark's half-diagonal at 29 units. */
-await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.62, transparent: true, dy: 0.02 }));
-await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0 }));
+   and must fit the guaranteed 66-unit circle: 0.68 of the file's width keeps
+   the mark's half-diagonal at about 30 of the 33 units of that circle's radius
+   (`src/lib/brand/native-icons.test.ts` holds it by pixel). */
+await out(path.join(NATIVE, "icon-foreground.png"), await iconOn(1024, { scale: 0.68, transparent: true, dy: 0.02 }));
+await out(path.join(NATIVE, "icon-background.png"), await iconOn(1024, { scale: 0, bright: true }));
 for (const dir of await readdir(ANDROID_RES)) {
   if (!dir.startsWith("mipmap-") || dir.includes("anydpi")) continue;
   const base = path.join(ANDROID_RES, dir);
   const { width: size } = await sharp(path.join(base, "ic_launcher.png")).metadata();
-  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded" }));
-  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02 }));
-  await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.62, transparent: true, dy: 0.02 }));
-  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0 }));
+  await out(path.join(base, "ic_launcher.png"), await iconOn(size, { scale: 0.7, shape: "rounded", bright: true }));
+  await out(path.join(base, "ic_launcher_round.png"), await iconOn(size, { scale: 0.64, shape: "circle", dy: 0.02, bright: true }));
+  await out(path.join(base, "ic_launcher_foreground.png"), await iconOn(size, { scale: 0.68, transparent: true, dy: 0.02 }));
+  await out(path.join(base, "ic_launcher_background.png"), await iconOn(size, { scale: 0, bright: true }));
 }
-await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7 })).flatten({ background: NAVY }).png().toBuffer());
+await out(IOS_ICON, await sharp(await iconOn(1024, { scale: 0.7, bright: true })).flatten({ background: BRIGHT_TOP }).removeAlpha().png().toBuffer());
+}
 
 console.log(written.join("\n"));
 console.log(`\n${written.length} files. Now run build-email-lockup.mjs and build-og-image.mjs.`);

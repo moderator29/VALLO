@@ -26,6 +26,22 @@ const RETIRED = ["your-wallet", "money-and-the-guarantee", "booking-and-paying"]
 
 const live = new Map(CHAPTERS.map((chapter) => [chapter.slug, new Set(chapter.sections.map((s) => s.id))]));
 
+/* Static docs pages beside the chapters (a folder with its own page.tsx,
+   such as /docs/how-protection-works): live too, and an anchor on one is
+   live when the page's own source names that id. */
+const DOCS_DIR = join(SRC, "app", "(site)", "docs");
+const staticPages = new Map(
+  readdirSync(DOCS_DIR)
+    .filter((name) => /^[a-z0-9-]+$/.test(name) && statSync(join(DOCS_DIR, name)).isDirectory())
+    .flatMap((name) => {
+      try {
+        return [[name, readFileSync(join(DOCS_DIR, name, "page.tsx"), "utf8")] as const];
+      } catch {
+        return [];
+      }
+    }),
+);
+
 const redirects = new Map(
   [...CONFIG.matchAll(/source:\s*"\/docs\/([a-z0-9-]+)",\s*destination:\s*"\/docs\/([a-z0-9-]+)"/g)].map((m) => [
     m[1] ?? "",
@@ -81,7 +97,10 @@ describe("the docs register", () => {
         const anchor = m[2];
         const at = `${relative(SRC, file)}: /docs/${slug}${anchor ? `#${anchor}` : ""}`;
         const sections = live.get(slug);
-        if (sections) {
+        const page = staticPages.get(slug);
+        if (page !== undefined) {
+          if (anchor && !page.includes(`"${anchor}"`)) dead.push(`${at} (no such heading)`);
+        } else if (sections) {
           if (anchor && !sections.has(anchor)) dead.push(`${at} (no such heading)`);
         } else if (!redirects.has(slug)) {
           dead.push(`${at} (no such chapter)`);

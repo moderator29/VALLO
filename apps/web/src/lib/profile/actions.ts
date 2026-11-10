@@ -33,6 +33,7 @@ import {
   resolveSession,
 } from "../actions/session";
 import { setupExempt } from "../actions/setup-exempt";
+import { rememberSuccess } from "../ui/success-cookie";
 import { SUPABASE_URL } from "../supabase/env";
 import {
   avatarPublicUrl,
@@ -265,6 +266,9 @@ async function endSessions(scope: "local" | "global", deviceRef?: string): Promi
   }
 
   revalidatePath("/", "layout");
+  /* "You are signed out", at the top of the screen it lands on, by the one-shot
+     cookie (lib/ui/success-cookie.ts); the sign-out only redirects afterwards. */
+  await rememberSuccess("signed-out").catch(() => undefined);
   return ok(null);
 }
 

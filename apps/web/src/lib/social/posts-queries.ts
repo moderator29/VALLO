@@ -120,7 +120,39 @@ type Enrichment = {
   listings: Map<string, PostListing>;
   /** A roommate post shared to the feed (`posts.roommate_listing_id`), by post id. */
   roommates: Map<string, PostRoommateListing>;
+  /** A listing shared into the feed (`posts.shared_listing_id`), by post id. */
+  shares: Map<string, string | null>;
 };
+
+/**
+ * LISTINGS SHARED INTO THE FEED (10 November 2026). A share is a GIST with
+ * `posts.is_listing_share` set and, while the listing exists, its id in
+ * `posts.shared_listing_id`. Read on their own, like the roommate link, so
+ * before `feed_listing_shares_2026-11-10.sql` is applied the read answers "no
+ * such column", this returns nothing and every feed read stays as it was. The
+ * value is null for a share whose listing was deleted since: it is still a
+ * share (it still counts for its sharer) and the card says it is no longer
+ * available.
+ */
+async function readListingShares(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  postIds: string[],
+): Promise<Map<string, string | null>> {
+  const out = new Map<string, string | null>();
+  if (!postIds.length) return out;
+  try {
+    const db = supabase as unknown as import("@supabase/supabase-js").SupabaseClient;
+    const { data, error } = await db.from("posts").select("id, shared_listing_id").in("id", postIds).eq("is_listing_share", true);
+    if (error || !data) {
+      if (error && !isNotLive(error)) console.error("[feed] listing shares read failed", error.code);
+      return out;
+    }
+    for (const row of data as { id: string; shared_listing_id: string | null }[]) out.set(row.id, row.shared_listing_id);
+    return out;
+  } catch {
+    return out;
+  }
+}
 
 /**
  * VALLO ROOMMATES ON THE FEED (8 November 2026). A roommate post shared to
@@ -224,7 +256,8 @@ async function readPostListings(
       .from("listings")
       .select(POST_LISTING_COLUMNS)
       .in("id", listingIds)
-      .eq("status", "PUBLISHED");
+      .eq("status", "PUBLISHED")
+      .is("closed_at", null);
     if (error || !data) return out;
 
     for (const row of data as unknown as PostListingRow[]) {
@@ -276,6 +309,8 @@ async function enrich(
     ]),
   ];
   const postIds = rows.map((r) => r.id);
+  const shares = await readListingShares(supabase, postIds);
+  for (const id of shares.values()) if (id) listingIds.push(id);
 
   const [profiles, areas, mods, reactions, reposts, listings, roommates] = await Promise.all([
     authorIds.length
@@ -357,7 +392,7 @@ async function enrich(
      trips. */
   const media = await readMediaFor(supabase, postIds);
 
-  return { authors, moderatorAreas, liked, saved, reposted, areas: areaMap, media, listings, roommates };
+  return { authors, moderatorAreas, liked, saved, reposted, areas: areaMap, media, listings, roommates, shares };
 }
 
 /**
@@ -436,7 +471,14 @@ function toView(row: RawPost, e: Enrichment, viewerId: string | null): PostView 
     edited: Boolean(row.edited_at),
     areaName: area?.name ?? null,
     areaSlug: area?.slug ?? null,
-    listing: removed || !row.listing_id ? null : (e.listings.get(row.listing_id) ?? null),
+    listing: removed
+      ? null
+      : row.listing_id
+        ? (e.listings.get(row.listing_id) ?? null)
+        : e.shares.get(row.id)
+          ? (e.listings.get(e.shares.get(row.id) as string) ?? null)
+          : null,
+    listingShare: removed || !e.shares.has(row.id) ? null : { listingId: e.shares.get(row.id) ?? null, available: Boolean(e.shares.get(row.id) && e.listings.get(e.shares.get(row.id) as string)) },
     roommateListing: removed ? null : (e.roommates.get(row.id) ?? null),
     /* The assistant's own note about where its answer came from. Written into
        `payload` by `summonBot` and, until it was, a field on every card that was

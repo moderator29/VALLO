@@ -1,4 +1,5 @@
 import "server-only";
+import { CONTACT_EMAIL } from "@/lib/support-email";
 
 /**
  * WHAT THIS DEPLOYMENT CAN ACTUALLY SEND, AND WHO HAS TO SUPPLY THE REST.
@@ -99,9 +100,7 @@ export function webPushStatus(): CredentialStatus {
 export function vapidSubject(): string {
   const set = envValue(VAPID_SUBJECT_VAR);
   if (set.length > 0) return set;
-  const support = (process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "").trim();
-  if (support.length > 0) return `mailto:${support}`;
-  return "mailto:hello@vallospaces.com";
+  return `mailto:${CONTACT_EMAIL}`;
 }
 
 export const FCM_PROJECT_ID_VAR = "FCM_PROJECT_ID";

@@ -4,6 +4,7 @@ import { getDictionary } from "@vallo/i18n";
 import { getLocale } from "@/lib/locale";
 import { gateFirstRun } from "@/components/app/feature-onboarding/first-run-store";
 import { AgentShell } from "@/components/agent/AgentShell";
+import { PageFrame } from "@/components/app/PageFrame";
 import {
   agentProfileFrom,
   getAgentContext,
@@ -119,7 +120,12 @@ export default async function AgentDashboardPage({
         locale={locale}
         active="/agent/dashboard"
         profile={agentProfileFrom(context.agent)}
+        /* The workspace root (Grade 1 page frame): no Back, in the bar or
+           in the header. The rail, the drawer and the dock are the ways out. */
+        chromeBack={false}
       >
+        <PageFrame title={t.agent.nav.dashboard} back={false} width="wide">
+        <div>
         {/* P0.1: the passcode is offered, never forced. */}
         <PasscodeOffer />
         {standing ? <KycBanner standing={standing} /> : null}
@@ -139,7 +145,10 @@ export default async function AgentDashboardPage({
           figure={<DeskFigure rows={requestRows} kind="viewings" t={t} locale={locale} now={figureNow} />}
           workspace={workspace}
           now={figureNow}
+          bandHeading="h2"
         />
+        </div>
+        </PageFrame>
       </AgentShell>
     );
   }

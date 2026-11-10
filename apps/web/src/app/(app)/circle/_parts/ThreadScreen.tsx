@@ -5,6 +5,7 @@ import { getDictionary } from "@vallo/i18n";
 import { PageFrame } from "@/components/app/PageFrame";
 import { PromoBanner } from "@/components/app/PromoBanner";
 import { CircleShareButton } from "@/components/social/circle/CircleShare";
+import { RoommateCircleCard } from "@/components/social/circle/RoommateCircleCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { UiIcon } from "@/design-system/icons/UiIcon";
 import { withNext } from "@/lib/auth/next-link";
@@ -75,6 +76,7 @@ export function ThreadScreen({ thread, now, fallback }: { thread: Thread; now: n
           </span>
           <h2 className="nf-cthread__title">{post.title}</h2>
           {post.body && post.body !== post.title ? <p className="nf-cthread__body">{post.body}</p> : null}
+          {post.roommate ? <RoommateCircleCard card={post.roommate} /> : null}
           {post.listingId ? (
             <Link href={`/listing/${post.listingId}`} className="nf-cthread__listing" data-testid="circle-thread-listing">
               <span className="nf-cthread__listing-glyph" aria-hidden="true">

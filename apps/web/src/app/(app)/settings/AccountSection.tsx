@@ -3,6 +3,7 @@
 import type { AccountCopy } from "@/components/app/account/settings-copy";
 import { withNext } from "@/lib/auth/next-link";
 import { clearListingDrafts } from "@/lib/agent/listing-draft-storage";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RowLink, RowValue, RowButton, SettingsGroup } from "@/components/app/account/rows";
 import { clearPacks } from "@/lib/offline/pack-store";
@@ -15,6 +16,7 @@ import { clearAllInflight } from "@/lib/offline/inflight";
 import { signOut } from "@/lib/profile/actions";
 import { clearLocalDevice, readLocalDevice } from "@/components/app/push/device-state";
 import { playThreshold } from "@/lib/motion/threshold";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import { DeleteAccountPanel } from "./DeleteAccountPanel";
 import type { Blocker } from "@/lib/account-deletion/preconditions";
 import type { Locale } from "@vallo/i18n/core";
@@ -64,6 +66,8 @@ export function AccountSection({
   const router = useRouter();
   const copy = t.settings.account;
   const [signingOut, startSignOut] = useSafeTransition();
+  /* Asked first, so a stray tap cannot end a session. */
+  const [asking, setAsking] = useState(false);
 
   const leave = () => {
     startSignOut(async () => {
@@ -73,6 +77,7 @@ export function AccountSection({
         /* The push row for THIS device is retired with the session. */
         const result = await signOut(readLocalDevice()?.deviceRef);
         if (!result.ok) {
+          setAsking(false);
           banner.error(result.error);
           return;
         }
@@ -93,6 +98,7 @@ export function AccountSection({
         router.replace("/");
         router.refresh();
       } catch (error) {
+        setAsking(false);
         if (!tapFailedOffline(error)) throw error;
       }
     });
@@ -134,9 +140,10 @@ export function AccountSection({
         <RowButton
           icon="arrow-right"
           label={signingOut ? copy.signingOut : t.common.signOut}
-          onClick={leave}
+          onClick={() => setAsking(true)}
           disabled={signingOut}
           chevron={false}
+          testId="account-signout"
         />
       ) : state === "signed-out" ? (
         <RowLink href={withNext("/sign-in", "/settings/account")} icon="key" label={t.common.signIn} />
@@ -153,6 +160,19 @@ export function AccountSection({
           unavailable={deletion.unavailable}
         />
       )}
+      <ConfirmSheet
+        open={asking}
+        onOpenChange={(next) => {
+          if (!signingOut) setAsking(next);
+        }}
+        title={copy.logOutTitle}
+        line={email ? copy.logOutLineAs.replace("{email}", email) : copy.logOutLine}
+        confirmLabel={signingOut ? copy.signingOut : t.common.signOut}
+        cancelLabel={copy.logOutCancel}
+        pending={signingOut}
+        onConfirm={leave}
+        testId="account-signout-sheet"
+      />
     </SettingsGroup>
   );
 }

@@ -17,6 +17,95 @@ and PAGE_LEDGER.md (every page, ticked as passed).
   their state in `pending/README.md`; applied ones are filed under their
   version and recorded in APPLIED.txt and the live migration list.
 
+## Session of 9 November 2026 (lead plus two agents, three workers at most)
+
+Branch `platform-grade-1-readiness` was re-cut from `main` (which holds the
+whole upgrade; the old branch's 181 commits were checked and are all in
+main). Vercel stays off for it. CI runs only on `main`, pull requests to
+`main`, or by hand, and this session cannot start it by hand (GitHub refuses
+the dispatch permission), so the founder starts it from Actions, CI, Run
+workflow, or says yes to a draft pull request that never merges.
+
+| Worker | Doing | State |
+|---|---|---|
+| Lead | setup, state report, CI probes, pending SQL, every commit | Probes b3-rate-gate, db-10-step2, new-a4-01-step2 fixed and passing live (8efbdbe7b); /api/build endpoint restored (the `build/` ignore rule had hidden it); example collection date applied live |
+| Agent 1 (done) | money copy sweep (batch one): every screen promising protected, held, secured or escrowed payment | Writes `docs/handoff/MONEY_COPY_SWEEP.md`; NO copy changes until the founder approves the list |
+| Agent 2 (done) | protected payments Phase 1: audit of every reference to the old provider | Writes `docs/handoff/PAYMENTS_MIGRATION_AUDIT.md`; no code until the founder has seen it |
+
+Batch two DONE (9 Nov): app/agent and app/host on PageFrame (29 pages, 13 skipped with reasons in the commit and ledger), app/admin on PageHead (37 desks, 23 loading files); the lead fixed the workspace bar's doubled title and the double dock clearance under every framed page (34379580c).
+Batch three (running): Agent MAP moves every map to OpenFreeMap vector tiles with MapLibre (lazy, with a lightweight fallback), owning lib/maps, the map components and csp.ts; Agent WIZARD re-flows app/agent/list onto StepFrame one question per screen, owning app/agent/list/** only.
+Left from batch two: fees, restaurant-fees, chargebacks and bookings/[bookingId] heads, agent/promotion, host/bookings, host/earnings (after the money copy lands); DecideView and HostReviewsView headers; agent/inspections hero decision; screenshots with real agent, host and staff sessions.
+Earlier note, batch two (running): an agent puts app/agent/** and app/host/** on PageFrame (not the wizard, not money pages); another puts app/admin/** on PageHead (not the money desks). Found live: the old escrow switch is ON since 8 Oct, a pending file switches it off.
+
+Next after batch one: the four shared components spread (PageFrame is on 96
+of 275 ledger pages, StepFrame on a handful), the listing wizard one question
+per screen (P1.1, reopened: the earlier "not needed" assessment contradicts
+the founder's brief), the free commercial map (still CARTO, non-commercial
+tiles), the payment rail design pass.
+
+## 9 to 10 November 2026, lead (after the founder's rulings)
+
+- Rent payment closed in code, not only in words (a9a5481eb): one switch,
+  `lib/rent/payment-open.ts`, `RENT_PAYMENT_OPEN = false`. Both rent money
+  actions refuse before reading anything, `/rent/pay/[inspectionId]` shows the
+  agreed figures and "Payment for rentals is not open on Vallo yet" with no pay
+  button, and a rent agreement's pay choice says the same instead of falling
+  back to card. Stays, rooms and restaurants unchanged. Before this a renter
+  could reach a card payment for rent (live: 0 rent payments ever made).
+- Money copy leftovers (a18b5ed94): host CSV column "Payment reference", the
+  legacy partner-hold refusals no longer say escrow, PRODUCT.md rule updated.
+- CI, first full run on the branch (run 42664578399): 8 failures. 7 fixed in
+  cbcd8f511. The 8th (slice-coverage priceCheck, the map layer reaching the
+  `meta` namespace) is the map agent's and lands with its commit.
+- Protected payment adapter, phase 2 (c45ca458a):
+  `lib/payments/providers/escrowpay/`, built switched off. It invents nothing:
+  no base URL, the client sends nothing while `DOCUMENTED` is false, the
+  status table is empty and webhooks are refused. The switch
+  `payments_escrowpay_on` fails closed. Nothing imports it yet. Next: the
+  provider's sandbox documentation (audit 10.2), then phase 3.
+- Map migration committed (c37667ee3) and its follow-ups (7a1698401): every
+  map on OpenFreeMap, no key; the staff review panel draws the still map; the
+  privacy notice names OpenFreeMap (Hungary); MapTiler gone from code, CI,
+  the env example and the deploy docs. The old MapTiler key can be deleted
+  from Vercel, the repository variables and the MapTiler account.
+- Help, guides and docs on the docs kit committed (7c45b869e), with the
+  profile Support group and in-context help links.
+- Framing leftovers (c178f6f39, a42c49d02): fees and restaurant-fees desks on
+  PageHead; promotion hub, host bookings, earnings, decide and reviews on
+  PageFrame.
+- Removal audit, flags: `rentals_protected_pay` is read by nothing; its row
+  goes in the end block (pending file of 10 Nov). Old guide CSS (`.nf-guide*`
+  in public-doors.css) is now unused and is next for the sweep.
+- Running: staff manual (new agent, app/admin/manual); docs tools (fee
+  calculator from real config, copy control, was this helpful, step player).
+- Protected payment screens 1 to 11 built, switched off (5e9845e15,
+  0700141e1): components/money/protected, the journey model, copy with a
+  scoped claims entry, a preview at /preview/protected, tests with axe. No
+  live page mounts them. Part 2 (wiring behind the switch, trust page,
+  receipts, payments list, failure screens, staff desk) is with an agent.
+- Staff manual committed (064a2def8). For the founder to settle: who holds
+  each position and how to reach them, out of hours on-call, whether business
+  developers and social media managers get an access area; and three places
+  the docs and the code disagree (property case restrictions, the name a
+  member sees on a support reply, listing approve and publish in one step).
+- The end-of-batch SQL is supabase/migrations/pending/END_OF_BATCH_2026-11-10.sql
+  (sent to the founder; not applied yet).
+- The founder APPLIED END_OF_BATCH_2026-11-10.sql (verified live, 10 Nov).
+- Protected rail server steps (9a1613f0b): lib/money/protected-rail.ts, the
+  EscrowPay webhook route (refuses all until the signature is documented),
+  reconcile by provider (the previous provider's rows scoped to it), pending SQL
+  protected_rail_server_2026-11-10.sql (not applied; two dry runs waited on
+  the founder's approval in the Supabase connection).
+- Docs deeper pass and tools committed (8a295d67c). Pending SQL
+  docs_page_feedback_2026-11-10.sql (not applied) switches on "Was this
+  helpful?".
+- Running: protected payments part 2 (wiring, trust page, receipts, list,
+  issue screens, staff desk); docs round three (legal cross-links, the
+  feedback desk, remaining chapter tables, icon sweep).
+- Both agents (map, docs) stopped on the account's weekly limit on 9 Nov at
+  about 17:30 UTC and were resumed on 10 Nov at 02:00 UTC with their work
+  intact.
+
 ## Agents (8 November 2026, early hours)
 
 | Agent | Done | Now | Next |
@@ -34,3 +123,26 @@ and PAGE_LEDGER.md (every page, ticked as passed).
 - Nothing blocking right now. The next app build (1.0.2) is planned for when
   GitHub Actions minutes are back; nothing is on main until he says "push to
   main".
+
+## 10 November 2026: Payluk removed (founder's word)
+- Payluk is gone from the platform. Audit and what changed: docs/handoff/PAYLUK_REMOVAL.md.
+  Old rail code, webhook, merchant client, fund/release flows and their tests
+  are deleted. The EscrowPay rail (switched off) is the only protected-pay rail.
+- Nothing live depended on it. The member Wallet (/wallet) had Payluk as its
+  only provider; it now reads "not configured" until the founder chooses a
+  new one.
+- Pending SQL, NOT APPLIED and DESTRUCTIVE: supabase/migrations/pending/payluk_removal_2026-11-10.sql
+  (new flag key payments_protected_pay_on, drops one table and two functions).
+  The app reads the new flag first and falls back to the old key until it runs.
+- Privacy notice no longer names the provider. PRIVACY_VERSION NOT bumped:
+  counsel decides (docs/handoff/LEGAL_PAGES_CHANGES.md, "Payluk removal").
+
+## 10 November 2026: founder rulings A to G (fees, wallet, cookies, retention, under 18)
+- Wallet hidden (A): `lib/money/wallet-open.ts`, `WALLET_OPEN = false`. `app/(app)/wallet/layout.tsx` answers not found for every wallet route; the nav model and keyboard shortcut read the switch. Code kept. Rent payments stay on the protected rail (switched off); everything else is Paystack.
+- Fees (B): one source `lib/money/fee-schedule.ts` (Vallo 2% plus partner about 1.5% on rent, total about 3.5%; every other payment about 3.5%). Sentences in `lib/money/copy.ts` (`FEE_*`, `WHO_PAYS_SENTENCE`) feed the Terms, glance, docs chapter, help, assistant and copilot, fee screen labels. Pending SQL `fee_schedule_2026-11-10.sql` (NOT APPLIED) adds the 1.5 row to `fee_protection_rates`.
+- Protected payment wording (C): Terms section 4A and the trust page, from `TERMS_HELD_*` in `copy.ts`; proposed wording recorded in COUNSEL_BRIEF 2.7. Rail still off.
+- Under 18 (D): Terms section 3 and Privacy section 10. Sign-up age gate is another workstream.
+- Cookies (E): `lib/consent/` (inventory, consent cookie `vallo_consent`), `components/consent/` (lazy bar and sheet), `/cookies` and `/legal/cookies`, footer and Settings entries. Preferences and analytics storage is written only after consent (`consentAllows`).
+- Retention (F): `lib/legal/retention.ts`, drawn by `components/legal/RetentionTable.tsx` in Privacy section 7. Pending counsel.
+- Displayed "Last updated" for Terms and Privacy moved to 10 November; `TERMS_VERSION` and `PRIVACY_VERSION` NOT bumped (the update sheet's words are about the Guarantee). Founder's call with counsel.
+- COUNSEL_BRIEF 2.1 handled by Vallo, 2.9 closed, 2.2 to 2.5 and 2.7 carry the new status.

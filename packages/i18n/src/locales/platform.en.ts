@@ -51,8 +51,8 @@ export const platformEn = {
     notMeBody:
       "This signs out every other device, pauses payments and changes to your payout details for 24 hours, and takes you to change your password.",
     notMe: "This was not me",
-    notMeConfirm: "Tap again to hold your money",
-    notMeWorking: "Holding your money",
+    notMeConfirm: "Tap again to pause payments",
+    notMeWorking: "Pausing payments",
   },
 
   alert: {
@@ -305,7 +305,7 @@ export const platformEn = {
     paidBody: "The payment that lost its connection reached us. Reference {reference}.",
     failedVerdict: "Your payment did not go through",
     failedBody: "Nothing was taken for reference {reference}. You can pay again.",
-    pendingVerdict: "Paystack has not told us yet",
+    pendingVerdict: "Our payment processor has not told us yet",
     pendingBody: "We are checking reference {reference} every minute. Do not pay again until this changes.",
     offline: "You are offline. Paying needs a connection. Nothing has been charged.",
     returnedVerdict: "Your payment was sent back",
