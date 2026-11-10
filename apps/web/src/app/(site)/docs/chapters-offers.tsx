@@ -59,12 +59,6 @@ export const HOW_OFFERS_WORK: DocChapter = {
   summary: "What an offer is and is not, what happens after you send one, and what Vallo does and does not do.",
   icon: "doc-review",
   updated: UPDATED,
-  glance: [
-    "An offer is a written proposal to buy a home, kept as a record. Nothing is charged.",
-    "Every change to the terms is a new version. Nothing is overwritten.",
-    AGREED_IS_NOT_SALE,
-    NO_MONEY_TAKEN,
-  ],
   actions: ["make-offer", "open-offers", "start-verification"],
   related: [
     { href: "/docs/making-an-offer", label: "How to make an offer" },
@@ -200,12 +194,6 @@ export const MAKING_AN_OFFER: DocChapter = {
   summary: "From a home you like to a sent offer: the requirements, the amount, how you plan to pay, and the review.",
   icon: "doc-review",
   updated: UPDATED,
-  glance: [
-    "You need to finish the requirements shown on the offer screen. Each one has a button that fixes it and brings you back.",
-    "Leave the amount blank to offer the asking price. The figure is shown before you send.",
-    "Cash, Mortgage or Instalment is what you tell the seller. Vallo does not check it and takes no payment.",
-    "You can withdraw an open offer later.",
-  ],
   actions: ["make-offer", "start-verification", "open-offers"],
   related: [
     { href: "/docs/how-offers-work", label: "How offers work" },
@@ -216,7 +204,16 @@ export const MAKING_AN_OFFER: DocChapter = {
       id: "steps",
       heading: "Step by step",
       body: (
-        <StepGuide
+        <>
+          {/* A chapter that opens straight into a numbered list leaves the reader
+              no footing, and leaves the register nothing to lift for its "at a
+              glance". Two plain sentences first. */}
+          <p>
+            Making an offer takes a few minutes and commits you to nothing. You say what you propose to pay, how you plan to
+            pay it and when you would like to complete, and the seller answers.
+          </p>
+          <p>Nothing is charged at any point in this chapter, and sending an offer does not take the home off the market.</p>
+          <StepGuide
           label="Making an offer"
           before={[
             "Your account, signed in",
@@ -313,7 +310,8 @@ export const MAKING_AN_OFFER: DocChapter = {
               actions: <DocButtons items={["open-offers"]} />,
             },
           ]}
-        />
+          />
+        </>
       ),
     },
     {
@@ -352,12 +350,6 @@ export const RECEIVING_OFFERS: DocChapter = {
   summary: "For sellers and agents: where offers arrive, what you can see, and the four ways to answer.",
   icon: "doc-review",
   updated: UPDATED,
-  glance: [
-    "Offers received are on the Received tab of My offers, each with the figure, the asking price and the difference.",
-    "You can accept, decline, counter, or ask the buyer a question.",
-    "You see the buyer's eligibility outcome, never an ID number, a document or a date of birth.",
-    "An agent can only act on a home they hold a sale mandate for.",
-  ],
   actions: ["open-offers-received", "open-deal-room"],
   related: [
     { href: "/docs/counteroffers-and-negotiation", label: "Counteroffers" },
@@ -459,12 +451,6 @@ export const COUNTEROFFERS: DocChapter = {
   summary: "How versions work, who can accept what, and a worked example with real figures.",
   icon: "doc-review",
   updated: UPDATED,
-  glance: [
-    "A counteroffer is a new version. The earlier ones stay, in order.",
-    "Each side confirms a specific version. Terms are agreed when both have confirmed the same one.",
-    "A replaced or expired version can never be accepted.",
-    "Terms agreed is not a sale.",
-  ],
   actions: ["open-offers", "open-offers-received"],
   related: [
     { href: "/docs/receiving-offers", label: "Receiving offers" },
@@ -569,12 +555,6 @@ export const DEAL_ROOM: DocChapter = {
   summary: "Every section of the room where an offer lives, from the first version to the end of the deal.",
   icon: "doc-review",
   updated: UPDATED,
-  glance: [
-    "Each offer has one Deal Room, for the buyer and the seller. It is a view of the offer, not a separate record.",
-    "Six sections: Overview, Negotiation, Messages, Inspection, Documents and Activity.",
-    "At every moment it answers four questions: what has happened, what is waiting, whose turn it is, and whether there is a deadline.",
-    "There is one obvious next action as a button.",
-  ],
   actions: ["open-deal-room", "open-offers"],
   related: [
     { href: "/docs/offer-inspections-and-checks", label: "Inspections and due diligence" },
@@ -669,11 +649,6 @@ export const OFFER_INSPECTIONS: DocChapter = {
   summary: "How to inspect a home from the Deal Room, and what to check before you commit.",
   icon: "listing-review",
   updated: UPDATED,
-  glance: [
-    "You can propose an inspection at any point. It does not commit either side to the offer.",
-    "The inspection report records eight items with dated photographs. It is a record of what was seen.",
-    "Vallo does not verify title. Check the documents with your own solicitor.",
-  ],
   actions: ["open-deal-room", "start-verification"],
   related: [
     { href: "/docs/viewings", label: "Viewings" },
@@ -746,11 +721,6 @@ export const OFFER_DOCUMENTS: DocChapter = {
   summary: "The checklist, what each state means, and what Vallo has and has not checked.",
   icon: "doc-lock",
   updated: UPDATED,
-  glance: [
-    DOCUMENT_NOT_VERIFIED,
-    "Documents are kept privately and opened through a short-lived link, and every open is logged.",
-    "A reviewer approving a document is not a check of title.",
-  ],
   actions: ["open-deal-room"],
   related: [
     { href: "/docs/the-deal-room", label: "The Deal Room" },
@@ -843,12 +813,6 @@ export const OFFER_FEES: DocChapter = {
   summary: "What making and agreeing an offer costs on Vallo, which costs go to someone else, and what Vallo cannot tell you.",
   icon: "naira-coins",
   updated: UPDATED,
-  glance: [
-    "Making an offer costs nothing. Agreeing terms costs nothing.",
-    NO_MONEY_TAKEN,
-    "Other costs of buying a home are paid directly to other people, and Vallo shows them only where the listing really carries them.",
-    "The calculator below reads the current rates. It does not guess.",
-  ],
   actions: ["make-offer", "open-offers"],
   related: [
     { href: "/docs/what-vallo-costs", label: "What Vallo costs" },

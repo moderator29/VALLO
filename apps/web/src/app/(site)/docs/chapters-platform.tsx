@@ -36,12 +36,6 @@ export const CIRCLE: DocChapter = {
     "The community side of Vallo: ask questions, join communities for a topic or a neighbourhood, and read answers from people who know the place.",
 icon: "chat-duo",
   updated: UPDATED,
-  glance: [
-    "Circle is where you ask and discuss. Around, the feed, is where you discover.",
-    "Ask a question, start a discussion or join a community for a topic or an area.",
-    "A private community is read only by its members, and its owner and moderators decide who joins.",
-    "Circle is advice from members, not advice from Vallo, and nobody there can make a deal for you.",
-  ],
   actions: ["open-circle", "open-around"],
   related: [
     { href: "/docs/around", label: "Around, the feed" },
@@ -170,12 +164,6 @@ export const ROOMMATES: DocChapter = {
     "Find people to share with, or a room to take: a roommate profile, posts, groups that search together, a school and corps directory, and a cost splitter.",
 icon: "house-sparkle",
   updated: UPDATED,
-  glance: [
-    "Make a roommate profile once, then browse people and room posts that fit it.",
-    "A group can search together, shortlist places and split the cost of a move-in.",
-    "Roommates has its own safety centre and its own checks, and a badge says exactly which check it stands for.",
-    "The cost splitter does arithmetic on your own figures and says it is an estimate.",
-  ],
   actions: ["open-roommates"],
   related: [
     { href: "/docs/badges-and-verification", label: "Badges and verification" },
@@ -308,11 +296,6 @@ export const SAVED_AND_COMPARE: DocChapter = {
   summary: "Keep a shortlist, keep a search, and put up to four places side by side.",
 icon: "home-search",
   updated: UPDATED,
-  glance: [
-    "The heart saves a place to your account. Saved places live at Saved.",
-    "A saved search keeps a hunt so you can run it again.",
-    "Compare shows up to four published places side by side, and the page can be sent to someone.",
-  ],
   actions: ["open-saved", "open-compare"],
   related: [{ href: "/docs/finding-a-place", label: "Finding a place" }],
   sections: [
@@ -374,11 +357,6 @@ export const NOTIFICATIONS: DocChapter = {
   summary: "Where things you need to act on arrive, how to open each one, and how to choose what reaches you.",
 icon: "support-shield",
   updated: UPDATED,
-  glance: [
-    "Notifications are your own rows, grouped by day, with new ones arriving as they happen.",
-    "Each one opens a full page, so a push or an email can link straight to it.",
-    "You choose what reaches you under Settings, Notifications, and a no-sign-in page handles email preferences.",
-  ],
   actions: ["open-notifications", "open-settings"],
   related: [{ href: "/docs/messages-and-notifications", label: "Messages" }],
   sections: [
@@ -444,12 +422,6 @@ export const SETTINGS: DocChapter = {
   summary: "What each settings page controls: account, privacy, security, appearance, region, devices and standing.",
 icon: "person-card",
   updated: UPDATED,
-  glance: [
-    "Settings is a home page with a row for each area, and each area is a page of its own.",
-    "Privacy choices cover who sees what, blocked people, your data and a money lock.",
-    "Security covers your passcode, your phone number and where you are signed in.",
-    "Your standing shows any restriction on your account, why, until when, and how to appeal.",
-  ],
   actions: ["open-settings", "privacy-choices"],
   related: [
     { href: "/docs/your-data-and-your-rights", label: "Your data and your rights" },
@@ -543,11 +515,6 @@ export const WALLET: DocChapter = {
   summary: "Every movement of your money in one place, what each figure means, and who holds it.",
 icon: "naira-coins",
   updated: UPDATED,
-  glance: [
-    HELD_BY,
-    `${BALANCE_TITLE} shows what was added, sent, withdrawn and held for a deal, read from our payment partner with its time.`,
-    `When the ${W} is not connected, it shows no figure at all, because any figure would be made up.`,
-  ],
   actions: ["open-wallet", "open-receipts"],
   related: [
     { href: "/docs/paying-on-vallo", label: "How paying works" },
@@ -674,12 +641,6 @@ export const REWARDS: DocChapter = {
   summary: "Invite people, see where each one stands, and what the rewards balance is and is not.",
 icon: "gift",
   updated: UPDATED,
-  glance: [
-    "Your invite link is made the first time you open Invite.",
-    "A referral moves through joined, pending, under review and qualified, and the list shows where each person is.",
-    "The rewards balance is separate from any payment you made or were paid.",
-    "Where rewards are not available for your account, the screens say so.",
-  ],
   actions: ["open-rewards"],
   related: [{ href: "/docs/what-vallo-costs", label: "What Vallo costs" }],
   sections: [
@@ -753,12 +714,6 @@ export const HOST_WORKSPACE: DocChapter = {
   summary: "For hotels, guest houses, serviced apartments, shortlets and restaurants: requests, the calendar, rooms, earnings and reviews.",
 icon: "key-ring",
   updated: UPDATED,
-  glance: [
-    "One list shows everything waiting for your answer, with the clock showing.",
-    "The calendar sets rates and nights and can sync with other sites you sell on.",
-    "Earnings shows each payment, the commission and your share. It is read only.",
-    "Photos and arrival charges stay open after your application is sent.",
-  ],
   actions: ["start-hosting", "open-payouts"],
   related: [
     { href: "/docs/hosting", label: "Hosting on Vallo" },
@@ -843,12 +798,6 @@ export const AGENT_WORKSPACE: DocChapter = {
   summary: "For agents, landlords, owners and firms: listings, the owner mandate, enquiries, analytics, promotion and earnings.",
 icon: "report-stats",
   updated: UPDATED,
-  glance: [
-    "A listing goes live only after Vallo has confirmed who instructed the lister, through the mandate.",
-    "Analytics shows only real figures. With no data, it shows nothing rather than a demonstration.",
-    "Verification is a ladder of rungs, and the workspace shows the next one.",
-    "A TO LET board and a status picture can be made for any listing, carrying no phone number, address or price.",
-  ],
   actions: ["list-property", "start-verification"],
   related: [
     { href: "/docs/listing-on-vallo", label: "Listing on Vallo" },
@@ -942,12 +891,6 @@ export const TENANCY: DocChapter = {
   summary: "The move-in ledger, paying the first rent, your tenancy file afterwards, and what to do when a caution is not returned.",
 icon: "house-sparkle",
   updated: UPDATED,
-  glance: [
-    "The move-in ledger lists every cost the lister named, each as its own row, and the total.",
-    "After you pay, your tenancy file keeps what the listing promised, the money, the caution and the move-in record.",
-    "Vallo holds nothing and decides nothing. If a caution is not returned, the file prints as a pack for the tribunal.",
-    "The file names the area, never the address.",
-  ],
   actions: ["open-agreements", "move-in-cost"],
   related: [
     { href: "/docs/agreements-and-paying", label: "Agreements and paying" },
@@ -1040,11 +983,6 @@ export const TOOLS: DocChapter = {
   summary: "Work out a move-in total, check an advert or a receipt, and read what homes in an area are asking.",
 icon: "naira-coins",
   updated: UPDATED,
-  glance: [
-    "The move-in calculator, area prices, the agent check and the receipt check work with no account.",
-    "A receipt code and a record code each check one thing and confirm nothing else.",
-    "A share link or a safety link opens one card for everybody the same way.",
-  ],
   actions: ["move-in-cost", "price-check"],
   related: [
     { href: "/docs/price-check", label: "Price Check" },
@@ -1131,11 +1069,6 @@ export const PROFILES: DocChapter = {
   summary: "Your public page, the passport other members can open, and how to find an agent, a landlord or a hotel.",
 icon: "user-check",
   updated: UPDATED,
-  glance: [
-    "Your page is at /u/ followed by your handle. You choose the name and the sentence people see.",
-    "Your passport shows only the lines you left on, to other signed-in members.",
-    "The directory lists agents, landlords and firms for property, and hotels, hosts and shortlet operators for stays.",
-  ],
   actions: ["open-profile", "open-settings"],
   related: [{ href: "/docs/badges-and-verification", label: "Badges and verification" }],
   sections: [
