@@ -164,8 +164,9 @@ import Link from "next/link";
  */
 const LADDER = VERIFICATION_ORDER.map((rung) => rung.label.toLowerCase()).join(", then ");
 
-export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
+export const TERMS_SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
   {
+    id: "about",
     title: "1. About these terms",
     body: (
       <p>
@@ -179,6 +180,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "what-vallo-is",
     title: `2. What ${COMPANY_TRADING_NAME} is`,
     body: (
       <>
@@ -227,6 +229,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "accounts",
     title: "3. Accounts and eligibility",
     body: (
       <ul>
@@ -247,6 +250,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "payments",
     title: "4. Payments, and what happens to your money",
     body: (
       <>
@@ -289,6 +293,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "cancellations",
     title: "5. Cancellations and refunds",
     body: (
       <ul>
@@ -304,7 +309,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
           it.</strong> What is payable, what is returnable and on what notice are terms of
           the agreement you make with the landlord, the vendor or their agent. A rental
           paid on {COMPANY_TRADING_NAME} is paid against an agreement both of you
-          confirmed and we approved (section 13), and the owner&rsquo;s or agent&rsquo;s
+          confirmed and we approved (<Link href="/terms#agreements" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 13</Link>), and the owner&rsquo;s or agent&rsquo;s
           share settles to them when you pay; the agreement decides what is returnable,
           between you and them.
         </li>
@@ -322,6 +327,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "listing",
     title: "6. Listing a property",
     body: (
       <ul>
@@ -377,6 +383,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "verification",
     title: "7. What verification means, and what it does not",
     body: (
       <>
@@ -425,6 +432,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "messages",
     title: "8. Messages, and what we can see",
     body: (
       <>
@@ -449,6 +457,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "inspections",
     title: "9. Inspections",
     body: (
       <>
@@ -470,12 +479,13 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
           After a rental inspection you submit the inspection report on the platform:
           eight items, each with its photographs. It is the record of the property as you
           found it, it is what an agreement is drawn up from, and it is the record we
-          look at first if something goes wrong (section 14).
+          look at first if something goes wrong (<Link href="/terms#what-vallo-does" className="font-semibold text-[var(--nf-content-link)] hover:underline">section 14</Link>).
         </p>
       </>
     ),
   },
   {
+    id: "assistant",
     title: "10. The assistant and anything automated",
     body: (
       <p>
@@ -492,6 +502,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "reviews",
     title: "11. Reviews and content",
     body: (
       <p>
@@ -505,6 +516,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "acceptable-use",
     title: "12. Acceptable use",
     body: (
       <>
@@ -525,6 +537,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "agreements",
     title: "13. Agreements and approval",
     body: (
       <>
@@ -549,6 +562,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "what-vallo-does",
     title: "14. What Vallo does, and what it does not do",
     body: (
       <>
@@ -597,6 +611,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "responsibility",
     title: "15. Our responsibility to you",
     body: (
       <>
@@ -631,11 +646,12 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "suspension",
     title: "16. Suspension, closing your account, and appealing",
     body: (
       <>
         <p>
-          You may close your account at any time from settings or by contacting support.
+          You may close your account at any time from <Link href="/settings" className="font-semibold text-[var(--nf-content-link)] hover:underline">settings</Link> or by contacting support.
           We may suspend or close an account that breaks these terms. Where we do, we
           tell you why and, where the breach can be fixed, give you the chance to fix
           it. Serious harm, fraud or a legal requirement may mean immediate suspension.
@@ -649,6 +665,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "privacy",
     title: "17. Privacy",
     body: (
       <p>
@@ -662,6 +679,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "changes",
     title: "18. Changes to these terms",
     body: (
       <p>
@@ -673,6 +691,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "governing-law",
     title: "19. Governing law and disputes",
     body: (
       <p>
@@ -684,6 +703,7 @@ export const TERMS_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "contact",
     title: "20. Contact",
     body: (
       <p>

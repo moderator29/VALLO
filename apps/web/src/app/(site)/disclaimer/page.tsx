@@ -34,7 +34,7 @@ export default function DisclaimerPage() {
           <DocumentSheet kind="document" printable className="mt-block nf-legal-sheet">
             <div className="space-y-block">
               {sections.map((s) => (
-                <section key={s.title}>
+                <section key={s.title} id={s.id} className="scroll-mt-28">
                   <h2 className="nf-h3">{s.title}</h2>
                   <div className="mt-inline space-y-row text-[length:var(--nf-text-body)] leading-relaxed text-[var(--nf-content-secondary)] [&_li]:mt-inline [&_strong]:text-[var(--nf-content-primary)] [&_ul]:list-disc [&_ul]:space-y-inline [&_ul]:pl-heading">
                     {s.body}

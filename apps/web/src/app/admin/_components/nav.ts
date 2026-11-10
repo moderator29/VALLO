@@ -114,6 +114,8 @@ export const ADMIN_PRIMARY: AdminDestination[] = [
         countKeys: ["chargebacks"],
         countLabel: "chargebacks open, waiting on evidence or a decision",
       },
+      /* BUILD 7.11: every protected payment with the provider's state beside Vallo's. Read-only. */
+      { key: "arrangements", href: "/admin/arrangements", icon: ui("shield-check"), label: "Protected payments" },
       { key: "fees", href: "/admin/fees", icon: ui("document"), label: "Fees" },
       /* The referral desk: rewards owed, the monthly budget, and the referrals and payouts a person has to decide. */
       {

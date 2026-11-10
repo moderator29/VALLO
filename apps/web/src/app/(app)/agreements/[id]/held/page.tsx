@@ -6,6 +6,9 @@ import { ButtonLink } from "@/components/ui/Button";
 import { readHeldPayment } from "@/lib/money/held-view";
 import { withNext } from "@/lib/auth/next-link";
 import { HeldPaymentBody } from "./HeldPaymentBody";
+import { PROTECTED_PAGE_TITLE } from "@/lib/money/copy";
+import { readProtectedDeal } from "@/lib/money/protected-read";
+import { ProtectedAgreementView, isFundingStage, protectedStageOf } from "@/components/money/protected/ProtectedAgreementView";
 
 /**
  * STEP 8, FUNDED (D68d, B.3.5): the screen that wins the market. A renter in
@@ -29,6 +32,25 @@ export default async function HeldPaymentPage({
 }) {
   const { id } = await params;
   if (!UUID_RE.test(id)) notFound();
+  /* THE NEW PROTECTED RAIL (10 November 2026), built switched off: null
+     unless payments_escrowpay_on is on, the arrangement is the new
+     provider's and the category is approved, and it reads nothing while
+     the switch is off. Null today, so the page below is unchanged. */
+  const now = requestTime();
+  const protectedDeal = await readProtectedDeal(id, now);
+  if (protectedDeal) {
+    if (protectedDeal.role === "payer" && isFundingStage(protectedStageOf(protectedDeal, now)) && protectedDeal.deal.status !== "failed") {
+      redirect(`/agreements/${id}/fund`);
+    }
+    const protectedLocale = await getLocale();
+    return (
+      <PageFrame title={PROTECTED_PAGE_TITLE} fallback={`/agreements/${id}`} width="narrow">
+        <div className="px-md pb-2xl">
+          <ProtectedAgreementView read={protectedDeal} now={now} locale={protectedLocale} />
+        </div>
+      </PageFrame>
+    );
+  }
   const [locale, read] = await Promise.all([getLocale(), readHeldPayment(id)]);
 
   if (read.state === "signed-out") {
@@ -77,4 +99,9 @@ export default async function HeldPaymentPage({
       </div>
     </PageFrame>
   );
+}
+
+/** The request's clock, read once so every time on the page agrees. */
+function requestTime(): number {
+  return Date.now();
 }

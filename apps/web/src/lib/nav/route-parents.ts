@@ -129,6 +129,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/delete-account": "/",
   "/docs": "/",
   "/docs/[slug]": "/docs",
+  /* The protected payment's trust page (BUILD 7.7), a static docs page beside the chapters. */
+  "/docs/how-protection-works": "/docs",
   "/eula": "/",
   "/ai/terms": "/",
   "/ai/privacy": "/",
@@ -511,6 +513,8 @@ export const ROUTE_PARENTS: Readonly<Record<string, ParentRoute>> = {
   "/admin/payments": "/admin",
   /* Chargebacks: the finance desk, and one case. */
   "/admin/chargebacks": "/admin",
+  /* Protected payments: the read-only arrangement operations desk (BUILD 7.11). */
+  "/admin/arrangements": "/admin",
   "/admin/chargebacks/[chargebackId]": "/admin/chargebacks",
   "/admin/people": "/admin",
   /*

@@ -308,6 +308,8 @@ const EXPECTED_PUBLIC = new Set([
   "/contact",
   "/docs",
   "/docs/[slug]",
+  /* The protected payment's trust page, public like every docs page (the "docs" segment). */
+  "/docs/how-protection-works",
   "/help",
   // V-55: the receipt check, a door for people who are not members.
   "/r",

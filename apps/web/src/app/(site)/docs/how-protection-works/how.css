@@ -1,0 +1,40 @@
+/*
+ * HOW PROTECTION WORKS: the one piece the docs kit does not already draw,
+ * the custodian named in the provider's own words, featured rather than
+ * buried (BUILD section 3, point 4). Tokens only; both themes from the theme.
+ */
+@layer components {
+  .nf-how-custody {
+    display: flex;
+    gap: var(--nf-space-sm);
+    margin: 0;
+    padding: var(--nf-space-md);
+    border: 1px solid var(--nf-brand-edge-soft);
+    border-radius: var(--nf-radius-card);
+    background: var(--nf-brand-tint-1);
+    max-inline-size: 68ch;
+  }
+
+  .nf-how-custody__plate {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--nf-radius-md);
+    background: var(--nf-surface-primary);
+    color: var(--nf-brand-primary);
+  }
+
+  .nf-how-custody__words {
+    margin: 0;
+    font-size: var(--nf-text-body);
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--nf-content-primary);
+  }
+
+  .nf-how-custody__words p {
+    margin: 0;
+  }
+}

@@ -24,8 +24,9 @@ export const DISCLAIMER_UPDATED = longDate(DISCLAIMER_UPDATED_ISO);
 
 const LINK = "font-semibold text-[var(--nf-content-link)] hover:underline";
 
-export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
+export const DISCLAIMER_SECTIONS: { id: string; title: string; body: React.ReactNode }[] = [
   {
+    id: "off-platform",
     title: "1. Off the platform is outside our responsibility",
     body: (
       <>
@@ -49,6 +50,7 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "marketplace",
     title: "2. We are a marketplace, not a party",
     body: (
       <>
@@ -68,6 +70,7 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "money",
     title: "3. We never hold your money",
     body: (
       <p>
@@ -79,6 +82,7 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "inspection-fees",
     title: "4. Inspection fees",
     body: (
       <p>
@@ -87,17 +91,20 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "no-guarantee",
     title: "5. Vallo does not guarantee the deal",
     body: (
       <p>
         Vallo is not a party to your tenancy or your sale, is not acting as agent for
         either side, and does not guarantee the transaction. The Vallo Guarantee was
-        retired on 9 November 2026. The Terms of service, section 14, set out what Vallo
+        retired on 9 November 2026. The <Link href="/terms" className={LINK}>Terms of service</Link>,{" "}
+        <Link href="/terms#what-vallo-does" className={LINK}>section 14</Link>, set out what Vallo
         does and does not do, and exactly what we will do if something goes wrong.
       </p>
     ),
   },
   {
+    id: "listings",
     title: "6. Listings, verification and information",
     body: (
       <>
@@ -116,6 +123,7 @@ export const DISCLAIMER_SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: "terms",
     title: "7. How this fits with the Terms",
     body: (
       <p>

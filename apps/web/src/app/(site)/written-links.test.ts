@@ -15,6 +15,9 @@ import { HELP_ANCHORS, topicId } from "./help/topics";
  *
  *   /help#<anchor>             a topic's id or one of HELP_ANCHORS
  *   /guides/<slug>[#<section>] a published guide, and one of its section ids
+ *   /terms#, /privacy#, /disclaimer#   a section id the legal document
+ *                              carries (read from its source, which holds
+ *                              JSX this test cannot import)
  *
  * The docs chapters' anchors are `docs/docs-links.dom.test.tsx`'s, and the
  * routes themselves `app/static-hrefs.test.ts`'s.
@@ -33,11 +36,22 @@ function walk(dir: string, out: string[] = []): string[] {
 const helpAnchors = new Set([...Object.keys(HELP_ANCHORS), ...new Set(FAQS.map((f) => topicId(f.category)))]);
 const guideSections = new Map(GUIDES.map((g) => [g.slug as string, new Set(g.sections.map((s) => s.id))]));
 
+/** A legal document's section ids, read from its source. */
+function legalIds(file: string): Set<string> {
+  const text = readFileSync(join(SRC, "lib", "legal", file), "utf8");
+  return new Set([...text.matchAll(/^ {4}id: "([a-z0-9-]+)",$/gm)].map((m) => m[1] ?? ""));
+}
+const LEGAL: Record<string, Set<string>> = {
+  terms: legalIds("terms.tsx"),
+  privacy: legalIds("privacy.tsx"),
+  disclaimer: legalIds("disclaimer.tsx"),
+};
+
 describe("links into the help centre and the guides", () => {
   const found: { at: string; href: string }[] = [];
   for (const file of walk(SRC)) {
     const text = withoutComments(readFileSync(file, "utf8"));
-    for (const m of text.matchAll(/["'`](\/(?:help|guides)(?:\/[a-z0-9-]+)?(?:#[a-z0-9-]+)?)["'`]/g)) {
+    for (const m of text.matchAll(/["'`](\/(?:help|guides|terms|privacy|disclaimer)(?:\/[a-z0-9-]+)?(?:#[a-z0-9-]+)?)["'`]/g)) {
       found.push({ at: relative(SRC, file), href: m[1] ?? "" });
     }
   }
@@ -58,6 +72,17 @@ describe("links into the help centre and the guides", () => {
       const [, slug, anchor] = m;
       if (!(GUIDE_SLUGS as readonly string[]).includes(slug ?? "")) return true;
       return anchor !== undefined && !guideSections.get(slug ?? "")?.has(anchor);
+    });
+    expect(bad).toEqual([]);
+  });
+
+  it("lands every /terms#, /privacy# and /disclaimer# link on a section the document carries", () => {
+    for (const doc of Object.keys(LEGAL)) expect(LEGAL[doc]!.size, doc).toBeGreaterThan(5);
+    const legal = found.filter(({ href }) => /^\/(terms|privacy|disclaimer)#/.test(href));
+    expect(legal.length).toBeGreaterThan(5);
+    const bad = legal.filter(({ href }) => {
+      const [doc, anchor] = href.slice(1).split("#");
+      return !LEGAL[doc ?? ""]?.has(anchor ?? "");
     });
     expect(bad).toEqual([]);
   });

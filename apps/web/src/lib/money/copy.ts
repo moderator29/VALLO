@@ -1934,3 +1934,4 @@ export const PROTECTED_PAYEE_DEFAULT = "The lister";
 export const PROTECTED_RECEIPT_FIGURE = "Amount";
 export const PROTECTED_RECEIPT_TOTAL = "Total transferred";
 export const PROTECTED_RECEIPT_KEEP = "More ways to keep this record";
+export const PROTECTED_PAGE_TITLE = "Your payment";
