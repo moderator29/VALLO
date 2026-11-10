@@ -50,7 +50,7 @@ describe("a Roommates card on a Circle post: only what the page already shows", 
   it("a room card holds the title, the place, the kind and the price, and nothing from the description, owner or photos", () => {
     const card = buildRoomCard(room, t);
     expect(Object.keys(card).sort()).toEqual([...CARD_KEYS].sort());
-    expect(card).toMatchObject({ v: 1, kind: "room", ref: ID, title: "Room near Unilag gate", place: "Akoka, Lagos, Lagos".replace("Lagos, Lagos", "Lagos") });
+    expect(card).toMatchObject({ v: 1, kind: "room", ref: ID, title: "Room near Unilag gate", place: "Akoka, Lagos" });
     expect(card.summary).toContain("Roommate wanted");
     expect(card.summary).toContain("150,000");
     const flat = JSON.stringify(card);
